@@ -8,6 +8,7 @@ module.exports = {
     'salmon-500': '#d24545',
     'salmon-700': '#b14848',
     //
+    'gray-50': '#f0f2f4',
     'gray-100': '#f5f5f5',
     'gray-200': '#c8ced7',
     'gray-250': '#98a3b4',
