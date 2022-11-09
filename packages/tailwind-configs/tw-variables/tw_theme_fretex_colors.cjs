@@ -1,5 +1,5 @@
 module.exports = {
-    'text-component': '#ffffff',
+    'text-component': '#1A1D23',
     'active-component': 'var(--colors-blue-500)',
     //
     'alpha-100': 'var(--colors-slate-100)',
