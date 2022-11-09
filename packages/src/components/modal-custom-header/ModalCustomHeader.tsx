@@ -50,7 +50,7 @@ export const ModalCustomHeader: React.FC<TModalWithCustomHeaderProps> = function
                     </Transition.Child>
 
                     {/* This element is to trick the browser into centering the modal contents. */}
-                    <span className='inline-block h-screen align-middle'>&#8203;</span>
+                    <span className='!inline-block !h-screen !align-middle'>&#8203;</span>
                     <Transition.Child
                         as={Fragment}
                         enter='ease-out duration-300'
