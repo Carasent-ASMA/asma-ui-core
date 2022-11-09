@@ -1,12 +1,12 @@
 .dialog {
-    @apply relative z-10 text-[#1a1a1a];
+    @apply fixed z-10 text-[#1a1a1a] overflow-y-auto;
 
     .overlay {
         @apply fixed inset-0 bg-black bg-opacity-25;
     }
 
     .panel-wrapper {
-        @apply fixed inset-0 flex items-center justify-center p-4;
+        @apply inset-0 flex items-center justify-center p-4 translate-y-52 ;
 
         .panel {
             @apply w-full max-w-xl transform overflow-hidden rounded-md border border-[#828282] bg-white text-left align-middle text-base transition-all focus:border-indigo-500 focus:ring-indigo-500;
@@ -19,3 +19,4 @@
         }
     }
 }
+
