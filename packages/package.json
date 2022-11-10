@@ -1,7 +1,7 @@
 {
     "name": "asma-antrd",
     "private": false,
-    "version": "0.0.95",
+    "version": "0.0.96",
     "type": "module",
     "scripts": {
         "dev": "vite",
@@ -93,7 +93,8 @@
         "./dist/style.css": "./dist/style.css",
         "./tailwind-configs/tw_configs.cjs": "./tailwind-configs/tw_configs.cjs",
         "./dist/RdBadge": "./dist/RdBadge.es.js",
-        "./dist/RdButton": "./dist/RdButton.es.js"
+        "./dist/RdButton": "./dist/RdButton.es.js",
+        "./dist/AtrdModalConfirm": "./dist/AtrdModalConfirm.es.js"
     },
     "lint-staged": {
         "src/**/*.{js,jsx,ts,tsx}": [
