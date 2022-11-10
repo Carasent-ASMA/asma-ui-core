@@ -53,7 +53,7 @@ module.exports = {
     'app-directory-button-select-recipient-bg': 'var(--colors-blue-200)',
 
     //
-    'btn-task-status': 'var(--colors-slate-600)',
+    'btn-task-status-bg': 'var(--colors-slate-600)',
 
     //
     'chat-ticket-message-bg': 'var(--colors-blue-200)',

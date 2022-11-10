@@ -37,6 +37,8 @@ module.exports = {
     'btn-bg-disabled': 'var(--colors-btn-bg-disabled)',
     'btn-bg-danger': 'var(--colors-btn-bg-danger)',
     'btn-bg-danger-active': 'var(--colors-btn-bg-danger-active)',
+    //
+    'btn-task-status-bg': 'var(--colors-btn-task-status-bg)',
     // mini action buttons
     'btn-bg-mini-action': 'var(--colors-btn-bg-mini-action)',
     'btn-bg-mini-action-hover': 'var(--colors-btn-bg-mini-action-hover)',
