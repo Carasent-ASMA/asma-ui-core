@@ -32,6 +32,7 @@ export default defineConfig(() => ({
                 resolve(__dirname, 'src/index.ts'),
                 resolve(__dirname, 'src/rd-components/badges/rd-badge/RdBadge.tsx'),
                 resolve(__dirname, 'src/rd-components/rd-button/RdButton.tsx'),
+                resolve(__dirname, 'src/rd-components/modals/modal-confirm/AtrdModalConfirm.tsx'),
             ],
             name: 'asma-antrd',
             formats: ['es'],
