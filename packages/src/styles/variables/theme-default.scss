@@ -7,7 +7,7 @@
 
     // Modal Custom Header
 
-    --color--modal-custom-header--background--default: hsl(var(--colors-cardea--grey-002));
+    --color--modal-custom-header--background--default: hsl(var(--colors-cardea--grey-02));
 
     // Basic Button
 
@@ -24,7 +24,7 @@
     // --color--basic--button--border--hover: ;
 
     --color--basic--button--text--default: var(--colors-cardea--white);
-    --color--basic--button--text--disabled: var(--colors-cardea--grey-004);
+    --color--basic--button--text--disabled: var(--colors-cardea--grey-04);
     --color--basic--button--text--focus: var(--colors-cardea--white);
     --color--basic--button--text--active: var(--colors-cardea--white);
     --color--basic--button--text--hover: var(--colors-cardea--black-001);
@@ -37,8 +37,8 @@
     --color--danger--button--background--focus: var(--colors-carasent--red--200);
     --color--danger--button--background--hover: var(--colors-carasent--red--100);
 
-    --color--danger--button--border--default: var(--colors-cardea--grey-003);
-    --color--danger--button--border--disabled: var(--colors-cardea--grey-003);
+    --color--danger--button--border--default: var(--colors-cardea--grey-03);
+    --color--danger--button--border--disabled: var(--colors-cardea--grey-03);
     --color--danger--button--border--active: var(--colors-carasent--red--200);
     --color--danger--button--border--focus: var(--colors-carasent--red--200);
     --color--danger--button--border--hover: var(--colors-carasent--red--100);
@@ -48,4 +48,26 @@
     --color--danger--button--text--active: var(--colors-cardea--white);
     --color--danger--button--text--focus: var(--colors-cardea--white);
     --color--danger--button--text--hover: var(--colors-cardea--white);
+
+    // Secondary Button
+
+    --color--secondary--button--background--default: var(--colors-cardea--white);
+    --color--secondary--button--background--disabled: var(--colors-cardea--white);
+    --color--secondary--button--background--active: var(--colors-cardea--jade-60);
+    --color--secondary--button--background--focus: var(--colors-cardea--white);
+    --color--secondary--button--background--hover: var(--colors-cardea--jade-40);
+
+    --color--secondary--button--border--default: var(--colors-cardea--jade-50);
+    --color--secondary--button--border--disabled: var(--colors-cardea--grey-03);
+    --color--secondary--button--border--active: var(--colors-cardea--jade-60);
+    --color--secondary--button--border--focus: var(--colors-cardea--jade-50);
+    --color--secondary--button--border--hover: var(--colors-cardea--jade-40);
+
+    --color--secondary--button--outline--focus: hsl(var(--colors-cardea--warning));
+
+    --color--secondary--button--text--default: var(--colors-cardea--jade-50);
+    --color--secondary--button--text--disabled: var(--colors-cardea--grey-04);
+    --color--secondary--button--text--active: var(--colors-cardea--white);
+    --color--secondary--button--text--focus: var(--colors-cardea--jade-50);
+    --color--secondary--button--text--hover: var(--colors-cardea--text-color);
 }

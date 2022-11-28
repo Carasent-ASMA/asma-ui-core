@@ -1,0 +1,52 @@
+.root {
+    @apply box-border flex h-10 w-full items-center justify-around gap-3 rounded-lg border border-solid px-2.5 outline-none transition duration-300 ease-in-out;
+
+    background-color: hsl(var(--color--secondary--button--background--default));
+    border-color: hsl(var(--color--secondary--button--border--default));
+
+    &:disabled {
+        background-color: hsl(var(--color--secondary--button--background--disabled));
+        border-color: hsl(var(--color--secondary--button--border--disabled));
+
+        .title {
+            color: hsl(var(--color--secondary--button--text--disabled));
+        }
+    }
+
+    &:focus:not(:disabled) {
+        background-color: hsl(var(--color--secondary--button--background--focus));
+        border-color: hsl(var(--color--secondary--button--border--focus));
+        outline: solid 2px var(--color--secondary--button--outline--focus);
+        outline-offset: 0px;
+
+        .title {
+            color: hsl(var(--color--secondary--button--text--focus));
+        }
+    }
+
+    &:active:not(:disabled) {
+        background-color: hsl(var(--color--secondary--button--background--active));
+        border-color: hsl(var(--color--secondary--button--border--active));
+
+        .title {
+            color: hsl(var(--color--secondary--button--text--active));
+        }
+    }
+
+    &:hover:not(:disabled),
+    &:hover:not(:disabled):not(:active),
+    &:hover:not(:disabled):not(:focus) {
+        background-color: hsl(var(--color--secondary--button--background--hover));
+        border-color: hsl(var(--color--secondary--button--border--hover));
+
+        .title {
+            color: hsl(var(--color--secondary--button--text--hover));
+        }
+    }
+}
+
+.title {
+    @apply truncate text-base font-semibold leading-5;
+
+    color: hsl(var(--color--secondary--button--text--default));
+}
