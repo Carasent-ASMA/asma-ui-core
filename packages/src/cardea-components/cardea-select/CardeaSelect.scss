@@ -1,5 +1,5 @@
 .cardea-select-wrapper {
-    @apply min-h-[46px]  rounded-lg border-delta-250 text-base shadow-none ring-1 ring-transparent 
+    @apply min-h-[40px] rounded-lg border-delta-250 text-base shadow-none ring-1 ring-transparent 
 	hover:border-delta-250
 	focus:border-delta-250 focus:shadow-none focus:ring-transparent
 	active:border-delta-250 active:ring-transparent;
@@ -9,34 +9,34 @@
     }
 
     &.ant-select:not(.ant-select-customize-input) > div.ant-select-selector {
-        @apply min-h-[46px] rounded-lg border-delta-250 text-base shadow-none ring-1 ring-transparent
+        @apply min-h-[40px] rounded-lg border-delta-250 text-base shadow-none ring-1 ring-transparent
 		hover:border-delta-250
 		focus:border-delta-250 focus:shadow-none focus:ring-transparent
 		active:border-delta-250 active:ring-transparent;
 
         .ant-select-selection-search {
             & > input.ant-select-selection-search-input {
-                @apply flex  min-h-[46px] items-center border-none shadow-none ring-0
+                @apply flex  min-h-[40px] items-center border-none shadow-none ring-0
 				focus:border-none focus:shadow-none focus:ring-0
 				active:border-none active:shadow-none active:ring-0 #{!important};
             }
         }
 
         .ant-select-selection-placeholder {
-            @apply flex  min-h-[46px] items-center px-4 text-base italic text-gray-500 #{!important};
+            @apply flex  min-h-[40px] items-center px-4 text-base italic text-gray-500 #{!important};
         }
     }
 
     .ant-select-arrow {
-        @apply right-5 w-3;
+        @apply right-5 w-3 text-delta-800 #{!important};
     }
 
     .ant-select-clear {
         @apply top-[45%];
     }
 
-    &.gama-color {
-        @apply ring-1 focus:ring-gama-700;
+    div.ant-select-selector {
+        @apply py-0 pl-[10px] pr-7 #{!important};
     }
 
     &.ant-select-focused {
@@ -69,7 +69,7 @@
     }
 
     div > div:nth-child(2) > div > div > div > div {
-        @apply flex h-11 items-center px-4 py-3 #{!important};
+        @apply flex h-11 items-center py-2 px-4 #{!important};
     }
 
     .ant-select-item.ant-select-item-option.ant-select-item-option-selected {
@@ -77,6 +77,6 @@
     }
 
     .ant-select-item-option-content {
-        @apply text-base;
+        @apply text-base font-normal;
     }
 }

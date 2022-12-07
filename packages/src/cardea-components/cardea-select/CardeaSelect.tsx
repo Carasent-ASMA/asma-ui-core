@@ -36,7 +36,7 @@ const SuffixIcon: React.FC<{ open: boolean }> = ({ open }) => {
 
     return (
         <button>
-            <Icon icon={icon} className='text-delta-800 ' width={30} height={30} />
+            <Icon icon={icon} className='!text-delta-800' width={30} height={30} />
         </button>
     )
 }
