@@ -5,7 +5,7 @@
 	active:border-delta-250 active:ring-transparent;
 
     .ant-select-selection-item {
-        @apply m-0 flex items-center  pl-1 text-lg #{!important};
+        @apply m-0 flex items-center  pl-1 text-base #{!important};
     }
 
     &.ant-select:not(.ant-select-customize-input) > div.ant-select-selector {
@@ -77,6 +77,6 @@
     }
 
     .ant-select-item-option-content {
-        @apply text-base font-normal;
+        @apply text-base;
     }
 }
