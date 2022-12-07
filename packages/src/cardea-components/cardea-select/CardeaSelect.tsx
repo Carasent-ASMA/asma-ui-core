@@ -7,6 +7,8 @@ import { useState } from 'react'
 
 export const CardeaSelectOption = Select.Option
 
+export type ICardeaSelectValue = SelectValue
+
 export const CardeaSelect = (props: SelectProps<SelectValue>) => {
     const [open, setOpen] = useState(false)
 
