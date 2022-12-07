@@ -25,7 +25,7 @@ export const CardeaSelect = (props: SelectProps<SelectValue>) => {
     )
 }
 
-export const SuffixIcon: React.FC<{ open: boolean }> = ({ open }) => {
+const SuffixIcon: React.FC<{ open: boolean }> = ({ open }) => {
     let icon
 
     if (open) {
