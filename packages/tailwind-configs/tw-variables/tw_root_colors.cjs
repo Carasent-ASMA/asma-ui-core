@@ -31,6 +31,7 @@ module.exports = {
     'green-900': '#81969e',
     //
     'slate-100': '#d0dee5',
+    'slate-200': '#abc8d42f',
     'slate-300': '#abc8d4',
     'slate-500': '#9fbcca',
     'slate-600': '#6198ae',

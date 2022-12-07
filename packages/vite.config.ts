@@ -34,6 +34,7 @@ export default defineConfig(() => ({
                 resolve(__dirname, 'src/rd-components/rd-button/RdButton.tsx'),
                 resolve(__dirname, 'src/rd-components/modals/modal-confirm/AtrdModalConfirm.tsx'),
                 resolve(__dirname, 'src/cardea-components/cardea-spinner/CardeaSpinner.tsx'),
+                resolve(__dirname, 'src/cardea-components/cardea-select/CardeaSelect.tsx'),
             ],
             name: 'asma-antrd',
             formats: ['es'],
