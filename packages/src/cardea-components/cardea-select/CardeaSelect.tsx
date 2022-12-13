@@ -20,7 +20,7 @@ export const CardeaSelect = (props: SelectProps<SelectValue>) => {
             optionFilterProp='children'
             suffixIcon={<SuffixIcon open={open} />}
             className={`cardea-select-wrapper ${props.className ?? ''}`}
-            popupClassName={`cardea-select-popup-wrapper ${props.className ?? ''}`}
+            popupClassName='cardea-select-popup-wrapper'
         >
             {props.children}
         </Select>
