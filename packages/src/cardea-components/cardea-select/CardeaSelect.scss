@@ -51,8 +51,6 @@
     &.ant-select-show-arrow,
     &.ant-select-selection-search,
     &.ant-seleect-open,
-    &.ant-select,
-    &.ant-select-single,
     &.ant-select-focused {
         @apply rounded-lg  text-base shadow-none ring-1 ring-delta-900 duration-75 #{!important};
         // &.ant-select:not(.ant-select-customize-input) > div.ant-select-selector {
