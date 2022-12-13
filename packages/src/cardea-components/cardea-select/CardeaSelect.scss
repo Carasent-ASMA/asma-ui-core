@@ -1,5 +1,5 @@
 .cardea-select-wrapper {
-    @apply min-h-[40px] rounded-lg border-delta-250 text-base shadow-none ring-1 ring-transparent 
+    @apply relative min-h-[40px] rounded-lg border-delta-250 text-base shadow-none ring-1 ring-transparent 
 	hover:border-delta-250
 	focus:border-delta-250 focus:shadow-none focus:ring-transparent
 	active:border-delta-250 active:ring-transparent;
@@ -28,11 +28,16 @@
     }
 
     .ant-select-arrow {
+        button {
+            @apply flex;
+        }
         @apply right-5 w-3 text-delta-800 #{!important};
     }
 
     .ant-select-clear {
-        @apply top-[45%];
+        position: absolute;
+        transform: translate(-50%, 0);
+        right: 5px;
     }
 
     div.ant-select-selector {
@@ -41,7 +46,7 @@
 
     &.ant-select-focused {
         &.ant-select:not(.ant-select-customize-input) > div.ant-select-selector {
-            @apply rounded-lg border-delta-250 text-base shadow-none ring-1 ring-transparent;
+            @apply rounded-lg border-2 border-delta-250 text-base shadow-none ring-1 ring-transparent duration-75;
         }
     }
 
