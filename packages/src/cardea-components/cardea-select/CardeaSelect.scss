@@ -45,9 +45,10 @@
     }
 
     &.ant-select-focused {
-        &.ant-select:not(.ant-select-customize-input) > div.ant-select-selector {
-            @apply rounded-lg border-2 border-delta-250 text-base shadow-none ring-1 ring-transparent duration-75 #{!important};
-        }
+        @apply rounded-lg  text-base shadow-none ring-1 ring-delta-900 duration-75 #{!important};
+        // &.ant-select:not(.ant-select-customize-input) > div.ant-select-selector {
+        //     @apply rounded-lg border-2 border-delta-900 text-base shadow-none ring-1 ring-transparent duration-75 #{!important};
+        // }
     }
 
     &.ant-select-disabled {
