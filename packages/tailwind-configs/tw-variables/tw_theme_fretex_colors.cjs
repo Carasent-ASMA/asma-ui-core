@@ -31,6 +31,7 @@ module.exports = {
     'delta-10000': 'var(--colors-gray-10000)',
 
     'sigma-700': 'var(--colors-gray-700)',
+    'zeta-700': 'var(--colors-gray-700)',
     // button
     'btn-bg-hover': 'var(--colors-gama-600)',
     'btn-bg-standart': 'var(--colors-gama-500)',
