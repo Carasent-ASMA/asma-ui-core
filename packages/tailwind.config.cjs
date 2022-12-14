@@ -76,6 +76,10 @@ module.exports = {
                 'custom-light-green': 'hsl(var(--color-custom-light-green) / <alpha-value>)',
                 'custom-dark-green': 'hsl(var(--color-custom-dark-green) / <alpha-value>)',
                 'custom-blue-10': 'hsl(var(--color-custom-blue-10) / <alpha-value>)',
+
+                //
+                'gray-01': '#F0F2F4',
+                'gray-04': '#98A3B4',
             },
 
             minHeight: {

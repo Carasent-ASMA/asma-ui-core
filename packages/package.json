@@ -26,7 +26,8 @@
         "antd-mobile": "^5.24.0",
         "clsx": "^1.2.1",
         "lodash-es": "^4.17.21",
-        "moment": "^2.29.4"
+        "moment": "^2.29.4",
+        "react-quill": "^2.0.0"
     },
     "devDependencies": {
         "@iconify/react": "^4.0.0",
