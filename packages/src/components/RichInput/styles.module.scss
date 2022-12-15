@@ -1,0 +1,19 @@
+.container {
+  @apply py-2;
+
+  > div:first-child {
+    @apply rounded-t-lg bg-gray-01 border-x border-t border-b-0 border-gray-04;
+  }
+
+  > div:last-child {
+    @apply rounded-b-lg border-x border-b border-t-0 border-gray-04;
+    ::before {
+      @apply text-gray-primary text-base font-light not-italic text-gray-04;
+    }
+
+     p {
+      @apply leading-5 text-base  font-light;
+    }
+  }
+}
+
