@@ -10,18 +10,14 @@
         background-color: hsl(var(--color--secondary--button--background--disabled));
         border-color: hsl(var(--color--secondary--button--border--disabled));
 
-        .title {
-            color: hsl(var(--color--secondary--button--text--disabled));
-        }
+        color: hsl(var(--color--secondary--button--text--disabled));
     }
 
     &:active:not(:disabled) {
         background-color: hsl(var(--color--secondary--button--background--active));
         border-color: hsl(var(--color--secondary--button--border--active));
 
-        .title {
-            color: hsl(var(--color--secondary--button--text--active));
-        }
+        color: hsl(var(--color--secondary--button--text--active));
     }
 
     &:focus:not(:disabled):not(:active) {
@@ -29,9 +25,7 @@
         border-color: hsl(var(--color--secondary--button--border--focus));
         box-shadow: 0px 0px 0px 2px var(--color--secondary--button--boxshadow--focus);
 
-        .title {
-            color: hsl(var(--color--secondary--button--text--focus));
-        }
+        color: hsl(var(--color--secondary--button--text--focus));
     }
 
     &:hover:not(:disabled):not(:active),
@@ -40,9 +34,7 @@
         background-color: hsl(var(--color--secondary--button--background--hover));
         border-color: hsl(var(--color--secondary--button--border--hover));
 
-        .title {
-            color: hsl(var(--color--secondary--button--text--hover));
-        }
+        color: hsl(var(--color--secondary--button--text--hover));
     }
 }
 
