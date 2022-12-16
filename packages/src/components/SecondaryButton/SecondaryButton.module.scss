@@ -1,8 +1,10 @@
 .root {
-    @apply box-border flex h-10 w-full items-center justify-around gap-3 rounded-lg border border-solid px-2.5 outline-none transition duration-300 ease-in-out;
+    @apply box-border flex h-10 w-auto items-center justify-around gap-3 rounded-lg border border-solid px-2.5 outline-none transition duration-300 ease-in-out;
 
     background-color: hsl(var(--color--secondary--button--background--default));
     border-color: hsl(var(--color--secondary--button--border--default));
+
+    color: hsl(var(--color--secondary--button--text--default));
 
     &:disabled {
         background-color: hsl(var(--color--secondary--button--background--disabled));
@@ -46,6 +48,4 @@
 
 .title {
     @apply truncate text-base font-semibold leading-5;
-
-    color: hsl(var(--color--secondary--button--text--default));
 }

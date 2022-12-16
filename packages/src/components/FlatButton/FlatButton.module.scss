@@ -3,6 +3,8 @@
 
     background-color: hsl(var(--color--flat--button--background--default));
 
+    color: hsl(var(--color--flat--button--text--default));
+
     &:disabled {
         background-color: hsl(var(--color--flat--button--background--disabled));
 
@@ -41,6 +43,4 @@
 
 .title {
     @apply truncate text-base font-semibold leading-5;
-
-    color: hsl(var(--color--flat--button--text--default));
 }
