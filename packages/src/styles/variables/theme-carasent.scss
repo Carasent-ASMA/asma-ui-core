@@ -1,0 +1,39 @@
+[data-theme='carasent'] {
+    // Basic Button
+
+    --color--basic--button--background--default: var(--colors-carasent--basic--500);
+    --color--basic--button--background--disabled: var(--colors-carasent--disabled--100);
+    --color--basic--button--background--focus: var(--colors-carasent--basic--600);
+    --color--basic--button--background--active: var(--colors-carasent--basic--600);
+    --color--basic--button--background--hover: var(--colors-carasent--basic--300);
+
+    // Primary Button
+
+    --color--primary--button--background--default: var(--colors-carasent--basic--500);
+    --color--primary--button--background--disabled: var(--colors-carasent--disabled--100);
+    --color--primary--button--background--focus: var(--colors-carasent--basic--600);
+    --color--primary--button--background--active: var(--colors-carasent--basic--600);
+    --color--primary--button--background--hover: var(--colors-carasent--basic--300);
+
+    --color--primary--button--boxshadow--focus: transparent;
+
+    // Danger Button
+
+    --color--danger--button--background--default: var(--colors-cardea--white);
+    --color--danger--button--background--disabled: var(--colors-carasent--disabled--100);
+    --color--danger--button--background--active: var(--colors-carasent--red--200);
+    --color--danger--button--background--focus: var(--colors-carasent--red--200);
+    --color--danger--button--background--hover: var(--colors-carasent--red--100);
+
+    --color--danger--button--border--default: var(--colors-cardea--grey-03);
+    --color--danger--button--border--disabled: var(--colors-cardea--grey-03);
+    --color--danger--button--border--active: var(--colors-carasent--red--200);
+    --color--danger--button--border--focus: var(--colors-carasent--red--200);
+    --color--danger--button--border--hover: var(--colors-carasent--red--100);
+
+    --color--danger--button--text--default: var(--colors-cardea--black-001);
+    --color--danger--button--text--disabled: var(--colors-cardea--grey-004);
+    --color--danger--button--text--active: var(--colors-cardea--white);
+    --color--danger--button--text--focus: var(--colors-cardea--white);
+    --color--danger--button--text--hover: var(--colors-cardea--white);
+}

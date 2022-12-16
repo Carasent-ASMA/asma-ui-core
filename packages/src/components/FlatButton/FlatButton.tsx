@@ -1,9 +1,9 @@
 import { clsx } from 'clsx'
 import type { FC, PropsWithChildren } from 'react'
 
-import styles from './DangerButton.module.scss'
+import styles from './FlatButton.module.scss'
 
-export type IDangerButton = PropsWithChildren<{
+export type IFlatButtonProps = PropsWithChildren<{
     icon?: React.ReactNode
     title?: string
     className?: string
@@ -12,10 +12,7 @@ export type IDangerButton = PropsWithChildren<{
     onClick?: React.MouseEventHandler<HTMLButtonElement>
 }>
 
-/**
- * @deprecated use SecondaryButton
- */
-export const DangerButton: FC<IDangerButton> = (props) => {
+export const FlatButton: FC<IFlatButtonProps> = function FlatButton(props) {
     return (
         <button className={clsx(styles['root'], props.className)} disabled={props.disabled} onClick={props.onClick}>
             {!!props.title && <span className={clsx(styles['title'], props.titleClassName)}>{props.title}</span>}

@@ -12,6 +12,9 @@ export type IBasicButton = PropsWithChildren<{
     onClick?: React.MouseEventHandler<HTMLButtonElement>
 }>
 
+/**
+ * @deprecated use PrimaryButton
+ */
 export const BasicButton: FC<IBasicButton> = (props) => {
     return (
         <button className={clsx(styles['root'], props.className)} disabled={props.disabled} onClick={props.onClick}>

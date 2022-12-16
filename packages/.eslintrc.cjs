@@ -15,7 +15,8 @@ module.exports = {
         'plugin:import/typescript',
         'plugin:react-hooks/recommended',
         'prettier',
-        'plugin:prettier/recommended', // Make sure this is always the last element in the array.
+        'plugin:prettier/recommended',
+        'plugin:storybook/recommended',
     ],
     parser: '@typescript-eslint/parser',
     parserOptions: {

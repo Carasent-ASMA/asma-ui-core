@@ -17,7 +17,7 @@ type IButtonCustom = ButtonProps & {
 }
 
 /**
- * @deprecated use BasicButton, DangerButton
+ * @deprecated use PrimaryButton, SecondaryButton, FlatButton
  */
 const Button: FC<IButtonCustom> = (props) => {
     let _btnType: string | undefined = 'primary'

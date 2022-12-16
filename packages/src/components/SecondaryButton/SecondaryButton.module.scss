@@ -13,17 +13,6 @@
         }
     }
 
-    &:focus:not(:disabled) {
-        background-color: hsl(var(--color--secondary--button--background--focus));
-        border-color: hsl(var(--color--secondary--button--border--focus));
-        outline: solid 2px var(--color--secondary--button--outline--focus);
-        outline-offset: 0px;
-
-        .title {
-            color: hsl(var(--color--secondary--button--text--focus));
-        }
-    }
-
     &:active:not(:disabled) {
         background-color: hsl(var(--color--secondary--button--background--active));
         border-color: hsl(var(--color--secondary--button--border--active));
@@ -33,8 +22,18 @@
         }
     }
 
-    &:hover:not(:disabled),
+    &:focus:not(:disabled):not(:active) {
+        background-color: hsl(var(--color--secondary--button--background--focus));
+        border-color: hsl(var(--color--secondary--button--border--focus));
+        box-shadow: 0px 0px 0px 2px var(--color--secondary--button--boxshadow--focus);
+
+        .title {
+            color: hsl(var(--color--secondary--button--text--focus));
+        }
+    }
+
     &:hover:not(:disabled):not(:active),
+    &:hover:not(:disabled):not(:active):not(:focus),
     &:hover:not(:disabled):not(:focus) {
         background-color: hsl(var(--color--secondary--button--background--hover));
         border-color: hsl(var(--color--secondary--button--border--hover));

@@ -31,7 +31,7 @@
 
     // Danger Button
 
-    --color--danger--button--background--default: var(--colors-cardea--white);
+    --color--danger--button--background--default: transparent;
     --color--danger--button--background--disabled: var(--colors-carasent--disabled--100);
     --color--danger--button--background--active: var(--colors-carasent--red--200);
     --color--danger--button--background--focus: var(--colors-carasent--red--200);
@@ -49,12 +49,34 @@
     --color--danger--button--text--focus: var(--colors-cardea--white);
     --color--danger--button--text--hover: var(--colors-cardea--white);
 
+    // Primary Button
+
+    --color--primary--button--background--default: var(--colors-cardea--jade-50);
+    --color--primary--button--background--hover: var(--colors-cardea--jade-40);
+    --color--primary--button--background--focus: var(--colors-cardea--jade-50);
+    --color--primary--button--background--active: var(--colors-cardea--jade-60);
+    --color--primary--button--background--disabled: var(--colors-cardea--grey-03);
+
+    --color--primary--button--boxshadow--focus: hsl(var(--colors-cardea--warning));
+
+    // --color--basic--button--border--default: ;
+    // --color--basic--button--border--disabled: ;
+    // --color--basic--button--border--active: ;
+    // --color--basic--button--border--focus: ;
+    // --color--basic--button--border--hover: ;
+
+    --color--primary--button--text--default: var(--colors-cardea--white);
+    --color--primary--button--text--hover: var(--colors-cardea--black-001);
+    --color--primary--button--text--focus: var(--colors-cardea--white);
+    --color--primary--button--text--active: var(--colors-cardea--white);
+    --color--primary--button--text--disabled: var(--colors-cardea--grey-04);
+
     // Secondary Button
 
-    --color--secondary--button--background--default: var(--colors-cardea--white);
-    --color--secondary--button--background--disabled: var(--colors-cardea--white);
+    --color--secondary--button--background--default: transparent;
+    --color--secondary--button--background--disabled: transparent;
     --color--secondary--button--background--active: var(--colors-cardea--jade-60);
-    --color--secondary--button--background--focus: var(--colors-cardea--white);
+    --color--secondary--button--background--focus: transparent;
     --color--secondary--button--background--hover: var(--colors-cardea--jade-40);
 
     --color--secondary--button--border--default: var(--colors-cardea--jade-50);
@@ -63,11 +85,27 @@
     --color--secondary--button--border--focus: var(--colors-cardea--jade-50);
     --color--secondary--button--border--hover: var(--colors-cardea--jade-40);
 
-    --color--secondary--button--outline--focus: hsl(var(--colors-cardea--warning));
+    --color--secondary--button--boxshadow--focus: hsl(var(--colors-cardea--warning));
 
     --color--secondary--button--text--default: var(--colors-cardea--jade-50);
     --color--secondary--button--text--disabled: var(--colors-cardea--grey-04);
     --color--secondary--button--text--active: var(--colors-cardea--white);
     --color--secondary--button--text--focus: var(--colors-cardea--jade-50);
     --color--secondary--button--text--hover: var(--colors-cardea--text-color);
+
+    // Flat Button
+
+    --color--flat--button--background--default: transparent;
+    --color--flat--button--background--hover: var(--colors-cardea--jade-40);
+    --color--flat--button--background--focus: transparent;
+    --color--flat--button--background--active: var(--colors-cardea--jade-60);
+    --color--flat--button--background--disabled: transparent;
+
+    --color--flat--button--boxshadow--focus: hsl(var(--colors-cardea--warning));
+
+    --color--flat--button--text--default: var(--colors-cardea--jade-50);
+    --color--flat--button--text--hover: var(--colors-cardea--text-color);
+    --color--flat--button--text--focus: var(--colors-cardea--jade-50);
+    --color--flat--button--text--active: var(--colors-cardea--white);
+    --color--flat--button--text--disabled: var(--colors-cardea--grey-04);
 }
