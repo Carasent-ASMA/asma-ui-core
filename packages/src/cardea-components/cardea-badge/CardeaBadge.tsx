@@ -14,7 +14,9 @@ const style = {
 export const CardeaBadge: React.FC<IRdBadgeProps> = (props) => {
     return (
         <div className={`h-[30px] w-[30px] overflow-hidden ${props.wrapperClassName || ''}`}>
-            <Badge {...props} style={style} />
+            <span>
+                <Badge {...props} style={style} />
+            </span>
         </div>
     )
 }
