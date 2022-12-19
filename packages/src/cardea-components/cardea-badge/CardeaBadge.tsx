@@ -1,7 +1,7 @@
 import { Badge, BadgeProps } from 'antd'
 
 type IRdBadgeProps = BadgeProps & {
-    className?: string
+    wrapperClassName?: string
 }
 
 const style = {
@@ -11,13 +11,9 @@ const style = {
     borderColor: 'var(--colors-badge-bg)',
 }
 
-/**
- * @deprecated The method should not be used
- * please use CardeaBadge
- */
-export const RdBadge: React.FC<IRdBadgeProps> = (props) => {
+export const CardeaBadge: React.FC<IRdBadgeProps> = (props) => {
     return (
-        <div className='h-[30px] w-[30px] overflow-hidden'>
+        <div className={`h-[30px] w-[30px] overflow-hidden ${props.wrapperClassName || ''}`}>
             <Badge {...props} style={style} />
         </div>
     )

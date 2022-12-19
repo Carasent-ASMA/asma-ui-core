@@ -1,7 +1,7 @@
 {
     "name": "asma-antrd",
     "private": false,
-    "version": "0.0.122",
+    "version": "0.0.123",
     "type": "module",
     "scripts": {
         "dev": "vite",
@@ -98,7 +98,8 @@
         "./dist/RdButton": "./dist/RdButton.es.js",
         "./dist/AtrdModalConfirm": "./dist/AtrdModalConfirm.es.js",
         "./dist/CardeaSpinner": "./dist/CardeaSpinner.es.js",
-        "./dist/CardeaSelect": "./dist/CardeaSelect.es.js"
+        "./dist/CardeaSelect": "./dist/CardeaSelect.es.js",
+        "./dist/CardeaBadge": "./dist/CardeaBadge.es.js"
     },
     "lint-staged": {
         "src/**/*.{js,jsx,ts,tsx}": [
