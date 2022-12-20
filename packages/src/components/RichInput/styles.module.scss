@@ -4,9 +4,6 @@
     @apply p-2 min-h-[100px] max-h-[400px] overflow-auto;
   }
 
-  span.text-label {
-    @apply mb-2 font-sans text-sm font-semibold leading-4 text-custom-grey-06 bg-red-500;
-  }
 }
 
 .viewMode {
@@ -30,6 +27,10 @@
     @apply rounded-b-lg border-x border-b border-t-0 border-gray-04;
   }
 
+}
+
+.text-label {
+  @apply mb-2 font-sans text-sm font-semibold leading-4 text-custom-grey-06;
 }
 
 .error-message {
