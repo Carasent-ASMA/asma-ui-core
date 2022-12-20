@@ -7,7 +7,12 @@ import ReactQuill from 'react-quill'
 import styles from './styles.module.scss'
 
 interface IRichInput extends ReactQuill.ReactQuillProps {
-    height?: string
+    isRequired?: boolean
+    disabled?: boolean
+    label?: string
+    error?: string
+    is_error?: boolean
+    is_warning?: boolean
 }
 
 const MODULES = {
@@ -23,15 +28,45 @@ const MODULES = {
 const FORMATS = ['size', 'font', 'bold', 'italic', 'underline', 'strike', 'blockquote', 'list', 'bullet', 'indent']
 
 const RichInput: FC<IRichInput> = (props) => {
-    return (
-        <ReactQuill
-            {...props}
-            className={clsx(styles['container'], props.className)}
-            modules={{ ...MODULES, ...props.modules }}
-            formats={{ ...FORMATS, ...props.formats }}
-            style={{ ...props.style, height: props.height ? props.height : 120}}
+    const isErrorOrNot = () => {
+        if (props.is_error) {
+            return 'error'
+        }
 
-        />
+        if (props.is_warning) {
+            return 'warning'
+        }
+
+        if (props.isRequired) {
+            return true
+        }
+        return null
+    }
+
+    return (
+        <>
+            <label>
+                {props.label && <span className={clsx(styles['text-label'])}>{props.label}</span>}
+
+                {props.disabled ? (
+                    <ReactQuill
+                        {...props}
+                        className={clsx(styles['viewMode'], props.className)}
+                        readOnly={true}
+                        modules={{ toolbar: false }}
+                    />
+                ) : (
+                    <ReactQuill
+                        {...props}
+                        className={clsx(styles['editMode'], props.className)}
+                        modules={{ ...MODULES, ...props.modules }}
+                        formats={{ ...FORMATS, ...props.formats }}
+                    />
+                )}
+            </label>
+
+            {isErrorOrNot() && <span className={styles['error-message']}>{props.error ? props.error : 'error'}</span>}
+        </>
     )
 }
 
