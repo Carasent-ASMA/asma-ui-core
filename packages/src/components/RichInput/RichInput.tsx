@@ -45,25 +45,25 @@ const RichInput: FC<IRichInput> = (props) => {
 
     return (
         <>
-            <label>
-                {props.label && <span className={clsx(styles['text-label'])}>{props.label}</span>}
+            {/*<label>*/}
+            {props.label && <span className={clsx(styles['text-label'])}>{props.label}</span>}
 
-                {props.disabled ? (
-                    <ReactQuill
-                        {...props}
-                        className={clsx(styles['viewMode'], props.className)}
-                        readOnly={true}
-                        modules={{ toolbar: false }}
-                    />
-                ) : (
-                    <ReactQuill
-                        {...props}
-                        className={clsx(styles['editMode'], props.className)}
-                        modules={{ ...MODULES, ...props.modules }}
-                        formats={{ ...FORMATS, ...props.formats }}
-                    />
-                )}
-            </label>
+            {props.disabled ? (
+                <ReactQuill
+                    {...props}
+                    className={clsx(styles['viewMode'], props.className)}
+                    readOnly={true}
+                    modules={{ toolbar: false }}
+                />
+            ) : (
+                <ReactQuill
+                    {...props}
+                    className={clsx(styles['editMode'], props.className)}
+                    modules={{ ...MODULES, ...props.modules }}
+                    formats={{ ...FORMATS, ...props.formats }}
+                />
+            )}
+            {/*</label>*/}
 
             {isErrorOrNot() && <span className={styles['error-message']}>{props.error ? props.error : 'error'}</span>}
         </>
