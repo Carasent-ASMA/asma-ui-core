@@ -25,5 +25,3 @@ dist-ssr
 
 tsconfig.tsbuildinfo
 ./tsconfig.tsbuildinfo
-./storybook
-storybook
