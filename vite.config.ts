@@ -5,6 +5,8 @@ import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
 import tsConfigPaths from 'vite-tsconfig-paths'
 
+import * as packageJson from './package.json'
+
 // https://vitejs.dev/config/
 export default defineConfig(() => ({
     plugins: [
@@ -14,7 +16,7 @@ export default defineConfig(() => ({
         tsConfigPaths(),
         dts({
             insertTypesEntry: true,
-            include: resolve(__dirname, 'src'),
+            include: resolve('src'),
         }),
         // cssInjectedByJsPlugin({ topExecutionPriority: false, styleId: 'antrd' }),
     ],
@@ -48,7 +50,7 @@ export default defineConfig(() => ({
             },
         },
         rollupOptions: {
-            external: ['react', 'react-dom'],
+            external: [...Object.keys(packageJson['peerDependencies'])],
             output: {
                 // format: 'es',
                 // dir: 'dist',
