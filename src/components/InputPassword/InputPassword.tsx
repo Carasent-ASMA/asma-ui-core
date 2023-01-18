@@ -5,7 +5,7 @@ import { omit } from 'lodash-es'
 import type { FC } from 'react'
 
 import { i18n } from '../helpers/i18n'
-import styles from './InputField.module.scss'
+import styles from './InputPassword.module.scss'
 import type {PasswordProps} from "antd/lib/input/Password";
 
 enum IconPositionEnum {
@@ -73,4 +73,4 @@ const InputPassword: FC<InputPassword> = (
     )
 }
 
-export { IconPositionEnum, InputPassword }
+export { IconPositionEnum as IconPositionEnumPassword , InputPassword }

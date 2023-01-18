@@ -18,3 +18,5 @@ export * from './SelectField'
 export * from './TextAreaField'
 export * from './TimeField'
 export * from './widget-card'
+export * from './InputPassword'
+
