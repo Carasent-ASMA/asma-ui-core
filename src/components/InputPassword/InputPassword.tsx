@@ -73,4 +73,4 @@ const InputPassword: FC<InputPassword> = (
     )
 }
 
-export { InputPassword }
+export { IconPositionEnum as IconPositionEnumPassword , InputPassword }

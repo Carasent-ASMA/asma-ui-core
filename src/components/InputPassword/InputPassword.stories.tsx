@@ -2,7 +2,7 @@ import 'antd/dist/antd.css'
 
 import type { ComponentMeta, ComponentStory } from '@storybook/react'
 
-import { IconPositionEnum, InputPassword as InputFieldComponent } from './InputPassword'
+import { IconPositionEnumPassword, InputPassword as InputFieldComponent } from './InputPassword'
 
 const meta: ComponentMeta<typeof InputFieldComponent> = {
     title: 'InputField',
@@ -15,9 +15,9 @@ const meta: ComponentMeta<typeof InputFieldComponent> = {
             control: 'select',
             options: ['Prefix', 'Suffix', 'Both'],
             mapping: {
-                Prefix: IconPositionEnum.Prefix,
-                Suffix: IconPositionEnum.Suffix,
-                Both: IconPositionEnum.Both,
+                Prefix: IconPositionEnumPassword.Prefix,
+                Suffix: IconPositionEnumPassword.Suffix,
+                Both: IconPositionEnumPassword.Both,
             },
         },
     },
@@ -37,5 +37,5 @@ InputField.args = {
     value: 'Value',
     is_error: false,
     is_warning: false,
-    iconPosition: IconPositionEnum.Prefix,
+    iconPosition: IconPositionEnumPassword.Prefix,
 }
