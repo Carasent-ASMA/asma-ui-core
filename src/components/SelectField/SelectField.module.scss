@@ -1,5 +1,9 @@
 .wrapper {
     @apply flex w-full flex-col;
+    
+    div:global(.ant-select-selector) {
+        @apply flex items-center;
+    }
 
     .label-wrapper {
         @apply mb-5 flex flex-col;
