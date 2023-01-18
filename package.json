@@ -1,7 +1,7 @@
 {
     "name": "asma-antrd",
     "private": false,
-    "version": "0.0.129",
+    "version": "0.0.130",
     "type": "module",
     "scripts": {
         "dev": "vite",
