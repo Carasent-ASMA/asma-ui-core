@@ -1,7 +1,7 @@
 {
     "name": "asma-antrd",
     "private": false,
-    "version": "0.0.130",
+    "version": "0.0.131",
     "type": "module",
     "scripts": {
         "dev": "vite",
@@ -22,13 +22,13 @@
     "license": "UNLICENSED",
     "dependencies": {
         "@headlessui/react": "^1.7.2",
+        "@iconify/react": "^4.0.0",
         "antd": "^4.23.2",
         "antd-mobile": "^5.24.0",
         "clsx": "^1.2.1",
         "lodash-es": "^4.17.21",
         "moment": "^2.29.4",
-        "react-quill": "^2.0.0",
-        "@iconify/react": "^4.0.0"
+        "react-quill": "^2.0.0"
     },
     "devDependencies": {
         "@storybook/addon-actions": "^6.5.14",
@@ -82,10 +82,10 @@
         "vite-tsconfig-paths": "^3.5.1"
     },
     "peerDependencies": {
-        "react": "^18.*",
-        "react-dom": "^18.*",
         "antd": "^4.23.2",
-        "antd-mobile": "^5.24.0"
+        "antd-mobile": "^5.24.0",
+        "react": "^18.*",
+        "react-dom": "^18.*"
     },
     "main": "./dist/asma-antrd.es.js",
     "module": "./dist/asma-antrd.es.js",
