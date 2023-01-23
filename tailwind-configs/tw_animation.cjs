@@ -3,6 +3,7 @@ module.exports = {
         'slide-in': 'slide-in 0.3s linear',
         'slide-out': 'slide-out 0.3s linear',
         'opacity-in': 'opacity-in 0.1s linear',
+        'opacity-in-3': 'opacity-appear 0.3s linear',
         'opacity-out': 'opacity-out 0.3s linear',
     },
     keyframes: {
@@ -22,6 +23,14 @@ module.exports = {
             '100%': {
                 opacity: '1',
                 height: '100%',
+            },
+        },
+        'opacity-appear': {
+            '0%': {
+                opacity: '0',
+            },
+            '100%': {
+                opacity: '1',
             },
         },
         'opacity-out': {
