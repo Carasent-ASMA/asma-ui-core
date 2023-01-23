@@ -39,6 +39,19 @@
         "experimentalDecorators": false,
         "importsNotUsedAsValues": "preserve",
         "useUnknownInCatchVariables": false,
+        //
+        "strictNullChecks": true,
+        "strictFunctionTypes": true,
+        "strictBindCallApply": true,
+
+        "noImplicitAny": true,
+        "noUnusedLocals": false,
+        "noImplicitReturns": true,
+        "noUnusedParameters": true,
+        "noUncheckedIndexedAccess": true,
+        "noFallthroughCasesInSwitch": true,
+        "noPropertyAccessFromIndexSignature": true,
+
         "composite": true
     },
     "exclude": ["node_modules", "dist"],

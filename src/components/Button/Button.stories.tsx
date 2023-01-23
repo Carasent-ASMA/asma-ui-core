@@ -41,7 +41,7 @@ Button.decorators = [
     (Story, context) => {
         // console.log('DefaultContext', context)
         return (
-            <div data-theme={context.args.theme}>
+            <div data-theme={context.args['theme']}>
                 <Story />
             </div>
         )

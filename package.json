@@ -1,7 +1,7 @@
 {
     "name": "asma-antrd",
     "private": false,
-    "version": "0.1.0",
+    "version": "0.1.1",
     "type": "module",
     "scripts": {
         "dev": "vite",
@@ -16,8 +16,9 @@
         "build-storybook": "build-storybook"
     },
     "files": [
-        "dist",
-        "tailwind-configs"
+        "dist/**/*",
+        "tailwind-configs",
+        "dist/style.css"
     ],
     "license": "UNLICENSED",
     "dependencies": {
@@ -31,6 +32,7 @@
         "react-quill": "^2.0.0"
     },
     "devDependencies": {
+        "@babel/core": "^7.20.12",
         "@storybook/addon-actions": "^6.5.14",
         "@storybook/addon-essentials": "^6.5.14",
         "@storybook/addon-interactions": "^6.5.14",

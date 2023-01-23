@@ -10,14 +10,15 @@ import * as packageJson from './package.json'
 // https://vitejs.dev/config/
 export default defineConfig(() => ({
     plugins: [
-        react({
-            jsxRuntime: 'automatic',
-        }),
-        tsConfigPaths(),
         dts({
             insertTypesEntry: true,
             include: resolve('src'),
         }),
+        react({
+            jsxRuntime: 'automatic',
+        }),
+        tsConfigPaths(),
+
         // cssInjectedByJsPlugin({ topExecutionPriority: false, styleId: 'antrd' }),
     ],
     resolve: {
