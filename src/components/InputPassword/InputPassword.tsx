@@ -6,7 +6,7 @@ import type { FC } from 'react'
 
 import { i18n } from '../helpers/i18n'
 import styles from './InputPassword.module.scss'
-import type {PasswordProps} from "antd/lib/input/Password";
+import type { PasswordProps } from 'antd/lib/input/Password'
 
 enum IconPositionEnum {
     Prefix = 'prefix',
@@ -73,4 +73,4 @@ const InputPassword: FC<InputPassword> = (
     )
 }
 
-export { IconPositionEnum as IconPositionEnumPassword , InputPassword }
+export { IconPositionEnum as IconPositionEnumPassword, InputPassword }

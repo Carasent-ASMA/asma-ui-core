@@ -1,6 +1,5 @@
 import { Icon } from '@iconify/react'
-import { ConfigProvider, DatePicker } from 'antd'
-import type { DatePickerProps } from 'antd/es'
+import { /* ConfigProvider, */ DatePicker, DatePickerProps } from 'antd'
 import type { Locale } from 'antd/lib/locale-provider'
 import { DatePicker as DatePickerMobile } from 'antd-mobile'
 import { clsx } from 'clsx'
@@ -112,24 +111,22 @@ const DateField: FC<IDateField> = (props, { format_data = defaultFormat }: { for
                         }}
                     </DatePickerMobile>
                 ) : (
-                    <ConfigProvider locale={props.locale}>
-                        <DatePicker
-                            placeholder={i18n.select_date}
-                            format={format_data}
-                            className={styles['content']}
-                            {...omit(props, 'error', 'is_error', 'is_warning')}
-                            value={(!!props.value && moment(props.value)) || null}
-                            onChange={(value) => {
-                                if (!value || !value.isValid()) {
-                                    props.onChange(null)
-                                    return
-                                }
+                    <DatePicker
+                        placeholder={i18n.select_date}
+                        format={format_data}
+                        className={styles['content']}
+                        {...omit(props, 'error', 'is_error', 'is_warning')}
+                        value={(!!props.value && moment(props.value)) || null}
+                        onChange={(value) => {
+                            if (!value || !value.isValid()) {
+                                props.onChange(null)
+                                return
+                            }
 
-                                props.onChange(value.toDate())
-                            }}
-                            status={isErrorOrNot()}
-                        />
-                    </ConfigProvider>
+                            props.onChange(value.toDate())
+                        }}
+                        status={isErrorOrNot()}
+                    />
                 )}
             </label>
             {isErrorOrNot() && (

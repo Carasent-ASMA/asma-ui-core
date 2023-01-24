@@ -1,8 +1,6 @@
-import 'moment/dist/locale/nb'
-
 import { Icon } from '@iconify/react'
-import { type TimePickerProps, ConfigProvider, TimePicker } from 'antd'
-import locale from 'antd/es/locale/nb_NO'
+import { type TimePickerProps, /* ConfigProvider, */ TimePicker } from 'antd'
+// import locale from 'antd/es/locale/nb_NO'
 import { Picker } from 'antd-mobile'
 import { clsx } from 'clsx'
 import { format, setHours, setMinutes } from 'date-fns'
@@ -16,9 +14,6 @@ import { getGeneratedTime } from './helper'
 import styles from './TimeField.module.scss'
 
 const format_time = 'HH:mm'
-
-// eslint-disable-next-line import/no-named-as-default-member
-moment.locale('nb')
 
 interface ITimeField {
     label?: string
@@ -112,29 +107,27 @@ const TimeField: React.FC<TTimeFieldCustom> = (props) => {
                         </Picker>
                     </>
                 ) : (
-                    <ConfigProvider locale={locale}>
-                        <TimePicker
-                            renderExtraFooter={() => null}
-                            showNow={false}
-                            minuteStep={10}
-                            format={format_time}
-                            placeholder={i18n.select_time}
-                            {...omit(props, 'is_warning', 'is_error', 'error')}
-                            className={styles['content']}
-                            popupClassName={styles['piker_time']}
-                            onChange={(time, timeString) => {
-                                if (!props.onChange) return
+                    <TimePicker
+                        renderExtraFooter={() => null}
+                        showNow={false}
+                        minuteStep={10}
+                        format={format_time}
+                        placeholder={i18n.select_time}
+                        {...omit(props, 'is_warning', 'is_error', 'error')}
+                        className={styles['content']}
+                        popupClassName={styles['piker_time']}
+                        onChange={(time, timeString) => {
+                            if (!props.onChange) return
 
-                                if (!time) {
-                                    props.onChange(null, timeString)
-                                    return
-                                }
+                            if (!time) {
+                                props.onChange(null, timeString)
+                                return
+                            }
 
-                                props.onChange(moment(time), timeString)
-                            }}
-                            status={isErrorOrNot()}
-                        />
-                    </ConfigProvider>
+                            props.onChange(moment(time), timeString)
+                        }}
+                        status={isErrorOrNot()}
+                    />
                 )}
             </label>
             {isErrorOrNot() && (

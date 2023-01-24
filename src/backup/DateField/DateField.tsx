@@ -1,7 +1,4 @@
-import 'moment/locale/nb'
-
 import { DatePicker } from 'antd'
-import locale from 'antd/es/date-picker/locale/nb_NO'
 import { clsx } from 'clsx'
 import moment from 'moment'
 
@@ -21,7 +18,6 @@ export const DateField: React.FC<{
                 <span className={styles['label']}>{props.label}</span>
                 <DatePicker
                     disabled={props.disabled}
-                    locale={locale}
                     picker='date'
                     format='DD.MM.YYYY'
                     className={styles['content']}

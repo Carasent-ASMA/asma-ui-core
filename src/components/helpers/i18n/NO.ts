@@ -1,8 +1,4 @@
-import nb_NO from 'antd/es/locale/nb_NO'
-
 export const norwegian = {
-    code: 'No',
-    locale: nb_NO,
     strings: {
         loading_qnr: 'Laster skjema...',
         send: 'Send',

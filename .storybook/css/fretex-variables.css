@@ -1,0 +1,58 @@
+[data-theme='fretex'] {
+    --colors-text-component: var(--colors-gray-9000);
+    --colors-active-component: var(--colors-gama-700);
+
+    --colors-alpha-100: var(--colors-slate-100);
+    --colors-alpha-500: var(--colors-slate-500);
+    --colors-alpha-600: var(--colors-slate-600);
+    --colors-alpha-700: var(--colors-slate-700);
+
+    --colors-beta-100: var(--colors-red-100);
+    --colors-beta-500: var(--colors-red-500);
+    --colors-beta-700: var(--colors-red-700);
+
+    --colors-gama-100: var(--colors-green-100);
+    --colors-gama-200: var(--colors-green-200);
+    --colors-gama-300: var(--colors-green-300);
+    --colors-gama-500: var(--colors-green-500);
+    --colors-gama-600: var(--colors-green-600);
+    --colors-gama-700: var(--colors-green-700);
+    --colors-gama-800: var(--colors-green-700);
+
+    --colors-delta-100: var(--colors-gray-100);
+    --colors-delta-200: var(--colors-gray-200);
+    --colors-delta-250: var(--colors-gray-250);
+    --colors-delta-300: var(--colors-gray-300);
+    --colors-delta-500: var(--colors-gray-500);
+    --colors-delta-700: var(--colors-gray-700);
+    --colors-delta-800: var(--colors-gray-800);
+    --colors-delta-900: var(--colors-gray-900);
+    --colors-delta-9000: var(--colors-gray-9000);
+    --colors-delta-10000: var(--colors-gray-10000);
+
+    --colors-sigma-700: var(--colors-gray-700);
+    --colors-zeta-700: var(--colors-gray-700);
+
+    --colors-btn-bg-hover: var(--colors-gama-600);
+    --colors-btn-bg-standart: var(--colors-gama-500);
+    --colors-btn-bg-active: var(--colors-gama-600);
+    --colors-btn-bg-disabled: var(--colors-gray-200);
+    --colors-btn-bg-danger: var(--colors-red-700);
+    --colors-btn-bg-danger-active: var(--colors-red-500);
+
+    --colors-colors-btn-bg-mini-action: var(--colors-gray-100);
+    --colors-colors-btn-bg-mini-action-hover: var(--colors-gama-700);
+
+    --colors-link-text-hover: var(--colors-red-700);
+    --colors-link-text-standart: var(--colors-gray-500);
+    --colors-link-text-active: var(--colors-red-700);
+    --colors-link-text-disabled: var(--colors-gray-200);
+
+    --colors-badge-bg: var(--colors-red-700);
+
+    --colors-app-directory-button-select-recipient-bg: var(--colors-slate-500);
+
+    --colors-btn-task-status-bg: var(--colors-green-150);
+
+    --colors-chat-ticket-message-bg: var(--colors-alpha-500);
+}

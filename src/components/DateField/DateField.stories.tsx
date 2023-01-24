@@ -2,8 +2,6 @@ import 'antd/dist/antd.css'
 
 import type { ComponentMeta, ComponentStory } from '@storybook/react'
 
-// import en_GB from 'antd/es/locale/en_GB'
-// import nb_NO from 'antd/es/locale/nb_NO'
 import { DateField as DateFieldComponent, defaultFormat } from './DateField'
 
 const meta: ComponentMeta<typeof DateFieldComponent> = {

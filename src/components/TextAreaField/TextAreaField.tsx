@@ -33,7 +33,7 @@ const TextAreaField: FC<TextAreaField> = (props) => {
             <label className={styles['label-wrapper']}>
                 {props.label && <span className={styles['text-label']}>{props.label}</span>}
                 <TextArea
-                    placeholder={i18n.write_something}
+                    placeholder={props.placeholder}
                     rows={4}
                     {...omit(props, 'is_warning', 'iconPosition', 'is_error', 'error')}
                     status={isErrorOrNot()}

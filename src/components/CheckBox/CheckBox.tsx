@@ -1,4 +1,4 @@
-import { Checkbox as AntCheckBox } from 'antd/es'
+import { Checkbox as AntCheckBox } from 'antd'
 import type { FC, PropsWithChildren } from 'react'
 
 import styles from './CheckBox.module.scss'

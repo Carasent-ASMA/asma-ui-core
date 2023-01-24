@@ -49,28 +49,8 @@ module.exports = {
         'react-hooks/exhaustive-deps': 'off',
         'react/prop-types': 0,
         'react/display-name': 0,
-        'simple-import-sort/imports': 'error',
-        'simple-import-sort/exports': 'error',
         '@typescript-eslint/no-empty-function': 'off',
         'react/no-unknown-property': 'off',
         'react/no-unescaped-entities ': 'off',
-    },
-    settings: {
-        react: {
-            version: 'detect',
-        },
-        'import/parsers': {
-            '@typescript-eslint/parser': ['.ts', '.tsx'],
-        },
-        'import/resolver': {
-            typescript: {
-                alwaysTryTypes: true,
-                project: ['tsconfig.json', 'packages/tsconfig.json'],
-            },
-            node: {
-                project: ['tsconfig.json', 'package/tsconfig.json'],
-                extensions: ['.js', '.jsx', '.ts', '.tsx'],
-            },
-        },
     },
 }

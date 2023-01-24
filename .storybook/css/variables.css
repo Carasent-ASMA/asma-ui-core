@@ -1,0 +1,105 @@
+:root {
+    /* base colors :*/
+    --colors-text: #4c4c4c;
+
+    --colors-red-100: #fdeae9;
+    --colors-red-500: #ef4444;
+    --colors-red-700: #871e17;
+
+    --colors-salmon-500: #d24545;
+    --colors-salmon-700: #b14848;
+
+    --colors-gray-50: #f0f2f4;
+    --colors-gray-100: #f5f5f5;
+    --colors-gray-200: #c8ced7;
+    --colors-gray-250: #98a3b4;
+    --colors-gray-300: #586782;
+    --colors-gray-500: #606671;
+    --colors-gray-700: #575757;
+    --colors-gray-800: #4c4c4c;
+    --colors-gray-900: #363e4a;
+    --colors-gray-9000: #1a1d23;
+    --colors-gray-10000: black;
+
+    --colors-green-100: #fefefe;
+    --colors-green-150: #e1ebe6;
+    --colors-green-200: #deebe5;
+    --colors-green-300: #b6e9d2b6;
+    --colors-green-400: #bae1d6;
+    --colors-green-500: #adc6bc;
+    --colors-green-600: #9bb1a8;
+    --colors-green-700: #667670;
+    --colors-green-900: #81969e;
+
+    --colors-slate-100: #d0dee5;
+    --colors-slate-200: #abc8d42f;
+    --colors-slate-300: #abc8d4;
+    --colors-slate-500: #9fbcca;
+    --colors-slate-600: #6198ae;
+    --colors-slate-700: #6e9aaf;
+    --colors-slate-800: #4c7f93;
+
+    --colors-blue-10: #f4f4f6;
+    --colors-blue-100: #d1e9ff;
+    --colors-blue-200: #d7e6fd;
+    --colors-blue-300: #74bcff;
+    --colors-blue-400: #46a6ff;
+    --colors-blue-500: #1890ff;
+    --colors-blue-600: #1373cc;
+    --colors-blue-700: #223399;
+    --colors-blue-800: #0e143d;
+    --colors-blue-900: #070a1f;
+
+    --colors-magic-blue-700: #247ba3;
+
+    --colors-text-component: #ffffff;
+
+    /*default theme :*/
+    --colors-active-component: var(--colors-blue-500);
+    --colors-alpha-100: var(--colors-blue-100);
+    --colors-alpha-500: var(--colors-blue-500);
+    --colors-alpha-600: var(--colors-blue-600);
+    --colors-alpha-700: var(--colors-blue-700);
+    --colors-beta-100: var(--colors-red-100);
+    --colors-beta-500: var(--colors-salmon-500);
+    --colors-beta-700: var(--colors-salmon-700);
+    --colors-gama-100: var(--colors-slate-100);
+    --colors-gama-200: var(--colors-slate-200);
+    --colors-gama-300: var(--colors-slate-300);
+    --colors-gama-500: var(--colors-slate-500);
+    --colors-gama-600: var(--colors-slate-600);
+    --colors-gama-700: var(--colors-slate-700);
+    --colors-gama-800: var(--colors-slate-800);
+    --colors-delta-100: var(--colors-gray-100);
+    --colors-delta-200: var(--colors-gray-200);
+    --colors-delta-250: var(--colors-gray-250);
+    --colors-delta-300: var(--colors-gray-300);
+    --colors-delta-500: var(--colors-gray-500);
+    --colors-delta-700: var(--colors-gray-700);
+    --colors-delta-800: var(--colors-gray-800);
+    --colors-delta-900: var(--colors-gray-900);
+    --colors-delta-9000: var(--colors-gray-9000);
+    --colors-delta-10000: var(--colors-gray-10000);
+
+    --colors-sigma-700: var(--colors-magic-blue-700);
+    --colors-zeta-700: var(--colors-blue-700);
+    --colors-btn-bg-hover: var(--colors-slate-300);
+    --colors-btn-bg-standart: var(--colors-slate-600);
+    --colors-btn-bg-active: var(--colors-slate-800);
+    --colors-btn-bg-disabled: var(--colors-green-900);
+    --colors-btn-bg-danger: var(--colors-salmon-700);
+    --colors-btn-bg-danger-active: var(--colors-salmon-500);
+    --colors-colors-btn-bg-mini-action: var(--colors-slate-600);
+    --colors-colors-btn-bg-mini-action-hover: var(--colors-slate-300);
+    --colors-link-text-hover: var(--colors-slate-800);
+    --colors-link-text-standart: var(--colors-gray-500);
+    --colors-link-text-active: var(--colors-slate-800);
+    --colors-link-text-disabled: var(--colors-green-900);
+    --colors-badge-bg: var(--colors-slate-600);
+
+    --colors-app-directory-button-select-recipient-bg: var(--colors-blue-200);
+
+    --colors-btn-task-status-bg: var(--colors-slate-600);
+
+    --colors-chat-ticket-message-bg: var(--colors-blue-200);
+}

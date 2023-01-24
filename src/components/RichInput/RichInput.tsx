@@ -1,4 +1,4 @@
-import 'react-quill/dist/quill.snow.css'
+import './quill.snow.css'
 
 import clsx from 'clsx'
 import type { FC } from 'react'
