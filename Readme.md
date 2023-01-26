@@ -6,6 +6,7 @@ Important!!!
 ---
 
 #ChangeLog:
-- added Badge component [Andrei Grini | 26.01.2023]
 - added Icons (Hamburger and NotificationBell) 
   added tailwind variable for advoca-top-menu text color (colors-topbar-text) [Andrei Grini | 26.01.2023]
+- added Badge component [Andrei Grini | 26.01.2023]
+
