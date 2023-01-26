@@ -1,19 +1,23 @@
 {
     "name": "asma-antrd",
     "private": false,
-    "version": "0.1.7",
+    "version": "1.0.2",
     "type": "module",
     "files": [
         "dist/**/*",
         "dist/style.css",
         "tailwind-configs"
     ],
+    "keywords": [
+        ""
+    ],
+    "author": "",
     "types": "./dist/index.d.ts",
     "main": "./dist/asma-antrd.es.js",
     "module": "./dist/asma-antrd.es.js",
     "scripts": {
         "dev": "vite",
-        "build": "tsc && vite build",
+        "build": "tsc && rm -rf ./dist && vite build",
         "preview": "vite preview",
         "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
         "lint:fix": "eslint --fix 'src/**/*.{jsx,ts,tsx}'",
