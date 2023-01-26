@@ -1,16 +1,14 @@
 {
     "name": "asma-antrd",
     "private": false,
-    "version": "1.0.2",
+    "version": "1.0.3",
     "type": "module",
     "files": [
         "dist/**/*",
         "dist/style.css",
         "tailwind-configs"
     ],
-    "keywords": [
-        ""
-    ],
+    "keywords": [],
     "author": "",
     "types": "./dist/index.d.ts",
     "main": "./dist/asma-antrd.es.js",

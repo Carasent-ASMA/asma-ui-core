@@ -49,4 +49,6 @@ module.exports = {
 
     // chat
     'chat-ticket-message-bg': 'var(--colors-chat-ticket-message-bg)',
+    //
+    'colors-topbar-text': 'var(--colors-topbar-text)',
 }

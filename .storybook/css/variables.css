@@ -102,4 +102,6 @@
     --colors-btn-task-status-bg: var(--colors-slate-600);
 
     --colors-chat-ticket-message-bg: var(--colors-blue-200);
+
+    --colors-topbar-text: var(--colors-gray-700);
 }

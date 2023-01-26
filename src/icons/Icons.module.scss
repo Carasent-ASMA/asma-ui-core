@@ -1,0 +1,7 @@
+.all-icons-container {
+    @apply flex items-center gap-5;
+}
+
+.icon {
+    @apply animate-opacity-in-3 cursor-pointer transition-all duration-300;
+}
