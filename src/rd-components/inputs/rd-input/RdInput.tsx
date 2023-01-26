@@ -10,6 +10,9 @@ const inputStyle = {
     height: '40px',
 }
 
+/**
+ * @deprecated Use Input
+ */
 export const RdInput = (props: InputProps & React.RefAttributes<InputRef>) => {
     return (
         <Input {...props} className={`${styles['ant-redesign']} antrd-input ${props.className}`} style={inputStyle} />
