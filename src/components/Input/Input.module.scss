@@ -8,9 +8,17 @@
         @apply flex items-center justify-center leading-4;
     }
 
-    &:not(&:global(.ant-input-status-warning)):not(&:global(.ant-input-status-error)),
-    &:not(&:global(.ant-input-affix-wrapper-status-warning)):not(&:global(.ant-input-affix-wrapper-status-error)) {
-        @apply rounded-lg border-gray-700   shadow-none
+    &:global(.ant-input-affix-wrapper-disabled) {
+        @apply cursor-default border border-gray-700 ring-transparent #{!important};
+        input {
+            @apply ring-transparent focus:ring-transparent active:ring-transparent #{!important};
+        }
+    }
+
+    &:not(&:global(.ant-input-status-warning)):not(&:global(.ant-input-status-error)):not(
+            &:global(.ant-input-affix-wrapper-status-warning)
+        ):not(&:global(.ant-input-affix-wrapper-status-error)) {
+        @apply rounded-lg border-gray-700 shadow-none
         ring-1 ring-transparent placeholder:italic
         hover:border-gray-700
         focus:border-gray-700 focus:shadow-none  focus:ring-gama-700
@@ -25,10 +33,7 @@
         }
 
         &:global(.ant-input-affix-wrapper-disabled) {
-            @apply cursor-default border ring-transparent #{!important};
-            input {
-                @apply ring-transparent focus:ring-transparent active:ring-transparent #{!important};
-            }
+            @apply ring-transparent #{!important};
         }
     }
 }
