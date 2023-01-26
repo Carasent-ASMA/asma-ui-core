@@ -1,34 +1,34 @@
 .input,
-span > .input {
+.input input {
     @apply rounded-lg text-[16px] text-delta-800 disabled:cursor-default disabled:text-delta-800  #{!important};
-}
 
-input:not(input:global(.ant-input-status-warning)):not(input:global(.ant-input-status-error)),
-span:not(span:global(.ant-input-affix-wrapper-status-warning)):not(span:global(.ant-input-affix-wrapper-status-error)) {
-    @apply rounded-lg border-gray-700   shadow-none
+    span:global(.ant-input-clear-icon),
+    span:global(.ant-input-show-count-suffix),
+    span:global(.ant-input-suffix) {
+        @apply flex items-center justify-center leading-4;
+    }
+
+    &:not(&:global(.ant-input-status-warning)):not(&:global(.ant-input-status-error)),
+    &:not(&:global(.ant-input-affix-wrapper-status-warning)):not(&:global(.ant-input-affix-wrapper-status-error)) {
+        @apply rounded-lg border-gray-700   shadow-none
         ring-1 ring-transparent placeholder:italic
         hover:border-gray-700
         focus:border-gray-700 focus:shadow-none  focus:ring-gama-700
         active:border-gray-700 active:ring-gama-700 
         disabled:cursor-default  disabled:ring-transparent #{!important};
 
-    &:global(.ant-input-affix-wrapper-focused) {
-        @apply ring-1 ring-gama-700 transition-all duration-300 #{!important};
-        input {
-            @apply focus:ring-transparent active:ring-transparent #{!important};
+        &:global(.ant-input-affix-wrapper-focused) {
+            @apply ring-1 ring-gama-700 transition-all duration-300 #{!important};
+            input {
+                @apply focus:ring-transparent active:ring-transparent #{!important};
+            }
+        }
+
+        &:global(.ant-input-affix-wrapper-disabled) {
+            @apply cursor-default border ring-transparent #{!important};
+            input {
+                @apply ring-transparent focus:ring-transparent active:ring-transparent #{!important};
+            }
         }
     }
-
-    &:global(.ant-input-affix-wrapper-disabled) {
-        @apply cursor-default border border-delta-200 #{!important};
-        input {
-            @apply focus:ring-transparent active:ring-transparent #{!important};
-        }
-    }
-}
-
-span:global(.ant-input-clear-icon),
-span:global(.ant-input-show-count-suffix),
-span:global(.ant-input-suffix) {
-    @apply flex items-center justify-center leading-4;
 }
