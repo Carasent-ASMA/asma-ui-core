@@ -1,6 +1,7 @@
-.input,
-.input input {
-    @apply rounded-lg text-[16px] text-delta-800 disabled:cursor-default disabled:text-delta-800  #{!important};
+.input:global(.ant-input),
+.input:global(.ant-input-affix-wrapper),
+.input:global(.ant-input-affix-wrapper) input {
+    @apply rounded-lg text-[16px] text-delta-800 disabled:cursor-default disabled:text-delta-800;
 
     span:global(.ant-input-clear-icon),
     span:global(.ant-input-show-count-suffix),
@@ -8,10 +9,11 @@
         @apply flex items-center justify-center leading-4;
     }
 
+    &:global(.ant-input[disabled]),
     &:global(.ant-input-affix-wrapper-disabled) {
-        @apply cursor-default border border-gray-700 ring-transparent #{!important};
+        @apply cursor-default border border-gray-700 ring-transparent;
         input {
-            @apply ring-transparent focus:ring-transparent active:ring-transparent #{!important};
+            @apply ring-transparent focus:ring-transparent active:ring-transparent;
         }
     }
 
@@ -23,17 +25,17 @@
         hover:border-gray-700
         focus:border-gray-700 focus:shadow-none  focus:ring-gama-700
         active:border-gray-700 active:ring-gama-700 
-        disabled:cursor-default  disabled:ring-transparent #{!important};
+        disabled:cursor-default  disabled:ring-transparent;
 
         &:global(.ant-input-affix-wrapper-focused) {
-            @apply ring-1 ring-gama-700 transition-all duration-300 #{!important};
+            @apply ring-1 ring-gama-700 transition-all duration-300;
             input {
-                @apply focus:ring-transparent active:ring-transparent #{!important};
+                @apply focus:ring-transparent active:ring-transparent;
             }
         }
 
         &:global(.ant-input-affix-wrapper-disabled) {
-            @apply ring-transparent #{!important};
+            @apply ring-transparent;
         }
     }
 }

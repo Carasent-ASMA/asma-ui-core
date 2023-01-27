@@ -17,6 +17,10 @@ const Template: ComponentStory<typeof InputComponent> = (args) => (
             <InputComponent {...args} status='warning' />
             <InputComponent {...args} status='error' />
             <InputComponent {...args} disabled />
+            <InputComponent {...args} disabled value='qnr input' className={styles['qnr-input']} />
+            <InputComponent {...args} value='qnr input' showCount allowClear />
+            <InputComponent {...args} disabled value='input example' />
+            {/*  */}
             <InputComponent {...args} className={styles['input-swidth']} />
             <InputComponent {...args} className={styles['input-swidth']} />
             <InputComponent {...args} className={styles['input-swidth']} />

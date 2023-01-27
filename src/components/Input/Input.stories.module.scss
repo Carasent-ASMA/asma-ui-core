@@ -23,3 +23,7 @@
 .input-swidth {
     @apply flex-[10%] #{!important};
 }
+
+.qnr-input {
+    @apply border-2 border-white bg-[#f5f5f5] #{!important};
+}
