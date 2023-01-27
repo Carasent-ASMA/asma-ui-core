@@ -5,18 +5,16 @@ import type { ModalProps } from 'antd/es'
 
 interface IAtrdModalConfirmProps extends ModalProps {
     content: string
-    cancelText:string
-    okText:string
-    title:string
+    cancelText: string
+    okText: string
+    title: string
 }
 
-export const AtrdModalConfirm: React.FC<IAtrdModalConfirmProps> = ( props ) => {
+export const AtrdModalConfirm: React.FC<IAtrdModalConfirmProps> = (props) => {
     return (
         <Modal
-        {...props}
-            
+            {...props}
             className={`antrd-modal-confirm ${props.className}`}
-            
             footer={
                 <>
                     <button className='antd-confirm-modal-body_cancel-button' onClick={props.onCancel}>
@@ -29,9 +27,9 @@ export const AtrdModalConfirm: React.FC<IAtrdModalConfirmProps> = ( props ) => {
             }
             width={343}
         >
-           
             <div className='pb-4 font-semibold'>{props.title}</div>
             <div>{props.content}</div>
+            <div className='flex h-full w-full'>{props.children}</div>
         </Modal>
     )
 }
