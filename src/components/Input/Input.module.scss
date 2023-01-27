@@ -1,7 +1,7 @@
 .input:global(.ant-input),
 .input:global(.ant-input-affix-wrapper),
 .input:global(.ant-input-affix-wrapper) input {
-    @apply rounded-lg text-[16px] text-delta-800 disabled:cursor-default disabled:text-delta-800;
+    @apply rounded-lg text-[16px] text-delta-800 disabled:cursor-default disabled:text-delta-800 placeholder:italic;
 
     span:global(.ant-input-clear-icon),
     span:global(.ant-input-show-count-suffix),
@@ -21,7 +21,7 @@
             &:global(.ant-input-affix-wrapper-status-warning)
         ):not(&:global(.ant-input-affix-wrapper-status-error)) {
         @apply rounded-lg border-gray-700 shadow-none
-        ring-1 ring-transparent placeholder:italic
+        ring-1 ring-transparent 
         hover:border-gray-700
         focus:border-gray-700 focus:shadow-none  focus:ring-gama-700
         active:border-gray-700 active:ring-gama-700 
