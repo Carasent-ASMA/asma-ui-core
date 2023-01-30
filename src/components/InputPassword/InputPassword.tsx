@@ -47,20 +47,10 @@ const InputPassword: FC<InputPassword> = (
                 <Input.Password
                     placeholder={i18n.write_something}
                     {...((iconPosition === IconPositionEnum.Prefix || iconPosition === IconPositionEnum.Both) && {
-                        prefix: (
-                            <Icon
-                                icon={props.icon ?? ''}
-                                className={clsx('text-xl', props.icon_style && props.icon_style)}
-                            />
-                        ),
+                        prefix: <Icon icon={props.icon ?? ''} className={clsx('text-xl', props.icon_style)} />,
                     })}
                     {...((iconPosition === IconPositionEnum.Suffix || iconPosition === IconPositionEnum.Both) && {
-                        suffix: (
-                            <Icon
-                                icon={props.icon ?? ''}
-                                className={clsx('text-xl', props.icon_style && props.icon_style)}
-                            />
-                        ),
+                        suffix: <Icon icon={props.icon ?? ''} className={clsx('text-xl', props.icon_style)} />,
                     })}
                     {...omit(props, 'is_warning', 'iconPosition', 'is_error', 'error')}
                     status={isErrorOrNot()}

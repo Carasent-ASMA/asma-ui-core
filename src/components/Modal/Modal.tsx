@@ -9,12 +9,13 @@ export interface ModalProps {
     onClose: () => void
     className?: string
     title?: string
+    id?: string
 }
 
 export const Modal: FC<PropsWithChildren<ModalProps>> = (props) => {
     return (
         <Transition appear show={props.isOpen} as={Fragment}>
-            <Dialog onClose={props.onClose} className={clsx(styles['dialog'], props.className)}>
+            <Dialog onClose={props.onClose} className={clsx(styles['dialog'], props.className)} id={props.id}>
                 <Transition.Child
                     as={Fragment}
                     enter='ease-out duration-300'
