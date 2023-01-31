@@ -6,6 +6,7 @@ Important!!!
 ---
 
 #ChangeLog:
+- added QnrIcon, PdfIcon [Andrei Grini | 31.01.2023]
 - added Input [Andrei Grini | 26.01.2023]
 - added Icons (Hamburger and NotificationBell) [Andrei Grini | 26.01.2023]
   added tailwind variable for advoca-top-menu text color (colors-topbar-text) [Andrei Grini | 26.01.2023]

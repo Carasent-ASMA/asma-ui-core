@@ -2,7 +2,14 @@ import { Icon } from '@iconify/react'
 import styles from './Icons.module.scss'
 import { IIconTemplate } from './Icons.types'
 
-export const IconTemplate: React.FC<IIconTemplate> = ({ width = 20, height = 20, className = '', icon, onClick }) => {
+export const IconTemplate: React.FC<IIconTemplate> = ({
+    width = 20,
+    height = 20,
+    className = '',
+    icon,
+    onClick,
+    color,
+}) => {
     return (
         <Icon
             onClick={onClick}
@@ -10,6 +17,7 @@ export const IconTemplate: React.FC<IIconTemplate> = ({ width = 20, height = 20,
             width={width}
             height={height}
             className={`${styles['icon']} ${className}`}
+            color={color}
         />
     )
 }

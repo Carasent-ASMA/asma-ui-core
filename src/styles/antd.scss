@@ -21877,6 +21877,7 @@ textarea.ant-mentions {
 .ant-modal-close:hover {
     color: rgba(0, 0, 0, 0.75);
     text-decoration: none;
+    outline: none !important;
 }
 .ant-modal-header {
     padding: 16px 24px;
