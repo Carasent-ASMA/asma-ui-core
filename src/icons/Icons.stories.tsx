@@ -1,9 +1,15 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { CollapseBackStory } from './collapse-back-icon/CollapseBackStory'
+import { CollapseStory } from './collpase-icon/CollapseStory'
 import { HamburgerIcon } from './hamburger-icon'
+import { HamburgerStory } from './hamburger-icon/HamburgerStory'
 import { Icons } from './Icons'
 import { NotificationBellIcon } from './notification-bell-icon'
+import { NotificationBellStory } from './notification-bell-icon/NotificationBellStory'
 import { PdfIcon } from './pdf-icon'
+import { PdfIconStory } from './pdf-icon/NotificationBellStory'
 import { QnrIcon } from './qnr-icon'
+import { QnrIconStory } from './qnr-icon/QnrIconStory'
 
 export default {
     title: 'Icons',
@@ -19,46 +25,9 @@ AllIcons.args = {
     height: 40,
 }
 
-// notificationBell
-const NotificationBellTemplate: ComponentStory<typeof NotificationBellIcon> = (args) => (
-    <NotificationBellIcon {...args} />
-)
-
-export const NotificationBell = NotificationBellTemplate.bind({})
-
-NotificationBell.args = {
-    width: 40,
-    height: 40,
-}
-
-// hamburger
-const HamburgerTemplate: ComponentStory<typeof NotificationBellIcon> = (args) => <HamburgerIcon {...args} />
-
-export const HamburgerMenu = HamburgerTemplate.bind({})
-
-HamburgerMenu.args = {
-    width: 40,
-    height: 40,
-}
-
-// pdf
-const PdfIconTemplate: ComponentStory<typeof NotificationBellIcon> = (args) => <PdfIcon {...args} />
-
-export const Pdf = PdfIconTemplate.bind({})
-
-Pdf.args = {
-    width: 40,
-    height: 40,
-    color: 'red',
-}
-
-// qnr
-const QnrTemplate: ComponentStory<typeof NotificationBellIcon> = (args) => <QnrIcon {...args} />
-
-export const Qnr = QnrTemplate.bind({})
-
-Qnr.args = {
-    width: 40,
-    height: 40,
-    color: '#1890ff',
-}
+export const NotificationBell = NotificationBellStory()
+export const Hamburger = HamburgerStory()
+export const CollapseBack = CollapseBackStory()
+export const Collapse = CollapseStory()
+export const Qnr = QnrIconStory()
+export const Pdf = PdfIconStory()

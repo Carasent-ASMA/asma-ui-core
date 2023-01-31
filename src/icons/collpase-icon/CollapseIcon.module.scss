@@ -1,0 +1,14 @@
+.collapse-icon {
+    @apply relative flex items-center;
+
+    svg {
+        @apply absolute m-0 p-0;
+
+        &:first-child {
+            @apply top-0 left-[7px];
+        }
+        &:last-child {
+            @apply top-0 right-[7px];
+        }
+    }
+}

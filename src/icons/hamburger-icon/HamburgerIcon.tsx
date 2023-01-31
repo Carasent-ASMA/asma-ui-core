@@ -1,7 +1,7 @@
 import { IIcon } from '../Icons.types'
 import { IconTemplate } from '../IconTemplate'
 
-export const HamburgerIcon: React.FC<IIcon> = ({ width = 20, height = 20, className = '', onClick }) => {
+export const HamburgerIcon: React.FC<IIcon> = ({ width = 20, height = 20, className = '', onClick, color }) => {
     return (
         <IconTemplate
             icon='charm:menu-hamburger'
@@ -9,6 +9,7 @@ export const HamburgerIcon: React.FC<IIcon> = ({ width = 20, height = 20, classN
             height={height}
             className={className}
             onClick={onClick}
+            color={color}
         />
     )
 }

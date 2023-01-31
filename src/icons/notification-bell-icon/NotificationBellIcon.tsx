@@ -1,7 +1,7 @@
 import { IIcon } from '../Icons.types'
 import { IconTemplate } from '../IconTemplate'
 
-export const NotificationBellIcon: React.FC<IIcon> = ({ width = 20, height = 20, className = '', onClick }) => {
+export const NotificationBellIcon: React.FC<IIcon> = ({ width = 20, height = 20, className = '', onClick, color }) => {
     return (
         <IconTemplate
             icon='material-symbols:notifications-rounded'
@@ -9,6 +9,7 @@ export const NotificationBellIcon: React.FC<IIcon> = ({ width = 20, height = 20,
             height={height}
             className={className}
             onClick={onClick}
+            color={color}
         />
     )
 }
