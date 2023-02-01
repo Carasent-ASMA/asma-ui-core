@@ -1,0 +1,31 @@
+.primary-select-field {
+    &.ant-select {
+        &:not(.ant-select-customize-input) {
+            .ant-select-selector {
+                @apply h-10 w-full min-w-full rounded-md border border-solid border-custom-grey-04;
+
+                .ant-select-selection-search {
+                    @apply font-sans text-base text-custom-text-color placeholder-custom-grey-04;
+                }
+
+                .ant-select-selection-item {
+                    @apply font-sans text-base leading-[38px] text-custom-text-color;
+                }
+            }
+        }
+    }
+
+    &.ant-select-single {
+        &.ant-select-lg:not(.ant-select-customize-input) {
+            .ant-select-selector {
+                @apply px-4;
+            }
+        }
+
+        .ant-select-selector {
+            .ant-select-selection-search {
+                @apply left-4 right-4;
+            }
+        }
+    }
+}

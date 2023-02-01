@@ -1,0 +1,19 @@
+.textarea-wrapper {
+    @apply flex w-full flex-col;
+
+    .label-wrapper {
+        @apply mb-5 flex flex-col;
+
+        .text-label {
+            @apply mb-1 flex font-sans text-sm font-semibold leading-4 text-custom-grey-06;
+        }
+
+        textarea {
+            @apply rounded-md border border-custom-grey-04 text-base text-[#1A1A1A] text-delta-700;
+        }
+    }
+
+    .error-message {
+        @apply -mt-4 text-sm leading-4 text-[#ff4d4f];
+    }
+}

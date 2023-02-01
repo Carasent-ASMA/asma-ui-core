@@ -27,9 +27,9 @@ export const BasicButton = Template.bind({})
 
 BasicButton.args = {
     icon: undefined,
-    title: 'Title',
+    text: 'Title',
     className: '',
-    titleClassName: '',
+    textClassName: '',
     disabled: false,
     // @ts-ignore
     theme: 'default',

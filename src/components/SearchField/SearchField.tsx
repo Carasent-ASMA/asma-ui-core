@@ -44,7 +44,7 @@ const Options: React.FC<{
 
 const keys = ['Enter', 'Escape']
 
-const SearchField: React.FC<{
+export const SearchField: React.FC<{
     className?: string
     prefix?: React.ReactNode
     label: string
@@ -112,5 +112,3 @@ const SearchField: React.FC<{
         </div>
     )
 }
-
-export { SearchField }

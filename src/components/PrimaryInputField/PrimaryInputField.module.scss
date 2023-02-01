@@ -1,0 +1,44 @@
+.input-wrapper {
+    input:-webkit-autofill,
+    input:-webkit-autofill:focus {
+        transition: background-color 600000s 0s, color 600000s 0s;
+    }
+    
+    input[data-autocompleted] {
+        background-color: transparent !important;
+    }
+    
+    @apply flex w-full flex-col;
+
+    span {
+        &.ant-input-affix-wrapper {
+            .ant-input-affix-wrapper-status-error {
+                @apply -mb-8 #{!important};
+            }
+        }
+    }
+
+    label {
+        @apply mb-5 flex flex-col;
+
+        input {
+            @apply rounded-md border-custom-grey-04 p-2;
+        }
+
+        & > span {
+            @apply rounded-md border-custom-grey-04;
+
+            &.text-label {
+                @apply mb-1 flex font-sans text-sm font-semibold leading-4 text-custom-grey-06 #{!important};
+            }
+
+            input {
+                @apply rounded-none p-2 #{!important};
+            }
+        }
+    }
+
+    .error-message {
+        @apply -mt-4 text-sm leading-4 text-[#ff4d4f] #{!important};
+    }
+}
