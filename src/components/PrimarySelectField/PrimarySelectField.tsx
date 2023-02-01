@@ -1,5 +1,3 @@
-import './custom-antd-select.scss'
-
 import { type SelectProps, Select } from 'antd'
 import { clsx } from 'clsx'
 import styles from './PrimarySelectField.module.scss'
@@ -38,7 +36,7 @@ export const PrimarySelectField = forwardRef<BaseSelectRef, IPrimarySelectField>
                 <Select
                     {...props}
                     ref={ref}
-                    className={clsx(styles['content'], 'primary-select-field')}
+                    className={clsx(styles['content'], styles['select-field'])}
                     status={status}
                     suffixIcon={<span className='material-icons-outlined'>arrow_drop_down</span>}
                 >

@@ -1,5 +1,3 @@
-import './custom-antd-select.scss'
-
 import { type SelectProps, Select } from 'antd'
 import type { SelectValue } from 'antd/lib/select'
 import { clsx } from 'clsx'
@@ -76,7 +74,7 @@ const SelectField = <T extends TSelectCustom = TSelectCustom>({
                 ) : (
                     <Select<T>
                         {...omit(props, 'lists', 'translate', 'is_warning', 'is_error', 'error')}
-                        className={clsx(styles['content'], 'select-field')}
+                        className={clsx(styles['content'], styles['select-field'])}
                         status={isErrorOrNot()}
                         suffixIcon={<span className='material-icons-outlined'>arrow_drop_down</span>}
                     >

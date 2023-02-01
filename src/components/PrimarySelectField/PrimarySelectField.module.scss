@@ -21,3 +21,35 @@
         @apply -mt-4 text-sm leading-4 text-[#ff4d4f];
     }
 }
+
+.select-field {
+    &:global(.ant-select) {
+        &:not(:global(.ant-select-customize-input)) {
+            :global(.ant-select-selector) {
+                @apply h-10 w-full min-w-full rounded-md border border-solid border-custom-grey-04;
+
+                :global(.ant-select-selection-search) {
+                    @apply font-sans text-base text-custom-text-color placeholder-custom-grey-04;
+                }
+
+                :global(.ant-select-selection-item) {
+                    @apply font-sans text-base leading-[38px] text-custom-text-color;
+                }
+            }
+        }
+    }
+
+    &:global(.ant-select-single) {
+        &:global(.ant-select-lg):not(:global(.ant-select-customize-input)) {
+            :global(.ant-select-selector) {
+                @apply px-4;
+            }
+        }
+
+        :global(.ant-select-selector) {
+            :global(.ant-select-selection-search) {
+                @apply left-4 right-4;
+            }
+        }
+    }
+}

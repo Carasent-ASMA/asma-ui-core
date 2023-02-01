@@ -2,6 +2,8 @@ import { ActionSheet } from 'antd-mobile'
 //import { observer } from 'mobx-react-lite'
 import { clsx } from 'clsx'
 
+import styles from './SelectOptionsMobile.module.scss'
+
 import { i18n } from '../helpers/i18n'
 import type { TSelectCustomProps } from './SelectField'
 
@@ -10,7 +12,7 @@ interface ISelectOptionsMobile extends TSelectCustomProps {
     onClose?: () => void
 }
 
-const SelectOptionsMobile: React.FC<ISelectOptionsMobile> = ({
+export const SelectOptionsMobile: React.FC<ISelectOptionsMobile> = ({
     lists,
     translate = false,
     placeholder,
@@ -32,7 +34,7 @@ const SelectOptionsMobile: React.FC<ISelectOptionsMobile> = ({
     return (
         <div>
             <ActionSheet
-                popupClassName={'antd-options-mobile'}
+                popupClassName={styles['antd-options-mobile']}
                 extra={placeholder}
                 // cancelText={i18n.cancel}
                 closeOnAction={true}
@@ -43,5 +45,3 @@ const SelectOptionsMobile: React.FC<ISelectOptionsMobile> = ({
         </div>
     )
 }
-
-export { SelectOptionsMobile }
