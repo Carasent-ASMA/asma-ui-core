@@ -54,6 +54,12 @@
 
     --colors-text-component: #ffffff;
 
+    --colors-jade-400: #1ca1a1;
+    --colors-jade-500: #157a7a;
+    --colors-jade-600: #105e5f;
+
+    --colors-lime-500: #beda2f;
+
     /*default theme :*/
     --colors-active-component: var(--colors-blue-500);
     --colors-alpha-100: var(--colors-blue-100);
@@ -83,6 +89,11 @@
 
     --colors-sigma-700: var(--colors-magic-blue-700);
     --colors-zeta-700: var(--colors-blue-700);
+
+    --colors-theta-400: #ffffff;
+    --colors-theta-500: #ffffff;
+    --colors-theta-600: #ffffff;
+
     --colors-btn-bg-hover: var(--colors-slate-300);
     --colors-btn-bg-standart: var(--colors-slate-600);
     --colors-btn-bg-active: var(--colors-slate-800);
@@ -95,7 +106,9 @@
     --colors-link-text-standart: var(--colors-gray-500);
     --colors-link-text-active: var(--colors-slate-800);
     --colors-link-text-disabled: var(--colors-green-900);
+
     --colors-badge-bg: var(--colors-slate-600);
+    --colors-badge-text: #ffffff;
 
     --colors-app-directory-button-select-recipient-bg: var(--colors-blue-200);
 

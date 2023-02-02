@@ -2,7 +2,7 @@ import { Badge as AntdBadge, BadgeProps } from 'antd'
 
 const style = {
     background: 'var(--colors-badge-bg)',
-    color: '#ffffff',
+    color: 'var(--colors-badge-text)',
     fontWeight: 'bolder',
     borderColor: 'var(--colors-badge-bg)',
 }

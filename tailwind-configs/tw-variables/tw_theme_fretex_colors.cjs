@@ -32,6 +32,10 @@ module.exports = {
 
     'sigma-700': 'var(--colors-gray-700)',
     'zeta-700': 'var(--colors-gray-700)',
+
+    'theta-400': '#ffffff',
+    'theta-500': '#ffffff',
+    'theta-600': '#ffffff',
     // button
     'btn-bg-hover': 'var(--colors-gama-600)',
     'btn-bg-standart': 'var(--colors-gama-500)',

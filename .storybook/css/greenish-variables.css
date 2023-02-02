@@ -1,0 +1,13 @@
+[data-theme='greenish'] {
+    --colors-theta-400: var(--colors-jade-400);
+    --colors-theta-500: var(--colors-jade-500);
+    --colors-theta-600: var(--colors-jade-600);
+
+    --colors-link-text-hover: #ffffff;
+    --colors-link-text-standart: #ffffff;
+    --colors-link-text-active: #ffffff;
+    --colors-link-text-disabled: var(--colors-gray-200);
+
+    --colors-badge-bg: var(--colors-lime-500);
+    --colors-badge-text: var(--colors-jade-600);
+}

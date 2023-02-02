@@ -33,6 +33,10 @@
     --colors-sigma-700: var(--colors-gray-700);
     --colors-zeta-700: var(--colors-gray-700);
 
+    --colors-theta-400: #ffffff;
+    --colors-theta-500: #ffffff;
+    --colors-theta-600: #ffffff;
+
     --colors-btn-bg-hover: var(--colors-gama-600);
     --colors-btn-bg-standart: var(--colors-gama-500);
     --colors-btn-bg-active: var(--colors-gama-600);
@@ -49,6 +53,7 @@
     --colors-link-text-disabled: var(--colors-gray-200);
 
     --colors-badge-bg: var(--colors-red-700);
+    --colors-badge-text: #ffffff;
 
     --colors-app-directory-button-select-recipient-bg: var(--colors-slate-500);
 

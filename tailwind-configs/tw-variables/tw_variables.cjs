@@ -1,7 +1,7 @@
 const twRootColors = require('./tw_root_colors.cjs')
 const twThemeDefaultColors = require('./tw_theme_default_colors.cjs')
 const twThemeFretexColors = require('./tw_theme_fretex_colors.cjs')
-const twThemeAdcurisColors = require('./tw_theme_adcuris_colors.cjs')
+const twThemeGreenishColors = require('./tw_theme_greenish.cjs')
 
 module.exports = {
     DEFAULT: {
@@ -15,9 +15,9 @@ module.exports = {
             ...twThemeFretexColors,
         },
     },
-    '[data-theme="adcuris"]': {
+    '[data-theme="greenish"]': {
         colors: {
-            ...twThemeAdcurisColors,
+            ...twThemeGreenishColors,
         },
     },
 }

@@ -31,6 +31,10 @@ module.exports = {
     //
     'sigma-700': 'var(--colors-sigma-700)',
     'zeta-700': 'var(--colors-zeta-700)',
+    //
+    'theta-400': 'var(--colors-theta-400)',
+    'theta-500': 'var(--colors-theta-500)',
+    'theta-600': 'var(--colors-theta-600)',
     // buttons
     'btn-bg': 'var(--colors-btn-bg-standart)',
     'btn-bg-active': 'var(--colors-btn-bg-active)',
@@ -45,6 +49,7 @@ module.exports = {
     'btn-bg-mini-action-hover': 'var(--colors-btn-bg-mini-action-hover)',
     //badge
     'badge-bg': 'var(--colors-badge-bg)',
+    'badge-text': 'var(--colors-badge-text)',
     //
 
     // chat

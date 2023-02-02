@@ -1,6 +1,7 @@
 import '../src/styles/index.scss'
 import './css/variables.css'
 import './css/fretex-variables.css'
+import './css/greenish-variables.css'
 import { useEffect, useGlobals } from '@storybook/addons'
 
 export const useTheme = (StoryFn) => {
@@ -29,10 +30,9 @@ export const globalTypes = {
         outerWidth: 500,
         name: 'Toggle theme',
         description: 'Global theme for components',
-        defaultValue: 'default',
         toolbar: {
             icon: 'globe',
-            items: ['default', 'fretex', 'adcuris'],
+            items: ['default', 'fretex', 'greenish'],
             // dynamicTitle: true,
         },
     },

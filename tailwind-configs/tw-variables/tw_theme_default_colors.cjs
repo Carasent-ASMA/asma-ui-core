@@ -32,6 +32,10 @@ module.exports = {
 
     'sigma-700': 'var(--colors-magic-blue-700)',
     'zeta-700': 'var(--colors-blue-700)',
+
+    'theta-400': '#ffffff',
+    'theta-500': '#ffffff',
+    'theta-600': '#ffffff',
     // button
     'btn-bg-hover': 'var(--colors-slate-300)',
     'btn-bg-standart': 'var(--colors-slate-600)',
@@ -49,6 +53,7 @@ module.exports = {
     'link-text-disabled': 'var(--colors-green-900)',
     // badge
     'badge-bg': 'var(--colors-slate-600)',
+    'badge-text': '#ffffff',
 
     // custom
     'app-directory-button-select-recipient-bg': 'var(--colors-blue-200)',
