@@ -4,6 +4,7 @@ import styles from './PrimarySelectField.module.scss'
 import { BaseSelectRef } from 'rc-select'
 import { forwardRef } from 'react'
 import { useErrorStatus } from '../helpers/hooks'
+import { Icon } from '@iconify/react'
 
 export interface IPrimarySelectFieldProps extends React.ComponentPropsWithRef<typeof Select> {
     label?: string
@@ -26,7 +27,7 @@ export const PrimarySelectField = forwardRef<BaseSelectRef, IPrimarySelectFieldP
                     ref={ref}
                     className={clsx(styles['content'], styles['select-field'])}
                     status={status}
-                    suffixIcon={<span className='material-icons-outlined'>arrow_drop_down</span>}
+                    suffixIcon={<Icon icon='ic:outline-arrow-drop-down' />}
                 >
                     {children}
                 </Select>

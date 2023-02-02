@@ -1,3 +1,4 @@
+import { Icon } from '@iconify/react'
 import { type SelectProps, Select } from 'antd'
 import type { SelectValue } from 'antd/lib/select'
 import { clsx } from 'clsx'
@@ -61,7 +62,7 @@ const SelectField = <T extends TSelectCustom = TSelectCustom>({
                         >
                             {/* @ts-ignore */}
                             <span>{translate ? i18n[props.value] : props.value}</span>
-                            <span className='material-icons-outlined'>arrow_drop_down</span>
+                            <Icon icon='ic:outline-arrow-drop-down' inline />
                         </div>
 
                         <SelectOptionsMobile
@@ -79,7 +80,7 @@ const SelectField = <T extends TSelectCustom = TSelectCustom>({
                         {...omit(props, 'lists', 'translate', 'is_warning', 'is_error', 'error')}
                         className={clsx(styles['content'], styles['select-field'])}
                         status={isErrorOrNot()}
-                        suffixIcon={<span className='material-icons-outlined'>arrow_drop_down</span>}
+                        suffixIcon={<Icon icon='ic:outline-arrow-drop-down' />}
                     >
                         {lists.map((list, i) => {
                             return (

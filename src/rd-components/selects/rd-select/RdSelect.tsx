@@ -1,3 +1,4 @@
+import { Icon } from '@iconify/react'
 import { Select, SelectProps } from 'antd'
 import type { SelectValue } from 'antd/lib/select'
 import { useState } from 'react'
@@ -37,9 +38,9 @@ export const SuffixIcon: React.FC<{ open: boolean }> = ({ open }) => {
     let suffixIcon
 
     if (open) {
-        suffixIcon = <button className='material-icons-round !text-[30px]'>arrow_drop_up</button>
+        suffixIcon = <Icon icon='ic:round-arrow-drop-up' height='30' />
     } else {
-        suffixIcon = <button className='material-icons-round !text-[30px]'>arrow_drop_down</button>
+        suffixIcon = <Icon icon='ic:round-arrow-drop-down' height='30' />
     }
 
     return suffixIcon

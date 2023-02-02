@@ -1,3 +1,4 @@
+import { Icon } from '@iconify/react'
 import { type SelectProps } from 'antd'
 import { clsx } from 'clsx'
 import { useState } from 'react'
@@ -36,7 +37,7 @@ export const PrimarySelectFieldMobile: React.FC<TPrimarySelectFieldMobileProps> 
                     >
                         {/* @ts-ignore */}
                         <span>{translate ? i18n[props.value] : props.value}</span>
-                        <span className='material-icons-outlined'>arrow_drop_down</span>
+                        <Icon icon='ic:outline-arrow-drop-down' inline />
                     </div>
 
                     <SelectOptionsMobile
