@@ -2,16 +2,14 @@ import 'antd/dist/antd.css'
 
 import type { ComponentMeta, ComponentStory } from '@storybook/react'
 
-import { PrimaryDateField as PrimaryDateFieldComponent, dateField } from './PrimaryDateField'
+import { PrimaryDateFieldMobile as PrimaryDateFieldMobileComponent } from './PrimaryDateFieldMobile'
 
-const meta: ComponentMeta<typeof PrimaryDateFieldComponent> = {
-    title: 'PrimaryDateField',
+const meta: ComponentMeta<typeof PrimaryDateFieldMobileComponent> = {
+    title: 'PrimaryDateFieldMobile',
     parameters: { actions: { argTypesRegex: '^on.*' } },
     argTypes: {
         onClick: { action: 'clicked' },
         onChange: { action: 'changed' },
-        onBlur: { action: 'blured' },
-        onFocus: { action: 'focused' },
         // locale: {
         //     control: 'select',
         //     options: ['English', 'Norsk'],
@@ -25,13 +23,17 @@ const meta: ComponentMeta<typeof PrimaryDateFieldComponent> = {
 
 export default meta
 
-const Template: ComponentStory<typeof PrimaryDateFieldComponent> = (args) => <PrimaryDateFieldComponent {...args} />
+const Template: ComponentStory<typeof PrimaryDateFieldMobileComponent> = (args) => (
+    <PrimaryDateFieldMobileComponent {...args} />
+)
 
-export const PrimaryDateField = Template.bind({})
+export const PrimaryDateFieldMobile = Template.bind({})
 
-PrimaryDateField.args = {
-    format: dateField,
+PrimaryDateFieldMobile.args = {
     label: 'Label',
+    // value: new Date(),
     error: 'Some error',
-    placeholder: 'Placeholder',
+    is_error: false,
+    is_warning: false,
+    // locale: en_GB,
 }

@@ -1,28 +1,16 @@
-import { type SelectProps, Select } from 'antd'
+import { Select } from 'antd'
 import { clsx } from 'clsx'
 import styles from './PrimarySelectField.module.scss'
 import { BaseSelectRef } from 'rc-select'
 import { forwardRef } from 'react'
-import { InputStatus } from 'antd/lib/_util/statusUtils'
+import { useErrorStatus } from '../helpers/hooks'
 
-type IPrimarySelectField = SelectProps & {
-    children?: React.ReactNode
-} & {
+export interface IPrimarySelectFieldProps extends React.ComponentPropsWithRef<typeof Select> {
     label?: string
     error?: string
 }
 
-function useErrorStatus(error?: string) {
-    let result: InputStatus | undefined
-
-    if (error) {
-        result = 'error'
-    }
-
-    return result
-}
-
-export const PrimarySelectField = forwardRef<BaseSelectRef, IPrimarySelectField>(function PrimarySelectField(
+export const PrimarySelectField = forwardRef<BaseSelectRef, IPrimarySelectFieldProps>(function PrimarySelectField(
     { error, label, children, ...props },
     ref,
 ) {

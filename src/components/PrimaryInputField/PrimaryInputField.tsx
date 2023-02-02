@@ -1,29 +1,18 @@
-import { type InputProps, type InputRef, Input } from 'antd'
-import { InputStatus } from 'antd/lib/_util/statusUtils'
+import { type InputRef, Input } from 'antd'
 import { forwardRef } from 'react'
+import { useErrorStatus } from '../helpers/hooks'
 
 import styles from './PrimaryInputField.module.scss'
 
-export interface InputFieldProps extends InputProps {
+export interface IPrimaryInputFieldProps extends React.ComponentPropsWithRef<typeof Input> {
     label?: string
     error?: string
-    inputRef?: React.Ref<InputRef> | null
 }
 
-function useErrorStatus(error?: string) {
-    let result: InputStatus | undefined
-
-    if (error) {
-        result = 'error'
-    }
-
-    return result
-}
-
-export const PrimaryInputField = forwardRef<InputRef, InputFieldProps>(function PrimaryInputField(
-    { label, error, ...props },
-    ref,
-) {
+export const PrimaryInputField: React.FC<IPrimaryInputFieldProps> = forwardRef<
+    InputRef,
+    React.PropsWithoutRef<IPrimaryInputFieldProps>
+>(function PrimaryInputField({ label, error, ...props }, ref) {
     const status = useErrorStatus(error)
 
     return (

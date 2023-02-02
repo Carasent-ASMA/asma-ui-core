@@ -5,9 +5,9 @@ import styles from './BasicButton.module.scss'
 
 export type IBasicButton = PropsWithChildren<{
     icon?: React.ReactNode
-    title?: string
+    text?: string
     className?: string
-    titleClassName?: string
+    textClassName?: string
     disabled?: boolean
     onClick?: React.MouseEventHandler<HTMLButtonElement>
 }>
@@ -23,7 +23,7 @@ export const BasicButton = forwardRef<HTMLButtonElement, IBasicButton>(function 
             disabled={props.disabled}
             onClick={props.onClick}
         >
-            {props.title && <span className={clsx(styles['text'], props.titleClassName)}>{props.title}</span>}
+            {props.text && <span className={clsx(styles['text'], props.textClassName)}>{props.text}</span>}
             {props.children}
             {props.icon}
         </button>

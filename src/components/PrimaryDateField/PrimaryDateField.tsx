@@ -1,51 +1,34 @@
-import { DatePicker, DatePickerProps } from 'antd'
-import { PickerProps } from 'antd/lib/date-picker/generatePicker'
-import { InputStatus } from 'antd/lib/_util/statusUtils'
-import { Moment } from 'moment'
+import { DatePicker } from 'antd'
+import type { PickerProps } from 'antd/lib/date-picker/generatePicker'
+import type { InputStatus } from 'antd/lib/_util/statusUtils'
+import type { Moment } from 'moment'
 import { type Component, forwardRef } from 'react'
+import { useErrorStatus } from '../helpers/hooks'
 
 import styles from './PrimaryDateField.module.scss'
 
-// type IPrimaryDateField = PickerComponentClass<
-//     PickerProps<Moment> & {
-//         status?: InputStatus
-//         dropdownClassName?: string
-//         popupClassName?: string
-//     },
-//     unknown
-// > & {
-//     label?: string
-//     error?: string
-// }
+type DatePickerProps = React.ComponentPropsWithRef<typeof DatePicker>
 
-type IPrimaryDateField = DatePickerProps & {
+type RefType = Component<
+    PickerProps<Moment> & {
+        status?: InputStatus
+        dropdownClassName?: string
+        popupClassName?: string
+    },
+    unknown
+>
+
+export type IPrimaryDateFieldProps = DatePickerProps & {
     label?: string
     error?: string
 }
 
-function useErrorStatus(error?: string) {
-    let result: InputStatus | undefined
+export const dateField = 'DD.MM.YYYY'
 
-    if (error) {
-        result = 'error'
-    }
-
-    return result
-}
-
-export const dateField_DefaultFormat = 'DD.MM.YYYY'
-
-export const PrimaryDateField = forwardRef<
-    Component<
-        PickerProps<Moment> & {
-            status?: InputStatus
-            dropdownClassName?: string
-            popupClassName?: string
-        },
-        unknown
-    >,
-    IPrimaryDateField
->(function PrimaryDateField({ error, label, ...props }, ref) {
+export const PrimaryDateField = forwardRef<RefType, IPrimaryDateFieldProps>(function PrimaryDateField(
+    { error, label, ...props },
+    ref,
+) {
     const status = useErrorStatus(error)
 
     return (

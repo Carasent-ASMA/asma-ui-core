@@ -5,9 +5,9 @@ import styles from './DangerButton.module.scss'
 
 export type IDangerButton = PropsWithChildren<{
     icon?: React.ReactNode
-    title?: string
+    text?: string
     className?: string
-    titleClassName?: string
+    textClassName?: string
     disabled?: boolean
     onClick?: React.MouseEventHandler<HTMLButtonElement>
 }>
@@ -23,7 +23,7 @@ export const DangerButton = forwardRef<HTMLButtonElement, IDangerButton>(functio
             disabled={props.disabled}
             onClick={props.onClick}
         >
-            {props.title && <span className={clsx(styles['text'], props.titleClassName)}>{props.title}</span>}
+            {props.text && <span className={clsx(styles['text'], props.textClassName)}>{props.text}</span>}
             {props.children}
             {props.icon}
         </button>

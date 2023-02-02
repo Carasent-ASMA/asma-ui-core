@@ -22,6 +22,9 @@ export type TSelectCustomProps = SelectProps & {
 
 const { Option } = Select
 
+/**
+ * @deprecated use PrimarySelectField or PrimarySelectFieldMobile
+ */
 const SelectField = <T extends TSelectCustom = TSelectCustom>({
     lists,
     translate = false,

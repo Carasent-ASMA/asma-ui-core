@@ -7,7 +7,7 @@ import type { FC } from 'react'
 import { i18n } from '../helpers/i18n'
 import styles from './InputField.module.scss'
 
-enum IconPositionEnum {
+export enum IconPositionEnum {
     Prefix = 'prefix',
     Suffix = 'suffix',
     Both = 'both',
@@ -23,7 +23,10 @@ interface InputField extends InputProps {
     iconPosition?: IconPositionEnum
 }
 
-const InputField: FC<InputField> = (
+/**
+ * @deprecated use PrimaryInputField
+ */
+export const InputField: FC<InputField> = (
     props,
     { iconPosition = IconPositionEnum.Prefix }: { iconPosition: IconPositionEnum },
 ) => {
@@ -61,5 +64,3 @@ const InputField: FC<InputField> = (
         </div>
     )
 }
-
-export { IconPositionEnum, InputField }

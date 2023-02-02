@@ -1,28 +1,18 @@
-import { type TimePickerProps, TimePicker } from 'antd'
-import { InputStatus } from 'antd/lib/_util/statusUtils'
+import { TimePicker } from 'antd'
 import clsx from 'clsx'
 import { forwardRef } from 'react'
+import { useErrorStatus } from '../helpers/hooks'
 
 import styles from './PrimaryTimeField.module.scss'
 
 const format_time = 'HH:mm'
 
-type ITimeFieldCustom = TimePickerProps & {
+export interface IPrimaryTimeFieldProps extends React.ComponentPropsWithRef<typeof TimePicker> {
     label?: string
     error?: string
 }
 
-function useErrorStatus(error?: string) {
-    let result: InputStatus | undefined
-
-    if (error) {
-        result = 'error'
-    }
-
-    return result
-}
-
-export const PrimaryTimeField = forwardRef<any, ITimeFieldCustom>(function PrimaryTimeField(
+export const PrimaryTimeField = forwardRef<any, IPrimaryTimeFieldProps>(function PrimaryTimeField(
     { error, label, ...props },
     ref,
 ) {

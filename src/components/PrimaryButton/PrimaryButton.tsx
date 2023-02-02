@@ -5,9 +5,9 @@ import styles from './PrimaryButton.module.scss'
 
 export type IPrimaryButton = PropsWithChildren<{
     icon?: React.ReactNode
-    title?: string
+    text?: string
     className?: string
-    titleClassName?: string
+    textClassName?: string
     disabled?: boolean
     onClick?: React.MouseEventHandler<HTMLButtonElement>
 }>
@@ -20,7 +20,7 @@ export const PrimaryButton = forwardRef<HTMLButtonElement, IPrimaryButton>(funct
             disabled={props.disabled}
             onClick={props.onClick}
         >
-            {props.title && <span className={clsx(styles['text'], props.titleClassName)}>{props.title}</span>}
+            {props.text && <span className={clsx(styles['text'], props.textClassName)}>{props.text}</span>}
             {props.children}
             {props.icon}
         </button>
