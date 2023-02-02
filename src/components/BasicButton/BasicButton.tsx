@@ -1,13 +1,13 @@
 import { clsx } from 'clsx'
-import type { FC, PropsWithChildren } from 'react'
+import { forwardRef, PropsWithChildren } from 'react'
 
 import styles from './BasicButton.module.scss'
 
 export type IBasicButton = PropsWithChildren<{
     icon?: React.ReactNode
-    title?: string
+    text?: string
     className?: string
-    titleClassName?: string
+    textClassName?: string
     disabled?: boolean
     onClick?: React.MouseEventHandler<HTMLButtonElement>
 }>
@@ -15,12 +15,17 @@ export type IBasicButton = PropsWithChildren<{
 /**
  * @deprecated use PrimaryButton
  */
-export const BasicButton: FC<IBasicButton> = (props) => {
+export const BasicButton = forwardRef<HTMLButtonElement, IBasicButton>(function BasicButton(props, ref) {
     return (
-        <button className={clsx(styles['root'], props.className)} disabled={props.disabled} onClick={props.onClick}>
-            {!!props.title && <span className={clsx(styles['title'], props.titleClassName)}>{props.title}</span>}
+        <button
+            ref={ref}
+            className={clsx(styles['root'], props.className)}
+            disabled={props.disabled}
+            onClick={props.onClick}
+        >
+            {props.text && <span className={clsx(styles['text'], props.textClassName)}>{props.text}</span>}
             {props.children}
             {props.icon}
         </button>
     )
-}
+})

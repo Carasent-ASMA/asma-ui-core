@@ -26,6 +26,9 @@ type IDateField = DatePickerProps & {
 
 export const defaultFormat = 'DD.MM.YYYY'
 
+/**
+ * @deprecated use PrimaryDateField, or PrimaryDateFieldMobile
+ */
 const DateField: FC<IDateField> = (props, { format_data = defaultFormat }: { format_data: string }) => {
     const windowWidthSize = useWindowWidthSize()
     const isMobileView = mobileView(windowWidthSize)

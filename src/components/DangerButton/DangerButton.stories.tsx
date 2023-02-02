@@ -27,9 +27,9 @@ export const DangerButton = Template.bind({})
 
 DangerButton.args = {
     icon: undefined,
-    title: 'Title',
+    text: 'Title',
     className: '',
-    titleClassName: '',
+    textClassName: '',
     disabled: false,
     // @ts-ignore
     theme: 'default',

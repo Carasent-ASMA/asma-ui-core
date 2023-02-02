@@ -1,6 +1,6 @@
 import { Dialog, Transition } from '@headlessui/react'
 import { clsx } from 'clsx'
-import { type FC, type PropsWithChildren, Fragment } from 'react'
+import { type FC, type PropsWithChildren, Fragment, forwardRef } from 'react'
 
 import styles from './Modal.module.scss'
 
@@ -12,10 +12,10 @@ export interface ModalProps {
     id?: string
 }
 
-export const Modal: FC<PropsWithChildren<ModalProps>> = (props) => {
+export const Modal = forwardRef<HTMLDivElement, PropsWithChildren<ModalProps>>((props, ref) => {
     return (
         <Transition appear show={props.isOpen} as={Fragment}>
-            <Dialog onClose={props.onClose} className={clsx(styles['dialog'], props.className)} id={props.id}>
+            <Dialog ref={ref} onClose={props.onClose} className={clsx(styles['dialog'], props.className)} id={props.id}>
                 <Transition.Child
                     as={Fragment}
                     enter='ease-out duration-300'
@@ -47,4 +47,4 @@ export const Modal: FC<PropsWithChildren<ModalProps>> = (props) => {
             </Dialog>
         </Transition>
     )
-}
+})

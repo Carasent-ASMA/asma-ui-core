@@ -27,6 +27,9 @@ interface ITimeField {
 
 type TTimeFieldCustom = TimePickerProps & ITimeField
 
+/**
+ * @deprecated use PrimaryTimeField or PrimaryTimeFieldMobile
+ */
 const TimeField: React.FC<TTimeFieldCustom> = (props) => {
     const windowWidthSize = useWindowWidthSize()
     const isMobileView = mobileView(windowWidthSize)

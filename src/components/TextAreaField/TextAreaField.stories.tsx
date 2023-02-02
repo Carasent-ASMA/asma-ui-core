@@ -21,6 +21,4 @@ TextAreaField.args = {
     value: 'Value',
     label: 'Label',
     error: 'Error',
-    is_error: false,
-    is_warning: false,
 }

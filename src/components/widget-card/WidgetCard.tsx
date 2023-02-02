@@ -34,7 +34,7 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({
                     <DangerButton
                         className={clsx(styles['action'], actionTitleClassName)}
                         onClick={onActionHandler}
-                        title={actionTitle}
+                        text={actionTitle}
                     />
                 </div>
             )}
