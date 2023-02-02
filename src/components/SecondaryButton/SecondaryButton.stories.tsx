@@ -27,9 +27,9 @@ export const SecondaryButton = Template.bind({})
 
 SecondaryButton.args = {
     icon: undefined,
-    text: 'Title',
+    title: 'Title',
     className: '',
-    textClassName: '',
+    titleClassName: '',
     disabled: false,
     // @ts-ignore
     theme: 'default',

@@ -27,9 +27,9 @@ export const FlatButton = Template.bind({})
 
 FlatButton.args = {
     icon: undefined,
-    text: 'Title',
+    title: 'Title',
     className: '',
-    textClassName: '',
+    titleClassName: '',
     disabled: false,
     // @ts-ignore
     theme: 'default',

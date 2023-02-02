@@ -5,9 +5,9 @@ import styles from './SecondaryButton.module.scss'
 
 export type ISecondaryButton = PropsWithChildren<{
     icon?: React.ReactNode
-    text?: string
+    title?: string
     className?: string
-    textClassName?: string
+    titleClassName?: string
     disabled?: boolean
     onClick?: React.MouseEventHandler<HTMLButtonElement>
 }>
@@ -20,7 +20,7 @@ export const SecondaryButton = forwardRef<HTMLButtonElement, ISecondaryButton>(f
             disabled={props.disabled}
             onClick={props.onClick}
         >
-            {props.text && <span className={clsx(styles['text'], props.textClassName)}>{props.text}</span>}
+            {props.title && <span className={clsx(styles['text'], props.titleClassName)}>{props.title}</span>}
             {props.children}
             {props.icon}
         </button>
