@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import type { ComponentMeta, ComponentStory } from '@storybook/react'
 import { Button } from '../Button'
 import { Badge } from './Badge'
 import { Badge as AntdBadge } from 'antd'

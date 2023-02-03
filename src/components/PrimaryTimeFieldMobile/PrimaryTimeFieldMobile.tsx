@@ -1,6 +1,6 @@
 import { Icon } from '@iconify/react'
 import { Picker } from 'antd-mobile'
-import { PickerActions } from 'antd-mobile/es/components/picker'
+import type { PickerActions } from 'antd-mobile/es/components/picker'
 import { clsx } from 'clsx'
 import { format, setHours, setMinutes } from 'date-fns'
 import { forwardRef, useState } from 'react'

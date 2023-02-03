@@ -2,7 +2,7 @@ import 'antd/dist/antd.css'
 
 import type { ComponentMeta, ComponentStory } from '@storybook/react'
 
-import { SearchField as SearchFieldComponent, TOption } from './SearchField'
+import { SearchField as SearchFieldComponent, type TOption } from './SearchField'
 
 const firstOption: TOption = { label: 'First', value: 'first' }
 const secondOption: TOption = { label: 'Second', value: 'second' }

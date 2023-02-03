@@ -1,6 +1,6 @@
 import { Icon } from '@iconify/react'
 import styles from './Icons.module.scss'
-import { IIconTemplate } from './Icons.types'
+import { type IIconTemplate } from './Icons.types'
 
 export const IconTemplate: React.FC<IIconTemplate> = ({
     width = 20,

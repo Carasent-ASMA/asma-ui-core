@@ -1,4 +1,4 @@
-import { ComponentStory } from '@storybook/react'
+import type { ComponentStory } from '@storybook/react'
 import { DashboardViewOutlineIcon } from './DashboardViewOutlineIcon'
 
 export const DashboardViewOutlineIconStory = () => {

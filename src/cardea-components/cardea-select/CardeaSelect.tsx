@@ -1,7 +1,7 @@
 import './CardeaSelect.scss'
 
 import { Icon } from '@iconify/react'
-import { Select, SelectProps } from 'antd'
+import { Select, type SelectProps } from 'antd'
 import type { SelectValue } from 'antd/lib/select'
 import { useState } from 'react'
 

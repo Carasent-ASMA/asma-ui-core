@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import type { ComponentMeta, ComponentStory } from '@storybook/react'
 import { AsignmentIconStory } from './asignment-icon/AsignmentIconStory'
 import { AsignmentOutlineIconStory } from './asignment-outline-icon/AsignmentOutlineIconStory'
 import { CalendarIconStory } from './calendar-icon/CalendarIconStory'

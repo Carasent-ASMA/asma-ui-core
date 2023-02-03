@@ -1,5 +1,5 @@
 import { Icon } from '@iconify/react'
-import { /* ConfigProvider, */ DatePicker, DatePickerProps } from 'antd'
+import { /* ConfigProvider, */ DatePicker, type DatePickerProps } from 'antd'
 import type { Locale } from 'antd/lib/locale-provider'
 import { DatePicker as DatePickerMobile } from 'antd-mobile'
 import { clsx } from 'clsx'

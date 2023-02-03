@@ -7,7 +7,7 @@ import React, { useCallback, useState, forwardRef } from 'react'
 import { i18n } from '../helpers/i18n'
 import styles from './PrimaryDateFieldMobile.module.scss'
 import { generateMonth } from './generate_month'
-import { PickerActions } from 'antd-mobile/es/components/picker'
+import type { PickerActions } from 'antd-mobile/es/components/picker'
 
 export interface IPrimaryDateFieldMobileProps extends React.ComponentPropsWithRef<typeof DatePickerMobile> {
     label?: string

@@ -1,7 +1,7 @@
 import { Select } from 'antd'
 import { clsx } from 'clsx'
 import styles from './PrimarySelectField.module.scss'
-import { BaseSelectRef } from 'rc-select'
+import type { BaseSelectRef } from 'rc-select'
 import { forwardRef } from 'react'
 import { useErrorStatus } from '../helpers/hooks'
 import { Icon } from '@iconify/react'

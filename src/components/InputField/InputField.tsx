@@ -13,7 +13,7 @@ export enum IconPositionEnum {
     Both = 'both',
 }
 
-interface InputField extends InputProps {
+export interface InputField extends InputProps {
     icon_style?: string
     icon?: string
     label?: string

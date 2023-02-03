@@ -25,7 +25,7 @@ interface ITimeField {
     lang?: 'En' | 'No'
 }
 
-type TTimeFieldCustom = TimePickerProps & ITimeField
+export type TTimeFieldCustom = TimePickerProps & ITimeField
 
 /**
  * @deprecated use PrimaryTimeField or PrimaryTimeFieldMobile

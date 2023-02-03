@@ -1,5 +1,5 @@
 import { clsx } from 'clsx'
-import { forwardRef, PropsWithChildren } from 'react'
+import { forwardRef, type PropsWithChildren } from 'react'
 
 import styles from './SecondaryButton.module.scss'
 

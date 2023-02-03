@@ -1,5 +1,5 @@
 import { Input } from 'antd'
-import { TextAreaProps, TextAreaRef } from 'antd/lib/input/TextArea'
+import type { TextAreaProps, TextAreaRef } from 'antd/lib/input/TextArea'
 import { forwardRef } from 'react'
 import { useErrorStatus } from '../helpers/hooks/useErrorState.hook'
 

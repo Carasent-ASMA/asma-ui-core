@@ -1,4 +1,4 @@
-import { ComponentStory } from '@storybook/react'
+import type { ComponentStory } from '@storybook/react'
 import { BellIcon } from './BellIcon'
 
 export const BellIconStory = () => {

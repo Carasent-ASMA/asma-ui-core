@@ -1,6 +1,6 @@
 import { Dialog, Transition } from '@headlessui/react'
 import { clsx } from 'clsx'
-import { type FC, type PropsWithChildren, Fragment, forwardRef } from 'react'
+import { type PropsWithChildren, Fragment, forwardRef } from 'react'
 
 import styles from './Modal.module.scss'
 

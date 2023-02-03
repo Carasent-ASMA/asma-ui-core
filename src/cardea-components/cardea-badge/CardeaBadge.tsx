@@ -1,4 +1,4 @@
-import { Badge, BadgeProps } from 'antd'
+import { Badge, type BadgeProps } from 'antd'
 
 const style = {
     background: 'var(--colors-badge-bg)',

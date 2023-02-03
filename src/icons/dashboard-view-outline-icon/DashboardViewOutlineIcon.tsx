@@ -1,4 +1,4 @@
-import { IIcon } from '../Icons.types'
+import type { IIcon } from '../Icons.types'
 import { IconTemplate } from '../IconTemplate'
 
 export const DashboardViewOutlineIcon: React.FC<IIcon> = ({

@@ -42,6 +42,7 @@ module.exports = {
         '@typescript-eslint/ban-ts-comment': 'off',
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/no-var-requires': 0,
+        '@typescript-eslint/consistent-type-imports': 'error',
         'react/react-in-jsx-scope': 'off',
         'no-console': 'warn',
         'no-debugger': 'warn',
