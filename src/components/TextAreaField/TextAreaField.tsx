@@ -1,5 +1,5 @@
 import { Input } from 'antd'
-import { TextAreaRef } from 'antd/lib/input/TextArea'
+import { TextAreaProps, TextAreaRef } from 'antd/lib/input/TextArea'
 import { forwardRef } from 'react'
 import { useErrorStatus } from '../helpers/hooks/useErrorState.hook'
 
@@ -7,7 +7,7 @@ import styles from './TextAreaField.module.scss'
 
 const { TextArea } = Input
 
-export interface TextAreaFieldProps extends React.ComponentPropsWithRef<typeof TextArea> {
+export interface TextAreaFieldProps extends TextAreaProps {
     label?: string
     error?: string
 }
