@@ -10,4 +10,6 @@
 
     --colors-badge-bg: var(--colors-lime-500);
     --colors-badge-text: var(--colors-jade-600);
+
+    --colors-sigma-700: var(--colors-jade-500);
 }

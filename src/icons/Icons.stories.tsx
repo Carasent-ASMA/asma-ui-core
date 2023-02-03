@@ -27,6 +27,8 @@ import { ChevronRightIconStory } from './chevron-right-icon/ChevronRightIconStor
 import { ChevronLeftIconStory } from './chevron-left-icon/ChevronLeftIconStory'
 import { FindReplaceIconStory } from './find-replace-icon/FindReplaceIconStory'
 import { MessageProcessingOutlineIconStory } from './message-processing-outline-icon/MessageProcessingOutlineIconStory'
+import { PersonIconStory } from './person-icon/PersonIconStory'
+import { DotsVerticalIconStory } from './dots-vertical-icon/DotsVerticalIconStory'
 
 export default {
     title: 'Icons',
@@ -42,6 +44,7 @@ AllIcons.args = {
     height: 40,
 }
 
+export const DotsVertical = DotsVerticalIconStory()
 export const FindReplace = FindReplaceIconStory()
 export const SettingsOutline = SettingsOutlineIconStory()
 export const Settings = SettingsIconStory()
@@ -60,6 +63,7 @@ export const DashboardViewOutline = DashboardViewOutlineIconStory()
 export const CheckFactOutline = CheckFactOutlineIconStory()
 export const DashboardFilled = DashboardViewIconStory()
 export const CheckOutline = CheckOutlineIconStory()
+export const Person = PersonIconStory()
 export const PeopleOutline = PeopleOutlineIconStory()
 export const People = PeopleIconStory()
 export const Calendar = CalendarIconStory()

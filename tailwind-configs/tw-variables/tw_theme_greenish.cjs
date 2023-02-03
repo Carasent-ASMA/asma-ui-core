@@ -30,10 +30,12 @@ module.exports = {
     // 'delta-9000': 'var(--colors-gray-9000)',
     // 'delta-10000': 'var(--colors-gray-10000)',
 
+    'theta-100': 'var(--colors-jade-100)',
     'theta-400': 'var(--colors-jade-400)',
     'theta-500': 'var(--colors-jade-500)',
     'theta-600': 'var(--colors-jade-600)',
 
+    'sigma-700': 'var(--colors-jade-600)',
     // 'sigma-700': 'var(--colors-gray-700)',
     // 'zeta-700': 'var(--colors-gray-700)',
     // button

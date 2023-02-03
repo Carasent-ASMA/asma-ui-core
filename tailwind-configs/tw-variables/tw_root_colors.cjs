@@ -51,7 +51,7 @@ module.exports = {
     //
     'magic-blue-700': '#247ba3',
     //
-    'jade-100': '',
+    'jade-100': '#FFFFFF33',
     'jade-200': '',
     'jade-300': '',
     'jade-400': '#1CA1A1',

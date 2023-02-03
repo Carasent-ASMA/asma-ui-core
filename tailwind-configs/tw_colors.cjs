@@ -32,6 +32,7 @@ module.exports = {
     'sigma-700': 'var(--colors-sigma-700)',
     'zeta-700': 'var(--colors-zeta-700)',
     //
+    'theta-100': 'var(--colors-theta-100)',
     'theta-400': 'var(--colors-theta-400)',
     'theta-500': 'var(--colors-theta-500)',
     'theta-600': 'var(--colors-theta-600)',
