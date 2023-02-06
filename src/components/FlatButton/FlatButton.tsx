@@ -3,7 +3,7 @@ import { forwardRef } from 'react'
 
 import styles from './FlatButton.module.scss'
 
-export interface IFlatButtonProps extends React.ComponentPropsWithRef<'button'> {
+export type IFlatButtonProps = React.ComponentPropsWithRef<'button'> & {
     icon?: React.ReactNode
     text?: string
     textClassName?: string

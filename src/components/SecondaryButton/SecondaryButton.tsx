@@ -3,7 +3,7 @@ import { forwardRef } from 'react'
 
 import styles from './SecondaryButton.module.scss'
 
-export interface ISecondaryButton extends React.ComponentPropsWithRef<'button'> {
+export type ISecondaryButton = React.ComponentPropsWithRef<'button'> & {
     icon?: React.ReactNode
     text?: string
     textClassName?: string

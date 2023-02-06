@@ -3,7 +3,7 @@ import { forwardRef } from 'react'
 
 import styles from './DangerButton.module.scss'
 
-export interface IDangerButton extends React.ComponentPropsWithRef<'button'> {
+export type IDangerButton = React.ComponentPropsWithRef<'button'> & {
     icon?: React.ReactNode
     text?: string
     textClassName?: string
