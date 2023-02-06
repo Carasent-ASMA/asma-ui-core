@@ -1,28 +1,23 @@
 import { clsx } from 'clsx'
-import { forwardRef, type PropsWithChildren } from 'react'
+import { forwardRef } from 'react'
 
 import styles from './SecondaryButton.module.scss'
 
-export type ISecondaryButton = PropsWithChildren<{
+export interface ISecondaryButton extends React.ComponentPropsWithRef<'button'> {
     icon?: React.ReactNode
     text?: string
-    className?: string
     textClassName?: string
-    disabled?: boolean
-    onClick?: React.MouseEventHandler<HTMLButtonElement>
-}>
+}
 
-export const SecondaryButton = forwardRef<HTMLButtonElement, ISecondaryButton>(function SecondaryButton(props, ref) {
+export const SecondaryButton = forwardRef<HTMLButtonElement, ISecondaryButton>(function SecondaryButton(
+    { icon, text, textClassName, children, ...props },
+    ref,
+) {
     return (
-        <button
-            ref={ref}
-            className={clsx(styles['root'], props.className)}
-            disabled={props.disabled}
-            onClick={props.onClick}
-        >
-            {props.text && <span className={clsx(styles['text'], props.textClassName)}>{props.text}</span>}
-            {props.children}
-            {props.icon}
+        <button ref={ref} className={clsx(styles['root'], props.className)} {...props}>
+            {text && <span className={clsx(styles['text'], textClassName)}>{text}</span>}
+            {children}
+            {icon}
         </button>
     )
 })
