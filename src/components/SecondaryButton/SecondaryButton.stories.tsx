@@ -10,11 +10,6 @@ const meta: ComponentMeta<typeof SecondaryButtonComponent> = {
         actions: { argTypesRegex: '^on.*' },
     },
     argTypes: {
-        // @ts-ignore
-        theme: {
-            control: 'select',
-            options: ['fretex', 'default'],
-        },
         onClick: { action: 'clicked' },
     },
 }
@@ -31,17 +26,4 @@ SecondaryButton.args = {
     className: '',
     textClassName: '',
     disabled: false,
-    // @ts-ignore
-    theme: 'default',
 }
-
-SecondaryButton.decorators = [
-    (Story, context) => {
-        // console.log('DefaultContext', context)
-        return (
-            <div data-theme={context.args['theme']}>
-                <Story />
-            </div>
-        )
-    },
-]

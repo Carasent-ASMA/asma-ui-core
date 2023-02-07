@@ -11,8 +11,8 @@
     @apply flex w-full flex-col;
 
     span {
-        &.ant-input-affix-wrapper {
-            .ant-input-affix-wrapper-status-error {
+        &:global(.ant-input-affix-wrapper) {
+            :global(.ant-input-affix-wrapper-status-error) {
                 @apply -mb-8 #{!important};
             }
         }

@@ -10,11 +10,6 @@ const meta: ComponentMeta<typeof ButtonComponent> = {
         actions: { argTypesRegex: '^on.*' },
     },
     argTypes: {
-        // @ts-ignore
-        theme: {
-            control: 'select',
-            options: ['fretex', 'default'],
-        },
         onClick: { action: 'clicked' },
         btnType: {
             control: 'select',
@@ -33,17 +28,4 @@ Button.args = {
     title: 'Title',
     icon: 'IconName',
     btnType: 'primary',
-    // @ts-ignore
-    theme: 'default',
 }
-
-Button.decorators = [
-    (Story, context) => {
-        // console.log('DefaultContext', context)
-        return (
-            <div data-theme={context.args['theme']}>
-                <Story />
-            </div>
-        )
-    },
-]

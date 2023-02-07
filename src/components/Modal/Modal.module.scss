@@ -2,7 +2,9 @@
     @apply relative z-10;
 
     .overlay {
-        @apply fixed inset-0 bg-modal-overlay-background;
+        @apply fixed inset-0;
+
+        background-color: var(--modal-overlay-background-color);
     }
 
     .wrapper {
@@ -12,7 +14,10 @@
             @apply flex max-h-[90vh] flex-col overflow-hidden rounded-lg bg-white shadow-modal;
 
             .title {
-                @apply m-0 flex h-12 flex-none  items-center bg-modal-toolbar-background px-6 font-sans text-xl font-normal text-modal-toolbar-text;
+                @apply m-0 flex h-12 flex-none items-center px-6 font-sans text-xl font-normal;
+
+                color: var(--modal-toolbar-text-color);
+                background-color: var(--modal-toolbar-background-color);
             }
 
             .content {

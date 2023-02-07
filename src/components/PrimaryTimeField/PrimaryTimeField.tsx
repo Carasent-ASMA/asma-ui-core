@@ -7,13 +7,16 @@ import styles from './PrimaryTimeField.module.scss'
 
 const format_time = 'HH:mm'
 
-export interface IPrimaryTimeFieldProps extends React.ComponentPropsWithRef<typeof TimePicker> {
+export type IPrimaryTimeFieldProps = Omit<
+    React.ComponentPropsWithRef<typeof TimePicker>,
+    'status' | 'renderExtraFooter' | 'showNow' | 'format'
+> & {
     label?: string
     error?: string
 }
 
 export const PrimaryTimeField = forwardRef<any, IPrimaryTimeFieldProps>(function PrimaryTimeField(
-    { error, label, ...props },
+    { error, label, className, popupClassName, ...props },
     ref,
 ) {
     const status = useErrorStatus(error)
@@ -29,10 +32,10 @@ export const PrimaryTimeField = forwardRef<any, IPrimaryTimeFieldProps>(function
                     showNow={false}
                     minuteStep={10}
                     format={format_time}
-                    {...props}
-                    className={clsx(styles['content'], props.className)}
-                    popupClassName={clsx(styles['piker_time'], props.popupClassName)}
+                    className={clsx(styles['content'], className)}
+                    popupClassName={clsx(styles['piker_time'], popupClassName)}
                     status={status}
+                    {...props}
                 />
             </label>
             {error && <span className={styles['error']}>{error}</span>}

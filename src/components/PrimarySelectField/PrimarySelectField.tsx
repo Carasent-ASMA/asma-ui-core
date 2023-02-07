@@ -9,23 +9,24 @@ import { Icon } from '@iconify/react'
 export interface IPrimarySelectFieldProps extends React.ComponentPropsWithRef<typeof Select> {
     label?: string
     error?: string
+    wrapperClassName?: string
 }
 
 export const PrimarySelectField = forwardRef<BaseSelectRef, IPrimarySelectFieldProps>(function PrimarySelectField(
-    { error, label, children, ...props },
+    { error, label, children, className, wrapperClassName, ...props },
     ref,
 ) {
     const status = useErrorStatus(error)
 
     return (
-        <div className={clsx(props.className, styles['wrapper'])}>
+        <div className={clsx(wrapperClassName, styles['wrapper'])}>
             <label className={styles['label-wrapper']}>
                 {label && <span className={styles['label']}>{label}</span>}
 
                 <Select
                     {...props}
                     ref={ref}
-                    className={clsx(styles['content'], styles['select-field'])}
+                    className={clsx(styles['content'], styles['select-field'], className)}
                     status={status}
                     suffixIcon={<Icon icon='ic:outline-arrow-drop-down' />}
                 >

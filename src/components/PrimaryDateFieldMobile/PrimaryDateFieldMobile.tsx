@@ -9,7 +9,7 @@ import styles from './PrimaryDateFieldMobile.module.scss'
 import { generateMonth } from './generate_month'
 import type { PickerActions } from 'antd-mobile/es/components/picker'
 
-export interface IPrimaryDateFieldMobileProps extends React.ComponentPropsWithRef<typeof DatePickerMobile> {
+export type IPrimaryDateFieldMobileProps = React.ComponentPropsWithRef<typeof DatePickerMobile> & {
     label?: string
     onChange: (date: Date | null) => void
     // format?: string

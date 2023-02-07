@@ -1,39 +1,33 @@
-.viewMode, .editMode {
-  @apply font-sans;
-  div:global(.ql-container) {
-    @apply p-2 min-h-[100px] max-h-[400px] overflow-auto;
-  }
-
+.viewMode,
+.editMode {
+    @apply font-sans;
+    div:global(.ql-container) {
+        @apply max-h-[400px] min-h-[100px] overflow-auto p-2;
+    }
 }
 
 .viewMode {
-  div:global(.ql-editor) {
-    @apply bg-none border-0 p-0 m-0 ;
-
-  }
-  div:global(.ql-container) {
-
-    @apply rounded-lg border-0 placeholder:italic text-base cursor-not-allowed bg-[#f5f5f5] opacity-100;
-  }
-
+    div:global(.ql-editor) {
+        @apply m-0 border-0 bg-none p-0;
+    }
+    div:global(.ql-container) {
+        @apply cursor-not-allowed rounded-lg border-0 bg-[#f5f5f5] text-base opacity-100 placeholder:italic;
+    }
 }
 
 .editMode {
-  div:global(.ql-toolbar) {
-    @apply rounded-t-lg bg-gray-01 border-x border-t border-b-0 border-gray-04;
-
-  }
-  div:global(.ql-container) {
-    @apply rounded-b-lg border-x border-b border-t-0 border-gray-04;
-  }
-
+    div:global(.ql-toolbar) {
+        @apply bg-custom-grey-01 border-custom-grey-04 rounded-t-lg border-x border-t border-b-0;
+    }
+    div:global(.ql-container) {
+        @apply border-custom-grey-04 rounded-b-lg border-x border-b border-t-0;
+    }
 }
 
 .text-label {
-  @apply mb-2 font-sans text-sm font-semibold leading-4 text-custom-grey-06;
+    @apply text-custom-grey-06 mb-2 font-sans text-sm font-semibold leading-4;
 }
 
 .error-message {
-  @apply mt-8 text-sm leading-4 text-[#ff4d4f];
+    @apply mt-8 text-sm leading-4 text-[#ff4d4f];
 }
-

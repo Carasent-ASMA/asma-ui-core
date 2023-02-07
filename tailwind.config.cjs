@@ -20,19 +20,19 @@ module.exports = {
                 // Calendar colors //
                 //  // // // // // //
 
-                'custom-ft-light-green': 'var(--color-custom-ft-light-green)',
+                // 'custom-ft-light-green': 'var(--color-custom-ft-light-green)',
 
-                'button-primary-background': 'var(--button-primary-background-color)',
-                'button-primary-text': 'var(--button-primary-text-color)',
+                // 'button-primary-background': 'var(--button-primary-background-color)',
+                // 'button-primary-text': 'var(--button-primary-text-color)',
 
-                'button-default-background': 'var(--button-default-background-color)',
-                'button-default-border': 'var(--button-default-border-color)',
-                'button-default-text': 'var(--button-default-text-color)',
+                // 'button-default-background': 'var(--button-default-background-color)',
+                // 'button-default-border': 'var(--button-default-border-color)',
+                // 'button-default-text': 'var(--button-default-text-color)',
 
-                'modal-overlay-background': 'var(--modal-overlay-background-color)',
-                'modal-toolbar-background': 'var(--modal-toolbar-background-color)',
-                'modal-toolbar-text': 'var(--modal-toolbar-text-color)',
-                'modal-content-background': 'var(--modal-content-background-color)',
+                // 'modal-overlay-background': 'var(--modal-overlay-background-color)',
+                // 'modal-toolbar-background': 'var(--modal-toolbar-background-color)',
+                // 'modal-toolbar-text': 'var(--modal-toolbar-text-color)',
+                // 'modal-content-background': 'var(--modal-content-background-color)',
 
                 'old-green-light': 'hsl(var(--color-old-green-light) / <alpha-value>)',
                 'green-06': 'var(--color-green-06)',
@@ -65,21 +65,12 @@ module.exports = {
                 'custom-red-dark': 'hsl(var(--color-custom-red-dark) / <alpha-value>)',
                 'custom-text-color': 'hsl(var(--color-custom-text) / <alpha-value>)',
 
-                'custom-grey-01': 'hsl(var(--color-custom-grey-01) / <alpha-value>)',
-                'custom-grey-02': 'hsl(var(--color-custom-grey-02) / <alpha-value>)',
-                'custom-grey-03': 'var(--color-custom-grey-03)',
-                'custom-grey-04': 'var(--color-custom-grey-04)',
-                'custom-grey-06': 'hsl(var(--color-custom-grey-06) / <alpha-value>)',
                 'custom-dark-grey': 'hsl(var(--color-custom-dark-grey) / <alpha-value>)',
 
                 'custom-gray-95': 'hsl(var(--color-gray-95) / <alpha-value>)',
                 'custom-light-green': 'hsl(var(--color-custom-light-green) / <alpha-value>)',
                 'custom-dark-green': 'hsl(var(--color-custom-dark-green) / <alpha-value>)',
                 'custom-blue-10': 'hsl(var(--color-custom-blue-10) / <alpha-value>)',
-
-                //
-                'gray-01': '#F0F2F4',
-                'gray-04': '#98A3B4',
             },
 
             minHeight: {

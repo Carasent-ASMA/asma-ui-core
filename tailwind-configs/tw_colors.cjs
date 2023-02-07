@@ -58,4 +58,10 @@ module.exports = {
     'chat-ticket-message-bg': 'var(--colors-chat-ticket-message-bg)',
     //
     'colors-topbar-text': 'var(--colors-topbar-text)',
+    //
+    'custom-grey-01': 'hsl(var(--color-cardea--grey-01) / <alpha-value>)',
+    'custom-grey-02': 'hsl(var(--color-cardea--grey-02) / <alpha-value>)',
+    'custom-grey-03': 'hsl(var(--color-cardea--grey-03) / <alpha-value>)',
+    'custom-grey-04': 'hsl(var(--color-cardea--grey-04) / <alpha-value>)',
+    'custom-grey-06': 'hsl(var(--color-cardea--grey-06) / <alpha-value>)',
 }

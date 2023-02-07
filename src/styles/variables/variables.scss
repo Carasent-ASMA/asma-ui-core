@@ -1,4 +1,17 @@
 :root {
+    // Forgotten Ancient Times Pallete
+
+    --color-gray-10-blury: hsla(0, 0%, 10%, 0.4);
+    --color-gray-10: hsl(0, 0%, 10%);
+    --color-gray-20: hsl(0, 0%, 20%);
+    --color-gray-30: hsl(0, 0%, 30%);
+    --color-gray-40: hsl(0, 0%, 40%);
+    --color-gray-50: hsl(0, 0%, 50%);
+    --color-gray-60: hsl(0, 0%, 60%);
+    --color-gray-70: hsl(0, 0%, 70%);
+    --color-gray-80: hsl(0, 0%, 80%);
+    --color-gray-90: hsl(0, 0%, 90%);
+
     // Cardea Pallete
 
     --colors-cardea--grey-01: 210deg 16% 95%; // #F0F2F4;
@@ -63,10 +76,10 @@
 
     // Fretex Green Pallete
 
-    --color-custom-green-darkest : 156deg 18% 25%; // #344b42; !! generated
-    --color-custom-green-darker  : 156deg 18% 40%; // #54786a; !! generated
-    --color-custom-green-dark    : 156deg 18% 52%; // #6f9b89; !! generated
-    --color-custom-green-normal  : 156deg 18% 65%; // #96b6a9;
-    --color-custom-green-light   : 156deg 18% 73%; // #adc6bc;
-    --color-custom-green-lighter : 156deg 18% 81%; // #c6d7d0;
+    --color-custom-green-darkest: 156deg 18% 25%; // #344b42; !! generated
+    --color-custom-green-darker: 156deg 18% 40%; // #54786a; !! generated
+    --color-custom-green-dark: 156deg 18% 52%; // #6f9b89; !! generated
+    --color-custom-green-normal: 156deg 18% 65%; // #96b6a9;
+    --color-custom-green-light: 156deg 18% 73%; // #adc6bc;
+    --color-custom-green-lighter: 156deg 18% 81%; // #c6d7d0;
 }

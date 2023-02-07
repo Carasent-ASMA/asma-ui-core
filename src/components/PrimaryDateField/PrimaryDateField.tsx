@@ -1,6 +1,7 @@
 import { DatePicker } from 'antd'
 import type { PickerProps } from 'antd/lib/date-picker/generatePicker'
 import type { InputStatus } from 'antd/lib/_util/statusUtils'
+import clsx from 'clsx'
 import type { Moment } from 'moment'
 import { type Component, forwardRef } from 'react'
 import { useErrorStatus } from '../helpers/hooks'
@@ -18,7 +19,7 @@ type RefType = Component<
     unknown
 >
 
-export type IPrimaryDateFieldProps = DatePickerProps & {
+export type IPrimaryDateFieldProps = Omit<DatePickerProps, 'status'> & {
     label?: string
     error?: string
 }
@@ -26,7 +27,7 @@ export type IPrimaryDateFieldProps = DatePickerProps & {
 export const dateField = 'DD.MM.YYYY'
 
 export const PrimaryDateField = forwardRef<RefType, IPrimaryDateFieldProps>(function PrimaryDateField(
-    { error, label, ...props },
+    { error, label, className, ...props },
     ref,
 ) {
     const status = useErrorStatus(error)
@@ -35,8 +36,7 @@ export const PrimaryDateField = forwardRef<RefType, IPrimaryDateFieldProps>(func
         <div className={styles['wrapper']}>
             <label className={styles['label-wrapper']}>
                 {label && <span className={styles['label']}>{label}</span>}
-
-                <DatePicker ref={ref} className={styles['content']} {...props} status={status} />
+                <DatePicker ref={ref} className={clsx(className, styles['content'])} status={status} {...props} />
             </label>
             {error && <span className={styles['error']}>{error}</span>}
         </div>

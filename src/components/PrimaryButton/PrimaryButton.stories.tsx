@@ -10,11 +10,6 @@ const meta: ComponentMeta<typeof PrimaryButtonComponent> = {
         actions: { argTypesRegex: '^on.*' },
     },
     argTypes: {
-        // @ts-ignore
-        theme: {
-            control: 'select',
-            options: ['fretex', 'carasent', 'default'],
-        },
         onClick: { action: 'clicked' },
     },
 }
@@ -31,17 +26,4 @@ PrimaryButton.args = {
     className: '',
     textClassName: '',
     disabled: false,
-    // @ts-ignore
-    theme: 'default',
 }
-
-PrimaryButton.decorators = [
-    (Story, context) => {
-        // console.log('DefaultContext', context)
-        return (
-            <div data-theme={context.args['theme']}>
-                <Story />
-            </div>
-        )
-    },
-]

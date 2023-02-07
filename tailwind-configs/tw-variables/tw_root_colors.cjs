@@ -20,6 +20,14 @@ module.exports = {
     'gray-9000': '#1a1d23',
     'gray-10000': 'black',
     //
+    'cardea--grey-01': '210deg 16% 95%', // #F0F2F4;
+    'cardea--grey-02': '215deg 16% 85%', // #D3D8DF;
+    'cardea--grey-03': '213deg 16% 75%', // #B5BEC9;
+    'cardea--grey-04': '216deg 16% 65%', // #98A3B4;
+    'cardea--grey-05': '215deg 16% 56%', // #7A899E;
+    'cardea--grey-06': '216deg 16% 25%', // #363E4A;
+
+    //
     'green-100': '#fefefe',
     'green-150': '#E1EBE6',
     'green-200': '#deebe5',

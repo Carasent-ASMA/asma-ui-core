@@ -4,7 +4,7 @@ import { useErrorStatus } from '../helpers/hooks'
 
 import styles from './PrimaryInputField.module.scss'
 
-export interface IPrimaryInputFieldProps extends React.ComponentPropsWithRef<typeof Input> {
+export type IPrimaryInputFieldProps = Omit<React.ComponentPropsWithRef<typeof Input>, 'status'> & {
     label?: string
     error?: string
 }
@@ -19,7 +19,7 @@ export const PrimaryInputField: React.FC<IPrimaryInputFieldProps> = forwardRef<
         <div className={styles['input-wrapper']}>
             <label>
                 {label && <span className={styles['text-label']}>{label}</span>}
-                <Input placeholder={props.placeholder} ref={ref} {...props} status={status} />
+                <Input {...props} status={status} ref={ref} />
             </label>
             {error && <span className={styles['error-message']}>{error}</span>}
         </div>
