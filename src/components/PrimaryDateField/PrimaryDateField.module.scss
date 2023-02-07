@@ -9,23 +9,27 @@
         @apply mb-5 flex flex-col;
 
         .label {
-            @apply mb-1 font-sans text-sm font-semibold leading-4 text-custom-grey-06 #{!important};
+            @apply text-custom-grey-06 mb-1 font-sans text-sm font-semibold leading-4 #{!important};
+        }
+
+        .content {
+            &:global(.ant-picker) {
+                @apply border-custom-grey-04 placeholder-custom-grey-04 flex h-10 w-full min-w-full items-center rounded-md border border-solid px-4 py-0 font-sans text-base text-custom-text-color;
+
+                &:global(.ant-picker-disabled) {
+                    @apply cursor-not-allowed bg-[#f5f5f5] bg-opacity-40;
+                }
+            }
+
+            &:global(.ant-picker):global(.ant-picker-status-error),
+            &:global(.ant-picker):global(.ant-picker-status-error):not([disabled]):hover {
+                background-color: #fff;
+                border-color: #ff4d4f;
+            }
         }
     }
 
     .error {
         @apply -mt-4 text-sm leading-4 text-[#ff4d4f];
-    }
-}
-
-.content {
-    @apply flex h-10 w-full min-w-full items-center rounded-md border border-solid border-custom-grey-04 px-4 py-0 font-sans text-base text-custom-text-color placeholder-custom-grey-04;
-
-    &_disabled {
-        @apply cursor-not-allowed bg-[#f5f5f5] opacity-40;
-    }
-
-    .icon {
-        @apply text-xl leading-5 text-custom-grey-06 #{!important};
     }
 }

@@ -19,6 +19,7 @@ export const PrimaryTimeField = Template.bind({})
 
 PrimaryTimeField.args = {
     label: 'Label',
+    disabled: false,
     error: 'Error',
     placeholder: 'Placeholder',
 }

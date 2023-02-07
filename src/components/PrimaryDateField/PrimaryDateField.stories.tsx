@@ -33,5 +33,6 @@ PrimaryDateField.args = {
     format: dateField,
     label: 'Label',
     error: 'Some error',
+    disabled: false,
     placeholder: 'Placeholder',
 }
