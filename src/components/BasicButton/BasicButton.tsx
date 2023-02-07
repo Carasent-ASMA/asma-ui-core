@@ -5,7 +5,7 @@ import styles from './BasicButton.module.scss'
 
 export type IBasicButton = React.ComponentPropsWithRef<'button'> & {
     icon?: React.ReactNode
-    text?: string
+    text?: React.ReactNode
     textClassName?: string
 }
 
@@ -18,9 +18,9 @@ export const BasicButton = forwardRef<HTMLButtonElement, IBasicButton>(function 
 ) {
     return (
         <button ref={ref} className={clsx(styles['root'], className)} {...props}>
+            {icon}
             {text && <span className={clsx(styles['text'], textClassName)}>{text}</span>}
             {children}
-            {icon}
         </button>
     )
 })

@@ -5,7 +5,7 @@ import styles from './FlatButton.module.scss'
 
 export type IFlatButtonProps = React.ComponentPropsWithRef<'button'> & {
     icon?: React.ReactNode
-    text?: string
+    text?: React.ReactNode
     textClassName?: string
 }
 
@@ -15,9 +15,9 @@ export const FlatButton = forwardRef<HTMLButtonElement, IFlatButtonProps>(functi
 ) {
     return (
         <button ref={ref} className={clsx(styles['root'], className)} {...props}>
+            {icon}
             {text && <span className={clsx(styles['text'], textClassName)}>{text}</span>}
             {children}
-            {icon}
         </button>
     )
 })

@@ -15,9 +15,9 @@ export const SecondaryButton = forwardRef<HTMLButtonElement, ISecondaryButton>(f
 ) {
     return (
         <button ref={ref} className={clsx(styles['root'], className)} {...props}>
+            {icon}
             {text && <span className={clsx(styles['text'], textClassName)}>{text}</span>}
             {children}
-            {icon}
         </button>
     )
 })

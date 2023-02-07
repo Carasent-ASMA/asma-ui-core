@@ -5,7 +5,7 @@ import styles from './DangerButton.module.scss'
 
 export type IDangerButton = React.ComponentPropsWithRef<'button'> & {
     icon?: React.ReactNode
-    text?: string
+    text?: React.ReactNode
     textClassName?: string
 }
 
@@ -18,9 +18,9 @@ export const DangerButton = forwardRef<HTMLButtonElement, IDangerButton>(functio
 ) {
     return (
         <button ref={ref} className={clsx(styles['root'], className)} {...props}>
+            {icon}
             {text && <span className={clsx(styles['text'], textClassName)}>{text}</span>}
             {children}
-            {icon}
         </button>
     )
 })
