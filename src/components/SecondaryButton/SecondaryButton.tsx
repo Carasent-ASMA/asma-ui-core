@@ -10,11 +10,11 @@ export type ISecondaryButton = React.ComponentPropsWithRef<'button'> & {
 }
 
 export const SecondaryButton = forwardRef<HTMLButtonElement, ISecondaryButton>(function SecondaryButton(
-    { icon, text, textClassName, children, ...props },
+    { icon, text, textClassName, children, className, ...props },
     ref,
 ) {
     return (
-        <button ref={ref} className={clsx(styles['root'], props.className)} {...props}>
+        <button ref={ref} className={clsx(styles['root'], className)} {...props}>
             {text && <span className={clsx(styles['text'], textClassName)}>{text}</span>}
             {children}
             {icon}
