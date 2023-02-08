@@ -29,6 +29,7 @@ import { FindReplaceIconStory } from './find-replace-icon/FindReplaceIconStory'
 import { MessageProcessingOutlineIconStory } from './message-processing-outline-icon/MessageProcessingOutlineIconStory'
 import { PersonIconStory } from './person-icon/PersonIconStory'
 import { DotsVerticalIconStory } from './dots-vertical-icon/DotsVerticalIconStory'
+import { SearchIconStory } from './search-icon/SearchIconStory'
 
 export default {
     title: 'Icons',
@@ -44,6 +45,7 @@ AllIcons.args = {
     height: 40,
 }
 
+export const Search = SearchIconStory()
 export const DotsVertical = DotsVerticalIconStory()
 export const FindReplace = FindReplaceIconStory()
 export const SettingsOutline = SettingsOutlineIconStory()

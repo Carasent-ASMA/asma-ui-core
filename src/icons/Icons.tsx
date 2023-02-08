@@ -17,7 +17,7 @@ import { CheckFactOutlineIcon } from './check-fact-outline-icon'
 import { PeopleIcon } from './people-icon'
 import { ListNumberedIcon } from './list-numbered-icon'
 import { MessageProcessingIcon } from './message-processing-icon'
-import { DotsVertical, MessageProcessingOutline } from './Icons.stories'
+import { DotsVertical, MessageProcessingOutline, Search } from './Icons.stories'
 import { ReportboxIcon } from './report-box-icon'
 import { ReportboxOutlineIcon } from './report-box-outline-icon'
 import { BellOutlineIcon } from './bell-outline-icon'
@@ -31,8 +31,15 @@ import { PersonIcon } from './person-icon'
 export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 20, width = 20 }) => {
     return (
         <div className={styles['all-icons-container']}>
-            <DotsVertical height={height} width={height} />
-            <FindReplaceIcon height={height} width={height} />
+            <div title='dots vertical'>
+                <DotsVertical height={height} width={height} />
+            </div>
+            <div title='find replace'>
+                <FindReplaceIcon height={height} width={height} />
+            </div>
+            <div title='search'>
+                <Search height={height} width={height} />
+            </div>
             <SettingsOutlineIcon height={height} width={height} />
             <SettingsIcon height={height} width={height} />
             <ReportboxOutlineIcon height={height} width={height} />
