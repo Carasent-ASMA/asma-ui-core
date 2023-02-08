@@ -1,4 +1,12 @@
 [data-theme='greenish'] {
+    --colors-gama-100: var(--colors-jade-100);
+    --colors-gama-200: var(--colors-jade-200);
+    --colors-gama-300: var(--colors-jade-300);
+    --colors-gama-500: var(--colors-jade-500);
+    --colors-gama-600: var(--colors-jade-600);
+    --colors-gama-700: var(--colors-jade-600);
+    --colors-gama-800: var(--colors-jade-600);
+
     --colors-theta-100: var(--colors-jade-100);
     --colors-theta-200: var(--colors-jade-200);
     --colors-theta-400: var(--colors-jade-400);

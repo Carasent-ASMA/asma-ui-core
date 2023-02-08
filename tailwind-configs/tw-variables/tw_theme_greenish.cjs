@@ -14,9 +14,9 @@ module.exports = {
     // 'gama-100': 'var(--colors-green-100)',
     // 'gama-200': 'var(--colors-green-200)',
     // 'gama-300': 'var(--colors-green-300)',
-    // 'gama-500': 'var(--colors-green-500)',
-    // 'gama-600': 'var(--colors-green-600)',
-    // 'gama-700': 'var(--colors-green-700)',
+    'gama-500': 'var(--colors-jade-500)',
+    'gama-600': 'var(--colors-jade-600)',
+    'gama-700': 'var(--colors-jade-600)',
     // 'gama-800': 'var(--colors-green-700)',
     //
     // 'delta-100': 'var(--colors-gray-100)',
