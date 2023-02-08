@@ -1,7 +1,7 @@
 .input:global(.ant-input),
 .input:global(.ant-input-affix-wrapper),
 .input:global(.ant-input-affix-wrapper) input {
-    @apply rounded-[4px] text-[16px] text-delta-800 placeholder:italic disabled:cursor-default disabled:text-delta-800;
+    @apply rounded-[4px] border-gama-700 text-[16px] text-delta-800 placeholder:italic disabled:cursor-default disabled:text-delta-800;
 
     span:global(.ant-input-clear-icon),
     span:global(.ant-input-show-count-suffix),
@@ -20,15 +20,15 @@
     &:not(&:global(.ant-input-status-warning)):not(&:global(.ant-input-status-error)):not(
             &:global(.ant-input-affix-wrapper-status-warning)
         ):not(&:global(.ant-input-affix-wrapper-status-error)) {
-        @apply border-transparent shadow-none
+        @apply border-gama-700 shadow-none
         ring-1 ring-transparent 
-        hover:border-transparent
-        focus:border-transparent focus:shadow-none  focus:ring-gama-700
-        active:border-transparent active:ring-gama-700 
+        hover:border-gama-700
+        focus:border-gama-700 focus:shadow-none  focus:ring-gama-700
+        active:border-gama-700 active:ring-gama-700 
         disabled:cursor-default  disabled:ring-transparent;
 
         &:global(.ant-input-affix-wrapper-focused) {
-            @apply ring-1 ring-gama-700 transition-all duration-300;
+            @apply ring-gama-700 transition-all duration-300;
             input {
                 @apply focus:ring-transparent active:ring-transparent;
             }
