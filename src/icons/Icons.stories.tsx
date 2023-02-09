@@ -30,6 +30,7 @@ import { MessageProcessingOutlineIconStory } from './message-processing-outline-
 import { PersonIconStory } from './person-icon/PersonIconStory'
 import { DotsVerticalIconStory } from './dots-vertical-icon/DotsVerticalIconStory'
 import { SearchIconStory } from './search-icon/SearchIconStory'
+import { LoadingIconStory } from './loading-icon/LoadingIconStory'
 
 export default {
     title: 'Icons',
@@ -45,6 +46,7 @@ AllIcons.args = {
     height: 40,
 }
 
+export const Loading = LoadingIconStory()
 export const Search = SearchIconStory()
 export const DotsVertical = DotsVerticalIconStory()
 export const FindReplace = FindReplaceIconStory()

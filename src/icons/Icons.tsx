@@ -27,10 +27,14 @@ import { ChevronRightIcon } from './chevron-right-icon'
 import { ChevronLeftIcon } from './chevron-left-icon'
 import { FindReplaceIcon } from './find-replace-icon'
 import { PersonIcon } from './person-icon'
+import { LoadingIcon } from './loading-icon'
 
 export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 20, width = 20 }) => {
     return (
         <div className={styles['all-icons-container']}>
+            <div title='loading'>
+                <LoadingIcon height={height} width={height} />
+            </div>
             <div title='dots vertical'>
                 <DotsVertical height={height} width={height} />
             </div>
