@@ -1,7 +1,7 @@
 {
     "name": "asma-antrd",
     "private": false,
-    "version": "1.0.39",
+    "version": "1.0.40",
     "type": "module",
     "files": [
         "dist/**/*",
