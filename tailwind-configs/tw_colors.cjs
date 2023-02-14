@@ -34,6 +34,7 @@ module.exports = {
     //
     'theta-100': 'var(--colors-theta-100)',
     'theta-200': 'var(--colors-theta-200)',
+    'theta-300': 'var(--colors-theta-300)',
     'theta-400': 'var(--colors-theta-400)',
     'theta-500': 'var(--colors-theta-500)',
     'theta-600': 'var(--colors-theta-600)',

@@ -53,8 +53,8 @@
     --colors-magic-blue-700: #247ba3;
 
     --colors-text-component: #ffffff;
-    --colors-jade-100: #FFFFFF33;
-    --colors-jade-200: #157A7A33;
+    --colors-jade-100: #ffffff33;
+    --colors-jade-200: #157a7a33;
     --colors-jade-400: #1ca1a1;
     --colors-jade-500: #157a7a;
     --colors-jade-600: #105e5f;
@@ -91,6 +91,9 @@
     --colors-sigma-700: var(--colors-magic-blue-700);
     --colors-zeta-700: var(--colors-blue-700);
 
+    --colors-theta-100: #ffffff;
+    --colors-theta-200: var(--colors-slate-200);
+    --colors-theta-300: var(--colors-slate-500);
     --colors-theta-400: #ffffff;
     --colors-theta-500: #ffffff;
     --colors-theta-600: #ffffff;

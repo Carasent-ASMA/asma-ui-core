@@ -32,6 +32,7 @@ module.exports = {
 
     'theta-100': 'var(--colors-jade-100)',
     'theta-200': 'var(--colors-jade-200)',
+    'theta-300': 'var(--colors-jade-300)',
     'theta-400': 'var(--colors-jade-400)',
     'theta-500': 'var(--colors-jade-500)',
     'theta-600': 'var(--colors-jade-600)',

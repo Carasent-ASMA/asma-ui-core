@@ -28,6 +28,8 @@ import { ChevronLeftIcon } from './chevron-left-icon'
 import { FindReplaceIcon } from './find-replace-icon'
 import { PersonIcon } from './person-icon'
 import { LoadingIcon } from './loading-icon'
+import { DropUpIcon } from './drop-up-icon'
+import { DropDownIcon } from './drop-down-icon'
 
 export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 20, width = 20 }) => {
     return (
@@ -53,6 +55,12 @@ export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 
             <HamburgerIcon height={height} width={width} />
             <PdfIcon color={'red'} height={height} width={width} />
             <QnrIcon color={'#1890ff'} height={height} width={width} />
+            <div title='DropUpIcon'>
+                <DropUpIcon height={height} width={width} />
+            </div>
+            <div title='DropDownIcon'>
+                <DropDownIcon height={height} width={width} />
+            </div>
             <ChevronLeftIcon height={height} width={width} />
             <ChevronRightIcon height={height} width={width} />
             <ChevronDoubleRightIcon height={height} width={width} />

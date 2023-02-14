@@ -31,6 +31,8 @@ import { PersonIconStory } from './person-icon/PersonIconStory'
 import { DotsVerticalIconStory } from './dots-vertical-icon/DotsVerticalIconStory'
 import { SearchIconStory } from './search-icon/SearchIconStory'
 import { LoadingIconStory } from './loading-icon/LoadingIconStory'
+import { DropUpIconStory } from './drop-up-icon/DropUpIconStory'
+import { DropDownIconStory } from './drop-down-icon/DropDownIconStory'
 
 export default {
     title: 'Icons',
@@ -57,6 +59,8 @@ export const Reportbox = ReportboxIconStory()
 export const BellOutline = BellOutlineIconStory()
 export const Bell = BellIconStory()
 export const Hamburger = HamburgerStory()
+export const DropUp = DropUpIconStory()
+export const DropDown = DropDownIconStory()
 export const ChevronLeft = ChevronLeftIconStory()
 export const ChevronRight = ChevronRightIconStory()
 export const ChevronDoubleLeft = ChevronDoubleLeftStory()

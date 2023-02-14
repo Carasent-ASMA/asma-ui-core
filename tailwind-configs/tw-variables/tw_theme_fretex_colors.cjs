@@ -34,7 +34,8 @@ module.exports = {
     'zeta-700': 'var(--colors-gray-700)',
 
     'theta-100': '#ffffff',
-    'theta-200': '#ffffff',
+    'theta-200': 'var(--colors-green-200)',
+    'theta-300': 'var(--colors-green-500)',
     'theta-400': '#ffffff',
     'theta-500': '#ffffff',
     'theta-600': '#ffffff',

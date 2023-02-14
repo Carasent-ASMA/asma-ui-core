@@ -61,7 +61,7 @@ module.exports = {
     //
     'jade-100': '#FFFFFF33',
     'jade-200': '#157A7A33',
-    'jade-300': '',
+    'jade-300': '#DFFAFA',
     'jade-400': '#1CA1A1',
     'jade-500': '#157A7A',
     'jade-600': '#105E5F',
