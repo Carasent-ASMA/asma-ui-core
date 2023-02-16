@@ -33,6 +33,9 @@ import { SearchIconStory } from './search-icon/SearchIconStory'
 import { LoadingIconStory } from './loading-icon/LoadingIconStory'
 import { DropUpIconStory } from './drop-up-icon/DropUpIconStory'
 import { DropDownIconStory } from './drop-down-icon/DropDownIconStory'
+import { ArchiveIconStory } from './archive-icon/ArchiveIconStory'
+import { DownloadIconStory } from './download-icon/DownloadIconStory'
+import { CheckBoxCheckedIconStory } from './checkbox-checked-icon/CheckBoxCheckedIconStory'
 
 export default {
     title: 'Icons',
@@ -48,6 +51,8 @@ AllIcons.args = {
     height: 40,
 }
 
+export const Download = DownloadIconStory()
+export const Archive = ArchiveIconStory()
 export const Loading = LoadingIconStory()
 export const Search = SearchIconStory()
 export const DotsVertical = DotsVerticalIconStory()
@@ -68,8 +73,9 @@ export const ChevronDoubleRight = ChevronDoubleRightStory()
 export const Qnr = QnrIconStory()
 export const Pdf = PdfIconStory()
 export const DashboardViewOutline = DashboardViewOutlineIconStory()
-export const CheckFactOutline = CheckFactOutlineIconStory()
 export const DashboardFilled = DashboardViewIconStory()
+export const CheckBoxChecked = CheckBoxCheckedIconStory()
+export const CheckFactOutline = CheckFactOutlineIconStory()
 export const CheckOutline = CheckOutlineIconStory()
 export const Person = PersonIconStory()
 export const PeopleOutline = PeopleOutlineIconStory()

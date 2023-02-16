@@ -30,31 +30,58 @@ import { PersonIcon } from './person-icon'
 import { LoadingIcon } from './loading-icon'
 import { DropUpIcon } from './drop-up-icon'
 import { DropDownIcon } from './drop-down-icon'
+import { ArchiveIcon } from './archive-icon'
+import { DownloadIcon } from './download-icon'
+import { CheckBoxCheckedIcon } from './checkbox-checked-icon'
 
 export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 20, width = 20 }) => {
     return (
         <div className={styles['all-icons-container']}>
-            <div title='loading'>
+            <div title='LoadingIcon'>
                 <LoadingIcon height={height} width={height} />
             </div>
-            <div title='dots vertical'>
+            <div title='DownloadIcon'>
+                <DownloadIcon height={height} width={height} />
+            </div>
+            <div title='ArchiveIcon'>
+                <ArchiveIcon height={height} width={height} />
+            </div>
+            <div title='DotsVertical'>
                 <DotsVertical height={height} width={height} />
             </div>
-            <div title='find replace'>
+            <div title='FindReplaceIcon'>
                 <FindReplaceIcon height={height} width={height} />
             </div>
-            <div title='search'>
+            <div title='Search'>
                 <Search height={height} width={height} />
             </div>
-            <SettingsOutlineIcon height={height} width={height} />
-            <SettingsIcon height={height} width={height} />
-            <ReportboxOutlineIcon height={height} width={height} />
-            <ReportboxIcon height={height} width={height} />
-            <BellOutlineIcon height={height} width={width} />
-            <BellIcon height={height} width={width} />
-            <HamburgerIcon height={height} width={width} />
-            <PdfIcon color={'red'} height={height} width={width} />
-            <QnrIcon color={'#1890ff'} height={height} width={width} />
+            <div title='SettingsOutlineIcon'>
+                <SettingsOutlineIcon height={height} width={height} />
+            </div>
+            <div title='SettingsIcon'>
+                <SettingsIcon height={height} width={height} />
+            </div>
+            <div title='ReportboxOutlineIcon'>
+                <ReportboxOutlineIcon height={height} width={height} />
+            </div>
+            <div title='ReportboxIcon'>
+                <ReportboxIcon height={height} width={height} />
+            </div>
+            <div title='BellOutlineIcon'>
+                <BellOutlineIcon height={height} width={width} />
+            </div>
+            <div title='BellIcon'>
+                <BellIcon height={height} width={width} />
+            </div>
+            <div title='HamburgerIcon'>
+                <HamburgerIcon height={height} width={width} />
+            </div>
+            <div title='PdfIcon'>
+                <PdfIcon color={'red'} height={height} width={width} />
+            </div>
+            <div title='QnrIcon'>
+                <QnrIcon color={'#1890ff'} height={height} width={width} />
+            </div>
             <div title='DropUpIcon'>
                 <DropUpIcon height={height} width={width} />
             </div>
@@ -70,8 +97,15 @@ export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 
             <PersonIcon height={height} width={height} />
             <PeopleOutlineIcon height={height} width={width} />
             <PeopleIcon height={height} width={width} />
-            <CheckOutlineIcon height={height} width={width} />
-            <CheckFactOutlineIcon height={height} width={width} />
+            <div title='CheckBoxCheckedIcon'>
+                <CheckBoxCheckedIcon height={height} width={width} />
+            </div>
+            <div title='CheckOutlineIcon'>
+                <CheckOutlineIcon height={height} width={width} />
+            </div>
+            <div title='CheckFactOutlineIcon'>
+                <CheckFactOutlineIcon height={height} width={width} />
+            </div>
             <CalendarIcon height={height} width={width} />
             <CalendarRangeIcon height={height} width={width} />
             <AsignmentOutlineIcon height={height} width={height} />

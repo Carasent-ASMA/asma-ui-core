@@ -1,5 +1,5 @@
 .all-icons-container {
-    @apply flex items-center gap-5;
+    @apply flex h-full w-full flex-wrap items-center gap-5 bg-gray-100 p-5;
 }
 
 .icon {

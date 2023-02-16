@@ -1,0 +1,15 @@
+import type { ComponentStory } from '@storybook/react'
+import { ArchiveIcon } from './ArchiveIcon'
+
+export const ArchiveIconStory = () => {
+    const Template: ComponentStory<typeof ArchiveIcon> = (args) => <ArchiveIcon {...args} />
+
+    const Icon = Template.bind({})
+
+    Icon.args = {
+        width: 40,
+        height: 40,
+    }
+
+    return Icon
+}
