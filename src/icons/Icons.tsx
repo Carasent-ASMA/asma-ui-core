@@ -25,6 +25,8 @@ import { SettingsIcon } from './settings-icon'
 import { SettingsOutlineIcon } from './settings-outline-icon'
 import { ChevronRightIcon } from './chevron-right-icon'
 import { ChevronLeftIcon } from './chevron-left-icon'
+import { ChevronDownIcon } from './chevron-down-icon'
+import { ChevronUpIcon } from './chevron-up-icon'
 import { FindReplaceIcon } from './find-replace-icon'
 import { PersonIcon } from './person-icon'
 import { LoadingIcon } from './loading-icon'
@@ -88,6 +90,8 @@ export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 
             <div title='DropDownIcon'>
                 <DropDownIcon height={height} width={width} />
             </div>
+            <ChevronDownIcon height={height} width={width} />
+            <ChevronUpIcon height={height} width={width} />
             <ChevronLeftIcon height={height} width={width} />
             <ChevronRightIcon height={height} width={width} />
             <ChevronDoubleRightIcon height={height} width={width} />

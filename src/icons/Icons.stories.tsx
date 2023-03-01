@@ -36,6 +36,8 @@ import { DropDownIconStory } from './drop-down-icon/DropDownIconStory'
 import { ArchiveIconStory } from './archive-icon/ArchiveIconStory'
 import { DownloadIconStory } from './download-icon/DownloadIconStory'
 import { CheckBoxCheckedIconStory } from './checkbox-checked-icon/CheckBoxCheckedIconStory'
+import { ChevronDownIconStory } from './chevron-down-icon/ChevronDownIconStory'
+import { ChevronUpIconStory } from './chevron-up-icon/ChevronUpIconStory'
 
 export default {
     title: 'Icons',
@@ -68,6 +70,8 @@ export const DropUp = DropUpIconStory()
 export const DropDown = DropDownIconStory()
 export const ChevronLeft = ChevronLeftIconStory()
 export const ChevronRight = ChevronRightIconStory()
+export const ChevronDown = ChevronDownIconStory()
+export const ChevronUp = ChevronUpIconStory()
 export const ChevronDoubleLeft = ChevronDoubleLeftStory()
 export const ChevronDoubleRight = ChevronDoubleRightStory()
 export const Qnr = QnrIconStory()
