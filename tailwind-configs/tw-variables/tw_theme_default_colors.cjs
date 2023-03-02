@@ -69,5 +69,5 @@ module.exports = {
     //
     'colors-topbar-text': 'var(--colors-gray-700)',
     // colors - menu link text on white background
-    'colors-menu-text-active': 'var(--colors-slate-700)',
+    'menu-text-active': 'var(--colors-slate-700)',
 }

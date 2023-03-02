@@ -69,5 +69,5 @@ module.exports = {
     //
     // 'colors-topbar-text': '#ffffff',
     // colors - menu link text on white background
-    'colors-menu-text-active': 'var(--colors-jade-700)',
+    'menu-text-active': 'var(--colors-jade-700)',
 }
