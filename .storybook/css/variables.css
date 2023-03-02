@@ -58,6 +58,7 @@
     --colors-jade-400: #1ca1a1;
     --colors-jade-500: #157a7a;
     --colors-jade-600: #105e5f;
+    --colors-jade-700: #0B4141;
 
     --colors-lime-500: #beda2f;
 
@@ -121,4 +122,6 @@
     --colors-chat-ticket-message-bg: var(--colors-blue-200);
 
     --colors-topbar-text: var(--colors-gray-700);
+    /*  */
+    --colors-menu-text-active:var(--colors-slate-700);
 }

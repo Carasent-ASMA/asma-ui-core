@@ -68,4 +68,6 @@ module.exports = {
     // 'chat-ticket-message-bg': 'var(--colors-alpha-500)',
     //
     // 'colors-topbar-text': '#ffffff',
+    // colors - menu link text on white background
+    'colors-menu-text-active': 'var(--colors-jade-700)',
 }

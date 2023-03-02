@@ -65,4 +65,6 @@
     --colors-chat-ticket-message-bg: var(--colors-alpha-500);
 
     --colors-topbar-text: #ffffff;
+    /*  */
+    --colors-menu-text-active:var(--colors-beta-700);
 }

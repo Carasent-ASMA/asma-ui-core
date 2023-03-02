@@ -68,14 +68,6 @@ module.exports = {
     'chat-ticket-message-bg': 'var(--colors-blue-200)',
     //
     'colors-topbar-text': 'var(--colors-gray-700)',
+    // colors - menu link text on white background
+    'colors-menu-text-active': 'var(--colors-slate-700)',
 }
-
-// [data-theme='default'] {
-//     --topbar-color-badge-bg: var(--colors-green-400);
-//     --topbar-color-badge-text: var(--colors-text);
-// }
-
-// [data-theme='fretex'] {
-//     --topbar-color-badge-bg: var(--colors-red-700);
-//     --topbar-color-badge-text: #ffffff;
-// }

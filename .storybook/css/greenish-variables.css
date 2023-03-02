@@ -23,4 +23,6 @@
     --colors-badge-text: var(--colors-jade-600);
 
     --colors-sigma-700: var(--colors-jade-500);
+    /*  */
+    --colors-menu-text-active:var(--colors-jade-700);
 }
