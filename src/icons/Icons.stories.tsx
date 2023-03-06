@@ -38,6 +38,8 @@ import { DownloadIconStory } from './download-icon/DownloadIconStory'
 import { CheckBoxCheckedIconStory } from './checkbox-checked-icon/CheckBoxCheckedIconStory'
 import { ChevronDownIconStory } from './chevron-down-icon/ChevronDownIconStory'
 import { ChevronUpIconStory } from './chevron-up-icon/ChevronUpIconStory'
+import { CheckIconStory } from './check-icon/CheckIconStory'
+import { CloseIconStory } from './close-icon/CloseIconStory'
 
 export default {
     title: 'Icons',
@@ -78,6 +80,8 @@ export const Qnr = QnrIconStory()
 export const Pdf = PdfIconStory()
 export const DashboardViewOutline = DashboardViewOutlineIconStory()
 export const DashboardFilled = DashboardViewIconStory()
+export const Close = CloseIconStory()
+export const Check = CheckIconStory()
 export const CheckBoxChecked = CheckBoxCheckedIconStory()
 export const CheckFactOutline = CheckFactOutlineIconStory()
 export const CheckOutline = CheckOutlineIconStory()

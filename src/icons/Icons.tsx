@@ -35,6 +35,8 @@ import { DropDownIcon } from './drop-down-icon'
 import { ArchiveIcon } from './archive-icon'
 import { DownloadIcon } from './download-icon'
 import { CheckBoxCheckedIcon } from './checkbox-checked-icon'
+import { CheckIcon } from './check-icon'
+import { CloseIcon } from './close-icon'
 
 export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 20, width = 20 }) => {
     return (
@@ -90,17 +92,45 @@ export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 
             <div title='DropDownIcon'>
                 <DropDownIcon height={height} width={width} />
             </div>
-            <ChevronDownIcon height={height} width={width} />
-            <ChevronUpIcon height={height} width={width} />
-            <ChevronLeftIcon height={height} width={width} />
-            <ChevronRightIcon height={height} width={width} />
-            <ChevronDoubleRightIcon height={height} width={width} />
-            <ChevronDoubleLeftIcon height={height} width={width} />
-            <DashboardViewOutlineIcon height={height} width={width} />
-            <DashboardViewIcon height={height} width={width} />
-            <PersonIcon height={height} width={height} />
-            <PeopleOutlineIcon height={height} width={width} />
-            <PeopleIcon height={height} width={width} />
+            <div title='ChevronDownIcon'>
+                <ChevronDownIcon height={height} width={width} />
+            </div>
+            <div title='ChevronUpIcon'>
+                <ChevronUpIcon height={height} width={width} />
+            </div>
+            <div title='ChevronLeftIcon'>
+                <ChevronLeftIcon height={height} width={width} />
+            </div>
+            <div title='ChevronRightIcon'>
+                <ChevronRightIcon height={height} width={width} />
+            </div>
+            <div title='ChevronDoubleRightIcon'>
+                <ChevronDoubleRightIcon height={height} width={width} />
+            </div>
+            <div title='ChevronDoubleLeftIcon'>
+                <ChevronDoubleLeftIcon height={height} width={width} />
+            </div>
+            <div title='DashboardViewOutlineIcon'>
+                <DashboardViewOutlineIcon height={height} width={width} />
+            </div>
+            <div title='DashboardViewIcon'>
+                <DashboardViewIcon height={height} width={width} />
+            </div>
+            <div title='PersonIcon'>
+                <PersonIcon height={height} width={width} />
+            </div>
+            <div title='PeopleOutlineIcon'>
+                <PeopleOutlineIcon height={height} width={width} />
+            </div>
+            <div title='PeopleIcon'>
+                <PeopleIcon height={height} width={width} />
+            </div>
+            <div title='CloseIcon'>
+                <CloseIcon height={height} width={width} />
+            </div>
+            <div title='CheckIcon'>
+                <CheckIcon height={height} width={width} />
+            </div>
             <div title='CheckBoxCheckedIcon'>
                 <CheckBoxCheckedIcon height={height} width={width} />
             </div>
@@ -110,13 +140,27 @@ export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 
             <div title='CheckFactOutlineIcon'>
                 <CheckFactOutlineIcon height={height} width={width} />
             </div>
-            <CalendarIcon height={height} width={width} />
-            <CalendarRangeIcon height={height} width={width} />
-            <AsignmentOutlineIcon height={height} width={height} />
-            <AsignmentIcon height={height} width={height} />
-            <ListNumberedIcon height={height} width={height} />
-            <MessageProcessingIcon height={height} width={height} />
-            <MessageProcessingOutline height={height} width={height} />
+            <div title='CalendarIcon'>
+                <CalendarIcon height={height} width={width} />
+            </div>
+            <div title='CalendarRangeIcon'>
+                <CalendarRangeIcon height={height} width={width} />
+            </div>
+            <div title='AsignmentOutlineIcon'>
+                <AsignmentOutlineIcon height={height} width={width} />
+            </div>
+            <div title='AsignmentIcon'>
+                <AsignmentIcon height={height} width={width} />
+            </div>
+            <div title='ListNumberedIcon'>
+                <ListNumberedIcon height={height} width={width} />
+            </div>
+            <div title='MessageProcessingIcon'>
+                <MessageProcessingIcon height={height} width={width} />
+            </div>
+            <div title='MessageProcessingOutline'>
+                <MessageProcessingOutline height={height} width={width} />
+            </div>
         </div>
     )
 }
