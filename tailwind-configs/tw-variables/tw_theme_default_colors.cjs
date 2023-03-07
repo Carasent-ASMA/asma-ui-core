@@ -47,6 +47,8 @@ module.exports = {
     'theta-400': '#ffffff',
     'theta-500': '#ffffff',
     'theta-600': '#ffffff',
+    'theta-700': '#ffffff',
+    'theta-800': '#ffffff',
     // button deprecated
     'btn-bg-hover': 'var(--colors-slate-300)',
     'btn-bg-standart': 'var(--colors-slate-600)',

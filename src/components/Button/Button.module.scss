@@ -1,35 +1,35 @@
 @mixin button($type) {
     &.#{$type} {
         @apply rounded px-4 text-base font-semibold transition duration-300 ease-in-out border;
-        color: var(--button-#{$type}-text-color);
-        background-color: var(--button-#{$type}-bg-color);
-        border-color: var(--button-#{$type}-border-color);
+        color: var(--colors-button-#{$type}-text-color);
+        background-color: var(--colors-button-#{$type}-bg-color);
+        border-color: var(--colors-button-#{$type}-border-color);
     
         &:hover {
-            color: var(--button-#{$type}-hover-text-color);
-            background-color: var(--button-#{$type}-hover-bg-color);
-            border-color: var(--button-#{$type}-hover-border-color);
+            color: var(--colors-button-#{$type}-hover-text-color);
+            background-color: var(--colors-button-#{$type}-hover-bg-color);
+            border-color: var(--colors-button-#{$type}-hover-border-color);
         }
 
         &:focus {
-            outline: 2px solid var(--button-#{$type}-focused-border-color);
+            outline: 2px solid var(--colors-button-#{$type}-focused-border-color);
             outline-offset: -1px;
-            color: var(--button-#{$type}-focused-text-color);
-            background-color: var(--button-#{$type}-focused-bg-color);
+            color: var(--colors-button-#{$type}-focused-text-color);
+            background-color: var(--colors-button-#{$type}-focused-bg-color);
             border-color: transparent;
         }
 
         &:active {
-            color: var(--button-#{$type}-active-text-color);
-            background-color: var(--button-#{$type}-active-bg-color);
-            border-color: var(--button-#{$type}-active-border-color);
+            color: var(--colors-button-#{$type}-active-text-color);
+            background-color: var(--colors-button-#{$type}-active-bg-color);
+            border-color: var(--colors-button-#{$type}-active-border-color);
             outline: none;
         }
 
         &:disabled {
-            color: var(--button-#{$type}-disabled-text-color);
-            background-color: var(--button-#{$type}-disabled-bg-color);
-            border-color: var(--button-#{$type}-disabled-border-color);
+            color: var(--colors-button-#{$type}-disabled-text-color);
+            background-color: var(--colors-button-#{$type}-disabled-bg-color);
+            border-color: var(--colors-button-#{$type}-disabled-border-color);
         }
     }
 
