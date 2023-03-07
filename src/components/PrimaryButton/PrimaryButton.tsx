@@ -10,6 +10,9 @@ export type IPrimaryButton = React.ComponentPropsWithRef<'button'> & {
     dataTest?: string
 }
 
+/**
+ * @deprecated use UnifiedButton
+ */
 export const PrimaryButton = forwardRef<HTMLButtonElement, IPrimaryButton>(function PrimaryButton(
     { className, dataTest = '', text, textClassName, icon, children, ...props },
     ref,

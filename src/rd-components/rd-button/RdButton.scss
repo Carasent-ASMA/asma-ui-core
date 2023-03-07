@@ -26,11 +26,11 @@
     &:disabled,
     &.ant-btn-default:disabled,
     &.ant-btn-primary:disabled {
-        @apply cursor-default border border-transparent bg-delta-100 text-delta-250 shadow-none;
+        @apply cursor-default border border-transparent bg-delta-100 text-delta-400 shadow-none;
 
         &:hover,
         &:focus {
-            @apply border border-transparent bg-delta-100 text-delta-250 shadow-none;
+            @apply border border-transparent bg-delta-100 text-delta-400 shadow-none;
         }
     }
 }

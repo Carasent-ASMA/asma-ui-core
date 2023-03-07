@@ -5,7 +5,7 @@ import type { ComponentMeta, ComponentStory } from '@storybook/react'
 import { DangerButton as DangerButtonComponent } from './DangerButton'
 
 const meta: ComponentMeta<typeof DangerButtonComponent> = {
-    title: 'DangerButton',
+    title: 'DangerButton (deprecated)',
     parameters: {
         actions: { argTypesRegex: '^on.*' },
     },

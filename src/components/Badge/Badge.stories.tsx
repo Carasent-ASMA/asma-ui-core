@@ -13,22 +13,22 @@ const Template: ComponentStory<typeof Badge> = (args) => (
     <div className={styles['module']}>
         <div className={styles['container']}>
             <Badge {...args}>
-                <Button title='dynamic example' />
+                <Button>example</Button>
             </Badge>
             <Badge {...args} count={5}>
-                <Button title='example' />
+                <Button>example</Button>
             </Badge>
             <Badge {...args} count={12}>
-                <Button title='example' />
+                <Button>example</Button>
             </Badge>
             <Badge {...args} count={98}>
-                <Button title='example' />
+                <Button>example</Button>
             </Badge>
             <Badge {...args} count={999} dot={false}>
-                <Button title='example' />
+                <Button>example</Button>
             </Badge>
             <AntdBadge {...args}>
-                <Button title='antd default' />
+                <Button>antd default</Button>
             </AntdBadge>
         </div>
         <div className={styles['description']}>size: small | default</div>

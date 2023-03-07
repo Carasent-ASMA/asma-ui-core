@@ -1,31 +1,29 @@
-import 'antd/dist/antd.css'
-
 import type { ComponentMeta, ComponentStory } from '@storybook/react'
 
 import { Button as ButtonComponent } from './Button'
 
-const meta: ComponentMeta<typeof ButtonComponent> = {
+export default {
     title: 'Button',
-    parameters: {
-        actions: { argTypesRegex: '^on.*' },
-    },
+    component: ButtonComponent,
     argTypes: {
-        onClick: { action: 'clicked' },
-        btnType: {
-            control: 'select',
-            options: ['primary', 'secondary', 'ghost'],
+        innerRef: {
+            control: false,
         },
     },
+} as ComponentMeta<typeof ButtonComponent>
+
+const Template: ComponentStory<typeof ButtonComponent> = (args) => {
+    return (
+        <ButtonComponent {...args} data-test='example-btn'>
+            <span>Primary</span>
+        </ButtonComponent>
+    )
 }
 
-export default meta
+export const Default = Template.bind({})
 
-const Template: ComponentStory<typeof ButtonComponent> = (args) => <ButtonComponent {...args} />
-
-export const Button = Template.bind({})
-
-Button.args = {
-    title: 'Title',
-    icon: 'IconName',
-    btnType: 'primary',
+Default.args = {
+    className: '',
+    disabled: false,
+    size: 'large',
 }

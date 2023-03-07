@@ -1,112 +1,46 @@
-[data-theme='fretex'] {
-    button.btn-wrapper {
-        @apply border-none     bg-transparent    shadow-none;
-    }
-
-    .icon-text {
-        @apply text-3xl;
-    }
-
-    .icon {
-        @apply text-xl;
-    }
-
-    button.btn-primary {
-        @apply flex h-10 min-w-min items-center justify-center		rounded border border-[#C8CED7]		bg-gama-500		text-base		hover:border-beta-700 hover:bg-beta-700 hover:text-white		focus:outline-none		sm:flex-col		xl:flex-row #{!important};
+@mixin button($type) {
+    &.#{$type} {
+        @apply rounded px-4 text-base font-semibold transition duration-300 ease-in-out border;
+        color: var(--button-#{$type}-text-color);
+        background-color: var(--button-#{$type}-bg-color);
+        border-color: var(--button-#{$type}-border-color);
+    
+        &:hover {
+            color: var(--button-#{$type}-hover-text-color);
+            background-color: var(--button-#{$type}-hover-bg-color);
+            border-color: var(--button-#{$type}-hover-border-color);
+        }
 
         &:focus {
-            @apply border-[#C8CED7]      text-black      outline-0      #{!important};
+            outline: 2px solid var(--button-#{$type}-focused-border-color);
+            outline-offset: -1px;
+            color: var(--button-#{$type}-focused-text-color);
+            background-color: var(--button-#{$type}-focused-bg-color);
+            border-color: transparent;
         }
 
-        &_disabled {
-            @apply hover:bg-gama-500      hover:text-black/25      hover:text-opacity-100               hover:opacity-100      #{!important};
+        &:active {
+            color: var(--button-#{$type}-active-text-color);
+            background-color: var(--button-#{$type}-active-bg-color);
+            border-color: var(--button-#{$type}-active-border-color);
+            outline: none;
+        }
+
+        &:disabled {
+            color: var(--button-#{$type}-disabled-text-color);
+            background-color: var(--button-#{$type}-disabled-bg-color);
+            border-color: var(--button-#{$type}-disabled-border-color);
         }
     }
 
-    button.btn-secondary {
-        @apply flex          h-10    min-w-min    items-center    justify-center   rounded    border    border-solid    border-[#C8CED7]    bg-white    text-base    hover:border-[#C8CED7]    hover:bg-[#ADC6BC]    hover:text-black    focus:outline-none    sm:flex-col     md:flex-col    xl:flex-row #{!important};
-
-        &:focus {
-            @apply border-[#C8CED7]      text-black      outline-0      #{!important};
-        }
-
-        &_disabled {
-            @apply hover:bg-white      hover:text-black/25      hover:text-opacity-100      hover:opacity-100      #{!important};
-        }
+    &.large {
+        @apply h-10;
     }
 }
 
-[data-theme='default'] {
-    button.btn-wrapper {
-        @apply border-none bg-transparent shadow-none;
-    }
-
-    .icon-text {
-        @apply text-3xl;
-    }
-
-    .icon {
-        @apply text-xl;
-    }
-
-    button.btn-primary {
-        @apply flex h-10 min-w-min items-center justify-center
-		rounded border border-[#C8CED7]
-		bg-gama-500
-		text-base text-textcolor-component
-		hover:border-beta-700 hover:bg-beta-700 hover:text-white
-		focus:outline-none
-		sm:flex-col
-		xl:flex-row #{!important};
-
-        &:focus {
-            @apply border-[#C8CED7]
-      text-black
-      outline-0
-      #{!important};
-        }
-
-        &_disabled {
-            @apply hover:bg-white
-      hover:text-black/25
-      hover:text-opacity-100
-      hover:opacity-100
-      #{!important};
-        }
-    }
-
-    button.btn-secondary {
-        @apply flex
-    h-10
-    min-w-min
-    items-center
-    justify-center
-    rounded
-    border
-    border-solid
-    border-[#C8CED7]
-    bg-white
-    text-base
-    hover:border-[#C8CED7]
-    hover:bg-gama-700 hover:text-textcolor-component
-    focus:outline-none
-    sm:flex-col
-    md:flex-col
-    xl:flex-row #{!important};
-
-        &:focus {
-            @apply border-[#C8CED7]
-      text-black
-      outline-0
-      #{!important};
-        }
-
-        &_disabled {
-            @apply hover:bg-white
-      hover:text-black/25
-      hover:text-opacity-100
-      hover:opacity-100
-      #{!important};
-        }
-    }
+.button {
+    @include button('primary');
+    @include button('secondary');
+    @include button('flat');
+    @include button('danger');
 }

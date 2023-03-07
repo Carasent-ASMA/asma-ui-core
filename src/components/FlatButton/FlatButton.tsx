@@ -9,6 +9,9 @@ export type IFlatButtonProps = React.ComponentPropsWithRef<'button'> & {
     textClassName?: string
 }
 
+/**
+ * @deprecated use UnifiedButton
+ */
 export const FlatButton = forwardRef<HTMLButtonElement, IFlatButtonProps>(function FlatButton(
     { className, text, textClassName, icon, children, ...props },
     ref,

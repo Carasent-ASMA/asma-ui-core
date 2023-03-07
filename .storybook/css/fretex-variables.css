@@ -9,29 +9,31 @@
 
     --colors-beta-100: var(--colors-red-100);
     --colors-beta-500: var(--colors-red-500);
+    --colors-beta-600: var(--colors-red-600);
     --colors-beta-700: var(--colors-red-700);
 
     --colors-gama-100: var(--colors-green-100);
     --colors-gama-200: var(--colors-green-200);
     --colors-gama-300: var(--colors-green-300);
+    --colors-gama-400: var(--colors-green-400);
     --colors-gama-500: var(--colors-green-500);
     --colors-gama-600: var(--colors-green-600);
     --colors-gama-700: var(--colors-green-700);
-    --colors-gama-800: var(--colors-green-700);
+    --colors-gama-800: var(--colors-green-800);
 
-    --colors-delta-100: var(--colors-gray-100);
-    --colors-delta-200: var(--colors-gray-200);
-    --colors-delta-250: var(--colors-gray-250);
-    --colors-delta-300: var(--colors-gray-300);
-    --colors-delta-500: var(--colors-gray-500);
-    --colors-delta-700: var(--colors-gray-700);
-    --colors-delta-800: var(--colors-gray-800);
-    --colors-delta-900: var(--colors-gray-900);
+    --colors-delta-100: var(--colors-zinc-100);
+    --colors-delta-200: var(--colors-zinc-200);
+    --colors-delta-300: var(--colors-zinc-300);
+    --colors-delta-400: var(--colors-zinc-400);
+    --colors-delta-500: var(--colors-zinc-500);
+    --colors-delta-600: var(--colors-zinc-600);
+    --colors-delta-900: var(--colors-zinc-900);
+   /* should be removed in the future*/
     --colors-delta-9000: var(--colors-gray-9000);
     --colors-delta-10000: var(--colors-gray-10000);
 
-    --colors-sigma-700: var(--colors-gray-700);
-    --colors-zeta-700: var(--colors-gray-700);
+    --colors-sigma-700: var(--colors-zinc-500);
+    --colors-zeta-700: var(--colors-zinc-500);
 
     --colors-theta-100: #ffffff;
     --colors-theta-200:  var(--colors-green-200);
@@ -47,7 +49,77 @@
     --colors-btn-bg-danger: var(--colors-red-700);
     --colors-btn-bg-danger-active: var(--colors-red-500);
 
-    --colors-colors-btn-bg-mini-action: var(--colors-gray-100);
+    /* New buttons */  
+
+    /* Primary button */
+    --button-primary-text-color: var(--colors-delta-900);
+    --button-primary-bg-color: var(--colors-gama-400);
+    --button-primary-border-color: transparent;
+    --button-primary-focused-text-color: var(--colors-delta-900);
+    --button-primary-focused-bg-color: var(--colors-gama-400);
+    --button-primary-focused-border-color: var(--colors-yellow-400);
+    --button-primary-active-text-color: #ffffff;
+    --button-primary-active-bg-color: var(--colors-gama-800);
+    --button-primary-active-border-color: var(--colors-gama-800);
+    --button-primary-hover-text-color: var(--colors-delta-900);
+    --button-primary-hover-bg-color: var(--colors-gama-600);
+    --button-primary-hover-border-color: transparent;
+    --button-primary-disabled-text-color:#ffffff;
+    --button-primary-disabled-bg-color: var(--colors-zinc-200);
+    --button-primary-disabled-border-color: transparent;
+
+    /* Secondary button */
+    --button-secondary-text-color: var(--colors-delta-900);
+    --button-secondary-bg-color: transparent;
+    --button-secondary-border-color: var(--colors-gama-400);
+    --button-secondary-focused-text-color: var(--colors-delta-900);
+    --button-secondary-focused-bg-color: transparent;
+    --button-secondary-focused-border-color: var(--colors-yellow-400);
+    --button-secondary-active-text-color: #ffffff;
+    --button-secondary-active-bg-color: var(--colors-gama-800);
+    --button-secondary-active-border-color: var(--colors-gama-800);
+    --button-secondary-hover-text-color: var(--colors-delta-900);
+    --button-secondary-hover-bg-color: var(--colors-gama-600);
+    --button-secondary-hover-border-color: var(--colors-gama-600);
+    --button-secondary-disabled-text-color: #ffffff;
+    --button-secondary-disabled-bg-color: var(--colors-zinc-200);
+    --button-secondary-disabled-border-color: transparent;
+
+    /* Flat button */
+    --button-flat-text-color: var(--colors-delta-900);
+    --button-flat-bg-color: transparent;
+    --button-flat-border-color: transparent;
+    --button-flat-focused-text-color: var(--colors-delta-900);
+    --button-flat-focused-bg-color: transparent;
+    --button-flat-focused-border-color: var(--colors-yellow-400);
+    --button-flat-active-text-color: #ffffff;
+    --button-flat-active-bg-color: var(--colors-gama-800);
+    --button-flat-active-border-color: var(--colors-gama-800);
+    --button-flat-hover-text-color: var(--colors-delta-900);
+    --button-flat-hover-bg-color: var(--colors-gama-600);
+    --button-flat-hover-border-color: var(--colors-gama-600);
+    --button-flat-disabled-text-color: #ffffff;
+    --button-flat-disabled-bg-color: var(--colors-zinc-200);
+    --button-flat-disabled-border-color: transparent;
+
+    /* Danger button */
+    --button-danger-text-color: #ffffff;
+    --button-danger-bg-color: var(--colors-beta-500);
+    --button-danger-border-color: var(--colors-beta-500);
+    --button-danger-focused-text-color: #ffffff;
+    --button-danger-focused-bg-color: var(--colors-beta-600);
+    --button-danger-focused-border-color: var(--colors-beta-600);
+    --button-danger-active-text-color: #ffffff;
+    --button-danger-active-bg-color: var(--colors-beta-700);
+    --button-danger-active-border-color: var(--colors-beta-700);
+    --button-danger-hover-text-color: #ffffff;
+    --button-danger-hover-bg-color: var(--colors-beta-600);
+    --button-danger-hover-border-color: var(--colors-beta-600);
+    --button-danger-disabled-text-color: #ffffff;
+    --button-danger-disabled-bg-color: var(--colors-beta-100);
+    --button-danger-disabled-border-color: var(--colors-beta-100);
+
+    --colors-colors-btn-bg-mini-action: var(--colors-zinc-100);
     --colors-colors-btn-bg-mini-action-hover: var(--colors-gama-700);
 
     --colors-link-text-hover: var(--colors-red-700);
@@ -60,7 +132,7 @@
 
     --colors-app-directory-button-select-recipient-bg: var(--colors-slate-500);
 
-    --colors-btn-task-status-bg: var(--colors-green-150);
+    --colors-btn-task-status-bg: var(--colors-green-100);
 
     --colors-chat-ticket-message-bg: var(--colors-alpha-500);
 

@@ -1,14 +1,14 @@
 .xselect-wrapper {
-    @apply min-h-[46px] min-w-[300px] rounded-lg border-gray-700 text-base shadow-none ring-1 ring-transparent
-	hover:border-gray-700
-	focus:border-gray-700 focus:shadow-none focus:ring-transparent
-	active:border-gray-700 active:ring-transparent;
+    @apply min-h-[46px] min-w-[300px] rounded-lg border-zinc-500 text-base shadow-none ring-1 ring-transparent
+	hover:border-zinc-500
+	focus:border-zinc-500 focus:shadow-none focus:ring-transparent
+	active:border-zinc-500 active:ring-transparent;
 
     &.ant-select:not(.ant-select-customize-input) > div.ant-select-selector {
-        @apply min-h-[46px]  min-w-[300px] rounded-lg border-gray-700 text-base shadow-none ring-1 ring-transparent
-		hover:border-gray-700
-		focus:border-gray-700 focus:shadow-none focus:ring-transparent
-		active:border-gray-700 active:ring-transparent;
+        @apply min-h-[46px]  min-w-[300px] rounded-lg border-zinc-500 text-base shadow-none ring-1 ring-transparent
+		hover:border-zinc-500
+		focus:border-zinc-500 focus:shadow-none focus:ring-transparent
+		active:border-zinc-500 active:ring-transparent;
 
         .ant-select-selection-item {
             @apply flex  min-h-[46px] items-center;
@@ -41,7 +41,7 @@
 
     &.ant-select-focused {
         &.ant-select:not(.ant-select-customize-input) > div.ant-select-selector {
-            @apply min-h-[46px]  min-w-[300px] rounded-lg border-gray-700 text-base shadow-none ring-1 ring-gama-700;
+            @apply min-h-[46px]  min-w-[300px] rounded-lg border-zinc-500 text-base shadow-none ring-1 ring-gama-700;
         }
     }
 
@@ -50,7 +50,7 @@
             @apply cursor-default border-transparent text-gray-500 #{!important};
 
             input {
-                @apply cursor-default text-delta-800;
+                @apply cursor-default text-delta-600;
             }
         }
 

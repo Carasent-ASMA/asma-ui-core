@@ -9,6 +9,9 @@ export type ISecondaryButton = React.ComponentPropsWithRef<'button'> & {
     textClassName?: string
 }
 
+/**
+ * @deprecated use UnifiedButton
+ */
 export const SecondaryButton = forwardRef<HTMLButtonElement, ISecondaryButton>(function SecondaryButton(
     { icon, text, textClassName, children, className, ...props },
     ref,

@@ -1,6 +1,6 @@
 .ant-redesign {
-    @apply min-w-[200px] rounded-lg border-gray-700 text-base shadow-none ring-1 
+    @apply min-w-[200px] rounded-lg border-zinc-500 text-base shadow-none ring-1 
     ring-transparent 
-    placeholder:italic hover:border-gray-700 focus:border-gray-700
-    focus:shadow-none  focus:ring-gama-700 active:border-gray-700 active:ring-gama-700 disabled:ring-transparent #{!important};
+    placeholder:italic hover:border-zinc-500 focus:border-zinc-500
+    focus:shadow-none  focus:ring-gama-700 active:border-zinc-500 active:ring-gama-700 disabled:ring-transparent #{!important};
 }

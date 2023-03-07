@@ -5,7 +5,7 @@ import type { ComponentMeta, ComponentStory } from '@storybook/react'
 import { BasicButton as BasicButtonComponent } from './BasicButton'
 
 const meta: ComponentMeta<typeof BasicButtonComponent> = {
-    title: 'BasicButton',
+    title: 'BasicButton (deprecated)',
     parameters: {
         actions: { argTypesRegex: '^on.*' },
     },

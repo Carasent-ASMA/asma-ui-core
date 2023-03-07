@@ -5,7 +5,7 @@ import type { ComponentMeta, ComponentStory } from '@storybook/react'
 import { SecondaryButton as SecondaryButtonComponent } from './SecondaryButton'
 
 const meta: ComponentMeta<typeof SecondaryButtonComponent> = {
-    title: 'SecondaryButton',
+    title: 'SecondaryButton (deprecated)',
     parameters: {
         actions: { argTypesRegex: '^on.*' },
     },

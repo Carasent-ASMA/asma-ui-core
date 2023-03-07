@@ -10,23 +10,26 @@ module.exports = {
     // beta
     'beta-100': 'var(--colors-beta-100)',
     'beta-500': 'var(--colors-beta-500)',
+    'beta-600': 'var(--colors-beta-600)',
     'beta-700': 'var(--colors-beta-700)',
     // gama
     'gama-100': 'var(--colors-gama-100)',
     'gama-200': 'var(--colors-gama-200)',
     'gama-300': 'var(--colors-gama-300)',
+    'gama-400': 'var(--colors-gama-400)',
     'gama-500': 'var(--colors-gama-500)',
     'gama-600': 'var(--colors-gama-600)',
     'gama-700': 'var(--colors-gama-700)',
+    'gama-800': 'var(--colors-gama-800)',
     // delta
     'delta-100': 'var(--colors-delta-100)',
     'delta-200': 'var(--colors-delta-200)',
-    'delta-250': 'var(--colors-delta-250)',
     'delta-300': 'var(--colors-delta-300)',
+    'delta-400': 'var(--colors-delta-400)',
     'delta-500': 'var(--colors-delta-500)',
-    'delta-700': 'var(--colors-delta-700)',
-    'delta-800': 'var(--colors-delta-800)',
+    'delta-600': 'var(--colors-delta-600)',
     'delta-900': 'var(--colors-delta-900)',
+    // should be removed in the future
     'delta-9000': 'var(--colors-gray-9000)',
     //
     'sigma-700': 'var(--colors-sigma-700)',
@@ -38,6 +41,8 @@ module.exports = {
     'theta-400': 'var(--colors-theta-400)',
     'theta-500': 'var(--colors-theta-500)',
     'theta-600': 'var(--colors-theta-600)',
+    'theta-700': 'var(--colors-theta-700)',
+    'theta-800': 'var(--colors-theta-800)',
     // buttons
     'btn-bg': 'var(--colors-btn-bg-standart)',
     'btn-bg-active': 'var(--colors-btn-bg-active)',
