@@ -27,6 +27,8 @@ module.exports = {
     'delta-400': 'var(--colors-gray-400)',
     'delta-500': 'var(--colors-gray-500)',
     'delta-600': 'var(--colors-gray-600)',
+    'delta-700': 'var(--colors-gray-600)',
+    'delta-800': 'var(--colors-gray-600)',
     'delta-900': 'var(--colors-gray-900)',
     // should be removed in the future
     'delta-9000': 'var(--colors-gray-9000)',
