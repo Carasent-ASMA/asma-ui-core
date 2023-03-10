@@ -13,7 +13,7 @@ const Template: ComponentStory<typeof Badge> = (args) => (
     <div className={styles['module']}>
         <div className={styles['container']}>
             <Badge {...args}>
-                <Button>example</Button>
+                <Button size='small'>example</Button>
             </Badge>
             <Badge {...args} count={5}>
                 <Button>example</Button>

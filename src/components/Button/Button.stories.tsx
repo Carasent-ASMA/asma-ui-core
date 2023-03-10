@@ -1,6 +1,7 @@
 import type { ComponentMeta, ComponentStory } from '@storybook/react'
 
 import { Button as ButtonComponent } from './Button'
+import styles from './Button.stories.module.scss'
 
 export default {
     title: 'Button',
@@ -14,9 +15,14 @@ export default {
 
 const Template: ComponentStory<typeof ButtonComponent> = (args) => {
     return (
-        <ButtonComponent {...args} data-test='example-btn'>
-            <span>Primary</span>
-        </ButtonComponent>
+        <div className={styles['buttons-container']}>
+            <ButtonComponent {...args} data-test='example-btn'>
+                <span>Primary</span>
+            </ButtonComponent>
+            <ButtonComponent {...args} size='small' data-test='example-btn'>
+                <span>Primary</span>
+            </ButtonComponent>
+        </div>
     )
 }
 

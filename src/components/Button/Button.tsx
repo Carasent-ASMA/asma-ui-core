@@ -10,12 +10,17 @@ export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
     size?: 'large' | 'small'
 }
 
-export const Button = ({ btnType, className, size, children, innerRef, ...otherProps }: ButtonProps) => (
+export const Button = ({
+    btnType = 'primary',
+    className = '',
+    size = 'large',
+    children,
+    innerRef,
+    ...otherProps
+}: ButtonProps) => (
     <button
         {...otherProps}
-        className={`${styles['button']} ${btnType ? styles[btnType] : styles['primary']} ${
-            size === 'large' ? styles[size] : ''
-        } ${className || ''}`}
+        className={`${styles['button']} ${styles[btnType]} ${styles[size]} ${className}`}
         ref={innerRef}
     >
         {children}

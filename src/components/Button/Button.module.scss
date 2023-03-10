@@ -1,10 +1,10 @@
 @mixin button($type) {
     &.#{$type} {
-        @apply rounded px-4 text-base font-semibold transition duration-300 ease-in-out border;
+        @apply rounded border px-4 text-base font-semibold transition duration-300 ease-in-out;
         color: var(--colors-button-#{$type}-text-color);
         background-color: var(--colors-button-#{$type}-bg-color);
         border-color: var(--colors-button-#{$type}-border-color);
-    
+
         &:hover {
             color: var(--colors-button-#{$type}-hover-text-color);
             background-color: var(--colors-button-#{$type}-hover-bg-color);
@@ -35,6 +35,9 @@
 
     &.large {
         @apply h-10;
+    }
+    &.small {
+        @apply h-fit;
     }
 }
 
