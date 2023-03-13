@@ -37,6 +37,7 @@ import { DownloadIcon } from './download-icon'
 import { CheckBoxCheckedIcon } from './checkbox-checked-icon'
 import { CheckIcon } from './check-icon'
 import { CloseIcon } from './close-icon'
+import { PermMediaIcon } from './perm-media-icon'
 
 export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 20, width = 20 }) => {
     return (
@@ -160,6 +161,9 @@ export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 
             </div>
             <div title='MessageProcessingOutline'>
                 <MessageProcessingOutline height={height} width={width} />
+            </div>
+            <div title='PermMediaIcon'>
+                <PermMediaIcon height={height} width={height} />
             </div>
         </div>
     )

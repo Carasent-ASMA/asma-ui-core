@@ -40,7 +40,7 @@ import { ChevronDownIconStory } from './chevron-down-icon/ChevronDownIconStory'
 import { ChevronUpIconStory } from './chevron-up-icon/ChevronUpIconStory'
 import { CheckIconStory } from './check-icon/CheckIconStory'
 import { CloseIconStory } from './close-icon/CloseIconStory'
-
+import { PermMediaIconStory } from './perm-media-icon/PermMediaIconStory'
 export default {
     title: 'Icons',
     component: Icons,
@@ -78,6 +78,7 @@ export const ChevronDoubleLeft = ChevronDoubleLeftStory()
 export const ChevronDoubleRight = ChevronDoubleRightStory()
 export const Qnr = QnrIconStory()
 export const Pdf = PdfIconStory()
+export const PermMediaIcon = PermMediaIconStory()
 export const DashboardViewOutline = DashboardViewOutlineIconStory()
 export const DashboardFilled = DashboardViewIconStory()
 export const Close = CloseIconStory()
