@@ -37,6 +37,8 @@ const SelectField = <T extends TSelectCustom = TSelectCustom>({
 
     const [selectMobile, setSelectMobile] = useState(false)
 
+    const [internalValue, setInternalValue] = useState(props.value)
+
     const isErrorOrNot = () => {
         if (props.is_error) {
             return 'error'
@@ -61,7 +63,7 @@ const SelectField = <T extends TSelectCustom = TSelectCustom>({
                             onClick={() => setSelectMobile(!selectMobile)}
                         >
                             {/* @ts-ignore */}
-                            <span>{translate ? i18n[props.value] : props.value}</span>
+                            <span>{translate ? i18n[internalValue] : internalValue}</span>
                             <Icon icon='ic:outline-arrow-drop-down' inline />
                         </div>
 
@@ -69,8 +71,10 @@ const SelectField = <T extends TSelectCustom = TSelectCustom>({
                             translate={translate}
                             lists={lists}
                             placeholder={props.placeholder}
-                            value={props.value}
-                            onSelect={props.onSelect}
+                            value={internalValue}
+                            onSelect={(value) => {
+                                setInternalValue(value)
+                            }}
                             visible={selectMobile}
                             onClose={() => setSelectMobile(!selectMobile)}
                         />
@@ -81,15 +85,14 @@ const SelectField = <T extends TSelectCustom = TSelectCustom>({
                         className={clsx(styles['content'], styles['select-field'])}
                         status={isErrorOrNot()}
                         suffixIcon={<Icon icon='ic:outline-arrow-drop-down' />}
+                        value={internalValue}
                     >
-                        {lists.map((list, i) => {
-                            return (
-                                <Option key={i} value={list} enum='enum+'>
-                                    {/* @ts-ignore */}
-                                    {translate ? i18n[list] : list}
-                                </Option>
-                            )
-                        })}
+                        {lists.map((list, i) => (
+                            <Option key={i} value={list} enum='enum+'>
+                                {/* @ts-ignore */}
+                                {translate ? i18n[list] : list}
+                            </Option>
+                        ))}
                     </Select>
                 )}
             </label>
