@@ -2,7 +2,7 @@ import 'antd/dist/antd.css'
 
 import type { ComponentMeta, ComponentStory } from '@storybook/react'
 
-import SelectFieldComponent from './SelectField'
+import { SelectField as SelectFieldComponent } from './SelectField'
 
 const meta: ComponentMeta<typeof SelectFieldComponent> = {
     title: 'SelectField',

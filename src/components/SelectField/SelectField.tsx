@@ -22,7 +22,7 @@ export type TSelectCustomProps = SelectProps & {
 
 const { Option } = Select
 
-const SelectField = forwardRef<BaseSelectRef, TSelectCustomProps>((props, ref) => {
+export const SelectField = forwardRef<BaseSelectRef, TSelectCustomProps>((props, ref) => {
     const { translate, lists } = props
     const windowWidthSize = useWindowWidthSize()
     const isMobileView = mobileView(windowWidthSize)
@@ -93,5 +93,3 @@ const SelectField = forwardRef<BaseSelectRef, TSelectCustomProps>((props, ref) =
         </div>
     )
 })
-
-export default SelectField
