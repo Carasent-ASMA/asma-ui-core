@@ -39,6 +39,6 @@
     }
 
     .error-message {
-        @apply -mt-4 text-sm leading-4 text-[#ff4d4f] #{!important};
+        @apply -mt-4 mb-1 text-sm leading-4 text-[#ff4d4f] #{!important};
     }
 }

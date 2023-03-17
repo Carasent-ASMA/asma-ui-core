@@ -1,8 +1,8 @@
 import { Icon } from '@iconify/react'
-import { type InputProps, Input } from 'antd'
+import { type InputProps, Input, type InputRef } from 'antd'
 import { clsx } from 'clsx'
 import { omit } from 'lodash-es'
-import type { FC } from 'react'
+import React, { forwardRef } from 'react'
 
 import { i18n } from '../helpers/i18n'
 import styles from './InputField.module.scss'
@@ -13,7 +13,7 @@ export enum IconPositionEnum {
     Both = 'both',
 }
 
-export interface InputField extends InputProps {
+type CustomInputProps = InputProps & {
     icon_style?: string
     icon?: string
     label?: string
@@ -23,13 +23,7 @@ export interface InputField extends InputProps {
     iconPosition?: IconPositionEnum
 }
 
-/**
- * @deprecated use PrimaryInputField
- */
-export const InputField: FC<InputField> = (
-    props,
-    { iconPosition = IconPositionEnum.Prefix }: { iconPosition: IconPositionEnum },
-) => {
+export const InputField = forwardRef<InputRef, CustomInputProps>((props, ref) => {
     const isErrorOrNot = () => {
         if (props.is_error) {
             return 'error'
@@ -48,14 +42,17 @@ export const InputField: FC<InputField> = (
                 {props.label && <span className={styles['text-label']}>{props.label}</span>}
                 <Input
                     placeholder={i18n.write_something}
-                    {...((iconPosition === IconPositionEnum.Prefix || iconPosition === IconPositionEnum.Both) && {
+                    {...((props.iconPosition === IconPositionEnum.Prefix ||
+                        props.iconPosition === IconPositionEnum.Both) && {
                         prefix: <Icon icon={props.icon ?? ''} className={clsx('text-xl', props.icon_style)} />,
                     })}
-                    {...((iconPosition === IconPositionEnum.Suffix || iconPosition === IconPositionEnum.Both) && {
+                    {...((props.iconPosition === IconPositionEnum.Suffix ||
+                        props.iconPosition === IconPositionEnum.Both) && {
                         suffix: <Icon icon={props.icon ?? ''} className={clsx('text-xl', props.icon_style)} />,
                     })}
                     {...omit(props, 'is_warning', 'iconPosition', 'is_error', 'error')}
                     status={isErrorOrNot()}
+                    ref={ref}
                 />
             </label>
             {isErrorOrNot() && (
@@ -63,4 +60,4 @@ export const InputField: FC<InputField> = (
             )}
         </div>
     )
-}
+})

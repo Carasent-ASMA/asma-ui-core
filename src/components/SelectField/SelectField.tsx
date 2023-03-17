@@ -1,16 +1,16 @@
 import { Icon } from '@iconify/react'
-import { type SelectProps, Select } from 'antd'
-import type { SelectValue } from 'antd/lib/select'
-import { clsx } from 'clsx'
+import { Select } from 'antd'
+import type { SelectProps } from 'antd/es/select'
+import clsx from 'clsx'
 import { omit } from 'lodash-es'
-import { useState } from 'react'
+import React, { forwardRef, useState } from 'react'
+import type { BaseSelectRef } from 'rc-select'
 
-import { mobileView, useWindowWidthSize } from '../helpers/hooks/useWindowWidthSize.hook'
-import { i18n } from '../helpers/i18n'
 import styles from './SelectField.module.scss'
 import { SelectOptionsMobile } from './SelectOptionsMobile'
+import { mobileView, useWindowWidthSize } from '../helpers/hooks/useWindowWidthSize.hook'
+import { i18n } from '../helpers/i18n'
 
-type TSelectCustom = SelectValue & { lists: string[]; translate?: boolean; label?: string }
 export type TSelectCustomProps = SelectProps & {
     lists: string[]
     translate?: boolean
@@ -18,26 +18,16 @@ export type TSelectCustomProps = SelectProps & {
     error?: string
     is_error?: boolean
     is_warning?: boolean
-    background?: string
 }
 
 const { Option } = Select
 
-/**
- * @deprecated use PrimarySelectField or PrimarySelectFieldMobile
- */
-const SelectField = <T extends TSelectCustom = TSelectCustom>({
-    lists,
-    translate = false,
-    background = '',
-    ...props
-}: TSelectCustomProps) => {
+const SelectField = forwardRef<BaseSelectRef, TSelectCustomProps>((props, ref) => {
+    const { translate, lists } = props
     const windowWidthSize = useWindowWidthSize()
     const isMobileView = mobileView(windowWidthSize)
 
     const [selectMobile, setSelectMobile] = useState(false)
-
-    const [internalValue, setInternalValue] = useState(props.value)
 
     const isErrorOrNot = () => {
         if (props.is_error) {
@@ -59,40 +49,41 @@ const SelectField = <T extends TSelectCustom = TSelectCustom>({
                 {isMobileView ? (
                     <>
                         <div
-                            className={`flex h-10 items-center justify-between overflow-hidden rounded-md border border-custom-grey-04 px-4 text-base ${background}`}
+                            className={
+                                'flex h-10 items-center justify-between overflow-hidden rounded-md border border-custom-grey-04 px-4 text-base'
+                            }
                             onClick={() => setSelectMobile(!selectMobile)}
                         >
-                            {/* @ts-ignore */}
-                            <span>{translate ? i18n[internalValue] : internalValue}</span>
-                            <Icon icon='ic:outline-arrow-drop-down' inline />
+                            <span>{translate ? i18n[props.value as keyof typeof i18n] : props.value}</span>
+                            <span className={'text-2xl opacity-40'}>
+                                <Icon icon={'ic:baseline-keyboard-arrow-down'} />
+                            </span>
                         </div>
 
                         <SelectOptionsMobile
                             translate={translate}
                             lists={lists}
                             placeholder={props.placeholder}
-                            value={internalValue}
-                            onSelect={(value) => {
-                                setInternalValue(value)
-                            }}
+                            value={props.value}
+                            onSelect={props.onSelect}
                             visible={selectMobile}
                             onClose={() => setSelectMobile(!selectMobile)}
                         />
                     </>
                 ) : (
-                    <Select<T>
+                    <Select
                         {...omit(props, 'lists', 'translate', 'is_warning', 'is_error', 'error')}
-                        className={clsx(styles['content'], styles['select-field'])}
+                        className={clsx(styles['content'], 'select-field')}
                         status={isErrorOrNot()}
-                        suffixIcon={<Icon icon='ic:outline-arrow-drop-down' />}
-                        value={internalValue}
+                        ref={ref}
                     >
-                        {lists.map((list, i) => (
-                            <Option key={i} value={list} enum='enum+'>
-                                {/* @ts-ignore */}
-                                {translate ? i18n[list] : list}
-                            </Option>
-                        ))}
+                        {lists.map((list, i) => {
+                            return (
+                                <Option key={i} value={list}>
+                                    {translate ? i18n[list as keyof typeof i18n] : list}
+                                </Option>
+                            )
+                        })}
                     </Select>
                 )}
             </label>
@@ -101,6 +92,6 @@ const SelectField = <T extends TSelectCustom = TSelectCustom>({
             )}
         </div>
     )
-}
+})
 
-export { SelectField }
+export default SelectField

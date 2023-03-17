@@ -2,7 +2,7 @@ import 'antd/dist/antd.css'
 
 import type { ComponentMeta, ComponentStory } from '@storybook/react'
 
-import { SelectField as SelectFieldComponent } from './SelectField'
+import SelectFieldComponent from './SelectField'
 
 const meta: ComponentMeta<typeof SelectFieldComponent> = {
     title: 'SelectField',
@@ -24,5 +24,4 @@ SelectField.args = {
     error: 'Error',
     is_error: false,
     is_warning: false,
-    background: '',
 }
