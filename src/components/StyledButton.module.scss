@@ -1,0 +1,6 @@
+.focusVisible{
+    @apply bg-red-50 mt-3;
+}
+.containedPrimary {
+    @apply normal-case bg-primary-main hover:bg-primary-700 active:bg-primary-dark;
+}

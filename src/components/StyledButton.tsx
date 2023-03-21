@@ -2,6 +2,7 @@
 import { Button, ButtonProps } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import grey from '@mui/material/colors/grey'
+import style from './StyledButton.module.scss'
 
 export const StyledButton = styled((props: ButtonProps) => <Button {...props} disableRipple />)`
     text-transform: none;
@@ -28,11 +29,12 @@ export const StyledButton = styled((props: ButtonProps) => <Button {...props} di
 
 export const TailwindStyledButton = styled((props: ButtonProps) => (
     <Button
-        {...props}
         disableRipple
         classes={{
+            focusVisible: style.focusVisible,
             containedPrimary: 'normal-case bg-primary-main hover:bg-primary-700 active:bg-primary-dark',
             disabled: 'bg-gray-400 text-gray-50',
         }}
+        {...props}
     />
 ))``
