@@ -15,14 +15,15 @@ export default defineConfig({
         dts({
             insertTypesEntry: true,
             include: 'src',
+            skipDiagnostics: false,
         }),
     ],
     build: {
         lib: {
             entry: resolve('src', 'index.ts'),
-            name: 'asma-antrd',
+            name: 'asma-antrd-v3',
             formats: ['es'],
-            fileName: (format) => `asma-antrd.${format}.js`,
+            fileName: (format) => `asma-antrd-v3.${format}.js`,
         },
         rollupOptions: {
             external: [...Object.keys(packageJson.peerDependencies)],

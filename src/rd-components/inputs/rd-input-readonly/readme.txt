@@ -1,1 +1,0 @@
-# for artifact presenter adcuris
