@@ -1,3 +1,5 @@
+import './../styles/index.scss'
+
 const customPalettes = {
     jade: {
         primary: {
