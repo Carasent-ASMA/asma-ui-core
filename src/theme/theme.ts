@@ -21,8 +21,6 @@ const theme = {
             dark: teal[900],
             contrastText: '#fff',
         },
-        // primaryPalette: {
-        // },
         error: {
             main: 'rgb(176, 0, 32)', // = '#b00020',
             light: '#ffaaaa',
@@ -107,22 +105,9 @@ declare module '@mui/material/styles' {
                 main: string
                 dark: string
             }
-            // primaryPalette: {
-            //     [key: string]: Partial<Color>
-            // }[]
             success: SimplePaletteColorOptions
             warning: SimplePaletteColorOptions
             error: SimplePaletteColorOptions
         }
     }
-    // interface Palette {
-    //     primaryPalette: {
-    //         [key: string]: Partial<Color>
-    //     }[]
-    // }
-    // interface PaletteOptions {
-    //     primaryPalette: {
-    //         [key: string]: Partial<Color>
-    //     }[]
-    // }
 }
