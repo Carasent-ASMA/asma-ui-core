@@ -9,9 +9,28 @@
 
 ```tsx
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-import { theme } from 'asma-antrd-v3';
+import { defaultTheme, customPalettes } from 'asma-antrd-v3';
 
-...
+const dataTheme = window.document.body.attributes.getNamedItem('data-theme');
+
+const getTheme = () => {
+  switch (dataTheme?.value) {
+    case 'fretex':
+      return customPalettes.fretex.primary;
+    default:
+      return null;
+  }
+};
+
+const theme = createTheme(defaultTheme, {
+  palette: {
+    ...defaultTheme.palette,
+    primary: {
+      ...getTheme(),
+    },
+    role: customPalettes.role,
+  },
+});
 
 <React.Fragment>
   <ThemeProvider theme={createMuiTheme(theme)}>
