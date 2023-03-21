@@ -36,8 +36,3 @@ export const TailwindStyledButton = styled((props: ButtonProps) => (
         }}
     />
 ))``
-
-export const StyledButtonExample = styled((props: ButtonProps) => <Button {...props} />)`
-    color: blue;
-    background-color: ${(props) => props.theme.palette.primary[500]};
-`
