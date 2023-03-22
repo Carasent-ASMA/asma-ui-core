@@ -1,21 +1,21 @@
 import type { SimplePaletteColorOptions } from '@mui/material'
 import { teal } from '@mui/material/colors'
 // Required for the create-index automation to work
-import './../styles/index.scss'
+import './../styles/index.css'
 
 const theme = {
     palette: {
         primary: {
-            50: teal[50],
-            100: teal[100],
-            200: teal[200],
-            300: teal[300],
-            400: teal[400],
-            500: teal[500],
-            600: teal[600],
-            700: teal[700],
-            800: teal[800],
-            900: teal[900],
+            50: 'var(--colors-primary-50)',
+            100: 'var(--colors-primary-100)',
+            200: 'var(--colors-primary-200)',
+            300: 'var(--colors-primary-300)',
+            400: 'var(--colors-primary-400)',
+            500: 'var(--colors-primary-500)',
+            600: 'var(--colors-primary-600)',
+            700: 'var(--colors-primary-700)',
+            800: 'var(--colors-primary-800)',
+            900: 'var(--colors-primary-900)',
             light: teal[50],
             main: teal[600],
             dark: teal[900],

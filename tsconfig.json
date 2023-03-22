@@ -6,7 +6,7 @@
         "paths": {
             "*": ["*"],
             "@": ["src/*"],
-            "asma-antrd": ["src/index.ts"]
+            "asma-core-ui": ["src/index.ts"]
         },
         "target": "ESNext",
         "useDefineForClassFields": true,
@@ -41,6 +41,13 @@
         "importsNotUsedAsValues": "preserve",
         "useUnknownInCatchVariables": false
     },
-    "exclude": ["dist"],
-    "include": ["tailwind.config.cjs", "src/**/*.ts", "src/**/*.tsx", "vite.config.ts", "package.json"]
+    "exclude": ["dist", "node_modules"],
+    "include": [
+        "tailwind.config.cjs",
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "vite.config.ts",
+        "package.json",
+        "src/styles/**/*.json"
+    ]
 }

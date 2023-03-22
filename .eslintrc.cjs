@@ -9,6 +9,7 @@ module.exports = {
     extends: [
         'eslint:recommended',
         'plugin:react/recommended',
+        'plugin:react/jsx-runtime',
         'plugin:@typescript-eslint/recommended',
         'plugin:import/errors',
         'plugin:import/warnings',
@@ -53,5 +54,10 @@ module.exports = {
         '@typescript-eslint/no-empty-function': 'off',
         'react/no-unknown-property': 'off',
         'react/no-unescaped-entities ': 'off',
+    },
+    settings: {
+        react: {
+            version: 'detect',
+        },
     },
 }

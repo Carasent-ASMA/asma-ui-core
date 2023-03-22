@@ -1,0 +1,8 @@
+@import 'color-variables/rootVariables.css';
+@import 'color-variables/defaultTokens.css';
+@import 'color-variables/fretexTokens.css';
+@import 'color-variables/jadeTokens.css';
+/* let use base from MUI */
+/* @tailwind base; */
+@tailwind components;
+@tailwind utilities;

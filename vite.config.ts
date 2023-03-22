@@ -4,6 +4,7 @@ import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
 import tsConfigPaths from 'vite-tsconfig-paths'
 import * as packageJson from './package.json'
+import rollupTs from 'rollup-plugin-typescript2'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -12,18 +13,31 @@ export default defineConfig({
             jsxRuntime: 'automatic',
         }),
         tsConfigPaths(),
-        dts({
-            insertTypesEntry: true,
-            include: 'src',
-            skipDiagnostics: false,
-        }),
+        // dts({
+        //     insertTypesEntry: true,
+        //     include: 'src',
+        //     skipDiagnostics: false,
+        // }),
+        dts({ insertTypesEntry: true }),
+        // only for type checking
+        {
+            ...rollupTs({
+                check: true,
+                tsconfig: './tsconfig.json',
+                tsconfigOverride: {
+                    noEmits: true,
+                },
+            }),
+            // run before build
+            enforce: 'pre',
+        },
     ],
     build: {
         lib: {
             entry: resolve('src', 'index.ts'),
-            name: 'asma-antrd-v3',
+            name: 'asma-core-ui',
             formats: ['es'],
-            fileName: (format) => `asma-antrd-v3.${format}.js`,
+            fileName: (format) => `asma-core-ui.${format}.js`,
         },
         rollupOptions: {
             external: [...Object.keys(packageJson.peerDependencies)],

@@ -3,13 +3,13 @@
 ## Create index
 
 - ctix is used for automatically create index files for exporting componens. Run "npm run create-index"
-- 'src/styles/index.scss' is imported to 'src/theme/customMuiColors.ts' so exporting works with ctix.
+- 'src/styles/index.ccss' is imported to 'src/theme/customMuiColors.ts' so exporting works with ctix.
 
 ## Using MUI theme in App
 
 ```tsx
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-import { defaultTheme, customPalettes } from 'asma-antrd-v3';
+import { defaultTheme, customPalettes } from 'asma-core-ui';
 
 const dataTheme = window.document.body.attributes.getNamedItem('data-theme');
 
@@ -42,7 +42,7 @@ const theme = createTheme(defaultTheme, {
 ## Using Components in App
 
 ```tsx
-import { StyledButton } from 'asma-antrd-v3';
+import { StyledButton } from 'asma-core-ui';
 
 ...
 
