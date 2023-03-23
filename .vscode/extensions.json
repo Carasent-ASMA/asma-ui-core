@@ -1,0 +1,13 @@
+{
+    "recommendations": [
+        "eamodio.gitlens",
+        "bradlc.vscode-tailwindcss",
+        "dbaeumer.vscode-eslint",
+        "formulahendry.auto-rename-tag",
+        "IronGeek.vscode-env",
+        "stylelint.vscode-stylelint",
+        "esbenp.prettier-vscode",
+        "ZainChen.json",
+        "Gruntfuggly.todo-tree"
+    ]
+}

@@ -9,7 +9,7 @@ import '@fontsource/material-icons'
 import { createTheme, CssBaseline, ThemeProvider } from '@mui/material'
 import { withThemeFromJSXProvider } from '@storybook/addon-styling'
 import defaultTheme from '../src/theme/theme'
-// import customColors from '../src/theme/customMuiColors'
+import customColors from '../src/theme/customMuiColors'
 import { useEffect, useGlobals } from '@storybook/addons'
 
 export const parameters = {
@@ -33,28 +33,28 @@ export const useTheme = (StoryFn) => {
 }
 
 const theme = createTheme(defaultTheme)
-// const fretex = createTheme(defaultTheme, {
-//     palette: {
-//         primary: {
-//             ...customColors.fretex.primary,
-//         },
-//     },
-// })
-// const greenish = createTheme(defaultTheme, {
-//     palette: {
-//         primary: {
-//             ...customColors.fretex.primary,
-//         },
-//     },
-// })
+const fretex = createTheme(defaultTheme, {
+    palette: {
+        primary: {
+            ...customColors.fretex.primary,
+        },
+    },
+})
+const greenish = createTheme(defaultTheme, {
+    palette: {
+        primary: {
+            ...customColors.greenish.primary,
+        },
+    },
+})
 
 export const decorators = [
     useTheme,
     withThemeFromJSXProvider({
         themes: {
             default: theme,
-            fretex: theme,
-            greenish: theme,
+            fretex,
+            greenish,
         },
         defaultTheme: 'default',
         Provider: ThemeProvider,
