@@ -3,10 +3,11 @@ import type { ComponentStory, ComponentMeta } from '@storybook/react'
 // import { Experimental_CssVarsProvider as CssVarsProvider } from '@mui/material/styles'
 import { StyledButton } from './StyledButton'
 import { CircularProgress, Stack } from '@mui/material'
+import VisibilityOff from '@mui/icons-material/VisibilityOff'
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
-    title: 'Atoms/Button',
+    title: 'Inputs/Button',
     component: StyledButton,
     // More on argTypes: https://storybook.js.org/docs/react/api/argtypes
 } as ComponentMeta<typeof StyledButton>
@@ -15,6 +16,9 @@ export default {
 const Template: ComponentStory<typeof StyledButton> = (args) => (
     <Stack direction='row' spacing={2}>
         <StyledButton {...args}>{args.variant}styledButton</StyledButton>
+        <StyledButton {...args} startIcon={<VisibilityOff />}>
+            {args.variant} with icon
+        </StyledButton>
         <StyledButton {...args} startIcon={<CircularProgress size={24} style={{ color: 'inherit' }} />}>
             {args.variant} circularprogress
         </StyledButton>

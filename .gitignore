@@ -29,3 +29,5 @@ tsconfig.tsbuildinfo
 .dccache
 
 *.bak
+
+storybook-static

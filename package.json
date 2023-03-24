@@ -1,7 +1,7 @@
 {
     "name": "asma-core-ui",
     "private": false,
-    "version": "0.0.1",
+    "version": "1.0.0",
     "type": "module",
     "files": [
         "dist/**/*",
@@ -27,10 +27,12 @@
     },
     "license": "UNLICENSED",
     "dependencies": {
+        "@changesets/cli": "^2.26.1",
         "@emotion/react": "^11.10.6",
         "@emotion/styled": "^11.10.6",
         "@fontsource/material-icons": "^4.5.4",
         "@fontsource/roboto": "^4.5.8",
+        "@mui/icons-material": "^5.11.11",
         "@mui/material": "^5.11.13",
         "@storybook/addon-styling": "^0.3.1",
         "@storybook/addons": "^6.5.16",
