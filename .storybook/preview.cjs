@@ -13,53 +13,53 @@ import customColors from '../src/theme/customMuiColors'
 import { useEffect, useGlobals } from '@storybook/addons'
 
 export const parameters = {
-    actions: { argTypesRegex: '^on[A-Z].*' },
-    controls: {
-        matchers: {
-            color: /(background|color)$/i,
-            date: /Date$/,
-        },
+  actions: { argTypesRegex: '^on[A-Z].*' },
+  controls: {
+    matchers: {
+      color: /(background|color)$/i,
+      date: /Date$/,
     },
+  },
 }
 
 export const useTheme = (StoryFn) => {
-    const [globals] = useGlobals()
-
-    useEffect(() => {
-        document.body.setAttribute('data-theme', globals.theme)
-    }, [globals])
-
-    return StoryFn()
+  const [ globals ] = useGlobals()
+  
+  useEffect(() => {
+    document.body.setAttribute('data-theme', globals.theme)
+  }, [ globals ])
+  
+  return StoryFn()
 }
 
 const theme = createTheme(defaultTheme)
 const fretex = createTheme(defaultTheme, {
-    palette: {
-        primary: {
-            ...customColors.fretex.primary,
-        },
+  palette: {
+    primary: {
+      ...customColors.fretex.primary,
     },
+  },
 })
 const greenish = createTheme(defaultTheme, {
-    palette: {
-        primary: {
-            ...customColors.greenish.primary,
-        },
+  palette: {
+    primary: {
+      ...customColors.greenish.primary,
     },
+  },
 })
 
 export const decorators = [
-    useTheme,
-    withThemeFromJSXProvider({
-        themes: {
-            default: theme,
-            fretex,
-            greenish,
-        },
-        defaultTheme: 'default',
-        Provider: ThemeProvider,
-        GlobalStyles: CssBaseline,
-    }),
+  useTheme,
+  withThemeFromJSXProvider({
+    themes: {
+      default: theme,
+      fretex,
+      greenish,
+    },
+    defaultTheme: 'default',
+    Provider: ThemeProvider,
+    GlobalStyles: CssBaseline,
+  }),
 ]
 
 // export const globalTypes = {
