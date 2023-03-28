@@ -27,11 +27,12 @@ const Template: ComponentStory<typeof StyledDialog> = (args) => {
     )
 }
 
-export const Default = Template.bind({})
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
+export const Default = Template.bind({
+    open: true,
+})
 Default.args = {
     title: 'The modal title',
-    open: false,
+    open: true,
     onClose: () => {},
     childrenActions: (
         <>

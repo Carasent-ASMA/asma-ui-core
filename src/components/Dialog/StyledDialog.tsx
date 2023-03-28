@@ -9,7 +9,7 @@ import clsx from 'clsx'
 import type { PropsWithChildren, ReactNode } from 'react'
 import { omit } from 'lodash-es'
 
-interface IStyledDialogProps extends Omit<DialogProps, 'onClose'> {
+export interface IStyledDialogProps extends Omit<DialogProps, 'onClose'> {
     title: string
     onClose: (event: object, reason: 'backdropClick' | 'escapeKeyDown' | 'closeButtonClick') => void
     onCloseText?: string
