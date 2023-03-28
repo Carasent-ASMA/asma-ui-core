@@ -1,1 +1,1 @@
-export * from './StyledButton'
+export * from './Dialog/StyledDialog'
