@@ -1,0 +1,8 @@
+.actions {
+    @apply my-2 flex justify-end space-x-4;
+    
+    > * {
+        @apply my-2 flex justify-end space-x-4;
+    }
+}
+

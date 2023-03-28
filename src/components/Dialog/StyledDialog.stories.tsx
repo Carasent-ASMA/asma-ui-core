@@ -33,11 +33,12 @@ export const Default = Template.bind({
 Default.args = {
     title: 'The modal title',
     open: true,
+
     onClose: () => {},
     childrenActions: (
-        <>
+        <div>
             <Button variant={'contained'}>Save</Button>
             <Button>Edit</Button>
-        </>
+        </div>
     ),
 }
