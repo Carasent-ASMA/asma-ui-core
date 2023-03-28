@@ -6,11 +6,13 @@ import type { DialogContentProps } from '@mui/material/DialogContent/DialogConte
 import { styled } from '@mui/material/styles'
 import { Icon } from '@iconify/react'
 import clsx from 'clsx'
+import { omit } from 'lodash'
+
+import style from './StyledDialog.module.scss'
 import type { PropsWithChildren, ReactNode } from 'react'
-import { omit } from 'lodash-es'
 
 export interface IStyledDialogProps extends Omit<DialogProps, 'onClose'> {
-    title: string
+    title?: string
     onClose: (event: object, reason: 'backdropClick' | 'escapeKeyDown' | 'closeButtonClick') => void
     onCloseText?: string
     childrenActions?: ReactNode
@@ -24,22 +26,23 @@ export const StyledDialog = styled((props: IStyledDialogProps) => {
                 zIndex: 999,
             }}
         >
-            <div className={clsx('w-full max-w-[37.5rem] p-6 sm:min-w-[20rem] md:min-w-[37.5rem]')}>
-                <div className={' flex justify-end'}>
+            <div className={clsx('w-full max-w-[37.5rem] p-4 sm:min-w-[20rem] md:min-w-[37.5rem]')}>
+                <div className={'mb-2 flex justify-end'}>
                     <div
                         className={'flex cursor-pointer items-center space-x-1.5 hover:opacity-50'}
                         onClick={(event) => props.onClose(event, 'escapeKeyDown')}
                     >
-                        <span className={'text-xs'}>{props.onCloseText || 'Close'}</span>
+                        <span className={'text-xs'}>{props.onCloseText?.length ? props.onCloseText : 'Close'}</span>
                         <Icon icon={'ic:baseline-close'} className={'text-2xl'} />
                     </div>
                 </div>
+                <div className={'px-4'}>
+                    <DialogTitleContainer>{props.title}</DialogTitleContainer>
 
-                <DialogTitleContainer>{props.title}</DialogTitleContainer>
+                    <DialogContentContainer>{props.children}</DialogContentContainer>
 
-                <DialogContentContainer>{props.children}</DialogContentContainer>
-
-                <DialogActionsContainer> {props.childrenActions} </DialogActionsContainer>
+                    <DialogActionsContainer> {props.childrenActions}</DialogActionsContainer>
+                </div>
             </div>
         </Dialog>
     )
@@ -47,6 +50,9 @@ export const StyledDialog = styled((props: IStyledDialogProps) => {
 
 const DialogTitleContainer = styled((props: DialogTitleProps) => {
     const { children, ...other } = props
+
+    if (!children) return null
+
     return (
         <DialogTitle
             {...other}
@@ -63,6 +69,9 @@ const DialogTitleContainer = styled((props: DialogTitleProps) => {
 
 const DialogContentContainer = styled((props: DialogContentProps) => {
     const { children, ...other } = props
+
+    if (!children) return null
+
     return (
         <DialogContent
             {...other}
@@ -79,8 +88,12 @@ const DialogContentContainer = styled((props: DialogContentProps) => {
 
 const DialogActionsContainer = styled((props: PropsWithChildren) => {
     return (
-        <DialogActions>
-            <div className={'-mx-2 flex justify-end space-x-4'}>{props.children}</div>
+        <DialogActions
+            classes={{
+                root: 'p-0 m-0',
+            }}
+        >
+            <div className={clsx(style['actions'])}>{props.children}</div>
         </DialogActions>
     )
 })``
