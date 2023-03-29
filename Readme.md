@@ -4,6 +4,8 @@
 
 - When creating components that consists of several components, each component should be styled.
 - Each components that is used to create a "composed" component should be styled, and remember to check if the component alread is styled.
+- When creating a "composed component" evalute if it's really needed to create a composed component, or just document how to use the styled components.
+  - MUI often has documentation on how to create composed components.
 
 ## Documentation and testing
 
