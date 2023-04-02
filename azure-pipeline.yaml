@@ -40,9 +40,12 @@ jobs:
       # Publish the package using Changesets
       npx @changesets/cli publish
 
-      VERSION=$(npm run version --silent --prefix apps/eme-frontend)
+      VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | awk '{$1=$1};1' | sed 's/[",]//g')
+      LASTCOMMIT=$(git rev-parse --short HEAD)
       # Commit changes
-      git add .
-      git commit -m "[skip ci] Version - ${VERSION}"
-      git push origin main
+      git config --global user.email "no-reply@carasent.com"
+      git config --global user.name "npx changeset"
+      git remote set-url origin 'https://dev.azure.com/avanssoma/Arbeidoginkludering/_git/asma-core-ui'
+      git tag -a "v${VERSION}" "${LASTCOMMIT}" -m "Version - ${VERSION}"
+      git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" push --tag
     displayName: 'Bump version and publish package'
