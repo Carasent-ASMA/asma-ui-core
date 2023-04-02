@@ -8,11 +8,10 @@ trigger:
 
 pool:
   vmImage: 'ubuntu-latest'
-
+variables:
+    - group: common-vg
 jobs:
 - job: Release_new_version
-  variables:
-    - group: common-vg
   steps:
   - task: NodeTool@0
     displayName: 'Install Node.js'
