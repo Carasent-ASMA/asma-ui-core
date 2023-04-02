@@ -1,0 +1,49 @@
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - .changeset/*.md
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+jobs:
+- job: Release_new_version
+  variables:
+    - group: common-vg
+  steps:
+  - task: NodeTool@0
+    displayName: 'Install Node.js'
+    inputs:
+      versionSpec: '18.x'
+
+  - checkout: self
+    persistCredentials: true
+
+  - script: |
+      # Rename package.json
+      mv package.json package_old.json
+
+      # Install Changeset CLI
+      npm install @changesets/cli --no-save --no-package-lock
+
+      # Rename package_old.json to package.json
+      mv package_old.json package.json
+
+      # Bump version and create changelog with Changeset
+      npx @changesets/cli --version
+
+      # Log in to npm
+      echo "//registry.npmjs.org/:_authToken=${{ parameters.npm-token }}" > .npmrc
+
+      # Publish the package using Changesets
+      npx @changesets/cli publish
+
+      VERSION=$(npm run version --silent --prefix apps/eme-frontend)
+      # Commit changes
+      git add .
+      git commit -m "[skip ci] Version - ${VERSION}"
+      git push origin main
+    displayName: 'Bump version and publish package'
