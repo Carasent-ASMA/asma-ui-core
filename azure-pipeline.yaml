@@ -35,7 +35,7 @@ jobs:
       npx @changesets/cli --version
 
       # Log in to npm
-      echo "//registry.npmjs.org/:_authToken=${{ parameters.npm-token }}" > .npmrc
+      echo "//registry.npmjs.org/:_authToken=$(npm-token)" > .npmrc
 
       # Publish the package using Changesets
       npx @changesets/cli publish
