@@ -38,6 +38,7 @@ export const StyledButton = styled((props: ButtonProps) => (
             focusVisible: `${props.variant === 'contained' && 'bg-primary-700 shadow-[0_0_0_3px] shadow-primary-400'} ${
                 props.variant === 'outlined' && 'bg-primary-100 text-primary-dark'
             }}`,
+            text: 'normal-case',
         }}
     />
 ))``

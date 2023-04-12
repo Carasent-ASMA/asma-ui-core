@@ -1,8 +1,11 @@
 import React from 'react'
 import type { ComponentMeta, ComponentStory } from '@storybook/react'
 
-import { Button, Stack } from '@mui/material'
 import { StyledDialog } from './StyledDialog'
+import { StyledDialogActions } from './StyledDialogActions'
+import { StyledDialogContent } from './StyledDialogContent'
+import { StyledDialogTitle } from './StyledDialogTitle'
+import { StyledButton } from '../inputs'
 
 export default {
     title: 'Dialog',
@@ -10,10 +13,20 @@ export default {
 } as ComponentMeta<typeof StyledDialog>
 
 const Template: ComponentStory<typeof StyledDialog> = (args) => {
+    const [open, setOpen] = React.useState(true)
+
+    const handleCloseModal = () => {
+        setOpen(false)
+    }
+
     return (
-        <Stack direction='row' spacing={2}>
-            <StyledDialog {...args}>
-                <div>
+        <React.Fragment>
+            <StyledButton onClick={() => setOpen(true)} variant='contained'>
+                Open
+            </StyledButton>
+            <StyledDialog {...args} onCloseText='Close' open={open} onClose={handleCloseModal}>
+                <StyledDialogTitle>{args.title}</StyledDialogTitle>
+                <StyledDialogContent>
                     Lorem ipsum dolor sit amet consectetur adipiscing elit placerat, habitasse justo eros suspendisse
                     aptent eleifend dis ultrices duis, facilisis laoreet proin varius magna neque vulputate. Ligula
                     sociosqu sociis penatibus non iaculis, himenaeos volutpat cubilia netus feugiat, interdum leo enim
@@ -21,9 +34,17 @@ const Template: ComponentStory<typeof StyledDialog> = (args) => {
                     suspendisse aptent eleifend dis ultrices duis, facilisis laoreet proin varius magna neque vulputate.
                     Ligula sociosqu sociis penatibus non iaculis, himenaeos volutpat cubilia netus feugiat, interdum leo
                     enim mi.
-                </div>
+                </StyledDialogContent>
+                <StyledDialogActions>
+                    <StyledButton variant='contained' onClick={handleCloseModal}>
+                        Save
+                    </StyledButton>
+                    <StyledButton variant='outlined' onClick={handleCloseModal}>
+                        Abort
+                    </StyledButton>
+                </StyledDialogActions>
             </StyledDialog>
-        </Stack>
+        </React.Fragment>
     )
 }
 
@@ -35,10 +56,4 @@ Default.args = {
     open: true,
 
     onClose: () => {},
-    childrenActions: (
-        <div>
-            <Button variant={'contained'}>Save</Button>
-            <Button>Edit</Button>
-        </div>
-    ),
 }
