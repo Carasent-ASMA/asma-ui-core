@@ -18,6 +18,7 @@
         "build": "tsc && rm -rf ./dist && vite build",
         "preview": "vite preview",
         "lint": "eslint src/**/*.{js,jsx,ts,tsx}",
+        "version": "echo $npm_package_version",
         "lint:fix": "eslint --fix src/**/*.{jsx,ts,tsx}",
         "prettier": "prettier --write src//**/*.{ts,tsx,scss} --config ./.prettierrc",
         "storybook": "start-storybook -p 6006",
