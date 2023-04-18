@@ -11,6 +11,16 @@
 
 - All components shall be documented and tested in Storybook before PR is created.
 
+## Changelog
+
+The project uses "changesets" to automatically bump version and create a changelog.
+
+For each new feature or change run "npx changeset". Choose patch for a change or bug fix, minor for a new feature or major version for a breaking change. This creates a markdown file in .changeset folder. Commit to brach/PR as normal.
+
+A PR can have several changesets.
+
+The pipeline will automatically bump version and create changelog after merge to master.
+
 ## Index file
 
 - Index files shall not be edited manually.
