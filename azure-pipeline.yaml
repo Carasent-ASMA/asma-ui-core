@@ -1,7 +1,7 @@
 trigger:
   branches:
     include:
-      - main
+      - master
   paths:
     include:
       - .changeset/*.md
@@ -32,7 +32,7 @@ jobs:
       mv package_old.json package.json
 
       # Bump version and create changelog with Changeset
-      npx @changesets/cli --version
+      npx @changesets/cli -- version
 
       # Log in to npm
       echo "//registry.npmjs.org/:_authToken=$(npm-token)" > .npmrc
@@ -40,12 +40,13 @@ jobs:
       # Publish the package using Changesets
       npx @changesets/cli publish
 
-      VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | awk '{$1=$1};1' | sed 's/[",]//g')
-      LASTCOMMIT=$(git rev-parse --short HEAD)
       # Commit changes
+      VERSION=$(npm run version --silent)
+      LASTCOMMIT=$(git rev-parse --short HEAD)
       git config --global user.email "no-reply@carasent.com"
       git config --global user.name "npx changeset"
       git remote set-url origin 'https://dev.azure.com/avanssoma/Arbeidoginkludering/_git/asma-core-ui'
-      git tag -a "v${VERSION}" "${LASTCOMMIT}" -m "Version - ${VERSION}"
-      git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" push --tag
+      git add .
+      git commit -m "Version - ${VERSION}"
+      git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" push origin master
     displayName: 'Bump version and publish package'
