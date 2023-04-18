@@ -26,6 +26,7 @@ import { styled } from '@mui/material/styles'
 
 export const StyledButton = styled((props: ButtonProps) => (
     <Button
+        variant={props.variant || 'contained'}
         {...props}
         disableRipple
         classes={{

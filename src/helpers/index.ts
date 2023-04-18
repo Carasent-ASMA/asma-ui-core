@@ -1,1 +1,1 @@
-export * from './tokenOptimizer.helper'
+export * from './tokenOptimizer.helper';

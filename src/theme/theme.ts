@@ -5,20 +5,20 @@ import { tokens } from '../styles/tokens'
 const theme = {
     palette: {
         primary: tokens().primary,
-        error: {
-            main: 'rgb(176, 0, 32)', // = '#b00020',
-            light: '#ffaaaa',
-        },
-        success: {
-            light: '#CBFFD9',
-            main: '#EFCC1D',
-            dark: '#388e3c',
-        },
-        warning: {
-            light: '#FFF9C4',
-            main: '#ffeb3b',
-            dark: '#fbc02d',
-        },
+        // error: {
+        //     main: 'rgb(176, 0, 32)', // = '#b00020',
+        //     light: '#ffaaaa',
+        // },
+        // success: {
+        //     light: '#CBFFD9',
+        //     main: '#EFCC1D',
+        //     dark: '#388e3c',
+        // },
+        // warning: {
+        //     light: '#FFF9C4',
+        //     main: '#ffeb3b',
+        //     dark: '#fbc02d',
+        // },
     },
     typography: {
         fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
