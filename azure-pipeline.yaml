@@ -22,7 +22,7 @@ jobs:
             persistCredentials: true
 
           - script: |
-                git switch refs/remotes/origin/master
+                git checkout master
 
                 # Rename package.json
                 mv package.json package_old.json
