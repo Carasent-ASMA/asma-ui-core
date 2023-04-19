@@ -12,11 +12,14 @@ variables:
     - group: common-vg
 jobs:
     - job: Release_new_version
+      displayName: 'Release new version'
+      container:
+          image: node:16
       steps:
-          - task: NodeTool@0
-            displayName: 'Install Node.js'
-            inputs:
-                versionSpec: '16.x'
+          # - task: NodeTool@0
+          #   displayName: 'Install Node.js'
+          #   inputs:
+          #       versionSpec: '16.x'
 
           - checkout: self
             persistCredentials: true
@@ -46,7 +49,7 @@ jobs:
 
                 # Publish the package using Changesets
                 #npx -q @changesets/cli publish
-                npm run changeset:version
+                npm run changeset:publish
 
                 # Commit changes
                 VERSION=$(npm run version --silent)
