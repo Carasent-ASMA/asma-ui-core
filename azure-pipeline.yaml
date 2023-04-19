@@ -32,13 +32,13 @@ jobs:
       mv package_old.json package.json
 
       # Bump version and create changelog with Changeset
-      npx -q @changesets/cli -- version
+      npx -q @changesets/cli version
 
       # Log in to npm
       echo "//registry.npmjs.org/:_authToken=$(npm-token)" > .npmrc
 
       # Publish the package using Changesets
-      npx @changesets/cli publish
+      npx -q @changesets/cli publish
 
       # Commit changes
       VERSION=$(npm run version --silent)
