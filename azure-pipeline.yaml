@@ -23,16 +23,19 @@ jobs:
 
   - script: |
       # Rename package.json
-      mv package.json package_old.json
+      #mv package.json package_old.json
 
       # Install Changeset CLI
-      npm install @changesets/cli --no-save --no-package-lock
+      #npm install @changesets/cli --no-save --no-package-lock
 
       # Rename package_old.json to package.json
-      mv package_old.json package.json
+      #mv package_old.json package.json
+
+      yarn install
+      yarn changeset version
 
       # Bump version and create changelog with Changeset
-      npx @changesets/cli -yes -- version
+      #npx @changesets/cli -yes -- version
 
       # Log in to npm
       echo "//registry.npmjs.org/:_authToken=$(npm-token)" > .npmrc
