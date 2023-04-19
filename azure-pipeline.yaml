@@ -24,11 +24,6 @@ jobs:
   - script: |
       # Rename package.json
       mv package.json package_old.json
-      
-      ls
-      cd .changeset
-      ls
-      cd ..
 
       # Install Changeset CLI
       npm install @changesets/cli --no-save --no-package-lock
@@ -37,8 +32,7 @@ jobs:
       mv package_old.json package.json
 
       # Bump version and create changelog with Changeset
-      #npx @changesets/cli -yes -- version
-      npm run changeset:version
+      npx @changesets/cli -yes -- version
 
       # Log in to npm
       echo "//registry.npmjs.org/:_authToken=$(npm-token)" > .npmrc
