@@ -32,7 +32,7 @@ jobs:
       mv package_old.json package.json
 
       # Bump version and create changelog with Changeset
-      npx -yes @changesets/cli -- version
+      npx -q @changesets/cli -- version
 
       # Log in to npm
       echo "//registry.npmjs.org/:_authToken=$(npm-token)" > .npmrc
