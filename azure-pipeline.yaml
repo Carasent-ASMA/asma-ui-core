@@ -16,12 +16,14 @@ jobs:
           - task: NodeTool@0
             displayName: 'Install Node.js'
             inputs:
-                versionSpec: '16.x'
+                versionSpec: '18.x'
 
           - checkout: self
             persistCredentials: true
 
           - script: |
+                git switch master
+
                 # Rename package.json
                 mv package.json package_old.json
 
