@@ -26,7 +26,8 @@
         "build-storybook": "build-storybook",
         "create-index": "ctix create -p ./tsconfig.json -w -a ./src",
         "changeset:version": "changeset version",
-        "changeset:publish": "changeset publish"
+        "changeset:publish": "changeset publish",
+        "changeset:status": "changeset status"
     },
     "license": "UNLICENSED",
     "dependencies": {

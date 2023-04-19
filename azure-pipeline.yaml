@@ -1,54 +1,57 @@
 trigger:
-  branches:
-    include:
-      - master
-  paths:
-    include:
-      - .changeset/*.md
+    branches:
+        include:
+            - master
+    paths:
+        include:
+            - .changeset/*.md
 
 pool:
-  vmImage: 'ubuntu-latest'
+    vmImage: 'ubuntu-latest'
 variables:
     - group: common-vg
 jobs:
-- job: Release_new_version
-  steps:
-  - task: NodeTool@0
-    displayName: 'Install Node.js'
-    inputs:
-      versionSpec: '18.x'
+    - job: Release_new_version
+      steps:
+          - task: NodeTool@0
+            displayName: 'Install Node.js'
+            inputs:
+                versionSpec: '18.x'
 
-  - checkout: self
-    persistCredentials: true
+          - checkout: self
+            persistCredentials: true
 
-  - script: |
-      # Rename package.json
-      mv package.json package_old.json
+          - script: |
+                # Rename package.json
+                mv package.json package_old.json
 
-      # Install Changeset CLI
-      npm install @changesets/cli --no-save --no-package-lock
+                # Install Changeset CLI
+                npm install @changesets/cli --no-save --no-package-lock
 
-      # Rename package_old.json to package.json
-      mv package_old.json package.json
+                # Rename package_old.json to package.json
+                mv package_old.json package.json
 
-      # Bump version and create changelog with Changeset
-      #npx -q @changesets/cli -- version
-      npm run changeset:version
+                # Show changeset status
+                npm run changeset:status
 
-      # Log in to npm
-      echo "//registry.npmjs.org/:_authToken=$(npm-token)" > .npmrc
+                # Bump version and create changelog with Changeset
+                #npx -q @changesets/cli -- version
+                npm run changeset:version
 
-      # Publish the package using Changesets
-      #npx -q @changesets/cli publish
-      npm run changeset:version
+                # Log in to npm
+                echo "//registry.npmjs.org/:_authToken=$(npm-token)" > .npmrc
 
-      # Commit changes
-      VERSION=$(npm run version --silent)
-      LASTCOMMIT=$(git rev-parse --short HEAD)
-      git config --global user.email "no-reply@carasent.com"
-      git config --global user.name "npx changeset"
-      git remote set-url origin 'https://dev.azure.com/avanssoma/Arbeidoginkludering/_git/asma-core-ui'
-      git add .
-      git commit -m "[skip ci] Version - ${VERSION}"
-      git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" push origin master
-    displayName: 'Bump version and publish package'
+                # Publish the package using Changesets
+                #npx -q @changesets/cli publish
+                npm run changeset:version
+
+                # Commit changes
+                VERSION=$(npm run version --silent)
+                LASTCOMMIT=$(git rev-parse --short HEAD)
+                git config --global user.email "no-reply@carasent.com"
+                git config --global user.name "npx changeset"
+                git remote set-url origin 'https://dev.azure.com/avanssoma/Arbeidoginkludering/_git/asma-core-ui'
+                git add .
+                git commit -m "[skip ci] Version - ${VERSION}"
+                git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" push origin master
+            displayName: 'Bump version and publish package'
