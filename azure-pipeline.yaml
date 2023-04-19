@@ -26,6 +26,9 @@ jobs:
       mv package.json package_old.json
       
       ls
+      cd .changeset
+      ls
+      cd ..
 
       # Install Changeset CLI
       npm install @changesets/cli --no-save --no-package-lock
