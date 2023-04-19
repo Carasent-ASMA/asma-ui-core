@@ -25,7 +25,8 @@
         "storybook:node18": "export NODE_OPTIONS=--openssl-legacy-provider && start-storybook -p 6006",
         "build-storybook": "build-storybook",
         "create-index": "ctix create -p ./tsconfig.json -w -a ./src",
-        "changeset:version": "changeset version"
+        "changeset:version": "changeset version",
+        "changeset:publish": "changeset publish"
     },
     "license": "UNLICENSED",
     "dependencies": {
