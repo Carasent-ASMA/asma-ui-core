@@ -22,7 +22,8 @@ jobs:
             persistCredentials: true
 
           - script: |
-                git checkout origin/master
+                git fetch
+                git checkout master
 
                 # Rename package.json
                 mv package.json package_old.json
