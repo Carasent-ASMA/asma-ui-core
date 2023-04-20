@@ -27,6 +27,7 @@ jobs:
           - script: |
                 git fetch
                 git checkout master
+                git checkout temp-branch
 
                 # Rename package.json
                 mv package.json package_old.json
@@ -45,19 +46,19 @@ jobs:
                 npm run changeset:version
 
                 # Log in to npm
-                echo "//registry.npmjs.org/:_authToken=$(npm-token)" > .npmrc
+                # echo "//registry.npmjs.org/:_authToken=$(npm-token)" > .npmrc
 
                 # Publish the package using Changesets
-                #npx -q @changesets/cli publish
-                npm run changeset:publish
+                # #npx -q @changesets/cli publish
+                # npm run changeset:publish
 
                 # Commit changes
-                VERSION=$(npm run version --silent)
-                LASTCOMMIT=$(git rev-parse --short HEAD)
-                git config --global user.email "no-reply@carasent.com"
-                git config --global user.name "npx changeset"
-                git remote set-url origin 'https://dev.azure.com/avanssoma/Arbeidoginkludering/_git/asma-core-ui'
-                git add .
-                git commit -m "[skip ci] Version - ${VERSION}"
-                git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" push origin master
+                # VERSION=$(npm run version --silent)
+                # LASTCOMMIT=$(git rev-parse --short HEAD)
+                # git config --global user.email "no-reply@carasent.com"
+                # git config --global user.name "npx changeset"
+                # git remote set-url origin 'https://dev.azure.com/avanssoma/Arbeidoginkludering/_git/asma-core-ui'
+                # git add .
+                # git commit -m "[skip ci] Version - ${VERSION}"
+                # git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" push origin master
             displayName: 'Bump version and publish package'
