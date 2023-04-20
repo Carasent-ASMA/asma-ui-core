@@ -27,7 +27,7 @@ jobs:
           - script: |
                 git fetch
                 git checkout master
-                git checkout temp-branch
+                git checkout -b temp-branch
 
                 # Rename package.json
                 mv package.json package_old.json
