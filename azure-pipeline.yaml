@@ -13,13 +13,13 @@ variables:
 jobs:
     - job: Release_new_version
       displayName: 'Release new version'
-      container:
-          image: node:16
+      # container:
+      #     image: node:16
       steps:
-          # - task: NodeTool@0
-          #   displayName: 'Install Node.js'
-          #   inputs:
-          #       versionSpec: '16.x'
+          - task: NodeTool@0
+            displayName: 'Install Node.js'
+            inputs:
+                versionSpec: '16.x'
 
           - checkout: self
             persistCredentials: true
