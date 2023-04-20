@@ -1,5 +1,18 @@
 # asma-core-ui
 
+## 1.3.0
+
+### Minor Changes
+
+-   22a817a: StyledAlert, StyledAlertTitle
+-   22a817a: StyledSnackbar
+-   e117b3c: StyledBadge
+
+### Patch Changes
+
+-   22a817a: StyledButton: Default variant - contained.
+-   22a817a: Theme: Reverted default colors for error, success and warning because of faulty success colors.
+
 ## 1.2.0
 
 ### Minor Changes
