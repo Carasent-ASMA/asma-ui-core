@@ -1,6 +1,9 @@
 {
     "name": "asma-core-ui",
     "private": false,
+    "publishConfig": {
+        "access": "public"
+    },
     "version": "1.2.6",
     "type": "module",
     "files": [
