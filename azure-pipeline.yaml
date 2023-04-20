@@ -43,12 +43,15 @@ jobs:
                 # Bump version and create changelog with Changeset
                 #npx -q @changesets/cli -- version
                 npm run changeset:version
+                cd .changeset
+                ls
+                cd ..
 
                 # Log in to npm
-                # echo "//registry.npmjs.org/:_authToken=$(npm-token)" > .npmrc
+                echo "//registry.npmjs.org/:_authToken=$(npm-token)" > .npmrc
 
                 # Publish the package using Changesets
-                # #npx -q @changesets/cli publish
+                #npx -q @changesets/cli publish
                 # npm run changeset:publish
 
                 # Commit changes
