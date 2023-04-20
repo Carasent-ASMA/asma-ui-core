@@ -1,0 +1,45 @@
+trigger: none
+
+pool:
+    vmImage: 'ubuntu-latest'
+variables:
+    - group: common-vg
+jobs:
+    - job: Build
+      displayName: Build
+      # container:
+      #     image: node:16
+      steps:
+          - task: NodeTool@0
+            displayName: 'Install Node.js'
+            inputs:
+                versionSpec: '16.x'
+
+          - checkout: self
+            persistCredentials: true
+
+          - script: |
+                yarn install
+                yarn build
+            displayName: 'Build design system'
+
+          - script: |
+                yarn install
+                yarn build-storybook
+            displayName: 'Build storybook'
+
+    - job: Changeset
+      displayName: 'Check if changesets exists'
+      steps:
+          - task: PowerShell@2
+            displayName: 'Check if changesets exists'
+            inputs:
+                targetType: 'inline'
+                script: |
+                    $fileExists = Test-Path -Path "$(System.DefaultWorkingDirectory)/.changeset/*.md" -Exclude README.md
+                    Write-Output "##vso[task.setvariable variable=ChangesetsExists]$fileExists"
+                    echo "ChangesetsExists: $fileExists"
+
+                    if ( -not $fileExists) {
+                        throw "No changesets found."
+                    }
