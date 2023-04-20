@@ -44,16 +44,8 @@ jobs:
                 # Bump version and create changelog with Changeset
                 #npx -q @changesets/cli -- version
                 npm run changeset:version
-                cd .changeset
-                ls
-                cd ..
 
-                # Log in to npm
-                echo "//registry.npmjs.org/:_authToken=$(npm-token)" > .npmrc
 
-                # Publish the package using Changesets
-                #npx -q @changesets/cli publish
-                # npm run changeset:publish
 
                 # Commit changes
                 # VERSION=$(npm run version --silent)
@@ -64,4 +56,11 @@ jobs:
                 # git add .
                 # git commit -m "[skip ci] Version - ${VERSION}"
                 # git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" push origin master
+
+                # Log in to npm
+                echo "//registry.npmjs.org/:_authToken=$(npm-token)" > .npmrc
+
+                # Publish the package using Changesets
+                #npx -q @changesets/cli publish
+                npm run changeset:publish
             displayName: 'Bump version and publish package'
