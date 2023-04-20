@@ -62,5 +62,5 @@ jobs:
 
                 # Publish the package using Changesets
                 #npx -q @changesets/cli publish
-                # npm run changeset:publish
+                npm run changeset:publish
             displayName: 'Bump version and publish package'
