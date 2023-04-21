@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.3.1
+
+### Patch Changes
+
+-   e673ff4: Fixed index files.
+
 ## 1.3.0
 
 ### Minor Changes
