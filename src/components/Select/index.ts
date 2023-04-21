@@ -1,2 +1,2 @@
-export * from './StyledSelect'
-export * from './StyledSelectItem'
+export * from './StyledSelect';
+export * from './StyledSelectItem';

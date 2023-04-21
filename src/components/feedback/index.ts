@@ -1,3 +1,3 @@
-export * from './StyledAlert'
-export * from './StyledAlertTitle'
-export * from './StyledSnackbar'
+export * from './StyledAlert';
+export * from './StyledAlertTitle';
+export * from './StyledSnackbar';

@@ -1,5 +1,5 @@
 export * from './data-display'
-export * from './dialog'
+export * from './Dialog'
 export * from './feedback'
 export * from './inputs'
-export * from './select'
+export * from './Select'
