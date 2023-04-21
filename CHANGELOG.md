@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.3.2
+
+### Patch Changes
+
+-   ee5d00f: Pipelines: Create second step with build and publish.
+
 ## 1.3.1
 
 ### Patch Changes
