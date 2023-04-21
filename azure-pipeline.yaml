@@ -45,8 +45,6 @@ jobs:
                 #npx -q @changesets/cli -- version
                 npm run changeset:version
 
-
-
                 # Commit changes
                 VERSION=$(npm run version --silent)
                 LASTCOMMIT=$(git rev-parse --short HEAD)
@@ -56,6 +54,11 @@ jobs:
                 git add .
                 git commit -m "[skip ci] Version - ${VERSION}"
                 git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" push origin master
+            displayName: 'Bump version and create changelog'
+
+          - script: |
+                yarn install
+                yarn build
 
                 # Log in to npm
                 echo "//registry.npmjs.org/:_authToken=$(npm-token)" > .npmrc
@@ -63,4 +66,4 @@ jobs:
                 # Publish the package using Changesets
                 #npx -q @changesets/cli publish
                 npm run changeset:publish
-            displayName: 'Bump version and publish package'
+            displayName: 'Publish package'
