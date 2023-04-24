@@ -1,6 +1,5 @@
 {
     "name": "asma-core-ui",
-    "private": false,
     "publishConfig": {
         "access": "public"
     },
