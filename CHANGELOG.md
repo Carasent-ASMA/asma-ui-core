@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.4.0
+
+### Minor Changes
+
+-   bb12a0a: StyledTooltip with stories.
+
 ## 1.3.2
 
 ### Patch Changes
