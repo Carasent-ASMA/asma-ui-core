@@ -1,0 +1,10 @@
+:root {
+    --text-h1: 1.5rem;
+    --text-h2: 1.125rem;
+    --text-pageTitle: 1.5rem;
+    --text-sectionTitle: 1.125rem;
+    --text-medium: 1rem;
+    --text-base: 0.875rem;
+    --text-small: 0.75rem;
+    --text-xSmall: 0.625rem;
+}

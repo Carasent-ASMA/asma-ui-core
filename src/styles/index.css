@@ -2,6 +2,7 @@
 @import 'color-variables/defaultTokens.css';
 @import 'color-variables/fretexTokens.css';
 @import 'color-variables/jadeTokens.css';
+@import 'font/fontSizeTokens.css';
 /* let use base from MUI */
 /* @tailwind base; */
 @tailwind components;

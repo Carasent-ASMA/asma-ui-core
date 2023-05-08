@@ -24,18 +24,18 @@ const theme = {
         fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
         fontSize: 16,
         h1: {
-            fontSize: '2.125rem',
-            fontWeight: 'normal',
+            fontSize: 'var(--text-h1)',
+            fontWeight: 600,
             marginBottom: '1rem',
         },
         h2: {
-            fontSize: '1.5rem',
-            fontWeight: 'normal',
+            fontSize: 'var(--text-h2)',
+            fontWeight: 600,
             marginBottom: '1rem',
         },
         h3: {
-            fontSize: '1.25rem',
-            fontWeight: 'normal',
+            fontSize: '1rem',
+            fontWeight: 600,
             marginBottom: '1rem',
         },
         subtitle1: {
@@ -47,11 +47,11 @@ const theme = {
             fontWeight: 500,
         },
         body1: {
-            fontSize: '1rem',
+            fontSize: 'var(--text-base)',
             fontWeight: 'normal',
         },
         body2: {
-            fontSize: '0.875rem',
+            fontSize: 'var(--text-small)',
             fontWeight: 'normal',
         },
         button: {
@@ -59,7 +59,7 @@ const theme = {
             fontWeight: 500,
         },
         caption: {
-            fontSize: '0.75rem',
+            fontSize: '0.625rem',
             fontWeight: 'normal',
         },
         overline: {
