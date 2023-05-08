@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.5.0
+
+### Minor Changes
+
+-   9a3ce35: Updated, and created, typography classes. Created Typography Storybook story.
+
 ## 1.4.0
 
 ### Minor Changes
