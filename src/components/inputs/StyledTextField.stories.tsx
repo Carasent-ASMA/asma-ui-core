@@ -15,30 +15,35 @@ export default {
 
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
 const Template: ComponentStory<typeof StyledTextField> = (args) => (
-    <Stack direction='row' spacing={2}>
-        <StyledTextField {...args} label='Default' />
-        <StyledTextField
-            {...args}
-            label='Start InputAdornment'
-            InputProps={{
-                startAdornment: <InputAdornment position='start'>kg</InputAdornment>,
-            }}
-        />
-        <StyledTextField
-            {...args}
-            label='End InputAdornment'
-            InputProps={{
-                endAdornment: (
-                    <InputAdornment position='end'>
-                        <IconButton aria-label='toggle password visibility' edge='end'>
-                            <VisibilityOff />
-                        </IconButton>
-                    </InputAdornment>
-                ),
-            }}
-            placeholder='Password'
-        />
-    </Stack>
+    <>
+        <Stack direction='row' spacing={2}>
+            <StyledTextField {...args} label='Default' />
+            <StyledTextField
+                {...args}
+                label='Start InputAdornment'
+                InputProps={{
+                    startAdornment: <InputAdornment position='start'>kg</InputAdornment>,
+                }}
+            />
+            <StyledTextField
+                {...args}
+                label='End InputAdornment'
+                InputProps={{
+                    endAdornment: (
+                        <InputAdornment position='end'>
+                            <IconButton aria-label='toggle password visibility' edge='end'>
+                                <VisibilityOff />
+                            </IconButton>
+                        </InputAdornment>
+                    ),
+                }}
+                placeholder='Password'
+            />
+        </Stack>
+        <Stack direction='row' mt={4}>
+            <StyledTextField {...args} label='Full width' FormControlProps={{ fullWidth: true }} />
+        </Stack>
+    </>
 )
 
 export const Default = Template.bind({})
