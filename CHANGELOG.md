@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.5.1
+
+### Patch Changes
+
+-   4371a5b: add form control props for styled text field
+
 ## 1.5.0
 
 ### Minor Changes
