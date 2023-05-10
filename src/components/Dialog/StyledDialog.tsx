@@ -19,7 +19,7 @@ export const StyledDialog = styled(({ onCloseText, children, onClose, ...rest }:
                 zIndex: 999,
             }}
         >
-            <div className={clsx('w-full max-w-[37.5rem] p-4 sm:min-w-[20rem] md:min-w-[37.5rem]')}>
+            <div className={clsx('w-full p-4 sm:min-w-[20rem] md:min-w-[37.5rem]')}>
                 <div className={'mb-2 flex justify-end'}>
                     <StyledButton
                         variant='text'
