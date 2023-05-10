@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.5.2
+
+### Patch Changes
+
+-   e1fc012: remove max width for styled dialog
+
 ## 1.5.1
 
 ### Patch Changes
