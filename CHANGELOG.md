@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.5.3
+
+### Patch Changes
+
+-   f6958e4: bump version so it's not 1 commit behind
+
 ## 1.5.2
 
 ### Patch Changes
