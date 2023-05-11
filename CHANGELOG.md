@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.5.7
+
+### Patch Changes
+
+-   601522c: added showCloseIcon props to StyledDialog
+
 ## 1.5.3
 
 ### Patch Changes
