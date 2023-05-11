@@ -22,8 +22,8 @@ export const StyledDialog = styled(
                 }}
             >
                 <div className={clsx('w-full p-4 sm:min-w-[20rem] md:min-w-[37.5rem]')}>
-                    <div className={'mb-2 flex h-10 justify-end'}>
-                        {showCloseIcon ? (
+                    {showCloseIcon ? (
+                        <div className={'mb-2 flex justify-end'}>
                             <StyledButton
                                 variant='text'
                                 endIcon={<Icon icon={'ic:baseline-close'} className={'text-2xl'} />}
@@ -34,8 +34,9 @@ export const StyledDialog = styled(
                             >
                                 {onCloseText}
                             </StyledButton>
-                        ) : null}
-                    </div>
+                        </div>
+                    ) : null}
+
                     <div className={'px-4'}>{children}</div>
                 </div>
             </Dialog>
