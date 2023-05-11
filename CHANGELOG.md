@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.5.9
+
+### Patch Changes
+
+-   58f8d13: fixed height of styledDialog closeIcon
+
 ## 1.5.7
 
 ### Patch Changes
