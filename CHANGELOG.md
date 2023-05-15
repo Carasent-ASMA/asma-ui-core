@@ -1,5 +1,15 @@
 # asma-core-ui
 
+## 1.6.0
+
+### Minor Changes
+
+-   37e14dc: StyledDataGrid
+
+### Patch Changes
+
+-   37e14dc: DataGrid: Row background, custom checkbox classes
+
 ## 1.5.9
 
 ### Patch Changes
