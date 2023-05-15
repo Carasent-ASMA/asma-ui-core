@@ -1,4 +1,5 @@
 export * from './data-display'
+export * from './DataGrid'
 export * from './Dialog'
 export * from './feedback'
 export * from './inputs'
