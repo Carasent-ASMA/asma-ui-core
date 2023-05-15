@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.6.1
+
+### Patch Changes
+
+-   0cb2ef9: fixed wrongly merged branches
+
 ## 1.6.0
 
 ### Minor Changes
