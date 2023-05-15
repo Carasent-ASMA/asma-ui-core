@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.6.2
+
+### Patch Changes
+
+-   f53ff78: add export for data grid
+
 ## 1.6.1
 
 ### Patch Changes
