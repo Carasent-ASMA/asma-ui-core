@@ -3,7 +3,7 @@
     "publishConfig": {
         "access": "public"
     },
-    "version": "1.5.5",
+    "version": "1.6.0",
     "type": "module",
     "files": [
         "dist/**/*",
@@ -40,6 +40,7 @@
         "@fontsource/roboto": "^4.5.8",
         "@mui/icons-material": "^5.11.11",
         "@mui/material": "^5.11.13",
+        "@mui/x-data-grid": "^6.3.0",
         "@storybook/addon-styling": "^0.3.1",
         "@storybook/addons": "^6.5.16",
         "clsx": "^1.2.1",
