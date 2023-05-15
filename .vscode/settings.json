@@ -42,5 +42,14 @@
     //"typescript.tsdk": "node_modules/typescript/lib",
     "typescript.tsdk": "node_modules\\typescript\\lib",
     "tailwindCSS.classAttributes": ["class", "className", "classes"],
-    "cSpell.words": ["asma", "clsx"]
+    "cSpell.words": ["asma", "clsx"],
+    "cSpell.ignorePaths": [
+        "package-lock.json",
+        "node_modules",
+        "dist",
+        "vscode-extension",
+        ".git/objects",
+        ".vscode",
+        ".vscode-insiders"
+    ]
 }
