@@ -1,8 +1,8 @@
 import { Icon } from '@iconify/react'
 import { Stack, Typography } from '@mui/material'
-import { GridActionsCellItem } from '@mui/x-data-grid'
 import type { ComponentMeta, ComponentStory } from '@storybook/react'
 import { StyledDataGrid } from './StyledDataGrid'
+import { StyledGridActionsCellItem } from './StyledGridActionsCellItem'
 
 export default { title: 'DataGrid' } as ComponentMeta<typeof StyledDataGrid>
 
@@ -51,8 +51,8 @@ Default.args = {
             type: 'actions',
             renderHeader: () => <Icon icon={'mdi:pin'} color='#000' width='20' />,
             getActions: () => [
-                <GridActionsCellItem key='edit' label='Edit' icon={<Icon icon='mdi:pencil' />} showInMenu />,
-                <GridActionsCellItem key='delete' label='Delete' icon={<Icon icon='mdi:delete' />} showInMenu />,
+                <StyledGridActionsCellItem key='edit' label='Edit' icon={<Icon icon='mdi:pencil' />} showInMenu />,
+                <StyledGridActionsCellItem key='delete' label='Delete' icon={<Icon icon='mdi:delete' />} showInMenu />,
             ],
         },
     ],

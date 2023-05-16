@@ -9,7 +9,7 @@ export const StyledDataGrid = styled((props: DataGridProps) => (
             actionsCell: 'text-black text-2xl',
             cell: 'text-[#0b0c0f] text-sm border-b border-[#b5bec9] focus:outline-none focus-within:outline-none',
             columnHeader: 'border-r-0 text-[#7a899e] text-xs h-[30px] focus:outline-none focus-within:outline-none',
-            columnHeaders: 'bg-gray-100 border-t border-b border-[#b5bec9] min-h-[40px]',
+            columnHeaders: 'bg-gray-100 border-b border-[#b5bec9] min-h-[40px]',
             iconSeparator: 'hidden',
             row: 'hover:bg-primary-50',
             virtualScrollerContent: 'border-b-0',
