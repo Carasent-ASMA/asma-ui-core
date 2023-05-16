@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.6.3
+
+### Patch Changes
+
+-   a91eb4c: remove top border datagrid, export datagrid components/types
+
 ## 1.6.2
 
 ### Patch Changes
