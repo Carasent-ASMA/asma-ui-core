@@ -25,6 +25,7 @@
         "prettier": "prettier --write src//**/*.{ts,tsx,scss} --config ./.prettierrc",
         "storybook": "start-storybook -p 6006",
         "storybook:node18": "export NODE_OPTIONS=--openssl-legacy-provider && start-storybook -p 6006",
+        "storybook:node18:win": "set NODE_OPTIONS=--openssl-legacy-provider && start-storybook -p 6006",
         "build-storybook": "build-storybook",
         "create-index": "ctix create -p ./tsconfig.json -w -a ./src",
         "changeset:version": "changeset version",

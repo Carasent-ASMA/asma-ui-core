@@ -9,9 +9,9 @@ export const StyledDialogContent = styled(({ children, classes, className, ...re
             {...rest}
             classes={{
                 ...classes,
-                root: 'p-0 mx-0 mt-0 mb-4',
+                root: 'p-0 mx-0 mt-0',
             }}
-            className={clsx('w-full', className)}
+            className={clsx('w-full p-4', className)}
         >
             {children}
         </DialogContent>
