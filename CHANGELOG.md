@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.6.4
+
+### Patch Changes
+
+-   4b6dfc8: Fixed fullscreen mode for styled modal window
+
 ## 1.6.3
 
 ### Patch Changes
