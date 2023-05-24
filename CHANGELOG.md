@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.6.5
+
+### Patch Changes
+
+-   bcc9515: restyled datagrid
+
 ## 1.6.4
 
 ### Patch Changes
