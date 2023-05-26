@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.6.6
+
+### Patch Changes
+
+-   2bc692d: On StyledDialog added style to be ovveridable
+
 ## 1.6.5
 
 ### Patch Changes
