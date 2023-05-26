@@ -1,5 +1,35 @@
 # asma-core-ui
 
+## 1.6.5
+
+### Patch Changes
+
+-   bcc9515: restyled datagrid
+
+## 1.6.4
+
+### Patch Changes
+
+-   4b6dfc8: Fixed fullscreen mode for styled modal window
+
+## 1.6.3
+
+### Patch Changes
+
+-   a91eb4c: remove top border datagrid, export datagrid components/types
+
+## 1.6.2
+
+### Patch Changes
+
+-   f53ff78: add export for data grid
+
+## 1.6.1
+
+### Patch Changes
+
+-   0cb2ef9: fixed wrongly merged branches
+
 ## 1.6.0
 
 ### Minor Changes

@@ -10,7 +10,7 @@ export const StyledDialogActions = styled((props: DialogActionsProps) => {
                 root: 'p-0 m-0 justify-center',
             }}
         >
-            <div className={clsx('my-2 flex w-full justify-end space-x-4', props.className)}>{props.children}</div>
+            <div className={clsx('flex w-full justify-end space-x-4 p-4', props.className)}>{props.children}</div>
         </DialogActions>
     )
 })``

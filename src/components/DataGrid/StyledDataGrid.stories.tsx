@@ -1,8 +1,8 @@
 import { Icon } from '@iconify/react'
 import { Stack, Typography } from '@mui/material'
-import { GridActionsCellItem } from '@mui/x-data-grid'
 import type { ComponentMeta, ComponentStory } from '@storybook/react'
 import { StyledDataGrid } from './StyledDataGrid'
+import { StyledGridActionsCellItem } from './StyledGridActionsCellItem'
 
 export default { title: 'DataGrid' } as ComponentMeta<typeof StyledDataGrid>
 
@@ -38,21 +38,21 @@ Default.args = {
         },
     ],
     columns: [
-        { field: 'title', headerName: 'Title', width: 200 },
-        { field: 'description', headerName: 'Description', width: 200 },
-        { field: 'context', headerName: 'Context', width: 200 },
-        { field: 'deadline', headerName: 'Deadline', width: 200 },
+        { field: 'title', headerName: 'Title', flex: 2 },
+        { field: 'description', headerName: 'Description', flex: 3 },
+        { field: 'context', headerName: 'Context', flex: 1 },
+        { field: 'deadline', headerName: 'Deadline', flex: 1 },
         {
             field: 'actions',
             headerName: 'Actions',
-            width: 50,
+            flex: 0.5,
             disableColumnMenu: true,
             sortable: false,
             type: 'actions',
             renderHeader: () => <Icon icon={'mdi:pin'} color='#000' width='20' />,
             getActions: () => [
-                <GridActionsCellItem key='edit' label='Edit' icon={<Icon icon='mdi:pencil' />} showInMenu />,
-                <GridActionsCellItem key='delete' label='Delete' icon={<Icon icon='mdi:delete' />} showInMenu />,
+                <StyledGridActionsCellItem key='edit' label='Edit' icon={<Icon icon='mdi:pencil' />} showInMenu />,
+                <StyledGridActionsCellItem key='delete' label='Delete' icon={<Icon icon='mdi:delete' />} showInMenu />,
             ],
         },
     ],

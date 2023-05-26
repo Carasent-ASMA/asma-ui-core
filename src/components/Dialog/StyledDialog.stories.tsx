@@ -4,8 +4,8 @@ import type { ComponentMeta, ComponentStory } from '@storybook/react'
 import { StyledDialog } from './StyledDialog'
 import { StyledDialogActions } from './StyledDialogActions'
 import { StyledDialogContent } from './StyledDialogContent'
-import { StyledDialogTitle } from './StyledDialogTitle'
 import { StyledButton } from '../inputs'
+import { StyledDialogTitle } from './StyledDialogTitle'
 
 export default {
     title: 'Dialog',
@@ -34,6 +34,32 @@ const Template: ComponentStory<typeof StyledDialog> = (args) => {
                     suspendisse aptent eleifend dis ultrices duis, facilisis laoreet proin varius magna neque vulputate.
                     Ligula sociosqu sociis penatibus non iaculis, himenaeos volutpat cubilia netus feugiat, interdum leo
                     enim mi.
+                    <br />
+                    <br />
+                    Lorem ipsum dolor sit amet consectetur adipiscing elit placerat, habitasse justo eros suspendisse
+                    aptent eleifend dis ultrices duis, facilisis laoreet proin varius magna neque vulputate. Ligula
+                    sociosqu sociis penatibus non iaculis, himenaeos volutpat cubilia netus feugiat, interdum leo enim
+                    mi. Lorem ipsum dolor sit amet consectetur adipiscing elit placerat, habitasse justo eros
+                    suspendisse aptent eleifend dis ultrices duis, facilisis laoreet proin varius magna neque vulputate.
+                    Ligula sociosqu sociis penatibus non iaculis, himenaeos volutpat cubilia netus feugiat, interdum leo
+                    enim mi.
+                    <br />
+                    <br />
+                    Lorem ipsum dolor sit amet consectetur adipiscing elit placerat, habitasse justo eros suspendisse
+                    aptent eleifend dis ultrices duis, facilisis laoreet proin varius magna neque vulputate. Ligula
+                    sociosqu sociis penatibus non iaculis, himenaeos volutpat cubilia netus feugiat, interdum leo enim
+                    mi. Lorem ipsum dolor sit amet consectetur adipiscing elit placerat, habitasse justo eros
+                    suspendisse aptent eleifend dis ultrices duis, facilisis laoreet proin varius magna neque vulputate.
+                    Ligula sociosqu sociis penatibus non iaculis, himenaeos volutpat cubilia netus feugiat, interdum leo
+                    enim mi.
+                    <br />
+                    Lorem ipsum dolor sit amet consectetur adipiscing elit placerat, habitasse justo eros suspendisse
+                    aptent eleifend dis ultrices duis, facilisis laoreet proin varius magna neque vulputate. Ligula
+                    sociosqu sociis penatibus non iaculis, himenaeos volutpat cubilia netus feugiat, interdum leo enim
+                    mi. Lorem ipsum dolor sit amet consectetur adipiscing elit placerat, habitasse justo eros
+                    suspendisse aptent eleifend dis ultrices duis, facilisis laoreet proin varius magna neque vulputate.
+                    Ligula sociosqu sociis penatibus non iaculis, himenaeos volutpat cubilia netus feugiat, interdum leo
+                    enim mi.
                 </StyledDialogContent>
                 <StyledDialogActions>
                     <StyledButton variant='contained' onClick={handleCloseModal}>
@@ -50,10 +76,12 @@ const Template: ComponentStory<typeof StyledDialog> = (args) => {
 
 export const Default = Template.bind({
     open: true,
+    fullScreen: false,
 })
 Default.args = {
     title: 'The modal title',
     open: true,
+    fullScreen: false,
 
     onClose: () => {},
 }

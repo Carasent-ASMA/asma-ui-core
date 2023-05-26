@@ -3,7 +3,6 @@ import type { DialogProps } from '@mui/material/Dialog'
 
 import { styled } from '@mui/material/styles'
 import { Icon } from '@iconify/react'
-import clsx from 'clsx'
 import { StyledButton } from '../inputs'
 
 export interface IStyledDialogProps extends DialogProps {
@@ -21,24 +20,22 @@ export const StyledDialog = styled(
                     zIndex: 999,
                 }}
             >
-                <div className={clsx('w-full p-4 sm:min-w-[20rem] md:min-w-[37.5rem]')}>
-                    {showCloseIcon ? (
-                        <div className={'mb-2 flex justify-end'}>
-                            <StyledButton
-                                variant='text'
-                                endIcon={<Icon icon={'ic:baseline-close'} className={'text-2xl'} />}
-                                onClick={(event) => {
-                                    onClose ? onClose(event, 'escapeKeyDown') : null
-                                }}
-                                className={'text-gray-800'}
-                            >
-                                {onCloseText}
-                            </StyledButton>
-                        </div>
-                    ) : null}
+                {showCloseIcon && (
+                    <div className={'mr-2 mt-2 flex justify-end'}>
+                        <StyledButton
+                            variant='text'
+                            endIcon={<Icon icon={'ic:baseline-close'} className={'text-2xl'} />}
+                            onClick={(event) => {
+                                onClose ? onClose(event, 'escapeKeyDown') : null
+                            }}
+                            className={'text-gray-800'}
+                        >
+                            {onCloseText}
+                        </StyledButton>
+                    </div>
+                )}
 
-                    <div className={'px-4'}>{children}</div>
-                </div>
+                {children}
             </Dialog>
         )
     },
