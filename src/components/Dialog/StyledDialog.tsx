@@ -18,6 +18,7 @@ export const StyledDialog = styled(
                 onClose={onClose}
                 style={{
                     zIndex: 999,
+                    ...rest.style,
                 }}
             >
                 {showCloseIcon && (
