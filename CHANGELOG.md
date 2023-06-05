@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.7.0
+
+### Minor Changes
+
+-   de81629: asma-grid UI fixed, added custom columns menu
+
 ## 1.6.6
 
 ### Patch Changes
