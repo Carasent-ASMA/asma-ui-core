@@ -2,17 +2,17 @@
 export declare const StyledButton: import("@emotion/styled").StyledComponent<{
     children?: import("react").ReactNode;
     classes?: Partial<import("@mui/material").ButtonClasses> | undefined;
-    color?: "primary" | "secondary" | "error" | "info" | "success" | "warning" | "inherit" | undefined;
+    color?: import("@mui/types").OverridableStringUnion<"primary" | "secondary" | "error" | "info" | "success" | "warning" | "inherit", import("@mui/material").ButtonPropsColorOverrides> | undefined;
     disabled?: boolean | undefined;
     disableElevation?: boolean | undefined;
     disableFocusRipple?: boolean | undefined;
     endIcon?: import("react").ReactNode;
     fullWidth?: boolean | undefined;
     href?: string | undefined;
-    size?: "small" | "medium" | "large" | undefined;
+    size?: import("@mui/types").OverridableStringUnion<"small" | "medium" | "large", import("@mui/material").ButtonPropsSizeOverrides> | undefined;
     startIcon?: import("react").ReactNode;
     sx?: import("@mui/material").SxProps<import("@mui/material").Theme> | undefined;
-    variant?: "text" | "outlined" | "contained" | undefined;
+    variant?: import("@mui/types").OverridableStringUnion<"text" | "outlined" | "contained", import("@mui/material").ButtonPropsVariantOverrides> | undefined;
 } & Omit<{
     action?: import("react").Ref<import("@mui/material").ButtonBaseActions> | undefined;
     centerRipple?: boolean | undefined;
@@ -29,6 +29,6 @@ export declare const StyledButton: import("@emotion/styled").StyledComponent<{
     tabIndex?: number | undefined;
     TouchRippleProps?: Partial<import("@mui/material/ButtonBase/TouchRipple").TouchRippleProps> | undefined;
     touchRippleRef?: import("react").Ref<import("@mui/material/ButtonBase/TouchRipple").TouchRippleActions> | undefined;
-}, "classes"> & import("@mui/material/OverridableComponent").CommonProps & Omit<Pick<import("react").DetailedHTMLProps<import("react").ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>, "key" | keyof import("react").ButtonHTMLAttributes<HTMLButtonElement>> & {
+}, "classes"> & import("@mui/material/OverridableComponent").CommonProps & Omit<Omit<import("react").DetailedHTMLProps<import("react").ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>, "ref"> & {
     ref?: ((instance: HTMLButtonElement | null) => void) | import("react").RefObject<HTMLButtonElement> | null | undefined;
-}, keyof import("@mui/material/OverridableComponent").CommonProps | "color" | "sx" | "variant" | "children" | "tabIndex" | "href" | "disabled" | "action" | "size" | "fullWidth" | "centerRipple" | "disableRipple" | "disableTouchRipple" | "focusRipple" | "focusVisibleClassName" | "LinkComponent" | "onFocusVisible" | "TouchRippleProps" | "touchRippleRef" | "disableElevation" | "disableFocusRipple" | "endIcon" | "startIcon"> & import("@mui/system").MUIStyledCommonProps<import("@mui/material").Theme>, {}, {}>;
+}, keyof import("@mui/material/OverridableComponent").CommonProps | "color" | "sx" | "variant" | "children" | "tabIndex" | "href" | "disabled" | "action" | "size" | "centerRipple" | "disableRipple" | "disableTouchRipple" | "focusRipple" | "focusVisibleClassName" | "LinkComponent" | "onFocusVisible" | "TouchRippleProps" | "touchRippleRef" | "disableFocusRipple" | "fullWidth" | "disableElevation" | "endIcon" | "startIcon"> & import("@mui/system").MUIStyledCommonProps<import("@mui/material").Theme>, {}, {}>;

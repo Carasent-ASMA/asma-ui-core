@@ -9,7 +9,7 @@ export declare const StyledFormHelperText: import("@emotion/styled").StyledCompo
     margin?: "dense" | undefined;
     required?: boolean | undefined;
     sx?: import("@mui/material").SxProps<import("@mui/material").Theme> | undefined;
-    variant?: "standard" | "filled" | "outlined" | undefined;
-} & import("@mui/material/OverridableComponent").CommonProps & Omit<Pick<import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>, "key" | keyof import("react").HTMLAttributes<HTMLParagraphElement>> & {
+    variant?: import("@mui/types").OverridableStringUnion<"standard" | "filled" | "outlined", import("@mui/material").FormHelperTextPropsVariantOverrides> | undefined;
+} & import("@mui/material/OverridableComponent").CommonProps & Omit<Omit<import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>, "ref"> & {
     ref?: ((instance: HTMLParagraphElement | null) => void) | import("react").RefObject<HTMLParagraphElement> | null | undefined;
 }, keyof import("@mui/material/OverridableComponent").CommonProps | "sx" | "variant" | "children" | "error" | "margin" | "disabled" | "required" | "filled" | "focused"> & import("@mui/system").MUIStyledCommonProps<import("@mui/material").Theme>, {}, {}>;

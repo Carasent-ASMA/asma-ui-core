@@ -1,0 +1,46 @@
+.styled-data-grid {
+    @apply rounded-none border-0 border-t border-[#bdc4cf] bg-white #{!important};
+    svg {
+        @apply text-[#0B0C0F] #{!important};
+    }
+}
+
+.cell {
+    @apply min-h-[50px] border-b border-[#bdc4cf] focus-within:outline-none focus:outline-none #{!important};
+}
+
+.cellContent {
+    @apply text-base text-[#0b0c0f] #{!important};
+}
+
+.columnHeader {
+    @apply h-[30px] border-r-0 focus-within:outline-none focus:outline-none #{!important};
+}
+
+.columnHeaderTitle {
+    @apply text-[10px] font-semibold uppercase text-[#7A899E] #{!important};
+}
+
+.columnHeaders {
+    @apply min-h-[30px] rounded-none border-b border-[#bdc4cf] bg-[#FCFCFD] #{!important};
+}
+
+.footerContainer {
+    @apply border-[#bdc4cf] #{!important};
+}
+
+.iconSeparator {
+    @apply hidden #{!important};
+}
+
+.row {
+    @apply min-h-[50px] hover:cursor-pointer hover:bg-primary-50 #{!important};
+}
+
+.virtualScrollerContent {
+    @apply border-b-0 #{!important};
+}
+
+.menuIconButton {
+    @apply visible absolute right-5 flex #{!important};
+}
