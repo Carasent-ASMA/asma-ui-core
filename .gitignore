@@ -31,3 +31,4 @@ tsconfig.tsbuildinfo
 
 storybook-static
 .yarn
+dist
