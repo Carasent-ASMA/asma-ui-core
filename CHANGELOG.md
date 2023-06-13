@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.8.0
+
+### Minor Changes
+
+-   a0503fa: Added StyledCheckbox
+
 ## 1.7.2
 
 ### Patch Changes
