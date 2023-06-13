@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.7.2
+
+### Patch Changes
+
+-   0c21b38: Updated index ts
+
 ## 1.7.1
 
 ### Patch Changes
