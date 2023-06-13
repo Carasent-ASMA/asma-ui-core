@@ -2,7 +2,7 @@
 export declare const StyledButton: import("@emotion/styled").StyledComponent<{
     children?: import("react").ReactNode;
     classes?: Partial<import("@mui/material").ButtonClasses> | undefined;
-    color?: import("@mui/types").OverridableStringUnion<"primary" | "secondary" | "error" | "info" | "success" | "warning" | "inherit", import("@mui/material").ButtonPropsColorOverrides> | undefined;
+    color?: import("@mui/types").OverridableStringUnion<"error" | "success" | "warning" | "info" | "primary" | "secondary" | "inherit", import("@mui/material").ButtonPropsColorOverrides> | undefined;
     disabled?: boolean | undefined;
     disableElevation?: boolean | undefined;
     disableFocusRipple?: boolean | undefined;
@@ -31,4 +31,4 @@ export declare const StyledButton: import("@emotion/styled").StyledComponent<{
     touchRippleRef?: import("react").Ref<import("@mui/material/ButtonBase/TouchRipple").TouchRippleActions> | undefined;
 }, "classes"> & import("@mui/material/OverridableComponent").CommonProps & Omit<Omit<import("react").DetailedHTMLProps<import("react").ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>, "ref"> & {
     ref?: ((instance: HTMLButtonElement | null) => void) | import("react").RefObject<HTMLButtonElement> | null | undefined;
-}, keyof import("@mui/material/OverridableComponent").CommonProps | "color" | "sx" | "variant" | "children" | "tabIndex" | "href" | "disabled" | "action" | "size" | "centerRipple" | "disableRipple" | "disableTouchRipple" | "focusRipple" | "focusVisibleClassName" | "LinkComponent" | "onFocusVisible" | "TouchRippleProps" | "touchRippleRef" | "disableFocusRipple" | "fullWidth" | "disableElevation" | "endIcon" | "startIcon"> & import("@mui/system").MUIStyledCommonProps<import("@mui/material").Theme>, {}, {}>;
+}, "children" | "variant" | "action" | keyof import("@mui/material/OverridableComponent").CommonProps | "color" | "sx" | "tabIndex" | "href" | "disabled" | "size" | "centerRipple" | "disableRipple" | "disableTouchRipple" | "focusRipple" | "focusVisibleClassName" | "LinkComponent" | "onFocusVisible" | "TouchRippleProps" | "touchRippleRef" | "disableFocusRipple" | "fullWidth" | "disableElevation" | "endIcon" | "startIcon"> & import("@mui/system").MUIStyledCommonProps<import("@mui/material").Theme>, {}, {}>;

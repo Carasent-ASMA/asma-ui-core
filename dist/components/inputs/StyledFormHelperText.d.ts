@@ -12,4 +12,4 @@ export declare const StyledFormHelperText: import("@emotion/styled").StyledCompo
     variant?: import("@mui/types").OverridableStringUnion<"standard" | "filled" | "outlined", import("@mui/material").FormHelperTextPropsVariantOverrides> | undefined;
 } & import("@mui/material/OverridableComponent").CommonProps & Omit<Omit<import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>, "ref"> & {
     ref?: ((instance: HTMLParagraphElement | null) => void) | import("react").RefObject<HTMLParagraphElement> | null | undefined;
-}, keyof import("@mui/material/OverridableComponent").CommonProps | "sx" | "variant" | "children" | "error" | "margin" | "disabled" | "required" | "filled" | "focused"> & import("@mui/system").MUIStyledCommonProps<import("@mui/material").Theme>, {}, {}>;
+}, "children" | "error" | "variant" | keyof import("@mui/material/OverridableComponent").CommonProps | "sx" | "margin" | "disabled" | "required" | "filled" | "focused"> & import("@mui/system").MUIStyledCommonProps<import("@mui/material").Theme>, {}, {}>;

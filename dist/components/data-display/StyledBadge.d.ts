@@ -3,7 +3,7 @@ export declare const StyledBadge: import("@emotion/styled").StyledComponent<{
     anchorOrigin?: import("@mui/material").BadgeOrigin | undefined;
     classes?: Partial<import("@mui/material").BadgeClasses> | undefined;
     className?: string | undefined;
-    color?: import("@mui/types").OverridableStringUnion<"primary" | "secondary" | "default" | "error" | "info" | "success" | "warning", import("@mui/material").BadgePropsColorOverrides> | undefined;
+    color?: import("@mui/types").OverridableStringUnion<"default" | "error" | "success" | "warning" | "info" | "primary" | "secondary", import("@mui/material").BadgePropsColorOverrides> | undefined;
     componentsProps?: {
         root?: import("@mui/base").SlotComponentProps<"span", import("@mui/base").BadgeRootSlotPropsOverrides, {
             badgeContent: import("react").ReactNode;
@@ -33,4 +33,4 @@ export declare const StyledBadge: import("@emotion/styled").StyledComponent<{
     variant?: import("@mui/types").OverridableStringUnion<"dot" | "standard", import("@mui/material").BadgePropsVariantOverrides> | undefined;
 } & import("@mui/base").BadgeOwnProps & import("@mui/material/OverridableComponent").CommonProps & Omit<Omit<import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>, "ref"> & {
     ref?: ((instance: HTMLSpanElement | null) => void) | import("react").RefObject<HTMLSpanElement> | null | undefined;
-}, keyof import("@mui/material/OverridableComponent").CommonProps | "anchorOrigin" | "color" | "componentsProps" | "components" | "overlap" | "sx" | "variant" | keyof import("@mui/base").BadgeOwnProps> & import("@mui/system").MUIStyledCommonProps<import("@mui/material").Theme>, {}, {}>;
+}, "anchorOrigin" | "variant" | keyof import("@mui/material/OverridableComponent").CommonProps | "color" | "componentsProps" | "components" | "overlap" | "sx" | keyof import("@mui/base").BadgeOwnProps> & import("@mui/system").MUIStyledCommonProps<import("@mui/material").Theme>, {}, {}>;
