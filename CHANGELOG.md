@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.7.1
+
+### Patch Changes
+
+-   61a9d22: Extened stanckbar
+
 ## 1.7.0
 
 ### Minor Changes
