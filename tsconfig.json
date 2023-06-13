@@ -1,7 +1,11 @@
 {
     "compilerOptions": {
         "composite": true,
-        "plugins": [{ "name": "typescript-plugin-css-modules" }],
+        "plugins": [
+            {
+                "name": "typescript-plugin-css-modules"
+            }
+        ],
         "types": ["vite/client", "node"],
         "paths": {
             "*": ["*"],
@@ -16,7 +20,8 @@
         "esModuleInterop": false,
         "strict": true,
         "forceConsistentCasingInFileNames": true,
-        "isolatedModules": true,
+        //depricated
+        //        "isolatedModules": true,
         "noEmit": true,
         "jsx": "preserve",
         "baseUrl": ".",
@@ -28,7 +33,7 @@
         "strictNullChecks": true,
         "strictFunctionTypes": true,
         "strictBindCallApply": true,
-
+        
         "noImplicitAny": true,
         "noImplicitThis": true,
         "noUnusedLocals": false,
@@ -38,7 +43,9 @@
         "noFallthroughCasesInSwitch": true,
         "noPropertyAccessFromIndexSignature": true,
         "experimentalDecorators": false,
-        "importsNotUsedAsValues": "preserve",
+        //depricated
+        //        "importsNotUsedAsValues": "preserve",
+        "verbatimModuleSyntax": true,
         "useUnknownInCatchVariables": false
     },
     "exclude": ["dist", "node_modules"],

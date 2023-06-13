@@ -6,11 +6,12 @@ import '@fontsource/roboto/500.css'
 import '@fontsource/roboto/700.css'
 import '@fontsource/material-icons'
 
-import { createTheme, CssBaseline, ThemeProvider } from '@mui/material'
+import { CssBaseline } from '@mui/material'
 import { withThemeFromJSXProvider } from '@storybook/addon-styling'
 import defaultTheme from '../src/theme/theme'
 import customColors from '../src/theme/customMuiColors'
 import { useEffect, useGlobals } from '@storybook/addons'
+import { createTheme, ThemeProvider } from '../src/providers'
 
 export const parameters = {
   actions: { argTypesRegex: '^on[A-Z].*' },

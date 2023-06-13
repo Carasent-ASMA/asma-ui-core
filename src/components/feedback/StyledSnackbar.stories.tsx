@@ -5,6 +5,7 @@ import { StyledButton } from '../inputs'
 import React from 'react'
 import { StyledAlert } from './StyledAlert'
 import CloseIcon from '@mui/icons-material/Close'
+import { enqueueSnackbar } from 'notistack'
 
 export default {
     title: 'Feedback/Snackbar',
@@ -35,6 +36,17 @@ const Template: ComponentStory<typeof StyledSnackbar> = () => {
 
     return (
         <Stack direction='column' spacing={2} sx={{ maxWidth: 400 }}>
+            <StyledButton
+                onClick={() => {
+                    enqueueSnackbar({
+                        variant: 'success',
+                        message: 'Nice snack',
+                    })
+                }}
+            >
+                Show snackbar using notistack
+            </StyledButton>
+
             <StyledButton onClick={handleOpen}>Show default snackbar with action</StyledButton>
             <StyledSnackbar
                 open={openDefault}
