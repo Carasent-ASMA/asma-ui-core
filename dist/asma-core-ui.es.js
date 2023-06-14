@@ -38485,7 +38485,7 @@ const tj = xv, oj = ({ columnsMenuTitle: e, apiRef: t }) => {
 }, nj = (e, t, o) => ({
   field: "actions",
   headerName: "Actions",
-  flex: 0.5,
+  width: 50,
   disableColumnMenu: !0,
   sortable: !1,
   type: "actions",
@@ -38525,7 +38525,7 @@ const tj = xv, oj = ({ columnsMenuTitle: e, apiRef: t }) => {
       classes: {
         checked: "text-primary-700 hover:text-primary-700"
       },
-      className: "text-[#b5bec9] hover:text-primary-600 [&>svg]:h-5 [&>svg]:w-5"
+      className: "text-[#b5bec9] hover:text-primary-600 [&>svg]:h-5 [&>svg]:w-5 [&>input]:h-full [&>input]:w-full"
     }
   } });
 })``, zB = Fo((e) => /* @__PURE__ */ T(mg, { ...e }))``, lj = le((e) => /* @__PURE__ */ T(Hv, { variant: e.variant || "contained", ...e, disableRipple: !0, classes: {

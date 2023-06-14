@@ -35,7 +35,8 @@ export const StyledDataGrid = styled((props: IBaseStyledDataGrid) => {
                     classes: {
                         checked: 'text-primary-700 hover:text-primary-700',
                     },
-                    className: 'text-[#b5bec9] hover:text-primary-600 [&>svg]:h-5 [&>svg]:w-5',
+                    className:
+                        'text-[#b5bec9] hover:text-primary-600 [&>svg]:h-5 [&>svg]:w-5 [&>input]:h-full [&>input]:w-full',
                 },
             }}
         />

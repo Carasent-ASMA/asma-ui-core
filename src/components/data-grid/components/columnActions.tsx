@@ -15,7 +15,7 @@ export const columnActions = (
     return {
         field: 'actions',
         headerName: 'Actions',
-        flex: 0.5,
+        width: 50,
         disableColumnMenu: true,
         sortable: false,
         type: 'actions',
