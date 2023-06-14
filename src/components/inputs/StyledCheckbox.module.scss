@@ -1,0 +1,10 @@
+.root {
+    @apply text-[#b5bec9] hover:text-primary-600 #{!important};
+    svg {
+        @apply h-6 w-6 #{!important};
+    }
+}
+
+.checked {
+    @apply text-primary-600 hover:text-primary-600 #{!important};
+}

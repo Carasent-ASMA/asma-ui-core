@@ -1,13 +1,13 @@
 import { Checkbox, type CheckboxProps, styled } from '@mui/material'
-import clsx from 'clsx'
+import styles from './StyledCheckbox.module.scss'
 
 export const StyledCheckbox = styled((props: CheckboxProps) => (
     <Checkbox
         {...props}
         classes={{
             ...props.classes,
-            checked: 'text-primary-600 hover:text-primary-600',
+            root: `${styles['root']}`,
+            checked: `${styles['checked']}`,
         }}
-        className={clsx(props.className, 'text-[#b5bec9] hover:text-primary-600 [&>svg]:h-6 [&>svg]:w-6')}
     />
 ))``
