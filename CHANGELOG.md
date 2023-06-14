@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.8.1
+
+### Patch Changes
+
+-   306adf9: Fix StyledCheckbox export
+
 ## 1.8.0
 
 ### Minor Changes
