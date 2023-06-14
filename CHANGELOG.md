@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.8.3
+
+### Patch Changes
+
+-   930e646: Fixed asma-core-grid input checkbox height and width, Fixed actions columns width
+
 ## 1.8.2
 
 ### Patch Changes
