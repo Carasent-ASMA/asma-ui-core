@@ -1,5 +1,10 @@
 .root {
     @apply text-[#b5bec9] hover:text-primary-600 #{!important};
+
+    input {
+        @apply h-full w-full #{!important};
+    }
+
     svg {
         @apply h-6 w-6 #{!important};
     }
@@ -7,4 +12,8 @@
 
 .checked {
     @apply text-primary-600 hover:text-primary-600 #{!important};
+}
+
+.disabled {
+    @apply opacity-50 #{!important};
 }

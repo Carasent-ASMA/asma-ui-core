@@ -13,6 +13,7 @@ const Template: ComponentStory<typeof StyledCheckbox> = (args) => (
         <StyledFormControlLabel label='Unchecked' control={<StyledCheckbox {...args} />} />
         <StyledFormControlLabel label='Checked' control={<StyledCheckbox {...args} defaultChecked />} />
         <StyledFormControlLabel label='Disabled' control={<StyledCheckbox {...args} disabled />} />
+        <StyledFormControlLabel label='Disabled checked' control={<StyledCheckbox {...args} disabled checked />} />
         <StyledFormControlLabel label='Disabled ripple' control={<StyledCheckbox {...args} disableRipple />} />
     </Stack>
 )

@@ -1,4 +1,5 @@
 export * from './StyledButton';
+export * from './StyledCheckbox';
 export * from './StyledFormControlLabel';
 export * from './StyledFormHelperText';
 export * from './StyledFormLabel';
