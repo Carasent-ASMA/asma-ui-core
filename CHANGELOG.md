@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.8.4
+
+### Patch Changes
+
+-   2212b07: Fix StyledCheckbox input size & add disabled style
+
 ## 1.8.3
 
 ### Patch Changes
