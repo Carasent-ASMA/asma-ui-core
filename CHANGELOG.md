@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.8.5
+
+### Patch Changes
+
+-   59140d5: StyledTooltip - added arrow and top placement by default
+
 ## 1.8.4
 
 ### Patch Changes
