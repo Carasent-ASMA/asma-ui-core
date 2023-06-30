@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.8.7
+
+### Patch Changes
+
+-   e1da358: add option to disable row actions for data grid
+
 ## 1.8.6
 
 ### Patch Changes
