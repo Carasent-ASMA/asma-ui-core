@@ -11,6 +11,7 @@ export const columnActions = (
         params: GridRowParams<any>,
     ) => ReactElement<GridActionsCellItemProps, string | JSXElementConstructor<any>>[],
     columnsMenuTitle: ReactNode,
+    fixedColumns?: string[],
 ) => {
     return {
         field: 'actions',
@@ -19,15 +20,18 @@ export const columnActions = (
         disableColumnMenu: true,
         sortable: false,
         type: 'actions',
-        renderHeader: () => <RenderHeader apiRef={apiRef} columnsMenuTitle={columnsMenuTitle} />,
+        renderHeader: () => (
+            <RenderHeader apiRef={apiRef} columnsMenuTitle={columnsMenuTitle} fixedColumns={fixedColumns} />
+        ),
         getActions: rowActions || (() => []),
     }
 }
 
-const RenderHeader: React.FC<{ apiRef: React.MutableRefObject<GridApiCommunity>; columnsMenuTitle: ReactNode }> = ({
-    apiRef,
-    columnsMenuTitle,
-}) => {
+const RenderHeader: React.FC<{
+    apiRef: React.MutableRefObject<GridApiCommunity>
+    columnsMenuTitle: ReactNode
+    fixedColumns?: string[]
+}> = ({ apiRef, columnsMenuTitle, fixedColumns }) => {
     const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
     const open = Boolean(anchorEl)
     const id = open ? 'simple-popover' : undefined
@@ -59,7 +63,7 @@ const RenderHeader: React.FC<{ apiRef: React.MutableRefObject<GridApiCommunity>;
                     horizontal: 'left',
                 }}
             >
-                <ColumnsMenu columnsMenuTitle={columnsMenuTitle} apiRef={apiRef} />
+                <ColumnsMenu columnsMenuTitle={columnsMenuTitle} apiRef={apiRef} fixedColumns={fixedColumns} />
             </Popover>
         </>
     )

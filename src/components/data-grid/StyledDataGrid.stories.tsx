@@ -2,7 +2,7 @@ import { Icon } from '@iconify/react'
 import { Stack, Typography } from '@mui/material'
 import type { ComponentMeta, ComponentStory } from '@storybook/react'
 import { StyledDataGrid } from './StyledDataGrid'
-import { StyledGridActionsCellItem } from './StyledGridActionsCellItem'
+import { StyledButton } from '../inputs'
 
 export default { title: 'DataGrid' } as ComponentMeta<typeof StyledDataGrid>
 
@@ -38,11 +38,34 @@ Default.args = {
         },
     ],
     columns: [
+        {
+            field: 'prefixIcon',
+            headerName: '',
+            renderCell: () => <Icon icon='material-symbols:notes' className='text-gray-600' height='20' width='20' />,
+            width: 50,
+            sortable: false,
+        },
         { field: 'title', headerName: 'Title', flex: 2 },
         { field: 'description', headerName: 'Description', flex: 3 },
         { field: 'context', headerName: 'Context', flex: 1 },
         { field: 'deadline', headerName: 'Deadline', flex: 1 },
+        {
+            field: 'shared',
+            headerName: 'Shared',
+            renderHeader: () => <div />,
+            renderCell: () => (
+                <StyledButton
+                    type='button'
+                    variant='text'
+                    className='m-auto mt-2 flex w-fit justify-center bg-transparent'
+                >
+                    Shared
+                </StyledButton>
+            ),
+            sortable: false,
+        },
     ],
+    fixedColumns: ['prefixIcon', 'shared'],
     checkboxSelection: true,
     disableColumnMenu: true,
     disableColumnSelector: true,

@@ -8,7 +8,9 @@ export const StyledDataGrid = styled((props: IBaseStyledDataGrid) => {
     const apiRef = useGridApiRef()
 
     const columns = [...props.columns.map((col) => ({ ...col, disableColumnMenu: true }))]
-    columns.push(columnActions(apiRef, props.rowActions || (() => []), props.columnsMenuTitle || ''))
+    columns.push(
+        columnActions(apiRef, props.rowActions || (() => []), props.columnsMenuTitle || '', props.fixedColumns),
+    )
 
     return (
         <DataGrid

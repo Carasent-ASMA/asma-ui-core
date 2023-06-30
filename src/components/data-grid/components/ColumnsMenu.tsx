@@ -5,17 +5,26 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 import FormGroup from '@mui/material/FormGroup'
 import type { ReactNode } from 'react'
 
+const checkboxSelection = '__check__'
+
 export const ColumnsMenu: React.FC<{
     columnsMenuTitle: ReactNode
     apiRef: React.MutableRefObject<GridApiCommunity>
-}> = ({ columnsMenuTitle, apiRef }) => {
+    fixedColumns?: string[]
+}> = ({ columnsMenuTitle, apiRef, fixedColumns }) => {
     const cols = apiRef?.current.getAllColumns()
+
+    const filteredColumns = cols.filter((col) => {
+        if (col.field === checkboxSelection) return false
+        if (fixedColumns?.includes(col.field)) return false
+        return true
+    })
 
     return (
         <div className='flex flex-col p-5'>
             {columnsMenuTitle && <div>{columnsMenuTitle}</div>}
             <FormGroup className='flex flex-col !text-[14px]'>
-                {cols
+                {filteredColumns
                     .map((col) => (
                         <FormControlLabel
                             key={col.field}
