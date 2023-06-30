@@ -3,6 +3,7 @@ import type { JSXElementConstructor, ReactElement, ReactNode } from 'react'
 
 export interface IBaseStyledDataGrid extends DataGridProps {
     columnsMenuTitle?: ReactNode
+    disableRowActions?: boolean
     fixedColumns?: string[]
 
     rowActions?: (
