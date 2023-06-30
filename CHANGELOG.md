@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.8.6
+
+### Patch Changes
+
+-   bd7fa6f: added fixed columns prop for StyledDataGrid
+
 ## 1.8.5
 
 ### Patch Changes
