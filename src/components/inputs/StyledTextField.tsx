@@ -16,4 +16,10 @@ export const StyledTextField = styled(
             <TextField aria-labelledby={`${props.id}-label`} {...props} size={size} />
         </FormControl>
     ),
-)``
+)`
+    & .MuiOutlinedInput-root {
+        & fieldset {
+            border-color: #626e7e;
+        }
+    }
+`
