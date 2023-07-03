@@ -1,2 +1,2 @@
-export * from './StyledBadge';
-export * from './StyledTooltip';
+export * from './StyledBadge'
+export * from './StyledTooltip'
