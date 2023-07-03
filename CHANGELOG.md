@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.9.2
+
+### Patch Changes
+
+-   f985a8a: StyledFormGroup
+
 ## 1.9.1
 
 ### Patch Changes
