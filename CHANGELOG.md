@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.9.0
+
+### Minor Changes
+
+-   ee41eab: added icons from asma-antrd
+
 ## 1.8.7
 
 ### Patch Changes
