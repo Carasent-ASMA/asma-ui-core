@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.9.1
+
+### Patch Changes
+
+-   d6646f3: changed the border for textField
+
 ## 1.9.0
 
 ### Minor Changes
