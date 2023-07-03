@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.9.3
+
+### Patch Changes
+
+-   bfb9d4f: Fix some class conflicts for StyledDialog
+
 ## 1.9.2
 
 ### Patch Changes
