@@ -2,8 +2,8 @@ import type { GridApiCommunity } from '@mui/x-data-grid/internals'
 import { ColumnFormControlItem } from './ColumnFormControlItem'
 import { capitalize } from 'lodash-es'
 import FormControlLabel from '@mui/material/FormControlLabel'
-import FormGroup from '@mui/material/FormGroup'
 import type { ReactNode } from 'react'
+import { StyledFormGroup } from '../../form-group'
 
 const checkboxSelection = '__check__'
 
@@ -23,7 +23,7 @@ export const ColumnsMenu: React.FC<{
     return (
         <div className='flex flex-col p-5'>
             {columnsMenuTitle && <div>{columnsMenuTitle}</div>}
-            <FormGroup className='flex flex-col !text-[14px]'>
+            <StyledFormGroup className='flex flex-col !text-[14px]'>
                 {filteredColumns
                     .map((col) => (
                         <FormControlLabel
@@ -33,7 +33,7 @@ export const ColumnsMenu: React.FC<{
                         />
                     ))
                     .slice(0, -1)}
-            </FormGroup>
+            </StyledFormGroup>
         </div>
     )
 }
