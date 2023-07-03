@@ -8,12 +8,11 @@ export const StyledDialogTitle = styled(({ children, ...rest }: DialogTitleProps
         <DialogTitle
             {...rest}
             classes={{
-                root: 'p-0 m-0',
+                ...rest.classes,
+                root: 'space-x-3 p-4 text-xl font-semibold leading-tight',
             }}
         >
-            <div className={'flex items-baseline justify-between space-x-3 p-4 text-xl font-semibold leading-tight'}>
-                {children}
-            </div>
+            {children}
         </DialogTitle>
     ) : null
 })``

@@ -38498,14 +38498,16 @@ const tj = ej, oj = (e) => /* @__PURE__ */ C(zv, { ...e }), nj = "__check__", rj
     o && o(i, "escapeKeyDown");
   }, className: "text-gray-800", children: e }) }),
   t
-] }))``, UG = le((e) => /* @__PURE__ */ C(ey, { classes: {
+] }))``, UG = le((e) => /* @__PURE__ */ C(ey, { ...e, classes: {
+  ...e.classes,
   root: "p-0 m-0 justify-center"
 }, children: /* @__PURE__ */ C("div", { className: ie("flex w-full justify-end space-x-4 p-4", e.className), children: e.children }) }))``, WG = le(({ children: e, classes: t, className: o, ...r }) => /* @__PURE__ */ C(ty, { ...r, classes: {
   ...t,
-  root: "p-0 mx-0 mt-0"
-}, className: ie("w-full p-4", o), children: e }))``, qG = le(({ children: e, ...t }) => e ? /* @__PURE__ */ C(oy, { ...t, classes: {
-  root: "p-0 m-0"
-}, children: /* @__PURE__ */ C("div", { className: "flex items-baseline justify-between space-x-3 p-4 text-xl font-semibold leading-tight", children: e }) }) : null)``, KG = wo((e) => /* @__PURE__ */ C(ny, { ...e }))``, YG = wo((e) => /* @__PURE__ */ C(ry, { ...e }))``, QG = wo(({ children: e, ...t }) => /* @__PURE__ */ C(ly, { autoHideDuration: t.autoHideDuration ?? 6e3, ...t, children: e && /* @__PURE__ */ C("div", { children: e }) }))``, ZG = wo((e) => /* @__PURE__ */ C(iy, { ...e, children: e.children }))``, XG = (e) => /* @__PURE__ */ C(ay, { ...e, children: e.children });
+  root: "p-4 mx-0 mt-0 w-full"
+}, className: o, children: e }))``, qG = le(({ children: e, ...t }) => e ? /* @__PURE__ */ C(oy, { ...t, classes: {
+  ...t.classes,
+  root: "space-x-3 p-4 text-xl font-semibold leading-tight"
+}, children: e }) : null)``, KG = wo((e) => /* @__PURE__ */ C(ny, { ...e }))``, YG = wo((e) => /* @__PURE__ */ C(ry, { ...e }))``, QG = wo(({ children: e, ...t }) => /* @__PURE__ */ C(ly, { autoHideDuration: t.autoHideDuration ?? 6e3, ...t, children: e && /* @__PURE__ */ C("div", { children: e }) }))``, ZG = wo((e) => /* @__PURE__ */ C(iy, { ...e, children: e.children }))``, XG = (e) => /* @__PURE__ */ C(ay, { ...e, children: e.children });
 function hu(e) {
   const t = {};
   for (const [o, r] of Object.entries(e))

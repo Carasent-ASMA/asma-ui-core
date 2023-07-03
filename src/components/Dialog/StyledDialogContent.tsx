@@ -1,7 +1,6 @@
 import { DialogContent, type DialogContentProps } from '@mui/material'
 
 import { styled } from '@mui/material/styles'
-import clsx from 'clsx'
 
 export const StyledDialogContent = styled(({ children, classes, className, ...rest }: DialogContentProps) => {
     return (
@@ -9,9 +8,9 @@ export const StyledDialogContent = styled(({ children, classes, className, ...re
             {...rest}
             classes={{
                 ...classes,
-                root: 'p-0 mx-0 mt-0',
+                root: 'p-4 mx-0 mt-0 w-full',
             }}
-            className={clsx('w-full p-4', className)}
+            className={className}
         >
             {children}
         </DialogContent>

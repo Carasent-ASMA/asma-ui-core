@@ -6,7 +6,9 @@ import clsx from 'clsx'
 export const StyledDialogActions = styled((props: DialogActionsProps) => {
     return (
         <DialogActions
+            {...props}
             classes={{
+                ...props.classes,
                 root: 'p-0 m-0 justify-center',
             }}
         >
