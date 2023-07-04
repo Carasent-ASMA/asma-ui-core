@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 1.9.4
+
+### Patch Changes
+
+-   5b1f300: tailwind configs from asma-antrd to asma-core-ui
+
 ## 1.9.3
 
 ### Patch Changes
