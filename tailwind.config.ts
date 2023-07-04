@@ -1,21 +1,20 @@
-const twConfigs = require('./tailwind-configs/tw_configs.cjs')
-const colors = require('./src/styles/tokens/tokens.json')
-const fontSize = require('./src/styles/tokens/fontSize.json')
-const defaultConfig = require('tailwindcss/defaultConfig')
+import { type Config } from 'tailwindcss'
+import colors from './src/styles/tokens/tokens.json'
+import fontSize from './src/styles/tokens/fontSize.json'
+import twConfigs from './tailwind-configs/twConfigs'
 
 const boxShadow = twConfigs.boxShadow,
     animation = twConfigs.animation,
     keyframes = twConfigs.keyframes
 
-module.exports = {
+export default {
     mode: 'jit',
     important: true,
     content: ['src/**/*.{js,jsx,ts,tsx}'],
     theme: {
         fontFamily: {
-            sans: ['Source Sans Pro', defaultConfig.theme.fontFamily.sans],
-            roboto: ['Roboto', defaultConfig.theme.fontFamily.serif],
-            slab: ['Roboto Slab', defaultConfig.theme.fontFamily.serif],
+            roboto: ['Roboto'],
+            sans: ['Source Sans Pro'],
         },
         fontSize: {
             sm: '0.75rem',
@@ -27,7 +26,7 @@ module.exports = {
             '5xl': '3.052rem',
         },
         extend: {
-            colors,
+            colors: { ...colors, ...twConfigs.colors },
             boxShadow,
             animation,
             keyframes,
@@ -35,4 +34,5 @@ module.exports = {
         },
     },
     darkMode: 'media',
-}
+    plugins: [],
+} satisfies Config

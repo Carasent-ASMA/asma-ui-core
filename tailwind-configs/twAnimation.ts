@@ -1,4 +1,4 @@
-module.exports = {
+export default {
     animation: {
         'slide-in': 'slide-in 0.3s linear',
         'slide-out': 'slide-out 0.3s linear',

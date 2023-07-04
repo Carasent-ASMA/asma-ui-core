@@ -38511,9 +38511,9 @@ const tj = ej, oj = (e) => /* @__PURE__ */ C(zv, { ...e }), nj = "__check__", rj
 function hu(e) {
   const t = {};
   for (const [o, r] of Object.entries(e))
-    r.includes("var") ? Object.assign(t, {
+    r.includes("var") ? (console.log("value->>>", r), Object.assign(t, {
       [`${o}`]: JSON.parse(JSON.stringify(getComputedStyle(document.body).getPropertyValue(r.replaceAll(/((var)|\(|\))/g, "")))).trim()
-    }) : Object.assign(t, {
+    })) : Object.assign(t, {
       [`${o}`]: r
     });
   return t;

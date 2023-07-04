@@ -94,7 +94,7 @@
         "react-hooks": "^1.0.1",
         "sass": "^1.57.1",
         "tailwind": "^4.0.0",
-        "tailwindcss": "^3.1.8",
+        "tailwindcss": "^3.3.2",
         "typescript": "5.0.2",
         "typescript-plugin-css-modules": "^3.4.0",
         "vite": "^4.3.5",
@@ -114,6 +114,6 @@
             "import": "./dist/asma-core-ui.es.js"
         },
         "./dist/style.css": "./dist/style.css",
-        "./tailwind-configs/tw_configs.cjs": "./tailwind-configs/tw_configs.cjs"
+        "./tailwind-configs/tw_configs.ts": "./tailwind-configs/tw_configs.ts"
     }
 }

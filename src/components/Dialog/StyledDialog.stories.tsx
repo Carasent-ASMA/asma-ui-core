@@ -26,7 +26,7 @@ const Template: ComponentStory<typeof StyledDialog> = (args) => {
             </StyledButton>
             <StyledDialog {...args} onCloseText='Close' open={open} onClose={handleCloseModal}>
                 <StyledDialogTitle className='text-center'>{args.title}</StyledDialogTitle>
-                <StyledDialogContent>
+                <StyledDialogContent className='text-gama-700'>
                     Lorem ipsum dolor sit amet consectetur adipiscing elit placerat, habitasse justo eros suspendisse
                     aptent eleifend dis ultrices duis, facilisis laoreet proin varius magna neque vulputate. Ligula
                     sociosqu sociis penatibus non iaculis, himenaeos volutpat cubilia netus feugiat, interdum leo enim

@@ -20,8 +20,6 @@
         "esModuleInterop": false,
         "strict": true,
         "forceConsistentCasingInFileNames": true,
-        //depricated
-        //        "isolatedModules": true,
         "noEmit": true,
         "jsx": "preserve",
         "baseUrl": ".",
@@ -29,11 +27,10 @@
         "moduleResolution": "Node",
         "allowSyntheticDefaultImports": true,
         "resolveJsonModule": true,
-        //
         "strictNullChecks": true,
         "strictFunctionTypes": true,
         "strictBindCallApply": true,
-        
+
         "noImplicitAny": true,
         "noImplicitThis": true,
         "noUnusedLocals": false,
@@ -43,14 +40,13 @@
         "noFallthroughCasesInSwitch": true,
         "noPropertyAccessFromIndexSignature": true,
         "experimentalDecorators": false,
-        //depricated
-        //        "importsNotUsedAsValues": "preserve",
         "verbatimModuleSyntax": true,
         "useUnknownInCatchVariables": false
     },
     "exclude": ["dist", "node_modules"],
     "include": [
-        "tailwind.config.cjs",
+        "tailwind.config.ts",
+        "tailwind-configs/**/*.ts",
         "src/**/*.ts",
         "src/**/*.tsx",
         "vite.config.ts",
