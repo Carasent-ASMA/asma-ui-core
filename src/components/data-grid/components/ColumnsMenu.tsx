@@ -3,7 +3,7 @@ import { ColumnFormControlItem } from './ColumnFormControlItem'
 import { capitalize } from 'lodash-es'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import type { ReactNode } from 'react'
-import { StyledFormGroup } from '../../form-group'
+import { StyledFormGroup } from '../../miscellaneous/StyledFormGroup'
 
 const checkboxSelection = '__check__'
 

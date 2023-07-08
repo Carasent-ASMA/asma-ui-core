@@ -1,10 +1,9 @@
-import { styled } from '@mui/material/styles'
 import { DataGrid, useGridApiRef } from '@mui/x-data-grid'
 import styles from './StyledDataGrid.module.scss'
 import { columnActions } from './components/columnActions'
 import type { IBaseStyledDataGrid } from './types'
 
-export const StyledDataGrid = styled((props: IBaseStyledDataGrid) => {
+export const StyledDataGrid = (props: IBaseStyledDataGrid) => {
     const apiRef = useGridApiRef()
 
     const columns = [...props.columns.map((col) => ({ ...col, disableColumnMenu: true }))]
@@ -45,4 +44,4 @@ export const StyledDataGrid = styled((props: IBaseStyledDataGrid) => {
             }}
         />
     )
-})``
+}

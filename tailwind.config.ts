@@ -1,7 +1,7 @@
 import { type Config } from 'tailwindcss'
 import colors from './src/styles/tokens/tokens.json'
 import fontSize from './src/styles/tokens/fontSize.json'
-import twConfigs from './tailwind-configs/twConfigs'
+import twConfigs from './tw-configs/twConfigs.json'
 
 const boxShadow = twConfigs.boxShadow,
     animation = twConfigs.animation,

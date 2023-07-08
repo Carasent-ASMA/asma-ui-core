@@ -46,7 +46,7 @@
     "exclude": ["dist", "node_modules"],
     "include": [
         "tailwind.config.ts",
-        "tailwind-configs/**/*.ts",
+        "tw-configs/**/*.json",
         "src/**/*.ts",
         "src/**/*.tsx",
         "vite.config.ts",

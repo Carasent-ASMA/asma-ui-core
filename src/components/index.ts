@@ -1,6 +1,0 @@
-export * from './data-display'
-export * from './data-grid'
-export * from './Dialog'
-export * from './feedback'
-export * from './inputs'
-export * from './Select'
