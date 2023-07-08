@@ -158,10 +158,10 @@ export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 
             <div title='CalendarRangeIcon'>
                 <CalendarRangeIcon height={height} width={width} />
             </div>
-            <div title='AsignmentOutlineIcon'>
+            <div title='AssignmentOutlineIcon'>
                 <AssignmentOutlineIcon height={height} width={width} />
             </div>
-            <div title='AsignmentIcon'>
+            <div title='AssignmentIcon'>
                 <AssignmentIcon height={height} width={width} />
             </div>
             <div title='ListNumberedIcon'>

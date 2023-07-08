@@ -41,15 +41,5 @@
     "todo-tree.tree.scanMode": "workspace only",
     //"typescript.tsdk": "node_modules/typescript/lib",
     "typescript.tsdk": "node_modules\\typescript\\lib",
-    "tailwindCSS.classAttributes": ["class", "className", "classes"],
-    "cSpell.words": ["asma", "clsx", "Fretex", "mertasan", "Roboto", "tailwindcss"],
-    "cSpell.ignorePaths": [
-        "package-lock.json",
-        "node_modules",
-        "dist",
-        "vscode-extension",
-        ".git/objects",
-        ".vscode",
-        ".vscode-insiders"
-    ]
+    "tailwindCSS.classAttributes": ["class", "className", "classes"]
 }
