@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 2.0.0
+
+### Major Changes
+
+-   42ae731: storybook7, pnpm, tw-configs
+
 ## 1.9.4
 
 ### Patch Changes
