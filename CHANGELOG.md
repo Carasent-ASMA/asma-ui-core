@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 2.0.2
+
+### Patch Changes
+
+-   a980095: export styled textfield
+
 ## 2.0.1
 
 ### Patch Changes
