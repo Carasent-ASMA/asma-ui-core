@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 2.0.1
+
+### Patch Changes
+
+-   2d2fe53: restored StyledTextField, added cspell.json
+
 ## 2.0.0
 
 ### Major Changes
