@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 2.0.3
+
+### Patch Changes
+
+-   a95643e: fixed fretex tokens
+
 ## 2.0.2
 
 ### Patch Changes
