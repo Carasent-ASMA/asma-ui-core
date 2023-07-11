@@ -19,6 +19,7 @@ export * from './components/inputs/checkbox'
 export * from './components/inputs/input'
 export * from './components/inputs/select'
 export * from './components/inputs/text-field'
+export * from './components/inputs/switch'
 // miscellaneous
 export * from './components/miscellaneous/StyledFormControl'
 export * from './components/miscellaneous/StyledFormControlLabel'
