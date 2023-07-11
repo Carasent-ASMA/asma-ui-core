@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 2.2.0
+
+### Minor Changes
+
+-   537750f: added new props for data-grid
+
 ## 2.1.0
 
 ### Minor Changes
