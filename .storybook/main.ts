@@ -28,15 +28,18 @@ const config: StorybookConfig = {
         builder: '@storybook/builder-vite',
     },
     typescript: {
-        check: false,
+        check: true,
         reactDocgen: 'react-docgen-typescript',
         reactDocgenTypescriptOptions: {
-            // makes union prop types like variant and size appear as select controls
             shouldExtractLiteralValuesFromEnum: true,
-            // makes string and boolean types that can be undefined appear as inputs and switches
-            shouldRemoveUndefinedFromOptional: true,
-            // Filter out third-party props from node_modules except @mui packages
-            propFilter: (prop) => (prop.parent ? !/node_modules\/(?!@mui)/.test(prop.parent.fileName) : true),
+            savePropValueAsString: true,
+            propFilter: (prop) =>
+                prop.parent
+                    ? /@material-ui/.test(prop.parent.fileName) || !/node_modules/.test(prop.parent.fileName)
+                    : true,
+            compilerOptions: {
+                allowSyntheticDefaultImports: false,
+            },
         },
     },
 }

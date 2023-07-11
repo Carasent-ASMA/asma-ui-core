@@ -3,12 +3,16 @@ import { Stack, Typography } from '@mui/material'
 import type { Meta, StoryObj } from '@storybook/react'
 import { StyledDataGrid } from './StyledDataGrid'
 import { StyledButton } from '../inputs/button/StyledButton'
+import { GridActionsCellItem } from '@mui/x-data-grid'
 
 const meta = {
     title: 'DataGrid/Styled Data Grid',
     component: StyledDataGrid,
     tags: ['autodocs'],
-    argTypes: {},
+    argTypes: {
+        disableHeaderPin: { control: 'boolean', defaultValue: false },
+        disableRowActions: { control: 'boolean', defaultValue: false },
+    },
     args: {
         rows: [
             {
@@ -62,11 +66,24 @@ const meta = {
         disableColumnSelector: true,
         disableColumnFilter: true,
         disableDensitySelector: true,
+        rowActions: () => {
+            return [
+                <GridActionsCellItem
+                    onClick={() => {
+                        console.log('click')
+                    }}
+                    key='to-draft'
+                    label={'label'}
+                    showInMenu
+                />,
+            ]
+        },
         slots: {
             columnSortedAscendingIcon: () => <Icon icon={'mdi:menu-up'} />,
             columnSortedDescendingIcon: () => <Icon icon={'mdi:menu-down'} />,
         },
-        disableHeaderPin: true,
+        disableHeaderPin: false,
+        disableRowActions: false,
     },
 } satisfies Meta<typeof StyledDataGrid>
 
@@ -75,17 +92,25 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const DataGrid: Story = {
-    argTypes: meta.argTypes,
-    render: () => (
-        <>
-            <Stack mt={2} mb={4}>
-                <Typography variant='h1'>Standard DataGrid</Typography>
-                <StyledDataGrid {...meta.args} checkboxSelection={false} disableRowSelectionOnClick hideFooter />
-            </Stack>
-            <Stack mt={2}>
-                <Typography variant='h1'>DataGrid with checkboxSelection and footer</Typography>
-                <StyledDataGrid {...meta.args} />
-            </Stack>
-        </>
-    ),
+    args: meta.args,
+    render: (args) => {
+        return (
+            <>
+                <Stack mt={2} mb={4}>
+                    <Typography variant='h1'>Standard DataGrid</Typography>
+                    <StyledDataGrid
+                        {...meta.args}
+                        {...args}
+                        checkboxSelection={false}
+                        disableRowSelectionOnClick
+                        hideFooter
+                    />
+                </Stack>
+                <Stack mt={2}>
+                    <Typography variant='h1'>DataGrid with checkboxSelection and footer</Typography>
+                    <StyledDataGrid {...meta.args} {...args} />
+                </Stack>
+            </>
+        )
+    },
 }

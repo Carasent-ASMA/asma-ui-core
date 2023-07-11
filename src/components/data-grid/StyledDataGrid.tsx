@@ -4,17 +4,23 @@ import { columnActions } from './components/columnActions'
 import type { IBaseStyledDataGrid } from './types'
 import clsx from 'clsx'
 
-export const StyledDataGrid = ({ disableHeaderPin = true, ...props }: IBaseStyledDataGrid) => {
+export const StyledDataGrid = (props: IBaseStyledDataGrid) => {
     const apiRef = useGridApiRef()
-    console.log('>>disableHeaderPin', disableHeaderPin)
-
     const columns = [...props.columns.map((col) => ({ ...col, disableColumnMenu: true }))]
-    if (!props.disableRowActions && disableHeaderPin) {
+
+    if (!props.disableRowActions) {
         columns.push(
             columnActions(apiRef, props.rowActions || (() => []), props.columnsMenuTitle || '', props.fixedColumns),
         )
     }
 
+    if (props.disableHeaderPin) {
+        columns.forEach((col) => {
+            if (col.type === 'actions') {
+                col.renderHeader = () => ''
+            }
+        })
+    }
     return (
         <DataGrid
             apiRef={apiRef}
@@ -55,4 +61,9 @@ export const StyledDataGrid = ({ disableHeaderPin = true, ...props }: IBaseStyle
             }}
         />
     )
+}
+
+StyledDataGrid.defaultProps = {
+    disableHeaderPin: false,
+    disableRowActions: false,
 }
