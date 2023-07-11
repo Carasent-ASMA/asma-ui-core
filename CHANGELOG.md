@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 2.0.6
+
+### Patch Changes
+
+-   6641ff2: fixed order props for data-grid to be possible override them
+
 ## 2.0.5
 
 ### Patch Changes
