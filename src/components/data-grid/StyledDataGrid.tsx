@@ -30,9 +30,9 @@ export const StyledDataGrid = (props: IBaseStyledDataGrid) => {
                 row: `${styles['row']}`,
                 virtualScrollerContent: `${styles['virtualScrollerContent']}`,
                 menuIconButton: `${styles['menuIconButton']}`,
+                ...props.classes,
             }}
             slotProps={{
-                ...props.slotProps,
                 baseCheckbox: {
                     disableRipple: true,
                     classes: {
@@ -41,6 +41,7 @@ export const StyledDataGrid = (props: IBaseStyledDataGrid) => {
                     className:
                         'text-[#b5bec9] hover:text-primary-600 [&>svg]:h-5 [&>svg]:w-5 [&>input]:h-full [&>input]:w-full',
                 },
+                ...props.slotProps,
             }}
         />
     )
