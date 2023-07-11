@@ -1,5 +1,15 @@
 # asma-core-ui
 
+## 2.1.0
+
+### Minor Changes
+
+-   4aba823: Extended interface data grid
+
+### Patch Changes
+
+-   4aba823: fixed order props for data-grid to be possible override them
+
 ## 2.0.6
 
 ### Patch Changes
