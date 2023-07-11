@@ -66,6 +66,7 @@ const meta = {
             columnSortedAscendingIcon: () => <Icon icon={'mdi:menu-up'} />,
             columnSortedDescendingIcon: () => <Icon icon={'mdi:menu-down'} />,
         },
+        disableHeaderPin: true,
     },
 } satisfies Meta<typeof StyledDataGrid>
 
