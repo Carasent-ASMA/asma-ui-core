@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 2.0.5
+
+### Patch Changes
+
+-   a9b7b6a: added styled switch
+
 ## 2.0.4
 
 ### Patch Changes
