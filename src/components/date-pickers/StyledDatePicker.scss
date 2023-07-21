@@ -1,0 +1,20 @@
+.StyledDatePicker-popper {
+    .MuiDateCalendar-root {
+        width: 260px;
+        max-height: 320px;
+    }
+
+    .MuiPickersCalendarHeader-root {
+        margin-top: 15px;
+        margin-bottom: 15px;
+        padding-left: 18px;
+        padding-right: 10px;
+    }
+
+    .MuiDayCalendar-weekDayLabel {
+        color: #0b0c0f;
+        width: 28px;
+        height: 24px;
+        margin: 4px;
+    }
+}
