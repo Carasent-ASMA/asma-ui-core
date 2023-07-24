@@ -1,8 +1,5 @@
 .styled-data-grid {
     @apply rounded-none border-0 border-t border-[#bdc4cf] bg-white #{!important};
-    svg {
-        @apply text-[#0B0C0F] #{!important};
-    }
 }
 
 .cell {

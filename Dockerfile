@@ -1,8 +1,9 @@
-FROM node:16 AS build
+FROM node:19 AS build
 WORKDIR /app
 COPY . .
-RUN yarn install
-RUN yarn build-storybook
+RUN npm i -g pnpm
+RUN pnpm install
+RUN pnpm build-storybook
 
 FROM nginx:latest
 COPY --from=build /app/storybook-static/ /var/www/
