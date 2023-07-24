@@ -1,3 +1,3 @@
 import { Select, type SelectProps } from '@mui/material'
-
-export const StyledSelect = (props: SelectProps) => <Select {...props} />
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+export const StyledSelect = (props: SelectProps) => <Select {...props} IconComponent={ExpandMoreIcon} />
