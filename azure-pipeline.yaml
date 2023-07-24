@@ -22,46 +22,52 @@ jobs:
           versionSpec: "16.x"
 
       - script: |
-          git clone https://x-token-auth:$(asma-core-ui-bitbucket-token)@bitbucket.org/carasent/asma-core-ui.git
-          cd asma-core-ui
-          git fetch
-          git checkout master
+          ls -la
+          pwd
+          rm -rf ./*
+          git clone https://x-token-auth:$(asma-core-ui-bitbucket-token)@bitbucket.org/carasent/asma-core-ui.git .
+          git status
+          # git fetch origin master:master
+          # git checkout master
+          # git clone https://x-token-auth:$(asma-core-ui-bitbucket-token)@bitbucket.org/carasent/asma-core-ui.git
+          # cd asma-core-ui
+          # mv asma-core-ui/* .
           # git switch --detach master
 
-          # echo "Rename package.json"
+          # # Rename package.json
           # mv package.json package_old.json
 
-          # echo "Install Changeset CLI"
+          # # Install Changeset CLI
           # npm install @changesets/cli --no-save --no-package-lock
 
-          # echo "Rename package_old.json to package.json"
+          # # Rename package_old.json to package.json
           # mv package_old.json package.json
 
-          echo "Show changeset status"
-          npx changeset status
+          # # Show changeset status
+          # npm run changeset:status
 
-          echo "Bump version and create changelog with Changeset"
-          #npx -q @changesets/cli -- version
-          npx changeset version
+          # # Bump version and create changelog with Changeset
+          # #npx -q @changesets/cli -- version
+          # npm run changeset:version
 
-          echo "Commit changes"
-          VERSION=$(npm run version --silent)
-          LASTCOMMIT=$(git rev-parse --short HEAD)
-          git config user.email "712020:f4b4d0c3-fb46-4b7b-b851-f6509a6ab9bc@bots.bitbucket.org"
-          git config --global user.name "npx changeset"
-          git add .
-          git commit -m "[skip ci] Version - ${VERSION}"
-          git -c http.extraheader="AUTHORIZATION: bearer $(asma-core-ui-bitbucket-token)" push origin master
+          # # Commit changes
+          # VERSION=$(npm run version --silent)
+          # LASTCOMMIT=$(git rev-parse --short HEAD)
+          # git config user.email "712020:f4b4d0c3-fb46-4b7b-b851-f6509a6ab9bc@bots.bitbucket.org"
+          # git config --global user.name "npx changeset"
+          # git add .
+          # git commit -m "[skip ci] Version - ${VERSION}"
+          # git -c http.extraheader="AUTHORIZATION: bearer $(asma-core-ui-bitbucket-token)" push origin master
         displayName: "Bump version and create changelog"
 
-      - script: |
-          yarn install
-          yarn build
+      # - script: |
+      #     yarn install
+      #     yarn build
 
-          # Log in to npm
-          echo "//registry.npmjs.org/:_authToken=$(npm-token)" > .npmrc
+      #     # Log in to npm
+      #     echo "//registry.npmjs.org/:_authToken=$(npm-token)" > .npmrc
 
-          # Publish the package using Changesets
-          #npx -q @changesets/cli publish
-          npm run changeset:publish
-        displayName: "Publish package"
+      #     # Publish the package using Changesets
+      #     #npx -q @changesets/cli publish
+      #     npm run changeset:publish
+      #   displayName: "Publish package"
