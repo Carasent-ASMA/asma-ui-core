@@ -20,6 +20,7 @@ export * from './components/inputs/button'
 export * from './components/inputs/checkbox'
 export * from './components/inputs/input'
 export * from './components/inputs/select'
+export * from './components/inputs/slider'
 export * from './components/inputs/text-field'
 export * from './components/inputs/switch'
 // miscellaneous
