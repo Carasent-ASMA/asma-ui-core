@@ -7,9 +7,7 @@ const meta = {
     title: 'Inputs/Styled Slider',
     component: StyledSlider,
     tags: ['autodocs'],
-    argTypes: {
-
-    },
+    argTypes: {},
     args: {
         size: 'medium',
         max: 10,
