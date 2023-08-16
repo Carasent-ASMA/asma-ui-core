@@ -1,5 +1,20 @@
 # asma-core-ui
 
+## 2.5.0
+
+### Minor Changes
+
+-   4defa8e: Added StyledDateCalendar
+-   4447c64: Added StyledSlider
+-   4defa8e: Added StyledDatePicker, StyledTimePicker & mobile versions for all date components
+
+### Patch Changes
+
+-   cbdb995: updated docker file nodejs19 pnpm
+-   ad65511: Refactor StyledSlider classes
+-   59780a8: fix onclick event for icons
+-   4fe79ae: Fixed colors for green & blue theme
+
 ## 2.2.0
 
 ### Minor Changes
