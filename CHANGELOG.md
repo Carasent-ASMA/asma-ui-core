@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 2.5.1
+
+### Patch Changes
+
+-   453a861: changed more colors to match figma
+
 ## 2.5.0
 
 ### Minor Changes
