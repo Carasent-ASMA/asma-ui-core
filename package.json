@@ -34,7 +34,6 @@
     },
     "license": "UNLICENSED",
     "dependencies": {
-        "@changesets/cli": "^2.26.2",
         "@emotion/react": "^11.11.1",
         "@emotion/styled": "^11.11.0",
         "@fontsource/material-icons": "^5.0.4",
@@ -44,19 +43,16 @@
         "@mui/material": "^5.13.7",
         "@mui/x-data-grid": "^6.9.2",
         "@mui/x-date-pickers": "^6.10.0",
-        "@types/node": "^20.3.3",
         "clsx": "^1.2.1",
         "lodash-es": "^4.17.21",
         "node": "^20.3.1",
         "notistack": "^3.0.1",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
-        "react-quill": "^2.0.0",
-        "rollup-plugin-typescript2": "^0.35.0",
-        "vite-plugin-dts": "^3.1.1",
-        "vite-tsconfig-paths": "^4.2.0"
+        "react-quill": "^2.0.0"
     },
     "devDependencies": {
+        "@changesets/cli": "^2.26.2",
         "@storybook/addon-essentials": "^7.0.26",
         "@storybook/addon-interactions": "^7.0.26",
         "@storybook/addon-links": "^7.0.26",
@@ -72,6 +68,7 @@
         "@storybook/testing-library": "^0.2.0",
         "@storybook/theming": "^7.0.26",
         "@types/lodash-es": "^4.17.7",
+        "@types/node": "^20.3.3",
         "@types/react": "^18.0.37",
         "@types/react-dom": "^18.0.11",
         "@typescript-eslint/eslint-plugin": "^5.59.0",
@@ -85,12 +82,15 @@
         "eslint-plugin-storybook": "^0.6.12",
         "postcss": "^8.4.24",
         "prop-types": "^15.8.1",
+        "rollup-plugin-typescript2": "^0.35.0",
         "storybook": "^7.0.26",
         "storybook-addon-themes": "^6.1.0",
         "tailwindcss": "^3.3.2",
         "typescript": "^5.0.2",
         "typescript-plugin-css-modules": "^5.0.1",
-        "vite": "^4.3.9"
+        "vite": "^4.3.9",
+        "vite-plugin-dts": "^3.1.1",
+        "vite-tsconfig-paths": "^4.2.0"
     },
     "peerDependencies": {
         "@emotion/react": "^11.*",

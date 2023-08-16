@@ -4,7 +4,17 @@
     // language - current active spelling language
     "language": "en, nb, nb-NO",
     // words - list of words to be always considered correct
-    "words": ["asma", "clsx", "Fretex", "mertasan", "Roboto", "tailwindcss"],
+    "words": [
+        "asma",
+        "clsx",
+        "fontsource",
+        "Fretex",
+        "iconify",
+        "mertasan",
+        "notistack",
+        "Roboto",
+        "tailwindcss"
+    ],
     "ignorePaths": [
         "package-lock.json",
         "node_modules",
