@@ -1,14 +1,14 @@
 [data-theme='greenish'] {
-    --colors-primary-50: #e9fcfc;
-    --colors-primary-100: #dffafa;
-    --colors-primary-200: #bef4f4;
-    --colors-primary-300: #78e8e8;
-    --colors-primary-400: #32dcdc;
-    --colors-primary-500: #1ca1a1;
-    --colors-primary-600: #157a7a;
-    --colors-primary-700: #105c5c;
-    --colors-primary-800: #0b4141;
-    --colors-primary-900: #093434;
+    --colors-primary-50: #e8f6f6;
+    --colors-primary-100: #c5e7e7;
+    --colors-primary-200: #8ed0d0;
+    --colors-primary-300: #60bdbd;
+    --colors-primary-400: #1ca1a1;
+    --colors-primary-500: #168181;
+    --colors-primary-600: #116161;
+    --colors-primary-700: #0b4040;
+    --colors-primary-800: #083030;
+    --colors-primary-900: #062020;
     --colors-beta-100: var(--colors-red-100);
     --colors-beta-500: var(--colors-red-500);
     --colors-beta-600: var(--colors-red-600);
