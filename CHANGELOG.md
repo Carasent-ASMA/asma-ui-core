@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 2.5.2
+
+### Patch Changes
+
+-   820b7a8: fixed core-ui dependecies
+
 ## 2.5.1
 
 ### Patch Changes
