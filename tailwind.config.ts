@@ -34,5 +34,8 @@ export default {
         },
     },
     darkMode: 'media',
+    corePlugins: {
+        preflight: false,
+    },
     plugins: [],
 } satisfies Config

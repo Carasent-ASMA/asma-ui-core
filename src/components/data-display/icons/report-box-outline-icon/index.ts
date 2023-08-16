@@ -1,1 +1,1 @@
-export * from './ReportboxOutlineIcon'
+export * from './ReportBoxOutlineIcon'

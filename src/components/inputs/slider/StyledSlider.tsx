@@ -2,15 +2,11 @@ import { Slider, type SliderProps } from '@mui/material'
 import clsx from 'clsx'
 
 export const StyledSlider = (props: SliderProps) => {
-    const sliderClasses = props.value ? '' : 'custom-disabled'
-
     return (
         <Slider
             {...props}
-            className={clsx(sliderClasses, props.className)}
             classes={{
                 ...props.classes,
-                markActive: clsx('bg-gama-600 border-gama-600 opacity-100', props.classes?.markActive),
             }}
             slotProps={{
                 ...props.slotProps,
@@ -19,7 +15,7 @@ export const StyledSlider = (props: SliderProps) => {
                         'w-4 h-4',
                         'before:shadow-none',
                         props.orientation === 'vertical' ? 'ml-0 mb-1' : 'ml-1',
-                        props.disabled || sliderClasses ? 'bg-delta-200' : 'bg-gama-600',
+                        props.disabled || !props.value ? 'bg-delta-200' : 'bg-gama-600',
                     ),
                     ...props.slotProps?.thumb,
                 },
@@ -27,16 +23,29 @@ export const StyledSlider = (props: SliderProps) => {
                     className: 'bg-delta-200',
                     ...props.slotProps?.rail,
                 },
-                mark: {
-                    className: 'bg-white border border-delta-200 rounded-full h-2 w-2',
-                    ...props.slotProps?.mark,
-                },
                 markLabel: {
                     className: clsx(
                         'text-delta-600 text-base font-semibold ml-1',
                         props.orientation === 'vertical' && 'mb-1',
                     ),
                     ...props.slotProps?.markLabel,
+                },
+            }}
+            sx={{
+                ...props.sx,
+                '& .MuiSlider-mark': {
+                    backgroundColor: 'white',
+                    border: '1px solid var(--colors-gray-200)',
+                    borderRadius: '50%',
+                    height: '8px',
+                    width: '8px',
+
+                    '&.MuiSlider-markActive': {
+                        backgroundColor: !props.disabled ? 'var(--colors-gama-600)' : 'var(--colors-gray-200)',
+                        border: '1px solid',
+                        borderColor: !props.disabled ? 'var(--colors-gama-600)' : 'var(--colors-gray-200)',
+                        opacity: 1,
+                    },
                 },
             }}
         />

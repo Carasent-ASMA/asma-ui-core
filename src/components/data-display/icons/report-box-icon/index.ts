@@ -1,1 +1,1 @@
-export * from './ReportboxIcon'
+export * from './ReportBoxIcon'

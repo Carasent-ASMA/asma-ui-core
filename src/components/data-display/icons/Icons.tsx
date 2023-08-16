@@ -2,7 +2,6 @@ import { HamburgerIcon } from './hamburger-icon'
 import { BellIcon } from './bell-icon'
 import { PdfIcon } from './pdf-icon'
 import { QnrIcon } from './qnr-icon'
-import styles from './Icons.module.scss'
 import { ChevronDoubleLeftIcon } from './chevron-double-left-icon'
 import { ChevronDoubleRightIcon } from './chevron-double-right-icon'
 import { DashboardViewIcon } from './dashboard-view-icon'
@@ -20,8 +19,8 @@ import { MessageProcessingIcon } from './message-processing-icon'
 import { DotsVerticalIcon } from './dots-vertical-icon'
 import { SearchIcon } from './search-icon'
 import { MessageProcessingOutlineIcon } from './message-processing-outline-icon'
-import { ReportboxIcon } from './report-box-icon'
-import { ReportboxOutlineIcon } from './report-box-outline-icon'
+import { ReportBoxIcon } from './report-box-icon'
+import { ReportBoxOutlineIcon } from './report-box-outline-icon'
 import { BellOutlineIcon } from './bell-outline-icon'
 import { SettingsIcon } from './settings-icon'
 import { SettingsOutlineIcon } from './settings-outline-icon'
@@ -43,6 +42,10 @@ import { CloseIcon } from './close-icon'
 import { PermMediaIcon } from './perm-media-icon'
 import { PermMediaOutline } from './perm-media-outline-icon'
 import { FindReplacePeopleIcon } from './find-replace-people-icon'
+import { CalendarBlankOutlineIcon } from './calendar-blank-outline-icon'
+import { ClockOutlineIcon } from './clock-outline-icon'
+
+import styles from './Icons.module.scss'
 
 export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 20, width = 20 }) => {
     return (
@@ -75,10 +78,10 @@ export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 
                 <SettingsIcon height={height} width={height} />
             </div>
             <div title='ReportboxOutlineIcon'>
-                <ReportboxOutlineIcon height={height} width={height} />
+                <ReportBoxOutlineIcon height={height} width={height} />
             </div>
             <div title='ReportboxIcon'>
-                <ReportboxIcon height={height} width={height} />
+                <ReportBoxIcon height={height} width={height} />
             </div>
             <div title='BellOutlineIcon'>
                 <BellOutlineIcon height={height} width={width} />
@@ -178,6 +181,12 @@ export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 
             </div>
             <div title='PermMediaOutline'>
                 <PermMediaOutline height={height} width={height} />
+            </div>
+            <div title='CalendarBlankOutlineIcon'>
+                <CalendarBlankOutlineIcon height={height} width={height} />
+            </div>
+            <div title='ClockOutlineIcon'>
+                <ClockOutlineIcon height={height} width={height} />
             </div>
         </div>
     )
