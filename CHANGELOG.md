@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 2.5.3
+
+### Patch Changes
+
+-   1b0c0cb: fixed slider styles
+
 ## 2.5.2
 
 ### Patch Changes
