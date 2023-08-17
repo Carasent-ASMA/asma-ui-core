@@ -1,4 +1,8 @@
 {
+    "fontFamily": {
+        "sans": ["Roboto"],
+        "roboto": ["Roboto"]
+    },
     "colors": {
         "inherit": "inherit",
         "textcolor-component": "var(--colors-text-component)",
