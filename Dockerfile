@@ -1,4 +1,4 @@
-FROM node:19 AS build
+FROM node:18.17.0 AS build
 WORKDIR /app
 COPY . .
 RUN npm i -g pnpm
