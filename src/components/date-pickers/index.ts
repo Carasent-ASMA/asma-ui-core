@@ -1,7 +1,0 @@
-export * from './StyledDateCalendar'
-export * from './StyledDatePicker'
-export * from './StyledMobileDateCalendar'
-export * from './StyledMobileDatePicker'
-export * from './StyledMobileTimePicker'
-export * from './StyledTimePicker'
-export * from './x-date-pickers-types'

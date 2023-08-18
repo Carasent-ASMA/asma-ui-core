@@ -33,9 +33,6 @@ dependencies:
   '@mui/x-data-grid':
     specifier: ^6.9.2
     version: 6.9.2(@mui/material@5.13.7)(@mui/system@5.13.7)(react-dom@18.2.0)(react@18.2.0)
-  '@mui/x-date-pickers':
-    specifier: ^6.10.0
-    version: 6.10.0(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@mui/base@5.0.0-beta.6)(@mui/material@5.13.7)(@mui/system@5.13.7)(date-fns@2.30.0)(react-dom@18.2.0)(react@18.2.0)
   clsx:
     specifier: ^1.2.1
     version: 1.2.1
@@ -131,9 +128,6 @@ devDependencies:
   autoprefixer:
     specifier: ^10.4.14
     version: 10.4.14(postcss@8.4.24)
-  date-fns:
-    specifier: ^2.30.0
-    version: 2.30.0
   eslint:
     specifier: ^8.38.0
     version: 8.38.0
@@ -4116,60 +4110,6 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       reselect: 4.1.8
-    dev: false
-
-  /@mui/x-date-pickers@6.10.0(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@mui/base@5.0.0-beta.6)(@mui/material@5.13.7)(@mui/system@5.13.7)(date-fns@2.30.0)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-tp0i65JqZarIRyyTyQy5OjOPgjJv5cO7oQAbOrAePIHn7UEYPXe3k4ISiUzEAjBBXy1HhwQxGRJslVp4BXe3MA==}
-    engines: {node: '>=14.0.0'}
-    peerDependencies:
-      '@emotion/react': ^11.9.0
-      '@emotion/styled': ^11.8.1
-      '@mui/base': ^5.0.0-alpha.87
-      '@mui/material': ^5.8.6
-      '@mui/system': ^5.8.0
-      date-fns: ^2.25.0
-      date-fns-jalali: ^2.13.0-0
-      dayjs: ^1.10.7
-      luxon: ^3.0.2
-      moment: ^2.29.4
-      moment-hijri: ^2.1.2
-      moment-jalaali: ^0.7.4 || ^0.8.0 || ^0.9.0 || ^0.10.0
-      react: ^17.0.0 || ^18.0.0
-      react-dom: ^17.0.0 || ^18.0.0
-    peerDependenciesMeta:
-      '@emotion/react':
-        optional: true
-      '@emotion/styled':
-        optional: true
-      date-fns:
-        optional: true
-      date-fns-jalali:
-        optional: true
-      dayjs:
-        optional: true
-      luxon:
-        optional: true
-      moment:
-        optional: true
-      moment-hijri:
-        optional: true
-      moment-jalaali:
-        optional: true
-    dependencies:
-      '@babel/runtime': 7.22.6
-      '@emotion/react': 11.11.1(@types/react@18.0.37)(react@18.2.0)
-      '@emotion/styled': 11.11.0(@emotion/react@11.11.1)(@types/react@18.0.37)(react@18.2.0)
-      '@mui/base': 5.0.0-beta.6(@types/react@18.0.37)(react-dom@18.2.0)(react@18.2.0)
-      '@mui/material': 5.13.7(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.0.37)(react-dom@18.2.0)(react@18.2.0)
-      '@mui/system': 5.13.7(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.0.37)(react@18.2.0)
-      '@mui/utils': 5.13.7(react@18.2.0)
-      '@types/react-transition-group': 4.4.6
-      clsx: 1.2.1
-      date-fns: 2.30.0
-      prop-types: 15.8.1
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      react-transition-group: 4.4.5(react-dom@18.2.0)(react@18.2.0)
     dev: false
 
   /@ndelangen/get-tarball@3.0.9:
@@ -8353,12 +8293,6 @@ packages:
       whatwg-mimetype: 2.3.0
       whatwg-url: 8.7.0
     dev: true
-
-  /date-fns@2.30.0:
-    resolution: {integrity: sha512-fnULvOpxnC5/Vg3NCiWelDsLiUc9bRwAPs/+LfTLNvetFCtCTN+yQz15C/fs4AwX1R9K5GLtLfn8QW+dWisaAw==}
-    engines: {node: '>=0.11'}
-    dependencies:
-      '@babel/runtime': 7.22.6
 
   /de-indent@1.0.2:
     resolution: {integrity: sha512-e/1zu3xH5MQryN2zdVaF0OrdNLUbvWxzMbi+iNA6Bky7l1RoP8a2fIbRocyHclXt/arDrrR6lL3TqFD9pMQTsg==}

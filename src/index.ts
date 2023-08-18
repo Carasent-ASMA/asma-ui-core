@@ -9,8 +9,6 @@ export * from './components/data-display/tooltip'
 export * from './components/data-display/icons'
 // data-grid
 export * from './components/data-grid'
-// date-pickers
-export * from './components/date-pickers'
 // feedback
 export * from './components/feedback/dialog'
 export * from './components/feedback/alert'
