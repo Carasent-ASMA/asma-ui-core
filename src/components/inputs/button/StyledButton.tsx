@@ -22,10 +22,22 @@ import { Button, type ButtonProps } from '@mui/material'
 //     }
 // `
 
-export const StyledButton = (props: ButtonProps) => (
+/**
+ * Custom props:
+ *
+ * @reflink
+ * use reflink to provide ref attribute on wrapper component.
+ *
+ */
+export const StyledButton = (
+    props: ButtonProps & {
+        reflink?: React.RefObject<HTMLButtonElement> | null | undefined
+    },
+) => (
     <Button
         variant={props.variant || 'contained'}
         {...props}
+        ref={props.reflink}
         disableRipple
         classes={{
             containedPrimary: 'normal-case bg-primary-main hover:bg-primary-700 active:bg-primary-dark',

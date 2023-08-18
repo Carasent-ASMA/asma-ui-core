@@ -3,7 +3,7 @@
     "publishConfig": {
         "access": "public"
     },
-    "version": "2.6.5",
+    "version": "2.6.10",
     "type": "module",
     "files": [
         "dist/**/*",
@@ -38,7 +38,6 @@
         "@fontsource/material-icons": "^5.0.4",
         "@fontsource/roboto": "^5.0.4",
         "@iconify/react": "^4.1.1",
-        "@mui/icons-material": "^5.14.1",
         "@mui/material": "^5.13.7",
         "@mui/x-data-grid": "^6.9.2",
         "clsx": "^1.2.1",
