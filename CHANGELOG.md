@@ -1,5 +1,20 @@
 # asma-core-ui
 
+## 2.7.0
+
+### Minor Changes
+
+-   0423ecc: Remove mui date pickers
+-   6753e14: stabilized node version to 18.17.0 and types/node to 18.0.3
+
+### Patch Changes
+
+-   dca730f: added Roboto font to tw-configs
+-   309fc71: Export StyledEngineProvider, Accordion, Typography
+-   dec3836: 2.5.4
+-   a5490a2: 2.6.5
+-   342519d: 2.5.5
+
 ## 2.5.3
 
 ### Patch Changes
