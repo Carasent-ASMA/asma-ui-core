@@ -1,13 +1,13 @@
-import { Box, Typography as MuiTypography } from '@mui/material'
-
+import { Box } from '@mui/material'
 import type { Meta, StoryObj } from '@storybook/react'
+import { StyledTypography } from './StyledTypography'
 
 const meta = {
     title: 'DataDisplay/Styled Typography',
-    component: MuiTypography,
+    component: StyledTypography,
     tags: ['autodocs'],
     argTypes: {},
-} satisfies Meta<typeof MuiTypography>
+} satisfies Meta<typeof StyledTypography>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -21,15 +21,15 @@ const BasicTypography = () => {
     return (
         <>
             <Box mb={4}>
-                <MuiTypography variant='h1'>MUI Typography variants</MuiTypography>
-                <MuiTypography variant='h1'>H1 - Page title (variant="h1")</MuiTypography>
-                <MuiTypography variant='h2'>H2 - Section title (variant="h2")</MuiTypography>
-                <MuiTypography>Base - (variant="body", default)</MuiTypography>
-                <MuiTypography variant='caption'>Caption - caption (variant="caption")</MuiTypography>
+                <StyledTypography variant='h1'>MUI Typography variants</StyledTypography>
+                <StyledTypography variant='h1'>H1 - Page title (variant="h1")</StyledTypography>
+                <StyledTypography variant='h2'>H2 - Section title (variant="h2")</StyledTypography>
+                <StyledTypography>Base - (variant="body", default)</StyledTypography>
+                <StyledTypography variant='caption'>Caption - caption (variant="caption")</StyledTypography>
             </Box>
 
             <Box mb={2}>
-                <MuiTypography variant='h1'>Tailwind Typography variants</MuiTypography>
+                <StyledTypography variant='h1'>Tailwind Typography variants</StyledTypography>
 
                 <h1 className='text-h1'>H1 - Page title - (text-h1)</h1>
                 <h2 className='text-h2'>H2 - Section title - (text-h2)</h2>

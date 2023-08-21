@@ -7,6 +7,7 @@ export * from './interfaces'
 export * from './components/data-display/badge'
 export * from './components/data-display/tooltip'
 export * from './components/data-display/icons'
+export * from './components/data-display/typography'
 // data-grid
 export * from './components/data-grid'
 // feedback
@@ -29,3 +30,5 @@ export * from './components/miscellaneous/StyledFormLabel'
 export * from './components/miscellaneous/StyledInputLabel'
 export * from './components/miscellaneous/StyledStack'
 export * from './components/miscellaneous/StyledFormGroup'
+// surfaces
+export * from './components/surfaces/accordion'
