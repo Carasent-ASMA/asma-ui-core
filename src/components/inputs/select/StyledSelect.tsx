@@ -13,7 +13,7 @@ export const StyledSelect = (
 ) => (
     <Select
         {...props}
-        inputRef={props.reflink}
+        ref={props.reflink}
         IconComponent={() => (
             <Icon icon='material-symbols:expand-more-rounded' width={30} height={30} className='mx-2' />
         )}
