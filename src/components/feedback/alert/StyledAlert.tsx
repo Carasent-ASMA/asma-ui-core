@@ -1,5 +1,6 @@
 import { Icon } from '@iconify/react'
 import { Alert, type AlertProps } from '@mui/material'
+import clsx from 'clsx'
 
 export const StyledAlert = (props: AlertProps) => {
     return (
@@ -7,16 +8,18 @@ export const StyledAlert = (props: AlertProps) => {
             {...props}
             classes={{
                 ...props.classes,
-                root: 'text-base font-normal px-3 py-2',
-                icon: 'mr-2 -mt-0.5 text-inherit',
-                filledError: 'border border-solid border-error-500 bg-error-100 text-error-700',
-                filledInfo: 'border border-solid border-info-500 bg-info-300 text-info-700',
-                filledSuccess: 'border border-solid border-success-500 bg-success-100 text-success-700',
-                filledWarning: 'border border-solid border-warning-500 bg-warning-100 text-warning-700',
-                outlinedError: 'border-2 border-solid border-error-700 text-error-700',
-                outlinedInfo: 'border-2 border-solid border-info-700 text-info-700',
-                outlinedSuccess: 'border-2 border-solid border-success-700 text-success-700',
-                outlinedWarning: 'border-2 border-solid border-warning-700 text-warning-700',
+                root: clsx('items-start border-solid text-sm font-normal px-3 py-2', props.classes?.root),
+                icon: clsx('-mt-0.5 text-inherit', props.classes?.icon),
+                filled: clsx('border', props.classes?.filled),
+                filledError: clsx('border-error-500 bg-error-100 text-error-700', props.classes?.filledError),
+                filledInfo: clsx('border-info-500 bg-info-300 text-info-700', props.classes?.filledInfo),
+                filledSuccess: clsx('border-success-500 bg-success-100 text-success-700', props.classes?.filledSuccess),
+                filledWarning: clsx('border-warning-500 bg-warning-100 text-warning-700', props.classes?.filledWarning),
+                outlined: clsx('border-2', props.classes?.outlined),
+                outlinedError: clsx('border-error-700 text-error-700', props.classes?.outlinedError),
+                outlinedInfo: clsx('border-info-700 text-info-700', props.classes?.outlinedInfo),
+                outlinedSuccess: clsx('border-success-700 text-success-700', props.classes?.outlinedSuccess),
+                outlinedWarning: clsx('border-warning-700 text-warning-700', props.classes?.outlinedWarning),
             }}
             iconMapping={{
                 ...props.iconMapping,
