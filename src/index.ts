@@ -32,3 +32,5 @@ export * from './components/miscellaneous/StyledStack'
 export * from './components/miscellaneous/StyledFormGroup'
 // surfaces
 export * from './components/surfaces/accordion'
+//widgets
+export * from './components/custom/widget/widget-title/StyledWidgetTitle'
