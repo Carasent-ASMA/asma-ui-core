@@ -1,24 +1,13 @@
-import type { SimplePaletteColorOptions } from '@mui/material'
 import './../styles/index.css'
 import { tokens } from '../styles/tokens'
 
 const theme = {
     palette: {
         primary: tokens().primary,
-        // error: {
-        //     main: 'rgb(176, 0, 32)', // = '#b00020',
-        //     light: '#ffaaaa',
-        // },
-        // success: {
-        //     light: '#CBFFD9',
-        //     main: '#EFCC1D',
-        //     dark: '#388e3c',
-        // },
-        // warning: {
-        //     light: '#FFF9C4',
-        //     main: '#ffeb3b',
-        //     dark: '#fbc02d',
-        // },
+        error: tokens().error,
+        success: tokens().success,
+        warning: tokens().warning,
+        info: tokens().info,
     },
     typography: {
         fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
@@ -89,9 +78,41 @@ declare module '@mui/material/styles' {
                 main: string
                 dark: string
             }
-            success: SimplePaletteColorOptions
-            warning: SimplePaletteColorOptions
-            error: SimplePaletteColorOptions
+            success: {
+                100: string
+                300: string
+                500: string
+                700: string
+                light: string
+                main: string
+                dark: string
+            }
+            warning: {
+                100: string
+                300: string
+                500: string
+                700: string
+                light: string
+                main: string
+                dark: string
+            }
+            error: {
+                100: string
+                300: string
+                500: string
+                700: string
+                light: string
+                main: string
+                dark: string
+            }
+            info: {
+                300: string
+                500: string
+                700: string
+                light: string
+                main: string
+                dark: string
+            }
         }
     }
 }

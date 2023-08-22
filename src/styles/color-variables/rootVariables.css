@@ -90,5 +90,27 @@
     --colors-jade-700: #0b4040;
     --colors-jade-800: #083030;
     --colors-yellow-400: #efcc1d;
+
+    --colors-lime-300: #e6f1b1;
     --colors-lime-500: #beda2f;
+    --colors-lime-700: #8ba01d;
+
+    --colors-success-100: #d3f8e1;
+    --colors-success-300: #a1ebbd;
+    --colors-success-500: #13ce5a;
+    --colors-success-700: #0b7c36;
+
+    --colors-warning-100: #fcf4cf;
+    --colors-warning-300: #fdeb92;
+    --colors-warning-500: #f0c800;
+    --colors-warning-700: #816d09;
+
+    --colors-error-100: #f7dede;
+    --colors-error-300: #f6b9b9;
+    --colors-error-500: #ea1710;
+    --colors-error-700: #9d0f0f;
+
+    --colors-info-300: #bae8fd;
+    --colors-info-500: #0297e8;
+    --colors-info-700: #1563bc;
 }
