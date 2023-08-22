@@ -41,7 +41,6 @@
         "@mui/material": "^5.13.7",
         "@mui/x-data-grid": "^6.9.2",
         "clsx": "^1.2.1",
-        "lodash-es": "^4.17.21",
         "node": "18.17.0",
         "notistack": "^3.0.1",
         "react": "^18.2.0",
@@ -50,6 +49,7 @@
     },
     "devDependencies": {
         "@changesets/cli": "^2.26.2",
+        "@rollup/plugin-terser": "^0.4.3",
         "@storybook/addon-essentials": "^7.0.26",
         "@storybook/addon-interactions": "^7.0.26",
         "@storybook/addon-links": "^7.0.26",

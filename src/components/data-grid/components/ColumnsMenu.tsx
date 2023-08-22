@@ -1,6 +1,5 @@
 import type { GridApiCommunity } from '@mui/x-data-grid/internals'
 import { ColumnFormControlItem } from './ColumnFormControlItem'
-import { capitalize } from 'lodash-es'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import type { ReactNode } from 'react'
 import { StyledFormGroup } from '../../miscellaneous/StyledFormGroup'
@@ -28,8 +27,9 @@ export const ColumnsMenu: React.FC<{
                     .map((col) => (
                         <FormControlLabel
                             key={col.field}
+                            className='capitalize'
                             control={<ColumnFormControlItem apiRef={apiRef} columnField={col.field} />}
-                            label={capitalize(col.headerName)}
+                            label={col.headerName}
                         />
                     ))
                     .slice(0, -1)}
