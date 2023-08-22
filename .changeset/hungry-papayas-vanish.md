@@ -2,4 +2,4 @@
 'asma-core-ui': patch
 ---
 
-bump version
+2.8.0

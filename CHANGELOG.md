@@ -1,5 +1,16 @@
 # asma-core-ui
 
+## 2.8.0
+
+### Minor Changes
+
+-   1caf76a: StyledAlert according to figma design
+
+### Patch Changes
+
+-   14b765f: bump version
+-   9708fb1: Fixed some StyledAlert conflicts
+
 ## 2.7.4
 
 ### Patch Changes
