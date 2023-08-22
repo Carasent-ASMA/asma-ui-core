@@ -1,5 +1,13 @@
 # asma-core-ui
 
+## 2.7.4
+
+### Patch Changes
+
+-   4239ef5: fixed ref in styled select
+-   8b77eaf: reduce bundle size
+-   622557f: added styled widget title
+
 ## 2.7.0
 
 ### Minor Changes
