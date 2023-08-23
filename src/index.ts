@@ -30,6 +30,8 @@ export * from './components/miscellaneous/StyledFormLabel'
 export * from './components/miscellaneous/StyledInputLabel'
 export * from './components/miscellaneous/StyledStack'
 export * from './components/miscellaneous/StyledFormGroup'
+// navigation
+export * from './components/navigation/menu'
 // surfaces
 export * from './components/surfaces/accordion'
 //widgets
