@@ -1,2 +1,2 @@
-export { GridRow } from '@mui/x-data-grid'
+export { gridDateComparator, GridRow } from '@mui/x-data-grid'
 export type * from '@mui/x-data-grid'
