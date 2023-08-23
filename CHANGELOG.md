@@ -1,5 +1,15 @@
 # asma-core-ui
 
+## 2.9.0
+
+### Minor Changes
+
+-   5d4a40e: Added StyledMenu
+
+### Patch Changes
+
+-   f525dd9: 2.8.1
+
 ## 2.8.1
 
 ### Patch Changes
