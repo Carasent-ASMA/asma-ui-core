@@ -2,4 +2,4 @@
 'asma-core-ui': patch
 ---
 
-2.8.0
+2.8.1

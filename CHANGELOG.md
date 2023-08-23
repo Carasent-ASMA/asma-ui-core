@@ -1,5 +1,12 @@
 # asma-core-ui
 
+## 2.8.1
+
+### Patch Changes
+
+-   a88d00d: 2.8.0
+-   2b40bf5: Fixed StyledSelect arrow unclickable
+
 ## 2.8.0
 
 ### Minor Changes
