@@ -1,5 +1,12 @@
 # asma-core-ui
 
+## 2.9.1
+
+### Patch Changes
+
+-   e189975: Export grid date comparator
+-   9f23080: 2.9.0
+
 ## 2.9.0
 
 ### Minor Changes
