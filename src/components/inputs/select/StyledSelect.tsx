@@ -1,5 +1,6 @@
 import { Select, type SelectProps } from '@mui/material'
 import { Icon } from '@iconify/react'
+import clsx from 'clsx'
 
 /**
  * Custom props:
@@ -14,8 +15,14 @@ export const StyledSelect = (
     <Select
         {...props}
         ref={props.reflink}
-        IconComponent={() => (
-            <Icon icon='material-symbols:expand-more-rounded' width={30} height={30} className='mx-2' />
+        IconComponent={(props) => (
+            <Icon
+                {...props}
+                icon='material-symbols:expand-more-rounded'
+                width={30}
+                height={30}
+                className={clsx(props.className, '-mt-1.5 mx-2')}
+            />
         )}
     />
 )

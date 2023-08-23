@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { StyledFormControl } from '../../miscellaneous/StyledFormControl'
 import { StyledStack } from '../../miscellaneous/StyledStack'
 import type { SelectProps } from '@mui/material'
+import { StyledTypography } from 'src/components/data-display/typography'
 
 const selectOptions = [
     { title: 'Van Henry', content: 'Van Henry12' },
@@ -38,10 +39,24 @@ export const Select: Story = {
 const StyledSelectExample: React.FC<{ args: Partial<SelectProps<unknown>> }> = ({ args }) => {
     const [value, setValue] = useState(selectOptions[0]?.content)
     return (
-        <StyledStack direction='row' spacing={2}>
+        <StyledStack direction='column' spacing={2}>
+            <StyledTypography variant='h1'>Select size medium</StyledTypography>
             <StyledFormControl fullWidth>
                 <StyledSelect
                     {...args}
+                    size='medium'
+                    value={value}
+                    onChange={(e) => {
+                        const target: string = e.target.value as string
+                        setValue(target)
+                    }}
+                />
+            </StyledFormControl>
+            <StyledTypography variant='h1'>Select size small</StyledTypography>
+            <StyledFormControl fullWidth>
+                <StyledSelect
+                    {...args}
+                    size='small'
                     value={value}
                     onChange={(e) => {
                         const target: string = e.target.value as string
