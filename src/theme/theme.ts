@@ -1,6 +1,8 @@
 import './../styles/index.css'
 import { tokens } from '../styles/tokens'
 
+const rootElement = document.getElementById('root')
+
 const theme = {
     palette: {
         primary: tokens().primary,
@@ -56,6 +58,29 @@ const theme = {
             fontWeight: 'normal',
         },
     },
+
+    components: {
+        MuiPopover: {
+          defaultProps: {
+            container: rootElement,
+          },
+        },
+        MuiPopper: {
+          defaultProps: {
+            container: rootElement,
+          },
+        },
+        MuiDialog: {
+          defaultProps: {
+            container: rootElement,
+          },
+        },
+        MuiModal: {
+          defaultProps: {
+            container: rootElement,
+          },
+        },
+    }
 }
 
 export default theme
