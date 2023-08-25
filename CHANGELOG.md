@@ -1,5 +1,12 @@
 # asma-core-ui
 
+## 2.9.2
+
+### Patch Changes
+
+-   c680289: 2.9.1
+-   551d2e1: added portal elements fix
+
 ## 2.9.1
 
 ### Patch Changes
