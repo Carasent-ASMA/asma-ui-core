@@ -1,5 +1,12 @@
 # asma-core-ui
 
+## 2.9.3
+
+### Patch Changes
+
+-   cffcc80: comment portal elements
+-   65487b3: 2.9.2
+
 ## 2.9.2
 
 ### Patch Changes
