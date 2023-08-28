@@ -1,0 +1,5 @@
+.root {
+    @apply bg-white rounded border border-solid border-delta-500 px-2 h-10 
+            hover:border-delta-800 hover:bg-delta-10 active:border-delta-800 active:bg-delta-10
+            focus-visible:border-2 focus-visible:border-warning-500;
+}
