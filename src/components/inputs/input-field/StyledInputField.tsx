@@ -100,7 +100,7 @@ export const StyledInputField = forwardRef<HTMLDivElement, StyledInputFieldProps
                     disabled: clsx('border-delta-300 text-delta-300', other.classes?.disabled),
                     error: clsx('bg-error-100 border-error-700 text-error-700', other.classes?.error),
                     input: clsx(
-                        'px-2 placeholder:opacity-100',
+                        'px-2 text-sm placeholder:opacity-100',
                         disabled
                             ? 'placeholder:text-delta-300'
                             : error
