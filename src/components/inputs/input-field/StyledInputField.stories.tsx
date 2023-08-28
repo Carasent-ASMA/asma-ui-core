@@ -1,9 +1,8 @@
 import React from 'react'
 import type { Meta } from '@storybook/react'
 
-import { IconButton, InputAdornment, Stack, TextField } from '@mui/material'
+import { Stack } from '@mui/material'
 import { StyledInputField } from './StyledInputField'
-import clsx from 'clsx'
 import { Icon } from '@iconify/react'
 
 const meta = {
@@ -25,35 +24,44 @@ export default meta
 export const InputField = () => (
     <>
         <Stack direction='column' spacing={2}>
-            <StyledInputField {...meta.args} label='Default' />
-            <StyledInputField
-                {...meta.args}
-                error
-                label='Start InputAdornment'
-            />
-            <StyledInputField
-                {...meta.args}
-                disabled
-                label='End InputAdornment'
-            />
+            <StyledInputField {...meta.args} label='Label text' />
+            <StyledInputField {...meta.args} label='Active' value='Generated text' />
+            <StyledInputField {...meta.args} error label='Error' />
+            <StyledInputField {...meta.args} disabled label='Disabled' />
+            <StyledInputField {...meta.args} readOnly label='Not editable' value='Input text' />
         </Stack>
-        <Stack direction='row' spacing={4} mt={4}>
-            <StyledInputField {...meta.args} label='Full width' />
-
-            <TextField
-                size='small'
-                label='Name'
-                InputLabelProps={{
-                    classes: {
-                        root: clsx('text-medium text-delta-800 font-semibold'),
-                        error: clsx('!text-error-700'),
-                        disabled: clsx('!text-delta-300'),
-                    },
-                }}
-                classes={{
-                    root: `[&_fieldset]:!border-delta-500`,
-                }}
+        <Stack direction='column' spacing={2} mt={4} maxWidth={214}>
+            <StyledInputField {...meta.args} size='small' label='Enabled small' />
+            <StyledInputField
+                {...meta.args}
+                label='End adornment'
+                helperText=''
+                placeholder='Placeholder long text'
+                startAdornment={null}
             />
+            <StyledInputField
+                {...meta.args}
+                label='Start adornment'
+                helperText=''
+                placeholder='Placeholder long text'
+                endAdornment={null}
+            />
+            <StyledInputField
+                {...meta.args}
+                label=''
+                helperText=''
+                placeholder='Placeholder long text'
+                startAdornment={null}
+            />
+            <StyledInputField
+                {...meta.args}
+                label=''
+                helperText=''
+                placeholder='Placeholder long text'
+                endAdornment={null}
+            />
+            <StyledInputField {...meta.args} size='small' type='search' label='' helperText='' startAdornment={null} />
+            <StyledInputField {...meta.args} label='' helperText='' startAdornment={null} endAdornment={null} />
         </Stack>
     </>
 )

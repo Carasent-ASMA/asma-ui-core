@@ -1,9 +1,9 @@
 .styled-data-grid {
-    @apply rounded-none border-0 border-t border-[#bdc4cf] bg-white #{!important};
+    @apply rounded-none border-0 border-t border-delta-300 bg-white #{!important};
 }
 
 .cell {
-    @apply min-h-[50px] border-b border-[#bdc4cf] focus-within:outline-none focus:outline-none #{!important};
+    @apply min-h-[50px] border-b border-delta-300 focus-within:outline-none focus:outline-none #{!important};
 }
 
 .cellContent {
@@ -15,15 +15,15 @@
 }
 
 .columnHeaderTitle {
-    @apply text-[10px] font-semibold uppercase text-[#7A899E] #{!important};
+    @apply text-[10px] font-semibold uppercase text-delta-500 #{!important};
 }
 
 .columnHeaders {
-    @apply min-h-[30px] rounded-none border-b border-[#bdc4cf] bg-[#FCFCFD] #{!important};
+    @apply min-h-[30px] rounded-none border-b border-delta-300 bg-[#FCFCFD] #{!important};
 }
 
 .footerContainer {
-    @apply border-[#bdc4cf] #{!important};
+    @apply border-delta-300 #{!important};
 }
 
 .iconSeparator {
