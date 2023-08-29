@@ -9,7 +9,7 @@ import {
     type InputLabelProps,
     type InputBaseProps,
 } from '@mui/material'
-import { forwardRef } from 'react'
+import { forwardRef, type ReactNode } from 'react'
 import clsx from 'clsx'
 
 import styles from './StyledInputField.module.scss'
@@ -18,7 +18,7 @@ type StyledInputFieldProps = InputBaseProps & {
     /**
      * The helper text to display below the input field.
      */
-    helperText?: string
+    helperText?: ReactNode
     /**
      * The label to display above the input field.
      */
@@ -108,6 +108,8 @@ export const StyledInputField = forwardRef<HTMLDivElement, StyledInputFieldProps
                             : 'placeholder:text-delta-500',
                         other.classes?.input,
                     ),
+                    // focused: clsx('bg-delta-10 border-delta-800', other.classes?.focused),
+                    focused: clsx('border-2 border-warning-500', other.classes?.focused),
                     readOnly: clsx('bg-delta-50 border-none', other.classes?.readOnly),
                     inputSizeSmall: clsx('pt-1.5', other.classes?.inputSizeSmall),
                     sizeSmall: clsx('h-8', other.classes?.sizeSmall),
