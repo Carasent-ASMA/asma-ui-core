@@ -1,5 +1,15 @@
 # asma-core-ui
 
+## 2.10.0
+
+### Minor Changes
+
+-   f4be3c3: added inbox-outbox and inbox-outbox-outline icons
+
+### Patch Changes
+
+-   61efd74: 2.9.3
+
 ## 2.9.3
 
 ### Patch Changes
