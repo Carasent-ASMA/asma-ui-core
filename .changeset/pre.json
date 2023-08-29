@@ -1,0 +1,11 @@
+{
+  "mode": "pre",
+  "tag": "beta",
+  "initialVersions": {
+    "asma-core-ui": "2.9.3"
+  },
+  "changesets": [
+    "purple-ties-teach",
+    "soft-dodos-wonder"
+  ]
+}
