@@ -5,6 +5,11 @@
 ### Minor Changes
 
 -   286154b: Added StyledInputField
+## 2.10.0
+
+### Minor Changes
+
+-   f4be3c3: added inbox-outbox and inbox-outbox-outline icons
 
 ### Patch Changes
 

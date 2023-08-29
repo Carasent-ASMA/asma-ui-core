@@ -46,6 +46,8 @@ import { CalendarBlankOutlineIcon } from './calendar-blank-outline-icon'
 import { ClockOutlineIcon } from './clock-outline-icon'
 
 import styles from './Icons.module.scss'
+import { InboxOutboxIcon } from './inbox-outbox-icon'
+import { InboxOutboxOutlineIcon } from './inbox-outbox-outline-icon'
 
 export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 20, width = 20 }) => {
     return (
@@ -187,6 +189,12 @@ export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 
             </div>
             <div title='ClockOutlineIcon'>
                 <ClockOutlineIcon height={height} width={height} />
+            </div>
+            <div title='InboxOutboxIcon'>
+                <InboxOutboxIcon height={height} width={height} />
+            </div>
+            <div title='InboxOutboxOutlineIcon'>
+                <InboxOutboxOutlineIcon height={height} width={height} />
             </div>
         </div>
     )
