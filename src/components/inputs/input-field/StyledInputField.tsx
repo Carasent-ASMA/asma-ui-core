@@ -108,7 +108,6 @@ export const StyledInputField = forwardRef<HTMLDivElement, StyledInputFieldProps
                             : 'placeholder:text-delta-500',
                         other.classes?.input,
                     ),
-                    // focused: clsx('bg-delta-10 border-delta-800', other.classes?.focused),
                     focused: clsx('border-2 border-warning-500', other.classes?.focused),
                     readOnly: clsx('bg-delta-50 border-none', other.classes?.readOnly),
                     inputSizeSmall: clsx('pt-1.5', other.classes?.inputSizeSmall),
