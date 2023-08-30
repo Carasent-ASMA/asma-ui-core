@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 2.12.0
+
+### Minor Changes
+
+-   8f18554: Added TopicIcon
+
 ## 2.11.0
 
 ### Minor Changes
