@@ -6,6 +6,10 @@ type StyledTextFieldProps = TextFieldProps & {
     FormControlProps?: FormControlProps
 }
 
+/**
+ * @deprecated This component is deprecated. Please use the `StyledInputField` component instead.
+ * This component will be removed in the next major version, so please update your code accordingly.
+ */
 export const StyledTextField = ({
     FormControlProps,
     InputLabelProps,
@@ -23,7 +27,7 @@ export const StyledTextField = ({
             size={size}
             classes={{
                 ...props.classes,
-                root: `[&_fieldset]:!border-[#626e7e]`,
+                root: `[&_fieldset]:!border-delta-600`,
             }}
         />
     </FormControl>
