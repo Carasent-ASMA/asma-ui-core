@@ -1,5 +1,15 @@
 # asma-core-ui
 
+## 2.13.0
+
+### Minor Changes
+
+-   2d21b31: Added custom snackbars for provider
+
+### Patch Changes
+
+-   2d5871c: 2.12.1
+
 ## 2.12.1
 
 ### Patch Changes
