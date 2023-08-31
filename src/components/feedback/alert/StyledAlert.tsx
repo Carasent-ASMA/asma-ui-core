@@ -1,6 +1,7 @@
 import { Icon } from '@iconify/react'
 import { Alert, type AlertProps } from '@mui/material'
 import clsx from 'clsx'
+import { Children } from 'react'
 
 export const StyledAlert = (props: AlertProps) => {
     return (
@@ -8,8 +9,13 @@ export const StyledAlert = (props: AlertProps) => {
             {...props}
             classes={{
                 ...props.classes,
-                root: clsx('items-start border-solid text-sm font-normal px-3 py-2', props.classes?.root),
-                icon: clsx('-mt-0.5 text-inherit', props.classes?.icon),
+                root: clsx(
+                    'border-solid text-sm font-normal px-3 py-2',
+                    Children.count(props.children) > 1 ? 'items-start' : 'items-center',
+                    props.classes?.root,
+                ),
+                action: clsx('p-0 pl-4', props.classes?.action),
+                icon: clsx('text-2xl text-inherit', props.classes?.icon),
                 filled: clsx('border', props.classes?.filled),
                 filledError: clsx('border-error-500 bg-error-100 text-error-700', props.classes?.filledError),
                 filledInfo: clsx('border-info-500 bg-info-300 text-info-700', props.classes?.filledInfo),

@@ -1,7 +1,7 @@
 import { ThemeProvider as _ThemeProvider } from '@mui/material/styles'
-import { SnackbarProvider } from 'notistack'
 import type { IThemeProvider } from '../interfaces'
 import { omit, pick } from 'src/helpers'
+import { SnackbarProvider } from './SnackbarProvider'
 
 export const ThemeProvider = (props: IThemeProvider) => {
     const _ThemeProviderProps = omit(props, ['SnackbarProviderProps'])

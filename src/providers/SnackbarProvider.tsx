@@ -1,0 +1,38 @@
+import type { AlertColor } from '@mui/material'
+import { SnackbarProvider as NotistackProvider, type SnackbarProviderProps } from 'notistack'
+import { StyledAlertSnackbar } from 'src/components/feedback/snack-bar/StyledAlertSnackbar'
+
+export const SnackbarProvider = (props: SnackbarProviderProps) => {
+    return (
+        <NotistackProvider
+            {...props}
+            Components={{
+                alert: StyledAlertSnackbar,
+            }}
+        >
+            {props.children}
+        </NotistackProvider>
+    )
+}
+
+declare module 'notistack' {
+    interface VariantOverrides {
+        alert: {
+            /**
+             * The severity of the alert. This defines the color and icon used.
+             * @default 'success'
+             */
+            severity?: AlertColor
+            /**
+             * The variant to use.
+             * @default 'standard'
+             */
+            alertVariant?: 'standard' | 'filled' | 'outlined'
+            /**
+             * If true, the alert is closable.
+             * @default false
+             */
+            closeButton?: boolean
+        }
+    }
+}

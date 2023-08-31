@@ -51,8 +51,11 @@ export const SnackbarExample = () => {
             <StyledButton
                 onClick={() => {
                     enqueueSnackbar({
-                        variant: 'success',
+                        variant: 'alert',
                         message: 'Nice snack',
+                        severity: 'success',
+                        alertVariant: 'filled',
+                        closeButton: true,
                     })
                 }}
             >
