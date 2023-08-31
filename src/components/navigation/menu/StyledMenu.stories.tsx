@@ -9,7 +9,7 @@ import { StyledMenuItem } from './StyledMenuItem'
 import { Icon } from '@iconify/react'
 
 const meta = {
-    title: 'Navigation/Menu',
+    title: 'Navigation/Styled Menu',
     component: StyledMenu,
     tags: ['autodocs'],
     argTypes: {},

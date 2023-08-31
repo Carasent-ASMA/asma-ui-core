@@ -1,12 +1,13 @@
 import { DataGrid, useGridApiRef } from '@mui/x-data-grid'
-import styles from './StyledDataGrid.module.scss'
 import { columnActions } from './components/columnActions'
 import type { IBaseStyledDataGrid } from './types'
 import clsx from 'clsx'
 
+import styles from './StyledDataGrid.module.scss'
+
 export const StyledDataGrid = (props: IBaseStyledDataGrid) => {
     const apiRef = useGridApiRef()
-    const columns = [...props.columns.map((col) => ({ ...col, disableColumnMenu: true }))]
+    const columns = [...props.columns]
 
     if (!props.disableRowActions) {
         columns.push(
@@ -21,8 +22,10 @@ export const StyledDataGrid = (props: IBaseStyledDataGrid) => {
             }
         })
     }
+
     return (
         <DataGrid
+            disableColumnMenu
             apiRef={apiRef}
             {...props}
             columns={columns}

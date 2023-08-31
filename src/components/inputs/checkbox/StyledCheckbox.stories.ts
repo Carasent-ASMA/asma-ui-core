@@ -6,7 +6,9 @@ const meta = {
     component: StyledCheckbox,
     tags: ['autodocs'],
     argTypes: {},
-    args: {},
+    args: {
+        disableRipple: true,
+    },
 } satisfies Meta<typeof StyledCheckbox>
 
 export default meta

@@ -31,11 +31,11 @@ const BasicTypography = () => {
             <Box mb={2}>
                 <StyledTypography variant='h1'>Tailwind Typography variants</StyledTypography>
 
-                <h1 className='text-h1'>H1 - Page title - (text-h1)</h1>
-                <h2 className='text-h2'>H2 - Section title - (text-h2)</h2>
+                <h1 className='text-2xl'>H1 - Page title - (text-2xl)</h1>
+                <h2 className='text-xl'>H2 - Section title - (text-xl)</h2>
                 <div className='text-base'>text-base (Standard no class)</div>
-                <div className='text-small'>text-small (text-small)</div>
-                <div className='text-xSmall'>text-xSmall (text-xSmall)</div>
+                <div className='text-sm'>text-small (text-small)</div>
+                <div className='text-xs'>text-xs (text-xs)</div>
             </Box>
         </>
     )

@@ -10,6 +10,7 @@
     --colors-teal-800: #083030;
     --colors-teal-900: #062020;
 
+    --colors-blue-25: #f3fafa;
     --colors-blue-50: #e6f2f8;
     --colors-blue-100: #cce6f1;
     --colors-blue-200: #99cce4;
@@ -65,6 +66,7 @@
     --colors-cardea--grey-04: 216deg 16% 65%;
     --colors-cardea--grey-05: 215deg 16% 56%;
     --colors-cardea--grey-06: 216deg 16% 25%;
+    --colors-green-25: #f3fafa;
     --colors-green-50: #eff4f2;
     --colors-green-100: #deebe5;
     --colors-green-200: #ceddd7;
@@ -82,6 +84,7 @@
     --colors-slate-700: #6e9aaf;
     --colors-slate-800: #4c7f93;
     --colors-magic-blue-700: #247ba3;
+    --colors-jade-25: #f3fafa;
     --colors-jade-50: #e8f6f6;
     --colors-jade-100: #c5e7e7;
     --colors-jade-200: #8ed0d0;

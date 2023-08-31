@@ -1,26 +1,4 @@
 import { Button, type ButtonProps } from '@mui/material'
-// export const StyledButton = styled((props: ButtonProps) => <Button {...props} disableRipple />)`
-//     text-transform: none;
-//     &.MuiButton-containedPrimary {
-//         background-color: ${({ theme }) => theme.palette.primary[500]};
-//     }
-//     &.MuiButton-containedPrimary:disabled {
-//         color: ${grey[50]};
-//         background-color: ${grey[500]};
-//     }
-//     &.MuiButton-containedPrimary:hover {
-//         background-color: ${(props) => props.theme.palette.primary[700]};
-//     }
-//     &.MuiButton-containedPrimary:active {
-//         background-color: ${(props) => props.theme.palette.primary.dark};
-//     }
-//     &.Mui-focusVisible {
-//         box-shadow: ${(props) => props.variant === 'contained' && `0 0 0 3px ${props.theme.palette.primary[400]}`};
-//         background-color: ${(props) => props.variant === 'contained' && props.theme.palette.primary[700]};
-//         background-color: ${(props) => props.variant === 'outlined' && props.theme.palette.primary[100]};
-//         color: ${(props) => props.variant === 'outlined' && grey[900]};
-//     }
-// `
 
 /**
  * Custom props:

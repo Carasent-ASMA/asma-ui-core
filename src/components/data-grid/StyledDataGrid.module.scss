@@ -7,7 +7,7 @@
 }
 
 .cellContent {
-    @apply text-base text-[#0b0c0f] #{!important};
+    @apply text-sm text-delta-900 #{!important};
 }
 
 .columnHeader {
@@ -31,7 +31,7 @@
 }
 
 .row {
-    @apply min-h-[50px] hover:cursor-pointer hover:bg-primary-50 #{!important};
+    @apply min-h-[50px] hover:cursor-pointer hover:bg-primary-25 #{!important};
 }
 
 .virtualScrollerContent {

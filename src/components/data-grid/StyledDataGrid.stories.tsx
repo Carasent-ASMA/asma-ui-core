@@ -3,7 +3,7 @@ import { Stack, Typography } from '@mui/material'
 import type { Meta, StoryObj } from '@storybook/react'
 import { StyledDataGrid } from './StyledDataGrid'
 import { StyledButton } from '../inputs/button/StyledButton'
-import { GridActionsCellItem } from '@mui/x-data-grid'
+import { StyledGridActionsCellItem } from './StyledGridActionsCellItem'
 
 const meta = {
     title: 'DataGrid/Styled Data Grid',
@@ -62,18 +62,49 @@ const meta = {
         ],
         fixedColumns: ['prefixIcon', 'shared'],
         checkboxSelection: true,
-        disableColumnMenu: true,
         disableColumnSelector: true,
         disableColumnFilter: true,
         disableDensitySelector: true,
         rowActions: () => {
             return [
-                <GridActionsCellItem
+                <StyledGridActionsCellItem
                     onClick={() => {
                         console.log('click')
                     }}
                     key='to-draft'
-                    label={'label'}
+                    label='context menu item 1'
+                    showInMenu
+                />,
+                <StyledGridActionsCellItem
+                    onClick={() => {
+                        console.log('click')
+                    }}
+                    key='item-2'
+                    label='context menu item 2'
+                    showInMenu
+                />,
+                <StyledGridActionsCellItem
+                    onClick={() => {
+                        console.log('click')
+                    }}
+                    key='item-3'
+                    label='context menu item 3'
+                    showInMenu
+                />,
+                <StyledGridActionsCellItem
+                    onClick={() => {
+                        console.log('click')
+                    }}
+                    key='item-4'
+                    label='context menu item 4'
+                    showInMenu
+                />,
+                <StyledGridActionsCellItem
+                    onClick={() => {
+                        console.log('click')
+                    }}
+                    key='item-5'
+                    label='context menu item 5'
                     showInMenu
                 />,
             ]

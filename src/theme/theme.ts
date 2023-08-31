@@ -89,6 +89,7 @@ declare module '@mui/material/styles' {
     interface Theme {
         palette: {
             primary: {
+                25: string
                 50: string
                 100: string
                 200: string

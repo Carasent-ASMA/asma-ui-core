@@ -25,7 +25,7 @@ export const StyledSlider = (props: SliderProps) => {
                 },
                 markLabel: {
                     className: clsx(
-                        'text-delta-600 text-base font-semibold ml-1',
+                        'text-delta-600 text-sm font-semibold ml-1',
                         props.orientation === 'vertical' && 'mb-1',
                     ),
                     ...props.slotProps?.markLabel,

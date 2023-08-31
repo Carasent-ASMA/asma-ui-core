@@ -1,5 +1,6 @@
 .root {
-    @apply text-[#b5bec9] hover:text-primary-600 #{!important};
+    @apply text-delta-500 hover:bg-delta-10 hover:text-delta-800
+            active:bg-delta-50 disabled:text-delta-300 #{!important};
 
     input {
         @apply h-full w-full #{!important};
@@ -11,9 +12,10 @@
 }
 
 .checked {
-    @apply text-primary-600 hover:text-primary-600 #{!important};
+    @apply text-primary-500 hover:text-primary-600 active:text-primary-700
+     #{!important};
 }
 
 .disabled {
-    @apply opacity-50 #{!important};
+    @apply opacity-50 text-delta-300 #{!important};
 }

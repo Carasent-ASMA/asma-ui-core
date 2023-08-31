@@ -1,4 +1,5 @@
 [data-theme='fretex'] {
+    --colors-primary-25: #f3fafa;
     --colors-primary-50: #eff4f2;
     --colors-primary-100: #dee8e4;
     --colors-primary-200: #ceddd7;
@@ -19,6 +20,7 @@
     --colors-beta-500: var(--colors-red-500);
     --colors-beta-600: var(--colors-red-600);
     --colors-beta-700: var(--colors-red-700);
+    --colors-gama-25: var(--colors-green-25);
     --colors-gama-50: var(--colors-green-50);
     --colors-gama-100: var(--colors-green-100);
     --colors-gama-200: var(--colors-green-200);
