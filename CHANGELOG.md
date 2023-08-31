@@ -1,5 +1,12 @@
 # asma-core-ui
 
+## 2.12.1
+
+### Patch Changes
+
+-   84f05b8: 2.12.0
+-   b732f77: Fix some font size, padding, minor things
+
 ## 2.12.0
 
 ### Minor Changes
