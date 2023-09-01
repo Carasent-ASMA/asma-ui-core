@@ -1,5 +1,12 @@
 # asma-core-ui
 
+## 2.13.2
+
+### Patch Changes
+
+-   ecd4508: Add classname for internal alert in snackbar
+-   b8f1a0c: 2.13.1
+
 ## 2.13.1
 
 ### Patch Changes
