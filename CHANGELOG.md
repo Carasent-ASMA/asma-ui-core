@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 2.13.3
+
+### Patch Changes
+
+-   3012a02: fix snackbar props
+
 ## 2.13.2
 
 ### Patch Changes
