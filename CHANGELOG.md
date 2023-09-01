@@ -1,5 +1,12 @@
 # asma-core-ui
 
+## 2.13.1
+
+### Patch Changes
+
+-   5349fe5: 2.13.1
+-   67c3f6e: fix notistack types
+
 ## 2.13.0
 
 ### Minor Changes
