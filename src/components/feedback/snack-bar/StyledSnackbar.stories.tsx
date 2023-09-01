@@ -57,6 +57,11 @@ export const SnackbarExample = () => {
                         alertClassName: 'min-w-[350px]',
                         alertVariant: 'filled',
                         closeButton: true,
+                        autoHideDuration: 1000,
+                        anchorOrigin: {
+                            vertical: 'bottom',
+                            horizontal: 'right',
+                        },
                     })
                 }}
             >

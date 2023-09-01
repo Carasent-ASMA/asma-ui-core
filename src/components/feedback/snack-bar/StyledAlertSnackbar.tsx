@@ -2,6 +2,7 @@ import type { AlertColor } from '@mui/material'
 import { SnackbarContent, type CustomContentProps, useSnackbar } from 'notistack'
 import { forwardRef } from 'react'
 import { StyledAlert } from '../alert'
+import { omit } from 'src/helpers'
 
 interface StyledAlertSnackbarProps extends CustomContentProps {
     severity?: AlertColor
@@ -11,7 +12,13 @@ interface StyledAlertSnackbarProps extends CustomContentProps {
 }
 
 export const StyledAlertSnackbar = forwardRef<HTMLDivElement, StyledAlertSnackbarProps>((props, ref) => {
-    const { id, message, severity, alertClassName, alertVariant, closeButton, ...other } = props
+    const { id, message, severity, alertClassName, alertVariant, closeButton, ...other } = omit(props, [
+        'anchorOrigin',
+        'autoHideDuration',
+        'hideIconVariant',
+        'iconVariant',
+        'persist',
+    ])
 
     const { closeSnackbar } = useSnackbar()
 
