@@ -23,15 +23,19 @@ declare module 'notistack' {
     interface VariantOverrides {
         alert: {
             /**
-             * The severity of the alert. This defines the color and icon used.
-             * @default 'success'
+             * The className to apply to the alert.
              */
-            severity?: AlertColor
+            alertClassName?: string
             /**
              * The variant to use.
              * @default 'standard'
              */
             alertVariant?: 'standard' | 'filled' | 'outlined'
+            /**
+             * The severity of the alert. This defines the color and icon used.
+             * @default 'success'
+             */
+            severity?: AlertColor
             /**
              * If true, the alert is closable.
              * @default false

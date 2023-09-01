@@ -52,8 +52,9 @@ export const SnackbarExample = () => {
                 onClick={() => {
                     enqueueSnackbar({
                         variant: 'alert',
-                        message: 'Nice snack',
+                        message: 'Shared successfully!',
                         severity: 'success',
+                        alertClassName: 'min-w-[350px]',
                         alertVariant: 'filled',
                         closeButton: true,
                     })
