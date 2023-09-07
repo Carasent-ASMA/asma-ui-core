@@ -1,5 +1,15 @@
 # asma-core-ui
 
+## 2.14.0
+
+### Minor Changes
+
+-   4a3d94f: Redesign buttons
+
+### Patch Changes
+
+-   44e0a5b: 2.13.4
+
 ## 2.13.4
 
 ### Patch Changes
