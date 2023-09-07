@@ -48,7 +48,6 @@ export const StyledDataGrid = (props: IBaseStyledDataGrid) => {
             }}
             slotProps={{
                 baseCheckbox: {
-                    disableRipple: true,
                     classes: {
                         checked: clsx(
                             'text-primary-700 hover:text-primary-700',
@@ -59,6 +58,27 @@ export const StyledDataGrid = (props: IBaseStyledDataGrid) => {
                         'text-[#b5bec9] hover:text-primary-600 [&>svg]:h-5 [&>svg]:w-5 [&>input]:h-full [&>input]:w-full',
                         props.slotProps?.baseCheckbox?.className,
                     ),
+                    disableRipple: true,
+                },
+                baseIconButton: {
+                    classes: {
+                        root: clsx(
+                            'p-1 rounded text-delta-800 hover:bg-primary-50 active:bg-primary-100 focus:border-2 focus:border-solid focus:border-warning-500 disabled:text-delta-300',
+                            props.slotProps?.baseIconButton?.classes?.root,
+                        ),
+                    },
+                    disableRipple: true,
+                },
+                basePopper: {
+                    className: clsx(
+                        'border border-solid border-delta-300 rounded shadow-[0px_2px_4px_0px_rgba(34,_33,_51,_0.15)]',
+                        props.slotProps?.basePopper?.className,
+                    ),
+                    sx: {
+                        '& .MuiList-root': {
+                            padding: '4px 0',
+                        },
+                    },
                 },
                 ...props.slotProps,
             }}
