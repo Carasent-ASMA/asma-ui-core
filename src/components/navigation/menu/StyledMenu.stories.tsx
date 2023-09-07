@@ -42,7 +42,7 @@ const StyledMenuExample: FC<{ args: Partial<MenuProps> }> = ({ args }) => {
     return (
         <>
             <Stack mt={2} mb={4}>
-                <StyledTypography variant='h1'>Standard Menu</StyledTypography>
+                <StyledTypography variant='h6'>Standard Menu</StyledTypography>
                 <StyledButton
                     id='basic-button'
                     className='self-start'
@@ -71,7 +71,7 @@ const StyledMenuExample: FC<{ args: Partial<MenuProps> }> = ({ args }) => {
             </Stack>
 
             <Stack mt={2}>
-                <StyledTypography variant='h1'>Standard Icon Menu</StyledTypography>
+                <StyledTypography variant='h6'>Standard Icon Menu</StyledTypography>
                 <StyledMenuList className='bg-primary-50'>
                     <StyledMenuItem>
                         <ListItemIcon>

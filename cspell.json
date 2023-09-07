@@ -6,7 +6,9 @@
     // words - list of words to be always considered correct
     "words": [
         "asma",
+        "autodocs",
         "clsx",
+        "Docgen",
         "fontsource",
         "Fretex",
         "iconify",

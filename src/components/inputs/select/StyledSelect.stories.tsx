@@ -40,7 +40,7 @@ const StyledSelectExample: React.FC<{ args: Partial<SelectProps<unknown>> }> = (
     const [value, setValue] = useState(selectOptions[0]?.content)
     return (
         <StyledStack direction='column' spacing={2}>
-            <StyledTypography variant='h1'>Select size medium</StyledTypography>
+            <StyledTypography variant='h6'>Select size medium</StyledTypography>
             <StyledFormControl fullWidth>
                 <StyledSelect
                     {...args}
@@ -52,7 +52,7 @@ const StyledSelectExample: React.FC<{ args: Partial<SelectProps<unknown>> }> = (
                     }}
                 />
             </StyledFormControl>
-            <StyledTypography variant='h1'>Select size small</StyledTypography>
+            <StyledTypography variant='h6'>Select size small</StyledTypography>
             <StyledFormControl fullWidth>
                 <StyledSelect
                     {...args}

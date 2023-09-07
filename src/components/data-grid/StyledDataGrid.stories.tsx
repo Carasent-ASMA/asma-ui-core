@@ -128,7 +128,7 @@ export const DataGrid: Story = {
         return (
             <>
                 <Stack mt={2} mb={4}>
-                    <Typography variant='h1'>Standard DataGrid</Typography>
+                    <Typography variant='h6'>Standard DataGrid</Typography>
                     <StyledDataGrid
                         {...meta.args}
                         {...args}
@@ -138,7 +138,7 @@ export const DataGrid: Story = {
                     />
                 </Stack>
                 <Stack mt={2}>
-                    <Typography variant='h1'>DataGrid with checkboxSelection and footer</Typography>
+                    <Typography variant='h6'>DataGrid with checkboxSelection and footer</Typography>
                     <StyledDataGrid {...meta.args} {...args} />
                 </Stack>
             </>

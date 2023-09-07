@@ -29,7 +29,7 @@ export const Primary: Story = {
         return (
             <>
                 <Stack direction='column' spacing={2} sx={{ maxWidth: 400 }}>
-                    <Typography variant='h1'>{meta.args.variant} alert</Typography>
+                    <Typography variant='h6'>{meta.args.variant} alert</Typography>
                     <StyledAlert {...meta.args} severity='success' variant='filled' onClose={handleClose}>
                         <StyledAlertTitle>Success with title</StyledAlertTitle>
                         Success body lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent
@@ -66,7 +66,7 @@ export const Primary: Story = {
                 </Stack>
 
                 <Stack direction='column' spacing={2} mt={4} sx={{ maxWidth: 400 }}>
-                    <Typography variant='h1'>outlined alert</Typography>
+                    <Typography variant='h6'>outlined alert</Typography>
 
                     <StyledAlert {...meta.args} severity='success' variant='outlined'>
                         <StyledAlertTitle>Success with title</StyledAlertTitle>

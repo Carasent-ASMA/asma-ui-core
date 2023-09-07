@@ -14,21 +14,6 @@ const theme = {
     typography: {
         fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
         fontSize: 16,
-        h1: {
-            fontSize: 'var(--text-h1)',
-            fontWeight: 600,
-            marginBottom: '1rem',
-        },
-        h2: {
-            fontSize: 'var(--text-h2)',
-            fontWeight: 600,
-            marginBottom: '1rem',
-        },
-        h3: {
-            fontSize: '1rem',
-            fontWeight: 600,
-            marginBottom: '1rem',
-        },
         subtitle1: {
             fontSize: '1rem',
             fontWeight: 'normal',
@@ -38,11 +23,11 @@ const theme = {
             fontWeight: 500,
         },
         body1: {
-            fontSize: 'var(--text-base)',
+            fontSize: '0.875rem',
             fontWeight: 'normal',
         },
         body2: {
-            fontSize: 'var(--text-small)',
+            fontSize: '0.75rem',
             fontWeight: 'normal',
         },
         button: {

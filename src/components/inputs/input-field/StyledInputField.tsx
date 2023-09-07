@@ -79,7 +79,7 @@ export const StyledInputField = forwardRef<HTMLDivElement, StyledInputFieldProps
                     id={inputLabelId}
                     classes={{
                         root: clsx(
-                            'text-sm font-semibold',
+                            'text-sm font-semibold scale-100 -translate-y-2',
                             disabled ? 'text-delta-300' : error ? 'text-error-700' : 'text-delta-800',
                             InputLabelProps?.classes?.root,
                         ),

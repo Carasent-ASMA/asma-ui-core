@@ -21,7 +21,7 @@ const BasicTypography = () => {
     return (
         <>
             <Box mb={4}>
-                <StyledTypography variant='h1'>MUI Typography variants</StyledTypography>
+                <StyledTypography>MUI Typography variants</StyledTypography>
                 <StyledTypography variant='h1'>H1 - Page title (variant="h1")</StyledTypography>
                 <StyledTypography variant='h2'>H2 - Section title (variant="h2")</StyledTypography>
                 <StyledTypography>Base - (variant="body", default)</StyledTypography>
@@ -29,12 +29,12 @@ const BasicTypography = () => {
             </Box>
 
             <Box mb={2}>
-                <StyledTypography variant='h1'>Tailwind Typography variants</StyledTypography>
+                <StyledTypography>Tailwind Typography variants</StyledTypography>
 
                 <h1 className='text-2xl'>H1 - Page title - (text-2xl)</h1>
                 <h2 className='text-xl'>H2 - Section title - (text-xl)</h2>
                 <div className='text-base'>text-base (Standard no class)</div>
-                <div className='text-sm'>text-small (text-small)</div>
+                <div className='text-sm'>text-sm (text-sm)</div>
                 <div className='text-xs'>text-xs (text-xs)</div>
             </Box>
         </>
