@@ -2,4 +2,4 @@
 'asma-core-ui': patch
 ---
 
-Fixed some datagrid styles
+2.13.4

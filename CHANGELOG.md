@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 2.13.4
+
+### Patch Changes
+
+-   5a1b778: Fixed some datagrid styles
+
 ## 2.13.3
 
 ### Patch Changes
