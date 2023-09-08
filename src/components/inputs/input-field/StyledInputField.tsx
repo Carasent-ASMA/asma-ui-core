@@ -129,12 +129,12 @@ export const StyledInputField = forwardRef<HTMLDivElement, StyledInputFieldProps
                     htmlFor={id}
                     id={inputLabelId}
                     classes={{
+                        ...InputLabelProps?.classes,
                         root: clsx(
                             'text-sm font-semibold scale-100 -translate-y-2',
                             disabled ? 'text-delta-300' : error ? 'text-error-700' : 'text-delta-800',
                             InputLabelProps?.classes?.root,
                         ),
-                        ...InputLabelProps?.classes,
                         // TODO Find a way to make the following classes work:
                         // error: clsx('text-error-700', InputLabelProps?.classes?.error),
                         // disabled: clsx('text-delta-300', InputLabelProps?.classes?.disabled),
@@ -150,12 +150,12 @@ export const StyledInputField = forwardRef<HTMLDivElement, StyledInputFieldProps
                     {...DescriptionMessageProps}
                     id={descriptionMessageId}
                     classes={{
+                        ...DescriptionMessageProps?.classes,
                         root: clsx(
                             'text-xs mt-3.5 mb-1',
                             disabled ? 'text-delta-300' : error ? 'text-error-700' : 'text-delta-600',
                             DescriptionMessageProps?.classes?.root,
                         ),
-                        ...DescriptionMessageProps?.classes,
                     }}
                 >
                     {descriptionMessage}
@@ -164,6 +164,7 @@ export const StyledInputField = forwardRef<HTMLDivElement, StyledInputFieldProps
 
             <InputBase
                 classes={{
+                    ...other.classes,
                     root: clsx(styles['root'], other.classes?.root),
                     multiline: clsx('max-w-[400px] min-h-[64px] h-full p-3', other.classes?.multiline),
                     disabled: clsx('border-delta-300 text-delta-300', multiline && 'border-2', other.classes?.disabled),
@@ -190,13 +191,12 @@ export const StyledInputField = forwardRef<HTMLDivElement, StyledInputFieldProps
                     ),
                     inputSizeSmall: clsx('pt-1.5', other.classes?.inputSizeSmall),
                     sizeSmall: clsx('h-8', other.classes?.sizeSmall),
-                    ...other.classes,
                 }}
                 sx={{
+                    ...other.sx,
                     'label + &': {
                         marginTop: '1rem',
                     },
-                    ...other.sx,
                 }}
                 id={id}
                 aria-describedby={helperTextId}
@@ -224,6 +224,7 @@ export const StyledInputField = forwardRef<HTMLDivElement, StyledInputFieldProps
                     {...FormHelperTextProps}
                     id={helperTextId}
                     classes={{
+                        ...FormHelperTextProps?.classes,
                         root: clsx(
                             'text-xs mt-1 absolute',
                             helperTextPositionClass,
@@ -236,7 +237,6 @@ export const StyledInputField = forwardRef<HTMLDivElement, StyledInputFieldProps
                                 : 'text-delta-600',
                             FormHelperTextProps?.classes?.root,
                         ),
-                        ...FormHelperTextProps?.classes,
                         // TODO Find a way to make the following classes work:
                         // error: clsx('text-error-700', FormHelperTextProps?.classes?.error),
                         // disabled: clsx('text-delta-300', FormHelperTextProps?.classes?.disabled),
