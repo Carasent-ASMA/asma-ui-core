@@ -2,4 +2,4 @@
 'asma-core-ui': patch
 ---
 
-Fixed chevron arrow pointing
+2.14.4
