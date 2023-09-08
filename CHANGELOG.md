@@ -1,5 +1,12 @@
 # asma-core-ui
 
+## 2.14.3
+
+### Patch Changes
+
+-   54be30a: 2.14.2
+-   1b8c038: Change default width multi line input field
+
 ## 2.14.2
 
 ### Patch Changes
