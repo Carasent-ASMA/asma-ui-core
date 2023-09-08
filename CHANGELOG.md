@@ -1,5 +1,12 @@
 # asma-core-ui
 
+## 2.14.2
+
+### Patch Changes
+
+-   a5011c6: Fix overriding classes
+-   fe53fac: 2.14.1
+
 ## 2.14.1
 
 ### Patch Changes
