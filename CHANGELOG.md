@@ -1,5 +1,12 @@
 # asma-core-ui
 
+## 2.14.1
+
+### Patch Changes
+
+-   e3804d6: 2.14.0
+-   5f03390: Added multi line support for Input Field
+
 ## 2.14.0
 
 ### Minor Changes
