@@ -1,5 +1,12 @@
 # asma-core-ui
 
+## 2.14.4
+
+### Patch Changes
+
+-   675d71a: Fixed chevron arrow pointing
+-   e1c943f: 2.14.3
+
 ## 2.14.3
 
 ### Patch Changes
