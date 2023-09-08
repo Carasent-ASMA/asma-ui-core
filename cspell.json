@@ -16,6 +16,7 @@
         "mertasan",
         "notistack",
         "Roboto",
+        "Scroller",
         "tailwindcss"
     ],
     "ignorePaths": [
@@ -31,18 +32,10 @@
         "*norwegian_postal_codes*",
         "target/npmlist.json",
         "img",
-        "*.backup",
-        //TODO this is temporary shall be removed when all misspellings are fixed in .scss files
-        "*.scss",
-        //TODO this is temporary as well need to fix all misspellings
-        "tailwind.config.js"
+        "*.backup"
     ],
-    "import": [
-        "@cspell/dict-nb-no/cspell-ext.json"
-    ],
-    "ignoreRegExpList": [
-        "enum.*"
-    ]
+    "import": ["@cspell/dict-nb-no/cspell-ext.json"],
+    "ignoreRegExpList": ["enum.*"]
     // flagWords - list of words to be always considered incorrect
     // This is useful for offensive words and common spelling errors.
     // For example "hte" should be "the"
