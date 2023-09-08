@@ -115,7 +115,7 @@ export const StyledInputField = forwardRef<HTMLDivElement, StyledInputFieldProps
     return (
         <FormControl
             {...FormControlProps}
-            className={clsx(className, multiline && 'max-w-[400px]')}
+            className={clsx(className, multiline && 'w-[400px]')}
             disabled={disabled}
             error={error}
             fullWidth={fullWidth}
