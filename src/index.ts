@@ -37,3 +37,5 @@ export * from './components/navigation/menu'
 export * from './components/surfaces/accordion'
 //widgets
 export * from './components/custom/widget/widget-title/StyledWidgetTitle'
+//modules
+export * from './components/custom/module/module-title/StyledModuleTitle'
