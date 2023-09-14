@@ -127,7 +127,7 @@
     --colors-link-text-standart: #ffffff;
     --colors-link-text-active: var(--colors-blue-800);
     --colors-link-text-disabled: var(--colors-green-800);
-    --colors-badge-bg: var(--colors-slate-600);
+    --colors-badge-bg: var(--colors-lime-500);
     --colors-badge-text: #ffffff;
     --colors-app-directory-button-select-recipient-bg: var(--colors-blue-200);
     --colors-btn-task-status-bg: var(--colors-slate-600);
