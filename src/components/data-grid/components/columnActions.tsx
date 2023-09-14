@@ -51,7 +51,7 @@ const RenderHeader: React.FC<{
                 onClick={handleClick}
                 aria-describedby={id}
             >
-                <Icon icon={'mdi:pin'} color='#000' width={20} height={20} />
+                <Icon icon={'mdi:pin'} className='text-delta-600' width={20} height={20} />
             </div>
             <Popover
                 id={id}
