@@ -35,10 +35,11 @@
     --colors-xanadu-900: #2f3533;
 
     --colors-text: #4c4c4c;
-    --colors-red-100: #fdeae9;
-    --colors-red-500: #df0101;
-    --colors-red-600: #a7241b;
-    --colors-red-700: #871e17;
+    --colors-red-100: #f7dede;
+    --colors-red-300: #f6b9b9;
+    --colors-red-500: #e10700;
+    --colors-red-600: #b6120d;
+    --colors-red-700: #9d0f0f;
     --colors-salmon-500: #d24545;
     --colors-salmon-700: #b14848;
     --colors-gray-10: #f9fafb;
@@ -55,7 +56,7 @@
     --colors-gray-9000: #1a1d23;
     --colors-gray-10000: black;
     --colors-zinc-100: #f5f5f5;
-    --colors-zinc-200: #bcbcbc;
+    --colors-zinc-200: #b4b4b4;
     --colors-zinc-300: #898989;
     --colors-zinc-400: #686868;
     --colors-zinc-500: #575757;
@@ -95,7 +96,9 @@
     --colors-jade-600: #116161;
     --colors-jade-700: #0b4040;
     --colors-jade-800: #083030;
+
     --colors-yellow-400: #efcc1d;
+    --colors-yellow-500: #ffd815;
 
     --colors-lime-300: #e6f1b1;
     --colors-lime-500: #beda2f;

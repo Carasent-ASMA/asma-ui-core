@@ -1,0 +1,56 @@
+@mixin button($type, $color) {
+    padding-inline: 0px;
+    border-style: solid;
+    &.#{$type}.#{$color} {
+        @apply cursor-pointer rounded border flex gap-2 items-center justify-center text-sm font-semibold transition duration-300 ease-in-out;
+        color: var(--colors-button-#{$type}-#{$color}-text-color);
+        background-color: var(--colors-button-#{$type}-#{$color}-bg-color);
+        border-color: var(--colors-button-#{$type}-#{$color}-border-color);
+
+        &:active {
+            color: var(--colors-button-#{$type}-#{$color}-active-text-color);
+            background-color: var(--colors-button-#{$type}-#{$color}-active-bg-color);
+            border-color: var(--colors-button-#{$type}-#{$color}-active-border-color);
+            outline: none;
+        }
+
+        &:hover {
+            color: var(--colors-button-#{$type}-#{$color}-hover-text-color);
+            background-color: var(--colors-button-#{$type}-#{$color}-hover-bg-color);
+            border-color: var(--colors-button-#{$type}-#{$color}-hover-border-color);
+        }
+
+        &:focus {
+            outline: 2px solid var(--colors-button-#{$type}-#{$color}-focused-border-color);
+            outline-offset: -1px;
+            color: var(--colors-button-#{$type}-#{$color}-focused-text-color);
+            background-color: var(--colors-button-#{$type}-#{$color}-focused-bg-color);
+            border-color: transparent;
+        }
+
+        &:disabled {
+            cursor: default;
+            color: var(--colors-button-#{$type}-#{$color}-disabled-text-color);
+            background-color: var(--colors-button-#{$type}-#{$color}-disabled-bg-color);
+            border-color: var(--colors-button-#{$type}-#{$color}-disabled-border-color);
+        }
+    }
+
+    &.large {
+        @apply h-10;
+    }
+    &.small {
+        @apply h-8;
+    }
+}
+
+.button {
+    @include button('contained', 'common');
+    @include button('contained', 'error');
+
+    @include button('outlined', 'common');
+    @include button('outlined', 'error');
+
+    @include button('text', 'common');
+    @include button('text', 'error');
+}
