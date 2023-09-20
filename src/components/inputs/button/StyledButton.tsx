@@ -14,7 +14,20 @@ export type StyledButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & 
     dataTest?: string
     error?: boolean
 }
-
+/**
+ * Developer: daria.bogatiriov@carasent.com
+ *
+ * @remarks for icon button add only startIcon prop
+ *
+ * Custom props:
+ * @param variant -  'contained' | 'outlined' | 'text'
+ * @param size -  'large' | 'small'
+ * @param startIcon - ReactNode
+ * @param endIcon - ReactNode
+ * @param error -  boolean
+ * @param refLink -  ref to component
+ * @param dataTest -  data-test tag
+ */
 export const StyledButton = ({
     variant = 'contained',
     className = '',
@@ -35,8 +48,6 @@ export const StyledButton = ({
     return (
         <button
             {...otherProps}
-            aria-label='Aria Name'
-            title='Aria Name'
             className={clsx(
                 isLarge ? 'px-2' : 'px-1.5',
                 styles['button'],

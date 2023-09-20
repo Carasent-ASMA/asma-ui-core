@@ -1,0 +1,77 @@
+:root {
+    /* Textarea Active */
+    --colors-input-active-placeholder-color: var(--colors-gray-500);
+
+    --colors-input-active-bg-color: transparent;
+    --colors-input-active-hover-bg-color: var(--colors-gray-10);
+    --colors-input-active-active-bg-color: var(--colors-gray-10);
+    --colors-input-active-focus-bg-color: var(--colors-gray-10);
+    --colors-input-active-disabled-bg-color: transparent;
+
+    --colors-input-active-text-color: var(--colors-gray-800);
+    --colors-input-active-hover-text-color: var(--colors-gray-800);
+    --colors-input-active-active-text-color: var(--colors-gray-800);
+    --colors-input-active-focus-text-color: var(--colors-gray-800);
+    --colors-input-active-disabled-text-color: var(--colors-gray-300);
+
+    --colors-input-active-outline-color: var(--colors-gray-500);
+    --colors-input-active-hover-outline-color: var(--colors-gray-800);
+    --colors-input-active-active-outline-color: var(--colors-gray-800);
+    --colors-input-active-focus-outline-color: var(--colors-warning-500);
+    --colors-input-active-disabled-outline-color: var(--colors-gray-300);
+
+    --input-active-cursor: text;
+    --input-active-hover-cursor: text;
+    --input-active-active-cursor: text;
+    --input-active-focus-cursor: text;
+    --input-active-disabled-cursor: default;
+
+    --input-active-outline-width: 1px;
+    --input-active-hover-outline-width: 1px;
+    --input-active-active-outline-width: 1px;
+    --input-active-focus-outline-width: 2px;
+    --input-active-disabled-outline-width: 1px;
+
+    /* Textarea Error */
+    --colors-input-error-placeholder-color: var(--colors-error-700);
+
+    --colors-input-error-bg-color: var(--colors-error-100);
+    --colors-input-error-hover-bg-color: var(--colors-error-100);
+    --colors-input-error-active-bg-color: var(--colors-error-100);
+    --colors-input-error-focus-bg-color: var(--colors-error-100);
+    --colors-input-error-disabled-bg-color: var(--colors-error-100);
+
+    --colors-input-error-text-color: var(--colors-error-700);
+    --colors-input-error-hover-text-color: var(--colors-error-700);
+    --colors-input-error-active-text-color: var(--colors-error-700);
+    --colors-input-error-focus-text-color: var(--colors-error-700);
+    --colors-input-error-disabled-text-color: var(--colors-error-700);
+
+    --colors-input-error-outline-color: var(--colors-error-700);
+    --colors-input-error-hover-outline-color: var(--colors-error-700);
+    --colors-input-error-active-outline-color: var(--colors-error-700);
+    --colors-input-error-focus-outline-color: var(--colors-error-700);
+    --colors-input-error-disabled-outline-color: var(--colors-error-700);
+
+    --input-error-cursor: text;
+    --input-error-hover-cursor: text;
+    --input-error-active-cursor: text;
+    --input-error-focus-cursor: text;
+    --input-error-disabled-cursor: default;
+
+    --input-error-outline-width: 1px;
+    --input-error-hover-outline-width: 1px;
+    --input-error-active-outline-width: 1px;
+    --input-error-focus-outline-width: 1px;
+    --input-error-disabled-outline-width: 1px;
+
+    /* Textarea Label */
+    --colors-input-label-active-text-color: var(--colors-gray-800);
+    --colors-input-label-error-text-color: var(--colors-error-700);
+    --colors-input-label-disabled-text-color: var(--colors-gray-300);
+
+    /* Textarea Description */
+    --colors-input-description-active-text-color: var(--colors-gray-600);
+    --colors-input-description-error-text-color: var(--colors-error-700);
+    --colors-input-description-disabled-text-color: var(--colors-gray-300);
+}
