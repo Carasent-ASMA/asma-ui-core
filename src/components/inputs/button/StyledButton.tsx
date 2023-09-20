@@ -61,7 +61,7 @@ export const StyledButton = ({
         >
             {startIcon && startIcon}
             {children && (
-                <div className={`truncate flex items-center justify-center  gap-2 ${isLarge ? 'px-2' : 'px-1'}`}>
+                <div className={`truncate flex items-center justify-center gap-2 ${isLarge ? 'px-2' : 'px-1'}`}>
                     {children}
                 </div>
             )}

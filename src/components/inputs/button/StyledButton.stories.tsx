@@ -87,10 +87,14 @@ const CommonEnabledButtons: React.FC<{
                         >
                             <div>Button label</div>
                         </StyledButton>
-                        <StyledButton error={error} size={size} disabled={disabled} {...meta.args} variant='contained'>
-                            Button label
-                            <ChevronDownIcon width={izSmall ? 20 : 24} height={izSmall ? 20 : 24} />
-                        </StyledButton>
+                        <StyledButton
+                            error={error}
+                            size={size}
+                            disabled={disabled}
+                            {...meta.args}
+                            variant='contained'
+                            endIcon={<ChevronDownIcon width={izSmall ? 20 : 24} height={izSmall ? 20 : 24} />}
+                        />
                         <StyledButton
                             error={error}
                             size={size}
