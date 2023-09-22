@@ -1,5 +1,21 @@
 # asma-core-ui
 
+## 2.16.0
+
+### Minor Changes
+
+-   fedc045: Added StyledTextarea
+-   5226aec: New table component
+
+### Patch Changes
+
+-   5f3fb1d: 2.14.4
+-   8877a50: new custom styled button
+-   fedc045: added styled textarea
+-   d554885: removed styled button paddings
+-   6defcc1: Removed bg color on RichInput when disabled
+-   55343ea: Added Styled Module Title
+
 ## 2.14.4
 
 ### Patch Changes

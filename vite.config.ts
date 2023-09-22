@@ -13,7 +13,10 @@ export default defineConfig({
             jsxRuntime: 'automatic',
         }),
         tsConfigPaths(),
-        dts({ insertTypesEntry: true, exclude: ['node_modules/**/*', 'src/stories/**', 'src/**/*.stories.tsx'] }),
+        dts({
+            insertTypesEntry: true,
+            exclude: ['node_modules/**/*', 'src/stories/**', 'src/**/*.stories.tsx', 'src/components/**/makeData.ts'],
+        }),
     ],
     build: {
         lib: {

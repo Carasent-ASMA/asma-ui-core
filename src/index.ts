@@ -35,6 +35,8 @@ export * from './components/miscellaneous/StyledFormGroup'
 export * from './components/navigation/menu'
 // surfaces
 export * from './components/surfaces/accordion'
+// table
+export * from './components/table'
 //widgets
 export * from './components/custom/widget/widget-title/StyledWidgetTitle'
 //modules

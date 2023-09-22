@@ -17,7 +17,8 @@
         "notistack",
         "Roboto",
         "Scroller",
-        "tailwindcss"
+        "tailwindcss",
+        "tanstack"
     ],
     "ignorePaths": [
         "package-lock.json",
@@ -34,8 +35,12 @@
         "img",
         "*.backup"
     ],
-    "import": ["@cspell/dict-nb-no/cspell-ext.json"],
-    "ignoreRegExpList": ["enum.*"]
+    "import": [
+        "@cspell/dict-nb-no/cspell-ext.json"
+    ],
+    "ignoreRegExpList": [
+        "enum.*"
+    ]
     // flagWords - list of words to be always considered incorrect
     // This is useful for offensive words and common spelling errors.
     // For example "hte" should be "the"
