@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 2.16.1
+
+### Patch Changes
+
+-   7586b47: Styled Table fixes
+
 ## 2.16.0
 
 ### Minor Changes
