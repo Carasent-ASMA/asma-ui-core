@@ -1,5 +1,12 @@
 # asma-core-ui
 
+## 2.16.2
+
+### Patch Changes
+
+-   87bd4cc: Styled Table actions fix onclick
+-   4a85a8f: 2.16.1
+
 ## 2.16.1
 
 ### Patch Changes
