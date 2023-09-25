@@ -26,7 +26,7 @@ interface StyledTableProps<TData, TCustomData>
         TableOptions<TData>,
         'getCoreRowModel' | 'getExpandedRowModel' | 'getFilteredRowModel' | 'getSortedRowModel'
     > {
-    actions?: { label: string; disabled?: boolean; onClick: (row: Row<TData>) => void }[]
+    actions?: { label: string; disabled?: boolean; onClick?: (row: Row<TData>) => void }[]
     customSubRowData?: Map<string, TCustomData[]>
     disableHeaderPin?: boolean
     tableInstanceRef?: React.MutableRefObject<Table<TData> | null>
@@ -156,7 +156,11 @@ export const StyledTable = <
                     <StyledMenuItem
                         key={action.label}
                         disabled={action.disabled}
-                        onClick={() => action.onClick(currentRowRef.current as Row<TData>)}
+                        onClick={() => {
+                            if (currentRowRef.current) {
+                                action.onClick?.(currentRowRef.current)
+                            }
+                        }}
                     >
                         {action.label}
                     </StyledMenuItem>,
