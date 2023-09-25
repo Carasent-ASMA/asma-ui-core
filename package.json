@@ -58,7 +58,6 @@
         "@rollup/plugin-terser": "^0.4.3",
         "@storybook/addon-a11y": "^7.4.0",
         "@storybook/addon-essentials": "^7.4.0",
-        "@storybook/addon-highlight": "^7.4.0",
         "@storybook/addon-interactions": "^7.4.0",
         "@storybook/addon-links": "^7.4.0",
         "@storybook/addon-mdx-gfm": "^7.4.0",

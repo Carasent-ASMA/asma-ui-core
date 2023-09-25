@@ -63,7 +63,7 @@ const Table = () => {
             columnHelper.display({
                 id: 'share_action',
                 enableHiding: false,
-                size: 150,
+                size: 100,
                 cell: () => (
                     <StyledButton className='m-auto' type='button' variant='text'>
                         Shared
@@ -116,10 +116,11 @@ const Table = () => {
                     actions={[
                         {
                             label: 'Action 1',
-                            onClick: () => console.log('click'),
+                            onClick: (row) => console.log('click', row),
                         },
                         {
                             label: 'Action 2',
+                            disabled: true,
                             onClick: () => console.log('click'),
                         },
                         {

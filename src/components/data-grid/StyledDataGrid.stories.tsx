@@ -65,11 +65,11 @@ const meta = {
         disableColumnSelector: true,
         disableColumnFilter: true,
         disableDensitySelector: true,
-        rowActions: () => {
+        rowActions: (params) => {
             return [
                 <StyledGridActionsCellItem
                     onClick={() => {
-                        console.log('click')
+                        console.log('click', params)
                     }}
                     key='to-draft'
                     label='context menu item 1'

@@ -8,9 +8,10 @@ import {
     getFilteredRowModel,
     type Table,
     getExpandedRowModel,
+    type Row,
 } from '@tanstack/react-table'
 import clsx from 'clsx'
-import { Fragment, useEffect, type ReactElement, useMemo } from 'react'
+import { Fragment, useEffect, type ReactElement, useMemo, useRef } from 'react'
 import { DotsVerticalIcon, DropDownIcon, DropUpIcon } from '../data-display/icons'
 import { StyledMenu, StyledMenuItem } from '../navigation/menu'
 import { StyledButton } from '../inputs/button'
@@ -20,15 +21,26 @@ import { StyledCheckbox } from '../inputs/checkbox'
 
 const SELECT_COLUMN_ID = 'select'
 
-interface StyledTableProps<TData, TCustomData> extends Omit<TableOptions<TData>, 'getCoreRowModel'> {
-    actions?: { label: string; onClick: () => void }[]
+interface StyledTableProps<TData, TCustomData>
+    extends Omit<
+        TableOptions<TData>,
+        'getCoreRowModel' | 'getExpandedRowModel' | 'getFilteredRowModel' | 'getSortedRowModel'
+    > {
+    actions?: { label: string; disabled?: boolean; onClick: (row: Row<TData>) => void }[]
     customSubRowData?: Map<string, TCustomData[]>
     disableHeaderPin?: boolean
     tableInstanceRef?: React.MutableRefObject<Table<TData> | null>
+    tdClassName?: string
+    thClassName?: string
     renderSubRows?: (props: { rows: TCustomData[] }) => ReactElement
 }
 
-export const StyledTable = <TData extends Record<string, unknown>, TCustomData = Record<string, unknown>>({
+export const StyledTable = <
+    TData extends {
+        id: string
+    },
+    TCustomData = Record<string, unknown>,
+>({
     actions,
     columns,
     data,
@@ -37,6 +49,8 @@ export const StyledTable = <TData extends Record<string, unknown>, TCustomData =
     enableRowSelection,
     disableHeaderPin,
     tableInstanceRef,
+    tdClassName,
+    thClassName,
     renderSubRows,
     ...rest
 }: StyledTableProps<TData, TCustomData>) => {
@@ -50,15 +64,18 @@ export const StyledTable = <TData extends Record<string, unknown>, TCustomData =
 
     const hasActions = actions && actions.length > 0
 
+    const currentRowRef = useRef<Row<TData> | null>(null)
+
     const actionColumn = createColumnHelper<TData>().display({
         id: 'actions',
         enableHiding: false,
         enableSorting: false,
+        maxSize: 50,
         header: () =>
             !disableHeaderPin && (
                 <Icon icon='mdi:pin' className='text-delta-600' width={20} height={20} onClick={handleOpenPin} />
             ),
-        cell: () =>
+        cell: (info) =>
             hasActions ? (
                 <StyledButton
                     className='m-auto'
@@ -67,6 +84,7 @@ export const StyledTable = <TData extends Record<string, unknown>, TCustomData =
                     onClick={(e) => {
                         e.stopPropagation()
                         handleOpen(e)
+                        currentRowRef.current = info.row
                     }}
                 >
                     <DotsVerticalIcon className='!text-delta-800' width={24} height={24} />
@@ -74,13 +92,14 @@ export const StyledTable = <TData extends Record<string, unknown>, TCustomData =
             ) : null,
     })
 
-    if (!disableHeaderPin && hasActions && !columns.find((col) => col.id === actionColumn.id)) {
+    if (!disableHeaderPin && !columns.find((col) => col.id === actionColumn.id)) {
         columns.push(actionColumn)
     }
 
     if (enableRowSelection && !columns.find((col) => col.id === SELECT_COLUMN_ID)) {
         columns.unshift({
             id: SELECT_COLUMN_ID,
+            maxSize: 50,
             header: ({ table }) => (
                 <StyledCheckbox
                     {...{
@@ -109,6 +128,7 @@ export const StyledTable = <TData extends Record<string, unknown>, TCustomData =
         ...rest,
         columns,
         data,
+        defaultColumn: { minSize: 0, size: Number.MAX_SAFE_INTEGER, maxSize: Number.MAX_SAFE_INTEGER },
         initialState: {
             ...initialState,
             columnVisibility: {
@@ -133,7 +153,11 @@ export const StyledTable = <TData extends Record<string, unknown>, TCustomData =
         if (hasActions && actions.length !== menuItems.length) {
             actions.forEach((action) =>
                 menuItems.push(
-                    <StyledMenuItem key={action.label} onClick={action.onClick}>
+                    <StyledMenuItem
+                        key={action.label}
+                        disabled={action.disabled}
+                        onClick={() => action.onClick(currentRowRef.current as Row<TData>)}
+                    >
                         {action.label}
                     </StyledMenuItem>,
                 ),
@@ -143,7 +167,7 @@ export const StyledTable = <TData extends Record<string, unknown>, TCustomData =
 
     return (
         <>
-            <table className='border-collapse table-fixed'>
+            <table className='border-collapse table-fixed w-full'>
                 <thead className='table-header-group bg-[#fcfcfd] border-x-0 border-y border-solid border-y-delta-300'>
                     {table.getHeaderGroups().map((headerGroup) => (
                         <tr key={headerGroup.id}>
@@ -152,7 +176,16 @@ export const StyledTable = <TData extends Record<string, unknown>, TCustomData =
                                     <th
                                         key={header.id}
                                         colSpan={header.colSpan}
-                                        className='px-2.5 text-delta-500 text-[10px] font-semibold uppercase overflow-hidden whitespace-nowrap overflow-ellipsis'
+                                        className={clsx(
+                                            'px-2.5 text-delta-500 text-[10px] font-semibold uppercase overflow-hidden whitespace-nowrap overflow-ellipsis',
+                                            thClassName,
+                                        )}
+                                        style={{
+                                            width:
+                                                header.getSize() === Number.MAX_SAFE_INTEGER
+                                                    ? 'auto'
+                                                    : header.getSize(),
+                                        }}
                                     >
                                         {header.isPlaceholder ? null : (
                                             <div
@@ -184,7 +217,7 @@ export const StyledTable = <TData extends Record<string, unknown>, TCustomData =
                             <Fragment key={row.id}>
                                 <tr
                                     className={clsx(
-                                        'border-x-0 border-y border-solid border-delta-300 min-h-[50px] hover:cursor-pointer hover:bg-primary-25',
+                                        'border-x-0 border-y border-solid border-delta-300 h-[50px] hover:cursor-pointer hover:bg-primary-25',
                                         (row.getIsExpanded() || row.getIsSelected()) && 'bg-primary-50',
                                     )}
                                     onClick={row.getToggleExpandedHandler()}
@@ -193,7 +226,16 @@ export const StyledTable = <TData extends Record<string, unknown>, TCustomData =
                                         return (
                                             <td
                                                 key={cell.id}
-                                                className='text-center align-middle text-sm text-delta-900'
+                                                className={clsx(
+                                                    'text-center align-middle text-sm text-delta-900',
+                                                    tdClassName,
+                                                )}
+                                                style={{
+                                                    width:
+                                                        cell.column.getSize() === Number.MAX_SAFE_INTEGER
+                                                            ? 'auto'
+                                                            : cell.column.getSize(),
+                                                }}
                                             >
                                                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                             </td>
@@ -209,7 +251,7 @@ export const StyledTable = <TData extends Record<string, unknown>, TCustomData =
                                             {customSubRowData &&
                                                 renderSubRows &&
                                                 renderSubRows({
-                                                    rows: customSubRowData.get(row.original['id'] as string) ?? [],
+                                                    rows: customSubRowData.get(row.original.id) ?? [],
                                                 })}
                                         </td>
                                     </tr>

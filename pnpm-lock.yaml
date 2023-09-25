@@ -71,9 +71,6 @@ devDependencies:
   '@storybook/addon-essentials':
     specifier: ^7.4.0
     version: 7.4.0(@types/react-dom@18.0.11)(@types/react@18.0.37)(react-dom@18.2.0)(react@18.2.0)
-  '@storybook/addon-highlight':
-    specifier: ^7.4.0
-    version: 7.4.0
   '@storybook/addon-interactions':
     specifier: ^7.4.0
     version: 7.4.0(@types/react-dom@18.0.11)(@types/react@18.0.37)(react-dom@18.2.0)(react@18.2.0)
