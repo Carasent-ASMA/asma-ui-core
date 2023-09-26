@@ -52,14 +52,14 @@
 @mixin label($type) {
     &.#{$type} {
         @apply font-roboto text-sm font-semibold w-fit;
-        color: var(--colors-textarea-label-#{$type}-text-color);
+        color: var(--colors-input-label-#{$type}-text-color);
     }
 }
 
 @mixin description($type) {
     &.#{$type} {
         @apply font-roboto text-xs;
-        color: var(--colors-textarea-description-#{$type}-text-color);
+        color: var(--colors-input-description-#{$type}-text-color);
     }
 }
 

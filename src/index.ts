@@ -23,6 +23,7 @@ export * from './components/inputs/select'
 export * from './components/inputs/slider'
 export * from './components/inputs/text-field'
 export * from './components/inputs/switch'
+export * from './components/inputs/textarea'
 // miscellaneous
 export * from './components/miscellaneous/StyledFormControl'
 export * from './components/miscellaneous/StyledFormControlLabel'

@@ -39,7 +39,9 @@ type TextAreaActiveProps = {
     refLink?: React.RefObject<HTMLTextAreaElement> | null | undefined
 }
 type TextareaConditionalProps = TextAreaActiveProps | TextAreaNotEditableProps
-type StyledTextAreaProps = TextareaCommonProps & TextareaConditionalProps
+type StyledTextAreaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement> &
+    TextareaCommonProps &
+    TextareaConditionalProps
 
 /**
  * Developer: bularga.alexandru@carasent.com
@@ -58,18 +60,16 @@ type StyledTextAreaProps = TextareaCommonProps & TextareaConditionalProps
  */
 export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
     id,
-    placeholder = 'Placeholder text',
-    value = '',
     variant = 'active',
     label = '',
     description = '',
+    value = '',
     minRows = 3,
     maxRows = Infinity,
     disabled,
     error,
     errorMessage,
     className = '',
-    onChange,
     maxLength = Infinity,
     counter,
     refLink,
@@ -116,10 +116,7 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
                     className={`${styles['textarea']} ${styles[textareaType]} ${className} ${
                         counterEnabled ? 'pb-[32px]' : ''
                     }`}
-                    value={value}
                     rows={minRows}
-                    onChange={onChange ? (e) => onChange(e) : undefined}
-                    placeholder={placeholder}
                     wrap='soft'
                     disabled={disabled}
                     maxLength={maxLength}

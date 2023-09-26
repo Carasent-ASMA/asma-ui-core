@@ -8,7 +8,7 @@ const meta = {
     component: StyledTextarea,
     tags: ['autodocs'],
     argTypes: {},
-    args: {},
+    args: { placeholder: 'This is placeholder text' },
 } satisfies Meta<typeof StyledTextarea>
 
 export default meta
@@ -39,6 +39,7 @@ const StyledTextareaExample = () => {
             <div>
                 <div className='flex align-middle justify-center text-xl font-semibold underline'>Active</div>
                 <StyledTextarea
+                    {...meta.args}
                     dataTest='test1'
                     id='1'
                     variant='active'
