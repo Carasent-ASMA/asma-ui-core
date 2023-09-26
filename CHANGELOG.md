@@ -1,5 +1,12 @@
 # asma-core-ui
 
+## 2.16.3
+
+### Patch Changes
+
+-   5ce89b5: Fix Styled Table types & styles
+-   020b294: 2.16.2
+
 ## 2.16.2
 
 ### Patch Changes
