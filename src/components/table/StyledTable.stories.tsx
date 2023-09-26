@@ -5,6 +5,7 @@ import { StyledTable } from './StyledTable'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createColumnHelper, type Table } from '@tanstack/react-table'
 import { makeData, makeParticipantsData, type Participant, type Person } from './makeData'
+import { PersonIcon } from '../data-display/icons'
 
 const meta = {
     title: 'Table/Styled Table',
@@ -36,7 +37,14 @@ const Table = () => {
                 header: 'First Name',
                 enableHiding: false,
                 size: 150,
-                cell: ({ getValue }) => getValue(),
+                className: 'pl-2',
+                headerAlign: 'left',
+                cell: ({ getValue }) => (
+                    <div className='ml-2 flex items-center gap-5'>
+                        <PersonIcon width={20} height={20} />
+                        <div className='text-sm text-black'>{getValue() ?? ''}</div>
+                    </div>
+                ),
             }),
             columnHelper.accessor((row) => row.lastName, {
                 id: 'lastName',
@@ -58,12 +66,12 @@ const Table = () => {
             columnHelper.accessor('progress', {
                 id: 'progress',
                 header: 'Progress',
-                size: 150,
+                size: 100,
             }),
             columnHelper.display({
                 id: 'share_action',
                 enableHiding: false,
-                size: 100,
+                size: 75,
                 cell: () => (
                     <StyledButton className='m-auto' type='button' variant='text'>
                         Shared
@@ -120,7 +128,6 @@ const Table = () => {
                         },
                         {
                             label: 'Action 2',
-                            disabled: true,
                             onClick: () => console.log('click'),
                         },
                         {

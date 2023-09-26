@@ -11,7 +11,7 @@ import {
     type Row,
 } from '@tanstack/react-table'
 import clsx from 'clsx'
-import { Fragment, useEffect, type ReactElement, useMemo, useRef } from 'react'
+import { Fragment, useEffect, type ReactElement, useMemo, useRef, type MouseEvent } from 'react'
 import { DotsVerticalIcon, DropDownIcon, DropUpIcon } from '../data-display/icons'
 import { StyledMenu, StyledMenuItem } from '../navigation/menu'
 import { StyledButton } from '../inputs/button'
@@ -30,8 +30,10 @@ interface StyledTableProps<TData, TCustomData>
     customSubRowData?: Map<string, TCustomData[]>
     disableHeaderPin?: boolean
     tableInstanceRef?: React.MutableRefObject<Table<TData> | null>
+    className?: string
     tdClassName?: string
     thClassName?: string
+    onRowClick?: (e: MouseEvent<HTMLTableRowElement, globalThis.MouseEvent>, row: Row<TData>) => void
     renderSubRows?: (props: { rows: TCustomData[] }) => ReactElement
 }
 
@@ -49,8 +51,10 @@ export const StyledTable = <
     enableRowSelection,
     disableHeaderPin,
     tableInstanceRef,
+    className,
     tdClassName,
     thClassName,
+    onRowClick,
     renderSubRows,
     ...rest
 }: StyledTableProps<TData, TCustomData>) => {
@@ -171,7 +175,7 @@ export const StyledTable = <
 
     return (
         <>
-            <table className='border-collapse table-fixed w-full'>
+            <table className={clsx('border-collapse table-fixed w-full', className)}>
                 <thead className='table-header-group bg-[#fcfcfd] border-x-0 border-y border-solid border-y-delta-300'>
                     {table.getHeaderGroups().map((headerGroup) => (
                         <tr key={headerGroup.id}>
@@ -195,9 +199,15 @@ export const StyledTable = <
                                             <div
                                                 {...{
                                                     className: clsx(
-                                                        'flex justify-center items-center h-[30px]',
-                                                        header.column.getCanSort() ? 'cursor-pointer select-none' : '',
+                                                        'flex items-center h-[30px]',
+                                                        header.column.getCanSort() || header.column.id === 'actions'
+                                                            ? 'cursor-pointer select-none'
+                                                            : '',
+                                                        header.column.columnDef.className,
                                                     ),
+                                                    style: {
+                                                        justifyContent: header.column.columnDef.headerAlign ?? 'center',
+                                                    },
                                                     onClick: header.column.getToggleSortingHandler(),
                                                 }}
                                             >
@@ -224,7 +234,13 @@ export const StyledTable = <
                                         'border-x-0 border-y border-solid border-delta-300 h-[50px] hover:cursor-pointer hover:bg-primary-25',
                                         (row.getIsExpanded() || row.getIsSelected()) && 'bg-primary-50',
                                     )}
-                                    onClick={row.getToggleExpandedHandler()}
+                                    onClick={(e) => {
+                                        if (row.getCanExpand()) {
+                                            row.getToggleExpandedHandler()()
+                                        }
+
+                                        if (onRowClick) onRowClick(e, row)
+                                    }}
                                 >
                                     {row.getVisibleCells().map((cell) => {
                                         return (
@@ -247,11 +263,8 @@ export const StyledTable = <
                                     })}
                                 </tr>
                                 {row.getIsExpanded() && (
-                                    <tr>
-                                        <td
-                                            colSpan={row.getVisibleCells().length}
-                                            className='border-t border-delta-300'
-                                        >
+                                    <tr className='h-[50px]'>
+                                        <td colSpan={row.getVisibleCells().length}>
                                             {customSubRowData &&
                                                 renderSubRows &&
                                                 renderSubRows({
