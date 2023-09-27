@@ -2,4 +2,4 @@
 'asma-core-ui': patch
 ---
 
-export for styled textarea
+2.16.5

@@ -1,5 +1,14 @@
 # asma-core-ui
 
+## 2.16.5
+
+### Patch Changes
+
+-   98a4a41: 2.16.3
+-   a3978ba: export for styled textarea
+-   a3978ba: Exported StyledTextarea
+-   e5283db: Exported rich-input globally
+
 ## 2.16.3
 
 ### Patch Changes
