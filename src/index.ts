@@ -24,6 +24,7 @@ export * from './components/inputs/slider'
 export * from './components/inputs/text-field'
 export * from './components/inputs/switch'
 export * from './components/inputs/textarea'
+export * from './components/inputs/rich-input'
 // miscellaneous
 export * from './components/miscellaneous/StyledFormControl'
 export * from './components/miscellaneous/StyledFormControlLabel'
