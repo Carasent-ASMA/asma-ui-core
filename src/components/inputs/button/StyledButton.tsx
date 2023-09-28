@@ -3,24 +3,36 @@ import React, { type ReactNode } from 'react'
 import styles from './StyledButton.module.scss'
 import clsx from 'clsx'
 
-export type StyledButtonType = 'contained' | 'outlined' | 'text'
+export type StyledButtonType = 'contained' | 'outlined' | 'text' | 'textGray'
 
-export type StyledButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-    variant?: StyledButtonType
+type commonProps = {
     refLink?: React.Ref<HTMLButtonElement>
     size?: 'large' | 'small'
     startIcon?: ReactNode
     endIcon?: ReactNode
     dataTest?: string
+}
+
+type variantTextGrayProps = {
+    variant?: 'textGray'
+    error?: never
+}
+type buttonStandartVariantsProps = {
+    variant?: 'contained' | 'outlined' | 'text'
     error?: boolean
 }
+
+type conditionalProps = variantTextGrayProps | buttonStandartVariantsProps
+
+export type StyledButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & commonProps & conditionalProps
 /**
  * Developer: daria.bogatiriov@carasent.com
  *
  * @remarks for icon button add only startIcon prop
+ * @remarks for error button no textGray variant
  *
  * Custom props:
- * @param variant -  'contained' | 'outlined' | 'text'
+ * @param variant -  'contained' | 'outlined' | 'text' | 'textGray'
  * @param size -  'large' | 'small'
  * @param startIcon - ReactNode
  * @param endIcon - ReactNode

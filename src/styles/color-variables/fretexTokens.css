@@ -38,8 +38,8 @@
     --colors-delta-400: var(--colors-zinc-400);
     --colors-delta-500: var(--colors-zinc-500);
     --colors-delta-600: var(--colors-zinc-600);
-    --colors-delta-700: var(--colors-zinc-600);
-    --colors-delta-800: var(--colors-zinc-600);
+    --colors-delta-700: var(--colors-zinc-700);
+    --colors-delta-800: var(--colors-zinc-800);
     --colors-delta-900: var(--colors-zinc-900);
     --colors-delta-9000: var(--colors-gray-9000);
     --colors-delta-10000: var(--colors-gray-10000);
@@ -90,24 +90,24 @@
     --colors-button-contained-error-hover-bg-color: var(--colors-beta-600);
     --colors-button-contained-error-hover-border-color: var(--colors-beta-600);
     --colors-button-contained-error-disabled-text-color: #ffffff;
-    --colors-button-contained-error-disabled-bg-color: var(--colors-delta-300);
+    --colors-button-contained-error-disabled-bg-color: var(--colors-delta-200);
     --colors-button-contained-error-disabled-border-color: transparent;
 
-    --colors-button-outlined-common-text-color: var(--colors-gama-700);
+    --colors-button-outlined-common-text-color: var(--colors-delta-700);
     --colors-button-outlined-common-bg-color: transparent;
-    --colors-button-outlined-common-border-color: var(--colors-gama-500);
-    --colors-button-outlined-common-focused-text-color: var(--colors-gama-800);
+    --colors-button-outlined-common-border-color: var(--colors-delta-400);
+    --colors-button-outlined-common-focused-text-color: var(--colors-delta-800);
     --colors-button-outlined-common-focused-bg-color: var(--colors-gama-50);
     --colors-button-outlined-common-focused-border-color: var(--colors-yellow-500);
-    --colors-button-outlined-common-active-text-color: var(--colors-gama-800);
+    --colors-button-outlined-common-active-text-color: var(--colors-delta-800);
     --colors-button-outlined-common-active-bg-color: var(--colors-gama-50);
-    --colors-button-outlined-common-active-border-color: var(--colors-gama-700);
-    --colors-button-outlined-common-hover-text-color: var(--colors-gama-800);
+    --colors-button-outlined-common-active-border-color: var(--colors-delta-700);
+    --colors-button-outlined-common-hover-text-color: var(--colors-delta-800);
     --colors-button-outlined-common-hover-bg-color: var(--colors-gama-100);
-    --colors-button-outlined-common-hover-border-color: var(--colors-gama-700);
-    --colors-button-outlined-common-disabled-text-color: var(--colors-delta-300);
+    --colors-button-outlined-common-hover-border-color: var(--colors-delta-700);
+    --colors-button-outlined-common-disabled-text-color: var(--colors-delta-200);
     --colors-button-outlined-common-disabled-bg-color: transparent;
-    --colors-button-outlined-common-disabled-border-color: var(--colors-delta-300);
+    --colors-button-outlined-common-disabled-border-color: var(--colors-delta-200);
 
     --colors-button-outlined-error-text-color: var(--colors-beta-500);
     --colors-button-outlined-error-bg-color: transparent;
@@ -121,23 +121,23 @@
     --colors-button-outlined-error-hover-text-color: var(--colors-beta-600);
     --colors-button-outlined-error-hover-bg-color: var(--colors-beta-100);
     --colors-button-outlined-error-hover-border-color: var(--colors-beta-600);
-    --colors-button-outlined-error-disabled-text-color: var(--colors-delta-300);
+    --colors-button-outlined-error-disabled-text-color: var(--colors-delta-200);
     --colors-button-outlined-error-disabled-bg-color: transparent;
-    --colors-button-outlined-error-disabled-border-color: var(--colors-delta-300);
+    --colors-button-outlined-error-disabled-border-color: var(--colors-delta-200);
 
     --colors-button-text-common-text-color: var(--colors-gama-500);
     --colors-button-text-common-bg-color: transparent;
     --colors-button-text-common-border-color: transparent;
-    --colors-button-text-common-focused-text-color: var(--colors-gama-800);
+    --colors-button-text-common-focused-text-color: var(--colors-delta-800);
     --colors-button-text-common-focused-bg-color: var(--colors-gama-50);
     --colors-button-text-common-focused-border-color: var(--colors-yellow-500);
-    --colors-button-text-common-active-text-color: var(--colors-gama-800);
+    --colors-button-text-common-active-text-color: var(--colors-delta-800);
     --colors-button-text-common-active-bg-color: var(--colors-gama-100);
     --colors-button-text-common-active-border-color: var(--colors-gama-100);
-    --colors-button-text-common-hover-text-color: var(--colors-gama-800);
+    --colors-button-text-common-hover-text-color: var(--colors-delta-800);
     --colors-button-text-common-hover-bg-color: var(--colors-gama-50);
     --colors-button-text-common-hover-border-color: var(--colors-gama-50);
-    --colors-button-text-common-disabled-text-color: var(--colors-delta-300);
+    --colors-button-text-common-disabled-text-color: var(--colors-delta-200);
     --colors-button-text-common-disabled-bg-color: transparent;
     --colors-button-text-common-disabled-border-color: transparent;
 
@@ -153,9 +153,25 @@
     --colors-button-text-error-hover-text-color: var(--colors-beta-600);
     --colors-button-text-error-hover-bg-color: var(--colors-beta-100);
     --colors-button-text-error-hover-border-color: var(--colors-beta-100);
-    --colors-button-text-error-disabled-text-color: var(--colors-delta-300);
+    --colors-button-text-error-disabled-text-color: var(--colors-delta-200);
     --colors-button-text-error-disabled-bg-color: transparent;
     --colors-button-text-error-disabled-border-color: transparent;
+
+    --colors-button-textGray-common-text-color: var(--colors-delta-700);
+    --colors-button-textGray-common-bg-color: transparent;
+    --colors-button-textGray-common-border-color: transparent;
+    --colors-button-textGray-common-focused-text-color: var(--colors-delta-800);
+    --colors-button-textGray-common-focused-bg-color: var(--colors-gama-50);
+    --colors-button-textGray-common-focused-border-color: var(--colors-yellow-500);
+    --colors-button-textGray-common-active-text-color: var(--colors-delta-800);
+    --colors-button-textGray-common-active-bg-color: var(--colors-gama-100);
+    --colors-button-textGray-common-active-border-color: var(--colors-gama-100);
+    --colors-button-textGray-common-hover-text-color: var(--colors-delta-800);
+    --colors-button-textGray-common-hover-bg-color: var(--colors-gama-50);
+    --colors-button-textGray-common-hover-border-color: var(--colors-gama-50);
+    --colors-button-textGray-common-disabled-text-color: var(--colors-delta-200);
+    --colors-button-textGray-common-disabled-bg-color: transparent;
+    --colors-button-textGray-common-disabled-border-color: transparent;
 
     --colors-colors-btn-bg-mini-action: var(--colors-zinc-100);
     --colors-colors-btn-bg-mini-action-hover: var(--colors-gama-700);

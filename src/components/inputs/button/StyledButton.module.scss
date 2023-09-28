@@ -52,4 +52,6 @@
 
     @include button('text', 'common');
     @include button('text', 'error');
+
+    @include button('textGray', 'common');
 }
