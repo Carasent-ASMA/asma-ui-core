@@ -40,7 +40,7 @@ const Table = () => {
                 className: 'pl-2',
                 headerAlign: 'left',
                 cell: ({ getValue }) => (
-                    <div className='ml-2 flex items-center gap-5'>
+                    <div className='flex items-center gap-5'>
                         <PersonIcon width={20} height={20} />
                         <div className='text-sm text-black'>{getValue() ?? ''}</div>
                     </div>

@@ -90,6 +90,7 @@ export const StyledTable = <
         enableHiding: false,
         enableSorting: false,
         maxSize: 50,
+        headerAlign: 'center',
         header: () =>
             !disableHeaderPin && (
                 <Icon icon='mdi:pin' className='text-delta-600' width={20} height={20} onClick={handleOpenPin} />
@@ -202,52 +203,61 @@ export const StyledTable = <
         <>
             <table className={clsx('border-collapse table-fixed w-full', className)}>
                 <thead className='table-header-group bg-[#fcfcfd] border-x-0 border-y border-solid border-y-delta-300'>
-                    {table.getHeaderGroups().map((headerGroup) => (
-                        <tr key={headerGroup.id}>
-                            {headerGroup.headers.map((header) => {
-                                return (
-                                    <th
-                                        key={header.id}
-                                        colSpan={header.colSpan}
-                                        className={clsx(
-                                            'px-2.5 text-delta-500 text-[10px] font-semibold uppercase overflow-hidden whitespace-nowrap overflow-ellipsis',
-                                            thClassName,
-                                        )}
-                                        style={{
-                                            width:
-                                                header.getSize() === Number.MAX_SAFE_INTEGER
-                                                    ? 'auto'
-                                                    : header.getSize(),
-                                        }}
-                                    >
-                                        {header.isPlaceholder ? null : (
-                                            <div
-                                                {...{
-                                                    className: clsx(
-                                                        'flex items-center h-[30px]',
-                                                        header.column.getCanSort() || header.column.id === 'actions'
-                                                            ? 'cursor-pointer select-none'
-                                                            : '',
-                                                        header.column.columnDef.className,
-                                                    ),
-                                                    style: {
-                                                        justifyContent: header.column.columnDef.headerAlign ?? 'center',
-                                                    },
-                                                    onClick: header.column.getToggleSortingHandler(),
-                                                }}
-                                            >
-                                                {flexRender(header.column.columnDef.header, header.getContext())}
-                                                {{
-                                                    asc: <DropUpIcon className='text-delta-800' />,
-                                                    desc: <DropDownIcon className='text-delta-800' />,
-                                                }[header.column.getIsSorted() as string] ?? null}
-                                            </div>
-                                        )}
-                                    </th>
-                                )
-                            })}
+                    {data.length === 0 && loading ? (
+                        <tr>
+                            <th colSpan={columns.length}>
+                                <Skeleton variant='text' />
+                            </th>
                         </tr>
-                    ))}
+                    ) : (
+                        table.getHeaderGroups().map((headerGroup) => (
+                            <tr key={headerGroup.id}>
+                                {headerGroup.headers.map((header) => {
+                                    return (
+                                        <th
+                                            key={header.id}
+                                            colSpan={header.colSpan}
+                                            className={clsx(
+                                                'px-2.5 text-delta-500 text-[10px] font-semibold uppercase overflow-hidden whitespace-nowrap overflow-ellipsis',
+                                                thClassName,
+                                            )}
+                                            style={{
+                                                width:
+                                                    header.getSize() === Number.MAX_SAFE_INTEGER
+                                                        ? 'auto'
+                                                        : header.getSize(),
+                                            }}
+                                        >
+                                            {header.isPlaceholder ? null : (
+                                                <div
+                                                    {...{
+                                                        className: clsx(
+                                                            'flex items-center h-[30px]',
+                                                            header.column.getCanSort() || header.column.id === 'actions'
+                                                                ? 'cursor-pointer select-none'
+                                                                : '',
+                                                            header.column.columnDef.className,
+                                                        ),
+                                                        style: {
+                                                            justifyContent:
+                                                                header.column.columnDef.headerAlign ?? 'left',
+                                                        },
+                                                        onClick: header.column.getToggleSortingHandler(),
+                                                    }}
+                                                >
+                                                    {flexRender(header.column.columnDef.header, header.getContext())}
+                                                    {{
+                                                        asc: <DropUpIcon className='text-delta-800' />,
+                                                        desc: <DropDownIcon className='text-delta-800' />,
+                                                    }[header.column.getIsSorted() as string] ?? null}
+                                                </div>
+                                            )}
+                                        </th>
+                                    )
+                                })}
+                            </tr>
+                        ))
+                    )}
                 </thead>
 
                 <tbody className='table-row-group'>
@@ -295,7 +305,7 @@ export const StyledTable = <
                                                 <td
                                                     key={cell.id}
                                                     className={clsx(
-                                                        'text-center align-middle text-sm text-delta-900',
+                                                        'text-left align-middle text-sm text-delta-900 px-2.5',
                                                         tdClassName,
                                                     )}
                                                     style={{
