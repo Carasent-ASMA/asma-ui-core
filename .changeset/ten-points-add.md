@@ -2,4 +2,4 @@
 'asma-core-ui': patch
 ---
 
-Add more props for table
+2.16.6

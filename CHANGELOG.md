@@ -1,5 +1,13 @@
 # asma-core-ui
 
+## 2.16.7
+
+### Patch Changes
+
+-   1d5a134: Add more props for table
+-   74dcb75: updated styled button, added new variant - grey text
+-   969eb73: 2.16.5
+
 ## 2.16.5
 
 ### Patch Changes
