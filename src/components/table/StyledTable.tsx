@@ -50,7 +50,7 @@ interface StyledTableProps<TData, TCustomData>
 
 export const StyledTable = <
     TData extends {
-        id: string
+        id: string | number
     },
     TCustomData = Record<string, unknown>,
 >({
@@ -325,7 +325,7 @@ export const StyledTable = <
                                             {customSubRowData &&
                                                 renderSubRows &&
                                                 renderSubRows({
-                                                    rows: customSubRowData.get(row.original.id) ?? [],
+                                                    rows: customSubRowData.get(row.original.id.toString()) ?? [],
                                                 })}
                                         </>
                                     )}
