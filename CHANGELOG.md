@@ -1,5 +1,12 @@
 # asma-core-ui
 
+## 2.16.9
+
+### Patch Changes
+
+-   91d54a7: Fix id type TData
+-   d93b53d: 2.16.8
+
 ## 2.16.8
 
 ### Patch Changes
