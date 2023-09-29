@@ -1,5 +1,12 @@
 # asma-core-ui
 
+## 2.16.8
+
+### Patch Changes
+
+-   c5809e2: Fix Styled Table alignment
+-   c0ef21e: 2.16.6
+
 ## 2.16.7
 
 ### Patch Changes

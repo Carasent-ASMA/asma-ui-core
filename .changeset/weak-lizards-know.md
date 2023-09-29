@@ -2,4 +2,4 @@
 'asma-core-ui': patch
 ---
 
-Fix Styled Table alignment
+2.16.8
