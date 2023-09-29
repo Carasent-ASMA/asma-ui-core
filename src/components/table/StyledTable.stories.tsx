@@ -5,7 +5,7 @@ import { StyledTable } from './StyledTable'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createColumnHelper, type Table } from '@tanstack/react-table'
 import { makeData, makeParticipantsData, type Participant, type Person } from './makeData'
-import { PersonIcon } from '../data-display/icons'
+import { PeopleIcon, PersonIcon } from '../data-display/icons'
 
 const meta = {
     title: 'Table/Styled Table',
@@ -82,12 +82,21 @@ const Table = () => {
         [columnHelper],
     )
 
-    const [data] = useState(() => makeData(100))
+    const [data, setData] = useState<Person[]>([])
+    const [loading, setLoading] = useState(false)
     const [participants, setParticipants] = useState<Map<string, Participant[]>>(new Map())
     const [globalFilter, setGlobalFilter] = useState('')
     const [rowSelection, setRowSelection] = useState({})
 
     const tableRef = useRef<Table<Person>>(null)
+
+    useEffect(() => {
+        setLoading(true)
+        setTimeout(() => {
+            setData(makeData(20))
+            setLoading(false)
+        }, 1500)
+    }, [])
 
     useEffect(() => {
         data.forEach((row) => {
@@ -132,11 +141,19 @@ const Table = () => {
                         },
                         {
                             label: 'Action 3',
+                            className: 'text-error-700',
+                            onClick: () => console.log('click'),
+                        },
+                        {
+                            label: 'Hidden action',
+                            hide: true,
+                            className: 'text-primary-700',
                             onClick: () => console.log('click'),
                         },
                     ]}
                     columns={columns}
                     data={data}
+                    loading={loading}
                     customSubRowData={participants}
                     initialState={{
                         columnVisibility: {
@@ -154,6 +171,16 @@ const Table = () => {
                     onGlobalFilterChange={setGlobalFilter}
                     onRowSelectionChange={setRowSelection}
                     renderSubRows={renderSubRows}
+                    getRowClassName={(row) => (row.original.progress > 50 ? 'bg-primary-25' : '')}
+                    rowHeight={40}
+                    noRowsOverlay={
+                        <div className='flex h-full w-full items-center justify-center'>
+                            <div className='flex flex-col items-center'>
+                                <PeopleIcon />
+                                No recipients found
+                            </div>
+                        </div>
+                    }
                 />
             </Stack>
         </>
@@ -164,14 +191,11 @@ const renderSubRows = ({ rows }: { rows: Participant[] }) => {
     return (
         <>
             {rows?.map((row) => (
-                <div
-                    key={row.activityId}
-                    className='flex items-center justify-between ml-10 min-h-[50px] hover:cursor-pointer hover:bg-primary-25'
-                >
-                    <span>{row.fullName}</span>
-                    <span>{row.activityId}</span>
-                    <span>{new Date(row.addedAt).toLocaleDateString()}</span>
-                </div>
+                <tr key={row.activityId} className='pl-10 h-[50px] w-full hover:cursor-pointer hover:bg-primary-25'>
+                    <td>{row.fullName}</td>
+                    <td>{row.activityId}</td>
+                    <td colSpan={3}>{new Date(row.addedAt).toLocaleDateString()}</td>
+                </tr>
             ))}
         </>
     )

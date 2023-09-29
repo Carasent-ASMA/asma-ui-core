@@ -11,13 +11,14 @@ import {
     type Row,
 } from '@tanstack/react-table'
 import clsx from 'clsx'
-import { Fragment, useEffect, type ReactElement, useMemo, useRef, type MouseEvent } from 'react'
-import { DotsVerticalIcon, DropDownIcon, DropUpIcon } from '../data-display/icons'
+import { Fragment, useEffect, type ReactElement, useMemo, useRef, type MouseEvent, useCallback } from 'react'
+import { DotsVerticalIcon, DropDownIcon, DropUpIcon, LoadingIcon } from '../data-display/icons'
 import { StyledMenu, StyledMenuItem } from '../navigation/menu'
 import { StyledButton } from '../inputs/button'
 import { Icon } from '@iconify/react'
 import { useToggleMenuVisibility } from './useToggleMenuVisibility'
 import { StyledCheckbox } from '../inputs/checkbox'
+import { Skeleton } from '@mui/material'
 
 const SELECT_COLUMN_ID = 'select'
 
@@ -26,13 +27,23 @@ interface StyledTableProps<TData, TCustomData>
         TableOptions<TData>,
         'getCoreRowModel' | 'getExpandedRowModel' | 'getFilteredRowModel' | 'getSortedRowModel'
     > {
-    actions?: { label: string; disabled?: boolean; onClick?: (row: Row<TData>) => void }[]
+    actions?: {
+        label: string
+        className?: string
+        disabled?: boolean
+        hide?: boolean
+        onClick?: (row: Row<TData>) => void
+    }[]
     customSubRowData?: Map<string, TCustomData[]>
     disableHeaderPin?: boolean
+    loading?: boolean
+    noRowsOverlay?: ReactElement
     tableInstanceRef?: React.MutableRefObject<Table<TData> | null>
     className?: string
+    rowHeight?: number
     tdClassName?: string
     thClassName?: string
+    getRowClassName?: (row: Row<TData>) => string
     onRowClick?: (e: MouseEvent<HTMLTableRowElement, globalThis.MouseEvent>, row: Row<TData>) => void
     renderSubRows?: (props: { rows: TCustomData[] }) => ReactElement
 }
@@ -50,10 +61,14 @@ export const StyledTable = <
     initialState,
     enableRowSelection,
     disableHeaderPin,
+    loading,
+    noRowsOverlay,
     tableInstanceRef,
     className,
+    rowHeight,
     tdClassName,
     thClassName,
+    getRowClassName,
     onRowClick,
     renderSubRows,
     ...rest
@@ -120,6 +135,7 @@ export const StyledTable = <
                             checked: row.getIsSelected(),
                             disabled: !row.getCanSelect(),
                             indeterminate: row.getIsSomeSelected(),
+                            onClick: (e) => e.stopPropagation(),
                             onChange: row.getToggleSelectedHandler(),
                         }}
                     />
@@ -153,25 +169,34 @@ export const StyledTable = <
 
     const menuItems: JSX.Element[] = useMemo(() => [], [])
 
-    useEffect(() => {
-        if (hasActions && actions.length !== menuItems.length) {
-            actions.forEach((action) =>
-                menuItems.push(
-                    <StyledMenuItem
-                        key={action.label}
-                        disabled={action.disabled}
-                        onClick={() => {
-                            if (currentRowRef.current) {
-                                action.onClick?.(currentRowRef.current)
-                            }
-                        }}
-                    >
-                        {action.label}
-                    </StyledMenuItem>,
-                ),
-            )
+    const pushActions = useCallback(() => {
+        const hiddenActionsLength = actions?.filter((action) => action.hide).length ?? 0
+
+        if (hasActions && actions.length !== menuItems.length + hiddenActionsLength) {
+            actions.forEach((action) => {
+                if (!action.hide) {
+                    menuItems.push(
+                        <StyledMenuItem
+                            key={action.label}
+                            className={action.className}
+                            disabled={action.disabled}
+                            onClick={() => {
+                                if (currentRowRef.current) {
+                                    action.onClick?.(currentRowRef.current)
+                                }
+                            }}
+                        >
+                            {action.label}
+                        </StyledMenuItem>,
+                    )
+                }
+            })
         }
     }, [actions, hasActions, menuItems])
+
+    useEffect(() => {
+        pushActions()
+    }, [pushActions])
 
     return (
         <>
@@ -226,56 +251,84 @@ export const StyledTable = <
                 </thead>
 
                 <tbody className='table-row-group'>
-                    {table.getRowModel().rows.map((row) => {
-                        return (
-                            <Fragment key={row.id}>
-                                <tr
-                                    className={clsx(
-                                        'border-x-0 border-y border-solid border-delta-300 h-[50px] hover:cursor-pointer hover:bg-primary-25',
-                                        (row.getIsExpanded() || row.getIsSelected()) && 'bg-primary-50',
-                                    )}
-                                    onClick={(e) => {
-                                        if (row.getCanExpand()) {
-                                            row.getToggleExpandedHandler()()
-                                        }
-
-                                        if (onRowClick) onRowClick(e, row)
-                                    }}
-                                >
-                                    {row.getVisibleCells().map((cell) => {
-                                        return (
-                                            <td
-                                                key={cell.id}
-                                                className={clsx(
-                                                    'text-center align-middle text-sm text-delta-900',
-                                                    tdClassName,
-                                                )}
-                                                style={{
-                                                    width:
-                                                        cell.column.getSize() === Number.MAX_SAFE_INTEGER
-                                                            ? 'auto'
-                                                            : cell.column.getSize(),
-                                                }}
-                                            >
-                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                            </td>
-                                        )
-                                    })}
+                    {data.length > 0 && loading ? (
+                        <LoadingIcon
+                            className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary-500 z-10'
+                            width={50}
+                            height={50}
+                        />
+                    ) : null}
+                    {data.length === 0 && loading ? (
+                        <>
+                            {Array.from({ length: 5 }).map((_, index) => (
+                                <tr key={index}>
+                                    <td colSpan={columns.length}>
+                                        <Skeleton key={index} variant='text' width='100%' height={50} />
+                                    </td>
                                 </tr>
-                                {row.getIsExpanded() && (
-                                    <tr className='h-[50px]'>
-                                        <td colSpan={row.getVisibleCells().length}>
+                            ))}
+                        </>
+                    ) : data.length > 0 ? (
+                        table.getRowModel().rows.map((row) => {
+                            return (
+                                <Fragment key={row.id}>
+                                    <tr
+                                        className={clsx(
+                                            'border-x-0 border-y border-solid border-delta-300 hover:cursor-pointer hover:bg-primary-25',
+                                            (row.getIsExpanded() || row.getIsSelected()) && 'bg-primary-50',
+                                            loading && 'opacity-50',
+                                            getRowClassName?.(row),
+                                        )}
+                                        style={{
+                                            height: rowHeight ? `${rowHeight}px` : '50px',
+                                        }}
+                                        onClick={(e) => {
+                                            if (row.getCanExpand()) {
+                                                row.getToggleExpandedHandler()()
+                                            }
+
+                                            if (onRowClick) onRowClick(e, row)
+                                        }}
+                                    >
+                                        {row.getVisibleCells().map((cell) => {
+                                            return (
+                                                <td
+                                                    key={cell.id}
+                                                    className={clsx(
+                                                        'text-center align-middle text-sm text-delta-900',
+                                                        tdClassName,
+                                                    )}
+                                                    style={{
+                                                        width:
+                                                            cell.column.getSize() === Number.MAX_SAFE_INTEGER
+                                                                ? 'auto'
+                                                                : cell.column.getSize(),
+                                                    }}
+                                                >
+                                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                                </td>
+                                            )
+                                        })}
+                                    </tr>
+                                    {row.getIsExpanded() && (
+                                        <>
                                             {customSubRowData &&
                                                 renderSubRows &&
                                                 renderSubRows({
                                                     rows: customSubRowData.get(row.original.id) ?? [],
                                                 })}
-                                        </td>
-                                    </tr>
-                                )}
-                            </Fragment>
-                        )
-                    })}
+                                        </>
+                                    )}
+                                </Fragment>
+                            )
+                        })
+                    ) : (
+                        <tr className='h-28'>
+                            <td colSpan={columns.length} className='text-center align-middle text-sm text-delta-900'>
+                                {noRowsOverlay}
+                            </td>
+                        </tr>
+                    )}
                 </tbody>
             </table>
 
