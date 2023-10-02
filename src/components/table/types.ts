@@ -1,4 +1,4 @@
-import type { CellContext, ColumnMeta, HeaderContext } from '@tanstack/react-table'
+import type { CellContext, ColumnMeta, HeaderContext, Row } from '@tanstack/react-table'
 import type { AccessorFn, ColumnDefTemplate } from '@tanstack/react-table'
 import type {
     ColumnPinningColumnDef,
@@ -9,6 +9,7 @@ import type {
     SortingColumnDef,
     VisibilityColumnDef,
 } from '@tanstack/react-table'
+import type { MouseEvent } from 'react'
 
 declare module '@tanstack/react-table' {
     interface ColumnDefExtensions<TData extends RowData, TValue = unknown>
@@ -19,6 +20,7 @@ declare module '@tanstack/react-table' {
             GroupingColumnDef<TData, TValue>,
             ColumnSizingColumnDef {
         className?: string
+        cellAlign?: 'left' | 'center' | 'right'
         headerAlign?: 'left' | 'center' | 'right'
     }
 
@@ -29,3 +31,8 @@ declare module '@tanstack/react-table' {
         meta?: ColumnMeta<TData, TValue>
     }
 }
+
+export type TableRowClickHandler<TData extends RowData> = (
+    e: MouseEvent<HTMLTableRowElement, globalThis.MouseEvent>,
+    row: Row<TData>,
+) => void

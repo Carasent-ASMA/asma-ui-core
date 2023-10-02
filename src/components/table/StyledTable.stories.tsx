@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { createColumnHelper, type Table } from '@tanstack/react-table'
 import { makeData, makeParticipantsData, type Participant, type Person } from './makeData'
 import { PeopleIcon, PersonIcon } from '../data-display/icons'
+import { Icon } from '@iconify/react'
 
 const meta = {
     title: 'Table/Styled Table',
@@ -32,6 +33,20 @@ const Table = () => {
 
     const columns = useMemo(
         () => [
+            columnHelper.display({
+                id: 'favorite',
+                enableHiding: false,
+                enableSorting: false,
+                headerAlign: 'center',
+                cellAlign: 'center',
+                maxSize: 50,
+                header() {
+                    return <Icon icon={'mdi:star'} color='#7a899e' width='20' />
+                },
+                cell() {
+                    return <Icon icon={'mdi:star-outline'} color={'#7a899e'} width='20' cursor={'pointer'} />
+                },
+            }),
             columnHelper.accessor('firstName', {
                 id: 'firstName',
                 header: 'First Name',
@@ -130,9 +145,10 @@ const Table = () => {
                 <StyledTable<Person, Participant>
                     {...meta.args}
                     tableInstanceRef={tableRef}
-                    actions={[
+                    actions={(row) => [
                         {
-                            label: 'Action 1',
+                            label: row.original.progress > 50 ? 'Action 50' : 'Action less than 50',
+                            hide: row.original.progress > 50,
                             onClick: (row) => console.log('click', row),
                         },
                         {

@@ -11,7 +11,7 @@ import {
     type Row,
 } from '@tanstack/react-table'
 import clsx from 'clsx'
-import { Fragment, useEffect, type ReactElement, useMemo, useRef, type MouseEvent, useCallback } from 'react'
+import { Fragment, type ReactElement, useMemo, useRef, type MouseEvent, useCallback } from 'react'
 import { DotsVerticalIcon, DropDownIcon, DropUpIcon, LoadingIcon } from '../data-display/icons'
 import { StyledMenu, StyledMenuItem } from '../navigation/menu'
 import { StyledButton } from '../inputs/button'
@@ -27,7 +27,7 @@ interface StyledTableProps<TData, TCustomData>
         TableOptions<TData>,
         'getCoreRowModel' | 'getExpandedRowModel' | 'getFilteredRowModel' | 'getSortedRowModel'
     > {
-    actions?: {
+    actions?: (row: Row<TData>) => {
         label: string
         className?: string
         disabled?: boolean
@@ -81,9 +81,9 @@ export const StyledTable = <
         handleOpen: handleOpenPin,
     } = useToggleMenuVisibility()
 
-    const hasActions = actions && actions.length > 0
-
     const currentRowRef = useRef<Row<TData> | null>(null)
+
+    const hasActions = typeof actions === 'function'
 
     const actionColumn = createColumnHelper<TData>().display({
         id: 'actions',
@@ -91,6 +91,7 @@ export const StyledTable = <
         enableSorting: false,
         maxSize: 50,
         headerAlign: 'center',
+        cellAlign: 'center',
         header: () =>
             !disableHeaderPin && (
                 <Icon icon='mdi:pin' className='text-delta-600' width={20} height={20} onClick={handleOpenPin} />
@@ -105,6 +106,7 @@ export const StyledTable = <
                         e.stopPropagation()
                         handleOpen(e)
                         currentRowRef.current = info.row
+                        pushActions(currentRowRef.current)
                     }}
                 >
                     <DotsVerticalIcon className='!text-delta-800' width={24} height={24} />
@@ -170,11 +172,17 @@ export const StyledTable = <
 
     const menuItems: JSX.Element[] = useMemo(() => [], [])
 
-    const pushActions = useCallback(() => {
-        const hiddenActionsLength = actions?.filter((action) => action.hide).length ?? 0
+    const pushActions = useCallback<(row: Row<TData>) => void>((row) => {
+        if (!hasActions || !row) return
 
-        if (hasActions && actions.length !== menuItems.length + hiddenActionsLength) {
-            actions.forEach((action) => {
+        const actionItems = actions(row)
+
+        const hiddenActionsLength = actionItems.filter((action) => action.hide).length ?? 0
+
+        if (hasActions && actionItems.length !== menuItems.length + hiddenActionsLength) {
+            menuItems.splice(0, menuItems.length)
+
+            actionItems.forEach((action) => {
                 if (!action.hide) {
                     menuItems.push(
                         <StyledMenuItem
@@ -194,10 +202,6 @@ export const StyledTable = <
             })
         }
     }, [actions, hasActions, menuItems])
-
-    useEffect(() => {
-        pushActions()
-    }, [pushActions])
 
     return (
         <>
@@ -305,10 +309,11 @@ export const StyledTable = <
                                                 <td
                                                     key={cell.id}
                                                     className={clsx(
-                                                        'text-left align-middle text-sm text-delta-900 px-2.5',
+                                                        'align-middle text-ellipsis overflow-hidden text-sm text-delta-900 px-2.5',
                                                         tdClassName,
                                                     )}
                                                     style={{
+                                                        textAlign: cell.column.columnDef.cellAlign ?? 'left',
                                                         width:
                                                             cell.column.getSize() === Number.MAX_SAFE_INTEGER
                                                                 ? 'auto'
