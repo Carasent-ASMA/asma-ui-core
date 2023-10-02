@@ -91,26 +91,26 @@ export const StyledTable = <
         enableSorting: false,
         maxSize: 50,
         headerAlign: 'center',
-        cellAlign: 'center',
         header: () =>
             !disableHeaderPin && (
                 <Icon icon='mdi:pin' className='text-delta-600' width={20} height={20} onClick={handleOpenPin} />
             ),
         cell: (info) =>
             hasActions ? (
-                <StyledButton
-                    className='m-auto'
-                    variant='text'
-                    size='small'
-                    onClick={(e) => {
-                        e.stopPropagation()
-                        handleOpen(e)
-                        currentRowRef.current = info.row
-                        pushActions(currentRowRef.current)
-                    }}
-                >
-                    <DotsVerticalIcon className='!text-delta-800' width={24} height={24} />
-                </StyledButton>
+                <div className='flex justify-center items-center'>
+                    <StyledButton
+                        variant='text'
+                        size='small'
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            handleOpen(e)
+                            currentRowRef.current = info.row
+                            pushActions(currentRowRef.current)
+                        }}
+                    >
+                        <DotsVerticalIcon className='!text-delta-800' width={24} height={24} />
+                    </StyledButton>
+                </div>
             ) : null,
     })
 
@@ -132,17 +132,15 @@ export const StyledTable = <
                 />
             ),
             cell: ({ row }) => (
-                <div className='px-1'>
-                    <StyledCheckbox
-                        {...{
-                            checked: row.getIsSelected(),
-                            disabled: !row.getCanSelect(),
-                            indeterminate: row.getIsSomeSelected(),
-                            onClick: (e) => e.stopPropagation(),
-                            onChange: row.getToggleSelectedHandler(),
-                        }}
-                    />
-                </div>
+                <StyledCheckbox
+                    {...{
+                        checked: row.getIsSelected(),
+                        disabled: !row.getCanSelect(),
+                        indeterminate: row.getIsSomeSelected(),
+                        onClick: (e) => e.stopPropagation(),
+                        onChange: row.getToggleSelectedHandler(),
+                    }}
+                />
             ),
         })
     }
@@ -172,36 +170,39 @@ export const StyledTable = <
 
     const menuItems: JSX.Element[] = useMemo(() => [], [])
 
-    const pushActions = useCallback<(row: Row<TData>) => void>((row) => {
-        if (!hasActions || !row) return
+    const pushActions = useCallback<(row: Row<TData>) => void>(
+        (row) => {
+            if (!hasActions || !row) return
 
-        const actionItems = actions(row)
+            const actionItems = actions(row)
 
-        const hiddenActionsLength = actionItems.filter((action) => action.hide).length ?? 0
+            const hiddenActionsLength = actionItems.filter((action) => action.hide).length ?? 0
 
-        if (hasActions && actionItems.length !== menuItems.length + hiddenActionsLength) {
-            menuItems.splice(0, menuItems.length)
+            if (hasActions && actionItems.length !== menuItems.length + hiddenActionsLength) {
+                menuItems.splice(0, menuItems.length)
 
-            actionItems.forEach((action) => {
-                if (!action.hide) {
-                    menuItems.push(
-                        <StyledMenuItem
-                            key={action.label}
-                            className={action.className}
-                            disabled={action.disabled}
-                            onClick={() => {
-                                if (currentRowRef.current) {
-                                    action.onClick?.(currentRowRef.current)
-                                }
-                            }}
-                        >
-                            {action.label}
-                        </StyledMenuItem>,
-                    )
-                }
-            })
-        }
-    }, [actions, hasActions, menuItems])
+                actionItems.forEach((action) => {
+                    if (!action.hide) {
+                        menuItems.push(
+                            <StyledMenuItem
+                                key={action.label}
+                                className={action.className}
+                                disabled={action.disabled}
+                                onClick={() => {
+                                    if (currentRowRef.current) {
+                                        action.onClick?.(currentRowRef.current)
+                                    }
+                                }}
+                            >
+                                {action.label}
+                            </StyledMenuItem>,
+                        )
+                    }
+                })
+            }
+        },
+        [actions, hasActions, menuItems],
+    )
 
     return (
         <>
@@ -222,7 +223,7 @@ export const StyledTable = <
                                             key={header.id}
                                             colSpan={header.colSpan}
                                             className={clsx(
-                                                'px-2.5 text-delta-500 text-[10px] font-semibold uppercase overflow-hidden whitespace-nowrap overflow-ellipsis',
+                                                'px-2.5 text-delta-500 text-[10px] font-semibold uppercase truncate',
                                                 thClassName,
                                             )}
                                             style={{
@@ -309,7 +310,8 @@ export const StyledTable = <
                                                 <td
                                                     key={cell.id}
                                                     className={clsx(
-                                                        'align-middle text-ellipsis overflow-hidden text-sm text-delta-900 px-2.5',
+                                                        'align-middle text-sm text-delta-900 px-2.5',
+                                                        cell.column.id !== SELECT_COLUMN_ID && 'truncate',
                                                         tdClassName,
                                                     )}
                                                     style={{

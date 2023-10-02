@@ -51,7 +51,7 @@ const Table = () => {
                 id: 'firstName',
                 header: 'First Name',
                 enableHiding: false,
-                size: 150,
+                size: 190,
                 className: 'pl-2',
                 headerAlign: 'left',
                 cell: ({ getValue }) => (
@@ -66,7 +66,7 @@ const Table = () => {
                 cell: (info) => info.getValue(),
                 header: 'Last Name',
                 enableHiding: false,
-                size: 150,
+                size: 190,
             }),
             columnHelper.accessor('visits', {
                 id: 'visits',
