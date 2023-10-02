@@ -1,5 +1,13 @@
 # asma-core-ui
 
+## 2.16.13
+
+### Patch Changes
+
+-   4a6f577: styled input
+-   29cce0e: 2.16.10
+-   076e5cc: Styled Table css fixes
+
 ## 2.16.10
 
 ### Patch Changes

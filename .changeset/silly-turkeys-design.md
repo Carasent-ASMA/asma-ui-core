@@ -2,4 +2,4 @@
 'asma-core-ui': patch
 ---
 
-Styled Table css fixes
+2.16.13
