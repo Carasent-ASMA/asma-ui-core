@@ -1,5 +1,12 @@
 # asma-core-ui
 
+## 2.16.10
+
+### Patch Changes
+
+-   15e4747: 2.16.9
+-   042bb5f: Fix Table actions
+
 ## 2.16.9
 
 ### Patch Changes

@@ -2,4 +2,4 @@
 'asma-core-ui': patch
 ---
 
-Fix Table actions
+2.16.10
