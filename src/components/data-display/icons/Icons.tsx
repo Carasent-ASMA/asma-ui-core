@@ -49,6 +49,7 @@ import styles from './Icons.module.scss'
 import { InboxOutboxIcon } from './inbox-outbox-icon'
 import { InboxOutboxOutlineIcon } from './inbox-outbox-outline-icon'
 import { TopicIcon } from './topic-icon'
+import { EmptyPageIcon } from './empty-page-icon/EmptyPageIcon'
 
 export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 20, width = 20 }) => {
     return (
@@ -199,6 +200,9 @@ export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 
             </div>
             <div title='TopicIcon'>
                 <TopicIcon height={height} width={width} />
+            </div>
+            <div title='EmptyPageIcon'>
+                <EmptyPageIcon height={height} width={width} />
             </div>
         </div>
     )
