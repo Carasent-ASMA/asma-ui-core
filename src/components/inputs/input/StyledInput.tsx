@@ -52,7 +52,6 @@ export type StyledInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>,
 
 export const StyledInput: FC<StyledInputProps> = ({
     descriptionMessage,
-    disabled = false,
     error = false,
     label,
     refLink,
@@ -72,7 +71,7 @@ export const StyledInput: FC<StyledInputProps> = ({
 
     const typeMixin = error
         ? 'error'
-        : disabled
+        : otherProps.disabled
         ? 'disabled'
         : readOnly
         ? 'readOnly'
@@ -104,7 +103,6 @@ export const StyledInput: FC<StyledInputProps> = ({
                     endIcon && 'pr-12',
                     className,
                 )}
-                disabled={disabled}
                 readOnly={notEditable || readOnly}
                 data-test={dataTest}
             />

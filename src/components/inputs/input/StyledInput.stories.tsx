@@ -114,9 +114,10 @@ export const Inputs = () => {
                     placeholder='StyledInput'
                     value={inputText}
                     dataTest='StyledInput'
-                    error
+                    disabled={true}
+                    error={false}
                     descriptionMessage='Describe me'
-                    label='ewfwefwe'
+                    label='Pali Pali'
                     endIcon={<Icon icon='mdi:magnify' width={24} height={24} />}
                 />
                 <StyledButton>Button Example Small</StyledButton>
@@ -128,7 +129,7 @@ export const Inputs = () => {
                 dataTest='StyledInput'
                 disabled={!!inputText}
                 size='small'
-                error
+                error={false}
                 descriptionMessage='Describe me'
                 label='ewfwefwe'
                 endIcon={<Icon icon='mdi:magnify' width={24} height={24} />}

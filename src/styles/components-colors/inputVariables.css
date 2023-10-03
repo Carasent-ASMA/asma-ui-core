@@ -1,7 +1,7 @@
 :root {
     /* input Active */
     --colors-input-active-placeholder-color: var(--colors-gray-500);
-    --colors-input-active-bg-color: transparent;
+    --colors-input-active-bg-color: #ffffff;
     --colors-input-active-hover-bg-color: var(--colors-gray-10);
     --colors-input-active-active-bg-color: var(--colors-gray-10);
     --colors-input-active-focus-bg-color: var(--colors-gray-10);
