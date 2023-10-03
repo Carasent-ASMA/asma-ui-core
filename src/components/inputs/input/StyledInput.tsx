@@ -17,12 +17,12 @@ import clsx from 'clsx'
 type ConditionalProps =
     | {
           disabled?: boolean
-          error?: never
+          error?: boolean
           notEditable?: never
           readOnly?: never
       }
     | {
-          disabled?: never
+          disabled?: boolean
           error?: boolean
           notEditable?: never
           readOnly?: never
@@ -40,7 +40,7 @@ type ConditionalProps =
           readOnly?: boolean
       }
 
-type StyledInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> & {
+export type StyledInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> & {
     size?: 'large' | 'small'
     descriptionMessage?: string
     startIcon?: JSX.Element
@@ -49,6 +49,7 @@ type StyledInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'
     label?: string
     refLink?: React.Ref<HTMLInputElement>
 } & ConditionalProps
+
 export const StyledInput: FC<StyledInputProps> = ({
     descriptionMessage,
     disabled = false,

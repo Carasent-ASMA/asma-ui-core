@@ -3,12 +3,12 @@ import { useAutosizeTextArea } from './useAutosizeTextArea'
 import styles from './StyledTextarea.module.scss'
 
 type TextareaCommonProps = {
-    id: string
+    id?: string
     value?: string
     label?: string
     description?: string
     className?: string
-    dataTest: string
+    dataTest?: string
 }
 
 type TextAreaNotEditableProps = {

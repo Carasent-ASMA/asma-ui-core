@@ -126,6 +126,7 @@ export const Inputs = () => {
                 placeholder='StyledInput'
                 value={inputText}
                 dataTest='StyledInput'
+                disabled={!!inputText}
                 size='small'
                 error
                 descriptionMessage='Describe me'
