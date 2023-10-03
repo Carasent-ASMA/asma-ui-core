@@ -36,6 +36,7 @@ export * from './components/miscellaneous/StyledStack'
 export * from './components/miscellaneous/StyledFormGroup'
 // navigation
 export * from './components/navigation/menu'
+export * from './components/navigation/link'
 // surfaces
 export * from './components/surfaces/accordion'
 // table
