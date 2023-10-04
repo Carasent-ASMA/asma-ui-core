@@ -23,6 +23,7 @@ type TextAreaNotEditableProps = {
     maxLength?: never
     counter?: never
     refLink?: never
+    counterLimit?: never
 }
 
 type TextAreaActiveProps = {
@@ -37,6 +38,7 @@ type TextAreaActiveProps = {
     maxLength?: number
     counter?: boolean
     refLink?: React.RefObject<HTMLTextAreaElement> | null | undefined
+    counterLimit?: number
 }
 type TextareaConditionalProps = TextAreaActiveProps | TextAreaNotEditableProps
 type StyledTextAreaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement> &
@@ -74,6 +76,7 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
     counter,
     refLink,
     dataTest,
+    counterLimit,
     ...otherProps
 }) => {
     const textAreaInnerRef = useRef<HTMLTextAreaElement>(null)
@@ -96,7 +99,7 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
     type textTypes = 'active' | 'error' | 'disabled'
     const textType: textTypes = error ? 'error' : disabled ? 'disabled' : 'active'
 
-    const counterEnabled = counter && maxLength !== Infinity
+    const counterEnabled = counter && counterLimit
 
     return (
         <div className='flex flex-col gap-1 max-w-[400px] relative' data-test={dataTest}>
@@ -118,13 +121,14 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
                     }`}
                     rows={minRows}
                     wrap='soft'
+                    value={value}
                     disabled={disabled}
                     maxLength={maxLength}
                 />
             )}
             {counterEnabled && (
                 <div className='flex justify-end absolute bottom-3 right-3 text-[10px] font-roboto h-[15px] pointer-events-none'>
-                    {charsCount}/{maxLength}
+                    {charsCount}/{counterLimit}
                 </div>
             )}
         </div>

@@ -5,7 +5,7 @@ import clsx from 'clsx'
 /**
  * Developer: bragari.andrei@carasent.com
  * Custom props:
- * @param descriptionMessage - message under input (string)
+ * @param description - message under input (string)
  * @param startIcon - icon before input (JSX.Element)
  * @param endIcon - icon after input (JSX.Element)
  * @param dataTest - data-test tag (string)
@@ -42,7 +42,7 @@ type ConditionalProps =
 
 export type StyledInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> & {
     size?: 'large' | 'small'
-    descriptionMessage?: string
+    description?: string
     startIcon?: JSX.Element
     endIcon?: JSX.Element
     dataTest?: string
@@ -51,7 +51,7 @@ export type StyledInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>,
 } & ConditionalProps
 
 export const StyledInput: FC<StyledInputProps> = ({
-    descriptionMessage,
+    description,
     error = false,
     label,
     refLink,
@@ -109,7 +109,7 @@ export const StyledInput: FC<StyledInputProps> = ({
             <span className={`${styles['endIcon']} ${styles[typeMixin]} ${typeMixin === 'readOnly' ? 'right-0' : ''}`}>
                 {endIcon}
             </span>
-            <div className={`${styles['description']} ${styles[typeMixin]}`}>{descriptionMessage}</div>
+            <div className={`${styles['description']} ${styles[typeMixin]}`}>{description}</div>
         </div>
     )
 }

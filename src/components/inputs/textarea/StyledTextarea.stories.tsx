@@ -2,6 +2,8 @@ import type { Meta } from '@storybook/react'
 import type { StoryObj } from '@storybook/react'
 import { StyledTextarea } from './StyledTextarea'
 import { useState, type ChangeEvent, useRef } from 'react'
+import { StyledSelect, StyledSelectItem } from '../select'
+import { StyledFormControl } from 'src/components/miscellaneous/StyledFormControl'
 
 const meta = {
     title: 'Inputs/Styled Textarea',
@@ -25,7 +27,15 @@ const StyledTextareaExample = () => {
 
     const ref = useRef<HTMLTextAreaElement>(null)
 
-    const [firstValue, setFirstValue] = useState('')
+    const selectOptions = [
+        { title: 'Van Henry title', content: 'Van Henry content' },
+        { title: 'April Tucker title', content: 'April Tucker content' },
+        { title: 'Ralph Hubbard title', content: 'Ralph Hubbard content' },
+    ]
+
+    const [selectedOption, setSelectedOption] = useState(selectOptions[0])
+
+    const [firstValue, setFirstValue] = useState(selectedOption?.content)
     const [secondValue, setSecondValue] = useState('')
     const [thirdValue, setThirdValue] = useState('')
     const [fourthValue, setFourthValue] = useState('')
@@ -36,8 +46,28 @@ const StyledTextareaExample = () => {
 
     return (
         <div className='flex flex-col gap-4 items-center'>
-            <div>
-                <div className='flex align-middle justify-center text-xl font-semibold underline'>Active</div>
+            <div className='max-w-[400px]'>
+                <div className='flex align-middle justify-center text-xl font-semibold underline '>Active</div>
+                <StyledFormControl className='w-full pb-5'>
+                    <StyledSelect
+                        size='medium'
+                        value={selectedOption?.title}
+                        onChange={(e) => {
+                            const target: string = e.target.value as string
+                            const option = selectOptions.find((o) => o.title === target)
+                            if (option) {
+                                setSelectedOption(option)
+                                setFirstValue(option.content)
+                            }
+                        }}
+                    >
+                        {selectOptions.map((option, i) => (
+                            <StyledSelectItem key={i} value={option.title}>
+                                {option.title}
+                            </StyledSelectItem>
+                        ))}
+                    </StyledSelect>
+                </StyledFormControl>
                 <StyledTextarea
                     {...meta.args}
                     dataTest='test1'
@@ -49,6 +79,10 @@ const StyledTextareaExample = () => {
                     maxRows={5}
                     onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setFirstValue(e.target.value)}
                 />
+                <div className='bg-gray-50 p-4 rounded mt-1'>
+                    <p className='font-semibold text-xs'>Preview</p>
+                    <div className='bg-gray-300 p-4 rounded max-w-[400px] truncate'>{firstValue}</div>
+                </div>
             </div>
 
             <div>
@@ -63,6 +97,7 @@ const StyledTextareaExample = () => {
                     description='Description message'
                     value={thirdValue}
                     counter={true}
+                    counterLimit={160}
                     maxLength={1000}
                     onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setThirdValue(e.target.value)}
                 />
@@ -104,6 +139,7 @@ const StyledTextareaExample = () => {
                     label='Label Text'
                     maxLength={50}
                     counter
+                    counterLimit={160}
                     description='Description message'
                 />
                 <div className='font-semibold'>Height of the textarea with ref is: {ref.current?.style.height}</div>

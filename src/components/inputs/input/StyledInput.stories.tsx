@@ -15,7 +15,7 @@ const meta = {
         placeholder: 'Placeholder text',
         startIcon: <Icon icon='mdi:account-outline' width={24} height={24} />,
         endIcon: <Icon icon='mdi:magnify' width={24} height={24} />,
-        descriptionMessage: 'Description message',
+        description: 'Description message',
         required: false,
         value: '',
         type: 'text',
@@ -43,14 +43,14 @@ export const Inputs = () => {
                 value={inputText}
                 error={inputText.length < 5}
                 label='Error'
-                descriptionMessage={showDescription ? 'Error message' : ''}
+                description={showDescription ? 'Error message' : ''}
             />
             <StyledInput
                 onChange={handleInputChange}
                 value={inputText}
                 disabled
                 label='Disabled'
-                descriptionMessage='Disabled message'
+                description='Disabled message'
             />
             <StyledInput
                 {...meta.args}
@@ -58,7 +58,7 @@ export const Inputs = () => {
                 value={inputText}
                 notEditable
                 label='Not editable'
-                descriptionMessage='Not editable message'
+                description='Not editable message'
             />
             <StyledInput
                 {...meta.args}
@@ -66,7 +66,7 @@ export const Inputs = () => {
                 value={inputText}
                 readOnly
                 label='Read only'
-                descriptionMessage='Read only message'
+                description='Read only message'
             />
             <StyledInput
                 onChange={handleInputChange}
@@ -102,7 +102,7 @@ export const Inputs = () => {
                     dataTest='StyledInput'
                     size='small'
                     error
-                    // descriptionMessage='Describe me'
+                    // description='Describe me'
                     label='Small with error'
                     className='flex flex-auto w-full'
                 />
@@ -116,7 +116,7 @@ export const Inputs = () => {
                     dataTest='StyledInput'
                     disabled={true}
                     error={false}
-                    descriptionMessage='Describe me'
+                    description='Describe me'
                     label='Pali Pali'
                     endIcon={<Icon icon='mdi:magnify' width={24} height={24} />}
                 />
@@ -130,7 +130,7 @@ export const Inputs = () => {
                 disabled={!!inputText}
                 size='small'
                 error={false}
-                descriptionMessage='Describe me'
+                description='Describe me'
                 label='ewfwefwe'
                 endIcon={<Icon icon='mdi:magnify' width={24} height={24} />}
             />
