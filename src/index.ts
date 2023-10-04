@@ -5,6 +5,7 @@ export * from './interfaces'
 
 // data-display
 export * from './components/data-display/badge'
+export * from './components/data-display/chip'
 export * from './components/data-display/tooltip'
 export * from './components/data-display/icons'
 export * from './components/data-display/typography'
@@ -41,6 +42,8 @@ export * from './components/navigation/link'
 export * from './components/surfaces/accordion'
 // table
 export * from './components/table'
+// utils
+export * from './components/utils/popover'
 //widgets
 export * from './components/custom/widget/widget-title/StyledWidgetTitle'
 //modules

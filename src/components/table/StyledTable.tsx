@@ -22,7 +22,7 @@ import { Skeleton } from '@mui/material'
 
 const SELECT_COLUMN_ID = 'select'
 
-interface StyledTableProps<TData, TCustomData>
+export interface StyledTableProps<TData, TCustomData>
     extends Omit<
         TableOptions<TData>,
         'getCoreRowModel' | 'getExpandedRowModel' | 'getFilteredRowModel' | 'getSortedRowModel'
