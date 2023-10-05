@@ -1,5 +1,5 @@
-import { greenishTokens } from './../styles/greenish-tokens/index'
-import { fretexTokens } from './../styles/fretex-tokens/index'
+import { greenishTokens } from '../styles/greenish-tokens/index'
+import { fretexTokens } from '../styles/fretex-tokens/index'
 import './../styles/index.css'
 
 const customPalettes = {

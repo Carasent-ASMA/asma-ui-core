@@ -1,16 +1,11 @@
 import { useEffect, useGlobals } from '@storybook/addons'
-import { withThemeFromJSXProvider } from '@storybook/addon-styling'
-import defaultTheme from '../src/theme/theme'
-import customColors from '../src/theme/customMuiColors'
-import { createTheme, ThemeProvider } from '../src/providers'
-import { CssBaseline } from '@mui/material'
+import { withThemeByClassName } from '@storybook/addon-styling'
 import 'tailwindcss/tailwind.css'
 import '../src/styles/index.css'
 import '@fontsource/roboto/300.css'
 import '@fontsource/roboto/400.css'
 import '@fontsource/roboto/500.css'
 import '@fontsource/roboto/700.css'
-import '@fontsource/material-icons'
 
 export const parameters = {
     // themes: {
@@ -41,32 +36,14 @@ export const useTheme = (StoryFn) => {
     return StoryFn()
 }
 
-const theme = createTheme(defaultTheme)
-const fretex = createTheme(defaultTheme, {
-    palette: {
-        primary: {
-            ...customColors.fretex.primary,
-        },
-    },
-})
-const greenish = createTheme(defaultTheme, {
-    palette: {
-        primary: {
-            ...customColors.greenish.primary,
-        },
-    },
-})
-
 export const decorators = [
     useTheme,
-    withThemeFromJSXProvider({
+    withThemeByClassName({
         themes: {
-            default: theme,
-            fretex,
-            greenish,
+            default: 'default',
+            fretex: 'fretex',
+            greenish: 'greenish',
         },
-        defaultTheme: 'default',
-        Provider: ThemeProvider,
-        GlobalStyles: CssBaseline,
+        defaultTheme: 'greenish',
     }),
 ]

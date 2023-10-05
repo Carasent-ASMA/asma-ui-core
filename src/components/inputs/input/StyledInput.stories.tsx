@@ -34,6 +34,7 @@ export const Inputs = () => {
         setInputText(e.target.value)
     }
     const showDescription = inputText.length < 5
+
     return (
         <div className='flex flex-col w-full gap-12'>
             <StyledInput {...meta.args} onChange={handleInputChange} value={inputText} label='Label text' />

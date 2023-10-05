@@ -1,5 +1,4 @@
 export * from './helpers'
-export * from './theme'
 export * from './providers'
 export * from './interfaces'
 
@@ -25,7 +24,6 @@ export * from './components/inputs/rich-input'
 export * from './components/inputs/select'
 export * from './components/inputs/slider'
 export * from './components/inputs/switch'
-
 
 // miscellaneous
 export * from './components/miscellaneous/StyledFormControl'
