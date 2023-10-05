@@ -7,6 +7,9 @@ export const StyledSwitch = (props: SwitchProps) => (
             '& .MuiButtonBase-root.Mui-checked': {
                 color: 'var(--colors-gama-500) !important',
             },
+            '& .Mui-disabled .MuiSwitch-thumb': {
+                backgroundColor: 'var(--colors-gama-200) !important',
+            },
             '& .MuiSwitch-thumb': {
                 backgroundColor: 'var(--colors-gama-500) !important',
             },
