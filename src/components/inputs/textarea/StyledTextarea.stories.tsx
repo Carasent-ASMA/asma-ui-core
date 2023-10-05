@@ -46,7 +46,7 @@ const StyledTextareaExample = () => {
 
     return (
         <div className='flex flex-col gap-4 items-center'>
-            <div className='max-w-[400px]'>
+            <div>
                 <div className='flex align-middle justify-center text-xl font-semibold underline '>Active</div>
                 <StyledFormControl className='w-full pb-5'>
                     <StyledSelect
