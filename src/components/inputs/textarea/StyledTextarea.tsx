@@ -81,7 +81,15 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
 }) => {
     const textAreaInnerRef = useRef<HTMLTextAreaElement>(null)
     const textAreaRef = refLink ? refLink : textAreaInnerRef
-    useAutosizeTextArea(textAreaRef.current, value, minRows, maxRows)
+    const counterEnabled = !!(counter && counterLimit)
+
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    useAutosizeTextArea(textAreaRef.current, value, minRows, maxRows, mounted, counterEnabled)
 
     if (maxRows < minRows) {
         minRows = maxRows
@@ -98,8 +106,6 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
 
     type textTypes = 'active' | 'error' | 'disabled'
     const textType: textTypes = error ? 'error' : disabled ? 'disabled' : 'active'
-
-    const counterEnabled = counter && counterLimit
 
     return (
         <div className='flex flex-col gap-1 max-w-[400px] relative' data-test={dataTest}>
@@ -119,7 +125,6 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
                     className={`${styles['textarea']} ${styles[textareaType]} ${className} ${
                         counterEnabled ? 'pb-[32px]' : ''
                     }`}
-                    rows={minRows}
                     wrap='soft'
                     value={value}
                     disabled={disabled}

@@ -89,18 +89,29 @@ const StyledTextareaExample = () => {
                 <div className='flex align-middle justify-center text-xl font-semibold underline'>
                     Active with counter
                 </div>
-                <StyledTextarea
-                    dataTest='test2'
-                    id='2'
-                    variant='active'
-                    label='Label Text'
-                    description='Description message'
-                    value={thirdValue}
-                    counter={true}
-                    counterLimit={160}
-                    maxLength={1000}
-                    onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setThirdValue(e.target.value)}
-                />
+                <div className='flex gap-2'>
+                    <StyledTextarea
+                        dataTest='test2'
+                        id='2'
+                        variant='active'
+                        label='Label Text'
+                        description='Description message'
+                        value={thirdValue}
+                        counter={true}
+                        counterLimit={160}
+                        maxLength={1000}
+                        onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setThirdValue(e.target.value)}
+                    />
+                    <StyledTextarea
+                        dataTest='test2'
+                        id='2'
+                        variant='active'
+                        label='Label Text'
+                        description='Description message'
+                        value={thirdValue}
+                        onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setThirdValue(e.target.value)}
+                    />
+                </div>
             </div>
 
             <div>
