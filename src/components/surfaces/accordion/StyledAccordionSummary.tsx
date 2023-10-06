@@ -9,6 +9,7 @@ export const StyledAccordionSummary = (props: AccordionSummaryProps) => (
         expandIcon={<ChevronDownIcon width={24} height={24} />}
         sx={{
             ...props.sx,
+            backgroundColor: 'transparent !important',
             '& .MuiAccordionSummary-expandIconWrapper.Mui-expanded': {
                 transform: 'rotate(0deg)',
             },

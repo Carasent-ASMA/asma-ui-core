@@ -1,5 +1,5 @@
-export * from './styles/index.css'
 export * from './helpers'
+export * from './theme'
 export * from './providers'
 export * from './interfaces'
 
