@@ -13,6 +13,11 @@ export const SnackbarProvider = (props: SnackbarProviderProps) => {
             Components={{
                 alert: StyledAlertSnackbar,
             }}
+            autoHideDuration={4000}
+            anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+            }}
         >
             {props.children}
         </NotistackProvider>

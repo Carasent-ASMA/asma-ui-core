@@ -6,11 +6,12 @@ import React from 'react'
 import { StyledAlert } from '../alert/StyledAlert'
 import { enqueueSnackbar } from 'notistack'
 import { Icon } from '@iconify/react'
+import { SnackbarProvider } from './SnackbarProvider'
 
 const meta = {
     title: 'Feedback/Styled Snackbar',
     component: StyledSnackbar,
-    tags: ['autodocs'],
+    tags: [],
     argTypes: {},
     args: {},
 } satisfies Meta<typeof StyledSnackbar>
@@ -18,13 +19,12 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-// More on writing stories with args: https://storybook.js.org/docs/react/writing-stories/args
 export const SnackBar: Story = {
     args: { ...meta.args },
     render: () => <SnackbarExample />,
 }
 
-export const SnackbarExample = () => {
+const SnackbarExample = () => {
     const [openDefault, setOpenDefault] = React.useState(false)
     const [openAlert, setOpenAlert] = React.useState(false)
 
@@ -57,9 +57,8 @@ export const SnackbarExample = () => {
                         alertClassName: 'min-w-[350px]',
                         alertVariant: 'filled',
                         closeButton: true,
-                        autoHideDuration: 1000,
                         anchorOrigin: {
-                            vertical: 'bottom',
+                            vertical: 'top',
                             horizontal: 'right',
                         },
                     })
@@ -67,9 +66,14 @@ export const SnackbarExample = () => {
             >
                 Show snackbar using notistack
             </StyledButton>
+            <SnackbarProvider autoHideDuration={3000} />
 
             <StyledButton onClick={handleOpen}>Show default snackbar with action</StyledButton>
             <StyledSnackbar
+                anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                }}
                 open={openDefault}
                 onClose={handleClose}
                 message='Nice default snack'
@@ -86,7 +90,14 @@ export const SnackbarExample = () => {
             />
 
             <StyledButton onClick={handleOpenAlert}>Show snackbar with alert</StyledButton>
-            <StyledSnackbar open={openAlert} onClose={handleCloseAlert}>
+            <StyledSnackbar
+                open={openAlert}
+                onClose={handleCloseAlert}
+                anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'center',
+                }}
+            >
                 <StyledAlert onClose={handleCloseAlert} severity='success' variant='filled' sx={{ width: '100%' }}>
                     Nice alert snack
                 </StyledAlert>
