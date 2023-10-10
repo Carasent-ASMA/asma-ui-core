@@ -3,10 +3,9 @@ import { Icon } from '@iconify/react'
 import clsx from 'clsx'
 
 /**
- * Custom props:
  *
- * @reflink
- * use reflink to provide ref attribute on wrapper component.
+ * @inputRef
+ * inputRef to get Node of Input Element inside
  *
  */
 export const StyledSelect = (
@@ -14,7 +13,7 @@ export const StyledSelect = (
 ) => (
     <Select
         {...props}
-        ref={props.reflink}
+        className={clsx('!text-sm', props.className)}
         IconComponent={(props) => (
             <Icon
                 {...props}
@@ -25,6 +24,7 @@ export const StyledSelect = (
             />
         )}
         sx={{
+            ...props.sx,
             '& .MuiOutlinedInput-notchedOutline': {
                 borderColor: 'var(--colors-gama-500) !important',
             },
