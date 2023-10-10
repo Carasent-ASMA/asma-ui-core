@@ -19,10 +19,18 @@ export const StyledSelect = (
             <Icon
                 {...props}
                 icon='material-symbols:expand-more-rounded'
-                width={30}
-                height={30}
-                className={clsx(props.className, '-mt-1.5 mx-2')}
+                width={24}
+                height={24}
+                className={clsx(props.className, 'select-custom-icon')}
             />
         )}
+        sx={{
+            '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: 'var(--colors-gama-500) !important',
+            },
+            '& .select-custom-icon': {
+                marginTop: '-3.5px !important',
+            },
+        }}
     />
 )
