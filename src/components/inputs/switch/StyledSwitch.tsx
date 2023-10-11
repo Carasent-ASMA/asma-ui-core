@@ -13,8 +13,11 @@ export const StyledSwitch = (props: SwitchProps) => (
             '& .MuiSwitch-thumb': {
                 backgroundColor: 'var(--colors-gama-500) !important',
             },
-            '& .Mui-checked+.MuiSwitch-track': {
-                backgroundColor: 'var(--colors-gama-500) !important',
+            '& .MuiSwitch-input:not(:checked) ~ .MuiSwitch-thumb': {
+                backgroundColor: 'var(--colors-gray-10) !important',
+            },
+            '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                backgroundColor: 'var(--colors-gama-200) !important',
             },
         }}
     />
