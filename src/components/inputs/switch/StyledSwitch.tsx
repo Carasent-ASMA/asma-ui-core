@@ -19,6 +19,9 @@ export const StyledSwitch = (props: SwitchProps) => (
             '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
                 backgroundColor: 'var(--colors-gama-200) !important',
             },
+            '& .PrivateSwitchBase-input.MuiSwitch-input': {
+                height: '100% !important',
+            },
         }}
     />
 )
