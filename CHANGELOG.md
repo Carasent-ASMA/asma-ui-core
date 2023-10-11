@@ -291,7 +291,7 @@
 
 -   4defa8e: Added StyledDateCalendar
 -   4447c64: Added StyledSlider
--   4defa8e: Added StyledDatePicker, StyledTimePicker & mobile versions for all date components
+-   4defa8e: Added StyledCalendarPicker, StyledTimePicker & mobile versions for all date components
 
 ### Patch Changes
 

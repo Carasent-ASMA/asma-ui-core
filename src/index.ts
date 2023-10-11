@@ -24,6 +24,7 @@ export * from './components/inputs/rich-input'
 export * from './components/inputs/select'
 export * from './components/inputs/slider'
 export * from './components/inputs/switch'
+// export * from './components/inputs/date-picker'
 
 // miscellaneous
 export * from './components/miscellaneous/StyledFormControl'
