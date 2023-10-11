@@ -18,6 +18,8 @@ export const SnackbarProvider = (props: SnackbarProviderProps) => {
                 vertical: 'top',
                 horizontal: 'right',
             }}
+            domRoot={document.body}
+            maxSnack={3}
         >
             {props.children}
         </NotistackProvider>
