@@ -1,12 +1,11 @@
 import 'react-day-picker/dist/style.css'
 import { format } from 'date-fns'
 import { Popover } from '@mui/material'
-import { type FC, useState } from 'react'
-
+import { useState } from 'react'
 import { CalendarBlankOutlineIcon } from '../../data-display/icons/calendar-blank-outline-icon'
 
 import { type CalendarProps, StyledCalendarPicker } from './StyledCalendarPicker'
-import { StyledInput } from '../input'
+import { StyledInputField } from '../input-field'
 
 type CommonDatePickerProps = {
     dateFormat?: string
@@ -55,16 +54,29 @@ export const StyledDatePicker = ({
     ...props
 }: DatePickerProps) => {
     const [anchor, setAnchor] = useState<HTMLDivElement | null>(null)
+    const [positionAbove, setPositionAbove] = useState(false)
     const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
         setAnchor(event.currentTarget)
+
+        const windowHeight = window.innerHeight
+        const inputRect = event.currentTarget.getBoundingClientRect()
+        const spaceAbove = inputRect.top
+        const spaceBelow = windowHeight - inputRect.bottom
+
+        if (spaceBelow < 300 && spaceAbove > spaceBelow) {
+            setPositionAbove(true)
+        } else {
+            setPositionAbove(false)
+        }
     }
+
     const handleClose = () => {
         setAnchor(null)
     }
     const open = Boolean(anchor)
 
-    const getValue = (date?: Date, dateFormat = 'dd.MM.yy', placeholder?: string) => {
-        return date ? format(date, dateFormat) : placeholder
+    const getValue = (date?: Date, dateFormat = 'dd.MM.yy') => {
+        return date ? format(date, dateFormat) : ''
     }
 
     let value: string | undefined = ''
@@ -72,13 +84,13 @@ export const StyledDatePicker = ({
     let value_to: string | undefined = ''
 
     if (props.mode === 'range') {
-        value_from = getValue(props.selected?.from, dateFormat, placeholderFrom)
+        value_from = getValue(props.selected?.from, dateFormat)
 
-        value_to = getValue(props.selected?.to, dateFormat, placeholderTo)
+        value_to = getValue(props.selected?.to, dateFormat)
 
-        value = props.selected?.from ? (props.selected.to ? `${value_from} - ${value_to}` : value_from) : placeholder
+        value = props.selected?.from ? (props.selected.to ? `${value_from} - ${value_to}` : value_from) : ''
     } else {
-        value = getValue(props.selected, dateFormat, placeholder)
+        value = getValue(props.selected, dateFormat)
     }
 
     return (
@@ -90,27 +102,33 @@ export const StyledDatePicker = ({
                     } inline-flex gap-1 w-fit items-center`}
                     onClick={(e) => !disabled && handleClick(e)}
                 >
-                    <Input
+                    <StyledInputField
+                        size='small'
+                        placeholder={placeholderFrom}
                         value={value_from}
                         disabled={!!disabled}
-                        selected={!!props.selected?.from}
-                        className={`${inputClassName} ${props.selected?.from ? 'p-2' : 'py-2 px-4'} w-20`}
+                        className={`${inputClassName}  w-28`}
                     />
                     -
-                    <Input
+                    <StyledInputField
+                        size='small'
+                        placeholder={placeholderTo}
                         value={value_to}
                         disabled={!!disabled}
-                        selected={!!props.selected?.to}
-                        className={`${inputClassName} ${props.selected?.to ? 'p-2' : 'py-2 px-4'} w-20`}
+                        className={`${inputClassName} w-28`}
                     />
                 </div>
             ) : (
-                <StyledInput
+                <StyledInputField
+                    placeholder={placeholder}
+                    size='small'
                     onClick={(e) => !disabled && handleClick(e)}
-                    endIcon={<CalendarBlankOutlineIcon className={`mr-2 h-6 w-6 ${disabled && 'cursor-default'}`} />}
+                    InputProps={{
+                        endAdornment: <CalendarBlankOutlineIcon width={24} height={24} />,
+                    }}
                     value={value}
                     disabled={!!disabled}
-                    className={`${inputClassName} p-0 w-full border-none`}
+                    className={`${inputClassName}`}
                 />
             )}
             <Popover
@@ -118,37 +136,16 @@ export const StyledDatePicker = ({
                 anchorEl={anchor}
                 onClose={handleClose}
                 anchorOrigin={{
-                    vertical: 'bottom',
+                    vertical: positionAbove ? 'top' : 'bottom',
                     horizontal: 'center',
                 }}
                 transformOrigin={{
-                    vertical: 'top',
+                    vertical: positionAbove ? 'bottom' : 'top',
                     horizontal: 'center',
                 }}
             >
                 <StyledCalendarPicker {...props} />
             </Popover>
         </>
-    )
-}
-
-const Input: FC<{ value?: string; disabled: boolean; selected: boolean; className?: string }> = ({
-    value,
-    disabled,
-    selected,
-    className,
-}) => {
-    return (
-        <input
-            value={value}
-            readOnly
-            className={`${className} ${
-                disabled
-                    ? 'border-[var(--colors-gray-300)] !text-[var(--colors-gray-300)] cursor-default'
-                    : `${
-                          selected ? 'text-[var(--colors-gray-800)]' : 'text-[var(--colors-gray-500)]'
-                      }  border-[var(--colors-gray-500)] cursor-pointer`
-            } rounded text-sm font-normal border border-solid outline-none`}
-        />
     )
 }

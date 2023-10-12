@@ -4,6 +4,11 @@ import type { DateRange } from 'react-day-picker'
 import { nb } from 'date-fns/locale'
 
 import { StyledDatePicker } from './StyledDatePicker'
+import { StyledButton } from '../button'
+import { StyledTypography } from 'src/components/data-display/typography'
+import { StyledPopover } from 'src/components/utils/popover'
+import { StyledCheckbox } from '../checkbox'
+import { StyledFormControlLabel } from 'src/components/miscellaneous/StyledFormControlLabel'
 
 const meta = {
     title: 'Inputs/Styled Date Picker',
@@ -24,7 +29,25 @@ export const StyledDatePickerExample = () => {
     const [date, setDate] = useState<Date>()
     const [range, setRange] = useState<DateRange>()
     const [rangeCompact, setRangeCompact] = useState<DateRange>()
+    const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
 
+    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setAnchorEl(event.currentTarget)
+    }
+
+    const handleClose = () => {
+        setAnchorEl(null)
+    }
+
+    const open = Boolean(anchorEl)
+    const id = open ? 'simple-popover' : undefined
+
+    const windowHeight = window.innerHeight
+    const buttonRect = anchorEl?.getBoundingClientRect() || { top: 0, bottom: 0 }
+    const spaceBelow = windowHeight - buttonRect.bottom
+    const spaceAbove = buttonRect.top
+
+    const menuAbove = spaceBelow < 300 && spaceAbove > spaceBelow
     return (
         <div className={'flex flex-col gap-5'}>
             <StyledDatePicker placeholder='Pick a date' mode='single' selected={date} onSelect={setDate} />
@@ -56,6 +79,43 @@ export const StyledDatePickerExample = () => {
                 mode='range'
                 disabled
             />
+
+            {/* Popover like in InOutBox */}
+            <StyledButton variant='contained' className='w-28' onClick={handleClick}>
+                Open popover
+            </StyledButton>
+
+            <StyledPopover
+                id={id}
+                open={open}
+                anchorEl={anchorEl}
+                onClose={handleClose}
+                anchorOrigin={{
+                    vertical: menuAbove ? 'top' : 'bottom',
+                    horizontal: 'center',
+                }}
+                transformOrigin={{
+                    vertical: menuAbove ? 'bottom' : 'top',
+                    horizontal: 'center',
+                }}
+            >
+                <StyledTypography sx={{ p: 2 }}>
+                    <div className='flex flex-col '>
+                        <StyledFormControlLabel label={'test'} control={<StyledCheckbox size='small' />} />
+                        <StyledFormControlLabel label={'test'} control={<StyledCheckbox size='small' />} />
+                        <StyledFormControlLabel label={'test'} control={<StyledCheckbox size='small' />} />
+                    </div>
+
+                    <StyledDatePicker
+                        placeholder='Pick a start date'
+                        mode='single'
+                        selected={date}
+                        onSelect={setDate}
+                    />
+                    <div className='my-2'></div>
+                    <StyledDatePicker placeholder='Pick a end date' mode='single' selected={date} onSelect={setDate} />
+                </StyledTypography>
+            </StyledPopover>
         </div>
     )
 }
