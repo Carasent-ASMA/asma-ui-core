@@ -86,7 +86,6 @@ const Table = () => {
             columnHelper.display({
                 id: 'share_action',
                 enableHiding: false,
-                size: 75,
                 cell: () => (
                     <StyledButton className='m-auto' type='button' variant='text'>
                         Shared
@@ -186,7 +185,7 @@ const Table = () => {
                     getRowCanExpand={() => true}
                     onGlobalFilterChange={setGlobalFilter}
                     onRowSelectionChange={setRowSelection}
-                    renderSubRows={renderSubRows}
+                    // renderSubRows={renderSubRows}
                     getRowClassName={(row) => (row.original.progress > 50 ? 'bg-primary-25' : '')}
                     rowHeight={40}
                     noRowsOverlay={
@@ -203,16 +202,16 @@ const Table = () => {
     )
 }
 
-const renderSubRows = ({ rows }: { rows: Participant[] }) => {
-    return (
-        <>
-            {rows?.map((row) => (
-                <tr key={row.activityId} className='pl-10 h-[50px] w-full hover:cursor-pointer hover:bg-primary-25'>
-                    <td>{row.fullName}</td>
-                    <td>{row.activityId}</td>
-                    <td colSpan={3}>{new Date(row.addedAt).toLocaleDateString()}</td>
-                </tr>
-            ))}
-        </>
-    )
-}
+// const renderSubRows = ({ rows }: { rows: Participant[] }) => {
+//     return (
+//         <>
+//             {rows?.map((row) => (
+//                 <tr key={row.activityId} className='pl-10 h-[50px] w-full hover:cursor-pointer hover:bg-primary-25'>
+//                     <td>{row.fullName}</td>
+//                     <td>{row.activityId}</td>
+//                     <td colSpan={3}>{new Date(row.addedAt).toLocaleDateString()}</td>
+//                 </tr>
+//             ))}
+//         </>
+//     )
+// }

@@ -4,7 +4,6 @@ import {
     useReactTable,
     type TableOptions,
     getSortedRowModel,
-    createColumnHelper,
     getFilteredRowModel,
     type Table,
     getExpandedRowModel,
@@ -12,13 +11,13 @@ import {
 } from '@tanstack/react-table'
 import clsx from 'clsx'
 import { Fragment, type ReactElement, useMemo, useRef, type MouseEvent, useCallback } from 'react'
-import { DotsVerticalIcon, DropDownIcon, DropUpIcon, LoadingIcon } from '../data-display/icons'
+import { DropDownIcon, DropUpIcon, LoadingIcon } from '../data-display/icons'
 import { StyledMenu, StyledMenuItem } from '../navigation/menu'
-import { StyledButton } from '../inputs/button'
-import { Icon } from '@iconify/react'
 import { useToggleMenuVisibility } from './useToggleMenuVisibility'
 import { StyledCheckbox } from '../inputs/checkbox'
 import { Skeleton } from '@mui/material'
+import { generateActionsColumn } from './components/columns/actionColumn'
+import { widthStabilizer } from './components/columns/widthStabilizer'
 
 const SELECT_COLUMN_ID = 'select'
 
@@ -46,6 +45,7 @@ export interface StyledTableProps<TData, TCustomData>
     getRowClassName?: (row: Row<TData>) => string
     onRowClick?: (e: MouseEvent<HTMLTableRowElement, globalThis.MouseEvent>, row: Row<TData>) => void
     renderSubRows?: (props: { rows: TCustomData[] }) => ReactElement
+    autosize?: boolean
 }
 
 export const StyledTable = <
@@ -71,6 +71,7 @@ export const StyledTable = <
     getRowClassName,
     onRowClick,
     renderSubRows,
+    autosize = true,
     ...rest
 }: StyledTableProps<TData, TCustomData>) => {
     const { anchorEl, open, handleClose, handleOpen } = useToggleMenuVisibility()
@@ -82,40 +83,23 @@ export const StyledTable = <
     } = useToggleMenuVisibility()
 
     const currentRowRef = useRef<Row<TData> | null>(null)
-
     const hasActions = typeof actions === 'function'
+    autosize && columns.push(widthStabilizer())
 
-    const actionColumn = createColumnHelper<TData>().display({
-        id: 'actions',
-        enableHiding: false,
-        enableSorting: false,
-        maxSize: 50,
-        headerAlign: 'center',
-        header: () =>
-            !disableHeaderPin && (
-                <Icon icon='mdi:pin' className='text-delta-600' width={20} height={20} onClick={handleOpenPin} />
-            ),
-        cell: (info) =>
-            hasActions ? (
-                <div className='flex justify-center items-center'>
-                    <StyledButton
-                        variant='text'
-                        size='small'
-                        onClick={(e) => {
-                            e.stopPropagation()
-                            handleOpen(e)
-                            currentRowRef.current = info.row
-                            pushActions(currentRowRef.current)
-                        }}
-                    >
-                        <DotsVerticalIcon className='!text-delta-800' width={24} height={24} />
-                    </StyledButton>
-                </div>
-            ) : null,
-    })
-
-    if (!disableHeaderPin && !columns.find((col) => col.id === actionColumn.id)) {
-        columns.push(actionColumn)
+    if (!disableHeaderPin && !columns.find((col) => col.id === 'actions')) {
+        columns.push(
+            generateActionsColumn({
+                disableHeaderPin,
+                hasActions,
+                handleOpenPin,
+                handleOpenCellAction: (e, info) => {
+                    e.stopPropagation()
+                    handleOpen(e)
+                    currentRowRef.current = info.row
+                    pushActions(currentRowRef.current)
+                },
+            }),
+        )
     }
 
     if (enableRowSelection && !columns.find((col) => col.id === SELECT_COLUMN_ID)) {
@@ -206,8 +190,8 @@ export const StyledTable = <
 
     return (
         <>
-            <table className={clsx('border-collapse table-fixed w-full', className)}>
-                <thead className='table-header-group bg-[#fcfcfd] border-x-0 border-y border-solid border-y-delta-300'>
+            <table className={clsx('animate-opacity-appear-3 border-collapse overflow-y-auto', className)}>
+                <thead className='table-header-group bg-[#fcfcfd] border-t-solid border-b-solid  border-y-[#bdc4cf] border-y cursor-default'>
                     {data.length === 0 && loading ? (
                         <tr>
                             <th colSpan={columns.length}>
@@ -218,6 +202,12 @@ export const StyledTable = <
                         table.getHeaderGroups().map((headerGroup) => (
                             <tr key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => {
+                                    let size: number | string = header.getSize()
+                                    if (isNaN(size) || size > 1200) {
+                                        size = '100%'
+                                    } else {
+                                        size = `${size}px`
+                                    }
                                     return (
                                         <th
                                             key={header.id}
@@ -227,10 +217,9 @@ export const StyledTable = <
                                                 thClassName,
                                             )}
                                             style={{
-                                                width:
-                                                    header.getSize() === Number.MAX_SAFE_INTEGER
-                                                        ? 'auto'
-                                                        : header.getSize(),
+                                                width: size || '100%',
+                                                maxWidth: size || '100%',
+                                                minWidth: size || '100%',
                                             }}
                                         >
                                             {header.isPlaceholder ? null : (
@@ -306,6 +295,12 @@ export const StyledTable = <
                                         }}
                                     >
                                         {row.getVisibleCells().map((cell) => {
+                                            let size: number | string = cell.column.getSize()
+                                            if (isNaN(size) || size > 1200) {
+                                                size = '100%'
+                                            } else {
+                                                size = `${size}px`
+                                            }
                                             return (
                                                 <td
                                                     key={cell.id}
@@ -316,10 +311,9 @@ export const StyledTable = <
                                                     )}
                                                     style={{
                                                         textAlign: cell.column.columnDef.cellAlign ?? 'left',
-                                                        width:
-                                                            cell.column.getSize() === Number.MAX_SAFE_INTEGER
-                                                                ? 'auto'
-                                                                : cell.column.getSize(),
+                                                        width: size || '100%',
+                                                        maxWidth: size || '100%',
+                                                        minWidth: size || '100%',
                                                     }}
                                                 >
                                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
