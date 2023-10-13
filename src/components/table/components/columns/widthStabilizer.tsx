@@ -1,7 +1,7 @@
 export function widthStabilizer() {
     return {
+        id: 'width_stabilizer',
         header: '',
-        accessorKey: 'width_stabilizer',
         cell: () => null,
         size: NaN,
     }

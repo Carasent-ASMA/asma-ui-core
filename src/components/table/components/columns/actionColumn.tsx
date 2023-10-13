@@ -13,6 +13,7 @@ export function generateActionsColumn<TData>(options: {
     ) => void
 }) {
     const { disableHeaderPin, hasActions, handleOpenPin, handleOpenCellAction } = options
+
     return createColumnHelper<TData>().display({
         id: 'actions',
         enableHiding: false,

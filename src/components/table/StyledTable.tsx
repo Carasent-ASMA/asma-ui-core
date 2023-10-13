@@ -33,6 +33,7 @@ export interface StyledTableProps<TData, TCustomData>
         hide?: boolean
         onClick?: (row: Row<TData>) => void
     }[]
+    autoSize?: boolean
     customSubRowData?: Map<string, TCustomData[]>
     disableHeaderPin?: boolean
     loading?: boolean
@@ -45,7 +46,6 @@ export interface StyledTableProps<TData, TCustomData>
     getRowClassName?: (row: Row<TData>) => string
     onRowClick?: (e: MouseEvent<HTMLTableRowElement, globalThis.MouseEvent>, row: Row<TData>) => void
     renderSubRows?: (props: { rows: TCustomData[] }) => ReactElement
-    autosize?: boolean
 }
 
 export const StyledTable = <
@@ -55,6 +55,7 @@ export const StyledTable = <
     TCustomData = Record<string, unknown>,
 >({
     actions,
+    autoSize = true,
     columns,
     data,
     customSubRowData,
@@ -71,7 +72,6 @@ export const StyledTable = <
     getRowClassName,
     onRowClick,
     renderSubRows,
-    autosize = true,
     ...rest
 }: StyledTableProps<TData, TCustomData>) => {
     const { anchorEl, open, handleClose, handleOpen } = useToggleMenuVisibility()
@@ -84,7 +84,10 @@ export const StyledTable = <
 
     const currentRowRef = useRef<Row<TData> | null>(null)
     const hasActions = typeof actions === 'function'
-    autosize && columns.push(widthStabilizer())
+
+    if (autoSize && !columns.find((col) => col.id === 'width_stabilizer')) {
+        columns.push(widthStabilizer())
+    }
 
     if (!disableHeaderPin && !columns.find((col) => col.id === 'actions')) {
         columns.push(
@@ -191,7 +194,7 @@ export const StyledTable = <
     return (
         <>
             <table className={clsx('animate-opacity-appear-3 border-collapse overflow-y-auto', className)}>
-                <thead className='table-header-group bg-[#fcfcfd] border-t-solid border-b-solid  border-y-[#bdc4cf] border-y cursor-default'>
+                <thead className='table-header-group bg-[#fcfcfd] border-t-solid border-b-solid  border-y-delta-300 border-y cursor-default'>
                     {data.length === 0 && loading ? (
                         <tr>
                             <th colSpan={columns.length}>
@@ -203,11 +206,13 @@ export const StyledTable = <
                             <tr key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => {
                                     let size: number | string = header.getSize()
+
                                     if (isNaN(size) || size > 1200) {
                                         size = '100%'
                                     } else {
                                         size = `${size}px`
                                     }
+
                                     return (
                                         <th
                                             key={header.id}
@@ -262,6 +267,7 @@ export const StyledTable = <
                             height={50}
                         />
                     ) : null}
+
                     {data.length === 0 && loading ? (
                         <>
                             {Array.from({ length: 5 }).map((_, index) => (
@@ -296,11 +302,13 @@ export const StyledTable = <
                                     >
                                         {row.getVisibleCells().map((cell) => {
                                             let size: number | string = cell.column.getSize()
+
                                             if (isNaN(size) || size > 1200) {
                                                 size = '100%'
                                             } else {
                                                 size = `${size}px`
                                             }
+
                                             return (
                                                 <td
                                                     key={cell.id}
