@@ -35,6 +35,7 @@ export * from './components/miscellaneous/StyledInputLabel'
 export * from './components/miscellaneous/StyledStack'
 export * from './components/miscellaneous/StyledFormGroup'
 // navigation
+export * from './components/navigation/drawer'
 export * from './components/navigation/menu'
 export * from './components/navigation/link'
 // surfaces
