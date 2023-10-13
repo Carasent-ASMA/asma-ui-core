@@ -2,4 +2,4 @@
 'asma-core-ui': patch
 ---
 
-export tanstack interfaces
+2.18.3

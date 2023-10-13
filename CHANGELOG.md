@@ -1,5 +1,14 @@
 # asma-core-ui
 
+## 2.18.3
+
+### Patch Changes
+
+-   947c849: small fix for autoSize column
+-   73abc45: update style table columns width
+-   73abc45: export tanstack interfaces
+-   a89fb53: 2.18.0
+
 ## 2.18.0
 
 ### Minor Changes
