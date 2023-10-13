@@ -1,5 +1,33 @@
 # asma-core-ui
 
+## 2.18.0
+
+### Minor Changes
+
+-   3475f35: Added StyledLink component
+-   62a5e65: Added EmptyPageIcon
+-   059bdf9: removing mui style config provider
+
+### Patch Changes
+
+-   991ee7f: styled text area - optional props, styledInput interface fix
+-   e7bc214: fixed bg color of styled accordion to transparent
+-   61e50f6: reflink for select
+-   da2c8cd: optimized snackbar
+-   eebb6f2: updated storybook 7.4.6
+-   e7bc214: tokens inside css
+-   043b349: return exporting of main css
+-   2fc0c1b: switch disabled colors
+-   f191a3c: fixed styled switch height
+-   a033535: Styled Drawer
+-   f191a3c: snackbar on DOMROOT level
+-   8518620: Fixed some bugs related to StyledInput ans StyledTextarea
+-   a204108: styles for select
+-   bbf3a24: 2.16.13
+-   939b7ed: fixed StyledInput background
+-   c9017e7: Fixed counter paddings in StyledTextarea
+-   5f090ab: styling switch element
+
 ## 2.16.13
 
 ### Patch Changes

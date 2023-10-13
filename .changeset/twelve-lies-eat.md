@@ -2,4 +2,4 @@
 'asma-core-ui': patch
 ---
 
-snackbar on DOMROOT level
+2.18.0
