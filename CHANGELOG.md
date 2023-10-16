@@ -1,5 +1,12 @@
 # asma-core-ui
 
+## 2.18.4
+
+### Patch Changes
+
+-   8922f3d: 2.18.3
+-   50c8c29: add classname to styled link
+
 ## 2.18.3
 
 ### Patch Changes
