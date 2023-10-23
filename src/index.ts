@@ -38,6 +38,7 @@ export * from './components/miscellaneous/StyledFormGroup'
 export * from './components/navigation/drawer'
 export * from './components/navigation/menu'
 export * from './components/navigation/link'
+export * from './components/navigation/tabs'
 // surfaces
 export * from './components/surfaces/accordion'
 // table
