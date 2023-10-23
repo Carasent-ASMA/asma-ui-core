@@ -5,6 +5,9 @@ export const StyledSelectItem = (item: MenuItemProps) => {
         <MenuItem
             {...item}
             sx={{
+                '&.MuiMenuItem-root': {
+                    fontSize: '14px !important',
+                },
                 '&.Mui-selected': {
                     backgroundColor: 'var(--colors-gama-50) !important',
                 },
