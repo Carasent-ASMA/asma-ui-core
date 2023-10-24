@@ -39,6 +39,8 @@ export * from './components/navigation/drawer'
 export * from './components/navigation/menu'
 export * from './components/navigation/link'
 export * from './components/navigation/tabs'
+// layout
+export * from './components/layout/container'
 // surfaces
 export * from './components/surfaces/accordion'
 // table

@@ -31,6 +31,9 @@ export const StyledSelect = (
             '& .select-custom-icon': {
                 marginTop: '-3.5px !important',
             },
+            '& .MuiInputBase-inputSizeSmall': {
+                minHeight: '23px !important',
+            },
         }}
     />
 )
