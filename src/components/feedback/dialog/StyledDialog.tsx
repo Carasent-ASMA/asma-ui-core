@@ -3,9 +3,10 @@ import type { DialogProps } from '@mui/material/Dialog'
 
 import { Icon } from '@iconify/react'
 import { StyledButton } from '../../inputs/button/StyledButton'
+import type { ReactNode } from 'react'
 
 export interface IStyledDialogProps extends DialogProps {
-    onCloseText?: string
+    onCloseText?: ReactNode
     showCloseIcon?: boolean
 }
 

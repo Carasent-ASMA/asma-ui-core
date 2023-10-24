@@ -1,4 +1,4 @@
-import { type FC } from 'react'
+import { type FC, type ReactNode } from 'react'
 import styles from './StyledInput.module.scss'
 import clsx from 'clsx'
 
@@ -46,7 +46,7 @@ export type StyledInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>,
     startIcon?: JSX.Element
     endIcon?: JSX.Element
     dataTest?: string
-    label?: string
+    label?: ReactNode
     refLink?: React.Ref<HTMLInputElement>
 } & ConditionalProps
 

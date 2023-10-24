@@ -1,11 +1,11 @@
-import React, { useEffect, useRef, useState, type ChangeEvent } from 'react'
+import React, { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from 'react'
 import { useAutosizeTextArea } from './useAutosizeTextArea'
 import styles from './StyledTextarea.module.scss'
 
 type TextareaCommonProps = {
     id?: string
     value?: string
-    label?: string
+    label?: ReactNode
     labelClassName?: string
     description?: string
     containerClassName?: string
