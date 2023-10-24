@@ -6,6 +6,7 @@ type TextareaCommonProps = {
     id?: string
     value?: string
     label?: string
+    labelClassName?: string
     description?: string
     containerClassName?: string
     className?: string
@@ -65,6 +66,7 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
     id,
     variant = 'active',
     label = '',
+    labelClassName = '',
     description = '',
     value = '',
     minRows = 3,
@@ -111,7 +113,7 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
 
     return (
         <div className={`flex flex-col gap-1 relative ${containerClassName}`} data-test={dataTest}>
-            <label htmlFor={id} className={`${styles['label']} ${styles[textType]}`}>
+            <label htmlFor={id} className={`${styles['label']} ${styles[textType]} ${labelClassName}`}>
                 {label}
             </label>
             <span className={`${styles['description']} ${styles[textType]}`}>{error ? errorMessage : description}</span>
