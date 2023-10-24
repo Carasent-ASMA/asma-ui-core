@@ -1,5 +1,14 @@
 # asma-core-ui
 
+## 2.18.9
+
+### Patch Changes
+
+-   a7c1d7b: 2.18.7
+-   a73c7cd: styles for styled select
+-   a73c7cd: styled container
+-   62a4ba6: added label classname
+
 ## 2.18.7
 
 ### Patch Changes
