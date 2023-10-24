@@ -1,5 +1,14 @@
 # asma-core-ui
 
+## 2.18.7
+
+### Patch Changes
+
+-   1cc6183: Add container classname for textarea
+-   e31066e: textSize-of-select-dropdown
+-   af25d7c: StyledTabs
+-   1be5492: 2.18.4
+
 ## 2.18.4
 
 ### Patch Changes
