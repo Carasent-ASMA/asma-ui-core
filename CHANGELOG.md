@@ -1,5 +1,11 @@
 # asma-core-ui
 
+## 2.18.11
+
+### Patch Changes
+
+-   8faaa84: 2.18.10
+
 ## 2.18.10
 
 ### Patch Changes
