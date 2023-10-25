@@ -1,5 +1,13 @@
 # asma-core-ui
 
+## 2.18.10
+
+### Patch Changes
+
+-   bd83c68: added some more reactnode types
+-   03fce5c: 2.18.9
+-   a00024e: add possibility to pass component besides text to inputs
+
 ## 2.18.9
 
 ### Patch Changes
