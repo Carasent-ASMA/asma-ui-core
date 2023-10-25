@@ -50,6 +50,9 @@ import { InboxOutboxIcon } from './inbox-outbox-icon'
 import { InboxOutboxOutlineIcon } from './inbox-outbox-outline-icon'
 import { TopicIcon } from './topic-icon'
 import { EmptyPageIcon } from './empty-page-icon/EmptyPageIcon'
+import { DragHorizontalIcon } from './drag-horizontal-icon'
+import { FilePdfIcon } from './file-pdf-icon/FilePdfIcon'
+import { DeleteOutlineIcon } from './delete-outline-icon'
 
 export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 20, width = 20 }) => {
     return (
@@ -204,6 +207,16 @@ export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 
             <div title='EmptyPageIcon'>
                 <EmptyPageIcon height={height} width={width} />
             </div>
+            <div title='DragHorizontalIcon'>
+                <DragHorizontalIcon height={height} width={width} />
+            </div>
+            <div title='FilePdfIcon'>
+                <FilePdfIcon height={height} width={width} />
+            </div>
+            <div title='DeleteOutlineIcon'>
+                <DeleteOutlineIcon height={height} width={width} />
+            </div>
+
         </div>
     )
 }
