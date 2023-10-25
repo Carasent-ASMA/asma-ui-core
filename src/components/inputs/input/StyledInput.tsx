@@ -42,7 +42,7 @@ type ConditionalProps =
 
 export type StyledInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> & {
     size?: 'large' | 'small'
-    description?: string
+    description?: ReactNode
     startIcon?: JSX.Element
     endIcon?: JSX.Element
     dataTest?: string

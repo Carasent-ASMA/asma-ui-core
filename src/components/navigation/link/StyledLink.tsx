@@ -1,11 +1,11 @@
-import React, { type AnchorHTMLAttributes } from 'react'
+import React, { type AnchorHTMLAttributes, type ReactNode } from 'react'
 import styles from './StyledLink.module.scss'
 import clsx from 'clsx'
 
 export type StyledLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
     disabled?: boolean
     size?: 'small' | 'large'
-    title: string
+    title: ReactNode
     children?: never
     reflink?: React.Ref<HTMLAnchorElement>
     dataTest?: string

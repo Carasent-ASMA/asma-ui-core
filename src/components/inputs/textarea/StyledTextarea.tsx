@@ -7,7 +7,7 @@ type TextareaCommonProps = {
     value?: string
     label?: ReactNode
     labelClassName?: string
-    description?: string
+    description?: ReactNode
     containerClassName?: string
     className?: string
     dataTest?: string
