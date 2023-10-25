@@ -1,4 +1,6 @@
-:root {
+[data-theme='default'],
+[data-theme='fretex'],
+[data-theme='greenish'] {
     /* input Active */
     --colors-input-active-placeholder-color: var(--colors-gray-500);
     --colors-input-active-bg-color: #ffffff;
@@ -14,7 +16,7 @@
     --colors-input-active-outline-color: var(--colors-gray-500);
     --colors-input-active-hover-outline-color: var(--colors-gray-800);
     --colors-input-active-active-outline-color: var(--colors-gray-800);
-    --colors-input-active-focus-outline-color: var(--colors-warning-500);
+    --colors-input-active-focus-outline-color: var(--colors-gama-500);
     --colors-input-active-disabled-outline-color: var(--colors-gray-300);
     --input-active-cursor: text;
     --input-active-hover-cursor: text;
@@ -41,7 +43,7 @@
     --colors-input-error-outline-color: var(--colors-error-700);
     --colors-input-error-hover-outline-color: var(--colors-error-700);
     --colors-input-error-active-outline-color: var(--colors-error-700);
-    --colors-input-error-focus-outline-color: var(--colors-warning-500);
+    --colors-input-error-focus-outline-color: var(--colors-error-700);
     --colors-input-error-disabled-outline-color: var(--colors-error-700);
     --input-error-cursor: text;
     --input-error-hover-cursor: text;

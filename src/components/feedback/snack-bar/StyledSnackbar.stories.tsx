@@ -4,9 +4,9 @@ import { IconButton, Stack } from '@mui/material'
 import { StyledButton } from '../../inputs/button/StyledButton'
 import React from 'react'
 import { StyledAlert } from '../alert/StyledAlert'
-import { enqueueSnackbar } from 'notistack'
 import { Icon } from '@iconify/react'
 import { SnackbarProvider } from './SnackbarProvider'
+import { processInfoSnackbar } from './processInfoSnackbar'
 
 const meta = {
     title: 'Feedback/Styled Snackbar',
@@ -50,18 +50,7 @@ const SnackbarExample = () => {
         <Stack direction='column' spacing={2} sx={{ maxWidth: 400 }}>
             <StyledButton
                 onClick={() => {
-                    enqueueSnackbar({
-                        variant: 'alert',
-                        message: 'Shared successfully!',
-                        severity: 'success',
-                        alertClassName: 'min-w-[350px]',
-                        alertVariant: 'filled',
-                        closeButton: true,
-                        anchorOrigin: {
-                            vertical: 'top',
-                            horizontal: 'right',
-                        },
-                    })
+                    processInfoSnackbar('Shared successfully!')
                 }}
             >
                 Show snackbar using notistack
