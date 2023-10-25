@@ -9,6 +9,7 @@ export const StyledCheckbox = (props: CheckboxProps) => (
             root: `${styles['root']}`,
             checked: `${styles['checked']}`,
             disabled: `${styles['disabled']}`,
+            indeterminate: `${styles['indeterminate']}`,
         }}
     />
 )

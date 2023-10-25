@@ -19,3 +19,8 @@
 .disabled {
     @apply opacity-50 text-delta-300 #{!important};
 }
+
+.indeterminate {
+    @apply text-primary-500 hover:text-primary-600 active:text-primary-700
+     #{!important};
+}
