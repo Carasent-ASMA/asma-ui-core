@@ -3,16 +3,7 @@ import styles from './StyledInput.module.scss'
 import clsx from 'clsx'
 
 /**
- * Developer: bragari.andrei@carasent.com
- * Custom props:
- * @param description - message under input (string)
- * @param startIcon - icon before input (JSX.Element)
- * @param endIcon - icon after input (JSX.Element)
- * @param dataTest - data-test tag (string)
- * @param label - string
- * @param refLink -  ref to component
- * @param size -  'large' | 'small'
- * @param className - for styles (width)
+ * @deprecated The input should not be used, use ->> StyledInputField
  */
 type ConditionalProps =
     | {

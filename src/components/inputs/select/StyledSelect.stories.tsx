@@ -8,33 +8,11 @@ import type { SelectProps } from '@mui/material'
 import { StyledTypography } from 'src/components/data-display/typography'
 
 const selectOptions = [
-    { title: 'Van Henry', content: 'Van Henry12' },
-    { title: 'April Tucker', content: 'April Tucker12' },
-    { title: 'Ralph Hubbard', content: 'Ralph Hubbard21' },
-    { title: 'Van Henry', content: 'Van Henry12' },
-    { title: 'April Tucker', content: 'April Tucker12' },
-    { title: 'Ralph Hubbard', content: 'Ralph Hubbard21' },
-    { title: 'Van Henry', content: 'Van Henry12' },
-    { title: 'April Tucker', content: 'April Tucker12' },
-    { title: 'Ralph Hubbard', content: 'Ralph Hubbard21' },
-    { title: 'Van Henry', content: 'Van Henry12' },
-    { title: 'April Tucker', content: 'April Tucker12' },
-    { title: 'Ralph Hubbard', content: 'Ralph Hubbard21' },
-    { title: 'Van Henry', content: 'Van Henry12' },
-    { title: 'April Tucker', content: 'April Tucker12' },
-    { title: 'Ralph Hubbard', content: 'Ralph Hubbard21' },
-    { title: 'Van Henry', content: 'Van Henry12' },
-    { title: 'April Tucker', content: 'April Tucker12' },
-    { title: 'Ralph Hubbard', content: 'Ralph Hubbard21' },
-    { title: 'Van Henry', content: 'Van Henry12' },
-    { title: 'April Tucker', content: 'April Tucker12' },
-    { title: 'Ralph Hubbard', content: 'Ralph Hubbard21' },
-    { title: 'Van Henry', content: 'Van Henry12' },
-    { title: 'April Tucker', content: 'April Tucker12' },
-    { title: 'Ralph Hubbard', content: 'Ralph Hubbard21' },
-    { title: 'Van Henry', content: 'Van Henry12' },
-    { title: 'April Tucker', content: 'April Tucker12' },
-    { title: 'Ralph Hubbard', content: 'Ralph Hubbard21' },
+    { title: 'Van Henry', id: '1' },
+    { title: 'April Tucker', id: '2' },
+    { title: 'Ralph Hubbard', id: '3' },
+    { title: 'Andrei Grini', id: '4' },
+    { title: 'Roberto Cavalli', id: '5' },
 ]
 
 const meta = {
@@ -43,9 +21,9 @@ const meta = {
     tags: ['autodocs'],
     argTypes: { children: { description: 'The option elements to populate the select with' } },
     args: {
-        children: selectOptions.map((option, index) => {
+        children: selectOptions.map((option) => {
             return (
-                <StyledSelectItem key={index} value={option.content}>
+                <StyledSelectItem key={option.id} value={option.id}>
                     {option.title}
                 </StyledSelectItem>
             )
@@ -61,7 +39,7 @@ export const Select: Story = {
 }
 
 const StyledSelectExample: React.FC<{ args: Partial<SelectProps<unknown>> }> = ({ args }) => {
-    const [value, setValue] = useState(selectOptions[0]?.content)
+    const [value, setValue] = useState(selectOptions[0]?.id)
     return (
         <StyledStack direction='column' spacing={2}>
             <StyledTypography variant='h6'>Select size medium</StyledTypography>
