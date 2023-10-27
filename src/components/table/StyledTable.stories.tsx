@@ -119,6 +119,12 @@ const Table = () => {
         })
     }, [data])
 
+    useEffect(() => {
+        console.log('->>', tableRef?.current?.getSelectedRowModel().rowsById)
+        const rows = Object.keys(tableRef?.current?.getSelectedRowModel().rowsById || {})
+        console.log('rows', rows)
+    }, [rowSelection])
+
     return (
         <>
             <Stack mt={2} mb={4} spacing={4}>
@@ -184,7 +190,9 @@ const Table = () => {
                     enableRowSelection={true}
                     getRowCanExpand={() => true}
                     onGlobalFilterChange={setGlobalFilter}
-                    onRowSelectionChange={setRowSelection}
+                    onRowSelectionChange={(e) => {
+                        setRowSelection(e)
+                    }}
                     // renderSubRows={renderSubRows}
                     getRowClassName={(row) => (row.original.progress > 50 ? 'bg-primary-25' : '')}
                     rowHeight={40}
@@ -196,6 +204,9 @@ const Table = () => {
                             </div>
                         </div>
                     }
+                    // getRowId={(row: Person, _index: number, parent?: Row<Person>) =>
+                    //     parent ? `abrakadabra${_index}` : _index.toString()
+                    // }
                 />
             </Stack>
         </>

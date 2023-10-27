@@ -46,6 +46,7 @@ export interface StyledTableProps<TData, TCustomData>
     getRowClassName?: (row: Row<TData>) => string
     onRowClick?: (e: MouseEvent<HTMLTableRowElement, globalThis.MouseEvent>, row: Row<TData>) => void
     renderSubRows?: (props: { rows: TCustomData[] }) => ReactElement
+    getRowSelectionIds?: (ids: string[]) => void
 }
 
 export const StyledTable = <
@@ -149,6 +150,10 @@ export const StyledTable = <
         getExpandedRowModel: getExpandedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
         getSortedRowModel: getSortedRowModel(),
+        getRowId:
+            rest.getRowId ||
+            ((row: TData, _index: number, parent?: Row<TData>) =>
+                parent ? [parent.id, row.id].join('.') : row.id.toString()),
     })
 
     if (tableInstanceRef) {
