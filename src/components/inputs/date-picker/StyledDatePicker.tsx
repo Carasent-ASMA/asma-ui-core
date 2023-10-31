@@ -11,6 +11,7 @@ type CommonDatePickerProps = {
     dateFormat?: string
     className?: string
     inputClassName?: string
+    onClear?: () => void
 } & CalendarProps
 
 type CompactRangeProps = {
@@ -20,6 +21,9 @@ type CompactRangeProps = {
     placeholderTo?: string
 
     placeholder?: never
+
+    onClearFrom?: () => void
+    onClearTo?: () => void
 }
 
 type DefaultRangeProps = {
@@ -29,6 +33,9 @@ type DefaultRangeProps = {
 
     placeholderFrom?: never
     placeholderTo?: never
+
+    onClearFrom?: () => void
+    onClearTo?: () => void
 }
 
 type DefaultSingleProps = {
@@ -51,6 +58,8 @@ export const StyledDatePicker = ({
     className,
     inputClassName,
     disabled,
+    onClear,
+
     ...props
 }: DatePickerProps) => {
     const [anchor, setAnchor] = useState<HTMLDivElement | null>(null)
@@ -107,7 +116,11 @@ export const StyledDatePicker = ({
                         placeholder={placeholderFrom}
                         value={value_from}
                         disabled={!!disabled}
-                        className={`${inputClassName}  w-28`}
+                        className={`${inputClassName} w-32  `}
+                        allowClear
+                        onClear={() => {
+                            props?.onClearFrom?.() || onClear?.()
+                        }}
                     />
                     -
                     <StyledInputField
@@ -115,7 +128,11 @@ export const StyledDatePicker = ({
                         placeholder={placeholderTo}
                         value={value_to}
                         disabled={!!disabled}
-                        className={`${inputClassName} w-28`}
+                        className={`${inputClassName} w-32 `}
+                        allowClear
+                        onClear={() => {
+                            props?.onClearTo?.() || onClear?.()
+                        }}
                     />
                 </div>
             ) : (
@@ -129,6 +146,12 @@ export const StyledDatePicker = ({
                     value={value}
                     disabled={!!disabled}
                     className={`${inputClassName}`}
+                    allowClear
+                    onClear={() => {
+                        props.mode === 'single' && onClear?.()
+                        props.mode === 'range' && props?.onClearTo?.()
+                        props.mode === 'range' && props?.onClearFrom?.()
+                    }}
                 />
             )}
             <Popover

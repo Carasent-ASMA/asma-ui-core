@@ -1,14 +1,37 @@
 import { TextField, type TextFieldProps } from '@mui/material'
-
+import { CloseIcon } from 'src/components/data-display/icons'
 /**
  *
  * @inputRef
  * inputRef to get Node of Input Element inside
  *
  */
-export const StyledInputField = (props: TextFieldProps) => (
+export const StyledInputField = (
+    props: TextFieldProps & {
+        allowClear?: boolean
+        onClear?: () => void
+    },
+) => (
     <TextField
         {...props}
+        InputProps={
+            props.allowClear && props.value
+                ? {
+                      endAdornment: (
+                          <div
+                              className='z-40 hover:bg-gama-100 duration-300 absolute right-4 p-[2px] rounded-full flex items-center justify-center'
+                              onClick={(e) => {
+                                  e.stopPropagation()
+                                  e.preventDefault()
+                                  props.onClear?.()
+                              }}
+                          >
+                              <CloseIcon width={18} height={18} />
+                          </div>
+                      ),
+                  }
+                : props.InputProps
+        }
         sx={{
             ...props.sx,
             '& .MuiInputBase-colorPrimary.Mui-focused fieldset': {
@@ -30,14 +53,14 @@ export const StyledInputField = (props: TextFieldProps) => (
                 color: 'var(--colors-delta-300) !important',
             },
 
-            '& .MuiInputBase-inputSizeSmall': {
-                fontSize: '14px',
-                height: '23px',
-            },
-            '& .MuiInputBase-input': {
-                fontSize: '14px',
-                height: '23px',
-            },
+            // '& .MuiInputBase-inputSizeSmall': {
+            //     fontSize: '14px',
+            //     height: '23px',
+            // },
+            // '& .MuiInputBase-input': {
+            //     fontSize: '14px',
+            //     height: '23px',
+            // },
             '& .MuiOutlinedInput-input.Mui-disabled': {
                 WebkitTextFillColor: 'var(--colors-delta-300) !important',
             },
