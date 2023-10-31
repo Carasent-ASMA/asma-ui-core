@@ -12,6 +12,7 @@ type CommonDatePickerProps = {
     className?: string
     inputClassName?: string
     onClear?: () => void
+    allowClear?: boolean
 } & CalendarProps
 
 type CompactRangeProps = {
@@ -59,7 +60,7 @@ export const StyledDatePicker = ({
     inputClassName,
     disabled,
     onClear,
-
+    allowClear,
     ...props
 }: DatePickerProps) => {
     const [anchor, setAnchor] = useState<HTMLDivElement | null>(null)
@@ -117,7 +118,7 @@ export const StyledDatePicker = ({
                         value={value_from}
                         disabled={!!disabled}
                         className={`${inputClassName} w-32  `}
-                        allowClear
+                        allowClear={allowClear}
                         onClear={() => {
                             props?.onClearFrom?.() || onClear?.()
                         }}
@@ -129,7 +130,7 @@ export const StyledDatePicker = ({
                         value={value_to}
                         disabled={!!disabled}
                         className={`${inputClassName} w-32 `}
-                        allowClear
+                        allowClear={allowClear}
                         onClear={() => {
                             props?.onClearTo?.() || onClear?.()
                         }}
@@ -146,9 +147,9 @@ export const StyledDatePicker = ({
                     value={value}
                     disabled={!!disabled}
                     className={`${inputClassName}`}
-                    allowClear
+                    allowClear={allowClear}
                     onClear={() => {
-                        props.mode === 'single' && onClear?.()
+                        onClear?.()
                         props.mode === 'range' && props?.onClearTo?.()
                         props.mode === 'range' && props?.onClearFrom?.()
                     }}

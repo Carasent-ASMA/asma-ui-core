@@ -61,6 +61,7 @@ export const StyledDatePickerExample = () => {
                 locale={nb}
                 dateFormat={'dd.MM.y'}
                 onClear={() => setRange({ to: undefined, from: undefined })}
+                allowClear
             />
             <StyledDatePicker
                 placeholderFrom='Fra'
@@ -73,6 +74,7 @@ export const StyledDatePickerExample = () => {
                 dateFormat={'dd.MM.yy'}
                 onClearFrom={() => setRangeCompact({ ...rangeCompact, from: undefined })}
                 onClearTo={() => setRangeCompact({ from: rangeCompact?.from, to: undefined })}
+                allowClear
             />
             <StyledDatePicker
                 placeholderFrom='Fra'

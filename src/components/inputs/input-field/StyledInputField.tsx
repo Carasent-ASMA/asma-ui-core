@@ -34,6 +34,9 @@ export const StyledInputField = (
         }
         sx={{
             ...props.sx,
+            '& .MuiInputBase-colorPrimary fieldset': {
+                borderColor: 'var(--colors-delta-500) !important',
+            },
             '& .MuiInputBase-colorPrimary.Mui-focused fieldset': {
                 borderColor: 'var(--colors-gama-500) !important',
             },
