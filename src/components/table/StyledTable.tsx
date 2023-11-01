@@ -45,7 +45,7 @@ export interface StyledTableProps<TData, TCustomData>
     thClassName?: string
     getRowClassName?: (row: Row<TData>) => string
     onRowClick?: (e: MouseEvent<HTMLTableRowElement, globalThis.MouseEvent>, row: Row<TData>) => void
-    renderSubRows?: (props: { rows: TCustomData[] }) => ReactElement
+    renderSubRows?: (props: { rows: TCustomData[]; row: TData }) => ReactElement
     getRowSelectionIds?: (ids: string[]) => void
 }
 
@@ -340,6 +340,7 @@ export const StyledTable = <
                                                 renderSubRows &&
                                                 renderSubRows({
                                                     rows: customSubRowData.get(row.original.id.toString()) ?? [],
+                                                    row: row.original,
                                                 })}
                                         </>
                                     )}
