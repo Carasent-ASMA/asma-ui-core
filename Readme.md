@@ -1,6 +1,6 @@
 # How to create and use the Design System
 
-## Component composition
+## Component composition.
 
 - When creating components that consists of several components, each component should be styled.
 - Each components that is used to create a "composed" component should be styled, and remember to check if the component alread is styled.
