@@ -33,7 +33,7 @@ export type StyledButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & 
  *
  * Custom props:
  * @param variant -  'contained' | 'outlined' | 'text' | 'textGray'
- * @param size -  'large' | 'small'
+ * @param size -  'large' | 'small' | 'medium'
  * @param startIcon - ReactNode
  * @param endIcon - ReactNode
  * @param error -  boolean
@@ -52,7 +52,7 @@ export const StyledButton = ({
     error,
     ...otherProps
 }: StyledButtonProps) => {
-    const isLarge = size === 'large'
+    const isLarge = size === 'large' || size === 'medium'
 
     // setup className
     const color = error ? 'error' : 'common'

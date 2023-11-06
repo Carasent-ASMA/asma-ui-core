@@ -36,13 +36,13 @@
     }
 
     &.medium {
-        @apply h-[38px] #{!important};
-    }
-    &.large {
-        @apply h-[40px] #{!important};
+        @apply h-[38px];
     }
     &.small {
-        @apply h-[30px] #{!important};
+        @apply h-[30px];
+    }
+    &.large {
+        @apply h-[40px];
     }
 }
 
