@@ -1,0 +1,63 @@
+import { DotsVerticalIcon } from 'src/components/data-display/icons'
+import { StyledButton } from 'src/components/inputs/button'
+import { useToggleMenuVisibility } from 'src/hooks/useToggleMenuVisibility.hook'
+import { StyledPopover } from 'src/components/utils/popover'
+import { StyledMenuItem } from 'src/components/navigation/menu'
+import type { CellContext, Row } from '@tanstack/react-table'
+
+export function RowActionMenu<TData>({
+    tableData,
+    actions,
+}: {
+    tableData: CellContext<TData, TData>
+    actions: (row: Row<TData>) => {
+        label: string
+        className?: string
+        disabled?: boolean
+        hide?: boolean
+        onClick?: (row: Row<TData>) => void
+    }[]
+}) {
+    const { anchorEl, open, handleClose, handleOpen } = useToggleMenuVisibility()
+
+    return (
+        <div className='flex justify-center items-center'>
+            <StyledButton
+                variant='text'
+                size='small'
+                onClick={(e) => {
+                    handleOpen(e)
+                }}
+            >
+                <DotsVerticalIcon className='!text-delta-800' width={24} height={24} />
+            </StyledButton>
+            <StyledPopover
+                open={open}
+                anchorEl={anchorEl}
+                onClose={handleClose}
+                onClick={handleClose}
+                anchorOrigin={{
+                    horizontal: 'center',
+                    vertical: 'bottom',
+                }}
+                transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                }}
+            >
+                {actions(tableData.row).map((action) => (
+                    <StyledMenuItem
+                        key={action.label}
+                        className={action.className}
+                        disabled={action.disabled}
+                        onClick={() => {
+                            action.onClick?.(tableData.row)
+                        }}
+                    >
+                        {action.label}
+                    </StyledMenuItem>
+                ))}
+            </StyledPopover>
+        </div>
+    )
+}

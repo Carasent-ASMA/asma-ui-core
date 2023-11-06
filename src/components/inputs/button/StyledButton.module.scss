@@ -35,8 +35,11 @@
         }
     }
 
-    &.large {
+    &.medium {
         @apply h-[38px] #{!important};
+    }
+    &.large {
+        @apply h-[40px] #{!important};
     }
     &.small {
         @apply h-[30px] #{!important};

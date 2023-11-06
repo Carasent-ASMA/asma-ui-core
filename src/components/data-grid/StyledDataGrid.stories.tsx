@@ -69,7 +69,7 @@ const meta = {
             return [
                 <StyledGridActionsCellItem
                     onClick={() => {
-                        console.log('click', params)
+                        console.info('click', params)
                     }}
                     key='to-draft'
                     label='context menu item 1'
@@ -77,7 +77,7 @@ const meta = {
                 />,
                 <StyledGridActionsCellItem
                     onClick={() => {
-                        console.log('click')
+                        console.info('click')
                     }}
                     key='item-2'
                     label='context menu item 2'
@@ -85,7 +85,7 @@ const meta = {
                 />,
                 <StyledGridActionsCellItem
                     onClick={() => {
-                        console.log('click')
+                        console.info('click')
                     }}
                     key='item-3'
                     label='context menu item 3'
@@ -93,7 +93,7 @@ const meta = {
                 />,
                 <StyledGridActionsCellItem
                     onClick={() => {
-                        console.log('click')
+                        console.info('click')
                     }}
                     key='item-4'
                     label='context menu item 4'
@@ -101,7 +101,7 @@ const meta = {
                 />,
                 <StyledGridActionsCellItem
                     onClick={() => {
-                        console.log('click')
+                        console.info('click')
                     }}
                     key='item-5'
                     label='context menu item 5'

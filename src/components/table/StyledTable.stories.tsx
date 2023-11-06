@@ -7,6 +7,7 @@ import { createColumnHelper, type Table } from '@tanstack/react-table'
 import { makeData, makeParticipantsData, type Participant, type Person } from './makeData'
 import { PeopleIcon, PersonIcon } from '../data-display/icons'
 import { Icon } from '@iconify/react'
+import { cloneDeep } from 'lodash-es'
 
 const meta = {
     title: 'Table/Styled Table',
@@ -120,96 +121,94 @@ const Table = () => {
     }, [data])
 
     useEffect(() => {
-        console.log('->>', tableRef?.current?.getSelectedRowModel().rowsById)
+        console.info('->>', tableRef?.current?.getSelectedRowModel().rowsById)
         const rows = Object.keys(tableRef?.current?.getSelectedRowModel().rowsById || {})
-        console.log('rows', rows)
+        console.info('rows', rows)
     }, [rowSelection])
 
     return (
-        <>
-            <Stack mt={2} mb={4} spacing={4}>
-                <Stack direction='row' justifyContent='space-between'>
-                    <Typography variant='h6'>Standard Table</Typography>
-                    <input
-                        value={globalFilter ?? ''}
-                        onChange={(e) => setGlobalFilter(String(e.target.value))}
-                        className='p-2 font-lg shadow border border-block'
-                        placeholder='Search all columns...'
-                    />
-                    <StyledButton
-                        onClick={() =>
-                            tableRef.current?.setColumnVisibility((old) => ({
-                                ...old,
-                                select: !old['select'],
-                            }))
-                        }
-                    >
-                        Toggle row selection
-                    </StyledButton>
-                </Stack>
-                <StyledTable<Person, Participant>
-                    {...meta.args}
-                    tableInstanceRef={tableRef}
-                    actions={(row) => [
-                        {
-                            label: row.original.progress > 50 ? 'Action 50' : 'Action less than 50',
-                            hide: row.original.progress > 50,
-                            onClick: (row) => console.log('click', row),
-                        },
-                        {
-                            label: 'Action 2',
-                            onClick: () => console.log('click'),
-                        },
-                        {
-                            label: 'Action 3',
-                            className: 'text-error-700',
-                            onClick: () => console.log('click'),
-                        },
-                        {
-                            label: 'Hidden action',
-                            hide: true,
-                            className: 'text-primary-700',
-                            onClick: () => console.log('click'),
-                        },
-                    ]}
-                    columns={columns}
-                    data={data}
-                    loading={loading}
-                    customSubRowData={participants}
-                    initialState={{
-                        columnVisibility: {
-                            visits: false,
-                            status: false,
-                        },
-                    }}
-                    state={{
-                        globalFilter,
-                        rowSelection,
-                    }}
-                    enableGlobalFilter={true}
-                    enableRowSelection={true}
-                    getRowCanExpand={() => true}
-                    onGlobalFilterChange={setGlobalFilter}
-                    onRowSelectionChange={(e) => {
-                        setRowSelection(e)
-                    }}
-                    // renderSubRows={renderSubRows}
-                    getRowClassName={(row) => (row.original.progress > 50 ? 'bg-primary-25' : '')}
-                    rowHeight={40}
-                    noRowsOverlay={
-                        <div className='flex h-full w-full items-center justify-center'>
-                            <div className='flex flex-col items-center'>
-                                <PeopleIcon />
-                                No recipients found
-                            </div>
-                        </div>
-                    }
-                    // getRowId={(row: Person, _index: number, parent?: Row<Person>) =>
-                    //     parent ? `abrakadabra${_index}` : _index.toString()
-                    // }
+        <Stack mt={2} mb={4} spacing={4}>
+            <Stack direction='row' justifyContent='space-between'>
+                <Typography variant='h6'>Standard Table</Typography>
+                <input
+                    value={globalFilter ?? ''}
+                    onChange={(e) => setGlobalFilter(String(e.target.value))}
+                    className='p-2 font-lg shadow border border-block'
+                    placeholder='Search all columns...'
                 />
+                <StyledButton
+                    onClick={() =>
+                        tableRef.current?.setColumnVisibility((old) => ({
+                            ...old,
+                            select: !old['select'],
+                        }))
+                    }
+                >
+                    Toggle row selection
+                </StyledButton>
             </Stack>
-        </>
+            <StyledTable<Person, Participant>
+                {...meta.args}
+                tableInstanceRef={tableRef}
+                actions={(row) => [
+                    {
+                        label: row.original.progress > 50 ? 'Action 50' : 'Action less than 50',
+                        hide: row.original.progress > 50,
+                        onClick: () => console.info('row:', cloneDeep(row.original)),
+                    },
+                    {
+                        label: 'Original',
+                        onClick: () => console.info('original:', cloneDeep(row.original)),
+                    },
+                    {
+                        label: 'Action 3',
+                        className: 'text-error-700',
+                        onClick: () => console.info('click'),
+                    },
+                    {
+                        label: 'Hidden action',
+                        hide: true,
+                        className: 'text-primary-700',
+                        onClick: () => console.info('click'),
+                    },
+                ]}
+                columns={columns}
+                data={data}
+                loading={loading}
+                customSubRowData={participants}
+                initialState={{
+                    columnVisibility: {
+                        visits: false,
+                        status: false,
+                    },
+                }}
+                state={{
+                    globalFilter,
+                    rowSelection,
+                }}
+                enableGlobalFilter={true}
+                enableRowSelection={true}
+                getRowCanExpand={() => true}
+                onGlobalFilterChange={setGlobalFilter}
+                onRowSelectionChange={(e) => {
+                    setRowSelection(e)
+                }}
+                // renderSubRows={renderSubRows}
+                getRowClassName={(row) => (row.original.progress > 50 ? 'bg-primary-25' : '')}
+                rowHeight={40}
+                noRowsOverlay={
+                    <div className='flex h-full w-full items-center justify-center'>
+                        <div className='flex flex-col items-center'>
+                            <PeopleIcon />
+                            No recipients found
+                        </div>
+                    </div>
+                }
+                // getRowId={(row: Person, _index: number, parent?: Row<Person>) =>
+                //     parent ? `abrakadabra${_index}` : _index.toString()
+                // }
+            />
+        </Stack>
     )
 }
 

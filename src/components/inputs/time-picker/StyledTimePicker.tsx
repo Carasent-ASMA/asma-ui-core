@@ -2,7 +2,7 @@ import { StyledInputField } from '../input-field'
 import { Popover } from '@mui/material'
 import { ClockOutlineIcon } from 'src/components/data-display/icons/clock-outline-icon'
 import clsx from 'clsx'
-import { useToggleMenuVisibility } from 'src/components/table/useToggleMenuVisibility'
+import { useToggleMenuVisibility } from 'src/hooks/useToggleMenuVisibility.hook'
 import { format } from 'date-fns'
 
 import { TimePickerBody } from './components/TimePickerBody'

@@ -7,7 +7,7 @@ export type StyledButtonType = 'contained' | 'outlined' | 'text' | 'textGray'
 
 type commonProps = {
     refLink?: React.Ref<HTMLButtonElement>
-    size?: 'large' | 'small'
+    size?: 'large' | 'small' | 'medium'
     startIcon?: ReactNode
     endIcon?: ReactNode
     dataTest?: string
@@ -43,7 +43,7 @@ export type StyledButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & 
 export const StyledButton = ({
     variant = 'contained',
     className = '',
-    size = 'large',
+    size = 'medium',
     children,
     refLink,
     startIcon,
