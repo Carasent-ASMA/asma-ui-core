@@ -5,6 +5,12 @@ import { CloseIcon } from 'src/components/data-display/icons'
 
 /**
  *
+ * @usage
+ * use StyleSelect only inside StyledFormControl
+ * 
+ * @size
+ * control the size through StyledFormControl
+ * 
  * @inputRef
  * inputRef to get Node of Input Element inside
  *

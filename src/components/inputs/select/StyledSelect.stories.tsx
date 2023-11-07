@@ -70,13 +70,12 @@ const StyledSelectExample: React.FC<{ args: Partial<SelectProps<unknown>> }> = (
                 />
             </StyledFormControl>
             <StyledTypography variant='h6'>Select with label and placeholder</StyledTypography>
-            <StyledFormControl className='w-52'>
+            <StyledFormControl size='small' className='w-52'>
                 <StyledInputLabel>Find me...</StyledInputLabel>
                 <StyledSelect
                     {...args}
                     dataTest='Test_x'
                     allowClear
-                    size='small'
                     value={value}
                     onChange={(e) => {
                         const target: string = e.target.value as string
