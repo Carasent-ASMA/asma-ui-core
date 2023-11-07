@@ -14,7 +14,10 @@ export function StyledSelectAutocomplete<
     DisableClearable extends boolean | undefined = false,
     FreeSolo extends boolean | undefined = false,
     ChipComponent extends React.ElementType = ChipTypeMap['defaultComponent'],
->(props: AutocompleteProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent> & { dataTest: string }) {
+>({
+    dataTest,
+    ...props
+}: AutocompleteProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent> & { dataTest: string }) {
     return (
         <Autocomplete
             {...props}
@@ -24,19 +27,22 @@ export function StyledSelectAutocomplete<
                     icon='material-symbols:expand-more-rounded'
                     width={24}
                     height={24}
-                    className={clsx(props.className, 'select-custom-icon')}
+                    className={clsx('select-custom-icon')}
                 />
             }
-            data-test={props.dataTest}
+            data-test={dataTest}
             PaperComponent={({ children }) => (
                 <Paper
-                    data-test={`paper-${props.dataTest}`}
+                    data-test={`paper-${dataTest}`}
                     sx={{
                         '& .MuiAutocomplete-option.Mui-focused': {
-                            background: 'var(--colors-gama-300) !important',
+                            background: 'var(--colors-delta-50) !important',
                         },
                         '& li[aria-selected=true]': {
-                            background: 'var(--colors-gama-100) !important',
+                            background: 'var(--colors-gama-50) !important',
+                        },
+                        '& li[aria-selected=true].MuiAutocomplete-option.Mui-focused': {
+                            background: 'var(--colors-gama-50) !important',
                         },
                     }}
                 >
@@ -49,7 +55,7 @@ export function StyledSelectAutocomplete<
                     borderColor: 'var(--colors-gama-500) !important',
                 },
                 '& .select-custom-icon': {
-                    marginTop: '-3.5px !important',
+                    marginTop: '-0.5px !important',
                 },
                 '& .MuiInputBase-inputSizeSmall': {
                     minHeight: '23px !important',

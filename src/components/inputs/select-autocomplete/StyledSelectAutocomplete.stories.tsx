@@ -4,6 +4,7 @@ import { StyledFormControl } from '../../miscellaneous/StyledFormControl'
 import { StyledStack } from '../../miscellaneous/StyledStack'
 import { TextField } from '@mui/material'
 import { StyledTypography } from 'src/components/data-display/typography'
+import { StyledInputField } from '../input-field'
 
 const top100Films = [
     { title: 'The Shawshank Redemption', year: 1994 },
@@ -154,6 +155,7 @@ const SelectAutocompleteExample = () => {
             <StyledTypography variant='h6'>SelectAutocompleteExample</StyledTypography>
             <StyledFormControl fullWidth>
                 <StyledSelectAutocomplete
+                    disableCloseOnSelect
                     dataTest='dataTest-autocomplete'
                     multiple
                     size='small'
@@ -162,8 +164,9 @@ const SelectAutocompleteExample = () => {
                     defaultValue={[top100Films[13]]}
                     getOptionLabel={(option) => option?.title || ''}
                     renderInput={(params) => (
-                        <TextField {...params} variant='outlined' label='' placeholder='Favorites' />
+                        <StyledInputField {...params} variant='outlined' label='' placeholder='Favorites' />
                     )}
+                    open={true}
                 />
             </StyledFormControl>
         </StyledStack>

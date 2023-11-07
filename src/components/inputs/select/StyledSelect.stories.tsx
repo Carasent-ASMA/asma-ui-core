@@ -6,6 +6,7 @@ import { StyledFormControl } from '../../miscellaneous/StyledFormControl'
 import { StyledStack } from '../../miscellaneous/StyledStack'
 import type { SelectProps } from '@mui/material'
 import { StyledTypography } from 'src/components/data-display/typography'
+import { StyledInputLabel } from 'src/components/miscellaneous/StyledInputLabel'
 
 const selectOptions = [
     { title: 'Van Henry', id: '1' },
@@ -46,6 +47,7 @@ const StyledSelectExample: React.FC<{ args: Partial<SelectProps<unknown>> }> = (
             <StyledFormControl fullWidth>
                 <StyledSelect
                     {...args}
+                    dataTest='Test_z'
                     size='medium'
                     value={value}
                     onChange={(e) => {
@@ -58,6 +60,22 @@ const StyledSelectExample: React.FC<{ args: Partial<SelectProps<unknown>> }> = (
             <StyledFormControl fullWidth>
                 <StyledSelect
                     {...args}
+                    dataTest='Test_y'
+                    size='small'
+                    value={value}
+                    onChange={(e) => {
+                        const target: string = e.target.value as string
+                        setValue(target)
+                    }}
+                />
+            </StyledFormControl>
+            <StyledTypography variant='h6'>Select with label and placeholder</StyledTypography>
+            <StyledFormControl className='w-52'>
+                <StyledInputLabel>Find me...</StyledInputLabel>
+                <StyledSelect
+                    {...args}
+                    dataTest='Test_x'
+                    allowClear
                     size='small'
                     value={value}
                     onChange={(e) => {

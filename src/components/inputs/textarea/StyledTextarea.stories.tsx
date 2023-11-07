@@ -50,6 +50,7 @@ const StyledTextareaExample = () => {
                 <div className='flex align-middle justify-center text-xl font-semibold underline '>Active</div>
                 <StyledFormControl className='w-full pb-5'>
                     <StyledSelect
+                        dataTest='Test-alpha'
                         size='medium'
                         value={selectedOption?.title}
                         onChange={(e) => {

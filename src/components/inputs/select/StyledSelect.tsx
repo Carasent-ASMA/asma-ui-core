@@ -9,13 +9,17 @@ import { CloseIcon } from 'src/components/data-display/icons'
  * inputRef to get Node of Input Element inside
  *
  */
-export const StyledSelect = (
-    props: SelectProps & {
+export const StyledSelect: React.FC<
+    SelectProps & {
         allowClear?: boolean
-    },
-) => (
+        dataTest: string
+        dataId?: string
+    }
+> = ({ dataTest, dataId, allowClear, ...props }) => (
     <Select
         {...props}
+        data-test={dataTest}
+        data-id={dataId}
         value={props.value}
         IconComponent={(props) => (
             <Icon
@@ -27,7 +31,7 @@ export const StyledSelect = (
             />
         )}
         endAdornment={
-            props.allowClear && props.value ? (
+            allowClear && props.value ? (
                 <div
                     className='hover:bg-gama-100 duration-300 absolute right-8 p-[2px] rounded-full flex items-center justify-center'
                     onClick={() => {
@@ -40,7 +44,7 @@ export const StyledSelect = (
         }
         sx={{
             ...props.sx,
-            '& .MuiOutlinedInput-notchedOutline': {
+            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                 borderColor: 'var(--colors-gama-500) !important',
             },
             '& .select-custom-icon': {
