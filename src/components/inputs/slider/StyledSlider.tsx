@@ -1,10 +1,16 @@
 import { Slider, type SliderProps } from '@mui/material'
 import clsx from 'clsx'
 
-export const StyledSlider = (props: SliderProps) => {
+export interface StyledSliderProps extends SliderProps {
+    dataTest?: string
+}
+
+
+export const StyledSlider = ({dataTest, ...props}: StyledSliderProps) => {
     return (
         <Slider
             {...props}
+            data-test={dataTest}
             classes={{
                 ...props.classes,
             }}

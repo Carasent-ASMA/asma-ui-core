@@ -42,8 +42,9 @@ const StyledMenuExample: FC<{ args: Partial<MenuProps> }> = ({ args }) => {
     return (
         <>
             <Stack mt={2} mb={4}>
-                <StyledTypography variant='h6'>Standard Menu</StyledTypography>
+                <StyledTypography dataTest='standard-menu' variant='h6'>Standard Menu</StyledTypography>
                 <StyledButton
+                    dataTest='basic-button'
                     id='basic-button'
                     className='self-start'
                     aria-controls={open ? 'basic-menu' : undefined}
@@ -56,6 +57,7 @@ const StyledMenuExample: FC<{ args: Partial<MenuProps> }> = ({ args }) => {
                 <StyledMenu
                     {...meta.args}
                     {...args}
+                    dataTest='basic-menu'
                     id='basic-menu'
                     anchorEl={anchorEl}
                     open={open}
@@ -64,44 +66,44 @@ const StyledMenuExample: FC<{ args: Partial<MenuProps> }> = ({ args }) => {
                         'aria-labelledby': 'basic-button',
                     }}
                 >
-                    <StyledMenuItem onClick={handleClose}>Profile</StyledMenuItem>
-                    <StyledMenuItem onClick={handleClose}>My account</StyledMenuItem>
-                    <StyledMenuItem onClick={handleClose}>Logout</StyledMenuItem>
+                    <StyledMenuItem dataTest='profile' onClick={handleClose}>Profile</StyledMenuItem>
+                    <StyledMenuItem dataTest='my-account' onClick={handleClose}>My account</StyledMenuItem>
+                    <StyledMenuItem dataTest='logout' onClick={handleClose}>Logout</StyledMenuItem>
                 </StyledMenu>
             </Stack>
 
             <Stack mt={2}>
-                <StyledTypography variant='h6'>Standard Icon Menu</StyledTypography>
-                <StyledMenuList className='bg-primary-50'>
-                    <StyledMenuItem>
+                <StyledTypography dataTest='standard-icon-menu' variant='h6'>Standard Icon Menu</StyledTypography>
+                <StyledMenuList dataTest='menu-list' className='bg-primary-50'>
+                    <StyledMenuItem dataTest='cut'>
                         <ListItemIcon>
                             <Icon icon='mdi:content-cut' fontSize='small' />
                         </ListItemIcon>
                         <ListItemText>Cut</ListItemText>
-                        <StyledTypography variant='body2' color='text.secondary'>
+                        <StyledTypography dataTest='x' variant='body2' color='text.secondary'>
                             ⌘X
                         </StyledTypography>
                     </StyledMenuItem>
-                    <StyledMenuItem>
+                    <StyledMenuItem dataTest='copy'>
                         <ListItemIcon>
                             <Icon icon='mdi:content-copy' fontSize='small' />
                         </ListItemIcon>
                         <ListItemText>Copy</ListItemText>
-                        <StyledTypography variant='body2' color='text.secondary'>
+                        <StyledTypography dataTest='c' variant='body2' color='text.secondary'>
                             ⌘C
                         </StyledTypography>
                     </StyledMenuItem>
-                    <StyledMenuItem>
+                    <StyledMenuItem dataTest='paste'>
                         <ListItemIcon>
                             <Icon icon='mdi:content-paste' fontSize='small' />
                         </ListItemIcon>
                         <ListItemText>Paste</ListItemText>
-                        <StyledTypography variant='body2' color='text.secondary'>
+                        <StyledTypography dataTest='v' variant='body2' color='text.secondary'>
                             ⌘V
                         </StyledTypography>
                     </StyledMenuItem>
                     <Divider />
-                    <StyledMenuItem>
+                    <StyledMenuItem dataTest='web-clipboard'>
                         <ListItemIcon>
                             <Icon icon='mdi:cloud' fontSize='small' />
                         </ListItemIcon>

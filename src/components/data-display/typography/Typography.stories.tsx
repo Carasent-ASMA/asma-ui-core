@@ -21,15 +21,15 @@ const BasicTypography = () => {
     return (
         <>
             <Box mb={4}>
-                <StyledTypography>MUI Typography variants</StyledTypography>
-                <StyledTypography variant='h1'>H1 - Page title (variant="h1")</StyledTypography>
-                <StyledTypography variant='h2'>H2 - Section title (variant="h2")</StyledTypography>
-                <StyledTypography>Base - (variant="body", default)</StyledTypography>
-                <StyledTypography variant='caption'>Caption - caption (variant="caption")</StyledTypography>
+                <StyledTypography dataTest='mui-typography-variants'>MUI Typography variants</StyledTypography>
+                <StyledTypography dataTest='h1-page-title' variant='h1'>H1 - Page title (variant="h1")</StyledTypography>
+                <StyledTypography dataTest='h2-section-title' variant='h2'>H2 - Section title (variant="h2")</StyledTypography>
+                <StyledTypography dataTest='base'>Base - (variant="body", default)</StyledTypography>
+                <StyledTypography dataTest='caption' variant='caption'>Caption - caption (variant="caption")</StyledTypography>
             </Box>
 
             <Box mb={2}>
-                <StyledTypography>Tailwind Typography variants</StyledTypography>
+                <StyledTypography dataTest='tailwind-typography-variants'>Tailwind Typography variants</StyledTypography>
 
                 <h1 className='text-2xl'>H1 - Page title - (text-2xl)</h1>
                 <h2 className='text-xl'>H2 - Section title - (text-xl)</h2>

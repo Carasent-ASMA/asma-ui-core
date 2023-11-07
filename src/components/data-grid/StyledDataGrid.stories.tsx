@@ -50,6 +50,7 @@ const meta = {
                 renderHeader: () => <div />,
                 renderCell: () => (
                     <StyledButton
+                        dataTest='btn-shared'
                         type='button'
                         variant='text'
                         className='m-auto mt-2 flex w-fit justify-center bg-transparent'
@@ -71,6 +72,7 @@ const meta = {
                     onClick={() => {
                         console.info('click', params)
                     }}
+                    dataTest='to-draft'
                     key='to-draft'
                     label='context menu item 1'
                     showInMenu
@@ -79,6 +81,7 @@ const meta = {
                     onClick={() => {
                         console.info('click')
                     }}
+                    dataTest='item-2'
                     key='item-2'
                     label='context menu item 2'
                     showInMenu
@@ -87,6 +90,7 @@ const meta = {
                     onClick={() => {
                         console.info('click')
                     }}
+                    dataTest='item-3'
                     key='item-3'
                     label='context menu item 3'
                     showInMenu
@@ -95,6 +99,7 @@ const meta = {
                     onClick={() => {
                         console.info('click')
                     }}
+                    dataTest='item-4'
                     key='item-4'
                     label='context menu item 4'
                     showInMenu
@@ -103,6 +108,7 @@ const meta = {
                     onClick={() => {
                         console.info('click')
                     }}
+                    dataTest='item-5'
                     key='item-5'
                     label='context menu item 5'
                     showInMenu
@@ -130,6 +136,7 @@ export const DataGrid: Story = {
                 <Stack mt={2} mb={4}>
                     <Typography variant='h6'>Standard DataGrid</Typography>
                     <StyledDataGrid
+                        dataTest='standard-styled-data-grid'
                         {...meta.args}
                         {...args}
                         checkboxSelection={false}
@@ -139,7 +146,7 @@ export const DataGrid: Story = {
                 </Stack>
                 <Stack mt={2}>
                     <Typography variant='h6'>DataGrid with checkboxSelection and footer</Typography>
-                    <StyledDataGrid {...meta.args} {...args} />
+                    <StyledDataGrid dataTest='styled-data-grid-with-checkbox-selection' {...meta.args} {...args} />
                 </Stack>
             </>
         )

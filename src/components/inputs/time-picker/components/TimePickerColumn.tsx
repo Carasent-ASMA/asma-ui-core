@@ -6,14 +6,14 @@ export type TimePickerColumnProps = Omit<StyledTimePickerProps, 'placeholder' | 
     type: 'hours' | 'minutes'
 }
 
-export const TimePickerColumn: React.FC<TimePickerColumnProps> = ({ type, value, onSelect }) => {
+export const TimePickerColumn: React.FC<TimePickerColumnProps & { dataTest?: string }> = ({ type, value, onSelect, dataTest }) => {
     const now = new Date()
     const isHours = type === 'hours'
     const size = isHours ? 24 : 60
     const currentTime = isHours ? now.getHours() : now.getMinutes()
 
     return (
-        <div className={styles['columns']}>
+        <div className={styles['columns']} data-test={dataTest} >
             {new Array(size).fill(null).map((_, idx) => {
                 const isSelected = value && idx === (isHours ? getHours(value) : getMinutes(value))
                 const isNow = currentTime == idx

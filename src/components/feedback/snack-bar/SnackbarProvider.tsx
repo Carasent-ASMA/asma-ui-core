@@ -1,6 +1,6 @@
 import type { AlertColor } from '@mui/material'
 import { SnackbarProvider as NotistackProvider, type SnackbarProviderProps } from 'notistack'
-import { StyledAlertSnackbar } from 'src/components/feedback/snack-bar/StyledAlertSnackbar'
+import { StyledAlertSnackbar as alert } from 'src/components/feedback/snack-bar/StyledAlertSnackbar'
 
 /**
  * @ignore
@@ -11,7 +11,7 @@ export const SnackbarProvider = (props: SnackbarProviderProps) => {
         <NotistackProvider
             {...props}
             Components={{
-                alert: StyledAlertSnackbar,
+                alert,
             }}
             autoHideDuration={4000}
             anchorOrigin={{

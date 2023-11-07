@@ -3,9 +3,10 @@ import { ChevronLeftIcon, ChevronRightIcon } from 'asma-core-ui'
 import 'react-day-picker/dist/style.css'
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
-export const StyledCalendarPicker = ({ showOutsideDays = true, ...props }: CalendarProps) => {
+export const StyledCalendarPicker = ({ dataTest, showOutsideDays = true, ...props }: CalendarProps & { dataTest?: string }) => {
     return (
         <DayPicker
+            data-test={dataTest}
             showOutsideDays={showOutsideDays}
             classNames={{
                 months: 'flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0',

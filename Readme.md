@@ -69,7 +69,7 @@ import { StyledButton } from 'asma-core-ui';
 ...
 
 <>
-  <StyledButton>
+  <StyledButton dataTest='text'>
     Text
   </StyledButton>
 </>

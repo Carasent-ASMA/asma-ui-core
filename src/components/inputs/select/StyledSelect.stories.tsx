@@ -23,7 +23,7 @@ const meta = {
     args: {
         children: selectOptions.map((option) => {
             return (
-                <StyledSelectItem key={option.id} value={option.id}>
+                <StyledSelectItem dataTest={`select-item-${option.id}`} key={option.id} value={option.id}>
                     {option.title}
                 </StyledSelectItem>
             )
@@ -41,11 +41,12 @@ export const Select: Story = {
 const StyledSelectExample: React.FC<{ args: Partial<SelectProps<unknown>> }> = ({ args }) => {
     const [value, setValue] = useState(selectOptions[0]?.id)
     return (
-        <StyledStack direction='column' spacing={2}>
-            <StyledTypography variant='h6'>Select size medium</StyledTypography>
-            <StyledFormControl fullWidth>
+        <StyledStack dataTest='column-stack' direction='column' spacing={2}>
+            <StyledTypography dataTest='typography-medium' variant='h6'>Select size medium</StyledTypography>
+            <StyledFormControl dataTest='form-control-medium' fullWidth>
                 <StyledSelect
                     {...args}
+                    dataTest='medium-select'
                     size='medium'
                     value={value}
                     onChange={(e) => {
@@ -54,10 +55,11 @@ const StyledSelectExample: React.FC<{ args: Partial<SelectProps<unknown>> }> = (
                     }}
                 />
             </StyledFormControl>
-            <StyledTypography variant='h6'>Select size small</StyledTypography>
-            <StyledFormControl fullWidth>
+            <StyledTypography dataTest='typography-small' variant='h6'>Select size small</StyledTypography>
+            <StyledFormControl dataTest='form-control-small' fullWidth>
                 <StyledSelect
                     {...args}
+                    dataTest='small-select'
                     size='small'
                     value={value}
                     onChange={(e) => {

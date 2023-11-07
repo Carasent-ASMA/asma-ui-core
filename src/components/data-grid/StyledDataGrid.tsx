@@ -5,7 +5,7 @@ import clsx from 'clsx'
 
 import styles from './StyledDataGrid.module.scss'
 
-export const StyledDataGrid = (props: IBaseStyledDataGrid) => {
+export const StyledDataGrid = ({dataTest, ...props}: IBaseStyledDataGrid) => {
     const apiRef = useGridApiRef()
     const columns = [...props.columns]
 
@@ -25,6 +25,7 @@ export const StyledDataGrid = (props: IBaseStyledDataGrid) => {
 
     return (
         <DataGrid
+            data-test={dataTest}
             disableColumnMenu
             apiRef={apiRef}
             {...props}

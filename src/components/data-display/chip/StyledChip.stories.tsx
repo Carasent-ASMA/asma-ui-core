@@ -25,23 +25,25 @@ export const Chip = () => {
     return (
         <Stack direction="column" spacing={2}>
             <Stack direction="row" spacing={1}>
-                <StyledChip label="Chip Filled" />
-                <StyledChip label="Chip Outlined" variant="outlined" />
+                <StyledChip dataTest='chip-filled' label="Chip Filled" />
+                <StyledChip dataTest='chip-outlined' label="Chip Outlined" variant="outlined" />
             </Stack>
             <Stack direction="row" spacing={1}>
-                <StyledChip label="Clickable" onClick={handleClick} />
-                <StyledChip label="Clickable" variant="outlined" onClick={handleClick} />
+                <StyledChip dataTest='chip-clickable' label="Clickable" onClick={handleClick} />
+                <StyledChip dataTest='chip-clickable-outlined' label="Clickable" variant="outlined" onClick={handleClick} />
             </Stack>
             <Stack direction="row" spacing={1}>
-                <StyledChip label="Deletable" onDelete={handleDelete} />
-                <StyledChip label="Deletable" variant="outlined" onDelete={handleDelete} />
+                <StyledChip dataTest='chip-deletable' label="Deletable" onDelete={handleDelete} />
+                <StyledChip dataTest='chip-deletable-outlined' label="Deletable" variant="outlined" onDelete={handleDelete} />
             </Stack>
             <Stack direction="row" spacing={1}>
                 <StyledChip
+                    dataTest='chip-hover'
                     className='bg-gama-500 text-white text-sm hover:bg-gama-600'
                     label="Styled Hover Chip"
                 />
                 <StyledChip
+                    dataTest='chip-hover-outlined'
                     className='border-delta-500 text-delta-700 hover:border-delta-700 hover:bg-gama-50'
                     label="Styled Hover Chip"
                     variant="outlined"

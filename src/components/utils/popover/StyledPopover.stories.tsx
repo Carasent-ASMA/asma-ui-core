@@ -29,12 +29,13 @@ export const Popover = () => {
 
     return (
         <>
-            <StyledButton variant="contained" onClick={handleClick}>
+            <StyledButton data-test='open-popover' variant="contained" onClick={handleClick}>
                 Open popover
             </StyledButton>
 
             <StyledPopover
                 id={id}
+                dataTest='popover'
                 open={open}
                 anchorEl={anchorEl}
                 onClose={handleClose}
@@ -47,7 +48,7 @@ export const Popover = () => {
                     horizontal: 'center',
                 }}
             >
-                <StyledTypography sx={{ p: 2 }}>The content of the Popover</StyledTypography>
+                <StyledTypography dataTest='content-of-the-popover' sx={{ p: 2 }}>The content of the Popover</StyledTypography>
             </StyledPopover>
         </>
     )

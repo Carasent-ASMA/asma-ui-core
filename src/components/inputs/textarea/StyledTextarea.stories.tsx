@@ -48,8 +48,9 @@ const StyledTextareaExample = () => {
         <div className='flex flex-col gap-4 items-center'>
             <div>
                 <div className='flex align-middle justify-center text-xl font-semibold underline '>Active</div>
-                <StyledFormControl className='w-full pb-5'>
+                <StyledFormControl dataTest='form-control' className='w-full pb-5'>
                     <StyledSelect
+                        dataTest='select'
                         size='medium'
                         value={selectedOption?.title}
                         onChange={(e) => {
@@ -62,7 +63,7 @@ const StyledTextareaExample = () => {
                         }}
                     >
                         {selectOptions.map((option, i) => (
-                            <StyledSelectItem key={i} value={option.title}>
+                            <StyledSelectItem dataTest={`select-item-${i}`} key={i} value={option.title}>
                                 {option.title}
                             </StyledSelectItem>
                         ))}

@@ -1,3 +1,7 @@
 import { Chip, type ChipProps } from '@mui/material'
 
-export const StyledChip = (props: ChipProps) => <Chip {...props} />
+export interface StyledChipProps extends ChipProps {
+    dataTest?: string
+}
+
+export const StyledChip = ({dataTest, ...props}: StyledChipProps) => <Chip data-test={dataTest} {...props} />

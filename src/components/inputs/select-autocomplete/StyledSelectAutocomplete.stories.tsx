@@ -150,9 +150,9 @@ export const SelectAutocomplete: Story = {
 
 const SelectAutocompleteExample = () => {
     return (
-        <StyledStack direction='column' spacing={2}>
-            <StyledTypography variant='h6'>SelectAutocompleteExample</StyledTypography>
-            <StyledFormControl fullWidth>
+        <StyledStack dataTest='autocomplete-stack' direction='column' spacing={2}>
+            <StyledTypography data-test='selected-autocomplete-example' variant='h6'>SelectAutocompleteExample</StyledTypography>
+            <StyledFormControl dataTest='select-autocomplete-form-control' fullWidth>
                 <StyledSelectAutocomplete
                     dataTest='dataTest-autocomplete'
                     multiple

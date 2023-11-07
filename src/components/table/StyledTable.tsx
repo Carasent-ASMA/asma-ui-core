@@ -42,6 +42,7 @@ export const StyledTable = <
     getRowClassName,
     onRowClick,
     renderSubRows,
+    dataTest,
     ...rest
 }: StyledTableProps<TData, TCustomData>) => {
     if (autoSize && !columns.find((col) => col.id === 'width_stabilizer')) {
@@ -63,6 +64,7 @@ export const StyledTable = <
             maxSize: 50,
             header: ({ table }) => (
                 <StyledCheckbox
+                    dataTest=''
                     {...{
                         checked: table.getIsAllRowsSelected(),
                         indeterminate: table.getIsSomeRowsSelected(),
@@ -72,6 +74,7 @@ export const StyledTable = <
             ),
             cell: ({ row }) => (
                 <StyledCheckbox
+                    dataTest=''
                     {...{
                         checked: row.getIsSelected(),
                         disabled: !row.getCanSelect(),
@@ -112,7 +115,7 @@ export const StyledTable = <
     }
 
     return (
-        <table className={clsx('animate-opacity-appear-3 border-collapse overflow-y-auto', className)}>
+        <table data-test={dataTest} className={clsx('animate-opacity-appear-3 border-collapse overflow-y-auto', className)}>
             <thead className='table-header-group bg-[#fcfcfd] border-t-solid border-b-solid  border-y-delta-300 border-y cursor-default'>
                 {data.length === 0 && loading ? (
                     <tr>

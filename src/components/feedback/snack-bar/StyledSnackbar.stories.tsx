@@ -49,6 +49,7 @@ const SnackbarExample = () => {
     return (
         <Stack direction='column' spacing={2} sx={{ maxWidth: 400 }}>
             <StyledButton
+                dataTest='btn-snackbar-notistack'
                 onClick={() => {
                     processInfoSnackbar('Shared successfully!')
                 }}
@@ -57,8 +58,9 @@ const SnackbarExample = () => {
             </StyledButton>
             <SnackbarProvider autoHideDuration={3000} />
 
-            <StyledButton onClick={handleOpen}>Show default snackbar with action</StyledButton>
+            <StyledButton dataTest='btn-default-snackbar-with-actions' onClick={handleOpen}>Show default snackbar with action</StyledButton>
             <StyledSnackbar
+                dataTest='default-snackbar'
                 anchorOrigin={{
                     vertical: 'top',
                     horizontal: 'right',
@@ -68,7 +70,7 @@ const SnackbarExample = () => {
                 message='Nice default snack'
                 action={
                     <>
-                        <StyledButton variant='text' onClick={handleClose} color='inherit'>
+                        <StyledButton dataTest='btn-close' variant='text' onClick={handleClose} color='inherit'>
                             Close
                         </StyledButton>
                         <IconButton size='small' aria-label='close' color='inherit' onClick={handleClose}>
@@ -78,8 +80,9 @@ const SnackbarExample = () => {
                 }
             />
 
-            <StyledButton onClick={handleOpenAlert}>Show snackbar with alert</StyledButton>
+            <StyledButton dataTest='btn-snackbar-with-alert' onClick={handleOpenAlert}>Show snackbar with alert</StyledButton>
             <StyledSnackbar
+                dataTest='alert-snackbar'
                 open={openAlert}
                 onClose={handleCloseAlert}
                 anchorOrigin={{
@@ -87,7 +90,7 @@ const SnackbarExample = () => {
                     horizontal: 'center',
                 }}
             >
-                <StyledAlert onClose={handleCloseAlert} severity='success' variant='filled' sx={{ width: '100%' }}>
+                <StyledAlert data-test='nice-alert-snack' onClose={handleCloseAlert} severity='success' variant='filled' sx={{ width: '100%' }}>
                     Nice alert snack
                 </StyledAlert>
             </StyledSnackbar>

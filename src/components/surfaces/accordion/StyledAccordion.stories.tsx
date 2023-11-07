@@ -22,12 +22,12 @@ export const Accordion: Story = {
 
 const StyledAccordionExample = () => {
     return (
-        <StyledAccordion {...meta.args}>
-            <StyledAccordionSummary>
+        <StyledAccordion dataTest='accordion' {...meta.args}>
+            <StyledAccordionSummary dataTest='accordion-summary'>
                 <span className='text-lg font-semibold'>Accordion</span>
             </StyledAccordionSummary>
 
-            <StyledAccordionDetails>
+            <StyledAccordionDetails dataTest='accordion-details'>
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vestibulum, ipsum id lacinia tincidunt,
                 nisi mi placerat ex, id tempor nunc nisl id urna. Pellentesque habitant morbi tristique senectus et
                 netus et malesuada fames ac turpis egestas.

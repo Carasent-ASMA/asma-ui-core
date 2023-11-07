@@ -14,9 +14,13 @@ export function StyledSelectAutocomplete<
     DisableClearable extends boolean | undefined = false,
     FreeSolo extends boolean | undefined = false,
     ChipComponent extends React.ElementType = ChipTypeMap['defaultComponent'],
->(props: AutocompleteProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent> & { dataTest: string }) {
+>({
+    dataTest,
+    ...props
+}: AutocompleteProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent> & { dataTest: string }) {
     return (
         <Autocomplete
+            data-test={dataTest}
             {...props}
             className={clsx('!text-sm', props.className)}
             popupIcon={
@@ -27,10 +31,9 @@ export function StyledSelectAutocomplete<
                     className={clsx(props.className, 'select-custom-icon')}
                 />
             }
-            data-test={props.dataTest}
             PaperComponent={({ children }) => (
                 <Paper
-                    data-test={`paper-${props.dataTest}`}
+                    data-test={`paper-${dataTest}`}
                     sx={{
                         '& .MuiAutocomplete-option.Mui-focused': {
                             background: 'var(--colors-gama-300) !important',

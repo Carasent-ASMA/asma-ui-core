@@ -39,9 +39,10 @@ const StyledDrawerExample: FC<{ args: Partial<DrawerProps> }> = ({ args }) => {
 
     return (
         <Stack mt={2} mb={4}>
-            <StyledTypography variant='h6'>Standard Drawer</StyledTypography>
+            <StyledTypography dataTest='standar-drawer' variant='h6'>Standard Drawer</StyledTypography>
             <StyledButton
                 id='basic-button'
+                dataTest='basic-button'
                 className='self-start'
                 aria-controls={open ? 'basic-drawer' : undefined}
                 aria-haspopup='true'
@@ -53,6 +54,7 @@ const StyledDrawerExample: FC<{ args: Partial<DrawerProps> }> = ({ args }) => {
             <StyledDrawer
                 {...meta.args}
                 {...args}
+                dataTest='basic-drawer'
                 id='basic-drawer'
                 anchor='right'
                 open={open}

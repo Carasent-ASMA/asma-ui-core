@@ -9,6 +9,7 @@ const meta = {
     args: {
         disableRipple: true,
         indeterminate: false,
+        dataTest: 'checkbox'
     },
 } satisfies Meta<typeof StyledCheckbox>
 

@@ -9,6 +9,7 @@ interface StyledAlertSnackbarProps extends CustomContentProps {
     alertClassName?: string
     alertVariant?: 'standard' | 'filled' | 'outlined'
     closeButton?: boolean
+    dataTest: string
 }
 
 export const StyledAlertSnackbar = forwardRef<HTMLDivElement, StyledAlertSnackbarProps>((props, ref) => {
@@ -25,12 +26,13 @@ export const StyledAlertSnackbar = forwardRef<HTMLDivElement, StyledAlertSnackba
     const handleClose = () => closeSnackbar(id)
 
     return (
-        <SnackbarContent ref={ref} role='alert' {...other}>
+        <SnackbarContent data-test={props.dataTest} ref={ref} role='alert' {...other}>
             <StyledAlert
                 className={alertClassName}
                 severity={severity}
                 variant={alertVariant}
                 onClose={closeButton ? handleClose : undefined}
+                dataTest='snackbar-alert'
             >
                 {message}
             </StyledAlert>

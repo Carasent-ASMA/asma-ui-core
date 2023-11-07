@@ -13,6 +13,7 @@ export type StyledTimePickerProps = {
     inputClassName?: string
     value?: Date
     onSelect: (date: Date | undefined) => void
+    dataTest?: string
 }
 
 export const StyledTimePicker: React.FC<StyledTimePickerProps> = ({
@@ -21,12 +22,14 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = ({
     inputClassName,
     value,
     onSelect,
+    dataTest,
 }) => {
     const { anchorEl, open, handleClose, handleOpen } = useToggleMenuVisibility()
 
     return (
         <>
             <StyledInputField
+                dataTest={dataTest}
                 placeholder={placeholder}
                 size='small'
                 onClick={(e) => !disabled && handleOpen(e)}
@@ -52,7 +55,7 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = ({
                     horizontal: 'center',
                 }}
             >
-                <TimePickerBody value={value} onSelect={onSelect} />
+                <TimePickerBody dataTest={`popover-${dataTest}`} value={value} onSelect={onSelect} />
             </Popover>
         </>
     )

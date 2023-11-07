@@ -40,12 +40,12 @@ export const DialogExample = () => {
     }
     return (
         <React.Fragment>
-            <StyledButton onClick={() => setOpen(true)} variant='contained'>
+            <StyledButton dataTest='open-styled-dialog' onClick={() => setOpen(true)} variant='contained'>
                 Open
             </StyledButton>
-            <StyledDialog {...meta.args} onCloseText='Close' open={open} onClose={handleCloseModal}>
-                <StyledDialogTitle className='text-center'>{meta.args.title}</StyledDialogTitle>
-                <StyledDialogContent className='text-gama-700'>
+            <StyledDialog {...meta.args} dataTest='styled-dialog' onCloseText='Close' open={open} onClose={handleCloseModal}>
+                <StyledDialogTitle dataTest='styled-dialog-title' className='text-center'>{meta.args.title}</StyledDialogTitle>
+                <StyledDialogContent dataTest='styled-dialog-content' className='text-gama-700'>
                     Lorem ipsum dolor sit amet consectetur adipiscing elit placerat, habitasse justo eros suspendisse
                     aptent eleifend dis ultrices duis, facilisis laoreet proin varius magna neque vulputate. Ligula
                     sociosqu sociis penatibus non iaculis, himenaeos volutpat cubilia netus feugiat, interdum leo enim
@@ -80,11 +80,11 @@ export const DialogExample = () => {
                     Ligula sociosqu sociis penatibus non iaculis, himenaeos volutpat cubilia netus feugiat, interdum leo
                     enim mi.
                 </StyledDialogContent>
-                <StyledDialogActions>
-                    <StyledButton variant='contained' onClick={handleCloseModal}>
+                <StyledDialogActions dataTest='styled-dialog-actions'>
+                    <StyledButton dataTest='styled-dialog-save-button' variant='contained' onClick={handleCloseModal}>
                         Save
                     </StyledButton>
-                    <StyledButton variant='outlined' onClick={handleCloseModal}>
+                    <StyledButton dataTest='styled-dialog-abort-button' variant='outlined' onClick={handleCloseModal}>
                         Abort
                     </StyledButton>
                 </StyledDialogActions>

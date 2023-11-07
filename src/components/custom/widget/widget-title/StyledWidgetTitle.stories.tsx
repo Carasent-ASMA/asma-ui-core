@@ -7,7 +7,7 @@ const meta = {
     component: StyledWidgetTitle,
     tags: ['autodocs'],
     argTypes: {},
-    args: { children: <div>Widget title example</div> },
+    args: { children: <div>Widget title example</div>, dataTest: 'widget-title-example'  },
 } satisfies Meta<typeof StyledWidgetTitle>
 
 export default meta

@@ -50,9 +50,10 @@ export const StyledDatePickerExample = () => {
     const menuAbove = spaceBelow < 300 && spaceAbove > spaceBelow
     return (
         <div className={'flex flex-col gap-5'}>
-            <StyledDatePicker placeholder='Pick a date' mode='single' selected={date} onSelect={setDate} />
-            <StyledDatePicker placeholder='Disabled' mode='single' disabled />
+            <StyledDatePicker dataTest='single-date-picker' placeholder='Pick a date' mode='single' selected={date} onSelect={setDate} />
+            <StyledDatePicker dataTest='disabled-single-date-picker' placeholder='Disabled' mode='single' disabled />
             <StyledDatePicker
+                dataTest='range-date-picker'
                 placeholder='Pick a range date'
                 numberOfMonths={2}
                 mode='range'
@@ -64,6 +65,7 @@ export const StyledDatePickerExample = () => {
                 allowClear
             />
             <StyledDatePicker
+                dataTest='compact-range-date-picker'
                 placeholderFrom='Fra'
                 placeholderTo='Til'
                 numberOfMonths={2}
@@ -77,6 +79,7 @@ export const StyledDatePickerExample = () => {
                 allowClear
             />
             <StyledDatePicker
+                dataTest='disabled-compact-range-date-picker'
                 placeholderFrom='Fra'
                 placeholderTo='Til'
                 numberOfMonths={2}
@@ -86,11 +89,12 @@ export const StyledDatePickerExample = () => {
             />
 
             {/* Popover like in InOutBox */}
-            <StyledButton variant='contained' className='w-28' onClick={handleClick}>
+            <StyledButton dataTest='btn-open-popover' variant='contained' className='w-28' onClick={handleClick}>
                 Open popover
             </StyledButton>
 
             <StyledPopover
+                dataTest='popover-with-date-picker'
                 id={id}
                 open={open}
                 anchorEl={anchorEl}
@@ -104,21 +108,27 @@ export const StyledDatePickerExample = () => {
                     horizontal: 'center',
                 }}
             >
-                <StyledTypography sx={{ p: 2 }}>
+                <StyledTypography dataTest='styled-typography' sx={{ p: 2 }}>
                     <div className='flex flex-col '>
-                        <StyledFormControlLabel label={'test'} control={<StyledCheckbox size='small' />} />
-                        <StyledFormControlLabel label={'test'} control={<StyledCheckbox size='small' />} />
-                        <StyledFormControlLabel label={'test'} control={<StyledCheckbox size='small' />} />
+                        <StyledFormControlLabel label={'test'} control={<StyledCheckbox size='small' dataTest='test1' />} />
+                        <StyledFormControlLabel label={'test'} control={<StyledCheckbox size='small' dataTest='test2' />} />
+                        <StyledFormControlLabel label={'test'} control={<StyledCheckbox size='small' dataTest='test3' />} />
                     </div>
 
                     <StyledDatePicker
+                        dataTest='popover-content-start-date-picker'
                         placeholder='Pick a start date'
                         mode='single'
                         selected={date}
                         onSelect={setDate}
                     />
                     <div className='my-2'></div>
-                    <StyledDatePicker placeholder='Pick a end date' mode='single' selected={date} onSelect={setDate} />
+                    <StyledDatePicker
+                        dataTest='popover-content-end-date-picker'
+                        placeholder='Pick a end date' mode='single'
+                        selected={date}
+                        onSelect={setDate}
+                    />
                 </StyledTypography>
             </StyledPopover>
         </div>

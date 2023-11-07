@@ -22,7 +22,7 @@ export const ColumnsMenu: React.FC<{
     return (
         <div className='flex flex-col p-5'>
             {columnsMenuTitle && <div>{columnsMenuTitle}</div>}
-            <StyledFormGroup className='flex flex-col !text-[14px]'>
+            <StyledFormGroup dataTest='' className='flex flex-col !text-[14px]'>
                 {filteredColumns
                     .map((col) => (
                         <FormControlLabel
