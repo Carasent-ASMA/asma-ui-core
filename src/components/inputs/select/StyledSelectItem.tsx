@@ -1,10 +1,9 @@
 import { MenuItem, type MenuItemProps } from '@mui/material'
 
-export const StyledSelectItem = ({dataTest, ...item}: MenuItemProps & { dataTest?: string }) => {
+export const StyledSelectItem = (item: MenuItemProps) => {
     return (
         <MenuItem
             {...item}
-            data-test={dataTest}
             sx={{
                 '&.MuiMenuItem-root': {
                     fontSize: '14px !important',

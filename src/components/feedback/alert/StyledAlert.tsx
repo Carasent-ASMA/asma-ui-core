@@ -3,11 +3,10 @@ import { Alert, type AlertProps } from '@mui/material'
 import clsx from 'clsx'
 import { Children } from 'react'
 
-export const StyledAlert = ({dataTest, ...props}: AlertProps & { dataTest?: string }) => {
+export const StyledAlert = (props: AlertProps) => {
     return (
         <Alert
             {...props}
-            data-test={dataTest}
             classes={{
                 ...props.classes,
                 root: clsx(

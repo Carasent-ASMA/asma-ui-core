@@ -13,7 +13,6 @@ export function HeaderActionMenu<TData>({ headerData }: { headerData: HeaderCont
         <div className='w-[50px]'>
             <Icon icon='mdi:pin' className='text-delta-600' width={20} height={20} onClick={handleOpen} />
             <StyledPopover
-                dataTest=''
                 anchorEl={anchorEl}
                 anchorOrigin={{
                     horizontal: 'left',
@@ -28,11 +27,10 @@ export function HeaderActionMenu<TData>({ headerData }: { headerData: HeaderCont
                     .map((column) =>
                         column.columnDef.header ? (
                             <StyledMenuItem
-                                dataTest=''
                                 key={column.id}
                                 onClick={() => column.toggleVisibility(!column.getIsVisible())}
                             >
-                                <StyledCheckbox dataTest='' disableRipple className='p-0 pr-2' checked={column.getIsVisible()} />
+                                <StyledCheckbox disableRipple className='p-0 pr-2' checked={column.getIsVisible()} />
                                 {typeof column.columnDef.header === 'string' ? column.columnDef.header : column.id}
                             </StyledMenuItem>
                         ) : null,

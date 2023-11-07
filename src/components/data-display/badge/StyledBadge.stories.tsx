@@ -15,8 +15,8 @@ export default meta
 
 export const BasicBadge = () => {
     return (
-        <StyledBadge {...meta.argTypes} dataTest={'styled-badge-example'} badgeContent={4} color='primary'>
-            <StyledButton dataTest='btn-badge-example' variant='outlined'>Badge example</StyledButton>
+        <StyledBadge {...meta.argTypes} badgeContent={4} color='primary'>
+            <StyledButton variant='outlined'>Badge example</StyledButton>
         </StyledBadge>
     )
 }

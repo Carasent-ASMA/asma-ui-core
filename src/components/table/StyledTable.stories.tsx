@@ -88,7 +88,7 @@ const Table = () => {
                 id: 'share_action',
                 enableHiding: false,
                 cell: () => (
-                    <StyledButton dataTest='shared' className='m-auto' type='button' variant='text'>
+                    <StyledButton className='m-auto' type='button' variant='text'>
                         Shared
                     </StyledButton>
                 ),
@@ -137,7 +137,6 @@ const Table = () => {
                     placeholder='Search all columns...'
                 />
                 <StyledButton
-                    dataTest='toggle-row-selection'
                     onClick={() =>
                         tableRef.current?.setColumnVisibility((old) => ({
                             ...old,
@@ -150,7 +149,6 @@ const Table = () => {
             </Stack>
             <StyledTable<Person, Participant>
                 {...meta.args}
-                dataTest='table'
                 tableInstanceRef={tableRef}
                 actions={(row) => [
                     {

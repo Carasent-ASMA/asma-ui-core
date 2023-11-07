@@ -23,7 +23,6 @@ export function RowActionMenu<TData>({
     return (
         <div className='flex justify-center items-center'>
             <StyledButton
-                dataTest=''
                 variant='text'
                 size='small'
                 onClick={(e) => {
@@ -33,7 +32,6 @@ export function RowActionMenu<TData>({
                 <DotsVerticalIcon className='!text-delta-800' width={24} height={24} />
             </StyledButton>
             <StyledPopover
-                dataTest=''
                 open={open}
                 anchorEl={anchorEl}
                 onClose={handleClose}
@@ -49,7 +47,6 @@ export function RowActionMenu<TData>({
             >
                 {actions(tableData.row).map((action) => (
                     <StyledMenuItem
-                        dataTest=''
                         key={action.label}
                         className={action.className}
                         disabled={action.disabled}

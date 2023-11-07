@@ -9,16 +9,13 @@ import { CloseIcon } from 'src/components/data-display/icons'
  * inputRef to get Node of Input Element inside
  *
  */
-export const StyledSelect = ({
-    dataTest,
-    ...props
-}: SelectProps & {
-    allowClear?: boolean
-    dataTest?: string
-}) => (
+export const StyledSelect = (
+    props: SelectProps & {
+        allowClear?: boolean
+    },
+) => (
     <Select
         {...props}
-        data-test={dataTest}
         value={props.value}
         IconComponent={(props) => (
             <Icon

@@ -83,7 +83,7 @@ export const Inputs = () => {
                     value={inputText}
                     dataTest='StyledInput'
                 />
-                <StyledButton dataTest='btn-example'>Button Example</StyledButton>
+                <StyledButton>Button Example</StyledButton>
             </div>
             <div className='flex gap-2 items-center justify-center bg-green-50 p-5'>
                 <StyledInput
@@ -93,7 +93,7 @@ export const Inputs = () => {
                     dataTest='StyledInput'
                     size='small'
                 />
-                <StyledButton dataTest='btn-example-small' size='small'>Button Example Small</StyledButton>
+                <StyledButton size='small'>Button Example Small</StyledButton>
             </div>
             <div className='flex gap-2 w-[500px]  relative bg-yellow-50 p-5'>
                 <StyledInput
@@ -107,7 +107,7 @@ export const Inputs = () => {
                     label='Small with error'
                     className='flex flex-auto w-full'
                 />
-                <StyledButton dataTest='btn-example-small-2'  size='small'>Button Example Small</StyledButton>
+                <StyledButton size='small'>Button Example Small</StyledButton>
             </div>
             <div className='flex gap-2 w-[500px]  relative bg-green-50'>
                 <StyledInput
@@ -121,7 +121,7 @@ export const Inputs = () => {
                     label='Pali Pali'
                     endIcon={<Icon icon='mdi:magnify' width={24} height={24} />}
                 />
-                <StyledButton dataTest='btn-example-small-3' >Button Example Small</StyledButton>
+                <StyledButton>Button Example Small</StyledButton>
             </div>
             <StyledInput
                 onChange={handleInputChange}

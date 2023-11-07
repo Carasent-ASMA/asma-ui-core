@@ -13,7 +13,6 @@ type CommonDatePickerProps = {
     inputClassName?: string
     onClear?: () => void
     allowClear?: boolean
-    dataTest?: string
 } & CalendarProps
 
 type CompactRangeProps = {
@@ -62,7 +61,6 @@ export const StyledDatePicker = ({
     disabled,
     onClear,
     allowClear,
-    dataTest,
     ...props
 }: DatePickerProps) => {
     const [anchor, setAnchor] = useState<HTMLDivElement | null>(null)
@@ -109,14 +107,12 @@ export const StyledDatePicker = ({
         <>
             {compact && props.mode === 'range' ? (
                 <div
-                    data-test={dataTest}
                     className={`${className} ${
                         disabled ? 'cursor-default text-[var(--colors-gray-300)]' : 'cursor-pointer'
                     } inline-flex gap-1 w-fit items-center`}
                     onClick={(e) => !disabled && handleClick(e)}
                 >
                     <StyledInputField
-                        data-test={`${dataTest}-from`}
                         size='small'
                         placeholder={placeholderFrom}
                         value={value_from}
@@ -129,7 +125,6 @@ export const StyledDatePicker = ({
                     />
                     -
                     <StyledInputField
-                        data-test={`${dataTest}-to`}
                         size='small'
                         placeholder={placeholderTo}
                         value={value_to}
@@ -143,7 +138,6 @@ export const StyledDatePicker = ({
                 </div>
             ) : (
                 <StyledInputField
-                    data-test={dataTest}
                     placeholder={placeholder}
                     size='small'
                     onClick={(e) => !disabled && handleClick(e)}
@@ -174,7 +168,7 @@ export const StyledDatePicker = ({
                     horizontal: 'center',
                 }}
             >
-                <StyledCalendarPicker {...props} dataTest={`calendar-${dataTest}`} />
+                <StyledCalendarPicker {...props} />
             </Popover>
         </>
     )

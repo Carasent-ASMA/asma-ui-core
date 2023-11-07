@@ -64,7 +64,6 @@ const CommonEnabledButtons: React.FC<{
                 <div className='w-[570px] flex justify-center py-2  border border-l border-y-0 border-r-0 border-solid border-gray-200'>
                     <Stack direction='row' spacing={4}>
                         <StyledButton
-                            dataTest='contained-btn'
                             error={error}
                             size={size}
                             disabled={disabled}
@@ -72,7 +71,6 @@ const CommonEnabledButtons: React.FC<{
                             variant='contained'
                         />
                         <StyledButton
-                            dataTest='contained-btn-with-start-icon'
                             error={error}
                             size={size}
                             disabled={disabled}
@@ -90,7 +88,6 @@ const CommonEnabledButtons: React.FC<{
                             <div>Button label</div>
                         </StyledButton>
                         <StyledButton
-                            dataTest='contained-btn-with-end-icon'
                             error={error}
                             size={size}
                             disabled={disabled}
@@ -99,7 +96,6 @@ const CommonEnabledButtons: React.FC<{
                             endIcon={<ChevronDownIcon width={izSmall ? 20 : 24} height={izSmall ? 20 : 24} />}
                         />
                         <StyledButton
-                            dataTest='contained-btn-icon'
                             error={error}
                             size={size}
                             disabled={disabled}
@@ -115,9 +111,8 @@ const CommonEnabledButtons: React.FC<{
                 <div className='w-[100px] flex items-center h-[50px] text-gray-600 font-bold'>Outlined</div>
                 <div className='w-[570px] flex justify-center py-2 border border-l border-y-0 border-r-0 border-solid border-gray-200'>
                     <Stack direction='row' spacing={4}>
-                        <StyledButton dataTest='outlined-btn' error={error} size={size} disabled={disabled} {...meta.args} variant='outlined' />
+                        <StyledButton error={error} size={size} disabled={disabled} {...meta.args} variant='outlined' />
                         <StyledButton
-                            dataTest='outlined-btn-with-start-icon'
                             error={error}
                             size={size}
                             disabled={disabled}
@@ -128,7 +123,6 @@ const CommonEnabledButtons: React.FC<{
                             }
                         />
                         <StyledButton
-                            dataTest='outlined-btn-with-end-icon'
                             error={error}
                             size={size}
                             disabled={disabled}
@@ -137,7 +131,6 @@ const CommonEnabledButtons: React.FC<{
                             endIcon={<ChevronDownIcon width={izSmall ? 20 : 24} height={izSmall ? 20 : 24} />}
                         />
                         <StyledButton
-                            dataTest='outlined-btn-icon'
                             error={error}
                             size={size}
                             disabled={disabled}
@@ -153,9 +146,8 @@ const CommonEnabledButtons: React.FC<{
                 <div className='w-[100px] flex items-center h-[50px] text-gray-600 font-bold'>Text</div>
                 <div className='w-[570px] flex justify-center py-2 border border-l border-y-0 border-r-0 border-solid border-gray-200'>
                     <Stack direction='row' spacing={4}>
-                        <StyledButton dataTest='text-btn' error={error} size={size} disabled={disabled} {...meta.args} variant='text' />
+                        <StyledButton error={error} size={size} disabled={disabled} {...meta.args} variant='text' />
                         <StyledButton
-                            dataTest='text-btn-with-start-icon'
                             error={error}
                             size={size}
                             disabled={disabled}
@@ -167,7 +159,6 @@ const CommonEnabledButtons: React.FC<{
                             }
                         />
                         <StyledButton
-                            dataTest='text-btn-with-end-icon'
                             error={error}
                             size={size}
                             disabled={disabled}
@@ -176,7 +167,6 @@ const CommonEnabledButtons: React.FC<{
                             endIcon={<ChevronDownIcon width={izSmall ? 20 : 24} height={izSmall ? 20 : 24} />}
                         />
                         <StyledButton
-                            dataTest='text-btn-icon'
                             error={error}
                             size={size}
                             disabled={disabled}
@@ -193,11 +183,10 @@ const CommonEnabledButtons: React.FC<{
                     <div className='w-[100px] flex items-center h-[50px] text-gray-600 font-bold'>Text Gray</div>
                     <div className='w-[570px] flex justify-center py-2 border border-l border-y-0 border-r-0 border-solid border-gray-200'>
                         <Stack direction='row' spacing={4}>
-                            <StyledButton dataTest='textgray-btn' size={size} disabled={disabled} variant='textGray'>
+                            <StyledButton size={size} disabled={disabled} variant='textGray'>
                                 Button label
                             </StyledButton>
                             <StyledButton
-                                dataTest='textgray-btn-with-start-icon'
                                 size={size}
                                 disabled={disabled}
                                 variant='textGray'
@@ -213,7 +202,6 @@ const CommonEnabledButtons: React.FC<{
                                 Button label
                             </StyledButton>
                             <StyledButton
-                                dataTest='textgray-btn-with-end-icon'
                                 size={size}
                                 disabled={disabled}
                                 variant='textGray'
@@ -222,7 +210,6 @@ const CommonEnabledButtons: React.FC<{
                                 Button label
                             </StyledButton>
                             <StyledButton
-                                dataTest='textgray-btn-icon'
                                 size={size}
                                 disabled={disabled}
                                 variant='textGray'

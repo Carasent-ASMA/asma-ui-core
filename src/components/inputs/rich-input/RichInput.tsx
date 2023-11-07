@@ -13,7 +13,6 @@ export interface IRichInput extends ReactQuill.ReactQuillProps {
     error?: string
     is_error?: boolean
     is_warning?: boolean
-    dataTest?: string
 }
 
 const MODULES = {
@@ -28,7 +27,7 @@ const MODULES = {
 
 const FORMATS = ['size', 'font', 'bold', 'italic', 'underline', 'strike', 'blockquote', 'list', 'bullet', 'indent']
 
-const RichInput: FC<IRichInput> = ({dataTest, ...props}) => {
+const RichInput: FC<IRichInput> = (props) => {
     const isErrorOrNot = () => {
         if (props.is_error) {
             return 'error'
@@ -46,7 +45,7 @@ const RichInput: FC<IRichInput> = ({dataTest, ...props}) => {
 
     return (
         <>
-            {props.label && <span className={clsx(styles['text-label'])} data-test={`label-${dataTest}`}>{props.label}</span>}
+            {props.label && <span className={clsx(styles['text-label'])}>{props.label}</span>}
 
             {props.disabled ? (
                 <ReactQuill
@@ -54,7 +53,6 @@ const RichInput: FC<IRichInput> = ({dataTest, ...props}) => {
                     className={clsx(styles['viewMode'], props.className)}
                     readOnly={true}
                     modules={{ toolbar: false }}
-                    data-test={dataTest}
                 />
             ) : (
                 <ReactQuill
@@ -62,11 +60,10 @@ const RichInput: FC<IRichInput> = ({dataTest, ...props}) => {
                     className={clsx(styles['editMode'], props.className)}
                     modules={{ ...MODULES, ...props.modules }}
                     formats={{ ...FORMATS, ...props.formats }}
-                    data-test={dataTest}
                 />
             )}
 
-            {isErrorOrNot() && <span className={styles['error-message']} data-test={`error-${dataTest}`}>{props.error ? props.error : 'error'}</span>}
+            {isErrorOrNot() && <span className={styles['error-message']}>{props.error ? props.error : 'error'}</span>}
         </>
     )
 }

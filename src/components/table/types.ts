@@ -91,5 +91,4 @@ export interface StyledTableProps<TData, TCustomData>
     onRowClick?: (e: MouseEvent<HTMLTableRowElement, globalThis.MouseEvent>, row: Row<TData>) => void
     renderSubRows?: (props: { rows: TCustomData[]; row: TData }) => ReactElement
     getRowSelectionIds?: (ids: string[]) => void
-    dataTest?: string
 }

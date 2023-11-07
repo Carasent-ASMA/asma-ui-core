@@ -2,11 +2,10 @@ import { DialogActions, type DialogActionsProps } from '@mui/material'
 
 import clsx from 'clsx'
 
-export const StyledDialogActions = ({dataTest, ...props}: DialogActionsProps & { dataTest?: string }) => {
+export const StyledDialogActions = (props: DialogActionsProps) => {
     return (
         <DialogActions
             {...props}
-            data-test={dataTest}
             classes={{
                 ...props.classes,
                 root: 'p-0 m-0 justify-center',

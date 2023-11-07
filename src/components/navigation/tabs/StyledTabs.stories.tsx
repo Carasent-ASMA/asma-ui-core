@@ -29,10 +29,10 @@ const StyledTabsExample: FC<{ args: Partial<TabsProps> }> = () => {
     }
 
     return (
-        <StyledTabs dataTest='tabs' value={value} onChange={handleChange} centered>
-            <StyledTab dataTest='item-one' label='Item One' />
-            <StyledTab dataTest='item-two' label='Item Two' />
-            <StyledTab dataTest='item-three' label='Item Three' />
+        <StyledTabs value={value} onChange={handleChange} centered>
+            <StyledTab label='Item One' />
+            <StyledTab label='Item Two' />
+            <StyledTab label='Item Three' />
         </StyledTabs>
     )
 }

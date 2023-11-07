@@ -6,21 +6,16 @@ import { CloseIcon } from 'src/components/data-display/icons'
  * inputRef to get Node of Input Element inside
  *
  */
-export const StyledInputField = ({
-    dataTest,
-    allowClear,
-    onClear,
-    ...props
-}: TextFieldProps & {
-    allowClear?: boolean
-    onClear?: () => void
-    dataTest?: string
-}) => (
+export const StyledInputField = (
+    props: TextFieldProps & {
+        allowClear?: boolean
+        onClear?: () => void
+    },
+) => (
     <TextField
         {...props}
-        data-test={dataTest}
         InputProps={
-            allowClear && props.value
+            props.allowClear && props.value
                 ? {
                       endAdornment: (
                           <div
@@ -28,7 +23,7 @@ export const StyledInputField = ({
                               onClick={(e) => {
                                   e.stopPropagation()
                                   e.preventDefault()
-                                  onClear?.()
+                                  props.onClear?.()
                               }}
                           >
                               <CloseIcon width={18} height={18} />

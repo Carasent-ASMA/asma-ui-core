@@ -23,8 +23,8 @@ export const StyledTimePickerExample = () => {
 
     return (
         <div className='flex w-full gap-4'>
-            <StyledTimePicker dataTest='time-picker' value={value} onSelect={setValue} />
-            <StyledTimePicker dataTest='disabled-time-picker' value={value} onSelect={setValue} disabled />
+            <StyledTimePicker value={value} onSelect={setValue} />
+            <StyledTimePicker value={value} onSelect={setValue} disabled />
         </div>
     )
 }

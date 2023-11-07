@@ -6,7 +6,6 @@ export interface IBaseStyledDataGrid extends DataGridProps {
     disableRowActions?: boolean
     disableHeaderPin?: boolean
     fixedColumns?: string[]
-    dataTest?: string
     rowActions?: (
         params: GridRowParams<any>,
     ) => ReactElement<GridActionsCellItemProps, string | JSXElementConstructor<any>>[]
