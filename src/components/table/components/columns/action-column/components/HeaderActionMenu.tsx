@@ -10,7 +10,7 @@ export function HeaderActionMenu<TData>({ headerData }: { headerData: HeaderCont
     const { anchorEl, open, handleClose, handleOpen } = useToggleMenuVisibility()
     console.log('headerData', headerData)
     return (
-        <div className='w-[50px]'>
+        <div className='w-[50px] flex items-center justify-center text-center'>
             <Icon icon='mdi:pin' className='text-delta-600' width={20} height={20} onClick={handleOpen} />
             <StyledPopover
                 anchorEl={anchorEl}
