@@ -8,7 +8,6 @@ import { useToggleMenuVisibility } from 'src/hooks/useToggleMenuVisibility.hook'
 
 export function HeaderActionMenu<TData>({ headerData }: { headerData: HeaderContext<TData, TData> }) {
     const { anchorEl, open, handleClose, handleOpen } = useToggleMenuVisibility()
-    console.log('headerData', headerData)
     return (
         <div className='w-[50px] flex items-center justify-center text-center'>
             <Icon icon='mdi:pin' className='text-delta-600' width={20} height={20} onClick={handleOpen} />

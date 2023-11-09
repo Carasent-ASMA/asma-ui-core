@@ -48,7 +48,7 @@ export const StyledTable = <
         columns.push(widthStabilizer())
     }
 
-    if (headerPin && !columns.find((col) => col.id === 'actions')) {
+    if (!columns.find((col) => col.id === 'actions')) {
         columns.push(
             generateActionsColumn({
                 headerPin,
