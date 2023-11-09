@@ -7,10 +7,10 @@ import { CloseIcon } from 'src/components/data-display/icons'
  *
  * @usage
  * use StyleSelect only inside StyledFormControl
- * 
+ *
  * @size
  * control the size through StyledFormControl
- * 
+ *
  * @inputRef
  * inputRef to get Node of Input Element inside
  *
@@ -19,13 +19,11 @@ export const StyledSelect: React.FC<
     SelectProps & {
         allowClear?: boolean
         dataTest: string
-        dataId?: string
     }
-> = ({ dataTest, dataId, allowClear, ...props }) => (
+> = ({ dataTest, allowClear, ...props }) => (
     <Select
         {...props}
         data-test={dataTest}
-        data-id={dataId}
         value={props.value}
         IconComponent={(props) => (
             <Icon

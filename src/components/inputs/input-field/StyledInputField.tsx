@@ -6,16 +6,16 @@ import { CloseIcon } from 'src/components/data-display/icons'
  * inputRef to get Node of Input Element inside
  *
  */
-export const StyledInputField = (
-    props: TextFieldProps & {
+export const StyledInputField: React.FC<
+    TextFieldProps & {
         allowClear?: boolean
         onClear?: () => void
-    },
-) => (
+    }
+> = ({ allowClear, onClear, ...props }) => (
     <TextField
         {...props}
         InputProps={
-            props.allowClear && props.value
+            allowClear && props.value
                 ? {
                       endAdornment: (
                           <div
@@ -23,7 +23,7 @@ export const StyledInputField = (
                               onClick={(e) => {
                                   e.stopPropagation()
                                   e.preventDefault()
-                                  props.onClear?.()
+                                  onClear?.()
                               }}
                           >
                               <CloseIcon width={18} height={18} />
