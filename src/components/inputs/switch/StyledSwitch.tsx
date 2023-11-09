@@ -1,8 +1,9 @@
 import { Switch, type SwitchProps as _SwitchProps } from '@mui/material'
 export type SwitchProps = _SwitchProps
-export const StyledSwitch = (props: SwitchProps) => (
+export const StyledSwitch = ({dataTest, ...props}: SwitchProps & { dataTest: string }) => (
     <Switch
         {...props}
+        data-test={dataTest}
         sx={{
             '& .MuiButtonBase-root.Mui-checked': {
                 color: 'var(--colors-gama-500) !important',

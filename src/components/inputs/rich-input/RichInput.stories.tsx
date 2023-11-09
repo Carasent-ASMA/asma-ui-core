@@ -16,6 +16,7 @@ const meta = {
         error: '',
         is_error: false,
         is_warning: false,
+        dataTest: 'rich-input'
     }
 } satisfies Meta<IRichInput>
 

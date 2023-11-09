@@ -1,8 +1,9 @@
 import { Radio, type RadioProps } from '@mui/material'
 
-export const StyledRadio = (props: RadioProps) => (
+export const StyledRadio = ({dataTest, ...props}: RadioProps & { dataTest: string }) => (
     <Radio
         {...props}
+        data-test={dataTest}
         sx={{
             '&':{
                 color: 'var(--colors-gray-200)',

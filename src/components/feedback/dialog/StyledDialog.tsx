@@ -8,12 +8,21 @@ import type { ReactNode } from 'react'
 export interface IStyledDialogProps extends DialogProps {
     onCloseText?: ReactNode
     showCloseIcon?: boolean
+    dataTest: string
 }
 
-export const StyledDialog = ({ onCloseText, children, onClose, showCloseIcon = true, ...rest }: IStyledDialogProps) => {
+export const StyledDialog: React.FC<IStyledDialogProps> = ({
+    onCloseText,
+    children,
+    onClose,
+    dataTest,
+    showCloseIcon = true,
+    ...rest
+}) => {
     return (
         <Dialog
             {...rest}
+            data-test={dataTest}
             onClose={onClose}
             style={{
                 zIndex: 999,
@@ -23,6 +32,7 @@ export const StyledDialog = ({ onCloseText, children, onClose, showCloseIcon = t
             {showCloseIcon && (
                 <div className={'mr-2 mt-2 flex justify-end'}>
                     <StyledButton
+                        data-test={`close-button-${dataTest}`}
                         variant='text'
                         endIcon={<Icon icon={'ic:baseline-close'} className={'text-2xl'} />}
                         onClick={(event) => {

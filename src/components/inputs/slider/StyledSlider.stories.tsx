@@ -71,15 +71,15 @@ export const Slider = () => {
         <>
             <Stack mt={2} mb={4} className='w-[700px]'>
                 <Typography variant='h6'>Standard Slider</Typography>
-                <StyledSlider {...meta.args} value={value} onChangeCommitted={handleChange} />
+                <StyledSlider dataTest='standard-slider' {...meta.args} value={value} onChangeCommitted={handleChange} />
             </Stack>
             <Stack mt={2}>
                 <Typography variant='h6'>Disabled Slider</Typography>
-                <StyledSlider {...meta.args} disabled value={value} />
+                <StyledSlider dataTest='disabled-slider' {...meta.args} disabled value={value} />
             </Stack>
             <Stack mt={2} className='h-[400px]'>
                 <Typography variant='h6'>Vertical Slider</Typography>
-                <StyledSlider {...meta.args} orientation='vertical' value={value} onChangeCommitted={handleChange} />
+                <StyledSlider dataTest='vertical-slider' {...meta.args} orientation='vertical' value={value} onChangeCommitted={handleChange} />
             </Stack>
         </>
     )

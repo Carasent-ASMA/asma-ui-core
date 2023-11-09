@@ -28,7 +28,7 @@ type Story = StoryObj<typeof meta>
 
 // More on writing stories with args: https://storybook.js.org/docs/react/writing-stories/args
 export const Dialog: Story = {
-    args: { ...meta.args },
+    args: { ...meta.args, dataTest: 'test' },
     render: () => <DialogExample />,
 }
 
@@ -43,7 +43,7 @@ export const DialogExample = () => {
             <StyledButton onClick={() => setOpen(true)} variant='contained'>
                 Open
             </StyledButton>
-            <StyledDialog {...meta.args} onCloseText='Close' open={open} onClose={handleCloseModal}>
+            <StyledDialog {...meta.args} onCloseText='Close' open={open} dataTest='test' onClose={handleCloseModal}>
                 <StyledDialogTitle className='text-center'>{meta.args.title}</StyledDialogTitle>
                 <StyledDialogContent className='text-gama-700'>
                     Lorem ipsum dolor sit amet consectetur adipiscing elit placerat, habitasse justo eros suspendisse

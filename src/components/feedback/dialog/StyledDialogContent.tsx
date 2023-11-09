@@ -4,6 +4,7 @@ export const StyledDialogContent = ({ children, classes, className, ...rest }: D
     return (
         <DialogContent
             {...rest}
+            data-test='styled-dialog-content'
             classes={{
                 ...classes,
                 root: 'p-4 mx-0 mt-0 w-full',

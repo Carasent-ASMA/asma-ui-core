@@ -6,6 +6,7 @@ export const StyledDialogActions = (props: DialogActionsProps) => {
     return (
         <DialogActions
             {...props}
+            data-test='styled-dialog-actions'
             classes={{
                 ...props.classes,
                 root: 'p-0 m-0 justify-center',

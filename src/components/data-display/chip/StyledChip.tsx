@@ -1,3 +1,5 @@
 import { Chip, type ChipProps } from '@mui/material'
 
-export const StyledChip = (props: ChipProps) => <Chip {...props} />
+export const StyledChip: React.FC<ChipProps & { dataTest: string }> = (dataTest, ...props) => (
+    <Chip data-test={dataTest} {...props} />
+)
