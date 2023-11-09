@@ -5,6 +5,7 @@ import { CloseIcon } from 'src/components/data-display/icons'
  * @inputRef
  * inputRef to get Node of Input Element inside
  *
+ * type='mui-input' is temporary, remove it after deleting antd from all projects. Antd lib overwrites styles for type[text]
  */
 export const StyledInputField: React.FC<
     TextFieldProps & {
@@ -14,6 +15,7 @@ export const StyledInputField: React.FC<
 > = ({ allowClear, onClear, ...props }) => (
     <TextField
         {...props}
+        type='mui-input'
         InputProps={
             allowClear && props.value
                 ? {

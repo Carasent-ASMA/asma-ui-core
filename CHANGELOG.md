@@ -1,5 +1,36 @@
 # asma-core-ui
 
+## 2.19.0
+
+### Minor Changes
+
+-   7c6b42d: Added styling for indeterminate state of a StyledCheckbox
+
+### Patch Changes
+
+-   bc984c4: fix/datePicker-clearAction
+-   688d82e: fix/ASMA-2834-StyledTable-actions-not-working-as-expected-published
+-   1ae02c6: feat: Added styled radio button
+-   f264fc7: exporting-date-picker
+-   8ae828f: before data-tests
+-   baed007: styledSelectAutocomplete
+-   fix/styledInputField-custom-type-to-avoit-ui-crash
+-   c694edd: feat: Time picker
+-   fde85c1: fixed props errors in StyledInputField
+-   0e89b7c: fix/rowSelection-styledTable
+-   d19aa55: fix/select-with-label-styles
+-   047f94e: button size medium
+-   3b109eb: fix/DatePicker-allowCleat-as-prop
+-   519b54b: fixed hiding column header pin in styled table
+-   1273e77: feat: Added icons
+-   e8e77aa: 2.18.11
+-   6653757: updated renderSubRows function in StyledTable
+-   b0f7660: Exporting-MenuProps
+-   c3f4740: fix/ASMA-2834-StyledTable-actions-not-working-as-expected
+-   eae9d9f: control the size of StyleSelect through StyledFormControl
+-   08192fa: fix/styledSnackbarInfo
+-   367ae6c: fixed styledtable header pin
+
 ## 2.18.11
 
 ### Patch Changes
