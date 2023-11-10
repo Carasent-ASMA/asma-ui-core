@@ -40,7 +40,7 @@ export const DialogExample = () => {
     }
     return (
         <React.Fragment>
-            <StyledButton onClick={() => setOpen(true)} variant='contained'>
+            <StyledButton dataTest='test' onClick={() => setOpen(true)} variant='contained'>
                 Open
             </StyledButton>
             <StyledDialog {...meta.args} onCloseText='Close' open={open} dataTest='test' onClose={handleCloseModal}>
@@ -81,10 +81,10 @@ export const DialogExample = () => {
                     enim mi.
                 </StyledDialogContent>
                 <StyledDialogActions>
-                    <StyledButton variant='contained' onClick={handleCloseModal}>
+                    <StyledButton dataTest='test' variant='contained' onClick={handleCloseModal}>
                         Save
                     </StyledButton>
-                    <StyledButton variant='outlined' onClick={handleCloseModal}>
+                    <StyledButton dataTest='test' variant='outlined' onClick={handleCloseModal}>
                         Abort
                     </StyledButton>
                 </StyledDialogActions>

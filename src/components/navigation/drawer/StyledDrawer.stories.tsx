@@ -41,6 +41,7 @@ const StyledDrawerExample: FC<{ args: Partial<DrawerProps> }> = ({ args }) => {
         <Stack mt={2} mb={4}>
             <StyledTypography variant='h6'>Standard Drawer</StyledTypography>
             <StyledButton
+                dataTest='test'
                 id='basic-button'
                 className='self-start'
                 aria-controls={open ? 'basic-drawer' : undefined}
@@ -50,14 +51,7 @@ const StyledDrawerExample: FC<{ args: Partial<DrawerProps> }> = ({ args }) => {
             >
                 Dashboard
             </StyledButton>
-            <StyledDrawer
-                {...meta.args}
-                {...args}
-                id='basic-drawer'
-                anchor='right'
-                open={open}
-                onClose={handleClose}
-            >
+            <StyledDrawer {...meta.args} {...args} id='basic-drawer' anchor='right' open={open} onClose={handleClose}>
                 <List>
                     {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
                         <ListItem key={text} disablePadding>

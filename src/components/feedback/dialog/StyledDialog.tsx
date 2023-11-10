@@ -32,7 +32,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
             {showCloseIcon && (
                 <div className={'mr-2 mt-2 flex justify-end'}>
                     <StyledButton
-                        data-test={`close-button-${dataTest}`}
+                        dataTest={`close-button-${dataTest}`}
                         variant='text'
                         endIcon={<Icon icon={'ic:baseline-close'} className={'text-2xl'} />}
                         onClick={(event) => {

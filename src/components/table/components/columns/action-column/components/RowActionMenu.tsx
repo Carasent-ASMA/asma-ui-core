@@ -23,6 +23,7 @@ export function RowActionMenu<TData>({
     return (
         <div className='flex justify-center items-center'>
             <StyledButton
+                dataTest='test'
                 variant='text'
                 size='small'
                 onClick={(e) => {

@@ -86,7 +86,7 @@ export const StyledDatePickerExample = () => {
             />
 
             {/* Popover like in InOutBox */}
-            <StyledButton variant='contained' className='w-28' onClick={handleClick}>
+            <StyledButton dataTest='test' variant='contained' className='w-28' onClick={handleClick}>
                 Open popover
             </StyledButton>
 
@@ -106,9 +106,18 @@ export const StyledDatePickerExample = () => {
             >
                 <StyledTypography sx={{ p: 2 }}>
                     <div className='flex flex-col '>
-                        <StyledFormControlLabel label={'test'} control={<StyledCheckbox size='small' />} />
-                        <StyledFormControlLabel label={'test'} control={<StyledCheckbox size='small' />} />
-                        <StyledFormControlLabel label={'test'} control={<StyledCheckbox size='small' />} />
+                        <StyledFormControlLabel
+                            label={'test'}
+                            control={<StyledCheckbox dataTest='test' size='small' />}
+                        />
+                        <StyledFormControlLabel
+                            label={'test'}
+                            control={<StyledCheckbox dataTest='test' size='small' />}
+                        />
+                        <StyledFormControlLabel
+                            label={'test'}
+                            control={<StyledCheckbox dataTest='test' size='small' />}
+                        />
                     </div>
 
                     <StyledDatePicker

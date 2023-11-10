@@ -114,6 +114,7 @@ export const StyledDatePicker = ({
                 >
                     <StyledInputField
                         size='small'
+                        dataTest='styled-date-picker-input-range-from'
                         placeholder={placeholderFrom}
                         value={value_from}
                         disabled={!!disabled}
@@ -125,6 +126,7 @@ export const StyledDatePicker = ({
                     />
                     -
                     <StyledInputField
+                        dataTest='styled-date-picker-input-range-to'
                         size='small'
                         placeholder={placeholderTo}
                         value={value_to}
@@ -138,6 +140,7 @@ export const StyledDatePicker = ({
                 </div>
             ) : (
                 <StyledInputField
+                    dataTest='styled-date-picker-input'
                     placeholder={placeholder}
                     size='small'
                     onClick={(e) => !disabled && handleClick(e)}

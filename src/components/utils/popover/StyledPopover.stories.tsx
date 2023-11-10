@@ -29,7 +29,7 @@ export const Popover = () => {
 
     return (
         <>
-            <StyledButton variant="contained" onClick={handleClick}>
+            <StyledButton dataTest='test' variant='contained' onClick={handleClick}>
                 Open popover
             </StyledButton>
 

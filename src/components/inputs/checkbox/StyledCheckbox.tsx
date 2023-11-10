@@ -1,9 +1,10 @@
 import { Checkbox, type CheckboxProps } from '@mui/material'
 import styles from './StyledCheckbox.module.scss'
 
-export const StyledCheckbox = (props: CheckboxProps) => (
+export const StyledCheckbox: React.FC<CheckboxProps & { dataTest: string }> = ({ dataTest, ...props }) => (
     <Checkbox
         {...props}
+        data-test={dataTest}
         classes={{
             ...props.classes,
             root: `${styles['root']}`,

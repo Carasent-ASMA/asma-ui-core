@@ -4,9 +4,9 @@ import { TimePickerColumn } from './TimePickerColumn'
 
 type TimePickerBodyProps = Omit<StyledTimePickerProps, 'placeholder' | 'disabled' | 'inputClassName'>
 
-export const TimePickerBody: React.FC<TimePickerBodyProps> = ({ value, onSelect }) => {
+export const TimePickerBody: React.FC<TimePickerBodyProps> = ({ value, onSelect, dataTest }) => {
     return (
-        <div className={styles['root']}>
+        <div data-test={dataTest} className={styles['root']}>
             <TimePickerColumn type='hours' value={value} onSelect={onSelect} />
             <TimePickerColumn type='minutes' value={value} onSelect={onSelect} />
         </div>

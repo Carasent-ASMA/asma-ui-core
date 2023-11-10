@@ -49,6 +49,7 @@ const SnackbarExample = () => {
     return (
         <Stack direction='column' spacing={2} sx={{ maxWidth: 400 }}>
             <StyledButton
+                dataTest='test'
                 onClick={() => {
                     processInfoSnackbar('Shared successfully!')
                 }}
@@ -57,7 +58,9 @@ const SnackbarExample = () => {
             </StyledButton>
             <SnackbarProvider autoHideDuration={3000} />
 
-            <StyledButton onClick={handleOpen}>Show default snackbar with action</StyledButton>
+            <StyledButton dataTest='test' onClick={handleOpen}>
+                Show default snackbar with action
+            </StyledButton>
             <StyledSnackbar
                 anchorOrigin={{
                     vertical: 'top',
@@ -68,7 +71,7 @@ const SnackbarExample = () => {
                 message='Nice default snack'
                 action={
                     <>
-                        <StyledButton variant='text' onClick={handleClose} color='inherit'>
+                        <StyledButton dataTest='test' variant='text' onClick={handleClose} color='inherit'>
                             Close
                         </StyledButton>
                         <IconButton size='small' aria-label='close' color='inherit' onClick={handleClose}>
@@ -78,7 +81,9 @@ const SnackbarExample = () => {
                 }
             />
 
-            <StyledButton onClick={handleOpenAlert}>Show snackbar with alert</StyledButton>
+            <StyledButton dataTest='test' onClick={handleOpenAlert}>
+                Show snackbar with alert
+            </StyledButton>
             <StyledSnackbar
                 open={openAlert}
                 onClose={handleCloseAlert}

@@ -44,6 +44,7 @@ const StyledMenuExample: FC<{ args: Partial<MenuProps> }> = ({ args }) => {
             <Stack mt={2} mb={4}>
                 <StyledTypography variant='h6'>Standard Menu</StyledTypography>
                 <StyledButton
+                    dataTest='test'
                     id='basic-button'
                     className='self-start'
                     aria-controls={open ? 'basic-menu' : undefined}

@@ -29,7 +29,12 @@ export function HeaderActionMenu<TData>({ headerData }: { headerData: HeaderCont
                                 key={column.id}
                                 onClick={() => column.toggleVisibility(!column.getIsVisible())}
                             >
-                                <StyledCheckbox disableRipple className='p-0 pr-2' checked={column.getIsVisible()} />
+                                <StyledCheckbox
+                                    dataTest='test'
+                                    disableRipple
+                                    className='p-0 pr-2'
+                                    checked={column.getIsVisible()}
+                                />
                                 {typeof column.columnDef.header === 'string' ? column.columnDef.header : column.id}
                             </StyledMenuItem>
                         ) : null,

@@ -50,6 +50,7 @@ const meta = {
                 renderHeader: () => <div />,
                 renderCell: () => (
                     <StyledButton
+                        dataTest='test'
                         type='button'
                         variant='text'
                         className='m-auto mt-2 flex w-fit justify-center bg-transparent'

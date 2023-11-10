@@ -10,7 +10,7 @@ type commonProps = {
     size?: 'large' | 'small' | 'medium'
     startIcon?: ReactNode
     endIcon?: ReactNode
-    dataTest?: string
+    dataTest: string
 }
 
 type variantTextGrayProps = {

@@ -11,10 +11,12 @@ export const StyledInputField: React.FC<
     TextFieldProps & {
         allowClear?: boolean
         onClear?: () => void
+        dataTest: string
     }
-> = ({ allowClear, onClear, ...props }) => (
+> = ({ allowClear, onClear, dataTest, ...props }) => (
     <TextField
         {...props}
+        data-test={dataTest}
         type='mui-input'
         InputProps={
             allowClear && props.value

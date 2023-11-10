@@ -164,7 +164,13 @@ const SelectAutocompleteExample = () => {
                     defaultValue={[top100Films[13]]}
                     getOptionLabel={(option) => option?.title || ''}
                     renderInput={(params) => (
-                        <StyledInputField {...params} variant='outlined' label='' placeholder='Favorites' />
+                        <StyledInputField
+                            dataTest='test'
+                            {...params}
+                            variant='outlined'
+                            label=''
+                            placeholder='Favorites'
+                        />
                     )}
                     open={true}
                 />

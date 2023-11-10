@@ -63,6 +63,7 @@ export const StyledTable = <
             maxSize: 50,
             header: ({ table }) => (
                 <StyledCheckbox
+                    dataTest='test'
                     {...{
                         checked: table.getIsAllRowsSelected(),
                         indeterminate: table.getIsSomeRowsSelected(),
@@ -72,6 +73,7 @@ export const StyledTable = <
             ),
             cell: ({ row }) => (
                 <StyledCheckbox
+                    dataTest='test'
                     {...{
                         checked: row.getIsSelected(),
                         disabled: !row.getCanSelect(),

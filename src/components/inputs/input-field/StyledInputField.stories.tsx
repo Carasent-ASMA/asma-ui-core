@@ -15,16 +15,31 @@ export default meta
 export const Inputs = () => {
     return (
         <div className='flex flex-col w-full gap-12'>
-            <StyledInputField {...meta.args} onChange={() => undefined} value='Hello World' label='Label text' />
             <StyledInputField
+                dataTest='test'
+                {...meta.args}
+                onChange={() => undefined}
+                value='Hello World'
+                label='Label text'
+            />
+            <StyledInputField
+                dataTest='test'
                 {...meta.args}
                 onChange={() => undefined}
                 value='Hello World'
                 label='Small label text'
                 size='small'
             />
-            <StyledInputField {...meta.args} onChange={() => undefined} value='Hello World' label='' size='small' />
             <StyledInputField
+                dataTest='test'
+                {...meta.args}
+                onChange={() => undefined}
+                value='Hello World'
+                label=''
+                size='small'
+            />
+            <StyledInputField
+                dataTest='test'
                 {...meta.args}
                 onChange={() => undefined}
                 value='Hello World'
@@ -32,6 +47,7 @@ export const Inputs = () => {
                 error
             />
             <StyledInputField
+                dataTest='test'
                 {...meta.args}
                 onChange={() => undefined}
                 value='Hello World'
@@ -41,6 +57,7 @@ export const Inputs = () => {
             />
 
             <StyledInputField
+                dataTest='test'
                 {...meta.args}
                 onChange={() => undefined}
                 value='Hello World'
@@ -49,6 +66,7 @@ export const Inputs = () => {
                 error
             />
             <StyledInputField
+                dataTest='test'
                 {...meta.args}
                 onChange={() => undefined}
                 value='Hello World'
@@ -57,6 +75,7 @@ export const Inputs = () => {
                 helperText={'Required field'}
             />
             <StyledInputField
+                dataTest='test'
                 {...meta.args}
                 onChange={() => undefined}
                 value='Hello World'
@@ -66,6 +85,7 @@ export const Inputs = () => {
                 helperText={'Required field'}
             />
             <StyledInputField
+                dataTest='test'
                 {...meta.args}
                 onChange={() => undefined}
                 value='Hello World'
@@ -74,8 +94,16 @@ export const Inputs = () => {
                 error
                 helperText={'Required field'}
             />
-            <StyledInputField {...meta.args} onChange={() => undefined} value='Hello World' label='Disabled' disabled />
             <StyledInputField
+                dataTest='test'
+                {...meta.args}
+                onChange={() => undefined}
+                value='Hello World'
+                label='Disabled'
+                disabled
+            />
+            <StyledInputField
+                dataTest='test'
                 {...meta.args}
                 onChange={() => undefined}
                 value='Hello World'
@@ -84,6 +112,7 @@ export const Inputs = () => {
                 size='small'
             />
             <StyledInputField
+                dataTest='test'
                 {...meta.args}
                 onChange={() => undefined}
                 value='Hello World'

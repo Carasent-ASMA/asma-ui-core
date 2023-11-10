@@ -2,7 +2,10 @@ import { getHours, getMinutes, set } from 'date-fns'
 import type { StyledTimePickerProps } from '../StyledTimePicker'
 import styles from '../StyledTimePicker.module.scss'
 import clsx from 'clsx'
-export type TimePickerColumnProps = Omit<StyledTimePickerProps, 'placeholder' | 'disabled' | 'inputClassName'> & {
+export type TimePickerColumnProps = Omit<
+    StyledTimePickerProps,
+    'placeholder' | 'disabled' | 'inputClassName' | 'dataTest'
+> & {
     type: 'hours' | 'minutes'
 }
 
