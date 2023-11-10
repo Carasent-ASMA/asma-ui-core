@@ -41,6 +41,11 @@ export type StyledInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>,
     refLink?: React.Ref<HTMLInputElement>
 } & ConditionalProps
 
+/**
+ * @deprecated The input should not be used, use ->> StyledInputField
+ * 
+ * USE @@@@ StyledInputField @@@
+ */
 export const StyledInput: FC<StyledInputProps> = ({
     description,
     error = false,

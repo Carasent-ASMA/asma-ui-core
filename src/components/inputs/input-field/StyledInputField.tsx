@@ -44,6 +44,9 @@ export const StyledInputField: React.FC<
             '& .MuiInputBase-colorPrimary.Mui-focused fieldset': {
                 borderColor: 'var(--colors-gama-500) !important',
             },
+            '& .MuiInputBase-colorPrimary.Mui-focused::after': {
+                borderColor: 'var(--colors-gama-500) !important',
+            },
             '& .MuiInputBase-colorPrimary.Mui-focused.Mui-error fieldset': {
                 borderColor: '#d3302f !important',
             },

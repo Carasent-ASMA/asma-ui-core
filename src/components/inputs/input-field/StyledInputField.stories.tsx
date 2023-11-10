@@ -16,6 +16,7 @@ export const Inputs = () => {
     return (
         <div className='flex flex-col w-full gap-12'>
             <StyledInputField
+                variant='standard'
                 dataTest='test'
                 {...meta.args}
                 onChange={() => undefined}
@@ -24,6 +25,8 @@ export const Inputs = () => {
             />
             <StyledInputField
                 dataTest='test'
+                variant='standard'
+                disabled
                 {...meta.args}
                 onChange={() => undefined}
                 value='Hello World'
