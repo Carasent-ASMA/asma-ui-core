@@ -2,7 +2,7 @@
 .editMode {
     @apply font-sans;
     div:global(.ql-container) {
-        @apply max-h-[400px] min-h-[100px] overflow-auto p-2;
+        @apply max-h-[400px] overflow-auto p-2;
     }
 }
 
@@ -20,7 +20,7 @@
         @apply bg-custom-grey-01 border-custom-grey-04 rounded-t-lg border-x border-t border-b-0;
     }
     div:global(.ql-container) {
-        @apply border-custom-grey-04 rounded-b-lg border-x border-b border-t-0;
+        @apply border-custom-grey-04 rounded-b-lg border-x border-b border-t-0 min-h-[100px];
     }
 }
 

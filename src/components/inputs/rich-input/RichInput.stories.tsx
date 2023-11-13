@@ -1,28 +1,27 @@
 import type { Meta } from '@storybook/react'
-import { type IRichInput, RichInput } from './RichInput'
-import type { StoryObj } from '@storybook/react'
+import { RichInput } from './RichInput'
 
 const meta = {
     title: 'Inputs/RichInput',
     component: RichInput,
-    tags: ['autodocs'],
+    tags: [],
     argTypes: {},
-    args: {
-        placeholder: 'placeholder',
-        value: '',
-        isRequired: false,
-        disabled: false,
-        label: '',
-        error: '',
-        is_error: false,
-        is_warning: false,
-        dataTest: 'rich-input'
-    }
-} satisfies Meta<IRichInput>
+    args: {},
+} satisfies Meta<typeof RichInput>
 
 export default meta
-type Story = StoryObj<typeof meta>
-
-export const RichInputExample: Story = {
-    args: { ...meta.argTypes}
+export const Inputs = () => {
+    return (
+        <div className='flex flex-col w-full gap-12'>
+            <RichInput dataTest='test' {...meta.args} onChange={() => undefined} value='Hello World' />
+            <RichInput
+                dataTest='test'
+                disabled
+                {...meta.args}
+                onChange={() => undefined}
+                value='Hello World'
+                className='bg-gray-200 rounded-md'
+            />
+        </div>
+    )
 }
