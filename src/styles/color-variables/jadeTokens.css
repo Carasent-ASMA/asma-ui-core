@@ -167,4 +167,5 @@
     --colors-button-textGray-common-disabled-border-color: transparent;
 
     --colors-menu-text-active: var(--colors-jade-700);
+    --colors-badge-background: var(--colors-gama-500);
 }

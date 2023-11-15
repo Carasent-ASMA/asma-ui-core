@@ -185,5 +185,7 @@
     --colors-btn-task-status-bg: var(--colors-green-100);
     --colors-chat-ticket-message-bg: var(--colors-alpha-500);
     --colors-colors-topbar-text: #ffffff;
+
     --colors-menu-text-active: var(--colors-beta-700);
+    --colors-badge-background: var(--colors-beta-700);
 }
