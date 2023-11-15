@@ -7,7 +7,8 @@ export const StyledBadge: React.FC<BadgeProps & { dataTest: string }> = ({ color
         {...props}
         sx={{
             '& .MuiBadge-colorPrimary': {
-                backgroundColor: 'var(--colors-badge-background)',
+                backgroundColor: 'var(--colors-badge-bg)',
+                color: 'var(--colors-badge-text)',
             },
         }}
     />

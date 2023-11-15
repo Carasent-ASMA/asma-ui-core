@@ -1,5 +1,16 @@
 # asma-core-ui
 
+## 2.19.7
+
+### Patch Changes
+
+-   da5ffa8: richinput height fix
+-   badges-themming
+-   583c3b7: fix/styled-input-field-variant-sdantard-styling
+-   c12d01c: fix/fretex-badge-color
+-   583c3b7: feat/dataTests-buttons-inputs
+-   7307b1d: data tests for styled dialog and other components
+
 ## 2.19.0
 
 ### Minor Changes

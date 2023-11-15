@@ -51,8 +51,6 @@
     --colors-link-text-standart: #ffffff;
     --colors-link-text-active: #ffffff;
     --colors-link-text-disabled: var(--colors-gray-200);
-    --colors-badge-bg: var(--colors-lime-500);
-    --colors-badge-text: var(--colors-jade-600);
 
     --colors-button-contained-common-text-color: #ffffff;
     --colors-button-contained-common-bg-color: var(--colors-gama-500);
@@ -167,5 +165,6 @@
     --colors-button-textGray-common-disabled-border-color: transparent;
 
     --colors-menu-text-active: var(--colors-jade-700);
-    --colors-badge-background: var(--colors-gama-500);
+    --colors-badge-bg: var(--colors-lime-500);
+    --colors-badge-text: var(--colors-jade-600);
 }
