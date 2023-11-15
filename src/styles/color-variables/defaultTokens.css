@@ -187,6 +187,6 @@
     --colors-topbar-text: var(--colors-zinc-500);
     --colors-menu-text-active: var(--colors-slate-700);
 
-    --colors-badge-bg: var(--colors-gama-500);
+    --colors-badge-background: var(--colors-gama-500);
     --colors-badge-text: #ffffff;
 }

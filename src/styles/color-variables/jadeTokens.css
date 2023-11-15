@@ -165,6 +165,6 @@
     --colors-button-textGray-common-disabled-border-color: transparent;
 
     --colors-menu-text-active: var(--colors-jade-700);
-    --colors-badge-bg: var(--colors-lime-500);
+    --colors-badge-background: var(--colors-lime-500);
     --colors-badge-text: var(--colors-jade-600);
 }

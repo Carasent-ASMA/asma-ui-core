@@ -56,8 +56,7 @@
         "btn-task-status-bg": "var(--colors-btn-task-status-bg)",
         "btn-bg-mini-action": "var(--colors-btn-bg-mini-action)",
         "btn-bg-mini-action-hover": "var(--colors-btn-bg-mini-action-hover)",
-        "badge-bg": "var(--colors-badge-bg)",
-        "badge-text": "var(--colors-badge-text)",
+
         "chat-ticket-message-bg": "var(--colors-chat-ticket-message-bg)",
         "colors-topbar-text": "var(--colors-topbar-text)",
         "custom-grey-01": "hsl(var(--color-cardea--grey-01) / <alpha-value>)",

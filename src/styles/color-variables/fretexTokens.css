@@ -187,6 +187,6 @@
 
     --colors-menu-text-active: var(--colors-beta-700);
 
-    --colors-badge-bg: var(--colors-beta-700);
+    --colors-badge-background: var(--colors-beta-700);
     --colors-badge-text: #ffffff;
 }
