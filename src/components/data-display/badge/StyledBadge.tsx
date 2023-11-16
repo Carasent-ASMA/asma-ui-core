@@ -10,6 +10,7 @@ export const StyledBadge: React.FC<BadgeProps & { dataTest: string }> = ({ color
                 backgroundColor: 'var(--colors-badge-background)',
                 color: 'var(--colors-badge-text)',
             },
+            ...props.sx,
         }}
     />
 )
