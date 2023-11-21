@@ -90,7 +90,7 @@ export const StyledTable = <
         ...rest,
         columns,
         data,
-        defaultColumn: { minSize: 0, size: Number.MAX_SAFE_INTEGER, maxSize: Number.MAX_SAFE_INTEGER },
+        defaultColumn: { minSize: 25, size: Number.MAX_SAFE_INTEGER, maxSize: 400 },
         initialState: {
             ...initialState,
             columnVisibility: {
@@ -139,28 +139,25 @@ export const StyledTable = <
                                         key={header.id}
                                         colSpan={header.colSpan}
                                         className={clsx(
-                                            'px-2.5 text-delta-500 text-[10px] font-semibold uppercase truncate',
+                                            'px-2.5 text-delta-500 text-start text-[10px] font-semibold uppercase justify-start truncate',
                                             thClassName,
                                         )}
                                         style={{
                                             width: size || '100%',
-                                            maxWidth: size || '100%',
-                                            minWidth: size || '100%',
+                                            maxWidth: header.column.columnDef.maxSize,
+                                            minWidth: header.column.columnDef.minSize,
                                         }}
                                     >
                                         {header.isPlaceholder ? null : (
                                             <div
                                                 {...{
                                                     className: clsx(
-                                                        'flex items-center h-[30px]',
+                                                        'flex items-center h-[30px] justify-left',
                                                         header.column.getCanSort() || header.column.id === 'actions'
                                                             ? 'cursor-pointer select-none'
                                                             : '',
                                                         header.column.columnDef.className,
                                                     ),
-                                                    style: {
-                                                        justifyContent: header.column.columnDef.headerAlign ?? 'left',
-                                                    },
                                                     onClick: header.column.getToggleSortingHandler(),
                                                 }}
                                             >
@@ -233,15 +230,16 @@ export const StyledTable = <
                                             <td
                                                 key={cell.id}
                                                 className={clsx(
-                                                    'align-middle text-sm text-delta-900 px-2.5',
+                                                    'align-middle text-sm text-delta-900',
+                                                    cell.id.includes('width_stabilizer') ? 'p-0 m-0' : 'px-2.5',
                                                     cell.column.id !== SELECT_COLUMN_ID && 'truncate',
                                                     tdClassName,
                                                 )}
                                                 style={{
                                                     textAlign: cell.column.columnDef.cellAlign ?? 'left',
                                                     width: size || '100%',
-                                                    maxWidth: size || '100%',
-                                                    minWidth: size || '100%',
+                                                    maxWidth: cell.column.columnDef.maxSize,
+                                                    minWidth: cell.column.columnDef.minSize,
                                                 }}
                                             >
                                                 {flexRender(cell.column.columnDef.cell, cell.getContext())}

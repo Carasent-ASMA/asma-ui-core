@@ -2,12 +2,13 @@ import { Stack, Typography } from '@mui/material'
 import type { Meta, StoryObj } from '@storybook/react'
 import { StyledButton } from '../inputs/button/StyledButton'
 import { StyledTable } from './StyledTable'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { createColumnHelper, type Table } from '@tanstack/react-table'
+import { useEffect, useRef, useState } from 'react'
+import { type Table } from '@tanstack/react-table'
 import { makeData, makeParticipantsData, type Participant, type Person } from './makeData'
-import { PeopleIcon, PersonIcon } from '../data-display/icons'
-import { Icon } from '@iconify/react'
+import { PeopleIcon } from '../data-display/icons'
 import { cloneDeep } from 'lodash-es'
+import { useStyledTableColumns } from './components-story/useTableColumns'
+import { useIsTabletView } from 'src/hooks/useWindowWidthSize.hook'
 
 const meta = {
     title: 'Table/Styled Table',
@@ -30,72 +31,8 @@ export const TableStory: Story = {
 }
 
 const Table = () => {
-    const columnHelper = createColumnHelper<Person>()
-
-    const columns = useMemo(
-        () => [
-            columnHelper.display({
-                id: 'favorite',
-                enableHiding: false,
-                enableSorting: false,
-                headerAlign: 'center',
-                cellAlign: 'center',
-                maxSize: 50,
-                header() {
-                    return <Icon icon={'mdi:star'} color='#7a899e' width='20' />
-                },
-                cell() {
-                    return <Icon icon={'mdi:star-outline'} color={'#7a899e'} width='20' cursor={'pointer'} />
-                },
-            }),
-            columnHelper.accessor('firstName', {
-                id: 'firstName',
-                header: 'First Name',
-                enableHiding: false,
-                size: 190,
-                className: 'pl-2',
-                headerAlign: 'left',
-                cell: ({ getValue }) => (
-                    <div className='flex items-center gap-5'>
-                        <PersonIcon width={20} height={20} />
-                        <div className='text-sm text-black'>{getValue() ?? ''}</div>
-                    </div>
-                ),
-            }),
-            columnHelper.accessor((row) => row.lastName, {
-                id: 'lastName',
-                cell: (info) => info.getValue(),
-                header: 'Last Name',
-                enableHiding: false,
-                size: 190,
-            }),
-            columnHelper.accessor('visits', {
-                id: 'visits',
-                header: 'Visits',
-                size: 130,
-            }),
-            columnHelper.accessor('status', {
-                id: 'status',
-                header: 'Status',
-                size: 150,
-            }),
-            columnHelper.accessor('progress', {
-                id: 'progress',
-                header: 'Progress',
-                size: 100,
-            }),
-            columnHelper.display({
-                id: 'share_action',
-                enableHiding: false,
-                cell: () => (
-                    <StyledButton dataTest='test' className='m-auto' type='button' variant='text'>
-                        Shared
-                    </StyledButton>
-                ),
-            }),
-        ],
-        [columnHelper],
-    )
+    const isTablet = useIsTabletView()
+    const { columns } = useStyledTableColumns(isTablet)
 
     const [data, setData] = useState<Person[]>([])
     const [loading, setLoading] = useState(false)
@@ -127,7 +64,7 @@ const Table = () => {
     }, [rowSelection])
 
     return (
-        <Stack mt={2} mb={4} spacing={4}>
+        <Stack mt={2} mb={4} spacing={4} className='max-w-[1000px] overflow-auto m-auto'>
             <Stack direction='row' justifyContent='space-between'>
                 <Typography variant='h6'>Standard Table</Typography>
                 <input
@@ -196,7 +133,7 @@ const Table = () => {
                 }}
                 // renderSubRows={renderSubRows}
                 getRowClassName={(row) => (row.original.progress > 50 ? 'bg-primary-25' : '')}
-                rowHeight={40}
+                rowHeight={48}
                 noRowsOverlay={
                     <div className='flex h-full w-full items-center justify-center'>
                         <div className='flex flex-col items-center'>
