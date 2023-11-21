@@ -42,6 +42,7 @@ export const StyledTable = <
     getRowClassName,
     onRowClick,
     renderSubRows,
+    customActionsNode,
     ...rest
 }: StyledTableProps<TData, TCustomData>) => {
     if (autoSize && !columns.find((col) => col.id === 'width_stabilizer')) {
@@ -53,6 +54,7 @@ export const StyledTable = <
             generateActionsColumn({
                 headerPin,
                 actions,
+                customActionsNode,
             }),
         )
     }
@@ -133,19 +135,21 @@ export const StyledTable = <
                                 } else {
                                     size = `${size}px`
                                 }
-
                                 return (
                                     <th
                                         key={header.id}
                                         colSpan={header.colSpan}
                                         className={clsx(
-                                            'px-2.5 text-delta-500 text-start text-[10px] font-semibold uppercase justify-start truncate',
+                                            header.id.includes('width_stabilizer') ? 'p-0 m-0' : 'px-2.5',
+                                            'text-delta-500 text-start text-[10px] font-semibold uppercase justify-start truncate',
                                             thClassName,
                                         )}
                                         style={{
                                             width: size || '100%',
                                             maxWidth: header.column.columnDef.maxSize,
-                                            minWidth: header.column.columnDef.minSize,
+                                            minWidth: header.id.includes('width_stabilizer')
+                                                ? 1
+                                                : header.column.columnDef.minSize,
                                         }}
                                     >
                                         {header.isPlaceholder ? null : (
@@ -239,7 +243,9 @@ export const StyledTable = <
                                                     textAlign: cell.column.columnDef.cellAlign ?? 'left',
                                                     width: size || '100%',
                                                     maxWidth: cell.column.columnDef.maxSize,
-                                                    minWidth: cell.column.columnDef.minSize,
+                                                    minWidth: cell.id.includes('width_stabilizer')
+                                                        ? 1
+                                                        : cell.column.columnDef.minSize,
                                                 }}
                                             >
                                                 {flexRender(cell.column.columnDef.cell, cell.getContext())}

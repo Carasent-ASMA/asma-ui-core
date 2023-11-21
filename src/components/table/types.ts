@@ -9,7 +9,7 @@ import type {
     SortingColumnDef,
     VisibilityColumnDef,
 } from '@tanstack/react-table'
-import type { MouseEvent, ReactElement } from 'react'
+import type { MouseEvent, ReactElement, ReactNode } from 'react'
 
 declare module '@tanstack/react-table' {
     interface ColumnDefExtensions<TData extends RowData, TValue = unknown>
@@ -49,6 +49,7 @@ export interface StyledTableProps<TData, TCustomData>
         hide?: boolean
         onClick?: (row: Row<TData>) => void
     }[]
+    customActionsNode?: (row: CellContext<TData, TData>) => ReactNode
     autoSize?: boolean
     customSubRowData?: Map<string, TCustomData[]>
     headerPin?: boolean

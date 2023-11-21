@@ -87,6 +87,7 @@ const Table = () => {
             </Stack>
             <StyledTable<Person, Participant>
                 {...meta.args}
+                // rowHeight={30}
                 tableInstanceRef={tableRef}
                 actions={(row) => [
                     {
@@ -110,6 +111,11 @@ const Table = () => {
                         onClick: () => console.info('click'),
                     },
                 ]}
+                customActionsNode={(cell) => (
+                    <StyledButton size='small' dataTest='custom-button-action'>
+                        {cell.row.original.firstName}
+                    </StyledButton>
+                )}
                 columns={columns}
                 data={data}
                 loading={loading}
@@ -133,7 +139,6 @@ const Table = () => {
                 }}
                 // renderSubRows={renderSubRows}
                 getRowClassName={(row) => (row.original.progress > 50 ? 'bg-primary-25' : '')}
-                rowHeight={48}
                 noRowsOverlay={
                     <div className='flex h-full w-full items-center justify-center'>
                         <div className='flex flex-col items-center'>

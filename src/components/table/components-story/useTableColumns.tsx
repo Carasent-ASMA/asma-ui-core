@@ -13,9 +13,6 @@ export const useStyledTableColumns = (isTablet: boolean) => {
                 id: 'favorite',
                 enableHiding: false,
                 enableSorting: false,
-                headerAlign: 'center',
-                cellAlign: 'center',
-                maxSize: 50,
                 header() {
                     return <Icon icon={'mdi:star'} color='#7a899e' width='20' />
                 },
@@ -27,8 +24,6 @@ export const useStyledTableColumns = (isTablet: boolean) => {
                 accessorFn: (row) => row.firstName,
                 id: 'firstName',
                 header: 'First Name',
-                size: 190,
-                className: 'pl-2',
                 headerAlign: 'left',
                 cell: (info) => {
                     const proxy = info.row.original
@@ -44,7 +39,6 @@ export const useStyledTableColumns = (isTablet: boolean) => {
                 accessorFn: (row) => row.lastName,
                 id: 'lastName',
                 header: 'Last Name',
-                size: 190,
                 cell: (info) => {
                     const proxy = info.row.original
                     return (
@@ -97,7 +91,7 @@ export const useStyledTableColumns = (isTablet: boolean) => {
 
 const PersonDescription: React.FC<{ cellContext: CellContext<Person, Person> }> = () => {
     return (
-        <div className='truncate break-words max-w-[600px] flex flex-wrap text-ellipsis bg-red-500'>
+        <div className='truncate'>
             Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the
             industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and
             scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into

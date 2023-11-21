@@ -5,10 +5,6 @@
     input {
         @apply h-full w-full #{!important};
     }
-
-    svg {
-        @apply h-6 w-6 #{!important};
-    }
 }
 
 .checked {

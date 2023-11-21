@@ -1,6 +1,7 @@
 import { type CellContext, type HeaderContext, type Row } from '@tanstack/react-table'
 import { RowActionMenu } from './components/RowActionMenu'
 import { HeaderActionMenu } from './components/HeaderActionMenu'
+import type { ReactNode } from 'react'
 
 export function generateActionsColumn<TData>(options: {
     headerPin: boolean
@@ -11,8 +12,9 @@ export function generateActionsColumn<TData>(options: {
         hide?: boolean
         onClick?: (row: Row<TData>) => void
     }[]
+    customActionsNode?: (row: CellContext<TData, TData>) => ReactNode
 }) {
-    const { headerPin, actions } = options
+    const { headerPin, actions, customActionsNode } = options
 
     return {
         id: 'actions',
@@ -25,7 +27,12 @@ export function generateActionsColumn<TData>(options: {
             return headerPin ? <HeaderActionMenu headerData={props} /> : null
         },
         cell: (row: CellContext<TData, TData>) =>
-            actions ? <RowActionMenu tableData={row} actions={actions} /> : null,
+            actions ? (
+                <div className='flex gap-2 items-center justify-end'>
+                    {customActionsNode?.(row)}
+                    <RowActionMenu tableData={row} actions={actions} />
+                </div>
+            ) : null,
         size: 50,
     }
 }

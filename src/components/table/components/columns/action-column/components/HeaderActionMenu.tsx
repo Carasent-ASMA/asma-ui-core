@@ -1,5 +1,6 @@
 import { Icon } from '@iconify/react'
 import type { HeaderContext } from '@tanstack/react-table'
+import { StyledButton } from 'src/components/inputs/button'
 import { StyledCheckbox } from 'src/components/inputs/checkbox'
 import { StyledMenuItem } from 'src/components/navigation/menu'
 import { SELECT_COLUMN_ID } from 'src/components/table/StyledTable'
@@ -9,8 +10,10 @@ import { useToggleMenuVisibility } from 'src/hooks/useToggleMenuVisibility.hook'
 export function HeaderActionMenu<TData>({ headerData }: { headerData: HeaderContext<TData, TData> }) {
     const { anchorEl, open, handleClose, handleOpen } = useToggleMenuVisibility()
     return (
-        <div className='w-full  flex items-center justify-center text-center'>
-            <Icon icon='mdi:pin' className='text-delta-600' width={20} height={20} onClick={handleOpen} />
+        <div className='w-full  flex items-center justify-end '>
+            <StyledButton dataTest='data-test-pin' variant='text' size='small' onClick={handleOpen}>
+                <Icon icon='mdi:pin' className='text-delta-600 min-w-[24px] min-h-[24px]' />
+            </StyledButton>
             <StyledPopover
                 anchorEl={anchorEl}
                 anchorOrigin={{
@@ -30,6 +33,7 @@ export function HeaderActionMenu<TData>({ headerData }: { headerData: HeaderCont
                                 onClick={() => column.toggleVisibility(!column.getIsVisible())}
                             >
                                 <StyledCheckbox
+                                    size='small'
                                     dataTest='test'
                                     disableRipple
                                     className='p-0 pr-2'
