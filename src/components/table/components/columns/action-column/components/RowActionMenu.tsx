@@ -30,7 +30,7 @@ export function RowActionMenu<TData>({
                     handleOpen(e)
                 }}
             >
-                <DotsVerticalIcon className='!text-delta-800' width={24} height={24} />
+                <DotsVerticalIcon className='!text-delta-800' width={20} height={20} />
             </StyledButton>
             <StyledPopover
                 open={open}
@@ -46,18 +46,20 @@ export function RowActionMenu<TData>({
                     horizontal: 'right',
                 }}
             >
-                {actions(tableData.row).map((action) => (
-                    <StyledMenuItem
-                        key={action.label}
-                        className={action.className}
-                        disabled={action.disabled}
-                        onClick={() => {
-                            action.onClick?.(tableData.row)
-                        }}
-                    >
-                        {action.label}
-                    </StyledMenuItem>
-                ))}
+                {actions(tableData.row)
+                    .filter((action) => !action.hide)
+                    .map((action) => (
+                        <StyledMenuItem
+                            key={action.label}
+                            className={action.className}
+                            disabled={action.disabled}
+                            onClick={() => {
+                                action.onClick?.(tableData.row)
+                            }}
+                        >
+                            {action.label}
+                        </StyledMenuItem>
+                    ))}
             </StyledPopover>
         </div>
     )

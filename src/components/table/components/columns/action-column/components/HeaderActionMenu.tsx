@@ -12,7 +12,7 @@ export function HeaderActionMenu<TData>({ headerData }: { headerData: HeaderCont
     return (
         <div className='w-full  flex items-center justify-end '>
             <StyledButton dataTest='data-test-pin' variant='text' size='small' onClick={handleOpen}>
-                <Icon icon='mdi:pin' className='text-delta-600 min-w-[24px] min-h-[24px]' />
+                <Icon icon='mdi:pin' className='text-delta-600 min-w-[20px] min-h-[20px]' />
             </StyledButton>
             <StyledPopover
                 anchorEl={anchorEl}
