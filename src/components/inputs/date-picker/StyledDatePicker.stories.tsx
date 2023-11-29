@@ -50,9 +50,18 @@ export const StyledDatePickerExample = () => {
     const menuAbove = spaceBelow < 300 && spaceAbove > spaceBelow
     return (
         <div className={'flex flex-col gap-5'}>
-            <StyledDatePicker placeholder='Pick a date' mode='single' selected={date} onSelect={setDate} />
-            <StyledDatePicker placeholder='Disabled' mode='single' disabled />
+            <StyledDatePicker dataTest='' placeholder='Pick a date' mode='single' selected={date} onSelect={setDate} />
+            <StyledDatePicker dataTest='' placeholder='Disabled' mode='single' disabled />
+            <StyledDatePicker 
+                dataTest=''
+                disabledDays={{ before: new Date() }}
+                placeholder='Disabled days'
+                mode='single'
+                selected={date}
+                onSelect={setDate}
+            />
             <StyledDatePicker
+                dataTest=''
                 placeholder='Pick a range date'
                 numberOfMonths={2}
                 mode='range'
@@ -64,6 +73,7 @@ export const StyledDatePickerExample = () => {
                 allowClear
             />
             <StyledDatePicker
+                dataTest=''
                 placeholderFrom='Fra'
                 placeholderTo='Til'
                 numberOfMonths={2}
@@ -77,6 +87,7 @@ export const StyledDatePickerExample = () => {
                 allowClear
             />
             <StyledDatePicker
+                dataTest=''
                 placeholderFrom='Fra'
                 placeholderTo='Til'
                 numberOfMonths={2}
@@ -121,13 +132,14 @@ export const StyledDatePickerExample = () => {
                     </div>
 
                     <StyledDatePicker
+                        dataTest=''
                         placeholder='Pick a start date'
                         mode='single'
                         selected={date}
                         onSelect={setDate}
                     />
                     <div className='my-2'></div>
-                    <StyledDatePicker placeholder='Pick a end date' mode='single' selected={date} onSelect={setDate} />
+                    <StyledDatePicker dataTest='' placeholder='Pick a end date' mode='single' selected={date} onSelect={setDate} />
                 </StyledTypography>
             </StyledPopover>
         </div>

@@ -6,6 +6,7 @@ import { CalendarBlankOutlineIcon } from '../../data-display/icons/calendar-blan
 
 import { type CalendarProps, StyledCalendarPicker } from './StyledCalendarPicker'
 import { StyledInputField } from '../input-field'
+import type { Matcher } from 'react-day-picker'
 
 type CommonDatePickerProps = {
     dateFormat?: string
@@ -13,6 +14,8 @@ type CommonDatePickerProps = {
     inputClassName?: string
     onClear?: () => void
     allowClear?: boolean
+    disabledDays?: Matcher | Matcher[]
+    dataTest: string
 } & CalendarProps
 
 type CompactRangeProps = {
@@ -61,6 +64,8 @@ export const StyledDatePicker = ({
     disabled,
     onClear,
     allowClear,
+    disabledDays,
+    dataTest,
     ...props
 }: DatePickerProps) => {
     const [anchor, setAnchor] = useState<HTMLDivElement | null>(null)
@@ -107,6 +112,7 @@ export const StyledDatePicker = ({
         <>
             {compact && props.mode === 'range' ? (
                 <div
+                    data-test={dataTest}
                     className={`${className} ${
                         disabled ? 'cursor-default text-[var(--colors-gray-300)]' : 'cursor-pointer'
                     } inline-flex gap-1 w-fit items-center`}
@@ -140,7 +146,7 @@ export const StyledDatePicker = ({
                 </div>
             ) : (
                 <StyledInputField
-                    dataTest='styled-date-picker-input'
+                    dataTest={dataTest}
                     placeholder={placeholder}
                     size='small'
                     onClick={(e) => !disabled && handleClick(e)}
@@ -171,7 +177,7 @@ export const StyledDatePicker = ({
                     horizontal: 'center',
                 }}
             >
-                <StyledCalendarPicker {...props} />
+                <StyledCalendarPicker {...props} disabled={disabledDays} />
             </Popover>
         </>
     )

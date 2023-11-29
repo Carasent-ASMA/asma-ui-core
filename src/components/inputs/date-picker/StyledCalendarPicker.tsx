@@ -6,6 +6,7 @@ export type CalendarProps = React.ComponentProps<typeof DayPicker>
 export const StyledCalendarPicker = ({ showOutsideDays = true, ...props }: CalendarProps) => {
     return (
         <DayPicker
+            data-test={'calendar-picker'}
             showOutsideDays={showOutsideDays}
             classNames={{
                 months: 'flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0',
