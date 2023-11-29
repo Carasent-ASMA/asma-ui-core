@@ -5,8 +5,7 @@ export interface StyledSliderProps extends SliderProps {
     dataTest: string
 }
 
-
-export const StyledSlider = ({dataTest, ...props}: StyledSliderProps) => {
+export const StyledSlider = ({ dataTest, ...props }: StyledSliderProps) => {
     return (
         <Slider
             {...props}
@@ -39,6 +38,10 @@ export const StyledSlider = ({dataTest, ...props}: StyledSliderProps) => {
             }}
             sx={{
                 ...props.sx,
+                '& .MuiSlider-track': {
+                    backgroundColor: props.disabled ? 'var(--colors-gray-200)' : 'var(--colors-gama-600)',
+                    borderColor: props.disabled ? 'var(--colors-gray-200)' : 'var(--colors-gama-600)',
+                },
                 '& .MuiSlider-mark': {
                     backgroundColor: 'white',
                     border: '1px solid var(--colors-gray-200)',
