@@ -27,7 +27,17 @@ export function RowActionMenu<TData>({
                 variant='text'
                 size='small'
                 onClick={(e) => {
+                    e.stopPropagation()
+                    e.preventDefault()
                     handleOpen(e)
+                }}
+                onMouseDown={(e) => {
+                    e.stopPropagation()
+                    e.preventDefault()
+                }}
+                onMouseUp={(e) => {
+                    e.stopPropagation()
+                    e.preventDefault()
                 }}
             >
                 <DotsVerticalIcon className='!text-delta-800' width={20} height={20} />
@@ -55,6 +65,14 @@ export function RowActionMenu<TData>({
                             disabled={action.disabled}
                             onClick={() => {
                                 action.onClick?.(tableData.row)
+                            }}
+                            onMouseDown={(e) => {
+                                e.stopPropagation()
+                                e.preventDefault()
+                            }}
+                            onMouseUp={(e) => {
+                                e.stopPropagation()
+                                e.preventDefault()
                             }}
                         >
                             {action.label}

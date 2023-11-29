@@ -5,7 +5,12 @@ import type { CellContext, ColumnDef } from '@tanstack/react-table'
 import { Icon } from '@iconify/react'
 import { PersonIcon } from 'src/components/data-display/icons'
 
-export const useStyledTableColumns = (isTablet: boolean) => {
+/**
+ * Custom props:
+ * @param size. use NaN (width 100%) only one time for the main column. It will make the column very responsive
+ *
+ */
+export const useStyledTableColumns = () => {
     const columns = useMemo<ColumnDef<Person, Person>[]>(
         () => [
             {
@@ -19,6 +24,7 @@ export const useStyledTableColumns = (isTablet: boolean) => {
                 cell() {
                     return <Icon icon={'mdi:star-outline'} color={'#7a899e'} width='20' cursor={'pointer'} />
                 },
+                size: 30,
             },
             {
                 accessorFn: (row) => row.firstName,
@@ -34,6 +40,7 @@ export const useStyledTableColumns = (isTablet: boolean) => {
                         </div>
                     )
                 },
+                minSize: 100,
             },
             {
                 accessorFn: (row) => row.lastName,
@@ -47,6 +54,7 @@ export const useStyledTableColumns = (isTablet: boolean) => {
                         </div>
                     )
                 },
+                minSize: 100,
             },
             {
                 accessorFn: (row) => row.id,
@@ -55,7 +63,20 @@ export const useStyledTableColumns = (isTablet: boolean) => {
                 cell: (info) => {
                     return <PersonDescription cellContext={info} />
                 },
-                maxSize: isTablet ? 300 : 400,
+                size: NaN,
+            },
+            {
+                accessorFn: (row) => row.lastName,
+                id: 'lastNameX',
+                header: 'Last Name',
+                cell: (info) => {
+                    const proxy = info.row.original
+                    return (
+                        <div className='flex items-center gap-5'>
+                            <div className='text-sm text-black'>{proxy.lastName}</div>
+                        </div>
+                    )
+                },
             },
 
             // columnHelper.accessor('visits', {
@@ -83,7 +104,7 @@ export const useStyledTableColumns = (isTablet: boolean) => {
             //     ),
             // }),
         ],
-        [isTablet],
+        [],
     )
 
     return { columns }
@@ -91,13 +112,11 @@ export const useStyledTableColumns = (isTablet: boolean) => {
 
 const PersonDescription: React.FC<{ cellContext: CellContext<Person, Person> }> = () => {
     return (
-        <div className='truncate'>
-            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the
-            industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and
-            scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into
-            electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of
-            Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like
-            Aldus PageMaker including versions of Lorem Ipsum.
+        <div>
+            <input
+                className='border-none pointer-events-none bg-transparent max-h-[40px] truncate w-full min-w-[120px] max-w-full'
+                defaultValue={`Lorem Ipsum is simply dummy text Lorem Ipsum is simply dummy textLorem Ipsum is simply dummy textLorem Ipsum is simply dummy textLorem Ipsum is simply dummy textLorem Ipsum is simply dummy textLorem Ipsum is simply dummy text`}
+            />
         </div>
     )
 }

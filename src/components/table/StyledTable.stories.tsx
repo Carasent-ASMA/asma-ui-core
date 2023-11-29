@@ -1,4 +1,4 @@
-import { Stack, Typography } from '@mui/material'
+import { Typography } from '@mui/material'
 import type { Meta, StoryObj } from '@storybook/react'
 import { StyledButton } from '../inputs/button/StyledButton'
 import { StyledTable } from './StyledTable'
@@ -8,7 +8,7 @@ import { makeData, makeParticipantsData, type Participant, type Person } from '.
 import { PeopleIcon } from '../data-display/icons'
 import { cloneDeep } from 'lodash-es'
 import { useStyledTableColumns } from './components-story/useTableColumns'
-import { useIsTabletView } from 'src/hooks/useWindowWidthSize.hook'
+import clsx from 'clsx'
 
 const meta = {
     title: 'Table/Styled Table',
@@ -30,9 +30,15 @@ export const TableStory: Story = {
     render: () => <Table />,
 }
 
+const loadColumnVisibilityInitState = (basicData: Record<string, boolean>): Record<string, boolean> => {
+    const localStorageColumnVisibility = localStorage.getItem('exampleColumnVisibility')
+    let localStorageColumnVisibilityParsed: Record<string, boolean> | null = null
+    localStorageColumnVisibility && (localStorageColumnVisibilityParsed = JSON.parse(localStorageColumnVisibility))
+    return localStorageColumnVisibilityParsed || basicData
+}
+
 const Table = () => {
-    const isTablet = useIsTabletView()
-    const { columns } = useStyledTableColumns(isTablet)
+    const { columns } = useStyledTableColumns()
 
     const [data, setData] = useState<Person[]>([])
     const [loading, setLoading] = useState(false)
@@ -41,6 +47,17 @@ const Table = () => {
     const [rowSelection, setRowSelection] = useState({})
 
     const tableRef = useRef<Table<Person>>(null)
+
+    const [columnsVisibility, setColumnsVisibility] = useState<Record<string, boolean>>(() => {
+        return loadColumnVisibilityInitState({
+            firstName: false,
+            select: false,
+        })
+    })
+
+    useEffect(() => {
+        localStorage.setItem('exampleColumnVisibility', JSON.stringify(columnsVisibility))
+    }, [columnsVisibility])
 
     useEffect(() => {
         setLoading(true)
@@ -64,8 +81,8 @@ const Table = () => {
     }, [rowSelection])
 
     return (
-        <Stack mt={2} mb={4} spacing={4} className='max-w-[1000px] overflow-auto m-auto'>
-            <Stack direction='row' justifyContent='space-between'>
+        <div className='max-w-[1200px] overflow-auto m-auto'>
+            <div className='flex justify-between gap-5'>
                 <Typography variant='h6'>Standard Table</Typography>
                 <input
                     value={globalFilter ?? ''}
@@ -84,87 +101,109 @@ const Table = () => {
                 >
                     Toggle row selection
                 </StyledButton>
-            </Stack>
-            <StyledTable<Person, Participant>
-                {...meta.args}
-                // rowHeight={30}
-                tableInstanceRef={tableRef}
-                actions={(row) => [
-                    {
-                        label: row.original.progress > 50 ? 'Action 50' : 'Action less than 50',
-                        hide: row.original.progress > 50,
-                        onClick: () => console.info('row:', cloneDeep(row.original)),
-                    },
-                    {
-                        label: 'Original',
-                        onClick: () => console.info('original:', cloneDeep(row.original)),
-                    },
-                    {
-                        label: 'Action 3',
-                        className: 'text-error-700',
-                        onClick: () => console.info('click'),
-                    },
-                    {
-                        label: 'Hidden action',
-                        hide: true,
-                        className: 'text-primary-700',
-                        onClick: () => console.info('click'),
-                    },
-                ]}
-                customActionsNode={(cell) => (
-                    <StyledButton size='small' dataTest='custom-button-action'>
-                        {cell.row.original.firstName}
-                    </StyledButton>
-                )}
-                columns={columns}
-                data={data}
-                loading={loading}
-                customSubRowData={participants}
-                initialState={{
-                    columnVisibility: {
-                        visits: false,
-                        status: false,
-                    },
-                }}
-                state={{
-                    globalFilter,
-                    rowSelection,
-                }}
-                enableGlobalFilter={true}
-                enableRowSelection={true}
-                getRowCanExpand={() => true}
-                onGlobalFilterChange={setGlobalFilter}
-                onRowSelectionChange={(e) => {
-                    setRowSelection(e)
-                }}
-                // renderSubRows={renderSubRows}
-                getRowClassName={(row) => (row.original.progress > 50 ? 'bg-primary-25' : '')}
-                noRowsOverlay={
-                    <div className='flex h-full w-full items-center justify-center'>
-                        <div className='flex flex-col items-center'>
-                            <PeopleIcon />
-                            No recipients found
+            </div>
+            <div className='max-w-[1200px] overflow-auto relative mx-auto '>
+                <StyledTable<Person, Participant>
+                    {...meta.args}
+                    className='max-w-[1000px]'
+                    tableInstanceRef={tableRef}
+                    actions={(row) => [
+                        {
+                            label: row.original.progress > 50 ? 'Action 50' : 'Action less than 50',
+                            hide: row.original.progress > 50,
+                            onClick: () => console.info('row:', cloneDeep(row.original)),
+                        },
+                        {
+                            label: 'Original',
+                            onClick: () => console.info('original:', cloneDeep(row.original)),
+                        },
+                        {
+                            label: 'Action 3',
+                            className: 'text-error-700',
+                            onClick: () => console.info('click'),
+                        },
+                        {
+                            label: 'Hidden action',
+                            hide: true,
+                            className: 'text-primary-700',
+                            onClick: () => console.info('click'),
+                        },
+                    ]}
+                    customActionsNode={(cell) => (
+                        <StyledButton
+                            size='small'
+                            dataTest='custom-button-action'
+                            onMouseDown={(e) => {
+                                e.stopPropagation()
+                                e.preventDefault()
+                            }}
+                            onMouseUp={(e) => {
+                                e.stopPropagation()
+                                e.preventDefault()
+                            }}
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                e.preventDefault()
+                            }}
+                        >
+                            {cell.row.original.firstName}
+                        </StyledButton>
+                    )}
+                    columns={columns}
+                    data={data}
+                    loading={loading}
+                    customSubRowData={participants}
+                    initialState={{
+                        columnVisibility: columnsVisibility,
+                    }}
+                    state={{
+                        globalFilter,
+                        rowSelection,
+                        columnVisibility: columnsVisibility,
+                    }}
+                    onRowClick={(e, row) => {
+                        console.log('e', e, cloneDeep(row.original))
+                    }}
+                    enableGlobalFilter={true}
+                    enableRowSelection={true}
+                    getRowCanExpand={(row) => row.original.progress < 50}
+                    onGlobalFilterChange={setGlobalFilter}
+                    onRowSelectionChange={(e) => {
+                        setRowSelection(e)
+                    }}
+                    onColumnVisibilityChange={(e) => {
+                        setColumnsVisibility(e)
+                    }}
+                    renderSubRows={renderSubRows}
+                    getRowClassName={(row) => clsx('max-h-[40px]', row.original.progress > 50 ? 'bg-primary-25' : '')}
+                    noRowsOverlay={
+                        <div className='flex h-full w-full items-center justify-center'>
+                            <div className='flex flex-col items-center'>
+                                <PeopleIcon />
+                                No recipients found
+                            </div>
                         </div>
-                    </div>
-                }
-                // getRowId={(row: Person, _index: number, parent?: Row<Person>) =>
-                //     parent ? `abrakadabra${_index}` : _index.toString()
-                // }
-            />
-        </Stack>
+                    }
+                    rowHeight={60}
+                    // getRowId={(row: Person, _index: number, parent?: Row<Person>) =>
+                    //     parent ? `abrakadabra${_index}` : _index.toString()
+                    // }
+                />
+            </div>
+        </div>
     )
 }
 
-// const renderSubRows = ({ rows }: { rows: Participant[] }) => {
-//     return (
-//         <>
-//             {rows?.map((row) => (
-//                 <tr key={row.activityId} className='pl-10 h-[50px] w-full hover:cursor-pointer hover:bg-primary-25'>
-//                     <td>{row.fullName}</td>
-//                     <td>{row.activityId}</td>
-//                     <td colSpan={3}>{new Date(row.addedAt).toLocaleDateString()}</td>
-//                 </tr>
-//             ))}
-//         </>
-//     )
-// }
+const renderSubRows = ({ rows }: { rows: Participant[] }) => {
+    return (
+        <>
+            {rows?.map((row) => (
+                <tr key={row.activityId} className='pl-10 h-[50px] w-full hover:cursor-pointer hover:bg-primary-25'>
+                    <td>{row.fullName}</td>
+                    <td>{row.activityId}</td>
+                    <td colSpan={3}>{new Date(row.addedAt).toLocaleDateString()}</td>
+                </tr>
+            ))}
+        </>
+    )
+}

@@ -50,7 +50,6 @@ export interface StyledTableProps<TData, TCustomData>
         onClick?: (row: Row<TData>) => void
     }[]
     customActionsNode?: (row: CellContext<TData, TData>) => ReactNode
-    autoSize?: boolean
     customSubRowData?: Map<string, TCustomData[]>
     headerPin?: boolean
     loading?: boolean

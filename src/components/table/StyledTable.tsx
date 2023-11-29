@@ -13,11 +13,18 @@ import { DropDownIcon, DropUpIcon, LoadingIcon } from '../data-display/icons'
 import { StyledCheckbox } from '../inputs/checkbox'
 import { Skeleton } from '@mui/material'
 import { generateActionsColumn } from './components/columns/action-column/actionColumn'
-import { widthStabilizer } from './components/columns/widthStabilizer'
 import type { StyledTableProps } from './types'
 
 export const SELECT_COLUMN_ID = 'select'
 
+/**
+ *
+ * Custom props:
+ * @param size: Column sizing. use NaN (width 100%) -  only one time for the main column. It will make the column very responsive.. Example is in Storybook.
+ *
+ * If you have a very long data, like descriptions. use input to render long strings instead of div. Example is in Storybook.
+ *
+ */
 export const StyledTable = <
     TData extends {
         id: string | number
@@ -25,7 +32,6 @@ export const StyledTable = <
     TCustomData = Record<string, unknown>,
 >({
     actions,
-    autoSize = true,
     columns,
     data,
     customSubRowData,
@@ -45,10 +51,6 @@ export const StyledTable = <
     customActionsNode,
     ...rest
 }: StyledTableProps<TData, TCustomData>) => {
-    if (autoSize && !columns.find((col) => col.id === 'width_stabilizer')) {
-        columns.push(widthStabilizer())
-    }
-
     if (!columns.find((col) => col.id === 'actions')) {
         columns.push(
             generateActionsColumn({
@@ -92,7 +94,6 @@ export const StyledTable = <
         ...rest,
         columns,
         data,
-        defaultColumn: { minSize: 25, size: Number.MAX_SAFE_INTEGER, maxSize: 400 },
         initialState: {
             ...initialState,
             columnVisibility: {
@@ -116,7 +117,12 @@ export const StyledTable = <
     }
 
     return (
-        <table className={clsx('animate-opacity-appear-3 border-collapse overflow-y-auto', className)}>
+        <table
+            className={clsx(
+                'table box-border border-collapse animate-opacity-appear-3 border-spacing-[1px] max-w-[inherit] mx-auto w-full',
+                className,
+            )}
+        >
             <thead className='table-header-group bg-[#fcfcfd] border-t-solid border-b-solid  border-y-delta-300 border-y cursor-default'>
                 {data.length === 0 && loading ? (
                     <tr>
@@ -128,28 +134,33 @@ export const StyledTable = <
                     table.getHeaderGroups().map((headerGroup) => (
                         <tr key={headerGroup.id}>
                             {headerGroup.headers.map((header) => {
-                                let size: number | string = header.getSize()
+                                let columnWidth: number | string = header.getSize()
 
-                                if (isNaN(size) || size > 1200) {
-                                    size = '100%'
-                                } else {
-                                    size = `${size}px`
+                                // setup size, if user predefined it in column builder
+                                if (columnWidth) {
+                                    columnWidth = `min-w-[${columnWidth}px] w-[${columnWidth}px] max-w-[${columnWidth}px]`
                                 }
+
+                                // last column, except actions
+                                const lastUserColumn = header.headerGroup.headers[header.headerGroup.headers.length - 2]
+                                //  setup full width for last user created column
+                                if (lastUserColumn?.id === header.id || !columnWidth) {
+                                    columnWidth = 'w-full'
+                                }
+
                                 return (
                                     <th
                                         key={header.id}
                                         colSpan={header.colSpan}
                                         className={clsx(
+                                            columnWidth,
                                             header.id.includes('width_stabilizer') ? 'p-0 m-0' : 'px-2.5',
                                             'text-delta-500 text-start text-[10px] font-semibold uppercase justify-start truncate',
                                             thClassName,
                                         )}
                                         style={{
-                                            width: size || '100%',
                                             maxWidth: header.column.columnDef.maxSize,
-                                            minWidth: header.id.includes('width_stabilizer')
-                                                ? 1
-                                                : header.column.columnDef.minSize,
+                                            minWidth: header.column.columnDef.minSize,
                                         }}
                                     >
                                         {header.isPlaceholder ? null : (
@@ -180,7 +191,7 @@ export const StyledTable = <
                 )}
             </thead>
 
-            <tbody className='table-row-group'>
+            <tbody className='table-row-group align-middle max-w-[inherit]'>
                 {data.length > 0 && loading ? (
                     <LoadingIcon
                         className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary-500 z-10'
@@ -204,16 +215,24 @@ export const StyledTable = <
                         return (
                             <Fragment key={row.id}>
                                 <tr
+                                    data-test={row.id}
                                     className={clsx(
-                                        'border-x-0 border-y border-solid border-delta-300 hover:cursor-pointer hover:bg-primary-25',
+                                        'table-row align-middle border-x-0 border-y border-solid border-delta-300 hover:cursor-pointer hover:bg-primary-25',
                                         (row.getIsExpanded() || row.getIsSelected()) && 'bg-primary-50',
                                         loading && 'opacity-50',
                                         getRowClassName?.(row),
                                     )}
                                     style={{
-                                        height: rowHeight ? `${rowHeight}px` : '50px',
+                                        height: rowHeight ? `${rowHeight}px` : 'inherit',
                                     }}
-                                    onClick={(e) => {
+                                    onMouseDown={(e) => {
+                                        e.preventDefault()
+                                        if (
+                                            (e.target as HTMLDivElement).classList.contains('MuiModal-backdrop') ||
+                                            (e.target as Node).nodeName === 'INPUT' ||
+                                            (e.target as Node).nodeName === 'BUTTON'
+                                        )
+                                            return
                                         if (row.getCanExpand()) {
                                             row.getToggleExpandedHandler()()
                                         }
@@ -222,31 +241,22 @@ export const StyledTable = <
                                     }}
                                 >
                                     {row.getVisibleCells().map((cell) => {
-                                        let size: number | string = cell.column.getSize()
+                                        // let size: number | string = cell.column.getSize()
 
-                                        if (isNaN(size) || size > 1200) {
-                                            size = '100%'
-                                        } else {
-                                            size = `${size}px`
-                                        }
-
+                                        // if (isNaN(size) || size > 1200) {
+                                        //     size = '100%'
+                                        // } else {
+                                        //     size = `${size}px`
+                                        // }
                                         return (
                                             <td
                                                 key={cell.id}
                                                 className={clsx(
-                                                    'align-middle text-sm text-delta-900',
+                                                    'break-words table-cell align-middle text-sm text-delta-900 whitespace-pre-wrap',
                                                     cell.id.includes('width_stabilizer') ? 'p-0 m-0' : 'px-2.5',
                                                     cell.column.id !== SELECT_COLUMN_ID && 'truncate',
                                                     tdClassName,
                                                 )}
-                                                style={{
-                                                    textAlign: cell.column.columnDef.cellAlign ?? 'left',
-                                                    width: size || '100%',
-                                                    maxWidth: cell.column.columnDef.maxSize,
-                                                    minWidth: cell.id.includes('width_stabilizer')
-                                                        ? 1
-                                                        : cell.column.columnDef.minSize,
-                                                }}
                                             >
                                                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                             </td>
