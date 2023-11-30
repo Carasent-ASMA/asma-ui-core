@@ -59,6 +59,7 @@ export interface StyledTableProps<TData, TCustomData>
     rowHeight?: number
     tdClassName?: string
     thClassName?: string
+    focusable?: boolean
     getRowClassName?: (row: Row<TData>) => string
     onRowClick?: (e: MouseEvent<HTMLTableRowElement, globalThis.MouseEvent>, row: Row<TData>) => void
     renderSubRows?: (props: { rows: TCustomData[]; row: TData }) => ReactElement

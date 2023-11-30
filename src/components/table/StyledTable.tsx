@@ -24,6 +24,8 @@ export const SELECT_COLUMN_ID = 'select'
  *
  * If you have a very long data, like descriptions. use input to render long strings instead of div. Example is in Storybook.
  *
+ *  @param focusable: Used for controlling the focusability of rows. If set to true, the tabIndex={0} attribute will be added to each table row. Used, for example, when adding a new item to scroll to it and focus it
+ *
  */
 export const StyledTable = <
     TData extends {
@@ -49,6 +51,7 @@ export const StyledTable = <
     onRowClick,
     renderSubRows,
     customActionsNode,
+    focusable,
     ...rest
 }: StyledTableProps<TData, TCustomData>) => {
     if (!columns.find((col) => col.id === 'actions')) {
@@ -216,8 +219,9 @@ export const StyledTable = <
                             <Fragment key={row.id}>
                                 <tr
                                     data-test={row.id}
+                                    tabIndex={focusable ? 0: undefined}
                                     className={clsx(
-                                        'table-row align-middle border-x-0 border-y border-solid border-delta-300 hover:cursor-pointer hover:bg-primary-25',
+                                        'table-row align-middle border-x-0 border-y border-solid border-delta-300 hover:cursor-pointer hover:bg-primary-25 focus:bg-primary-100',
                                         (row.getIsExpanded() || row.getIsSelected()) && 'bg-primary-50',
                                         loading && 'opacity-50',
                                         getRowClassName?.(row),
