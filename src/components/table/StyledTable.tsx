@@ -219,6 +219,7 @@ export const StyledTable = <
                             <Fragment key={row.id}>
                                 <tr
                                     data-test={row.id}
+                                    id={row.id}
                                     tabIndex={focusable ? 0: undefined}
                                     className={clsx(
                                         'table-row align-middle border-x-0 border-y border-solid border-delta-300 hover:cursor-pointer hover:bg-primary-25 focus:bg-primary-100',
