@@ -1,0 +1,77 @@
+@mixin textarea($type) {
+    &.#{$type} {
+        @apply font-roboto text-sm font-normal rounded w-[400px] outline p-3 resize-none duration-75 leading-[20px] border-none #{!important};
+        color: var(--colors-input-#{$type}-text-color) #{!important};
+        background-color: var(--colors-input-#{$type}-bg-color) #{!important};
+        outline-color: var(--colors-input-#{$type}-outline-color) #{!important};
+        outline-width: var(--input-#{$type}-outline-width) #{!important};
+        cursor: var(--input-#{$type}-cursor) #{!important};
+        outline-offset: -1px #{!important};
+
+        &::placeholder {
+            color: var(--colors-input-#{$type}-placeholder-color) #{!important};
+        }
+
+        &:hover {
+            color: var(--colors-input-#{$type}-hover-text-color) #{!important};
+            background-color: var(--colors-input-#{$type}-hover-bg-color) #{!important};
+            outline-color: var(--colors-input-#{$type}-hover-outline-color) #{!important};
+            outline-width: var(--input-#{$type}-hover-outline-width) #{!important};
+        }
+
+        &:active {
+            color: var(--colors-input-#{$type}-active-text-color) #{!important};
+            background-color: var(--colors-input-#{$type}-active-bg-color) #{!important};
+            outline-color: var(--colors-input-#{$type}-active-outline-color) #{!important};
+            outline-width: var(--input-#{$type}-active-outline-width) #{!important};
+            cursor: var(--input-#{$type}-active-cursor) #{!important};
+        }
+
+        &:focus {
+            color: var(--colors-input-#{$type}-focus-text-color) #{!important};
+            background-color: var(--colors-input-#{$type}-focus-bg-color) #{!important};
+            outline-color: var(--colors-input-#{$type}-focus-outline-color) #{!important};
+            outline-width: var(--input-#{$type}-focus-outline-width) #{!important};
+            cursor: var(--input-#{$type}-focus-cursor) #{!important};
+        }
+
+        &:disabled {
+            color: var(--colors-input-#{$type}-disabled-text-color) #{!important};
+            background-color: var(--colors-input-#{$type}-disabled-bg-color) #{!important};
+            outline-color: var(--colors-input-#{$type}-disabled-outline-color) #{!important};
+            outline-width: var(--input-#{$type}-disabled-outline-width) #{!important};
+            cursor: var(--input-#{$type}-disabled-cursor) #{!important};
+        }
+    }
+}
+
+.textarea {
+    @include textarea('active');
+    @include textarea('error');
+}
+
+@mixin label($type) {
+    &.#{$type} {
+        @apply font-roboto text-sm font-semibold w-fit;
+        color: var(--colors-input-label-#{$type}-text-color);
+    }
+}
+
+@mixin description($type) {
+    &.#{$type} {
+        @apply font-roboto text-xs;
+        color: var(--colors-input-description-#{$type}-text-color);
+    }
+}
+
+.label {
+    @include label('active');
+    @include label('error');
+    @include label('disabled');
+}
+
+.description {
+    @include description('active');
+    @include description('error');
+    @include description('disabled');
+}
