@@ -74,6 +74,18 @@ export const StyledInputField: React.FC<
             '& .MuiOutlinedInput-input.Mui-disabled': {
                 WebkitTextFillColor: 'var(--colors-delta-300) !important',
             },
+            '& .MuiOutlinedInput-root:not(.Mui-disabled)': {
+                '&.Mui-error': {
+                    '&:hover fieldset': {
+                        borderWidth: '1px !important',
+                        borderColor: 'var(--colors-error-500) !important',
+                    },
+                },
+                '&:hover fieldset': {
+                    borderWidth: '2px !important',
+                    borderColor: 'var(--colors-gama-300) !important',
+                },
+            },
         }}
     />
 )
