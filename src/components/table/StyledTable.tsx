@@ -158,7 +158,7 @@ export const StyledTable = <
                                         className={clsx(
                                             columnWidth,
                                             header.id.includes('width_stabilizer') ? 'p-0 m-0' : 'px-2.5',
-                                            'text-delta-500 text-start text-[10px] font-semibold uppercase justify-start truncate',
+                                            'text-delta-500 text-start text-[10px] font-semibold uppercase justify-start',
                                             thClassName,
                                         )}
                                         style={{
@@ -220,9 +220,9 @@ export const StyledTable = <
                                 <tr
                                     data-test={row.id}
                                     id={row.id}
-                                    tabIndex={focusable ? -1: undefined}
+                                    tabIndex={focusable ? -1 : undefined}
                                     className={clsx(
-                                        'table-row align-middle border-x border-x-transparent border-t border-b-0 last:border-b border-solid border-delta-300 hover:cursor-pointer hover:bg-primary-25 focus:bg-primary-50 focus:border focus:border-primary-500',
+                                        'table-row align-middle border-x-0 border-y border-solid border-delta-300 hover:cursor-pointer hover:bg-primary-25 focus:bg-primary-100',
                                         (row.getIsExpanded() || row.getIsSelected()) && 'bg-primary-50',
                                         loading && 'opacity-50',
                                         getRowClassName?.(row),
@@ -231,7 +231,7 @@ export const StyledTable = <
                                         height: rowHeight ? `${rowHeight}px` : 'inherit',
                                     }}
                                     onMouseDown={(e) => {
-                                        e.preventDefault()
+                                        // e.preventDefault()
                                         if (
                                             (e.target as HTMLDivElement).classList.contains('MuiModal-backdrop') ||
                                             (e.target as Node).nodeName === 'INPUT' ||
@@ -259,7 +259,6 @@ export const StyledTable = <
                                                 className={clsx(
                                                     'break-words table-cell align-middle text-sm text-delta-900 whitespace-pre-wrap',
                                                     cell.id.includes('width_stabilizer') ? 'p-0 m-0' : 'px-2.5',
-                                                    cell.column.id !== SELECT_COLUMN_ID && 'truncate',
                                                     tdClassName,
                                                 )}
                                             >

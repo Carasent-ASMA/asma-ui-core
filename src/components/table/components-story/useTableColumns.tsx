@@ -58,6 +58,14 @@ export const useStyledTableColumns = () => {
             },
             {
                 accessorFn: (row) => row.id,
+                id: 'multiheight-description',
+                header: 'About Mh',
+                cell: (info) => {
+                    return <PersonDescriptionDiv cellContext={info} />
+                },
+            },
+            {
+                accessorFn: (row) => row.id,
                 id: 'description',
                 header: 'About',
                 cell: (info) => {
@@ -117,6 +125,16 @@ const PersonDescription: React.FC<{ cellContext: CellContext<Person, Person> }> 
                 className='border-none pointer-events-none bg-transparent max-h-[40px] truncate w-full min-w-[120px] max-w-full'
                 defaultValue={`Lorem Ipsum is simply dummy text Lorem Ipsum is simply dummy textLorem Ipsum is simply dummy textLorem Ipsum is simply dummy textLorem Ipsum is simply dummy textLorem Ipsum is simply dummy textLorem Ipsum is simply dummy text`}
             />
+        </div>
+    )
+}
+
+const PersonDescriptionDiv: React.FC<{ cellContext: CellContext<Person, Person> }> = () => {
+    return (
+        <div className='min-w-[200px]'>
+            Lorem Ipsum is simply dummy text Lorem Ipsum is simply dummy textLorem Ipsum is simply dummy textLorem Ipsum
+            is simply dummy textLorem Ipsum is simply dummy textLorem Ipsum is simply dummy textLorem Ipsum is simply
+            dummy text
         </div>
     )
 }
