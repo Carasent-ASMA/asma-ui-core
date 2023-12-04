@@ -52,6 +52,7 @@ export const StyledTable = <
     renderSubRows,
     customActionsNode,
     focusable,
+    stickyHeader,
     ...rest
 }: StyledTableProps<TData, TCustomData>) => {
     if (!columns.find((col) => col.id === 'actions')) {
@@ -126,7 +127,16 @@ export const StyledTable = <
                 className,
             )}
         >
-            <thead className='table-header-group bg-[#fcfcfd] border-t-solid border-b-solid  border-y-delta-300 border-y cursor-default'>
+            <thead
+                className='table-header-group bg-[#fcfcfd] border-t-solid border-b-solid  border-y-delta-300 border-y cursor-default'
+                style={
+                    (stickyHeader && {
+                        position: 'sticky',
+                        top: -0.1,
+                    }) ||
+                    {}
+                }
+            >
                 {data.length === 0 && loading ? (
                     <tr>
                         <th colSpan={columns.length}>

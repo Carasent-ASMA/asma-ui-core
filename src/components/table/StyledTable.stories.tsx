@@ -102,9 +102,10 @@ const Table = () => {
                     Toggle row selection
                 </StyledButton>
             </div>
-            <div className='max-w-[1200px] overflow-auto relative mx-auto '>
+            <div className='max-w-[1200px] max-h-[800px] overflow-auto relative mx-auto '>
                 <StyledTable<Person, Participant>
                     {...meta.args}
+                    stickyHeader
                     className='max-w-[1000px]'
                     tableInstanceRef={tableRef}
                     actions={(row) => [
