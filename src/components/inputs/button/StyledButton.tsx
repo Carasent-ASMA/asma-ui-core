@@ -11,6 +11,7 @@ type commonProps = {
     startIcon?: ReactNode
     endIcon?: ReactNode
     dataTest: string
+    rounded?: string
 }
 
 type variantTextGrayProps = {
@@ -39,6 +40,7 @@ export type StyledButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & 
  * @param error -  boolean
  * @param refLink -  ref to component
  * @param dataTest -  data-test tag
+ * @param rounded -  set radius with tailwind
  */
 export const StyledButton = ({
     variant = 'contained',
@@ -50,6 +52,8 @@ export const StyledButton = ({
     endIcon,
     dataTest,
     error,
+    style,
+    rounded = 'rounded',
     ...otherProps
 }: StyledButtonProps) => {
     const isLarge = size === 'large' || size === 'medium'
@@ -60,7 +64,9 @@ export const StyledButton = ({
     return (
         <button
             {...otherProps}
+            style={style}
             className={clsx(
+                rounded,
                 isLarge ? 'px-2' : 'px-1.5',
                 styles['button'],
                 styles[variant],
