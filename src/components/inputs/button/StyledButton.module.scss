@@ -1,7 +1,7 @@
 @mixin button($type, $color) {
     @apply border-transparent border border-solid;
     &.#{$type}.#{$color} {
-        @apply cursor-pointer border flex items-center justify-center text-sm font-semibold transition duration-300 ease-in-out #{!important};
+        @apply cursor-pointer rounded border flex items-center justify-center text-sm font-semibold transition duration-300 ease-in-out #{!important};
         color: var(--colors-button-#{$type}-#{$color}-text-color) #{!important};
         background-color: var(--colors-button-#{$type}-#{$color}-bg-color) #{!important};
         border-color: var(--colors-button-#{$type}-#{$color}-border-color) #{!important};
