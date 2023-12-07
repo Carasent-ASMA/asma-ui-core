@@ -38,6 +38,9 @@ export const StyledInputField: React.FC<
         }
         sx={{
             ...props.sx,
+            '& input:-webkit-autofill, & .MuiInputBase-root:has(> input:-webkit-autofill)': {
+                backgroundColor: '#e8f0fe !important',
+            },
             '& .MuiInputBase-colorPrimary fieldset': {
                 borderColor: 'var(--colors-delta-500) !important',
             },
