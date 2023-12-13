@@ -232,7 +232,7 @@ export const StyledTable = <
                                     id={row.id}
                                     tabIndex={focusable ? -1 : undefined}
                                     className={clsx(
-                                        'table-row align-middle border-x-0 border-y border-solid border-delta-300 hover:cursor-pointer hover:bg-primary-25 focus:bg-primary-100',
+                                        'table-row align-middle border-solid border-x border-t border-b-0 last:border-b border-x-transparent border-y-delta-300 hover:cursor-pointer hover:bg-primary-25 focus:bg-primary-50 focus:border focus:border-primary-500',
                                         (row.getIsExpanded() || row.getIsSelected()) && 'bg-primary-50',
                                         loading && 'opacity-50',
                                         getRowClassName?.(row),
