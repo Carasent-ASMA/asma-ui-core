@@ -37,7 +37,6 @@ export const StyledInputField: React.FC<
                 : props.InputProps
         }
         sx={{
-            ...props.sx,
             '& input:-webkit-autofill, & .MuiInputBase-root:has(> input:-webkit-autofill)': {
                 backgroundColor: '#e8f0fe !important',
             },
@@ -89,6 +88,7 @@ export const StyledInputField: React.FC<
                     borderColor: 'var(--colors-gama-300) !important',
                 },
             },
+            ...props.sx,
         }}
     />
 )
