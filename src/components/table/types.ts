@@ -52,6 +52,7 @@ export interface StyledTableProps<TData, TCustomData>
     customActionsNode?: (row: CellContext<TData, TData>) => ReactNode
     customSubRowData?: Map<string, TCustomData[]>
     headerPin?: boolean
+    expandArrow?: boolean
     loading?: boolean
     noRowsOverlay?: ReactElement
     tableInstanceRef?: React.MutableRefObject<Table<TData> | null>

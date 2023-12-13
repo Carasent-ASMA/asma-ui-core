@@ -26,11 +26,11 @@ export function generateActionsColumn<TData>(options: {
         header: (props: HeaderContext<TData, TData>) => {
             return headerPin ? <HeaderActionMenu headerData={props} /> : null
         },
-        cell: (row: CellContext<TData, TData>) =>
+        cell: (cell: CellContext<TData, TData>) =>
             actions ? (
                 <div className='flex gap-2 items-center justify-end'>
-                    {customActionsNode?.(row)}
-                    <RowActionMenu tableData={row} actions={actions} />
+                    {customActionsNode?.(cell)}
+                    <RowActionMenu tableData={cell} actions={actions} />
                 </div>
             ) : null,
         size: 50,

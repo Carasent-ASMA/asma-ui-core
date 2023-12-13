@@ -14,8 +14,10 @@ import { StyledCheckbox } from '../inputs/checkbox'
 import { Skeleton } from '@mui/material'
 import { generateActionsColumn } from './components/columns/action-column/actionColumn'
 import type { StyledTableProps } from './types'
+import { generateExpandColumn } from './components/columns/action-column/expandColumn'
 
 export const SELECT_COLUMN_ID = 'select'
+export const EXPAND_COLUMN_ID = 'expand-column-id'
 
 /**
  *
@@ -24,7 +26,7 @@ export const SELECT_COLUMN_ID = 'select'
  *
  * If you have a very long data, like descriptions. use input to render long strings instead of div. Example is in Storybook.
  *
- *  @param focusable: Used for controlling the focusability of rows. If set to true, the tabIndex={0} attribute will be added to each table row. Used, for example, when adding a new item to scroll to it and focus it
+ *  @param focusable: Used for controlling the focus of rows. If set to true, the tabIndex={0} attribute will be added to each table row. Used, for example, when adding a new item to scroll to it and focus it
  *
  */
 export const StyledTable = <
@@ -53,6 +55,7 @@ export const StyledTable = <
     customActionsNode,
     focusable,
     stickyHeader,
+    expandArrow,
     ...rest
 }: StyledTableProps<TData, TCustomData>) => {
     if (!columns.find((col) => col.id === 'actions')) {
@@ -63,6 +66,10 @@ export const StyledTable = <
                 customActionsNode,
             }),
         )
+    }
+
+    if (expandArrow && !columns.find((col) => col.id === EXPAND_COLUMN_ID)) {
+        columns.unshift(generateExpandColumn())
     }
 
     if (enableRowSelection && !columns.find((col) => col.id === SELECT_COLUMN_ID)) {
@@ -248,7 +255,7 @@ export const StyledTable = <
                                             (e.target as Node).nodeName === 'BUTTON'
                                         )
                                             return
-                                        if (row.getCanExpand()) {
+                                        if (row.getCanExpand() && !expandArrow) {
                                             row.getToggleExpandedHandler()()
                                         }
 

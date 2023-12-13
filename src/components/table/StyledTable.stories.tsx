@@ -150,6 +150,7 @@ const Table = () => {
                             {cell.row.original.firstName}
                         </StyledButton>
                     )}
+                    expandArrow={true}
                     columns={columns}
                     data={data}
                     loading={loading}
@@ -200,6 +201,8 @@ const renderSubRows = ({ rows }: { rows: Participant[] }) => {
         <>
             {rows?.map((row) => (
                 <tr key={row.activityId} className='pl-10 h-[50px] w-full hover:cursor-pointer hover:bg-primary-25'>
+                    <td />
+                    <td />
                     <td>{row.fullName}</td>
                     <td>{row.activityId}</td>
                     <td colSpan={3}>{new Date(row.addedAt).toLocaleDateString()}</td>

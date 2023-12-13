@@ -2,7 +2,7 @@
     "editor.wordSeparators": "`~!@#%^&*()-=+[{]}\\|;:'\",.<>/?",
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": true
+        "source.fixAll.eslint": "explicit"
     },
     // let editor format using prettier for all other files
     "editor.formatOnSave": true,
