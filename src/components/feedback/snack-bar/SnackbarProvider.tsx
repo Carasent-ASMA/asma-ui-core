@@ -1,6 +1,7 @@
 import type { AlertColor } from '@mui/material'
 import { SnackbarProvider as NotistackProvider, type SnackbarProviderProps } from 'notistack'
 import { StyledAlertSnackbar } from 'src/components/feedback/snack-bar/StyledAlertSnackbar'
+import { StyledInfoSnackbar } from './components/StyledInfoSnackbar'
 
 /**
  * @ignore
@@ -12,6 +13,7 @@ export const SnackbarProvider = (props: SnackbarProviderProps) => {
             {...props}
             Components={{
                 alert: StyledAlertSnackbar,
+                info: StyledInfoSnackbar,
             }}
             autoHideDuration={4000}
             anchorOrigin={{
@@ -20,6 +22,8 @@ export const SnackbarProvider = (props: SnackbarProviderProps) => {
             }}
             domRoot={document.body}
             maxSnack={3}
+            classes={{ root: 'min-w-fit' }}
+            className='w-fit min-w-fit max-w-fit '
         >
             {props.children}
         </NotistackProvider>
