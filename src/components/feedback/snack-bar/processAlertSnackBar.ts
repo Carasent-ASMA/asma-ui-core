@@ -8,7 +8,7 @@ export function processAlertSnackBar(message: string) {
         alertClassName: 'min-w-[350px] max-w-[350px]',
         alertVariant: 'filled',
         closeButton: true,
-        autoHideDuration: 4000,
+        autoHideDuration: 6000,
         anchorOrigin: {
             vertical: 'top',
             horizontal: 'right',

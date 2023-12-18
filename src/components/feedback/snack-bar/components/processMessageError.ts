@@ -6,10 +6,10 @@ export function processMessageError(messageInfo: string | ReactNode, options?: M
     enqueueSnackbar({
         variant: 'info',
         message: messageInfo,
-        autoHideDuration: 10000,
-        className: 'bg-red-600 text-red-200 !min-w-[100px] rounded-md p-4 flex items-center',
+        autoHideDuration: 6000,
+        className: 'bg-red-700 text-white !min-w-[100px] !max-w-[400px] rounded-md p-4 flex items-center',
         anchorOrigin: {
-            vertical: 'top',
+            vertical: 'bottom',
             horizontal: 'center',
         },
         ...options,

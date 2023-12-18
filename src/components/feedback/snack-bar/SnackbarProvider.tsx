@@ -15,7 +15,7 @@ export const SnackbarProvider = (props: SnackbarProviderProps) => {
                 alert: StyledAlertSnackbar,
                 info: StyledInfoSnackbar,
             }}
-            autoHideDuration={4000}
+            autoHideDuration={6000}
             anchorOrigin={{
                 vertical: 'top',
                 horizontal: 'right',
