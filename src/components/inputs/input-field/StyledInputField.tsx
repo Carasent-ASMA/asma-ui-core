@@ -40,6 +40,12 @@ export const StyledInputField: React.FC<
             '& input:-webkit-autofill, & .MuiInputBase-root:has(> input:-webkit-autofill)': {
                 backgroundColor: '#e8f0fe !important',
             },
+            '& input': {
+                backgroundColor: 'white',
+            },
+            '& .MuiInputBase-root': {
+                backgroundColor: 'white',
+            },
             '& .MuiInputBase-colorPrimary fieldset': {
                 borderColor: 'var(--colors-delta-500) !important',
             },

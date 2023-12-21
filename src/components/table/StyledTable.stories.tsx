@@ -164,7 +164,7 @@ const Table = () => {
                         columnVisibility: columnsVisibility,
                     }}
                     onRowClick={(e, row) => {
-                        console.log('e', e, cloneDeep(row.original))
+                        console.info('e', e, cloneDeep(row.original))
                     }}
                     enableGlobalFilter={true}
                     enableRowSelection={true}

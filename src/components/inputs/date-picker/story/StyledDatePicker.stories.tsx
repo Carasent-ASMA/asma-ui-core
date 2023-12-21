@@ -1,58 +1,59 @@
-import type { StoryObj, Meta } from '@storybook/react'
-import { useState } from 'react'
-import type { DateRange } from 'react-day-picker'
-import { nb } from 'date-fns/locale'
+import type { Meta } from '@storybook/react'
+// import { useState } from 'react'
+// import type { DateRange } from 'react-day-picker'
+// import { nb } from 'date-fns/locale'
 
-import { StyledDatePicker } from './StyledDatePicker'
-import { StyledButton } from '../button'
-import { StyledTypography } from 'src/components/data-display/typography'
-import { StyledPopover } from 'src/components/utils/popover'
-import { StyledCheckbox } from '../checkbox'
-import { StyledFormControlLabel } from 'src/components/miscellaneous/StyledFormControlLabel'
+import { StyledDatePicker } from '../StyledDatePicker'
+// import { StyledButton } from '../../button'
+// import { StyledTypography } from 'src/components/data-display/typography'
+// import { StyledPopover } from 'src/components/utils/popover'
+// import { StyledCheckbox } from '../../checkbox'
+// import { StyledFormControlLabel } from 'src/components/miscellaneous/StyledFormControlLabel'
+import { RangePicker } from './components/RangePicker'
 
 const meta = {
-    title: 'Inputs/Styled Date Picker',
+    title: 'Inputs/Date Picker',
     component: StyledDatePicker,
-    tags: ['autodocs'],
+    tags: [],
     argTypes: {},
     args: {},
 } satisfies Meta<typeof StyledDatePicker>
 
 export default meta
-type Story = StoryObj<typeof StyledDatePicker>
 
-export const DatePicker: Story = {
-    render: () => <StyledDatePickerExample />,
-}
+export const DatePicker = () => {
+    // const [date, setDate] = useState<Date>()
+    // const [range, setRange] = useState<DateRange>()
+    // const [rangeCompact, setRangeCompact] = useState<DateRange>()
+    // const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
 
-export const StyledDatePickerExample = () => {
-    const [date, setDate] = useState<Date>()
-    const [range, setRange] = useState<DateRange>()
-    const [rangeCompact, setRangeCompact] = useState<DateRange>()
-    const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
+    // const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    //     setAnchorEl(event.currentTarget)
+    // }
 
-    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-        setAnchorEl(event.currentTarget)
-    }
+    // const handleClose = () => {
+    //     setAnchorEl(null)
+    // }
 
-    const handleClose = () => {
-        setAnchorEl(null)
-    }
+    // const open = Boolean(anchorEl)
+    // const id = open ? 'simple-popover' : undefined
 
-    const open = Boolean(anchorEl)
-    const id = open ? 'simple-popover' : undefined
+    // const windowHeight = window.innerHeight
+    // const buttonRect = anchorEl?.getBoundingClientRect() || { top: 0, bottom: 0 }
+    // const spaceBelow = windowHeight - buttonRect.bottom
+    // const spaceAbove = buttonRect.top
 
-    const windowHeight = window.innerHeight
-    const buttonRect = anchorEl?.getBoundingClientRect() || { top: 0, bottom: 0 }
-    const spaceBelow = windowHeight - buttonRect.bottom
-    const spaceAbove = buttonRect.top
-
-    const menuAbove = spaceBelow < 300 && spaceAbove > spaceBelow
+    // const menuAbove = spaceBelow < 300 && spaceAbove > spaceBelow
     return (
         <div className={'flex flex-col gap-5'}>
-            <StyledDatePicker dataTest='' placeholder='Pick a date' mode='single' selected={date} onSelect={setDate} />
+            <div className=' px-5 pb-5 rounded-md bg-gray-100 w-fit'>
+                <h2 className='opacity-70'>Range Picker</h2>
+                <RangePicker />
+              
+            </div>
+            {/* <StyledDatePicker dataTest='' placeholder='Pick a date' mode='single' selected={date} onSelect={setDate} />
             <StyledDatePicker dataTest='' placeholder='Disabled' mode='single' disabled />
-            <StyledDatePicker 
+            <StyledDatePicker
                 dataTest=''
                 disabledDays={{ before: new Date() }}
                 placeholder='Disabled days'
@@ -60,18 +61,7 @@ export const StyledDatePickerExample = () => {
                 selected={date}
                 onSelect={setDate}
             />
-            <StyledDatePicker
-                dataTest=''
-                placeholder='Pick a range date'
-                numberOfMonths={2}
-                mode='range'
-                selected={range}
-                onSelect={setRange}
-                locale={nb}
-                dateFormat={'dd.MM.y'}
-                onClear={() => setRange({ to: undefined, from: undefined })}
-                allowClear
-            />
+      
             <StyledDatePicker
                 dataTest=''
                 placeholderFrom='Fra'
@@ -94,10 +84,10 @@ export const StyledDatePickerExample = () => {
                 compact={true}
                 mode='range'
                 disabled
-            />
+            /> */}
 
             {/* Popover like in InOutBox */}
-            <StyledButton dataTest='test' variant='contained' className='w-28' onClick={handleClick}>
+            {/* <StyledButton dataTest='test' variant='contained' className='w-28' onClick={handleClick}>
                 Open popover
             </StyledButton>
 
@@ -139,9 +129,15 @@ export const StyledDatePickerExample = () => {
                         onSelect={setDate}
                     />
                     <div className='my-2'></div>
-                    <StyledDatePicker dataTest='' placeholder='Pick a end date' mode='single' selected={date} onSelect={setDate} />
+                    <StyledDatePicker
+                        dataTest=''
+                        placeholder='Pick a end date'
+                        mode='single'
+                        selected={date}
+                        onSelect={setDate}
+                    />
                 </StyledTypography>
-            </StyledPopover>
+            </StyledPopover> */}
         </div>
     )
 }
