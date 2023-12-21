@@ -37,8 +37,6 @@ export const DefaultInput: React.FC<DatePickerProps & { onClick: (e: React.Mouse
             allowClear={allowClear}
             onClear={() => {
                 onClear?.()
-                props.mode === 'range' && props?.onClearTo?.()
-                props.mode === 'range' && props?.onClearFrom?.()
             }}
         />
     )

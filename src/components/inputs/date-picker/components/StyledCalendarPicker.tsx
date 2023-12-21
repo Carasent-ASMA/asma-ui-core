@@ -15,7 +15,7 @@ export const StyledCalendarPicker: React.FC<{
     popoverProps: PopoverProps
     positionAbove: boolean
 }> = ({ datePickerProps, popoverProps, positionAbove }) => {
-    const { showOutsideDays = true, locale, selected, numberOfMonths } = datePickerProps
+    const { showOutsideDays = true, locale, selected, numberOfMonths, disabledDays } = datePickerProps
     const { open, anchorEl, onClose } = popoverProps
     const [month, setMonth] = useState<Date | undefined>(new Date(Date.now()))
     //
@@ -24,7 +24,6 @@ export const StyledCalendarPicker: React.FC<{
     //
     const removeSelection = (e: React.MouseEvent) =>
         selected && datePickerProps?.onSelect?.(undefined, new Date(Date.now()), {}, e)
-
     return (
         <Popover
             open={open}
@@ -39,8 +38,8 @@ export const StyledCalendarPicker: React.FC<{
                 horizontal: 'left',
             }}
         >
-            {/* <StyledCalendarPicker {...props} disabled={disabledDays} /> */}
             <DayPicker
+                disabled={disabledDays}
                 month={month}
                 onMonthChange={(e) => {
                     setMonth(e)
@@ -68,11 +67,13 @@ export const StyledCalendarPicker: React.FC<{
                     row: 'flex w-full mt-2',
                     cell: 'text-sm w-9 text-[var(--colors-gray-800)]  relative [&:has([aria-selected])]:bg-gama-50 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md ',
                     day: 'h-10 w-9 p-0 font-normal rounded-md hover:bg-[var(--colors-gray-50)] focus-visible:border-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gama-500 focus-visible:z-50',
-                    day_selected: '!bg-gama-500 text-white hover:bg-gama-500 hover:text-white',
-                    day_today: ' text-gama-700 text-base bg-gray-100 font-bold  hover:bg-gama-50',
+                    day_today: 'text-gama-700 text-base bg-gray-100 font-bold  hover:bg-gama-50',
+                    day_selected:
+                        '[&.bg-gray-100]:bg-gama-500  bg-gama-500 text-white hover:bg-gama-500 hover:text-white',
                     day_outside: 'text-[var(--colors-gray-400)]',
                     day_disabled: 'text-[var(--colors-gray-400)]',
-                    day_range_middle: 'aria-selected:bg-gama-50 aria-selected:text-[var(--colors-gray-800)]',
+                    day_range_middle:
+                        'aria-selected:bg-gama-50 [&.bg-gray-100.bg-gama-500]:bg-gama-50 aria-selected:text-[var(--colors-gray-800)]',
                     day_hidden: 'invisible',
                     caption_end: isOneMonthView
                         ? ''
@@ -98,6 +99,8 @@ export const StyledCalendarPicker: React.FC<{
                         isNb={isNb}
                         selected={selected}
                         removeSelection={removeSelection}
+                        setMonth={setMonth}
+                        month={month}
                     />
                 }
                 {...datePickerProps}

@@ -5,18 +5,7 @@ import type { DatePickerProps } from '../types'
 export const RangeInput: React.FC<DatePickerProps & { onClick: (e: React.MouseEvent<HTMLDivElement>) => void }> = (
     props,
 ) => {
-    const {
-        dataTest,
-        className,
-        inputClassName,
-        disabled,
-        placeholderFrom,
-        placeholderTo,
-        allowClear,
-        onClear,
-        dateFormat,
-        onClick,
-    } = props
+    const { dataTest, className, inputClassName, disabled, placeholderFrom, placeholderTo, dateFormat, onClick } = props
 
     if (props.mode !== 'range') return null
     const value_from: string | undefined = getValue(props.selected?.from, dateFormat)
@@ -37,11 +26,7 @@ export const RangeInput: React.FC<DatePickerProps & { onClick: (e: React.MouseEv
                 placeholder={placeholderFrom}
                 value={value_from}
                 disabled={!!disabled}
-                className={`${inputClassName} w-[142px] `}
-                allowClear={allowClear}
-                onClear={() => {
-                    props?.onClearFrom?.() || onClear?.()
-                }}
+                className={`${inputClassName} w-[90px] `}
             />
             -
             <StyledInputField
@@ -51,11 +36,7 @@ export const RangeInput: React.FC<DatePickerProps & { onClick: (e: React.MouseEv
                 placeholder={placeholderTo}
                 value={value_to}
                 disabled={!!disabled}
-                className={`${inputClassName} w-[142px]`}
-                allowClear={allowClear}
-                onClear={() => {
-                    props?.onClearTo?.() || onClear?.()
-                }}
+                className={`${inputClassName} w-[90px]`}
             />
         </div>
     )

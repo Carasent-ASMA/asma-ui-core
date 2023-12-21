@@ -51,6 +51,9 @@ export const StyledSelect: React.FC<
             '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                 borderColor: 'var(--colors-gama-500) !important',
             },
+            '&.Mui-focused::after': {
+                borderColor: 'var(--colors-gama-500) !important',
+            },
             '& .select-custom-icon': {
                 marginTop: '-3.5px !important',
             },

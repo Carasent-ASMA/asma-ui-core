@@ -5,7 +5,7 @@ import { nb } from 'date-fns/locale'
 import { setMidnightTime, setZeroTime } from 'src/helpers/date.helpers'
 import { useIsMobileView } from 'src/hooks/useWindowWidthSize.hook'
 
-export const RangePicker: React.FC = () => {
+export const RangePickerExample: React.FC = () => {
     const [rangeCompact, setRangeCompact] = useState<DateRange>()
     const isMobile = useIsMobileView()
 
@@ -27,9 +27,6 @@ export const RangePicker: React.FC = () => {
                 setRangeCompact(selected)
             }}
             dateFormat={'dd.MM.yy'}
-            onClearFrom={() => setRangeCompact({ ...rangeCompact, from: undefined })}
-            onClearTo={() => setRangeCompact({ from: rangeCompact?.from, to: undefined })}
-            allowClear
         />
     )
 }

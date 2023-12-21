@@ -17,11 +17,8 @@ type CompactRangeProps = {
     compact: true
     placeholderFrom?: string
     placeholderTo?: string
-
+    allowClear?: never
     placeholder?: never
-
-    onClearFrom?: () => void
-    onClearTo?: () => void
 }
 
 type DefaultRangeProps = {
