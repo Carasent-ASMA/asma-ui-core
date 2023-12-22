@@ -54,7 +54,7 @@ export const StyledCalendarPickerFooter: React.FC<{
                     dataTest='select-today'
                     className='!disabled:cursor-default'
                 >
-                    {isNb ? 'i dag' : 'today'}
+                    {isNb ? 'I dag' : 'Today'}
                 </StyledButton>
                 <StyledButton
                     variant='outlined'
@@ -73,7 +73,7 @@ export const StyledCalendarPickerFooter: React.FC<{
                 dataTest='select-today'
                 className='!min-w-[60px]'
             >
-                {isNb ? 'velg' : 'select'}
+                {isNb ? 'Velg' : 'Select'}
             </StyledButton>
         </div>
     )

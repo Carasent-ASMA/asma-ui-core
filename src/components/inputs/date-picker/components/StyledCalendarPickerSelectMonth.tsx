@@ -2,6 +2,7 @@ import { useNavigation, type DropdownProps, useDayPicker } from 'react-day-picke
 import { StyledFormControl } from 'src/components/miscellaneous/StyledFormControl'
 import { StyledSelect, StyledSelectItem } from '../../select'
 import { setMonth } from 'date-fns'
+import { capitalize } from 'lodash-es'
 
 export const StyledCalendarPickerSelectMonth: React.FC<DropdownProps> = (props) => {
     const { caption, children } = props
@@ -27,7 +28,7 @@ export const StyledCalendarPickerSelectMonth: React.FC<DropdownProps> = (props) 
             >
                 {selectedOptions?.map((month) => (
                     <StyledSelectItem key={month.id} value={month.label}>
-                        {month.label}
+                        {capitalize(month.label)}
                     </StyledSelectItem>
                 ))}
             </StyledSelect>

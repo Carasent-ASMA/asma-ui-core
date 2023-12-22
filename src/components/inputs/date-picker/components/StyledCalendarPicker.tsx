@@ -8,6 +8,7 @@ import { StyledCalendarPickerFooter } from './StyledCalendarPickerFooter'
 import { CustomCaption } from './StyledCalendarPickerCaption'
 import { StyledCalendarPickerSelectMonth } from './StyledCalendarPickerSelectMonth'
 import { StyledCalendarPickerSelectYear } from './StyledCalendarPickerSelectYear'
+import { enGB } from 'date-fns/locale'
 
 import 'react-day-picker/dist/style.css'
 export const StyledCalendarPicker: React.FC<{
@@ -45,6 +46,7 @@ export const StyledCalendarPicker: React.FC<{
                     setMonth(e)
                 }}
                 captionLayout='dropdown'
+                locale={locale ? locale : enGB}
                 fromYear={2000}
                 toYear={2050}
                 data-test={'calendar-picker'}
@@ -63,7 +65,7 @@ export const StyledCalendarPicker: React.FC<{
                     nav_button_previous: 'absolute left-1',
                     nav_button_next: 'absolute right-1',
                     head_row: 'flex text-sm  cursor-pointer',
-                    head_cell: 'text-[var(--colors-gray-600)] w-9 cursor-pointer',
+                    head_cell: 'text-[var(--colors-gray-600)] w-9 cursor-pointer capitalize',
                     row: 'flex w-full mt-2',
                     cell: 'text-sm w-9 text-[var(--colors-gray-800)]  relative [&:has([aria-selected])]:bg-gama-50 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md ',
                     day: 'h-10 w-9 p-0 font-normal rounded-md hover:bg-[var(--colors-gray-50)] focus-visible:border-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gama-500 focus-visible:z-50',

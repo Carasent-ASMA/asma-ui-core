@@ -7,6 +7,7 @@ export const DefaultPickerExample: React.FC = () => {
     return (
         <StyledDatePicker
             dataTest=''
+            // locale={enGB}
             placeholder='Pick a date'
             mode='single'
             selected={date}
