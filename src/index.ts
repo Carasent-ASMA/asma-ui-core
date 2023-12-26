@@ -53,3 +53,5 @@ export * from './components/utils/popover'
 export * from './components/custom/widget/widget-title/StyledWidgetTitle'
 //modules
 export * from './components/custom/module/module-title/StyledModuleTitle'
+//filter menu
+export * from './components/filter-menu/StyledFilterMenu'

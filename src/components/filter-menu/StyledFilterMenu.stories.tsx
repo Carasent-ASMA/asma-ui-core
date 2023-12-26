@@ -86,7 +86,6 @@ const FilterMenuExample = () => {
                         ))}
                     </>
                 }
-                size='large'
             />
         </div>
     )
