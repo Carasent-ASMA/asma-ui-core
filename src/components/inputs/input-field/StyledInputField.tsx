@@ -70,7 +70,11 @@ export const StyledInputField: React.FC<
             '& label.Mui-disabled': {
                 color: 'var(--colors-delta-300) !important',
             },
-
+            '& .MuiOutlinedInput-input::placeholder': {
+                color: '#666666',
+                opacity: '100'
+            },
+            
             // '& .MuiInputBase-inputSizeSmall': {
             //     fontSize: '14px',
             //     height: '23px',
