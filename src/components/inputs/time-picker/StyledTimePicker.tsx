@@ -14,6 +14,7 @@ export type StyledTimePickerProps = {
     value?: Date
     onSelect: (date: Date | undefined) => void
     dataTest: string
+    width?: number
 }
 
 export const StyledTimePicker: React.FC<StyledTimePickerProps> = ({
@@ -23,6 +24,7 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = ({
     value,
     onSelect,
     dataTest,
+    width,
 }) => {
     const { anchorEl, open, handleClose, handleOpen } = useToggleMenuVisibility()
 
@@ -37,9 +39,13 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = ({
                     endAdornment: <ClockOutlineIcon width={24} height={24} />,
                 }}
                 value={value ? format(value, 'HH:mm') : undefined}
-                sx={{ maxWidth: 110 }}
+                sx={{
+                    maxWidth: width || 102,
+                    width,
+                    minWidth: width,
+                }}
                 disabled={disabled}
-                className={clsx(inputClassName, 'my-2 py-2')}
+                className={clsx(inputClassName ? inputClassName : 'mb-2 pb-2')}
             />
 
             <Popover
@@ -48,7 +54,7 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = ({
                 onClose={handleClose}
                 anchorOrigin={{
                     vertical: 'bottom',
-                    horizontal: 'center',
+                    horizontal: 'left',
                 }}
                 transformOrigin={{
                     vertical: -5,
