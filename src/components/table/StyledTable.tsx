@@ -14,6 +14,8 @@ import { StyledCheckbox } from '../inputs/checkbox'
 import { Skeleton } from '@mui/material'
 import { generateActionsColumn } from './components/columns/action-column/actionColumn'
 import type { StyledTableProps } from './types'
+import React from 'react'
+import {useVirtual} from 'react-virtual'
 import { generateExpandColumn } from './components/columns/action-column/expandColumn'
 
 export const SELECT_COLUMN_ID = 'select'
@@ -45,6 +47,8 @@ export const StyledTable = <
     loading,
     noRowsOverlay,
     tableInstanceRef,
+    virtualContainerRef,
+    useVirtualization,
     className,
     rowHeight,
     tdClassName,
@@ -126,6 +130,81 @@ export const StyledTable = <
     if (tableInstanceRef) {
         tableInstanceRef.current = table
     }
+    const {rows} = table.getRowModel()
+
+    const rowVirtualizer = useVirtual({
+        parentRef: virtualContainerRef || { current: null },
+        size: rows.length,
+    })
+    
+    const {virtualItems: virtualRows, totalSize,  } = rowVirtualizer
+
+    const paddingTop = virtualRows?.length > 0 && virtualContainerRef && useVirtualization ? (virtualRows?.[0]?.start || 0) : 0
+    const paddingBottom = virtualRows?.length > 0 && virtualContainerRef && useVirtualization ? totalSize - (virtualRows?.at(-1)?.end || 0) : 0
+
+    const renderRow = (row: Row<TData>) => (
+        <Fragment key={row.id}>
+            <tr
+                data-test={row.id}
+                id={row.id}
+                tabIndex={focusable ? -1 : undefined}
+                className={clsx(
+                    'table-row align-middle border-solid border-x border-t border-b-0 last:border-b border-x-transparent border-y-delta-300 hover:cursor-pointer hover:bg-primary-25 focus:bg-primary-50 focus:border focus:border-primary-500',
+                    (row.getIsExpanded() || row.getIsSelected()) && 'bg-primary-50',
+                    loading && 'opacity-50',
+                    getRowClassName?.(row),
+                )}
+                    style={{
+                        height: rowHeight ? `${rowHeight}px` : 'inherit',
+                    }}
+                    onMouseDown={(e) => {
+                        // e.preventDefault()
+                        if (
+                            (e.target as HTMLDivElement).classList.contains('MuiModal-backdrop') ||
+                            (e.target as Node).nodeName === 'INPUT' ||
+                            (e.target as Node).nodeName === 'BUTTON'
+                        )
+                            return
+                        if (row.getCanExpand() && !expandArrow) {
+                            row.getToggleExpandedHandler()()
+                        }
+
+                        if (onRowClick) onRowClick(e, row)
+                    }}
+                >
+                {row.getVisibleCells().map((cell) => {
+                    // let size: number | string = cell.column.getSi
+                       // if (isNaN(size) || size > 1200) {
+                       //     size = '100%'
+                    // } else {
+                    //     size = `${size}px`
+                    // }
+                    return (
+                        <td
+                            key={cell.id}
+                            className={clsx(
+                               'break-words table-cell align-middle text-sm text-delta-900 whitespace-pre-wrap',
+                                cell.id.includes('width_stabilizer') ? 'p-0 m-0' : 'px-2.5',
+                                tdClassName,
+                            )}
+                        >
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </td>
+                    )
+                })}
+            </tr>
+                {row.getIsExpanded() && (
+                <>
+                    {customSubRowData &&
+                            renderSubRows &&
+                         renderSubRows({
+                            rows: customSubRowData.get(row.original.id.toString()) ?? [],
+                            row: row.original,
+                        })}
+                 </>
+            )}
+        </Fragment>
+    )
 
     return (
         <table
@@ -212,6 +291,9 @@ export const StyledTable = <
             </thead>
 
             <tbody className='table-row-group align-middle max-w-[inherit]'>
+                {
+                    paddingTop > 0 && <tr style={{height:paddingTop}} ></tr>
+                }
                 {data.length > 0 && loading ? (
                     <LoadingIcon
                         className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary-500 z-10'
@@ -230,80 +312,22 @@ export const StyledTable = <
                             </tr>
                         ))}
                     </>
-                ) : data.length > 0 ? (
-                    table.getRowModel().rows.map((row) => {
-                        return (
-                            <Fragment key={row.id}>
-                                <tr
-                                    data-test={row.id}
-                                    id={row.id}
-                                    tabIndex={focusable ? -1 : undefined}
-                                    className={clsx(
-                                        'table-row align-middle border-solid border-x border-t border-b-0 last:border-b border-x-transparent border-y-delta-300 hover:cursor-pointer hover:bg-primary-25 focus:bg-primary-50 focus:border focus:border-primary-500',
-                                        (row.getIsExpanded() || row.getIsSelected()) && 'bg-primary-50',
-                                        loading && 'opacity-50',
-                                        getRowClassName?.(row),
-                                    )}
-                                    style={{
-                                        height: rowHeight ? `${rowHeight}px` : 'inherit',
-                                    }}
-                                    onMouseDown={(e) => {
-                                        // e.preventDefault()
-                                        if (
-                                            (e.target as HTMLDivElement).classList.contains('MuiModal-backdrop') ||
-                                            (e.target as Node).nodeName === 'INPUT' ||
-                                            (e.target as Node).nodeName === 'BUTTON'
-                                        )
-                                            return
-                                        if (row.getCanExpand() && !expandArrow) {
-                                            row.getToggleExpandedHandler()()
-                                        }
-
-                                        if (onRowClick) onRowClick(e, row)
-                                    }}
-                                >
-                                    {row.getVisibleCells().map((cell) => {
-                                        // let size: number | string = cell.column.getSize()
-
-                                        // if (isNaN(size) || size > 1200) {
-                                        //     size = '100%'
-                                        // } else {
-                                        //     size = `${size}px`
-                                        // }
-                                        return (
-                                            <td
-                                                key={cell.id}
-                                                className={clsx(
-                                                    'break-words table-cell align-middle text-sm text-delta-900 whitespace-pre-wrap',
-                                                    cell.id.includes('width_stabilizer') ? 'p-0 m-0' : 'px-2.5',
-                                                    tdClassName,
-                                                )}
-                                            >
-                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                            </td>
-                                        )
-                                    })}
-                                </tr>
-                                {row.getIsExpanded() && (
-                                    <>
-                                        {customSubRowData &&
-                                            renderSubRows &&
-                                            renderSubRows({
-                                                rows: customSubRowData.get(row.original.id.toString()) ?? [],
-                                                row: row.original,
-                                            })}
-                                    </>
-                                )}
-                            </Fragment>
-                        )
-                    })
-                ) : (
+                 ) : data.length > 0 ? 
+                 (
+                    useVirtualization && virtualContainerRef
+                        ? virtualRows.map((virtualRow) => renderRow(rows[virtualRow.index] as Row<TData>))
+                        : rows.map((row) => renderRow(row))
+                ) 
+                 : (
                     <tr className='h-28'>
                         <td colSpan={columns.length} className='text-center align-middle text-sm text-delta-900'>
                             {noRowsOverlay}
                         </td>
                     </tr>
                 )}
+                 {
+                    paddingBottom > 0 && <tr style={{height:paddingBottom}} ></tr>
+                }
             </tbody>
         </table>
     )

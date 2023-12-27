@@ -85,6 +85,8 @@ export interface StyledTableProps<TData, TCustomData>
     loading?: boolean
     noRowsOverlay?: ReactElement
     tableInstanceRef?: React.MutableRefObject<Table<TData> | null>
+    virtualContainerRef?: React.RefObject<Element| null>
+    useVirtualization?:boolean
     className?: string
     rowHeight?: number
     tdClassName?: string

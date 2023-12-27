@@ -9,6 +9,7 @@ import { PeopleIcon } from '../data-display/icons'
 import { cloneDeep } from 'lodash-es'
 import { useStyledTableColumns } from './components-story/useTableColumns'
 import clsx from 'clsx'
+import React from 'react'
 
 const meta = {
     title: 'Table/Styled Table',
@@ -47,6 +48,7 @@ const Table = () => {
     const [rowSelection, setRowSelection] = useState({})
 
     const tableRef = useRef<Table<Person>>(null)
+    const virtualContainerRef = React.useRef(null)
 
     const [columnsVisibility, setColumnsVisibility] = useState<Record<string, boolean>>(() => {
         return loadColumnVisibilityInitState({
@@ -62,7 +64,7 @@ const Table = () => {
     useEffect(() => {
         setLoading(true)
         setTimeout(() => {
-            setData(makeData(20))
+            setData(makeData(1000))
             setLoading(false)
         }, 1500)
     }, [])
@@ -102,12 +104,15 @@ const Table = () => {
                     Toggle row selection
                 </StyledButton>
             </div>
-            <div className='max-w-[1200px] max-h-[800px] overflow-auto relative mx-auto '>
+            <div className='max-w-[1200px] max-h-[400px] overflow-auto relative mx-auto ' ref={virtualContainerRef} >
+
                 <StyledTable<Person, Participant>
                     {...meta.args}
                     stickyHeader
                     className='max-w-[1000px]'
                     tableInstanceRef={tableRef}
+                    virtualContainerRef = {virtualContainerRef}
+                    useVirtualization = {true}
                     actions={(row) => [
                         {
                             label: row.original.progress > 50 ? 'Action 50' : 'Action less than 50',
