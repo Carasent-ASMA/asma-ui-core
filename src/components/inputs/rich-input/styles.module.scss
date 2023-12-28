@@ -11,7 +11,7 @@
         @apply m-0 border-0 bg-none p-0;
     }
     div:global(.ql-container) {
-        @apply cursor-not-allowed rounded-lg border-0 text-sm opacity-100 placeholder:italic;
+        @apply cursor-not-allowed rounded-lg border-0 text-base opacity-100 placeholder:italic;
     }
 }
 
@@ -20,7 +20,7 @@
         @apply bg-custom-grey-01 border-custom-grey-04 rounded-t-lg border-x border-t border-b-0;
     }
     div:global(.ql-container) {
-        @apply border-custom-grey-04 rounded-b-lg border-x border-b border-t-0 min-h-[100px];
+        @apply border-custom-grey-04 rounded-b-lg border-x border-b border-t-0 min-h-[100px] text-base;
     }
 }
 
