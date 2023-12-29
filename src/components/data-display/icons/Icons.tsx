@@ -54,6 +54,7 @@ import { DragHorizontalIcon } from './drag-horizontal-icon'
 import { FilePdfIcon } from './file-pdf-icon/FilePdfIcon'
 import { DeleteOutlineIcon } from './delete-outline-icon'
 import { FilterIcon } from './filter-icon'
+import { LockIcon } from './lock-icon'
 
 export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 20, width = 20 }) => {
     return (
@@ -219,6 +220,9 @@ export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 
             </div>
             <div title='FilterIcon'>
                 <FilterIcon height={height} width={width} />
+            </div>
+            <div title='LockIcon'>
+                <LockIcon height={height} width={width} />
             </div>
         </div>
     )
