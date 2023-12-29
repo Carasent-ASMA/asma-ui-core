@@ -58,7 +58,7 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = ({
                 }}
                 transformOrigin={{
                     vertical: -5,
-                    horizontal: 'center',
+                    horizontal: 'left',
                 }}
             >
                 <TimePickerBody dataTest={`${dataTest}-time-picker-body`} value={value} onSelect={onSelect} />
