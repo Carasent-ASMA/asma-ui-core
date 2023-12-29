@@ -23,12 +23,14 @@ export function StyledSelectAutocomplete<
             {...props}
             className={clsx('!text-sm', props.className)}
             popupIcon={
-                <Icon
-                    icon='material-symbols:expand-more-rounded'
-                    width={24}
-                    height={24}
-                    className={clsx('select-custom-icon')}
-                />
+                props.popupIcon || (
+                    <Icon
+                        icon='material-symbols:expand-more-rounded'
+                        width={24}
+                        height={24}
+                        className={clsx('select-custom-icon')}
+                    />
+                )
             }
             data-test={dataTest}
             PaperComponent={({ children }) => (
