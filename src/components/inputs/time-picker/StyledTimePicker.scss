@@ -1,0 +1,19 @@
+.styled-time-picker-root {
+    @apply flex max-h-56  overflow-hidden border-gray-800 #{!important};
+
+    .styled-time-picker-root_column {
+        @apply overflow-y-scroll flex flex-col #{!important};
+    }
+
+    .styled-time-picker-root_cell {
+        @apply bg-white min-h-[36px] w-9 h-9 text-sm hover:bg-gray-100 cursor-pointer rounded-lg flex items-center place-content-center;
+
+        &.styled-time-picker-root_cell__cell-now {
+            @apply bg-gama-50 hover:bg-gama-50;
+        }
+
+        &.styled-time-picker-root_cell__cell-selected {
+            @apply bg-gama-500 text-white hover:bg-gama-600;
+        }
+    }
+}

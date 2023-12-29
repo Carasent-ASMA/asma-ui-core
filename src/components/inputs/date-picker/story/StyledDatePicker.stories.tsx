@@ -1,3 +1,4 @@
+import React from 'react'
 import type { Meta } from '@storybook/react'
 import { RangePickerExample } from './components/RangePickerExample'
 import { DefaultPickerExample } from './components/DefaultPickerExample'

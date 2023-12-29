@@ -7,7 +7,7 @@ import { StyledCheckbox } from '../inputs/checkbox'
 import { StyledFormControlLabel } from '../miscellaneous/StyledFormControlLabel'
 
 const meta: Meta<typeof StyledFilterMenu> = {
-    title: 'Styled Filter Menu',
+    title: 'Utils/Styled Filter Menu',
     component: StyledFilterMenu,
     tags: ['autodocs'],
     args: {},

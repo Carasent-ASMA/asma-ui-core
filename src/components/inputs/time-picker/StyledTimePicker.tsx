@@ -1,11 +1,12 @@
 import { StyledInputField } from '../input-field'
-import { Popover } from '@mui/material'
+import { Popover, type PopoverOrigin } from '@mui/material'
 import { ClockOutlineIcon } from 'src/components/data-display/icons/clock-outline-icon'
 import clsx from 'clsx'
 import { useToggleMenuVisibility } from 'src/hooks/useToggleMenuVisibility.hook'
 import { format } from 'date-fns'
 
 import { TimePickerBody } from './components/TimePickerBody'
+import './StyledTimePicker.scss'
 
 export type StyledTimePickerProps = {
     placeholder?: string
@@ -15,6 +16,8 @@ export type StyledTimePickerProps = {
     onSelect: (date: Date | undefined) => void
     dataTest: string
     width?: number
+    anchorOrigin?: PopoverOrigin
+    transformOrigin?: PopoverOrigin
 }
 
 export const StyledTimePicker: React.FC<StyledTimePickerProps> = ({
@@ -25,6 +28,8 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = ({
     onSelect,
     dataTest,
     width,
+    anchorOrigin,
+    transformOrigin,
 }) => {
     const { anchorEl, open, handleClose, handleOpen } = useToggleMenuVisibility()
 
@@ -52,14 +57,18 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = ({
                 open={open}
                 anchorEl={anchorEl}
                 onClose={handleClose}
-                anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left',
-                }}
-                transformOrigin={{
-                    vertical: -5,
-                    horizontal: 'left',
-                }}
+                anchorOrigin={
+                    anchorOrigin || {
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                    }
+                }
+                transformOrigin={
+                    transformOrigin || {
+                        vertical: -5,
+                        horizontal: 'left',
+                    }
+                }
             >
                 <TimePickerBody dataTest={`${dataTest}-time-picker-body`} value={value} onSelect={onSelect} />
             </Popover>

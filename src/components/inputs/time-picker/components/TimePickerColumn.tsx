@@ -1,6 +1,5 @@
 import { getHours, getMinutes, set } from 'date-fns'
 import type { StyledTimePickerProps } from '../StyledTimePicker'
-import styles from '../StyledTimePicker.module.scss'
 import clsx from 'clsx'
 export type TimePickerColumnProps = Omit<
     StyledTimePickerProps,
@@ -16,16 +15,19 @@ export const TimePickerColumn: React.FC<TimePickerColumnProps> = ({ type, value,
     const currentTime = isHours ? now.getHours() : now.getMinutes()
 
     return (
-        <div className={styles['columns']}>
+        <div className={'styled-time-picker-root_column'}>
             {new Array(size).fill(null).map((_, idx) => {
                 const isSelected = value && idx === (isHours ? getHours(value) : getMinutes(value))
                 const isNow = currentTime == idx
-                const className = isSelected ? styles['cell-selected'] : isNow ? styles['cell-now'] : ''
 
                 return (
                     <div
                         key={idx}
-                        className={clsx(className, styles['cell'])}
+                        className={clsx(
+                            'styled-time-picker-root_cell',
+                            isSelected && 'styled-time-picker-root_cell__cell-selected',
+                            isNow && 'styled-time-picker-root_cell__cell-now',
+                        )}
                         onClick={() => {
                             value && onSelect(set(value, isHours ? { hours: idx } : { minutes: idx }))
                         }}
