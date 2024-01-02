@@ -1,7 +1,7 @@
 import React from 'react'
 import type { Meta } from '@storybook/react'
 
-import { StyledInputField } from './StyledInputField'
+import { StyledInputField } from '../StyledInputField'
 
 const meta = {
     title: 'Inputs/Styled Input Field',

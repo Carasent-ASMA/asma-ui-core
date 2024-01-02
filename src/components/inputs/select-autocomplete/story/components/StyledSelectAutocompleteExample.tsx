@@ -1,10 +1,7 @@
-import type { StoryObj, Meta } from '@storybook/react'
-import { StyledSelectAutocomplete } from './StyledSelectAutocomplete'
-import { StyledFormControl } from '../../miscellaneous/StyledFormControl'
-import { StyledStack } from '../../miscellaneous/StyledStack'
-import { TextField } from '@mui/material'
 import { StyledTypography } from 'src/components/data-display/typography'
-import { StyledInputField } from '../input-field'
+import { StyledFormControl } from 'src/components/miscellaneous/StyledFormControl'
+import { StyledInputField } from 'src/components/inputs/input-field'
+import { StyledSelectAutocomplete } from '../../StyledSelectAutocomplete'
 
 const top100Films = [
     { title: 'The Shawshank Redemption', year: 1994 },
@@ -133,35 +130,19 @@ const top100Films = [
     { title: 'Monty Python and the Holy Grail', year: 1975 },
 ]
 
-const meta = {
-    title: 'Inputs/Styled Select Autocomplete',
-    component: StyledSelectAutocomplete,
-    argTypes: {},
-    args: {
-        options: top100Films,
-    },
-} satisfies Meta<typeof StyledSelectAutocomplete>
-
-export default meta
-type Story = StoryObj<typeof StyledSelectAutocomplete>
-
-export const SelectAutocomplete: Story = {
-    render: () => <SelectAutocompleteExample />,
-}
-
-const SelectAutocompleteExample = () => {
+export const StyledSelectAutocompleteExample: React.FC = () => {
     return (
-        <StyledStack direction='column' spacing={2}>
-            <StyledTypography variant='h6'>SelectAutocompleteExample</StyledTypography>
+        <div>
+            <StyledTypography variant='h6'>SelectAutocomplete Example</StyledTypography>
             <StyledFormControl fullWidth>
                 <StyledSelectAutocomplete
                     disableCloseOnSelect
                     dataTest='dataTest-autocomplete'
-                    multiple
+                    // multiple
                     size='small'
                     id='tags-standard'
                     options={top100Films}
-                    defaultValue={[top100Films[13]]}
+                    // defaultValue={[top100Films[13]]}
                     getOptionLabel={(option) => option?.title || ''}
                     renderInput={(params) => (
                         <StyledInputField
@@ -172,9 +153,11 @@ const SelectAutocompleteExample = () => {
                             placeholder='Favorites'
                         />
                     )}
-                    open={true}
+                    // use on KeyDown if you want disable text typing
+                    // onKeyDown={(e) => e.preventDefault()}
+                    // open={true}
                 />
             </StyledFormControl>
-        </StyledStack>
+        </div>
     )
 }

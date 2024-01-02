@@ -1,12 +1,12 @@
 import type { StoryObj, Meta } from '@storybook/react'
-import { StyledSelect } from './StyledSelect'
-import { StyledSelectItem } from './StyledSelectItem'
 import { useState } from 'react'
-import { StyledFormControl } from '../../miscellaneous/StyledFormControl'
-import { StyledStack } from '../../miscellaneous/StyledStack'
 import type { SelectProps } from '@mui/material'
 import { StyledTypography } from 'src/components/data-display/typography'
 import { StyledInputLabel } from 'src/components/miscellaneous/StyledInputLabel'
+import { StyledSelect } from '../StyledSelect'
+import { StyledSelectItem } from '../StyledSelectItem'
+import { StyledFormControl } from 'src/components/miscellaneous/StyledFormControl'
+import { StyledStack } from 'src/components/miscellaneous/StyledStack'
 
 const selectOptions = [
     { title: 'Van Henry', id: '1' },
@@ -56,19 +56,9 @@ const StyledSelectExample: React.FC<{ args: Partial<SelectProps<unknown>> }> = (
                     }}
                 />
             </StyledFormControl>
-            <StyledTypography variant='h6'>Select size small</StyledTypography>
-            <StyledFormControl fullWidth>
-                <StyledSelect
-                    {...args}
-                    dataTest='Test_y'
-                    size='small'
-                    value={value}
-                    onChange={(e) => {
-                        const target: string = e.target.value as string
-                        setValue(target)
-                    }}
-                />
-            </StyledFormControl>
+
+            <StyledSelectExample args={args} />
+
             <StyledTypography variant='h6'>Select with label and placeholder</StyledTypography>
             <StyledFormControl size='small' className='w-52'>
                 <StyledInputLabel>Find me...</StyledInputLabel>

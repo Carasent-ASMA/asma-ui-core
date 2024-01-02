@@ -46,8 +46,21 @@ export const StyledSelect: React.FC<
                 </div>
             ) : null
         }
+        // inputComponent={(params) => (
+        //     <StyledInputField
+        //         dataTest='test'
+        //         {...params}
+        //         variant='outlined'
+        //         size='small'
+        //         label=''
+        //         placeholder='Favorites'
+        //     />
+        // )}
         sx={{
             ...props.sx,
+            '.MuiOutlinedInput-notchedOutline': {
+                borderColor: 'var(--colors-delta-500) !important',
+            },
             '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                 borderColor: 'var(--colors-gama-500) !important',
             },
