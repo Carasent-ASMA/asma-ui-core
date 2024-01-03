@@ -1,4 +1,4 @@
-import { StyledInputField } from '../input-field'
+import { StyledInputField } from '../../inputs/input-field'
 import { Popover, type PopoverOrigin } from '@mui/material'
 import { ClockOutlineIcon } from 'src/components/data-display/icons/clock-outline-icon'
 import clsx from 'clsx'
@@ -7,6 +7,8 @@ import { format } from 'date-fns'
 
 import { TimePickerBody } from './components/TimePickerBody'
 import './StyledTimePicker.scss'
+import { StyledButton } from '../../inputs/button'
+import { Icon } from '@iconify/react'
 
 export type StyledTimePickerProps = {
     placeholder?: string
@@ -18,6 +20,8 @@ export type StyledTimePickerProps = {
     width?: number
     anchorOrigin?: PopoverOrigin
     transformOrigin?: PopoverOrigin
+    error?: boolean
+    helperText?: string
 }
 
 export const StyledTimePicker: React.FC<StyledTimePickerProps> = ({
@@ -30,6 +34,8 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = ({
     width,
     anchorOrigin,
     transformOrigin,
+    error,
+    helperText,
 }) => {
     const { anchorEl, open, handleClose, handleOpen } = useToggleMenuVisibility()
 
@@ -39,13 +45,15 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = ({
                 dataTest={dataTest}
                 placeholder={placeholder}
                 size='small'
+                error={error}
+                helperText={helperText}
                 onClick={(e) => !disabled && handleOpen(e)}
                 InputProps={{
                     endAdornment: <ClockOutlineIcon width={24} height={24} />,
                 }}
-                value={value ? format(value, 'HH:mm') : undefined}
+                value={value ? format(value, 'HH:mm') : ''}
                 sx={{
-                    maxWidth: width || 102,
+                    maxWidth: width || 130,
                     width,
                     minWidth: width,
                 }}
@@ -71,6 +79,26 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = ({
                 }
             >
                 <TimePickerBody dataTest={`${dataTest}-time-picker-body`} value={value} onSelect={onSelect} />
+                <div className='flex my-3 justify-between'>
+                    <StyledButton
+                        variant='text'
+                        onClick={() => {
+                            onSelect(undefined)
+                        }}
+                        size='small'
+                        disabled={!value}
+                        dataTest='select-today'
+                        className='!min-w-[40px] ml-2.5'
+                        startIcon={<Icon icon='ph:eraser-duotone' width={24} height={24} />}
+                    />
+                    <StyledButton
+                        size='small'
+                        onClick={handleClose}
+                        dataTest='select-time'
+                        className='!min-w-[40px] mr-4'
+                        startIcon={<Icon icon='bi:check-lg' width={20} height={20} />}
+                    ></StyledButton>
+                </div>
             </Popover>
         </>
     )

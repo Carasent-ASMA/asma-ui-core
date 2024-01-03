@@ -1,6 +1,6 @@
 import { useNavigation, type DropdownProps, useDayPicker } from 'react-day-picker'
 import { StyledFormControl } from 'src/components/miscellaneous/StyledFormControl'
-import { StyledSelect, StyledSelectItem } from '../../select'
+import { StyledSelect, StyledSelectItem } from '../../../inputs/select'
 import { setYear } from 'date-fns'
 
 export const StyledCalendarPickerSelectYear: React.FC<DropdownProps> = (props) => {

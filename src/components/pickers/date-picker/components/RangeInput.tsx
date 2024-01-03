@@ -1,4 +1,4 @@
-import { StyledInputField } from '../../input-field'
+import { StyledInputField } from '../../../inputs/input-field'
 import { getValue } from '../helpers'
 import type { DatePickerProps } from '../types'
 

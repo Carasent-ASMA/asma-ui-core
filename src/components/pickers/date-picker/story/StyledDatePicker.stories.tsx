@@ -7,7 +7,7 @@ import { NestedRangePickerExample } from './components/NestedRangePickerExample'
 import { DatePickerContainer } from './components/DatePickerContainer'
 
 const meta = {
-    title: 'Inputs/Date Picker',
+    title: 'Pickers/Date Picker',
     component: StyledDatePicker,
     tags: [],
     argTypes: {},

@@ -29,7 +29,7 @@ export const TimePickerColumn: React.FC<TimePickerColumnProps> = ({ type, value,
                             isNow && 'styled-time-picker-root_cell__cell-now',
                         )}
                         onClick={() => {
-                            value && onSelect(set(value, isHours ? { hours: idx } : { minutes: idx }))
+                            onSelect(set(value || new Date(), isHours ? { hours: idx } : { minutes: idx }))
                         }}
                     >
                         {idx.toString().padStart(2, '0')}

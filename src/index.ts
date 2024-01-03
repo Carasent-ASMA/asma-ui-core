@@ -26,8 +26,10 @@ export * from './components/inputs/select-autocomplete'
 export * from './components/inputs/slider'
 export * from './components/inputs/switch'
 export * from './components/inputs/radio-button'
-export * from './components/inputs/date-picker'
-export * from './components/inputs/time-picker'
+
+// pickers
+export * from './components/pickers/date-picker'
+export * from './components/pickers/time-picker'
 
 // miscellaneous
 export * from './components/miscellaneous/StyledFormControl'

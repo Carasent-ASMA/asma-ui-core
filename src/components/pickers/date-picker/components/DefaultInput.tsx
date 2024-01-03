@@ -1,5 +1,5 @@
 import { CalendarBlankOutlineIcon } from 'src/components/data-display/icons/calendar-blank-outline-icon'
-import { StyledInputField } from '../../input-field'
+import { StyledInputField } from '../../../inputs/input-field'
 import type { DatePickerProps } from '../types'
 import { getValue } from '../helpers'
 
