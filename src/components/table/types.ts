@@ -32,16 +32,13 @@ declare module '@tanstack/react-table' {
     }
 }
 
-export type TableRowClickHandler<TData extends RowData> = (
-    e: MouseEvent<HTMLTableRowElement, globalThis.MouseEvent>,
-    row: Row<TData>,
-) => void
-
 export interface StyledTableProps<TData, TCustomData>
     extends Omit<
         TableOptions<TData>,
         'getCoreRowModel' | 'getExpandedRowModel' | 'getFilteredRowModel' | 'getSortedRowModel'
     > {
+    locale?: 'no' | 'en'
+    height?: string | number
     actions?: (row: Row<TData>) => {
         label: string
         className?: string
@@ -59,41 +56,14 @@ export interface StyledTableProps<TData, TCustomData>
     className?: string
     rowHeight?: number
     tdClassName?: string
-    thClassName?: string
     focusable?: boolean
-    getRowClassName?: (row: Row<TData>) => string
-    onRowClick?: (e: MouseEvent<HTMLTableRowElement, globalThis.MouseEvent>, row: Row<TData>) => void
-    renderSubRows?: (props: { rows: TCustomData[]; row: TData }) => ReactElement
-    getRowSelectionIds?: (ids: string[]) => void
-}
-
-export interface StyledTableProps<TData, TCustomData>
-    extends Omit<
-        TableOptions<TData>,
-        'getCoreRowModel' | 'getExpandedRowModel' | 'getFilteredRowModel' | 'getSortedRowModel'
-    > {
-    actions?: (row: Row<TData>) => {
-        label: string
-        className?: string
-        disabled?: boolean
-        hide?: boolean
-        onClick?: (row: Row<TData>) => void
-    }[]
-    autoSize?: boolean
-    customSubRowData?: Map<string, TCustomData[]>
-    headerPin?: boolean
-    loading?: boolean
-    noRowsOverlay?: ReactElement
-    tableInstanceRef?: React.MutableRefObject<Table<TData> | null>
-    virtualContainerRef?: React.RefObject<Element| null>
-    useVirtualization?:boolean
-    className?: string
-    rowHeight?: number
-    tdClassName?: string
-    thClassName?: string
     stickyHeader?: boolean
     getRowClassName?: (row: Row<TData>) => string
     onRowClick?: (e: MouseEvent<HTMLTableRowElement, globalThis.MouseEvent>, row: Row<TData>) => void
     renderSubRows?: (props: { rows: TCustomData[]; row: TData }) => ReactElement
     getRowSelectionIds?: (ids: string[]) => void
 }
+
+export const SELECT_COLUMN_ID = 'select'
+export const EXPAND_COLUMN_ID = 'expand-column-id'
+export const ACTIONS_COLUMN_ID = 'actions'

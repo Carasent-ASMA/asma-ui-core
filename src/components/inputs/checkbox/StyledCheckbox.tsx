@@ -1,16 +1,21 @@
 import { Checkbox, type CheckboxProps } from '@mui/material'
-import styles from './StyledCheckbox.module.scss'
 
 export const StyledCheckbox: React.FC<CheckboxProps & { dataTest: string }> = ({ dataTest, ...props }) => (
     <Checkbox
         {...props}
         data-test={dataTest}
-        classes={{
-            ...props.classes,
-            root: `${styles['root']}`,
-            checked: `${styles['checked']}`,
-            disabled: `${styles['disabled']}`,
-            indeterminate: `${styles['indeterminate']}`,
+        sx={{
+            ...props.sx,
+            '&.MuiCheckbox-root': {
+                color: 'var(--colors-gama-500) !important',
+            },
+            '&.MuiCheckbox-root.Mui-disabled': {
+                color: 'var(--colors-delta-200) !important',
+            },
+            '&.MuiCheckbox-root .PrivateSwitchBase-input': {
+                height: '100% !important',
+                width: '100% !important',
+            },
         }}
     />
 )

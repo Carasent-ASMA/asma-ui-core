@@ -25,7 +25,7 @@ export const StyledSelectExample: React.FC = () => {
                     value={value}
                     onChange={(e) => {
                         const target: string = e.target.value as string
-                        setValue(target)
+                        setValue(target) 
                     }}
                 >
                     {selectOptions.map((option) => {

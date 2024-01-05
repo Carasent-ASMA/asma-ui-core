@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import type { Person } from '../makeData'
+import type { Person } from '../helpers/makeData'
 import type { CellContext, ColumnDef } from '@tanstack/react-table'
 import { Icon } from '@iconify/react'
 import { PersonIcon } from 'src/components/data-display/icons'
@@ -24,6 +24,7 @@ export const useStyledTableColumns = () => {
                 cell() {
                     return <Icon icon={'mdi:star-outline'} color={'#7a899e'} width='20' cursor={'pointer'} />
                 },
+                minSize: 30,
                 size: 30,
             },
             {
@@ -59,10 +60,11 @@ export const useStyledTableColumns = () => {
             {
                 accessorFn: (row) => row.id,
                 id: 'multiheight-description',
-                header: 'About Mh',
+                header: 'About Me',
                 cell: (info) => {
                     return <PersonDescriptionDiv cellContext={info} />
                 },
+                minSize: 100,
             },
             {
                 accessorFn: (row) => row.id,
@@ -71,6 +73,7 @@ export const useStyledTableColumns = () => {
                 cell: (info) => {
                     return <PersonDescription cellContext={info} />
                 },
+                minSize: 100,
                 size: NaN,
             },
             {
@@ -85,6 +88,7 @@ export const useStyledTableColumns = () => {
                         </div>
                     )
                 },
+                minSize: 100,
             },
 
             // columnHelper.accessor('visits', {
@@ -130,10 +134,5 @@ const PersonDescription: React.FC<{ cellContext: CellContext<Person, Person> }> 
 }
 
 const PersonDescriptionDiv: React.FC<{ cellContext: CellContext<Person, Person> }> = () => {
-    return (
-        <div className='min-w-[200px]'>
-            Lorem Ipsum is simply dummy text 
-            is 
-        </div>
-    )
+    return <div className='min-w-[200px]'>Lorem Ipsum is simply dummy text is</div>
 }

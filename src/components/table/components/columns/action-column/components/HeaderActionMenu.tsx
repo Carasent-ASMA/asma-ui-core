@@ -3,7 +3,7 @@ import type { HeaderContext } from '@tanstack/react-table'
 import { StyledButton } from 'src/components/inputs/button'
 import { StyledCheckbox } from 'src/components/inputs/checkbox'
 import { StyledMenuItem } from 'src/components/navigation/menu'
-import { SELECT_COLUMN_ID } from 'src/components/table/StyledTable'
+import { SELECT_COLUMN_ID } from 'src/components/table/types'
 import { StyledPopover } from 'src/components/utils/popover'
 import { useToggleMenuVisibility } from 'src/hooks/useToggleMenuVisibility.hook'
 

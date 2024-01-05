@@ -1,12 +1,12 @@
 import { type CellContext } from '@tanstack/react-table'
-import { EXPAND_COLUMN_ID } from 'src/components/table/StyledTable'
-import { StyledButton } from 'src/components/inputs/button'
 import { ChevronDownIcon, ChevronUpIcon } from 'src/components/data-display/icons'
+import { EXPAND_COLUMN_ID } from '../../types'
 
 export function generateExpandColumn<TData>() {
     return {
         id: EXPAND_COLUMN_ID,
         maxSize: 50,
+        size: 50,
         enableHiding: false,
         enableSorting: false,
         header: () => null,
@@ -14,19 +14,12 @@ export function generateExpandColumn<TData>() {
             const isExpanded = cell.row.getIsExpanded()
             const canExpand = cell.row.getCanExpand()
             return canExpand ? (
-                <StyledButton
-                    dataTest='data-button-expand'
-                    variant='text'
-                    data-test='expand-arrow-container'
+                <span
+                    className='flex w-fit h-fit bg-transparent outline-none focus:outline-none items-center justify-center'
                     onClick={() => cell.row.getToggleExpandedHandler()()}
-                    startIcon={
-                        isExpanded ? (
-                            <ChevronUpIcon width={24} height={24} />
-                        ) : (
-                            <ChevronDownIcon width={24} height={24} />
-                        )
-                    }
-                />
+                >
+                    {isExpanded ? <ChevronUpIcon width={24} height={24} /> : <ChevronDownIcon width={24} height={24} />}
+                </span>
             ) : null
         },
     }

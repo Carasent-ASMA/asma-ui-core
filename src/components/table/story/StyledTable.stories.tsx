@@ -1,20 +1,20 @@
 import { Typography } from '@mui/material'
-import type { Meta, StoryObj } from '@storybook/react'
-import { StyledButton } from '../inputs/button/StyledButton'
-import { StyledTable } from './StyledTable'
+import type { Meta } from '@storybook/react'
+import { StyledButton } from '../../inputs/button/StyledButton'
+import { StyledTable } from '../StyledTable'
 import { useEffect, useRef, useState } from 'react'
-import { type Table } from '@tanstack/react-table'
-import { makeData, makeParticipantsData, type Participant, type Person } from './makeData'
-import { PeopleIcon } from '../data-display/icons'
+import { type Table as TanstackTable } from '@tanstack/react-table'
+import { makeData, makeParticipantsData, type Participant, type Person } from './helpers/makeData'
+import { PeopleIcon } from '../../data-display/icons'
 import { cloneDeep } from 'lodash-es'
-import { useStyledTableColumns } from './components-story/useTableColumns'
+import { useStyledTableColumns } from './components/useTableColumns'
 import clsx from 'clsx'
 import React from 'react'
 
 const meta = {
-    title: 'Table/Styled Table',
+    title: 'Tables/Table',
     component: StyledTable,
-    tags: ['autodocs'],
+    tags: [],
     argTypes: {},
     args: {
         columns: [],
@@ -24,13 +24,6 @@ const meta = {
 
 export default meta
 
-type Story = StoryObj<typeof meta>
-
-export const TableStory: Story = {
-    args: meta.args,
-    render: () => <Table />,
-}
-
 const loadColumnVisibilityInitState = (basicData: Record<string, boolean>): Record<string, boolean> => {
     const localStorageColumnVisibility = localStorage.getItem('exampleColumnVisibility')
     let localStorageColumnVisibilityParsed: Record<string, boolean> | null = null
@@ -38,7 +31,7 @@ const loadColumnVisibilityInitState = (basicData: Record<string, boolean>): Reco
     return localStorageColumnVisibilityParsed || basicData
 }
 
-const Table = () => {
+export const Table = () => {
     const { columns } = useStyledTableColumns()
 
     const [data, setData] = useState<Person[]>([])
@@ -47,8 +40,7 @@ const Table = () => {
     const [globalFilter, setGlobalFilter] = useState('')
     const [rowSelection, setRowSelection] = useState({})
 
-    const tableRef = useRef<Table<Person>>(null)
-    const virtualContainerRef = React.useRef(null)
+    const tableRef = useRef<TanstackTable<Person>>(null)
 
     const [columnsVisibility, setColumnsVisibility] = useState<Record<string, boolean>>(() => {
         return loadColumnVisibilityInitState({
@@ -104,15 +96,13 @@ const Table = () => {
                     Toggle row selection
                 </StyledButton>
             </div>
-            <div className='max-w-[1200px] max-h-[400px] overflow-auto relative mx-auto ' ref={virtualContainerRef} >
-
+            <div className='max-w-[1200px] relative mx-auto'>
                 <StyledTable<Person, Participant>
                     {...meta.args}
                     stickyHeader
-                    className='max-w-[1000px]'
+                    className='h-[400px]'
+                    locale='no'
                     tableInstanceRef={tableRef}
-                    virtualContainerRef = {virtualContainerRef}
-                    useVirtualization = {true}
                     actions={(row) => [
                         {
                             label: row.original.progress > 50 ? 'Action 50' : 'Action less than 50',
@@ -157,6 +147,7 @@ const Table = () => {
                     )}
                     expandArrow={true}
                     columns={columns}
+                    // data={data.splice(0, 51)}
                     data={data}
                     loading={loading}
                     customSubRowData={participants}

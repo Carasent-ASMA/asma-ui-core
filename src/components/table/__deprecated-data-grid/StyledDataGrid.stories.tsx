@@ -2,11 +2,11 @@ import { Icon } from '@iconify/react'
 import { Stack, Typography } from '@mui/material'
 import type { Meta, StoryObj } from '@storybook/react'
 import { StyledDataGrid } from './StyledDataGrid'
-import { StyledButton } from '../inputs/button/StyledButton'
+import { StyledButton } from '../../inputs/button/StyledButton'
 import { StyledGridActionsCellItem } from './StyledGridActionsCellItem'
 
 const meta = {
-    title: 'DataGrid/Styled Data Grid',
+    title: 'Tables/Styled Data Grid',
     component: StyledDataGrid,
     tags: ['autodocs'],
     argTypes: {

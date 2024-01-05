@@ -2,7 +2,7 @@ import type { GridApiCommunity } from '@mui/x-data-grid/internals'
 import { ColumnFormControlItem } from './ColumnFormControlItem'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import type { ReactNode } from 'react'
-import { StyledFormGroup } from '../../miscellaneous/StyledFormGroup'
+import { StyledFormGroup } from '../../../miscellaneous/StyledFormGroup'
 
 const checkboxSelection = '__check__'
 
