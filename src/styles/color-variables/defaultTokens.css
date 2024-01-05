@@ -174,6 +174,22 @@
     --colors-button-textGray-common-disabled-bg-color: transparent;
     --colors-button-textGray-common-disabled-border-color: transparent;
 
+    --colors-button-textWhite-common-text-color: white;
+    --colors-button-textWhite-common-bg-color: transparent;
+    --colors-button-textWhite-common-border-color: transparent;
+    --colors-button-textWhite-common-focused-text-color: white;
+    --colors-button-textWhite-common-focused-bg-color: transparent;
+    --colors-button-textWhite-common-focused-border-color: transparent;
+    --colors-button-textWhite-common-active-text-color: white;
+    --colors-button-textWhite-common-active-bg-color: transparent;
+    --colors-button-textWhite-common-active-border-color: transparent;
+    --colors-button-textWhite-common-hover-text-color: white;
+    --colors-button-textWhite-common-hover-bg-color: transparent;
+    --colors-button-textWhite-common-hover-border-color: transparent;
+    --colors-button-textWhite-common-disabled-text-color: white;
+    --colors-button-textWhite-common-disabled-bg-color: transparent;
+    --colors-button-textWhite-common-disabled-border-color: transparent;
+
     --colors-btn-bg-mini-action: var(--colors-slate-600);
     --colors-btn-bg-mini-action-hover: var(--colors-slate-300);
     --colors-link-text-hover: #ffffff;
