@@ -18,12 +18,16 @@ type variantTextGrayProps = {
     variant?: 'textGray'
     error?: never
 }
+type variantTextWhiteProps = {
+    variant?: 'textWhite'
+    error?: never
+}
 type buttonStandartVariantsProps = {
     variant?: 'contained' | 'outlined' | 'text'
     error?: boolean
 }
 
-type conditionalProps = variantTextGrayProps | buttonStandartVariantsProps
+type conditionalProps = variantTextGrayProps | variantTextWhiteProps | buttonStandartVariantsProps
 
 export type StyledButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & commonProps & conditionalProps
 /**

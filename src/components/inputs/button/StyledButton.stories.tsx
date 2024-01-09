@@ -252,6 +252,56 @@ const CommonEnabledButtons: React.FC<{
                     </div>
                 </div>
             )}
+            {!error && (
+                <div className='flex'>
+                    <div className='w-[100px] flex items-center h-[50px] text-gray-600 font-bold'>Text White</div>
+                    <div className='w-[570px] flex justify-center py-2 border border-l border-y-0 border-r-0 border-solid border-gray-200'>
+                        <Stack direction='row' spacing={4}>
+                            <StyledButton dataTest='test' size={size} disabled={disabled} variant='textWhite'>
+                                Button label
+                            </StyledButton>
+                            <StyledButton
+                                dataTest='test'
+                                size={size}
+                                disabled={disabled}
+                                variant='textWhite'
+                                color='common'
+                                startIcon={
+                                    <Icon
+                                        icon='mdi:filter-variant'
+                                        width={izSmall ? 20 : 24}
+                                        height={izSmall ? 20 : 24}
+                                    />
+                                }
+                            >
+                                Button label
+                            </StyledButton>
+                            <StyledButton
+                                dataTest='test'
+                                size={size}
+                                disabled={disabled}
+                                variant='textWhite'
+                                endIcon={<ChevronDownIcon width={izSmall ? 20 : 24} height={izSmall ? 20 : 24} />}
+                            >
+                                Button label
+                            </StyledButton>
+                            <StyledButton
+                                dataTest='test'
+                                size={size}
+                                disabled={disabled}
+                                variant='textWhite'
+                                startIcon={
+                                    <Icon
+                                        icon='mdi:filter-variant'
+                                        width={izSmall ? 20 : 24}
+                                        height={izSmall ? 20 : 24}
+                                    />
+                                }
+                            ></StyledButton>
+                        </Stack>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
