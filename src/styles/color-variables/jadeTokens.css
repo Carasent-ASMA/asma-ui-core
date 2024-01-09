@@ -57,7 +57,7 @@
     --colors-button-contained-common-border-color: var(--colors-gama-500);
     --colors-button-contained-common-focused-text-color: #ffffff;
     --colors-button-contained-common-focused-bg-color: var(--colors-gama-500);
-    --colors-button-contained-common-focused-border-color: var(--colors-yellow-500);
+    --colors-button-contained-common-focused-border-color: var(--colors-gama-400);
     --colors-button-contained-common-active-text-color: #ffffff;
     --colors-button-contained-common-active-bg-color: var(--colors-gama-700);
     --colors-button-contained-common-active-border-color: var(--colors-gama-700);
@@ -73,7 +73,7 @@
     --colors-button-contained-error-border-color: var(--colors-beta-500);
     --colors-button-contained-error-focused-text-color: #ffffff;
     --colors-button-contained-error-focused-bg-color: var(--colors-beta-500);
-    --colors-button-contained-error-focused-border-color: var(--colors-yellow-500);
+    --colors-button-contained-error-focused-border-color: var(--colors-beta-400);
     --colors-button-contained-error-active-text-color: #ffffff;
     --colors-button-contained-error-active-bg-color: var(--colors-beta-700);
     --colors-button-contained-error-active-border-color: var(--colors-beta-700);
@@ -89,7 +89,7 @@
     --colors-button-outlined-common-border-color: var(--colors-delta-500);
     --colors-button-outlined-common-focused-text-color: var(--colors-delta-800);
     --colors-button-outlined-common-focused-bg-color: var(--colors-gama-50);
-    --colors-button-outlined-common-focused-border-color: var(--colors-yellow-500);
+    --colors-button-outlined-common-focused-border-color: var(--colors-gama-400);
     --colors-button-outlined-common-active-text-color: var(--colors-delta-800);
     --colors-button-outlined-common-active-bg-color: var(--colors-gama-100);
     --colors-button-outlined-common-active-border-color: var(--colors-delta-700);
@@ -105,7 +105,7 @@
     --colors-button-outlined-error-border-color: var(--colors-beta-500);
     --colors-button-outlined-error-focused-text-color: #ffffff;
     --colors-button-outlined-error-focused-bg-color: var(--colors-beta-100);
-    --colors-button-outlined-error-focused-border-color: var(--colors-yellow-500);
+    --colors-button-outlined-error-focused-border-color: var(--colors-beta-400);
     --colors-button-outlined-error-active-text-color: var(--colors-beta-700);
     --colors-button-outlined-error-active-bg-color: var(--colors-beta-100);
     --colors-button-outlined-error-active-border-color: var(--colors-beta-700);
@@ -121,7 +121,7 @@
     --colors-button-text-common-border-color: transparent;
     --colors-button-text-common-focused-text-color: var(--colors-delta-800);
     --colors-button-text-common-focused-bg-color: var(--colors-gama-50);
-    --colors-button-text-common-focused-border-color: var(--colors-yellow-500);
+    --colors-button-text-common-focused-border-color: var(--colors-gama-400);
     --colors-button-text-common-active-text-color: var(--colors-delta-800);
     --colors-button-text-common-active-bg-color: var(--colors-gama-100);
     --colors-button-text-common-active-border-color: var(--colors-gama-100);
@@ -137,7 +137,7 @@
     --colors-button-text-error-border-color: transparent;
     --colors-button-text-error-focused-text-color: var(--colors-beta-600);
     --colors-button-text-error-focused-bg-color: var(--colors-beta-100);
-    --colors-button-text-error-focused-border-color: var(--colors-yellow-500);
+    --colors-button-text-error-focused-border-color: var(--colors-beta-400);
     --colors-button-text-error-active-text-color: var(--colors-beta-600);
     --colors-button-text-error-active-bg-color: var(--colors-beta-100);
     --colors-button-text-error-active-border-color: var(--colors-beta-100);
@@ -153,7 +153,7 @@
     --colors-button-textGray-common-border-color: transparent;
     --colors-button-textGray-common-focused-text-color: var(--colors-delta-800);
     --colors-button-textGray-common-focused-bg-color: var(--colors-gama-50);
-    --colors-button-textGray-common-focused-border-color: var(--colors-yellow-500);
+    --colors-button-textGray-common-focused-border-color: var(--colors-gama-400);
     --colors-button-textGray-common-active-text-color: var(--colors-delta-800);
     --colors-button-textGray-common-active-bg-color: var(--colors-gama-100);
     --colors-button-textGray-common-active-border-color: var(--colors-gama-100);
