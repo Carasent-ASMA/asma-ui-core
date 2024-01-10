@@ -10,9 +10,10 @@ export const StyledCalendarPickerFooter: React.FC<{
     isNb: boolean
     selected: Matcher | Matcher[] | undefined
     removeSelection: (e: React.MouseEvent) => void
+    onClear: (() => void) | undefined
     month: Date | undefined
     setMonth: Dispatch<SetStateAction<Date | undefined>>
-}> = ({ onClose, isNb, selected, removeSelection, setMonth, month }) => {
+}> = ({ onClose, isNb, selected, removeSelection, setMonth, month, onClear }) => {
     const { goToMonth, nextMonth, previousMonth } = useNavigation()
     const eraserDisabled = isArray(selected)
         ? !selected.length
@@ -27,7 +28,7 @@ export const StyledCalendarPickerFooter: React.FC<{
             <StyledButton
                 variant='text'
                 onClick={(e) => {
-                    removeSelection(e)
+                    onClear ? onClear() : removeSelection(e)
                 }}
                 size='small'
                 disabled={eraserDisabled}

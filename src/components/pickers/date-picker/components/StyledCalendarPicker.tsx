@@ -16,7 +16,7 @@ export const StyledCalendarPicker: React.FC<{
     popoverProps: PopoverProps
     positionAbove: boolean
 }> = ({ datePickerProps, popoverProps, positionAbove }) => {
-    const { showOutsideDays = true, locale, selected, numberOfMonths, disabledDays } = datePickerProps
+    const { showOutsideDays = true, locale, selected, numberOfMonths, disabledDays, onClear } = datePickerProps
     const { open, anchorEl, onClose } = popoverProps
     const [month, setMonth] = useState<Date | undefined>(new Date(Date.now()))
     //
@@ -103,6 +103,7 @@ export const StyledCalendarPicker: React.FC<{
                         removeSelection={removeSelection}
                         setMonth={setMonth}
                         month={month}
+                        onClear={onClear}
                     />
                 }
                 {...datePickerProps}
