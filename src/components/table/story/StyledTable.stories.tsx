@@ -186,6 +186,10 @@ export const Table = () => {
                     // getRowId={(row: Person, _index: number, parent?: Row<Person>) =>
                     //     parent ? `abrakadabra${_index}` : _index.toString()
                     // }
+                    footer={(table) => {
+                        console.log('<div>{table.getAllColumns.length}</div>', table)
+                        return <div>columns - {table.getAllColumns().length}</div>
+                    }}
                 />
             </div>
         </div>

@@ -13,10 +13,9 @@ import { Fragment } from 'react'
 import { LoadingIcon } from '../data-display/icons'
 import { Skeleton } from '@mui/material'
 import { SELECT_COLUMN_ID, type StyledTableProps } from './types'
-import React from 'react'
-import { TablePagination } from './components/TablePagination'
 import { TableHeader } from './components/TableHeader'
 import { injectColumns } from './components/columns/injectColumns'
+import { TableFooter } from './components/TableFooter'
 
 /**
  *
@@ -56,6 +55,7 @@ export const StyledTable = <
     expandArrow,
     height,
     locale = 'en',
+    footer,
     ...rest
 }: StyledTableProps<TData, TCustomData>) => {
     injectColumns({ columns, expandArrow, enableRowSelection, headerPin, actions, customActionsNode })
@@ -91,14 +91,15 @@ export const StyledTable = <
 
     const { rows } = table.getRowModel()
 
-    const renderRow = (row: Row<TData>) => (
+    const renderRow = (row: Row<TData>, index: number) => (
         <Fragment key={row.id}>
             <tr
+                data-index={index}
                 data-test={row.id}
                 id={row.id}
                 tabIndex={focusable ? -1 : undefined}
                 className={clsx(
-                    'table-row align-middle border-solid border-x border-t border-b-0 last:border-b border-x-transparent border-y-delta-300 hover:cursor-pointer hover:bg-primary-25 focus:bg-primary-50 focus:border focus:border-primary-500',
+                    'table-row align-middle border-solid border-x border-t border-b-0 last:border-b first:border-t-transparent border-x-transparent border-y-delta-300 hover:cursor-pointer hover:bg-primary-25 focus:bg-primary-50 focus:border focus:border-primary-500',
                     (row.getIsExpanded() || row.getIsSelected()) && 'bg-primary-50',
                     loading && 'opacity-50',
                     getRowClassName?.(row),
@@ -132,7 +133,7 @@ export const StyledTable = <
                             key={cell.id}
                             className={clsx(
                                 'break-words table-cell align-middle text-sm text-delta-900 whitespace-pre-wrap',
-                                cell.id.includes('width_stabilizer') ? 'p-0 m-0' : 'px-2.5',
+                                'px-2.5',
                                 tdClassName,
                             )}
                         >
@@ -184,7 +185,7 @@ export const StyledTable = <
                                 ))}
                             </>
                         ) : data.length > 0 ? (
-                            rows.map((row) => renderRow(row))
+                            rows.map((row, index) => renderRow(row, index))
                         ) : (
                             <tr className='h-28'>
                                 <td
@@ -198,7 +199,9 @@ export const StyledTable = <
                     </tbody>
                 </table>
             </div>
-            <TablePagination table={table} locale={locale} />
+            <TableFooter table={table} locale={locale}>
+                {footer?.(table)}
+            </TableFooter>
         </div>
     )
 }

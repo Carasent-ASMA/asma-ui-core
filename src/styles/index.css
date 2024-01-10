@@ -30,6 +30,11 @@
         border-top-style: solid;
     }
 
+    .border-y-solid {
+        border-top-style: solid;
+        border-bottom-style: solid;
+    }
+
     .absolute-center {
         @apply absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2;
     }

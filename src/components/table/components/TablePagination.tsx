@@ -20,11 +20,16 @@ export function TablePagination<TData>({ table, locale }: { locale: 'en' | 'no';
         handleOpen(event)
     }
 
+    const scrollToTop = () => {
+        const elements = document.querySelectorAll('[data-index="0"]')
+        elements?.[0]?.scrollIntoView({ behavior: 'smooth', block: 'end', inline: 'end' })
+    }
+
     const pagesLength = table.getPageCount()
     const currentPage = table.getState().pagination.pageIndex + 1
     const pages = Array.from({ length: pagesLength }, (_value, index) => index + 1)
     return pagesLength > 1 ? (
-        <div className='w-[calc(100%-16px)] animate-opacity-in-5 justify-end flex py-2 my-2 pr-4 items-center bg-transparent gap-2'>
+        <div className='w-fit animate-opacity-in-5 justify-end flex items-center bg-transparent gap-2'>
             <StyledTooltip title={isNo ? 'Nåværende side' : 'Current Page'}>
                 <div>
                     <StyledButton
@@ -65,6 +70,7 @@ export function TablePagination<TData>({ table, locale }: { locale: 'en' | 'no';
                                 onClick={() => {
                                     table.setPageIndex(page - 1)
                                     handleClose()
+                                    scrollToTop()
                                 }}
                             >
                                 {currentPage === page && (
@@ -84,7 +90,10 @@ export function TablePagination<TData>({ table, locale }: { locale: 'en' | 'no';
                         variant='outlined'
                         dataTest='pagination-ChevronLeftIcon'
                         startIcon={<ChevronLeftIcon height={24} width={24} />}
-                        onClick={() => table.previousPage()}
+                        onClick={() => {
+                            table.previousPage()
+                            scrollToTop()
+                        }}
                         disabled={!table.getCanPreviousPage()}
                     />
                 </div>
@@ -95,7 +104,10 @@ export function TablePagination<TData>({ table, locale }: { locale: 'en' | 'no';
                         variant='outlined'
                         dataTest='pagination-ChevronRightIcon'
                         startIcon={<ChevronRightIcon height={24} width={24} />}
-                        onClick={() => table.nextPage()}
+                        onClick={() => {
+                            table.nextPage()
+                            scrollToTop()
+                        }}
                         disabled={!table.getCanNextPage()}
                     />
                 </div>

@@ -5,15 +5,16 @@ import { DropDownIcon, DropUpIcon } from 'src/components/data-display/icons'
 export function TableHeader<TData>({ table, stickyHeader = false }: { table: Table<TData>; stickyHeader?: boolean }) {
     return (
         <thead
-            className='table-header-group z-50 bg-[#fcfcfd] border-t-solid border-b-solid  border-y-delta-300 border-y cursor-default'
+            className='table-header-group z-50 bg-[#fcfcfd] cursor-default'
             style={
                 (stickyHeader && {
                     position: 'sticky',
-                    top: -0.4,
+                    top: -0.2,
                 }) ||
                 {}
             }
         >
+            <TableBorder />
             {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                     {headerGroup.headers.map((header) => {
@@ -37,8 +38,8 @@ export function TableHeader<TData>({ table, stickyHeader = false }: { table: Tab
                                 colSpan={header.colSpan}
                                 className={clsx(
                                     columnWidth,
-                                    header.id.includes('width_stabilizer') ? 'p-0 m-0' : 'px-2.5',
-                                    'text-delta-500 text-start text-[10px] font-semibold uppercase justify-start',
+                                    'px-2.5',
+                                    'text-delta-500 bg-transparent text-start text-[10px] font-semibold uppercase justify-start',
                                 )}
                                 style={{
                                     maxWidth: header.column.columnDef.maxSize,
@@ -70,6 +71,17 @@ export function TableHeader<TData>({ table, stickyHeader = false }: { table: Tab
                     })}
                 </tr>
             ))}
+            <TableBorder />
         </thead>
+    )
+}
+
+// custom borders
+// to avoid  -> border-collapse: separate <- on table level
+const TableBorder = () => {
+    return (
+        <tr className='bg-transparent  w-full relative table-row'>
+            <th className='w-full border-b-solid border-[0.5px] border-b-delta-300 h-full absolute-center' />
+        </tr>
     )
 }
