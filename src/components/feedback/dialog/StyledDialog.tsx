@@ -33,7 +33,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                 <div className={'mr-2 mt-2 flex justify-end'}>
                     <StyledButton
                         dataTest={`close-button-${dataTest}`}
-                        variant='text'
+                        variant='textGray'
                         endIcon={<Icon icon={'ic:baseline-close'} className={'text-2xl'} />}
                         onClick={(event) => {
                             onClose ? onClose(event, 'escapeKeyDown') : null
