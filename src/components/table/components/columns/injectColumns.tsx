@@ -11,7 +11,7 @@ export function injectColumns<TData>({
     actions,
     customActionsNode,
 }: Omit<StyledTableProps<TData, TData>, 'data'>) {
-    if (!columns.find((col) => col.id === 'actions')) {
+    if (!columns.find((col) => col.id === 'actions') && (actions || customActionsNode || headerPin)) {
         columns.push(
             generateActionsColumn({
                 headerPin: headerPin || false,

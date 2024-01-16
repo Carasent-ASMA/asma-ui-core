@@ -134,5 +134,5 @@ const PersonDescription: React.FC<{ cellContext: CellContext<Person, Person> }> 
 }
 
 const PersonDescriptionDiv: React.FC<{ cellContext: CellContext<Person, Person> }> = () => {
-    return <div className='min-w-[200px]'>Lorem Ipsum is simply dummy text is</div>
+    return <div className='min-w-[200px] w-fit'>Lorem Ipsum is simply dummy text is</div>
 }

@@ -27,10 +27,10 @@ export function generateActionsColumn<TData>(options: {
             return headerPin ? <HeaderActionMenu headerData={props} /> : null
         },
         cell: (cell: CellContext<TData, TData>) =>
-            actions ? (
+            actions || customActionsNode ? (
                 <div className='flex gap-2 items-center justify-end'>
-                    {customActionsNode?.(cell)}
-                    <RowActionMenu tableData={cell} actions={actions} />
+                    {customActionsNode && customActionsNode?.(cell)}
+                    {actions && <RowActionMenu tableData={cell} actions={actions} />}
                 </div>
             ) : null,
         size: 50,

@@ -122,12 +122,6 @@ export const StyledTable = <
                 }}
             >
                 {row.getVisibleCells().map((cell) => {
-                    // let size: number | string = cell.column.getSi
-                    // if (isNaN(size) || size > 1200) {
-                    //     size = '100%'
-                    // } else {
-                    //     size = `${size}px`
-                    // }
                     return (
                         <td
                             key={cell.id}

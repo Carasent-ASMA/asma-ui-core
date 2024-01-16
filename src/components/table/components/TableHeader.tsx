@@ -1,5 +1,6 @@
 import { flexRender, type Table } from '@tanstack/react-table'
 import clsx from 'clsx'
+import { last } from 'lodash-es'
 import { DropDownIcon, DropUpIcon } from 'src/components/data-display/icons'
 
 export function TableHeader<TData>({ table, stickyHeader = false }: { table: Table<TData>; stickyHeader?: boolean }) {
@@ -26,7 +27,9 @@ export function TableHeader<TData>({ table, stickyHeader = false }: { table: Tab
                         }
 
                         // last column, except actions
-                        const lastUserColumn = header.headerGroup.headers[header.headerGroup.headers.length - 2]
+                        const hasActionsColumn = last(header.headerGroup.headers)?.id === 'actions'
+                        const lastUserColumn =
+                            header.headerGroup.headers[header.headerGroup.headers.length - (hasActionsColumn ? 2 : 1)]
                         //  setup full width for last user created column
                         if (lastUserColumn?.id === header.id || !columnWidth) {
                             columnWidth = 'w-full'
@@ -80,8 +83,8 @@ export function TableHeader<TData>({ table, stickyHeader = false }: { table: Tab
 // to avoid  -> border-collapse: separate <- on table level
 const TableBorder = () => {
     return (
-        <tr className='bg-transparent  w-full relative table-row'>
-            <th className='w-full border-b-solid border-[0.5px] border-b-delta-300 h-full absolute-center' />
+        <tr className='bg-transparent w-full relative table-row'>
+            <th className='w-[calc(100%-1px)] border-b-solid border-[0.5px] border-b-delta-300 h-full absolute-center' />
         </tr>
     )
 }
