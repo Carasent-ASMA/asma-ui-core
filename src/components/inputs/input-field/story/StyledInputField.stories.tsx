@@ -20,7 +20,8 @@ export const Inputs = () => {
                 dataTest='test'
                 {...meta.args}
                 onChange={() => undefined}
-                value='Hello World'
+                value=''
+                placeholder='Label text'
                 label='Label text'
             />
             <StyledInputField

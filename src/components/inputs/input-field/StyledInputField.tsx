@@ -41,10 +41,10 @@ export const StyledInputField: React.FC<
                 backgroundColor: '#e8f0fe !important',
             },
             '& input': {
-                backgroundColor: 'white',
+                backgroundColor: 'transparent',
             },
             '& .MuiInputBase-root': {
-                backgroundColor: 'white',
+                backgroundColor: 'transparent',
             },
             '& .MuiInputBase-colorPrimary fieldset': {
                 borderColor: 'var(--colors-delta-500) !important',
@@ -72,17 +72,9 @@ export const StyledInputField: React.FC<
             },
             '& .MuiOutlinedInput-input::placeholder': {
                 color: '#666666',
-                opacity: '100'
+                opacity: '100',
             },
-            
-            // '& .MuiInputBase-inputSizeSmall': {
-            //     fontSize: '14px',
-            //     height: '23px',
-            // },
-            // '& .MuiInputBase-input': {
-            //     fontSize: '14px',
-            //     height: '23px',
-            // },
+
             '& .MuiOutlinedInput-input.Mui-disabled': {
                 WebkitTextFillColor: 'var(--colors-delta-300) !important',
             },
