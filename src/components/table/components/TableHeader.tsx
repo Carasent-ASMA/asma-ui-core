@@ -83,8 +83,8 @@ export function TableHeader<TData>({ table, stickyHeader = false }: { table: Tab
 // to avoid  -> border-collapse: separate <- on table level
 const TableBorder = () => {
     return (
-        <tr className='bg-transparent w-full relative table-row'>
-            <th className='w-[calc(100%-1px)] border-b-solid border-[0.5px] border-b-delta-300 h-full absolute-center' />
+        <tr className='bg-[#fcfcfd] w-full relative table-row'>
+            <th className='w-[calc(100%-1px)] bg-[#fcfcfd] border-b-solid border-t-transparent border-x-0 border-[0.5px] border-b-delta-300 h-full absolute-center' />
         </tr>
     )
 }
