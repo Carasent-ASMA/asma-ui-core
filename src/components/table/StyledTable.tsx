@@ -56,6 +56,7 @@ export const StyledTable = <
     height,
     locale = 'en',
     footer,
+    hideHeader,
     ...rest
 }: StyledTableProps<TData, TCustomData>) => {
     injectColumns({ columns, expandArrow, enableRowSelection, headerPin, actions, customActionsNode })
@@ -157,7 +158,7 @@ export const StyledTable = <
                         'table box-border border-collapse animate-opacity-appear-3 border-spacing-[1px] max-w-[inherit] mx-auto w-full',
                     )}
                 >
-                    {!loading && <TableHeader table={table} stickyHeader={stickyHeader} />}
+                    {!loading && !hideHeader && <TableHeader table={table} stickyHeader={stickyHeader} />}
 
                     <tbody className='table-row-group align-middle max-w-[inherit]'>
                         {data.length > 0 && loading ? (

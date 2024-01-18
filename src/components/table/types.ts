@@ -63,6 +63,7 @@ export interface StyledTableProps<TData, TCustomData>
     renderSubRows?: (props: { rows: TCustomData[]; row: TData }) => ReactElement
     getRowSelectionIds?: (ids: string[]) => void
     footer?: (table: Table<TData>) => ReactNode
+    hideHeader?: boolean
 }
 
 export const SELECT_COLUMN_ID = 'select'
