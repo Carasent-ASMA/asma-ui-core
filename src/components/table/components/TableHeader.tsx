@@ -41,7 +41,7 @@ export function TableHeader<TData>({ table, stickyHeader = false }: { table: Tab
                                 colSpan={header.colSpan}
                                 className={clsx(
                                     columnWidth,
-                                    'px-2.5',
+                                    'px-2.5 py-0',
                                     'text-delta-500 bg-transparent text-start text-[10px] font-semibold uppercase justify-start',
                                 )}
                                 style={{
@@ -84,7 +84,7 @@ export function TableHeader<TData>({ table, stickyHeader = false }: { table: Tab
 const TableBorder = () => {
     return (
         <tr className='bg-[#fcfcfd] w-full relative table-row'>
-            <th className='w-[calc(100%-1px)] bg-[#fcfcfd] border-b-solid border-t-transparent border-x-0 border-[0.5px] border-b-delta-300 h-full absolute-center' />
+            <th className='w-[calc(100%-1px)] p-0 bg-[#fcfcfd] border-b-solid border-t-transparent border-x-0 border-[0.5px] border-b-delta-300 h-full absolute-center' />
         </tr>
     )
 }
