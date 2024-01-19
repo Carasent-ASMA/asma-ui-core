@@ -32,20 +32,31 @@ declare module '@tanstack/react-table' {
     }
 }
 
-export interface StyledTableProps<TData, TCustomData>
-    extends Omit<
-        TableOptions<TData>,
-        'getCoreRowModel' | 'getExpandedRowModel' | 'getFilteredRowModel' | 'getSortedRowModel'
-    > {
+export interface IAction<TData> {
+    label: string
+    className?: string
+    disabled?: boolean
+    hide?: boolean
+    onClick?: (row: Row<TData>) => void
+}
+
+type IFooter<TData> = {
+    footer?: (table: Table<TData>) => ReactNode
+    hideFooter?: never
+}
+
+type IHideFooter = {
+    footer?: never
+    hideFooter?: boolean
+}
+
+type TFooter<TData> = IFooter<TData> | IHideFooter
+type TTableOptions<TData> = TableOptions<TData>
+
+export type StyledTableProps<TData, TCustomData> = {
     locale?: 'no' | 'en'
     height?: string | number
-    actions?: (row: Row<TData>) => {
-        label: string
-        className?: string
-        disabled?: boolean
-        hide?: boolean
-        onClick?: (row: Row<TData>) => void
-    }[]
+    actions?: (row: Row<TData>) => IAction<TData>[]
     customActionsNode?: (row: CellContext<TData, TData>) => ReactNode
     customSubRowData?: Map<string, TCustomData[]>
     headerPin?: boolean
@@ -60,11 +71,14 @@ export interface StyledTableProps<TData, TCustomData>
     stickyHeader?: boolean
     getRowClassName?: (row: Row<TData>) => string
     onRowClick?: (e: MouseEvent<HTMLTableRowElement, globalThis.MouseEvent>, row: Row<TData>) => void
-    renderSubRows?: (props: { rows: TCustomData[]; row: TData }) => ReactElement
+    renderSubRows?: (props: { rows: TCustomData[]; row: TData }) => ReactElement | null
     getRowSelectionIds?: (ids: string[]) => void
-    footer?: (table: Table<TData>) => ReactNode
     hideHeader?: boolean
-}
+} & Omit<
+    TTableOptions<TData>,
+    'getCoreRowModel' | 'getExpandedRowModel' | 'getFilteredRowModel' | 'getSortedRowModel'
+> &
+    TFooter<TData>
 
 export const SELECT_COLUMN_ID = 'select'
 export const EXPAND_COLUMN_ID = 'expand-column-id'

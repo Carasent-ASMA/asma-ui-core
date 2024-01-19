@@ -3,10 +3,18 @@ import clsx from 'clsx'
 import { last } from 'lodash-es'
 import { DropDownIcon, DropUpIcon } from 'src/components/data-display/icons'
 
-export function TableHeader<TData>({ table, stickyHeader = false }: { table: Table<TData>; stickyHeader?: boolean }) {
+export function TableHeader<TData>({
+    table,
+    stickyHeader = false,
+    hideHeader = false,
+}: {
+    table: Table<TData>
+    stickyHeader?: boolean
+    hideHeader?: boolean
+}) {
     return (
         <thead
-            className='table-header-group z-50 bg-[#fcfcfd] cursor-default'
+            className={clsx('table-header-group z-50 bg-[#fcfcfd] cursor-default', hideHeader && 'h-0 opacity-0')}
             style={
                 (stickyHeader && {
                     position: 'sticky',
@@ -53,7 +61,8 @@ export function TableHeader<TData>({ table, stickyHeader = false }: { table: Tab
                                     <div
                                         {...{
                                             className: clsx(
-                                                'flex items-center h-[30px] justify-left',
+                                                'flex items-center justify-left',
+                                                hideHeader ? 'h-0' : 'h-[30px]',
                                                 header.column.getCanSort() || header.column.id === 'actions'
                                                     ? 'cursor-pointer select-none'
                                                     : '',

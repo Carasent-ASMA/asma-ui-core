@@ -10,6 +10,8 @@ import { cloneDeep } from 'lodash-es'
 import { useStyledTableColumns } from './components/useTableColumns'
 import clsx from 'clsx'
 import React from 'react'
+import { RenderSubRows } from './components/RenderSubRows'
+import { getRowActions } from './components/getRowActions'
 
 const meta = {
     title: 'Tables/Table',
@@ -97,33 +99,13 @@ export const Table = () => {
                 </StyledButton>
             </div>
             <StyledTable<Person, Participant>
-                {...meta.args}
+                // data={data.splice(0, 49)}
+                data={data}
                 stickyHeader
-                className='max-h-[600px]'
+                className='h-[calc(100vh-170px)]'
                 locale='no'
                 tableInstanceRef={tableRef}
-                actions={(row) => [
-                    {
-                        label: row.original.progress > 50 ? 'Action 50' : 'Action less than 50',
-                        hide: row.original.progress > 50,
-                        onClick: () => console.info('row:', cloneDeep(row.original)),
-                    },
-                    {
-                        label: 'Original',
-                        onClick: () => console.info('original:', cloneDeep(row.original)),
-                    },
-                    {
-                        label: 'Action 3',
-                        className: 'text-error-700',
-                        onClick: () => console.info('click'),
-                    },
-                    {
-                        label: 'Hidden action',
-                        hide: true,
-                        className: 'text-primary-700',
-                        onClick: () => console.info('click'),
-                    },
-                ]}
+                actions={(row) => getRowActions(row)}
                 customActionsNode={(cell) => (
                     <StyledButton
                         size='small'
@@ -144,11 +126,8 @@ export const Table = () => {
                         {cell.row.original.firstName}
                     </StyledButton>
                 )}
-                expandArrow={true}
                 columns={columns}
                 // headerPin={false}
-                // data={data.splice(0, 51)}
-                data={data}
                 loading={loading}
                 customSubRowData={participants}
                 initialState={{
@@ -159,6 +138,10 @@ export const Table = () => {
                     rowSelection,
                     columnVisibility: columnsVisibility,
                 }}
+                expandArrow={true}
+                onRowSelectionChange={(e) => {
+                    setRowSelection(e)
+                }}
                 onRowClick={(e, row) => {
                     console.info('e', e, cloneDeep(row.original))
                 }}
@@ -166,13 +149,10 @@ export const Table = () => {
                 enableRowSelection={true}
                 getRowCanExpand={(row) => row.original.progress < 50}
                 onGlobalFilterChange={setGlobalFilter}
-                onRowSelectionChange={(e) => {
-                    setRowSelection(e)
-                }}
                 onColumnVisibilityChange={(e) => {
                     setColumnsVisibility(e)
                 }}
-                renderSubRows={renderSubRows}
+                renderSubRows={(data) => <RenderSubRows subRows={data.rows} />}
                 getRowClassName={(row) => clsx('max-h-[40px]', row.original.progress > 50 ? 'bg-primary-25' : '')}
                 noRowsOverlay={
                     <div className='flex h-full w-full items-center justify-center'>
@@ -187,26 +167,10 @@ export const Table = () => {
                 //     parent ? `abrakadabra${_index}` : _index.toString()
                 // }
                 footer={(table) => {
-                    console.log('<div>{table.getAllColumns.length}</div>', table)
                     return <div>columns - {table.getAllColumns().length}</div>
                 }}
+                // hideFooter
             />
         </div>
-    )
-}
-
-const renderSubRows = ({ rows }: { rows: Participant[] }) => {
-    return (
-        <>
-            {rows?.map((row) => (
-                <tr key={row.activityId} className='pl-10 h-[50px] w-full hover:cursor-pointer hover:bg-primary-25'>
-                    <td />
-                    <td />
-                    <td>{row.fullName}</td>
-                    <td>{row.activityId}</td>
-                    <td colSpan={3}>{new Date(row.addedAt).toLocaleDateString()}</td>
-                </tr>
-            ))}
-        </>
     )
 }

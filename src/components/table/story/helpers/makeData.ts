@@ -12,6 +12,7 @@ export type Person = {
 }
 
 export type Participant = {
+    id: string
     fullName: string
     activityId: string
     addedAt: string
@@ -62,6 +63,7 @@ export function makeParticipantsData(...lens: number[]): Participant[] {
         if (!len) return []
         return range(len).map((): Participant => {
             return {
+                id: crypto.randomUUID(),
                 fullName: faker.person.fullName(),
                 activityId: faker.number.int({ min: 1, max: 20000 }).toString(),
                 addedAt: faker.date.past().toISOString(),

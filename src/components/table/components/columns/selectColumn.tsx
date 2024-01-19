@@ -5,8 +5,9 @@ import { SELECT_COLUMN_ID } from '../../types'
 export function selectColumn<TData>() {
     return {
         id: SELECT_COLUMN_ID,
-        size: 50,
-        maxSize: 50,
+        minSize: 40,
+        maxSize: 40,
+        size: 40,
         header: ({ table }: HeaderContext<TData, TData>) => {
             return (
                 <div className='w-[25px]'>

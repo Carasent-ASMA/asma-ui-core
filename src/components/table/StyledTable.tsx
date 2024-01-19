@@ -9,7 +9,7 @@ import {
     getPaginationRowModel,
 } from '@tanstack/react-table'
 import clsx from 'clsx'
-import { Fragment } from 'react'
+import { Fragment, useEffect, useLayoutEffect, useState } from 'react'
 import { LoadingIcon } from '../data-display/icons'
 import { Skeleton } from '@mui/material'
 import { SELECT_COLUMN_ID, type StyledTableProps } from './types'
@@ -57,21 +57,21 @@ export const StyledTable = <
     locale = 'en',
     footer,
     hideHeader,
+    hideFooter,
     ...rest
 }: StyledTableProps<TData, TCustomData>) => {
     injectColumns({ columns, expandArrow, enableRowSelection, headerPin, actions, customActionsNode })
-
     const table = useReactTable({
         ...rest,
         columns,
         data,
         initialState: {
-            ...initialState,
             pagination: { pageIndex: 0, pageSize: 50 },
             columnVisibility: {
                 ...initialState?.columnVisibility,
                 [SELECT_COLUMN_ID]: false,
             },
+            ...initialState,
         },
         enableRowSelection,
         getCoreRowModel: getCoreRowModel(),
@@ -79,7 +79,6 @@ export const StyledTable = <
         getFilteredRowModel: getFilteredRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
-
         getRowId:
             rest.getRowId ||
             ((row: TData, _index: number, parent?: Row<TData>) =>
@@ -90,7 +89,7 @@ export const StyledTable = <
         tableInstanceRef.current = table
     }
 
-    const { rows } = table.getRowModel()
+    const rows = hideFooter ? table.getCoreRowModel().rows : table.getRowModel().rows
 
     const renderRow = (row: Row<TData>, index: number) => (
         <Fragment key={row.id}>
@@ -100,7 +99,7 @@ export const StyledTable = <
                 id={row.id}
                 tabIndex={focusable ? -1 : undefined}
                 className={clsx(
-                    'table-row align-middle border-solid border-x border-t border-b-0 last:border-b first:border-t-transparent border-x-transparent border-y-delta-300 hover:cursor-pointer hover:bg-primary-25 focus:bg-primary-50 focus:border focus:border-primary-500',
+                    'table-row align-middle border-solid border-x border-t border-b-0 last:border-b-transparent first:border-t-transparent border-x-transparent border-y-delta-300 hover:cursor-pointer hover:bg-primary-25 focus:bg-primary-50 focus:border focus:border-primary-500',
                     (row.getIsExpanded() || row.getIsSelected()) && 'bg-primary-50',
                     loading && 'opacity-50',
                     getRowClassName?.(row),
@@ -152,13 +151,13 @@ export const StyledTable = <
 
     return (
         <div>
-            <div className={clsx('overflow-auto', className)} style={{ height }}>
+            <div className={clsx('overflow-auto w-full', className)} style={{ height }}>
                 <table
                     className={clsx(
-                        'table box-border border-collapse animate-opacity-appear-3 border-spacing-[1px] max-w-[inherit] mx-auto w-full',
+                        'table box-border border-collapse animate-opacity-appear-3 border-spacing-[1px] max-w-[inherit] mx-auto w-[calc(100%-5px)]',
                     )}
                 >
-                    {!loading && !hideHeader && <TableHeader table={table} stickyHeader={stickyHeader} />}
+                    {!loading && <TableHeader table={table} stickyHeader={stickyHeader} hideHeader={hideHeader} />}
 
                     <tbody className='table-row-group align-middle max-w-[inherit]'>
                         {data.length > 0 && loading ? (
@@ -194,9 +193,11 @@ export const StyledTable = <
                     </tbody>
                 </table>
             </div>
-            <TableFooter table={table} locale={locale}>
-                {footer?.(table)}
-            </TableFooter>
+            {!hideFooter && (
+                <TableFooter table={table} locale={locale}>
+                    {footer?.(table)}
+                </TableFooter>
+            )}
         </div>
     )
 }

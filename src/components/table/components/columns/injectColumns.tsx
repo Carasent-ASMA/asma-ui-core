@@ -20,12 +20,10 @@ export function injectColumns<TData>({
             }),
         )
     }
-
-    if (expandArrow && !columns.find((col) => col.id === EXPAND_COLUMN_ID)) {
-        columns.unshift(generateExpandColumn())
-    }
-
     if (enableRowSelection && !columns.find((col) => col.id === SELECT_COLUMN_ID)) {
         columns.unshift(selectColumn())
+    }
+    if (expandArrow && !columns.find((col) => col.id === EXPAND_COLUMN_ID)) {
+        columns.unshift(generateExpandColumn())
     }
 }

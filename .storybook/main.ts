@@ -12,6 +12,7 @@ const config: StorybookConfig = {
         '@storybook/manager-api',
         'storybook-addon-themes',
         '@storybook/preset-create-react-app',
+        '@storybook/addon-mdx-gfm'
     ],
     framework: {
         name: '@storybook/react-vite',
