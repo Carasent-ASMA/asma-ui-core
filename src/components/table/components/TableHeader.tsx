@@ -50,7 +50,7 @@ export function TableHeader<TData>({
                                 className={clsx(
                                     columnWidth,
                                     'px-2.5 py-0',
-                                    'text-delta-500 bg-transparent text-start text-[10px] font-semibold uppercase justify-start',
+                                    'text-delta-500 bg-transparent border-none text-start text-[10px] font-semibold uppercase justify-start',
                                 )}
                                 style={{
                                     maxWidth: header.column.columnDef.maxSize,

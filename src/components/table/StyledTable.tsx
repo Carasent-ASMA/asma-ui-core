@@ -127,7 +127,7 @@ export const StyledTable = <
                             key={cell.id}
                             className={clsx(
                                 'break-words table-cell align-middle text-sm text-delta-900 whitespace-pre-wrap',
-                                'px-2.5',
+                                'px-2.5 py-0',
                                 tdClassName,
                             )}
                         >
@@ -154,7 +154,7 @@ export const StyledTable = <
             <div className={clsx('overflow-auto w-full', className)} style={{ height }}>
                 <table
                     className={clsx(
-                        'table box-border border-collapse animate-opacity-appear-3 border-spacing-[1px] max-w-[inherit] mx-auto w-[calc(100%-5px)]',
+                        'table box-border border-collapse animate-opacity-appear-3 border-spacing-[1px] max-w-[inherit] m-0 w-[calc(100%-5px)]',
                     )}
                 >
                     {!loading && <TableHeader table={table} stickyHeader={stickyHeader} hideHeader={hideHeader} />}
