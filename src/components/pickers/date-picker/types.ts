@@ -17,6 +17,8 @@ type CompactRangeProps = {
     compact: true
     placeholderFrom?: string
     placeholderTo?: string
+    labelFrom?: string
+    labelTo?: string
     allowClear?: never
     placeholder?: never
 }
@@ -29,17 +31,24 @@ type DefaultRangeProps = {
     placeholderFrom?: never
     placeholderTo?: never
 
+    labelFrom?: never
+    labelTo?: never
+
     onClearFrom?: () => void
     onClearTo?: () => void
 }
 
 type DefaultSingleProps = {
     mode: 'single'
+    dateFormat?: string
     placeholder?: string
+    label?: string
 
     compact?: never
     placeholderFrom?: never
     placeholderTo?: never
+    labelFrom?: never
+    labelTo?: never
 }
 
 export type DatePickerProps = CommonDatePickerProps & (CompactRangeProps | DefaultRangeProps | DefaultSingleProps)

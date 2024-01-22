@@ -22,6 +22,7 @@ export type StyledTimePickerProps = {
     transformOrigin?: PopoverOrigin
     error?: boolean
     helperText?: string
+    label?: string
 }
 
 export const StyledTimePicker: React.FC<StyledTimePickerProps> = ({
@@ -36,6 +37,7 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = ({
     transformOrigin,
     error,
     helperText,
+    label,
 }) => {
     const { anchorEl, open, handleClose, handleOpen } = useToggleMenuVisibility()
 
@@ -59,6 +61,7 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = ({
                 }}
                 disabled={disabled}
                 className={clsx(inputClassName ? inputClassName : 'mb-2 pb-2')}
+                label={label}
             />
 
             <Popover

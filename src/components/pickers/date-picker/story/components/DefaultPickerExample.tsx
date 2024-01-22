@@ -8,14 +8,14 @@ export const DefaultPickerExample: React.FC = () => {
         <StyledDatePicker
             dataTest=''
             // locale={enGB}
-            placeholder='Pick a date'
             mode='single'
             selected={date}
             onSelect={(e) => {
                 setDate(e)
             }}
-            inputClassName='w-[130px]'
+            inputClassName='w-[148px]'
             disabledDays={{ before: new Date(Date.now()) }}
+            dateFormat='dd.MM.yyyy'
         />
     )
 }

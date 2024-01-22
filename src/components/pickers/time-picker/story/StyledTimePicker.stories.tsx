@@ -18,16 +18,27 @@ export const TimePicker = () => {
 
     return (
         <div className='flex w-full gap-4'>
-            <StyledTimePicker placeholder='Select time' dataTest='test' value={value} onSelect={setValue} />
             <StyledTimePicker
-                placeholder='Select time'
+                dataTest='test'
+                value={value}
+                onSelect={setValue}
+                label='Select Time'
+            />
+            <StyledTimePicker
                 dataTest='test'
                 value={value}
                 onSelect={setValue}
                 error
                 helperText='Some error'
+                label='Select Time'
             />
-            <StyledTimePicker placeholder='Select time' dataTest='test' value={value} onSelect={setValue} disabled />
+            <StyledTimePicker
+                dataTest='test'
+                value={value}
+                onSelect={setValue}
+                disabled
+                label='Select Time'
+            />
         </div>
     )
 }

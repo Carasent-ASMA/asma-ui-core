@@ -15,6 +15,8 @@ export const RangePickerExample: React.FC = () => {
             locale={nb}
             placeholderFrom='Fra'
             placeholderTo='Til'
+            labelFrom='Fra'
+            labelTo='Til'
             numberOfMonths={isMobile ? 1 : 2}
             compact={true}
             mode='range'
@@ -26,7 +28,7 @@ export const RangePickerExample: React.FC = () => {
                 }
                 setRangeCompact(selected)
             }}
-            dateFormat={'dd.MM.yy'}
+            dateFormat={'dd.MM.yyyy'}
         />
     )
 }

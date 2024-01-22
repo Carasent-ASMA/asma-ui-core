@@ -1,11 +1,23 @@
 import { StyledInputField } from '../../../inputs/input-field'
 import { getValue } from '../helpers'
 import type { DatePickerProps } from '../types'
+import { CalendarRangeIcon } from 'src/components/data-display/icons'
 
 export const RangeInput: React.FC<DatePickerProps & { onClick: (e: React.MouseEvent<HTMLDivElement>) => void }> = (
     props,
 ) => {
-    const { dataTest, className, inputClassName, disabled, placeholderFrom, placeholderTo, dateFormat, onClick } = props
+    const {
+        dataTest,
+        className,
+        inputClassName,
+        disabled,
+        placeholderFrom,
+        placeholderTo,
+        dateFormat,
+        onClick,
+        labelFrom,
+        labelTo,
+    } = props
 
     if (props.mode !== 'range') return null
     const value_from: string | undefined = getValue(props.selected?.from, dateFormat)
@@ -16,27 +28,34 @@ export const RangeInput: React.FC<DatePickerProps & { onClick: (e: React.MouseEv
             data-test={dataTest}
             className={`${className} ${
                 disabled ? 'cursor-default text-[var(--colors-gray-300)]' : 'cursor-pointer'
-            } inline-flex gap-1 w-fit items-center`}
+            } inline-flex gap-4 w-fit items-center`}
             onClick={(e) => !disabled && onClick(e)}
         >
             <StyledInputField
+                label={labelFrom}
                 autoComplete={'off'}
                 size='small'
                 dataTest='styled-date-picker-input-range-from'
                 placeholder={placeholderFrom}
                 value={value_from}
                 disabled={!!disabled}
-                className={`${inputClassName} w-[90px] `}
+                className={`${inputClassName} w-[148px] `}
+                InputProps={{
+                    endAdornment: <CalendarRangeIcon width={24} height={24} />,
+                }}
             />
-            -
             <StyledInputField
+                label={labelTo}
                 autoComplete={'off'}
                 dataTest='styled-date-picker-input-range-to'
                 size='small'
                 placeholder={placeholderTo}
                 value={value_to}
                 disabled={!!disabled}
-                className={`${inputClassName} w-[90px]`}
+                className={`${inputClassName} w-[148px]`}
+                InputProps={{
+                    endAdornment: <CalendarRangeIcon width={24} height={24} />,
+                }}
             />
         </div>
     )
