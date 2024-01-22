@@ -2,25 +2,14 @@ import { StyledInputField } from '../../../inputs/input-field'
 import type { DatePickerProps } from '../types'
 import { getValue } from '../helpers'
 import { CalendarRangeIcon } from 'src/components/data-display/icons'
+import { cn } from 'src/helpers/cn'
 
-export const DefaultInput: React.FC<DatePickerProps & { onClick: (e: React.MouseEvent<HTMLDivElement>) => void }> = (
-    props,
-) => {
+export const DatePickerInputSingle: React.FC<
+    DatePickerProps & { onClick: (e: React.MouseEvent<HTMLDivElement>) => void }
+> = (props) => {
     const { dataTest, placeholder, disabled, onClick, inputClassName, onClear, allowClear, dateFormat } = props
 
-    let value: string | undefined = ''
-    let value_from: string | undefined = ''
-    let value_to: string | undefined = ''
-
-    if (props.mode === 'range') {
-        value_from = getValue(props.selected?.from, dateFormat)
-
-        value_to = getValue(props.selected?.to, dateFormat)
-
-        value = props.selected?.from ? (props.selected.to ? `${value_from} - ${value_to}` : value_from) : ''
-    } else {
-        value = getValue(props.selected, dateFormat)
-    }
+    if (props.mode !== 'single') return null
 
     return (
         <StyledInputField
@@ -31,14 +20,14 @@ export const DefaultInput: React.FC<DatePickerProps & { onClick: (e: React.Mouse
             InputProps={{
                 endAdornment: <CalendarRangeIcon width={24} height={24} />,
             }}
-            value={value}
+            value={getValue(props.selected, dateFormat)}
             disabled={!!disabled}
-            className={`${inputClassName}`}
+            className={cn(`w-36 ${inputClassName}`)}
             allowClear={allowClear}
             onClear={() => {
                 onClear?.()
             }}
-            label='Pick a date'
+            label={props.label}
         />
     )
 }

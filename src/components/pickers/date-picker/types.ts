@@ -12,43 +12,43 @@ type CommonDatePickerProps = {
     dataTest: string
 } & CalendarProps
 
-type CompactRangeProps = {
-    mode: 'range'
-    compact: true
-    placeholderFrom?: string
-    placeholderTo?: string
-    labelFrom?: string
-    labelTo?: string
-    allowClear?: never
-    placeholder?: never
+type DefaultSingleProps = {
+    mode: 'single'
+    compact?: never
+    //
+    placeholder?: string
+    placeholderFrom?: never
+    placeholderTo?: never
+    //
+    label?: string
+    labelFrom?: never
+    labelTo?: never
 }
 
 type DefaultRangeProps = {
     mode: 'range'
-    compact?: false
+    compact?: never
+    //
     placeholder?: string
-
     placeholderFrom?: never
     placeholderTo?: never
-
+    //
+    label?: string
     labelFrom?: never
     labelTo?: never
-
-    onClearFrom?: () => void
-    onClearTo?: () => void
 }
 
-type DefaultSingleProps = {
-    mode: 'single'
-    dateFormat?: string
-    placeholder?: string
-    label?: string
-
-    compact?: never
-    placeholderFrom?: never
-    placeholderTo?: never
-    labelFrom?: never
-    labelTo?: never
+type CompactRangeProps = {
+    mode: 'range'
+    compact: true
+    //
+    placeholder?: never
+    placeholderFrom?: string
+    placeholderTo?: string
+    //
+    label?: never
+    labelFrom?: string
+    labelTo?: string
 }
 
 export type DatePickerProps = CommonDatePickerProps & (CompactRangeProps | DefaultRangeProps | DefaultSingleProps)

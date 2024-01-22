@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { StyledDatePicker } from '../../StyledDatePicker'
 
-export const DefaultPickerExample: React.FC = () => {
+export const SinglePickerExample: React.FC = () => {
     const [date, setDate] = useState<Date>()
 
     return (
@@ -13,7 +13,8 @@ export const DefaultPickerExample: React.FC = () => {
             onSelect={(e) => {
                 setDate(e)
             }}
-            inputClassName='w-[148px]'
+            placeholder='Placeholder'
+            label='Label'
             disabledDays={{ before: new Date(Date.now()) }}
             dateFormat='dd.MM.yyyy'
         />

@@ -2,37 +2,28 @@ import { useState } from 'react'
 
 import { StyledCalendarPicker } from './components/StyledCalendarPicker'
 import type { DatePickerProps } from './types'
-import { RangeInput } from './components/RangeInput'
-import { DefaultInput } from './components/DefaultInput'
 import { setPickerPosition } from './helpers'
+import { DatePickerInputIndex } from './components/DatePickerInputIndex'
 
 export const StyledDatePicker = (props: DatePickerProps) => {
-    const { compact } = props
-    const [anchor, setAnchor] = useState<HTMLDivElement | null>(null)
+    const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
     const [positionAbove, setPositionAbove] = useState(false)
 
     const openDatePicker = (event: React.MouseEvent<HTMLDivElement>) => {
-        setAnchor(event.currentTarget)
+        setAnchorEl(event.currentTarget)
         setPickerPosition(event, setPositionAbove)
     }
 
-    const closeDatePicker = () => {
-        setAnchor(null)
+    const onClose = () => {
+        setAnchorEl(null)
     }
-
-    const isRangeCompact = compact && props.mode === 'range'
 
     return (
         <>
-            {isRangeCompact ? (
-                <RangeInput {...props} onClick={openDatePicker} />
-            ) : (
-                <DefaultInput {...props} onClick={openDatePicker} />
-            )}
-
+            <DatePickerInputIndex {...props} onClick={openDatePicker} />
             <StyledCalendarPicker
                 datePickerProps={{ ...props }}
-                popoverProps={{ open: !!anchor, anchorEl: anchor, onClose: closeDatePicker }}
+                popoverProps={{ open: !!anchorEl, anchorEl, onClose }}
                 positionAbove={positionAbove}
             />
         </>
