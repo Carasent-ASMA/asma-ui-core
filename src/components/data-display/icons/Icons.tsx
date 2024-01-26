@@ -56,6 +56,17 @@ import { DeleteOutlineIcon } from './delete-outline-icon'
 import { FilterIcon } from './filter-icon'
 import { LockIcon } from './lock-icon'
 import { DvrIcon } from './dvr-icon'
+import { ErrorOutlineIcon } from './error-outline-icon'
+import { ReplayIcon } from './replay-icon'
+import { LinkOutlineIcon } from './link-outline-icon'
+import { FastCheckOutlineIcon } from './fast-check-outline-icon'
+import { UnknownDocumentOutlineRoundedIcon } from './unknown-document-outline-rounded-icon'
+import { ListStatusIcon } from './list-status-icon'
+import { TextBoxCheckOutlineIcon } from './text-box-check-outline-icon'
+import { ListSettingsLineIcon } from './list-settings-line-icon'
+import { EarthIcon } from './earth-icon'
+import { SettingsMenuHorizontalIcon } from './settings-menu-horizontal-icon'
+import { PencilOutlineIcon } from './pencil-outline-icon'
 
 export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 20, width = 20 }) => {
     return (
@@ -227,6 +238,39 @@ export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 
             </div>
             <div title='DvrIcon'>
                 <DvrIcon height={height} width={width} />
+            </div>
+            <div title='ErrorOutlineIcon'>
+                <ErrorOutlineIcon height={height} width={width} />
+            </div>
+            <div title='ReplayIcon'>
+                <ReplayIcon height={height} width={width} />
+            </div>
+            <div title='LinkOutlineIcon'>
+                <LinkOutlineIcon height={height} width={width} />
+            </div>
+            <div title='FastCheckOutlineIcon'>
+                <FastCheckOutlineIcon height={height} width={width} />
+            </div>
+            <div title='UnknownDocumentOutlineRoundedIcon'>
+                <UnknownDocumentOutlineRoundedIcon height={height} width={width} />
+            </div>
+            <div title='ListStatusIcon'>
+                <ListStatusIcon height={height} width={width} />
+            </div>
+            <div title='TextBoxCheckOutlineIcon'>
+                <TextBoxCheckOutlineIcon height={height} width={width} />
+            </div>
+            <div title='ListSettingsLineIcon'>
+                <ListSettingsLineIcon height={height} width={width} />
+            </div>
+            <div title='EarthIcon'>
+                <EarthIcon height={height} width={width} />
+            </div>
+            <div title='SettingsMenuHorizontalIcon'>
+                <SettingsMenuHorizontalIcon height={height} width={width} />
+            </div>
+            <div title='PencilOutlineIcon'>
+                <PencilOutlineIcon height={height} width={width} />
             </div>
         </div>
     )
