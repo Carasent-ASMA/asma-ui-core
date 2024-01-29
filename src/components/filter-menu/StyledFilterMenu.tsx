@@ -16,6 +16,7 @@ type StyledFilterMenuProps = {
     popoverContent: React.ReactNode
     disabled?: boolean
     size?: 'small' | 'large' | 'medium'
+    variant?: 'contained' | 'outlined' | 'text' | 'textGray'
 }
 
 const useAnchor = () => {
@@ -46,6 +47,7 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
     dataTest,
     disabled,
     size = 'large',
+    variant = 'outlined',
 }) => {
     const { onAnchorClick, onClose, anchorEl } = useAnchor()
 
@@ -54,7 +56,7 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
             <div className='w-fit h-fit relative'>
                 <StyledButton
                     disabled={disabled}
-                    variant='outlined'
+                    variant={variant}
                     startIcon={<FilterIcon width={size === 'large' ? 24 : 20} height={size === 'large' ? 24 : 20} />}
                     onClick={onAnchorClick}
                     size={size}
