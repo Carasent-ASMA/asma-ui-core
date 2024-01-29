@@ -55,6 +55,19 @@ export const StyledInputField: React.FC<
             '& .MuiInputBase-colorPrimary.Mui-focused::after': {
                 borderColor: 'var(--colors-gama-500) !important',
             },
+            '& .MuiInputBase-colorPrimary:hover fieldset': {
+                borderColor: 'var(--colors-gama-300) !important',
+                borderWidth: '2px !important',
+            },
+            '& .MuiInputBase-colorPrimary.Mui-focused:hover fieldset': {
+                borderColor: 'var(--colors-gama-500) !important',
+            },
+            '& .MuiInputBase-colorPrimary.Mui-error fieldset': {
+                borderColor: 'var(--colors-error-500) !important',
+            },
+            '& .MuiInputBase-colorPrimary.Mui-error:hover fieldset': {
+                borderColor: 'var(--colors-error-500) !important',
+            },
             '& .MuiInputBase-colorPrimary.Mui-focused.Mui-error fieldset': {
                 borderColor: '#d3302f !important',
             },
@@ -77,18 +90,6 @@ export const StyledInputField: React.FC<
 
             '& .MuiOutlinedInput-input.Mui-disabled': {
                 WebkitTextFillColor: 'var(--colors-delta-300) !important',
-            },
-            '& .MuiOutlinedInput-root:not(.Mui-disabled)': {
-                '&.Mui-error': {
-                    '&:hover fieldset': {
-                        borderWidth: '1px !important',
-                        borderColor: 'var(--colors-error-500) !important',
-                    },
-                },
-                '&:hover fieldset': {
-                    borderWidth: '2px !important',
-                    borderColor: 'var(--colors-gama-300) !important',
-                },
             },
             ...props.sx,
         }}
