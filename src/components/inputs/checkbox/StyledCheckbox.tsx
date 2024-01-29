@@ -7,6 +7,12 @@ export const StyledCheckbox: React.FC<CheckboxProps & { dataTest: string }> = ({
         sx={{
             ...props.sx,
             '&.MuiCheckbox-root': {
+                color: 'var(--colors-delta-500) !important',
+            },
+            '&.MuiCheckbox-root.Mui-checked': {
+                color: 'var(--colors-gama-500) !important',
+            },
+            '&.MuiCheckbox-root.MuiCheckbox-indeterminate': {
                 color: 'var(--colors-gama-500) !important',
             },
             '&.MuiCheckbox-root.Mui-disabled': {
