@@ -68,10 +68,30 @@ const FilterMenuExample = () => {
     }, [mockData])
 
     return (
-        <div className='w-full flex justify-center'>
+        <div className='w-full flex flex-col gap-8 items-center'>
             <StyledFilterMenu
                 filterIsActive={filterIsActive}
                 dataTest='filter-menu-example'
+                popoverContent={
+                    <>
+                        {mockData.map(({ key, label, checked }) => (
+                            <MenuItem key={key} className={`${checked ? 'bg-primary-50' : ''} h-12`}>
+                                <StyledFormControlLabel
+                                    label={label}
+                                    control={<StyledCheckbox dataTest='menu-item-checkbox' disableRipple />}
+                                    checked={checked}
+                                    onChange={() => handleCheckboxChange(key)}
+                                />
+                            </MenuItem>
+                        ))}
+                    </>
+                }
+            />
+
+            <StyledFilterMenu
+                filterIsActive={filterIsActive}
+                dataTest='filter-menu-example-2'
+                size='small'
                 popoverContent={
                     <>
                         {mockData.map(({ key, label, checked }) => (

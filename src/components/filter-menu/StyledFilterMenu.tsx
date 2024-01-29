@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { StyledButton } from '../inputs/button'
 import { FilterIcon } from '../data-display/icons'
 import { StyledPopover } from '../utils/popover'
+import clsx from 'clsx'
 
 /**
  * Custom props:
@@ -14,6 +15,7 @@ type StyledFilterMenuProps = {
     filterIsActive: boolean
     popoverContent: React.ReactNode
     disabled?: boolean
+    size?: 'small' | 'large' | 'medium'
 }
 
 const useAnchor = () => {
@@ -38,7 +40,13 @@ const useAnchor = () => {
     return { anchorEl, onClose, onAnchorClick }
 }
 
-export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({ filterIsActive, popoverContent, dataTest, disabled }) => {
+export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
+    filterIsActive,
+    popoverContent,
+    dataTest,
+    disabled,
+    size = 'large',
+}) => {
     const { onAnchorClick, onClose, anchorEl } = useAnchor()
 
     return (
@@ -47,14 +55,21 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({ filterIsActi
                 <StyledButton
                     disabled={disabled}
                     variant='outlined'
-                    startIcon={<FilterIcon width={24} height={24} />}
+                    startIcon={<FilterIcon width={size === 'large' ? 24 : 20} height={size === 'large' ? 24 : 20} />}
                     onClick={onAnchorClick}
-                    size='large'
+                    size={size}
                     dataTest={dataTest}
                 >
                     Filter
                 </StyledButton>
-                {filterIsActive && <div className='h-2 w-2 bg-primary-400 rounded-full absolute top-2 right-2'></div>}
+                {filterIsActive && (
+                    <div
+                        className={clsx(
+                            'h-2 w-2 bg-primary-400 rounded-full absolute',
+                            size === 'large' ? 'top-2 right-2' : 'top-1 right-1',
+                        )}
+                    ></div>
+                )}
             </div>
             <StyledPopover
                 open={!!anchorEl}
