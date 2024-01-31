@@ -274,7 +274,7 @@ export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 
                 <PencilOutlineIcon height={height} width={width} />
             </div>
             <div title='OutlineWarningAmberIcon'>
-                <OutlineWarningAmberIcon height={height} width={height} />
+                <OutlineWarningAmberIcon height={height} width={height} className='text-red-500' />
             </div>
         </div>
     )
