@@ -67,8 +67,9 @@ import { ListSettingsLineIcon } from './list-settings-line-icon'
 import { EarthIcon } from './earth-icon'
 import { SettingsMenuHorizontalIcon } from './settings-menu-horizontal-icon'
 import { PencilOutlineIcon } from './pencil-outline-icon'
+import { OutlineWarningAmberIcon } from './warning-icon'
 
-export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 20, width = 20 }) => {
+export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 24, width = 24 }) => {
     return (
         <div className={styles['all-icons-container']}>
             <div title='LoadingIcon'>
@@ -271,6 +272,9 @@ export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 
             </div>
             <div title='PencilOutlineIcon'>
                 <PencilOutlineIcon height={height} width={width} />
+            </div>
+            <div title='OutlineWarningAmberIcon'>
+                <OutlineWarningAmberIcon height={height} width={height} />
             </div>
         </div>
     )
