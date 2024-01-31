@@ -67,7 +67,7 @@ import { ListSettingsLineIcon } from './list-settings-line-icon'
 import { EarthIcon } from './earth-icon'
 import { SettingsMenuHorizontalIcon } from './settings-menu-horizontal-icon'
 import { PencilOutlineIcon } from './pencil-outline-icon'
-import { OutlineWarningAmberIcon } from './warning-icon'
+import { WarningAmberOutlineIcon } from './warning-icon'
 
 export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 24, width = 24 }) => {
     return (
@@ -274,7 +274,7 @@ export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 
                 <PencilOutlineIcon height={height} width={width} />
             </div>
             <div title='OutlineWarningAmberIcon'>
-                <OutlineWarningAmberIcon height={height} width={height} className='text-red-500' />
+                <WarningAmberOutlineIcon height={height} width={height} className='text-amber-600' />
             </div>
         </div>
     )

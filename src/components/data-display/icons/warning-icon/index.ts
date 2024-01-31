@@ -1,1 +1,1 @@
-export * from './OutlineWarningAmberIcon'
+export * from './WarningAmberOutlineIcon'
