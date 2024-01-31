@@ -9,7 +9,7 @@ import {
     getPaginationRowModel,
 } from '@tanstack/react-table'
 import clsx from 'clsx'
-import { Fragment, useEffect, useLayoutEffect, useState } from 'react'
+import { Fragment } from 'react'
 import { LoadingIcon } from '../data-display/icons'
 import { Skeleton } from '@mui/material'
 import { SELECT_COLUMN_ID, type StyledTableProps } from './types'
@@ -99,8 +99,8 @@ export const StyledTable = <
                 id={row.id}
                 tabIndex={focusable ? -1 : undefined}
                 className={clsx(
-                    'table-row align-middle border-solid border-x border-t border-b-0 last:border-b-transparent first:border-t-transparent border-x-transparent border-y-delta-300 hover:cursor-pointer hover:bg-primary-25 focus:bg-primary-50 focus:border focus:border-primary-500',
-                    (row.getIsExpanded() || row.getIsSelected()) && 'bg-primary-50',
+                    'table-row align-middle border-solid border-x border-t border-b-0 last:border-b-transparent first:border-t-transparent border-x-transparent border-y-delta-300 hover:cursor-pointer hover:bg-gama-25 focus:bg-gama-50 focus:border focus:border-gama-500',
+                    (row.getIsExpanded() || row.getIsSelected()) && 'bg-gama-50',
                     loading && 'opacity-50',
                     getRowClassName?.(row),
                 )}
@@ -162,7 +162,7 @@ export const StyledTable = <
                     <tbody className='table-row-group align-middle max-w-[inherit]'>
                         {data.length > 0 && loading ? (
                             <LoadingIcon
-                                className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary-500 z-10'
+                                className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-gama-500 z-10'
                                 width={50}
                                 height={50}
                             />

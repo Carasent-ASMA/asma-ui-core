@@ -50,12 +50,12 @@ export const StyledDataGrid = (props: IBaseStyledDataGrid) => {
                 baseCheckbox: {
                     classes: {
                         checked: clsx(
-                            'text-primary-700 hover:text-primary-700',
+                            'text-gama-700 hover:text-gama-700',
                             props.slotProps?.baseCheckbox?.classes?.checked,
                         ),
                     },
                     className: clsx(
-                        'text-[#b5bec9] hover:text-primary-600 [&>svg]:h-5 [&>svg]:w-5 [&>input]:h-full [&>input]:w-full',
+                        'text-[#b5bec9] hover:text-gama-600 [&>svg]:h-5 [&>svg]:w-5 [&>input]:h-full [&>input]:w-full',
                         props.slotProps?.baseCheckbox?.className,
                     ),
                     disableRipple: true,
@@ -63,7 +63,7 @@ export const StyledDataGrid = (props: IBaseStyledDataGrid) => {
                 baseIconButton: {
                     classes: {
                         root: clsx(
-                            'p-1 rounded text-delta-800 hover:bg-primary-50 active:bg-primary-100 focus:border-2 focus:border-solid focus:border-warning-500 disabled:text-delta-300',
+                            'p-1 rounded text-delta-800 hover:bg-gama-50 active:bg-gama-100 focus:border-2 focus:border-solid focus:border-warning-500 disabled:text-delta-300',
                             props.slotProps?.baseIconButton?.classes?.root,
                         ),
                     },

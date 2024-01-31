@@ -153,7 +153,7 @@ export const Table = () => {
                     setColumnsVisibility(e)
                 }}
                 renderSubRows={(data) => <RenderSubRows subRows={data.rows} />}
-                getRowClassName={(row) => clsx('max-h-[40px]', row.original.progress > 50 ? 'bg-primary-25' : '')}
+                getRowClassName={(row) => clsx('max-h-[40px]', row.original.progress > 50 ? 'bg-gama-25' : '')}
                 noRowsOverlay={
                     <div className='flex h-full w-full items-center justify-center'>
                         <div className='flex flex-col items-center'>

@@ -1,15 +1,4 @@
 [data-theme='fretex'] {
-    --colors-primary-25: #f7f9f8;
-    --colors-primary-50: #eff4f2;
-    --colors-primary-100: #dee8e4;
-    --colors-primary-200: #ceddd7;
-    --colors-primary-300: #bdd1c9;
-    --colors-primary-400: #adc6bc;
-    --colors-primary-500: #9cb2a9;
-    --colors-primary-600: #8a9e96;
-    --colors-primary-700: #798b84;
-    --colors-primary-800: #4e5955;
-    --colors-primary-900: #2f3533;
     --colors-text-component: var(--colors-gray-9000);
     --colors-active-component: var(--colors-gama-700);
     --colors-alpha-100: var(--colors-slate-100);

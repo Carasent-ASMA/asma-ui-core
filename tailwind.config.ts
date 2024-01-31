@@ -1,5 +1,4 @@
 import { type Config } from 'tailwindcss'
-import colors from './src/styles/tokens/tokens.json'
 import twConfigs from './tw-configs/twConfigs.json'
 
 const boxShadow = twConfigs.boxShadow,
@@ -14,7 +13,7 @@ export default {
     theme: {
         fontFamily,
         extend: {
-            colors: { ...colors, ...twConfigs.colors },
+            colors: { ...twConfigs.colors },
             boxShadow,
             animation,
             keyframes,

@@ -21,7 +21,7 @@ export function getRowActions(row: Row<Person>) {
         {
             label: 'Hidden action',
             hide: true,
-            className: 'text-primary-700',
+            className: 'text-gama-700',
             onClick: () => console.info('click'),
         },
     ]

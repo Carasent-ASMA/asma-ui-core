@@ -1,15 +1,4 @@
 [data-theme='greenish'] {
-    --colors-primary-25: #f3fafa;
-    --colors-primary-50: #e8f6f6;
-    --colors-primary-100: #c5e7e7;
-    --colors-primary-200: #8ed0d0;
-    --colors-primary-300: #60bdbd;
-    --colors-primary-400: #1ca1a1;
-    --colors-primary-500: #168181;
-    --colors-primary-600: #116161;
-    --colors-primary-700: #0b4040;
-    --colors-primary-800: #083030;
-    --colors-primary-900: #062020;
     --colors-beta-100: var(--colors-red-100);
     --colors-beta-500: var(--colors-red-500);
     --colors-beta-600: var(--colors-red-600);

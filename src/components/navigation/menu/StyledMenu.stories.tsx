@@ -73,7 +73,7 @@ const StyledMenuExample: FC<{ args: Partial<MenuProps> }> = ({ args }) => {
 
             <Stack mt={2}>
                 <StyledTypography variant='h6'>Standard Icon Menu</StyledTypography>
-                <StyledMenuList className='bg-primary-50'>
+                <StyledMenuList className='bg-gama-50'>
                     <StyledMenuItem>
                         <ListItemIcon>
                             <Icon icon='mdi:content-cut' fontSize='small' />

@@ -15,6 +15,7 @@
         "beta-500": "var(--colors-beta-500)",
         "beta-600": "var(--colors-beta-600)",
         "beta-700": "var(--colors-beta-700)",
+        "gama-25": "var(--colors-gama-25)",
         "gama-50": "var(--colors-gama-50)",
         "gama-100": "var(--colors-gama-100)",
         "gama-200": "var(--colors-gama-200)",

@@ -67,7 +67,7 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
                 {filterIsActive && (
                     <div
                         className={clsx(
-                            'h-2 w-2 bg-primary-400 rounded-full absolute',
+                            'h-2 w-2 bg-gama-400 rounded-full absolute',
                             size === 'large' ? 'top-2 right-2' : 'top-1 right-1',
                         )}
                     ></div>

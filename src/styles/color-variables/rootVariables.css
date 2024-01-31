@@ -1,15 +1,5 @@
 :root {
-    --colors-teal-25: #f3fafa;
-    --colors-teal-50: #e8f6f6;
-    --colors-teal-100: #c5e7e7;
-    --colors-teal-200: #8ed0d0;
-    --colors-teal-300: #60bdbd;
-    --colors-teal-400: #1ca1a1;
-    --colors-teal-500: #168181;
-    --colors-teal-600: #116161;
-    --colors-teal-700: #0b4040;
-    --colors-teal-800: #083030;
-    --colors-teal-900: #062020;
+    --colors-text: #4c4c4c;
 
     --colors-blue-25: #f2f8fb;
     --colors-blue-50: #e6f2f8;
@@ -23,18 +13,6 @@
     --colors-blue-800: #00405e;
     --colors-blue-900: #002638;
 
-    --colors-xanadu-50: #eff4f2;
-    --colors-xanadu-100: #dee8e4;
-    --colors-xanadu-200: #ceddd7;
-    --colors-xanadu-300: #bdd1c9;
-    --colors-xanadu-400: #adc6bc;
-    --colors-xanadu-500: #9cb2a9;
-    --colors-xanadu-600: #8a9e96;
-    --colors-xanadu-700: #798b84;
-    --colors-xanadu-800: #4e5955;
-    --colors-xanadu-900: #2f3533;
-
-    --colors-text: #4c4c4c;
     --colors-red-100: #f7dede;
     --colors-red-300: #f6b9b9;
     --colors-red-500: #e10700;

@@ -1,15 +1,4 @@
 :root {
-    --colors-primary-25: #f2f8fb;
-    --colors-primary-50: #e6f2f8;
-    --colors-primary-100: #cce6f1;
-    --colors-primary-200: #99cce4;
-    --colors-primary-300: #66b3d6;
-    --colors-primary-400: #4da6cf;
-    --colors-primary-500: #007cb5;
-    --colors-primary-600: #006696;
-    --colors-primary-700: #005a83;
-    --colors-primary-800: #00405e;
-    --colors-primary-900: #002638;
     --colors-text-component: #ffffff;
     --colors-active-component: var(--colors-blue-500);
     --colors-alpha-100: var(--colors-blue-100);
