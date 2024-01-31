@@ -37,6 +37,9 @@ export function StyledSelectAutocomplete<
                 <Paper
                     data-test={`paper-${dataTest}`}
                     sx={{
+                        '& ul': {
+                            padding: '0 !important',
+                        },
                         '& .MuiAutocomplete-option.Mui-focused': {
                             background: 'var(--colors-delta-50) !important',
                         },
