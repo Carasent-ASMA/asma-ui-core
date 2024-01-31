@@ -29,6 +29,9 @@ export const StyledCalendarPickerFooter: React.FC<{
                 variant='text'
                 onClick={(e) => {
                     onClear ? onClear() : removeSelection(e)
+                    //
+                    // to reset picker navigation
+                    setMonth(new Date(Date.now()))
                 }}
                 size='small'
                 disabled={eraserDisabled}
