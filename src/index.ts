@@ -1,6 +1,7 @@
+import './styles/index.css'
+
 export * from './helpers'
 export * from './interfaces'
-
 // data-display
 export * from './components/data-display/badge'
 export * from './components/data-display/chip'
@@ -55,5 +56,4 @@ export * from './components/utils/popover'
 export * from './components/custom/widget/widget-title/StyledWidgetTitle'
 //modules
 export * from './components/custom/module/module-title/StyledModuleTitle'
-//filter menu
 export * from './components/filter-menu/StyledFilterMenu'
