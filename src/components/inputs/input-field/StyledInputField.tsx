@@ -11,12 +11,14 @@ export const StyledInputField: React.FC<
     TextFieldProps & {
         allowClear?: boolean
         onClear?: () => void
+        readOnly?: boolean
         dataTest: string
     }
-> = ({ allowClear, onClear, dataTest, ...props }) => (
+> = ({ allowClear, onClear, readOnly, disabled, dataTest, ...props }) => (
     <TextField
         {...props}
         data-test={dataTest}
+        disabled={disabled || readOnly}
         type='mui-input'
         InputProps={
             allowClear && props.value
@@ -87,10 +89,20 @@ export const StyledInputField: React.FC<
                 color: '#666666',
                 opacity: '100',
             },
-
             '& .MuiOutlinedInput-input.Mui-disabled': {
                 WebkitTextFillColor: 'var(--colors-delta-300) !important',
             },
+            ...(readOnly && {
+                '& .MuiOutlinedInput-input.Mui-disabled': {
+                    WebkitTextFillColor: 'var(--colors-delta-800) !important',
+                },
+                '& .MuiInputBase-colorPrimary.Mui-disabled': {
+                    backgroundColor: 'var(--colors-delta-10) !important',
+                },
+                '& .MuiInputBase-colorPrimary.Mui-disabled fieldset': {
+                    borderColor: 'var(--colors-delta-200) !important',
+                },
+            }),
             ...props.sx,
         }}
     />

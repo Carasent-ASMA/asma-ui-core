@@ -141,6 +141,32 @@ export const Inputs = () => {
                 label=''
                 size='small'
             />
+            <StyledInputField
+                dataTest='test'
+                {...meta.args}
+                onChange={() => undefined}
+                value='Hello World'
+                label='Read only'
+                readOnly
+            />
+            <StyledInputField
+                dataTest='test'
+                {...meta.args}
+                onChange={() => undefined}
+                value='Hello World'
+                readOnly
+                label='Small read only'
+                size='small'
+            />
+            <StyledInputField
+                dataTest='test'
+                {...meta.args}
+                onChange={() => undefined}
+                value='Hello World'
+                readOnly
+                label=''
+                size='small'
+            />
         </div>
     )
 }
