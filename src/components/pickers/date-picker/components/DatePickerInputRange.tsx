@@ -1,7 +1,7 @@
 import { StyledInputField } from '../../../inputs/input-field'
 import type { DatePickerProps } from '../types'
 import { getValue } from '../helpers'
-import { CalendarRangeIcon } from 'src/components/data-display/icons'
+import { OutlineCalendarMonth } from 'src/components/data-display/icons'
 import { cn } from 'src/helpers/cn'
 
 export const DatePickerInputRange: React.FC<
@@ -24,7 +24,7 @@ export const DatePickerInputRange: React.FC<
             size='small'
             onClick={(e) => !disabled && onClick(e)}
             InputProps={{
-                endAdornment: <CalendarRangeIcon width={24} height={24} />,
+                endAdornment: <OutlineCalendarMonth width={24} height={24} />,
             }}
             value={value}
             disabled={!!disabled}
