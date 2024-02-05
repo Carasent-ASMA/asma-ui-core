@@ -1,5 +1,4 @@
 import type { Meta } from '@storybook/react'
-
 import { StyledTimePicker } from '../StyledTimePicker'
 import { useState } from 'react'
 
@@ -14,30 +13,28 @@ const meta = {
 export default meta
 
 export const TimePicker = () => {
-    const [value, setValue] = useState<Date | undefined>(new Date())
+    const [value, setValue] = useState<Date | undefined>()
 
     return (
         <div className='flex w-full gap-4'>
-            <StyledTimePicker
-                dataTest='test'
-                value={value}
-                onSelect={setValue}
-                label='Select Time'
-            />
+            <StyledTimePicker dataTest='test' value={value} onSelect={setValue} label='Time' placeholder='Time' />
             <StyledTimePicker
                 dataTest='test'
                 value={value}
                 onSelect={setValue}
                 error
                 helperText='Some error'
-                label='Select Time'
+                label='Time'
+                placeholder='Time'
+                locale={'no'}
             />
             <StyledTimePicker
                 dataTest='test'
                 value={value}
                 onSelect={setValue}
                 disabled
-                label='Select Time'
+                label='Time'
+                placeholder='Time'
             />
         </div>
     )
