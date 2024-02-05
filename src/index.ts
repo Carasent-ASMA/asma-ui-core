@@ -26,6 +26,7 @@ export * from './components/inputs/select-autocomplete'
 export * from './components/inputs/slider'
 export * from './components/inputs/switch'
 export * from './components/inputs/radio-button'
+export * from './components/inputs/label'
 
 // pickers
 export * from './components/pickers/date-picker'
