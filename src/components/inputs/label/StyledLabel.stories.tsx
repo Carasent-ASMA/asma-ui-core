@@ -1,6 +1,6 @@
 import React, { type ReactNode } from 'react'
 
-import StyledLabel from './StyledLabel'
+import { StyledLabel } from './StyledLabel'
 
 import { StyledTypography } from 'src/components/data-display/typography'
 

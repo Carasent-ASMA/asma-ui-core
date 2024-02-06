@@ -8,7 +8,7 @@ export type StyledLabelProps = {
     dataTest?: string
 }
 
-const StyledLabel: FC<StyledLabelProps> = ({ children, onClick, className, dataTest }) => {
+export const StyledLabel: FC<StyledLabelProps> = ({ children, onClick, className, dataTest }) => {
     return (
         <div
             className={cn(
@@ -22,5 +22,3 @@ const StyledLabel: FC<StyledLabelProps> = ({ children, onClick, className, dataT
         </div>
     )
 }
-
-export default StyledLabel
