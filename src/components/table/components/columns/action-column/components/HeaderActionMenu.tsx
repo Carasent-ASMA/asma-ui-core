@@ -1,6 +1,5 @@
 import { Icon } from '@iconify/react'
 import type { HeaderContext } from '@tanstack/react-table'
-import { StyledButton } from 'src/components/inputs/button'
 import { StyledCheckbox } from 'src/components/inputs/checkbox'
 import { StyledMenuItem } from 'src/components/navigation/menu'
 import { SELECT_COLUMN_ID } from 'src/components/table/types'
@@ -11,9 +10,9 @@ export function HeaderActionMenu<TData>({ headerData }: { headerData: HeaderCont
     const { anchorEl, open, handleClose, handleOpen } = useToggleMenuVisibility()
     return (
         <div className='w-full  flex items-center justify-end '>
-            <StyledButton dataTest='data-test-pin' variant='text' size='small' onClick={handleOpen}>
-                <Icon icon='mdi:pin' className='text-delta-600 min-w-[20px] min-h-[20px]' />
-            </StyledButton>
+            <div className='px-2.5 h-[30px] flex items-center justify-center' onClick={handleOpen}>
+                <Icon icon='mdi:pin' className='text-delta-500 hover:text-delta-600 min-w-[20px] min-h-[20px]' />
+            </div>
             <StyledPopover
                 anchorEl={anchorEl}
                 anchorOrigin={{
