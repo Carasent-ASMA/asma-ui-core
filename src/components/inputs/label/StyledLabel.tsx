@@ -5,7 +5,7 @@ export type StyledLabelProps = {
     children: ReactNode
     onClick?: (event: MouseEvent<HTMLDivElement>) => void
     className?: string
-    dataTest?: string
+    dataTest: string
 }
 
 export const StyledLabel: FC<StyledLabelProps> = ({ children, onClick, className, dataTest }) => {

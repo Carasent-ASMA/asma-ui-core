@@ -15,47 +15,67 @@ export const Default = () => (
     <>
         <StyledTypography className='py-2'>Label/Highlighting</StyledTypography>
         <MarginBlock>
-            <StyledLabel className='bg-green-500 text-delta-900'>Good</StyledLabel>
+            <StyledLabel dataTest='label good' className='bg-green-500 text-delta-900'>
+                Good
+            </StyledLabel>
         </MarginBlock>
         <MarginBlock>
-            <StyledLabel className='bg-yellow-300 text-delta-900'>Attention</StyledLabel>
+            <StyledLabel dataTest='label attention' className='bg-yellow-300 text-delta-900'>
+                Attention
+            </StyledLabel>
         </MarginBlock>
         <MarginBlock>
-            <StyledLabel className='bg-orange-200 text-delta-900'>Warning</StyledLabel>
+            <StyledLabel dataTest='label warning' className='bg-orange-200 text-delta-900'>
+                Warning
+            </StyledLabel>
         </MarginBlock>
         <MarginBlock>
-            <StyledLabel className='bg-red-200 text-delta-900'>Urgent</StyledLabel>
+            <StyledLabel dataTest='label urgent' className='bg-red-200 text-delta-900'>
+                Urgent
+            </StyledLabel>
         </MarginBlock>
 
         <StyledTypography className='py-2'>Label/Groups</StyledTypography>
         <MarginBlock>
-            <StyledLabel className='bg-delta-700 text-white'>Group</StyledLabel>
+            <StyledLabel dataTest='label group' className='bg-delta-700 text-white'>
+                Group
+            </StyledLabel>
         </MarginBlock>
         <MarginBlock>
-            <StyledLabel className='bg-purple-500 text-white'>Network</StyledLabel>
+            <StyledLabel dataTest='label network' className='bg-purple-500 text-white'>
+                Network
+            </StyledLabel>
         </MarginBlock>
         <MarginBlock>
-            <StyledLabel className='bg-delta-700 text-white'>Gruppe</StyledLabel>
+            <StyledLabel dataTest='label gruppe' className='bg-delta-700 text-white'>
+                Gruppe
+            </StyledLabel>
         </MarginBlock>
         <MarginBlock>
-            <StyledLabel className='bg-blue-400 text-white'>ORG</StyledLabel>
+            <StyledLabel dataTest='label ORG' className='bg-blue-400 text-white'>
+                ORG
+            </StyledLabel>
         </MarginBlock>
 
         <StyledTypography className='py-2'>Label/General</StyledTypography>
         <MarginBlock>
-            <StyledLabel className='bg-gray-100 text-delta-700'>Archived</StyledLabel>
+            <StyledLabel dataTest='label archived' className='bg-gray-100 text-delta-700'>
+                Archived
+            </StyledLabel>
         </MarginBlock>
         <MarginBlock>
-            <StyledLabel>Admin</StyledLabel>
+            <StyledLabel dataTest='label admin'>Admin</StyledLabel>
         </MarginBlock>
         <MarginBlock>
-            <StyledLabel>Parent</StyledLabel>
+            <StyledLabel dataTest='label parent'>Parent</StyledLabel>
         </MarginBlock>
         <MarginBlock>
-            <StyledLabel>Linked</StyledLabel>
+            <StyledLabel dataTest='label linked'>Linked</StyledLabel>
         </MarginBlock>
         <MarginBlock>
-            <StyledLabel onClick={() => alert('Click!')}>Styled Label + onClick handler</StyledLabel>
+            <StyledLabel dataTest='label onClick' onClick={() => alert('Click!')}>
+                Styled Label + onClick handler
+            </StyledLabel>
         </MarginBlock>
     </>
 )
