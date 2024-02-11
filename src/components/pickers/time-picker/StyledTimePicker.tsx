@@ -104,6 +104,7 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = ({
                 helperText={
                     <HelperText isValidTime={isValidTime} error={error} localization={locale} helperText={helperText} />
                 }
+                onClick={(e) => !disabled && handleOpen(e)}
                 onChange={handleChange}
                 InputProps={{
                     endAdornment: (
