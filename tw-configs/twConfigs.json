@@ -20,7 +20,7 @@
         "gama-100": "var(--colors-gama-100)",
         "gama-200": "var(--colors-gama-200)",
         "gama-300": "var(--colors-gama-300)",
-        "gama-400": "red",
+        "gama-400": "var(--colors-gama-400)",
         "gama-500": "var(--colors-gama-500)",
         "gama-600": "var(--colors-gama-600)",
         "gama-700": "var(--colors-gama-700)",
