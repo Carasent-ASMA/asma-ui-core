@@ -68,7 +68,7 @@ import { EarthIcon } from './earth-icon'
 import { SettingsMenuHorizontalIcon } from './settings-menu-horizontal-icon'
 import { PencilOutlineIcon } from './pencil-outline-icon'
 import { WarningAmberOutlineIcon } from './warning-icon'
-import { OutlineCalendarMonth } from 'asma-core-ui'
+import { ConsentsIcon, OutlineCalendarMonth } from 'asma-core-ui'
 
 export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 24, width = 24 }) => {
     return (
@@ -279,6 +279,9 @@ export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 
             </div>
             <div title='OutlineWarningAmberIcon'>
                 <WarningAmberOutlineIcon height={height} width={height} className='text-amber-600' />
+            </div>
+            <div title='ConsentsIcon'>
+                <ConsentsIcon height={height} width={height} className='text-blue-600' />
             </div>
         </div>
     )
