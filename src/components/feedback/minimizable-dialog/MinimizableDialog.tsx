@@ -1,0 +1,148 @@
+import { CloseIcon, KeyboardCapslockIcon, MinimizeIcon } from 'src/components/data-display/icons'
+import { StyledButton } from 'src/components/inputs/button'
+import clsx from 'clsx'
+import { useState } from 'react'
+
+export const MinimizableDialog: React.FC<{
+    onCloseText: string
+    onMinimizeText: string
+    onExpandText: string
+    open: boolean
+    onClose: () => void
+    showCloseIcon?: boolean
+    showMinimizeIcon?: boolean
+    showExpandIcon?: boolean
+    title: string
+    label?: string
+    children?: React.ReactNode
+    className?: string
+    primaryButtonText?: string
+    secondaryButtonText?: string
+    onPrimaryButtonClick?: () => void
+    onSecondaryButtonClick?: () => void
+}> = ({
+    onCloseText,
+    onMinimizeText,
+    onExpandText,
+    showCloseIcon = true,
+    showMinimizeIcon = true,
+    showExpandIcon = true,
+    title,
+    label,
+    children,
+    open,
+    onClose,
+    className = '',
+    primaryButtonText,
+    secondaryButtonText,
+    onPrimaryButtonClick,
+    onSecondaryButtonClick,
+}) => {
+    const [minimized, setMinimized] = useState(false)
+
+    const toggleMinimized = () => {
+        setMinimized(!minimized)
+    }
+
+    if (!open) return null
+
+    if (minimized) {
+        return (
+            <div className='fixed bottom-4 right-4 z-[51] w-[387px] rounded-lg bg-white py-2 pl-4 pr-3 shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)] transition-all duration-300'>
+                <div className='flex items-center justify-between'>
+                    <div className='truncate text-lg font-semibold text-delta-800'>{title}</div>
+                    <div className='flex gap-x-1'>
+                        <div className='flex items-center gap-x-2'>
+                            <StyledButton
+                                dataTest='minimize-button'
+                                variant='text'
+                                size='small'
+                                onClick={toggleMinimized}
+                                endIcon={
+                                    showExpandIcon && (
+                                        <KeyboardCapslockIcon height={20} width={20} color='text-gama-500' />
+                                    )
+                                }
+                            >
+                                {onExpandText}
+                            </StyledButton>
+                        </div>
+                        <div className='flex items-center gap-x-2'>
+                            <StyledButton
+                                dataTest='close-button'
+                                variant='textGray'
+                                size='small'
+                                onClick={onClose}
+                                endIcon={showCloseIcon && <CloseIcon height={20} width={20} color='text-delta-700' />}
+                            >
+                                {onCloseText}
+                            </StyledButton>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    return (
+        <div
+            className={clsx(
+                'fixed bottom-4 right-4 z-[51] rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)] transition-all duration-300',
+                className,
+            )}
+        >
+            <div className='fixed-top flex flex-col gap-y-2 p-4'>
+                <div className='flex items-center justify-between'>
+                    {!label ? (
+                        <div className='text-2xl font-semibold text-delta-800'>{title}</div>
+                    ) : (
+                        <div className='text-sm text-delta-700'>{label}</div>
+                    )}
+
+                    <div className='flex gap-x-1'>
+                        <div className='flex items-center gap-x-2'>
+                            <StyledButton
+                                dataTest='minimize-button'
+                                variant='textGray'
+                                size='small'
+                                onClick={toggleMinimized}
+                                endIcon={
+                                    showMinimizeIcon && <MinimizeIcon height={20} width={20} color='text-delta-700' />
+                                }
+                            >
+                                {onMinimizeText}
+                            </StyledButton>
+                        </div>
+                        <div className='flex items-center gap-x-2'>
+                            <StyledButton
+                                dataTest='close-button'
+                                variant='textGray'
+                                size='small'
+                                onClick={onClose}
+                                endIcon={<CloseIcon height={20} width={20} color='text-delta-700' />}
+                            >
+                                {onCloseText}
+                            </StyledButton>
+                        </div>
+                    </div>
+                </div>
+
+                {label && <div className='text-2xl font-semibold text-delta-800'>{title}</div>}
+            </div>
+            <div>{children}</div>
+
+            <div className='fixed-bottom flex justify-end gap-x-4 border-t-[1px] border-delta-200 p-4'>
+                {secondaryButtonText && onSecondaryButtonClick && (
+                    <StyledButton dataTest='cancel-button' variant='outlined' onClick={onSecondaryButtonClick}>
+                        {secondaryButtonText}
+                    </StyledButton>
+                )}
+                {primaryButtonText && onPrimaryButtonClick && (
+                    <StyledButton dataTest='save-button' onClick={onPrimaryButtonClick}>
+                        {primaryButtonText}
+                    </StyledButton>
+                )}
+            </div>
+        </div>
+    )
+}

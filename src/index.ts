@@ -58,3 +58,4 @@ export * from './components/custom/widget/widget-title/StyledWidgetTitle'
 //modules
 export * from './components/custom/module/module-title/StyledModuleTitle'
 export * from './components/filter-menu/StyledFilterMenu'
+export * from './components/feedback/minimizable-dialog/MinimizableDialog'
