@@ -68,7 +68,7 @@ import { EarthIcon } from './earth-icon'
 import { SettingsMenuHorizontalIcon } from './settings-menu-horizontal-icon'
 import { PencilOutlineIcon } from './pencil-outline-icon'
 import { WarningAmberOutlineIcon } from './warning-icon'
-import { ConsentsIcon, KeyboardCapslockIcon, MinimizeIcon, OutlineCalendarMonth } from 'asma-core-ui'
+import { BadgeIcon, ConsentsIcon, KeyboardCapslockIcon, MinimizeIcon, OutlineCalendarMonth } from 'asma-core-ui'
 import { MessageReplyIcon } from './message-reply-icon'
 
 export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 24, width = 24 }) => {
@@ -292,6 +292,9 @@ export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 
             </div>
             <div title='MessageReplyIcon'>
                 <MessageReplyIcon height={height} width={height} />
+            </div>
+            <div title='BadgeIcon'>
+                <BadgeIcon height={height} width={height} className='text-gama-500' />
             </div>
         </div>
     )

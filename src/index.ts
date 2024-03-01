@@ -59,3 +59,5 @@ export * from './components/custom/widget/widget-title/StyledWidgetTitle'
 export * from './components/custom/module/module-title/StyledModuleTitle'
 export * from './components/filter-menu/StyledFilterMenu'
 export * from './components/feedback/minimizable-dialog/MinimizableDialog'
+
+export { Fade, Paper, ClickAwayListener, Popper, Avatar } from '@mui/material'
