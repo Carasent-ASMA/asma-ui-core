@@ -90,7 +90,7 @@ export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 
                 <FindReplaceIcon height={height} width={height} />
             </div>
             <div title='FindReplacePeopleIcon' className='cursor-pointer'>
-                <FindReplacePeopleIcon height={33} width={33} />
+                <FindReplacePeopleIcon className='w-[33px] h-[33px]' />
             </div>
             <div title='Search'>
                 <SearchIcon height={height} width={height} />
