@@ -94,7 +94,7 @@ export const MinimizableDialog: React.FC<{
             )}
             data-test={dataTest}
         >
-            <div className='fixed-top flex flex-col gap-y-2 p-4'>
+            <div className='fixed-top flex flex-col gap-y-2 p-4 border-b-[1px] border-delta-200'>
                 <div className='flex items-center justify-between'>
                     {!label ? (
                         <div className='text-2xl font-semibold text-delta-800'>{title}</div>
