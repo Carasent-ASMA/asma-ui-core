@@ -60,4 +60,4 @@ export * from './components/custom/module/module-title/StyledModuleTitle'
 export * from './components/filter-menu/StyledFilterMenu'
 export * from './components/feedback/minimizable-dialog/MinimizableDialog'
 
-export { Fade, Paper, ClickAwayListener, Popper, Avatar } from '@mui/material'
+export { Fade, Paper, ClickAwayListener, Popper, Avatar, Skeleton } from '@mui/material'
