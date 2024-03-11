@@ -16,6 +16,7 @@ import { SELECT_COLUMN_ID, type StyledTableProps } from './types'
 import { TableHeader } from './components/TableHeader'
 import { injectColumns } from './components/columns/injectColumns'
 import { TableFooter } from './components/TableFooter'
+import { cn } from 'src/helpers/cn'
 
 /**
  *
@@ -99,7 +100,7 @@ export const StyledTable = <
                 id={row.id}
                 tabIndex={focusable ? -1 : undefined}
                 className={clsx(
-                    'table-row align-middle border-solid border-x border-t border-b-0 last:border-b-transparent first:border-t-transparent border-x-transparent border-y-delta-300 hover:cursor-pointer hover:bg-gama-25 focus:bg-gama-50 focus:border focus:border-gama-500',
+                    'table-row align-middle group border-solid border-x border-t border-b-0 last:border-b-transparent first:border-t-transparent border-x-transparent border-y-delta-300 hover:cursor-pointer hover:bg-gama-25 focus:bg-gama-50 focus:border focus:border-gama-500',
                     (row.getIsExpanded() || row.getIsSelected()) && 'bg-gama-50',
                     loading && 'opacity-50',
                     getRowClassName?.(row),
@@ -122,13 +123,20 @@ export const StyledTable = <
                 }}
             >
                 {row.getVisibleCells().map((cell) => {
+                    // *
+                    //  sticky actions
+                    const isActionsCell = cell.column.id === 'actions'
                     return (
                         <td
                             key={cell.id}
-                            className={clsx(
+                            className={cn(
                                 'break-words table-cell align-middle text-sm text-delta-900 whitespace-pre-wrap',
                                 'px-2.5 py-0',
                                 tdClassName,
+                                // *
+                                //  sticky actions
+                                isActionsCell && 'bg-white sticky right-0 group-hover:bg-gama-25',
+                                isActionsCell && getRowClassName?.(row),
                             )}
                         >
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}

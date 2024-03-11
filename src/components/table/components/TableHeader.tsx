@@ -2,6 +2,7 @@ import { flexRender, type Table } from '@tanstack/react-table'
 import clsx from 'clsx'
 import { last } from 'lodash-es'
 import { DropDownIcon, DropUpIcon } from 'src/components/data-display/icons'
+import { cn } from 'src/helpers/cn'
 
 export function TableHeader<TData>({
     table,
@@ -43,14 +44,24 @@ export function TableHeader<TData>({
                             columnWidth = 'w-full'
                         }
 
+                        // *
+                        //  sticky actions
+                        let stickyActionsClassName = ''
+                        if (header.column.id === 'actions') {
+                            stickyActionsClassName = 'sticky bg-[#fcfcfd] right-0'
+                        }
+
                         return (
                             <th
                                 key={header.id}
                                 colSpan={header.colSpan}
-                                className={clsx(
+                                className={cn(
                                     columnWidth,
                                     'px-2.5 py-0',
                                     'text-delta-500 bg-transparent border-none text-start text-[10px] font-semibold uppercase justify-start',
+                                    // *
+                                    //  sticky actions
+                                    stickyActionsClassName,
                                 )}
                                 style={{
                                     maxWidth: header.column.columnDef.maxSize,
