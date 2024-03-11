@@ -11,10 +11,10 @@ export const StyledAccordionSummary = (props: AccordionSummaryProps) => (
             ...props.sx,
             backgroundColor: 'transparent !important',
             '& .MuiAccordionSummary-expandIconWrapper.Mui-expanded': {
-                transform: 'rotate(0deg)',
+                transform: 'rotate(180deg)',
             },
             '& .MuiAccordionSummary-expandIconWrapper:not(.Mui-expanded)': {
-                transform: 'rotate(-90deg)',
+                transform: 'rotate(0deg)',
             },
         }}
     />
