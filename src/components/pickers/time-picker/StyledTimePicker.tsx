@@ -97,6 +97,9 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = ({
     return (
         <>
             <StyledInputField
+                name='password'
+                autoComplete='off'
+                type='text'
                 dataTest={dataTest}
                 placeholder={placeholder}
                 size='small'
@@ -129,12 +132,12 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = ({
                 anchorOrigin={
                     anchorOrigin || {
                         vertical: 'bottom',
-                        horizontal: -100,
+                        horizontal: 0,
                     }
                 }
                 transformOrigin={
                     transformOrigin || {
-                        vertical: -15,
+                        vertical: -8,
                         horizontal: 'left',
                     }
                 }
