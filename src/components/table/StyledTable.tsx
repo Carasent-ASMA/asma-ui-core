@@ -135,7 +135,7 @@ export const StyledTable = <
                                 tdClassName,
                                 // *
                                 //  sticky actions
-                                isActionsCell && 'bg-white sticky right-0 group-hover:bg-gama-25',
+                                isActionsCell && 'bg-white sticky right-[-1px] group-hover:bg-gama-25',
                                 isActionsCell && getRowClassName?.(row),
                             )}
                         >

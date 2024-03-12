@@ -4,6 +4,7 @@ import { useToggleMenuVisibility } from 'src/hooks/useToggleMenuVisibility.hook'
 import { StyledPopover } from 'src/components/utils/popover'
 import { StyledMenuItem } from 'src/components/navigation/menu'
 import type { CellContext, Row } from '@tanstack/react-table'
+import type { ReactNode } from 'react'
 
 export function RowActionMenu<TData>({
     tableData,
@@ -11,7 +12,7 @@ export function RowActionMenu<TData>({
 }: {
     tableData: CellContext<TData, TData>
     actions: (row: Row<TData>) => {
-        label: string
+        label: ReactNode
         className?: string
         disabled?: boolean
         hide?: boolean
@@ -58,9 +59,9 @@ export function RowActionMenu<TData>({
             >
                 {actions(tableData.row)
                     .filter((action) => !action.hide)
-                    .map((action) => (
+                    .map((action, index) => (
                         <StyledMenuItem
-                            key={action.label}
+                            key={index}
                             className={action.className}
                             disabled={action.disabled}
                             onClick={() => {

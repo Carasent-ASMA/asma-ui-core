@@ -33,7 +33,7 @@ declare module '@tanstack/react-table' {
 }
 
 export interface IAction<TData> {
-    label: string
+    label: ReactNode
     className?: string
     disabled?: boolean
     hide?: boolean

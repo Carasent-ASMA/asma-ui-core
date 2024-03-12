@@ -6,7 +6,7 @@ import type { ReactNode } from 'react'
 export function generateActionsColumn<TData>(options: {
     headerPin: boolean
     actions?: (row: Row<TData>) => {
-        label: string
+        label: ReactNode
         className?: string
         disabled?: boolean
         hide?: boolean
