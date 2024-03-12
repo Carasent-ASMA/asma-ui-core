@@ -48,7 +48,7 @@ export function TableHeader<TData>({
                         //  sticky actions
                         let stickyActionsClassName = ''
                         if (header.column.id === 'actions') {
-                            stickyActionsClassName = 'sticky bg-[#fcfcfd] right-0'
+                            stickyActionsClassName = 'sticky bg-transparent right-0'
                         }
 
                         return (
