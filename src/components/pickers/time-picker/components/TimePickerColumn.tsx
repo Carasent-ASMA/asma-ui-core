@@ -1,6 +1,6 @@
 import { getHours, getMinutes, set } from 'date-fns'
-import type { StyledTimePickerProps } from '../StyledTimePicker'
 import clsx from 'clsx'
+import type { StyledTimePickerProps } from '../types'
 export type TimePickerColumnProps = Omit<
     StyledTimePickerProps,
     'placeholder' | 'disabled' | 'inputClassName' | 'dataTest'
@@ -16,7 +16,11 @@ export const TimePickerColumn: React.FC<TimePickerColumnProps> = ({ type, value,
     const currentTime = isHours ? now.getHours() : now.getMinutes()
 
     return (
-        <div className={'styled-time-picker-root_column'}>
+        <div
+            className={
+                'styled-time-picker-root_column overflow-y-scroll scrollbar-track-transparent scrollbar-thumb-delta-100 scrollbar-thin'
+            }
+        >
             {new Array(size).fill(null).map((_, _index) => {
                 //  _index * 5 for minutes column
                 const idx = isHours ? _index : _index * 5

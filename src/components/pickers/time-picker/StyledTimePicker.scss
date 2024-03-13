@@ -2,7 +2,7 @@
     @apply flex max-h-56  overflow-hidden border-gray-800 #{!important};
 
     .styled-time-picker-root_column {
-        @apply overflow-y-scroll flex flex-col w-full p-1.5 pb-0 #{!important};
+        @apply flex flex-col w-full p-1.5 pb-0 #{!important};
     }
 
     .styled-time-picker-root_cell {

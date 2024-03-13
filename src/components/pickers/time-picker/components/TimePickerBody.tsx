@@ -1,14 +1,10 @@
 import { useEffect, useRef } from 'react'
-import type { StyledTimePickerProps } from '../StyledTimePicker'
 import { TimePickerColumn } from './TimePickerColumn'
+import type { StyledTimePickerProps } from '../types'
 
 type TimePickerBodyProps = Omit<StyledTimePickerProps, 'placeholder' | 'disabled' | 'inputClassName'>
 
-export const TimePickerBody: React.FC<Omit<TimePickerBodyProps, 'anchorOrigin' | 'anchorPosition'>> = ({
-    value,
-    onSelect,
-    dataTest,
-}) => {
+export const TimePickerBody: React.FC<Omit<TimePickerBodyProps, 'anchorOrigin'>> = ({ value, onSelect, dataTest }) => {
     const ref = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
