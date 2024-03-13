@@ -8,6 +8,7 @@ const boxShadow = twConfigs.boxShadow,
 
 export default {
     mode: 'jit',
+    important: true,
     content: ['src/**/*.{js,jsx,ts,tsx}'],
     theme: {
         fontFamily,
