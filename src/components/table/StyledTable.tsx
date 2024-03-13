@@ -1,29 +1,17 @@
-import {
-    flexRender,
-    getCoreRowModel,
-    useReactTable,
-    getSortedRowModel,
-    getFilteredRowModel,
-    getExpandedRowModel,
-    type Row,
-    getPaginationRowModel,
-} from '@tanstack/react-table'
 import clsx from 'clsx'
-import { Fragment } from 'react'
 import { LoadingIcon } from '../data-display/icons'
 import { Skeleton } from '@mui/material'
-import { SELECT_COLUMN_ID, type StyledTableProps } from './types'
+import { type StyledTableProps } from './types'
 import { TableHeader } from './components/TableHeader'
-import { injectColumns } from './components/columns/injectColumns'
 import { TableFooter } from './components/TableFooter'
-import { cn } from 'src/helpers/cn'
+import { useStyledTable } from './hooks/useStyledTable'
+import { injectColumns } from './helpers/injectColumns'
+import { TableRows } from './components/TableRows'
 
 /**
  *
  * Custom props:
  * @param size: Column sizing. use NaN (width 100%) -  only one time for the main column. It will make the column very responsive.. Example is in Storybook.
- *
- * If you have a very long data, like descriptions. use input to render long strings instead of div. Example is in Storybook.
  *
  *  @param focusable: Used for controlling the focus of rows. If set to true, the tabIndex={0} attribute will be added to each table row. Used, for example, when adding a new item to scroll to it and focus it
  *
@@ -33,129 +21,25 @@ export const StyledTable = <
         id: string | number
     },
     TCustomData = Record<string, unknown>,
->({
-    actions,
-    columns,
-    data,
-    customSubRowData,
-    initialState,
-    enableRowSelection,
-    headerPin = true,
-    loading,
-    noRowsOverlay,
-    tableInstanceRef,
-    className,
-    rowHeight,
-    tdClassName,
-    getRowClassName,
-    onRowClick,
-    renderSubRows,
-    customActionsNode,
-    focusable,
-    stickyHeader,
-    expandArrow,
-    height,
-    locale = 'en',
-    footer,
-    hideHeader,
-    hideFooter,
-    ...rest
-}: StyledTableProps<TData, TCustomData>) => {
-    injectColumns({ columns, expandArrow, enableRowSelection, headerPin, actions, customActionsNode })
-    const table = useReactTable({
-        ...rest,
+>(
+    props: StyledTableProps<TData, TCustomData>,
+) => {
+    const {
         columns,
         data,
-        initialState: {
-            pagination: { pageIndex: 0, pageSize: 50 },
-            columnVisibility: {
-                ...initialState?.columnVisibility,
-                [SELECT_COLUMN_ID]: false,
-            },
-            ...initialState,
-        },
-        enableRowSelection,
-        getCoreRowModel: getCoreRowModel(),
-        getExpandedRowModel: getExpandedRowModel(),
-        getFilteredRowModel: getFilteredRowModel(),
-        getSortedRowModel: getSortedRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
-        getRowId:
-            rest.getRowId ||
-            ((row: TData, _index: number, parent?: Row<TData>) =>
-                parent ? [parent.id, row.id].join('.') : row.id.toString()),
-    })
+        loading,
+        noRowsOverlay,
+        className,
+        stickyHeader,
+        height,
+        locale = 'en',
+        footer,
+        hideHeader,
+        hideFooter,
+    } = props
 
-    if (tableInstanceRef) {
-        tableInstanceRef.current = table
-    }
-
-    const rows = hideFooter ? table.getCoreRowModel().rows : table.getRowModel().rows
-
-    const renderRow = (row: Row<TData>, index: number) => (
-        <Fragment key={row.id}>
-            <tr
-                data-index={index}
-                data-test={row.id}
-                id={row.id}
-                tabIndex={focusable ? -1 : undefined}
-                className={clsx(
-                    'table-row align-middle group border-solid border-x border-t border-b-0 last:border-b-transparent first:border-t-transparent border-x-transparent border-y-delta-300 hover:cursor-pointer hover:bg-gama-25 focus:bg-gama-50 focus:border focus:border-gama-500',
-                    (row.getIsExpanded() || row.getIsSelected()) && 'bg-gama-50',
-                    loading && 'opacity-50',
-                    getRowClassName?.(row),
-                )}
-                style={{
-                    height: rowHeight ? `${rowHeight}px` : 'inherit',
-                }}
-                onMouseDown={(e) => {
-                    if (
-                        (e.target as HTMLDivElement).classList.contains('MuiModal-backdrop') ||
-                        (e.target as Node).nodeName === 'INPUT' ||
-                        (e.target as Node).nodeName === 'BUTTON'
-                    )
-                        return
-                    if (row.getCanExpand() && !expandArrow) {
-                        row.getToggleExpandedHandler()()
-                    }
-
-                    if (onRowClick) onRowClick(e, row)
-                }}
-            >
-                {row.getVisibleCells().map((cell) => {
-                    // *
-                    //  sticky actions
-                    const isActionsCell = cell.column.id === 'actions'
-                    return (
-                        <td
-                            key={cell.id}
-                            className={cn(
-                                'break-words table-cell align-middle text-sm text-delta-900 whitespace-pre-wrap',
-                                'px-2.5 py-0',
-                                tdClassName,
-                                // *
-                                //  sticky actions
-                                isActionsCell && 'bg-white sticky right-[-1px] group-hover:bg-gama-25',
-                                isActionsCell && getRowClassName?.(row),
-                            )}
-                        >
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </td>
-                    )
-                })}
-            </tr>
-            {row.getIsExpanded() && (
-                <>
-                    {customSubRowData &&
-                        renderSubRows &&
-                        renderSubRows({
-                            rows: customSubRowData.get(row.original.id.toString()) ?? [],
-                            row: row.original,
-                        })}
-                </>
-            )}
-        </Fragment>
-    )
+    injectColumns(props)
+    const { table } = useStyledTable(props)
 
     return (
         <div>
@@ -187,7 +71,7 @@ export const StyledTable = <
                                 ))}
                             </>
                         ) : data.length > 0 ? (
-                            rows.map((row, index) => renderRow(row, index))
+                            <TableRows tableProps={props} table={table} />
                         ) : (
                             <tr className='h-28'>
                                 <td

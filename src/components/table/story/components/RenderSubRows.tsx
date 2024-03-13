@@ -12,7 +12,7 @@ export const RenderSubRows: React.FC<{ subRows: Participant[] }> = ({ subRows })
 
     return (
         <tr className='relative w-0 z-0' style={{ height: `${subRows.length * 60 + 2}px` }}>
-            <td className='absolute top-0 left-[-3px] right-[-3px] border-y-none flex  h-full'>
+            <td className='absolute top-0 left-[-1px] right-[-6px] border-y-none flex  h-full'>
                 <div className='w-full'>
                     <StyledTable
                         data={subRows}
