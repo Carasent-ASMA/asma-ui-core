@@ -10,6 +10,8 @@ type CommonDatePickerProps = {
     allowClear?: boolean
     disabledDays?: Matcher | Matcher[]
     dataTest: string
+    helperText?: React.ReactNode
+    error?: boolean
 } & CalendarProps
 
 type DefaultSingleProps = {

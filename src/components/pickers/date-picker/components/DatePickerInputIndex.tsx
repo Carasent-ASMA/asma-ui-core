@@ -3,6 +3,14 @@ import { DatePickerInputRange } from './DatePickerInputRange'
 import { DatePickerInputRangeCompact } from './DatePickerInputRangeCompact'
 import { DatePickerInputSingle } from './DatePickerInputSingle'
 
+/**
+ *
+ * @remarks  error and helper text will work only for Single
+ *
+ * Custom props:
+ * @param error - boolean
+ * @param helperText - ReactNode
+ */
 export const DatePickerInputIndex: React.FC<
     DatePickerProps & { onClick: (e: React.MouseEvent<HTMLDivElement>) => void }
 > = (props) => {

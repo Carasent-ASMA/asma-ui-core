@@ -7,7 +7,18 @@ import { cn } from 'src/helpers/cn'
 export const DatePickerInputSingle: React.FC<
     DatePickerProps & { onClick: (e: React.MouseEvent<HTMLDivElement>) => void }
 > = (props) => {
-    const { dataTest, placeholder, disabled, onClick, inputClassName, onClear, allowClear, dateFormat } = props
+    const {
+        dataTest,
+        placeholder,
+        disabled,
+        onClick,
+        inputClassName,
+        onClear,
+        allowClear,
+        dateFormat,
+        error = false,
+        helperText,
+    } = props
 
     if (props.mode !== 'single') return null
 
@@ -28,6 +39,8 @@ export const DatePickerInputSingle: React.FC<
                 onClear?.()
             }}
             label={props.label}
+            error={error}
+            helperText={helperText}
         />
     )
 }
