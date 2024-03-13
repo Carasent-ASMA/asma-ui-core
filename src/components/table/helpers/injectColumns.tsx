@@ -11,12 +11,12 @@ export const injectColumns = <
 >(
     props: StyledTableProps<TData, TCustomData>,
 ) => {
-    const { columns, actions, customActionsNode, headerPin, enableRowSelection, expandArrow } = props
+    const { columns, actions, customActionsNode, headerPin = true, enableRowSelection, expandArrow } = props
 
     if (!columns.find((col) => col.id === 'actions') && (actions || customActionsNode || headerPin)) {
         columns.push(
             generateActionsColumn({
-                headerPin: headerPin || false,
+                headerPin,
                 actions,
                 customActionsNode,
             }),
