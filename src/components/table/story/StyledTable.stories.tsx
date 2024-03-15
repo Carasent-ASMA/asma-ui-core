@@ -105,7 +105,17 @@ export const Table = () => {
                 className='h-[calc(100vh-170px)]'
                 locale='no'
                 tableInstanceRef={tableRef}
-                actions={(row) => getRowActions(row)}
+                actions={(row) => {
+                    return row.original.progress > 50
+                        ? getRowActions(row)
+                        : [
+                              {
+                                  label: 'Toggle sub row',
+                                  className: 'text-amber-700',
+                                  onClick: () => row.getToggleExpandedHandler()(),
+                              },
+                          ]
+                }}
                 customActionsNode={(cell) => (
                     <StyledButton
                         size='small'

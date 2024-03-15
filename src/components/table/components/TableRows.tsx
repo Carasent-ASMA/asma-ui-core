@@ -7,12 +7,12 @@ export function TableRows<
         id: string | number
     },
     TCustomData = Record<string, unknown>,
->({ tableProps, table }: { tableProps: StyledTableProps<TData, TCustomData>; table: Table<TData> }) {
-    const rows = tableProps.hideFooter ? table.getCoreRowModel().rows : table.getRowModel().rows
+>({ styledTableProps, table }: { styledTableProps: StyledTableProps<TData, TCustomData>; table: Table<TData> }) {
+    const rows = styledTableProps.hideFooter ? table.getCoreRowModel().rows : table.getRowModel().rows
     return (
         <>
             {rows.map((row, index) => (
-                <TableRow key={row.id} tableProps={tableProps} row={row} index={index} />
+                <TableRow key={row.id} styledTableProps={styledTableProps} row={row} index={index} />
             ))}
         </>
     )

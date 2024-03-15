@@ -3,16 +3,18 @@ import clsx from 'clsx'
 import { last } from 'lodash-es'
 import { DropDownIcon, DropUpIcon } from 'src/components/data-display/icons'
 import { cn } from 'src/helpers/cn'
+import type { StyledTableProps } from '../types'
 
-export function TableHeader<TData>({
-    table,
-    stickyHeader = false,
-    hideHeader = false,
-}: {
-    table: Table<TData>
-    stickyHeader?: boolean
-    hideHeader?: boolean
-}) {
+export function TableHeader<
+    TData extends {
+        id: string | number
+    },
+    TCustomData = Record<string, unknown>,
+>({ table, styledTableProps }: { table: Table<TData>; styledTableProps: StyledTableProps<TData, TCustomData> }) {
+    const { stickyHeader = false, hideHeader = false } = styledTableProps
+
+    if (styledTableProps.loading) return null
+
     return (
         <thead
             className={clsx('table-header-group z-50 bg-[#fcfcfd] cursor-default', hideHeader && 'h-0 opacity-0')}

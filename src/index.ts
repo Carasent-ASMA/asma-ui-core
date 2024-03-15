@@ -8,8 +8,6 @@ export * from './components/data-display/chip'
 export * from './components/data-display/tooltip'
 export * from './components/data-display/icons'
 export * from './components/data-display/typography'
-// data-grid
-export * from './components/table/__deprecated-data-grid'
 // feedback
 export * from './components/feedback/dialog'
 export * from './components/feedback/alert'

@@ -8,7 +8,15 @@ export function TableRow<
         id: string | number
     },
     TCustomData = Record<string, unknown>,
->({ tableProps, row, index }: { tableProps: StyledTableProps<TData, TCustomData>; row: Row<TData>; index: number }) {
+>({
+    styledTableProps,
+    row,
+    index,
+}: {
+    styledTableProps: StyledTableProps<TData, TCustomData>
+    row: Row<TData>
+    index: number
+}) {
     const {
         focusable,
         loading,
@@ -19,7 +27,8 @@ export function TableRow<
         tdClassName,
         customSubRowData,
         renderSubRows,
-    } = tableProps
+    } = styledTableProps
+
     return (
         <Fragment key={row.id}>
             <tr

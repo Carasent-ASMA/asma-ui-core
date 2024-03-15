@@ -512,12 +512,6 @@
 
 -   e1da358: add option to disable row actions for data grid
 
-## 1.8.6
-
-### Patch Changes
-
--   bd7fa6f: added fixed columns prop for StyledDataGrid
-
 ## 1.8.5
 
 ### Patch Changes
@@ -607,12 +601,6 @@
 ### Patch Changes
 
 -   0cb2ef9: fixed wrongly merged branches
-
-## 1.6.0
-
-### Minor Changes
-
--   37e14dc: StyledDataGrid
 
 ### Patch Changes
 

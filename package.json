@@ -3,7 +3,7 @@
     "publishConfig": {
         "access": "public"
     },
-    "version": "2.21.4",
+    "version": "2.22.4",
     "type": "module",
     "files": [
         "dist/**/*",
@@ -43,7 +43,6 @@
         "@fontsource/roboto": "^5.0.4",
         "@iconify/react": "^4.1.1",
         "@mui/material": "^5.13.7",
-        "@mui/x-data-grid": "^6.9.2",
         "@tanstack/react-table": "^8.10.0",
         "clsx": "^1.2.1",
         "date-fns": "^2.30.0",
