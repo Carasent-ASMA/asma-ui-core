@@ -28,8 +28,8 @@ export function generateActionsColumn<TData>(options: {
         },
         cell: (cell: CellContext<TData, TData>) =>
             actions || customActionsNode ? (
-                <div className='flex gap-2 items-center justify-end'>
-                    {customActionsNode && customActionsNode?.(cell)}
+                <div className='flex items-center justify-end'>
+                    {customActionsNode && <div className='mr-1'>{customActionsNode?.(cell)}</div>}
                     {actions && <RowActionMenu tableData={cell} actions={actions} />}
                 </div>
             ) : null,

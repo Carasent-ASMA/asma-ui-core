@@ -2,6 +2,7 @@ import { flexRender, type Row } from '@tanstack/react-table'
 import { Fragment } from 'react'
 import { cn } from 'src/helpers/cn'
 import type { StyledTableProps } from '../types'
+import './TableRow.scss'
 
 export function TableRow<
     TData extends {
@@ -29,6 +30,23 @@ export function TableRow<
         renderSubRows,
     } = styledTableProps
 
+    const onMouseDown = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
+        if (
+            (e.target as HTMLDivElement).classList.contains('MuiModal-backdrop') ||
+            (e.target as Node).nodeName === 'INPUT' ||
+            (e.target as Node).nodeName === 'BUTTON'
+        )
+            return
+
+        if (row.getCanExpand() && !expandArrow) {
+            row.getToggleExpandedHandler()()
+        }
+
+        document.getElementById(row.id)?.focus()
+
+        if (onRowClick) onRowClick(e, row)
+    }
+
     return (
         <Fragment key={row.id}>
             <tr
@@ -37,27 +55,15 @@ export function TableRow<
                 id={row.id}
                 tabIndex={focusable ? -1 : undefined}
                 className={cn(
-                    'table-row align-middle group border-solid border-x border-t border-b-0 last:border-b-transparent first:border-t-transparent border-x-transparent border-y-delta-300 hover:cursor-pointer hover:bg-gama-25 focus:bg-gama-50 focus:border focus:border-gama-500',
-                    (row.getIsExpanded() || row.getIsSelected()) && 'bg-gama-50',
-                    loading && 'opacity-50',
+                    't-row',
+                    loading && 'is-loading',
+                    (row.getIsExpanded() || row.getIsSelected()) && 'selected',
                     getRowClassName?.(row),
                 )}
                 style={{
                     height: rowHeight ? `${rowHeight}px` : 'inherit',
                 }}
-                onMouseDown={(e) => {
-                    if (
-                        (e.target as HTMLDivElement).classList.contains('MuiModal-backdrop') ||
-                        (e.target as Node).nodeName === 'INPUT' ||
-                        (e.target as Node).nodeName === 'BUTTON'
-                    )
-                        return
-                    if (row.getCanExpand() && !expandArrow) {
-                        row.getToggleExpandedHandler()()
-                    }
-
-                    if (onRowClick) onRowClick(e, row)
-                }}
+                onMouseDown={onMouseDown}
             >
                 {row.getVisibleCells().map((cell) => {
                     // *
@@ -67,13 +73,16 @@ export function TableRow<
                         <td
                             key={cell.id}
                             className={cn(
-                                'break-words table-cell align-middle text-sm text-delta-900 whitespace-pre-wrap',
-                                'px-2.5 py-0',
+                                't-cell',
                                 tdClassName,
                                 // *
                                 //  sticky actions
-                                isActionsCell && 'bg-white sticky right-[-1px] group-hover:bg-gama-25',
-                                isActionsCell && getRowClassName?.(row),
+                                isActionsCell && 'action-cell',
+                                isActionsCell && (row.getIsExpanded() || row.getIsSelected()) && 'selected',
+                                isActionsCell &&
+                                    (getRowClassName?.(row)
+                                        ? getRowClassName?.(row)
+                                        : 'action-cell-default-background'),
                             )}
                         >
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}

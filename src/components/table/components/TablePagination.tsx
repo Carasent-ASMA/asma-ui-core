@@ -1,5 +1,4 @@
 import type { Table } from '@tanstack/react-table'
-import clsx from 'clsx'
 import {
     CheckIcon,
     ChevronDownIcon,
@@ -11,6 +10,8 @@ import { StyledTooltip } from 'src/components/data-display/tooltip'
 import { StyledButton } from 'src/components/inputs/button'
 import { StyledPopover } from 'src/components/utils/popover'
 import { useToggleMenuVisibility } from 'src/hooks/useToggleMenuVisibility.hook'
+import './TablePagination.scss'
+import { cn } from 'src/helpers/cn'
 
 export function TablePagination<TData>({ table, locale }: { locale: 'en' | 'no'; table: Table<TData> }) {
     const { anchorEl, open, handleClose, handleOpen } = useToggleMenuVisibility()
@@ -29,13 +30,13 @@ export function TablePagination<TData>({ table, locale }: { locale: 'en' | 'no';
     const currentPage = table.getState().pagination.pageIndex + 1
     const pages = Array.from({ length: pagesLength }, (_value, index) => index + 1)
     return pagesLength > 1 ? (
-        <div className='w-fit animate-opacity-in-5 justify-end flex items-center bg-transparent gap-2'>
+        <div className='table-pagination'>
             <StyledTooltip title={isNo ? 'Nåværende side' : 'Current Page'}>
                 <div>
                     <StyledButton
                         variant='outlined'
                         dataTest='list-pages'
-                        className='w-[134px]'
+                        style={{ width: '134px' }}
                         onClick={handleClick}
                         endIcon={
                             open ? <ChevronUpIcon height={24} width={24} /> : <ChevronDownIcon height={24} width={24} />
@@ -58,13 +59,13 @@ export function TablePagination<TData>({ table, locale }: { locale: 'en' | 'no';
                     horizontal: 'center',
                 }}
             >
-                <div className='max-h-[200px] w-[134px] overflow-auto'>
+                <div className='table-pagination__pages-list'>
                     {pages.map((page) => {
                         return (
                             <div
-                                className={clsx(
-                                    'h-[36px] relative flex items-center pl-10 cursor-pointer hover:bg-delta-50',
-                                    currentPage === page && 'bg-gama-50',
+                                className={cn(
+                                    'table-pagination__pages-list__page',
+                                    currentPage === page && 'page-selected',
                                 )}
                                 key={page}
                                 onClick={() => {
@@ -73,9 +74,7 @@ export function TablePagination<TData>({ table, locale }: { locale: 'en' | 'no';
                                     scrollToTop()
                                 }}
                             >
-                                {currentPage === page && (
-                                    <CheckIcon className='absolute left-2 top-1 text-gama-500' height={24} width={24} />
-                                )}
+                                {currentPage === page && <CheckIcon className='check-icon' height={24} width={24} />}
                                 <span>
                                     {isNo ? 'Side' : 'Page'} {page}
                                 </span>

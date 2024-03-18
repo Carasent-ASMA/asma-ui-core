@@ -12,6 +12,7 @@ import clsx from 'clsx'
 import React from 'react'
 import { RenderSubRows } from './components/RenderSubRows'
 import { getRowActions } from './components/getRowActions'
+import './StyledTableStories.scss'
 
 const meta = {
     title: 'Tables/Table',
@@ -100,6 +101,7 @@ export const Table = () => {
             </div>
             <StyledTable<Person, Participant>
                 // data={data.splice(0, 49)}
+                focusable
                 data={data}
                 stickyHeader
                 className='h-[calc(100vh-170px)]'
@@ -109,11 +111,11 @@ export const Table = () => {
                     return row.original.progress > 50
                         ? getRowActions(row)
                         : [
-                              {
-                                  label: 'Toggle sub row',
-                                  className: 'text-amber-700',
-                                  onClick: () => row.getToggleExpandedHandler()(),
-                              },
+                              //   {
+                              //       label: 'Toggle sub row',
+                              //       className: 'text-amber-700',
+                              //       onClick: () => row.getToggleExpandedHandler()(),
+                              //   },
                           ]
                 }}
                 customActionsNode={(cell) => (
@@ -163,7 +165,7 @@ export const Table = () => {
                     setColumnsVisibility(e)
                 }}
                 renderSubRows={(data) => <RenderSubRows subRows={data.rows} />}
-                getRowClassName={(row) => clsx('max-h-[40px]', row.original.progress > 50 ? 'bg-gama-25' : 'bg-white')}
+                getRowClassName={(row) => clsx(row.original.progress > 50 && 'high-progress')}
                 noRowsOverlay={
                     <div className='flex h-full w-full items-center justify-center'>
                         <div className='flex flex-col items-center'>

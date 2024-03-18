@@ -1,0 +1,102 @@
+.asma-core-ui-styled-table {
+    .t-row {
+        margin-top: 1px;
+        display: table-row;
+        border-style: solid;
+        border-left-width: 0.5px;
+        border-right-width: 0.5px;
+        border-top-width: 0.5px;
+        border-bottom-width: 0.5px;
+        border-left-color: transparent;
+        border-right-color: transparent;
+        border-top-color: var(--colors-delta-300);
+        // border-bottom-color: var(--colors-delta-300);
+
+        &:hover {
+            background-color: var(--colors-gama-25);
+            cursor: pointer;
+
+            .action-cell {
+                background-color: var(--colors-gama-25);
+            }
+        }
+
+        &:focus {
+            background-color: var(--colors-gama-50);
+            .action-cell {
+                background-color: var(--colors-gama-50);
+            }
+
+            // t-cell on parent focus
+            .t-cell {
+                border-top: 0.5px solid var(--colors-gama-500);
+                border-bottom: 0.5px solid var(--colors-gama-500);
+                &:first-child {
+                    border-left: 0.5px solid var(--colors-gama-500);
+                }
+                &:last-child {
+                    border-right: 0.5px solid var(--colors-gama-500);
+                }
+            }
+        }
+
+        &:focus-visible {
+            outline: none;
+        }
+
+        &:last-child {
+            border-bottom-color: transparent;
+        }
+        &:first-child {
+            border-top-color: transparent;
+        }
+
+        .t-cell {
+            overflow-wrap: break-word;
+            vertical-align: middle;
+            font-size: 14px;
+            line-height: 20px;
+            color: var(--colors-delta-900);
+            display: table-cell;
+            white-space: pre-wrap;
+            padding-left: 5px;
+            padding-right: 5px;
+            padding-top: 0;
+            padding-bottom: 0;
+            border-top: 0.5px solid transparent;
+            border-bottom: 0.5px solid var(--colors-delta-300);
+
+            &:first-child {
+                border-left: 0.5px solid transparent;
+            }
+            &:last-child {
+                border-right: 0.5px solid transparent;
+            }
+        }
+
+        .action-cell {
+            height: 100%;
+            position: sticky;
+            right: -1px;
+
+            // cell selected
+            &.selected {
+                background-color: var(--colors-gama-50);
+            }
+        }
+
+        // row selected
+        &.selected {
+            background-color: var(--colors-gama-50);
+        }
+    }
+
+    .t-row.is-loading {
+        opacity: 0.5;
+    }
+
+    // custom
+    .action-cell-default-background {
+        background-color: white;
+    }
+}

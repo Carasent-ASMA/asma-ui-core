@@ -1,4 +1,11 @@
 .asma-core-ui-styled-table {
+    *,
+    *:after,
+    *:before {
+        box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+    }
+
     .table-wrapper {
         overflow: auto;
         width: 100%;
@@ -7,9 +14,11 @@
         box-sizing: border-box;
         display: table;
         margin: 0;
-        border-collapse: collapse;
+        // border-collapse: collapse;
+        border-collapse: separate;
+        border-spacing: 0 0.5px;
         max-width: inherit;
-        width: calc(100% - 5px);
+        width: 100%;
 
         .tbody {
             display: table-row-group;

@@ -1,0 +1,51 @@
+.asma-core-ui-styled-table {
+    .hide-table-header {
+        height: 0px;
+        opacity: 0;
+    }
+    .show-table-header {
+        height: 30px;
+        opacity: 1;
+    }
+
+    .sortable-column {
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .table-header {
+        display: table-header-group;
+        z-index: 50;
+        background-color: #fcfcfd;
+        cursor: default;
+
+        .t-cell {
+            display: flex;
+            justify-content: flex-start;
+            text-transform: uppercase;
+            background-color: transparent;
+            font-size: 10px;
+            font-weight: 600;
+            text-align: start;
+            color: var(--colors-delta-500);
+            display: table-cell;
+            white-space: pre-wrap;
+            padding-left: 5px;
+            padding-right: 5px;
+            padding-top: 0;
+            padding-bottom: 0;
+            border-top: 0.5px solid var(--colors-delta-300);
+            border-bottom: 0.5px solid var(--colors-delta-300);
+
+            &.t-cell__actions {
+                position: sticky;
+                right: 0;
+                background-color: #fcfcfd;
+            }
+        }
+
+        .sort-icon {
+            color: var(--colors-delta-800);
+        }
+    }
+}

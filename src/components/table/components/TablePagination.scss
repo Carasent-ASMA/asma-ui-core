@@ -1,0 +1,41 @@
+.table-pagination {
+    display: flex;
+    width: fit-content;
+    gap: 8px;
+    background-color: transparent;
+    flex-direction: row;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.table-pagination__pages-list {
+    overflow: auto;
+    width: 134px;
+    max-height: 200px;
+
+    .table-pagination__pages-list__page {
+        height: 36px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        padding-left: 40px;
+        cursor: pointer;
+
+        &:hover {
+            background-color: var(--colors-delta-30);
+        }
+
+        &.page-selected {
+            background-color: var(--colors-gama-50);
+        }
+
+        & .check-icon {
+            position: absolute;
+            left: 8px;
+            top: 4px;
+            color: var(--colors-gama-500);
+        }
+    }
+}

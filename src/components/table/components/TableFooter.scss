@@ -1,0 +1,13 @@
+.asma-core-ui-styled-table {
+    .table-footer {
+        display: flex;
+        width: 100%;
+        gap: 8px;
+        background-color: transparent;
+        flex-direction: row;
+        padding-top: 4px;
+        padding-bottom: 4px;
+        align-items: center;
+        justify-content: flex-end;
+    }
+}
