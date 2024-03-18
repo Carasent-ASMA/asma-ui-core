@@ -17,13 +17,13 @@ export const useStyledTable = <
 >(
     props: StyledTableProps<TData, TCustomData>,
 ) => {
-    const { columns, data, initialState, enableRowSelection, tableInstanceRef, ...rest } = props
+    const { columns, data, initialState, pageSize, enableRowSelection, tableInstanceRef, ...rest } = props
     const table = useReactTable({
         ...rest,
         columns,
         data,
         initialState: {
-            pagination: { pageIndex: 0, pageSize: 50 },
+            pagination: { pageIndex: 0, pageSize: pageSize || 50 },
             columnVisibility: {
                 ...initialState?.columnVisibility,
                 [SELECT_COLUMN_ID]: false,

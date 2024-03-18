@@ -74,6 +74,7 @@ export type StyledTableProps<TData, TCustomData> = {
     renderSubRows?: (props: { rows: TCustomData[]; row: TData }) => ReactElement | null
     getRowSelectionIds?: (ids: string[]) => void
     hideHeader?: boolean
+    pageSize?: number
 } & Omit<
     TTableOptions<TData>,
     'getCoreRowModel' | 'getExpandedRowModel' | 'getFilteredRowModel' | 'getSortedRowModel'
