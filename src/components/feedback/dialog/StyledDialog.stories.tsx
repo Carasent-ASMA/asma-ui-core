@@ -43,7 +43,14 @@ export const DialogExample = () => {
             <StyledButton dataTest='test' onClick={() => setOpen(true)} variant='contained'>
                 Open
             </StyledButton>
-            <StyledDialog {...meta.args} onCloseText='Close' open={open} dataTest='test' onClose={handleCloseModal}>
+            <StyledDialog
+                {...meta.args}
+                onCloseText='Close'
+                open={open}
+                dataTest='test'
+                onClose={handleCloseModal}
+                dialogTitle='Dialog Title'
+            >
                 <StyledDialogTitle className='text-center'>{meta.args.title}</StyledDialogTitle>
                 <StyledDialogContent className='text-gama-700'>
                     Lorem ipsum dolor sit amet consectetur adipiscing elit placerat, habitasse justo eros suspendisse

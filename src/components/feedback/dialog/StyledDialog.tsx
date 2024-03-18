@@ -9,6 +9,7 @@ export interface IStyledDialogProps extends DialogProps {
     onCloseText?: ReactNode
     showCloseIcon?: boolean
     dataTest: string
+    dialogTitle?: ReactNode
 }
 
 export const StyledDialog: React.FC<IStyledDialogProps> = ({
@@ -17,6 +18,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     onClose,
     dataTest,
     showCloseIcon = true,
+
     ...rest
 }) => {
     return (
@@ -29,21 +31,28 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                 ...rest.style,
             }}
         >
-            {showCloseIcon && (
-                <div className={'mr-2 mt-2 flex justify-end'}>
-                    <StyledButton
-                        dataTest={`close-button-${dataTest}`}
-                        variant='textGray'
-                        endIcon={<Icon icon={'ic:baseline-close'} className={'text-2xl'} />}
-                        onClick={(event) => {
-                            onClose ? onClose(event, 'escapeKeyDown') : null
-                        }}
-                        className={'text-gray-800'}
-                    >
-                        {onCloseText}
-                    </StyledButton>
-                </div>
-            )}
+            <div className='flex items-center'>
+                {rest.dialogTitle && (
+                    <div className={'pl-4 pt-2 flex justify-start text-sm text-[var(--colors-gray-700)] '}>
+                        {rest.dialogTitle}
+                    </div>
+                )}
+                {showCloseIcon && (
+                    <div className={'mr-2 mt-2 flex justify-end flex-grow'}>
+                        <StyledButton
+                            dataTest={`close-button-${dataTest}`}
+                            variant='textGray'
+                            endIcon={<Icon icon={'ic:baseline-close'} className={'text-2xl'} />}
+                            onClick={(event) => {
+                                onClose ? onClose(event, 'escapeKeyDown') : null
+                            }}
+                            className={'text-gray-800'}
+                        >
+                            {onCloseText}
+                        </StyledButton>
+                    </div>
+                )}
+            </div>
 
             {children}
         </Dialog>
