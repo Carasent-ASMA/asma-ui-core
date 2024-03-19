@@ -15,26 +15,24 @@ export interface IStyledDialogProps extends DialogProps {
 export const StyledDialog: React.FC<IStyledDialogProps> = ({
     onCloseText,
     children,
-    onClose,
     dataTest,
     showCloseIcon = true,
-
+    dialogTitle,
     ...rest
 }) => {
     return (
         <Dialog
             {...rest}
             data-test={dataTest}
-            onClose={onClose}
             style={{
                 zIndex: 999,
                 ...rest.style,
             }}
         >
             <div className='flex items-center'>
-                {rest.dialogTitle && (
+                {dialogTitle && (
                     <div className={'pl-4 pt-2 flex justify-start text-sm text-[var(--colors-gray-700)] '}>
-                        {rest.dialogTitle}
+                        {dialogTitle}
                     </div>
                 )}
                 {showCloseIcon && (
@@ -44,7 +42,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                             variant='textGray'
                             endIcon={<Icon icon={'ic:baseline-close'} className={'text-2xl'} />}
                             onClick={(event) => {
-                                onClose ? onClose(event, 'escapeKeyDown') : null
+                                rest.onClose ? rest.onClose(event, 'escapeKeyDown') : null
                             }}
                             className={'text-gray-800'}
                         >
