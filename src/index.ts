@@ -15,7 +15,6 @@ export * from './components/feedback/snack-bar'
 // inputs
 export * from './components/inputs/button'
 export * from './components/inputs/checkbox'
-export * from './components/inputs/input'
 export * from './components/inputs/input-field'
 export * from './components/inputs/textarea'
 export * from './components/inputs/rich-input'
