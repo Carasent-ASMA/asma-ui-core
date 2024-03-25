@@ -1,45 +1,38 @@
-import type { StoryObj, Meta } from '@storybook/react'
-import { useState } from 'react'
-import type { SelectProps } from '@mui/material'
-import { StyledTypography } from 'src/components/data-display/typography'
-import { StyledInputLabel } from 'src/components/miscellaneous/StyledInputLabel'
 import { StyledSelect } from '../StyledSelect'
-import { StyledSelectItem } from '../StyledSelectItem'
-import { StyledFormControl } from 'src/components/miscellaneous/StyledFormControl'
+import { useState } from 'react'
 import { StyledStack } from 'src/components/miscellaneous/StyledStack'
+import { StyledTypography } from 'src/components/data-display/typography'
+import { StyledFormControl } from 'src/components/miscellaneous/StyledFormControl'
+import { StyledSelectExample } from './components/StyledSelectExample'
+import { StyledInputLabel } from 'src/components/miscellaneous/StyledInputLabel'
+import { StyledSelectItem } from '../StyledSelectItem'
+import type { Meta } from '@storybook/react'
 
 const selectOptions = [
     { title: 'Van Henry', id: '1' },
     { title: 'April Tucker', id: '2' },
     { title: 'Ralph Hubbard', id: '3' },
     { title: 'Andrei Grini', id: '4' },
-    { title: 'Roberto Cavalli', id: '5' },
+    { title: 'Andrei Armani', id: '5' },
 ]
 
-const meta = {
-    title: 'Inputs/Styled Select',
+const meta: Meta<typeof StyledSelect> = {
+    title: 'Inputs/Select',
     component: StyledSelect,
-    tags: ['autodocs'],
+    tags: [],
     argTypes: { children: { description: 'The option elements to populate the select with' } },
     args: {
-        children: selectOptions.map((option) => {
-            return (
-                <StyledSelectItem key={option.id} value={option.id}>
-                    {option.title}
-                </StyledSelectItem>
-            )
-        }),
+        children: selectOptions.map((option) => (
+            <StyledSelectItem key={option.id} value={option.id}>
+                {option.title}
+            </StyledSelectItem>
+        )),
     },
-} satisfies Meta<typeof StyledSelect>
-
-export default meta
-type Story = StoryObj<typeof StyledSelect>
-
-export const Select: Story = {
-    render: () => <StyledSelectExample args={meta.args} />,
 }
 
-const StyledSelectExample: React.FC<{ args: Partial<SelectProps<unknown>> }> = ({ args }) => {
+export default meta
+
+export const Select = (args: { children: React.ReactNode }) => {
     const [value, setValue] = useState(selectOptions[0]?.id)
     return (
         <StyledStack direction='column' spacing={2}>
@@ -57,10 +50,10 @@ const StyledSelectExample: React.FC<{ args: Partial<SelectProps<unknown>> }> = (
                 />
             </StyledFormControl>
 
-            <StyledSelectExample args={args} />
+            <StyledSelectExample />
 
             <StyledTypography variant='h6'>Select with label and placeholder</StyledTypography>
-            <StyledFormControl size='small' className='w-52'>
+            <StyledFormControl size='small' className='w-52' error={!value}>
                 <StyledInputLabel>Find me...</StyledInputLabel>
                 <StyledSelect
                     {...args}

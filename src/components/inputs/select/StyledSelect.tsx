@@ -57,12 +57,17 @@ export const StyledSelect: React.FC<
         //     />
         // )}
         sx={{
-            ...props.sx,
             '.MuiOutlinedInput-notchedOutline': {
                 borderColor: 'var(--colors-delta-500) !important',
             },
             '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                 borderColor: 'var(--colors-gama-500) !important',
+            },
+            '&.Mui-error .MuiOutlinedInput-notchedOutline': {
+                borderColor: 'var(--colors-error-500) !important',
+            },
+            '& .MuiInputBase-colorPrimary.Mui-error fieldset': {
+                borderColor: 'var(--colors-error-500) !important',
             },
             '&.Mui-focused::after': {
                 borderColor: 'var(--colors-gama-500) !important',
@@ -70,6 +75,7 @@ export const StyledSelect: React.FC<
             '& .select-custom-icon': {
                 marginTop: '-3.5px !important',
             },
+            ...props.sx,
         }}
     />
 )
