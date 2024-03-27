@@ -29,15 +29,17 @@ export const StyledTable = <
     injectColumns(props)
     const { table } = useStyledTable(props)
 
+    const tableId = crypto.randomUUID()
+
     return (
         <div className='asma-core-ui-styled-table'>
             <div className={cn('table-wrapper', className)} style={{ height }}>
-                <table className='table'>
+                <table id={tableId} className='table'>
                     <TableHeader table={table} styledTableProps={props} />
                     <TableBody table={table} styledTableProps={props} />
                 </table>
             </div>
-            <TableFooter table={table} styledTableProps={props} />
+            <TableFooter table={table} styledTableProps={props} tableId={tableId} />
         </div>
     )
 }

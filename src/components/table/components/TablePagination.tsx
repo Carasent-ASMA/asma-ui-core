@@ -13,7 +13,15 @@ import { useToggleMenuVisibility } from 'src/hooks/useToggleMenuVisibility.hook'
 import './TablePagination.scss'
 import { cn } from 'src/helpers/cn'
 
-export function TablePagination<TData>({ table, locale }: { locale: 'en' | 'no'; table: Table<TData> }) {
+export function TablePagination<TData>({
+    table,
+    locale,
+    tableId,
+}: {
+    locale: 'en' | 'no'
+    table: Table<TData>
+    tableId: string
+}) {
     const { anchorEl, open, handleClose, handleOpen } = useToggleMenuVisibility()
     const isNo = locale === 'no'
 
@@ -22,8 +30,10 @@ export function TablePagination<TData>({ table, locale }: { locale: 'en' | 'no';
     }
 
     const scrollToTop = () => {
-        const elements = document.querySelectorAll('[data-index="0"]')
-        elements?.[0]?.scrollIntoView({ behavior: 'smooth', block: 'end', inline: 'end' })
+        const elementTable = document.getElementById(tableId)
+        const element = elementTable?.querySelectorAll('[data-index="0"]')?.[0]
+
+        element?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'start' })
     }
 
     const pagesLength = table.getPageCount()
