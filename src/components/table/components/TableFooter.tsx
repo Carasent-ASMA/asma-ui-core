@@ -8,25 +8,13 @@ export function TableFooter<
         id: string | number
     },
     TCustomData = Record<string, unknown>,
->({
-    table,
-    styledTableProps,
-    tableId,
-}: {
-    table: Table<TData>
-    styledTableProps: StyledTableProps<TData, TCustomData>
-    tableId: string
-}) {
+>({ table, styledTableProps }: { table: Table<TData>; styledTableProps: StyledTableProps<TData, TCustomData> }) {
     if (styledTableProps.hideFooter) return null
 
     return (
         <div className='table-footer'>
             {styledTableProps.footer?.(table)}
-            <TablePagination
-                table={table}
-                locale={styledTableProps.locale || 'en'}
-                tableId={tableId}
-            />
+            <TablePagination table={table} locale={styledTableProps.locale || 'en'} />
         </div>
     )
 }

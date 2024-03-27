@@ -12,17 +12,11 @@ import { StyledPopover } from 'src/components/utils/popover'
 import { useToggleMenuVisibility } from 'src/hooks/useToggleMenuVisibility.hook'
 import './TablePagination.scss'
 import { cn } from 'src/helpers/cn'
+import { useRef } from 'react'
 
-export function TablePagination<TData>({
-    table,
-    locale,
-    tableId,
-}: {
-    locale: 'en' | 'no'
-    table: Table<TData>
-    tableId: string
-}) {
+export function TablePagination<TData>({ table, locale }: { locale: 'en' | 'no'; table: Table<TData> }) {
     const { anchorEl, open, handleClose, handleOpen } = useToggleMenuVisibility()
+    const tablePagination = useRef<HTMLDivElement | null>(null)
     const isNo = locale === 'no'
 
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -30,17 +24,17 @@ export function TablePagination<TData>({
     }
 
     const scrollToTop = () => {
-        const elementTable = document.getElementById(tableId)
-        const element = elementTable?.querySelectorAll('[data-index="0"]')?.[0]
-
-        element?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'start' })
+        tablePagination?.current
+            ?.closest('.asma-core-ui-styled-table')
+            ?.querySelectorAll('[data-index="0"]')?.[0]
+            ?.scrollIntoView({ block: 'center', inline: 'start' })
     }
 
     const pagesLength = table.getPageCount()
     const currentPage = table.getState().pagination.pageIndex + 1
     const pages = Array.from({ length: pagesLength }, (_value, index) => index + 1)
     return pagesLength > 1 ? (
-        <div className='table-pagination'>
+        <div ref={tablePagination} className='table-pagination'>
             <StyledTooltip title={isNo ? 'Nåværende side' : 'Current Page'}>
                 <div>
                     <StyledButton
