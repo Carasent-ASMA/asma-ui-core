@@ -1,4 +1,4 @@
-import type { Person } from '../helpers/makeData'
+import type { Person } from '../../helpers/makeData'
 import type { Row } from '@tanstack/react-table'
 import { cloneDeep } from 'lodash-es'
 

@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import type { Participant } from '../helpers/makeData'
+import type { Participant } from '../../helpers/makeData'
 import type { ColumnDef } from '@tanstack/react-table'
 import { StyledCheckbox } from 'src/components/inputs/checkbox'
 import { Icon } from '@iconify/react'

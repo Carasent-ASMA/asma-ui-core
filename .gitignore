@@ -32,3 +32,5 @@ tsconfig.tsbuildinfo
 storybook-static
 .yarn
 dist
+configs
+configs/env.ts

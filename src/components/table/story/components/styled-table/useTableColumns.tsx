@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import type { Person } from '../helpers/makeData'
+import type { Person } from '../../helpers/makeData'
 import type { CellContext, ColumnDef } from '@tanstack/react-table'
 import { Icon } from '@iconify/react'
 import { PersonIcon } from 'src/components/data-display/icons'

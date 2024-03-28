@@ -20,15 +20,13 @@
         cursor: default;
 
         .t-cell {
-            display: flex;
-            justify-content: flex-start;
             text-transform: uppercase;
             background-color: transparent;
             font-size: 10px;
             font-weight: 600;
             text-align: start;
             color: var(--colors-delta-500);
-            display: table-cell;
+            // display: table-cell;
             white-space: pre-wrap;
             padding-left: 5px;
             padding-right: 5px;

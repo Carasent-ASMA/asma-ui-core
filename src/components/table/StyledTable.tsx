@@ -32,7 +32,7 @@ export const StyledTable = <
     return (
         <div className='asma-core-ui-styled-table'>
             <div className={cn('table-wrapper', className)} style={{ height }}>
-                <table className='table'>
+                <table className='styled-table'>
                     <TableHeader table={table} styledTableProps={props} />
                     <TableBody table={table} styledTableProps={props} />
                 </table>

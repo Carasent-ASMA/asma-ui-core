@@ -19,7 +19,6 @@ export const useStyledTable = <
 ) => {
     const { columns, data, initialState, pageSize, enableRowSelection, tableInstanceRef, ...rest } = props
     const table = useReactTable({
-        ...rest,
         columns,
         data,
         initialState: {
@@ -40,6 +39,13 @@ export const useStyledTable = <
             rest.getRowId ||
             ((row: TData, _index: number, parent?: Row<TData>) =>
                 parent ? [parent.id, row.id].join('.') : row.id.toString()),
+        defaultColumn: props.enableResizing
+            ? {
+                  size: undefined,
+                  //   maxSize: Infinity,
+              }
+            : undefined,
+        ...rest,
     })
 
     if (tableInstanceRef) {

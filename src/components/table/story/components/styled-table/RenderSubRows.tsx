@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import type { Participant } from '../helpers/makeData'
+import type { Participant } from '../../helpers/makeData'
 import { useTableSubRowsColumns } from './useTableSubRowsColumns'
-import { StyledTable } from '../../StyledTable'
+import { StyledTable } from '../../../StyledTable'
 import { cloneDeep } from 'lodash-es'
 
 export const RenderSubRows: React.FC<{ subRows: Participant[] }> = ({ subRows }) => {

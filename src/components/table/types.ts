@@ -56,7 +56,7 @@ type TTableOptions<TData> = TableOptions<TData>
 export type StyledTableProps<TData, TCustomData> = {
     locale?: 'no' | 'en'
     height?: string | number
-    actions?: (row: Row<TData>) => IAction<TData>[] 
+    actions?: (row: Row<TData>) => IAction<TData>[]
     customActionsNode?: (row: CellContext<TData, TData>) => ReactNode
     customSubRowData?: Map<string, TCustomData[]>
     headerPin?: boolean
@@ -75,6 +75,7 @@ export type StyledTableProps<TData, TCustomData> = {
     getRowSelectionIds?: (ids: string[]) => void
     hideHeader?: boolean
     pageSize?: number
+    enableResizing?: boolean
 } & Omit<
     TTableOptions<TData>,
     'getCoreRowModel' | 'getExpandedRowModel' | 'getFilteredRowModel' | 'getSortedRowModel'
