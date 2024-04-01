@@ -77,6 +77,8 @@ import {
     StyledTooltip,
 } from 'asma-core-ui'
 import { MessageReplyIcon } from './message-reply-icon'
+import { EditSquareIcon } from './edit-square-icon/EditSquareIcon'
+import { Tooltip } from '@mui/material'
 
 export const StyledIcons: React.FC<{ height?: number; width?: number }> = ({ height = 24, width = 24 }) => {
     return (
@@ -186,7 +188,7 @@ export const StyledIcons: React.FC<{ height?: number; width?: number }> = ({ hei
                 </div>
             </StyledTooltip>
             <div title='CheckFactOutlineIcon'>
-                <CheckFactOutlineIcon height={height} width={width} />S
+                <CheckFactOutlineIcon height={height} width={width} />
             </div>
             <div title='CalendarIcon'>
                 <CalendarIcon height={height} width={width} />
@@ -297,14 +299,19 @@ export const StyledIcons: React.FC<{ height?: number; width?: number }> = ({ hei
                 <MinimizeIcon height={height} width={height} className='text-delta-700' />
             </div>
             <div title='KeyboardCapslockIcon'>
-                <KeyboardCapslockIcon height={height} width={height} className='text-gama-500' />
+                <KeyboardCapslockIcon height={height} width={height} color='violet' />
             </div>
             <div title='MessageReplyIcon'>
                 <MessageReplyIcon height={height} width={height} />
             </div>
             <div title='BadgeIcon'>
-                <BadgeIcon height={height} width={height} className='text-gama-500' />
+                <BadgeIcon height={height} width={height} color='violet' />
             </div>
+            <StyledTooltip title='EditSquareIcon'>
+                <div title='EditSquareIcon'>
+                    <EditSquareIcon height={height} width={height} color='violet' />
+                </div>
+            </StyledTooltip>
         </div>
     )
 }

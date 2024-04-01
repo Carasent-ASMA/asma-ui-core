@@ -32,16 +32,22 @@ export const StyledLink: React.FC<StyledLinkProps> = ({
     content,
     ...otherProps
 }) => {
-    let textSize = 'text-sm'
+    let textSize = 'styled-link-small'
 
-    if (size === 'large') textSize = 'text-base'
+    if (size === 'large') textSize = 'styled-link-large'
 
     if (disabled) {
-        return <span className={clsx('styled-link', 'styled-link-disabled', textSize)}>{content}</span>
+        return <span className={clsx('styled-link', 'styled-link-disabled', textSize, className)}>{content}</span>
     }
 
     return (
-        <a {...otherProps} data-test={dataTest} ref={reflink} href={href} className={clsx(`styled-link`, className)}>
+        <a
+            {...otherProps}
+            data-test={dataTest}
+            ref={reflink}
+            href={href}
+            className={clsx(`styled-link`, textSize, className)}
+        >
             {content}
         </a>
     )
