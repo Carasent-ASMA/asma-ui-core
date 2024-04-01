@@ -14,5 +14,5 @@ export const HelperText: React.FC<{
 
     if (!isValidTime) errorText = localization === 'en' ? enString : noString
 
-    return <span className='absolute'>{errorText}</span>
+    return <span style={{ position: 'absolute' }}>{errorText}</span>
 }

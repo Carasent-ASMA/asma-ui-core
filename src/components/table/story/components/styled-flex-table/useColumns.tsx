@@ -1,10 +1,9 @@
 import { useMemo } from 'react'
 
-import type { Person } from '../../helpers/makeData'
-import type { CellContext, ColumnDef } from '@tanstack/react-table'
+import type { ColumnDef } from '@tanstack/react-table'
 import { Icon } from '@iconify/react'
-import { PersonIcon, QnrIcon } from 'src/components/data-display/icons'
 import type { ITemplate } from '../../service/types'
+import { QnrIcon } from 'src/components/icons'
 
 export const useColumns = () => {
     const columns = useMemo<ColumnDef<ITemplate, ITemplate>[]>(

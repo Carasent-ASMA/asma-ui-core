@@ -4,9 +4,9 @@ import { StyledChip } from './StyledChip'
 import { Stack } from '@mui/material'
 
 const meta: Meta = {
-    title: 'DataDisplay/Styled Chip',
+    title: 'DataDisplay/Chip',
     component: StyledChip,
-    tags: ['autodocs'],
+    tags: [],
     argTypes: {},
     args: {},
 } satisfies Meta<typeof StyledChip>
@@ -44,19 +44,6 @@ export const Chip = () => {
                     label='Deletable'
                     variant='outlined'
                     onDelete={handleDelete}
-                />
-            </Stack>
-            <Stack direction='row' spacing={1}>
-                <StyledChip
-                    dataTest='chip-hover'
-                    className='bg-gama-500 text-white text-sm hover:bg-gama-600'
-                    label='Styled Hover Chip'
-                />
-                <StyledChip
-                    dataTest='chip-hover-outlined'
-                    className='border-delta-500 text-delta-700 hover:border-delta-700 hover:bg-gama-50'
-                    label='Styled Hover Chip'
-                    variant='outlined'
                 />
             </Stack>
         </Stack>

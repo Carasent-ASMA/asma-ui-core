@@ -1,12 +1,11 @@
 import './styles/index.css'
 
 export * from './helpers'
-export * from './interfaces'
 // data-display
 export * from './components/data-display/badge'
 export * from './components/data-display/chip'
 export * from './components/data-display/tooltip'
-export * from './components/data-display/icons'
+export * from './components/icons'
 export * from './components/data-display/typography'
 // feedback
 export * from './components/feedback/dialog'
@@ -35,17 +34,14 @@ export * from './components/miscellaneous/StyledFormControlLabel'
 export * from './components/miscellaneous/StyledFormHelperText'
 export * from './components/miscellaneous/StyledFormLabel'
 export * from './components/miscellaneous/StyledInputLabel'
-export * from './components/miscellaneous/StyledStack'
 export * from './components/miscellaneous/StyledFormGroup'
 // navigation
 export * from './components/navigation/drawer'
 export * from './components/navigation/menu'
 export * from './components/navigation/link'
 export * from './components/navigation/tabs'
-// layout
-export * from './components/layout/container'
 // surfaces
-export * from './components/surfaces/accordion'
+export * from './components/utils/accordion'
 // table
 export * from './components/table'
 // utils
@@ -54,7 +50,7 @@ export * from './components/utils/popover'
 export * from './components/custom/widget/widget-title/StyledWidgetTitle'
 //modules
 export * from './components/custom/module/module-title/StyledModuleTitle'
-export * from './components/filter-menu/StyledFilterMenu'
+export * from './components/utils/filter-menu/StyledFilterMenu'
 export * from './components/feedback/minimizable-dialog/MinimizableDialog'
 
-export { Fade, Paper, ClickAwayListener, Popper, Avatar, Skeleton } from '@mui/material'
+export { Fade, Paper, ClickAwayListener, Popper, Avatar, Skeleton, Container, Stack } from '@mui/material'

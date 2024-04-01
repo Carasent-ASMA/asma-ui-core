@@ -1,18 +1,20 @@
-import type { Meta, StoryObj } from '@storybook/react'
-
+import type { Meta } from '@storybook/react'
 import { StyledModuleTitle } from './StyledModuleTitle'
 
 const meta = {
-    title: 'Modules/Styled ModuleTitle',
+    title: 'Modules/ModuleTitle',
     component: StyledModuleTitle,
-    tags: ['autodocs'],
+    tags: [],
     argTypes: {},
-    args: { children: <div>Anonyme skjema</div>, dataTest: 'Anonyme Schema' },
+    args: {},
 } satisfies Meta<typeof StyledModuleTitle>
 
 export default meta
-type Story = StoryObj<typeof meta>
 
-export const WidgetTitle: Story = {
-    args: { ...meta.args },
+export const ModuleTitle = () => {
+    return (
+        <div className='max-w-sm '>
+            <StyledModuleTitle dataTest='anonyme-schema'>Anonyme skjema</StyledModuleTitle>
+        </div>
+    )
 }

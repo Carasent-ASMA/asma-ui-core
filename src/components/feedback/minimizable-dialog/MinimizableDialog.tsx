@@ -1,4 +1,4 @@
-import { CloseIcon, KeyboardCapslockIcon, MinimizeIcon } from 'src/components/data-display/icons'
+import { CloseIcon, KeyboardCapslockIcon, MinimizeIcon } from 'src/components/icons'
 import { StyledButton } from 'src/components/inputs/button'
 import clsx from 'clsx'
 import { useState } from 'react'

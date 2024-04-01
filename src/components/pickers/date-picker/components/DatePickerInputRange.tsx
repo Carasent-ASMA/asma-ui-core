@@ -1,8 +1,7 @@
 import { StyledInputField } from '../../../inputs/input-field'
 import type { DatePickerProps } from '../types'
 import { getValue } from '../helpers'
-import { OutlineCalendarMonth } from 'src/components/data-display/icons'
-import { cn } from 'src/helpers/cn'
+import { OutlineCalendarMonth } from 'src/components/icons'
 
 export const DatePickerInputRange: React.FC<
     DatePickerProps & { onClick: (e: React.MouseEvent<HTMLDivElement>) => void }
@@ -28,7 +27,8 @@ export const DatePickerInputRange: React.FC<
             }}
             value={value}
             disabled={!!disabled}
-            className={cn(`w-60 ${inputClassName}`)}
+            className={inputClassName}
+            style={{ width: '240px' }}
             allowClear={allowClear}
             onClear={() => {
                 onClear?.()

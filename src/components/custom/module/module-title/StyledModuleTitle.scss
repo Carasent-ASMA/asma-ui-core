@@ -1,0 +1,11 @@
+.styled-module-title {
+    margin-bottom: 20px;
+    font-size: 24px;
+    line-height: 40px;
+    font-weight: 700;
+    color: #17232e;
+
+    @media (min-width: 768px) {
+        margin-bottom: 8px;
+    }
+}

@@ -52,7 +52,7 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
                         popupState.close()
                     }}
                 >
-                    <div className='w-fit h-fit relative'>
+                    <div style={{ width: 'auto', height: 'auto', position: 'relative' }}>
                         <div {...bindTrigger(popupState)}>
                             <TimePickerInput
                                 {...props}

@@ -11,28 +11,35 @@ export const TimePickerPopper: React.FC<StyledTimePickerProps & { popupState: Po
     const { popupState, dataTest, value, onSelect, handleClear } = props
 
     return (
-        <Popper {...bindPopper(popupState)} transition className='z-[1300] absolute top-2'>
+        <Popper {...bindPopper(popupState)} transition style={{ zIndex: '1300', position: 'absolute', top: '2px' }}>
             {({ TransitionProps }) => (
                 <Fade {...TransitionProps} timeout={350}>
-                    <Paper className='pb-[1px]'>
+                    <Paper style={{ paddingBottom: '1px' }}>
                         <TimePickerBody dataTest={`${dataTest}-time-picker-body`} value={value} onSelect={onSelect} />
-                        <div className='flex my-3 justify-between'>
+                        <div
+                            style={{
+                                display: 'flex',
+                                marginTop: '12px',
+                                marginBottom: '12px',
+                                justifyContent: 'space-between',
+                            }}
+                        >
                             <StyledButton
                                 variant='text'
                                 onClick={handleClear}
                                 size='small'
                                 disabled={!value}
                                 dataTest='select-today'
-                                className='!min-w-[40px] ml-2.5'
+                                style={{ minWidth: '40px', marginLeft: '10px' }}
                                 startIcon={<Icon icon='ph:eraser-duotone' width={24} height={24} />}
                             />
                             <StyledButton
                                 size='small'
                                 onClick={() => popupState.close()}
                                 dataTest='select-time'
-                                className='!min-w-[40px] mr-4'
+                                style={{ minWidth: '40px', marginRight: '16px' }}
                                 startIcon={<Icon icon='bi:check-lg' width={20} height={20} />}
-                            ></StyledButton>
+                            />
                         </div>
                     </Paper>
                 </Fade>

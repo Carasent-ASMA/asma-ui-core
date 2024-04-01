@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
-import { StyledButton } from '../inputs/button'
-import { FilterIcon } from '../data-display/icons'
-import { StyledPopover } from '../utils/popover'
+import { StyledButton } from '../../inputs/button'
+import { FilterIcon } from '../../icons'
+import { StyledPopover } from '../popover'
 import clsx from 'clsx'
 
 /**

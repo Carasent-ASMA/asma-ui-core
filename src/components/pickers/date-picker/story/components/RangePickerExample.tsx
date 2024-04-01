@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { StyledDatePicker } from '../../StyledDatePicker'
 import type { DateRange } from 'react-day-picker'
 import { nb } from 'date-fns/locale'
-import { setMidnightTime, setZeroTime } from 'src/helpers/date.helpers'
+import { setMidnightTime, setZeroTime } from 'src/helpers/date.helper'
 import { useIsMobileView } from 'src/hooks/useWindowWidthSize.hook'
 
 export const RangePickerExample: React.FC = () => {

@@ -1,81 +1,39 @@
-import React, { type ReactNode } from 'react'
-
 import { StyledLabel } from './StyledLabel'
 
-import { StyledTypography } from 'src/components/data-display/typography'
+import { StyledWidgetTitle } from 'src/components/custom/widget/widget-title/StyledWidgetTitle'
 
 export default {
-    title: 'StyledLabel',
+    title: 'DataDisplay/Label',
     component: StyledLabel,
 }
 
-const MarginBlock = ({ children }: { children: ReactNode }) => <div className='mb-3'>{children}</div>
-
-export const Default = () => (
+export const Label = () => (
     <>
-        <StyledTypography className='py-2'>Label/Highlighting</StyledTypography>
-        <MarginBlock>
-            <StyledLabel dataTest='label good' className='bg-green-500 text-delta-900'>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', margin: '10px' }}>
+            <StyledWidgetTitle>Label/Highlighting</StyledWidgetTitle>
+            <StyledLabel dataTest='label-good' style={{ background: 'var(--colors-jade-600)', color: 'white' }}>
                 Good
             </StyledLabel>
-        </MarginBlock>
-        <MarginBlock>
-            <StyledLabel dataTest='label attention' className='bg-yellow-300 text-delta-900'>
-                Attention
-            </StyledLabel>
-        </MarginBlock>
-        <MarginBlock>
-            <StyledLabel dataTest='label warning' className='bg-orange-200 text-delta-900'>
-                Warning
-            </StyledLabel>
-        </MarginBlock>
-        <MarginBlock>
-            <StyledLabel dataTest='label urgent' className='bg-red-200 text-delta-900'>
-                Urgent
-            </StyledLabel>
-        </MarginBlock>
-
-        <StyledTypography className='py-2'>Label/Groups</StyledTypography>
-        <MarginBlock>
-            <StyledLabel dataTest='label group' className='bg-delta-700 text-white'>
-                Group
-            </StyledLabel>
-        </MarginBlock>
-        <MarginBlock>
-            <StyledLabel dataTest='label network' className='bg-purple-500 text-white'>
+            <StyledLabel dataTest='label-network' style={{ background: 'purple', color: 'white' }}>
                 Network
             </StyledLabel>
-        </MarginBlock>
-        <MarginBlock>
-            <StyledLabel dataTest='label gruppe' className='bg-delta-700 text-white'>
-                Gruppe
+            <StyledLabel dataTest='label-attention' style={{ background: 'yellow', color: '#333' }}>
+                Attention
             </StyledLabel>
-        </MarginBlock>
-        <MarginBlock>
-            <StyledLabel dataTest='label ORG' className='bg-blue-400 text-white'>
-                ORG
+            <StyledLabel dataTest='label-warning' style={{ background: 'salmon', color: 'black' }}>
+                Warning
             </StyledLabel>
-        </MarginBlock>
+        </div>
 
-        <StyledTypography className='py-2'>Label/General</StyledTypography>
-        <MarginBlock>
-            <StyledLabel dataTest='label archived' className='bg-gray-100 text-delta-700'>
-                Archived
-            </StyledLabel>
-        </MarginBlock>
-        <MarginBlock>
-            <StyledLabel dataTest='label admin'>Admin</StyledLabel>
-        </MarginBlock>
-        <MarginBlock>
-            <StyledLabel dataTest='label parent'>Parent</StyledLabel>
-        </MarginBlock>
-        <MarginBlock>
-            <StyledLabel dataTest='label linked'>Linked</StyledLabel>
-        </MarginBlock>
-        <MarginBlock>
-            <StyledLabel dataTest='label onClick' onClick={() => alert('Click!')}>
+        {/*  */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', margin: '10px' }}>
+            <StyledWidgetTitle>Label/General</StyledWidgetTitle>
+            <StyledLabel dataTest='label-admin'>Admin</StyledLabel>
+            <StyledLabel dataTest='label-parent'>Parent</StyledLabel>
+            <StyledLabel dataTest='label-linked'>Linked</StyledLabel>
+            <StyledLabel dataTest='label-onClick' onClick={() => alert('Click!')}>
                 Styled Label + onClick handler
             </StyledLabel>
-        </MarginBlock>
+        </div>
     </>
 )

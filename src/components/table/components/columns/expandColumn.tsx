@@ -1,5 +1,5 @@
 import { type CellContext } from '@tanstack/react-table'
-import { ChevronDownIcon, ChevronUpIcon } from 'src/components/data-display/icons'
+import { ChevronDownIcon, ChevronUpIcon } from 'src/components/icons'
 import { EXPAND_COLUMN_ID } from '../../types'
 
 export function generateExpandColumn<TData>() {

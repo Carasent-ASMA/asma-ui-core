@@ -1,7 +1,8 @@
+import { cn } from 'src/helpers'
 import { StyledInputField } from '../../../inputs/input-field'
 import { getValue } from '../helpers'
 import type { DatePickerProps } from '../types'
-import { OutlineCalendarMonth } from 'src/components/data-display/icons'
+import { OutlineCalendarMonth } from 'src/components/icons'
 
 export const DatePickerInputRangeCompact: React.FC<
     DatePickerProps & { onClick: (e: React.MouseEvent<HTMLDivElement>) => void }
@@ -26,9 +27,7 @@ export const DatePickerInputRangeCompact: React.FC<
     return (
         <div
             data-test={dataTest}
-            className={`${className} ${
-                disabled ? 'cursor-default text-[var(--colors-gray-300)]' : 'cursor-pointer'
-            } inline-flex gap-4 w-fit items-center`}
+            className={cn(className, 'styled-date-picker-input-range-compact', disabled && 'range-compact-disabled')}
             onClick={(e) => !disabled && onClick(e)}
         >
             <StyledInputField
@@ -39,7 +38,8 @@ export const DatePickerInputRangeCompact: React.FC<
                 placeholder={placeholderFrom}
                 value={value_from}
                 disabled={!!disabled}
-                className={`${inputClassName} w-36`}
+                className={inputClassName}
+                style={{ width: '144px' }}
                 InputProps={{
                     endAdornment: <OutlineCalendarMonth width={24} height={24} />,
                 }}
@@ -52,7 +52,8 @@ export const DatePickerInputRangeCompact: React.FC<
                 placeholder={placeholderTo}
                 value={value_to}
                 disabled={!!disabled}
-                className={`${inputClassName} w-36`}
+                className={inputClassName}
+                style={{ width: '144px' }}
                 InputProps={{
                     endAdornment: <OutlineCalendarMonth width={24} height={24} />,
                 }}

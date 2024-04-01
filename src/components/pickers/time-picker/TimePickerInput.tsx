@@ -1,7 +1,6 @@
 import { StyledInputField } from 'src/components/inputs/input-field'
 import type { StyledTimePickerProps } from './types'
-import { cn } from 'src/helpers/cn'
-import { ClockOutlineIcon } from 'src/components/data-display/icons/clock-outline-icon'
+import { ClockOutlineIcon } from 'src/components/icons/clock-outline-icon'
 import { type PopupState } from 'material-ui-popup-state/hooks'
 import { HelperText } from './components/HelperText'
 import type { ChangeEvent } from 'react'
@@ -57,7 +56,7 @@ export const TimePickerInput: React.FC<
                 minWidth: width,
             }}
             disabled={disabled}
-            className={cn(inputClassName)}
+            className={inputClassName}
             label={label}
         />
     )

@@ -1,5 +1,5 @@
 import { TextField, type TextFieldProps } from '@mui/material'
-import { CloseIcon } from 'src/components/data-display/icons'
+import { CloseIcon } from 'src/components/icons'
 /**
  *
  * @inputRef

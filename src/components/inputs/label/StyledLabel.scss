@@ -1,0 +1,17 @@
+.styled-label {
+    font-size: 10px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    text-transform: uppercase;
+    height: 16px;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    border-radius: 3px;
+    background-color: var(--colors-gama-50);
+    color: var(--colors-gama-700);
+}

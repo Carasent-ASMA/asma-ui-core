@@ -19,7 +19,13 @@ export default meta
 
 export const DatePicker = () => {
     return (
-        <div className={'flex flex-col gap-5'}>
+        <div
+            style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '20px',
+            }}
+        >
             <DatePickerContainer title={'Default Picker'} node={<SinglePickerExample />} />
             <DatePickerContainer title={'Range Picker'} node={<RangePickerExample />} />
             <DatePickerContainer title={'Range Picker Compact'} node={<RangePickerCompactExample />} />

@@ -3,8 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { StyledFilterMenu } from './StyledFilterMenu'
 import { useEffect, useState } from 'react'
 import { MenuItem } from '@mui/material'
-import { StyledCheckbox } from '../inputs/checkbox'
-import { StyledFormControlLabel } from '../miscellaneous/StyledFormControlLabel'
+import { StyledCheckbox } from '../../inputs/checkbox'
+import { StyledFormControlLabel } from '../../miscellaneous/StyledFormControlLabel'
 
 const meta: Meta<typeof StyledFilterMenu> = {
     title: 'Utils/Styled Filter Menu',

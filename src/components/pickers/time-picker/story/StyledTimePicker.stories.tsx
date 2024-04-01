@@ -16,7 +16,7 @@ export const TimePicker = () => {
     const [value, setValue] = useState<Date | undefined>()
 
     return (
-        <div className='flex w-full gap-4'>
+        <div style={{ display: 'flex', width: '100%', gap: '16px' }}>
             <StyledTimePicker dataTest='test' value={value} onSelect={setValue} label='Time' placeholder='Time' />
             <StyledTimePicker
                 dataTest='test'

@@ -3,7 +3,7 @@ import { getTableHeaderStyle } from '../helpers/getTableHeaderStyle'
 import type { StyledTableProps } from '../types'
 import { useRef } from 'react'
 import clsx from 'clsx'
-import { DropDownIcon, DropUpIcon } from 'src/components/data-display/icons'
+import { DropDownIcon, DropUpIcon } from 'src/components/icons'
 
 export function TableHeaderCell<
     TData extends {

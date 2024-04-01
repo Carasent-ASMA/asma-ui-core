@@ -3,6 +3,7 @@ import { StyledFormControl } from 'src/components/miscellaneous/StyledFormContro
 import { StyledSelect, StyledSelectItem } from '../../../inputs/select'
 import { setMonth } from 'date-fns'
 import { capitalize } from 'lodash-es'
+import './StyledCalendarPickerSelectPeriod.scss'
 
 export const StyledCalendarPickerSelectMonth: React.FC<DropdownProps> = (props) => {
     const { caption, children } = props
@@ -13,7 +14,7 @@ export const StyledCalendarPickerSelectMonth: React.FC<DropdownProps> = (props) 
     const selectedOptions = monthsList?.map((month) => ({ id: month.props.value, label: month.props.children }))
 
     return (
-        <StyledFormControl className='w-[105px] ml-[-5px]'>
+        <StyledFormControl style={{ width: '105px', marginLeft: '-5px' }}>
             <StyledSelect
                 dataTest='StyledCalendarPickerSelectMonth'
                 size='small'
@@ -24,7 +25,7 @@ export const StyledCalendarPickerSelectMonth: React.FC<DropdownProps> = (props) 
                     const id = selectedOptions.find((opt) => opt.label === selectedValue)?.id
                     month && !isNaN(Number(id)) && goToMonth(setMonth(month, Number(id)))
                 }}
-                MenuProps={{ className: '[&_ul]:overflow-auto [&_ul]:max-h-[250px]' }}
+                MenuProps={{ className: 'styled-calendar-picker-select-period-menu' }}
             >
                 {selectedOptions?.map((month) => (
                     <StyledSelectItem key={month.id} value={month.label}>

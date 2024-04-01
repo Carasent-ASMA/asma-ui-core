@@ -12,7 +12,16 @@ export function CustomCaption(
     const { month } = props
 
     return (
-        <div className='rdp-custom-caption flex justify-between  items-center h-[30px] ml-4'>
+        <div
+            className='rdp-custom-caption'
+            style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                height: '30px',
+                marginLeft: '16px',
+            }}
+        >
             {month && <Caption displayMonth={month} />}
         </div>
     )

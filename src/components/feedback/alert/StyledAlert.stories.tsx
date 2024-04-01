@@ -5,9 +5,9 @@ import { StyledAlertTitle } from './StyledAlertTitle'
 import { useState } from 'react'
 
 const meta = {
-    title: 'Feedback/Styled Alert',
+    title: 'Feedback/Alert',
     component: StyledAlert,
-    tags: ['autodocs'],
+    tags: [],
     argTypes: {},
     args: { severity: 'success', variant: 'filled' },
 } satisfies Meta<typeof StyledAlert>
@@ -16,7 +16,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 // More on writing stories with args: https://storybook.js.org/docs/react/writing-stories/args
-export const Primary: Story = {
+export const Alert: Story = {
     args: { ...meta.argTypes, children: 'Styled Button', variant: 'outlined' },
     render: () => {
         // eslint-disable-next-line react-hooks/rules-of-hooks

@@ -3,7 +3,8 @@ import type { Meta } from '@storybook/react'
 import { StyledButton } from './StyledButton'
 import { Stack } from '@mui/material'
 import { Icon } from '@iconify/react'
-import { ChevronDownIcon } from 'src/components/data-display/icons'
+import { ChevronDownIcon } from 'src/components/icons'
+import './StyledButtonStories.scss'
 
 const meta: Meta<typeof StyledButton> = {
     title: 'Inputs/Styled Button',
@@ -17,27 +18,27 @@ export default meta
 
 export const Buttons = () => (
     <Stack direction='column' spacing={2}>
-        <h2 className='text-gray-800 '>Buttons Common Enabled</h2>
+        <h2 className='header'>Buttons Common Enabled</h2>
         <CommonEnabledButtons />
         {/*  */}
-        <h2 className='text-gray-800'>Buttons Common Disabled</h2>
+        <h2 className='header'>Buttons Common Disabled</h2>
         <CommonEnabledButtons disabled={true} />
         {/*  */}
-        <h2 className='text-gray-800'>Buttons Common Size Small</h2>
+        <h2 className='header'>Buttons Common Size Small</h2>
         <CommonEnabledButtons size={'small'} />
         {/*  */}
-        <h2 className='text-gray-800'>Buttons Common Size Small Disabled</h2>
+        <h2 className='header'>Buttons Common Size Small Disabled</h2>
         <CommonEnabledButtons size={'small'} disabled />
         {/*  */}
-        <h2 className='text-gray-800'>Buttons Error Enabled</h2>
+        <h2 className='header'>Buttons Error Enabled</h2>
         <CommonEnabledButtons error />
         {/*  */}
-        <h2 className='text-gray-800'>Buttons Error Disabled</h2>
+        <h2 className='header'>Buttons Error Disabled</h2>
         <CommonEnabledButtons error disabled />
-        <h2 className='text-gray-800'>Buttons Error Size Small</h2>
+        <h2 className='header'>Buttons Error Size Small</h2>
         <CommonEnabledButtons size={'small'} error />
         {/*  */}
-        <h2 className='text-gray-800'>Buttons Error Size Small Disabled</h2>
+        <h2 className='header'>Buttons Error Size Small Disabled</h2>
         <CommonEnabledButtons error size={'small'} disabled />
         {/*  */}
     </Stack>
@@ -50,18 +51,14 @@ const CommonEnabledButtons: React.FC<{
 }> = ({ disabled = false, size = 'large', error = false }) => {
     const izSmall = size === 'small'
     return (
-        <div>
-            <div className='flex w-fit border border-b border-t-0 border-x-0 border-solid border-gray-200'>
-                <div className='w-[100px] min-w-[100px] flex items-center  h-[50px] font-bold text-base text-gray-800'>
-                    {izSmall ? 'Small' : 'Medium'}
-                </div>
-                <div className='w-[570px] flex min-w-[570px] items-center justify-center border-l-solid font-bold border-gray-200 text-gray-600'>
-                    {disabled ? 'Disabled' : 'Enabled'}
-                </div>
+        <div className='buttons-module'>
+            <div className='buttons-module__table-borders'>
+                <div className='buttons-module__table-header-button-type'>{izSmall ? 'Small' : 'Medium'}</div>
+                <div className='buttons-module__table-header-button-state'>{disabled ? 'Disabled' : 'Enabled'}</div>
             </div>
-            <div className='flex'>
-                <div className='w-[100px] flex items-center text-gray-600 font-bold'>Contained</div>
-                <div className='w-[570px] flex justify-center py-2  border border-l border-y-0 border-r-0 border-solid border-gray-200'>
+            <div className='buttons-module__table-row'>
+                <div className='buttons-module__text'>Contained</div>
+                <div className='buttons-module__table-row-borders'>
                     <Stack direction='row' spacing={4}>
                         <StyledButton
                             dataTest='test'
@@ -111,9 +108,9 @@ const CommonEnabledButtons: React.FC<{
                     </Stack>
                 </div>
             </div>
-            <div className='flex'>
-                <div className='w-[100px] flex items-center h-[50px] text-gray-600 font-bold'>Outlined</div>
-                <div className='w-[570px] flex justify-center py-2 border border-l border-y-0 border-r-0 border-solid border-gray-200'>
+            <div className='buttons-module__table-row'>
+                <div className='buttons-module__text'>Outlined</div>
+                <div className='buttons-module__table-row-borders'>
                     <Stack direction='row' spacing={4}>
                         <StyledButton
                             error={error}
@@ -156,9 +153,9 @@ const CommonEnabledButtons: React.FC<{
                     </Stack>
                 </div>
             </div>
-            <div className='flex'>
-                <div className='w-[100px] flex items-center h-[50px] text-gray-600 font-bold'>Text</div>
-                <div className='w-[570px] flex justify-center py-2 border border-l border-y-0 border-r-0 border-solid border-gray-200'>
+            <div className='buttons-module__table-row'>
+                <div className='buttons-module__text'>Text</div>
+                <div className='buttons-module__table-row-borders'>
                     <Stack direction='row' spacing={4}>
                         <StyledButton
                             dataTest='test'
@@ -203,9 +200,9 @@ const CommonEnabledButtons: React.FC<{
                 </div>
             </div>
             {!error && (
-                <div className='flex'>
-                    <div className='w-[100px] flex items-center h-[50px] text-gray-600 font-bold'>Text Gray</div>
-                    <div className='w-[570px] flex justify-center py-2 border border-l border-y-0 border-r-0 border-solid border-gray-200'>
+                <div className='buttons-module__table-row'>
+                    <div className='buttons-module__text'>Text Gray</div>
+                    <div className='buttons-module__table-row-borders'>
                         <Stack direction='row' spacing={4}>
                             <StyledButton dataTest='test' size={size} disabled={disabled} variant='textGray'>
                                 Button label
@@ -253,9 +250,9 @@ const CommonEnabledButtons: React.FC<{
                 </div>
             )}
             {!error && (
-                <div className='flex'>
-                    <div className='w-[100px] flex items-center h-[50px] text-gray-600 font-bold'>Text White</div>
-                    <div className='w-[570px] flex justify-center py-2 border border-l border-y-0 border-r-0 border-solid border-gray-200'>
+                <div className='buttons-module__table-row'>
+                    <div className='buttons-module__text'>Text White</div>
+                    <div className='buttons-module__table-row-borders'>
                         <Stack direction='row' spacing={4}>
                             <StyledButton dataTest='test' size={size} disabled={disabled} variant='textWhite'>
                                 Button label

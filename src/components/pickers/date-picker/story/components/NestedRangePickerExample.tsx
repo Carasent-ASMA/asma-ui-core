@@ -29,7 +29,7 @@ export const NestedRangePickerExample: React.FC = () => {
                     horizontal: 'left',
                 }}
             >
-                <div className='p-5'>
+                <div style={{ padding: '5px' }}>
                     <RangePickerCompactExample />
                 </div>
             </StyledPopover>

@@ -1,12 +1,12 @@
 import { StyledSelect } from '../StyledSelect'
 import { useState } from 'react'
-import { StyledStack } from 'src/components/miscellaneous/StyledStack'
 import { StyledTypography } from 'src/components/data-display/typography'
 import { StyledFormControl } from 'src/components/miscellaneous/StyledFormControl'
 import { StyledSelectExample } from './components/StyledSelectExample'
 import { StyledInputLabel } from 'src/components/miscellaneous/StyledInputLabel'
 import { StyledSelectItem } from '../StyledSelectItem'
 import type { Meta } from '@storybook/react'
+import { Stack } from '@mui/material'
 
 const selectOptions = [
     { title: 'Van Henry', id: '1' },
@@ -35,7 +35,7 @@ export default meta
 export const Select = (args: { children: React.ReactNode }) => {
     const [value, setValue] = useState(selectOptions[0]?.id)
     return (
-        <StyledStack direction='column' spacing={2}>
+        <Stack direction='column' spacing={2}>
             <StyledTypography variant='h6'>Select size medium</StyledTypography>
             <StyledFormControl fullWidth>
                 <StyledSelect
@@ -66,6 +66,6 @@ export const Select = (args: { children: React.ReactNode }) => {
                     }}
                 />
             </StyledFormControl>
-        </StyledStack>
+        </Stack>
     )
 }

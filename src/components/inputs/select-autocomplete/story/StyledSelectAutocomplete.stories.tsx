@@ -1,7 +1,7 @@
 import type { StoryObj, Meta } from '@storybook/react'
 import { StyledSelectAutocomplete } from '../StyledSelectAutocomplete'
-import { StyledStack } from '../../../miscellaneous/StyledStack'
 import { StyledSelectAutocompleteExample } from './components/StyledSelectAutocompleteExample'
+import { Stack } from '@mui/material'
 
 const meta = {
     title: 'Inputs/Styled Select Autocomplete',
@@ -18,8 +18,8 @@ export const SelectAutocomplete: Story = {
 
 const SelectAutocompleteExample = () => {
     return (
-        <StyledStack direction='column' spacing={2}>
+        <Stack direction='column' spacing={2}>
             <StyledSelectAutocompleteExample />
-        </StyledStack>
+        </Stack>
     )
 }

@@ -1,19 +1,46 @@
 .styled-time-picker-root {
-    @apply flex max-h-56  overflow-hidden border-gray-800 #{!important};
+    display: flex;
+    max-height: 224px;
+    overflow: hidden;
+    border: var(--colors-gray-800);
+}
 
-    .styled-time-picker-root_column {
-        @apply flex flex-col w-full p-1.5 pb-0 #{!important};
+.styled-time-picker-root_column {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 6px;
+    padding-bottom: 0;
+    overflow-y: scroll;
+    scrollbar-width: thin;
+}
+
+.styled-time-picker-root_cell {
+    background-color: #fff;
+    min-height: 36px;
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    &:hover {
+        background-color: var(--colors-gray-100);
     }
-
-    .styled-time-picker-root_cell {
-        @apply bg-white min-h-[36px] w-9 h-9 text-sm hover:bg-gray-100 cursor-pointer rounded-lg flex items-center place-content-center;
-
-        &.styled-time-picker-root_cell__cell-now {
-            @apply bg-gama-50 hover:bg-gama-50;
+    &.styled-time-picker-root_cell__cell-now {
+        background-color: var(--colors-gama-50);
+        &:hover {
+            background-color: var(--colors-gama-50);
         }
-
-        &.styled-time-picker-root_cell__cell-selected {
-            @apply bg-gama-500 text-white hover:bg-gama-600;
+    }
+    &.styled-time-picker-root_cell__cell-selected {
+        @apply bg-gama-500 text-white hover:bg-gama-600;
+        background-color: var(--colors-gama-500);
+        color: white;
+        &:hover {
+            background-color: var(--colors-gama-600);
         }
     }
 }

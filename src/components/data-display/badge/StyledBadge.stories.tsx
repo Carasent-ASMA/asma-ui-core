@@ -3,20 +3,22 @@ import type { Meta } from '@storybook/react'
 import { StyledBadge } from './StyledBadge'
 import { StyledButton } from '../../inputs/button/StyledButton'
 
-const meta:Meta = {
-    title: 'DataDisplay/Styled Badge',
+const meta: Meta = {
+    title: 'DataDisplay/Badge',
     component: StyledBadge,
-    tags: ['autodocs'],
+    tags: [],
     args: {},
-    argTypes: { children: { description: 'The option elements to populate the select with' } },
+    argTypes: {},
 } satisfies Meta<typeof StyledBadge>
 
 export default meta
 
-export const BasicBadge = () => {
+export const Badge = () => {
     return (
-        <StyledBadge {...meta.argTypes} dataTest='styled-badge-example' badgeContent={4} color='primary'>
-            <StyledButton dataTest='btn-badge-example' variant='outlined'>Badge example</StyledButton>
+        <StyledBadge dataTest='styled-badge-example' badgeContent={777} color='primary'>
+            <StyledButton dataTest='btn-badge-example' variant='outlined'>
+                Button with badge
+            </StyledButton>
         </StyledBadge>
     )
 }

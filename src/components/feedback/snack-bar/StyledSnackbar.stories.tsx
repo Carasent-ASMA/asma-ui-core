@@ -8,7 +8,7 @@ import { Icon } from '@iconify/react'
 import { SnackbarProvider } from './SnackbarProvider'
 import { processInfoSnackbar } from './processInfoSnackbar'
 import { message } from './message'
-import { LoadingIcon } from 'src/components/data-display/icons'
+import { LoadingIcon } from 'src/components/icons'
 import { InfoMessages } from './components-styled/InfoMessages'
 
 const meta = {

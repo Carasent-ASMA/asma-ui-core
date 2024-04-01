@@ -12,7 +12,7 @@ export const StyledCalendarPickerSelectYear: React.FC<DropdownProps> = (props) =
     const selectedOptions = monthsList?.map((month) => ({ id: month.props.value, label: month.props.children }))
 
     return (
-        <StyledFormControl className='w-[70px] ml-[5px]'>
+        <StyledFormControl style={{ width: '70px', marginLeft: '5px' }}>
             <StyledSelect
                 dataTest='StyledCalendarPickerSelectYear'
                 size='small'
@@ -23,7 +23,7 @@ export const StyledCalendarPickerSelectYear: React.FC<DropdownProps> = (props) =
                     const id = selectedOptions.find((opt) => opt.label === selectedValue)?.id
                     month && !isNaN(Number(id)) && goToMonth(setYear(month, Number(id)))
                 }}
-                MenuProps={{ className: '[&_ul]:overflow-auto [&_ul]:max-h-[250px]' }}
+                MenuProps={{ className: 'styled-calendar-picker-select-period-menu' }}
             >
                 {selectedOptions?.map((month) => (
                     <StyledSelectItem key={month.id} value={month.label}>

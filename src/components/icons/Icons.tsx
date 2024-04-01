@@ -68,10 +68,17 @@ import { EarthIcon } from './earth-icon'
 import { SettingsMenuHorizontalIcon } from './settings-menu-horizontal-icon'
 import { PencilOutlineIcon } from './pencil-outline-icon'
 import { WarningAmberOutlineIcon } from './warning-icon'
-import { BadgeIcon, ConsentsIcon, KeyboardCapslockIcon, MinimizeIcon, OutlineCalendarMonth } from 'asma-core-ui'
+import {
+    BadgeIcon,
+    ConsentsIcon,
+    KeyboardCapslockIcon,
+    MinimizeIcon,
+    OutlineCalendarMonth,
+    StyledTooltip,
+} from 'asma-core-ui'
 import { MessageReplyIcon } from './message-reply-icon'
 
-export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 24, width = 24 }) => {
+export const StyledIcons: React.FC<{ height?: number; width?: number }> = ({ height = 24, width = 24 }) => {
     return (
         <div className={styles['all-icons-container']}>
             <div title='LoadingIcon'>
@@ -173,11 +180,13 @@ export const Icons: React.FC<{ height?: number; width?: number }> = ({ height = 
             <div title='CheckBoxCheckedIcon'>
                 <CheckBoxCheckedIcon height={height} width={width} />
             </div>
-            <div title='CheckOutlineIcon'>
-                <CheckOutlineIcon height={height} width={width} />
-            </div>
+            <StyledTooltip title='CheckOutlineIcon'>
+                <div>
+                    <CheckOutlineIcon height={height} width={width} color='green' />
+                </div>
+            </StyledTooltip>
             <div title='CheckFactOutlineIcon'>
-                <CheckFactOutlineIcon height={height} width={width} />
+                <CheckFactOutlineIcon height={height} width={width} />S
             </div>
             <div title='CalendarIcon'>
                 <CalendarIcon height={height} width={width} />

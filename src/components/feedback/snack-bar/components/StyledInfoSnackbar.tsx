@@ -2,7 +2,7 @@ import type { AlertColor } from '@mui/material'
 import clsx from 'clsx'
 import { SnackbarContent, type CustomContentProps, useSnackbar } from 'notistack'
 import { forwardRef } from 'react'
-import { CloseIcon, LoadingIcon } from 'src/components/data-display/icons'
+import { CloseIcon, LoadingIcon } from 'src/components/icons'
 import { omit } from 'src/helpers'
 
 interface StyledInfoSnackbarProps extends CustomContentProps {

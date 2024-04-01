@@ -24,7 +24,7 @@ export const StyledCalendarPickerFooter: React.FC<{
         : true
 
     return (
-        <div className='mt-2 flex justify-between mr-3'>
+        <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'space-between', marginRight: '12px' }}>
             <StyledButton
                 variant='text'
                 onClick={(e) => {
@@ -36,10 +36,10 @@ export const StyledCalendarPickerFooter: React.FC<{
                 size='small'
                 disabled={eraserDisabled}
                 dataTest='select-today'
-                className='!min-w-[60px]'
+                style={{ minWidth: '60px' }}
                 startIcon={<Icon icon='ph:eraser-duotone' width={24} height={24} />}
             />
-            <div className='rdp-custom-caption-navigation flex gap-1'>
+            <div className='rdp-custom-caption-navigation' style={{ display: 'flex', gap: '4px' }}>
                 <StyledButton
                     variant='outlined'
                     size='small'
@@ -56,7 +56,6 @@ export const StyledCalendarPickerFooter: React.FC<{
                     }}
                     variant='outlined'
                     dataTest='select-today'
-                    className='!disabled:cursor-default'
                 >
                     {isNb ? 'I dag' : 'Today'}
                 </StyledButton>
@@ -75,7 +74,7 @@ export const StyledCalendarPickerFooter: React.FC<{
                     onClose?.(e, 'backdropClick')
                 }}
                 dataTest='select-today'
-                className='!min-w-[60px]'
+                style={{ minWidth: '60px' }}
             >
                 {isNb ? 'Velg' : 'Select'}
             </StyledButton>

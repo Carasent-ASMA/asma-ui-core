@@ -1,7 +1,18 @@
 @mixin button($type, $color) {
-    @apply border-transparent border border-solid;
+    border-color: transparent;
+    border-width: 1px;
+    border-style: solid;
     &.#{$type}.#{$color} {
-        @apply cursor-pointer rounded border flex items-center justify-center text-sm font-semibold transition duration-300 ease-in-out;
+        cursor: pointer;
+        border-radius: 4px;
+        border-width: 1px;
+        border-style: solid;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 300ms ease-in-out;
         color: var(--colors-button-#{$type}-#{$color}-text-color) #{!important};
         background-color: var(--colors-button-#{$type}-#{$color}-bg-color) #{!important};
         border-color: var(--colors-button-#{$type}-#{$color}-border-color) #{!important};
@@ -40,12 +51,18 @@
 
     &.medium {
         @apply h-[38px];
+        padding-left: 4px;
+        padding-right: 4px;
     }
     &.small {
         @apply h-[32px];
+        padding-left: 4px;
+        padding-right: 4px;
     }
     &.large {
         @apply h-[40px];
+        padding-left: 8px;
+        padding-right: 8px;
     }
 }
 

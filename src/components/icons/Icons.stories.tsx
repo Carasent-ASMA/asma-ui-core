@@ -1,21 +1,21 @@
 import type { Meta, StoryObj } from '@storybook/react'
 
-import { Icons } from './Icons'
+import { StyledIcons } from './Icons'
 
 // More on how to set up stories at: https://storybook.js.org/docs/react/writing-stories/introduction
 const meta = {
-    title: 'DataDisplay/Icons',
-    component: Icons,
-    tags: ['autodocs'],
+    title: 'Icons/Icons',
+    component: StyledIcons,
+    tags: [],
     argTypes: {},
     args: { width: 40, height: 40 },
-} satisfies Meta<typeof Icons>
+} satisfies Meta<typeof StyledIcons>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
 // More on writing stories with args: https://storybook.js.org/docs/react/writing-stories/args
-export const Primary: Story = {
+export const Icons: Story = {
     args: {},
-    render: () => <Icons />,
+    render: () => <StyledIcons />,
 }

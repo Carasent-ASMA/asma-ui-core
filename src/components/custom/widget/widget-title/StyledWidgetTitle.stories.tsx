@@ -3,9 +3,9 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { StyledWidgetTitle } from './StyledWidgetTitle'
 
 const meta = {
-    title: 'Widgets/Styled WidgetTitle',
+    title: 'Widgets/WidgetTitle',
     component: StyledWidgetTitle,
-    tags: ['autodocs'],
+    tags: [],
     argTypes: {},
     args: { children: <div>Widget title example</div> },
 } satisfies Meta<typeof StyledWidgetTitle>

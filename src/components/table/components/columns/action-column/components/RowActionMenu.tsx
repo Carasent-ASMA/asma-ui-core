@@ -1,4 +1,4 @@
-import { DotsVerticalIcon } from 'src/components/data-display/icons'
+import { DotsVerticalIcon } from 'src/components/icons'
 import { StyledButton } from 'src/components/inputs/button'
 import { useToggleMenuVisibility } from 'src/hooks/useToggleMenuVisibility.hook'
 import { StyledPopover } from 'src/components/utils/popover'

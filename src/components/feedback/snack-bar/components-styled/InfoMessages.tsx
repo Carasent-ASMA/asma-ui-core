@@ -1,6 +1,6 @@
 import { StyledButton } from 'src/components/inputs/button'
 import { message } from '../message'
-import { LoadingIcon } from 'src/components/data-display/icons'
+import { LoadingIcon } from 'src/components/icons'
 
 export const InfoMessages: React.FC = () => {
     return (

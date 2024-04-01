@@ -1,6 +1,6 @@
 import { type Table } from '@tanstack/react-table'
 import type { StyledTableProps } from '../types'
-import { LoadingIcon } from 'src/components/data-display/icons'
+import { LoadingIcon } from 'src/components/icons'
 import { TableSkeleton } from './TableSkeleton'
 import { TableRows } from './TableRows'
 import { TableNoRowsOverlay } from './TableNoRowsOverlay'

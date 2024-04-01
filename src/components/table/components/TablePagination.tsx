@@ -1,11 +1,5 @@
 import type { Table } from '@tanstack/react-table'
-import {
-    CheckIcon,
-    ChevronDownIcon,
-    ChevronLeftIcon,
-    ChevronRightIcon,
-    ChevronUpIcon,
-} from 'src/components/data-display/icons'
+import { CheckIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon } from 'src/components/icons'
 import { StyledTooltip } from 'src/components/data-display/tooltip'
 import { StyledButton } from 'src/components/inputs/button'
 import { StyledPopover } from 'src/components/utils/popover'
