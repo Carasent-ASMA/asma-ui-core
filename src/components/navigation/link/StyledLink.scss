@@ -1,0 +1,33 @@
+.styled-link {
+    font-family: Roboto;
+    font-weight: 600;
+    width: fit-content;
+    text-decoration-line: underline;
+    border-radius: 4px;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    border-style: none;
+    color: var(--colors-gama-500);
+
+    &:not(.styled-link-disabled):hover {
+        color: var(--colors-gama-600) #{!important};
+    }
+
+    &:not(.styled-link-disabled):active {
+        color: var(--colors-gama-500) #{!important};
+    }
+
+    &:not(.styled-link-disabled):focus {
+        outline-offset: -1px #{!important};
+        outline: 1px solid var(--colors-warning-500) #{!important};
+        color: var(--colors-gama-500) #{!important};
+    }
+}
+
+.styled-link-disabled {
+    color: var(--colors-delta-300);
+}
