@@ -1,14 +1,12 @@
+import React from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import { StyledSnackbar } from './StyledSnackbar'
 import { IconButton, Stack } from '@mui/material'
 import { StyledButton } from '../../inputs/button/StyledButton'
-import React from 'react'
 import { StyledAlert } from '../alert/StyledAlert'
 import { Icon } from '@iconify/react'
 import { SnackbarProvider } from './SnackbarProvider'
 import { processInfoSnackbar } from './processInfoSnackbar'
-import { message } from './message'
-import { LoadingIcon } from 'src/components/icons'
 import { InfoMessages } from './components-styled/InfoMessages'
 
 const meta = {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta } from '@storybook/react'
 
 import { StyledDialog } from './StyledDialog'
 import { StyledDialogActions } from './StyledDialogActions'
@@ -8,9 +8,9 @@ import { StyledButton } from '../../inputs/button/StyledButton'
 import { StyledDialogTitle } from './StyledDialogTitle'
 
 const meta = {
-    title: 'Feedback/Styled Dialog',
+    title: 'Feedback/Dialog',
     component: StyledDialog,
-    tags: ['autodocs'],
+    tags: [],
     argTypes: {},
     args: {
         title: 'The modal title',
@@ -24,15 +24,8 @@ const meta = {
 } satisfies Meta<typeof StyledDialog>
 
 export default meta
-type Story = StoryObj<typeof meta>
 
-// More on writing stories with args: https://storybook.js.org/docs/react/writing-stories/args
-export const Dialog: Story = {
-    args: { ...meta.args, dataTest: 'test' },
-    render: () => <DialogExample />,
-}
-
-export const DialogExample = () => {
+export const Dialog = () => {
     const [open, setOpen] = useState(true)
 
     const handleCloseModal = () => {

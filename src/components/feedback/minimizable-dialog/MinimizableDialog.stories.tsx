@@ -4,12 +4,12 @@ import { StyledButton } from 'src/components/inputs/button'
 import { StyledSelectExample } from 'src/components/inputs/select/story/components/StyledSelectExample'
 
 const meta = {
-    title: 'Feedback/Minimizable Dialog',
+    title: 'Feedback/Dialog Minimizable',
 }
 
 export default meta
 
-export const MinimizableDialogExample = () => {
+export const DialogMinimizable = () => {
     const [open, setOpen] = useState(false)
 
     const handleClose = () => {
