@@ -50,7 +50,10 @@ export const MinimizableDialog: React.FC<{
 
     if (minimized) {
         return (
-            <div className='fixed bottom-4 right-4 z-[51] w-[387px] rounded-lg bg-white py-2 pl-4 pr-3 shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)] transition-all duration-300'>
+            <div
+                style={{ zIndex: 51 }}
+                className='fixed bottom-4 right-4 w-[387px] rounded-lg bg-white py-2 pl-4 pr-3 shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)] transition-all duration-300'
+            >
                 <div className='flex items-center justify-between' data-test={dataTest}>
                     <div className='truncate text-lg font-semibold text-delta-800'>{title}</div>
                     <div className='flex gap-x-1'>
