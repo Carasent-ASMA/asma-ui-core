@@ -5,9 +5,9 @@ import { EXPAND_COLUMN_ID } from '../../types'
 export function generateExpandColumn<TData>() {
     return {
         id: EXPAND_COLUMN_ID,
-        minSize: 40,
-        maxSize: 40,
-        size: 40,
+        minSize: 50,
+        maxSize: 50,
+        size: 50,
         enableHiding: false,
         enableSorting: false,
         header: () => null,
@@ -16,7 +16,7 @@ export function generateExpandColumn<TData>() {
             const canExpand = cell.row.getCanExpand()
             return canExpand ? (
                 <span
-                    className='flex w-fit h-fit px-2 bg-transparent outline-none focus:outline-none items-center justify-center'
+                    className='flex h-fit w-full outline-none focus:outline-none items-center justify-center'
                     onClick={() => cell.row.getToggleExpandedHandler()()}
                 >
                     {isExpanded ? <ChevronUpIcon width={24} height={24} /> : <ChevronDownIcon width={24} height={24} />}
