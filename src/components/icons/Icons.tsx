@@ -74,11 +74,13 @@ import {
     KeyboardCapslockIcon,
     MinimizeIcon,
     OutlineCalendarMonth,
+    PlusIcon,
     StyledTooltip,
 } from 'asma-core-ui'
 import { MessageReplyIcon } from './message-reply-icon'
 import { EditSquareIcon } from './edit-square-icon/EditSquareIcon'
 import { Tooltip } from '@mui/material'
+import { CheckFactIcon } from './check-fact-icon'
 
 export const StyledIcons: React.FC<{ height?: number; width?: number }> = ({ height = 24, width = 24 }) => {
     return (
@@ -177,19 +179,26 @@ export const StyledIcons: React.FC<{ height?: number; width?: number }> = ({ hei
                 <CloseIcon height={height} width={width} />
             </div>
             <div title='CheckIcon'>
-                <CheckIcon height={height} width={width} />
+                <CheckIcon height={height} width={width} color='green' />
             </div>
             <div title='CheckBoxCheckedIcon'>
-                <CheckBoxCheckedIcon height={height} width={width} />
+                <CheckBoxCheckedIcon height={height} width={width} color='green' />
             </div>
             <StyledTooltip title='CheckOutlineIcon'>
                 <div>
                     <CheckOutlineIcon height={height} width={width} color='green' />
                 </div>
             </StyledTooltip>
-            <div title='CheckFactOutlineIcon'>
-                <CheckFactOutlineIcon height={height} width={width} />
-            </div>
+            <StyledTooltip title='CheckFactOutlineIcon'>
+                <div title='CheckFactOutlineIcon'>
+                    <CheckFactOutlineIcon height={height} width={height} color='green' />
+                </div>
+            </StyledTooltip>
+            <StyledTooltip title='CheckFactIcon'>
+                <div title='CheckFactIcon'>
+                    <CheckFactIcon height={height} width={height} color='green' />
+                </div>
+            </StyledTooltip>
             <div title='CalendarIcon'>
                 <CalendarIcon height={height} width={width} />
             </div>
@@ -310,6 +319,11 @@ export const StyledIcons: React.FC<{ height?: number; width?: number }> = ({ hei
             <StyledTooltip title='EditSquareIcon'>
                 <div title='EditSquareIcon'>
                     <EditSquareIcon height={height} width={height} color='violet' />
+                </div>
+            </StyledTooltip>
+            <StyledTooltip title='PlusIcon'>
+                <div title='PlusIcon'>
+                    <PlusIcon height={height} width={height} color='green' />
                 </div>
             </StyledTooltip>
         </div>

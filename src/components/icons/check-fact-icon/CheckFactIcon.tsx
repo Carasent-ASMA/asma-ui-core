@@ -1,0 +1,13 @@
+import React from 'react'
+import type { SVGProps } from 'react'
+
+export function CheckFactIcon(props: SVGProps<SVGSVGElement>) {
+    return (
+        <svg xmlns='http://www.w3.org/2000/svg' width='1rem' height='1rem' viewBox='0 0 24 24' {...props}>
+            <path
+                fill='currentColor'
+                d='M4 21q-.825 0-1.412-.587T2 19V5q0-.825.588-1.412T4 3h16q.825 0 1.413.588T22 5v14q0 .825-.587 1.413T20 21zm5-4q.425 0 .713-.288T10 16q0-.425-.288-.712T9 15H6q-.425 0-.712.288T5 16q0 .425.288.713T6 17zm5.55-4.825l-.725-.725q-.3-.3-.7-.287t-.7.312q-.275.3-.288.7t.288.7L13.85 14.3q.3.3.7.3t.7-.3l3.55-3.55q.3-.3.3-.7t-.3-.7q-.3-.3-.712-.3t-.713.3zM9 13q.425 0 .713-.288T10 12q0-.425-.288-.712T9 11H6q-.425 0-.712.288T5 12q0 .425.288.713T6 13zm0-4q.425 0 .713-.288T10 8q0-.425-.288-.712T9 7H6q-.425 0-.712.288T5 8q0 .425.288.713T6 9z'
+            ></path>
+        </svg>
+    )
+}
