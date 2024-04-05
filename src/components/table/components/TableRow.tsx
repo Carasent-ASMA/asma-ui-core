@@ -30,7 +30,7 @@ export function TableRow<
         renderSubRows,
     } = styledTableProps
 
-    const onMouseDown = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
+    const onMouseUp = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
         if (
             (e.target as HTMLDivElement).classList.contains('MuiModal-backdrop') ||
             (e.target as Node).nodeName === 'INPUT' ||
@@ -44,7 +44,9 @@ export function TableRow<
 
         document.getElementById(row.id)?.focus()
 
-        if (onRowClick) onRowClick(e, row)
+        const selection = window.getSelection()?.type === 'Range'
+
+        if (onRowClick && !selection) onRowClick(e, row)
     }
 
     return (
@@ -63,7 +65,7 @@ export function TableRow<
                 style={{
                     height: rowHeight ? `${rowHeight}px` : 'inherit',
                 }}
-                onMouseDown={onMouseDown}
+                onMouseUp={onMouseUp}
             >
                 {row.getVisibleCells().map((cell) => {
                     // *
