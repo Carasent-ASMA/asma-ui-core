@@ -1,0 +1,22 @@
+.styled-dialog-root {
+    display: flex;
+    align-items: center;
+}
+
+.styled-dialog-close {
+    display: flex;
+    margin-right: 8px;
+    margin-top: 8px;
+    justify-content: flex-end;
+    flex-grow: 1;
+}
+
+.styled-dialog-title {
+    display: flex;
+    padding-left: 16px;
+    padding-top: 8px;
+    justify-content: flex-start;
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--colors-grey-700);
+}

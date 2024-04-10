@@ -1,5 +1,5 @@
 import { DialogContent, type DialogContentProps } from '@mui/material'
-
+import './StyledDialogContent.scss'
 export const StyledDialogContent = ({ children, classes, className, ...rest }: DialogContentProps) => {
     return (
         <DialogContent
@@ -7,7 +7,7 @@ export const StyledDialogContent = ({ children, classes, className, ...rest }: D
             data-test='styled-dialog-content'
             classes={{
                 ...classes,
-                root: 'p-4 mx-0 mt-0 w-full',
+                root: 'styled-dialog-content',
             }}
             className={className}
         >

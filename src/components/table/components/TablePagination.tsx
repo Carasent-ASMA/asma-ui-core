@@ -5,8 +5,8 @@ import { StyledButton } from 'src/components/inputs/button'
 import { StyledPopover } from 'src/components/utils/popover'
 import { useToggleMenuVisibility } from 'src/hooks/useToggleMenuVisibility.hook'
 import './TablePagination.scss'
-import { cn } from 'src/helpers/cn'
 import { useRef } from 'react'
+import clsx from 'clsx'
 
 export function TablePagination<TData>({ table, locale }: { locale: 'en' | 'no'; table: Table<TData> }) {
     const { anchorEl, open, handleClose, handleOpen } = useToggleMenuVisibility()
@@ -61,7 +61,7 @@ export function TablePagination<TData>({ table, locale }: { locale: 'en' | 'no';
                     {pages.map((page) => {
                         return (
                             <div
-                                className={cn(
+                                className={clsx(
                                     'table-pagination__pages-list__page',
                                     currentPage === page && 'page-selected',
                                 )}

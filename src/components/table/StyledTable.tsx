@@ -1,4 +1,3 @@
-import { cn } from 'src/helpers/cn'
 import { type StyledTableProps } from './types'
 import { TableHeader } from './components/TableHeader'
 import { TableBody } from './components/TableBody'
@@ -7,6 +6,7 @@ import { useStyledTable } from './hooks/useStyledTable'
 import { injectColumns } from './helpers/injectColumns'
 
 import './StyledTable.scss'
+import clsx from 'clsx'
 
 /**
  *
@@ -31,7 +31,7 @@ export const StyledTable = <
 
     return (
         <div className='asma-core-ui-styled-table'>
-            <div className={cn('table-wrapper', className)} style={{ height }}>
+            <div className={clsx('table-wrapper', className)} style={{ height }}>
                 <table className='styled-table'>
                     <TableHeader table={table} styledTableProps={props} />
                     <TableBody table={table} styledTableProps={props} />

@@ -2,7 +2,7 @@ import React, { type ReactNode } from 'react'
 
 import './StyledButton.scss'
 
-import { cn } from 'src/helpers'
+import clsx from 'clsx'
 
 export type StyledButtonType = 'contained' | 'outlined' | 'text' | 'textGray'
 
@@ -65,7 +65,7 @@ export const StyledButton = ({
     return (
         <button
             {...otherProps}
-            className={cn('asma-core-ui-button', variant, color, size, className)}
+            className={clsx('asma-core-ui-button', variant, color, size, className)}
             ref={refLink}
             data-test={dataTest}
         >

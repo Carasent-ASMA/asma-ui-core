@@ -1,7 +1,8 @@
 import { CloseIcon, KeyboardCapslockIcon, MinimizeIcon } from 'src/components/icons'
 import { StyledButton } from 'src/components/inputs/button'
-import clsx from 'clsx'
 import { useState } from 'react'
+
+import clsx from 'clsx'
 
 export const MinimizableDialog: React.FC<{
     onCloseText: string

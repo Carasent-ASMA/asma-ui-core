@@ -1,7 +1,7 @@
 import { DialogActions, type DialogActionsProps } from '@mui/material'
 
+import './StyledDialogActions.scss'
 import clsx from 'clsx'
-
 export const StyledDialogActions = (props: DialogActionsProps) => {
     return (
         <DialogActions
@@ -9,10 +9,10 @@ export const StyledDialogActions = (props: DialogActionsProps) => {
             data-test='styled-dialog-actions'
             classes={{
                 ...props.classes,
-                root: 'p-0 m-0 justify-center',
+                root: 'styled-dialog-actions-root',
             }}
         >
-            <div className={clsx('flex w-full justify-end space-x-4 p-4', props.className)}>{props.children}</div>
+            <div className={clsx('styled-dialog-actions', props.className)}>{props.children}</div>
         </DialogActions>
     )
 }

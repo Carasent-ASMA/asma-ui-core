@@ -1,8 +1,8 @@
 import { flexRender, type Row } from '@tanstack/react-table'
 import { Fragment } from 'react'
-import { cn } from 'src/helpers/cn'
 import type { StyledTableProps } from '../types'
 import './TableRow.scss'
+import clsx from 'clsx'
 
 export function TableRow<
     TData extends {
@@ -56,7 +56,7 @@ export function TableRow<
                 data-test={row.id}
                 id={row.id}
                 tabIndex={focusable ? -1 : undefined}
-                className={cn(
+                className={clsx(
                     't-row',
                     loading && 'is-loading',
                     (row.getIsExpanded() || row.getIsSelected()) && 'selected',
@@ -74,7 +74,7 @@ export function TableRow<
                     return (
                         <td
                             key={cell.id}
-                            className={cn(
+                            className={clsx(
                                 't-cell',
                                 tdClassName,
                                 // *
