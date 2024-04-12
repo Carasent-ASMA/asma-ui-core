@@ -12,8 +12,8 @@ const meta = {
 export default meta
 export const Inputs = () => {
     return (
-        <div className='flex flex-col w-full gap-12'>
-            <RichInput dataTest='test' {...meta.args} onChange={() => undefined} value='Hello World' />
+        <div className='flex flex-col w-full'>
+            <RichInput error='* Required' is_error={true} dataTest='test' {...meta.args}  onChange={() => undefined} value='' placeholder='Hello world'/>
             <RichInput
                 dataTest='test'
                 disabled
