@@ -31,11 +31,3 @@
 .error-message {
     @apply ml-1 mt-1 text-xs leading-4 text-[#ff4d4f];
 }
-.error-editMode {
-    div:global(.ql-toolbar) {
-        @apply border-[#ff4d4f] rounded-t-lg border-x border-t border-b-0;
-    }
-    div:global(.ql-container) {
-        @apply border-[#ff4d4f] rounded-b-lg border-x border-b border-t-0 min-h-[100px] text-base;
-    }
-}
