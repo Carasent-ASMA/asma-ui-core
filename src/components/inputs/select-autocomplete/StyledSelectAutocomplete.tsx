@@ -1,6 +1,7 @@
 import { Autocomplete, Paper, type AutocompleteProps, type ChipTypeMap } from '@mui/material'
 import { Icon } from '@iconify/react'
 import clsx from 'clsx'
+import { useEffect, useRef, useState } from 'react'
 
 /**
  *
@@ -18,54 +19,73 @@ export function StyledSelectAutocomplete<
     dataTest,
     ...props
 }: AutocompleteProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent> & { dataTest: string }) {
+    const [maxHeight, setMaxHeight] = useState<number | 'auto'>('auto')
+    const selectRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        const selectHeight = selectRef.current?.getBoundingClientRect().height ?? 0
+        const selectTop = selectRef.current?.getBoundingClientRect().top ?? 0
+        const viewportHeight = window.innerHeight
+        const availableHeight = viewportHeight - selectTop - selectHeight - 40
+        setMaxHeight(availableHeight > 0 ? availableHeight : 'auto')
+    }, [])
+
     return (
-        <Autocomplete
-            {...props}
-            className={clsx('!text-sm', props.className)}
-            popupIcon={
-                props.popupIcon || (
-                    <Icon
-                        icon='material-symbols:expand-more-rounded'
-                        width={24}
-                        height={24}
-                        className={clsx('select-custom-icon')}
-                    />
-                )
-            }
-            data-test={dataTest}
-            PaperComponent={({ children }) => (
-                <Paper
-                    data-test={`paper-${dataTest}`}
-                    sx={{
-                        '& ul': {
+        <div ref={selectRef}>
+            <Autocomplete
+                {...props}
+                className={clsx('!text-sm', props.className)}
+                popupIcon={
+                    props.popupIcon || (
+                        <Icon
+                            icon='material-symbols:expand-more-rounded'
+                            width={24}
+                            height={24}
+                            className={clsx('select-custom-icon')}
+                        />
+                    )
+                }
+                ListboxProps={{
+                    style: {
+                        maxHeight: maxHeight === 'auto' ? 'auto' : `${maxHeight}px`,
+                    },
+                }}
+                data-test={dataTest}
+                PaperComponent={({ children }) => (
+                    <Paper
+                        data-test={`paper-${dataTest}`}
+                        sx={{
                             padding: '0 !important',
-                        },
-                        '& .MuiAutocomplete-option.Mui-focused': {
-                            background: 'var(--colors-delta-50) !important',
-                        },
-                        '& li[aria-selected=true]': {
-                            background: 'var(--colors-gama-50) !important',
-                        },
-                        '& li[aria-selected=true].MuiAutocomplete-option.Mui-focused': {
-                            background: 'var(--colors-gama-50) !important',
-                        },
-                    }}
-                >
-                    {children}
-                </Paper>
-            )}
-            sx={{
-                ...props.sx,
-                '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: 'var(--colors-gama-500) !important',
-                },
-                '& .select-custom-icon': {
-                    marginTop: '-0.5px !important',
-                },
-                '& .MuiInputBase-inputSizeSmall': {
-                    minHeight: '23px !important',
-                },
-            }}
-        />
+                            marginBottom: '24px !important',
+                            marginTop: '0px !important',
+
+                            '& .MuiAutocomplete-option.Mui-focused': {
+                                background: 'var(--colors-delta-50) !important',
+                            },
+                            '& li[aria-selected=true]': {
+                                background: 'var(--colors-gama-50) !important',
+                            },
+                            '& li[aria-selected=true].MuiAutocomplete-option.Mui-focused': {
+                                background: 'var(--colors-gama-50) !important',
+                            },
+                        }}
+                    >
+                        {children}
+                    </Paper>
+                )}
+                sx={{
+                    ...props.sx,
+                    '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: 'var(--colors-gama-500) !important',
+                    },
+                    '& .select-custom-icon': {
+                        marginTop: '-0.5px !important',
+                    },
+                    '& .MuiInputBase-inputSizeSmall': {
+                        minHeight: '23px !important',
+                    },
+                }}
+            />
+        </div>
     )
 }
