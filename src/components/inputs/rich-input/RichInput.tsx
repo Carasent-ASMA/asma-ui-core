@@ -28,7 +28,7 @@ const MODULES = {
 
 const FORMATS = ['size', 'font', 'bold', 'italic', 'underline', 'strike', 'blockquote', 'list', 'bullet', 'indent']
 
-const RichInput: FC<IRichInput> = ({dataTest, ...props}) => {
+const RichInput: FC<IRichInput> = ({ dataTest, ...props }) => {
     const isErrorOrNot = () => {
         if (props.is_error) {
             return 'error'
@@ -46,7 +46,11 @@ const RichInput: FC<IRichInput> = ({dataTest, ...props}) => {
 
     return (
         <>
-            {props.label && <span className={clsx(styles['text-label'])} data-test={`label-${dataTest}`}>{props.label}</span>}
+            {props.label && (
+                <span className={clsx(styles['text-label'])} data-test={`label-${dataTest}`}>
+                    {props.label}
+                </span>
+            )}
 
             {props.disabled ? (
                 <ReactQuill
@@ -66,7 +70,11 @@ const RichInput: FC<IRichInput> = ({dataTest, ...props}) => {
                 />
             )}
 
-            {isErrorOrNot() && <span className={styles['error-message']} data-test={`error-${dataTest}`}>{props.error ? props.error : 'error'}</span>}
+            {isErrorOrNot() && (
+                <span className={styles['error-message']} data-test={`error-${dataTest}`}>
+                    {props.error ? props.error : 'error'}
+                </span>
+            )}
         </>
     )
 }
