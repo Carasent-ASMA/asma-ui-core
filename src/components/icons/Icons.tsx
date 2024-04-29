@@ -81,6 +81,7 @@ import { MessageReplyIcon } from './message-reply-icon'
 import { EditSquareIcon } from './edit-square-icon/EditSquareIcon'
 import { Tooltip } from '@mui/material'
 import { CheckFactIcon } from './check-fact-icon'
+import { PlusIconCircle } from './plus-icon-circle'
 
 export const StyledIcons: React.FC<{ height?: number; width?: number }> = ({ height = 24, width = 24 }) => {
     return (
@@ -324,6 +325,11 @@ export const StyledIcons: React.FC<{ height?: number; width?: number }> = ({ hei
             <StyledTooltip title='PlusIcon'>
                 <div title='PlusIcon'>
                     <PlusIcon height={height} width={height} color='green' />
+                </div>
+            </StyledTooltip>
+            <StyledTooltip title='PlusIconCircle'>
+                <div title='PlusIconCircle'>
+                    <PlusIconCircle height={height} width={height} color='text-gray-700' />
                 </div>
             </StyledTooltip>
         </div>
