@@ -138,18 +138,20 @@ export const MinimizableDialog: React.FC<{
             </div>
             <div>{children}</div>
 
-            <div className='fixed-bottom flex justify-end gap-x-4 border-t-[1px] border-delta-200 p-4'>
-                {secondaryButtonText && onSecondaryButtonClick && (
-                    <StyledButton dataTest='cancel-button' variant='outlined' onClick={onSecondaryButtonClick}>
-                        {secondaryButtonText}
-                    </StyledButton>
-                )}
-                {primaryButtonText && onPrimaryButtonClick && (
-                    <StyledButton dataTest='save-button' onClick={onPrimaryButtonClick}>
-                        {primaryButtonText}
-                    </StyledButton>
-                )}
-            </div>
+            {secondaryButtonText || primaryButtonText ? (
+                <div className='fixed-bottom flex justify-end gap-x-4 border-t-[1px] border-delta-200 p-4'>
+                    {secondaryButtonText && onSecondaryButtonClick && (
+                        <StyledButton dataTest='cancel-button' variant='outlined' onClick={onSecondaryButtonClick}>
+                            {secondaryButtonText}
+                        </StyledButton>
+                    )}
+                    {primaryButtonText && onPrimaryButtonClick && (
+                        <StyledButton dataTest='save-button' onClick={onPrimaryButtonClick}>
+                            {primaryButtonText}
+                        </StyledButton>
+                    )}
+                </div>
+            ) : null}
         </div>
     )
 }
