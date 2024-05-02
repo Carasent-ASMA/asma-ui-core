@@ -1,5 +1,6 @@
 import type { Meta } from '@storybook/react'
 import { RichInput } from './RichInput'
+import { useState } from 'react'
 
 const meta = {
     title: 'Inputs/RichInput',
@@ -11,17 +12,11 @@ const meta = {
 
 export default meta
 export const Inputs = () => {
+    const [val, setVal] = useState('')
     return (
         <div className='flex flex-col w-full gap-12'>
-            <RichInput dataTest='test' {...meta.args} onChange={() => undefined} value='Hello World' />
-            <RichInput
-                dataTest='test'
-                disabled
-                {...meta.args}
-                onChange={() => undefined}
-                value='Hello World'
-                className='bg-gray-200 rounded-md'
-            />
+            <RichInput dataTest='test' onChange={(newVal) => setVal(newVal)} placeholder='Type something' value={val} />
+            <RichInput dataTest='test' disabled onChange={() => undefined} value='Hello World' className='' />
         </div>
     )
 }

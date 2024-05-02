@@ -1,10 +1,8 @@
-import './quill.snow.css'
-
-import clsx from 'clsx'
 import type { FC } from 'react'
 import ReactQuill from 'react-quill'
+import clsx from 'clsx'
 
-import styles from './styles.module.scss'
+import './quill.snow.css'
 
 export interface IRichInput extends ReactQuill.ReactQuillProps {
     isRequired?: boolean
@@ -47,7 +45,10 @@ const RichInput: FC<IRichInput> = ({ dataTest, ...props }) => {
     return (
         <>
             {props.label && (
-                <span className={clsx(styles['text-label'])} data-test={`label-${dataTest}`}>
+                <span
+                    className='text-custom-grey-06 mb-2 font-sans text-xs font-semibold leading-4'
+                    data-test={`label-${dataTest}`}
+                >
                     {props.label}
                 </span>
             )}
@@ -55,7 +56,7 @@ const RichInput: FC<IRichInput> = ({ dataTest, ...props }) => {
             {props.disabled ? (
                 <ReactQuill
                     {...props}
-                    className={clsx(styles['viewMode'], props.className)}
+                    className={clsx('core-ui-rte', 'core-ui-rte-view-mode', props.className)}
                     readOnly={true}
                     modules={{ toolbar: false }}
                     data-test={dataTest}
@@ -63,7 +64,7 @@ const RichInput: FC<IRichInput> = ({ dataTest, ...props }) => {
             ) : (
                 <ReactQuill
                     {...props}
-                    className={clsx(styles['editMode'], props.className)}
+                    className={clsx('core-ui-rte', 'core-ui-rte-edit-mode', props.className)}
                     modules={{ ...MODULES, ...props.modules }}
                     formats={{ ...FORMATS, ...props.formats }}
                     data-test={dataTest}
@@ -71,7 +72,7 @@ const RichInput: FC<IRichInput> = ({ dataTest, ...props }) => {
             )}
 
             {isErrorOrNot() && (
-                <span className={styles['error-message']} data-test={`error-${dataTest}`}>
+                <span className={'mt-8 text-xs leading-4 text-[#ff4d4f]'} data-test={`error-${dataTest}`}>
                     {props.error ? props.error : 'error'}
                 </span>
             )}
