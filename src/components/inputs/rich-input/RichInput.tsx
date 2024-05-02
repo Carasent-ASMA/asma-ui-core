@@ -5,13 +5,12 @@ import clsx from 'clsx'
 import './quill.snow.css'
 
 export interface IRichInput extends ReactQuill.ReactQuillProps {
-    isRequired?: boolean
     disabled?: boolean
     label?: string
-    error?: string
+    isRequired?: boolean
     is_error?: boolean
-    is_warning?: boolean
-    dataTest?: string
+    helperText?: string
+    dataTest: string
 }
 
 const MODULES = {
@@ -27,23 +26,8 @@ const MODULES = {
 const FORMATS = ['size', 'font', 'bold', 'italic', 'underline', 'strike', 'blockquote', 'list', 'bullet', 'indent']
 
 const RichInput: FC<IRichInput> = ({ dataTest, ...props }) => {
-    const isErrorOrNot = () => {
-        if (props.is_error) {
-            return 'error'
-        }
-
-        if (props.is_warning) {
-            return 'warning'
-        }
-
-        if (props.isRequired) {
-            return true
-        }
-        return null
-    }
-
     return (
-        <>
+        <div className='relative'>
             {props.label && (
                 <span
                     className='text-custom-grey-06 mb-2 font-sans text-xs font-semibold leading-4'
@@ -64,19 +48,27 @@ const RichInput: FC<IRichInput> = ({ dataTest, ...props }) => {
             ) : (
                 <ReactQuill
                     {...props}
-                    className={clsx('core-ui-rte', 'core-ui-rte-edit-mode', props.className)}
+                    className={clsx(
+                        'core-ui-rte',
+                        'core-ui-rte-edit-mode',
+                        props.is_error && 'core-ui-rte-error',
+                        props.className,
+                    )}
                     modules={{ ...MODULES, ...props.modules }}
                     formats={{ ...FORMATS, ...props.formats }}
                     data-test={dataTest}
                 />
             )}
 
-            {isErrorOrNot() && (
-                <span className={'mt-8 text-xs leading-4 text-[#ff4d4f]'} data-test={`error-${dataTest}`}>
-                    {props.error ? props.error : 'error'}
+            {(props.is_error || props.isRequired) && (
+                <span
+                    className={clsx('core-ui-rte-helper-text', props.is_error && 'core-ui-rte-error')}
+                    data-test={`error-${dataTest}`}
+                >
+                    {props.helperText ? props.helperText : 'Helper text'}
                 </span>
             )}
-        </>
+        </div>
     )
 }
 

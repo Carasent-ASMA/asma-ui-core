@@ -3,6 +3,11 @@
     border: 1px solid #d3d8df;
 }
 
+.core-ui-rte.core-ui-rte-error {
+    border-radius: 4px;
+    border: 1px solid #ff4d4f;
+}
+
 .core-ui-rte .ql-container {
     max-height: 400px;
     overflow: auto;
@@ -11,6 +16,16 @@
 .core-ui-rte-edit-mode .ql-container {
     min-height: 100px;
 }
+
+.core-ui-rte-helper-text {
+    color: #626e7e;
+    font-size: 12px;
+}
+.core-ui-rte-helper-text.core-ui-rte-error {
+    color: #ff4d4f;
+}
+
+/*  */
 
 .ql-container {
     box-sizing: border-box;

@@ -15,7 +15,15 @@ export const Inputs = () => {
     const [val, setVal] = useState('')
     return (
         <div className='flex flex-col w-full gap-12'>
-            <RichInput dataTest='test' onChange={(newVal) => setVal(newVal)} placeholder='Type something' value={val} />
+            <RichInput
+                helperText='Required Field'
+                // is_error
+                isRequired
+                dataTest='test'
+                onChange={(newVal) => setVal(newVal)}
+                placeholder='Type something'
+                value={val}
+            />
             <RichInput dataTest='test' disabled onChange={() => undefined} value='Hello World' className='' />
         </div>
     )
