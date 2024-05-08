@@ -11,7 +11,7 @@ const meta = {
     tags: [],
     argTypes: {},
     args: {
-        title: 'The dialog title',
+        title: 'The dialog title (title)',
         open: true,
         fullScreen: false,
 
@@ -52,7 +52,8 @@ export const Dialog = () => {
                 open={open}
                 dataTest='test'
                 onClose={handleCloseDialog}
-                dialogTitle='Story about Liro'
+                dialogLabel='Story about Liro (label)'
+                dialogTitle='Story about Liro (title)'
             >
                 <div
                     style={{

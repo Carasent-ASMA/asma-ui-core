@@ -1,22 +1,40 @@
 .styled-dialog-root {
     display: flex;
-    align-items: center;
+    align-items: top;
+}
+.styled-top-header {
+    display: flex;
+    width: 100%;
+    padding: 16px 16px 0px;
+    justify-content: space-between;
 }
 
 .styled-dialog-close {
     display: flex;
-    margin-right: 8px;
-    margin-top: 8px;
     justify-content: flex-end;
     flex-grow: 1;
 }
 
-.styled-dialog-title {
+.styled-dialog-info {
     display: flex;
-    padding-left: 16px;
-    padding-top: 8px;
+    flex-direction: column;
     justify-content: flex-start;
+    gap: 2px;
+}
+
+.styled-dialog-label {
+    display: flex;
+    align-items: center;
+    height: 32px;
+    font-weight: 400;
     font-size: 14px;
     line-height: 20px;
     color: var(--colors-grey-700);
+}
+.styled-dialog-title {
+    display: flex;
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 32px;
+    color: var(--colors-grey-800);
 }
