@@ -1,0 +1,57 @@
+.asma-core-ui-styled-widget {
+    *,
+    *:after,
+    *:before {
+        box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+    }
+
+    .widget-wrapper {
+        background-color: #ffffff;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 16px;
+        width: fit-content;
+        border-radius: 8px;
+        box-shadow: 0 0 4px 0 rgba(34, 33, 51, 0.15);
+        transition: all .3s ease-out;
+    }
+
+    .widget-expanded {
+        height: 600px;
+    }
+
+    .widget-collapsed {
+        height: 400px;
+    }
+
+    .widget-header {
+        color: var(--colors-gray-800);
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .widget-content {
+        height: 100%;
+        overflow-y: auto;
+    }
+
+    .widget-footer {
+        display: flex;
+        align-items: center;
+    }
+
+    .widget-footer-space-between {
+        justify-content: space-between;
+    }
+
+    .widget-footer-center {
+        justify-content: center;
+    }
+
+    .widget-link {
+        cursor: pointer;
+    }
+}

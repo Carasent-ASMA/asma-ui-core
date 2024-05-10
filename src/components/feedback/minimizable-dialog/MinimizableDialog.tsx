@@ -21,7 +21,7 @@ export const MinimizableDialog: React.FC<{
     secondaryButtonText?: string
     onPrimaryButtonClick?: () => void
     onSecondaryButtonClick?: () => void
-    dataTest?: string
+    dataTest: string
 }> = ({
     onCloseText,
     onMinimizeText,

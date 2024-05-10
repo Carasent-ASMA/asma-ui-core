@@ -22,6 +22,7 @@ export const DialogMinimizable = () => {
                 Open minimizable dialog
             </StyledButton>
             <MinimizableDialog
+                dataTest='test'
                 onCloseText='Close'
                 onMinimizeText='Minimize'
                 onExpandText='Expand'
