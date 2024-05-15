@@ -25,6 +25,7 @@ export const Inputs = () => {
                 value={val}
             />
             <RichInput dataTest='test' disabled onChange={() => undefined} value='Hello World' className='' />
+            <RichInput dataTest='test' ghost onChange={() => undefined} value='Hello World' />
         </div>
     )
 }

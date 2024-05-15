@@ -11,6 +11,7 @@ export interface IRichInput extends ReactQuill.ReactQuillProps {
     is_error?: boolean
     helperText?: string
     dataTest: string
+    ghost?: boolean
 }
 
 const MODULES = {
@@ -41,6 +42,14 @@ const RichInput: FC<IRichInput> = ({ dataTest, ...props }) => {
                 <ReactQuill
                     {...props}
                     className={clsx('core-ui-rte', 'core-ui-rte-view-mode', props.className)}
+                    readOnly={true}
+                    modules={{ toolbar: false }}
+                    data-test={dataTest}
+                />
+            ) : props.ghost ? (
+                <ReactQuill
+                    {...props}
+                    className={clsx('core-ui-rte', 'core-ui-rte-ghost-mode', props.className)}
                     readOnly={true}
                     modules={{ toolbar: false }}
                     data-test={dataTest}

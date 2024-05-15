@@ -17,6 +17,15 @@
     min-height: 100px;
 }
 
+.core-ui-rte.core-ui-rte-ghost-mode {
+    border: 1px solid transparent;
+    background-color: transparent;
+    padding: 0px;
+}
+.core-ui-rte.core-ui-rte-ghost-mode .ql-editor {
+    padding: 0px;
+}
+
 .core-ui-rte-helper-text {
     color: #626e7e;
     font-size: 12px;
