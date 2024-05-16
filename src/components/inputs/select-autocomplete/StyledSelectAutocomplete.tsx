@@ -2,6 +2,7 @@ import { Autocomplete, Paper, type AutocompleteProps, type ChipTypeMap } from '@
 import { Icon } from '@iconify/react'
 import clsx from 'clsx'
 import { useEffect, useRef, useState } from 'react'
+import './StyledSelectAutocomplete.scss'
 
 /**
  *
@@ -31,7 +32,7 @@ export function StyledSelectAutocomplete<
     }, [])
 
     return (
-        <div ref={selectRef}>
+        <div className='styledSelectAutocompleteWrapper' ref={selectRef}>
             <Autocomplete
                 {...props}
                 className={clsx('!text-sm', props.className)}
