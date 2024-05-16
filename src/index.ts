@@ -49,6 +49,7 @@ export * from './components/utils/popover'
 //widgets
 export * from './components/custom/widget/widget-title/StyledWidgetTitle'
 export * from './components/custom/widget/widget-header/StyledWidgetHeader'
+export * from './components/custom/widget/widget/StyledWidget'
 //modules
 export * from './components/custom/module/module-title/StyledModuleTitle'
 export * from './components/utils/filter-menu/StyledFilterMenu'

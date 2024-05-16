@@ -4,7 +4,7 @@ import './StyledWidget.scss'
 import { useState } from 'react'
 import clsx from 'clsx'
 
-export type StyledTableProps = {
+export type StyledWidgetProps = {
     title: string
     icon?: ReactNode
     link?: {
@@ -19,7 +19,7 @@ export type StyledTableProps = {
     }
 }
 
-export const StyledWidget: React.FC<PropsWithChildren<StyledTableProps>> = ({ children, title, icon, link, viewMore }) => {
+export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({ children, title, icon, link, viewMore }) => {
     const [expanded, setExpanded] = useState(false)
 
     return (
