@@ -61,6 +61,9 @@ export const StyledInputField: React.FC<
                 borderColor: 'var(--colors-gama-300) !important',
                 borderWidth: '2px !important',
             },
+            '& .MuiInputBase-colorPrimary.Mui-disabled:hover fieldset': {
+                borderWidth: '1px !important',
+            },
             '& .MuiInputBase-colorPrimary.Mui-focused:hover fieldset': {
                 borderColor: 'var(--colors-gama-500) !important',
             },
