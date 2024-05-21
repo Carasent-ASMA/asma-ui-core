@@ -16,14 +16,14 @@ export default meta
 export const Widget = () => {
     return (
         <div className={styles['page-wrapper']}>
-            <div className={styles['column-wrapper']}>
+            <div className={styles['column-wrapper']} style={{ width: '736px' }} >
                 <StyledWidget
                     title='Widget name'
                     icon={<InboxOutboxOutlineIcon width={24} height={24} />}
                     viewMore={{ hide: false, onClick: () => console.log('Click on viewMore button') }}
                     link={{ hide: false, content: 'Go to Somewhere', onClick: () => console.log('Click on link') }}
                 >
-                    <div style={{ width: '736px', height: '100%', borderRadius: '8px', backgroundColor: '#F0F2F4' }}></div>
+                    <div style={{ height: '100%', borderRadius: '8px', backgroundColor: '#F0F2F4' }}></div>
                 </StyledWidget>
 
                 <StyledWidget
@@ -32,18 +32,18 @@ export const Widget = () => {
                     viewMore={{ hide: false, onClick: () => console.log('Click on viewMore button') }}
                     link={{ hide: false, content: 'Go to Somewhere', onClick: () => console.log('Click on link') }}
                 >
-                    <div style={{ width: '736px', height: '100%', borderRadius: '8px', backgroundColor: '#F0F2F4' }}></div>
+                    <div style={{ height: '100%', borderRadius: '8px', backgroundColor: '#F0F2F4' }}></div>
                 </StyledWidget>
             </div>
 
-            <div className={styles['column-wrapper']}>
+            <div className={styles['column-wrapper']} style={{ width: '400px' }}>
                 <StyledWidget
                     title='Widget name'
                     icon={<InboxOutboxOutlineIcon width={24} height={24} />}
                     viewMore={{ hide: false, onClick: () => console.log('Click on viewMore button') }}
                     link={{ hide: false, content: 'Go to Somewhere', onClick: () => console.log('Click on link') }}
                 >
-                    <div style={{ width: '400px', height: '100%', borderRadius: '8px', backgroundColor: '#F0F2F4' }}></div>
+                    <div style={{ height: '100%', borderRadius: '8px', backgroundColor: '#F0F2F4' }}></div>
                 </StyledWidget>
 
                 <StyledWidget
@@ -52,7 +52,7 @@ export const Widget = () => {
                     viewMore={{ hide: false, onClick: () => console.log('Click on viewMore button') }}
                     link={{ hide: false, content: 'Go to Somewhere', onClick: () => console.log('Click on link') }}
                 >
-                    <div style={{ width: '400px', height: '100%', borderRadius: '8px', backgroundColor: '#F0F2F4' }}></div>
+                    <div style={{ height: '100%', borderRadius: '8px', backgroundColor: '#F0F2F4' }}></div>
                 </StyledWidget>
             </div>
         </div>
