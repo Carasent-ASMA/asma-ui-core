@@ -71,6 +71,7 @@ import { WarningAmberOutlineIcon } from './warning-icon'
 import {
     BadgeIcon,
     ConsentsIcon,
+    HandymanIcon,
     KeyboardCapslockIcon,
     MinimizeIcon,
     OutlineCalendarMonth,
@@ -79,9 +80,9 @@ import {
 } from 'asma-core-ui'
 import { MessageReplyIcon } from './message-reply-icon'
 import { EditSquareIcon } from './edit-square-icon/EditSquareIcon'
-import { Tooltip } from '@mui/material'
 import { CheckFactIcon } from './check-fact-icon'
 import { PlusIconCircle } from './plus-icon-circle'
+import { HandymanOutlineIcon } from './handyman-outline-icon'
 
 export const StyledIcons: React.FC<{ height?: number; width?: number }> = ({ height = 24, width = 24 }) => {
     return (
@@ -330,6 +331,16 @@ export const StyledIcons: React.FC<{ height?: number; width?: number }> = ({ hei
             <StyledTooltip title='PlusIconCircle'>
                 <div title='PlusIconCircle'>
                     <PlusIconCircle height={height} width={height} color='text-gray-700' />
+                </div>
+            </StyledTooltip>
+            <StyledTooltip title='HandymanOutlineIcon'>
+                <div title='HandymanOutlineIcon'>
+                    <HandymanOutlineIcon height={height} width={height} color='text-gray-700' />
+                </div>
+            </StyledTooltip>
+            <StyledTooltip title='HandymanIcon'>
+                <div title='HandymanIcon'>
+                    <HandymanIcon height={height} width={height} color='text-gray-700' />
                 </div>
             </StyledTooltip>
         </div>
