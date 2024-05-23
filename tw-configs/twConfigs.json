@@ -38,7 +38,6 @@
         "delta-900": "var(--colors-delta-900)",
         "delta-9000": "var(--colors-gray-9000)",
         "sigma-700": "var(--colors-sigma-700)",
-        "zeta-700": "var(--colors-zeta-700)",
         "theta-100": "var(--colors-theta-100)",
         "theta-200": "var(--colors-theta-200)",
         "theta-300": "var(--colors-theta-300)",
