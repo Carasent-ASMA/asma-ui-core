@@ -1,6 +1,6 @@
 import { CloseIcon, KeyboardCapslockIcon, MinimizeIcon } from 'src/components/icons'
 import { StyledButton } from 'src/components/inputs/button'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 
 import clsx from 'clsx'
 
@@ -13,7 +13,7 @@ export const MinimizableDialog: React.FC<{
     showCloseIcon?: boolean
     showMinimizeIcon?: boolean
     showExpandIcon?: boolean
-    title: string
+    title: ReactNode
     label?: string
     children?: React.ReactNode
     className?: string
