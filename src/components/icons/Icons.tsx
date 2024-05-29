@@ -83,6 +83,7 @@ import { EditSquareIcon } from './edit-square-icon/EditSquareIcon'
 import { CheckFactIcon } from './check-fact-icon'
 import { PlusIconCircle } from './plus-icon-circle'
 import { HandymanOutlineIcon } from './handyman-outline-icon'
+import { PinIcon } from './pin-icon'
 
 export const StyledIcons: React.FC<{ height?: number; width?: number }> = ({ height = 24, width = 24 }) => {
     return (
@@ -341,6 +342,11 @@ export const StyledIcons: React.FC<{ height?: number; width?: number }> = ({ hei
             <StyledTooltip title='HandymanIcon'>
                 <div title='HandymanIcon'>
                     <HandymanIcon height={height} width={height} color='text-gray-700' />
+                </div>
+            </StyledTooltip>
+            <StyledTooltip title='PinIcon'>
+                <div title='PinIcon'>
+                    <PinIcon height={height} width={height} color='text-gray-700' />
                 </div>
             </StyledTooltip>
         </div>
