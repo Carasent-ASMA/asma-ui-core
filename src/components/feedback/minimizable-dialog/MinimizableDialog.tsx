@@ -14,7 +14,7 @@ export const MinimizableDialog: React.FC<{
     showMinimizeIcon?: boolean
     showExpandIcon?: boolean
     title: ReactNode
-    label?: string
+    label?: ReactNode
     children?: React.ReactNode
     className?: string
     primaryButtonText?: string
