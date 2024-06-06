@@ -18,8 +18,12 @@ export function StyledSelectAutocomplete<
     ChipComponent extends React.ElementType = ChipTypeMap['defaultComponent'],
 >({
     dataTest,
+    autoHeight,
     ...props
-}: AutocompleteProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent> & { dataTest: string }) {
+}: AutocompleteProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent> & {
+    dataTest: string
+    autoHeight?: boolean
+}) {
     const [maxHeight, setMaxHeight] = useState<number | 'auto'>('auto')
     const selectRef = useRef<HTMLDivElement>(null)
 
@@ -28,13 +32,22 @@ export function StyledSelectAutocomplete<
         const selectTop = selectRef.current?.getBoundingClientRect().top ?? 0
         const viewportHeight = window.innerHeight
         const availableHeight = viewportHeight - selectTop - selectHeight - 40
-        setMaxHeight(availableHeight > 0 ? availableHeight : 'auto')
-    }, [])
+        autoHeight && setMaxHeight(availableHeight > 0 ? availableHeight : 'auto')
+    }, [autoHeight])
 
-    return (
-        <div className='styledSelectAutocompleteWrapper' ref={selectRef}>
+    const listboxProps = autoHeight
+        ? {
+              style: {
+                  maxHeight: maxHeight === 'auto' ? 'auto' : `${maxHeight}px`,
+                },
+            }
+            : {}
+            
+            return (
+                <div className='styledSelectAutocompleteWrapper' ref={selectRef}>
             <Autocomplete
                 {...props}
+                ListboxProps={listboxProps}
                 className={clsx('!text-sm', props.className)}
                 popupIcon={
                     props.popupIcon || (
@@ -46,11 +59,6 @@ export function StyledSelectAutocomplete<
                         />
                     )
                 }
-                ListboxProps={{
-                    style: {
-                        maxHeight: maxHeight === 'auto' ? 'auto' : `${maxHeight}px`,
-                    },
-                }}
                 data-test={dataTest}
                 PaperComponent={({ children }) => (
                     <Paper

@@ -153,6 +153,7 @@ export const StyledSelectAutocompleteExample: React.FC = () => {
                             placeholder='Favorites'
                         />
                     )}
+                    autoHeight
                     // use on KeyDown if you want disable text typing
                     // onKeyDown={(e) => e.preventDefault()}
                     // open={true}
