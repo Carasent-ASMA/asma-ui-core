@@ -33,6 +33,7 @@ const StyledTabsExample: FC<{ args: Partial<TabsProps> }> = () => {
             <StyledTab label='Item One' />
             <StyledTab label='Item Two' />
             <StyledTab label='Item Three' />
+            <StyledTab label='Item Four' disabled />
         </StyledTabs>
     )
 }
