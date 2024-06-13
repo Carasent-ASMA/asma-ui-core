@@ -9,7 +9,15 @@ export function TableHeader<
         id: string | number
     },
     TCustomData = Record<string, unknown>,
->({ table, styledTableProps }: { table: Table<TData>; styledTableProps: StyledTableProps<TData, TCustomData> }) {
+>({
+    table,
+    styledTableProps,
+    tableCanResize,
+}: {
+    table: Table<TData>
+    styledTableProps: StyledTableProps<TData, TCustomData>
+    tableCanResize: boolean
+}) {
     const { stickyHeader = false, hideHeader = false } = styledTableProps
 
     if (styledTableProps.loading) return null
@@ -33,6 +41,7 @@ export function TableHeader<
                                 key={header.column.id}
                                 styledTableProps={styledTableProps}
                                 header={header}
+                                tableCanResize={tableCanResize}
                             />
                         )
                     })}

@@ -13,9 +13,11 @@ export function TableHeaderCell<
 >({
     styledTableProps,
     header,
+    tableCanResize = false,
 }: {
     styledTableProps: StyledTableProps<TData, TCustomData>
     header: Header<TData, unknown>
+    tableCanResize: boolean
 }) {
     const { hideHeader = false, enableResizing = false } = styledTableProps
 
@@ -48,6 +50,16 @@ export function TableHeaderCell<
                     asc: <DropUpIcon className='sort-icon' />,
                     desc: <DropDownIcon className='sort-icon' />,
                 }[header.column.getIsSorted() as string] ?? null}
+                {tableCanResize && header.column.getCanResize() && (
+                    <div
+                        {...{
+                            onDoubleClick: () => header.column.resetSize(),
+                            onMouseDown: header.getResizeHandler(),
+                            onTouchStart: header.getResizeHandler(),
+                            className: `resizer ${header.column.getIsResizing() ? 'isResizing' : ''}`,
+                        }}
+                    />
+                )}
             </div>
         </th>
     )

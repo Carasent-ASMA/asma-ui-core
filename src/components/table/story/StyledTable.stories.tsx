@@ -101,6 +101,11 @@ export const Table = () => {
             </div>
             <StyledTable<Person, Participant>
                 // data={data.splice(0, 49)}
+                enableColumnResizing={true}
+                columnResizeMode='onChange'
+                defaultColumn={{
+                    maxSize: 600,
+                }}
                 focusable
                 data={data}
                 stickyHeader

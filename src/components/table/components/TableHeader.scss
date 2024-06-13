@@ -4,6 +4,7 @@
         opacity: 0;
     }
     .show-table-header {
+        position: relative;
         height: 30px;
         opacity: 1;
     }
@@ -11,6 +12,33 @@
     .sortable-column {
         cursor: pointer;
         user-select: none;
+    }
+
+    .resizer {
+        position: absolute;
+        top: 0;
+        height: 100%;
+        right: 0;
+        width: 5px;
+        background: var(--colors-delta-300);
+        cursor: col-resize;
+        user-select: none;
+        touch-action: none;
+    }
+
+    .resizer.isResizing {
+        background: var(--colors-gama-500);
+        opacity: 1;
+    }
+
+    @media (hover: hover) {
+        .resizer {
+            opacity: 0;
+        }
+
+        *:hover > .resizer {
+            opacity: 1;
+        }
     }
 
     .table-header {
