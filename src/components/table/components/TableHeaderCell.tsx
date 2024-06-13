@@ -1,6 +1,6 @@
 import { flexRender, type Header } from '@tanstack/react-table'
 import { getTableHeaderStyle } from '../helpers/getTableHeaderStyle'
-import type { StyledTableProps } from '../types'
+import { ACTIONS_COLUMN_ID, EXPAND_COLUMN_ID, SELECT_COLUMN_ID, type StyledTableProps } from '../types'
 import { useRef } from 'react'
 import clsx from 'clsx'
 import { DropDownIcon, DropUpIcon } from 'src/components/icons'
@@ -50,16 +50,18 @@ export function TableHeaderCell<
                     asc: <DropUpIcon className='sort-icon' />,
                     desc: <DropDownIcon className='sort-icon' />,
                 }[header.column.getIsSorted() as string] ?? null}
-                {tableCanResize && header.column.getCanResize() && (
-                    <div
-                        {...{
-                            onDoubleClick: () => header.column.resetSize(),
-                            onMouseDown: header.getResizeHandler(),
-                            onTouchStart: header.getResizeHandler(),
-                            className: `resizer ${header.column.getIsResizing() ? 'isResizing' : ''}`,
-                        }}
-                    />
-                )}
+                {tableCanResize &&
+                    header.column.getCanResize() &&
+                    ![SELECT_COLUMN_ID, EXPAND_COLUMN_ID, ACTIONS_COLUMN_ID].includes(header.column.id) && (
+                        <div
+                            {...{
+                                onDoubleClick: () => header.column.resetSize(),
+                                onMouseDown: header.getResizeHandler(),
+                                onTouchStart: header.getResizeHandler(),
+                                className: `resizer ${header.column.getIsResizing() ? 'isResizing' : ''}`,
+                            }}
+                        />
+                    )}
             </div>
         </th>
     )
