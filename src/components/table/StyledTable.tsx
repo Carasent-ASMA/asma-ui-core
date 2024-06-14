@@ -1,4 +1,4 @@
-import { type StyledTableProps } from './types'
+import { type StyledTableProps, type TableState } from './types'
 import { TableHeader } from './components/TableHeader'
 import { TableBody } from './components/TableBody'
 import { TableFooter } from './components/TableFooter'
@@ -24,7 +24,10 @@ export const StyledTable = <
     },
     TCustomData = Record<string, unknown>,
 >(
-    props: StyledTableProps<TData, TCustomData> & { getColumnSizing?: (column_sizing: ColumnSizingState) => void },
+    props: StyledTableProps<TData, TCustomData> & {
+        getColumnSizing?: (column_sizing: ColumnSizingState) => void
+        getTableState?: (tableState: TableState) => void
+    },
 ) => {
     const { className, height } = props
 
@@ -42,6 +45,7 @@ export const StyledTable = <
             colSizes[`--header-${header.id}-size`] = header.getSize()
             colSizes[`--col-${header.column.id}-size`] = header.column.getSize()
         }
+        props.getTableState?.(table.getState())
         props.getColumnSizing?.(table.getState().columnSizing)
         return colSizes
         // eslint-disable-next-line react-hooks/exhaustive-deps

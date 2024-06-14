@@ -1,7 +1,7 @@
 import { type Table } from '@tanstack/react-table'
 import { TablePagination } from './TablePagination'
 import type { StyledTableProps } from '../types'
-import './TableFooter.scss'
+import style from '../StyledTable.module.scss'
 
 export function TableFooter<
     TData extends {
@@ -12,7 +12,7 @@ export function TableFooter<
     if (styledTableProps.hideFooter) return null
 
     return (
-        <div className='table-footer'>
+        <div className={style['table-footer']}>
             {styledTableProps.footer?.(table)}
             <TablePagination table={table} locale={styledTableProps.locale || 'en'} />
         </div>

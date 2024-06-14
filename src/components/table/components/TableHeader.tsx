@@ -2,7 +2,7 @@ import { type Table } from '@tanstack/react-table'
 import clsx from 'clsx'
 import type { StyledTableProps } from '../types'
 import { TableHeaderCell } from './TableHeaderCell'
-import './TableHeader.scss'
+import style from '../StyledTable.module.scss'
 
 export function TableHeader<
     TData extends {
@@ -24,7 +24,7 @@ export function TableHeader<
 
     return (
         <thead
-            className={clsx('table-header', hideHeader && 'hide-table-header')}
+            className={clsx(style['table-header'], hideHeader && style['hide-table-header'])}
             style={
                 (stickyHeader && {
                     position: 'sticky',

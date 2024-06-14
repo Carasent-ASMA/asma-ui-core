@@ -1,7 +1,8 @@
 import { flexRender, type Row } from '@tanstack/react-table'
 import { Fragment } from 'react'
 import type { StyledTableProps } from '../types'
-import './TableRow.scss'
+
+import style from '../StyledTable.module.scss'
 import clsx from 'clsx'
 
 export function TableRow<
@@ -57,9 +58,9 @@ export function TableRow<
                 id={row.id}
                 tabIndex={focusable ? -1 : undefined}
                 className={clsx(
-                    't-row',
-                    loading && 'is-loading',
-                    (row.getIsExpanded() || row.getIsSelected()) && 'selected',
+                    style['t-row'],
+                    loading && style['is-loading'],
+                    (row.getIsExpanded() || row.getIsSelected()) && style['selected'],
                     getRowClassName?.(row),
                 )}
                 style={{
@@ -75,16 +76,16 @@ export function TableRow<
                         <td
                             key={cell.id}
                             className={clsx(
-                                't-cell',
+                                style['t-cell'],
                                 tdClassName,
                                 // *
                                 //  sticky actions
-                                isActionsCell && 'action-cell',
-                                isActionsCell && (row.getIsExpanded() || row.getIsSelected()) && 'selected',
+                                isActionsCell && style['action-cell'],
+                                isActionsCell && (row.getIsExpanded() || row.getIsSelected()) && style['selected'],
                                 isActionsCell &&
                                     (getRowClassName?.(row)
                                         ? getRowClassName?.(row)
-                                        : 'action-cell-default-background'),
+                                        : style['action-cell-default-background']),
                             )}
                         >
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}

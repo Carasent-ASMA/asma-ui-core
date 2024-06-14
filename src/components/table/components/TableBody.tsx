@@ -4,6 +4,7 @@ import { LoadingIcon } from 'src/components/icons'
 import { TableSkeleton } from './TableSkeleton'
 import { TableRows } from './TableRows'
 import { TableNoRowsOverlay } from './TableNoRowsOverlay'
+import style from '../StyledTable.module.scss'
 
 export function TableBody<
     TData extends {
@@ -14,8 +15,8 @@ export function TableBody<
     const { columns, data, loading, noRowsOverlay } = styledTableProps
 
     return (
-        <tbody className='tbody'>
-            {!!(data.length > 0) && loading && <LoadingIcon className='loading-icon' width={50} height={50} />}
+        <tbody className={style['tbody']}>
+            {!!(data.length > 0) && loading && <LoadingIcon className={style['loading-icon']} width={50} height={50} />}
 
             {data.length === 0 && loading ? (
                 <TableSkeleton colSpan={columns.length} />

@@ -4,6 +4,7 @@ import { ACTIONS_COLUMN_ID, EXPAND_COLUMN_ID, SELECT_COLUMN_ID, type StyledTable
 import { useRef } from 'react'
 import clsx from 'clsx'
 import { DropDownIcon, DropUpIcon } from 'src/components/icons'
+import style from '../StyledTable.module.scss'
 
 export function TableHeaderCell<
     TData extends {
@@ -29,26 +30,26 @@ export function TableHeaderCell<
             key={header.id}
             colSpan={header.colSpan}
             className={clsx(
-                't-cell',
+                style['t-cell'],
                 // *
                 //  sticky actions
-                header.column.id === 'actions' && 't-cell__actions',
+                header.column.id === 'actions' && style['t-cell__actions'],
             )}
             style={getTableHeaderStyle({ enableResizing, header, element: ref.current })}
         >
             <div
                 className={clsx(
                     'flex items-center justify-left',
-                    hideHeader ? 'hide-table-header' : 'show-table-header',
-                    header.column.getCanSort() && 'sortable-column',
+                    hideHeader ? style['hide-table-header'] : style['show-table-header'],
+                    header.column.getCanSort() && style['sortable-column'],
                     header.column.columnDef.className,
                 )}
                 onClick={header.column.getToggleSortingHandler()}
             >
                 {flexRender(header.column.columnDef.header, header.getContext())}
                 {{
-                    asc: <DropUpIcon className='sort-icon' />,
-                    desc: <DropDownIcon className='sort-icon' />,
+                    asc: <DropUpIcon className={style['sort-icon']} />,
+                    desc: <DropDownIcon className={style['sort-icon']} />,
                 }[header.column.getIsSorted() as string] ?? null}
                 {tableCanResize &&
                     header.column.getCanResize() &&
@@ -58,7 +59,9 @@ export function TableHeaderCell<
                                 onDoubleClick: () => header.column.resetSize(),
                                 onMouseDown: header.getResizeHandler(),
                                 onTouchStart: header.getResizeHandler(),
-                                className: `resizer ${header.column.getIsResizing() ? 'isResizing' : ''}`,
+                                className: `${style['resizer']} ${
+                                    header.column.getIsResizing() ? style['isResizing'] : ''
+                                }`,
                             }}
                         />
                     )}

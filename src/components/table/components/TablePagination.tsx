@@ -4,7 +4,8 @@ import { StyledTooltip } from 'src/components/data-display/tooltip'
 import { StyledButton } from 'src/components/inputs/button'
 import { StyledPopover } from 'src/components/utils/popover'
 import { useToggleMenuVisibility } from 'src/hooks/useToggleMenuVisibility.hook'
-import './TablePagination.scss'
+import style from './TablePagination.module.scss'
+import styleTable from '../StyledTable.module.scss'
 import { useRef } from 'react'
 import clsx from 'clsx'
 
@@ -16,10 +17,10 @@ export function TablePagination<TData>({ table, locale }: { locale: 'en' | 'no';
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         handleOpen(event)
     }
-
+    const AsmaCoreUiStyledTable = styleTable['asma-core-ui-styled-table']
     const scrollToTop = () => {
         tablePagination?.current
-            ?.closest('.asma-core-ui-styled-table')
+            ?.closest(`.${AsmaCoreUiStyledTable}`)
             ?.querySelectorAll('[data-index="0"]')?.[0]
             ?.scrollIntoView({ block: 'center', inline: 'start' })
     }
@@ -28,7 +29,7 @@ export function TablePagination<TData>({ table, locale }: { locale: 'en' | 'no';
     const currentPage = table.getState().pagination.pageIndex + 1
     const pages = Array.from({ length: pagesLength }, (_value, index) => index + 1)
     return pagesLength > 1 ? (
-        <div ref={tablePagination} className='table-pagination'>
+        <div ref={tablePagination} className={style['table-pagination']}>
             <StyledTooltip title={isNo ? 'Nåværende side' : 'Current Page'}>
                 <div>
                     <StyledButton
@@ -57,12 +58,12 @@ export function TablePagination<TData>({ table, locale }: { locale: 'en' | 'no';
                     horizontal: 'center',
                 }}
             >
-                <div className='table-pagination__pages-list'>
+                <div className={style['table-pagination__pages-list']}>
                     {pages.map((page) => {
                         return (
                             <div
                                 className={clsx(
-                                    'table-pagination__pages-list__page',
+                                    style['table-pagination__pages-list__page'],
                                     currentPage === page && 'page-selected',
                                 )}
                                 key={page}
@@ -72,7 +73,9 @@ export function TablePagination<TData>({ table, locale }: { locale: 'en' | 'no';
                                     scrollToTop()
                                 }}
                             >
-                                {currentPage === page && <CheckIcon className='check-icon' height={24} width={24} />}
+                                {currentPage === page && (
+                                    <CheckIcon className={style['check-icon']} height={24} width={24} />
+                                )}
                                 <span>
                                     {isNo ? 'Side' : 'Page'} {page}
                                 </span>
