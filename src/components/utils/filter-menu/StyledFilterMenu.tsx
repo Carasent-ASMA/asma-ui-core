@@ -3,6 +3,7 @@ import { StyledButton } from '../../inputs/button'
 import { FilterIcon } from '../../icons'
 import { StyledPopover } from '../popover'
 import clsx from 'clsx'
+import type { PopoverProps } from '@mui/material'
 
 /**
  * Custom props:
@@ -17,6 +18,7 @@ type StyledFilterMenuProps = {
     disabled?: boolean
     size?: 'small' | 'large' | 'medium'
     variant?: 'contained' | 'outlined' | 'text' | 'textGray'
+    popoverProps?: Omit<PopoverProps, 'open' | 'anchorEl' | 'onClose'>
 }
 
 const useAnchor = () => {
@@ -48,6 +50,7 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
     disabled,
     size = 'large',
     variant = 'outlined',
+    popoverProps,
 }) => {
     const { onAnchorClick, onClose, anchorEl } = useAnchor()
 
@@ -74,18 +77,23 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
                 )}
             </div>
             <StyledPopover
+                {...popoverProps}
                 open={!!anchorEl}
                 anchorEl={anchorEl}
                 onClose={onClose}
-                anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'right',
-                }}
-                transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                }}
-                className='my-1'
+                anchorOrigin={
+                    popoverProps?.anchorOrigin || {
+                        vertical: 'bottom',
+                        horizontal: 'right',
+                    }
+                }
+                transformOrigin={
+                    popoverProps?.transformOrigin || {
+                        vertical: 'top',
+                        horizontal: 'right',
+                    }
+                }
+                className={popoverProps?.className || 'my-1'}
             >
                 {popoverContent}
             </StyledPopover>
