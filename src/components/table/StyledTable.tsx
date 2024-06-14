@@ -5,7 +5,7 @@ import { TableFooter } from './components/TableFooter'
 import { useStyledTable } from './hooks/useStyledTable'
 import { injectColumns } from './helpers/injectColumns'
 
-import './StyledTable.scss'
+import style from './StyledTable.module.scss'
 import clsx from 'clsx'
 import { memo, useMemo } from 'react'
 import type { ColumnSizingState } from './types'
@@ -48,10 +48,10 @@ export const StyledTable = <
     }, [props.enableColumnResizing, table.getState().columnSizingInfo, table.getState().columnSizing])
 
     return (
-        <div className='asma-core-ui-styled-table'>
-            <div className={clsx('table-wrapper', className)} style={{ height }}>
+        <div className={style['asma-core-ui-styled-table']}>
+            <div className={clsx(style['table-wrapper'], className)} style={{ height }}>
                 <table
-                    className='styled-table'
+                    className={style['styled-table']}
                     style={{
                         ...columnSizeVars,
                         width: table.getTotalSize(),
