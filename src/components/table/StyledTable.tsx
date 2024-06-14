@@ -8,6 +8,7 @@ import { injectColumns } from './helpers/injectColumns'
 import './StyledTable.scss'
 import clsx from 'clsx'
 import { memo, useMemo } from 'react'
+import type { ColumnSizingState } from './types'
 
 /**
  *
@@ -23,7 +24,7 @@ export const StyledTable = <
     },
     TCustomData = Record<string, unknown>,
 >(
-    props: StyledTableProps<TData, TCustomData>,
+    props: StyledTableProps<TData, TCustomData> & { getColumnSizing?: (column_sizing: ColumnSizingState) => void },
 ) => {
     const { className, height } = props
 
@@ -41,6 +42,7 @@ export const StyledTable = <
             colSizes[`--header-${header.id}-size`] = header.getSize()
             colSizes[`--col-${header.column.id}-size`] = header.column.getSize()
         }
+        props.getColumnSizing?.(table.getState().columnSizing)
         return colSizes
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [props.enableColumnResizing, table.getState().columnSizingInfo, table.getState().columnSizing])

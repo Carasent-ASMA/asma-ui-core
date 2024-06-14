@@ -53,6 +53,8 @@ type IHideFooter = {
 type TFooter<TData> = IFooter<TData> | IHideFooter
 type TTableOptions<TData> = TableOptions<TData>
 
+export type * from '@tanstack/react-table'
+
 export type StyledTableProps<TData, TCustomData> = {
     locale?: 'no' | 'en'
     height?: string | number
