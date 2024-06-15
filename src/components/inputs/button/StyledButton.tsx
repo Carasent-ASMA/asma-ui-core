@@ -29,12 +29,18 @@ type buttonStandartVariantsProps = {
 
 type conditionalProps = variantTextGrayProps | variantTextWhiteProps | buttonStandartVariantsProps
 
-const BtnStyles: Record<'contained' | 'outlined' | 'text' | 'textGray' | 'textWhite', string | undefined> = {
+const BtnStyles: Record<
+    'contained' | 'outlined' | 'text' | 'textGray' | 'textWhite' | 'large' | 'small' | 'medium',
+    string | undefined
+> = {
     contained: style['contained'],
     outlined: style['outlined'],
     text: style['text'],
     textGray: style['textGray'],
     textWhite: style['textWhite'],
+    large: style['large'],
+    small: style['small'],
+    medium: style['medium'],
 }
 export type StyledButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & commonProps & conditionalProps
 /**
@@ -72,7 +78,7 @@ export const StyledButton = ({
     return (
         <button
             {...otherProps}
-            className={clsx(style['asma-core-ui-button'], BtnStyles[variant], color, size, className)}
+            className={clsx(style['asma-core-ui-button'], BtnStyles[variant], color, BtnStyles[size], className)}
             ref={refLink}
             data-test={dataTest}
         >
