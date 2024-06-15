@@ -4,7 +4,7 @@ import { Icon } from '@iconify/react'
 import { isDate, isSameMonth } from 'date-fns'
 import type { Dispatch, SetStateAction } from 'react'
 import { compact, isArray, isObject } from 'lodash-es'
-import style from './StyledCalendarPicker.module.scss'
+//import style from './StyledCalendarPicker.module.scss'
 
 export const StyledCalendarPickerFooter: React.FC<{
     onClose: ((event: object, reason: 'backdropClick' | 'escapeKeyDown') => void) | undefined

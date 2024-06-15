@@ -4,7 +4,7 @@ import { StyledCalendarPicker } from './components/StyledCalendarPicker'
 import type { DatePickerProps } from './types'
 import { setPickerPosition } from './helpers'
 import { DatePickerInputIndex } from './components/DatePickerInputIndex'
-import './components/index.scss'
+//import './components/index.scss'
 
 export const StyledDatePicker = (props: DatePickerProps) => {
     const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)

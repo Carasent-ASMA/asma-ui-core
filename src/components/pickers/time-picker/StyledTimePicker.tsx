@@ -1,6 +1,6 @@
 import { format } from 'date-fns'
 import PopupState from 'material-ui-popup-state'
-import './StyledTimePicker.scss'
+//import style from './StyledTimePicker.module.scss'
 import { useState, type ChangeEvent } from 'react'
 import { ClickAwayListener } from '@mui/material'
 import { bindTrigger } from 'material-ui-popup-state/hooks'

@@ -12,7 +12,7 @@ import clsx from 'clsx'
 import React from 'react'
 import { RenderSubRows } from './components/styled-table/RenderSubRows'
 import { getRowActions } from './components/styled-table/getRowActions'
-import './StyledTableStories.scss'
+import style from './StyledTableStories.module.scss'
 
 const meta = {
     title: 'Tables/Table',
@@ -170,7 +170,7 @@ export const Table = () => {
                     setColumnsVisibility(e)
                 }}
                 renderSubRows={(data) => <RenderSubRows subRows={data.rows} />}
-                getRowClassName={(row) => clsx(row.original.progress > 50 && 'high-progress')}
+                getRowClassName={(row) => clsx(row.original.progress > 50 && style['high-progress'])}
                 noRowsOverlay={
                     <div className='flex h-full w-full items-center justify-center'>
                         <div className='flex flex-col items-center'>
