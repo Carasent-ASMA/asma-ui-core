@@ -1,6 +1,7 @@
 import { type CaptionProps, Caption } from 'react-day-picker'
 
 import { type Dispatch, type SetStateAction } from 'react'
+import style from './StyledCalendarPicker.module.scss'
 
 export function CustomCaption(
     props: CaptionProps & {
@@ -13,7 +14,7 @@ export function CustomCaption(
 
     return (
         <div
-            className='rdp-custom-caption'
+            className={style['rdp-custom-caption']}
             style={{
                 display: 'flex',
                 justifyContent: 'space-between',

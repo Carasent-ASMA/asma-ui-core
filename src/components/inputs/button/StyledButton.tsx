@@ -1,6 +1,6 @@
 import React, { type ReactNode } from 'react'
 
-import './StyledButton.scss'
+import style from './StyledButton.module.scss'
 
 import clsx from 'clsx'
 
@@ -65,11 +65,11 @@ export const StyledButton = ({
     return (
         <button
             {...otherProps}
-            className={clsx('asma-core-ui-button', variant, color, size, className)}
+            className={clsx(style['asma-core-ui-button'], variant, color, size, className)}
             ref={refLink}
             data-test={dataTest}
         >
-            {startIcon && startIcon}
+            {startIcon}
             {children && (
                 <div
                     style={{
@@ -87,7 +87,7 @@ export const StyledButton = ({
                     {children}
                 </div>
             )}
-            {endIcon && endIcon}
+            {endIcon}
         </button>
     )
 }

@@ -8,6 +8,7 @@ import { CustomCaption } from './StyledCalendarPickerCaption'
 import { StyledCalendarPickerSelectMonth } from './StyledCalendarPickerSelectMonth'
 import { StyledCalendarPickerSelectYear } from './StyledCalendarPickerSelectYear'
 import { enGB } from 'date-fns/locale'
+import style from './StyledCalendarPicker.module.scss'
 import 'react-day-picker/dist/style.css'
 export const StyledCalendarPicker: React.FC<{
     datePickerProps: DatePickerProps
@@ -51,7 +52,7 @@ export const StyledCalendarPicker: React.FC<{
                 showWeekNumber
                 showOutsideDays={showOutsideDays}
                 fixedWeeks
-                className='styled-calendar-day-picker'
+                className={style['styled-calendar-day-picker']}
                 classNames={{
                     months: 'months',
                     month: 'month',

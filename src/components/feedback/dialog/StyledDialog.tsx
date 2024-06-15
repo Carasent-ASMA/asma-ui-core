@@ -3,7 +3,7 @@ import type { DialogProps } from '@mui/material/Dialog'
 
 import { StyledButton } from '../../inputs/button/StyledButton'
 import type { ReactNode } from 'react'
-import './StyledDialog.scss'
+import style from './StyledDialog.module.scss'
 import { CloseIcon } from 'src/components/icons'
 export interface IStyledDialogProps extends DialogProps {
     onCloseText?: ReactNode
@@ -31,14 +31,14 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                 ...rest.style,
             }}
         >
-            <div className={'styled-dialog-root'}>
-                <div className='styled-top-header'>
-                    <div className={'styled-dialog-info'}>
-                        {dialogLabel && <div className={'styled-dialog-label'}>{dialogLabel}</div>}
-                        {dialogTitle && <div className={'styled-dialog-title'}>{dialogTitle}</div>}
+            <div className={style['styled-dialog-root']}>
+                <div className={style['styled-top-header']}>
+                    <div className={style['styled-dialog-info']}>
+                        {dialogLabel && <div className={style['styled-dialog-label']}>{dialogLabel}</div>}
+                        {dialogTitle && <div className={style['styled-dialog-title']}>{dialogTitle}</div>}
                     </div>
                     {showCloseIcon && (
-                        <div className={'styled-dialog-close'}>
+                        <div className={style['styled-dialog-close']}>
                             <StyledButton
                                 dataTest={`close-button-${dataTest}`}
                                 variant='textGray'

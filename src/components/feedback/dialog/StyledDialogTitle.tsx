@@ -1,7 +1,7 @@
 import { DialogTitle } from '@mui/material'
 import type { DialogTitleProps } from '@mui/material/DialogTitle/DialogTitle'
 
-import './StyledDialogTitle.scss'
+import style from'./StyledDialogTitle.module.scss'
 export const StyledDialogTitle = ({ children, ...rest }: DialogTitleProps) => {
     return children ? (
         <DialogTitle
@@ -9,7 +9,7 @@ export const StyledDialogTitle = ({ children, ...rest }: DialogTitleProps) => {
             data-test='styled-dialog-title'
             classes={{
                 ...rest.classes,
-                root: 'styled-dialog-title-root',
+                root: style['styled-dialog-title-root'],
             }}
         >
             {children}

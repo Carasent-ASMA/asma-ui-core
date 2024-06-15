@@ -1,5 +1,5 @@
 import React from 'react'
-import './StyledWidgetHeader.scss'
+//import style from './StyledWidgetHeader.module.scss'
 import { StyledWidgetHeader } from './StyledWidgetHeader'
 import type { Meta } from '@storybook/react'
 import { StyledButton } from 'src/components/inputs/button'

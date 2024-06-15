@@ -1,5 +1,5 @@
 import type { CSSProperties, FC, MouseEvent, ReactNode } from 'react'
-import './StyledLabel.scss'
+import style from './StyledLabel.module.scss'
 import clsx from 'clsx'
 
 export type StyledLabelProps = {
@@ -9,10 +9,10 @@ export type StyledLabelProps = {
     dataTest: string
     style?: CSSProperties
 }
-
+const styledLabelCss = style['styled-label']
 export const StyledLabel: FC<StyledLabelProps> = ({ children, onClick, className, dataTest, style }) => {
     return (
-        <div className={clsx('styled-label', className)} style={style} onClick={onClick} data-test={dataTest}>
+        <div className={clsx(styledLabelCss, className)} style={style} onClick={onClick} data-test={dataTest}>
             {children}
         </div>
     )

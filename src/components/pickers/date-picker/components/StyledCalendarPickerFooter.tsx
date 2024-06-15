@@ -4,6 +4,7 @@ import { Icon } from '@iconify/react'
 import { isDate, isSameMonth } from 'date-fns'
 import type { Dispatch, SetStateAction } from 'react'
 import { compact, isArray, isObject } from 'lodash-es'
+import style from './StyledCalendarPicker.module.scss'
 
 export const StyledCalendarPickerFooter: React.FC<{
     onClose: ((event: object, reason: 'backdropClick' | 'escapeKeyDown') => void) | undefined
@@ -39,7 +40,8 @@ export const StyledCalendarPickerFooter: React.FC<{
                 style={{ minWidth: '60px' }}
                 startIcon={<Icon icon='ph:eraser-duotone' width={24} height={24} />}
             />
-            <div className='rdp-custom-caption-navigation' style={{ display: 'flex', gap: '4px' }}>
+            {/* #TODO: `rdp-custom-caption-navigation` is not found nowhere in this project investigate why he is here and remove it if it is added by mistake */}
+            <div className={'rdp-custom-caption-navigation'} style={{ display: 'flex', gap: '4px' }}>
                 <StyledButton
                     variant='outlined'
                     size='small'

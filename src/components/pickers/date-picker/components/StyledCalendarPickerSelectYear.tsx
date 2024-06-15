@@ -2,6 +2,7 @@ import { useNavigation, type DropdownProps, useDayPicker } from 'react-day-picke
 import { StyledFormControl } from 'src/components/miscellaneous/StyledFormControl'
 import { StyledSelect, StyledSelectItem } from '../../../inputs/select'
 import { setYear } from 'date-fns'
+import style from './StyledCalendarPickerSelectPeriod.module.scss'
 
 export const StyledCalendarPickerSelectYear: React.FC<DropdownProps> = (props) => {
     const { caption, children } = props
@@ -23,7 +24,7 @@ export const StyledCalendarPickerSelectYear: React.FC<DropdownProps> = (props) =
                     const id = selectedOptions.find((opt) => opt.label === selectedValue)?.id
                     month && !isNaN(Number(id)) && goToMonth(setYear(month, Number(id)))
                 }}
-                MenuProps={{ className: 'styled-calendar-picker-select-period-menu' }}
+                MenuProps={{ className: style['styled-calendar-picker-select-period-menu'] }}
             >
                 {selectedOptions?.map((month) => (
                     <StyledSelectItem key={month.id} value={month.label}>

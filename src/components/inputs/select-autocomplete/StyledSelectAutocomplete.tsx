@@ -2,7 +2,7 @@ import { Autocomplete, Paper, type AutocompleteProps, type ChipTypeMap } from '@
 import { Icon } from '@iconify/react'
 import clsx from 'clsx'
 import { useEffect, useRef, useState } from 'react'
-import './StyledSelectAutocomplete.scss'
+import style from './StyledSelectAutocomplete.module.scss'
 
 /**
  *
@@ -39,12 +39,12 @@ export function StyledSelectAutocomplete<
         ? {
               style: {
                   maxHeight: maxHeight === 'auto' ? 'auto' : `${maxHeight}px`,
-                },
-            }
-            : {}
-            
-            return (
-                <div className='styledSelectAutocompleteWrapper' ref={selectRef}>
+              },
+          }
+        : {}
+
+    return (
+        <div className={style['styledSelectAutocompleteWrapper']} ref={selectRef}>
             <Autocomplete
                 {...props}
                 ListboxProps={listboxProps}
@@ -55,7 +55,7 @@ export function StyledSelectAutocomplete<
                             icon='material-symbols:expand-more-rounded'
                             width={24}
                             height={24}
-                            className={clsx('select-custom-icon')}
+                            className={clsx(style['select-custom-icon'])}
                         />
                     )
                 }

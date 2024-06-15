@@ -1,6 +1,6 @@
 import { DialogActions, type DialogActionsProps } from '@mui/material'
 
-import './StyledDialogActions.scss'
+import style from './StyledDialogActions.module.scss'
 import clsx from 'clsx'
 export const StyledDialogActions = (props: DialogActionsProps) => {
     return (
@@ -9,10 +9,10 @@ export const StyledDialogActions = (props: DialogActionsProps) => {
             data-test='styled-dialog-actions'
             classes={{
                 ...props.classes,
-                root: 'styled-dialog-actions-root',
+                root: style['styled-dialog-actions-root'],
             }}
         >
-            <div className={clsx('styled-dialog-actions', props.className)}>{props.children}</div>
+            <div className={clsx(style['styled-dialog-actions'], props.className)}>{props.children}</div>
         </DialogActions>
     )
 }

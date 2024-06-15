@@ -3,6 +3,7 @@ import { getValue } from '../helpers'
 import type { DatePickerProps } from '../types'
 import { OutlineCalendarMonth } from 'src/components/icons'
 import clsx from 'clsx'
+import style from './DatePickerInputRangeCompact.module.scss'
 
 export const DatePickerInputRangeCompact: React.FC<
     DatePickerProps & { onClick: (e: React.MouseEvent<HTMLDivElement>) => void }
@@ -27,7 +28,7 @@ export const DatePickerInputRangeCompact: React.FC<
     return (
         <div
             data-test={dataTest}
-            className={clsx(className, 'styled-date-picker-input-range-compact', disabled && 'range-compact-disabled')}
+            className={clsx(className, style['styled-date-picker-input-range-compact'], disabled && style['range-compact-disabled'])}
             onClick={(e) => !disabled && onClick(e)}
         >
             <StyledInputField

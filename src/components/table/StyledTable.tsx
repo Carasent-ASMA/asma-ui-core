@@ -58,7 +58,7 @@ export const StyledTable = <
                     className={style['styled-table']}
                     style={{
                         ...columnSizeVars,
-                        width: table.getTotalSize(),
+                        //width: table.getTotalSize(),
                     }}
                 >
                     <TableHeader table={table} styledTableProps={props} tableCanResize={!!props.enableColumnResizing} />

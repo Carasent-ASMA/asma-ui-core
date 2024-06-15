@@ -50,6 +50,7 @@
         "src/**/*.ts",
         "src/**/*.tsx",
         "src/**/*.scss",
+        "**/*.module.scss",
         "vite.config.ts",
         "package.json",
         "src/styles/**/*.json"
