@@ -1,4 +1,4 @@
-.pointer-events-none {
+/* .pointer-events-none {
     pointer-events: none !important;
 }
 .invisible {
@@ -2065,7 +2065,7 @@
     line-height: 1rem;
     --tw-text-opacity: 1;
     color: rgb(255 77 79 / var(--tw-text-opacity));
-} */
+} *\/
 .rdp {
     --rdp-cell-size: 40px;
     --rdp-caption-font-size: 18px;
@@ -2605,3 +2605,4 @@
     line-height: 20.7px;
     color: var(--colors-gray-900);
 }
+ */
