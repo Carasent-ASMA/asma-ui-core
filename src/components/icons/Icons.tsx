@@ -8,7 +8,7 @@ import { DashboardViewIcon } from './dashboard-view-icon'
 import { DashboardViewOutlineIcon } from './dashboard-view-outline-icon'
 import { PeopleOutlineIcon } from './people-outline-icon'
 import { CheckOutlineIcon } from './check-outline-icon'
-import { CalendarIcon } from './calendar-icon'
+import { CalendarIcon, NewCalendarIcon } from './calendar-icon'
 import { AssignmentIcon } from './assignment'
 import { AssignmentOutlineIcon } from './assignment-outline-icon'
 import { CalendarRangeIcon } from './calendar-range-icon'
@@ -353,6 +353,11 @@ export const StyledIcons: React.FC<{ height?: number; width?: number }> = ({ hei
             <StyledTooltip title='WorkIcon'>
                 <div title='WorkIcon'>
                     <WorkIcon height={height} width={height} className='text-gama-500' />
+                </div>
+            </StyledTooltip>
+            <StyledTooltip title='NewCalendarIcon'>
+                <div title='NewCalendarIcon'>
+                    <NewCalendarIcon height={height} width={height} className='text-delta-800' />
                 </div>
             </StyledTooltip>
         </div>
