@@ -3,7 +3,7 @@
     "publishConfig": {
         "access": "public"
     },
-    "version": "4.0.0-1",
+    "version": "4.0.0-2",
     "type": "module",
     "files": [
         "dist/**/*",
@@ -50,7 +50,6 @@
         "lodash-es": "^4.17.21",
         "material-ui-popup-state": "^5.0.10",
         "node": "18.17.0",
-        "notistack": "^3.0.1",
         "react": "^18.2.0",
         "react-day-picker": "^8.8.2",
         "react-dom": "^18.2.0",
