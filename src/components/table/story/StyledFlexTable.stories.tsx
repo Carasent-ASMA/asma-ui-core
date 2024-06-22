@@ -7,7 +7,6 @@ import { useFetchTemplates } from './service/useFetchTemplates'
 import type { ITemplate } from './service/types'
 import { useColumns } from './components/styled-flex-table/useColumns'
 import { generateActions } from './components/styled-flex-table/generateActions'
-import './StyledTableStories.scss'
 import { PeopleIcon } from 'src/components/icons'
 
 const meta = {

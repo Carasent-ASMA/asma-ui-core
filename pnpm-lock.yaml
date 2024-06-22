@@ -33,9 +33,6 @@ importers:
       '@tanstack/react-table':
         specifier: ^8.10.0
         version: 8.10.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      asma-core-ui:
-        specifier: ^3.0.53
-        version: 3.0.53(@emotion/react@11.11.1(@types/react@18.0.37)(react@18.2.0))(@emotion/styled@11.11.0(@emotion/react@11.11.1(@types/react@18.0.37)(react@18.2.0))(@types/react@18.0.37)(react@18.2.0))(@mui/material@5.13.7(@emotion/react@11.11.1(@types/react@18.0.37)(react@18.2.0))(@emotion/styled@11.11.0(@emotion/react@11.11.1(@types/react@18.0.37)(react@18.2.0))(@types/react@18.0.37)(react@18.2.0))(@types/react@18.0.37)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@types/react@18.0.37)(csstype@3.1.2)(immer@9.0.21)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       clsx:
         specifier: ^1.2.1
         version: 1.2.1
@@ -3410,16 +3407,6 @@ packages:
   asap@2.0.6:
     resolution: {integrity: sha512-BSHWgDSAiKs50o2Re8ppvp3seVHXSRM44cdSsT9FfNEUUZLOGWVCsiWaRPWM1Znn+mqZ1OfVZ3z3DWEzSp7hRA==}
 
-  asma-core-ui@3.0.53:
-    resolution: {integrity: sha512-LJpjfGJ9waOW2x4ISOcqpt6ib9X7Xz6LX5ZdntopgsVkBQA+cwhYKxDN59qF1qW38zint5J/c63lffE6XdRrRA==}
-    peerDependencies:
-      '@emotion/react': ^11.*
-      '@emotion/styled': ^11.*
-      '@mui/material': ^5.*
-      immer: ^9.*
-      react: ^18.*
-      react-dom: ^18.*
-
   assert@2.1.0:
     resolution: {integrity: sha512-eLHpSK/Y4nhMJ07gDaAzoX/XAKS8PSaojml3M0DM4JpV1LAi5JOJ/p6H/XWrl8L+DzVEvVCW1z3vWAaB9oTsQw==}
 
@@ -5072,8 +5059,8 @@ packages:
   globrex@0.1.2:
     resolution: {integrity: sha512-uHJgbwAMwNFf5mLst7IWLNg14x1CkeqglJb/K3doi4dw6q2IvAAmM/Y81kevy83wP+Sst+nutFTYOGg3d1lsxg==}
 
-  goober@2.1.13:
-    resolution: {integrity: sha512-jFj3BQeleOoy7t93E9rZ2de+ScC4lQICLwiAQmKMg9F6roKGaLSHoCDYKkWlSafg138jejvq/mTdvmnwDQgqoQ==}
+  goober@2.1.14:
+    resolution: {integrity: sha512-4UpC0NdGyAFqLNPnhCT2iHpza2q+RAY3GV85a/mRPdzyPQMsj0KmMMuetdIkzWRbJ+Hgau1EZztq8ImmiMGhsg==}
     peerDependencies:
       csstype: ^3.0.10
 
@@ -13320,30 +13307,6 @@ snapshots:
 
   asap@2.0.6: {}
 
-  asma-core-ui@3.0.53(@emotion/react@11.11.1(@types/react@18.0.37)(react@18.2.0))(@emotion/styled@11.11.0(@emotion/react@11.11.1(@types/react@18.0.37)(react@18.2.0))(@types/react@18.0.37)(react@18.2.0))(@mui/material@5.13.7(@emotion/react@11.11.1(@types/react@18.0.37)(react@18.2.0))(@emotion/styled@11.11.0(@emotion/react@11.11.1(@types/react@18.0.37)(react@18.2.0))(@types/react@18.0.37)(react@18.2.0))(@types/react@18.0.37)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@types/react@18.0.37)(csstype@3.1.2)(immer@9.0.21)(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
-    dependencies:
-      '@emotion/react': 11.11.1(@types/react@18.0.37)(react@18.2.0)
-      '@emotion/styled': 11.11.0(@emotion/react@11.11.1(@types/react@18.0.37)(react@18.2.0))(@types/react@18.0.37)(react@18.2.0)
-      '@fontsource/material-icons': 5.0.16
-      '@fontsource/roboto': 5.0.12
-      '@iconify/react': 4.1.1(react@18.2.0)
-      '@mui/material': 5.13.7(@emotion/react@11.11.1(@types/react@18.0.37)(react@18.2.0))(@emotion/styled@11.11.0(@emotion/react@11.11.1(@types/react@18.0.37)(react@18.2.0))(@types/react@18.0.37)(react@18.2.0))(@types/react@18.0.37)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@tanstack/react-table': 8.10.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      clsx: 1.2.1
-      date-fns: 2.30.0
-      immer: 9.0.21
-      lodash-es: 4.17.21
-      material-ui-popup-state: 5.0.10(@emotion/react@11.11.1(@types/react@18.0.37)(react@18.2.0))(@emotion/styled@11.11.0(@emotion/react@11.11.1(@types/react@18.0.37)(react@18.2.0))(@types/react@18.0.37)(react@18.2.0))(@types/react@18.0.37)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      node: 18.17.0
-      notistack: 3.0.1(csstype@3.1.2)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      react: 18.2.0
-      react-day-picker: 8.8.2(date-fns@2.30.0)(react@18.2.0)
-      react-dom: 18.2.0(react@18.2.0)
-      react-quill: 2.0.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-    transitivePeerDependencies:
-      - '@types/react'
-      - csstype
-
   assert@2.1.0:
     dependencies:
       call-bind: 1.0.2
@@ -15326,7 +15289,7 @@ snapshots:
 
   globrex@0.1.2: {}
 
-  goober@2.1.13(csstype@3.1.2):
+  goober@2.1.14(csstype@3.1.2):
     dependencies:
       csstype: 3.1.2
 
@@ -17428,7 +17391,7 @@ snapshots:
   notistack@3.0.1(csstype@3.1.2)(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       clsx: 1.2.1
-      goober: 2.1.13(csstype@3.1.2)
+      goober: 2.1.14(csstype@3.1.2)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     transitivePeerDependencies:
