@@ -5,12 +5,12 @@ export * from './helpers'
 export * from './components/data-display/badge'
 export * from './components/data-display/chip'
 export * from './components/data-display/tooltip'
-// export * from './components/icons'11
+export * from './components/icons'
 export * from './components/data-display/typography'
 // feedback
 export * from './components/feedback/dialog'
-export * from './components/feedback/alert'
-export * from './components/feedback/snack-bar'
+// export * from './components/feedback/alert'
+// export * from './components/feedback/snack-bar'
 // inputs
 export * from './components/inputs/button'
 export * from './components/inputs/checkbox'

@@ -1,0 +1,7 @@
+.all-icons-container {
+    @apply flex h-full w-full flex-wrap items-center gap-5 bg-gray-100 p-5;
+}
+
+.icon {
+    @apply animate-opacity-appear-3 cursor-pointer transition-all duration-300;
+}
