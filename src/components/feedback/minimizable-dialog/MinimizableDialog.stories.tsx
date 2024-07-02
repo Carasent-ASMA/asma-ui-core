@@ -35,6 +35,11 @@ export const DialogMinimizable = () => {
                 onPrimaryButtonClick={handleClose}
                 secondaryButtonText='Cancel'
                 onSecondaryButtonClick={handleClose}
+                actionNode={
+                    <StyledButton dataTest='edit-button' variant='text'>
+                        Edit
+                    </StyledButton>
+                }
             >
                 <div className='flex flex-col gap-y-3 max-h-[400px] p-4 overflow-y-scroll'>
                     <div>

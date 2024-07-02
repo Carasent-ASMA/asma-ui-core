@@ -1,9 +1,10 @@
 import { useNavigation, type Matcher } from 'react-day-picker'
-import { ChevronLeftIcon, ChevronRightIcon, StyledButton } from 'asma-core-ui'
 import { Icon } from '@iconify/react'
 import { isDate, isSameMonth } from 'date-fns'
 import type { Dispatch, SetStateAction } from 'react'
 import { compact, isArray, isObject } from 'lodash-es'
+import { ChevronLeftIcon, ChevronRightIcon } from 'src/components/icons'
+import { StyledButton } from 'src/components/inputs/button'
 //import style from './StyledCalendarPicker.module.scss'
 
 export const StyledCalendarPickerFooter: React.FC<{

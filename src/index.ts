@@ -5,7 +5,7 @@ export * from './helpers'
 export * from './components/data-display/badge'
 export * from './components/data-display/chip'
 export * from './components/data-display/tooltip'
-export * from './components/icons'
+// export * from './components/icons'11
 export * from './components/data-display/typography'
 // feedback
 export * from './components/feedback/dialog'
@@ -16,7 +16,7 @@ export * from './components/inputs/button'
 export * from './components/inputs/checkbox'
 export * from './components/inputs/input-field'
 export * from './components/inputs/textarea'
-export * from './components/inputs/rich-input'
+// export * from './components/inputs/rich-input'
 export * from './components/inputs/select'
 export * from './components/inputs/select-autocomplete'
 export * from './components/inputs/slider'
@@ -25,8 +25,8 @@ export * from './components/inputs/radio-button'
 export * from './components/inputs/label'
 
 // pickers
-export * from './components/pickers/date-picker'
-export * from './components/pickers/time-picker'
+// export * from './components/pickers/date-picker'
+// export * from './components/pickers/time-picker'
 
 // miscellaneous
 export * from './components/miscellaneous/StyledFormControl'
@@ -43,7 +43,7 @@ export * from './components/navigation/tabs'
 // surfaces
 export * from './components/utils/accordion'
 // table
-export * from './components/table'
+// export * from './components/table'
 // utils
 export * from './components/utils/popover'
 //widgets

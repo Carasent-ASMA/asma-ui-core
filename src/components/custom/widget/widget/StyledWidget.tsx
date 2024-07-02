@@ -1,8 +1,9 @@
-import { ChevronDownIcon, ChevronUpIcon, StyledButton, StyledLink, StyledWidgetTitle } from 'asma-core-ui'
+import { StyledButton, StyledLink, StyledWidgetTitle } from 'asma-core-ui'
 import type { PropsWithChildren, ReactNode } from 'react'
 import style from './StyledWidget.module.scss'
 import { useState } from 'react'
 import clsx from 'clsx'
+import { ChevronDownIcon, ChevronUpIcon } from 'src/components/icons'
 
 export type StyledWidgetProps = {
     title: string

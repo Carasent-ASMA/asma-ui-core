@@ -1,11 +1,10 @@
 import { Icon } from '@iconify/react'
-import styles from './Icons.module.scss'
 import { type IIconTemplate } from './Icons.types'
 
 export const IconTemplate: React.FC<IIconTemplate> = ({
     width = 20,
     height = 20,
-    className = '',
+    className,
     icon,
     onClick,
     color,
@@ -17,9 +16,9 @@ export const IconTemplate: React.FC<IIconTemplate> = ({
             icon={icon}
             width={width}
             height={height}
-            className={`${styles['icon']} ${className}`}
             color={color}
             vFlip={vFlip}
+            className={className}
         />
     )
 }

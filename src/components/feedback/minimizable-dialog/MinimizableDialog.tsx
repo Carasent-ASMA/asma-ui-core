@@ -9,6 +9,7 @@ export const MinimizableDialog: React.FC<{
     onExpandText: string
     open: boolean
     onClose: () => void
+    actionNode?: React.ReactNode
     showCloseIcon?: boolean
     showMinimizeIcon?: boolean
     showExpandIcon?: boolean
@@ -39,6 +40,7 @@ export const MinimizableDialog: React.FC<{
     onPrimaryButtonClick,
     onSecondaryButtonClick,
     dataTest,
+    actionNode,
 }) => {
     const [minimized, setMinimized] = useState(false)
 
@@ -103,6 +105,7 @@ export const MinimizableDialog: React.FC<{
 
                         <div className='flex gap-x-1'>
                             <div className='flex items-center gap-x-2'>
+                                {actionNode}
                                 <StyledButton
                                     dataTest='minimize-button'
                                     variant='textGray'

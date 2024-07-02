@@ -1,7 +1,7 @@
 import type { Meta } from '@storybook/react'
 import { StyledWidget } from '../StyledWidget'
-import { InboxOutboxOutlineIcon } from 'asma-core-ui'
 import styles from './StyledWidgetStories.module.scss'
+import { InboxOutboxOutlineIcon } from 'src/components/icons'
 
 const meta: Meta = {
     title: 'Widgets/Widget',
