@@ -18,6 +18,8 @@ export type StyledWidgetProps = {
         onClick?: () => void
         hide?: boolean
     }
+    collapsedWrapperHeight?: string
+    expandedWrapperHeight?: string
 }
 
 export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
@@ -26,6 +28,8 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
     icon,
     link,
     viewMore,
+    collapsedWrapperHeight,
+    expandedWrapperHeight,
 }) => {
     const [expanded, setExpanded] = useState(false)
 
@@ -34,7 +38,9 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
             <div
                 className={clsx(
                     style['widget-wrapper'],
-                    expanded ? style['widget-expanded'] : style['widget-collapsed'],
+                    expanded
+                        ? expandedWrapperHeight || style['widget-expanded']
+                        : collapsedWrapperHeight || style['widget-collapsed'],
                 )}
             >
                 <div className={style['widget-header']}>
