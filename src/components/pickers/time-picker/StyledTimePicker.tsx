@@ -1,7 +1,7 @@
 import { format } from 'date-fns'
 import PopupState from 'material-ui-popup-state'
 //import style from './StyledTimePicker.module.scss'
-import { useState, type ChangeEvent } from 'react'
+import { useState, type ChangeEvent, useEffect } from 'react'
 import { ClickAwayListener } from '@mui/material'
 import { bindTrigger } from 'material-ui-popup-state/hooks'
 import { TimePickerPopper } from './TimePickerPopper'
@@ -14,6 +14,10 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
 
     const [localValue, setLocalValue] = useState(value ? format(value, 'HH:mm') : '')
     const [isValidTime, setIsValidTime] = useState(true)
+
+    useEffect(() => {
+        setLocalValue(value ? format(value, 'HH:mm') : '')
+    }, [value])
 
     const handleChange = (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
         const nextValue = e.target.value
