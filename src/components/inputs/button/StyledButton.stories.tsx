@@ -54,7 +54,9 @@ const CommonEnabledButtons: React.FC<{
         <div className={style['buttons-module']}>
             <div className={style['buttons-module__table-borders']}>
                 <div className={style['buttons-module__table-header-button-type']}>{izSmall ? 'Small' : 'Medium'}</div>
-                <div className={style['buttons-module__table-header-button-state']}>{disabled ? 'Disabled' : 'Enabled'}</div>
+                <div className={style['buttons-module__table-header-button-state']}>
+                    {disabled ? 'Disabled' : 'Enabled'}
+                </div>
             </div>
             <div className={style['buttons-module__table-row']}>
                 <div className={style['buttons-module__text']}>Contained</div>
