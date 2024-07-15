@@ -1,5 +1,4 @@
 import type { StorybookConfig } from '@storybook/react-vite'
-import { env } from '../configs/env'
 
 const config: StorybookConfig = {
     stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|ts|tsx)'],
@@ -43,6 +42,5 @@ const config: StorybookConfig = {
             },
         },
     },
-    env,
 }
 export default config
