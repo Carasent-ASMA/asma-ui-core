@@ -86,7 +86,7 @@ export const StyledInputField: React.FC<
                 color: '#d3302f !important',
             },
             '& label.Mui-disabled': {
-                color: 'var(--colors-delta-300) !important',
+                color: 'var(--colors-gray-800) !important',
             },
             '& .MuiOutlinedInput-input::placeholder': {
                 color: '#666666',
@@ -104,6 +104,9 @@ export const StyledInputField: React.FC<
                 },
                 '& .MuiInputBase-colorPrimary.Mui-disabled fieldset': {
                     borderColor: 'var(--colors-delta-200) !important',
+                },
+                '& label.Mui-disabled': {
+                    color: 'var(--colors-gray-800) !important',
                 },
             }),
             ...props.sx,

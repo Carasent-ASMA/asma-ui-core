@@ -65,7 +65,6 @@ export function StyledSelectAutocomplete<
                         data-test={`paper-${dataTest}`}
                         sx={{
                             padding: '0 !important',
-                            marginBottom: '24px !important',
                             marginTop: '0px !important',
 
                             '& .MuiAutocomplete-option.Mui-focused': {
