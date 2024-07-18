@@ -25,6 +25,15 @@ export const Inputs = () => {
             />
             <StyledInputField
                 dataTest='test'
+                size='small'
+                {...meta.args}
+                onChange={() => undefined}
+                value='Hello World'
+                placeholder='Label text'
+                label='Label text'
+            />
+            <StyledInputField
+                dataTest='test'
                 {...meta.args}
                 onChange={() => undefined}
                 value=''
