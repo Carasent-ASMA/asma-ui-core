@@ -27,12 +27,13 @@ export const TimePickerInput: React.FC<
         handleChange,
         isValidTime,
         localValue,
+        name,
     } = props
 
     return (
         <StyledInputField
             // disable autofill
-            name='password'
+            name={name}
             autoComplete='off'
             type='text'
             //

@@ -10,4 +10,5 @@ export type StyledTimePickerProps = {
     helperText?: string
     label?: string
     locale?: 'no' | 'en'
+    name?: string
 }
