@@ -6,7 +6,7 @@ export const StyledRadio = ({ dataTest, ...props }: RadioProps & { dataTest: str
         data-test={dataTest}
         sx={{
             '&': {
-                color: 'var(--colors-gray-200)',
+                color: 'var(--colors-delta-500)',
             },
             '& input': {
                 height: '100% !important',

@@ -92,8 +92,7 @@ export const StyledInputField: React.FC<
                 color: 'var(--colors-gray-800) !important',
             },
             '& .MuiOutlinedInput-input::placeholder': {
-                color: '#666666',
-                opacity: '100',
+                color: 'var(--colors-delta-400) !important',
             },
             '& .MuiOutlinedInput-input.Mui-disabled': {
                 WebkitTextFillColor: 'var(--colors-delta-300) !important',

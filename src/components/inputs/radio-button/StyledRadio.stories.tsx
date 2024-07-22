@@ -23,19 +23,11 @@ export const Radio: Story = {
 
 const StyledRadioExample = () => {
     return (
-        <StyledRadioGroup dataTest='radio-group' defaultValue="one" name="radio-buttons-group">
-            <StyledFormControlLabel
-                label='one'
-                control={<StyledRadio dataTest='one' value="one"  />}
-            />
-            <StyledFormControlLabel
-                label='two'
-                control={<StyledRadio dataTest='two' value="two" />}
-            />
-            <StyledFormControlLabel
-                label='three'
-                control={<StyledRadio dataTest='three' value="three" />}
-            />
+        <StyledRadioGroup dataTest='radio-group' defaultValue='one' name='radio-buttons-group'>
+            <StyledFormControlLabel label='one' control={<StyledRadio dataTest='one' value='one' />} />
+            <StyledFormControlLabel label='two' control={<StyledRadio dataTest='two' value='two' />} />
+            <StyledFormControlLabel label='two' disabled control={<StyledRadio dataTest='two' value='two' />} />
+            <StyledFormControlLabel label='three' control={<StyledRadio dataTest='three' value='three' />} />
         </StyledRadioGroup>
     )
 }
