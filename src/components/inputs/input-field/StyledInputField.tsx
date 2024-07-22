@@ -83,16 +83,17 @@ export const StyledInputField: React.FC<
                 color: 'var(--colors-gama-500) !important',
             },
             '& label': {
-                color: 'var(--colors-delta-800) !important',
+                color: 'var(--colors-delta-500) !important',
             },
             '& label.Mui-focused.Mui-error': {
                 color: '#d3302f !important',
             },
             '& label.Mui-disabled': {
-                color: 'var(--colors-gray-800) !important',
+                color: 'var(--colors-gray-300) !important',
             },
             '& .MuiOutlinedInput-input::placeholder': {
-                color: 'var(--colors-delta-400) !important',
+                color: 'var(--colors-delta-500) !important',
+                opacity: '1 !important',
             },
             '& .MuiOutlinedInput-input.Mui-disabled': {
                 WebkitTextFillColor: 'var(--colors-delta-300) !important',
