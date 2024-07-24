@@ -75,7 +75,8 @@
         "opacity-in": "opacity-in 0.1s linear",
         "opacity-in-5": "opacity-in 0.5s linear",
         "opacity-appear-3": "opacity-appear 0.3s linear",
-        "opacity-out": "opacity-out 0.3s linear"
+        "opacity-out": "opacity-out 0.3s linear",
+        "spin": "spin 1s linear infinite"
     },
     "keyframes": {
         "slide-in": {
@@ -108,6 +109,10 @@
             "0%": { "opacity": "1", "height": "100%" },
             "60%": { "opacity": "1", "height": "100%" },
             "100%": { "opacity": "0", "height": "100%" }
+        },
+        "spin": {
+            "0%": { "transform": "rotate(0deg)" },
+            "100%": { "transform": "rotate(360deg)" }
         }
     }
 }

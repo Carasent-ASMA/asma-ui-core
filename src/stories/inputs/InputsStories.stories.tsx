@@ -1,9 +1,7 @@
 import React from 'react'
 import type { Meta } from '@storybook/react'
 import { StyledInputField } from 'src/components/inputs/input-field'
-import { StyledSelectExample } from 'src/components/inputs/select/story/components/StyledSelectExample'
-import { StyledSelectAutocompleteExample } from 'src/components/inputs/select-autocomplete/story/components/StyledSelectAutocompleteExample'
-import { StyledInputFieldExample } from 'src/components/inputs/input-field/story/components/StyledInputFieldExample'
+import { StyledFormLabel } from 'src/components/data-display/form-label'
 
 const meta = {
     title: '*/Form Inputs',
@@ -19,7 +17,7 @@ export const FormInputs = () => {
     return (
         <div>
             <h2>Not filled</h2>
-            <h5>Enabled</h5>
+            <StyledFormLabel title='Enabled' size='xl' />
             <div className={'flex flex-col gap-5 max-w-lg '}>
                 <StyledInputField autoComplete='off' size='small' dataTest='not-filled' />
                 <StyledInputField
