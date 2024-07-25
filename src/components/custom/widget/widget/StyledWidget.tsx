@@ -17,6 +17,7 @@ export type StyledWidgetProps = {
     viewMore?: {
         onClick?: () => void
         hide?: boolean
+        disabled?: boolean
     }
     collapsedWrapperHeight?: string
     expandedWrapperHeight?: string
@@ -60,6 +61,7 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
                 >
                     {!!viewMore && !viewMore?.hide && (
                         <StyledButton
+                            disabled={viewMore.disabled}
                             dataTest='view-more'
                             variant='text'
                             endIcon={
