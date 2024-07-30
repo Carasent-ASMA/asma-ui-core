@@ -72,7 +72,7 @@ const FilterMenuExample = () => {
             <StyledFilterMenu
                 filterIsActive={filterIsActive}
                 dataTest='filter-menu-example'
-                popoverContent={
+                popoverContent={(/* { isOpen, onClose } */) => (
                     <>
                         {mockData.map(({ key, label, checked }) => (
                             <MenuItem key={key} className={`${checked ? 'bg-gama-50' : ''} h-12`}>
@@ -85,7 +85,7 @@ const FilterMenuExample = () => {
                             </MenuItem>
                         ))}
                     </>
-                }
+                )}
             />
 
             <StyledFilterMenu

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, type ReactNode } from 'react'
 import { StyledButton } from '../../inputs/button'
 import { FilterIcon } from '../../icons'
 import { StyledPopover } from '../popover'
@@ -14,11 +14,12 @@ import type { PopoverProps } from '@mui/material'
 type StyledFilterMenuProps = {
     dataTest: string
     filterIsActive: boolean
-    popoverContent: React.ReactNode
+    popoverContent: ((props: { isOpen: boolean; onClose: () => void }) => ReactNode) | ReactNode
     disabled?: boolean
     size?: 'small' | 'large' | 'medium'
     variant?: 'contained' | 'outlined' | 'text' | 'textGray'
     popoverProps?: Omit<PopoverProps, 'open' | 'anchorEl' | 'onClose'>
+    anchorNode?: (props: { isOpen: boolean; onClose: () => void }) => ReactNode
 }
 
 const useAnchor = () => {
@@ -43,6 +44,16 @@ const useAnchor = () => {
     return { anchorEl, onClose, onAnchorClick }
 }
 
+const isReactNode = (element: unknown): element is ReactNode => {
+    return (
+        React.isValidElement(element) ||
+        typeof element === 'string' ||
+        typeof element === 'number' ||
+        element === null ||
+        Array.isArray(element)
+    )
+}
+
 export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
     filterIsActive,
     popoverContent,
@@ -51,22 +62,31 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
     size = 'large',
     variant = 'outlined',
     popoverProps,
+    anchorNode,
 }) => {
     const { onAnchorClick, onClose, anchorEl } = useAnchor()
 
     return (
         <>
             <div className='w-fit h-fit relative'>
-                <StyledButton
-                    disabled={disabled}
-                    variant={variant}
-                    startIcon={<FilterIcon width={size === 'large' ? 24 : 20} height={size === 'large' ? 24 : 20} />}
-                    onClick={onAnchorClick}
-                    size={size}
-                    dataTest={dataTest}
-                >
-                    Filter
-                </StyledButton>
+                {anchorNode ? (
+                    React.cloneElement(anchorNode({ isOpen: !!anchorEl, onClose }) as React.ReactElement, {
+                        onClick: onAnchorClick,
+                    })
+                ) : (
+                    <StyledButton
+                        disabled={disabled}
+                        variant={variant}
+                        startIcon={
+                            <FilterIcon width={size === 'large' ? 24 : 20} height={size === 'large' ? 24 : 20} />
+                        }
+                        onClick={onAnchorClick}
+                        size={size}
+                        dataTest={dataTest}
+                    >
+                        Filter
+                    </StyledButton>
+                )}
                 {filterIsActive && (
                     <div
                         className={clsx(
@@ -95,7 +115,7 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
                 }
                 className={popoverProps?.className || 'my-1'}
             >
-                {popoverContent}
+                {isReactNode(popoverContent) ? popoverContent : popoverContent({ isOpen: !!anchorEl, onClose })}
             </StyledPopover>
         </>
     )
