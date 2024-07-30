@@ -2,6 +2,8 @@ import { CloseIcon, KeyboardCapslockIcon, MinimizeIcon } from 'src/components/ic
 import { StyledButton } from 'src/components/inputs/button'
 import { useState, type ReactNode } from 'react'
 import clsx from 'clsx'
+import { cn } from 'src/helpers/cn'
+import styles from './MinimizableDialog.module.scss'
 
 export const MinimizableDialog: React.FC<{
     onCloseText: string
@@ -52,13 +54,7 @@ export const MinimizableDialog: React.FC<{
 
     return (
         <>
-            <div
-                style={{ zIndex: 51 }}
-                className={clsx(
-                    'fixed bottom-4 right-4 w-[387px] rounded-lg bg-white py-2 pl-4 pr-3 shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)] transition-all duration-300',
-                    !minimized && '!h-0 !w-0 ',
-                )}
-            >
+            <div style={{ zIndex: 51 }} className={cn(styles['dialog'], !minimized && styles['hidden'])}>
                 <div className={clsx('flex items-center justify-between', !minimized && 'hidden')} data-test={dataTest}>
                     <div className='truncate text-lg font-semibold text-delta-800'>{title}</div>
                     <div className='flex gap-x-1'>

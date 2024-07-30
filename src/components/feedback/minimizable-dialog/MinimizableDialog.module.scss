@@ -1,0 +1,13 @@
+.dialog {
+    @apply fixed bottom-4 right-4 rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)] transition-all duration-300 animate-opacity-appear-1s;
+
+    width: 387px;
+    padding-left: 1rem;
+    padding-right: 0.75rem /* 12px */;
+    padding-top: 0.5rem /* 8px */;
+    padding-bottom: 0.5rem /* 8px */;
+
+    &.hidden {
+        @apply h-0 w-0 p-0 m-0 #{!important};
+    }
+}

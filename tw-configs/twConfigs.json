@@ -75,6 +75,7 @@
         "opacity-in": "opacity-in 0.1s linear",
         "opacity-in-5": "opacity-in 0.5s linear",
         "opacity-appear-3": "opacity-appear 0.3s linear",
+        "opacity-appear-1s": "opacity-appear 1s linear",
         "opacity-out": "opacity-out 0.3s linear",
         "spin": "spin 1s linear infinite"
     },

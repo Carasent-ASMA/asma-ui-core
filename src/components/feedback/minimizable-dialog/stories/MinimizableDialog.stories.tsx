@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { MinimizableDialog } from './MinimizableDialog'
+import { MinimizableDialog } from '../MinimizableDialog'
 import { StyledButton } from 'src/components/inputs/button'
 import { StyledSelectExample } from 'src/components/inputs/select/story/components/StyledSelectExample'
+
 
 const meta = {
     title: 'Feedback/Dialog Minimizable',
