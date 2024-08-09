@@ -25,6 +25,7 @@
         "gama-600": "var(--colors-gama-600)",
         "gama-700": "var(--colors-gama-700)",
         "gama-800": "var(--colors-gama-800)",
+        "gama-900": "var(--colors-gama-900)",
         "delta-10": "var(--colors-delta-10)",
         "delta-50": "var(--colors-delta-50)",
         "delta-100": "var(--colors-delta-100)",

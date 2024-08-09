@@ -19,6 +19,7 @@
     --colors-gama-600: var(--colors-green-600);
     --colors-gama-700: var(--colors-green-700);
     --colors-gama-800: var(--colors-green-700);
+    --colors-gama-900: var(--colors-green-900);
     --colors-delta-10: var(--colors-gray-10);
     --colors-delta-50: var(--colors-gray-50);
     --colors-delta-100: var(--colors-zinc-100);
@@ -190,7 +191,4 @@
     --colors-colors-topbar-text: #ffffff;
 
     --colors-menu-text-active: var(--colors-beta-700);
-
-    --colors-badge-background: var(--colors-beta-700);
-    --colors-badge-text: #ffffff;
 }

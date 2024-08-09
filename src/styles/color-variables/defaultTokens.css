@@ -190,7 +190,4 @@
     --colors-chat-ticket-message-bg: var(--colors-blue-200);
     --colors-topbar-text: var(--colors-zinc-500);
     --colors-menu-text-active: var(--colors-slate-700);
-
-    --colors-badge-background: var(--colors-gama-500);
-    --colors-badge-text: #ffffff;
 }

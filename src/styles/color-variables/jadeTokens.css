@@ -13,6 +13,7 @@
     --colors-gama-600: var(--colors-jade-600);
     --colors-gama-700: var(--colors-jade-700);
     --colors-gama-800: var(--colors-jade-800);
+    --colors-gama-900: var(--colors-jade-900);
     --colors-delta-10: var(--colors-gray-10);
     --colors-delta-50: var(--colors-gray-50);
     --colors-delta-100: var(--colors-gray-100);
@@ -170,6 +171,4 @@
     --colors-button-textWhite-common-disabled-border-color: transparent;
 
     --colors-menu-text-active: var(--colors-jade-700);
-    --colors-badge-background: var(--colors-lime-500);
-    --colors-badge-text: var(--colors-jade-600);
 }

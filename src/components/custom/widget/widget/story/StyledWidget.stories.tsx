@@ -16,7 +16,7 @@ export default meta
 export const Widget = () => {
     return (
         <div className={styles['page-wrapper']}>
-            <div className={styles['column-wrapper']} style={{ width: '736px' }} >
+            <div className={styles['column-wrapper']} style={{ width: '736px' }}>
                 <StyledWidget
                     title='Widget name'
                     icon={<InboxOutboxOutlineIcon width={24} height={24} />}
