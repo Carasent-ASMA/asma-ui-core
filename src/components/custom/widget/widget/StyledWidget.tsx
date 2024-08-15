@@ -1,5 +1,5 @@
 import { StyledButton, StyledLink, StyledWidgetTitle } from 'asma-core-ui'
-import type { PropsWithChildren, ReactNode } from 'react'
+import { useEffect, type PropsWithChildren, type ReactNode } from 'react'
 import style from './StyledWidget.module.scss'
 import { useState } from 'react'
 import clsx from 'clsx'
@@ -21,6 +21,10 @@ export type StyledWidgetProps = {
     }
     collapsedWrapperHeight?: string
     expandedWrapperHeight?: string
+    /**
+     * @param {string} persistKey - Unique key to persist expanded state
+     */
+    persistKey?: string
 }
 
 export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
@@ -31,8 +35,22 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
     viewMore,
     collapsedWrapperHeight,
     expandedWrapperHeight,
+    persistKey,
 }) => {
     const [expanded, setExpanded] = useState(false)
+
+    useEffect(() => {
+        if (persistKey) {
+            const val = localStorage.getItem(persistKey)
+            setExpanded(val === 'true' ? true : false)
+        }
+    }, [persistKey])
+
+    useEffect(() => {
+        if (persistKey) {
+            localStorage.setItem(persistKey, String(expanded))
+        }
+    }, [expanded, persistKey])
 
     return (
         <div className={style['asma-core-ui-styled-widget']}>

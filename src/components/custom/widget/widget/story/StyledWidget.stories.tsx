@@ -22,6 +22,7 @@ export const Widget = () => {
                     icon={<InboxOutboxOutlineIcon width={24} height={24} />}
                     viewMore={{ hide: false, onClick: () => console.log('Click on viewMore button') }}
                     link={{ hide: false, content: 'Go to Somewhere', onClick: () => console.log('Click on link') }}
+                    persistKey='widget-1'
                 >
                     <div style={{ height: '100%', borderRadius: '8px', backgroundColor: '#F0F2F4' }}></div>
                 </StyledWidget>
