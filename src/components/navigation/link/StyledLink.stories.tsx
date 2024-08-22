@@ -9,7 +9,7 @@ const meta = {
     args: { content: 'Base link', href: 'https://www.google.com' },
     argTypes: {
         size: {
-            options: ['small', 'large'],
+            options: ['xs', 'small', 'large'],
             control: { type: 'radio' },
         },
         disabled: {
@@ -24,6 +24,7 @@ export const Link = () => {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <StyledLink {...meta.args} />
+            <StyledLink {...meta.args} title='Medium link' size='xs' />
             <StyledLink {...meta.args} disabled={true} />
             <StyledLink {...meta.args} title='Medium link' size='large' />
             <StyledLink {...meta.args} title='Medium link' disabled={true} size='large' />

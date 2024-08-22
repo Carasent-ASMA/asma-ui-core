@@ -4,13 +4,12 @@ import style from './StyledLink.module.scss'
 
 export type StyledLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
     disabled?: boolean
-    size?: 'small' | 'large'
+    size?: 'small' | 'large' | 'xs'
     children?: never
     reflink?: React.Ref<HTMLAnchorElement>
     dataTest?: string
     content: ReactNode
 }
-
 /**
  * Developer: bularga.alexandru@carasent.com
  *
@@ -32,12 +31,25 @@ export const StyledLink: React.FC<StyledLinkProps> = ({
     content,
     ...otherProps
 }) => {
-    let textSize = style['styled-link-small']
-
-    if (size === 'large') textSize = style['styled-link-large']
+    let textSize = style['styled-link-large']
+    switch (size) {
+        case 'small':
+            textSize = style['styled-link-small']
+            break
+        case 'xs':
+            textSize = style['styled-link-xs']
+            break
+        default:
+            textSize = style['styled-link-large']
+            break
+    }
 
     if (disabled) {
-        return <span className={clsx(style['styled-link'], style['styled-link-disabled'], textSize, className)}>{content}</span>
+        return (
+            <span className={clsx(style['styled-link'], style['styled-link-disabled'], textSize, className)}>
+                {content}
+            </span>
+        )
     }
 
     return (
@@ -46,7 +58,7 @@ export const StyledLink: React.FC<StyledLinkProps> = ({
             data-test={dataTest}
             ref={reflink}
             href={href}
-            className={clsx(style[`styled-link`], textSize, className)}
+            className={clsx(style['styled-link'], textSize, className)}
         >
             {content}
         </a>
