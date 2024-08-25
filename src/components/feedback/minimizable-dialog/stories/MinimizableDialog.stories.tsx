@@ -3,7 +3,6 @@ import { MinimizableDialog } from '../MinimizableDialog'
 import { StyledButton } from 'src/components/inputs/button'
 import { StyledSelectExample } from 'src/components/inputs/select/story/components/StyledSelectExample'
 
-
 const meta = {
     title: 'Feedback/Dialog Minimizable',
 }
@@ -41,6 +40,11 @@ export const DialogMinimizable = () => {
                         Edit
                     </StyledButton>
                 }
+                extraActionsText='More Actions'
+                extraActions={[
+                    { label: 'Duplicate', onClick: () => console.log('duplicate') },
+                    { label: 'Delete', className: 'text-red-500', onClick: () => console.log('delete') },
+                ]}
             >
                 <div className='flex flex-col gap-y-3 max-h-[400px] p-4 overflow-y-scroll'>
                     <div>

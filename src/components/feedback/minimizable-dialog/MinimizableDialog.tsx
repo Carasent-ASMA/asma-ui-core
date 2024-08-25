@@ -1,9 +1,11 @@
-import { CloseIcon, KeyboardCapslockIcon, MinimizeIcon } from 'src/components/icons'
+import { CloseIcon, DotsVerticalIcon, KeyboardCapslockIcon, MinimizeIcon } from 'src/components/icons'
 import { StyledButton } from 'src/components/inputs/button'
 import { useState, type ReactNode } from 'react'
 import clsx from 'clsx'
 import { cn } from 'src/helpers/cn'
 import styles from './MinimizableDialog.module.scss'
+import { StyledMenu, StyledMenuItem } from 'src/components/navigation/menu'
+import { useToggleMenuVisibility } from 'src/hooks/useToggleMenuVisibility.hook'
 
 export const MinimizableDialog: React.FC<{
     onCloseText: string
@@ -23,6 +25,8 @@ export const MinimizableDialog: React.FC<{
     secondaryButtonText?: string
     onPrimaryButtonClick?: () => void
     onSecondaryButtonClick?: () => void
+    extraActions?: { label: string; className?: string; onClick: () => void }[]
+    extraActionsText?: string
     dataTest: string
 }> = ({
     onCloseText,
@@ -43,8 +47,11 @@ export const MinimizableDialog: React.FC<{
     onSecondaryButtonClick,
     dataTest,
     actionNode,
+    extraActions,
+    extraActionsText,
 }) => {
     const [minimized, setMinimized] = useState(false)
+    const { open: extraActionsOpen, anchorEl, handleOpen, handleClose } = useToggleMenuVisibility()
 
     const toggleMinimized = () => {
         setMinimized(!minimized)
@@ -134,20 +141,66 @@ export const MinimizableDialog: React.FC<{
                 </div>
                 <div>{children}</div>
 
-                {secondaryButtonText || primaryButtonText ? (
-                    <div className='fixed-bottom flex justify-end gap-x-4 border-t-[1px] border-delta-200 p-4'>
-                        {secondaryButtonText && onSecondaryButtonClick && (
-                            <StyledButton dataTest='cancel-button' variant='outlined' onClick={onSecondaryButtonClick}>
-                                {secondaryButtonText}
-                            </StyledButton>
-                        )}
-                        {primaryButtonText && onPrimaryButtonClick && (
-                            <StyledButton dataTest='save-button' onClick={onPrimaryButtonClick}>
-                                {primaryButtonText}
-                            </StyledButton>
-                        )}
+                {extraActions?.length && extraActionsText ? (
+                    <div className='flex items-center justify-between p-4'>
+                        <StyledButton
+                            dataTest='extra-actions-button'
+                            variant='textGray'
+                            startIcon={<DotsVerticalIcon width={24} height={24} />}
+                            onClick={handleOpen}
+                        >
+                            {extraActionsText}
+                        </StyledButton>
+
+                        <StyledMenu open={extraActionsOpen} anchorEl={anchorEl} onClose={handleClose}>
+                            {extraActions.map((a) => (
+                                <StyledMenuItem key={a.label} className={a.className} onClick={a.onClick}>
+                                    {a.label}
+                                </StyledMenuItem>
+                            ))}
+                        </StyledMenu>
+
+                        {secondaryButtonText || primaryButtonText ? (
+                            <div className='fixed-bottom flex justify-end gap-x-4 border-t-[1px] border-delta-200'>
+                                {secondaryButtonText && onSecondaryButtonClick && (
+                                    <StyledButton
+                                        dataTest='cancel-button'
+                                        variant='outlined'
+                                        onClick={onSecondaryButtonClick}
+                                    >
+                                        {secondaryButtonText}
+                                    </StyledButton>
+                                )}
+                                {primaryButtonText && onPrimaryButtonClick && (
+                                    <StyledButton dataTest='save-button' onClick={onPrimaryButtonClick}>
+                                        {primaryButtonText}
+                                    </StyledButton>
+                                )}
+                            </div>
+                        ) : null}
                     </div>
-                ) : null}
+                ) : (
+                    <>
+                        {secondaryButtonText || primaryButtonText ? (
+                            <div className='fixed-bottom flex justify-end gap-x-4 border-t-[1px] border-delta-200 p-4'>
+                                {secondaryButtonText && onSecondaryButtonClick && (
+                                    <StyledButton
+                                        dataTest='cancel-button'
+                                        variant='outlined'
+                                        onClick={onSecondaryButtonClick}
+                                    >
+                                        {secondaryButtonText}
+                                    </StyledButton>
+                                )}
+                                {primaryButtonText && onPrimaryButtonClick && (
+                                    <StyledButton dataTest='save-button' onClick={onPrimaryButtonClick}>
+                                        {primaryButtonText}
+                                    </StyledButton>
+                                )}
+                            </div>
+                        ) : null}
+                    </>
+                )}
             </div>
         </>
     )
