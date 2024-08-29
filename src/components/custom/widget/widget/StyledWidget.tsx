@@ -69,15 +69,8 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
 
                 <div className={style['widget-content']}>{children}</div>
 
-                <div
-                    className={clsx(
-                        style['widget-footer'],
-                        !!viewMore && !viewMore?.hide
-                            ? style['widget-footer-space-between']
-                            : style['widget-footer-center'],
-                    )}
-                >
-                    {!!viewMore && !viewMore?.hide && (
+                <div className={clsx(style['widget-footer'], style['widget-footer-space-between'])}>
+                    {!!viewMore && !viewMore?.hide ? (
                         <StyledButton
                             disabled={viewMore.disabled}
                             dataTest='view-more'
@@ -96,9 +89,11 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
                         >
                             {expanded ? 'View less' : 'View more'}
                         </StyledButton>
+                    ) : (
+                        <div></div>
                     )}
 
-                    {!!link && !link.hide && (
+                    {!!link && !link.hide ? (
                         <StyledLink
                             dataTest='go-to-button'
                             className={style['widget-link']}
@@ -107,6 +102,8 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
                             onClick={link.onClick}
                             content={link.content}
                         />
+                    ) : (
+                        <div></div>
                     )}
                 </div>
             </div>
