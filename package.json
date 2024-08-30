@@ -3,7 +3,7 @@
     "publishConfig": {
         "access": "public"
     },
-    "version": "3.0.98",
+    "version": "3.0.99",
     "type": "module",
     "files": [
         "dist/**/*",
