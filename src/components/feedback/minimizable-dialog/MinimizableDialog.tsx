@@ -142,7 +142,7 @@ export const MinimizableDialog: React.FC<{
                 <div>{children}</div>
 
                 {extraActions?.length && extraActionsText ? (
-                    <div className='flex items-center justify-between p-4'>
+                    <div className='flex items-center justify-between p-4 border-0 border-t-[1px] border-solid border-delta-200'>
                         <StyledButton
                             dataTest='extra-actions-button'
                             variant='textGray'
@@ -161,7 +161,7 @@ export const MinimizableDialog: React.FC<{
                         </StyledMenu>
 
                         {secondaryButtonText || primaryButtonText ? (
-                            <div className='fixed-bottom flex justify-end gap-x-4 border-t-[1px] border-delta-200'>
+                            <div className='fixed-bottom flex justify-end gap-x-4'>
                                 {secondaryButtonText && onSecondaryButtonClick && (
                                     <StyledButton
                                         dataTest='cancel-button'
