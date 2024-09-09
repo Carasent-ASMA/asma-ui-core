@@ -2,8 +2,11 @@ import { StyledButton, StyledLink, StyledWidgetTitle } from 'asma-core-ui'
 import { useEffect, type PropsWithChildren, type ReactNode } from 'react'
 import style from './StyledWidget.module.scss'
 import { useState } from 'react'
-import clsx from 'clsx'
-import { ChevronDownIcon, ChevronUpIcon } from 'src/components/icons'
+
+import StyledLoading from 'src/components/feedback/loading/StyledLoading'
+import StyledEmptyPage from 'src/components/feedback/empty-page/StyledEmptyPage'
+import ChevronUpIcon from '../icons/ChevronUpIcon'
+import ChevronDownIcon from '../icons/ChevronDownIcon'
 
 export type StyledWidgetProps = {
     title: string
@@ -19,12 +22,13 @@ export type StyledWidgetProps = {
         hide?: boolean
         disabled?: boolean
     }
-    collapsedWrapperHeight?: string
-    expandedWrapperHeight?: string
     /**
      * @param {string} persistKey - Unique key to persist expanded state
      */
     persistKey?: string
+    isLoading: boolean
+    isEmpty: boolean
+    emptyText: string
 }
 
 export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
@@ -33,9 +37,10 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
     icon,
     link,
     viewMore,
-    collapsedWrapperHeight,
-    expandedWrapperHeight,
     persistKey,
+    isLoading,
+    isEmpty,
+    emptyText,
 }) => {
     const [expanded, setExpanded] = useState(false)
 
@@ -54,58 +59,56 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
 
     return (
         <div className={style['asma-core-ui-styled-widget']}>
-            <div
-                className={clsx(
-                    style['widget-wrapper'],
-                    expanded
-                        ? expandedWrapperHeight || style['widget-expanded']
-                        : collapsedWrapperHeight || style['widget-collapsed'],
+            <div className={style['widget-header']}>
+                {icon}
+                <StyledWidgetTitle>{title}</StyledWidgetTitle>
+            </div>
+            <div className={style['widget-content']}>
+                <>
+                    {children}
+
+                    <StyledLoading isLoading={isLoading} />
+
+                    <StyledEmptyPage isEmpty={isEmpty} emptyText={emptyText} />
+                </>
+            </div>
+
+            <div className={style['widget-footer']}>
+                {!!viewMore && !viewMore?.hide ? (
+                    <StyledButton
+                        disabled={viewMore.disabled}
+                        dataTest='view-more'
+                        variant='text'
+                        endIcon={
+                            expanded ? (
+                                <ChevronUpIcon width={20} height={20} />
+                            ) : (
+                                <ChevronDownIcon width={20} height={20} />
+                            )
+                        }
+                        onClick={() => {
+                            setExpanded(!expanded)
+                            viewMore?.onClick?.()
+                        }}
+                    >
+                        {expanded ? 'View less' : 'View more'}
+                    </StyledButton>
+                ) : (
+                    <div />
                 )}
-            >
-                <div className={style['widget-header']}>
-                    {icon}
-                    <StyledWidgetTitle>{title}</StyledWidgetTitle>
-                </div>
 
-                <div className={style['widget-content']}>{children}</div>
-
-                <div className={clsx(style['widget-footer'], style['widget-footer-space-between'])}>
-                    {!!viewMore && !viewMore?.hide ? (
-                        <StyledButton
-                            disabled={viewMore.disabled}
-                            dataTest='view-more'
-                            variant='text'
-                            endIcon={
-                                expanded ? (
-                                    <ChevronUpIcon width={20} height={20} />
-                                ) : (
-                                    <ChevronDownIcon width={20} height={20} />
-                                )
-                            }
-                            onClick={() => {
-                                setExpanded(!expanded)
-                                viewMore?.onClick?.()
-                            }}
-                        >
-                            {expanded ? 'View less' : 'View more'}
-                        </StyledButton>
-                    ) : (
-                        <div></div>
-                    )}
-
-                    {!!link && !link.hide ? (
-                        <StyledLink
-                            dataTest='go-to-button'
-                            className={style['widget-link']}
-                            size='small'
-                            href={link.href}
-                            onClick={link.onClick}
-                            content={link.content}
-                        />
-                    ) : (
-                        <div></div>
-                    )}
-                </div>
+                {!!link && !link.hide ? (
+                    <StyledLink
+                        dataTest='go-to-button'
+                        className={style['widget-link']}
+                        size='small'
+                        href={link.href}
+                        onClick={link.onClick}
+                        content={link.content}
+                    />
+                ) : (
+                    <div />
+                )}
             </div>
         </div>
     )

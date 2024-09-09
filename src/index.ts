@@ -10,6 +10,8 @@ export * from './components/data-display/typography'
 export * from './components/data-display/form-label'
 // feedback
 export * from './components/feedback/dialog'
+export * from './components/feedback/empty-page/StyledEmptyPage'
+export * from './components/feedback/loading/StyledLoading'
 // export * from './components/feedback/alert'
 // export * from './components/feedback/snack-bar'
 // inputs
