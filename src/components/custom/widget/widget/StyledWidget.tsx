@@ -1,10 +1,8 @@
-import { StyledButton, StyledLink, StyledWidgetTitle } from 'asma-core-ui'
+import { StyledButton, StyledEmptyPage, StyledLink, StyledLoading, StyledWidgetTitle } from 'asma-core-ui'
 import { useEffect, type PropsWithChildren, type ReactNode } from 'react'
 import style from './StyledWidget.module.scss'
 import { useState } from 'react'
 
-import StyledLoading from 'src/components/feedback/loading/StyledLoading'
-import StyledEmptyPage from 'src/components/feedback/empty-page/StyledEmptyPage'
 import ChevronUpIcon from '../icons/ChevronUpIcon'
 import ChevronDownIcon from '../icons/ChevronDownIcon'
 
@@ -18,6 +16,8 @@ export type StyledWidgetProps = {
         hide?: boolean
     }
     viewMore?: {
+        viewMoreText: string
+        viewLessText: string
         onClick?: () => void
         hide?: boolean
         disabled?: boolean
@@ -91,7 +91,7 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
                             viewMore?.onClick?.()
                         }}
                     >
-                        {expanded ? 'View less' : 'View more'}
+                        {expanded ? viewMore.viewLessText : viewMore.viewMoreText}
                     </StyledButton>
                 ) : (
                     <div />

@@ -19,7 +19,13 @@ export const Widget = () => {
                 <StyledWidget
                     title='Widget name'
                     icon={<InboxOutboxOutlineIcon width={24} height={24} />}
-                    viewMore={{ disabled: true, hide: false, onClick: () => console.log('Click on viewMore button') }}
+                    viewMore={{
+                        viewLessText: 'View less',
+                        viewMoreText: 'View more',
+                        disabled: true,
+                        hide: false,
+                        onClick: () => console.log('Click on viewMore button'),
+                    }}
                     link={{ hide: false, content: 'Go to Somewhere', onClick: () => console.log('Click on link') }}
                     persistKey='widget-1'
                     isEmpty={true}
@@ -32,7 +38,12 @@ export const Widget = () => {
                 <StyledWidget
                     title='Widget name'
                     icon={<InboxOutboxOutlineIcon width={24} height={24} />}
-                    viewMore={{ hide: false, onClick: () => console.log('Click on viewMore button') }}
+                    viewMore={{
+                        viewLessText: 'View less',
+                        viewMoreText: 'View more',
+                        hide: false,
+                        onClick: () => console.log('Click on viewMore button'),
+                    }}
                     link={{ hide: false, content: 'Go to Somewhere', onClick: () => console.log('Click on link') }}
                     isEmpty={false}
                     isLoading={true}
@@ -46,7 +57,12 @@ export const Widget = () => {
                 <StyledWidget
                     title='Widget name'
                     icon={<InboxOutboxOutlineIcon width={24} height={24} />}
-                    viewMore={{ hide: false, onClick: () => console.log('Click on viewMore button') }}
+                    viewMore={{
+                        viewLessText: 'View less',
+                        viewMoreText: 'View more',
+                        hide: false,
+                        onClick: () => console.log('Click on viewMore button'),
+                    }}
                     link={{ hide: false, content: 'Go to Somewhere', onClick: () => console.log('Click on link') }}
                     isEmpty={false}
                     isLoading={true}
@@ -58,7 +74,12 @@ export const Widget = () => {
                 <StyledWidget
                     title='Widget name'
                     icon={<InboxOutboxOutlineIcon width={24} height={24} />}
-                    viewMore={{ hide: false, onClick: () => console.log('Click on viewMore button') }}
+                    viewMore={{
+                        viewLessText: 'View less',
+                        viewMoreText: 'View more',
+                        hide: false,
+                        onClick: () => console.log('Click on viewMore button'),
+                    }}
                     link={{ hide: false, content: 'Go to Somewhere', onClick: () => console.log('Click on link') }}
                     isEmpty={false}
                     isLoading={false}

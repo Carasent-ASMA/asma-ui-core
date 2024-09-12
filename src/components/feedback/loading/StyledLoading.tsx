@@ -14,7 +14,7 @@ const sizeMap = {
     large: 32,
 }
 
-const StyledLoading: FC<StyledLoadingProps> = ({ isLoading, className = '', size = 'medium' }) => {
+export const StyledLoading: FC<StyledLoadingProps> = ({ isLoading, className = '', size = 'medium' }) => {
     if (!isLoading) return null
 
     const iconSize = sizeMap[size]
@@ -30,4 +30,3 @@ const StyledLoading: FC<StyledLoadingProps> = ({ isLoading, className = '', size
         </div>
     )
 }
-export default StyledLoading

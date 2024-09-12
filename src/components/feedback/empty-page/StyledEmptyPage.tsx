@@ -1,7 +1,7 @@
 import type { FC } from 'react'
 import EmptyPageIcon from 'src/components/feedback/empty-page/EmptyPageIcon'
 
-const StyledEmptyPage: FC<{ isEmpty: boolean; emptyText: string; className?: string }> = ({
+export const StyledEmptyPage: FC<{ isEmpty: boolean; emptyText: string; className?: string }> = ({
     isEmpty,
     emptyText,
     className = '',
@@ -23,4 +23,3 @@ const StyledEmptyPage: FC<{ isEmpty: boolean; emptyText: string; className?: str
         </div>
     )
 }
-export default StyledEmptyPage
