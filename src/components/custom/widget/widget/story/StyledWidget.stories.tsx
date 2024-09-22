@@ -1,6 +1,7 @@
 import type { Meta } from '@storybook/react'
 import { StyledWidget } from '../StyledWidget'
 import { InboxOutboxOutlineIcon } from 'src/components/icons'
+import { useState } from 'react'
 
 const meta: Meta = {
     title: 'Widgets/Widget',
@@ -13,6 +14,8 @@ const meta: Meta = {
 export default meta
 
 export const Widget = () => {
+    const [viewMore, setViewMore] = useState(false)
+
     return (
         <div className='flex flex-row gap-4 p-4 '>
             <div className='flex flex-col gap-4 flex-1 '>
@@ -37,19 +40,27 @@ export const Widget = () => {
 
                 <StyledWidget
                     title='Widget name'
+                    persistKey='test'
                     icon={<InboxOutboxOutlineIcon width={24} height={24} />}
                     viewMore={{
                         viewLessText: 'View less',
                         viewMoreText: 'View more',
                         hide: false,
-                        onClick: () => console.log('Click on viewMore button'),
+                        onClick: () => {
+                            localStorage.setItem('test', localStorage.getItem('test') !== 'true' ? 'false' : 'true')
+                            setViewMore((prev) => !prev)
+                        },
                     }}
                     link={{ hide: false, content: 'Go to Somewhere', onClick: () => console.log('Click on link') }}
                     isEmpty={false}
-                    isLoading={true}
+                    isLoading={false}
                     emptyText='No data'
                 >
-                    <div className='h-full rounded-lg bg-gray-200'></div>
+                    <div className='flex flex-col gap-2 h-full rounded-lg bg-gray-200'>
+                        {[...Array(20).keys()].slice(0, viewMore ? 20 : 5).map((k) => (
+                            <span key={k}>test</span>
+                        ))}
+                    </div>
                 </StyledWidget>
             </div>
 

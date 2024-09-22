@@ -26,6 +26,7 @@ export const DialogMinimizable = () => {
                 onCloseText='Close'
                 onMinimizeText='Minimize'
                 onExpandText='Expand'
+                onFullScreenText='Full screen'
                 title='Ny stilling og utplassering'
                 open={open}
                 onClose={handleClose}
