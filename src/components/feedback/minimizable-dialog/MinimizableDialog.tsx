@@ -127,7 +127,7 @@ export const MinimizableDialog: React.FC<{
                     minimized && '!h-0 !w-0',
                     className,
                     fullScreen &&
-                        'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] h-[95%] max-h-[95%]',
+                        'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] h-[95%] max-w-[95%] max-h-[95%]',
                 )}
                 data-test={dataTest}
             >
