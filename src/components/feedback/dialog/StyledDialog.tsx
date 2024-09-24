@@ -11,6 +11,7 @@ export interface IStyledDialogProps extends DialogProps {
     dataTest: string
     dialogLabel?: ReactNode
     dialogTitle?: ReactNode
+    dialogHeaderNode?: ReactNode
 }
 
 export const StyledDialog: React.FC<IStyledDialogProps> = ({
@@ -20,6 +21,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     showCloseIcon = true,
     dialogLabel,
     dialogTitle,
+    dialogHeaderNode,
     ...rest
 }) => {
     return (
@@ -39,6 +41,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                     </div>
                     {showCloseIcon && (
                         <div className={style['styled-dialog-close']}>
+                            {dialogHeaderNode}
                             <StyledButton
                                 dataTest={`close-button-${dataTest}`}
                                 variant='textGray'

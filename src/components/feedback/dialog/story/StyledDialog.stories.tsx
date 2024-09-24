@@ -4,6 +4,7 @@ import type { Meta } from '@storybook/react'
 import { StyledDialog } from '../StyledDialog'
 import { StyledDialogActions } from '../StyledDialogActions'
 import { StyledButton } from '../../../inputs/button/StyledButton'
+import { EditSquareIcon } from 'src/components/icons'
 
 const meta = {
     title: 'Feedback/Dialog',
@@ -52,6 +53,15 @@ export const Dialog = () => {
                 open={open}
                 dataTest='test'
                 onClose={handleCloseDialog}
+                dialogHeaderNode={
+                    <StyledButton
+                        dataTest='edit-button'
+                        variant='text'
+                        startIcon={<EditSquareIcon height={20} width={20} />}
+                    >
+                        Edit
+                    </StyledButton>
+                }
                 dialogLabel='Story about Liro (label)'
                 dialogTitle='Story about Liro (title)'
             >
