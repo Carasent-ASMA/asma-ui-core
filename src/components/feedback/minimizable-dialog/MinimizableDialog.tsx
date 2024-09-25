@@ -1,4 +1,10 @@
-import { CloseIcon, DotsVerticalIcon, KeyboardCapslockIcon, MinimizeIcon } from 'src/components/icons'
+import {
+    CloseIcon,
+    DotsVerticalIcon,
+    DragHorizontalIcon,
+    KeyboardCapslockIcon,
+    MinimizeIcon,
+} from 'src/components/icons'
 import { StyledButton } from 'src/components/inputs/button'
 import { useState, type ReactNode, useEffect } from 'react'
 import clsx from 'clsx'
@@ -8,8 +14,8 @@ import { StyledMenu, StyledMenuItem } from 'src/components/navigation/menu'
 import { useToggleMenuVisibility } from 'src/hooks/useToggleMenuVisibility.hook'
 import { ArrowExpand } from 'src/components/icons/arrow-expand'
 import { StyledTooltip } from 'src/components/data-display/tooltip'
-import { ArrowTopRight } from 'src/components/icons/arrow-top-right'
 import Draggable from 'react-draggable'
+import { ArrowShrink } from 'src/components/icons/arrow-shrink'
 
 const Wrapper = ({
     dataTest,
@@ -31,11 +37,11 @@ const Wrapper = ({
             {draggable ? (
                 <Draggable>
                     <div
-                        className={clsx(
+                        className={cn(
                             'rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)]',
-                            minimized && 'hidden',
+                            draggable && 'cursor-grab z-[9999]',
                             className,
-                            draggable && 'cursor-grab z-[999]',
+                            minimized && 'hidden',
                             fullScreen && 'w-[95%] h-[95%] max-w-[95%] max-h-[95%]',
                         )}
                     >
@@ -44,13 +50,12 @@ const Wrapper = ({
                 </Draggable>
             ) : (
                 <div
-                    className={clsx(
+                    className={cn(
                         'fixed bottom-4 right-4 z-[51] rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)] transition-all duration-300',
                         minimized && '!h-0 !w-0',
                         className,
                         fullScreen &&
                             'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] h-[95%] max-w-[95%] max-h-[95%]',
-                        draggable && 'cursor-grab z-[999]',
                     )}
                     data-test={dataTest}
                 >
@@ -222,7 +227,9 @@ export const MinimizableDialog: React.FC<{
                                             endIcon={
                                                 showFullScreenIcon &&
                                                 (shiftPressed ? (
-                                                    <ArrowTopRight width={20} height={20} color='text-delta-700' />
+                                                    <DragHorizontalIcon width={20} height={20} color='text-delta-700' />
+                                                ) : fullScreen ? (
+                                                    <ArrowShrink width={20} height={20} color='text-delta-700' />
                                                 ) : (
                                                     <ArrowExpand width={20} height={20} color='text-delta-700' />
                                                 ))
