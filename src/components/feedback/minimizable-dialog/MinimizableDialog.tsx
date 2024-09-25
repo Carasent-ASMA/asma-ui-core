@@ -9,6 +9,57 @@ import { useToggleMenuVisibility } from 'src/hooks/useToggleMenuVisibility.hook'
 import { ArrowExpand } from 'src/components/icons/arrow-expand'
 import { StyledTooltip } from 'src/components/data-display/tooltip'
 import { ArrowTopRight } from 'src/components/icons/arrow-top-right'
+import Draggable from 'react-draggable'
+
+const Wrapper = ({
+    dataTest,
+    className,
+    draggable,
+    fullScreen,
+    minimized,
+    children,
+}: {
+    dataTest: string
+    className: string
+    draggable: boolean
+    fullScreen: boolean
+    minimized: boolean
+    children: ReactNode
+}) => {
+    return (
+        <>
+            {draggable ? (
+                <Draggable>
+                    <div
+                        className={clsx(
+                            'rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)]',
+                            minimized && 'hidden',
+                            className,
+                            draggable && 'cursor-grab z-[999]',
+                            fullScreen && 'w-[95%] h-[95%] max-w-[95%] max-h-[95%]',
+                        )}
+                    >
+                        {children}
+                    </div>
+                </Draggable>
+            ) : (
+                <div
+                    className={clsx(
+                        'fixed bottom-4 right-4 z-[51] rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)] transition-all duration-300',
+                        minimized && '!h-0 !w-0',
+                        className,
+                        fullScreen &&
+                            'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] h-[95%] max-w-[95%] max-h-[95%]',
+                        draggable && 'cursor-grab z-[999]',
+                    )}
+                    data-test={dataTest}
+                >
+                    {children}
+                </div>
+            )}
+        </>
+    )
+}
 
 export const MinimizableDialog: React.FC<{
     onCloseText: string
@@ -57,6 +108,7 @@ export const MinimizableDialog: React.FC<{
     extraActions,
     extraActionsText,
 }) => {
+    const [draggable, setDraggable] = useState(false)
     const [minimized, setMinimized] = useState(false)
     const [shiftPressed, setShiftPressed] = useState(false)
     const [fullScreen, setFullScreen] = useState(false)
@@ -121,15 +173,12 @@ export const MinimizableDialog: React.FC<{
                     </div>
                 </div>
             </div>
-            <div
-                className={clsx(
-                    'fixed bottom-4 right-4 z-[51] rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)] transition-all duration-300',
-                    minimized && '!h-0 !w-0',
-                    className,
-                    fullScreen &&
-                        'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] h-[95%] max-w-[95%] max-h-[95%]',
-                )}
-                data-test={dataTest}
+            <Wrapper
+                dataTest={dataTest}
+                className={className}
+                fullScreen={fullScreen}
+                draggable={draggable}
+                minimized={minimized}
             >
                 <div className='fixed-top flex flex-col gap-y-2 p-4 border-b-[1px] border-delta-200'>
                     <div className='flex items-center justify-between'>
@@ -157,7 +206,7 @@ export const MinimizableDialog: React.FC<{
                                 </StyledButton>
                             </div>
                             <div className='flex items-center gap-x-2'>
-                                <StyledTooltip title='Full screen (Shift for pop-out)'>
+                                <StyledTooltip title='Full screen (Shift for draggable)'>
                                     <div>
                                         <StyledButton
                                             dataTest='fullscreen-button'
@@ -165,7 +214,7 @@ export const MinimizableDialog: React.FC<{
                                             size='small'
                                             onClick={() => {
                                                 if (shiftPressed) {
-                                                    console.log('pop out')
+                                                    setDraggable((prev) => !prev)
                                                 } else {
                                                     setFullScreen(!fullScreen)
                                                 }
@@ -260,7 +309,7 @@ export const MinimizableDialog: React.FC<{
                         ) : null}
                     </>
                 )}
-            </div>
+            </Wrapper>
         </>
     )
 }
