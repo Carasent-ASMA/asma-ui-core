@@ -11,7 +11,7 @@ export const StyledEmptyPage: FC<{ isEmpty: boolean; emptyText: string; classNam
     return (
         <div
             data-test='empty-page-container'
-            className={`flex animate-opacity-in items-center w-full justify-center gap-2 duration-300 text-gray-600 text-sm ${className}`}
+            className={`flex animate-opacity-in items-center w-full h-full justify-center gap-2 duration-300 text-gray-600 text-sm ${className}`}
         >
             <EmptyPageIcon
                 data-test='empty-page-icon'
