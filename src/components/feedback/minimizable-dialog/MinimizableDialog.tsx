@@ -1,22 +1,78 @@
 import { CloseIcon, DotsVerticalIcon, KeyboardCapslockIcon, MinimizeIcon } from 'src/components/icons'
 import { StyledButton } from 'src/components/inputs/button'
-import { useState, type ReactNode } from 'react'
+import { useState, type ReactNode, useEffect } from 'react'
 import clsx from 'clsx'
 import { cn } from 'src/helpers/cn'
 import styles from './MinimizableDialog.module.scss'
 import { StyledMenu, StyledMenuItem } from 'src/components/navigation/menu'
 import { useToggleMenuVisibility } from 'src/hooks/useToggleMenuVisibility.hook'
+import { ArrowExpand } from 'src/components/icons/arrow-expand'
+import { StyledTooltip } from 'src/components/data-display/tooltip'
+import { ArrowTopRight } from 'src/components/icons/arrow-top-right'
+import Draggable from 'react-draggable'
+
+const Wrapper = ({
+    dataTest,
+    className,
+    draggable,
+    fullScreen,
+    minimized,
+    children,
+}: {
+    dataTest: string
+    className: string
+    draggable: boolean
+    fullScreen: boolean
+    minimized: boolean
+    children: ReactNode
+}) => {
+    return (
+        <>
+            {draggable ? (
+                <Draggable>
+                    <div
+                        className={clsx(
+                            'rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)]',
+                            minimized && 'hidden',
+                            className,
+                            draggable && 'cursor-grab z-[999]',
+                            fullScreen && 'w-[95%] h-[95%] max-w-[95%] max-h-[95%]',
+                        )}
+                    >
+                        {children}
+                    </div>
+                </Draggable>
+            ) : (
+                <div
+                    className={clsx(
+                        'fixed bottom-4 right-4 z-[51] rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)] transition-all duration-300',
+                        minimized && '!h-0 !w-0',
+                        className,
+                        fullScreen &&
+                            'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] h-[95%] max-w-[95%] max-h-[95%]',
+                        draggable && 'cursor-grab z-[999]',
+                    )}
+                    data-test={dataTest}
+                >
+                    {children}
+                </div>
+            )}
+        </>
+    )
+}
 
 export const MinimizableDialog: React.FC<{
     onCloseText: string
     onMinimizeText: string
     onExpandText: string
+    onFullScreenText: string
     open: boolean
     onClose: () => void
     actionNode?: React.ReactNode
     showCloseIcon?: boolean
     showMinimizeIcon?: boolean
     showExpandIcon?: boolean
+    showFullScreenIcon?: boolean
     title: ReactNode
     label?: ReactNode
     children?: React.ReactNode
@@ -32,9 +88,11 @@ export const MinimizableDialog: React.FC<{
     onCloseText,
     onMinimizeText,
     onExpandText,
+    onFullScreenText,
     showCloseIcon = true,
     showMinimizeIcon = true,
     showExpandIcon = true,
+    showFullScreenIcon = true,
     title,
     label,
     children,
@@ -50,8 +108,33 @@ export const MinimizableDialog: React.FC<{
     extraActions,
     extraActionsText,
 }) => {
+    const [draggable, setDraggable] = useState(false)
     const [minimized, setMinimized] = useState(false)
+    const [shiftPressed, setShiftPressed] = useState(false)
+    const [fullScreen, setFullScreen] = useState(false)
     const { open: extraActionsOpen, anchorEl, handleOpen, handleClose } = useToggleMenuVisibility()
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Shift') {
+                setShiftPressed(true)
+            }
+        }
+        const handleKeyUp = (e: KeyboardEvent) => {
+            if (e.key === 'Shift') {
+                setShiftPressed(false)
+            }
+        }
+
+        addEventListener('keydown', (e) => handleKeyDown(e))
+
+        addEventListener('keyup', (e) => handleKeyUp(e))
+
+        return () => {
+            removeEventListener('keydown', (e) => handleKeyDown(e))
+            removeEventListener('keyup', (e) => handleKeyUp(e))
+        }
+    }, [])
 
     const toggleMinimized = () => {
         setMinimized(!minimized)
@@ -90,13 +173,12 @@ export const MinimizableDialog: React.FC<{
                     </div>
                 </div>
             </div>
-            <div
-                className={clsx(
-                    'fixed bottom-4 right-4 z-[51] rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)] transition-all duration-300',
-                    minimized && '!h-0 !w-0',
-                    className,
-                )}
-                data-test={dataTest}
+            <Wrapper
+                dataTest={dataTest}
+                className={className}
+                fullScreen={fullScreen}
+                draggable={draggable}
+                minimized={minimized}
             >
                 <div className='fixed-top flex flex-col gap-y-2 p-4 border-b-[1px] border-delta-200'>
                     <div className='flex items-center justify-between'>
@@ -124,6 +206,32 @@ export const MinimizableDialog: React.FC<{
                                 </StyledButton>
                             </div>
                             <div className='flex items-center gap-x-2'>
+                                <StyledTooltip title='Full screen (Shift for draggable)'>
+                                    <div>
+                                        <StyledButton
+                                            dataTest='fullscreen-button'
+                                            variant='textGray'
+                                            size='small'
+                                            onClick={() => {
+                                                if (shiftPressed) {
+                                                    setDraggable((prev) => !prev)
+                                                } else {
+                                                    setFullScreen(!fullScreen)
+                                                }
+                                            }}
+                                            endIcon={
+                                                showFullScreenIcon &&
+                                                (shiftPressed ? (
+                                                    <ArrowTopRight width={20} height={20} color='text-delta-700' />
+                                                ) : (
+                                                    <ArrowExpand width={20} height={20} color='text-delta-700' />
+                                                ))
+                                            }
+                                        >
+                                            {onFullScreenText}
+                                        </StyledButton>
+                                    </div>
+                                </StyledTooltip>
                                 <StyledButton
                                     dataTest='close-button'
                                     variant='textGray'
@@ -201,7 +309,7 @@ export const MinimizableDialog: React.FC<{
                         ) : null}
                     </>
                 )}
-            </div>
+            </Wrapper>
         </>
     )
 }
