@@ -39,7 +39,7 @@ const Wrapper = ({
                     <div
                         className={cn(
                             'rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)]',
-                            draggable && 'cursor-grab z-[9999]',
+                            draggable && 'cursor-grab z-[9999] absolute',
                             className,
                             minimized && 'hidden',
                             fullScreen && 'w-[95%] h-[95%] max-w-[95%] max-h-[95%]',
@@ -254,10 +254,10 @@ export const MinimizableDialog: React.FC<{
 
                     {label && <div className='text-2xl font-semibold text-delta-800'>{title}</div>}
                 </div>
-                <div>{children}</div>
+                <div className='bg-white'>{children}</div>
 
                 {extraActions?.length && extraActionsText ? (
-                    <div className='flex items-center justify-between p-4 border-0 border-t-[1px] border-solid border-delta-200'>
+                    <div className='flex items-center justify-between p-4 border-0 border-t-[1px] border-solid border-delta-200 bg-white'>
                         <StyledButton
                             dataTest='extra-actions-button'
                             variant='textGray'
@@ -297,7 +297,7 @@ export const MinimizableDialog: React.FC<{
                 ) : (
                     <>
                         {secondaryButtonText || primaryButtonText ? (
-                            <div className='fixed-bottom flex justify-end gap-x-4 border-t-[1px] border-delta-200 p-4'>
+                            <div className='fixed-bottom flex justify-end gap-x-4 border-t-[1px] border-delta-200 p-4 bg-white'>
                                 {secondaryButtonText && onSecondaryButtonClick && (
                                     <StyledButton
                                         dataTest='cancel-button'
