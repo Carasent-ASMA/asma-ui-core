@@ -35,7 +35,7 @@ const Wrapper = ({
     return (
         <>
             {draggable ? (
-                <Draggable>
+                <Draggable defaultClassName='bottom-4 right-4'>
                     <div
                         className={cn(
                             'rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)]',
@@ -55,7 +55,7 @@ const Wrapper = ({
                         minimized && '!h-0 !w-0',
                         className,
                         fullScreen &&
-                            'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] h-[95%] max-w-[95%] max-h-[95%]',
+                            'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] h-[95%] max-w-[95%] max-h-[95%]',
                     )}
                     data-test={dataTest}
                 >
@@ -185,7 +185,7 @@ export const MinimizableDialog: React.FC<{
                 draggable={draggable}
                 minimized={minimized}
             >
-                <div className='fixed-top flex flex-col gap-y-2 p-4 border-b-[1px] border-delta-200'>
+                <div className='flex flex-col gap-y-2 p-4 border-b-[1px] border-delta-200'>
                     <div className='flex items-center justify-between'>
                         {!label ? (
                             <div className='text-2xl font-semibold text-delta-800'>{title}</div>
@@ -276,7 +276,7 @@ export const MinimizableDialog: React.FC<{
                         </StyledMenu>
 
                         {secondaryButtonText || primaryButtonText ? (
-                            <div className='fixed-bottom flex justify-end gap-x-4'>
+                            <div className='flex justify-end gap-x-4'>
                                 {secondaryButtonText && onSecondaryButtonClick && (
                                     <StyledButton
                                         dataTest='cancel-button'
@@ -297,7 +297,7 @@ export const MinimizableDialog: React.FC<{
                 ) : (
                     <>
                         {secondaryButtonText || primaryButtonText ? (
-                            <div className='fixed-bottom flex justify-end gap-x-4 border-t-[1px] border-delta-200 p-4 bg-white'>
+                            <div className='flex justify-end gap-x-4 border-t-[1px] border-delta-200 p-4 bg-white'>
                                 {secondaryButtonText && onSecondaryButtonClick && (
                                     <StyledButton
                                         dataTest='cancel-button'
