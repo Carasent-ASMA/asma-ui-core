@@ -35,11 +35,11 @@ const Wrapper = ({
     return (
         <>
             {draggable ? (
-                <Draggable defaultClassName='bottom-4 right-4'>
+                <Draggable>
                     <div
                         className={cn(
-                            'rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)]',
-                            draggable && 'cursor-grab z-[9999] absolute',
+                            'fixed bottom-4 right-4 rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)]',
+                            draggable && 'cursor-grab z-[9999]',
                             className,
                             minimized && 'hidden',
                             fullScreen && 'w-[95%] h-[95%] max-w-[95%] max-h-[95%]',
