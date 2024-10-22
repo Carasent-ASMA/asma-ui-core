@@ -211,34 +211,40 @@ export const MinimizableDialog: React.FC<{
                                 </StyledButton>
                             </div>
                             <div className='flex items-center gap-x-2'>
-                                <StyledTooltip title='Full screen (Shift for draggable)'>
-                                    <div>
-                                        <StyledButton
-                                            dataTest='fullscreen-button'
-                                            variant='textGray'
-                                            size='small'
-                                            onClick={() => {
-                                                if (shiftPressed) {
-                                                    setDraggable((prev) => !prev)
-                                                } else {
-                                                    setFullScreen(!fullScreen)
+                                {showFullScreenIcon && (
+                                    <StyledTooltip title='Full screen (Shift for draggable)'>
+                                        <div>
+                                            <StyledButton
+                                                dataTest='fullscreen-button'
+                                                variant='textGray'
+                                                size='small'
+                                                onClick={() => {
+                                                    if (shiftPressed) {
+                                                        setDraggable((prev) => !prev)
+                                                    } else {
+                                                        setFullScreen(!fullScreen)
+                                                    }
+                                                }}
+                                                endIcon={
+                                                    shiftPressed ? (
+                                                        <DragHorizontalIcon
+                                                            width={20}
+                                                            height={20}
+                                                            color='text-delta-700'
+                                                        />
+                                                    ) : fullScreen ? (
+                                                        <ArrowShrink width={20} height={20} color='text-delta-700' />
+                                                    ) : (
+                                                        <ArrowExpand width={20} height={20} color='text-delta-700' />
+                                                    )
                                                 }
-                                            }}
-                                            endIcon={
-                                                showFullScreenIcon &&
-                                                (shiftPressed ? (
-                                                    <DragHorizontalIcon width={20} height={20} color='text-delta-700' />
-                                                ) : fullScreen ? (
-                                                    <ArrowShrink width={20} height={20} color='text-delta-700' />
-                                                ) : (
-                                                    <ArrowExpand width={20} height={20} color='text-delta-700' />
-                                                ))
-                                            }
-                                        >
-                                            {onFullScreenText}
-                                        </StyledButton>
-                                    </div>
-                                </StyledTooltip>
+                                            >
+                                                {onFullScreenText}
+                                            </StyledButton>
+                                        </div>
+                                    </StyledTooltip>
+                                )}
+
                                 <StyledButton
                                     dataTest='close-button'
                                     variant='textGray'
