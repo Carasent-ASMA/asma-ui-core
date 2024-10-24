@@ -68,7 +68,7 @@ const Wrapper = ({
 
 export const MinimizableDialog: React.FC<{
     onCloseText: string
-    onMinimizeText: string
+    onMinimizeText?: string
     onExpandText: string
     onFullScreenText: string
     open: boolean
@@ -153,17 +153,21 @@ export const MinimizableDialog: React.FC<{
                 <div className={clsx('flex items-center justify-between', !minimized && 'hidden')} data-test={dataTest}>
                     <div className='truncate text-lg font-semibold text-delta-800'>{title}</div>
                     <div className='flex gap-x-1'>
-                        <StyledButton
-                            dataTest='minimize-button'
-                            variant='text'
-                            size='small'
-                            onClick={toggleMinimized}
-                            endIcon={
-                                showExpandIcon && <KeyboardCapslockIcon height={20} width={20} color='text-gama-500' />
-                            }
-                        >
-                            {onExpandText}
-                        </StyledButton>
+                        {onMinimizeText && (
+                            <StyledButton
+                                dataTest='minimize-button'
+                                variant='text'
+                                size='small'
+                                onClick={toggleMinimized}
+                                endIcon={
+                                    showExpandIcon && (
+                                        <KeyboardCapslockIcon height={20} width={20} color='text-gama-500' />
+                                    )
+                                }
+                            >
+                                {onExpandText}
+                            </StyledButton>
+                        )}
                         <div className='flex items-center gap-x-2'>
                             <StyledButton
                                 dataTest='close-button'
@@ -194,22 +198,24 @@ export const MinimizableDialog: React.FC<{
                         )}
 
                         <div className='flex gap-x-1'>
-                            <div className='flex items-center gap-x-2'>
-                                {actionNode}
-                                <StyledButton
-                                    dataTest='minimize-button'
-                                    variant='textGray'
-                                    size='small'
-                                    onClick={toggleMinimized}
-                                    endIcon={
-                                        showMinimizeIcon && (
-                                            <MinimizeIcon height={20} width={20} color='text-delta-700' />
-                                        )
-                                    }
-                                >
-                                    {onMinimizeText}
-                                </StyledButton>
-                            </div>
+                            {onMinimizeText && (
+                                <div className='flex items-center gap-x-2'>
+                                    {actionNode}
+                                    <StyledButton
+                                        dataTest='minimize-button'
+                                        variant='textGray'
+                                        size='small'
+                                        onClick={toggleMinimized}
+                                        endIcon={
+                                            showMinimizeIcon && (
+                                                <MinimizeIcon height={20} width={20} color='text-delta-700' />
+                                            )
+                                        }
+                                    >
+                                        {onMinimizeText}
+                                    </StyledButton>
+                                </div>
+                            )}
                             <div className='flex items-center gap-x-2'>
                                 {showFullScreenIcon && (
                                     <StyledTooltip title='Full screen (Shift for draggable)'>
