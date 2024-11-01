@@ -1,7 +1,8 @@
+import React from 'react'
 import { DialogActions, type DialogActionsProps } from '@mui/material'
-
 import style from './StyledDialogActions.module.scss'
-import clsx from 'clsx'
+import { cn } from 'src/helpers/cn'
+
 export const StyledDialogActions = (props: DialogActionsProps) => {
     return (
         <DialogActions
@@ -12,7 +13,11 @@ export const StyledDialogActions = (props: DialogActionsProps) => {
                 root: style['styled-dialog-actions-root'],
             }}
         >
-            <div className={clsx(style['styled-dialog-actions'], props.className)}>{props.children}</div>
+            <div className={cn(style['styled-dialog-actions'], props.className)}>
+                {React.Children.map(props.children, (child) => (
+                    <div className={style['action-button-wrapper']}>{child}</div>
+                ))}
+            </div>
         </DialogActions>
     )
 }

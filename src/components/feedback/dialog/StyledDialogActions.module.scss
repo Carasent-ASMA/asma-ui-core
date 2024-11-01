@@ -11,3 +11,11 @@
     padding: 16px;
     gap: 16px;
 }
+@media (max-width: 768px) {
+    .action-button-wrapper {
+        flex: 1;
+        button {
+            width: 100%;
+        }
+    }
+}

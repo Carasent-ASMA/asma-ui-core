@@ -5,6 +5,7 @@ import { StyledButton } from '../../inputs/button/StyledButton'
 import type { ReactNode } from 'react'
 import style from './StyledDialog.module.scss'
 import { CloseIcon } from 'src/components/icons'
+import { useIsMobileView } from 'src/hooks/useWindowWidthSize.hook'
 export interface IStyledDialogProps extends DialogProps {
     onCloseText?: ReactNode
     showCloseIcon?: boolean
@@ -24,6 +25,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     dialogHeaderNode,
     ...rest
 }) => {
+    const isMobile = useIsMobileView()
     return (
         <Dialog
             {...rest}
@@ -32,6 +34,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                 zIndex: 999,
                 ...rest.style,
             }}
+            fullScreen={isMobile ? true : rest.fullScreen}
         >
             <div className={style['styled-dialog-root']}>
                 <div className={style['styled-top-header']}>

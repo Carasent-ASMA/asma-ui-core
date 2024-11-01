@@ -45,7 +45,7 @@ export const Dialog = () => {
                         minHeight: '360px',
                         maxWidth: '680px',
                         width: '100%',
-                        maxHeight: '80%',
+                        maxHeight: '100%',
                         height: '100%',
                     },
                 }}
