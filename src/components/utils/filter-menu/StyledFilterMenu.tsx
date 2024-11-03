@@ -20,6 +20,7 @@ type StyledFilterMenuProps = {
     variant?: 'contained' | 'outlined' | 'text' | 'textGray'
     popoverProps?: Omit<PopoverProps, 'open' | 'anchorEl' | 'onClose'>
     anchorNode?: (props: { isOpen: boolean; onClose: () => void }) => ReactNode
+    label?: string
 }
 
 const useAnchor = () => {
@@ -63,6 +64,7 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
     variant = 'outlined',
     popoverProps,
     anchorNode,
+    label,
 }) => {
     const { onAnchorClick, onClose, anchorEl } = useAnchor()
 
@@ -84,7 +86,7 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
                         size={size}
                         dataTest={dataTest}
                     >
-                        Filter
+                        {label || 'Filter'}
                     </StyledButton>
                 )}
                 {filterIsActive && (
