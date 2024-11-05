@@ -67,10 +67,10 @@ const Wrapper = ({
 }
 
 export const MinimizableDialog: React.FC<{
-    onCloseText: string
+    onCloseText?: string
     onMinimizeText?: string
-    onExpandText: string
-    onFullScreenText: string
+    onExpandText?: string
+    onFullScreenText?: string
     open: boolean
     onClose: () => void
     actionNode?: React.ReactNode
@@ -90,10 +90,10 @@ export const MinimizableDialog: React.FC<{
     extraActionsText?: string
     dataTest: string
 }> = ({
-    onCloseText,
-    onMinimizeText,
-    onExpandText,
-    onFullScreenText,
+    onCloseText = '',
+    onMinimizeText = '',
+    onExpandText = '',
+    onFullScreenText = '',
     showCloseIcon = true,
     showMinimizeIcon = true,
     showExpandIcon = true,
