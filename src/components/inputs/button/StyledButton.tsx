@@ -23,7 +23,17 @@ type variantTextWhiteProps = {
     error?: never
 }
 type buttonStandartVariantsProps = {
-    variant?: 'contained' | 'outlined' | 'text'
+    variant?:
+        | 'contained'
+        | 'outlined'
+        | 'text'
+        | 'textGray'
+        | 'textWhite'
+        | 'large'
+        | 'small'
+        | 'medium'
+        | 'error'
+        | 'common'
     error?: boolean
 }
 

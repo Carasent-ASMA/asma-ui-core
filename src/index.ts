@@ -48,13 +48,13 @@ export * from './components/utils/accordion'
 // export * from './components/table'
 // utils
 export * from './components/utils/popover'
+export * from './components/utils/filter-menu'
 //widgets
 export * from './components/custom/widget/widget-title/StyledWidgetTitle'
 export * from './components/custom/widget/widget-header/StyledWidgetHeader'
 export * from './components/custom/widget/widget/StyledWidget'
 //modules
 export * from './components/custom/module/module-title/StyledModuleTitle'
-export * from './components/utils/filter-menu/StyledFilterMenu'
 export * from './components/feedback/minimizable-dialog/MinimizableDialog'
 
 export { Fade, Paper, ClickAwayListener, Popper, Avatar, Skeleton, Container, Stack, FormLabel } from '@mui/material'

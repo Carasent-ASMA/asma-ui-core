@@ -77,6 +77,7 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
                     })
                 ) : (
                     <StyledButton
+                        type='button'
                         disabled={disabled}
                         variant={variant}
                         startIcon={
