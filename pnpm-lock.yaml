@@ -21,9 +21,6 @@ importers:
       '@fontsource/material-icons':
         specifier: ^5.0.4
         version: 5.0.16
-      '@fontsource/roboto':
-        specifier: ^5.0.4
-        version: 5.0.12
       '@iconify/react':
         specifier: ^4.1.1
         version: 4.1.1(react@18.2.0)
@@ -1496,9 +1493,6 @@ packages:
 
   '@fontsource/material-icons@5.0.16':
     resolution: {integrity: sha512-QjlHDR78ojpZfHEHJE0ltDYwyX0pWT6iMS2I9e/bJenVSktFcM+iyCHwjKmA+SDaLf5ASmx1QZNuNT4DNmsrHg==}
-
-  '@fontsource/roboto@5.0.12':
-    resolution: {integrity: sha512-x0o17jvgoSSbS9OZnUX2+xJmVRvVCfeaYJjkS7w62iN7CuJWtMf5vJj8LqgC7ibqIkitOHVW+XssRjgrcHn62g==}
 
   '@hapi/hoek@9.3.0':
     resolution: {integrity: sha512-/c6rf4UJlmHlC9b5BaNvzAcFv7HZ2QHaV0D4/HNlBdvFnvQq8RI4kYdhyPCl7Xj+oWvTWQ8ujhqS53LIgAe6KQ==}
@@ -3234,6 +3228,7 @@ packages:
 
   acorn-import-assertions@1.9.0:
     resolution: {integrity: sha512-cmMwop9x+8KFhxvKrKfPYmN6/pKTYYHBqLa0DfvVZcKMJWNyWLnaqND7dx/qn66R7ewM1UX5XMaDVP5wlVTaVA==}
+    deprecated: package has been renamed to acorn-import-attributes
     peerDependencies:
       acorn: ^8
 
@@ -10500,8 +10495,6 @@ snapshots:
   '@floating-ui/utils@0.1.1': {}
 
   '@fontsource/material-icons@5.0.16': {}
-
-  '@fontsource/roboto@5.0.12': {}
 
   '@hapi/hoek@9.3.0': {}
 

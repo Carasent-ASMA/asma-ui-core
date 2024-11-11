@@ -4,9 +4,6 @@
 @import 'color-variables/fretexTokens.css';
 @import 'color-variables/jadeTokens.css';
 
-/** #TODO: deprecated remove on next major verions. expected to be removed befroe 2024/09 */
-@import './backupCompatibilityStyle.css';
-
 @tailwind components;
 @tailwind utilities;
 

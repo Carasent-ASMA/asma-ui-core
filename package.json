@@ -3,7 +3,7 @@
     "publishConfig": {
         "access": "public"
     },
-    "version": "3.0.116",
+    "version": "3.0.117",
     "type": "module",
     "files": [
         "dist/**/*",
@@ -40,7 +40,6 @@
         "@emotion/react": "^11.11.1",
         "@emotion/styled": "^11.11.0",
         "@fontsource/material-icons": "^5.0.4",
-        "@fontsource/roboto": "^5.0.4",
         "@iconify/react": "^4.1.1",
         "@mui/material": "^5.13.7",
         "@tanstack/react-table": "^8.10.0",
