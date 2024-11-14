@@ -6,7 +6,7 @@ import {
     MinimizeIcon,
 } from 'src/components/icons'
 import { StyledButton } from 'src/components/inputs/button'
-import { useState, type ReactNode, useEffect } from 'react'
+import React, { useState, type ReactNode, useEffect } from 'react'
 import clsx from 'clsx'
 import { cn } from 'src/helpers/cn'
 import styles from './MinimizableDialog.module.scss'
@@ -16,6 +16,7 @@ import { ArrowExpand } from 'src/components/icons/arrow-expand'
 import { StyledTooltip } from 'src/components/data-display/tooltip'
 import Draggable from 'react-draggable'
 import { ArrowShrink } from 'src/components/icons/arrow-shrink'
+import type { IFloatingWindowProps } from './types'
 
 const Wrapper = ({
     dataTest,
@@ -30,7 +31,7 @@ const Wrapper = ({
     draggable: boolean
     fullScreen: boolean
     minimized: boolean
-    children: ReactNode
+    children: ReactNode | ((props: { fullScreen: boolean }) => ReactNode)
 }) => {
     return (
         <>
@@ -45,21 +46,22 @@ const Wrapper = ({
                             fullScreen && 'w-[95%] h-[95%] max-w-[95%] max-h-[95%]',
                         )}
                     >
-                        {children}
+                        {typeof children === 'function' ? children({ fullScreen }) : children}
                     </div>
                 </Draggable>
             ) : (
                 <div
                     className={cn(
                         'fixed bottom-4 right-4 z-[51] rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)] transition-all duration-300',
-                        minimized && '!h-0 !w-0',
-                        className,
+                        className && !minimized ? className : '',
+                        minimized && '!h-0 !w-0 opacity-0 duration-0',
                         fullScreen &&
-                            'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] h-[95%] max-w-[95%] max-h-[95%]',
+                            !minimized &&
+                            'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] h-[95%] max-w-[95%] max-h-[95%] duration-0',
                     )}
                     data-test={dataTest}
                 >
-                    {children}
+                    {typeof children === 'function' ? children({ fullScreen }) : children}
                 </div>
             )}
         </>
@@ -80,7 +82,7 @@ export const MinimizableDialog: React.FC<{
     showFullScreenIcon?: boolean
     title: ReactNode
     label?: ReactNode
-    children?: React.ReactNode
+    children?: React.ReactNode | ((props: IFloatingWindowProps) => ReactNode)
     className?: string
     primaryButtonText?: string
     secondaryButtonText?: string
@@ -266,7 +268,7 @@ export const MinimizableDialog: React.FC<{
 
                     {label && <div className='text-2xl font-semibold text-delta-800'>{title}</div>}
                 </div>
-                <div className='bg-white'>{children}</div>
+                <div className='h-full'> {typeof children === 'function' ? children({ fullScreen }) : children}</div>
 
                 {extraActions?.length && extraActionsText ? (
                     <div className='flex items-center justify-between p-4 border-0 border-t-[1px] border-solid border-delta-200 bg-white'>
