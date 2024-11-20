@@ -33,21 +33,38 @@ export const DialogMinimizable = () => {
                 onClose={handleClose}
                 label='Adevinta ASA'
                 // className='w-[600px] max-h-[800px]'
-                className={cn('max-h-[calc(100vh-100px)] h-full w-fit', 'min-w-[850px] max-w-[850px]')}
-                // primaryButtonText='Save'
-                // onPrimaryButtonClick={handleClose}
-                // secondaryButtonText='Cancel'
-                // onSecondaryButtonClick={handleClose}
+                className={cn('max-h-[calc(100vh-100px)] w-fit', 'min-w-[850px] max-w-[850px]')}
+                primaryButtonText='Save'
+                onPrimaryButtonClick={handleClose}
+                secondaryButtonText='Cancel'
+                onSecondaryButtonClick={handleClose}
                 actionNode={
                     <StyledButton dataTest='edit-button' variant='text'>
                         Edit
                     </StyledButton>
                 }
                 // extraActionsText='More Actions'
-                extraActions={[
-                    { label: 'Duplicate', onClick: () => console.log('duplicate') },
-                    { label: 'Delete', className: 'text-red-500', onClick: () => console.log('delete') },
-                ]}
+                // extraActions={[
+                //     { label: 'Duplicate', onClick: () => console.log('duplicate') },
+                //     { label: 'Delete', className: 'text-red-500', onClick: () => console.log('delete') },
+                // ]}
+                btnContainerClassName='w-full'
+                footerClassName='gap-2 pl-8'
+                footerInfo={
+                    <div className='flex items-center justify-between gap-4 w-full'>
+                        <div className='flex flex-col gap-0.5'>
+                            <span className='text-delta-800 text-sm font-semibold'>Sist optdatert</span>
+                            <span className='text-sm'>03.04.2024 kl. 14.13</span>
+                            <span className='text-sm'>av KristianAO</span>
+                        </div>
+
+                        <div className='flex flex-col gap-1'>
+                            <span className='text-delta-800 text-sm font-semibold'>Lagt til i registeret</span>
+                            <span className='text-sm'>05.04.2024 kl. 14.13</span>
+                            <span className='text-sm'>av Kristian Thyholdt</span>
+                        </div>
+                    </div>
+                }
             >
                 {(props) => (
                     <>
