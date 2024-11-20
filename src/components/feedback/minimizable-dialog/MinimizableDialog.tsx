@@ -16,7 +16,7 @@ import { ArrowExpand } from 'src/components/icons/arrow-expand'
 import { StyledTooltip } from 'src/components/data-display/tooltip'
 import Draggable from 'react-draggable'
 import { ArrowShrink } from 'src/components/icons/arrow-shrink'
-import type { IFloatingWindowProps } from './types'
+import type { IMinimizableDialogProps } from './types'
 
 const Wrapper = ({
     dataTest,
@@ -68,30 +68,7 @@ const Wrapper = ({
     )
 }
 
-export const MinimizableDialog: React.FC<{
-    onCloseText?: string
-    onMinimizeText?: string
-    onExpandText?: string
-    onFullScreenText?: string
-    open: boolean
-    onClose: () => void
-    actionNode?: React.ReactNode
-    showCloseIcon?: boolean
-    showMinimizeIcon?: boolean
-    showExpandIcon?: boolean
-    showFullScreenIcon?: boolean
-    title: ReactNode
-    label?: ReactNode
-    children?: React.ReactNode | ((props: IFloatingWindowProps) => ReactNode)
-    className?: string
-    primaryButtonText?: string
-    secondaryButtonText?: string
-    onPrimaryButtonClick?: () => void
-    onSecondaryButtonClick?: () => void
-    extraActions?: { label: string; className?: string; onClick: () => void }[]
-    extraActionsText?: string
-    dataTest: string
-}> = ({
+export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     onCloseText = '',
     onMinimizeText = '',
     onExpandText = '',
@@ -114,6 +91,9 @@ export const MinimizableDialog: React.FC<{
     actionNode,
     extraActions,
     extraActionsText,
+    btnContainerClassName,
+    footerClassName,
+    footerInfo,
 }) => {
     const [draggable, setDraggable] = useState(false)
     const [minimized, setMinimized] = useState(false)
@@ -270,27 +250,36 @@ export const MinimizableDialog: React.FC<{
                 </div>
                 <div className='h-full'> {typeof children === 'function' ? children({ fullScreen }) : children}</div>
 
-                {extraActions?.length && extraActionsText ? (
-                    <div className='flex items-center justify-between p-4 border-0 border-t-[1px] border-solid border-delta-200 bg-white'>
-                        <StyledButton
-                            dataTest='extra-actions-button'
-                            variant='textGray'
-                            startIcon={<DotsVerticalIcon width={24} height={24} />}
-                            onClick={handleOpen}
-                        >
-                            {extraActionsText}
-                        </StyledButton>
+                {(extraActions?.length && extraActionsText) || footerInfo ? (
+                    <div
+                        className={cn(
+                            'flex items-center justify-between p-4 border-0 border-t-[1px] border-solid border-delta-200 bg-white',
+                            footerClassName,
+                        )}
+                    >
+                        {extraActions?.length && extraActionsText && (
+                            <>
+                                <StyledButton
+                                    dataTest='extra-actions-button'
+                                    variant='textGray'
+                                    startIcon={<DotsVerticalIcon width={24} height={24} />}
+                                    onClick={handleOpen}
+                                >
+                                    {extraActionsText}
+                                </StyledButton>
 
-                        <StyledMenu open={extraActionsOpen} anchorEl={anchorEl} onClose={handleClose}>
-                            {extraActions.map((a) => (
-                                <StyledMenuItem key={a.label} className={a.className} onClick={a.onClick}>
-                                    {a.label}
-                                </StyledMenuItem>
-                            ))}
-                        </StyledMenu>
-
+                                <StyledMenu open={extraActionsOpen} anchorEl={anchorEl} onClose={handleClose}>
+                                    {extraActions.map((a) => (
+                                        <StyledMenuItem key={a.label} className={a.className} onClick={a.onClick}>
+                                            {a.label}
+                                        </StyledMenuItem>
+                                    ))}
+                                </StyledMenu>
+                            </>
+                        )}{' '}
+                        {footerInfo}
                         {secondaryButtonText || primaryButtonText ? (
-                            <div className='flex justify-end gap-x-4'>
+                            <div className={cn('flex justify-end gap-x-4', btnContainerClassName)}>
                                 {secondaryButtonText && onSecondaryButtonClick && (
                                     <StyledButton
                                         dataTest='cancel-button'
@@ -311,7 +300,12 @@ export const MinimizableDialog: React.FC<{
                 ) : (
                     <>
                         {secondaryButtonText || primaryButtonText ? (
-                            <div className='flex justify-end gap-x-4 border-t-[1px] border-delta-200 p-4 bg-white'>
+                            <div
+                                className={cn(
+                                    'flex justify-end gap-x-4 border-t-[1px] border-delta-200 p-4 bg-white',
+                                    btnContainerClassName,
+                                )}
+                            >
                                 {secondaryButtonText && onSecondaryButtonClick && (
                                     <StyledButton
                                         dataTest='cancel-button'
