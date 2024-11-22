@@ -134,8 +134,8 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
             <div style={{ zIndex: 51 }} className={cn(styles['dialog'], !minimized && styles['hidden'])}>
                 <div className={clsx('flex items-center justify-between', !minimized && 'hidden')} data-test={dataTest}>
                     <div className='truncate text-lg font-semibold text-delta-800'>{title}</div>
-                    <div className='flex gap-x-1'>
-                        {onMinimizeText && (
+                    <div className='flex items-center gap-x-1'>
+                        {showExpandIcon && (
                             <StyledButton
                                 dataTest='minimize-button'
                                 variant='text'
@@ -150,7 +150,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                                 {onExpandText}
                             </StyledButton>
                         )}
-                        <div className='flex items-center gap-x-2'>
+                        {showCloseIcon && (
                             <StyledButton
                                 dataTest='close-button'
                                 variant='textGray'
@@ -160,7 +160,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                             >
                                 {onCloseText}
                             </StyledButton>
-                        </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -179,60 +179,54 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                             <div className='text-sm text-delta-700'>{label}</div>
                         )}
 
-                        <div className='flex gap-x-1'>
-                            {onMinimizeText && (
-                                <div className='flex items-center gap-x-2'>
-                                    {actionNode}
-                                    <StyledButton
-                                        dataTest='minimize-button'
-                                        variant='textGray'
-                                        size='small'
-                                        onClick={toggleMinimized}
-                                        endIcon={
-                                            showMinimizeIcon && (
-                                                <MinimizeIcon height={20} width={20} color='text-delta-700' />
-                                            )
-                                        }
-                                    >
-                                        {onMinimizeText}
-                                    </StyledButton>
-                                </div>
+                        <div className='flex items-center gap-x-1'>
+                            {actionNode}
+                            {showMinimizeIcon && (
+                                <StyledButton
+                                    dataTest='minimize-button'
+                                    variant='textGray'
+                                    size='small'
+                                    onClick={toggleMinimized}
+                                    endIcon={
+                                        showMinimizeIcon && (
+                                            <MinimizeIcon height={20} width={20} color='text-delta-700' />
+                                        )
+                                    }
+                                >
+                                    {onMinimizeText}
+                                </StyledButton>
                             )}
-                            <div className='flex items-center gap-x-2'>
-                                {showFullScreenIcon && (
-                                    <StyledTooltip title='Full screen (Shift for draggable)'>
-                                        <div>
-                                            <StyledButton
-                                                dataTest='fullscreen-button'
-                                                variant='textGray'
-                                                size='small'
-                                                onClick={() => {
-                                                    if (shiftPressed) {
-                                                        setDraggable((prev) => !prev)
-                                                    } else {
-                                                        setFullScreen(!fullScreen)
-                                                    }
-                                                }}
-                                                endIcon={
-                                                    shiftPressed ? (
-                                                        <DragHorizontalIcon
-                                                            width={20}
-                                                            height={20}
-                                                            color='text-delta-700'
-                                                        />
-                                                    ) : fullScreen ? (
-                                                        <ArrowShrink width={20} height={20} color='text-delta-700' />
-                                                    ) : (
-                                                        <ArrowExpand width={20} height={20} color='text-delta-700' />
-                                                    )
+                            {showFullScreenIcon && (
+                                <StyledTooltip title='Full screen (Shift for draggable)'>
+                                    <div>
+                                        <StyledButton
+                                            dataTest='fullscreen-button'
+                                            variant='textGray'
+                                            size='small'
+                                            onClick={() => {
+                                                if (shiftPressed) {
+                                                    setDraggable((prev) => !prev)
+                                                } else {
+                                                    setFullScreen(!fullScreen)
                                                 }
-                                            >
-                                                {onFullScreenText}
-                                            </StyledButton>
-                                        </div>
-                                    </StyledTooltip>
-                                )}
+                                            }}
+                                            endIcon={
+                                                shiftPressed ? (
+                                                    <DragHorizontalIcon width={20} height={20} color='text-delta-700' />
+                                                ) : fullScreen ? (
+                                                    <ArrowShrink width={20} height={20} color='text-delta-700' />
+                                                ) : (
+                                                    <ArrowExpand width={20} height={20} color='text-delta-700' />
+                                                )
+                                            }
+                                        >
+                                            {onFullScreenText}
+                                        </StyledButton>
+                                    </div>
+                                </StyledTooltip>
+                            )}
 
+                            {showCloseIcon && (
                                 <StyledButton
                                     dataTest='close-button'
                                     variant='textGray'
@@ -242,7 +236,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                                 >
                                     {onCloseText}
                                 </StyledButton>
-                            </div>
+                            )}
                         </div>
                     </div>
 

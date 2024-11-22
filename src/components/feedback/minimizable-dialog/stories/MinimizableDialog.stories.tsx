@@ -24,10 +24,10 @@ export const DialogMinimizable = () => {
             </StyledButton>
             <MinimizableDialog
                 dataTest='test'
-                onCloseText='Close'
-                onMinimizeText='Minimize'
-                onExpandText='Expand'
-                onFullScreenText='Full screen'
+                // onCloseText='Close'
+                // onMinimizeText='Minimize'
+                // onExpandText='Expand'
+                // onFullScreenText='Full screen'
                 title='Ny stilling og utplassering'
                 open={open}
                 onClose={handleClose}
