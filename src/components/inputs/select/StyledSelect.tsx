@@ -70,7 +70,10 @@ export const StyledSelect: React.FC<
                 borderColor: 'var(--colors-error-500) !important',
             },
             '&.Mui-focused::after': {
-                borderColor: 'var(--colors-gama-500) !important',
+                borderColor: 'var(--colors-gama-400) !important',
+            },
+            '&:hover .MuiOutlinedInput-notchedOutline': {
+                border: '2px solid var(--colors-gama-300) !important',
             },
             '& .select-custom-icon': {
                 marginTop: '-3.5px !important',

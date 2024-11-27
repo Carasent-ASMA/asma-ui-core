@@ -52,10 +52,10 @@ export const StyledInputField: React.FC<
                 borderColor: 'var(--colors-delta-500) !important',
             },
             '& .MuiInputBase-colorPrimary.Mui-focused fieldset': {
-                borderColor: 'var(--colors-gama-500) !important',
+                borderColor: 'var(--colors-gama-400) !important',
             },
             '& .MuiInputBase-colorPrimary.Mui-focused::after': {
-                borderColor: 'var(--colors-gama-500) !important',
+                borderColor: 'var(--colors-gama-400) !important',
             },
             '& .MuiInputBase-colorPrimary:hover fieldset': {
                 borderColor: 'var(--colors-gama-300) !important',
@@ -65,7 +65,7 @@ export const StyledInputField: React.FC<
                 borderWidth: '1px !important',
             },
             '& .MuiInputBase-colorPrimary.Mui-focused:hover fieldset': {
-                borderColor: 'var(--colors-gama-500) !important',
+                borderColor: 'var(--colors-gama-300) !important',
             },
             '& .MuiInputBase-colorPrimary.Mui-error fieldset': {
                 borderColor: 'var(--colors-error-500) !important',
