@@ -94,6 +94,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     btnContainerClassName,
     footerClassName,
     footerInfo,
+    enableFullscreen = false,
 }) => {
     const [draggable, setDraggable] = useState(false)
     const [minimized, setMinimized] = useState(false)
@@ -102,6 +103,8 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     const { open: extraActionsOpen, anchorEl, handleOpen, handleClose } = useToggleMenuVisibility()
 
     useEffect(() => {
+        if (!enableFullscreen) return
+
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Shift') {
                 setShiftPressed(true)
@@ -121,7 +124,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
             removeEventListener('keydown', (e) => handleKeyDown(e))
             removeEventListener('keyup', (e) => handleKeyUp(e))
         }
-    }, [])
+    }, [enableFullscreen])
 
     const toggleMinimized = () => {
         setMinimized(!minimized)
@@ -196,7 +199,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                                     {onMinimizeText}
                                 </StyledButton>
                             )}
-                            {showFullScreenIcon && (
+                            {enableFullscreen && showFullScreenIcon && (
                                 <StyledTooltip title='Full screen (Shift for draggable)'>
                                     <div>
                                         <StyledButton

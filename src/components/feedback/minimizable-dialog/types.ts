@@ -29,5 +29,6 @@ export type IMinimizableDialogProps = {
     btnContainerClassName?: string
     footerClassName?: string
     footerInfo?: ReactNode
+    enableFullscreen?: boolean
     dataTest: string
 }
