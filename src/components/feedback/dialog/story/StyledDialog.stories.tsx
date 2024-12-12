@@ -55,6 +55,7 @@ export const Dialog = () => {
                 onClose={handleCloseDialog}
                 dialogHeaderNode={
                     <StyledButton
+                        size='small'
                         dataTest='edit-button'
                         variant='text'
                         startIcon={<EditSquareIcon height={20} width={20} />}
