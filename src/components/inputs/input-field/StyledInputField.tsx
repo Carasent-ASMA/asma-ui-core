@@ -57,15 +57,15 @@ export const StyledInputField: React.FC<
             '& .MuiInputBase-colorPrimary.Mui-focused::after': {
                 borderColor: 'var(--colors-gama-400) !important',
             },
+            '& .MuiInputBase-colorPrimary.Mui-focused:hover fieldset': {
+                borderColor: 'var(--colors-gama-400) !important',
+            },
             '& .MuiInputBase-colorPrimary:hover fieldset': {
                 borderColor: 'var(--colors-gama-300) !important',
                 borderWidth: '2px !important',
             },
             '& .MuiInputBase-colorPrimary.Mui-disabled:hover fieldset': {
                 borderWidth: '1px !important',
-            },
-            '& .MuiInputBase-colorPrimary.Mui-focused:hover fieldset': {
-                borderColor: 'var(--colors-gama-300) !important',
             },
             '& .MuiInputBase-colorPrimary.Mui-error fieldset': {
                 borderColor: 'var(--colors-error-500) !important',
