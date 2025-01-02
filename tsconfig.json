@@ -6,15 +6,28 @@
                 "name": "typescript-plugin-css-modules"
             }
         ],
-        "types": ["vite/client", "node"],
+        "types": [
+            "vite/client",
+            "node"
+        ],
         "paths": {
-            "*": ["*"],
-            "@": ["src/*"],
-            "asma-core-ui": ["src/index.ts"]
+            "*": [
+                "*"
+            ],
+            "@": [
+                "src/*"
+            ],
+            "asma-core-ui": [
+                "src/index.ts"
+            ]
         },
         "target": "ESNext",
         "useDefineForClassFields": true,
-        "lib": ["DOM", "DOM.Iterable", "ESNext"],
+        "lib": [
+            "DOM",
+            "DOM.Iterable",
+            "ESNext"
+        ],
         "allowJs": false,
         "skipLibCheck": true,
         "esModuleInterop": false,
@@ -30,7 +43,6 @@
         "strictNullChecks": true,
         "strictFunctionTypes": true,
         "strictBindCallApply": true,
-
         "noImplicitAny": true,
         "noImplicitThis": true,
         "noUnusedLocals": false,
@@ -43,14 +55,17 @@
         "verbatimModuleSyntax": true,
         "useUnknownInCatchVariables": false
     },
-    "exclude": ["dist", "node_modules"],
+    "exclude": [
+        "dist",
+        "node_modules"
+    ],
     "include": [
         "tailwind.config.ts",
         "tw-configs/**/*.json",
         "src/**/*.ts",
         "src/**/*.tsx",
         "src/**/*.scss",
-        "**/*.module.scss",
+        // "**/*.module.scss",
         "vite.config.ts",
         "package.json",
         "src/styles/**/*.json"

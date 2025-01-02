@@ -1,0 +1,23 @@
+.dialog-base {
+    @apply fixed bottom-0 right-0 bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)] flex flex-col;
+}
+
+.minimized-dialog {
+    @apply dialog-base;
+    @apply px-2 py-1 rounded-none w-screen overflow-clip;
+    @media (min-width: 440px) {
+        @apply bottom-4 right-4 rounded-lg max-h-[calc(100%-32px)] w-fit max-w-[calc(100%-48px)];
+    }
+}
+
+.dialog {
+    @apply dialog-base;
+    @apply w-screen h-screen;
+    @media (min-width: 440px) {
+        @apply bottom-4 right-4 rounded-lg max-h-[calc(100%-32px)] max-w-[calc(100%-32px)];
+    }
+}
+
+.hidden {
+    @apply h-0 w-0 p-0 m-0;
+}
