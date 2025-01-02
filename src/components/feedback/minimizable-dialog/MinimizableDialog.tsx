@@ -243,7 +243,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                         </div>
                     </div>
 
-                    {label && <div className='text-2xl font-semibold text-delta-800'>{title}</div>}
+                    {label && <div className='text-2xl font-semibold text-delta-800 truncate'>{title}</div>}
                 </div>
                 <div className='h-full'> {typeof children === 'function' ? children({ fullScreen }) : children}</div>
 
