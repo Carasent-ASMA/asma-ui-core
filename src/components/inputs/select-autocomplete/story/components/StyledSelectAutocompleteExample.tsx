@@ -130,6 +130,14 @@ const top100Films = [
     { title: 'Monty Python and the Holy Grail', year: 1975 },
 ]
 
+const top1001Films = [
+    { label: 'The Shawshank Redemption', value: 1994 },
+    { label: 'The Godfather', value: 1972 },
+    { label: 'The Godfather: Part II', value: 1974 },
+    { label: 'The Dark Knight', value: 2008 },
+    { label: '12 Angry Men', value: 1957 },
+]
+
 export const StyledSelectAutocompleteExample: React.FC = () => {
     return (
         <div>
@@ -154,9 +162,10 @@ export const StyledSelectAutocompleteExample: React.FC = () => {
                         />
                     )}
                     autoHeight
+                    multiple={true}
                     // use on KeyDown if you want disable text typing
                     // onKeyDown={(e) => e.preventDefault()}
-                    // open={true}
+                    //open={true}
                 />
             </StyledFormControl>
         </div>

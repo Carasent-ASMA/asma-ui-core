@@ -23,6 +23,7 @@ export const StyledSelect: React.FC<
 > = ({ dataTest, allowClear, ...props }) => (
     <Select
         {...props}
+        //open={true}
         data-test={dataTest}
         value={props.value}
         IconComponent={(props) => (

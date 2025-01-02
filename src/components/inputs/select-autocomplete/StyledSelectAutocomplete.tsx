@@ -19,10 +19,12 @@ export function StyledSelectAutocomplete<
 >({
     dataTest,
     autoHeight,
+    getOptionLabel,
     ...props
 }: AutocompleteProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent> & {
     dataTest: string
     autoHeight?: boolean
+    getOptionLabel?: (option: T) => string
 }) {
     const [maxHeight, setMaxHeight] = useState<number | 'auto'>('auto')
     const selectRef = useRef<HTMLDivElement>(null)
@@ -43,11 +45,26 @@ export function StyledSelectAutocomplete<
           }
         : {}
 
+    const defaultGetOptionLabel = (option: T) => {
+        if (typeof option === 'object' && option !== null && 'label' in option) {
+            return (option as { label: string }).label
+        }
+        return String(option)
+    }
+
     return (
         <div className={style['styledSelectAutocompleteWrapper']} ref={selectRef}>
             <Autocomplete
                 {...props}
-                ListboxProps={listboxProps}
+                getOptionLabel={getOptionLabel}
+                ListboxProps={{
+                    ...listboxProps,
+                    sx: {
+                        '& .MuiAutocomplete-option': {
+                            paddingLeft: '6px !important',
+                        },
+                    },
+                }}
                 className={clsx('!text-sm', props.className)}
                 popupIcon={
                     props.popupIcon || (
@@ -66,7 +83,6 @@ export function StyledSelectAutocomplete<
                         sx={{
                             padding: '0 !important',
                             marginTop: '0px !important',
-
                             '& .MuiAutocomplete-option.Mui-focused': {
                                 background: 'var(--colors-delta-50) !important',
                             },
@@ -80,6 +96,31 @@ export function StyledSelectAutocomplete<
                     >
                         {children}
                     </Paper>
+                )}
+                renderOption={(props, option, { selected }) => (
+                    <li {...props}>
+                        <span
+                            style={{
+                                width: '26px',
+                                height: '24px',
+                                paddingRight: '4px',
+                                justifyContent: 'center',
+                                alignContent: 'center',
+                                display: 'flex',
+                            }}
+                        >
+                            {selected && (
+                                <Icon
+                                    icon='mdi:tick'
+                                    width={24}
+                                    height={24}
+                                    style={{ color: 'var(--colors-gama-500)' }}
+                                />
+                            )}
+                        </span>
+
+                        <span className='flex-1'>{getOptionLabel?.(option) || defaultGetOptionLabel(option)}</span>
+                    </li>
                 )}
                 sx={{
                     ...props.sx,
