@@ -24,7 +24,7 @@ export type IMinimizableDialogProps = {
     secondaryButtonText?: string
     onPrimaryButtonClick?: () => void
     onSecondaryButtonClick?: () => void
-    extraActions?: () => void | { label: string; className?: string; onClick: () => void }[]
+    extraActions?: { label: string; className?: string; onClick: () => void }[] | (() => void)
     extraActionsText?: string
     btnContainerClassName?: string
     footerClassName?: string
