@@ -17,6 +17,7 @@ import { StyledTooltip } from 'src/components/data-display/tooltip'
 import Draggable from 'react-draggable'
 import { ArrowShrink } from 'src/components/icons/arrow-shrink'
 import type { IMinimizableDialogProps } from './types'
+import { isArray, isFunction } from 'lodash-es'
 
 const Wrapper = ({
     dataTest,
@@ -254,7 +255,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                             footerClassName,
                         )}
                     >
-                        {extraActions?.length && extraActionsText && (
+                        {isArray(extraActions) && extraActions?.length && extraActionsText ? (
                             <>
                                 <StyledButton
                                     dataTest='extra-actions-button'
@@ -273,6 +274,13 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                                     ))}
                                 </StyledMenu>
                             </>
+                        ) : (
+                            extraActionsText &&
+                            isFunction(extraActions) && (
+                                <StyledButton dataTest='extra-action-button' variant='text'>
+                                    {extraActionsText}
+                                </StyledButton>
+                            )
                         )}{' '}
                         {footerInfo}
                         {secondaryButtonText || primaryButtonText ? (
