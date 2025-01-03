@@ -248,7 +248,8 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                 </div>
                 <div className='h-full'> {typeof children === 'function' ? children({ fullScreen }) : children}</div>
 
-                {(extraActions?.length && extraActionsText) || footerInfo ? (
+                {(((isArray(extraActions) && extraActions?.length) || isFunction(extraActions)) && extraActionsText) ||
+                footerInfo ? (
                     <div
                         className={cn(
                             'flex items-center justify-between p-4 border-0 border-t-[1px] border-solid border-delta-200 bg-white',
