@@ -1,9 +1,10 @@
-import { CloseIcon, KeyboardCapslockIcon, MinimizeIcon } from 'src/components/icons'
-import { StyledButton } from 'src/components/inputs/button'
 import React, { useState, type ReactNode } from 'react'
 import clsx from 'clsx'
+import { CloseBtn } from './components/CloseBtn'
+import { MinimizeBtn } from './components/MinimizeBtn'
 import { cn } from 'src/helpers/cn'
 import styles from './MinimizableDialogV2.module.scss'
+import { StyledTooltip } from 'src/components/data-display/tooltip'
 
 export const MinimizableDialogV2: React.FC<{
     onCloseText?: string
@@ -22,6 +23,11 @@ export const MinimizableDialogV2: React.FC<{
     classNameOverrides?: {
         maximized?: string
         minimized?: string
+    }
+    tooltipOverrides?: {
+        maximized?: string
+        minimized?: string
+        close?: string
     }
     dataTest: string
 }> = ({
@@ -42,6 +48,11 @@ export const MinimizableDialogV2: React.FC<{
     },
     dataTest,
     actionNode,
+    tooltipOverrides = {
+        maximized: '',
+        minimized: '',
+        close: '',
+    },
 }) => {
     const [minimized, setMinimized] = useState(false)
 
@@ -59,34 +70,26 @@ export const MinimizableDialogV2: React.FC<{
                 className={cn(styles['minimized-dialog'], !minimized && styles['hidden'], classNameOverrides.minimized)}
             >
                 <div className={clsx('flex items-center justify-between', !minimized && 'hidden')} data-test={dataTest}>
-                    <div className='truncate text-lg font-semibold text-delta-800 pr-1'>{title}</div>
+                    <div className='truncate max-w-[303px] text-lg font-semibold text-delta-800 pr-1'>
+                        <StyledTooltip title={title} placement='top'>
+                            <div className='truncate'>{title}</div>
+                        </StyledTooltip>
+                    </div>
                     <div className='flex items-center gap-x-1'>
-                        {showExpandIcon && (
-                            <StyledButton
-                                dataTest='minimize-button'
-                                variant='text'
-                                size='small'
-                                onClick={toggleMinimized}
-                                endIcon={
-                                    showExpandIcon && (
-                                        <KeyboardCapslockIcon height={20} width={20} color='text-gama-500' />
-                                    )
-                                }
-                            >
-                                {onExpandText}
-                            </StyledButton>
-                        )}
-                        {showCloseIcon && (
-                            <StyledButton
-                                dataTest='close-button'
-                                variant='textGray'
-                                size='small'
-                                onClick={onClose}
-                                endIcon={showCloseIcon && <CloseIcon height={20} width={20} color='text-delta-700' />}
-                            >
-                                {onCloseText}
-                            </StyledButton>
-                        )}
+                        <MinimizeBtn
+                            type='expand'
+                            visibility={showExpandIcon}
+                            onClick={toggleMinimized}
+                            title={onExpandText}
+                            tooltipTitle={tooltipOverrides.maximized || 'Expand'}
+                        />
+
+                        <CloseBtn
+                            showCloseIcon={showCloseIcon}
+                            onClick={onClose}
+                            title={onCloseText}
+                            tooltipTitle={tooltipOverrides.close || 'Close'}
+                        />
                     </div>
                 </div>
             </div>
@@ -106,41 +109,26 @@ export const MinimizableDialogV2: React.FC<{
 
                         <div className='flex items-center gap-x-1'>
                             {actionNode}
-                            {showMinimizeIcon && (
-                                <StyledButton
-                                    dataTest='minimize-button'
-                                    variant='textGray'
-                                    size='small'
-                                    onClick={toggleMinimized}
-                                    endIcon={
-                                        showMinimizeIcon && (
-                                            <MinimizeIcon height={20} width={20} color='text-delta-700' />
-                                        )
-                                    }
-                                >
-                                    {onMinimizeText}
-                                </StyledButton>
-                            )}
-
-                            {showCloseIcon && (
-                                <StyledButton
-                                    dataTest='close-button'
-                                    variant='textGray'
-                                    size='small'
-                                    onClick={onClose}
-                                    endIcon={<CloseIcon height={20} width={20} color='text-delta-700' />}
-                                >
-                                    {onCloseText}
-                                </StyledButton>
-                            )}
+                            <MinimizeBtn
+                                visibility={showMinimizeIcon}
+                                type='minimize'
+                                onClick={toggleMinimized}
+                                title={onMinimizeText}
+                                tooltipTitle={tooltipOverrides.minimized || 'Minimize'}
+                            />
+                            <CloseBtn
+                                showCloseIcon={showCloseIcon}
+                                onClick={onClose}
+                                title={onCloseText}
+                                tooltipTitle={tooltipOverrides.close || 'Close'}
+                            />
                         </div>
                     </div>
 
                     {label && <div className='text-2xl font-semibold text-delta-800 truncate'>{title}</div>}
                 </div>
-                <>{children}</>
+                <>{!minimized && children}</>
             </div>
-            {/*  */}
         </>
     )
 }
