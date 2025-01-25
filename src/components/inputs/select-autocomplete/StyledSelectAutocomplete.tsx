@@ -97,31 +97,34 @@ export function StyledSelectAutocomplete<
                         {children}
                     </Paper>
                 )}
-                renderOption={(props, option, { selected }) => (
-                    <li {...props}>
-                        <span
-                            style={{
-                                width: '26px',
-                                height: '24px',
-                                paddingRight: '4px',
-                                justifyContent: 'center',
-                                alignContent: 'center',
-                                display: 'flex',
-                            }}
-                        >
-                            {selected && (
-                                <Icon
-                                    icon='mdi:tick'
-                                    width={24}
-                                    height={24}
-                                    style={{ color: 'var(--colors-gama-500)' }}
-                                />
-                            )}
-                        </span>
+                renderOption={
+                    props?.renderOption ||
+                    ((props, option, { selected }) => (
+                        <li {...props}>
+                            <span
+                                style={{
+                                    width: '26px',
+                                    height: '24px',
+                                    paddingRight: '4px',
+                                    justifyContent: 'center',
+                                    alignContent: 'center',
+                                    display: 'flex',
+                                }}
+                            >
+                                {selected && (
+                                    <Icon
+                                        icon='mdi:tick'
+                                        width={24}
+                                        height={24}
+                                        style={{ color: 'var(--colors-gama-500)' }}
+                                    />
+                                )}
+                            </span>
 
-                        <span className='flex-1'>{getOptionLabel?.(option) || defaultGetOptionLabel(option)}</span>
-                    </li>
-                )}
+                            <span className='flex-1'>{getOptionLabel?.(option) || defaultGetOptionLabel(option)}</span>
+                        </li>
+                    ))
+                }
                 sx={{
                     ...props.sx,
                     '& .MuiOutlinedInput-notchedOutline': {
