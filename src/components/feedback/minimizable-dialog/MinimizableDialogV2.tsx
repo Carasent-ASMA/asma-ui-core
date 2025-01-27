@@ -127,7 +127,8 @@ export const MinimizableDialogV2: React.FC<{
 
                     {label && <div className='text-2xl font-semibold text-delta-800 truncate'>{title}</div>}
                 </div>
-                <>{!minimized && children}</>
+                {/* hiding children instead of not rendering them to not reset any forms */}
+                <div className={cn(minimized && 'hidden')}>{children}</div>
             </div>
         </>
     )
