@@ -23,6 +23,7 @@ export const StyledTooltip = (props: TooltipProps) => (
                     lineHeight: '16px !important',
                     letterSpacing: ' 0.24px !important',
                     bgcolor: '#363E4A !important',
+                    wordBreak: 'break-word !important',
                 },
             },
         }}
