@@ -5,7 +5,7 @@
 .minimized-dialog {
     @apply dialog-base;
     @apply px-2 py-1 rounded-none w-screen overflow-clip;
-    @media (min-width: 440px) {
+    @media (min-width: 640px) {
         @apply bottom-4 right-4 rounded-lg max-h-[calc(100%-32px)] w-fit max-w-[calc(100%-48px)];
     }
 }
@@ -13,7 +13,7 @@
 .dialog {
     @apply dialog-base;
     @apply w-screen h-screen;
-    @media (min-width: 440px) {
+    @media (min-width: 640px) {
         @apply bottom-4 right-4 rounded-lg max-h-[calc(100%-32px)] max-w-[calc(100%-32px)];
     }
 }
