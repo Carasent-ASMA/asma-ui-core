@@ -3,7 +3,7 @@
     "publishConfig": {
         "access": "public"
     },
-    "version": "3.0.146",
+    "version": "3.0.147",
     "type": "module",
     "files": [
         "dist/**/*",
@@ -15,6 +15,16 @@
     "types": "./dist/index.d.ts",
     "main": "./dist/asma-core-ui.es.js",
     "module": "./dist/asma-core-ui.es.js",
+    "exports": {
+        ".": {
+            "import": {
+                "types": "./dist/index.d.ts",
+                "default": "./dist/asma-core-ui.es.js"
+            }
+        },
+        "./dist/style.css": "./dist/style.css",
+        "./tw-configs/twConfigs.json": "./tw-configs/twConfigs.json"
+    },
     "scripts": {
         "dev": "vite",
         "build": "npx tsc && rm -rf ./dist && vite build",
@@ -115,12 +125,5 @@
     "resolutions": {
         "@types/node": "18.0.3",
         "node": "18.17.0"
-    },
-    "exports": {
-        ".": {
-            "import": "./dist/asma-core-ui.es.js"
-        },
-        "./dist/style.css": "./dist/style.css",
-        "./tw-configs/twConfigs.json": "./tw-configs/twConfigs.json"
     }
 }
