@@ -1,13 +1,13 @@
 import type { FC } from 'react'
 import EmptyPageIcon from 'src/components/feedback/empty-page/EmptyPageIcon'
 
-export const StyledEmptyPage: FC<{ isEmpty: boolean; emptyText: string; className?: string }> = ({
-    isEmpty,
+/**
+ * @props `isEmpty` is redundant and kept optional for backward compatibility
+ */
+export const StyledEmptyPage: FC<{ isEmpty?: boolean; emptyText: string; className?: string }> = ({
     emptyText,
     className = '',
 }) => {
-    if (!isEmpty) return null
-
     return (
         <div
             data-test='empty-page-container'
