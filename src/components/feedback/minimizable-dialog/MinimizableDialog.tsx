@@ -246,7 +246,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
 
                     {label && <div className='text-2xl font-semibold text-delta-800 truncate'>{title}</div>}
                 </div>
-                <div className='h-full'> {typeof children === 'function' ? children({ fullScreen }) : children}</div>
+                <div className={'h-full'}> {typeof children === 'function' ? children({ fullScreen }) : children}</div>
 
                 {(((isArray(extraActions) && extraActions?.length) || isFunction(extraActions)) && extraActionsText) ||
                 footerInfo ? (
@@ -308,7 +308,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                         {secondaryButtonText || primaryButtonText ? (
                             <div
                                 className={cn(
-                                    'flex justify-end gap-x-4 border-t-[1px] border-delta-200 p-4 bg-white',
+                                    'flex justify-end gap-x-4 border-t-[1px] border-delta-200 p-4',
                                     btnContainerClassName,
                                 )}
                             >
