@@ -12,7 +12,7 @@
 
 .dialog {
     @apply dialog-base;
-    @apply w-screen h-screen;
+    @apply w-dvw h-dvh;
     @media (min-width: 640px) {
         @apply bottom-4 right-4 rounded-lg max-h-[calc(100dvh-32px)] max-w-[600px];
     }
