@@ -6,7 +6,7 @@
     @apply dialog-base;
     @apply px-2 py-1 rounded-none w-screen overflow-clip;
     @media (min-width: 640px) {
-        @apply bottom-4 right-4 rounded-lg max-h-[calc(100%-32px)] w-fit max-w-[calc(100%-48px)];
+        @apply bottom-4 right-4 rounded-lg max-h-[calc(100dvh-32px)] w-fit max-w-[calc(100dvw-48px)];
     }
 }
 
@@ -14,7 +14,7 @@
     @apply dialog-base;
     @apply w-screen h-screen;
     @media (min-width: 640px) {
-        @apply bottom-4 right-4 rounded-lg max-h-[calc(100%-32px)] max-w-[600px];
+        @apply bottom-4 right-4 rounded-lg max-h-[calc(100dvh-32px)] max-w-[600px];
     }
 }
 
