@@ -3,6 +3,7 @@ import { Icon } from '@iconify/react'
 import clsx from 'clsx'
 import { useEffect, useRef, useState } from 'react'
 import style from './StyledSelectAutocomplete.module.scss'
+import { cn } from 'src/helpers/cn'
 
 /**
  *
@@ -20,11 +21,13 @@ export function StyledSelectAutocomplete<
     dataTest,
     autoHeight,
     getOptionLabel,
+    wrapperClassName,
     ...props
 }: AutocompleteProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent> & {
     dataTest: string
     autoHeight?: boolean
     getOptionLabel?: (option: T) => string
+    wrapperClassName?: string
 }) {
     const [maxHeight, setMaxHeight] = useState<number | 'auto'>('auto')
     const selectRef = useRef<HTMLDivElement>(null)
@@ -53,7 +56,7 @@ export function StyledSelectAutocomplete<
     }
 
     return (
-        <div className={style['styledSelectAutocompleteWrapper']} ref={selectRef}>
+        <div className={cn(style['styledSelectAutocompleteWrapper'], wrapperClassName)} ref={selectRef}>
             <Autocomplete
                 {...props}
                 getOptionLabel={getOptionLabel}
