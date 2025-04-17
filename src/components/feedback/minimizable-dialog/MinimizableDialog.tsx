@@ -278,7 +278,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                         ) : (
                             extraActionsText &&
                             isFunction(extraActions) && (
-                                <StyledButton dataTest='extra-action-button' variant='text'>
+                                <StyledButton dataTest='extra-action-button' variant='text' onClick={extraActions}>
                                     {extraActionsText}
                                 </StyledButton>
                             )
