@@ -1,0 +1,75 @@
+import { CloseIcon, SearchIcon, StyledInputField, type TextFieldProps } from 'asma-core-ui'
+import clsx from 'clsx'
+import { useState, type FC } from 'react'
+import { cn } from 'src/helpers/cn'
+
+export const StyledSearchField: FC<
+    TextFieldProps & {
+        dataTest: string
+        searchQuery: string
+        onSearch: (query: string) => void
+    }
+> = ({ searchQuery, onSearch, className, ...props }) => {
+    const [isFocused, setIsFocused] = useState<boolean>(false)
+
+    return (
+        <div className={'relative w-fit'}>
+            <StyledInputField
+                size={'small'}
+                className={clsx('w-[160px]', className)}
+                variant={'outlined'}
+                value={searchQuery}
+                onChange={({ target }) => onSearch(target.value)}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+                InputProps={{
+                    className: cn(
+                        'transition-[padding] duration-300',
+                        isFocused ? 'pl-0' : 'pl-5',
+                        searchQuery ? 'pr-5' : 'pr-0',
+                    ),
+                    sx: {
+                        '& input': {
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                        },
+                    },
+                }}
+                InputLabelProps={{
+                    sx: {
+                        transform: 'translate(34px, 9px) scale(1)',
+                        width: isFocused || searchQuery ? undefined : 'calc(100% - 42px)',
+                        '&.MuiInputLabel-shrink': {
+                            transform: 'translate(16px, -9px) scale(0.75)',
+                        },
+                    },
+                }}
+                {...props}
+            />
+
+            <SearchIcon
+                width={24}
+                height={24}
+                className={cn(
+                    'absolute top-2 left-2',
+                    'transform-gpu transition-all duration-300 ease-in-out',
+                    isFocused ? 'opacity-0 scale-75 pointer-events-none' : 'opacity-100 scale-100',
+                )}
+                color={'var(--colors-delta-700)'}
+            />
+
+            <div
+                className={cn(
+                    'absolute right-2 top-2 cursor-pointer bg-delta-50 rounded-full outline outline-1 outline-delta-100',
+                    'flex items-center justify-center',
+                    'transform-gpu transition-all duration-200 ease-in-out',
+                    searchQuery ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none',
+                )}
+                onMouseDown={() => onSearch('')}
+            >
+                <CloseIcon width={24} height={24} color={'var(--colors-delta-700)'} />
+            </div>
+        </div>
+    )
+}
