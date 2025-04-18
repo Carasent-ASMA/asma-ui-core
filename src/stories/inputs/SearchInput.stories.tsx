@@ -16,13 +16,13 @@ export const SearchField = () => {
     const [searchQuery, setSearchQuery] = useState('')
 
     return (
-        <div>
-            <StyledSearchField
-                dataTest={'test-search-field'}
-                label={'Search'}
-                searchQuery={searchQuery}
-                onSearch={setSearchQuery}
-            />
-        </div>
+        <StyledSearchField
+            className={'w-[200px]'}
+            dataTest={'test-search-field'}
+            label={'Search component'}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onClear={() => setSearchQuery('')}
+        />
     )
 }
