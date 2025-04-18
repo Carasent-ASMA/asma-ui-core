@@ -12,6 +12,8 @@ export const StyledSearchField: FC<
 > = ({ searchQuery, onSearch, className, ...props }) => {
     const [isFocused, setIsFocused] = useState<boolean>(false)
 
+    const hasInteraction = isFocused || searchQuery
+
     return (
         <div className={'relative w-fit'}>
             <StyledInputField
@@ -25,7 +27,7 @@ export const StyledSearchField: FC<
                 InputProps={{
                     className: cn(
                         'transition-[padding] duration-300',
-                        isFocused ? 'pl-0' : 'pl-5',
+                        hasInteraction ? 'pl-0' : 'pl-5',
                         searchQuery ? 'pr-5' : 'pr-0',
                     ),
                     sx: {
@@ -39,7 +41,7 @@ export const StyledSearchField: FC<
                 InputLabelProps={{
                     sx: {
                         transform: 'translate(34px, 9px) scale(1)',
-                        width: isFocused || searchQuery ? undefined : 'calc(100% - 42px)',
+                        width: hasInteraction ? undefined : 'calc(100% - 42px)',
                         '&.MuiInputLabel-shrink': {
                             transform: 'translate(16px, -9px) scale(0.75)',
                         },
@@ -54,7 +56,7 @@ export const StyledSearchField: FC<
                 className={cn(
                     'absolute top-2 left-2',
                     'transform-gpu transition-all duration-300 ease-in-out',
-                    isFocused ? 'opacity-0 scale-75 pointer-events-none' : 'opacity-100 scale-100',
+                    hasInteraction ? 'opacity-0 scale-75 pointer-events-none' : 'opacity-100 scale-100',
                 )}
                 color={'var(--colors-delta-700)'}
             />
@@ -63,7 +65,7 @@ export const StyledSearchField: FC<
                 className={cn(
                     'absolute right-2 top-2 cursor-pointer bg-delta-50 rounded-full outline outline-1 outline-delta-100',
                     'flex items-center justify-center',
-                    'transform-gpu transition-all duration-200 ease-in-out',
+                    'transform-gpu transition-all duration-300 ease-in-out',
                     searchQuery ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none',
                 )}
                 onMouseDown={() => onSearch('')}
