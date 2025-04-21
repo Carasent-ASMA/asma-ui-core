@@ -17,7 +17,7 @@ export const SearchField = () => {
 
     return (
         <StyledSearchField
-            className={'w-[200px]'}
+            sx={{ width: 200 }}
             dataTest={'test-search-field'}
             label={'Search component'}
             value={searchQuery}

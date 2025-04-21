@@ -1,14 +1,8 @@
 import { CloseIcon, SearchIcon, StyledInputField } from 'asma-core-ui'
-import clsx from 'clsx'
 import { useState, type FC, type ComponentProps } from 'react'
 import { cn } from 'src/helpers/cn'
 
-export const StyledSearchField: FC<ComponentProps<typeof StyledInputField>> = ({
-    value,
-    className,
-    onClear,
-    ...props
-}) => {
+export const StyledSearchField: FC<ComponentProps<typeof StyledInputField>> = ({ value, onClear, ...props }) => {
     const [isFocused, setIsFocused] = useState<boolean>(false)
 
     const hasInteraction = isFocused || value
@@ -17,7 +11,7 @@ export const StyledSearchField: FC<ComponentProps<typeof StyledInputField>> = ({
         <div className={'relative w-fit'}>
             <StyledInputField
                 size={'small'}
-                className={clsx('w-[160px]', className)}
+                sx={{ width: 160 }}
                 variant={'outlined'}
                 value={value}
                 onFocus={() => setIsFocused(true)}
