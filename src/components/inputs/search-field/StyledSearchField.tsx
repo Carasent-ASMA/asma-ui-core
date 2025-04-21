@@ -11,7 +11,6 @@ export const StyledSearchField: FC<ComponentProps<typeof StyledInputField>> = ({
         <div className={'relative w-fit'}>
             <StyledInputField
                 size={'small'}
-                sx={{ width: 160 }}
                 variant={'outlined'}
                 value={value}
                 onFocus={() => setIsFocused(true)}
@@ -40,6 +39,10 @@ export const StyledSearchField: FC<ComponentProps<typeof StyledInputField>> = ({
                     },
                 }}
                 {...props}
+                sx={{
+                    width: 160,
+                    ...props.sx,
+                }}
             />
 
             <SearchIcon
