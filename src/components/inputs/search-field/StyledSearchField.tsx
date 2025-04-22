@@ -58,14 +58,14 @@ export const StyledSearchField: FC<ComponentProps<typeof StyledInputField>> = ({
 
             <div
                 className={cn(
-                    'absolute right-2 top-2 cursor-pointer bg-delta-50 rounded-full outline outline-1 outline-delta-100',
+                    'absolute w-6 h-6 right-2 top-2 cursor-pointer bg-delta-50 rounded-full',
                     'flex items-center justify-center',
                     'transform-gpu transition-all duration-300 ease-in-out',
                     value ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none',
                 )}
                 onMouseDown={onClear}
             >
-                <CloseIcon width={24} height={24} color={'var(--colors-delta-700)'} />
+                <CloseIcon width={20} height={20} color={'var(--colors-delta-700)'} />
             </div>
         </div>
     )

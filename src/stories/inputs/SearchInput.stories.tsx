@@ -3,7 +3,7 @@ import type { Meta } from '@storybook/react'
 import { StyledSearchField } from 'src/components/inputs/search-field/StyledSearchField'
 
 const meta = {
-    title: '*/Search field',
+    title: '*/SearchField',
     component: StyledSearchField,
     tags: [],
     argTypes: {},
