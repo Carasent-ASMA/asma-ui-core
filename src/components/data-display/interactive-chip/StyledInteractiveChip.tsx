@@ -56,6 +56,13 @@ export const StyledInteractiveChip: FC<StyledInteractiveChipProps> = ({ type = '
                         },
                     },
                 }),
+                ...(checked && {
+                    '& .MuiChip-avatar': {
+                        '& .MuiSvgIcon-root': {
+                            color: 'var(--colors-gama-500)',
+                        },
+                    },
+                }),
                 '&:focus:hover': interactionHoverStyles,
                 ...props.sx,
             }}
