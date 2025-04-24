@@ -51,6 +51,7 @@ export * from './components/utils/accordion'
 // utils
 export * from './components/utils/popover'
 export * from './components/utils/filter-menu'
+export * from './components/utils/copy-wrapper'
 //widgets
 export * from './components/custom/widget/widget-title/StyledWidgetTitle'
 export * from './components/custom/widget/widget-header/StyledWidgetHeader'

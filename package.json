@@ -3,7 +3,7 @@
     "publishConfig": {
         "access": "public"
     },
-    "version": "1.0.166",
+    "version": "1.0.167",
     "type": "module",
     "files": [
         "dist/**/*",
@@ -53,6 +53,7 @@
         "@iconify/react": "^4.1.1",
         "@mui/material": "^5.13.7",
         "@tanstack/react-table": "^8.10.0",
+        "asma-ui-icons": "^0.0.35",
         "clsx": "^1.2.1",
         "date-fns": "^2.30.0",
         "lodash-es": "^4.17.21",
