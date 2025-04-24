@@ -7,6 +7,8 @@ import type { MessageProps } from 'src/components/feedback/snack-bar/components/
 import { StyledButton } from 'src/components/inputs/button'
 import { cn } from 'src/helpers/cn'
 
+import style from './CopyWrapper.module.scss'
+
 export const defaultSnackProps: MessageProps = {
     Components: { info: StyledInfoSnackbar },
     autoHideDuration: 3000,
@@ -20,9 +22,9 @@ export const CopyWrapper: FC<
     PropsWithChildren<{ className?: string; contentToCopy: string; locale: 'en' | 'no'; snackProps?: MessageProps }>
 > = ({ className, contentToCopy, locale, snackProps, children }) => {
     return (
-        <div className={cn('flex items-center gap-2 hover:text-gama-500', className)}>
+        <div className={cn('flex items-center gap-2 hover:text-gama-500', style['copy-wrapper'], className)}>
             {children}
-            <StyledTooltip title={locale === 'no' ? 'Kopier' : 'Copy'}>
+            <StyledTooltip title={locale === 'no' ? 'Kopier' : 'Copy'} className={style['hidden-copy']}>
                 <div>
                     <StyledButton dataTest='copy-button' size='small' variant='text' className='cursor-pointer'>
                         <ContentCopyIcon

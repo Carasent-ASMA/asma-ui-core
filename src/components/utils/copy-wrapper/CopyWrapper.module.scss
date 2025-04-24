@@ -1,0 +1,11 @@
+.copy-wrapper {
+    &:hover {
+        .hidden-copy {
+            @apply visible;
+        }
+    }
+}
+
+.hidden-copy {
+    @apply invisible;
+}
