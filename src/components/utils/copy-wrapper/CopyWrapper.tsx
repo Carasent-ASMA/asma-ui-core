@@ -1,26 +1,20 @@
 import { ContentCopyIcon } from 'asma-ui-icons'
-import { type FC, type PropsWithChildren } from 'react'
+import { type FC, type PropsWithChildren, type ReactNode } from 'react'
 import { StyledTooltip } from 'src/components/data-display/tooltip'
-import { message } from 'src/components/feedback/snack-bar'
-import { StyledInfoSnackbar } from 'src/components/feedback/snack-bar/components/StyledInfoSnackbar'
 import type { MessageProps } from 'src/components/feedback/snack-bar/components/types'
 import { StyledButton } from 'src/components/inputs/button'
 import { cn } from 'src/helpers/cn'
 
 import style from './CopyWrapper.module.scss'
 
-export const defaultSnackProps: MessageProps = {
-    Components: { info: StyledInfoSnackbar },
-    autoHideDuration: 3000,
-    classes: { root: 'min-w-fit' },
-    domRoot: document.body,
-    maxSnack: 1,
-    preventDuplicate: true,
-}
-
 export const CopyWrapper: FC<
-    PropsWithChildren<{ className?: string; contentToCopy: string; locale: 'en' | 'no'; snackProps?: MessageProps }>
-> = ({ className, contentToCopy, locale, snackProps, children }) => {
+    PropsWithChildren<{
+        className?: string
+        contentToCopy: string
+        locale: 'en' | 'no'
+        messageInfo: (info: ReactNode, options?: MessageProps) => () => void
+    }>
+> = ({ className, contentToCopy, locale, messageInfo, children }) => {
     return (
         <div className={cn('flex items-center gap-2 hover:text-gama-500', style['copy-wrapper'], className)}>
             {children}
@@ -33,13 +27,7 @@ export const CopyWrapper: FC<
                             className='text-gama-500 hover:text-delta-700'
                             onClick={() => {
                                 navigator.clipboard.writeText(contentToCopy).then(() => {
-                                    message.info(
-                                        locale === 'no' ? 'Kopieres til utklippstavlen' : 'Copied to clipboard',
-                                        {
-                                            ...defaultSnackProps,
-                                            ...snackProps,
-                                        },
-                                    )
+                                    messageInfo(locale === 'no' ? 'Kopieres til utklippstavlen' : 'Copied to clipboard')
                                 })
                             }}
                         />
