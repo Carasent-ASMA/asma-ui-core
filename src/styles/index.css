@@ -66,15 +66,14 @@
         display: none;
     }
 
-    /* Define Roboto Regular */
-    @font-face {
+    /*  @font-face {
         font-family: 'Roboto';
         src: url('./fonts/roboto/Roboto-Regular.ttf') format('truetype');
         font-weight: 400;
         font-style: normal;
     }
 
-    /* Define Roboto Bold */
+   
     @font-face {
         font-family: 'Roboto';
         src: url('./fonts/roboto/Roboto-Bold.ttf') format('truetype');
@@ -82,7 +81,7 @@
         font-style: normal;
     }
 
-    /* Define Roboto Bold Italic */
+    
     @font-face {
         font-family: 'Roboto';
         src: url('./fonts/roboto/Roboto-BoldItalic.ttf') format('truetype');
@@ -90,7 +89,7 @@
         font-style: italic;
     }
 
-    /* Define Roboto Black */
+   
     @font-face {
         font-family: 'Roboto';
         src: url('./fonts/roboto/Roboto-Black.ttf') format('truetype');
@@ -98,7 +97,7 @@
         font-style: normal;
     }
 
-    /* Define Roboto Black Italic */
+    
     @font-face {
         font-family: 'Roboto';
         src: url('./fonts/roboto/Roboto-BlackItalic.ttf') format('truetype');
@@ -106,7 +105,7 @@
         font-style: italic;
     }
 
-    /* Define Roboto Light */
+   
     @font-face {
         font-family: 'Roboto';
         src: url('./fonts/roboto/Roboto-Light.ttf') format('truetype');
@@ -114,7 +113,7 @@
         font-style: normal;
     }
 
-    /* Define Roboto Light Italic */
+   
     @font-face {
         font-family: 'Roboto';
         src: url('./fonts/roboto/Roboto-LightItalic.ttf') format('truetype');
@@ -122,7 +121,7 @@
         font-style: italic;
     }
 
-    /* Define Roboto Medium */
+    
     @font-face {
         font-family: 'Roboto';
         src: url('./fonts/roboto/Roboto-Medium.ttf') format('truetype');
@@ -130,7 +129,7 @@
         font-style: normal;
     }
 
-    /* Define Roboto Medium Italic */
+    
     @font-face {
         font-family: 'Roboto';
         src: url('./fonts/roboto/Roboto-MediumItalic.ttf') format('truetype');
@@ -138,7 +137,7 @@
         font-style: italic;
     }
 
-    /* Define Roboto Thin */
+   
     @font-face {
         font-family: 'Roboto';
         src: url('./fonts/roboto/Roboto-Thin.ttf') format('truetype');
@@ -146,7 +145,7 @@
         font-style: normal;
     }
 
-    /* Define Roboto Thin Italic */
+   
     @font-face {
         font-family: 'Roboto';
         src: url('./fonts/roboto/Roboto-ThinItalic.ttf') format('truetype');
@@ -154,11 +153,11 @@
         font-style: italic;
     }
 
-    /* Define Roboto Italic */
+   
     @font-face {
         font-family: 'Roboto';
         src: url('./fonts/roboto/Roboto-Italic.ttf') format('truetype');
         font-weight: 400;
         font-style: italic;
-    }
+    } */
 }
