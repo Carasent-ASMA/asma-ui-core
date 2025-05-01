@@ -22,6 +22,7 @@ export const DialogMinimizableV2 = () => {
                 Open minimizable dialog v2
             </StyledButton>
             <MinimizableDialogV2
+                enableFullscreen
                 dataTest='test'
                 title='Ny stilling og utplassering Ny stilling og utplassering Ny stilling og utplassering'
                 open={open}
@@ -34,6 +35,7 @@ export const DialogMinimizableV2 = () => {
                 }
                 classNameOverrides={{
                     maximized: 'max-w-[600px]',
+                    fullscreen: 'max-w-[1000px]',
                 }}
             >
                 <>

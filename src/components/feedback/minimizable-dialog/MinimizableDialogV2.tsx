@@ -5,11 +5,13 @@ import { MinimizeBtn } from './components/MinimizeBtn'
 import { cn } from 'src/helpers/cn'
 import styles from './MinimizableDialogV2.module.scss'
 import { StyledTooltip } from 'src/components/data-display/tooltip'
+import { FullScreenBtn } from './components/FullscreenBtn'
 
 export const MinimizableDialogV2: React.FC<{
     onCloseText?: string
     onMinimizeText?: string
     onExpandText?: string
+    onFullScreenText?: string
     open: boolean
     onClose: () => void
     actionNode?: React.ReactNode
@@ -23,20 +25,25 @@ export const MinimizableDialogV2: React.FC<{
     classNameOverrides?: {
         maximized?: string
         minimized?: string
+        fullscreen?: string
     }
     tooltipOverrides?: {
         maximized?: string
         minimized?: string
         close?: string
+        fullscreen?: string
     }
+    enableFullscreen?: boolean
     dataTest: string
 }> = ({
     onCloseText = '',
     onMinimizeText = '',
     onExpandText = '',
+    onFullScreenText = '',
     showCloseIcon = true,
     showMinimizeIcon = true,
     showExpandIcon = true,
+    enableFullscreen = false,
     title,
     label,
     children,
@@ -45,6 +52,7 @@ export const MinimizableDialogV2: React.FC<{
     classNameOverrides = {
         maximized: '',
         minimized: '',
+        fullscreen: '',
     },
     dataTest,
     actionNode,
@@ -52,9 +60,11 @@ export const MinimizableDialogV2: React.FC<{
         maximized: '',
         minimized: '',
         close: '',
+        fullscreen: '',
     },
 }) => {
     const [minimized, setMinimized] = useState(false)
+    const [fullScreen, setFullScreen] = useState(false)
 
     const toggleMinimized = () => {
         setMinimized(!minimized)
@@ -97,7 +107,15 @@ export const MinimizableDialogV2: React.FC<{
             {/* Maximized  */}
             <div
                 style={{ zIndex: 51 }}
-                className={cn(styles['dialog'], minimized && styles['hidden'], classNameOverrides.maximized)}
+                className={cn(
+                    styles['dialog'],
+                    minimized && styles['hidden'],
+                    fullScreen &&
+                        !minimized &&
+                        'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[1000px] duration-0',
+                    classNameOverrides.maximized,
+                    fullScreen && classNameOverrides.fullscreen,
+                )}
             >
                 <div className='flex flex-col gap-y-2 p-4 border-b-[1px] border-delta-200'>
                     <div className='flex items-center justify-between'>
@@ -115,6 +133,15 @@ export const MinimizableDialogV2: React.FC<{
                                 onClick={toggleMinimized}
                                 title={onMinimizeText}
                                 tooltipTitle={tooltipOverrides.minimized || 'Minimize'}
+                            />
+                            <FullScreenBtn
+                                showFullScreenIcon={enableFullscreen}
+                                fullScreen={fullScreen}
+                                onClick={() => setFullScreen(!fullScreen)}
+                                title={onFullScreenText}
+                                tooltipTitle={
+                                    tooltipOverrides.fullscreen || (fullScreen ? 'Exit full screen' : 'Full screen')
+                                }
                             />
                             <CloseBtn
                                 showCloseIcon={showCloseIcon}

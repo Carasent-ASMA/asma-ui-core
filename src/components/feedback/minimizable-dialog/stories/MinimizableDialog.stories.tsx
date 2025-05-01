@@ -24,6 +24,7 @@ export const DialogMinimizable = () => {
             </StyledButton>
             <MinimizableDialog
                 dataTest='test'
+                enableFullscreen={true}
                 // onCloseText='Close'
                 // onMinimizeText='Minimize'
                 // onExpandText='Expand'
@@ -33,7 +34,7 @@ export const DialogMinimizable = () => {
                 onClose={handleClose}
                 label='Adevinta ASA'
                 // className='w-[600px] max-h-[800px]'
-                className={cn('max-h-[calc(100dvh-100px)] w-fit', 'min-w-[850px] max-w-[850px]')}
+                className={cn('max-w-[850px]')}
                 primaryButtonText='Save'
                 onPrimaryButtonClick={handleClose}
                 secondaryButtonText='Cancel'

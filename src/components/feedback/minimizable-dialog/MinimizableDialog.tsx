@@ -1,12 +1,6 @@
-import {
-    CloseIcon,
-    DotsVerticalIcon,
-    DragHorizontalIcon,
-    KeyboardCapslockIcon,
-    MinimizeIcon,
-} from 'src/components/icons'
+import { CloseIcon, DotsVerticalIcon, KeyboardCapslockIcon, MinimizeIcon } from 'src/components/icons'
 import { StyledButton } from 'src/components/inputs/button'
-import React, { useState, type ReactNode, useEffect } from 'react'
+import React, { useState } from 'react'
 import clsx from 'clsx'
 import { cn } from 'src/helpers/cn'
 import styles from './MinimizableDialog.module.scss'
@@ -14,60 +8,9 @@ import { StyledMenu, StyledMenuItem } from 'src/components/navigation/menu'
 import { useToggleMenuVisibility } from 'src/hooks/useToggleMenuVisibility.hook'
 import { ArrowExpand } from 'src/components/icons/arrow-expand'
 import { StyledTooltip } from 'src/components/data-display/tooltip'
-import Draggable from 'react-draggable'
 import { ArrowShrink } from 'src/components/icons/arrow-shrink'
 import type { IMinimizableDialogProps } from './types'
 import { isArray, isFunction } from 'lodash-es'
-
-const Wrapper = ({
-    dataTest,
-    className,
-    draggable,
-    fullScreen,
-    minimized,
-    children,
-}: {
-    dataTest: string
-    className: string
-    draggable: boolean
-    fullScreen: boolean
-    minimized: boolean
-    children: ReactNode | ((props: { fullScreen: boolean }) => ReactNode)
-}) => {
-    return (
-        <>
-            {draggable ? (
-                <Draggable>
-                    <div
-                        className={cn(
-                            'fixed bottom-4 right-4 rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)]',
-                            draggable && 'cursor-grab z-[9999]',
-                            className,
-                            minimized && 'hidden',
-                            fullScreen && 'w-[95%] h-[95%] max-w-[95%] max-h-[95%]',
-                        )}
-                    >
-                        {typeof children === 'function' ? children({ fullScreen }) : children}
-                    </div>
-                </Draggable>
-            ) : (
-                <div
-                    className={cn(
-                        'fixed bottom-4 right-4 z-[51] rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)] transition-all duration-300',
-                        className && !minimized ? className : '',
-                        minimized && '!h-0 !w-0 opacity-0 duration-0',
-                        fullScreen &&
-                            !minimized &&
-                            'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] h-[95%] max-w-[95%] max-h-[95%] duration-0',
-                    )}
-                    data-test={dataTest}
-                >
-                    {typeof children === 'function' ? children({ fullScreen }) : children}
-                </div>
-            )}
-        </>
-    )
-}
 
 export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     onCloseText = '',
@@ -95,37 +38,12 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     btnContainerClassName,
     footerClassName,
     footerInfo,
+    locale = 'en',
     enableFullscreen = false,
 }) => {
-    const [draggable, setDraggable] = useState(false)
     const [minimized, setMinimized] = useState(false)
-    const [shiftPressed, setShiftPressed] = useState(false)
     const [fullScreen, setFullScreen] = useState(false)
     const { open: extraActionsOpen, anchorEl, handleOpen, handleClose } = useToggleMenuVisibility()
-
-    useEffect(() => {
-        if (!enableFullscreen) return
-
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Shift') {
-                setShiftPressed(true)
-            }
-        }
-        const handleKeyUp = (e: KeyboardEvent) => {
-            if (e.key === 'Shift') {
-                setShiftPressed(false)
-            }
-        }
-
-        addEventListener('keydown', (e) => handleKeyDown(e))
-
-        addEventListener('keyup', (e) => handleKeyUp(e))
-
-        return () => {
-            removeEventListener('keydown', (e) => handleKeyDown(e))
-            removeEventListener('keyup', (e) => handleKeyUp(e))
-        }
-    }, [enableFullscreen])
 
     const toggleMinimized = () => {
         setMinimized(!minimized)
@@ -140,40 +58,54 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                     <div className='truncate text-lg font-semibold text-delta-800'>{title}</div>
                     <div className='flex items-center gap-x-1'>
                         {showExpandIcon && (
-                            <StyledButton
-                                dataTest='minimize-button'
-                                variant='text'
-                                size='small'
-                                onClick={toggleMinimized}
-                                endIcon={
-                                    showExpandIcon && (
-                                        <KeyboardCapslockIcon height={20} width={20} color='text-gama-500' />
-                                    )
-                                }
-                            >
-                                {onExpandText}
-                            </StyledButton>
+                            <StyledTooltip title={locale === 'en' ? 'Expand' : 'Utvid'}>
+                                <div>
+                                    <StyledButton
+                                        dataTest='minimize-button'
+                                        variant='text'
+                                        size='small'
+                                        onClick={toggleMinimized}
+                                        endIcon={
+                                            showExpandIcon && (
+                                                <KeyboardCapslockIcon height={20} width={20} color='text-gama-500' />
+                                            )
+                                        }
+                                    >
+                                        {onExpandText}
+                                    </StyledButton>
+                                </div>
+                            </StyledTooltip>
                         )}
                         {showCloseIcon && (
-                            <StyledButton
-                                dataTest='close-button'
-                                variant='textGray'
-                                size='small'
-                                onClick={onClose}
-                                endIcon={showCloseIcon && <CloseIcon height={20} width={20} color='text-delta-700' />}
-                            >
-                                {onCloseText}
-                            </StyledButton>
+                            <StyledTooltip title={locale === 'en' ? 'Close' : 'Lukk'}>
+                                <div>
+                                    <StyledButton
+                                        dataTest='close-button'
+                                        variant='textGray'
+                                        size='small'
+                                        onClick={onClose}
+                                        endIcon={
+                                            showCloseIcon && <CloseIcon height={20} width={20} color='text-delta-700' />
+                                        }
+                                    >
+                                        {onCloseText}
+                                    </StyledButton>
+                                </div>
+                            </StyledTooltip>
                         )}
                     </div>
                 </div>
             </div>
-            <Wrapper
-                dataTest={dataTest}
-                className={className}
-                fullScreen={fullScreen}
-                draggable={draggable}
-                minimized={minimized}
+            <div
+                className={cn(
+                    'fixed bottom-4 right-4 z-[51] rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)] transition-all duration-300',
+                    className && !minimized ? className : '',
+                    minimized && '!h-0 !w-0 opacity-0 duration-0',
+                    fullScreen &&
+                        !minimized &&
+                        'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[1000px] h-screen duration-0',
+                )}
+                data-test={dataTest}
             >
                 <div className='flex flex-col gap-y-2 p-4 border-b-[1px] border-delta-200'>
                     <div className='flex items-center justify-between'>
@@ -186,38 +118,46 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                         <div className='flex items-center gap-x-1'>
                             {actionNode}
                             {showMinimizeIcon && (
-                                <StyledButton
-                                    dataTest='minimize-button'
-                                    variant='textGray'
-                                    size='small'
-                                    onClick={toggleMinimized}
-                                    endIcon={
-                                        showMinimizeIcon && (
-                                            <MinimizeIcon height={20} width={20} color='text-delta-700' />
-                                        )
-                                    }
-                                >
-                                    {onMinimizeText}
-                                </StyledButton>
+                                <StyledTooltip title={locale === 'en' ? 'Minimize' : 'Minimer'}>
+                                    <div>
+                                        <StyledButton
+                                            dataTest='minimize-button'
+                                            variant='textGray'
+                                            size='small'
+                                            onClick={toggleMinimized}
+                                            endIcon={
+                                                showMinimizeIcon && (
+                                                    <MinimizeIcon height={20} width={20} color='text-delta-700' />
+                                                )
+                                            }
+                                        >
+                                            {onMinimizeText}
+                                        </StyledButton>
+                                    </div>
+                                </StyledTooltip>
                             )}
                             {enableFullscreen && showFullScreenIcon && (
-                                <StyledTooltip title='Full screen (Shift for draggable)'>
+                                <StyledTooltip
+                                    title={
+                                        fullScreen
+                                            ? locale === 'en'
+                                                ? 'Exit full screen'
+                                                : 'Avslutt fullskjerm'
+                                            : locale === 'en'
+                                            ? 'Full screen'
+                                            : 'Fullskjerm'
+                                    }
+                                >
                                     <div>
                                         <StyledButton
                                             dataTest='fullscreen-button'
                                             variant='textGray'
                                             size='small'
                                             onClick={() => {
-                                                if (shiftPressed) {
-                                                    setDraggable((prev) => !prev)
-                                                } else {
-                                                    setFullScreen(!fullScreen)
-                                                }
+                                                setFullScreen(!fullScreen)
                                             }}
                                             endIcon={
-                                                shiftPressed ? (
-                                                    <DragHorizontalIcon width={20} height={20} color='text-delta-700' />
-                                                ) : fullScreen ? (
+                                                fullScreen ? (
                                                     <ArrowShrink width={20} height={20} color='text-delta-700' />
                                                 ) : (
                                                     <ArrowExpand width={20} height={20} color='text-delta-700' />
@@ -231,22 +171,26 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                             )}
 
                             {showCloseIcon && (
-                                <StyledButton
-                                    dataTest='close-button'
-                                    variant='textGray'
-                                    size='small'
-                                    onClick={onClose}
-                                    endIcon={<CloseIcon height={20} width={20} color='text-delta-700' />}
-                                >
-                                    {onCloseText}
-                                </StyledButton>
+                                <StyledTooltip title={locale === 'en' ? 'Close' : 'Lukk'}>
+                                    <div>
+                                        <StyledButton
+                                            dataTest='close-button'
+                                            variant='textGray'
+                                            size='small'
+                                            onClick={onClose}
+                                            endIcon={<CloseIcon height={20} width={20} color='text-delta-700' />}
+                                        >
+                                            {onCloseText}
+                                        </StyledButton>
+                                    </div>
+                                </StyledTooltip>
                             )}
                         </div>
                     </div>
 
                     {label && <div className='text-2xl font-semibold text-delta-800 truncate'>{title}</div>}
                 </div>
-                <div className={'h-full'}> {typeof children === 'function' ? children({ fullScreen }) : children}</div>
+                <div className={'h-max'}> {typeof children === 'function' ? children({ fullScreen }) : children}</div>
 
                 {(((isArray(extraActions) && extraActions?.length) || isFunction(extraActions)) && extraActionsText) ||
                 footerInfo ? (
@@ -330,7 +274,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                         ) : null}
                     </>
                 )}
-            </Wrapper>
+            </div>
         </>
     )
 }
