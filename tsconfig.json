@@ -44,15 +44,14 @@
     },
     "exclude": ["dist", "node_modules"],
     "include": [
-        "tailwind.config.ts",
-        "tw-configs/**/*.json",
+        // "tailwind.config.ts",
+        // "tw-configs/**/*.json",
         "src/**/*.ts",
         "src/**/*.tsx",
         "src/**/*.scss",
         "**/*.module.scss",
-        "vite.config.ts",
-        "package.json",
-        "src/styles/**/*.json"
+        //"vite.config.ts",
+        "package.json"
+        // "src/styles/**/*.json"
     ]
 }
-

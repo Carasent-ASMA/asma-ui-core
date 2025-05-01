@@ -4,7 +4,7 @@ import { resolve } from 'path'
 import dts from 'vite-plugin-dts'
 import tsConfigPaths from 'vite-tsconfig-paths'
 import terser from '@rollup/plugin-terser'
-import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js'
+//import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js'
 import * as packageJson from './package.json'
 
 // https://vitejs.dev/config/
@@ -16,9 +16,10 @@ export default defineConfig({
         tsConfigPaths(),
         dts({
             insertTypesEntry: true,
+            //rollupTypes: true,
             exclude: ['node_modules/**/*', 'src/stories/**', 'src/**/*.stories.tsx', 'src/components/**/makeData.ts'],
         }),
-        cssInjectedByJsPlugin(),
+        // cssInjectedByJsPlugin(),
     ],
     build: {
         lib: {
@@ -28,13 +29,19 @@ export default defineConfig({
             fileName: (format) => `asma-core-ui.${format}.js`,
         },
         rollupOptions: {
-            external: [...Object.keys(packageJson.peerDependencies), ...Object.keys(packageJson.devDependencies)],
+            external: [
+                'react',
+                'react/jsx-runtime',
+                'react-dom',
+                ...Object.keys(packageJson.peerDependencies),
+                ...Object.keys(packageJson.devDependencies),
+            ],
             output: {
-                globals: {
-                    react: 'React',
-                    'react/jsx-runtime': 'react/jsx-runtime',
-                    'react-dom': 'ReactDOM',
-                },
+                //globals: {
+                //    react: 'React',
+                //    'react/jsx-runtime': 'react/jsx-runtime',
+                //     'react-dom': 'ReactDOM',
+                //  },
                 plugins: [terser()],
             },
         },
