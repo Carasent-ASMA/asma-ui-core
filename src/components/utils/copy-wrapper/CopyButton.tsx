@@ -1,7 +1,6 @@
 import { ContentCopyIcon } from 'asma-ui-icons'
-import { type FC } from 'react'
-import { StyledButton, StyledTooltip, defaultSnackProps } from 'src'
-import { message } from 'src/components/feedback/snack-bar'
+import { type FC, type ReactNode } from 'react'
+import { StyledButton, StyledTooltip } from 'src'
 import type { MessageProps } from 'src/components/feedback/snack-bar/components/types'
 import { useIsMobileView } from 'src/hooks/useWindowWidthSize.hook'
 
@@ -9,9 +8,9 @@ export const CopyButton: FC<{
     className?: string
     contentToCopy: string
     locale: 'en' | 'no'
-    snackProps?: MessageProps
+    messageInfo: (info: ReactNode, options?: MessageProps) => () => void
     text?: string
-}> = ({ className, contentToCopy, locale, snackProps, text }) => {
+}> = ({ className, contentToCopy, locale, messageInfo, text }) => {
     const title = locale === 'en' ? 'Copy' : 'Kopier'
     const isMobile = useIsMobileView()
 
@@ -26,10 +25,7 @@ export const CopyButton: FC<{
                     startIcon={<ContentCopyIcon width={20} height={20} />}
                     onClick={() => {
                         navigator.clipboard.writeText(contentToCopy).then(() => {
-                            message.info(locale === 'no' ? 'Kopieres til utklippstavlen' : 'Copied to clipboard', {
-                                ...defaultSnackProps,
-                                ...snackProps,
-                            })
+                            messageInfo(locale === 'no' ? 'Kopieres til utklippstavlen' : 'Copied to clipboard')
                         })
                     }}
                 >
