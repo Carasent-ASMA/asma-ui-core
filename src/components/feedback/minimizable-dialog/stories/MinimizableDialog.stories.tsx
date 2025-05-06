@@ -69,7 +69,7 @@ export const DialogMinimizable = () => {
                 {(props) => (
                     <>
                         <div className='text-delta-800 px-4'>{JSON.stringify(props)}</div>
-                        <div className='flex flex-col gap-y-3 max-h-[400px] p-4 overflow-y-scroll'>
+                        <div className='flex flex-col gap-y-3 p-4 overflow-y-scroll'>
                             <div>
                                 Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum
                                 has been the industry's standard dummy text ever since the 1500s, when an unknown

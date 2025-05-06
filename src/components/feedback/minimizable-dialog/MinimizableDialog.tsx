@@ -103,7 +103,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                     minimized && '!h-0 !w-0 opacity-0 duration-0',
                     fullScreen &&
                         !minimized &&
-                        'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[1000px] h-screen duration-0',
+                        'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[1000px] h-[95dvh] duration-0',
                 )}
                 data-test={dataTest}
             >
@@ -190,90 +190,96 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
 
                     {label && <div className='text-2xl font-semibold text-delta-800 truncate'>{title}</div>}
                 </div>
-                <div className={'h-max'}> {typeof children === 'function' ? children({ fullScreen }) : children}</div>
 
-                {(((isArray(extraActions) && extraActions?.length) || isFunction(extraActions)) && extraActionsText) ||
-                footerInfo ? (
-                    <div
-                        className={cn(
-                            'flex items-center justify-between p-4 border-0 border-t-[1px] border-solid border-delta-200 bg-white',
-                            footerClassName,
-                        )}
-                    >
-                        {isArray(extraActions) && extraActions?.length && extraActionsText ? (
-                            <>
-                                <StyledButton
-                                    dataTest='extra-actions-button'
-                                    variant='textGray'
-                                    startIcon={<DotsVerticalIcon width={24} height={24} />}
-                                    onClick={handleOpen}
-                                >
-                                    {extraActionsText}
-                                </StyledButton>
-
-                                <StyledMenu open={extraActionsOpen} anchorEl={anchorEl} onClose={handleClose}>
-                                    {extraActions.map((a) => (
-                                        <StyledMenuItem key={a.label} className={a.className} onClick={a.onClick}>
-                                            {a.label}
-                                        </StyledMenuItem>
-                                    ))}
-                                </StyledMenu>
-                            </>
-                        ) : (
-                            extraActionsText &&
-                            isFunction(extraActions) && (
-                                <StyledButton dataTest='extra-action-button' variant='text' onClick={extraActions}>
-                                    {extraActionsText}
-                                </StyledButton>
-                            )
-                        )}{' '}
-                        {footerInfo}
-                        {secondaryButtonText || primaryButtonText ? (
-                            <div className={cn('flex justify-end gap-x-4', btnContainerClassName)}>
-                                {secondaryButtonText && onSecondaryButtonClick && (
-                                    <StyledButton
-                                        dataTest='cancel-button'
-                                        variant='outlined'
-                                        onClick={onSecondaryButtonClick}
-                                    >
-                                        {secondaryButtonText}
-                                    </StyledButton>
-                                )}
-                                {primaryButtonText && onPrimaryButtonClick && (
-                                    <StyledButton dataTest='save-button' onClick={onPrimaryButtonClick}>
-                                        {primaryButtonText}
-                                    </StyledButton>
-                                )}
-                            </div>
-                        ) : null}
+                <div className={clsx('flex flex-col', fullScreen && !minimized && 'h-[87dvh]')}>
+                    <div className='flex-grow overflow-y-auto'>
+                        {typeof children === 'function' ? children({ fullScreen }) : children}
                     </div>
-                ) : (
-                    <>
-                        {secondaryButtonText || primaryButtonText ? (
-                            <div
-                                className={cn(
-                                    'flex justify-end gap-x-4 border-t-[1px] border-delta-200 p-4',
-                                    btnContainerClassName,
-                                )}
-                            >
-                                {secondaryButtonText && onSecondaryButtonClick && (
+
+                    {(((isArray(extraActions) && extraActions?.length) || isFunction(extraActions)) &&
+                        extraActionsText) ||
+                    footerInfo ? (
+                        <div
+                            className={cn(
+                                'flex items-center justify-between p-4 border-0 border-t-[1px] border-solid border-delta-200 bg-white',
+                                footerClassName,
+                            )}
+                        >
+                            {isArray(extraActions) && extraActions?.length && extraActionsText ? (
+                                <>
                                     <StyledButton
-                                        dataTest='cancel-button'
-                                        variant='outlined'
-                                        onClick={onSecondaryButtonClick}
+                                        dataTest='extra-actions-button'
+                                        variant='textGray'
+                                        startIcon={<DotsVerticalIcon width={24} height={24} />}
+                                        onClick={handleOpen}
                                     >
-                                        {secondaryButtonText}
+                                        {extraActionsText}
                                     </StyledButton>
-                                )}
-                                {primaryButtonText && onPrimaryButtonClick && (
-                                    <StyledButton dataTest='save-button' onClick={onPrimaryButtonClick}>
-                                        {primaryButtonText}
+
+                                    <StyledMenu open={extraActionsOpen} anchorEl={anchorEl} onClose={handleClose}>
+                                        {extraActions.map((a) => (
+                                            <StyledMenuItem key={a.label} className={a.className} onClick={a.onClick}>
+                                                {a.label}
+                                            </StyledMenuItem>
+                                        ))}
+                                    </StyledMenu>
+                                </>
+                            ) : (
+                                extraActionsText &&
+                                isFunction(extraActions) && (
+                                    <StyledButton dataTest='extra-action-button' variant='text' onClick={extraActions}>
+                                        {extraActionsText}
                                     </StyledButton>
-                                )}
-                            </div>
-                        ) : null}
-                    </>
-                )}
+                                )
+                            )}{' '}
+                            {footerInfo}
+                            {secondaryButtonText || primaryButtonText ? (
+                                <div className={cn('flex justify-end gap-x-4', btnContainerClassName)}>
+                                    {secondaryButtonText && onSecondaryButtonClick && (
+                                        <StyledButton
+                                            dataTest='cancel-button'
+                                            variant='outlined'
+                                            onClick={onSecondaryButtonClick}
+                                        >
+                                            {secondaryButtonText}
+                                        </StyledButton>
+                                    )}
+                                    {primaryButtonText && onPrimaryButtonClick && (
+                                        <StyledButton dataTest='save-button' onClick={onPrimaryButtonClick}>
+                                            {primaryButtonText}
+                                        </StyledButton>
+                                    )}
+                                </div>
+                            ) : null}
+                        </div>
+                    ) : (
+                        <>
+                            {secondaryButtonText || primaryButtonText ? (
+                                <div
+                                    className={cn(
+                                        'flex justify-end gap-x-4 border-t-[1px] border-delta-200 p-4',
+                                        btnContainerClassName,
+                                    )}
+                                >
+                                    {secondaryButtonText && onSecondaryButtonClick && (
+                                        <StyledButton
+                                            dataTest='cancel-button'
+                                            variant='outlined'
+                                            onClick={onSecondaryButtonClick}
+                                        >
+                                            {secondaryButtonText}
+                                        </StyledButton>
+                                    )}
+                                    {primaryButtonText && onPrimaryButtonClick && (
+                                        <StyledButton dataTest='save-button' onClick={onPrimaryButtonClick}>
+                                            {primaryButtonText}
+                                        </StyledButton>
+                                    )}
+                                </div>
+                            ) : null}
+                        </>
+                    )}
+                </div>
             </div>
         </>
     )
