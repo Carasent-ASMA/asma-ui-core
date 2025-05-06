@@ -22,7 +22,6 @@ export const DialogMinimizableV2 = () => {
                 Open minimizable dialog v2
             </StyledButton>
             <MinimizableDialogV2
-                enableFullscreen
                 dataTest='test'
                 title='Ny stilling og utplassering Ny stilling og utplassering Ny stilling og utplassering'
                 open={open}

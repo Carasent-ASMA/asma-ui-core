@@ -24,7 +24,6 @@ export const DialogMinimizable = () => {
             </StyledButton>
             <MinimizableDialog
                 dataTest='test'
-                enableFullscreen={true}
                 // onCloseText='Close'
                 // onMinimizeText='Minimize'
                 // onExpandText='Expand'

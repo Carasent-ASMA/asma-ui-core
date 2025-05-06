@@ -43,7 +43,7 @@ export const MinimizableDialogV2: React.FC<{
     showCloseIcon = true,
     showMinimizeIcon = true,
     showExpandIcon = true,
-    enableFullscreen = false,
+    enableFullscreen = true,
     title,
     label,
     children,

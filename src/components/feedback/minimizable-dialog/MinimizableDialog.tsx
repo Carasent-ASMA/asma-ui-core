@@ -39,7 +39,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     footerClassName,
     footerInfo,
     locale = 'en',
-    enableFullscreen = false,
+    enableFullscreen = true,
 }) => {
     const [minimized, setMinimized] = useState(false)
     const [fullScreen, setFullScreen] = useState(false)
