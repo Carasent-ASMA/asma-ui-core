@@ -114,7 +114,7 @@ export const MinimizableDialogV2: React.FC<{
                     classNameOverrides.maximized,
                     fullScreen &&
                         !minimized &&
-                        'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[1000px] duration-0',
+                        'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[1000px] h-[95dvh] duration-0',
                     fullScreen && classNameOverrides.fullscreen,
                 )}
             >
