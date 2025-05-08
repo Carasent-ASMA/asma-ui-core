@@ -111,10 +111,10 @@ export const MinimizableDialogV2: React.FC<{
                 className={cn(
                     styles['dialog'],
                     minimized && styles['hidden'],
+                    classNameOverrides.maximized,
                     fullScreen &&
                         !minimized &&
                         'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[1000px] duration-0',
-                    classNameOverrides.maximized,
                     fullScreen && classNameOverrides.fullscreen,
                 )}
             >
