@@ -105,6 +105,7 @@ export const MinimizableDialogV2: React.FC<{
             </div>
             {/*  */}
             {/* Maximized  */}
+            {fullScreen && !minimized && <div className='fixed inset-0 bg-[rgb(98,110,126)] bg-opacity-70' />}
             <div
                 style={{ zIndex: 51 }}
                 className={cn(

@@ -53,6 +53,8 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
 
     return (
         <>
+            {fullScreen && !minimized && <div className='fixed inset-0 bg-[rgb(98,110,126)] bg-opacity-70' />}
+
             <div style={{ zIndex: 51 }} className={cn(styles['dialog'], !minimized && styles['hidden'])}>
                 <div className={clsx('flex items-center justify-between', !minimized && 'hidden')} data-test={dataTest}>
                     <div className='truncate text-lg font-semibold text-delta-800'>{title}</div>
