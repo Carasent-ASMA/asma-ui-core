@@ -29,13 +29,7 @@ export default defineConfig({
             fileName: (format) => `asma-core-ui.${format}.js`,
         },
         rollupOptions: {
-            external: [
-                'react',
-                'react/jsx-runtime',
-                'react-dom',
-                ...Object.keys(packageJson.peerDependencies),
-                ...Object.keys(packageJson.devDependencies),
-            ],
+            external: [...Object.keys(packageJson.peerDependencies), ...Object.keys(packageJson.devDependencies)],
             output: {
                 //globals: {
                 //    react: 'React',
