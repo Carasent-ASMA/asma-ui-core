@@ -11,6 +11,7 @@ export default meta
 
 export const DialogMinimizableV2 = () => {
     const [open, setOpen] = useState(false)
+    const [fullScreen, setFullScreen] = useState(false)
 
     const handleClose = () => {
         setOpen(false)
@@ -23,6 +24,8 @@ export const DialogMinimizableV2 = () => {
             </StyledButton>
             <MinimizableDialogV2
                 dataTest='test'
+                fullScreenState={fullScreen}
+                handleFullScreenState={() => setFullScreen(!fullScreen)}
                 title='Ny stilling og utplassering Ny stilling og utplassering Ny stilling og utplassering'
                 open={open}
                 onClose={handleClose}

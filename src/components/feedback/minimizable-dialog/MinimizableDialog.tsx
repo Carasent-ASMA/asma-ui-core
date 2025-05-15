@@ -40,16 +40,20 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     footerInfo,
     locale = 'en',
     enableFullscreen = true,
+    fullScreenState,
+    handleFullScreenState,
 }) => {
     const [minimized, setMinimized] = useState(false)
-    const [fullScreen, setFullScreen] = useState(false)
+    const [fullscreen, setFullscreen] = useState(false)
     const { open: extraActionsOpen, anchorEl, handleOpen, handleClose } = useToggleMenuVisibility()
+
+    if (!open) return null
+
+    const fullScreen = fullScreenState !== undefined ? fullScreenState : fullscreen
 
     const toggleMinimized = () => {
         setMinimized(!minimized)
     }
-
-    if (!open) return null
 
     return (
         <>
@@ -156,7 +160,11 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                                             variant='textGray'
                                             size='small'
                                             onClick={() => {
-                                                setFullScreen(!fullScreen)
+                                                if (fullScreenState !== undefined && handleFullScreenState) {
+                                                    handleFullScreenState()
+                                                } else {
+                                                    setFullscreen(!fullscreen)
+                                                }
                                             }}
                                             endIcon={
                                                 fullScreen ? (

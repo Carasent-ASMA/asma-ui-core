@@ -30,6 +30,8 @@ export type IMinimizableDialogProps = {
     footerClassName?: string
     footerInfo?: ReactNode
     enableFullscreen?: boolean
+    fullScreenState?: boolean
+    handleFullScreenState?: () => void
     locale?: 'no' | 'en'
     dataTest: string
 }

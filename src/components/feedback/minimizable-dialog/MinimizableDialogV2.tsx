@@ -34,6 +34,8 @@ export const MinimizableDialogV2: React.FC<{
         fullscreen?: string
     }
     enableFullscreen?: boolean
+    fullScreenState?: boolean
+    handleFullScreenState?: () => void
     dataTest: string
 }> = ({
     onCloseText = '',
@@ -44,6 +46,8 @@ export const MinimizableDialogV2: React.FC<{
     showMinimizeIcon = true,
     showExpandIcon = true,
     enableFullscreen = true,
+    fullScreenState,
+    handleFullScreenState,
     title,
     label,
     children,
@@ -64,13 +68,15 @@ export const MinimizableDialogV2: React.FC<{
     },
 }) => {
     const [minimized, setMinimized] = useState(false)
-    const [fullScreen, setFullScreen] = useState(false)
+    const [fullscreen, setFullscreen] = useState(false)
+
+    if (!open) return null
+
+    const fullScreen = fullScreenState !== undefined ? fullScreenState : fullscreen
 
     const toggleMinimized = () => {
         setMinimized(!minimized)
     }
-
-    if (!open) return null
 
     return (
         <>
@@ -138,7 +144,13 @@ export const MinimizableDialogV2: React.FC<{
                             <FullScreenBtn
                                 showFullScreenIcon={enableFullscreen}
                                 fullScreen={fullScreen}
-                                onClick={() => setFullScreen(!fullScreen)}
+                                onClick={() => {
+                                    if (fullScreenState !== undefined && handleFullScreenState) {
+                                        handleFullScreenState()
+                                    } else {
+                                        setFullscreen(!fullscreen)
+                                    }
+                                }}
                                 title={onFullScreenText}
                                 tooltipTitle={
                                     tooltipOverrides.fullscreen || (fullScreen ? 'Exit full screen' : 'Full screen')
