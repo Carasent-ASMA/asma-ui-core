@@ -21,6 +21,7 @@ export type IMinimizableDialogProps = {
     children?: React.ReactNode | ((props: IFloatingWindowProps) => ReactNode)
     className?: string
     primaryButtonText?: string
+    primaryButtonLoading?: boolean
     secondaryButtonText?: string
     onPrimaryButtonClick?: () => void
     onSecondaryButtonClick?: () => void

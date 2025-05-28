@@ -11,6 +11,7 @@ import { StyledTooltip } from 'src/components/data-display/tooltip'
 import { ArrowShrink } from 'src/components/icons/arrow-shrink'
 import type { IMinimizableDialogProps } from './types'
 import { isArray, isFunction } from 'lodash-es'
+import { LoadingIcon } from 'asma-ui-icons'
 
 export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     onCloseText = '',
@@ -28,6 +29,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     onClose,
     className = '',
     primaryButtonText,
+    primaryButtonLoading = false,
     secondaryButtonText,
     onPrimaryButtonClick,
     onSecondaryButtonClick,
@@ -50,6 +52,10 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     if (!open) return null
 
     const fullScreen = fullScreenState !== undefined ? fullScreenState : fullscreen
+
+    const showPrimaryButton = primaryButtonText || primaryButtonLoading
+
+    const showButtons = showPrimaryButton || secondaryButtonText
 
     const toggleMinimized = () => {
         setMinimized(!minimized)
@@ -243,7 +249,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                                 )
                             )}{' '}
                             {footerInfo}
-                            {secondaryButtonText || primaryButtonText ? (
+                            {showButtons ? (
                                 <div className={cn('flex justify-end gap-x-4', btnContainerClassName)}>
                                     {secondaryButtonText && onSecondaryButtonClick && (
                                         <StyledButton
@@ -254,8 +260,12 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                                             {secondaryButtonText}
                                         </StyledButton>
                                     )}
-                                    {primaryButtonText && onPrimaryButtonClick && (
-                                        <StyledButton dataTest='save-button' onClick={onPrimaryButtonClick}>
+                                    {showPrimaryButton && onPrimaryButtonClick && (
+                                        <StyledButton
+                                            dataTest='save-button'
+                                            startIcon={primaryButtonLoading && <LoadingIcon width={24} height={24} />}
+                                            onClick={onPrimaryButtonClick}
+                                        >
                                             {primaryButtonText}
                                         </StyledButton>
                                     )}
@@ -264,7 +274,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                         </div>
                     ) : (
                         <>
-                            {secondaryButtonText || primaryButtonText ? (
+                            {showButtons ? (
                                 <div
                                     className={cn(
                                         'flex justify-end gap-x-4 border-t-[1px] border-delta-200 p-4',
@@ -280,8 +290,12 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                                             {secondaryButtonText}
                                         </StyledButton>
                                     )}
-                                    {primaryButtonText && onPrimaryButtonClick && (
-                                        <StyledButton dataTest='save-button' onClick={onPrimaryButtonClick}>
+                                    {showPrimaryButton && onPrimaryButtonClick && (
+                                        <StyledButton
+                                            dataTest='save-button'
+                                            startIcon={primaryButtonLoading && <LoadingIcon width={24} height={24} />}
+                                            onClick={onPrimaryButtonClick}
+                                        >
                                             {primaryButtonText}
                                         </StyledButton>
                                     )}

@@ -13,9 +13,14 @@ export default meta
 export const DialogMinimizable = () => {
     const [open, setOpen] = useState(false)
     const [fullScreen, setFullScreen] = useState(false)
+    const [isSaving, setIsSaving] = useState(false)
 
     const handleClose = () => {
-        setOpen(false)
+        setIsSaving(true)
+        setTimeout(() => {
+            setIsSaving(false)
+            setOpen(false)
+        }, 1500)
     }
 
     return (
@@ -37,7 +42,8 @@ export const DialogMinimizable = () => {
                 label='Adevinta ASA'
                 // className='w-[600px] max-h-[800px]'
                 className={cn('max-w-[850px]')}
-                primaryButtonText='Save'
+                primaryButtonText={isSaving ? '' : 'Save'}
+                primaryButtonLoading={isSaving}
                 onPrimaryButtonClick={handleClose}
                 secondaryButtonText='Cancel'
                 onSecondaryButtonClick={handleClose}
