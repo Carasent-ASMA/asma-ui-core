@@ -1,8 +1,12 @@
-import { CloseIcon, SearchIcon, StyledInputField } from 'asma-core-ui'
+import { CloseIcon, SearchIcon, StyledInputField, type TextFieldProps } from 'asma-core-ui'
 import { useState, type FC, type ComponentProps } from 'react'
 import { cn } from 'src/helpers/cn'
 
-export const StyledSearchField: FC<ComponentProps<typeof StyledInputField>> = ({ value, onClear, ...props }) => {
+export const StyledSearchField: FC<
+    ComponentProps<typeof StyledInputField> & {
+        label: Required<TextFieldProps['label']>
+    }
+> = ({ value, onClear, ...props }) => {
     const [isFocused, setIsFocused] = useState<boolean>(false)
 
     const hasInteraction = isFocused || value
