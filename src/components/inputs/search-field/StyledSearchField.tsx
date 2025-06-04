@@ -1,12 +1,13 @@
 import { CloseIcon, SearchIcon, StyledInputField, type TextFieldProps } from 'asma-core-ui'
-import { useState, type FC, type ComponentProps } from 'react'
+import type { FunctionComponent } from 'react'
+import { useState, type ComponentProps } from 'react'
 import { cn } from 'src/helpers/cn'
 
-export const StyledSearchField: FC<
-    ComponentProps<typeof StyledInputField> & {
-        label: Required<TextFieldProps['label']>
-    }
-> = ({ value, onClear, ...props }) => {
+export type StyledSearchFieldProps = ComponentProps<typeof StyledInputField> & {
+    label: Required<TextFieldProps['label']>
+}
+
+export const StyledSearchField = (({ value, onClear, ...props }) => {
     const [isFocused, setIsFocused] = useState<boolean>(false)
 
     const hasInteraction = isFocused || value
@@ -73,4 +74,4 @@ export const StyledSearchField: FC<
             </div>
         </div>
     )
-}
+}) satisfies FunctionComponent<StyledSearchFieldProps>
