@@ -68,9 +68,15 @@ export const StyledSearchField = (({ value, onClear, ...props }) => {
                     'transform-gpu transition-all duration-300 ease-in-out',
                     value ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none',
                 )}
-                onMouseDown={onClear}
+                onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+
+                    onClear?.()
+                    console.log('clicked')
+                }}
             >
-                <CloseIcon width={20} height={20} color={'var(--colors-delta-700)'} />
+                <CloseIcon width={20} height={20} color={'var(--colors-delta-700)'} className={'pointer-events-none'} />
             </div>
         </div>
     )
