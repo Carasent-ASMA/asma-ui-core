@@ -73,7 +73,6 @@ export const StyledSearchField = (({ value, onClear, ...props }) => {
                     e.stopPropagation()
 
                     onClear?.()
-                    console.log('clicked')
                 }}
             >
                 <CloseIcon width={20} height={20} color={'var(--colors-delta-700)'} className={'pointer-events-none'} />
