@@ -32,6 +32,11 @@ export const Switch = () => (
                 label='Disabled'
                 control={<StyledSwitch dataTest='disabled-switch' {...meta.args} disabled />}
             />
+            <StyledFormControlLabel
+                className='w-[150px] m-0  p-0 text-nowrap'
+                label='Disabled checked'
+                control={<StyledSwitch dataTest='disabled-switch' {...meta.args} defaultChecked disabled />}
+            />
         </Stack>
         <Stack direction='row' className='flex ml-1'>
             <StyledFormControlLabel
@@ -48,6 +53,19 @@ export const Switch = () => (
                 className='w-[150px] ml-0  p-0'
                 label='Disabled'
                 control={<StyledSwitch dataTest='disabled-small-switch' size='small' {...meta.args} disabled />}
+            />
+            <StyledFormControlLabel
+                className='w-[150px] ml-0  p-0 text-nowrap'
+                label='Disabled checked'
+                control={
+                    <StyledSwitch
+                        dataTest='disabled-small-switch'
+                        size='small'
+                        {...meta.args}
+                        defaultChecked
+                        disabled
+                    />
+                }
             />
         </Stack>
     </>
