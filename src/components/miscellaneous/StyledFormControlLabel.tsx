@@ -4,7 +4,8 @@ export const StyledFormControlLabel = ({ sx, ...props }: FormControlLabelProps) 
     <FormControlLabel
         {...props}
         sx={{
-            color: 'var(--colors-delta-700)',
+            color: 'var(--colors-delta-800)',
+            margin: 0,
             '& .MuiFormControlLabel-label': {
                 fontSize: '14px',
                 lineHeight: '20px',

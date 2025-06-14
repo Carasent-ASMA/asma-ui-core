@@ -1,7 +1,7 @@
 import React from 'react'
 import type { Meta } from '@storybook/react'
 import { StyledSwitch } from './StyledSwitch'
-import { Stack } from '@mui/material'
+import { Stack, Typography } from '@mui/material'
 import { StyledFormControlLabel } from 'src/components/miscellaneous/StyledFormControlLabel'
 
 const meta = {
@@ -15,58 +15,56 @@ const meta = {
 export default meta
 
 export const Switch = () => (
-    <>
-        <Stack direction='row' className='flex'>
+    <Stack spacing={4}>
+        <Stack spacing={2} alignItems='flex-start'>
+            <Typography variant='subtitle1' color='delta.800' fontWeight={500} fontSize={24}>
+                Label on the left
+            </Typography>
             <StyledFormControlLabel
-                className='w-[150px] m-0  p-0'
-                label='Unchecked'
+                labelPlacement='start'
+                label='Enabled Unchecked'
                 control={<StyledSwitch dataTest='unchecked-switch' {...meta.args} />}
             />
             <StyledFormControlLabel
-                className='w-[150px] m-0 p-0'
-                label='Checked'
+                labelPlacement='start'
+                label='Enabled Checked'
                 control={<StyledSwitch dataTest='checked-switch' {...meta.args} defaultChecked />}
             />
             <StyledFormControlLabel
-                className='w-[150px] m-0  p-0'
-                label='Disabled'
+                labelPlacement='start'
+                label='Disabled Unchecked'
                 control={<StyledSwitch dataTest='disabled-switch' {...meta.args} disabled />}
             />
+        </Stack>
+
+        <Stack spacing={2}>
+            <Typography variant='subtitle1' color='delta.800' fontWeight={500} fontSize={24}>
+                Label on the right
+            </Typography>
             <StyledFormControlLabel
-                className='w-[150px] m-0  p-0 text-nowrap'
-                label='Disabled checked'
-                control={<StyledSwitch dataTest='disabled-switch' {...meta.args} defaultChecked disabled />}
+                className='w-[200px]'
+                labelPlacement='end'
+                label='Enabled Unchecked'
+                control={<StyledSwitch dataTest='unchecked-switch-2' {...meta.args} />}
+            />
+            <StyledFormControlLabel
+                className='w-[200px]'
+                labelPlacement='end'
+                label='Enabled Checked'
+                control={<StyledSwitch dataTest='checked-switch-2' {...meta.args} defaultChecked />}
+            />
+            <StyledFormControlLabel
+                className='w-[200px]'
+                labelPlacement='end'
+                label='Disabled Unchecked'
+                control={<StyledSwitch dataTest='disabled-switch-2' {...meta.args} disabled />}
+            />
+            <StyledFormControlLabel
+                className='w-[200px]'
+                labelPlacement='end'
+                label='Disabled Checked'
+                control={<StyledSwitch dataTest='disabled-checked-switch-2' {...meta.args} defaultChecked disabled />}
             />
         </Stack>
-        <Stack direction='row' className='flex ml-1'>
-            <StyledFormControlLabel
-                className='w-[150px] m-0  p-0'
-                label='Unchecked'
-                control={<StyledSwitch dataTest='unchecked-small-switch' size='small' {...meta.args} />}
-            />
-            <StyledFormControlLabel
-                className='w-[150px] m-0  p-0'
-                label='Checked'
-                control={<StyledSwitch dataTest='checked-small-switch' size='small' {...meta.args} defaultChecked />}
-            />
-            <StyledFormControlLabel
-                className='w-[150px] ml-0  p-0'
-                label='Disabled'
-                control={<StyledSwitch dataTest='disabled-small-switch' size='small' {...meta.args} disabled />}
-            />
-            <StyledFormControlLabel
-                className='w-[150px] ml-0  p-0 text-nowrap'
-                label='Disabled checked'
-                control={
-                    <StyledSwitch
-                        dataTest='disabled-small-switch'
-                        size='small'
-                        {...meta.args}
-                        defaultChecked
-                        disabled
-                    />
-                }
-            />
-        </Stack>
-    </>
+    </Stack>
 )
