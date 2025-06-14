@@ -1,24 +1,30 @@
 import { Switch, type SwitchProps as _SwitchProps } from '@mui/material'
 import { CheckIcon } from 'asma-ui-icons'
 import { IndeterminateIcon } from 'src/components/icons/Indeterminate icon'
+import { cn } from 'src/helpers/cn'
+
+import styles from './StyledSwitch.module.scss'
+
 export type SwitchProps = _SwitchProps
+
 export const StyledSwitch = ({ dataTest, disabled, ...props }: Omit<SwitchProps, 'size'> & { dataTest: string }) => (
     <Switch
         {...props}
         disabled={disabled}
         data-test={dataTest}
         checkedIcon={
-            <div
-                className={`${
-                    disabled ? 'bg-gama-300' : 'bg-gama-500'
-                } rounded-full p-0.5 flex items-center justify-center w-4 h-4`}
-            >
-                <CheckIcon color='white' height={14} width={14} className='rounded-full' />
+            <div className={cn(styles['thumb'], styles['checked'], disabled && styles['disabled'])}>
+                <CheckIcon color={'white'} height={14} width={14} className={'rounded-full'} />
             </div>
         }
         icon={
-            <div className='bg-delta-10 rounded-full p-0.5 outline outline-1 outline-delta-200 flex items-center justify-center w-4 h-4'>
-                <IndeterminateIcon color='var(--colors-delta-600)' height={20} width={20} className='rounded-full' />
+            <div className={cn(styles['thumb'], styles['unchecked'], disabled && styles['disabled'])}>
+                <IndeterminateIcon
+                    color={'var(--colors-delta-600)'}
+                    height={20}
+                    width={20}
+                    className={'rounded-full'}
+                />
             </div>
         }
         sx={{
