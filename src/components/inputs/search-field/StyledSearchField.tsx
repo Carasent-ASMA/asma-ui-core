@@ -13,7 +13,7 @@ export const StyledSearchField = (({ value, onClear, ...props }) => {
     const hasInteraction = isFocused || value
 
     return (
-        <div className={'relative w-fit'}>
+        <div className={'relative w-full'}>
             <StyledInputField
                 size={'small'}
                 variant={'outlined'}
@@ -45,7 +45,7 @@ export const StyledSearchField = (({ value, onClear, ...props }) => {
                 }}
                 {...props}
                 sx={{
-                    width: 160,
+                    ...(props.fullWidth ? { width: '100%' } : { width: 160 }),
                     ...props.sx,
                 }}
             />
