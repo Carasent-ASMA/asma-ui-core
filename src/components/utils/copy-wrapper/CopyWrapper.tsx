@@ -25,22 +25,14 @@ export const CopyWrapper: FC<
                         size='small'
                         variant='text'
                         className='cursor-pointer'
-                        startIcon={
-                            <ContentCopyIcon
-                                width={20}
-                                height={20}
-                                className='text-gama-500 hover:text-delta-700'
-                                onClick={(e) => {
-                                    e.preventDefault()
-                                    e.stopPropagation()
-                                    navigator.clipboard.writeText(contentToCopy).then(() => {
-                                        messageInfo(
-                                            locale === 'no' ? 'Kopieres til utklippstavlen' : 'Copied to clipboard',
-                                        )
-                                    })
-                                }}
-                            />
-                        }
+                        onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            navigator.clipboard.writeText(contentToCopy).then(() => {
+                                messageInfo(locale === 'no' ? 'Kopieres til utklippstavlen' : 'Copied to clipboard')
+                            })
+                        }}
+                        startIcon={<ContentCopyIcon width={20} height={20} />}
                     />
                 </div>
             </StyledTooltip>

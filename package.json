@@ -3,7 +3,7 @@
     "publishConfig": {
         "access": "public"
     },
-    "version": "3.1.27",
+    "version": "3.1.29",
     "type": "module",
     "files": [
         "dist/**/*",
@@ -58,7 +58,7 @@
         "date-fns": "^2.30.0",
         "lodash-es": "^4.17.21",
         "material-ui-popup-state": "^5.0.10",
-        "notistack": "^3.0.1",
+        "notistack": "^3.0.2",
         "react-day-picker": "^8.8.2",
         "react-quill": "^2.0.0",
         "sass": "^1.77.5",
