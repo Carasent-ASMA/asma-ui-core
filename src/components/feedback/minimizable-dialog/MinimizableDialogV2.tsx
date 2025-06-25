@@ -31,7 +31,8 @@ export const MinimizableDialogV2: React.FC<{
         maximized?: string
         minimized?: string
         close?: string
-        fullscreen?: string
+        enterFullScreen?: string
+        exitFullScreen?: string
     }
     enableFullscreen?: boolean
     fullScreenState?: boolean
@@ -64,7 +65,8 @@ export const MinimizableDialogV2: React.FC<{
         maximized: '',
         minimized: '',
         close: '',
-        fullscreen: '',
+        enterFullScreen: '',
+        exitFullScreen: '',
     },
 }) => {
     const [minimized, setMinimized] = useState(false)
@@ -145,6 +147,9 @@ export const MinimizableDialogV2: React.FC<{
                                 showFullScreenIcon={enableFullscreen}
                                 fullScreen={fullScreen}
                                 onClick={() => {
+                                    // eslint-disable-next-line @typescript-eslint/no-extra-semi
+                                    (document.activeElement as HTMLElement)?.blur()
+
                                     if (fullScreenState !== undefined && handleFullScreenState) {
                                         handleFullScreenState()
                                     } else {
@@ -153,7 +158,9 @@ export const MinimizableDialogV2: React.FC<{
                                 }}
                                 title={onFullScreenText}
                                 tooltipTitle={
-                                    tooltipOverrides.fullscreen || (fullScreen ? 'Exit full screen' : 'Full screen')
+                                    fullScreen
+                                        ? tooltipOverrides.exitFullScreen || 'Exit full screen'
+                                        : tooltipOverrides.enterFullScreen || 'Full screen'
                                 }
                             />
                             <CloseBtn

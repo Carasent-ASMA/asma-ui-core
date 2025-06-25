@@ -39,6 +39,10 @@ export const DialogMinimizableV2 = () => {
                     maximized: 'max-w-[600px]',
                     fullscreen: 'max-w-[1000px]',
                 }}
+                tooltipOverrides={{
+                    enterFullScreen: 'Full screen',
+                    exitFullScreen: 'Exit full screen',
+                }}
             >
                 <>
                     <div className='flex-grow flex flex-col gap-y-3 overflow-auto px-4'>
