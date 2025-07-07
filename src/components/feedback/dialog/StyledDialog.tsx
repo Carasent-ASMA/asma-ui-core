@@ -28,13 +28,13 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     const isMobile = useIsMobileView()
     return (
         <Dialog
-            {...rest}
             data-test={dataTest}
             style={{
                 zIndex: 999,
                 ...rest.style,
             }}
             fullScreen={isMobile ? true : rest.fullScreen}
+            {...rest}
         >
             <div className={style['styled-dialog-root']}>
                 <div className={style['styled-top-header']}>
