@@ -1,4 +1,4 @@
-import React, { useState, type ReactNode } from 'react'
+import React, { useState, type ReactNode, useRef, useEffect } from 'react'
 import clsx from 'clsx'
 import { CloseBtn } from './components/CloseBtn'
 import { MinimizeBtn } from './components/MinimizeBtn'
@@ -71,10 +71,23 @@ export const MinimizableDialogV2: React.FC<{
 }) => {
     const [minimized, setMinimized] = useState(false)
     const [fullscreen, setFullscreen] = useState(false)
-
-    if (!open) return null
+    const modalRef = useRef<HTMLDivElement>(null)
 
     const fullScreen = fullScreenState !== undefined ? fullScreenState : fullscreen
+
+    useEffect(() => {
+        if (!fullScreen) return
+
+        const handler = (e: MouseEvent) =>
+            modalRef.current &&
+            !modalRef.current.contains(e.target as Node) &&
+            (fullScreenState !== undefined && handleFullScreenState ? handleFullScreenState() : setFullscreen(false))
+
+        document.addEventListener('mousedown', handler)
+        return () => document.removeEventListener('mousedown', handler)
+    }, [fullScreen, handleFullScreenState, fullScreenState])
+
+    if (!open) return null
 
     const toggleMinimized = () => {
         setMinimized(!minimized)
@@ -115,6 +128,7 @@ export const MinimizableDialogV2: React.FC<{
             {/* Maximized  */}
             {fullScreen && !minimized && <div className='z-[51] fixed inset-0 bg-[rgb(98,110,126)] bg-opacity-70' />}
             <div
+                ref={modalRef}
                 style={{ zIndex: 51 }}
                 className={cn(
                     styles['dialog'],
