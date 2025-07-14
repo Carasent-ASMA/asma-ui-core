@@ -52,6 +52,7 @@
         "warning-300": "var(--colors-warning-300)",
         "warning-500": "var(--colors-warning-500)",
         "warning-700": "var(--colors-warning-700)",
+        "warning-800": "var(--colors-warning-800)",
         "theta-hover": "var(--colors-theta-hover)",
         "btn-bg": "var(--colors-btn-bg-standart)",
         "btn-bg-active": "var(--colors-btn-bg-active)",
