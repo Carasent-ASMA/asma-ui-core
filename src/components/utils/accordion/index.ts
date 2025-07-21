@@ -1,3 +1,3 @@
-export * from './StyledAccordion';
-export * from './StyledAccordionSummary';
-export * from './StyledAccordionDetails';
+export * from './base-ui/StyledAccordion';
+export * from './base-ui/StyledAccordionSummary';
+export * from './base-ui/StyledAccordionDetails';
