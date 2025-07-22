@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { MenuItem } from '@mui/material'
 import { StyledCheckbox } from '../../inputs/checkbox'
 import { StyledFormControlLabel } from '../../miscellaneous/StyledFormControlLabel'
+import { StyledMenuItem } from 'src'
 
 const meta: Meta<typeof StyledFilterMenu> = {
     title: 'Utils/Styled Filter Menu',
@@ -75,14 +76,14 @@ const FilterMenuExample = () => {
                 popoverContent={(/* { isOpen, onClose } */) => (
                     <>
                         {mockData.map(({ key, label, checked }) => (
-                            <MenuItem key={key} className={`${checked ? 'bg-gama-50' : ''} h-12`}>
+                            <StyledMenuItem key={key} selected={checked}>
                                 <StyledFormControlLabel
                                     label={label}
                                     control={<StyledCheckbox dataTest='menu-item-checkbox' disableRipple />}
                                     checked={checked}
                                     onChange={() => handleCheckboxChange(key)}
                                 />
-                            </MenuItem>
+                            </StyledMenuItem>
                         ))}
                     </>
                 )}
