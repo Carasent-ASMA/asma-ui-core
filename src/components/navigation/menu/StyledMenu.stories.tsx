@@ -65,7 +65,7 @@ const StyledMenuExample: FC<{ args: Partial<MenuProps> }> = ({ args }) => {
                         'aria-labelledby': 'basic-button',
                     }}
                 >
-                    <StyledMenuItem onClick={handleClose}>Profile</StyledMenuItem>
+                    <StyledMenuItem onClick={handleClose} selected>Profile</StyledMenuItem>
                     <StyledMenuItem onClick={handleClose}>My account</StyledMenuItem>
                     <StyledMenuItem onClick={handleClose}>Logout</StyledMenuItem>
                 </StyledMenu>

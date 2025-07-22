@@ -5,7 +5,8 @@ export const StyledMenuItem = (props: MenuItemProps) => (
     <MenuItem
         {...props}
         classes={{
-            root: clsx('px-3 py-2.5', props.classes?.root),
+            selected: 'bg-gama-50',
+            root: clsx('px-3 py-2.5 hover:bg-delta-50', props.classes?.root),
             ...props.classes,
         }}
     />
