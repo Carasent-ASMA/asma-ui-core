@@ -37,29 +37,31 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
             {...rest}
         >
             <div className={style['styled-dialog-root']}>
-                <div className={style['styled-top-header']}>
-                    <div className={style['styled-dialog-info']}>
-                        {dialogLabel && <div className={style['styled-dialog-label']}>{dialogLabel}</div>}
-                        {dialogTitle && <div className={style['styled-dialog-title']}>{dialogTitle}</div>}
-                    </div>
-                    {showCloseIcon && (
-                        <div className={style['styled-dialog-close']}>
-                            {dialogHeaderNode}
-                            <StyledButton
-                                dataTest={`close-button-${dataTest}`}
-                                variant='textGray'
-                                size='small'
-                                endIcon={<CloseIcon width={24} height={24} />}
-                                onClick={(event) => {
-                                    rest.onClose ? rest.onClose(event, 'escapeKeyDown') : null
-                                }}
-                                style={{ color: 'var(--colors-grey-800)' }}
-                            >
-                                {onCloseText}
-                            </StyledButton>
+                {dialogLabel || dialogTitle || showCloseIcon ? (
+                    <div className={style['styled-top-header']}>
+                        <div className={style['styled-dialog-info']}>
+                            {dialogLabel && <div className={style['styled-dialog-label']}>{dialogLabel}</div>}
+                            {dialogTitle && <div className={style['styled-dialog-title']}>{dialogTitle}</div>}
                         </div>
-                    )}
-                </div>
+                        {showCloseIcon && (
+                            <div className={style['styled-dialog-close']}>
+                                {dialogHeaderNode}
+                                <StyledButton
+                                    dataTest={`close-button-${dataTest}`}
+                                    variant='textGray'
+                                    size='small'
+                                    endIcon={<CloseIcon width={24} height={24} />}
+                                    onClick={(event) => {
+                                        rest.onClose ? rest.onClose(event, 'escapeKeyDown') : null
+                                    }}
+                                    style={{ color: 'var(--colors-grey-800)' }}
+                                >
+                                    {onCloseText}
+                                </StyledButton>
+                            </div>
+                        )}
+                    </div>
+                ) : null}
             </div>
 
             {children}
