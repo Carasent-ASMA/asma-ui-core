@@ -1,44 +1,39 @@
-import * as React from 'react';
-import { Accordion } from '@base-ui-components/react/accordion';
-import clsx from 'clsx';
-import styles from './StyledAccordion.module.scss';
-import { ChevronDownIcon } from 'src/components/icons';
+import * as React from 'react'
+import { Accordion } from '@base-ui-components/react/accordion'
+import clsx from 'clsx'
+import styles from './StyledAccordion.module.scss'
+import { ChevronDownIcon } from 'src/components/icons'
 
-export type StyledAccordionSummarySize = 'small' | 'large';
+export type StyledAccordionSummarySize = 'small' | 'large'
 
-export interface StyledAccordionSummaryProps
-  extends React.ComponentProps<typeof Accordion.Trigger> {
-  size?: StyledAccordionSummarySize;
-  sx?: React.CSSProperties;
+export interface StyledAccordionSummaryProps extends React.ComponentProps<typeof Accordion.Trigger> {
+    size?: StyledAccordionSummarySize
+    sx?: React.CSSProperties
 }
 
 export const StyledAccordionSummary = ({
-  size = 'large',
-  className,
-  sx,
-  children,
-  ...rest
+    size = 'large',
+    className,
+    sx,
+    children,
+    ...rest
 }: StyledAccordionSummaryProps) => {
-  const isSmall = size === 'small';
+    const isSmall = size === 'small'
 
-  const styleVars: React.CSSProperties = {
-    '--trigger-height': isSmall ? '48px' : '72px',
-    '--trigger-padding-x': isSmall ? '8px' : '16px',
-    '--trigger-font-size': isSmall ? '14px' : '18px',
-    '--chevron-size': isSmall ? '20px' : '24px',
-    ...sx,
-  } as React.CSSProperties;
+    const styleVars: React.CSSProperties = {
+        '--trigger-height': isSmall ? '48px' : '72px',
+        '--trigger-padding-x': isSmall ? '8px' : '16px',
+        '--trigger-font-size': isSmall ? '14px' : '18px',
+        '--chevron-size': isSmall ? '20px' : '24px',
+        ...sx,
+    } as React.CSSProperties
 
-  return (
-    <Accordion.Header className={styles['Header']}>
-      <Accordion.Trigger
-        {...rest}
-        className={clsx(styles['Trigger'], className)}
-        style={styleVars}
-      >
-        {children}
-        <ChevronDownIcon className={styles['TriggerIcon']} data-state-icon />
-      </Accordion.Trigger>
-    </Accordion.Header>
-  );
-};
+    return (
+        <Accordion.Header className={styles['Header']}>
+            <Accordion.Trigger {...rest} className={clsx(styles['Trigger'], className)} style={styleVars}>
+                <ChevronDownIcon className={styles['TriggerIcon']} data-state-icon />
+                {children}
+            </Accordion.Trigger>
+        </Accordion.Header>
+    )
+}

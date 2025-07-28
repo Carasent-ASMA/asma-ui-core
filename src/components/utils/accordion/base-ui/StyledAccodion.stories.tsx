@@ -1,3 +1,4 @@
+import React, { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import { StyledAccordion } from './StyledAccordion'
 import { StyledAccordionSummary } from './StyledAccordionSummary'
@@ -17,39 +18,28 @@ const meta: Meta<typeof StyledAccordion> = {
 
 export default meta
 
-type Story = StoryObj<typeof StyledAccordion>
+export const Accordion = {
+    render: () => {
+        const [isExpanded, setIsExpanded] = useState(true)
 
-export const Accordion: Story = {
-    render: () => (
-        <div className='max-w-[600px] flex flex-col gap-4'>
-            <StyledAccordion defaultExpanded={true}>
-                <div className='relative flex items-center justify-between pr-4'>
-                    <StyledAccordionSummary size='large'>
-                        <StyledWidgetTitle>Header lorem ipsum</StyledWidgetTitle>
-                    </StyledAccordionSummary>
-                </div>
+        return (
+            <div className='max-w-[600px] flex flex-col gap-4'>
+                <StyledAccordion onChange={setIsExpanded}>
+                    <div className='flex items-center justify-between pr-4'>
+                        <StyledAccordionSummary className='' size='large'>
+                            <StyledWidgetTitle>Header lorem ipsum</StyledWidgetTitle>
+                        </StyledAccordionSummary>
 
-                <StyledAccordionDetails>
-                    <Typography>
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut
-                        labore et dolore magna aliqua. Ut enim ad minim veniam.
-                    </Typography>
-                </StyledAccordionDetails>
-            </StyledAccordion>
-            <StyledAccordion defaultExpanded={true}>
-                <div className='relative flex items-center justify-between pr-4'>
-                    <StyledAccordionSummary size='small'>
-                        <StyledWidgetTitle>Header lorem ipsum</StyledWidgetTitle>
-                    </StyledAccordionSummary>
-                </div>
+                        {/* {isExpanded && <StyledButton size='small' dataTest='test' {...meta.args} variant='contained'>
+                            <div>Button label</div>
+                        </StyledButton>} */}
+                    </div>
 
-                <StyledAccordionDetails>
-                    <Typography>
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut
-                        labore et dolore magna aliqua. Ut enim ad minim veniam.
-                    </Typography>
-                </StyledAccordionDetails>
-            </StyledAccordion>
-        </div>
-    ),
+                    <StyledAccordionDetails>
+                        <Typography>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</Typography>
+                    </StyledAccordionDetails>
+                </StyledAccordion>
+            </div>
+        )
+    },
 }

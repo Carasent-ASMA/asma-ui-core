@@ -1,55 +1,56 @@
 .AccordionRoot {
-  border-radius: 0.5rem;
-  border: 1px solid #bdc4cf;
-  background: #FFF;
+    border-radius: 0.5rem;
+    border: 1px solid #bdc4cf;
+    background: #fff;
 }
 
 .Header {
-  margin: 0;
+    margin: 0;
+    width: 100%;
 }
 
 .Trigger {
-  display: flex;
-  flex-direction: row-reverse;
-  align-items: center;
-  gap: 8px;
-  padding-left: var(--trigger-padding-x);
-  padding-right: var(--trigger-padding-x);
-  min-height: var(--trigger-height);
-  background-color: transparent;
-  border: none;
-  font-size: var(--trigger-font-size);
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    text-align: left;
+    gap: 8px;
+    padding-left: var(--trigger-padding-x);
+    padding-right: var(--trigger-padding-x);
+    min-height: var(--trigger-height);
+    padding-top: 0px;
+    background-color: transparent;
+    border: none;
+    font-size: var(--trigger-font-size);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
 .TriggerIcon {
-  color: #363e4a;
-  width: var(--chevron-size);
-  height: var(--chevron-size);
-  transition: transform 150ms ease;
+    color: #363e4a;
+    width: var(--chevron-size);
+    height: var(--chevron-size);
+    transition: transform 150ms ease;
 }
 
 .Trigger[data-panel-open] .TriggerIcon {
-  transform: rotate(180deg);
+    transform: rotate(180deg);
 }
 
 .Panel {
-  box-sizing: border-box;
-  height: var(--accordion-panel-height);
-  overflow: hidden;
-  color: var(--color-gray-600);
-  transition: height 0.2s ease-out;
-  
+    box-sizing: border-box;
+    height: var(--accordion-panel-height);
+    overflow: hidden;
+    color: var(--color-gray-600);
+    transition: height 0.2s ease-out;
 
-  &[data-starting-style],
-  &[data-ending-style] {
-    height: 0;
-  }
+    &[data-starting-style],
+    &[data-ending-style] {
+        height: 0;
+    }
 }
 
 .Content {
-  font-size: 14px;
-  padding: 0.5rem 1rem 1rem 1rem;
-  
+    font-size: 14px;
+    padding: 0.5rem 1rem 1rem 1rem;
 }
