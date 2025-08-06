@@ -38,6 +38,7 @@ export const MinimizableDialogV2: React.FC<{
     fullScreenState?: boolean
     handleFullScreenState?: () => void
     dataTest: string
+    style?: React.CSSProperties
 }> = ({
     onCloseText = '',
     onMinimizeText = '',
@@ -68,6 +69,7 @@ export const MinimizableDialogV2: React.FC<{
         enterFullScreen: '',
         exitFullScreen: '',
     },
+    style,
 }) => {
     const [minimized, setMinimized] = useState(false)
     const [fullscreen, setFullscreen] = useState(false)
@@ -97,7 +99,7 @@ export const MinimizableDialogV2: React.FC<{
         <>
             {/* Minimized  */}
             <div
-                style={{ zIndex: 51 }}
+                style={{ zIndex: 51, ...style }}
                 className={cn(styles['minimized-dialog'], !minimized && styles['hidden'], classNameOverrides.minimized)}
             >
                 <div className={clsx('flex items-center justify-between', !minimized && 'hidden')} data-test={dataTest}>
@@ -129,7 +131,7 @@ export const MinimizableDialogV2: React.FC<{
             {fullScreen && !minimized && <div className='z-[51] fixed inset-0 bg-[rgb(98,110,126)] bg-opacity-70' />}
             <div
                 ref={modalRef}
-                style={{ zIndex: 51 }}
+                style={{ zIndex: 51, ...style }}
                 className={cn(
                     styles['dialog'],
                     minimized && styles['hidden'],
@@ -162,7 +164,7 @@ export const MinimizableDialogV2: React.FC<{
                                 fullScreen={fullScreen}
                                 onClick={() => {
                                     // eslint-disable-next-line @typescript-eslint/no-extra-semi
-                                    (document.activeElement as HTMLElement)?.blur()
+                                    ;(document.activeElement as HTMLElement)?.blur()
 
                                     if (fullScreenState !== undefined && handleFullScreenState) {
                                         handleFullScreenState()
