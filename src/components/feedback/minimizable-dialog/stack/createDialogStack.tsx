@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, type ReactNode, useEffect } from 'react'
 
-export type DialogConfigMap = Record<string, { dependencies?: readonly string[] }>
+export type DialogConfigMap = Record<string, { dependencies?: readonly string[]; order?: number }>
 
 type DialogId<Config extends DialogConfigMap> = Extract<keyof Config, string>
 
@@ -10,6 +10,7 @@ interface DialogState<Id extends string> {
     width: number
     position: { right: number }
     dependencies?: readonly Id[]
+    order: number
 }
 
 interface DialogStackContextType<Config extends DialogConfigMap> {
@@ -48,10 +49,11 @@ export function createDialogStack<Config extends DialogConfigMap>({
 
         const recalculate = useCallback(
             (items: DialogState<DialogId<Config>>[]) => {
-                const count = items.length || 1
+                const sorted = [...items].sort((a, b) => a.order - b.order)
+                const count = sorted.length || 1
                 const dialogWidth = Math.min(MAX_DIALOG_WIDTH, (windowWidth - (count + 1) * GAP) / count)
 
-                return items.map((d, i) => ({
+                return sorted.map((d, i) => ({
                     ...d,
                     width: dialogWidth,
                     position: { right: GAP + i * (dialogWidth + GAP) },
@@ -61,8 +63,10 @@ export function createDialogStack<Config extends DialogConfigMap>({
         )
 
         const openDialog = useCallback(
-            (id: DialogId<Config>) => {
+            (id: DialogId<Config>, overrideOrder?: number) => {
                 const deps = config[id]?.dependencies as readonly DialogId<Config>[] | undefined
+                const confOrder = config[id]?.order ?? Infinity
+                const order = overrideOrder ?? confOrder
 
                 setDialogs((prev) => {
                     const exists = prev.find((d) => d.id === id)
@@ -73,6 +77,7 @@ export function createDialogStack<Config extends DialogConfigMap>({
                         width: 0,
                         position: { right: 0 },
                         dependencies: deps,
+                        order,
                     }
 
                     const merged = exists
