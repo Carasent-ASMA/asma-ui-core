@@ -1,0 +1,154 @@
+$checkbox-sizes: (
+    medium: 42px,
+    small: 38px,
+);
+
+@mixin checkbox-dimensions($size) {
+    $dim: map-get($checkbox-sizes, $size);
+    width: $dim;
+    height: $dim;
+}
+
+@mixin checkbox-size($size) {
+    border-radius: 2px;
+
+    @if $size == 'medium' {
+        width: 18px;
+        height: 18px;
+    } @else if $size == 'small' {
+        width: 15px;
+        height: 15px;
+    }
+}
+
+.CheckboxWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    @include checkbox-dimensions(medium);
+
+    &.size-small {
+        @include checkbox-dimensions(small);
+    }
+    &.Disabled {
+        cursor: default;
+        pointer-events: none;
+    }
+}
+
+%ripple-base {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.CheckboxRippleContainer {
+    @extend %ripple-base;
+    overflow: hidden;
+}
+
+.CheckboxRipple {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: var(--colors-gama-500);
+    border-radius: 50%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.25;
+    animation: ripple 400ms ease-out forwards;
+    z-index: 0;
+}
+
+@keyframes ripple {
+    to {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.025;
+    }
+}
+
+.CheckboxHover {
+    &::after {
+        content: '';
+        @extend %ripple-base;
+        @include checkbox-dimensions(medium);
+        background: var(--colors-gama-300);
+        border-radius: 50%;
+        top: 50%;
+        left: 50%;
+        opacity: 0;
+        transition: opacity 0.2s, transform 0.2s;
+        transform: translate(-50%, -50%) scale(0.7);
+    }
+
+    &:hover::after {
+        opacity: 0.07;
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    &.size-small::after {
+        @include checkbox-dimensions(small);
+    }
+}
+
+.Checkbox {
+    position: relative;
+    overflow: visible;
+    @include checkbox-size('medium');
+    padding: 0;
+    border-color: var(--colors-delta-500);
+    cursor: pointer;
+
+    &.size-small {
+        @include checkbox-size('small');
+    }
+
+    &[data-checked],
+    &[data-indeterminate] {
+        background-color: var(--colors-gama-500);
+        border: none;
+    }
+
+    &[data-unchecked] {
+        background-color: transparent;
+        border: 2px solid var(--colors-delta-500);
+
+        &.size-small {
+            border-width: 1.5px;
+        }
+    }
+
+    &[data-disabled] {
+        border: 2px solid var(--colors-delta-200);
+
+        &.size-small {
+            border-width: 1.5px;
+        }
+
+        &[data-checked],
+        &[data-indeterminate] {
+            background-color: var(--colors-delta-200);
+            border: none;
+        }
+    }
+}
+
+.Indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: white;
+    z-index: 1;
+    position: relative;
+}
