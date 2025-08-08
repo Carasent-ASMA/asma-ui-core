@@ -16,20 +16,24 @@ export const Checkbox = () => {
     const [checked, setChecked] = useState(false)
 
     return (
-        <div className='w-full h-full flex flex-col'>
+        <div className='flex flex-col'>
+            <div>
+                <StyledCheckbox dataTest='test' hideWrapper checked={true} />
+            </div>
             <div className='flex'>
                 <StyledCheckbox dataTest='test' checked={checked} onChange={(_, checked) => setChecked(checked)} />
                 <StyledCheckbox dataTest='test' checked={false} />
                 <StyledCheckbox dataTest='test' indeterminate />
                 <StyledCheckbox dataTest='test' disableRipple />
-                <StyledCheckbox dataTest='test' disabled hideWrapper  checked={true}/>
+                <StyledCheckbox dataTest='test' readOnly checked={true} />
+                <StyledCheckbox dataTest='test' readOnly indeterminate />
             </div>
             <div className='flex'>
                 <StyledCheckbox size='small' dataTest='test' checked={true} />
                 <StyledCheckbox size='small' dataTest='test' checked={false} />
                 <StyledCheckbox size='small' dataTest='test' indeterminate />
                 <StyledCheckbox size='small' dataTest='test' />
-                <StyledCheckbox size='small' dataTest='test' readOnly/>
+                <StyledCheckbox size='small' dataTest='test' readOnly checked={true} />
             </div>
             <div className='flex'>
                 <StyledCheckbox size='small' disabled dataTest='test' checked={true} />

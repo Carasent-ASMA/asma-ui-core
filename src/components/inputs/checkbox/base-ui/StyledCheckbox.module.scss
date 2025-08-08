@@ -26,17 +26,63 @@ $checkbox-sizes: (
     align-items: center;
     justify-content: center;
     position: relative;
-    overflow: hidden;
+    box-sizing: border-box;
     cursor: pointer;
+    background: transparent;
+    border: none;
+
     @include checkbox-dimensions(medium);
 
     &.size-small {
         @include checkbox-dimensions(small);
     }
-    &.Disabled {
+
+    &[data-disabled] {
         cursor: default;
         pointer-events: none;
     }
+
+    &:is([data-checked], [data-indeterminate]) .Checkbox {
+        background-color: var(--colors-gama-500);
+        border: none;
+    }
+
+    &[data-unchecked] .Checkbox {
+        background-color: transparent;
+        border: var(--cb-border-w) solid var(--colors-delta-500);
+    }
+
+    &[data-disabled][data-unchecked] .Checkbox {
+        background-color: transparent;
+        border: var(--cb-border-w) solid var(--colors-delta-200);
+    }
+
+    &[data-disabled]:is([data-checked], [data-indeterminate]) .Checkbox {
+        background-color: var(--colors-delta-200);
+        border: none;
+    }
+}
+
+.CheckboxWrapper.ReadOnly {
+    pointer-events: none;
+    cursor: default;
+
+    .Checkbox {
+        background-color: white;
+        border: var(--cb-border-w) solid var(--colors-delta-500);
+
+        .Indicator {
+            color: var(--colors-delta-500);
+        }
+    }
+}
+
+.HideWrapper {
+    display: inline-flex;
+    width: auto;
+    height: auto;
+    padding: 0;
+    overflow: visible;
 }
 
 %ripple-base {
@@ -45,14 +91,13 @@ $checkbox-sizes: (
     top: 0;
     width: 100%;
     height: 100%;
-    border-radius: inherit;
-    pointer-events: none;
     z-index: 0;
 }
 
 .CheckboxRippleContainer {
     @extend %ripple-base;
     overflow: hidden;
+    border-radius: 50%;
 }
 
 .CheckboxRipple {
@@ -80,7 +125,8 @@ $checkbox-sizes: (
     &::after {
         content: '';
         @extend %ripple-base;
-        @include checkbox-dimensions(medium);
+        width: 42px;
+        height: 42px;
         background: var(--colors-gama-300);
         border-radius: 50%;
         top: 50%;
@@ -96,49 +142,24 @@ $checkbox-sizes: (
     }
 
     &.size-small::after {
-        @include checkbox-dimensions(small);
+        width: 38px;
+        height: 38px;
     }
 }
 
 .Checkbox {
     position: relative;
     overflow: visible;
-    @include checkbox-size('medium');
     padding: 0;
-    border-color: var(--colors-delta-500);
-    cursor: pointer;
+    box-sizing: border-box;
+
+    --cb-border-w: 2px;
+
+    @include checkbox-size('medium');
 
     &.size-small {
+        --cb-border-w: 1.5px;
         @include checkbox-size('small');
-    }
-
-    &[data-checked],
-    &[data-indeterminate] {
-        background-color: var(--colors-gama-500);
-        border: none;
-    }
-
-    &[data-unchecked] {
-        background-color: transparent;
-        border: 2px solid var(--colors-delta-500);
-
-        &.size-small {
-            border-width: 1.5px;
-        }
-    }
-
-    &[data-disabled] {
-        border: 2px solid var(--colors-delta-200);
-
-        &.size-small {
-            border-width: 1.5px;
-        }
-
-        &[data-checked],
-        &[data-indeterminate] {
-            background-color: var(--colors-delta-200);
-            border: none;
-        }
     }
 }
 

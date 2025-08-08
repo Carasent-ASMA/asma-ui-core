@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React, { useEffect } from 'react'
 import { Checkbox } from '@base-ui-components/react/checkbox'
 import styles from './StyledCheckbox.module.scss'
 import { CheckIcon } from 'src/components/icons'
@@ -34,60 +34,73 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
     onChange,
     ...props
 }) => {
+    const isBare = !!hideWrapper
+    const isRippleEnabled = !disableRipple && !isBare && !disabled && !readOnly
+
     const wrapperClasses = cn(
-        !hideWrapper && styles['CheckboxWrapper'],
-        !hideWrapper && styles[`size-${size}`],
-        !hideWrapper && disabled && styles['Disabled'],
-        !hideWrapper && !disableRipple && styles['CheckboxHover'],
+        styles['CheckboxWrapper'],
+        styles[`size-${size}`],
+        isBare && styles['HideWrapper'],
+        readOnly && styles['ReadOnly'],
+        isRippleEnabled && styles['CheckboxHover'],
         className,
     )
 
-    const checkboxClasses = cn(
-        styles['Checkbox'],
-        styles[`size-${size}`],
-        disabled && styles['Disabled'],
-        readOnly && styles['ReadOnly'],
-    )
+    const checkboxClasses = cn(styles['Checkbox'], styles[`size-${size}`])
 
     const CheckboxIcon = indeterminate ? IndeterminateIcon : CheckIcon
 
     const rippleRef = React.useRef<HTMLSpanElement>(null)
 
-    const handleRipple = () => {
-        if (disableRipple || disabled || readOnly) return
+    const handlePointerDown = React.useCallback(
+        (e: React.PointerEvent) => {
+            e.stopPropagation()
+            if (!isRippleEnabled) return
 
-        const ripple = document.createElement('span')
-        ripple.className = styles['CheckboxRipple'] || ''
-        rippleRef.current?.appendChild(ripple)
+            const ripple = document.createElement('span')
+            ripple.className = styles['CheckboxRipple'] || ''
+            ripple.addEventListener('animationend', () => ripple.remove(), { once: true })
+            rippleRef.current?.appendChild(ripple)
+        },
+        [isRippleEnabled],
+    )
 
-        setTimeout(() => ripple.remove(), 400)
-    }
+    useEffect(() => {
+        return () => {
+            rippleRef.current?.replaceChildren()
+        }
+    }, [])
+
+    const handleCheckedChange = React.useCallback(
+        (val: boolean) => {
+            if (readOnly) return
+            const fakeEvent = {
+                target: { name: props.name, value: props.value, checked: val },
+            } as React.ChangeEvent<HTMLInputElement>
+            onChange?.(fakeEvent, val)
+        },
+        [onChange, props.name, props.value, readOnly],
+    )
 
     return (
-        <label className={wrapperClasses} data-test={dataTest} onClick={handleRipple}>
-            {!disableRipple && !hideWrapper && <span ref={rippleRef} className={styles['CheckboxRippleContainer']} />}
-            <Checkbox.Root
-                checked={checked}
-                disabled={disabled}
-                readOnly={readOnly}
-                data-test={dataTest}
-                className={checkboxClasses}
-                indeterminate={indeterminate}
-                onClick={(e) => e.stopPropagation()}
-                onMouseDown={(e) => e.stopPropagation()}
-                onCheckedChange={(val: boolean) => {
-                    if (readOnly) return
-                    const fakeEvent = {
-                        target: { name: props.name, value: props.value, checked: val },
-                    } as React.ChangeEvent<HTMLInputElement>
-                    onChange?.(fakeEvent, val)
-                }}
-                {...props}
-            >
+        <Checkbox.Root
+            className={wrapperClasses}
+            data-test={dataTest}
+            checked={checked}
+            disabled={disabled}
+            readOnly={readOnly}
+            indeterminate={indeterminate}
+            onPointerDown={handlePointerDown}
+            onCheckedChange={handleCheckedChange}
+            {...props}
+        >
+            {isRippleEnabled && <span ref={rippleRef} className={styles['CheckboxRippleContainer']} />}
+
+            <span className={checkboxClasses}>
                 <Checkbox.Indicator className={styles['Indicator']} style={{ pointerEvents: 'none' }}>
                     <CheckboxIcon />
                 </Checkbox.Indicator>
-            </Checkbox.Root>
-        </label>
+            </span>
+        </Checkbox.Root>
     )
 }
