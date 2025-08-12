@@ -34,13 +34,13 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
     onChange,
     ...props
 }) => {
-    const isBare = !!hideWrapper
-    const isRippleEnabled = !disableRipple && !isBare && !disabled && !readOnly
+    const isHideWrapper = !!hideWrapper
+    const isRippleEnabled = !disableRipple && !isHideWrapper && !disabled && !readOnly
 
     const wrapperClasses = cn(
         styles['CheckboxWrapper'],
-        styles[`size-${size}`],
-        isBare && styles['HideWrapper'],
+        !isHideWrapper && styles[`size-${size}`],
+        isHideWrapper && styles['HideWrapper'],
         readOnly && styles['ReadOnly'],
         isRippleEnabled && styles['CheckboxHover'],
         className,
@@ -94,10 +94,9 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
             onCheckedChange={handleCheckedChange}
             {...props}
         >
-            {isRippleEnabled && <span ref={rippleRef} className={styles['CheckboxRippleContainer']} />}
-
+            {!isHideWrapper && isRippleEnabled && <span ref={rippleRef} className={styles['CheckboxRippleContainer']} />}
             <span className={checkboxClasses}>
-                <Checkbox.Indicator className={styles['Indicator']} style={{ pointerEvents: 'none' }}>
+                <Checkbox.Indicator className={styles['Indicator']}>
                     <CheckboxIcon />
                 </Checkbox.Indicator>
             </span>

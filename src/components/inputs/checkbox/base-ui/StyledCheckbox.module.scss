@@ -78,7 +78,6 @@ $checkbox-sizes: (
 }
 
 .HideWrapper {
-    display: inline-flex;
     width: auto;
     height: auto;
     padding: 0;
@@ -172,4 +171,5 @@ $checkbox-sizes: (
     color: white;
     z-index: 1;
     position: relative;
+    pointer-events: none;
 }

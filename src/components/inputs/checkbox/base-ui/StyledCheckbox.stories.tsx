@@ -18,7 +18,10 @@ export const Checkbox = () => {
     return (
         <div className='flex flex-col'>
             <div>
-                <StyledCheckbox dataTest='test' hideWrapper checked={true} />
+                <StyledCheckbox dataTest='test' hideWrapper />
+            </div>
+            <div>
+                <StyledCheckbox dataTest='test' size='small' hideWrapper />
             </div>
             <div className='flex'>
                 <StyledCheckbox dataTest='test' checked={checked} onChange={(_, checked) => setChecked(checked)} />
