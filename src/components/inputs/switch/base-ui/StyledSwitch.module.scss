@@ -1,0 +1,81 @@
+.switch {
+    position: relative;
+    display: flex;
+    flex-shrink: 0;
+    flex-grow: 0;
+
+    --switch-w: 38px;
+    --switch-h: 22px;
+    --switch-pad: 2px;
+
+    width: var(--switch-w);
+    height: var(--switch-h);
+
+    border-radius: 9999px;
+    border: none;
+    padding: var(--switch-pad);
+    margin: 6px;
+
+    cursor: pointer;
+    transition: background-color 0.3s;
+
+    &[data-unchecked] {
+        background-color: var(--colors-delta-400);
+    }
+
+    &[data-checked] {
+        background-color: var(--colors-gama-500);
+    }
+
+    &:not([data-disabled]):active .iconContent {
+        opacity: 0.9;
+    }
+
+    &[data-disabled] {
+        opacity: 0.5;
+        cursor: default;
+        pointer-events: none;
+    }
+}
+
+.thumb {
+    width: calc(var(--switch-h) - (2 * var(--switch-pad)));
+    height: calc(var(--switch-h) - (2 * var(--switch-pad)));
+    border-radius: 100%;
+    background-color: white;
+    transition: transform 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .switch[data-checked] & {
+        transform: translateX(calc(var(--switch-w) - var(--switch-h)));
+    }
+}
+
+.icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+}
+
+.iconContent {
+    display: block;
+    pointer-events: none;
+    transition: color 0.3s; /* smooth color change */
+
+    svg {
+        transition: fill 0.3s, stroke 0.3s;
+    }
+
+    .switch[data-checked] & {
+        color: var(--colors-gama-500);
+    }
+
+    .switch[data-unchecked] & {
+        color: var(--colors-delta-400);
+    }
+}

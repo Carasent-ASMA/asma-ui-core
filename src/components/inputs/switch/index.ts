@@ -1,1 +1,1 @@
-export * from './StyledSwitch'
+export * from './base-ui/StyledSwitch'
