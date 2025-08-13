@@ -45,6 +45,7 @@ $checkbox-sizes: (
     &:is([data-checked], [data-indeterminate]) .Checkbox {
         background-color: var(--colors-gama-500);
         border: none;
+        --cb-border-w: 0px;
     }
 
     &[data-unchecked] .Checkbox {
@@ -60,6 +61,11 @@ $checkbox-sizes: (
     &[data-disabled]:is([data-checked], [data-indeterminate]) .Checkbox {
         background-color: var(--colors-delta-200);
         border: none;
+        --cb-border-w: 0px;
+    }
+
+    &:focus-visible {
+        outline: none;
     }
 }
 
@@ -70,6 +76,11 @@ $checkbox-sizes: (
     .Checkbox {
         background-color: white;
         border: var(--cb-border-w) solid var(--colors-delta-500);
+        --cb-border-w: 2px;
+
+        &.size-small {
+            --cb-border-w: 1.5px;
+        }
 
         .Indicator {
             color: var(--colors-delta-500);
@@ -159,6 +170,18 @@ $checkbox-sizes: (
     &.size-small {
         --cb-border-w: 1.5px;
         @include checkbox-size('small');
+    }
+
+    .CheckboxWrapper:focus-visible & {
+        &::before {
+            content: '';
+            position: absolute;
+            inset: calc(-2px - var(--cb-border-w));
+            border-radius: 4px;
+            outline: 2px solid var(--colors-gama-400);
+            outline-offset: 0;
+            pointer-events: none;
+        }
     }
 }
 
