@@ -1,8 +1,8 @@
 import type { ComponentProps, FC } from 'react'
 import { StyledChip } from '../chip'
-import { StyledRadio } from 'src'
 import type { CheckboxProps, RadioProps } from '@mui/material'
 import { StyledCheckbox } from 'src/components/inputs/checkbox/StyledCheckbox'
+import { StyledRadio } from 'src/components/inputs/radio-button/StyledRadio'
 
 export interface StyledInteractiveChipProps extends ComponentProps<typeof StyledChip> {
     type?: 'checkbox' | 'radio'

@@ -1,0 +1,166 @@
+@mixin radio-wrapper-size($size) {
+    @if $size == 'small' {
+        width: 38px;
+        height: 38px;
+    } @else {
+        width: 42px;
+        height: 42px;
+    }
+}
+
+@mixin radio-size($size) {
+    @if $size == 'small' {
+        width: 16px;
+        height: 16px;
+    } @else {
+        width: 19px;
+        height: 19px;
+    }
+}
+
+@mixin indicator-size($size) {
+    @if $size == 'small' {
+        width: 8px;
+        height: 8px;
+    } @else {
+        width: 10px;
+        height: 10px;
+    }
+}
+
+.RadioWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    flex-grow: 0;
+    position: relative;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    @include radio-wrapper-size(medium);
+
+    &.size-small {
+        @include radio-wrapper-size(small);
+    }
+    &[data-disabled] {
+        cursor: default;
+        pointer-events: none;
+    }
+    &:focus-visible {
+        outline: none;
+    }
+}
+
+%ripple-base {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.RadioRippleContainer {
+    @extend %ripple-base;
+    overflow: hidden;
+    border-radius: 50%;
+}
+
+.RadioRipple {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: var(--colors-gama-500);
+    border-radius: 50%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.25;
+    animation: ripple 400ms ease-out forwards;
+    z-index: 0;
+}
+
+@keyframes ripple {
+    to {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.025;
+    }
+}
+
+.RadioHover {
+    &::after {
+        content: '';
+        background: var(--colors-gama-300);
+        border-radius: 50%;
+        top: 50%;
+        left: 50%;
+        opacity: 0;
+        transition: opacity 0.2s, transform 0.2s;
+        transform: translate(-50%, -50%) scale(0.7);
+        position: absolute;
+        @include radio-wrapper-size(medium);
+    }
+    &.size-small::after {
+        @include radio-wrapper-size(small);
+    }
+    &:hover::after {
+        opacity: 0.07;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.Radio {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 2px solid var(--colors-delta-500);
+    background-color: transparent;
+    padding: 0;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+    @include radio-size(medium);
+
+    &.size-small {
+        @include radio-size(small);
+        border-width: 1.5px;
+    }
+
+    [data-checked] & {
+        border-color: var(--colors-gama-500);
+    }
+    [data-disabled][data-unchecked] &,
+    [data-disabled][data-checked] & {
+        border-color: var(--colors-delta-300);
+    }
+
+    :focus-visible > &::before {
+        content: '';
+        position: absolute;
+        inset: -4px;
+        border-radius: 50%;
+        outline: 2px solid var(--colors-gama-400);
+    }
+}
+
+.Indicator {
+    @include indicator-size(medium);
+    border-radius: 50%;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s;
+
+    .size-small & {
+        @include indicator-size(small);
+    }
+    [data-checked] & {
+        background-color: var(--colors-gama-500);
+        opacity: 1;
+    }
+    [data-disabled][data-checked] & {
+        background-color: var(--colors-delta-300);
+        opacity: 0.6;
+    }
+}
