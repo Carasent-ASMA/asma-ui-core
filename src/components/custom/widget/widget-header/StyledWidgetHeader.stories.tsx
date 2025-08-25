@@ -3,6 +3,7 @@ import React from 'react'
 import { StyledWidgetHeader } from './StyledWidgetHeader'
 import type { Meta } from '@storybook/react'
 import { StyledButton } from 'src/components/inputs/button'
+import { CloseIcon } from 'asma-ui-icons'
 
 const meta = {
     title: 'Widgets/StyledWidgetHeader',
@@ -22,10 +23,20 @@ export const WidgetHeader = () => {
         <StyledWidgetHeader
             title='Widget header example'
             actions={
-                <StyledButton dataTest='header-button' size='small'>
-                    Button
-                </StyledButton>
+                <div className='w-full flex justify-between'>
+                    <StyledButton
+                        dataTest='clear-selected-button'
+                        variant='text'
+                        startIcon={<CloseIcon height={24} width={24} className='text-gama-500' />}
+                    >
+                        3 selected
+                    </StyledButton>
+                    <StyledButton dataTest='header-button' size='small'>
+                        Button
+                    </StyledButton>
+                </div>
             }
+            actionsClassname='w-full'
         />
     )
 }
