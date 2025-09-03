@@ -119,18 +119,15 @@ export const MinimizableDialogV2: React.FC<{
             {fullScreen && !minimized ? (
                 <StyledDialog
                     PaperProps={{
-                        className: classNameOverrides.fullscreen || '',
+                        className: cn('w-full max-w-[1000px] h-[95dvh]', classNameOverrides.fullscreen || ''),
                     }}
                     dataTest='fullscreen-minimizable-dialog'
                     open={true}
-                    dialogTitle={
-                        <div className='text-2xl font-semibold text-delta-800 pb-4 border-b-[1px] border-delta-200'>
-                            {title}
-                        </div>
-                    }
+                    dialogTitle={<div className='text-2xl font-semibold text-delta-800 pb-4'>{title}</div>}
                     dialogLabel={label}
                     onClose={onClose}
                     showCloseIcon={showCloseIcon}
+                    fullWidth
                     dialogHeaderNode={
                         <div className='flex items-center gap-x-1 h-fit'>
                             {actionNode}
@@ -161,7 +158,12 @@ export const MinimizableDialogV2: React.FC<{
                         </div>
                     }
                 >
-                    <div className={cn(minimized && 'hidden', 'flex flex-grow flex-col overflow-y-auto')}>
+                    <div
+                        className={cn(
+                            minimized && 'hidden',
+                            'flex flex-grow flex-col overflow-y-auto border-t-[1px] border-delta-200',
+                        )}
+                    >
                         {children}
                     </div>
                 </StyledDialog>
