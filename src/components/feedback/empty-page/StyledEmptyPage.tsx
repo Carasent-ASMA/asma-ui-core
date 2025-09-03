@@ -19,7 +19,7 @@ export const StyledEmptyPage: FC<{ emptyText: string; isEmpty?: boolean; classNa
                 height={24}
                 className='text-gray-600 cursor-default'
             />
-            <p className='font-normal'>{emptyText}</p>
+            <span className='font-normal'>{emptyText}</span>
         </div>
     )
 }
