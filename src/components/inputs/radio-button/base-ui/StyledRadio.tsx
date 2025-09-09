@@ -8,15 +8,17 @@ type StyledRadioProps = {
     dataTest?: string
     className?: string
     size?: 'small' | 'medium'
+    error?: boolean
 } & Omit<React.ComponentProps<typeof Radio.Root>, 'value' | 'className'>
 
 export const StyledRadio = forwardRef<HTMLButtonElement, StyledRadioProps>(
-    ({ value, dataTest, className, size = 'medium', disabled, ...rest }, ref) => {
+    ({ value, dataTest, className, size = 'medium', error, disabled, ...rest }, ref) => {
         const wrapperClasses = cn(
             styles['RadioWrapper'],
             styles['RadioHover'],
             size === 'small' && styles['size-small'],
             className,
+            error && styles['Error'],
         )
 
         const radioClasses = cn(styles['Radio'], size === 'small' && styles['size-small'])
