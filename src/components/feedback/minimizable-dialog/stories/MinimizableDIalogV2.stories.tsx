@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { StyledButton } from 'src/components/inputs/button'
 import { StyledSelectExample } from 'src/components/inputs/select/story/components/StyledSelectExample'
 import { MinimizableDialogV2 } from '../MinimizableDialogV2'
+import { StyledInputField } from 'src'
 
 const meta = {
     title: 'Feedback/Dialog Minimizable V2',
@@ -56,6 +57,7 @@ export const DialogMinimizableV2 = () => {
                             versions of Lorem Ipsum.
                         </div>
                         <StyledSelectExample />
+                        <StyledInputField dataTest='input' />
                         <div>
                             Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has
                             been the industry's standard dummy text ever since the 1500s, when an unknown printer took a
