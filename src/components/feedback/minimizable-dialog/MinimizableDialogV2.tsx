@@ -1,4 +1,4 @@
-import React, { useState, type ReactNode, useEffect, useRef } from 'react'
+import React, { useState, type ReactNode, useRef } from 'react'
 import clsx from 'clsx'
 import { CloseBtn } from './components/CloseBtn'
 import { MinimizeBtn } from './components/MinimizeBtn'
@@ -78,23 +78,6 @@ export const MinimizableDialogV2: React.FC<{
 
     const fullScreen = fullScreenState !== undefined ? fullScreenState : fullscreen
 
-    useEffect(() => {
-        if (!fullScreen) return
-
-        const handler = (e: MouseEvent) => {
-            if ((e.target as HTMLElement).closest('.MuiPopover-root')) return
-
-            modalRef.current &&
-                !modalRef.current.contains(e.target as Node) &&
-                (fullScreenState !== undefined && handleFullScreenState
-                    ? handleFullScreenState()
-                    : setFullscreen(false))
-        }
-
-        document.addEventListener('mousedown', handler)
-        return () => document.removeEventListener('mousedown', handler)
-    }, [fullScreen, handleFullScreenState, fullScreenState])
-
     if (!open) return null
 
     const toggleMinimized = () => {
@@ -133,7 +116,12 @@ export const MinimizableDialogV2: React.FC<{
                 </div>
             </div>
             {/* Maximized */}
-            {fullScreen && !minimized && <div className='z-[52] fixed inset-0 bg-[rgb(98,110,126)] bg-opacity-70' />}
+            {fullScreen && !minimized && (
+                <div
+                    className='z-[52] fixed inset-0 bg-[rgb(98,110,126)] bg-opacity-70'
+                    onClick={() => (handleFullScreenState ? handleFullScreenState() : setFullscreen(false))}
+                />
+            )}
             <div
                 style={{ zIndex: 51, ...style }}
                 ref={modalRef}
