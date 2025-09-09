@@ -1,11 +1,7 @@
 {
     "fontFamily": {
-        "sans": [
-            "Roboto"
-        ],
-        "roboto": [
-            "Roboto"
-        ]
+        "sans": ["Roboto"],
+        "roboto": ["Roboto"]
     },
     "colors": {
         "inherit": "inherit",

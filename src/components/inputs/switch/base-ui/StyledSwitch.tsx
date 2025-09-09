@@ -1,7 +1,7 @@
 // components/StyledSwitch/StyledSwitch.tsx
 import React, { forwardRef, useState } from 'react'
 import { Switch } from '@base-ui-components/react/switch'
-import styles from './styledswitch.module.scss'
+import styles from './StyledSwitch.module.scss'
 import type { IIcon } from 'src/components/icons'
 import { IconTemplate } from 'src/components/icons/IconTemplate'
 import { cn } from 'src/helpers/cn'

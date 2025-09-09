@@ -13,19 +13,15 @@ export const StyledSearchField = (({ value, onClear, ...props }) => {
     const hasInteraction = isFocused || value
 
     return (
-        <div className={'relative w-full'}>
+        <div className='relative w-full'>
             <StyledInputField
-                size={'small'}
-                variant={'outlined'}
+                size='small'
+                variant='outlined'
                 value={value}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
                 InputProps={{
-                    className: cn(
-                        'transition-[padding] duration-300',
-                        hasInteraction ? 'pl-0' : 'pl-5',
-                        value ? 'pr-5' : 'pr-0',
-                    ),
+                    className: cn('transition-[padding] duration-300', hasInteraction ? 'pl-0' : 'pl-5'),
                     sx: {
                         '& input': {
                             textOverflow: 'ellipsis',
@@ -33,6 +29,33 @@ export const StyledSearchField = (({ value, onClear, ...props }) => {
                             overflow: 'hidden',
                         },
                     },
+                    endAdornment: value ? (
+                        <div
+                            className={cn(
+                                'cursor-pointer bg-delta-50 rounded-full',
+                                'flex items-center justify-center',
+                                'transform-gpu transition-all duration-300 ease-in-out',
+                                value ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none',
+                            )}
+                            style={{
+                                width: 24,
+                                height: 24,
+                                flexShrink: 0,
+                            }}
+                            onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                onClear?.()
+                            }}
+                        >
+                            <CloseIcon
+                                width={20}
+                                height={20}
+                                color='var(--colors-delta-700)'
+                                className='pointer-events-none'
+                            />
+                        </div>
+                    ) : null,
                 }}
                 InputLabelProps={{
                     sx: {
@@ -54,29 +77,12 @@ export const StyledSearchField = (({ value, onClear, ...props }) => {
                 width={24}
                 height={24}
                 className={cn(
-                    'absolute top-2 left-2',
+                    'absolute left-2 top-1/2 -translate-y-1/2',
                     'transform-gpu transition-all duration-300 ease-in-out',
                     hasInteraction ? 'opacity-0 scale-75 pointer-events-none' : 'opacity-100 scale-100',
                 )}
-                color={'var(--colors-delta-700)'}
+                color='var(--colors-delta-700)'
             />
-
-            <div
-                className={cn(
-                    'absolute w-6 h-6 right-2 top-2 cursor-pointer bg-delta-50 rounded-full',
-                    'flex items-center justify-center',
-                    'transform-gpu transition-all duration-300 ease-in-out',
-                    value ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none',
-                )}
-                onClick={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-
-                    onClear?.()
-                }}
-            >
-                <CloseIcon width={20} height={20} color={'var(--colors-delta-700)'} className={'pointer-events-none'} />
-            </div>
         </div>
     )
 }) satisfies FunctionComponent<StyledSearchFieldProps>

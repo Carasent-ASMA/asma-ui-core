@@ -12,7 +12,8 @@
         justify-content: center;
         font-size: 14px;
         font-weight: 600;
-        transition: all 300ms ease-in-out;
+        transition: color 300ms ease-in-out, background-color 300ms ease-in-out, border-color 300ms ease-in-out,
+            box-shadow 300ms ease-in-out;
         color: var(--colors-button-#{$type}-#{$color}-text-color) #{!important};
         background-color: var(--colors-button-#{$type}-#{$color}-bg-color) #{!important};
         border-color: var(--colors-button-#{$type}-#{$color}-border-color) #{!important};
@@ -35,7 +36,6 @@
             color: var(--colors-button-#{$type}-#{$color}-focused-text-color) #{!important};
             background-color: var(--colors-button-#{$type}-#{$color}-focused-bg-color) #{!important};
             outline: 2px solid var(--colors-button-#{$type}-#{$color}-focused-border-color) #{!important};
-            transition: none #{!important};
             &.asma-core-ui-button.#{contained} {
                 box-shadow: inset 0 0 0 2px white;
             }

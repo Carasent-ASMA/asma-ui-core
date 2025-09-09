@@ -1,6 +1,6 @@
 import React, { forwardRef, useRef, useCallback } from 'react'
 import { Radio } from '@base-ui-components/react/radio'
-import styles from './styledradio.module.scss'
+import styles from './StyledRadio.module.scss'
 import { cn } from 'src/helpers/cn'
 
 type StyledRadioProps = {
