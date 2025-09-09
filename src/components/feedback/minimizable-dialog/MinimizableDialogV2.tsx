@@ -1,12 +1,10 @@
-import React, { useState, type ReactNode, useMemo } from 'react'
+import React, { useState, type ReactNode, useEffect, useRef } from 'react'
 import clsx from 'clsx'
 import { CloseBtn } from './components/CloseBtn'
-import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal'
 import { MinimizeBtn } from './components/MinimizeBtn'
 import { cn } from 'src/helpers/cn'
 import { StyledTooltip } from 'src/components/data-display/tooltip'
 import { FullScreenBtn } from './components/FullscreenBtn'
-import { StyledDialog } from '../dialog'
 import styles from './MinimizableDialogV2.module.scss'
 
 export const MinimizableDialogV2: React.FC<{
@@ -76,9 +74,26 @@ export const MinimizableDialogV2: React.FC<{
     const [minimized, setMinimized] = useState(false)
     const [fullscreen, setFullscreen] = useState(false)
 
-    const portalNode = useMemo(() => createHtmlPortalNode({ attributes: { style: 'display: contents' } }), [])
+    const modalRef = useRef<HTMLDivElement>(null)
 
     const fullScreen = fullScreenState !== undefined ? fullScreenState : fullscreen
+
+    useEffect(() => {
+        if (!fullScreen) return
+
+        const handler = (e: MouseEvent) => {
+            if ((e.target as HTMLElement).closest('.MuiPopover-root')) return
+
+            modalRef.current &&
+                !modalRef.current.contains(e.target as Node) &&
+                (fullScreenState !== undefined && handleFullScreenState
+                    ? handleFullScreenState()
+                    : setFullscreen(false))
+        }
+
+        document.addEventListener('mousedown', handler)
+        return () => document.removeEventListener('mousedown', handler)
+    }, [fullScreen, handleFullScreenState, fullScreenState])
 
     if (!open) return null
 
@@ -88,9 +103,6 @@ export const MinimizableDialogV2: React.FC<{
 
     return (
         <>
-            {/* Render the children exactly once, detached from the DOM */}
-            <InPortal node={portalNode}>{children}</InPortal>
-
             {/* Minimized  */}
             <div
                 style={{ zIndex: 51, ...style }}
@@ -120,112 +132,67 @@ export const MinimizableDialogV2: React.FC<{
                     </div>
                 </div>
             </div>
+            {/* Maximized */}
+            {fullScreen && !minimized && <div className='z-[52] fixed inset-0 bg-[rgb(98,110,126)] bg-opacity-70' />}
+            <div
+                style={{ zIndex: 51, ...style }}
+                ref={modalRef}
+                className={cn(
+                    styles['dialog'],
+                    minimized && styles['hidden'],
+                    classNameOverrides.maximized,
+                    fullScreen &&
+                        !minimized &&
+                        'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[1000px] h-[95dvh] duration-0 z-[53]',
+                )}
+            >
+                <div className='flex flex-col gap-y-2 p-4 border-b-[1px] border-delta-200'>
+                    <div className='flex items-center justify-between'>
+                        {!label ? (
+                            <div className='text-2xl font-semibold text-delta-800'>{title}</div>
+                        ) : (
+                            <div className='text-sm text-delta-700'>{label}</div>
+                        )}
 
-            {!minimized && (
-                <>
-                    {fullScreen ? (
-                        <StyledDialog
-                            PaperProps={{
-                                className: cn('w-full max-w-[1000px] h-[95dvh]', classNameOverrides.fullscreen || ''),
-                            }}
-                            dataTest='fullscreen-minimizable-dialog'
-                            open={fullScreen && !minimized}
-                            dialogTitle={<div className='text-2xl font-semibold text-delta-800 pb-4'>{title}</div>}
-                            dialogLabel={label}
-                            onClose={onClose}
-                            showCloseIcon={showCloseIcon}
-                            fullWidth
-                            dialogHeaderNode={
-                                <div className='flex items-center gap-x-1 h-fit'>
-                                    {actionNode}
-                                    <MinimizeBtn
-                                        visibility={showMinimizeIcon}
-                                        type='minimize'
-                                        onClick={toggleMinimized}
-                                        title={onMinimizeText}
-                                        tooltipTitle={tooltipOverrides.minimized || 'Minimize'}
-                                    />
-                                    <FullScreenBtn
-                                        showFullScreenIcon={enableFullscreen}
-                                        fullScreen={fullscreen}
-                                        onClick={() => {
-                                            if (fullScreenState !== undefined && handleFullScreenState) {
-                                                handleFullScreenState()
-                                            } else {
-                                                setFullscreen(!fullscreen)
-                                            }
-                                        }}
-                                        title={onFullScreenText}
-                                        tooltipTitle={
-                                            fullscreen
-                                                ? tooltipOverrides.exitFullScreen || 'Exit full screen'
-                                                : tooltipOverrides.enterFullScreen || 'Full screen'
-                                        }
-                                    />
-                                </div>
-                            }
-                        >
-                            <div className='flex flex-grow flex-col overflow-y-auto border-t-[1px] border-delta-200'>
-                                <OutPortal node={portalNode} />
-                            </div>
-                        </StyledDialog>
-                    ) : (
-                        <div
-                            style={{ zIndex: 51, ...style }}
-                            className={cn(styles['dialog'], classNameOverrides.maximized)}
-                        >
-                            <div className='flex flex-col gap-y-2 p-4 border-b-[1px] border-delta-200'>
-                                <div className='flex items-center justify-between'>
-                                    {!label ? (
-                                        <div className='text-2xl font-semibold text-delta-800'>{title}</div>
-                                    ) : (
-                                        <div className='text-sm text-delta-700'>{label}</div>
-                                    )}
-
-                                    <div className='flex items-center gap-x-1'>
-                                        {actionNode}
-                                        <MinimizeBtn
-                                            visibility={showMinimizeIcon}
-                                            type='minimize'
-                                            onClick={toggleMinimized}
-                                            title={onMinimizeText}
-                                            tooltipTitle={tooltipOverrides.minimized || 'Minimize'}
-                                        />
-                                        <FullScreenBtn
-                                            showFullScreenIcon={enableFullscreen}
-                                            fullScreen={fullscreen}
-                                            onClick={() => {
-                                                if (fullScreenState !== undefined && handleFullScreenState) {
-                                                    handleFullScreenState()
-                                                } else {
-                                                    setFullscreen(!fullscreen)
-                                                }
-                                            }}
-                                            title={onFullScreenText}
-                                            tooltipTitle={
-                                                fullscreen
-                                                    ? tooltipOverrides.exitFullScreen || 'Exit full screen'
-                                                    : tooltipOverrides.enterFullScreen || 'Full screen'
-                                            }
-                                        />
-                                        <CloseBtn
-                                            showCloseIcon={showCloseIcon}
-                                            onClick={onClose}
-                                            title={onCloseText}
-                                            tooltipTitle={tooltipOverrides.close || 'Close'}
-                                        />
-                                    </div>
-                                </div>
-
-                                {label && <div className='text-2xl font-semibold text-delta-800 truncate'>{title}</div>}
-                            </div>
-                            <div className='flex flex-grow flex-col overflow-y-auto'>
-                                <OutPortal node={portalNode} />
-                            </div>
+                        <div className='flex items-center gap-x-1'>
+                            {actionNode}
+                            <MinimizeBtn
+                                visibility={showMinimizeIcon}
+                                type='minimize'
+                                onClick={toggleMinimized}
+                                title={onMinimizeText}
+                                tooltipTitle={tooltipOverrides.minimized || 'Minimize'}
+                            />
+                            <FullScreenBtn
+                                showFullScreenIcon={enableFullscreen}
+                                fullScreen={fullscreen}
+                                onClick={() => {
+                                    if (fullScreenState !== undefined && handleFullScreenState) {
+                                        handleFullScreenState()
+                                    } else {
+                                        setFullscreen(!fullscreen)
+                                    }
+                                }}
+                                title={onFullScreenText}
+                                tooltipTitle={
+                                    fullscreen
+                                        ? tooltipOverrides.exitFullScreen || 'Exit full screen'
+                                        : tooltipOverrides.enterFullScreen || 'Full screen'
+                                }
+                            />
+                            <CloseBtn
+                                showCloseIcon={showCloseIcon}
+                                onClick={onClose}
+                                title={onCloseText}
+                                tooltipTitle={tooltipOverrides.close || 'Close'}
+                            />
                         </div>
-                    )}
-                </>
-            )}
+                    </div>
+
+                    {label && <div className='text-2xl font-semibold text-delta-800 truncate'>{title}</div>}
+                </div>
+                <div className={cn(minimized && 'hidden', 'flex flex-grow flex-col overflow-y-auto')}>{children}</div>
+            </div>
         </>
     )
 }
