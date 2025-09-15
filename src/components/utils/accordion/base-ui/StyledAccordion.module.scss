@@ -1,7 +1,20 @@
 .AccordionRoot {
     border-radius: 0.5rem;
-    border: 1px solid #bdc4cf;
+    border: 2px solid transparent;
+    box-shadow: inset 0 0 0 1px var(--colors-delta-300);
+
     background: #fff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
+}
+
+.AccordionRoot:has(:focus-visible) {
+    border-color: var(--colors-gama-400);
+    box-shadow: none;
+}
+
+.Trigger:focus-visible {
+    outline: none;
 }
 
 .Header {
@@ -27,7 +40,7 @@
 }
 
 .TriggerIcon {
-    color: #363e4a;
+    color: var(--colors-delta-800);
     width: var(--chevron-size);
     height: var(--chevron-size);
     transition: transform 150ms ease;
@@ -41,7 +54,7 @@
     box-sizing: border-box;
     height: var(--accordion-panel-height);
     overflow: hidden;
-    color: var(--color-gray-600);
+    color: var(--colors-delta-800);
     transition: height 0.2s ease-out;
 
     &[data-starting-style],
