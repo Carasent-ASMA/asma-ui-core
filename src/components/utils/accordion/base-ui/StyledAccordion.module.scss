@@ -1,6 +1,5 @@
 .AccordionRoot {
     border-radius: 0.5rem;
-    border: 2px solid transparent;
     box-shadow: inset 0 0 0 1px var(--colors-delta-300);
 
     background: #fff;
@@ -10,7 +9,7 @@
 
 .AccordionRoot:has(:focus-visible) {
     border-color: var(--colors-gama-400);
-    box-shadow: none;
+    box-shadow: inset 0 0 0 2px var(--colors-gama-400);
 }
 
 .Trigger:focus-visible {
