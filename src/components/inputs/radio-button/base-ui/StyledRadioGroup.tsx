@@ -3,9 +3,9 @@ import { RadioGroup } from '@base-ui-components/react/radio-group'
 import styles from './styledradiogroup.module.scss'
 
 type StyledRadioGroupProps = {
-    value?: string | number | boolean
-    defaultValue?: string | number | boolean
-    onValueChange?: (value: string | number | boolean) => void
+    value?: string | number | boolean | null
+    defaultValue?: string | number | boolean | null
+    onValueChange?: (value: string | number | boolean | null) => void
     disabled?: boolean
     dataTest?: string
     children: React.ReactNode
