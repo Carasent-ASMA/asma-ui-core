@@ -31,10 +31,14 @@ export const StyledInfoSnackbar = forwardRef<HTMLDivElement, StyledInfoSnackbarP
     return (
         <SnackbarContent ref={ref} role='alert' {...other}>
             <div
-                className={clsx('flex items-center justify-center w-full', isLoading && 'pl-6', closeButton && 'pr-6')}
+                className={clsx(
+                    'relative flex items-center justify-center w-full',
+                    isLoading && 'pl-8',
+                    closeButton && 'pr-8',
+                )}
             >
                 {type === 'loading' ? (
-                    <LoadingIcon width={20} height={20} className='left-2 absolute top-1/2 -translate-y-1/2' />
+                    <LoadingIcon width={20} height={20} className='left-0 absolute top-1/2 -translate-y-1/2' />
                 ) : null}
                 <div>{message}</div>
                 {closeButton ? (
@@ -42,7 +46,7 @@ export const StyledInfoSnackbar = forwardRef<HTMLDivElement, StyledInfoSnackbarP
                         onClick={() => handleClose()}
                         width={20}
                         height={20}
-                        className='right-2 absolute top-1/2 -translate-y-1/2'
+                        className='right-0 absolute top-1/2 -translate-y-1/2'
                     />
                 ) : null}
             </div>
