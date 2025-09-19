@@ -27,6 +27,7 @@ export const DatePicker = () => {
             }}
         >
             <DatePickerContainer title={'Default Picker'} node={<SinglePickerExample />} />
+
             <DatePickerContainer title={'Range Picker'} node={<RangePickerExample />} />
             <DatePickerContainer title={'Range Picker Compact'} node={<RangePickerCompactExample />} />
             <DatePickerContainer title={'Nested Range Picker'} node={<NestedRangePickerExample />} />

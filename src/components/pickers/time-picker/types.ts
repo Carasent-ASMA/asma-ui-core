@@ -1,6 +1,7 @@
 export type StyledTimePickerProps = {
     placeholder?: string
     disabled?: boolean
+    readOnly?: boolean
     inputClassName?: string
     value?: Date
     onSelect: (date: Date | undefined) => void

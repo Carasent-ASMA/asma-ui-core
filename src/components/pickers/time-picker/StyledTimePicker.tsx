@@ -47,20 +47,19 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
         setIsValidTime(true)
     }
 
+    if (props.disabled || props.readOnly)
+        return (
+            <TimePickerInput {...props} localValue={localValue} isValidTime={isValidTime} handleChange={handleChange} />
+        )
+
     return (
         <PopupState variant='popper' popupId='time-picker-popper'>
             {(popupState) => (
-                <ClickAwayListener
-                    mouseEvent='onMouseDown'
-                    onClickAway={() => {
-                        popupState.close()
-                    }}
-                >
+                <ClickAwayListener mouseEvent='onMouseDown' onClickAway={() => popupState.close()}>
                     <div style={{ width: 'auto', height: 'auto', position: 'relative' }}>
                         <div {...bindTrigger(popupState)}>
                             <TimePickerInput
                                 {...props}
-                                popupState={popupState}
                                 localValue={localValue}
                                 isValidTime={isValidTime}
                                 handleChange={handleChange}

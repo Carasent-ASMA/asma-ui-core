@@ -36,6 +36,14 @@ export const TimePicker = () => {
                 label='Time'
                 placeholder='Time'
             />
+            <StyledTimePicker
+                dataTest='test'
+                value={value}
+                onSelect={setValue}
+                readOnly
+                label='Time'
+                placeholder='Time'
+            />
         </div>
     )
 }

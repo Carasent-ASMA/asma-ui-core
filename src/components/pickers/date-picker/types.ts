@@ -4,6 +4,7 @@ export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
 type CommonDatePickerProps = {
     dateFormat?: string
+    readOnly?: boolean
     className?: string
     inputClassName?: string
     onClear?: () => void

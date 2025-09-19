@@ -17,12 +17,14 @@ export const DatePickerInputSingle: React.FC<
         dateFormat,
         error = false,
         helperText,
+        readOnly,
     } = props
 
     if (props.mode !== 'single') return null
 
     return (
         <StyledInputField
+            readOnly={readOnly}
             dataTest={dataTest}
             placeholder={placeholder}
             size='small'

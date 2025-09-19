@@ -10,22 +10,60 @@ export const RangePickerExample: React.FC = () => {
     const isMobile = useIsMobileView()
 
     return (
-        <StyledDatePicker
-            label='Label'
-            placeholder='Placeholder'
-            dataTest=''
-            locale={nb}
-            numberOfMonths={isMobile ? 1 : 2}
-            mode='range'
-            selected={rangeCompact}
-            onSelect={(data) => {
-                const selected = {
-                    from: data?.from ? setZeroTime(data.from) : undefined,
-                    to: data?.to ? setMidnightTime(data.to) : undefined,
-                }
-                setRangeCompact(selected)
-            }}
-            dateFormat={'dd.MM.yyyy'}
-        />
+        <div className='flex items-center gap-4'>
+            <StyledDatePicker
+                label='Label'
+                placeholder='Placeholder'
+                dataTest=''
+                locale={nb}
+                numberOfMonths={isMobile ? 1 : 2}
+                mode='range'
+                selected={rangeCompact}
+                onSelect={(data) => {
+                    const selected = {
+                        from: data?.from ? setZeroTime(data.from) : undefined,
+                        to: data?.to ? setMidnightTime(data.to) : undefined,
+                    }
+                    setRangeCompact(selected)
+                }}
+                dateFormat={'dd.MM.yyyy'}
+            />
+            <StyledDatePicker
+                label='Label'
+                placeholder='Placeholder'
+                dataTest=''
+                locale={nb}
+                numberOfMonths={isMobile ? 1 : 2}
+                mode='range'
+                selected={rangeCompact}
+                disabled
+                onSelect={(data) => {
+                    const selected = {
+                        from: data?.from ? setZeroTime(data.from) : undefined,
+                        to: data?.to ? setMidnightTime(data.to) : undefined,
+                    }
+                    setRangeCompact(selected)
+                }}
+                dateFormat={'dd.MM.yyyy'}
+            />
+            <StyledDatePicker
+                label='Label'
+                placeholder='Placeholder'
+                dataTest=''
+                locale={nb}
+                readOnly
+                numberOfMonths={isMobile ? 1 : 2}
+                mode='range'
+                selected={rangeCompact}
+                onSelect={(data) => {
+                    const selected = {
+                        from: data?.from ? setZeroTime(data.from) : undefined,
+                        to: data?.to ? setMidnightTime(data.to) : undefined,
+                    }
+                    setRangeCompact(selected)
+                }}
+                dateFormat={'dd.MM.yyyy'}
+            />
+        </div>
     )
 }

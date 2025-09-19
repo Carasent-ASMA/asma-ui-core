@@ -1,13 +1,11 @@
 import { StyledInputField } from 'src/components/inputs/input-field'
 import type { StyledTimePickerProps } from './types'
 import { ClockOutlineIcon } from 'src/components/icons/clock-outline-icon'
-import { type PopupState } from 'material-ui-popup-state/hooks'
 import { HelperText } from './components/HelperText'
 import type { ChangeEvent } from 'react'
 
 export const TimePickerInput: React.FC<
     StyledTimePickerProps & {
-        popupState: PopupState
         handleChange: (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => void
         isValidTime: boolean
         localValue: string
@@ -23,16 +21,17 @@ export const TimePickerInput: React.FC<
         helperText,
         label,
         locale = 'en',
-        popupState,
         handleChange,
         isValidTime,
         localValue,
         name,
+        readOnly,
     } = props
 
     return (
         <StyledInputField
             // disable autofill
+            readOnly={readOnly}
             name={name}
             autoComplete='off'
             type='text'
@@ -46,9 +45,7 @@ export const TimePickerInput: React.FC<
             }
             onChange={handleChange}
             InputProps={{
-                endAdornment: (
-                    <ClockOutlineIcon width={24} height={24} onClick={() => !disabled && popupState.open()} />
-                ),
+                endAdornment: <ClockOutlineIcon width={24} height={24} className='pointer-events-none' />,
             }}
             value={localValue}
             sx={{

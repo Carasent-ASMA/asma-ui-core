@@ -19,6 +19,7 @@ export const DatePickerInputRangeCompact: React.FC<
         onClick,
         labelFrom,
         labelTo,
+        readOnly,
     } = props
 
     if (props.mode !== 'range') return null
@@ -28,10 +29,15 @@ export const DatePickerInputRangeCompact: React.FC<
     return (
         <div
             data-test={dataTest}
-            className={clsx(className, style['styled-date-picker-input-range-compact'], disabled && style['range-compact-disabled'])}
+            className={clsx(
+                className,
+                style['styled-date-picker-input-range-compact'],
+                disabled && style['range-compact-disabled'],
+            )}
             onClick={(e) => !disabled && onClick(e)}
         >
             <StyledInputField
+                readOnly={readOnly}
                 label={labelFrom}
                 autoComplete={'off'}
                 size='small'
@@ -46,6 +52,7 @@ export const DatePickerInputRangeCompact: React.FC<
                 }}
             />
             <StyledInputField
+                readOnly={readOnly}
                 label={labelTo}
                 autoComplete={'off'}
                 dataTest='styled-date-picker-input-range-to'

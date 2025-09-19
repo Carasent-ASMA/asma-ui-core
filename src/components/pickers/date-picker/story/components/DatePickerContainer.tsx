@@ -8,11 +8,11 @@ export const DatePickerContainer: React.FC<{ title: string; node: ReactNode }> =
                 paddingLeft: '20px',
                 paddingBottom: '20px',
                 borderRadius: '6px',
-                backgroundColor: 'var(--colors-gray-100)',
-                width: '400px',
+                backgroundColor: 'white',
+                border: '1px solid var(--colors-delta-200)',
             }}
         >
-            <h2 style={{ opacity: 0.7 }}>{title}</h2>
+            <h2 style={{ color: 'var(--colors-delta-800)' }}>{title}</h2>
             {node}
         </div>
     )

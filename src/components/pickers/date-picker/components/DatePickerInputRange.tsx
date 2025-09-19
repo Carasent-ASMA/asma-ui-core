@@ -6,7 +6,18 @@ import { OutlineCalendarMonth } from 'src/components/icons'
 export const DatePickerInputRange: React.FC<
     DatePickerProps & { onClick: (e: React.MouseEvent<HTMLDivElement>) => void }
 > = (props) => {
-    const { dataTest, placeholder, disabled, onClick, inputClassName, onClear, allowClear, dateFormat, label } = props
+    const {
+        dataTest,
+        placeholder,
+        disabled,
+        onClick,
+        inputClassName,
+        onClear,
+        allowClear,
+        dateFormat,
+        label,
+        readOnly,
+    } = props
 
     if (props.mode !== 'range') return null
 
@@ -17,6 +28,7 @@ export const DatePickerInputRange: React.FC<
 
     return (
         <StyledInputField
+            readOnly={readOnly}
             dataTest={dataTest}
             placeholder={placeholder}
             label={label}
