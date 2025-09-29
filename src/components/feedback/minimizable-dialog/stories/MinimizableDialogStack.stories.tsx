@@ -1,6 +1,6 @@
 import { StyledButton } from 'src/components/inputs/button'
 import { StyledSelectExample } from 'src/components/inputs/select/story/components/StyledSelectExample'
-import { MinimizableDialogV2 } from '../MinimizableDialogV2'
+import { MinimizableDialogV2 } from '../v2/MinimizableDialogV2'
 import { StyledInputField, createDialogStack } from 'src'
 
 const meta = {
@@ -67,10 +67,6 @@ const Content = () => {
                 classNameOverrides={{
                     maximized: 'max-w-[600px]',
                     fullscreen: 'max-w-[1000px]',
-                }}
-                tooltipOverrides={{
-                    enterFullScreen: 'Full screen',
-                    exitFullScreen: 'Exit full screen',
                 }}
             >
                 <>
@@ -167,10 +163,6 @@ const Content = () => {
                 classNameOverrides={{
                     maximized: 'max-w-[600px]',
                     fullscreen: 'max-w-[1000px]',
-                }}
-                tooltipOverrides={{
-                    enterFullScreen: 'Full screen',
-                    exitFullScreen: 'Exit full screen',
                 }}
             >
                 <>

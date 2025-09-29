@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { StyledButton } from 'src/components/inputs/button'
 import { StyledSelectExample } from 'src/components/inputs/select/story/components/StyledSelectExample'
-import { MinimizableDialogV2 } from '../MinimizableDialogV2'
+import { MinimizableDialogV2 } from '../v2/MinimizableDialogV2'
 import { StyledInputField } from 'src'
 
 const meta = {
@@ -13,6 +13,7 @@ export default meta
 export const DialogMinimizableV2 = () => {
     const [open, setOpen] = useState(false)
     const [fullScreen, setFullScreen] = useState(false)
+    const [minimized, setMinimized] = useState(false)
 
     const handleClose = () => {
         setOpen(false)
@@ -31,6 +32,8 @@ export const DialogMinimizableV2 = () => {
                 open={open}
                 onClose={handleClose}
                 label='Adevinta ASA'
+                minimizedState={minimized}
+                handleMinimizedState={setMinimized}
                 actionNode={
                     <StyledButton dataTest='edit-button' variant='text'>
                         Edit
@@ -39,10 +42,6 @@ export const DialogMinimizableV2 = () => {
                 classNameOverrides={{
                     maximized: 'max-w-[600px]',
                     fullscreen: 'max-w-[1000px]',
-                }}
-                tooltipOverrides={{
-                    enterFullScreen: 'Full screen',
-                    exitFullScreen: 'Exit full screen',
                 }}
             >
                 <>

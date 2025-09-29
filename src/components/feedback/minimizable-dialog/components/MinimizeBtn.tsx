@@ -6,9 +6,8 @@ export const MinimizeBtn: React.FC<{
     type: 'expand' | 'minimize'
     visibility: boolean
     onClick: () => void
-    title: string
     tooltipTitle: string
-}> = ({ visibility, tooltipTitle, onClick, title, type }) => {
+}> = ({ visibility, tooltipTitle, onClick, type }) => {
     if (!visibility) return null
 
     const isExpandBtn = type === 'expand'
@@ -25,9 +24,7 @@ export const MinimizeBtn: React.FC<{
                             size='small'
                             onClick={onClick}
                             endIcon={<KeyboardCapslockIcon height={20} width={20} color='text-gama-500' />}
-                        >
-                            {title}
-                        </StyledButton>
+                        />
                     </div>
                 </StyledTooltip>
             </div>
@@ -44,9 +41,7 @@ export const MinimizeBtn: React.FC<{
                             size='small'
                             onClick={onClick}
                             endIcon={<MinimizeIcon height={20} width={20} color='text-delta-700' />}
-                        >
-                            {title}
-                        </StyledButton>
+                        />
                     </div>
                 </StyledTooltip>
             </div>
