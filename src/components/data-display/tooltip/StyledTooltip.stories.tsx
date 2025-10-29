@@ -16,7 +16,11 @@ export default meta
 export const Tooltip = () => {
     return (
         <div>
-            <StyledTooltip title='Tooltip example'>
+            <StyledTooltip
+                title='Tooltip example'
+                // addTooltipStyle={{ maxWidth: '50px', height: '500px' }}
+                componentsProps={{ tooltip: { style: { maxWidth: '50px' } } }}
+            >
                 <div className='w-fit'>
                     <StyledButton dataTest='btn'>Hover to see tooltip</StyledButton>
                 </div>
