@@ -46,7 +46,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
         className,
     )
 
-    const checkboxClasses = cn(styles['Checkbox'], styles[`size-${size}`])
+    const checkboxClasses = cn('styled-checkbox-inner', styles['Checkbox'], styles[`size-${size}`])
 
     const CheckboxIcon = indeterminate ? IndeterminateIcon : CheckIcon
 
@@ -94,7 +94,9 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
             onCheckedChange={handleCheckedChange}
             {...props}
         >
-            {!isHideWrapper && isRippleEnabled && <span ref={rippleRef} className={styles['CheckboxRippleContainer']} />}
+            {!isHideWrapper && isRippleEnabled && (
+                <span ref={rippleRef} className={styles['CheckboxRippleContainer']} />
+            )}
             <span className={checkboxClasses}>
                 <Checkbox.Indicator className={styles['Indicator']}>
                     <CheckboxIcon />

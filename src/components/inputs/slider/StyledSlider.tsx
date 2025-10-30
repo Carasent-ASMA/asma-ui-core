@@ -19,8 +19,9 @@ export const StyledSlider = ({ dataTest, ...props }: StyledSliderProps) => {
                     className: clsx(
                         'w-4 h-4',
                         'before:shadow-none',
+                        'after:content-[""] after:h-8 after:w-8',
                         props.orientation === 'vertical' ? 'ml-0 mb-1' : 'ml-1',
-                        props.disabled || !props.value ? 'bg-delta-200' : 'bg-gama-600',
+                        props.disabled ? 'bg-delta-200' : 'bg-gama-500',
                     ),
                     ...props.slotProps?.thumb,
                 },
@@ -39,20 +40,20 @@ export const StyledSlider = ({ dataTest, ...props }: StyledSliderProps) => {
             sx={{
                 ...props.sx,
                 '& .MuiSlider-track': {
-                    backgroundColor: props.disabled ? 'var(--colors-gray-200)' : 'var(--colors-gama-600)',
-                    borderColor: props.disabled ? 'var(--colors-gray-200)' : 'var(--colors-gama-600)',
+                    backgroundColor: props.disabled ? 'var(--colors-gray-200)' : 'var(--colors-gama-500)',
+                    borderColor: props.disabled ? 'var(--colors-gray-200)' : 'var(--colors-gama-500)',
                 },
                 '& .MuiSlider-mark': {
                     backgroundColor: 'white',
-                    border: '1px solid var(--colors-gray-200)',
+                    border: '1px solid var(--colors-delta-300)',
                     borderRadius: '50%',
                     height: '8px',
                     width: '8px',
 
                     '&.MuiSlider-markActive': {
-                        backgroundColor: !props.disabled ? 'var(--colors-gama-600)' : 'var(--colors-gray-200)',
+                        backgroundColor: !props.disabled ? 'var(--colors-gama-500)' : 'var(--colors-gray-200)',
                         border: '1px solid',
-                        borderColor: !props.disabled ? 'var(--colors-gama-600)' : 'var(--colors-gray-200)',
+                        borderColor: !props.disabled ? 'var(--colors-gama-500)' : 'var(--colors-gray-200)',
                         opacity: 1,
                     },
                 },
