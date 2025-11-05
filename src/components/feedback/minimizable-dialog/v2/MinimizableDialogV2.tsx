@@ -9,6 +9,7 @@ import styles from './MinimizableDialogV2.module.scss'
 import type { IMinimizableDialogV2Props } from './types'
 import { useTranslations } from './useTranslations'
 import { useControlledProps } from './useControlledProps'
+import { useIsMobileView } from 'src/hooks/useWindowWidthSize.hook'
 
 export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) => {
     const {
@@ -31,6 +32,8 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
         locale = 'en',
         style,
     } = props
+
+    const isMobile = useIsMobileView()
 
     const t = useTranslations(locale)
 
@@ -84,10 +87,22 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                         'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[1000px] h-[95dvh] duration-0 z-[53]',
                 )}
             >
-                <div className='flex flex-col gap-y-2 p-4 border-b-[1px] border-delta-200'>
+                <div
+                    className={cn(
+                        'flex flex-col px-4 border-b-[1px] border-delta-200',
+                        isMobile ? 'py-3 gap-y-1' : 'py-4 gap-y-2',
+                    )}
+                >
                     <div className='flex items-center justify-between'>
                         {!label ? (
-                            <div className='text-2xl font-semibold text-delta-800'>{title}</div>
+                            <div
+                                className={cn(
+                                    'font-semibold text-delta-800',
+                                    isMobile ? 'text-xl line-clamp-2' : 'text-2xl line-clamp-1',
+                                )}
+                            >
+                                {title}
+                            </div>
                         ) : (
                             <div className='text-sm text-delta-700'>{label}</div>
                         )}
@@ -95,13 +110,13 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                         <div className='flex items-center gap-x-1'>
                             {actionNode}
                             <MinimizeBtn
-                                visibility={showMinimizeIcon}
+                                visibility={showMinimizeIcon && !isMobile}
                                 type='minimize'
                                 onClick={() => setMinimized(!minimized)}
                                 tooltipTitle={t.minimize}
                             />
                             <FullScreenBtn
-                                showFullScreenIcon={enableFullscreen}
+                                showFullScreenIcon={enableFullscreen && !isMobile}
                                 fullScreen={fullScreen}
                                 onClick={() => setFullScreen(!fullScreen)}
                                 tooltipTitle={fullScreen ? t.exitFullscreen : t.fullscreen}
@@ -110,7 +125,16 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                         </div>
                     </div>
 
-                    {label && <div className='text-2xl font-semibold text-delta-800 truncate'>{title}</div>}
+                    {label && (
+                        <div
+                            className={cn(
+                                'font-semibold text-delta-800',
+                                isMobile ? 'text-xl line-clamp-2' : 'text-2xl line-clamp-1',
+                            )}
+                        >
+                            {title}
+                        </div>
+                    )}
                 </div>
                 <div className={cn(minimized && 'hidden', 'flex flex-grow flex-col overflow-y-auto')}>{children}</div>
             </div>
