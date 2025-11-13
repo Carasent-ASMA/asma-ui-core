@@ -9,6 +9,8 @@ import ChevronDownIcon from '../icons/ChevronDownIcon'
 export type StyledWidgetProps = {
     title: string
     icon?: ReactNode
+    headerRight?: ReactNode
+    headerRightClassName?: string
     link?: {
         content: string
         href?: string
@@ -41,6 +43,8 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
     isLoading,
     isEmpty,
     emptyText,
+    headerRight,
+    headerRightClassName,
 }) => {
     const [expanded, setExpanded] = useState(false)
 
@@ -59,9 +63,10 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
 
     return (
         <div className={style['asma-core-ui-styled-widget']}>
-            <div className={style['widget-header']}>
+            <div className={style['widget-header-left']}>
                 {icon}
                 <StyledWidgetTitle>{title}</StyledWidgetTitle>
+                <div className={`${style['widget-header-right']} ${headerRightClassName ?? ''}`}>{headerRight}</div>
             </div>
             <div className={style['widget-content']}>
                 <>

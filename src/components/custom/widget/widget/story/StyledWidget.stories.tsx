@@ -34,6 +34,7 @@ export const Widget = () => {
                     isEmpty={true}
                     isLoading={false}
                     emptyText='No data'
+                    headerRight={<div>{'something here'}</div>}
                 >
                     <div className='h-full rounded-lg bg-gray-200'></div>
                 </StyledWidget>

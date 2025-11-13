@@ -16,6 +16,19 @@
         gap: 10px;
         align-items: center;
     }
+    .widget-header-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+    }
+
+    .widget-header-right {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
 
     .widget-content {
         height: 100%;
