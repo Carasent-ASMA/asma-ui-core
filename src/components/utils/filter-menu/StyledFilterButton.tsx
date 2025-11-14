@@ -10,11 +10,13 @@ import clsx from 'clsx'
 type StyledFilterMenuProps = {
     filterIsActive: boolean
     label?: string
+    hideLabel?: boolean
 }
 
 export const StyledFilterButton: React.FC<StyledButtonProps & StyledFilterMenuProps> = ({
     filterIsActive,
     label,
+    hideLabel = false,
     size = 'large',
     variant = 'outlined',
     ...props
@@ -29,7 +31,7 @@ export const StyledFilterButton: React.FC<StyledButtonProps & StyledFilterMenuPr
                     variant={variant}
                     size={size}
                 >
-                    {label || 'Filter'}
+                    {!hideLabel && (label || 'Filter')}
                 </StyledButton>
                 {filterIsActive && (
                     <div
