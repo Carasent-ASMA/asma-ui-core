@@ -20,6 +20,36 @@ export const Widget = () => {
         <div className='flex flex-row gap-4 p-4 '>
             <div className='flex flex-col gap-4 flex-1 '>
                 <StyledWidget
+                    title='Widget without footer'
+                    icon={<InboxOutboxOutlineIcon width={24} height={24} />}
+                    persistKey='widget-1'
+                    isEmpty={true}
+                    isLoading={false}
+                    emptyText='No data'
+                    headerRight={<div>{'something here'}</div>}
+                >
+                    <div className='h-full rounded-lg bg-gray-200'></div>
+                </StyledWidget>
+                <StyledWidget
+                    title='Widget name'
+                    icon={<InboxOutboxOutlineIcon width={24} height={24} />}
+                    viewMore={{
+                        viewLessText: 'View less',
+                        viewMoreText: 'View more',
+                        disabled: true,
+                        hide: false,
+                        onClick: () => console.log('Click on viewMore button'),
+                    }}
+                    link={{ hide: false, content: 'Go to Somewhere', onClick: () => console.log('Click on link') }}
+                    persistKey='widget-1'
+                    isEmpty={true}
+                    isLoading={false}
+                    emptyText='No data'
+                    headerRight={<div>{'something here'}</div>}
+                >
+                    <div className='h-full rounded-lg bg-gray-200'></div>
+                </StyledWidget>
+                <StyledWidget
                     title='Widget name'
                     icon={<InboxOutboxOutlineIcon width={24} height={24} />}
                     viewMore={{

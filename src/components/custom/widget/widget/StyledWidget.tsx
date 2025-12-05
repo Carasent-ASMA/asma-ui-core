@@ -61,6 +61,11 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
         }
     }, [expanded, persistKey])
 
+    const showLink = !!link && !link.hide
+    const showViewMore = !!viewMore && !viewMore?.hide
+
+    const showFooter = showLink || showViewMore
+
     return (
         <div className={style['asma-core-ui-styled-widget']}>
             <div className={style['widget-header-left']}>
@@ -78,43 +83,45 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
                 </>
             </div>
 
-            <div className={style['widget-footer']}>
-                {!!viewMore && !viewMore?.hide ? (
-                    <StyledButton
-                        disabled={viewMore.disabled}
-                        dataTest='view-more'
-                        variant='text'
-                        endIcon={
-                            expanded ? (
-                                <ChevronUpIcon width={20} height={20} />
-                            ) : (
-                                <ChevronDownIcon width={20} height={20} />
-                            )
-                        }
-                        onClick={() => {
-                            setExpanded(!expanded)
-                            viewMore?.onClick?.()
-                        }}
-                    >
-                        {expanded ? viewMore.viewLessText : viewMore.viewMoreText}
-                    </StyledButton>
-                ) : (
-                    <div />
-                )}
+            {showViewMore && (
+                <div className={style['widget-footer']}>
+                    {!!viewMore && !viewMore?.hide ? (
+                        <StyledButton
+                            disabled={viewMore.disabled}
+                            dataTest='view-more'
+                            variant='text'
+                            endIcon={
+                                expanded ? (
+                                    <ChevronUpIcon width={20} height={20} />
+                                ) : (
+                                    <ChevronDownIcon width={20} height={20} />
+                                )
+                            }
+                            onClick={() => {
+                                setExpanded(!expanded)
+                                viewMore?.onClick?.()
+                            }}
+                        >
+                            {expanded ? viewMore.viewLessText : viewMore.viewMoreText}
+                        </StyledButton>
+                    ) : (
+                        <div />
+                    )}
 
-                {!!link && !link.hide ? (
-                    <StyledLink
-                        dataTest='go-to-button'
-                        className={style['widget-link']}
-                        size='small'
-                        href={link.href}
-                        onClick={link.onClick}
-                        content={link.content}
-                    />
-                ) : (
-                    <div />
-                )}
-            </div>
+                    {showLink ? (
+                        <StyledLink
+                            dataTest='go-to-button'
+                            className={style['widget-link']}
+                            size='small'
+                            href={link.href}
+                            onClick={link.onClick}
+                            content={link.content}
+                        />
+                    ) : (
+                        <div />
+                    )}
+                </div>
+            )}
         </div>
     )
 }
