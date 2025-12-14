@@ -4,7 +4,7 @@ export type DialogConfigMap = Record<string, { dependencies?: readonly string[];
 
 type DialogId<Config extends DialogConfigMap> = Extract<keyof Config, string>
 
-interface DialogState<Id extends string> {
+export interface DialogState<Id extends string> {
     id: Id
     open: boolean
     width: number
