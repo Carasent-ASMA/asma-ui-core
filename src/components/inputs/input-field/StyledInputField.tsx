@@ -83,7 +83,7 @@ export const StyledInputField: React.FC<
                 color: 'var(--colors-gama-500) !important',
             },
             '& label': {
-                color: 'var(--colors-delta-800) !important',
+                color: 'var(--colors-delta-500) !important',
             },
             '& label.Mui-focused.Mui-error': {
                 color: '#d3302f !important',

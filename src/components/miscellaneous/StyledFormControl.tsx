@@ -7,7 +7,7 @@ export const StyledFormControl = (props: FormControlProps) => (
             ...props.sx,
             '& label.MuiInputLabel-shrink': {
                 background: 'white !important',
-                color: 'var(--colors-delta-500) !important',
+                color: 'var(--colors-delta-800) !important',
             },
             '& label.MuiInputLabel-shrink.Mui-focused': {
                 background: 'white !important',
