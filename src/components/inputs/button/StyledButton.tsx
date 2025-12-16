@@ -81,7 +81,7 @@ export const StyledButton = ({
     dataTest,
     error,
     ...otherProps
-}: StyledButtonProps) => {
+}: StyledButtonProps): JSX.Element => {
     const isLarge = size === 'large' || size === 'medium'
 
     // setup className

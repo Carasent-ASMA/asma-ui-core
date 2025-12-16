@@ -1,6 +1,6 @@
 import { Radio, type RadioProps } from '@mui/material'
 
-export const StyledRadio = ({ dataTest, ...props }: RadioProps & { dataTest: string }) => (
+export const StyledRadio = ({ dataTest, ...props }: RadioProps & { dataTest: string }): JSX.Element => (
     <Radio
         {...props}
         data-test={dataTest}

@@ -14,7 +14,7 @@ const meta = {
 
 export default meta
 
-export const Switch = () => (
+export const Switch = (): JSX.Element => (
     <Stack spacing={4}>
         <Stack spacing={2} alignItems='flex-start'>
             <Typography variant='subtitle1' color='delta.800' fontWeight={500} fontSize={24}>

@@ -40,7 +40,7 @@ export function createDialogStack<Config extends DialogConfigMap>({
 }: {
     config: Config
     MAX_DIALOG_WIDTH?: number
-}) {
+}): { DialogStackProvider: React.FC<{ children: React.ReactNode; }>; useDialogStack: () => DialogStackContextType<Config>; } {
     const DialogStackContext = createContext<DialogStackContextType<Config> | undefined>(undefined)
 
     const DialogStackProvider: React.FC<{ children: ReactNode }> = ({ children }) => {

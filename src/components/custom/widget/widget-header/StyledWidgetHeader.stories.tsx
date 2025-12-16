@@ -18,7 +18,7 @@ const meta = {
 
 export default meta
 
-export const WidgetHeader = () => {
+export const WidgetHeader = (): JSX.Element => {
     return (
         <StyledWidgetHeader
             title='Widget header example'

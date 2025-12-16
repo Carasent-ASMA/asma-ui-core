@@ -13,7 +13,7 @@ const meta = {
 
 export default meta
 
-export const Inputs = () => {
+export const Inputs = (): JSX.Element => {
     return (
         <div className='flex w-full flex-col gap-12'>
             <StyledInputField

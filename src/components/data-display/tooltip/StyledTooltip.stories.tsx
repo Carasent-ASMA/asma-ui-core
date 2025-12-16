@@ -13,7 +13,7 @@ const meta: Meta = {
 
 export default meta
 
-export const Tooltip = () => {
+export const Tooltip = (): JSX.Element => {
     return (
         <div>
             <StyledTooltip

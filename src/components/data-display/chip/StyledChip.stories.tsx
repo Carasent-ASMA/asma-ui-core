@@ -13,7 +13,7 @@ const meta: Meta = {
 
 export default meta
 
-export const Chip = () => {
+export const Chip = (): JSX.Element => {
     const handleClick = () => {
         console.info('You clicked the Chip.')
     }

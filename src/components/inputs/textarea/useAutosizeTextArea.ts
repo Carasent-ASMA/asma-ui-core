@@ -7,7 +7,7 @@ export const useAutosizeTextArea = (
     maxRows: number,
     mounted: boolean,
     counterEnabled?: boolean,
-) => {
+): void => {
     useLayoutEffect(() => {
         if (textAreaRef) {
             const additionalBottomPadding = counterEnabled ? 32 : 0

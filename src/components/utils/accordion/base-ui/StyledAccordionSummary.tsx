@@ -17,7 +17,7 @@ export const StyledAccordionSummary = ({
     sx,
     children,
     ...rest
-}: StyledAccordionSummaryProps) => {
+}: StyledAccordionSummaryProps): JSX.Element => {
     const isSmall = size === 'small'
 
     const styleVars: React.CSSProperties = {

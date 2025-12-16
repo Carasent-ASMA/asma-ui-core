@@ -5,7 +5,7 @@ export interface StyledSliderProps extends SliderProps {
     dataTest: string
 }
 
-export const StyledSlider = ({ dataTest, ...props }: StyledSliderProps) => {
+export const StyledSlider = ({ dataTest, ...props }: StyledSliderProps): JSX.Element => {
     return (
         <Slider
             {...props}

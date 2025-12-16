@@ -12,7 +12,7 @@ const meta = {
 
 export default meta
 
-export const SearchField = () => {
+export const SearchField = (): JSX.Element => {
     const [searchQuery, setSearchQuery] = useState('')
 
     return (

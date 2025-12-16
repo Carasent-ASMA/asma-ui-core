@@ -15,7 +15,7 @@ type StyledSwitchProps = {
     required?: boolean
     id?: string
     dataTest?: string
-    value?: React.InputHTMLAttributes<HTMLInputElement>['value'] | unknown
+    value?: React.InputHTMLAttributes<HTMLInputElement>['value']
 } & Omit<React.ComponentProps<typeof Switch.Root>, 'children'>
 
 export type SwitchProps = StyledSwitchProps

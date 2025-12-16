@@ -60,7 +60,7 @@ const meta = {
 
 export default meta
 
-export const Slider = () => {
+export const Slider = (): JSX.Element => {
     const [value, setValue] = useState<number>(0)
 
     const handleChange = (_event: Event | SyntheticEvent<Element, Event>, newValue: number | number[]) => {

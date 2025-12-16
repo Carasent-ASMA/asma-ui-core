@@ -13,7 +13,7 @@ const meta: Meta = {
 
 export default meta
 
-export const Widget = () => {
+export const Widget = (): JSX.Element => {
     const [viewMore, setViewMore] = useState(false)
 
     return (

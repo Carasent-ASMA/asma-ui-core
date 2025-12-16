@@ -4,7 +4,7 @@ import { IndeterminateIcon } from 'src/components/icons/Indeterminate icon'
 
 export type SwitchProps = _SwitchProps
 
-export const StyledSwitch = ({ dataTest, disabled, ...props }: Omit<SwitchProps, 'size'> & { dataTest: string }) => (
+export const StyledSwitch = ({ dataTest, disabled, ...props }: Omit<SwitchProps, 'size'> & { dataTest: string }): JSX.Element => (
     <Switch
         {...props}
         disabled={disabled}

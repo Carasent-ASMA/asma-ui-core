@@ -32,7 +32,7 @@ const meta: Meta<typeof StyledSelect> = {
 
 export default meta
 
-export const Select = (args: { children: React.ReactNode }) => {
+export const Select = (args: { children: React.ReactNode }): JSX.Element => {
     const [value, setValue] = useState(selectOptions[0]?.id)
     return (
         <Stack direction='column' spacing={2}>

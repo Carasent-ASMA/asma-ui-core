@@ -10,7 +10,7 @@ const meta = {
 
 export default meta
 
-export const DialogMinimizableV2 = () => {
+export const DialogMinimizableV2 = (): JSX.Element => {
     const [open, setOpen] = useState(false)
     const [fullScreen, setFullScreen] = useState(false)
     const [minimized, setMinimized] = useState(false)

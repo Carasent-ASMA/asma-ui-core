@@ -24,7 +24,7 @@ const meta = {
 
 export default meta
 
-export const Dialog = () => {
+export const Dialog = (): JSX.Element => {
     const [open, setOpen] = useState(true)
 
     const handleCloseDialog = () => {

@@ -1,7 +1,7 @@
 import { Accordion, type AccordionProps } from '@mui/material'
 import clsx from 'clsx'
 
-export const StyledAccordion = ({ className, ...props }: AccordionProps) => (
+export const StyledAccordion = ({ className, ...props }: AccordionProps): JSX.Element => (
     <Accordion
         {...props}
         disableGutters={true}

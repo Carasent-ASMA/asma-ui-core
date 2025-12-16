@@ -11,7 +11,7 @@ const meta = {
 } satisfies Meta<typeof RichInput>
 
 export default meta
-export const Inputs = () => {
+export const Inputs = (): JSX.Element => {
     const [val, setVal] = useState('')
     return (
         <div className='flex w-full flex-col gap-12'>

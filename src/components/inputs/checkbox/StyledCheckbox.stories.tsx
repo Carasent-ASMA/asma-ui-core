@@ -11,7 +11,7 @@ const meta = {
 
 export default meta
 
-export const Checkbox = () => {
+export const Checkbox = (): JSX.Element => {
     return (
         <div className='max-w-sm'>
             <div>

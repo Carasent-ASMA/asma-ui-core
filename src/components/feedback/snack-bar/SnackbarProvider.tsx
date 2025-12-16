@@ -7,7 +7,7 @@ import { StyledInfoSnackbar } from './components/StyledInfoSnackbar'
  * @ignore
  * @internal
  */
-export const SnackbarProvider = (props: SnackbarProviderProps) => {
+export const SnackbarProvider = (props: SnackbarProviderProps): JSX.Element => {
     return (
         <NotistackProvider
             {...props}

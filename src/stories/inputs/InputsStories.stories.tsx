@@ -13,7 +13,7 @@ const meta = {
 
 export default meta
 
-export const FormInputs = () => {
+export const FormInputs = (): JSX.Element => {
     return (
         <div>
             <h2>Not filled</h2>

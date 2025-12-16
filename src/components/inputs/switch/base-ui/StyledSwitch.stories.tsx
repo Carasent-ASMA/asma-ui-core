@@ -13,7 +13,7 @@ const meta = {
 
 export default meta
 
-export const Switch = () => (
+export const Switch = (): JSX.Element => (
     <div className='flex h-full max-w-[500px] flex-col gap-2'>
         <StyledFormControlLabel
             labelPlacement='start'

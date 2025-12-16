@@ -1,6 +1,6 @@
 import type { SVGProps } from 'react'
 
-export function BadgeIcon(props: SVGProps<SVGSVGElement>) {
+export function BadgeIcon(props: SVGProps<SVGSVGElement>): JSX.Element {
     return (
         <svg xmlns='http://www.w3.org/2000/svg' width='1rem' height='1rem' viewBox='0 0 24 24' {...props}>
             <path fill='currentColor' d='M14 12h4v1.5h-4zm0 3h4v1.5h-4z'></path>

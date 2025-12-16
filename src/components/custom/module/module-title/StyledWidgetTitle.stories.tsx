@@ -11,7 +11,7 @@ const meta = {
 
 export default meta
 
-export const ModuleTitle = () => {
+export const ModuleTitle = (): JSX.Element => {
     return (
         <div className='max-w-sm'>
             <StyledModuleTitle dataTest='anonyme-schema'>Anonyme skjema</StyledModuleTitle>

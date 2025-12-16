@@ -12,7 +12,7 @@ const meta = {
 
 export default meta
 
-export const Checkbox = () => {
+export const Checkbox = (): JSX.Element => {
     const [checked, setChecked] = useState(false)
 
     return (

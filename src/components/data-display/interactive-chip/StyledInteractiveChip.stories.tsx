@@ -13,7 +13,7 @@ const meta: Meta = {
 
 export default meta
 
-export const InteractiveChip = () => {
+export const InteractiveChip = (): JSX.Element => {
     const [readOnly, setReadOnly] = useState(false)
     const [selectedRadio, setSelectedRadio] = useState<string | null>('1')
     const [checkboxes, setCheckboxes] = useState({

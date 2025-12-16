@@ -28,7 +28,7 @@ export function StyledSelectAutocomplete<
     autoHeight?: boolean
     getOptionLabel?: (option: T) => string
     wrapperClassName?: string
-}) {
+}): JSX.Element {
     const [maxHeight, setMaxHeight] = useState<number | 'auto'>('auto')
     const selectRef = useRef<HTMLDivElement>(null)
 

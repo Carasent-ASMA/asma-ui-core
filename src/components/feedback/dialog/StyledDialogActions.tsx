@@ -3,7 +3,7 @@ import { DialogActions, type DialogActionsProps } from '@mui/material'
 import style from './StyledDialogActions.module.scss'
 import { cn } from 'src/helpers/cn'
 
-export const StyledDialogActions = (props: DialogActionsProps) => {
+export const StyledDialogActions = (props: DialogActionsProps): JSX.Element => {
     return (
         <DialogActions
             {...props}

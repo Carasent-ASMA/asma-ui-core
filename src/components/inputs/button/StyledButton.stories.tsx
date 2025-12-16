@@ -16,7 +16,7 @@ const meta: Meta<typeof StyledButton> = {
 
 export default meta
 
-export const Buttons = () => (
+export const Buttons = (): JSX.Element => (
     <Stack direction='column' spacing={2}>
         <h2 className={style['header']}>Buttons Common Enabled</h2>
         <CommonEnabledButtons />

@@ -1,11 +1,10 @@
-import React, { useState } from 'react'
-import type { Meta, StoryObj } from '@storybook/react-vite'
-import { StyledAccordion } from './StyledAccordion'
-import { StyledAccordionSummary } from './StyledAccordionSummary'
-import { StyledAccordionDetails } from './StyledAccordionDetails'
 import { Typography } from '@mui/material'
-import { StyledButton } from 'src/components/inputs/button'
+import type { Meta } from '@storybook/react-vite'
+import { useState } from 'react'
 import { StyledWidgetTitle } from 'src/components/custom/widget/widget-title/StyledWidgetTitle'
+import { StyledAccordion } from './StyledAccordion'
+import { StyledAccordionDetails } from './StyledAccordionDetails'
+import { StyledAccordionSummary } from './StyledAccordionSummary'
 
 const meta: Meta<typeof StyledAccordion> = {
     title: 'Utils/Accordion/BaseUi',
@@ -19,8 +18,8 @@ const meta: Meta<typeof StyledAccordion> = {
 export default meta
 
 export const Accordion = {
-    render: () => {
-        const [isExpanded, setIsExpanded] = useState(true)
+    render: (): JSX.Element => {
+        const [, setIsExpanded] = useState(true)
 
         return (
             <div className='flex max-w-[600px] flex-col gap-4'>

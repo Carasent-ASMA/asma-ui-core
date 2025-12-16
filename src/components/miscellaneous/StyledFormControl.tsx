@@ -1,6 +1,6 @@
 import { FormControl, type FormControlProps } from '@mui/material'
 
-export const StyledFormControl = (props: FormControlProps) => (
+export const StyledFormControl = (props: FormControlProps): JSX.Element => (
     <FormControl
         {...props}
         sx={{

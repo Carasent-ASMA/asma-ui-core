@@ -9,7 +9,7 @@ const meta = {
 
 export default meta
 
-export const DialogMinimizableStack = () => {
+export const DialogMinimizableStack = (): JSX.Element => {
     return (
         <DialogStackProvider>
             <Buttons />

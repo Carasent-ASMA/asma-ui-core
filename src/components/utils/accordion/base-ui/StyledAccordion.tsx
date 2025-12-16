@@ -19,7 +19,7 @@ export const StyledAccordion = ({
     defaultExpanded,
     onChange,
     ...props
-}: StyledAccordionProps) => {
+}: StyledAccordionProps): JSX.Element => {
     const value = 'item'
 
     const accordionProps = {

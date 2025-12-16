@@ -5,7 +5,7 @@ export default {
     component: StyledFormLabel,
 }
 
-export const FormLabel = () => (
+export const FormLabel = (): JSX.Element => (
     <>
         <div className='m-2.5 flex flex-col gap-2.5'>
             <StyledFormLabel size='md' title='Label-md' />

@@ -13,7 +13,7 @@ const meta: Meta = {
 
 export default meta
 
-export const Badge = () => {
+export const Badge = (): JSX.Element => {
     return (
         <StyledBadge dataTest='styled-badge-example' badgeContent={777} color='primary'>
             <StyledButton dataTest='btn-badge-example' variant='outlined'>

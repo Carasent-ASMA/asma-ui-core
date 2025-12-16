@@ -15,7 +15,7 @@ type StyledCheckboxProps = {
     onChange?: (event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => void
 } & Omit<React.ComponentProps<typeof Checkbox.Root>, 'children'>
 
-export const IndeterminateIcon = ({ className }: { className?: string }) => (
+export const IndeterminateIcon = ({ className }: { className?: string }): JSX.Element => (
     <svg viewBox='0 0 24 24' className={className} fill='none'>
         <rect x='5.5' y='10.5' width='13' height='2.75' fill='currentColor' />
     </svg>
@@ -33,7 +33,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
     className,
     onChange,
     ...props
-}) => {
+}): JSX.Element => {
     const isHideWrapper = !!hideWrapper
     const isRippleEnabled = !disableRipple && !isHideWrapper && !disabled && !readOnly
 
