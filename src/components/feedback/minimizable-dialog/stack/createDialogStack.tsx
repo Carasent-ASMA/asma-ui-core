@@ -40,7 +40,10 @@ export function createDialogStack<Config extends DialogConfigMap>({
 }: {
     config: Config
     MAX_DIALOG_WIDTH?: number
-}): { DialogStackProvider: React.FC<{ children: React.ReactNode; }>; useDialogStack: () => DialogStackContextType<Config>; } {
+}): {
+    DialogStackProvider: React.FC<{ children: React.ReactNode }>
+    useDialogStack: () => DialogStackContextType<Config>
+} {
     const DialogStackContext = createContext<DialogStackContextType<Config> | undefined>(undefined)
 
     const DialogStackProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -111,10 +114,7 @@ export function createDialogStack<Config extends DialogConfigMap>({
             [recalculate],
         )
 
-        const getDialogState = useCallback(
-            (id: DialogId<Config>) => dialogs.find((d) => d.id === id),
-            [dialogs],
-        )
+        const getDialogState = useCallback((id: DialogId<Config>) => dialogs.find((d) => d.id === id), [dialogs])
 
         return (
             <DialogStackContext.Provider value={{ dialogs, openDialog, closeDialog, getDialogState }}>

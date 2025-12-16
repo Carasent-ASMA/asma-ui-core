@@ -19,7 +19,6 @@ type Story = StoryObj<typeof meta>
 export const Alert: Story = {
     args: { ...meta.argTypes, children: 'Styled Button', variant: 'outlined' },
     render: () => {
-         
         const [, setOpen] = useState(true)
 
         const handleClose = () => {
