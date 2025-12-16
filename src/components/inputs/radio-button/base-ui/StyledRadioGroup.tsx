@@ -11,7 +11,7 @@ type StyledRadioGroupProps = {
 } & Omit<React.ComponentProps<typeof RadioGroup>, 'children' | 'defaultValue' | 'value'>
 
 export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps>(
-    ({ value, defaultValue, onValueChange, name, id, dataTest, children, ...rest }, ref) => {
+    ({ value, defaultValue, onValueChange, dataTest, children, ...rest }, ref) => {
         return (
             <RadioGroup
                 {...rest}

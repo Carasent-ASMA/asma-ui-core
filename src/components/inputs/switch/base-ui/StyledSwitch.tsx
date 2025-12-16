@@ -4,7 +4,6 @@ import { Switch } from '@base-ui-components/react/switch'
 import styles from './StyledSwitch.module.scss'
 import type { IIcon } from 'src/components/icons'
 import { IconTemplate } from 'src/components/icons/IconTemplate'
-import { cn } from 'src/helpers/cn'
 
 type StyledSwitchProps = {
     checked?: boolean
@@ -70,7 +69,7 @@ export const StyledSwitch = forwardRef<HTMLButtonElement, StyledSwitchProps>(
         }
 
         const stateProps = isControlled ? { checked } : { defaultChecked }
-        const iconClass = cn(styles['iconContent'], checked ? styles['checked'] : styles['unchecked'])
+        const iconClass = styles['iconContent']
 
         return (
             <Switch.Root

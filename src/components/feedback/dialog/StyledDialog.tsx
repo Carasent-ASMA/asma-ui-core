@@ -52,7 +52,9 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                                     size='small'
                                     endIcon={<CloseIcon width={24} height={24} />}
                                     onClick={(event) => {
-                                        rest.onClose ? rest.onClose(event, 'escapeKeyDown') : null
+                                        if (rest.onClose) {
+                                            rest.onClose(event, 'escapeKeyDown')
+                                        }
                                     }}
                                     style={{ color: 'var(--colors-grey-800)' }}
                                 >

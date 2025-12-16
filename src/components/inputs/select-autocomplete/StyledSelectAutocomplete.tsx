@@ -1,9 +1,9 @@
-import { Autocomplete, Paper, type AutocompleteProps, type ChipTypeMap } from '@mui/material'
 import { Icon } from '@iconify/react'
+import { Autocomplete, Paper, type AutocompleteProps, type ChipTypeMap } from '@mui/material'
 import clsx from 'clsx'
-import { useEffect, useRef, useState } from 'react'
-import style from './StyledSelectAutocomplete.module.scss'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { cn } from 'src/helpers/cn'
+import style from './StyledSelectAutocomplete.module.scss'
 
 /**
  *
@@ -32,12 +32,15 @@ export function StyledSelectAutocomplete<
     const [maxHeight, setMaxHeight] = useState<number | 'auto'>('auto')
     const selectRef = useRef<HTMLDivElement>(null)
 
-    useEffect(() => {
+    useLayoutEffect(() => {
+        if (!autoHeight) return
+
         const selectHeight = selectRef.current?.getBoundingClientRect().height ?? 0
         const selectTop = selectRef.current?.getBoundingClientRect().top ?? 0
         const viewportHeight = window.innerHeight
         const availableHeight = viewportHeight - selectTop - selectHeight - 40
-        autoHeight && setMaxHeight(availableHeight > 0 ? availableHeight : 'auto')
+
+        setMaxHeight(availableHeight > 0 ? availableHeight : 'auto')
     }, [autoHeight])
 
     const listboxProps = autoHeight

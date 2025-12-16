@@ -1,10 +1,9 @@
 import { StyledButton, StyledEmptyPage, StyledLink, StyledLoading, StyledWidgetTitle } from 'asma-core-ui'
-import { useEffect, type PropsWithChildren, type ReactNode } from 'react'
+import { useState, type PropsWithChildren, type ReactNode } from 'react'
 import style from './StyledWidget.module.scss'
-import { useState } from 'react'
 
-import ChevronUpIcon from '../icons/ChevronUpIcon'
 import ChevronDownIcon from '../icons/ChevronDownIcon'
+import ChevronUpIcon from '../icons/ChevronUpIcon'
 
 export interface StyledWidgetProps {
     title: string
@@ -46,25 +45,16 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
     headerRight,
     headerRightClassName,
 }) => {
-    const [expanded, setExpanded] = useState(false)
-
-    useEffect(() => {
+    const [expanded, setExpanded] = useState(() => {
         if (persistKey) {
             const val = localStorage.getItem(persistKey)
-            setExpanded(val === 'true' ? true : false)
+            return val === 'true' ? true : false
         }
-    }, [persistKey])
-
-    useEffect(() => {
-        if (persistKey) {
-            localStorage.setItem(persistKey, String(expanded))
-        }
-    }, [expanded, persistKey])
+        return false
+    })
 
     const showLink = !!link && !link.hide
     const showViewMore = !!viewMore && !viewMore?.hide
-
-    const showFooter = showLink || showViewMore
 
     return (
         <div className={style['asma-core-ui-styled-widget']}>
@@ -99,6 +89,9 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
                             }
                             onClick={() => {
                                 setExpanded(!expanded)
+                                if (persistKey) {
+                                    localStorage.setItem(persistKey, String(!expanded))
+                                }
                                 viewMore?.onClick?.()
                             }}
                         >

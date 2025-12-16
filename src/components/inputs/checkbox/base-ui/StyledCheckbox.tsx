@@ -46,7 +46,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
         className,
     )
 
-    const checkboxClasses = cn('styled-checkbox-inner', styles['Checkbox'], styles[`size-${size}`])
+    const checkboxClasses = cn(styles['Checkbox'], styles[`size-${size}`])
 
     const CheckboxIcon = indeterminate ? IndeterminateIcon : CheckIcon
 

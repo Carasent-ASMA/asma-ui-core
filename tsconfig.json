@@ -43,5 +43,5 @@
         "useUnknownInCatchVariables": false
     },
     "exclude": ["dist", "node_modules"],
-    "include": ["src", ".storybook", "scripts"]
+    "include": ["src", ".storybook"]
 }

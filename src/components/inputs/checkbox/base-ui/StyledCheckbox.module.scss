@@ -31,10 +31,12 @@ $checkbox-sizes: (
     background: transparent;
     border: none;
 
-    @include checkbox-dimensions(medium);
-
     &.size-small {
         @include checkbox-dimensions(small);
+    }
+
+    &.size-medium {
+        @include checkbox-dimensions(medium);
     }
 
     &[data-disabled] {

@@ -1,3 +1,5 @@
+// Old rich input that needs to be deleted no need to fix
+/* eslint-disable better-tailwindcss/no-unregistered-classes */
 import type { FC } from 'react'
 import ReactQuill from 'react-quill'
 import clsx from 'clsx'

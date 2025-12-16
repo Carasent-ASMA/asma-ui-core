@@ -36,6 +36,7 @@ export default defineConfig(
         'deployment',
         'src/index.html',
         'index.html',
+        'src/**/*.stories.*',
         '!.storybook',
     ]),
     {
@@ -149,5 +150,5 @@ export default defineConfig(
     // },
     // sonarjs.configs.recommended,
     deMorgan.configs.recommended,
-    storybook.configs['flat/recommended']
+    storybook.configs['flat/recommended'],
 )

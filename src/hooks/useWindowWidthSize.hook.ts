@@ -8,8 +8,6 @@ export function useWindowWidthSize(): number {
     }
 
     useEffect(() => {
-        handleSize()
-
         window.addEventListener('resize', handleSize)
 
         return () => window.removeEventListener('resize', handleSize)

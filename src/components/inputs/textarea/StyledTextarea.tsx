@@ -1,8 +1,7 @@
-import React, { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from 'react'
-import { useAutosizeTextArea } from './useAutosizeTextArea'
+import React, { useEffect, useRef, type ChangeEvent, type ReactNode } from 'react'
 import styles from './StyledTextarea.module.scss'
 
-interface TextareaCommonProps {
+export interface TextareaCommonProps {
     id?: string
     value?: string
     label?: ReactNode
@@ -13,7 +12,7 @@ interface TextareaCommonProps {
     dataTest?: string
 }
 
-interface TextAreaNotEditableProps {
+export interface TextAreaNotEditableProps {
     variant?: 'not_editable' | 'view_only'
     minRows?: never
     maxRows?: never
@@ -28,7 +27,7 @@ interface TextAreaNotEditableProps {
     counterLimit?: never
 }
 
-interface TextAreaActiveProps {
+export interface TextAreaActiveProps {
     variant?: 'active'
     minRows?: number
     maxRows?: number
@@ -90,23 +89,27 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
     const textAreaRef = refLink ? refLink : textAreaInnerRef
     const counterEnabled = !!(counter && counterLimit)
 
-    const [mounted, setMounted] = useState(false)
-
     useEffect(() => {
-        setMounted(true)
-    }, [])
+        if (textAreaRef.current) {
+            const textArea = textAreaRef.current
+            const additionalBottomPadding = counterEnabled ? 32 : 0
+            textArea.style.height = 'auto'
 
-    useAutosizeTextArea(textAreaRef.current, value, minRows, maxRows, mounted, counterEnabled)
+            const rowHeight = 20
+            const heightWithoutPaddings = textArea.scrollHeight - 24
+            const rows = Math.ceil(heightWithoutPaddings / rowHeight)
+
+            if (rows > maxRows) {
+                textArea.style.height = `${rowHeight * maxRows + 24 + additionalBottomPadding}px`
+            } else {
+                textArea.style.height = `${textArea.scrollHeight + additionalBottomPadding}px`
+            }
+        }
+    }, [textAreaRef, value, minRows, maxRows, counterEnabled])
 
     if (maxRows < minRows) {
         minRows = maxRows
     }
-
-    const [charsCount, setCharsCount] = useState<number>(value.length)
-
-    useEffect(() => {
-        setCharsCount(value.length)
-    }, [value])
 
     const textareaType: TextareaTypes = error ? 'error' : 'active'
 
@@ -138,7 +141,7 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
             )}
             {counterEnabled && (
                 <div className='pointer-events-none absolute bottom-3 right-3 flex h-[15px] justify-end font-roboto text-[10px]'>
-                    {charsCount}/{counterLimit}
+                    {value.length}/{counterLimit}
                 </div>
             )}
         </div>
