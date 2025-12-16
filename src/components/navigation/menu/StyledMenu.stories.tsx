@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { StyledMenu } from './StyledMenu'
 import { Stack, type MenuProps, Divider, ListItemIcon, ListItemText } from '@mui/material'
 import { useState, type FC } from 'react'
@@ -65,7 +65,9 @@ const StyledMenuExample: FC<{ args: Partial<MenuProps> }> = ({ args }) => {
                         'aria-labelledby': 'basic-button',
                     }}
                 >
-                    <StyledMenuItem onClick={handleClose} selected>Profile</StyledMenuItem>
+                    <StyledMenuItem onClick={handleClose} selected>
+                        Profile
+                    </StyledMenuItem>
                     <StyledMenuItem onClick={handleClose}>My account</StyledMenuItem>
                     <StyledMenuItem onClick={handleClose}>Logout</StyledMenuItem>
                 </StyledMenu>

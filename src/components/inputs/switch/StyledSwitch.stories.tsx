@@ -1,5 +1,5 @@
 import React from 'react'
-import type { Meta } from '@storybook/react'
+import type { Meta } from '@storybook/react-vite'
 import { StyledSwitch } from './StyledSwitch'
 import { Stack, Typography } from '@mui/material'
 import { StyledFormControlLabel } from 'src/components/miscellaneous/StyledFormControlLabel'

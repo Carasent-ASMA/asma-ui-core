@@ -1,7 +1,7 @@
 import React from 'react'
 //import style from './StyledWidgetHeader.module.scss'
 import { StyledWidgetHeader } from './StyledWidgetHeader'
-import type { Meta } from '@storybook/react'
+import type { Meta } from '@storybook/react-vite'
 import { StyledButton } from 'src/components/inputs/button'
 import { CloseIcon } from 'asma-ui-icons'
 

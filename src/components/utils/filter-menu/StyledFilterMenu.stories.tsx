@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 
 import { StyledFilterMenu } from './StyledFilterMenu'
 import { useEffect, useState } from 'react'

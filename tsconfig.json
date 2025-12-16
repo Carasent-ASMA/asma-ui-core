@@ -6,28 +6,15 @@
                 "name": "typescript-plugin-css-modules"
             }
         ],
-        "types": [
-            "vite/client",
-            "node"
-        ],
+        "types": ["vite/client", "node"],
         "paths": {
-            "*": [
-                "*"
-            ],
-            "@": [
-                "src/*"
-            ],
-            "asma-core-ui": [
-                "src/index.ts"
-            ]
+            "*": ["*"],
+            "@": ["src/*"],
+            "asma-core-ui": ["src/index.ts"]
         },
         "target": "ESNext",
         "useDefineForClassFields": true,
-        "lib": [
-            "DOM",
-            "DOM.Iterable",
-            "ESNext"
-        ],
+        "lib": ["DOM", "DOM.Iterable", "ESNext"],
         "allowJs": false,
         "skipLibCheck": true,
         "esModuleInterop": false,
@@ -55,11 +42,7 @@
         "verbatimModuleSyntax": true,
         "useUnknownInCatchVariables": false
     },
-    "exclude": [
-        "dist",
-        "node_modules",
-    ],
-    "include": [
-        "src",
-    ],
+    "exclude": ["dist", "node_modules"],
+    "include": ["src", ".storybook"]
 }
+

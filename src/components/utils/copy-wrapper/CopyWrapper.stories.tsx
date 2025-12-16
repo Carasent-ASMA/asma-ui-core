@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { CopyWrapper } from './CopyWrapper'
 import { CopyButton } from './CopyButton'
 import { SnackbarProvider, message } from 'src/components/feedback/snack-bar'

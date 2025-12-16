@@ -1,4 +1,4 @@
-import type { Meta } from '@storybook/react'
+import type { Meta } from '@storybook/react-vite'
 import { StyledTimePicker } from '../StyledTimePicker'
 import { useState } from 'react'
 

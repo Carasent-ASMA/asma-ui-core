@@ -1,5 +1,5 @@
 import React from 'react'
-import type { Meta } from '@storybook/react'
+import type { Meta } from '@storybook/react-vite'
 import { StyledInputField } from 'src/components/inputs/input-field'
 import { StyledFormLabel } from 'src/components/data-display/form-label'
 

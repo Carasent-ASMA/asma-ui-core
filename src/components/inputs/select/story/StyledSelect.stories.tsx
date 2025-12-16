@@ -5,7 +5,7 @@ import { StyledFormControl } from 'src/components/miscellaneous/StyledFormContro
 import { StyledSelectExample } from './components/StyledSelectExample'
 import { StyledInputLabel } from 'src/components/miscellaneous/StyledInputLabel'
 import { StyledSelectItem } from '../StyledSelectItem'
-import type { Meta } from '@storybook/react'
+import type { Meta } from '@storybook/react-vite'
 import { Stack } from '@mui/material'
 
 const selectOptions = [

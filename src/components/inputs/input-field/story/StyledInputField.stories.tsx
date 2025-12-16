@@ -1,5 +1,5 @@
 import React from 'react'
-import type { Meta } from '@storybook/react'
+import type { Meta } from '@storybook/react-vite'
 
 import { StyledInputField } from '../StyledInputField'
 
@@ -12,6 +12,7 @@ const meta = {
 } satisfies Meta<typeof StyledInputField>
 
 export default meta
+
 export const Inputs = () => {
     return (
         <div className='flex flex-col w-full gap-12'>

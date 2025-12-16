@@ -1,5 +1,5 @@
 import React from 'react'
-import type { Meta } from '@storybook/react'
+import type { Meta } from '@storybook/react-vite'
 import { StyledSwitch } from './StyledSwitch'
 import { StyledFormControlLabel } from 'src/components/miscellaneous/StyledFormControlLabel'
 
@@ -30,7 +30,7 @@ export const Switch = () => (
             label='Disabled Unchecked'
             control={<StyledSwitch dataTest='disabled-switch' disabled />}
         />
-         <StyledFormControlLabel
+        <StyledFormControlLabel
             labelPlacement='start'
             label='Disabled Checked'
             control={<StyledSwitch dataTest='disabled-checked-switch-1' defaultChecked disabled />}

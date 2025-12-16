@@ -1,5 +1,5 @@
 import { Stack, Typography } from '@mui/material'
-import type { Meta } from '@storybook/react'
+import type { Meta } from '@storybook/react-vite'
 import { StyledSlider } from './StyledSlider'
 import { useState, type SyntheticEvent } from 'react'
 
@@ -71,7 +71,12 @@ export const Slider = () => {
         <>
             <Stack mt={2} mb={4} className='w-[700px]'>
                 <Typography variant='h6'>Standard Slider</Typography>
-                <StyledSlider dataTest='standard-slider' {...meta.args} value={value} onChangeCommitted={handleChange} />
+                <StyledSlider
+                    dataTest='standard-slider'
+                    {...meta.args}
+                    value={value}
+                    onChangeCommitted={handleChange}
+                />
             </Stack>
             <Stack mt={2}>
                 <Typography variant='h6'>Disabled Slider</Typography>
@@ -79,7 +84,13 @@ export const Slider = () => {
             </Stack>
             <Stack mt={2} className='h-[400px]'>
                 <Typography variant='h6'>Vertical Slider</Typography>
-                <StyledSlider dataTest='vertical-slider' {...meta.args} orientation='vertical' value={value} onChangeCommitted={handleChange} />
+                <StyledSlider
+                    dataTest='vertical-slider'
+                    {...meta.args}
+                    orientation='vertical'
+                    value={value}
+                    onChangeCommitted={handleChange}
+                />
             </Stack>
         </>
     )

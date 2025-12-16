@@ -21,7 +21,8 @@
         "Roboto",
         "Scroller",
         "tailwindcss",
-        "tanstack"
+        "tanstack",
+        "VIEWPORTS"
     ],
     "ignorePaths": [
         "package-lock.json",
@@ -38,7 +39,9 @@
         "img",
         "*.backup"
     ],
-    "ignoreRegExpList": ["enum.*"]
+    "ignoreRegExpList": [
+        "enum.*"
+    ]
     // flagWords - list of words to be always considered incorrect
     // This is useful for offensive words and common spelling errors.
     // For example "hte" should be "the"

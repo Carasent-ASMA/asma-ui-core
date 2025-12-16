@@ -47,6 +47,9 @@ type StyledTextAreaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement> &
     TextareaCommonProps &
     TextareaConditionalProps
 
+type TextareaTypes = 'active' | 'error'
+type textTypes = 'active' | 'error' | 'disabled'
+
 /**
  * Developer: bularga.alexandru@carasent.com
  *
@@ -105,10 +108,8 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
         setCharsCount(value.length)
     }, [value])
 
-    type TextareaTypes = 'active' | 'error'
     const textareaType: TextareaTypes = error ? 'error' : 'active'
 
-    type textTypes = 'active' | 'error' | 'disabled'
     const textType: textTypes = error ? 'error' : disabled ? 'disabled' : 'active'
 
     return (

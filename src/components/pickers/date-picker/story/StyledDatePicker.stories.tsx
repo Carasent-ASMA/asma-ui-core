@@ -1,5 +1,5 @@
 import React from 'react'
-import type { Meta } from '@storybook/react'
+import type { Meta } from '@storybook/react-vite'
 import { RangePickerCompactExample } from './components/RangePickerCompactExample'
 import { SinglePickerExample } from './components/SinglePickerExample'
 import { StyledDatePicker } from '../StyledDatePicker'

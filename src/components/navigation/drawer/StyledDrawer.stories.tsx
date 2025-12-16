@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { StyledDrawer } from './StyledDrawer'
 import { Stack, type DrawerProps, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material'
 import { StyledTypography } from 'src/components/data-display/typography'

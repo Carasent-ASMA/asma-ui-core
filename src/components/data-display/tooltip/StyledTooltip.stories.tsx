@@ -1,5 +1,5 @@
 import React from 'react'
-import type { Meta } from '@storybook/react'
+import type { Meta } from '@storybook/react-vite'
 import { StyledTooltip } from './StyledTooltip'
 import { StyledButton } from 'src/components/inputs/button'
 

@@ -1,4 +1,4 @@
-import type { Meta } from '@storybook/react'
+import type { Meta } from '@storybook/react-vite'
 
 import { StyledBadge } from './StyledBadge'
 import { StyledButton } from '../../inputs/button/StyledButton'

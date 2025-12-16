@@ -1,5 +1,4 @@
-import type { Meta } from '@storybook/react'
-import type { StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { StyledTextarea } from './StyledTextarea'
 import { useState, type ChangeEvent, useRef } from 'react'
 import { StyledSelect, StyledSelectItem } from '../select'
@@ -45,9 +44,9 @@ const StyledTextareaExample = () => {
     }
 
     return (
-        <div className='flex flex-col gap-4 items-center'>
+        <div className='flex flex-col items-center gap-4'>
             <div>
-                <div className='flex align-middle justify-center text-xl font-semibold underline '>Active</div>
+                <div className='flex justify-center align-middle text-xl font-semibold underline'>Active</div>
                 <StyledFormControl className='w-full pb-5'>
                     <StyledSelect
                         dataTest='Test-alpha'
@@ -80,14 +79,14 @@ const StyledTextareaExample = () => {
                     maxRows={5}
                     onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setFirstValue(e.target.value)}
                 />
-                <div className='bg-gray-50 p-4 rounded mt-1'>
-                    <p className='font-semibold text-xs'>Preview</p>
-                    <div className='bg-gray-300 p-4 rounded max-w-[400px] truncate'>{firstValue}</div>
+                <div className='mt-1 rounded bg-gray-50 p-4'>
+                    <p className='text-xs font-semibold'>Preview</p>
+                    <div className='max-w-[400px] truncate rounded bg-gray-300 p-4'>{firstValue}</div>
                 </div>
             </div>
 
             <div>
-                <div className='flex align-middle justify-center text-xl font-semibold underline'>
+                <div className='flex justify-center align-middle text-xl font-semibold underline'>
                     Active with counter
                 </div>
                 <div className='flex gap-2'>
@@ -116,7 +115,7 @@ const StyledTextareaExample = () => {
             </div>
 
             <div>
-                <div className='flex align-middle justify-center text-xl font-semibold underline'>Error</div>
+                <div className='flex justify-center align-middle text-xl font-semibold underline'>Error</div>
                 <StyledTextarea
                     dataTest='test33'
                     id='33'
@@ -136,7 +135,7 @@ const StyledTextareaExample = () => {
             </div>
 
             <div>
-                <div className='flex align-middle justify-center text-xl font-semibold underline'>
+                <div className='flex justify-center align-middle text-xl font-semibold underline'>
                     With external ref
                 </div>
                 <StyledTextarea
@@ -158,7 +157,7 @@ const StyledTextareaExample = () => {
             </div>
 
             <div>
-                <div className='flex align-middle justify-center text-xl font-semibold underline'>Disabled</div>
+                <div className='flex justify-center align-middle text-xl font-semibold underline'>Disabled</div>
                 <StyledTextarea
                     dataTest='test4'
                     id='4'
@@ -170,7 +169,7 @@ const StyledTextareaExample = () => {
             </div>
 
             <div>
-                <div className='flex align-middle justify-center text-xl font-semibold underline'>View only</div>
+                <div className='flex justify-center align-middle text-xl font-semibold underline'>View only</div>
                 <StyledTextarea
                     dataTest='test5'
                     id='5'
@@ -182,7 +181,7 @@ const StyledTextareaExample = () => {
             </div>
 
             <div>
-                <div className='flex align-middle justify-center text-xl font-semibold underline'>Not editable</div>
+                <div className='flex justify-center align-middle text-xl font-semibold underline'>Not editable</div>
                 <StyledTextarea
                     dataTest='test6'
                     id='6'

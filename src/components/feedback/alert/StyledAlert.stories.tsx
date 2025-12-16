@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { StyledAlert } from './StyledAlert'
 import { Stack, Typography } from '@mui/material'
 import { StyledAlertTitle } from './StyledAlertTitle'

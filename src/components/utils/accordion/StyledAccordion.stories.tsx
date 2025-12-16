@@ -1,4 +1,4 @@
-import type { Meta } from '@storybook/react'
+import type { Meta } from '@storybook/react-vite'
 import { StyledAccordion } from './StyledAccordion'
 import { AccordionDetails, Typography } from '@mui/material'
 import { StyledAccordionSummary } from './StyledAccordionSummary'

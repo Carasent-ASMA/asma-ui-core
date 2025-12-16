@@ -1,6 +1,5 @@
 import React, { forwardRef } from 'react'
 import { RadioGroup } from '@base-ui-components/react/radio-group'
-import styles from './styledradiogroup.module.scss'
 
 type StyledRadioGroupProps = {
     value?: string | number | boolean | null

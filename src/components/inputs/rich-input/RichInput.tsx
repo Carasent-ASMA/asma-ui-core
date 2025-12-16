@@ -3,7 +3,6 @@ import ReactQuill from 'react-quill'
 import clsx from 'clsx'
 
 import './quill.snow.css'
-import style from './RichInput.module.scss'
 
 export interface IRichInput extends ReactQuill.ReactQuillProps {
     disabled?: boolean

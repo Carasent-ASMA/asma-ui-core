@@ -1,4 +1,4 @@
-import type { StoryObj, Meta } from '@storybook/react'
+import type { StoryObj, Meta } from '@storybook/react-vite'
 import { StyledSelectAutocomplete } from '../StyledSelectAutocomplete'
 import { StyledSelectAutocompleteExample } from './components/StyledSelectAutocompleteExample'
 import { Stack } from '@mui/material'

@@ -1,4 +1,4 @@
-import type { Meta } from '@storybook/react'
+import type { Meta } from '@storybook/react-vite'
 import { StyledWidget } from '../StyledWidget'
 import { InboxOutboxOutlineIcon } from 'src/components/icons'
 import { useState } from 'react'
