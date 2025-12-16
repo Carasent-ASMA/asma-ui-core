@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import type { FC } from 'react'
 import { LoadingIcon } from 'src/components/icons'
 
-type StyledLoadingProps = {
+interface StyledLoadingProps {
     isLoading: boolean
     className?: string
     size?: 'small' | 'medium' | 'large'
@@ -22,7 +22,7 @@ export const StyledLoading: FC<StyledLoadingProps> = ({ isLoading, className = '
     return (
         <div
             className={clsx(
-                'flex items-center justify-center h-[50px] w-full text-gama-500 animate-opacity-appear-3',
+                'flex h-[50px] w-full animate-opacity-appear-3 items-center justify-center text-gama-500',
                 className,
             )}
         >

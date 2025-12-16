@@ -22,7 +22,7 @@ export const CopyWrapperStory: Story = {
 const CopyWrapperExample = () => {
     return (
         <SnackbarProvider>
-            <div className='w-full flex flex-col gap-8 items-center'>
+            <div className='flex w-full flex-col items-center gap-8'>
                 <CopyWrapper locale='en' contentToCopy='something' messageInfo={message.info}>
                     something
                 </CopyWrapper>

@@ -124,7 +124,7 @@ export function StyledSelectAutocomplete<
                                 )}
                             </span>
 
-                            <span className='flex-1 text-sm truncate'>
+                            <span className='flex-1 truncate text-sm'>
                                 {getOptionLabel?.(option) || defaultGetOptionLabel(option)}
                             </span>
                         </li>

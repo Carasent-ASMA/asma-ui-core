@@ -14,7 +14,7 @@ export default meta
 export const Inputs = () => {
     const [val, setVal] = useState('')
     return (
-        <div className='flex flex-col w-full gap-12'>
+        <div className='flex w-full flex-col gap-12'>
             <RichInput
                 helperText='Required Field'
                 // is_error

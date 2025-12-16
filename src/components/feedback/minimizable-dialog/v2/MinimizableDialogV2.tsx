@@ -51,7 +51,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                 className={cn(styles['minimized-dialog'], !minimized && styles['hidden'], classNameOverrides.minimized)}
             >
                 <div className={clsx('flex items-center justify-between', !minimized && 'hidden')} data-test={dataTest}>
-                    <div className='truncate max-w-[303px] text-lg font-semibold text-delta-800 pr-1'>
+                    <div className='max-w-[303px] truncate pr-1 text-lg font-semibold text-delta-800'>
                         <StyledTooltip title={title} placement='top'>
                             <div className='truncate'>{title}</div>
                         </StyledTooltip>
@@ -71,7 +71,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
             {/* Maximized */}
             {fullScreen && !minimized && (
                 <div
-                    className='z-[52] fixed inset-0 bg-[rgb(98,110,126)] bg-opacity-70'
+                    className='fixed inset-0 z-[52] bg-[rgb(98,110,126)] bg-opacity-70'
                     onClick={() => setFullScreen(false)}
                 />
             )}
@@ -84,13 +84,13 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                     classNameOverrides.maximized,
                     fullScreen &&
                         !minimized &&
-                        'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[1000px] h-[95dvh] duration-0 z-[53]',
+                        'fixed left-1/2 top-1/2 z-[53] h-[95dvh] w-full max-w-[1000px] -translate-x-1/2 -translate-y-1/2 duration-0',
                 )}
             >
                 <div
                     className={cn(
-                        'flex flex-col px-4 border-b-[1px] border-delta-200',
-                        isMobile ? 'py-3 gap-y-1' : 'py-4 gap-y-2',
+                        'flex flex-col border-b-[1px] border-delta-200 px-4',
+                        isMobile ? 'gap-y-1 py-3' : 'gap-y-2 py-4',
                     )}
                 >
                     <div className='flex items-center justify-between'>
@@ -98,7 +98,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                             <div
                                 className={cn(
                                     'font-semibold text-delta-800',
-                                    isMobile ? 'text-xl line-clamp-2' : 'text-2xl line-clamp-1',
+                                    isMobile ? 'line-clamp-2 text-xl' : 'line-clamp-1 text-2xl',
                                 )}
                             >
                                 {title}
@@ -129,7 +129,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                         <div
                             className={cn(
                                 'font-semibold text-delta-800',
-                                isMobile ? 'text-xl line-clamp-2' : 'text-2xl line-clamp-1',
+                                isMobile ? 'line-clamp-2 text-xl' : 'line-clamp-1 text-2xl',
                             )}
                         >
                             {title}

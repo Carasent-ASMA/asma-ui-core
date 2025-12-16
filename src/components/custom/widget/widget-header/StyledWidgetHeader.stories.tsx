@@ -23,7 +23,7 @@ export const WidgetHeader = () => {
         <StyledWidgetHeader
             title='Widget header example'
             actions={
-                <div className='w-full flex justify-between'>
+                <div className='flex w-full justify-between'>
                     <StyledButton
                         dataTest='clear-selected-button'
                         variant='text'

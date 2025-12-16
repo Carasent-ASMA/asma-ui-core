@@ -15,7 +15,7 @@ export default meta
 
 export const Inputs = () => {
     return (
-        <div className='flex flex-col w-full gap-12'>
+        <div className='flex w-full flex-col gap-12'>
             <StyledInputField
                 dataTest='test'
                 {...meta.args}

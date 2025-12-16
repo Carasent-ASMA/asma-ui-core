@@ -4,7 +4,7 @@ import { LoadingIcon } from 'src/components/icons'
 
 export const InfoMessages: React.FC = () => {
     return (
-        <div className='flex gap-2 flex-col bg-orange-100 p-5 rounded-md shadow-md'>
+        <div className='flex flex-col gap-2 rounded-md bg-orange-100 p-5 shadow-md'>
             <h2 className='m-auto'>
                 message. <span className='text-blue-500'>info</span> | <span className='text-red-500'>error</span> |{' '}
                 <span className='text-green-500'>loading</span>

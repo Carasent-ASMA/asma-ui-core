@@ -7,7 +7,7 @@ export default {
 
 export const FormLabel = () => (
     <>
-        <div className='flex flex-col gap-2.5 m-2.5'>
+        <div className='m-2.5 flex flex-col gap-2.5'>
             <StyledFormLabel size='md' title='Label-md' />
             <StyledFormLabel size='base' title='Label-base' />
             <StyledFormLabel size='xl' title='Label-xl' />

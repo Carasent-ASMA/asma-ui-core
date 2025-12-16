@@ -31,7 +31,7 @@ const RichInput: FC<IRichInput> = ({ dataTest, ...props }) => {
         <div className='relative'>
             {props.label && (
                 <span
-                    className='text-custom-grey-06 mb-2 font-sans text-xs font-semibold leading-4'
+                    className='mb-2 font-sans text-xs font-semibold leading-4 text-custom-grey-06'
                     data-test={`label-${dataTest}`}
                 >
                     {props.label}

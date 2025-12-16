@@ -38,7 +38,7 @@ export const StyledSelect: React.FC<
         endAdornment={
             allowClear && props.value ? (
                 <div
-                    className='hover:bg-gama-100 duration-300 absolute right-8 p-[2px] rounded-full flex items-center justify-center'
+                    className='absolute right-8 flex items-center justify-center rounded-full p-[2px] duration-300 hover:bg-gama-100'
                     onClick={() => {
                         props.onChange?.({ target: { value: '' } } as SelectChangeEvent<unknown>, null)
                     }}

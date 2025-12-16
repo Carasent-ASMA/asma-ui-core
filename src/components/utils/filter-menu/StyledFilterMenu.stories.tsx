@@ -68,7 +68,7 @@ const FilterMenuExample = () => {
     }, [mockData])
 
     return (
-        <div className='w-full flex flex-col gap-8 items-center'>
+        <div className='flex w-full flex-col items-center gap-8'>
             <StyledFilterMenu
                 hideLabel={true}
                 filterIsActive={filterIsActive}

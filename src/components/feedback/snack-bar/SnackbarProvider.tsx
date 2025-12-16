@@ -23,7 +23,7 @@ export const SnackbarProvider = (props: SnackbarProviderProps) => {
             domRoot={document.body}
             maxSnack={3}
             classes={{ root: 'min-w-fit' }}
-            className='w-fit min-w-fit max-w-fit '
+            className='w-fit min-w-fit max-w-fit'
         >
             {props.children}
         </NotistackProvider>

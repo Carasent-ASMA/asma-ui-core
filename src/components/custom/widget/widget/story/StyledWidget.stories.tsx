@@ -17,8 +17,8 @@ export const Widget = () => {
     const [viewMore, setViewMore] = useState(false)
 
     return (
-        <div className='flex flex-row gap-4 p-4 '>
-            <div className='flex flex-col gap-4 flex-1 '>
+        <div className='flex flex-row gap-4 p-4'>
+            <div className='flex flex-1 flex-col gap-4'>
                 <StyledWidget
                     title='Widget without footer'
                     icon={<InboxOutboxOutlineIcon width={24} height={24} />}
@@ -87,7 +87,7 @@ export const Widget = () => {
                     isLoading={false}
                     emptyText='No data'
                 >
-                    <div className='flex flex-col gap-2 h-full rounded-lg bg-gray-200'>
+                    <div className='flex h-full flex-col gap-2 rounded-lg bg-gray-200'>
                         {[...Array(20).keys()].slice(0, viewMore ? 20 : 5).map((k) => (
                             <span key={k}>test</span>
                         ))}
@@ -95,7 +95,7 @@ export const Widget = () => {
                 </StyledWidget>
             </div>
 
-            <div className='flex flex-col gap-4 w-[400px] '>
+            <div className='flex w-[400px] flex-col gap-4'>
                 <StyledWidget
                     title='Widget name'
                     icon={<InboxOutboxOutlineIcon width={24} height={24} />}

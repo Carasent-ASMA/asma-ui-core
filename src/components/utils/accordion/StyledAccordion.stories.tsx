@@ -20,7 +20,7 @@ export default meta
 
 export const Accordion = () => (
     <>
-        <StyledAccordion className='max-w-[600px] mb-4'>
+        <StyledAccordion className='mb-4 max-w-[600px]'>
             <div className='relative flex items-center justify-between pr-4'>
                 <StyledAccordionSummary size={'large'} sx={{ flexDirection: 'row-reverse', gap: '10px' }}>
                     <StyledWidgetTitle>Header lorem ipsum</StyledWidgetTitle>

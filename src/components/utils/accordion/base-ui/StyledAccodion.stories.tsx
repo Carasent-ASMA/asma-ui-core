@@ -23,7 +23,7 @@ export const Accordion = {
         const [isExpanded, setIsExpanded] = useState(true)
 
         return (
-            <div className='max-w-[600px] flex flex-col gap-4'>
+            <div className='flex max-w-[600px] flex-col gap-4'>
                 <StyledAccordion onChange={setIsExpanded}>
                     <div className='flex items-center justify-between pr-4'>
                         <StyledAccordionSummary className='' size='large'>

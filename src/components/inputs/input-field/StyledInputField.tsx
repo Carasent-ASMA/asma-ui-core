@@ -25,7 +25,7 @@ export const StyledInputField: React.FC<
                 ? {
                       endAdornment: (
                           <div
-                              className='z-40 hover:bg-gama-100 duration-300 absolute right-4 p-[2px] rounded-full flex items-center justify-center'
+                              className='absolute right-4 z-40 flex items-center justify-center rounded-full p-[2px] duration-300 hover:bg-gama-100'
                               onClick={(e) => {
                                   e.stopPropagation()
                                   e.preventDefault()

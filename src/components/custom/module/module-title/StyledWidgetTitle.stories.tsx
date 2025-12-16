@@ -13,7 +13,7 @@ export default meta
 
 export const ModuleTitle = () => {
     return (
-        <div className='max-w-sm '>
+        <div className='max-w-sm'>
             <StyledModuleTitle dataTest='anonyme-schema'>Anonyme skjema</StyledModuleTitle>
         </div>
     )

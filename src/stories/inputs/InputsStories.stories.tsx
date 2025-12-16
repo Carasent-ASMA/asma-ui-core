@@ -18,7 +18,7 @@ export const FormInputs = () => {
         <div>
             <h2>Not filled</h2>
             <StyledFormLabel title='Enabled' size='xl' />
-            <div className={'flex flex-col gap-5 max-w-lg '}>
+            <div className={'flex max-w-lg flex-col gap-5'}>
                 <StyledInputField autoComplete='off' size='small' dataTest='not-filled' />
                 <StyledInputField
                     autoComplete='off'

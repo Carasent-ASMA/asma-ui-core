@@ -14,7 +14,7 @@ const meta = {
 export default meta
 
 export const Switch = () => (
-    <div className='max-w-[500px] h-full flex flex-col gap-2'>
+    <div className='flex h-full max-w-[500px] flex-col gap-2'>
         <StyledFormControlLabel
             labelPlacement='start'
             label='Enabled Unchecked'

@@ -11,7 +11,7 @@ import type { PopoverProps } from '@mui/material'
  * @param popoverContent
  */
 
-type StyledFilterMenuProps = {
+interface StyledFilterMenuProps {
     dataTest: string
     filterIsActive: boolean
     popoverContent: ((props: { isOpen: boolean; onClose: () => void }) => ReactNode) | ReactNode
@@ -72,7 +72,7 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
 
     return (
         <>
-            <div className='w-fit h-fit relative'>
+            <div className='relative h-fit w-fit'>
                 {anchorNode ? (
                     React.cloneElement(anchorNode({ isOpen: !!anchorEl, onClose }) as React.ReactElement, {
                         onClick: onAnchorClick,
@@ -95,8 +95,8 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
                 {filterIsActive && (
                     <div
                         className={clsx(
-                            'h-2 w-2 bg-gama-400 rounded-full absolute',
-                            size === 'large' ? 'top-2 right-2' : 'top-1 right-1',
+                            'absolute h-2 w-2 rounded-full bg-gama-400',
+                            size === 'large' ? 'right-2 top-2' : 'right-1 top-1',
                         )}
                     ></div>
                 )}

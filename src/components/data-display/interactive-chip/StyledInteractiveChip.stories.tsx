@@ -29,7 +29,7 @@ export const InteractiveChip = () => {
             <div>
                 <p>Checkbox interactive chips</p>
 
-                <div className={'flex gap-2 w-fit'}>
+                <div className={'flex w-fit gap-2'}>
                     {options.map(({ value, label }) => (
                         <StyledInteractiveChip
                             key={value}

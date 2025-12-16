@@ -2,7 +2,7 @@ import type { CSSProperties, FC, MouseEvent, ReactNode } from 'react'
 import style from './StyledLabel.module.scss'
 import clsx from 'clsx'
 
-export type StyledLabelProps = {
+export interface StyledLabelProps {
     children: ReactNode
     onClick?: (event: MouseEvent<HTMLDivElement>) => void
     className?: string

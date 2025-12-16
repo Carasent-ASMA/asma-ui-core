@@ -19,7 +19,7 @@ type Story = StoryObj<typeof meta>
 export const Alert: Story = {
     args: { ...meta.argTypes, children: 'Styled Button', variant: 'outlined' },
     render: () => {
-        // eslint-disable-next-line react-hooks/rules-of-hooks
+         
         const [, setOpen] = useState(true)
 
         const handleClose = () => {

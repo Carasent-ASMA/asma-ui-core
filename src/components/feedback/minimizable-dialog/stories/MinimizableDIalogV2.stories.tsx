@@ -45,7 +45,7 @@ export const DialogMinimizableV2 = () => {
                 }}
             >
                 <>
-                    <div className='flex-grow flex flex-col gap-y-3 overflow-auto px-4'>
+                    <div className='flex flex-grow flex-col gap-y-3 overflow-auto px-4'>
                         <div>
                             Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has
                             been the industry's standard dummy text ever since the 1500s, when an unknown printer took a
@@ -96,15 +96,15 @@ export const DialogMinimizableV2 = () => {
                         </div>
                     </div>
                     {/* Footer */}
-                    <div className='flex-none flex items-center justify-between gap-4 p-4 flex-wrap'>
+                    <div className='flex flex-none flex-wrap items-center justify-between gap-4 p-4'>
                         <div className='flex flex-col gap-0.5'>
-                            <span className='text-delta-800 text-sm font-semibold'>Sist optdatert</span>
+                            <span className='text-sm font-semibold text-delta-800'>Sist optdatert</span>
                             <span className='text-sm'>03.04.2024 kl. 14.13</span>
                             <span className='text-sm'>av KristianAO</span>
                         </div>
 
                         <div className='flex flex-col gap-1'>
-                            <span className='text-delta-800 text-sm font-semibold'>Lagt til i registeret</span>
+                            <span className='text-sm font-semibold text-delta-800'>Lagt til i registeret</span>
                             <span className='text-sm'>05.04.2024 kl. 14.13</span>
                             <span className='text-sm'>av Kristian Thyholdt</span>
                         </div>

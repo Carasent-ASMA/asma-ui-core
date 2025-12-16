@@ -13,7 +13,7 @@ export const StyledSwitch = ({ dataTest, disabled, ...props }: Omit<SwitchProps,
             <div
                 className={`${
                     disabled ? 'bg-gama-300' : 'bg-gama-500'
-                } rounded-full flex items-center justify-center w-5 h-5`}
+                } flex h-5 w-5 items-center justify-center rounded-full`}
             >
                 <CheckIcon color={'white'} height={14} width={14} className={'rounded-full'} />
             </div>
@@ -22,7 +22,7 @@ export const StyledSwitch = ({ dataTest, disabled, ...props }: Omit<SwitchProps,
             <div
                 className={`${
                     disabled ? 'bg-delta-50' : 'bg-delta-10'
-                } rounded-full outline outline-1 outline-delta-200 flex items-center justify-center w-5 h-5`}
+                } flex h-5 w-5 items-center justify-center rounded-full outline outline-1 outline-delta-200`}
             >
                 <IndeterminateIcon
                     color={'var(--colors-delta-600)'}

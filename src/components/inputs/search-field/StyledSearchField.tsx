@@ -32,10 +32,10 @@ export const StyledSearchField = (({ value, onClear, ...props }) => {
                     endAdornment: value ? (
                         <div
                             className={cn(
-                                'cursor-pointer bg-delta-50 rounded-full',
+                                'cursor-pointer rounded-full bg-delta-50',
                                 'flex items-center justify-center',
                                 'transform-gpu transition-all duration-300 ease-in-out',
-                                value ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none',
+                                value ? 'scale-100 opacity-100' : 'pointer-events-none scale-75 opacity-0',
                             )}
                             style={{
                                 width: 24,
@@ -79,7 +79,7 @@ export const StyledSearchField = (({ value, onClear, ...props }) => {
                 className={cn(
                     'absolute left-2 top-1/2 -translate-y-1/2',
                     'transform-gpu transition-all duration-300 ease-in-out',
-                    hasInteraction ? 'opacity-0 scale-75 pointer-events-none' : 'opacity-100 scale-100',
+                    hasInteraction ? 'pointer-events-none scale-75 opacity-0' : 'scale-100 opacity-100',
                 )}
                 color='var(--colors-delta-700)'
             />

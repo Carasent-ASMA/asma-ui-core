@@ -13,7 +13,7 @@ export default meta
 
 export const Checkbox = () => {
     return (
-        <div className='max-w-sm '>
+        <div className='max-w-sm'>
             <div>
                 <StyledCheckbox dataTest='test' checked={true} />
                 <StyledCheckbox dataTest='test' checked={false} />

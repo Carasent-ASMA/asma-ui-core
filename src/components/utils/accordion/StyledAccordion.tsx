@@ -6,6 +6,6 @@ export const StyledAccordion = ({ className, ...props }: AccordionProps) => (
         {...props}
         disableGutters={true}
         elevation={0}
-        className={clsx('rounded-lg border border-gray-300 border-solid', className)}
+        className={clsx('rounded-lg border border-solid border-gray-300', className)}
     />
 )

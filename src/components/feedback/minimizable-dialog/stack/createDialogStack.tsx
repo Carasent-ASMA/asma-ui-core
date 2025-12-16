@@ -112,7 +112,7 @@ export function createDialogStack<Config extends DialogConfigMap>({
         )
 
         const getDialogState = useCallback(
-            (id: DialogId<Config>) => dialogs.find((d) => d.id === id) as DialogState<DialogId<Config>> | undefined,
+            (id: DialogId<Config>) => dialogs.find((d) => d.id === id),
             [dialogs],
         )
 

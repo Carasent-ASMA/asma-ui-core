@@ -63,7 +63,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
 
     return (
         <>
-            {fullScreen && !minimized && <div className='z-[51] fixed inset-0 bg-[rgb(98,110,126)] bg-opacity-70' />}
+            {fullScreen && !minimized && <div className='fixed inset-0 z-[51] bg-[rgb(98,110,126)] bg-opacity-70' />}
 
             <div style={{ zIndex: 51 }} className={cn(styles['dialog'], !minimized && styles['hidden'])}>
                 <div className={clsx('flex items-center justify-between', !minimized && 'hidden')} data-test={dataTest}>
@@ -115,11 +115,11 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                     minimized && '!h-0 !w-0 opacity-0 duration-0',
                     fullScreen &&
                         !minimized &&
-                        'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[1000px] h-[95dvh] duration-0',
+                        'fixed left-1/2 top-1/2 h-[95dvh] w-full max-w-[1000px] -translate-x-1/2 -translate-y-1/2 duration-0',
                 )}
                 data-test={dataTest}
             >
-                <div className='flex flex-col gap-y-2 p-4 border-b-[1px] border-delta-200'>
+                <div className='flex flex-col gap-y-2 border-b-[1px] border-delta-200 p-4'>
                     <div className='flex items-center justify-between'>
                         {!label ? (
                             <div className='text-2xl font-semibold text-delta-800'>{title}</div>
@@ -204,7 +204,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                         </div>
                     </div>
 
-                    {label && <div className='text-2xl font-semibold text-delta-800 truncate'>{title}</div>}
+                    {label && <div className='truncate text-2xl font-semibold text-delta-800'>{title}</div>}
                 </div>
 
                 <div className={clsx('flex flex-col', fullScreen && !minimized && 'h-[87dvh]')}>
@@ -217,7 +217,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                     footerInfo ? (
                         <div
                             className={cn(
-                                'flex items-center justify-between p-4 border-0 border-t-[1px] border-solid border-delta-200 bg-white',
+                                'flex items-center justify-between border-0 border-t-[1px] border-solid border-delta-200 bg-white p-4',
                                 footerClassName,
                             )}
                         >

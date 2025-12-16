@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, type ChangeEvent, type ReactNode } 
 import { useAutosizeTextArea } from './useAutosizeTextArea'
 import styles from './StyledTextarea.module.scss'
 
-type TextareaCommonProps = {
+interface TextareaCommonProps {
     id?: string
     value?: string
     label?: ReactNode
@@ -13,7 +13,7 @@ type TextareaCommonProps = {
     dataTest?: string
 }
 
-type TextAreaNotEditableProps = {
+interface TextAreaNotEditableProps {
     variant?: 'not_editable' | 'view_only'
     minRows?: never
     maxRows?: never
@@ -28,7 +28,7 @@ type TextAreaNotEditableProps = {
     counterLimit?: never
 }
 
-type TextAreaActiveProps = {
+interface TextAreaActiveProps {
     variant?: 'active'
     minRows?: number
     maxRows?: number
@@ -113,15 +113,15 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
     const textType: textTypes = error ? 'error' : disabled ? 'disabled' : 'active'
 
     return (
-        <div className={`flex flex-col gap-1 relative ${containerClassName}`} data-test={dataTest}>
+        <div className={`relative flex flex-col gap-1 ${containerClassName}`} data-test={dataTest}>
             <label htmlFor={id} className={`${styles['label']} ${styles[textType]} ${labelClassName}`}>
                 {label}
             </label>
             <span className={`${styles['description']} ${styles[textType]}`}>{error ? errorMessage : description}</span>
             {variant === 'view_only' ? (
-                <div className='font-roboto text-sm font-normal pt-3 text-gray-700'>{value}</div>
+                <div className='pt-3 font-roboto text-sm font-normal text-gray-700'>{value}</div>
             ) : variant === 'not_editable' ? (
-                <div className='font-roboto text-sm font-normal rounded p-3 bg-gray-200 text-gray-700'>{value}</div>
+                <div className='rounded bg-gray-200 p-3 font-roboto text-sm font-normal text-gray-700'>{value}</div>
             ) : (
                 <textarea
                     {...otherProps}
@@ -137,7 +137,7 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
                 />
             )}
             {counterEnabled && (
-                <div className='flex justify-end absolute bottom-3 right-3 text-[10px] font-roboto h-[15px] pointer-events-none'>
+                <div className='pointer-events-none absolute bottom-3 right-3 flex h-[15px] justify-end font-roboto text-[10px]'>
                     {charsCount}/{counterLimit}
                 </div>
             )}

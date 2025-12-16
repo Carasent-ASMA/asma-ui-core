@@ -6,7 +6,7 @@ import { useState } from 'react'
 import ChevronUpIcon from '../icons/ChevronUpIcon'
 import ChevronDownIcon from '../icons/ChevronDownIcon'
 
-export type StyledWidgetProps = {
+export interface StyledWidgetProps {
     title: string
     icon?: ReactNode
     headerRight?: ReactNode
