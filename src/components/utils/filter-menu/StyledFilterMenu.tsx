@@ -89,7 +89,7 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
                         size={size}
                         dataTest={dataTest}
                     >
-                        {!hideLabel && (label || 'Filter')}
+                        {!hideLabel && (label ?? 'Filter')}
                     </StyledButton>
                 )}
                 {filterIsActive && (
@@ -107,18 +107,18 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
                 anchorEl={anchorEl}
                 onClose={onClose}
                 anchorOrigin={
-                    popoverProps?.anchorOrigin || {
+                    popoverProps?.anchorOrigin ?? {
                         vertical: 'bottom',
                         horizontal: 'right',
                     }
                 }
                 transformOrigin={
-                    popoverProps?.transformOrigin || {
+                    popoverProps?.transformOrigin ?? {
                         vertical: 'top',
                         horizontal: 'right',
                     }
                 }
-                className={popoverProps?.className || 'my-1'}
+                className={popoverProps?.className ?? 'my-1'}
             >
                 {isReactNode(popoverContent) ? popoverContent : popoverContent({ isOpen: !!anchorEl, onClose })}
             </StyledPopover>

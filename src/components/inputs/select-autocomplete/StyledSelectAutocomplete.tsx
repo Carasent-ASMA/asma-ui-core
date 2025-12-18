@@ -73,7 +73,7 @@ export function StyledSelectAutocomplete<
                 }}
                 className={clsx('!text-sm', props.className)}
                 popupIcon={
-                    props.popupIcon || (
+                    props.popupIcon ?? (
                         <Icon
                             icon='material-symbols:expand-more-rounded'
                             width={24}
@@ -104,7 +104,7 @@ export function StyledSelectAutocomplete<
                     </Paper>
                 )}
                 renderOption={
-                    props?.renderOption ||
+                    props?.renderOption ??
                     ((props, option, { selected }) => (
                         <li {...props}>
                             <span
@@ -128,7 +128,7 @@ export function StyledSelectAutocomplete<
                             </span>
 
                             <span className='flex-1 truncate text-sm'>
-                                {getOptionLabel?.(option) || defaultGetOptionLabel(option)}
+                                {getOptionLabel?.(option) ?? defaultGetOptionLabel(option)}
                             </span>
                         </li>
                     ))

@@ -22,7 +22,9 @@ export const StyledAlertSnackbar = forwardRef<HTMLDivElement, StyledAlertSnackba
 
     const { closeSnackbar } = useSnackbar()
 
-    const handleClose = () => closeSnackbar(id)
+    const handleClose = () => {
+        closeSnackbar(id)
+    }
 
     return (
         <SnackbarContent ref={ref} role='alert' {...other}>

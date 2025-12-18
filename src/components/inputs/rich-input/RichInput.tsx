@@ -29,6 +29,8 @@ const MODULES = {
 const FORMATS = ['size', 'font', 'bold', 'italic', 'underline', 'strike', 'blockquote', 'list', 'bullet', 'indent']
 
 const RichInput: FC<IRichInput> = ({ dataTest, ...props }) => {
+    const showHelper = props.is_error === true || props.isRequired === true
+
     return (
         <div className='relative'>
             {props.label && (
@@ -71,12 +73,12 @@ const RichInput: FC<IRichInput> = ({ dataTest, ...props }) => {
                 />
             )}
 
-            {(props.is_error || props.isRequired) && (
+            {showHelper && (
                 <span
                     className={clsx('core-ui-rte-helper-text', props.is_error && 'core-ui-rte-error')}
                     data-test={`error-${dataTest}`}
                 >
-                    {props.helperText ? props.helperText : 'Helper text'}
+                    {props.helperText ?? 'Helper text'}
                 </span>
             )}
         </div>

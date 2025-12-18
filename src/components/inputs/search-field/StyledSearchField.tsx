@@ -18,8 +18,12 @@ export const StyledSearchField = (({ value, onClear, ...props }) => {
                 size='small'
                 variant='outlined'
                 value={value}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => setIsFocused(false)}
+                onFocus={() => {
+                    setIsFocused(true)
+                }}
+                onBlur={() => {
+                    setIsFocused(false)
+                }}
                 InputProps={{
                     className: cn('transition-[padding] duration-300', hasInteraction ? 'pl-0' : 'pl-5'),
                     sx: {

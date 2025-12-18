@@ -157,6 +157,7 @@ export const Inputs = (): JSX.Element => {
                 onChange={() => undefined}
                 value='Hello World'
                 label='Read only'
+                disabled={false}
                 readOnly
             />
             <StyledInputField

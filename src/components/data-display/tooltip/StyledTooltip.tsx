@@ -14,7 +14,7 @@ export const StyledTooltip = (props: TooltipProps): JSX.Element => {
                 ...componentsProps,
                 tooltip: {
                     ...(userTooltip ?? {}),
-                    style: { ...(userTooltip?.style || {}) },
+                    style: { ...(userTooltip?.style ?? {}) },
                     sx: {
                         borderRadius: '3px',
                         '& .MuiTooltip-arrow': { color: '#363E4A' },

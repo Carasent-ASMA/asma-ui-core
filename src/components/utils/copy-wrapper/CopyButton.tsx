@@ -29,10 +29,12 @@ export const CopyButton: FC<{
                             .then(() => {
                                 messageInfo(locale === 'no' ? 'Kopieres til utklippstavlen' : 'Copied to clipboard')
                             })
-                            .catch((e) => console.error('Failed to copy to clipboard with: ', e))
+                            .catch((e: unknown) => {
+                                console.error('Failed to copy to clipboard with: ', e)
+                            })
                     }}
                 >
-                    {!isMobile && (text || title)}
+                    {!isMobile && (text ?? title)}
                 </StyledButton>
             </div>
         </StyledTooltip>

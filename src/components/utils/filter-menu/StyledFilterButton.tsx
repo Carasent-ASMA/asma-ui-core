@@ -31,7 +31,7 @@ export const StyledFilterButton: React.FC<StyledButtonProps & StyledFilterMenuPr
                     variant={variant}
                     size={size}
                 >
-                    {!hideLabel && (label || 'Filter')}
+                    {!hideLabel && (label ?? 'Filter')}
                 </StyledButton>
                 {filterIsActive && (
                     <div

@@ -24,7 +24,9 @@ export const StyledInfoSnackbar = forwardRef<HTMLDivElement, StyledInfoSnackbarP
 
     const { closeSnackbar } = useSnackbar()
 
-    const handleClose = () => closeSnackbar(id)
+    const handleClose = () => {
+        closeSnackbar(id)
+    }
 
     const isLoading = type === 'loading'
 
@@ -43,7 +45,9 @@ export const StyledInfoSnackbar = forwardRef<HTMLDivElement, StyledInfoSnackbarP
                 <div>{message}</div>
                 {closeButton ? (
                     <CloseIcon
-                        onClick={() => handleClose()}
+                        onClick={() => {
+                            handleClose()
+                        }}
                         width={20}
                         height={20}
                         className='absolute right-0 top-1/2 -translate-y-1/2'

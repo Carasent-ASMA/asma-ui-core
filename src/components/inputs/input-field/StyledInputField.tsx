@@ -18,8 +18,8 @@ export const StyledInputField: React.FC<
     <TextField
         {...props}
         data-test={dataTest}
-        disabled={disabled || readOnly}
-        type={props.type || 'mui-input'}
+        disabled={(disabled ?? false) || (readOnly ?? false)}
+        type={props.type ?? 'mui-input'}
         InputProps={
             allowClear && props.value
                 ? {

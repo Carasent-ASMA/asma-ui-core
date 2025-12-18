@@ -40,7 +40,7 @@
         "noPropertyAccessFromIndexSignature": true,
         "experimentalDecorators": false,
         "verbatimModuleSyntax": true,
-        "useUnknownInCatchVariables": false
+        "useUnknownInCatchVariables": true
     },
     "exclude": ["dist", "node_modules"],
     "include": ["src", ".storybook"]

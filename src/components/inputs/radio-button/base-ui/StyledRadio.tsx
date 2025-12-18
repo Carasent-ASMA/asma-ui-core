@@ -29,8 +29,14 @@ export const StyledRadio = forwardRef<HTMLButtonElement, StyledRadioProps>(
             e.stopPropagation()
             if (!rippleRef.current) return
             const ripple = document.createElement('span')
-            ripple.className = styles['RadioRipple'] || ''
-            ripple.addEventListener('animationend', () => ripple.remove(), { once: true })
+            ripple.className = styles['RadioRipple']
+            ripple.addEventListener(
+                'animationend',
+                () => {
+                    ripple.remove()
+                },
+                { once: true },
+            )
             rippleRef.current.appendChild(ripple)
         }, [])
 

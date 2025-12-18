@@ -54,7 +54,7 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
     })
 
     const showLink = !!link && !link.hide
-    const showViewMore = !!viewMore && !viewMore?.hide
+    const showViewMore = !!viewMore && !viewMore.hide
 
     return (
         <div className={style['asma-core-ui-styled-widget']}>
@@ -75,7 +75,7 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
 
             {showViewMore && (
                 <div className={style['widget-footer']}>
-                    {!!viewMore && !viewMore?.hide ? (
+                    {!viewMore.hide ? (
                         <StyledButton
                             disabled={viewMore.disabled}
                             dataTest='view-more'
@@ -92,7 +92,7 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
                                 if (persistKey) {
                                     localStorage.setItem(persistKey, String(!expanded))
                                 }
-                                viewMore?.onClick?.()
+                                viewMore.onClick?.()
                             }}
                         >
                             {expanded ? viewMore.viewLessText : viewMore.viewMoreText}

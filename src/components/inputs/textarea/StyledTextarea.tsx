@@ -86,7 +86,7 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
     ...otherProps
 }) => {
     const textAreaInnerRef = useRef<HTMLTextAreaElement>(null)
-    const textAreaRef = refLink ? refLink : textAreaInnerRef
+    const textAreaRef = refLink ?? textAreaInnerRef
     const counterEnabled = !!(counter && counterLimit)
 
     useEffect(() => {

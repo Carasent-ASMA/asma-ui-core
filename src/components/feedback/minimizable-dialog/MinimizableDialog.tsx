@@ -51,9 +51,9 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
 
     if (!open) return null
 
-    const fullScreen = fullScreenState !== undefined ? fullScreenState : fullscreen
+    const fullScreen = fullScreenState ?? fullscreen
 
-    const showPrimaryButton = primaryButtonText || primaryButtonLoading
+    const showPrimaryButton = primaryButtonText ?? primaryButtonLoading
 
     const showButtons = showPrimaryButton || secondaryButtonText
 
@@ -77,11 +77,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                                         variant='text'
                                         size='small'
                                         onClick={toggleMinimized}
-                                        endIcon={
-                                            showExpandIcon && (
-                                                <KeyboardCapslockIcon height={20} width={20} color='text-gama-500' />
-                                            )
-                                        }
+                                        endIcon={<KeyboardCapslockIcon height={20} width={20} color='text-gama-500' />}
                                     >
                                         {onExpandText}
                                     </StyledButton>
@@ -96,9 +92,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                                         variant='textGray'
                                         size='small'
                                         onClick={onClose}
-                                        endIcon={
-                                            showCloseIcon && <CloseIcon height={20} width={20} color='text-delta-700' />
-                                        }
+                                        endIcon={<CloseIcon height={20} width={20} color='text-delta-700' />}
                                     >
                                         {onCloseText}
                                     </StyledButton>
@@ -137,11 +131,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                                             variant='textGray'
                                             size='small'
                                             onClick={toggleMinimized}
-                                            endIcon={
-                                                showMinimizeIcon && (
-                                                    <MinimizeIcon height={20} width={20} color='text-delta-700' />
-                                                )
-                                            }
+                                            endIcon={<MinimizeIcon height={20} width={20} color='text-delta-700' />}
                                         >
                                             {onMinimizeText}
                                         </StyledButton>
@@ -212,7 +202,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                         {typeof children === 'function' ? children({ fullScreen }) : children}
                     </div>
 
-                    {(((isArray(extraActions) && extraActions?.length) || isFunction(extraActions)) &&
+                    {(((isArray(extraActions) && extraActions.length) || isFunction(extraActions)) &&
                         extraActionsText) ||
                     footerInfo ? (
                         <div
@@ -221,7 +211,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                                 footerClassName,
                             )}
                         >
-                            {isArray(extraActions) && extraActions?.length && extraActionsText ? (
+                            {isArray(extraActions) && extraActions.length && extraActionsText ? (
                                 <>
                                     <StyledButton
                                         dataTest='extra-actions-button'

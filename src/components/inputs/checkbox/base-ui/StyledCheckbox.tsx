@@ -58,8 +58,14 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
             if (!isRippleEnabled) return
 
             const ripple = document.createElement('span')
-            ripple.className = styles['CheckboxRipple'] || ''
-            ripple.addEventListener('animationend', () => ripple.remove(), { once: true })
+            ripple.className = styles['CheckboxRipple']
+            ripple.addEventListener(
+                'animationend',
+                () => {
+                    ripple.remove()
+                },
+                { once: true },
+            )
             rippleRef.current?.appendChild(ripple)
         },
         [isRippleEnabled],

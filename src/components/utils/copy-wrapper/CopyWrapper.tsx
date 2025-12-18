@@ -33,7 +33,9 @@ export const CopyWrapper: FC<
                                 .then(() => {
                                     messageInfo(locale === 'no' ? 'Kopieres til utklippstavlen' : 'Copied to clipboard')
                                 })
-                                .catch((e) => console.error('Failed to copy to clipboard with: ', e))
+                                .catch((e: unknown) => {
+                                    console.error('Failed to copy to clipboard with: ', e)
+                                })
                         }}
                         startIcon={<ContentCopyIcon width={20} height={20} />}
                     />

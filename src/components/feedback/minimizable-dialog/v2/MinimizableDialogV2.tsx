@@ -60,7 +60,9 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                         <MinimizeBtn
                             type='expand'
                             visibility={showExpandIcon}
-                            onClick={() => setMinimized(!minimized)}
+                            onClick={() => {
+                                setMinimized(!minimized)
+                            }}
                             tooltipTitle={t.expand}
                         />
 
@@ -72,7 +74,9 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
             {fullScreen && !minimized && (
                 <div
                     className='fixed inset-0 z-[52] bg-[rgb(98,110,126)] bg-opacity-70'
-                    onClick={() => setFullScreen(false)}
+                    onClick={() => {
+                        setFullScreen(false)
+                    }}
                 />
             )}
             <div
@@ -112,13 +116,17 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                             <MinimizeBtn
                                 visibility={showMinimizeIcon && !isMobile}
                                 type='minimize'
-                                onClick={() => setMinimized(!minimized)}
+                                onClick={() => {
+                                    setMinimized(!minimized)
+                                }}
                                 tooltipTitle={t.minimize}
                             />
                             <FullScreenBtn
                                 showFullScreenIcon={enableFullscreen && !isMobile}
                                 fullScreen={fullScreen}
-                                onClick={() => setFullScreen(!fullScreen)}
+                                onClick={() => {
+                                    setFullScreen(!fullScreen)
+                                }}
                                 tooltipTitle={fullScreen ? t.exitFullscreen : t.fullscreen}
                             />
                             <CloseBtn showCloseIcon={showCloseIcon} onClick={onClose} tooltipTitle={t.close} />
