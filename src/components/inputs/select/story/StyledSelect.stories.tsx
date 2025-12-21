@@ -66,6 +66,37 @@ export const Select = (args: { children: React.ReactNode }) => {
                     }}
                 />
             </StyledFormControl>
+
+            <StyledTypography variant='h6'>Select with error</StyledTypography>
+            <StyledSelect
+                {...args}
+                dataTest='Test_x'
+                allowClear
+                className='max-w-[600px]'
+                size='small'
+                value={value}
+                error={!value}
+                onChange={(e) => {
+                    const target: string = e.target.value as string
+                    setValue(target)
+                }}
+            />
+
+            <StyledTypography variant='h6'>Select with label & error</StyledTypography>
+            <StyledFormControl size='small' className='w-52' error={!value}>
+                <StyledInputLabel>Find me...</StyledInputLabel>
+                <StyledSelect
+                    {...args}
+                    dataTest='Test_x'
+                    allowClear
+                    value={value}
+                    error={!value}
+                    onChange={(e) => {
+                        const target: string = e.target.value as string
+                        setValue(target)
+                    }}
+                />
+            </StyledFormControl>
         </Stack>
     )
 }

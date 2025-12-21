@@ -1,4 +1,5 @@
 import { TextField, type TextFieldProps } from '@mui/material'
+import { ErrorOutlineIcon } from 'asma-ui-icons'
 import { CloseIcon } from 'src/components/icons'
 /**
  *
@@ -14,105 +15,120 @@ export const StyledInputField: React.FC<
         readOnly?: boolean
         dataTest: string
     }
-> = ({ allowClear, onClear, readOnly, disabled, dataTest, ...props }) => (
-    <TextField
-        {...props}
-        data-test={dataTest}
-        disabled={disabled || readOnly}
-        type={props.type || 'mui-input'}
-        InputProps={
-            allowClear && props.value
-                ? {
-                      endAdornment: (
-                          <div
-                              className='z-40 hover:bg-gama-100 duration-300 absolute right-4 p-[2px] rounded-full flex items-center justify-center'
-                              onClick={(e) => {
-                                  e.stopPropagation()
-                                  e.preventDefault()
-                                  onClear?.()
-                              }}
-                          >
-                              <CloseIcon width={18} height={18} />
-                          </div>
-                      ),
-                  }
-                : props.InputProps
-        }
-        sx={{
-            '& input:-webkit-autofill, & .MuiInputBase-root:has(> input:-webkit-autofill)': {
-                backgroundColor: '#e8f0fe !important',
-            },
-            '& input': {
-                backgroundColor: 'transparent',
-            },
-            '& .MuiInputBase-root': {
-                backgroundColor: 'transparent',
-            },
-            '& .MuiInputBase-colorPrimary fieldset': {
-                borderColor: 'var(--colors-delta-500) !important',
-            },
-            '& .MuiInputBase-colorPrimary.Mui-focused fieldset': {
-                borderColor: 'var(--colors-gama-400) !important',
-            },
-            '& .MuiInputBase-colorPrimary.Mui-focused::after': {
-                borderColor: 'var(--colors-gama-400) !important',
-            },
-            '& .MuiInputBase-colorPrimary.Mui-focused:hover fieldset': {
-                borderColor: 'var(--colors-gama-400) !important',
-            },
-            '& .MuiInputBase-colorPrimary:hover fieldset': {
-                borderColor: 'var(--colors-gama-300) !important',
-                borderWidth: '2px !important',
-            },
-            '& .MuiInputBase-colorPrimary.Mui-disabled:hover fieldset': {
-                borderWidth: '1px !important',
-            },
-            '& .MuiInputBase-colorPrimary.Mui-error fieldset': {
-                borderColor: 'var(--colors-error-500) !important',
-            },
-            '& .MuiInputBase-colorPrimary.Mui-error:hover fieldset': {
-                borderColor: 'var(--colors-error-500) !important',
-            },
-            '& .MuiInputBase-colorPrimary.Mui-focused.Mui-error fieldset': {
-                borderColor: '#d3302f !important',
-            },
-            '& .MuiInputBase-colorPrimary.Mui-disabled fieldset': {
-                borderColor: 'var(--colors-delta-300) !important',
-            },
-            '& label.Mui-focused': {
-                color: 'var(--colors-gama-500) !important',
-            },
-            '& label': {
-                color: 'var(--colors-delta-500) !important',
-            },
-            '& label.Mui-focused.Mui-error': {
-                color: '#d3302f !important',
-            },
-            '& label.Mui-disabled': {
-                color: 'var(--colors-gray-300) !important',
-            },
-            '& .MuiOutlinedInput-input::placeholder': {
-                color: 'var(--colors-delta-500) !important',
-                opacity: '1 !important',
-            },
-            '& .MuiOutlinedInput-input.Mui-disabled': {
-                WebkitTextFillColor: 'var(--colors-delta-300) !important',
-            },
-            ...(readOnly && {
-                '& .MuiOutlinedInput-input.Mui-disabled': {
-                    WebkitTextFillColor: 'var(--colors-delta-800) !important',
+> = ({ allowClear, onClear, readOnly, disabled, error, helperText, dataTest, ...props }) => {
+    return (
+        <TextField
+            {...props}
+            data-test={dataTest}
+            disabled={disabled || readOnly}
+            error={error}
+            helperText={
+                error ? (
+                    <div className='flex items-center gap-1'>
+                        <ErrorOutlineIcon width={20} height={20} />
+                        {helperText ?? 'Required'}
+                    </div>
+                ) : (
+                    helperText
+                )
+            }
+            type={props.type || 'mui-input'}
+            InputProps={
+                allowClear && props.value
+                    ? {
+                          ...props.InputProps,
+                          endAdornment: (
+                              <div
+                                  className='z-40 hover:bg-gama-100 duration-300 absolute right-4 p-[2px] rounded-full flex items-center justify-center'
+                                  onClick={(e) => {
+                                      e.stopPropagation()
+                                      e.preventDefault()
+                                      onClear?.()
+                                  }}
+                              >
+                                  <CloseIcon width={18} height={18} />
+                              </div>
+                          ),
+                      }
+                    : props.InputProps
+            }
+            sx={{
+                '& input:-webkit-autofill, & .MuiInputBase-root:has(> input:-webkit-autofill)': {
+                    backgroundColor: '#e8f0fe !important',
                 },
-                '& .MuiInputBase-colorPrimary.Mui-disabled': {
-                    backgroundColor: 'var(--colors-delta-10) !important',
+                '& input': {
+                    backgroundColor: 'transparent',
+                },
+                '& .MuiInputBase-root': {
+                    backgroundColor: 'transparent',
+                },
+                '& .MuiInputBase-colorPrimary fieldset': {
+                    borderColor: 'var(--colors-delta-500) !important',
+                },
+                '& .MuiInputBase-colorPrimary.Mui-focused fieldset': {
+                    borderColor: 'var(--colors-gama-400) !important',
+                },
+                '& .MuiInputBase-colorPrimary.Mui-focused::after': {
+                    borderColor: 'var(--colors-gama-400) !important',
+                },
+                '& .MuiInputBase-colorPrimary.Mui-focused:hover fieldset': {
+                    borderColor: 'var(--colors-gama-400) !important',
+                },
+                '& .MuiInputBase-colorPrimary:hover fieldset': {
+                    borderColor: 'var(--colors-gama-300) !important',
+                    borderWidth: '2px !important',
+                },
+                '& .MuiInputBase-colorPrimary.Mui-disabled:hover fieldset': {
+                    borderWidth: '1px !important',
+                },
+                '& .MuiInputBase-colorPrimary.Mui-error fieldset': {
+                    borderColor: 'var(--colors-error-500) !important',
+                },
+                '& .MuiInputBase-colorPrimary.Mui-error:hover fieldset': {
+                    borderColor: 'var(--colors-error-500) !important',
+                },
+                '& .MuiFormHelperText-root': {
+                    fontSize: '14px',
+                },
+                '& .MuiFormHelperText-root.Mui-error': {
+                    color: 'var(--colors-error-500) !important',
+                    marginLeft: 0,
                 },
                 '& .MuiInputBase-colorPrimary.Mui-disabled fieldset': {
-                    borderColor: 'var(--colors-delta-200) !important',
+                    borderColor: 'var(--colors-delta-300) !important',
+                },
+                '& label.Mui-focused': {
+                    color: 'var(--colors-gama-500) !important',
+                },
+                '& label': {
+                    color: 'var(--colors-delta-500) !important',
                 },
                 '& label.Mui-disabled': {
-                    color: 'var(--colors-gray-800) !important',
+                    color: 'var(--colors-gray-300) !important',
                 },
-            }),
-            ...props.sx,
-        }}
-    />
-)
+                '& .MuiOutlinedInput-input::placeholder': {
+                    color: 'var(--colors-delta-500) !important',
+                    opacity: '1 !important',
+                },
+                '& .MuiOutlinedInput-input.Mui-disabled': {
+                    WebkitTextFillColor: 'var(--colors-delta-300) !important',
+                },
+                ...(readOnly && {
+                    '& .MuiOutlinedInput-input.Mui-disabled': {
+                        WebkitTextFillColor: 'var(--colors-delta-800) !important',
+                    },
+                    '& .MuiInputBase-colorPrimary.Mui-disabled': {
+                        backgroundColor: 'var(--colors-delta-10) !important',
+                    },
+                    '& .MuiInputBase-colorPrimary.Mui-disabled fieldset': {
+                        borderColor: 'var(--colors-delta-200) !important',
+                    },
+                    '& label.Mui-disabled': {
+                        color: 'var(--colors-gray-800) !important',
+                    },
+                }),
+                ...props.sx,
+            }}
+        />
+    )
+}

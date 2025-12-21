@@ -1,4 +1,4 @@
-import type { Meta } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 import { StyledCheckbox } from './StyledCheckbox'
 import { useState } from 'react'
 
@@ -11,8 +11,14 @@ const meta = {
 } satisfies Meta<typeof StyledCheckbox>
 
 export default meta
+type Story = StoryObj<typeof StyledCheckbox>
 
-export const Checkbox = () => {
+export const Checkbox: Story = {
+    args: { ...meta.args },
+    render: () => <CheckboxExample />,
+}
+
+const CheckboxExample = () => {
     const [checked, setChecked] = useState(false)
 
     return (

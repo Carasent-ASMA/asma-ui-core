@@ -2,6 +2,7 @@ import { StyledTypography } from 'src/components/data-display/typography'
 import { StyledFormControl } from 'src/components/miscellaneous/StyledFormControl'
 import { StyledInputField } from 'src/components/inputs/input-field'
 import { StyledSelectAutocomplete } from '../../StyledSelectAutocomplete'
+import { useState } from 'react'
 
 const top100Films = [
     { title: 'The Shawshank Redemption', year: 1994 },
@@ -130,15 +131,8 @@ const top100Films = [
     { title: 'Monty Python and the Holy Grail', year: 1975 },
 ]
 
-const top1001Films = [
-    { label: 'The Shawshank Redemption', value: 1994 },
-    { label: 'The Godfather', value: 1972 },
-    { label: 'The Godfather: Part II', value: 1974 },
-    { label: 'The Dark Knight', value: 2008 },
-    { label: '12 Angry Men', value: 1957 },
-]
-
 export const StyledSelectAutocompleteExample: React.FC = () => {
+    const [value, setValue] = useState<{ title: string; year: number }[]>([])
     return (
         <div>
             <StyledTypography variant='h6'>SelectAutocomplete Example</StyledTypography>
@@ -150,12 +144,17 @@ export const StyledSelectAutocompleteExample: React.FC = () => {
                     size='small'
                     id='tags-standard'
                     options={top100Films}
+                    value={value}
+                    onChange={(_e, val) => {
+                        setValue(val)
+                    }}
                     // defaultValue={[top100Films[13]]}
                     getOptionLabel={(option) => option?.title || ''}
                     renderInput={(params) => (
                         <StyledInputField
                             dataTest='test'
                             {...params}
+                            error={!value.length}
                             variant='outlined'
                             label=''
                             placeholder='Favorites'
