@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react'
-import { RadioGroup } from '@base-ui-components/react/radio-group'
+import { RadioGroup } from '@base-ui/react/radio-group'
 import { StyledFormHelperText } from 'src'
 import { ErrorOutlineIcon } from 'asma-ui-icons'
 import clsx from 'clsx'

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Accordion } from '@base-ui-components/react/accordion'
+import { Accordion } from '@base-ui/react/accordion'
 import clsx from 'clsx'
 import styles from './StyledAccordion.module.scss'
 import { ChevronDownIcon } from 'src/components/icons'

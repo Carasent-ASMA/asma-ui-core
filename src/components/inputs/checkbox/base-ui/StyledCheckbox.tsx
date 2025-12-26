@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { Checkbox } from '@base-ui-components/react/checkbox'
+import { Checkbox } from '@base-ui/react/checkbox'
 import styles from './StyledCheckbox.module.scss'
 import { CheckIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
@@ -58,7 +58,9 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
             if (!isRippleEnabled) return
 
             const ripple = document.createElement('span')
-            ripple.className = styles['CheckboxRipple']
+            if (styles['CheckboxRipple']) {
+                ripple.className = styles['CheckboxRipple']
+            }
             ripple.addEventListener(
                 'animationend',
                 () => {

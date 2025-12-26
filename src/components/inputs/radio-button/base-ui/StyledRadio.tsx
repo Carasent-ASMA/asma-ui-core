@@ -1,5 +1,5 @@
 import React, { forwardRef, useRef, useCallback } from 'react'
-import { Radio } from '@base-ui-components/react/radio'
+import { Radio } from '@base-ui/react/radio'
 import styles from './StyledRadio.module.scss'
 import { cn } from 'src/helpers/cn'
 
@@ -29,7 +29,9 @@ export const StyledRadio = forwardRef<HTMLButtonElement, StyledRadioProps>(
             e.stopPropagation()
             if (!rippleRef.current) return
             const ripple = document.createElement('span')
-            ripple.className = styles['RadioRipple']
+            if (styles['RadioRipple']) {
+                ripple.className = styles['RadioRipple']
+            }
             ripple.addEventListener(
                 'animationend',
                 () => {

@@ -1,6 +1,6 @@
 // components/StyledSwitch/StyledSwitch.tsx
 import React, { forwardRef, useState } from 'react'
-import { Switch } from '@base-ui-components/react/switch'
+import { Switch } from '@base-ui/react/switch'
 import styles from './StyledSwitch.module.scss'
 import type { IIcon } from 'src/components/icons'
 import { IconTemplate } from 'src/components/icons/IconTemplate'
@@ -14,7 +14,7 @@ type StyledSwitchProps = {
     required?: boolean
     id?: string
     dataTest?: string
-    value?: React.InputHTMLAttributes<HTMLInputElement>['value']
+    // value?: React.InputHTMLAttributes<HTMLInputElement>['value']
 } & Omit<React.ComponentProps<typeof Switch.Root>, 'children'>
 
 export type SwitchProps = StyledSwitchProps
@@ -47,7 +47,7 @@ export const StyledSwitch = forwardRef<HTMLButtonElement, StyledSwitchProps>(
             disabled,
             readOnly,
             required,
-            value,
+            // value,
             id,
             dataTest,
             ...rest
@@ -62,7 +62,7 @@ export const StyledSwitch = forwardRef<HTMLButtonElement, StyledSwitchProps>(
             if (!isControlled) setChecked(newChecked)
             onChange?.(
                 {
-                    target: { checked: newChecked, name: id, value: value },
+                    target: { checked: newChecked, name: id },
                 } as React.ChangeEvent<HTMLInputElement>,
                 newChecked,
             )
@@ -81,7 +81,7 @@ export const StyledSwitch = forwardRef<HTMLButtonElement, StyledSwitchProps>(
                 disabled={disabled}
                 readOnly={readOnly}
                 required={required}
-                value={value}
+                // value={value}
                 id={id}
                 name={id}
                 data-testid={dataTest}
