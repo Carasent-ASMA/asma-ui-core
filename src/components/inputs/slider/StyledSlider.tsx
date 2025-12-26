@@ -10,7 +10,7 @@ export interface StyledSliderProps extends SliderProps {
     helperText?: string
 }
 
-export const StyledSlider = ({ dataTest, error, errorText, helperText, ...props }: StyledSliderProps) => {
+export const StyledSlider = ({ dataTest, error, errorText, helperText, ...props }: StyledSliderProps): JSX.Element => {
     const showHelperText = (error ?? false) || (helperText ?? false)
     const helperTextToDisplay = error ? errorText ?? 'Required' : helperText
 
@@ -26,10 +26,10 @@ export const StyledSlider = ({ dataTest, error, errorText, helperText, ...props 
                     ...props.slotProps,
                     thumb: {
                         className: clsx(
-                            'w-4 h-4',
+                            'h-4 w-4',
                             'before:shadow-none',
-                            'after:content-[""] after:h-8 after:w-8',
-                            props.orientation === 'vertical' ? 'ml-0 mb-1' : 'ml-1',
+                            'after:h-8 after:w-8 after:content-[""]',
+                            props.orientation === 'vertical' ? 'mb-1 ml-0' : 'ml-1',
                             props.disabled ? 'bg-delta-200' : 'bg-gama-500',
                         ),
                         ...props.slotProps?.thumb,
@@ -40,7 +40,7 @@ export const StyledSlider = ({ dataTest, error, errorText, helperText, ...props 
                     },
                     markLabel: {
                         className: clsx(
-                            'text-delta-600 text-sm font-semibold ml-1',
+                            'ml-1 text-sm font-semibold text-delta-600',
                             props.orientation === 'vertical' && 'mb-1',
                         ),
                         ...props.slotProps?.markLabel,
@@ -72,7 +72,7 @@ export const StyledSlider = ({ dataTest, error, errorText, helperText, ...props 
             {showHelperText && (
                 <StyledFormHelperText
                     className={clsx(
-                        'flex items-center gap-1 m-0 pt-1 text-sm',
+                        'm-0 flex items-center gap-1 pt-1 text-sm',
                         error ? 'text-error-500' : 'text-delta-600',
                     )}
                 >

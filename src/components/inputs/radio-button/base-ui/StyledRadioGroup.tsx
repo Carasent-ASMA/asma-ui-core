@@ -17,10 +17,7 @@ type StyledRadioGroupProps = {
 } & Omit<React.ComponentProps<typeof RadioGroup>, 'children' | 'defaultValue' | 'value'>
 
 export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps>(
-    (
-        { value, defaultValue, onValueChange, name, id, dataTest, error, errorText, helperText, children, ...rest },
-        ref,
-    ) => {
+    ({ value, defaultValue, onValueChange, dataTest, error, errorText, helperText, children, ...rest }, ref) => {
         const showHelperText = (error ?? false) || (helperText ?? false)
         const helperTextToDisplay = error ? errorText ?? 'Required' : helperText
 
@@ -38,7 +35,7 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
                 {showHelperText && (
                     <StyledFormHelperText
                         className={clsx(
-                            'flex items-center gap-1 m-0 pt-1 text-sm',
+                            'm-0 flex items-center gap-1 pt-1 text-sm',
                             error ? 'text-error-500' : 'text-delta-600',
                         )}
                     >

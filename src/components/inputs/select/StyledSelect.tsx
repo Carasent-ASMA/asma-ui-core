@@ -43,7 +43,7 @@ export const StyledSelect: React.FC<
                 endAdornment={
                     allowClear && props.value ? (
                         <div
-                            className='hover:bg-gama-100 duration-300 absolute right-8 p-[2px] rounded-full flex items-center justify-center'
+                            className='absolute right-8 flex items-center justify-center rounded-full p-[2px] duration-300 hover:bg-gama-100'
                             onClick={() => {
                                 props.onChange?.({ target: { value: '' } } as SelectChangeEvent<unknown>, null)
                             }}
@@ -82,7 +82,7 @@ export const StyledSelect: React.FC<
             />
 
             {error && (
-                <StyledFormHelperText className='flex items-center gap-1 m-0 pt-1 text-sm text-error-500'>
+                <StyledFormHelperText className='m-0 flex items-center gap-1 pt-1 text-sm text-error-500'>
                     <ErrorOutlineIcon width={20} height={20} />
                     {errorText ?? 'Required'}
                 </StyledFormHelperText>
