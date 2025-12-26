@@ -82,6 +82,18 @@ export const Slider = (): JSX.Element => {
                 <Typography variant='h6'>Disabled Slider</Typography>
                 <StyledSlider dataTest='disabled-slider' {...meta.args} disabled value={value} />
             </Stack>
+            <Stack mt={2} mb={4} className='w-[700px]'>
+                <Typography variant='h6'>Error Slider</Typography>
+                <StyledSlider
+                    dataTest='standard-slider'
+                    {...meta.args}
+                    error={true}
+                    errorText='Custom error msg'
+                    helperText='My helper text'
+                    value={value}
+                    onChangeCommitted={handleChange}
+                />
+            </Stack>
             <Stack mt={2} className='h-[400px]'>
                 <Typography variant='h6'>Vertical Slider</Typography>
                 <StyledSlider

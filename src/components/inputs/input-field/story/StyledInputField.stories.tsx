@@ -23,6 +23,7 @@ export const Inputs = (): JSX.Element => {
                 value=''
                 placeholder='Label text'
                 label='Label text'
+                helperText='some custom'
             />
             <StyledInputField
                 dataTest='test'
@@ -123,7 +124,7 @@ export const Inputs = (): JSX.Element => {
                 label=''
                 size='small'
                 error
-                helperText={'Required field'}
+                helperText={'Required'}
             />
             <StyledInputField
                 dataTest='test'
