@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react'
 import { Checkbox } from '@base-ui-components/react/checkbox'
 import styles from './StyledCheckbox.module.scss'
-import { CheckIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
+import { CheckIcon } from 'asma-ui-icons'
 
 type StyledCheckboxProps = {
     dataTest: string

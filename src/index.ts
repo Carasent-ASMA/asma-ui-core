@@ -28,6 +28,7 @@ export * from './components/inputs/slider'
 export * from './components/inputs/switch'
 export * from './components/inputs/radio-button'
 export * from './components/inputs/label'
+export * from './components/inputs/dynamic-select'
 
 // pickers
 // export * from './components/pickers/date-picker'

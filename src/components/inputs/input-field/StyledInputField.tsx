@@ -23,9 +23,9 @@ export const StyledInputField: React.FC<
             disabled={disabled || readOnly}
             error={error}
             helperText={
-                error ? (
+                readOnly ? null : error ? (
                     <div className='flex items-center gap-1'>
-                        <ErrorOutlineIcon width={20} height={20} />
+                        <ErrorOutlineIcon width={20} height={20} className='min-w-5' />
                         {helperText ?? 'Required'}
                     </div>
                 ) : (
