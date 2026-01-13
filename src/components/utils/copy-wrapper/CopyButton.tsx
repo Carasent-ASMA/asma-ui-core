@@ -25,7 +25,7 @@ export const CopyButton: FC<{
                     startIcon={<ContentCopyIcon width={20} height={20} />}
                     onClick={() => {
                         navigator.clipboard.writeText(contentToCopy).then(() => {
-                            messageInfo(locale === 'no' ? 'Kopieres til utklippstavlen' : 'Copied to clipboard')
+                            messageInfo(locale === 'no' ? 'Kopiert til utklippstavle' : 'Copied to clipboard')
                         })
                     }}
                 >
