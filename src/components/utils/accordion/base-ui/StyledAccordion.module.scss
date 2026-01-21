@@ -39,6 +39,7 @@
 }
 
 .TriggerIcon {
+    flex-shrink: 0;
     color: var(--colors-delta-800);
     width: var(--chevron-size);
     height: var(--chevron-size);

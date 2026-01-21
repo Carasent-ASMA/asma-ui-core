@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Accordion } from '@base-ui-components/react/accordion'
-import styles from './StyledAccordion.module.scss'
 import { cn } from 'src/helpers/cn'
+import styles from './StyledAccordion.module.scss'
 
 interface StyledAccordionProps
     extends Omit<React.ComponentProps<typeof Accordion.Root>, 'value' | 'onValueChange' | 'defaultValue' | 'onChange'> {
@@ -36,7 +36,7 @@ export const StyledAccordion = ({
 
     return (
         <Accordion.Root {...accordionProps}>
-            <Accordion.Item value={value} className={styles['Item']}>
+            <Accordion.Item value={value}>
                 {children}
             </Accordion.Item>
         </Accordion.Root>
