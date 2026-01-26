@@ -1,8 +1,7 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, type SVGProps } from 'react'
 import { Checkbox } from '@base-ui-components/react/checkbox'
 import styles from './StyledCheckbox.module.scss'
 import { cn } from 'src/helpers/cn'
-import { CheckIcon } from 'asma-ui-icons'
 
 type StyledCheckboxProps = {
     dataTest: string
@@ -17,7 +16,25 @@ type StyledCheckboxProps = {
 
 export const IndeterminateIcon = ({ className }: { className?: string }) => (
     <svg viewBox='0 0 24 24' className={className} fill='none'>
+        <title>Indeterminate icon</title>
         <rect x='5.5' y='10.5' width='13' height='2.75' fill='currentColor' />
+    </svg>
+)
+
+export const CheckIcon = (props: SVGProps<SVGSVGElement>) => (
+    <svg
+        viewBox='0 0 24 24'
+        width='24'
+        height='24'
+        fill='none'
+        stroke='currentColor'
+        strokeWidth={2}
+        strokeLinecap='round'
+        strokeLinejoin='round'
+        {...props}
+    >
+        <title>Check icon</title>
+        <path d='M4 12l5 5L20 6' />
     </svg>
 )
 
@@ -99,7 +116,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
             )}
             <span className={checkboxClasses}>
                 <Checkbox.Indicator className={styles['Indicator']}>
-                    <CheckboxIcon />
+                    <CheckboxIcon strokeWidth={size === 'small' ? 3 : 2} />
                 </Checkbox.Indicator>
             </span>
         </Checkbox.Root>
