@@ -103,6 +103,9 @@ export const StyledInputField: React.FC<
                 '& label': {
                     color: 'var(--colors-delta-500) !important',
                 },
+                '& label.MuiInputLabel-shrink': {
+                    color: 'var(--colors-delta-800) !important',
+                },
                 '& label.Mui-disabled': {
                     color: 'var(--colors-gray-300) !important',
                 },
