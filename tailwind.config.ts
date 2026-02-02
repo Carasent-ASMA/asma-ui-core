@@ -1,4 +1,4 @@
-import { type Config } from 'tailwindcss'
+import type { Config } from 'tailwindcss'
 import twConfigs from './tw-configs/twConfigs.json'
 
 const boxShadow = twConfigs.boxShadow,

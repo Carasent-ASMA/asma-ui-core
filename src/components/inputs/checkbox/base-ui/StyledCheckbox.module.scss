@@ -80,10 +80,6 @@ $checkbox-sizes: (
         border: var(--cb-border-w) solid var(--colors-delta-500);
         --cb-border-w: 2px;
 
-        &.size-small {
-            --cb-border-w: 1.5px;
-        }
-
         .Indicator {
             color: var(--colors-delta-500);
         }
@@ -170,7 +166,6 @@ $checkbox-sizes: (
     @include checkbox-size('medium');
 
     &.size-small {
-        --cb-border-w: 1.5px;
         @include checkbox-size('small');
     }
 

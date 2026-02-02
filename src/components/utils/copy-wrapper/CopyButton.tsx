@@ -24,14 +24,9 @@ export const CopyButton: FC<{
                     variant='text'
                     startIcon={<ContentCopyIcon width={20} height={20} />}
                     onClick={() => {
-                        navigator.clipboard
-                            .writeText(contentToCopy)
-                            .then(() => {
-                                messageInfo(locale === 'no' ? 'Kopieres til utklippstavlen' : 'Copied to clipboard')
-                            })
-                            .catch((e: unknown) => {
-                                console.error('Failed to copy to clipboard with: ', e)
-                            })
+                        navigator.clipboard.writeText(contentToCopy).then(() => {
+                            messageInfo(locale === 'no' ? 'Kopiert til utklippstavle' : 'Copied to clipboard')
+                        })
                     }}
                 >
                     {!isMobile && (text ?? title)}

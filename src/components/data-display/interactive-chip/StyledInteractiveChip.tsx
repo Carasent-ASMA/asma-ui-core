@@ -1,4 +1,4 @@
-import type { ComponentProps, FC } from 'react'
+import { forwardRef, type ComponentProps, type FC } from 'react'
 import { StyledChip } from '../chip'
 import type { CheckboxProps, RadioProps } from '@mui/material'
 import { StyledCheckbox } from 'src/components/inputs/checkbox/StyledCheckbox'
@@ -9,7 +9,10 @@ export interface StyledInteractiveChipProps extends ComponentProps<typeof Styled
     checked?: (CheckboxProps | RadioProps)['checked']
 }
 
-export const StyledInteractiveChip: FC<StyledInteractiveChipProps> = ({ type = 'checkbox', checked, ...props }) => {
+export const StyledInteractiveChip: FC<StyledInteractiveChipProps> = forwardRef<
+    HTMLDivElement,
+    StyledInteractiveChipProps
+>(({ type = 'checkbox', checked, ...props }, ref) => {
     const isCheckboxControl = type === 'checkbox'
 
     const ControlComponent = isCheckboxControl ? StyledCheckbox : StyledRadio
@@ -24,6 +27,7 @@ export const StyledInteractiveChip: FC<StyledInteractiveChipProps> = ({ type = '
 
     return (
         <StyledChip
+            ref={ref}
             avatar={
                 <ControlComponent
                     dataTest={props.dataTest}
@@ -34,6 +38,7 @@ export const StyledInteractiveChip: FC<StyledInteractiveChipProps> = ({ type = '
                 />
             }
             clickable
+            tabIndex={0}
             {...props}
             sx={{
                 ...(shouldApplyRadioStyles && {
@@ -46,13 +51,13 @@ export const StyledInteractiveChip: FC<StyledInteractiveChipProps> = ({ type = '
                 ...(props.readOnly && {
                     '& .MuiChip-avatar': {
                         '& .MuiSvgIcon-root': {
-                            color: 'var(--colors-delta-300)',
+                            color: 'var(--colors-delta-500)',
                         },
                         '& .MuiCheckbox-root, & .MuiRadio-root': {
-                            color: 'var(--colors-delta-300)',
+                            color: 'var(--colors-delta-500)',
                         },
                         '& .Mui-checked': {
-                            color: 'var(--colors-delta-300)',
+                            color: 'var(--colors-delta-500)',
                         },
                     },
                 }),
@@ -68,4 +73,4 @@ export const StyledInteractiveChip: FC<StyledInteractiveChipProps> = ({ type = '
             }}
         />
     )
-}
+})

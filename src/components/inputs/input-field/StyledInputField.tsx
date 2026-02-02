@@ -24,9 +24,9 @@ export const StyledInputField: React.FC<
             disabled={disabledOrReadonly}
             error={error}
             helperText={
-                error ? (
+                readOnly ? null : error ? (
                     <div className='flex items-center gap-1'>
-                        <ErrorOutlineIcon width={20} height={20} />
+                        <ErrorOutlineIcon width={20} height={20} className='min-w-5' />
                         {helperText ?? 'Required'}
                     </div>
                 ) : (
@@ -103,6 +103,9 @@ export const StyledInputField: React.FC<
                 },
                 '& label': {
                     color: 'var(--colors-delta-500) !important',
+                },
+                '& label.MuiInputLabel-shrink': {
+                    color: 'var(--colors-delta-800) !important',
                 },
                 '& label.Mui-disabled': {
                     color: 'var(--colors-gray-300) !important',

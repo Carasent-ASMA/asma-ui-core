@@ -23,7 +23,7 @@
 
     &:not(.styled-link-disabled):focus {
         outline-offset: -1px #{!important};
-        outline: 1px solid var(--colors-warning-500) #{!important};
+        outline: 1px solid var(--colors-gama-500) #{!important};
         color: var(--colors-gama-500) #{!important};
     }
 }
