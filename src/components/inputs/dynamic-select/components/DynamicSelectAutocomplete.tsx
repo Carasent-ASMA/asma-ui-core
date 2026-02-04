@@ -145,68 +145,74 @@ export const DynamicSelectAutocomplete = forwardRef(
                         if (multiple) {
                             const isSelected = !!value?.find((l) => isOptionEqualToValue(l, option))
                             return (
-                                <StyledTooltip arrow title={tooltipTitle} key={props.id}>
-                                    {/** biome-ignore lint/a11y/useKeyWithClickEvents: <onClick props is still passed so we need to block it for disabled options> */}
-                                    <li
-                                        {...props}
-                                        onClick={!disabled ? props.onClick : undefined}
-                                        className={cn(
-                                            'flex h-full gap-x-1 hover:bg-gama-50 cursor-pointer bg-white text-sm/5',
-                                            disabled && 'cursor-not-allowed bg-delta-50 hover:bg-delta-50',
-                                        )}
-                                        aria-disabled={disabled}
-                                    >
-                                        <StyledCheckbox
-                                            disabled={disabled}
-                                            dataTest={`${getOptionValue(option)}-checkbox`}
-                                            size='small'
-                                            className='min-w-[36px]'
-                                            checked={isSelected}
-                                        />
-                                        {renderLabel ? (
-                                            renderLabel(option)
-                                        ) : (
-                                            <span className='text-sm text-delta-700 h-fit py-[10px]'>
-                                                {getOptionLabel(option)}
-                                            </span>
-                                        )}
-                                    </li>
-                                </StyledTooltip>
+                                /** biome-ignore lint/a11y/useKeyWithClickEvents: <onClick props is still passed so we need to block it for disabled options> */
+                                <li
+                                    {...props}
+                                    key={props.id}
+                                    onClick={!disabled ? props.onClick : undefined}
+                                    className={cn(
+                                        'flex h-full gap-x-1 hover:bg-gama-50 cursor-pointer bg-white text-sm/5',
+                                        disabled && 'cursor-not-allowed bg-delta-50 hover:bg-delta-50',
+                                    )}
+                                    aria-disabled={disabled}
+                                >
+                                    <StyledTooltip arrow title={tooltipTitle}>
+                                        <>
+                                            <StyledCheckbox
+                                                disabled={disabled}
+                                                dataTest={`${getOptionValue(option)}-checkbox`}
+                                                size='small'
+                                                className='min-w-[36px]'
+                                                checked={isSelected}
+                                            />
+                                            {renderLabel ? (
+                                                renderLabel(option)
+                                            ) : (
+                                                <span className='text-sm text-delta-700 h-fit py-[10px]'>
+                                                    {getOptionLabel(option)}
+                                                </span>
+                                            )}
+                                        </>
+                                    </StyledTooltip>
+                                </li>
                             )
                         }
 
                         const isSelected = isOptionEqualToValue(value, option)
 
                         return (
-                            <StyledTooltip arrow title={tooltipTitle} key={props.id}>
-                                {/** biome-ignore lint/a11y/useKeyWithClickEvents: <onClick props is still passed so we need to block it for disabled options> */}
-                                <li
-                                    {...props}
-                                    className={cn(
-                                        'flex h-full gap-x-1 hover:bg-gama-50 px-2 cursor-pointer text-sm/5',
-                                        disabled && 'cursor-not-allowed bg-delta-50 hover:bg-delta-50',
-                                    )}
-                                    onClick={!disabled ? props.onClick : undefined}
-                                    aria-disabled={disabled}
-                                >
-                                    <span className='py-[10px] min-w-5 w-5 h-full'>
-                                        {isSelected && (
-                                            <CheckIcon
-                                                className='size-5 text-gama-500 min-h-5 min-w-5'
-                                                height={20}
-                                                width={20}
-                                            />
-                                        )}
-                                    </span>
-                                    {renderLabel ? (
-                                        renderLabel(option)
-                                    ) : (
-                                        <span className='text-sm text-delta-700 py-[10px]'>
-                                            {getOptionLabel(option)}
+                            /** biome-ignore lint/a11y/useKeyWithClickEvents: <onClick props is still passed so we need to block it for disabled options> */
+                            <li
+                                {...props}
+                                key={props.id}
+                                className={cn(
+                                    'flex h-full gap-x-1 hover:bg-gama-50 px-2 cursor-pointer text-sm/5',
+                                    disabled && 'cursor-not-allowed bg-delta-50 hover:bg-delta-50',
+                                )}
+                                onClick={!disabled ? props.onClick : undefined}
+                                aria-disabled={disabled}
+                            >
+                                <StyledTooltip arrow title={tooltipTitle}>
+                                    <>
+                                        <span className='py-[10px] min-w-5 w-5 h-full'>
+                                            {isSelected && (
+                                                <CheckIcon
+                                                    className='size-5 text-gama-500 min-h-5 min-w-5'
+                                                    height={20}
+                                                    width={20}
+                                                />
+                                            )}
                                         </span>
-                                    )}
-                                </li>
-                            </StyledTooltip>
+                                        {renderLabel ? (
+                                            renderLabel(option)
+                                        ) : (
+                                            <span className='text-sm text-delta-700 py-[10px]'>
+                                                {getOptionLabel(option)}
+                                            </span>
+                                        )}
+                                    </>
+                                </StyledTooltip>
+                            </li>
                         )
                     }}
                     renderInput={(params) => (
