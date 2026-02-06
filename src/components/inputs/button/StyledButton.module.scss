@@ -42,7 +42,7 @@
         }
 
         &:disabled {
-            cursor: default;
+            cursor: not-allowed;
             color: var(--colors-button-#{$type}-#{$color}-disabled-text-color) #{!important};
             background-color: var(--colors-button-#{$type}-#{$color}-disabled-bg-color) #{!important};
             border-color: var(--colors-button-#{$type}-#{$color}-disabled-border-color) #{!important};
