@@ -48,6 +48,13 @@ export const StyledInteractiveChip: FC<StyledInteractiveChipProps> = forwardRef<
                     backgroundColor: 'var(--colors-gama-50)',
                     '&:hover': interactionHoverStyles,
                 }),
+                ...(checked && {
+                    '& .MuiChip-avatar': {
+                        '& .MuiSvgIcon-root': {
+                            color: 'var(--colors-gama-500)',
+                        },
+                    },
+                }),
                 ...(props.readOnly && {
                     '& .MuiChip-avatar': {
                         '& .MuiSvgIcon-root': {
@@ -61,13 +68,7 @@ export const StyledInteractiveChip: FC<StyledInteractiveChipProps> = forwardRef<
                         },
                     },
                 }),
-                ...(checked && {
-                    '& .MuiChip-avatar': {
-                        '& .MuiSvgIcon-root': {
-                            color: 'var(--colors-gama-500)',
-                        },
-                    },
-                }),
+
                 '&:focus:hover': interactionHoverStyles,
                 ...props.sx,
             }}
