@@ -87,12 +87,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                         'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[1000px] h-[95dvh] duration-0 z-[53]',
                 )}
             >
-                <div
-                    className={cn(
-                        'flex flex-col px-4 border-b-[1px] border-delta-200',
-                        isMobile ? 'py-3 gap-y-1' : 'py-4 gap-y-2',
-                    )}
-                >
+                <div className={cn('flex flex-col px-4 border-b-[1px] border-delta-200', isMobile ? 'py-3' : 'py-4')}>
                     <div className='flex items-center justify-between'>
                         {!label ? (
                             <div
