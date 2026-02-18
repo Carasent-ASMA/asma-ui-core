@@ -35,7 +35,7 @@ export const DialogMinimizableV2 = (): JSX.Element => {
                 minimizedState={minimized}
                 handleMinimizedState={setMinimized}
                 actionNode={
-                    <StyledButton dataTest='edit-button' variant='text'>
+                    <StyledButton dataTest='edit-button' variant='text' size='small'>
                         Edit
                     </StyledButton>
                 }

@@ -10,6 +10,10 @@
     box-shadow: 0 0 4px 0 rgba(34, 33, 51, 0.15);
     transition: all 0.3s ease-out;
 
+    &.empty-state {
+        gap: 0;
+    }
+
     .widget-header {
         color: var(--colors-gray-800);
         display: flex;

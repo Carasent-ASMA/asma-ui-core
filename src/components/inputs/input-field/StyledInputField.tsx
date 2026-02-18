@@ -101,6 +101,9 @@ export const StyledInputField: React.FC<
                 '& label.Mui-focused': {
                     color: 'var(--colors-gama-500) !important',
                 },
+                '& label.Mui-focused.MuiInputLabel-shrink': {
+                    color: 'var(--colors-gama-500) !important',
+                },
                 '& label': {
                     color: 'var(--colors-delta-500) !important',
                 },

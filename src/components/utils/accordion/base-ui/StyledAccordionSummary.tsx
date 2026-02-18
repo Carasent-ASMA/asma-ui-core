@@ -7,6 +7,7 @@ import { ChevronDownIcon } from 'src/components/icons'
 export type StyledAccordionSummarySize = 'small' | 'large'
 
 export interface StyledAccordionSummaryProps extends React.ComponentProps<typeof Accordion.Trigger> {
+    headerClassName?: string | ((state: Accordion.Item.State) => string)
     size?: StyledAccordionSummarySize
     sx?: React.CSSProperties
 }
@@ -14,6 +15,7 @@ export interface StyledAccordionSummaryProps extends React.ComponentProps<typeof
 export const StyledAccordionSummary = ({
     size = 'large',
     className,
+    headerClassName,
     sx,
     children,
     ...rest
@@ -29,7 +31,7 @@ export const StyledAccordionSummary = ({
     } as React.CSSProperties
 
     return (
-        <Accordion.Header className={styles['Header']}>
+        <Accordion.Header className={clsx(styles['Header'], headerClassName)}>
             <Accordion.Trigger {...rest} className={clsx(styles['Trigger'], className)} style={styleVars}>
                 <ChevronDownIcon className={styles['TriggerIcon']} data-state-icon />
                 {children}

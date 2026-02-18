@@ -1,9 +1,5 @@
-import { ErrorOutlineIcon, Skeleton, StyledInteractiveChip, StyledTooltip } from 'src'
-import type {
-    DynamicSelectOption,
-    StyledDynamicSelectComponent,
-    StyledDynamicSelectProps,
-} from '../types'
+import { ErrorOutlineIcon, Skeleton, StyledChip, StyledInteractiveChip, StyledTooltip } from 'src'
+import type { DynamicSelectOption, StyledDynamicSelectComponent, StyledDynamicSelectProps } from '../types'
 import { cn } from 'src/helpers/cn'
 import { useWrap } from '../helpers/useWrap'
 import { forwardRef } from 'react'
@@ -32,8 +28,6 @@ export const DynamicInteractiveChipGroup = forwardRef(
         } = props
         const { containerRef, wrapDisabled } = useWrap({ dependencyList: [options, options.length] })
 
-
-      
         const getOptionLabel = (option: TOption) => {
             if (typeof option === 'object') {
                 return option?.[labelKey as keyof TOption]?.toString() || ''
@@ -106,11 +100,13 @@ export const DynamicInteractiveChipGroup = forwardRef(
                 </div>
 
                 <div className={cn('flex gap-2 flex-wrap', wrapDisabled && 'flex-col gap-1')}>
-                    {loading ? <div className='flex flex-wrap gap-2'>
-                        <Skeleton className='w-[60px] h-[32px]'/>
-                        <Skeleton className='w-[60px] h-[32px]'/>
-                        <Skeleton className='w-[60px] h-[32px]'/>
-                    </div>: visibleOptions?.length ? (
+                    {loading ? (
+                        <div className='flex flex-wrap gap-2'>
+                            <Skeleton className='w-[60px] h-[32px]' />
+                            <Skeleton className='w-[60px] h-[32px]' />
+                            <Skeleton className='w-[60px] h-[32px]' />
+                        </div>
+                    ) : visibleOptions?.length ? (
                         visibleOptions.map((o, index) => {
                             const optionValue = getOptionValue(o)
 
@@ -129,27 +125,40 @@ export const DynamicInteractiveChipGroup = forwardRef(
                             return (
                                 <StyledTooltip key={String(optionValue)} title={tooltipTitle} arrow>
                                     <span className={cn(optionDisabled && 'cursor-not-allowed')}>
-                                        <StyledInteractiveChip
-                                            ref={inputRef}
-                                            disabled={disabled || optionDisabled}
-                                            classes={
-                                                wrapDisabled
-                                                    ? {
-                                                          root: 'border-none bg-transparent w-full flex justify-start h-full',
-                                                          label: 'block whitespace-normal break-words overflow-visible',
-                                                      }
-                                                    : {
-                                                          root: 'min-h-[32px] h-full',
-                                                      }
-                                            }
-                                            className='w-fit text-sm'
-                                            readOnly={readOnly}
-                                            type={multiple ? 'checkbox' : 'radio'}
-                                            dataTest={`ic-${String(optionValue)}`}
-                                            checked={checked}
-                                            onClick={() => handleClick(o)}
-                                            label={renderLabel ? renderLabel(o) : getOptionLabel(o)}
-                                        />
+                                        {readOnly && !wrapDisabled ? (
+                                            <StyledChip
+                                                ref={inputRef}
+                                                disabled={disabled || optionDisabled}
+                                                classes={{
+                                                    root: 'min-h-[32px] h-full',
+                                                }}
+                                                className='w-fit text-sm'
+                                                dataTest={`ic-${String(optionValue)}`}
+                                                label={renderLabel ? renderLabel(o) : getOptionLabel(o)}
+                                            />
+                                        ) : (
+                                            <StyledInteractiveChip
+                                                ref={inputRef}
+                                                disabled={disabled || optionDisabled}
+                                                classes={
+                                                    wrapDisabled
+                                                        ? {
+                                                              root: 'border-none bg-transparent w-full flex justify-start h-full',
+                                                              label: 'block whitespace-normal break-words overflow-visible',
+                                                          }
+                                                        : {
+                                                              root: 'min-h-[32px] h-full',
+                                                          }
+                                                }
+                                                className='w-fit text-sm'
+                                                readOnly={readOnly}
+                                                type={multiple ? 'checkbox' : 'radio'}
+                                                dataTest={`ic-${String(optionValue)}`}
+                                                checked={checked}
+                                                onClick={() => handleClick(o)}
+                                                label={renderLabel ? renderLabel(o) : getOptionLabel(o)}
+                                            />
+                                        )}
                                     </span>
                                 </StyledTooltip>
                             )

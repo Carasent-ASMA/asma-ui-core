@@ -57,7 +57,7 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
     const showViewMore = !!viewMore && !viewMore.hide
 
     return (
-        <div className={style['asma-core-ui-styled-widget']}>
+        <div className={`${style['asma-core-ui-styled-widget']} ${isEmpty ? style['empty-state'] : ''}`}>
             <div className={style['widget-header-left']}>
                 {icon}
                 <StyledWidgetTitle>{title}</StyledWidgetTitle>

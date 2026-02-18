@@ -48,8 +48,9 @@ export function StyledSelectAutocomplete<
               style: {
                   maxHeight: maxHeight === 'auto' ? 'auto' : `${maxHeight}px`,
               },
+              ...props.ListboxProps,
           }
-        : {}
+        : props.ListboxProps
 
     const defaultGetOptionLabel = (option: T) => {
         if (typeof option === 'object' && option !== null && 'label' in option) {
