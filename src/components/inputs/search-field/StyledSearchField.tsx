@@ -1,5 +1,5 @@
 import { CloseIcon, SearchIcon, StyledInputField, type TextFieldProps } from 'asma-core-ui'
-import type { FunctionComponent } from 'react'
+import type { FC } from 'react'
 import { useState, type ComponentProps } from 'react'
 import { cn } from 'src/helpers/cn'
 
@@ -7,7 +7,7 @@ export type StyledSearchFieldProps = ComponentProps<typeof StyledInputField> & {
     label: Required<TextFieldProps['label']>
 }
 
-export const StyledSearchField = (({ value, onClear, ...props }) => {
+export const StyledSearchField: FC<StyledSearchFieldProps> = ({ value, onClear, ...props }) => {
     const [isFocused, setIsFocused] = useState<boolean>(false)
 
     const hasInteraction = isFocused || value
@@ -35,6 +35,7 @@ export const StyledSearchField = (({ value, onClear, ...props }) => {
                     },
                     endAdornment: value ? (
                         <div
+                            data-testid='styled-search-clear-icon'
                             className={cn(
                                 'cursor-pointer rounded-full bg-delta-50',
                                 'flex items-center justify-center',
@@ -78,15 +79,17 @@ export const StyledSearchField = (({ value, onClear, ...props }) => {
             />
 
             <SearchIcon
+                data-testid='styled-search-icon'
                 width={24}
                 height={24}
                 className={cn(
                     'absolute left-2 top-1/2 -translate-y-1/2',
                     'transform-gpu transition-all duration-300 ease-in-out',
                     hasInteraction ? 'pointer-events-none scale-75 opacity-0' : 'scale-100 opacity-100',
+                    props.error && 'top-1/3',
                 )}
                 color='var(--colors-delta-700)'
             />
         </div>
     )
-}) satisfies FunctionComponent<StyledSearchFieldProps>
+}

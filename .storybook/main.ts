@@ -9,7 +9,7 @@ const config: StorybookConfig = {
         '@storybook/addon-docs',
         '@storybook/addon-themes',
         '@storybook/addon-vitest',
-        '@chromatic-com/storybook'
+        '@chromatic-com/storybook',
     ],
     framework: {
         name: '@storybook/react-vite',
@@ -20,7 +20,7 @@ const config: StorybookConfig = {
         },
     },
     docs: {},
-    core: {},
+    core: { disableTelemetry: true },
     typescript: {
         check: true,
         reactDocgen: 'react-docgen-typescript',
@@ -30,7 +30,8 @@ const config: StorybookConfig = {
             savePropValueAsString: true,
             propFilter: (prop) =>
                 prop.parent
-                    ? /@material-ui/.test(prop.parent.fileName) || !/node_modules/.test(prop.parent.fileName)
+                    ? // ? /@material-ui/.test(prop.parent.fileName) || !/node_modules/.test(prop.parent.fileName)
+                      !/node_modules/.test(prop.parent.fileName)
                     : true,
             compilerOptions: {
                 allowSyntheticDefaultImports: false,

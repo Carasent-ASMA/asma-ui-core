@@ -59,13 +59,16 @@
 }
 
 .thumb {
+    // width: calc(var(--switch-h) - (2 * 2));
     width: calc(var(--switch-h) - (2 * var(--switch-pad)));
     height: calc(var(--switch-h) - (2 * var(--switch-pad)));
+    // height: calc(var(--switch-h) - (2 * 2));
     border-radius: 100%;
     background-color: white;
     transition: transform 0.3s;
     display: flex;
     align-items: center;
+    // align-self: center;
     justify-content: center;
 
     .switch[data-checked] & {

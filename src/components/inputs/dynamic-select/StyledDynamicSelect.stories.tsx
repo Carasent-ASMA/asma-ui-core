@@ -1,14 +1,8 @@
 import { useRef, useState } from 'react'
-import type { Meta } from '@storybook/react'
+import type { Meta } from '@storybook/react-vite'
 import { StyledDynamicSelect } from './StyledDynamicSelect'
 import { StyledSwitch } from '../switch'
-import {
-    StyledButton,
-    StyledFormControlLabel,
-    StyledFormLabel,
-    StyledInputField,
-    StyledInteractiveChip,
-} from 'src'
+import { StyledButton, StyledFormControlLabel, StyledFormLabel, StyledInputField, StyledInteractiveChip } from 'src'
 
 const meta: Meta = {
     title: 'Inputs/Styled Dynamic Select',
@@ -108,7 +102,7 @@ export const InteractiveSelectStory: React.FC = () => {
                                     dataTest={key}
                                     noOptionsText={noOptionsText}
                                     multiple={true}
-                                    options={!empty ? _options: []}
+                                    options={!empty ? _options : []}
                                     value={multiValue}
                                     onChange={setMultiValue}
                                     readOnly={readOnly}
@@ -129,7 +123,7 @@ export const InteractiveSelectStory: React.FC = () => {
                                     ref={setSelectRef(key)}
                                     dataTest={key}
                                     multiple={false}
-                                    options={!empty ? _options: []}
+                                    options={!empty ? _options : []}
                                     value={singleValue}
                                     size={size}
                                     onChange={setSingleValue}
@@ -144,8 +138,7 @@ export const InteractiveSelectStory: React.FC = () => {
                                     labelKey='name'
                                     getOptionTooltip={(o) => (o.disabled ? 'Disabled' : null)}
                                     renderLabel={overrideRenderLabel ? renderLabel : undefined}
-                                                                        maxTags={maxTags}
-
+                                    maxTags={maxTags}
                                 />
                             )}
                         </div>
@@ -183,24 +176,24 @@ export const InteractiveSelectStory: React.FC = () => {
                     <div>
                         <StyledFormLabel title='No options text' />
                         <StyledInputField
-                                dataTest='no-options-text-input'
-                                value={noOptionsText}
-                                onChange={(e) => setNoOptionsText(e.target.value)}
-                                size='small'
-                            />
-                             <StyledFormControlLabel
-                        label='Toggle empty'
-                        className='w-fit'
-                        control={
-                            <StyledSwitch
-                                dataTest='empty-switch'
-                                checked={empty}
-                                onChange={() => setEmpty(!empty)}
-                            />
-                        }
-                    />
+                            dataTest='no-options-text-input'
+                            value={noOptionsText}
+                            onChange={(e) => setNoOptionsText(e.target.value)}
+                            size='small'
+                        />
+                        <StyledFormControlLabel
+                            label='Toggle empty'
+                            className='w-fit'
+                            control={
+                                <StyledSwitch
+                                    dataTest='empty-switch'
+                                    checked={empty}
+                                    onChange={() => setEmpty(!empty)}
+                                />
+                            }
+                        />
                     </div>
-                    
+
                     <StyledFormControlLabel
                         label='Toggle loading'
                         className='w-fit'
@@ -225,16 +218,17 @@ export const InteractiveSelectStory: React.FC = () => {
                         }
                     />
 
-                     <div className='flex gap-2'>
+                    <div className='flex gap-2'>
                         <StyledFormControlLabel
-                        label='Toggle max tags'
-                        className='w-fit'
-                        control={
-                            <StyledSwitch
-                                dataTest='max-tags-switch'
-                                checked={maxTags !== undefined}
-                                onChange={() => setMaxTags((maxTags) => maxTags !== undefined ? undefined : 5)}
-                            />}
+                            label='Toggle max tags'
+                            className='w-fit'
+                            control={
+                                <StyledSwitch
+                                    dataTest='max-tags-switch'
+                                    checked={maxTags !== undefined}
+                                    onChange={() => setMaxTags((maxTags) => (maxTags !== undefined ? undefined : 5))}
+                                />
+                            }
                         />
                         <StyledInputField
                             dataTest='max-tags-input'
@@ -245,7 +239,7 @@ export const InteractiveSelectStory: React.FC = () => {
                             type='number'
                             size='small'
                         />
-                     </div>
+                    </div>
 
                     <StyledFormControlLabel
                         label='Toggle override render label'
