@@ -5,6 +5,12 @@ import { CloseIcon } from 'src/components/icons'
 import { StyledFormHelperText } from 'src'
 import { ErrorOutlineIcon } from 'asma-ui-icons'
 
+export type StyledSelectProps = SelectProps & {
+    allowClear?: boolean
+    errorText?: string
+    dataTest: string
+}
+
 /**
  *
  * @usage
@@ -17,13 +23,7 @@ import { ErrorOutlineIcon } from 'asma-ui-icons'
  * inputRef to get Node of Input Element inside
  *
  */
-export const StyledSelect: React.FC<
-    SelectProps & {
-        allowClear?: boolean
-        errorText?: string
-        dataTest: string
-    }
-> = ({ dataTest, allowClear, error, errorText, ...props }) => {
+export const StyledSelect: React.FC<StyledSelectProps> = ({ dataTest, allowClear, error, errorText, ...props }) => {
     return (
         <>
             <Select
@@ -43,6 +43,7 @@ export const StyledSelect: React.FC<
                 endAdornment={
                     allowClear && props.value ? (
                         <div
+                            data-testid='select-clear-button'
                             className='absolute right-8 flex items-center justify-center rounded-full p-[2px] duration-300 hover:bg-gama-100'
                             onClick={() => {
                                 props.onChange?.({ target: { value: '' } } as SelectChangeEvent<unknown>, null)

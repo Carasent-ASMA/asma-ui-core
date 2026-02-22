@@ -1,102 +1,437 @@
-import { StyledSelect } from '../StyledSelect'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
-import { StyledTypography } from 'src/components/data-display/typography'
 import { StyledFormControl } from 'src/components/miscellaneous/StyledFormControl'
-import { StyledSelectExample } from './components/StyledSelectExample'
-import { StyledInputLabel } from 'src/components/miscellaneous/StyledInputLabel'
+import { expect, within } from 'storybook/test'
+import { StyledSelect, type StyledSelectProps } from '../StyledSelect'
 import { StyledSelectItem } from '../StyledSelectItem'
-import type { Meta } from '@storybook/react-vite'
-import { Stack } from '@mui/material'
 
-const selectOptions = [
+const options = [
     { title: 'Van Henry', id: '1' },
     { title: 'April Tucker', id: '2' },
     { title: 'Ralph Hubbard', id: '3' },
-    { title: 'Andrei Grini', id: '4' },
-    { title: 'Andrei Armani', id: '5' },
 ]
 
 const meta: Meta<typeof StyledSelect> = {
     title: 'Inputs/Select',
     component: StyledSelect,
     tags: [],
-    argTypes: { children: { description: 'The option elements to populate the select with' } },
+    argTypes: {
+        size: {
+            control: 'radio',
+            options: ['small', 'medium'],
+        },
+    },
     args: {
-        children: selectOptions.map((option) => (
-            <StyledSelectItem key={option.id} value={option.id}>
-                {option.title}
-            </StyledSelectItem>
-        )),
+        size: 'small',
     },
 }
 
 export default meta
+type Story = StoryObj<typeof StyledSelect>
 
-export const Select = (args: { children: React.ReactNode }): JSX.Element => {
-    const [value, setValue] = useState(selectOptions[0]?.id)
+const Controlled = (args: StyledSelectProps) => {
+    const [value, setValue] = useState('1')
+
     return (
-        <Stack direction='column' spacing={2}>
-            <StyledTypography variant='h6'>Select size medium</StyledTypography>
-            <StyledFormControl fullWidth>
-                <StyledSelect
-                    {...args}
-                    dataTest='Test_z'
-                    size='medium'
-                    value={value}
-                    onChange={(e) => {
-                        const target: string = e.target.value as string
-                        setValue(target)
-                    }}
-                />
-            </StyledFormControl>
-
-            <StyledSelectExample />
-
-            <StyledTypography variant='h6'>Select with label and placeholder</StyledTypography>
-            <StyledFormControl size='small' className='w-52' error={!value}>
-                <StyledInputLabel>Find me...</StyledInputLabel>
-                <StyledSelect
-                    {...args}
-                    dataTest='Test_x'
-                    allowClear
-                    value={value}
-                    onChange={(e) => {
-                        const target: string = e.target.value as string
-                        setValue(target)
-                    }}
-                />
-            </StyledFormControl>
-
-            <StyledTypography variant='h6'>Select with error</StyledTypography>
+        <StyledFormControl>
             <StyledSelect
                 {...args}
-                dataTest='Test_x'
-                allowClear
-                className='max-w-[600px]'
-                size='small'
+                dataTest='select'
+                labelId='select'
                 value={value}
-                error={!value}
-                onChange={(e) => {
-                    const target: string = e.target.value as string
-                    setValue(target)
+                onChange={(e, child) => {
+                    setValue(e.target.value as string)
+                    args.onChange?.(e, child)
                 }}
-            />
-
-            <StyledTypography variant='h6'>Select with label & error</StyledTypography>
-            <StyledFormControl size='small' className='w-52' error={!value}>
-                <StyledInputLabel>Find me...</StyledInputLabel>
-                <StyledSelect
-                    {...args}
-                    dataTest='Test_x'
-                    allowClear
-                    value={value}
-                    error={!value}
-                    onChange={(e) => {
-                        const target: string = e.target.value as string
-                        setValue(target)
-                    }}
-                />
-            </StyledFormControl>
-        </Stack>
+            >
+                {options.map((o) => (
+                    <StyledSelectItem key={o.id} value={o.id}>
+                        {o.title}
+                    </StyledSelectItem>
+                ))}
+            </StyledSelect>
+        </StyledFormControl>
     )
 }
+
+export const SelectOption: Story = {
+    render: (args) => <Controlled {...args} />,
+    play: async ({ canvasElement, userEvent }) => {
+        const canvas = within(canvasElement.ownerDocument.body)
+        const trigger = canvas.getByRole('combobox')
+
+        await userEvent.click(trigger)
+
+        const option = await canvas.findByRole('option', { name: 'April Tucker' })
+        await userEvent.click(option)
+
+        await expect(trigger).toHaveTextContent('April Tucker')
+    },
+}
+
+export const KeyboardNavigation: Story = {
+    render: (args) => <Controlled {...args} />,
+    play: async ({ canvasElement, userEvent }) => {
+        const canvas = within(canvasElement.ownerDocument.body)
+        const trigger = canvas.getByRole('combobox')
+
+        trigger.focus()
+        await expect(trigger).toHaveFocus()
+
+        await userEvent.keyboard('{ArrowDown}')
+
+        const listbox = await canvas.findByRole('listbox')
+        await expect(listbox).toBeInTheDocument()
+
+        await userEvent.keyboard('{ArrowDown}')
+        await userEvent.keyboard('{ArrowDown}')
+
+        await userEvent.keyboard('{Enter}')
+
+        await expect(canvas.queryByRole('listbox')).not.toBeInTheDocument()
+
+        await expect(trigger).toHaveTextContent('Ralph Hubbard')
+    },
+}
+
+export const ClearBehavior: Story = {
+    args: { allowClear: true },
+    render: (args) => <Controlled {...args} />,
+    play: async ({ canvasElement, userEvent }) => {
+        const canvas = within(canvasElement.ownerDocument.body)
+        const trigger = canvas.getByRole('combobox')
+
+        await expect(trigger).toHaveTextContent('Van Henry')
+
+        const clearButton = canvas.getByTestId('select-clear-button')
+
+        await userEvent.click(clearButton)
+
+        await expect(trigger).not.toHaveTextContent('Van Henry')
+
+        await expect(canvas.queryByRole('listbox')).not.toBeInTheDocument()
+    },
+}
+
+export const DisabledBehavior: Story = {
+    render: (args) => (
+        <StyledFormControl>
+            <StyledSelect {...args} disabled value='1'>
+                {options.map((o) => (
+                    <StyledSelectItem key={o.id} value={o.id}>
+                        {o.title}
+                    </StyledSelectItem>
+                ))}
+            </StyledSelect>
+        </StyledFormControl>
+    ),
+    play: async ({ canvasElement, userEvent }) => {
+        const canvas = within(canvasElement.ownerDocument.body)
+        const trigger = canvas.getByRole('combobox')
+
+        await userEvent.click(trigger)
+
+        await expect(canvas.queryByRole('listbox')).not.toBeInTheDocument()
+    },
+}
+
+export const AriaLifecycle: Story = {
+    render: (args) => <Controlled {...args} />,
+    play: async ({ canvasElement, userEvent }) => {
+        const canvas = within(canvasElement.ownerDocument.body)
+
+        const trigger = canvas.getByRole('combobox')
+
+        await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+
+        await userEvent.click(trigger)
+
+        await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+
+        const listbox = await canvas.findByRole('listbox')
+        await expect(listbox).toBeInTheDocument()
+
+        await userEvent.keyboard('{Escape}')
+
+        await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+    },
+}
+
+export const FocusReturnAfterSelect: Story = {
+    render: (args) => <Controlled {...args} />,
+    play: async ({ canvasElement, userEvent }) => {
+        const canvas = within(canvasElement.ownerDocument.body)
+
+        const trigger = canvas.getByRole('combobox')
+
+        trigger.focus()
+        await expect(trigger).toHaveFocus()
+
+        await userEvent.keyboard('{ArrowDown}')
+        await userEvent.keyboard('{ArrowDown}')
+        await userEvent.keyboard('{Enter}')
+
+        // Focus should return to trigger
+        await expect(trigger).toHaveFocus()
+    },
+}
+
+export const EscapeCloses: Story = {
+    render: (args) => <Controlled {...args} />,
+    play: async ({ canvasElement, userEvent }) => {
+        const canvas = within(canvasElement.ownerDocument.body)
+
+        const trigger = canvas.getByRole('combobox')
+
+        await userEvent.click(trigger)
+
+        await canvas.findByRole('listbox')
+
+        await userEvent.keyboard('{Escape}')
+
+        await expect(canvas.queryByRole('listbox')).not.toBeInTheDocument()
+        await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+    },
+}
+
+export const SelectingSameValue: Story = {
+    render: (args) => <Controlled {...args} />,
+    play: async ({ canvasElement, userEvent }) => {
+        const canvas = within(canvasElement.ownerDocument.body)
+
+        const trigger = canvas.getByRole('combobox')
+
+        await expect(trigger).toHaveTextContent('Van Henry')
+
+        await userEvent.click(trigger)
+
+        const sameOption = await canvas.findByRole('option', {
+            name: 'Van Henry',
+        })
+
+        await userEvent.click(sameOption)
+
+        await expect(trigger).toHaveTextContent('Van Henry')
+
+        await expect(canvas.queryByRole('listbox')).not.toBeInTheDocument()
+    },
+}
+
+export const EmptyOptions: Story = {
+    render: (args) => (
+        <StyledFormControl>
+            <StyledSelect {...args} value=''></StyledSelect>
+        </StyledFormControl>
+    ),
+    play: async ({ canvasElement, userEvent }) => {
+        const canvas = within(canvasElement.ownerDocument.body)
+
+        const trigger = canvas.getByRole('combobox')
+
+        await userEvent.click(trigger)
+
+        const listbox = await canvas.findByRole('listbox')
+        await expect(listbox).toBeInTheDocument()
+
+        await expect(canvas.queryByRole('option')).not.toBeInTheDocument()
+    },
+}
+
+export const InvalidExternalValue: Story = {
+    render: (args) => <Controlled {...args} value='999' />,
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement.ownerDocument.body)
+
+        const trigger = canvas.getByRole('combobox')
+
+        // Should not crash
+        await expect(trigger).toBeInTheDocument()
+
+        // Should not show random text
+        await expect(trigger).not.toHaveTextContent('999')
+    },
+}
+
+export const DynamicOptionsChange: Story = {
+    render: (args) => {
+        const Dynamic = () => {
+            const [items, setItems] = useState(options)
+
+            return (
+                <>
+                    <button data-testid='update-options' onClick={() => setItems([{ id: '10', title: 'New User' }])}>
+                        Update
+                    </button>
+
+                    <StyledFormControl>
+                        <StyledSelect {...args} value='1'>
+                            {items.map((o) => (
+                                <StyledSelectItem key={o.id} value={o.id}>
+                                    {o.title}
+                                </StyledSelectItem>
+                            ))}
+                        </StyledSelect>
+                    </StyledFormControl>
+                </>
+            )
+        }
+
+        return <Dynamic />
+    },
+    play: async ({ canvasElement, userEvent }) => {
+        const canvas = within(canvasElement.ownerDocument.body)
+
+        await userEvent.click(canvas.getByTestId('update-options'))
+
+        const trigger = canvas.getByRole('combobox')
+
+        // Should not crash even if value no longer exists
+        await expect(trigger).toBeInTheDocument()
+    },
+}
+
+export const RapidOpenClose: Story = {
+    render: (args) => <Controlled {...args} />,
+    play: async ({ canvasElement, userEvent }) => {
+        const canvas = within(canvasElement.ownerDocument.body)
+
+        const trigger = canvas.getByRole('combobox')
+
+        await userEvent.click(trigger)
+        await userEvent.keyboard('{Escape}')
+        await userEvent.click(trigger)
+        await userEvent.keyboard('{Escape}')
+        await userEvent.click(trigger)
+
+        const listbox = await canvas.findByRole('listbox')
+        await expect(listbox).toBeInTheDocument()
+    },
+}
+
+export const MultipleSelectBehavior: Story = {
+    render: (args) => (
+        <StyledFormControl>
+            <StyledSelect {...args} multiple value={['1']}>
+                {options.map((o) => (
+                    <StyledSelectItem key={o.id} value={o.id}>
+                        {o.title}
+                    </StyledSelectItem>
+                ))}
+            </StyledSelect>
+        </StyledFormControl>
+    ),
+    play: async ({ canvasElement, userEvent }) => {
+        const canvas = within(canvasElement.ownerDocument.body)
+
+        const trigger = canvas.getByRole('combobox')
+
+        await userEvent.click(trigger)
+
+        const option = await canvas.findByRole('option', {
+            name: 'April Tucker',
+        })
+
+        await userEvent.click(option)
+
+        // Should remain open in multi mode
+        await expect(canvas.getByRole('listbox')).toBeInTheDocument()
+    },
+}
+
+export const PortalCleanup: Story = {
+    render: (args) => <Controlled {...args} />,
+    play: async ({ canvasElement, userEvent }) => {
+        const canvas = within(canvasElement.ownerDocument.body)
+
+        const trigger = canvas.getByRole('combobox')
+
+        await userEvent.click(trigger)
+        await canvas.findByRole('listbox')
+
+        await userEvent.keyboard('{Escape}')
+
+        // Ensure no orphaned listboxes remain in document
+        const allListboxes = document.querySelectorAll('[role="listbox"]')
+        console.log(allListboxes)
+        // const listbox = canvas.getAllByRole('listbox')
+        await expect(allListboxes.length).toBe(0)
+        // await expect(listbox.length).toBe(0)
+    },
+}
+
+// NOTE: this is for autocomplete
+// export const ActiveDescendantUpdates: Story = {
+//     render: (args) => <Controlled {...args} />,
+//     play: async ({ canvasElement, userEvent }) => {
+//         const canvas = within(canvasElement.ownerDocument.body)
+//
+//         const trigger = canvas.getByRole('combobox')
+//
+//         trigger.focus()
+//         await userEvent.keyboard('{ArrowDown}')
+//
+//         // const listbox = await canvas.findByRole('listbox')
+//
+//         const activeId = trigger.getAttribute('aria-activedescendant')
+//         await expect(activeId).toBeTruthy()
+//
+//         const activeOption = document.getElementById(activeId!)
+//         await expect(activeOption).toHaveAttribute('role', 'option')
+//     },
+// }
+
+// export const TypeAheadSearch: Story = {
+//     render: (args) => <Controlled {...args} />,
+//     play: async ({ canvasElement, userEvent }) => {
+//         const canvas = within(canvasElement.ownerDocument.body)
+//
+//         const trigger = canvas.getByRole('combobox')
+//
+//         trigger.focus()
+//         await userEvent.keyboard('{ArrowDown}')
+//
+//         await userEvent.keyboard('R')
+//
+//         const activeId = trigger.getAttribute('aria-activedescendant')
+//         const activeOption = document.getElementById(activeId!)
+//
+//         await expect(activeOption).toHaveTextContent('Ralph Hubbard')
+//     },
+// }
+//
+// export const LargeDataset: Story = {
+//     render: (args) => {
+//         const bigOptions = Array.from({ length: 1000 }).map((_, i) => ({
+//             id: String(i),
+//             title: `User ${i}`,
+//         }))
+//
+//         return (
+//             <StyledFormControl>
+//                 <StyledSelect {...args} value='0'>
+//                     {bigOptions.map((o) => (
+//                         <StyledSelectItem key={o.id} value={o.id}>
+//                             {o.title}
+//                         </StyledSelectItem>
+//                     ))}
+//                 </StyledSelect>
+//             </StyledFormControl>
+//         )
+//     },
+//     play: async ({ canvasElement, userEvent }) => {
+//         const canvas = within(canvasElement.ownerDocument.body)
+//
+//         const trigger = canvas.getByRole('combobox')
+//
+//         await userEvent.click(trigger)
+//
+//         const listbox = await canvas.findByRole('listbox')
+//         await expect(listbox).toBeInTheDocument()
+//
+//         // Jump navigation
+//         await userEvent.keyboard('{End}')
+//
+//         const activeId = trigger.getAttribute('aria-activedescendant')
+//         await expect(activeId).toBeTruthy()
+//     },
+// }

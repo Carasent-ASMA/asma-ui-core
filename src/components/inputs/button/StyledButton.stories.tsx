@@ -105,6 +105,7 @@ export const Disabled: Story = {
 
         await userEvent.click(button)
         await expect(button).toBeDisabled()
+        await expect(button).not.toHaveFocus()
     },
 }
 
@@ -170,7 +171,30 @@ export const KeyboardActivation: Story = {
         button.focus()
         await expect(button).toHaveFocus()
         await userEvent.keyboard('{Enter}')
+        await userEvent.keyboard(' ')
         await expect(activated).toHaveTextContent('activated')
+    },
+}
+
+export const IconOnlyAccessibility: Story = {
+    args: {
+        children: undefined,
+        startIcon: <ChevronDownIcon />,
+        'aria-label': 'Open menu',
+    },
+    play: async ({ canvas }) => {
+        const btn = canvas.getByRole('button', { name: /open menu/i })
+        await expect(btn).toBeInTheDocument()
+    },
+}
+
+export const FocusVisible: Story = {
+    args: { children: 'Focus me' },
+    play: async ({ canvas, userEvent }) => {
+        const btn = canvas.getByRole('button', { name: /focus me/i })
+
+        await userEvent.tab()
+        await expect(btn).toHaveFocus()
     },
 }
 

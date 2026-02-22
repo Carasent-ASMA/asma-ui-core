@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import React, { useState as useStateReact } from 'react'
 import { StyledSearchField, type StyledSearchFieldProps } from 'src/components/inputs/search-field/StyledSearchField'
 import { expect, fn } from 'storybook/test'
-// import { useArgs, useEffect, useState } from 'storybook/preview-api'
 
 const meta = {
     title: 'SearchField',
@@ -17,24 +16,6 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof StyledSearchField>
 
-// const useControlledProps = (params: Record<string, string>) => {
-//     const { valueProp = 'value', changeProp = 'onChange' } = params || {}
-//     const [args, setArgs] = useArgs()
-//     const [value, setValue] = useState(args[valueProp] || '')
-//
-//     useEffect(() => {
-//         setValue(args[valueProp])
-//     }, [args[valueProp]])
-//
-//     const onChange = (value: unknown) => {
-//         args[changeProp](value)
-//         setArgs({ [valueProp]: value })
-//         setValue(value)
-//     }
-//
-//     return [value, onChange]
-// }
-
 const ControlledRender = (args: StyledSearchFieldProps) => {
     const [value, setValue] = useStateReact<string>((args.value as string) ?? '')
     return (
@@ -45,7 +26,7 @@ const ControlledRender = (args: StyledSearchFieldProps) => {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     const v = e?.target?.value ?? ''
                     setValue(v)
-                    args.onChange?.(e) // keep actions for the UI
+                    args.onChange?.(e)
                 }}
                 onClear={() => {
                     setValue('')
@@ -62,42 +43,16 @@ export const Interactive: Story = {
         value: '',
     },
     render: (args) => <ControlledRender {...args} />,
-    // render: (args) => {
-    //     const [value, onChange] = useControlledProps({
-    //         valueProp: 'value',
-    //         changeProp: 'onChange',
-    //     })
-    //     // const [args, setArgs] = useArgs()
-    //
-    //     console.log('value in render: ', value)
-    //
-    //     return (
-    //         <StyledSearchField
-    //             {...args}
-    //             value={value}
-    //             onChange={(e) => onChange(e.target.value)}
-    //             onClear={() => onChange('')}
-    //             // onChange={(e) => setArgs({ value: e.target.value })}
-    //             // onClear={() => setArgs({ value: '' })}
-    //         />
-    //     )
-    // },
     play: async ({ canvasElement, canvas, userEvent }) => {
-        // find the input via its visible label — ensures accessible labeling is present
         const input = canvas.getByLabelText(/search/i)
         await expect(input).toBeInTheDocument()
 
-        // type into the input and assert the value updates
         await userEvent.type(input, 'hello')
         await expect(input).toHaveValue('hello')
 
-        // locate the clear control (endAdornment). The component renders a clickable div without a role,
-        // so we select the element that has the 'cursor-pointer' utility class used by the component.
-        // const clearBtn = canvasElement.querySelector('.cursor-pointer') as HTMLElement
         const clearBtn = canvas.getByTestId('styled-search-clear-icon')
         await expect(clearBtn).toBeTruthy()
 
-        // click it and assert the input is cleared
         await userEvent.click(clearBtn)
         await expect(input).toHaveValue('')
     },
