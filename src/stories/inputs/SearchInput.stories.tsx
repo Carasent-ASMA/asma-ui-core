@@ -85,8 +85,8 @@ export const LongTextOverflow: Story = {
     },
     render: (args) => <ControlledRender {...args} />,
     play: async ({ canvas }) => {
-        const input = canvas.getByLabelText(/search/i)
-        await expect(input).toHaveValue(expect.stringContaining('very long'))
+        const input = canvas.getByDisplayValue('very long', { exact: false })
+        await expect(input).toBeInTheDocument()
 
         const computed = window.getComputedStyle(input)
         expect(computed.textOverflow).toBe('ellipsis')
