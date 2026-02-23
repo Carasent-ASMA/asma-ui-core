@@ -5,6 +5,22 @@ import { useLayoutEffect, useRef, useState } from 'react'
 import { cn } from 'src/helpers/cn'
 import style from './StyledSelectAutocomplete.module.scss'
 
+export type StyledSelectAutocompleteProps<
+    T,
+    // Multiple extends boolean | undefined = false,
+    Multiple extends boolean | undefined,
+    // DisableClearable extends boolean | undefined = false,
+    DisableClearable extends boolean | undefined,
+    // FreeSolo extends boolean | undefined = false,
+    FreeSolo extends boolean | undefined,
+    ChipComponent extends React.ElementType = ChipTypeMap['defaultComponent'],
+> = AutocompleteProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent> & {
+    dataTest: string
+    autoHeight?: boolean
+    getOptionLabel?: (option: T) => string
+    wrapperClassName?: string
+}
+
 /**
  *
  * @inputRef
@@ -23,12 +39,7 @@ export function StyledSelectAutocomplete<
     getOptionLabel,
     wrapperClassName,
     ...props
-}: AutocompleteProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent> & {
-    dataTest: string
-    autoHeight?: boolean
-    getOptionLabel?: (option: T) => string
-    wrapperClassName?: string
-}): JSX.Element {
+}: StyledSelectAutocompleteProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent>): JSX.Element {
     const [maxHeight, setMaxHeight] = useState<number | 'auto'>('auto')
     const selectRef = useRef<HTMLDivElement>(null)
 
