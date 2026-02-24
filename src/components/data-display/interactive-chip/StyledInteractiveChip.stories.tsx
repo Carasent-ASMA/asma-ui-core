@@ -24,7 +24,12 @@ export const InteractiveChip = (): JSX.Element => {
 
     return (
         <div className={'flex flex-col gap-2'}>
-            <StyledSwitch dataTest={'ic-readonly-switch'} checked={readOnly} onChange={() => setReadOnly(!readOnly)} />
+            <StyledSwitch
+                dataTest={'ic-readonly-switch'}
+                aria-label='random-switch'
+                checked={readOnly}
+                onChange={() => setReadOnly(!readOnly)}
+            />
 
             <div>
                 <p>Checkbox interactive chips</p>

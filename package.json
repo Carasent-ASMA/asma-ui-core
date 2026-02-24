@@ -57,7 +57,6 @@
         "date-fns": "^2.30.0",
         "lodash-es": "^4.17.21",
         "material-ui-popup-state": "^5.0.10",
-        "notistack": "^3.0.2",
         "react-day-picker": "^8.8.2",
         "react-quill": "^2.0.0",
         "sass": "^1.77.5"
@@ -102,6 +101,7 @@
         "eslint-plugin-sonarjs": "^3.0.5",
         "eslint-plugin-storybook": "10.2.4",
         "node": "18.17.0",
+        "notistack": "^3.0.2",
         "playwright": "^1.57.0",
         "postcss": "^8.4.24",
         "prop-types": "^15.8.1",

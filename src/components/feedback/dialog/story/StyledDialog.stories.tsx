@@ -67,6 +67,7 @@ export const Dialog = (): JSX.Element => {
                 dialogTitle='Story about Liro (title)'
             >
                 <div
+                    tabIndex={0}
                     style={{
                         padding: 16,
                         fontSize: 20,

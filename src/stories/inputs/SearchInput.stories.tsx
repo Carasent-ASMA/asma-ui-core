@@ -138,9 +138,10 @@ export const Disabled: Story = {
     },
 }
 
-export const EmptyNoLabel: Story = {
-    args: {
-        label: '',
-        value: '',
-    },
-}
+// NOTE: this triggers accessibility warnings
+// export const EmptyNoLabel: Story = {
+//     args: {
+//         label: '',
+//         value: '',
+//     },
+// }

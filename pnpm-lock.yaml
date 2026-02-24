@@ -48,9 +48,6 @@ importers:
       material-ui-popup-state:
         specifier: ^5.0.10
         version: 5.0.10(@emotion/react@11.11.1(@types/react@18.0.37)(react@18.2.0))(@emotion/styled@11.11.0(@emotion/react@11.11.1(@types/react@18.0.37)(react@18.2.0))(@types/react@18.0.37)(react@18.2.0))(@types/react@18.0.37)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      notistack:
-        specifier: ^3.0.2
-        version: 3.0.2(csstype@3.2.3)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react-day-picker:
         specifier: ^8.8.2
         version: 8.8.2(date-fns@2.30.0)(react@18.2.0)
@@ -178,6 +175,9 @@ importers:
       node:
         specifier: 18.17.0
         version: 18.17.0
+      notistack:
+        specifier: ^3.0.2
+        version: 3.0.2(csstype@3.2.3)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       playwright:
         specifier: ^1.57.0
         version: 1.57.0
@@ -5563,8 +5563,8 @@ packages:
   globrex@0.1.2:
     resolution: {integrity: sha512-uHJgbwAMwNFf5mLst7IWLNg14x1CkeqglJb/K3doi4dw6q2IvAAmM/Y81kevy83wP+Sst+nutFTYOGg3d1lsxg==}
 
-  goober@2.1.14:
-    resolution: {integrity: sha512-4UpC0NdGyAFqLNPnhCT2iHpza2q+RAY3GV85a/mRPdzyPQMsj0KmMMuetdIkzWRbJ+Hgau1EZztq8ImmiMGhsg==}
+  goober@2.1.18:
+    resolution: {integrity: sha512-2vFqsaDVIT9Gz7N6kAL++pLpp41l3PfDuusHcjnGLfR6+huZkl6ziX+zgVC3ZxpqWhzH6pyDdGrCeDhMIvwaxw==}
     peerDependencies:
       csstype: ^3.0.10
 
@@ -16039,7 +16039,7 @@ snapshots:
 
   globrex@0.1.2: {}
 
-  goober@2.1.14(csstype@3.2.3):
+  goober@2.1.18(csstype@3.2.3):
     dependencies:
       csstype: 3.2.3
 
@@ -17961,7 +17961,7 @@ snapshots:
   notistack@3.0.2(csstype@3.2.3)(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       clsx: 1.2.1
-      goober: 2.1.14(csstype@3.2.3)
+      goober: 2.1.18(csstype@3.2.3)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     transitivePeerDependencies:

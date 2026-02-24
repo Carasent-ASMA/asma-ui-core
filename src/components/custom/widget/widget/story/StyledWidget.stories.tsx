@@ -87,7 +87,7 @@ export const Widget = (): JSX.Element => {
                     isLoading={false}
                     emptyText='No data'
                 >
-                    <div className='flex h-full flex-col gap-2 rounded-lg bg-gray-200'>
+                    <div className='flex h-full flex-col gap-2 rounded-lg'>
                         {[...Array(20).keys()].slice(0, viewMore ? 20 : 5).map((k) => (
                             <span key={k}>test</span>
                         ))}

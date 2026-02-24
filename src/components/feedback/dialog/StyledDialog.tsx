@@ -28,7 +28,8 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     const isMobile = useIsMobileView()
     return (
         <Dialog
-            data-test={dataTest}
+            data-testid={dataTest}
+            aria-label={dataTest}
             style={{
                 zIndex: 999,
                 ...rest.style,

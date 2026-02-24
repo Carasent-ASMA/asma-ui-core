@@ -31,10 +31,14 @@ export const StyledInteractiveChip: FC<StyledInteractiveChipProps> = forwardRef<
             avatar={
                 <ControlComponent
                     dataTest={props.dataTest}
+                    // aria-label={props.label}
                     disableRipple
                     checked={checked}
                     size={'small'}
                     sx={{ pointerEvents: 'none' }}
+                    // inputProps={{
+                    //     'aria-label': props.label,
+                    // }}
                 />
             }
             clickable

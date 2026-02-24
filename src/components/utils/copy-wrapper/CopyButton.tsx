@@ -1,7 +1,6 @@
 import { ContentCopyIcon } from 'asma-ui-icons'
 import { type FC, type ReactNode } from 'react'
-import { StyledButton, StyledTooltip } from 'src'
-import type { MessageProps } from 'src/components/feedback/snack-bar/components/types'
+import { StyledButton, StyledTooltip, type MessageProps } from 'src'
 import { useIsMobileView } from 'src/hooks/useWindowWidthSize.hook'
 
 export const CopyButton: FC<{

@@ -1,11 +1,21 @@
+import type { AlertColor } from '@mui/material'
 import { ContentCopyIcon } from 'asma-ui-icons'
+import type { SnackbarProviderProps } from 'notistack'
 import { type FC, type PropsWithChildren, type ReactNode } from 'react'
 import { StyledTooltip } from 'src/components/data-display/tooltip'
-import type { MessageProps } from 'src/components/feedback/snack-bar/components/types'
 import { StyledButton } from 'src/components/inputs/button'
 import { cn } from 'src/helpers/cn'
 
 import style from './CopyWrapper.module.scss'
+
+export type MessageProps = SnackbarProviderProps & {
+    severity?: AlertColor
+    persist?: boolean
+    closeButton?: boolean
+    className?: string
+    id?: string
+    type?: 'loading'
+}
 
 export const CopyWrapper: FC<
     PropsWithChildren<{
