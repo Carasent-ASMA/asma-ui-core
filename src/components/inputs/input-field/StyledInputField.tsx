@@ -34,25 +34,25 @@ export const StyledInputField: React.FC<
                 )
             }
             type={props.type ?? 'mui-input'}
-            InputProps={
-                allowClear && props.value
-                    ? {
-                          ...props.InputProps,
-                          endAdornment: (
-                              <div
-                                  className='absolute right-4 z-40 flex items-center justify-center rounded-full p-[2px] duration-300 hover:bg-gama-100'
-                                  onClick={(e) => {
-                                      e.stopPropagation()
-                                      e.preventDefault()
-                                      onClear?.()
-                                  }}
-                              >
-                                  <CloseIcon width={18} height={18} />
-                              </div>
-                          ),
-                      }
-                    : props.InputProps
-            }
+            InputProps={{
+                ...props.InputProps,
+                endAdornment:
+                    allowClear && props.value ? (
+                        <div
+                            role='button'
+                            className='absolute right-4 z-40 flex items-center justify-center rounded-full p-[2px] duration-300 hover:bg-gama-100'
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                e.preventDefault()
+                                onClear?.()
+                            }}
+                        >
+                            <CloseIcon width={18} height={18} />
+                        </div>
+                    ) : (
+                        props.InputProps?.endAdornment
+                    ),
+            }}
             sx={{
                 '& input:-webkit-autofill, & .MuiInputBase-root:has(> input:-webkit-autofill)': {
                     backgroundColor: '#e8f0fe !important',

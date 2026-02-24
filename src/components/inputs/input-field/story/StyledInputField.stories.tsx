@@ -1,184 +1,73 @@
-import React from 'react'
-import type { Meta } from '@storybook/react-vite'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 
 import { StyledInputField } from '../StyledInputField'
+import { expect } from 'storybook/test'
 
-const meta = {
-    title: 'Inputs/Styled Input Field',
+const meta: Meta<typeof StyledInputField> = {
+    title: 'Inputs/InputField',
     component: StyledInputField,
-    tags: [],
-    argTypes: {},
-    args: {},
-} satisfies Meta<typeof StyledInputField>
+    tags: ['autodocs'],
+    args: {
+        label: 'Label',
+        value: '',
+        dataTest: 'storybook-input',
+    },
+    argTypes: {
+        allowClear: { control: 'boolean' },
+        readOnly: { control: 'boolean' },
+        disabled: { control: 'boolean' },
+        error: { control: 'boolean' },
+        size: {
+            control: 'radio',
+            options: ['small', 'medium'],
+        },
+        variant: {
+            control: 'radio',
+            options: ['outlined', 'standard', 'filled'],
+        },
+    },
+}
 
 export default meta
+type Story = StoryObj<typeof StyledInputField>
 
-export const Inputs = (): JSX.Element => {
-    return (
-        <div className='flex w-full flex-col gap-12'>
-            <StyledInputField
-                dataTest='test'
-                {...meta.args}
-                onChange={() => undefined}
-                value=''
-                placeholder='Label text'
-                label='Label text'
-                helperText='some custom'
-            />
-            <StyledInputField
-                dataTest='test'
-                size='small'
-                {...meta.args}
-                onChange={() => undefined}
-                value='Hello World'
-                placeholder='Label text'
-                label='Label text'
-            />
-            <StyledInputField
-                dataTest='test'
-                {...meta.args}
-                onChange={() => undefined}
-                value=''
-                placeholder='Label text'
-                label='Label text'
-                size='small'
-            />
-            <StyledInputField
-                variant='standard'
-                dataTest='test'
-                {...meta.args}
-                onChange={() => undefined}
-                value=''
-                placeholder='Label text'
-                label='Label text'
-            />
-            <StyledInputField
-                dataTest='test'
-                variant='standard'
-                disabled
-                {...meta.args}
-                onChange={() => undefined}
-                value='Hello World'
-                label='Small label text'
-                size='small'
-            />
-            <StyledInputField
-                dataTest='test'
-                {...meta.args}
-                onChange={() => undefined}
-                value='Hello World'
-                label=''
-                size='small'
-            />
-            <StyledInputField
-                dataTest='test'
-                {...meta.args}
-                onChange={() => undefined}
-                value='Hello World'
-                label='Error label text'
-                error
-            />
-            <StyledInputField
-                dataTest='test'
-                {...meta.args}
-                onChange={() => undefined}
-                value='Hello World'
-                label='Small label text'
-                size='small'
-                error
-            />
+export const Default: Story = {
+    args: {
+        helperText: 'Helper text',
+    },
+}
 
-            <StyledInputField
-                dataTest='test'
-                {...meta.args}
-                onChange={() => undefined}
-                value='Hello World'
-                label=''
-                size='small'
-                error
-            />
-            <StyledInputField
-                dataTest='test'
-                {...meta.args}
-                onChange={() => undefined}
-                value='Hello World'
-                label='Required text'
-                error
-                helperText={'Required field'}
-            />
-            <StyledInputField
-                dataTest='test'
-                {...meta.args}
-                onChange={() => undefined}
-                value='Hello World'
-                label='Small required text'
-                size='small'
-                error
-                helperText={'Required field'}
-            />
-            <StyledInputField
-                dataTest='test'
-                {...meta.args}
-                onChange={() => undefined}
-                value='Hello World'
-                label=''
-                size='small'
-                error
-                helperText={'Required'}
-            />
-            <StyledInputField
-                dataTest='test'
-                {...meta.args}
-                onChange={() => undefined}
-                value='Hello World'
-                label='Disabled'
-                disabled
-            />
-            <StyledInputField
-                dataTest='test'
-                {...meta.args}
-                onChange={() => undefined}
-                value='Hello World'
-                disabled
-                label='Small disabled'
-                size='small'
-            />
-            <StyledInputField
-                dataTest='test'
-                {...meta.args}
-                onChange={() => undefined}
-                value='Hello World'
-                disabled
-                label=''
-                size='small'
-            />
-            <StyledInputField
-                dataTest='test'
-                {...meta.args}
-                onChange={() => undefined}
-                value='Hello World'
-                label='Read only'
-                disabled={false}
-                readOnly
-            />
-            <StyledInputField
-                dataTest='test'
-                {...meta.args}
-                onChange={() => undefined}
-                value='Hello World'
-                readOnly
-                label='Small read only'
-                size='small'
-            />
-            <StyledInputField
-                dataTest='test'
-                {...meta.args}
-                onChange={() => undefined}
-                value='Hello World'
-                readOnly
-                label=''
-                size='small'
-            />
-        </div>
-    )
+export const Error: Story = {
+    args: {
+        error: true,
+        helperText: 'Required field',
+        value: 'Wrong value',
+    },
+}
+
+export const Disabled: Story = {
+    args: {
+        disabled: true,
+        value: 'Disabled value',
+    },
+}
+
+export const ReadOnly: Story = {
+    args: {
+        readOnly: true,
+        value: 'Read only value',
+    },
+}
+
+export const WithClear: Story = {
+    args: {
+        allowClear: true,
+        value: 'Clear me',
+    },
+    play: async ({ canvas, userEvent }) => {
+        const clearButton = canvas.getByRole('button')
+        await userEvent.click(clearButton)
+
+        await expect(clearButton).toBeInTheDocument()
+    },
 }
