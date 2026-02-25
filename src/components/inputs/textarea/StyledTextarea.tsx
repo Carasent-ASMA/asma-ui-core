@@ -116,7 +116,7 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
     const textType: textTypes = error ? 'error' : disabled ? 'disabled' : 'active'
 
     return (
-        <div className={`relative flex flex-col gap-1 ${containerClassName}`} data-test={dataTest}>
+        <div className={`relative flex flex-col gap-1 ${containerClassName}`} data-testid={dataTest}>
             <label htmlFor={id} className={`${styles['label']} ${styles[textType]} ${labelClassName}`}>
                 {label}
             </label>

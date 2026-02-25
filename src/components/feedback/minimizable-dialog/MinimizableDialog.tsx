@@ -66,7 +66,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
             {fullScreen && !minimized && <div className='fixed inset-0 z-[51] bg-[rgb(98,110,126)] bg-opacity-70' />}
 
             <div style={{ zIndex: 51 }} className={cn(styles['dialog'], !minimized && styles['hidden'])}>
-                <div className={clsx('flex items-center justify-between', !minimized && 'hidden')} data-test={dataTest}>
+                <div className={clsx('flex items-center justify-between', !minimized && 'hidden')} data-testid={dataTest}>
                     <div className='truncate text-lg font-semibold text-delta-800'>{title}</div>
                     <div className='flex items-center gap-x-1'>
                         {showExpandIcon && (
@@ -111,7 +111,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                         !minimized &&
                         'fixed left-1/2 top-1/2 h-[95dvh] w-full max-w-[1000px] -translate-x-1/2 -translate-y-1/2 duration-0',
                 )}
-                data-test={dataTest}
+                data-testid={dataTest}
             >
                 <div className='flex flex-col gap-y-2 border-b-[1px] border-delta-200 p-4'>
                     <div className='flex items-center justify-between'>

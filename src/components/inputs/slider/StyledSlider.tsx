@@ -18,7 +18,7 @@ export const StyledSlider = ({ dataTest, error, errorText, helperText, ...props 
         <>
             <Slider
                 {...props}
-                data-test={dataTest}
+                data-testid={dataTest}
                 classes={{
                     ...props.classes,
                 }}

@@ -58,7 +58,7 @@ export const StyledLink: React.FC<StyledLinkProps> = ({
     return (
         <a
             {...otherProps}
-            data-test={dataTest}
+            data-testid={dataTest}
             ref={reflink}
             href={href}
             className={clsx(style['styled-link'], textSize, className)}

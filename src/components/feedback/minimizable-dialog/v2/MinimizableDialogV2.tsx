@@ -50,7 +50,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                 style={{ zIndex: 51, ...style }}
                 className={cn(styles['minimized-dialog'], !minimized && styles['hidden'], classNameOverrides.minimized)}
             >
-                <div className={clsx('flex items-center justify-between', !minimized && 'hidden')} data-test={dataTest}>
+                <div className={clsx('flex items-center justify-between', !minimized && 'hidden')} data-testid={dataTest}>
                     <div className='max-w-[303px] truncate pr-1 text-lg font-semibold text-delta-800'>
                         <StyledTooltip title={title} placement='top'>
                             <div className='truncate'>{title}</div>

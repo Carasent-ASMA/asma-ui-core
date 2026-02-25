@@ -10,11 +10,11 @@ export const StyledEmptyPage: FC<{ emptyText: string; isEmpty?: boolean; classNa
 
     return (
         <div
-            data-test='empty-page-container'
+            data-testid='empty-page-container'
             className={`flex h-full min-h-[106px] w-full animate-opacity-in items-center justify-center gap-2 text-sm text-gray-600 duration-300 ${className}`}
         >
             <EmptyPageIcon
-                data-test='empty-page-icon'
+                data-testid='empty-page-icon'
                 width={24}
                 height={24}
                 className='cursor-default text-gray-600'

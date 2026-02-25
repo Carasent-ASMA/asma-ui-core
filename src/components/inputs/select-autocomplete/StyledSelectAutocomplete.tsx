@@ -96,10 +96,10 @@ export function StyledSelectAutocomplete<
                               />
                           )
                 }
-                data-test={dataTest}
+                data-testid={dataTest}
                 PaperComponent={({ children }) => (
                     <Paper
-                        data-test={`paper-${dataTest}`}
+                        data-testid={`paper-${dataTest}`}
                         sx={{
                             padding: '0 !important',
                             marginTop: '0px !important',

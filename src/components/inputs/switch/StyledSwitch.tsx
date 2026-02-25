@@ -12,7 +12,7 @@ export const StyledSwitch = ({
     <Switch
         {...props}
         disabled={disabled}
-        data-test={dataTest}
+        data-testid={dataTest}
         checkedIcon={
             <div
                 className={`${

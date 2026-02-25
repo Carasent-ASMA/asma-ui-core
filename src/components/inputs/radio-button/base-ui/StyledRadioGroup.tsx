@@ -27,7 +27,7 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
                 ref={ref}
                 value={value}
                 defaultValue={defaultValue}
-                data-test={dataTest}
+                data-testid={dataTest}
                 onValueChange={onValueChange}
             >
                 {children}

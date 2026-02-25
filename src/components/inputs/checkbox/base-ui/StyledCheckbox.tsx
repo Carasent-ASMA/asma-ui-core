@@ -110,7 +110,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
     return (
         <Checkbox.Root
             className={wrapperClasses}
-            data-test={dataTest}
+            data-testid={dataTest}
             checked={checked}
             disabled={disabled}
             readOnly={readOnly}

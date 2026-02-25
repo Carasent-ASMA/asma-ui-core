@@ -20,7 +20,7 @@ export const StyledInputField: React.FC<
     return (
         <TextField
             {...props}
-            data-test={dataTest}
+            data-testid={dataTest}
             disabled={disabledOrReadonly}
             error={error}
             helperText={

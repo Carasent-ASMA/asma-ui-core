@@ -47,7 +47,7 @@ export const StyledRadio = forwardRef<HTMLButtonElement, StyledRadioProps>(
                 {...rest}
                 ref={ref}
                 value={value}
-                data-test={dataTest}
+                data-testid={dataTest}
                 className={wrapperClasses}
                 disabled={disabled}
                 onPointerDown={handlePointerDown}

@@ -75,7 +75,7 @@ export const DynamicInteractiveChipGroup = forwardRef(
         })
 
         return (
-            <div data-test={`${dataTest}-dynamic-radio-group`} className='relative flex flex-col gap-y-1'>
+            <div data-testid={`${dataTest}-dynamic-radio-group`} className='relative flex flex-col gap-y-1'>
                 {title && <span className='text-base font-semibold text-delta-800'>{title}</span>}
                 {/* HACK for calculating overflow layout */}
                 <div

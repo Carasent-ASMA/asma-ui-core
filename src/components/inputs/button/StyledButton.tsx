@@ -98,7 +98,7 @@ export const StyledButton = ({
                 className,
             )}
             ref={refLink}
-            data-test={dataTest}
+            data-testid={dataTest}
         >
             {startIcon}
             {children && (

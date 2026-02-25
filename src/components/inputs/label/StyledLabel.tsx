@@ -12,7 +12,7 @@ export interface StyledLabelProps {
 const styledLabelCss = style['styled-label']
 export const StyledLabel: FC<StyledLabelProps> = ({ children, onClick, className, dataTest, style }) => {
     return (
-        <div className={clsx(styledLabelCss, className)} style={style} onClick={onClick} data-test={dataTest}>
+        <div className={clsx(styledLabelCss, className)} style={style} onClick={onClick} data-testid={dataTest}>
             {children}
         </div>
     )

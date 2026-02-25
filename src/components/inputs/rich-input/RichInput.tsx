@@ -36,7 +36,7 @@ const RichInput: FC<IRichInput> = ({ dataTest, ...props }) => {
             {props.label && (
                 <span
                     className='mb-2 font-sans text-xs font-semibold leading-4 text-custom-grey-06'
-                    data-test={`label-${dataTest}`}
+                    data-testid={`label-${dataTest}`}
                 >
                     {props.label}
                 </span>
@@ -48,7 +48,7 @@ const RichInput: FC<IRichInput> = ({ dataTest, ...props }) => {
                     className={clsx('core-ui-rte', 'core-ui-rte-view-mode', props.className)}
                     readOnly={true}
                     modules={{ toolbar: false }}
-                    data-test={dataTest}
+                    data-testid={dataTest}
                 />
             ) : props.ghost ? (
                 <ReactQuill
@@ -56,7 +56,7 @@ const RichInput: FC<IRichInput> = ({ dataTest, ...props }) => {
                     className={clsx('core-ui-rte', 'core-ui-rte-ghost-mode', props.className)}
                     readOnly={true}
                     modules={{ toolbar: false }}
-                    data-test={dataTest}
+                    data-testid={dataTest}
                 />
             ) : (
                 <ReactQuill
@@ -69,14 +69,14 @@ const RichInput: FC<IRichInput> = ({ dataTest, ...props }) => {
                     )}
                     modules={{ ...MODULES, ...props.modules }}
                     formats={{ ...FORMATS, ...props.formats }}
-                    data-test={dataTest}
+                    data-testid={dataTest}
                 />
             )}
 
             {showHelper && (
                 <span
                     className={clsx('core-ui-rte-helper-text', props.is_error && 'core-ui-rte-error')}
-                    data-test={`error-${dataTest}`}
+                    data-testid={`error-${dataTest}`}
                 >
                     {props.helperText ?? 'Helper text'}
                 </span>

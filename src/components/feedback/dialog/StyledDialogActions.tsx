@@ -7,7 +7,7 @@ export const StyledDialogActions = (props: DialogActionsProps): JSX.Element => {
     return (
         <DialogActions
             {...props}
-            data-test='styled-dialog-actions'
+            data-testid='styled-dialog-actions'
             classes={{
                 ...props.classes,
                 root: style['styled-dialog-actions-root'],

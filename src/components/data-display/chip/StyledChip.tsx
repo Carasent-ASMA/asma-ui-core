@@ -10,7 +10,7 @@ export const StyledChip: React.FC<StyledChipProps> = forwardRef<HTMLDivElement, 
         <Chip
             {...props}
             ref={ref}
-            data-test={dataTest}
+            data-testid={dataTest}
             deleteIcon={readOnly ? undefined : <CloseIcon height={18} width={18} className='min-w-[18px]' />}
             onDelete={readOnly ? undefined : onDelete}
             sx={{
