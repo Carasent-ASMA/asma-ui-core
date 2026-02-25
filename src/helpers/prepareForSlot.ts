@@ -1,7 +1,8 @@
 import { createElement, forwardRef } from 'react'
 
 /**
- * When inserting a component from a third-party library into a slot, you may encounter this warning: "React does not recognize the ownerState prop on a DOM element." This is because the custom component isn't prepared to receive the ownerState like a built-in library component would be.
+ * When inserting a component from a third-party library into a slot, you may encounter this warning: "React does not recognize the ownerState prop on a DOM element."
+ * This is because the custom component isn't prepared to receive the ownerState like a built-in library component would be.
  */
 export function prepareForSlot<ComponentType extends React.ElementType>(
     Component: ComponentType,

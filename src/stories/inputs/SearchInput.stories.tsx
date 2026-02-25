@@ -43,7 +43,7 @@ export const Interactive: Story = {
         value: '',
     },
     render: (args) => <ControlledRender {...args} />,
-    play: async ({ canvasElement, canvas, userEvent }) => {
+    play: async ({ canvas, userEvent }) => {
         const input = canvas.getByLabelText(/search/i)
         await expect(input).toBeInTheDocument()
 
