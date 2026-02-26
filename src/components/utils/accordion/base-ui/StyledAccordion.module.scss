@@ -46,6 +46,10 @@
     transition: transform 150ms ease;
 }
 
+.TriggerIconRight {
+    margin-left: auto;
+}
+
 .Trigger[data-panel-open] .TriggerIcon {
     transform: rotate(180deg);
 }

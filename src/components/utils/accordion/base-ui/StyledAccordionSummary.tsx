@@ -9,11 +9,13 @@ export type StyledAccordionSummarySize = 'small' | 'large'
 export interface StyledAccordionSummaryProps extends React.ComponentProps<typeof Accordion.Trigger> {
     headerClassName?: string | ((state: Accordion.Item.State) => string)
     size?: StyledAccordionSummarySize
+    expandChevronRight?: boolean
     sx?: React.CSSProperties
 }
 
 export const StyledAccordionSummary = ({
     size = 'large',
+    expandChevronRight,
     className,
     headerClassName,
     sx,
@@ -33,8 +35,20 @@ export const StyledAccordionSummary = ({
     return (
         <Accordion.Header className={clsx(styles['Header'], headerClassName)}>
             <Accordion.Trigger {...rest} className={clsx(styles['Trigger'], className)} style={styleVars}>
-                <ChevronDownIcon className={styles['TriggerIcon']} data-state-icon />
-                {children}
+                {expandChevronRight ? (
+                    <>
+                        {children}
+                        <ChevronDownIcon
+                            className={clsx(styles['TriggerIcon'], styles['TriggerIconRight'])}
+                            data-state-icon
+                        />
+                    </>
+                ) : (
+                    <>
+                        <ChevronDownIcon className={styles['TriggerIcon']} data-state-icon />
+                        {children}
+                    </>
+                )}
             </Accordion.Trigger>
         </Accordion.Header>
     )
