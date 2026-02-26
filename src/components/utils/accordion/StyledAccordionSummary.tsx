@@ -7,10 +7,12 @@ export type StyledAccordionSummarySize = 'small' | 'large'
 
 export interface StyledAccordionSummaryProps extends AccordionSummaryProps {
     size?: StyledAccordionSummarySize
+    expandChevronRight?: boolean
 }
 
 export const StyledAccordionSummary = ({
     size = 'large',
+    expandChevronRight,
     className,
     sx,
     children,
@@ -26,7 +28,8 @@ export const StyledAccordionSummary = ({
     return (
         <AccordionSummary
             {...rest}
-            className={clsx('flex-row-reverse gap-2.5', className)}
+            className={clsx(
+            expandChevronRight ? 'flex-row justify-between items-center w-full' : 'flex-row-reverse gap-2.5', className)}
             expandIcon={<ChevronDownIcon className='text-delta-800' width={chevronSize} height={chevronSize} />}
             sx={{
                 minHeight: height,
