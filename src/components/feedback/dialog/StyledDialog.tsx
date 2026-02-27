@@ -50,11 +50,11 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                                     dataTest={`close-button-${dataTest}`}
                                     variant='textGray'
                                     size='small'
-                                    endIcon={<CloseIcon width={24} height={24} />}
+                                    endIcon={<CloseIcon width={20} height={20} />}
                                     onClick={(event) => {
                                         rest.onClose ? rest.onClose(event, 'escapeKeyDown') : null
                                     }}
-                                    style={{ color: 'var(--colors-grey-800)' }}
+                                    style={{ color: 'var(--colors-grey-800)', paddingRight: '6px', paddingLeft: '6px' }}
                                 >
                                     {onCloseText}
                                 </StyledButton>
