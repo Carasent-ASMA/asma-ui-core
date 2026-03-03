@@ -51,13 +51,11 @@
         "@emotion/styled": "^11.11.0",
         "@iconify/react": "^4.1.1",
         "@mui/material": "^5.18.0",
-        "@tanstack/react-table": "^8.10.0",
         "asma-ui-icons": "^0.0.35",
         "clsx": "^1.2.1",
         "date-fns": "^2.30.0",
         "lodash-es": "^4.17.21",
         "material-ui-popup-state": "^5.0.10",
-        "react-day-picker": "^8.8.2",
         "react-quill": "^2.0.0",
         "sass": "^1.77.5"
     },
