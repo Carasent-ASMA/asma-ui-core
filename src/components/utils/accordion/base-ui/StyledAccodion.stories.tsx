@@ -25,7 +25,7 @@ export const Accordion = {
             <div className='flex max-w-[600px] flex-col gap-4'>
                 <StyledAccordion onChange={setIsExpanded}>
                     <div className='flex items-center justify-between pr-4'>
-                        <StyledAccordionSummary className='' size='large'>
+                        <StyledAccordionSummary className='' size='large' expandChevronRight>
                             <StyledWidgetTitle>Header lorem ipsum</StyledWidgetTitle>
                         </StyledAccordionSummary>
 
