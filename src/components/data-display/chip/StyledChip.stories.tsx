@@ -1,51 +1,73 @@
-import React from 'react'
-import type { Meta } from '@storybook/react-vite'
+import type { Meta, StoryObj } from '@storybook/react-vite'
+import { expect, fn } from 'storybook/test'
 import { StyledChip } from './StyledChip'
-import { Stack } from '@mui/material'
 
 const meta: Meta = {
     title: 'DataDisplay/Chip',
     component: StyledChip,
     tags: [],
-    argTypes: {},
-    args: {},
+    args: { dataTest: 'chip', label: 'Default label', variant: 'filled' },
+    argTypes: {
+        disabled: { control: 'boolean' },
+        readOnly: { control: 'boolean' },
+        variant: {
+            control: 'radio',
+            options: ['filled', 'outlined'],
+        },
+    },
 } satisfies Meta<typeof StyledChip>
 
 export default meta
+type Story = StoryObj<typeof StyledChip>
 
-export const Chip = (): JSX.Element => {
-    const handleClick = () => {
-        console.info('You clicked the Chip.')
-    }
+export const Default: Story = {
+    args: {},
+}
 
-    const handleDelete = () => {
-        console.info('You clicked the delete icon.')
-    }
+export const Outlined: Story = {
+    args: { label: 'Outlined', variant: 'outlined' },
+}
 
-    return (
-        <Stack direction='column' spacing={2}>
-            <Stack direction='row' spacing={1}>
-                <StyledChip dataTest='chip-filled' label='Chip Filled' />
-                <StyledChip dataTest='chip-outlined' label='Chip Outlined' variant='outlined' />
-            </Stack>
-            <Stack direction='row' spacing={1}>
-                <StyledChip dataTest='chip-clickable' label='Clickable' onClick={handleClick} />
-                <StyledChip
-                    dataTest='chip-clickable-outlined'
-                    label='Clickable'
-                    variant='outlined'
-                    onClick={handleClick}
-                />
-            </Stack>
-            <Stack direction='row' spacing={1}>
-                <StyledChip dataTest='chip-deletable' label='Deletable' onDelete={handleDelete} />
-                <StyledChip
-                    dataTest='chip-deletable-outlined'
-                    label='Deletable'
-                    variant='outlined'
-                    onDelete={handleDelete}
-                />
-            </Stack>
-        </Stack>
-    )
+export const Clickable: Story = {
+    args: {
+        label: 'Clickable',
+        onClick: fn(),
+    },
+}
+
+export const Deletable: Story = {
+    args: { label: 'Deletable', onDelete: fn() },
+}
+
+// NOTE: hover state does not work yet
+export const Hovered: Story = {
+    args: { label: 'Hovered', onClick: fn() },
+    parameters: { pseudo: { hover: true } },
+    play: async ({ canvas, canvasElement, userEvent }) => {
+        const chip = canvas.getByRole('button', { name: 'Hovered' })
+
+        // const user = userEvent.setup({ document: canvasElement.ownerDocument })
+        //
+        // await user.hover(chip)
+
+        await userEvent.hover(chip)
+    },
+}
+
+export const Focused: Story = {
+    args: { label: 'Focused', onClick: fn() },
+    play: async ({ canvas }) => {
+        const chip = canvas.getByRole('button', { name: 'Focused' })
+        chip.focus()
+
+        await expect(chip).toHaveFocus()
+    },
+}
+
+export const Disabled: Story = {
+    args: { label: 'Disabled', disabled: true },
+}
+
+export const ReadOnly: Story = {
+    args: { label: 'ReadOnly', readOnly: true },
 }

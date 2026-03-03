@@ -10,6 +10,7 @@ const config: StorybookConfig = {
         '@storybook/addon-themes',
         '@storybook/addon-vitest',
         '@chromatic-com/storybook',
+        'storybook-addon-pseudo-states'
     ],
     framework: {
         name: '@storybook/react-vite',

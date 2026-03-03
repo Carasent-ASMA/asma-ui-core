@@ -19,9 +19,6 @@ export const StyledSlider = ({ dataTest, error, errorText, helperText, ...props 
             <Slider
                 {...props}
                 data-testid={dataTest}
-                classes={{
-                    ...props.classes,
-                }}
                 slotProps={{
                     ...props.slotProps,
                     thumb: {

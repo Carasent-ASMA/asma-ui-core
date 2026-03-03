@@ -14,12 +14,10 @@ export const StyledChip: React.FC<StyledChipProps> = forwardRef<HTMLDivElement, 
             deleteIcon={readOnly ? undefined : <CloseIcon height={18} width={18} className='min-w-[18px]' />}
             onDelete={readOnly ? undefined : onDelete}
             sx={{
-                ...{
-                    border: '1px solid',
-                    backgroundColor: 'white',
-                    borderColor: 'var(--colors-delta-200)',
-                    color: 'var(--colors-delta-800)',
-                },
+                border: '1px solid',
+                backgroundColor: 'white',
+                borderColor: 'var(--colors-delta-200)',
+                color: 'var(--colors-delta-800)',
                 ...(readOnly
                     ? {
                           pointerEvents: 'none',

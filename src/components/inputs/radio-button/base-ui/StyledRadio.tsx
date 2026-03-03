@@ -3,7 +3,7 @@ import { Radio } from '@base-ui/react/radio'
 import styles from './StyledRadio.module.scss'
 import { cn } from 'src/helpers/cn'
 
-type StyledRadioProps = {
+export type StyledRadioProps = {
     value?: string | number | boolean
     dataTest?: string
     className?: string
@@ -45,6 +45,8 @@ export const StyledRadio = forwardRef<HTMLButtonElement, StyledRadioProps>(
         return (
             <Radio.Root
                 {...rest}
+                nativeButton
+                render={<button />}
                 ref={ref}
                 value={value}
                 data-testid={dataTest}

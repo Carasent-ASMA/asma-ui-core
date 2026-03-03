@@ -1,10 +1,10 @@
-import React, { forwardRef } from 'react'
+import React, { forwardRef, useId } from 'react'
 import { RadioGroup } from '@base-ui/react/radio-group'
 import { StyledFormHelperText } from 'src'
 import { ErrorOutlineIcon } from 'asma-ui-icons'
 import clsx from 'clsx'
 
-type StyledRadioGroupProps = {
+export type StyledRadioGroupProps = {
     value?: string | number | boolean | null
     defaultValue?: string | number | boolean | null
     onValueChange?: (value: string | number | boolean | null) => void
@@ -18,22 +18,30 @@ type StyledRadioGroupProps = {
 
 export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps>(
     ({ value, defaultValue, onValueChange, dataTest, error, errorText, helperText, children, ...rest }, ref) => {
+        const helperId = useId()
+        const errorId = useId()
+
         const showHelperText = (error ?? false) || (helperText ?? false)
         const helperTextToDisplay = error ? errorText ?? 'Required' : helperText
+        const describedById = showHelperText ? (error ? errorId : helperId) : undefined
 
         return (
             <RadioGroup
                 {...rest}
+                data-testid={dataTest}
+                aria-describedby={describedById}
+                aria-invalid={error}
                 ref={ref}
                 value={value}
                 defaultValue={defaultValue}
-                data-testid={dataTest}
                 onValueChange={onValueChange}
             >
                 {children}
 
                 {showHelperText && (
                     <StyledFormHelperText
+                        id={error ? errorId : helperId}
+                        role={error ? 'alert' : 'status'}
                         className={clsx(
                             'm-0 flex items-center gap-1 pt-1 text-sm',
                             error ? 'text-error-500' : 'text-delta-600',

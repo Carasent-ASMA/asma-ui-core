@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, type ChangeEvent, type ReactNode } from 'react'
+import React, { useEffect, useId, useRef, type ChangeEvent, type ReactNode } from 'react'
 import styles from './StyledTextarea.module.scss'
 
 export interface TextareaCommonProps {
@@ -89,18 +89,25 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
     const textAreaRef = refLink ?? textAreaInnerRef
     const counterEnabled = !!(counter && counterLimit)
 
+    const descriptionId = useId()
+    const counterId = useId()
+    const internalId = useId()
+    const textAreaId = id ?? internalId
+
     useEffect(() => {
         if (textAreaRef.current) {
             const textArea = textAreaRef.current
-            const additionalBottomPadding = counterEnabled ? 32 : 0
+            const computedStyle = window.getComputedStyle(textArea)
+            const additionalBottomPadding = parseFloat(computedStyle.paddingBottom)
             textArea.style.height = 'auto'
 
-            const rowHeight = 20
-            const heightWithoutPaddings = textArea.scrollHeight - 24
+            const rowHeight = parseFloat(computedStyle.lineHeight)
+            const paddingTop = parseFloat(computedStyle.paddingTop)
+            const heightWithoutPaddings = textArea.scrollHeight - paddingTop
             const rows = Math.ceil(heightWithoutPaddings / rowHeight)
 
             if (rows > maxRows) {
-                textArea.style.height = `${rowHeight * maxRows + 24 + additionalBottomPadding}px`
+                textArea.style.height = `${rowHeight * maxRows + paddingTop + additionalBottomPadding}px`
             } else {
                 textArea.style.height = `${textArea.scrollHeight + additionalBottomPadding}px`
             }
@@ -117,10 +124,12 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
 
     return (
         <div className={`relative flex flex-col gap-1 ${containerClassName}`} data-testid={dataTest}>
-            <label htmlFor={id} className={`${styles['label']} ${styles[textType]} ${labelClassName}`}>
+            <label htmlFor={textAreaId} className={`${styles['label']} ${styles[textType]} ${labelClassName}`}>
                 {label}
             </label>
-            <span className={`${styles['description']} ${styles[textType]}`}>{error ? errorMessage : description}</span>
+            <span id={descriptionId} className={`${styles['description']} ${styles[textType]}`}>
+                {error ? errorMessage : description}
+            </span>
             {variant === 'view_only' ? (
                 <div className='pt-3 font-roboto text-sm font-normal text-gray-700'>{value}</div>
             ) : variant === 'not_editable' ? (
@@ -128,7 +137,9 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
             ) : (
                 <textarea
                     {...otherProps}
-                    id={id}
+                    aria-describedby={`${descriptionId} ${counterId}`}
+                    aria-invalid={error}
+                    id={textAreaId}
                     ref={textAreaRef}
                     className={`${styles['textarea']} ${styles[textareaType]} ${className} ${
                         counterEnabled ? 'pb-[32px]' : ''
@@ -140,9 +151,15 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
                 />
             )}
             {counterEnabled && (
-                <div className='pointer-events-none absolute bottom-3 right-3 flex h-[15px] justify-end font-roboto text-[10px]'>
-                    {value.length}/{counterLimit}
-                </div>
+                <>
+                    <div className='pointer-events-none absolute bottom-3 right-3 flex h-[15px] justify-end font-roboto text-[10px]'>
+                        {value.length}/{counterLimit}
+                    </div>
+
+                    <div id={counterId} aria-live='polite' className='sr-only'>
+                        {counterLimit - value.length} characters remaining
+                    </div>
+                </>
             )}
         </div>
     )

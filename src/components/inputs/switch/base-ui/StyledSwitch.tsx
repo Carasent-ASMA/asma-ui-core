@@ -75,6 +75,8 @@ export const StyledSwitch = forwardRef<HTMLButtonElement, StyledSwitchProps>(
             <Switch.Root
                 {...rest}
                 {...stateProps}
+                nativeButton
+                render={<button />}
                 ref={ref}
                 className={styles['switch']}
                 onCheckedChange={handleChange}

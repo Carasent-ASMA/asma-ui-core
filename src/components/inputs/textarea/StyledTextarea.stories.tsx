@@ -1,196 +1,201 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { useRef, useState } from 'react'
+import { expect } from 'storybook/test'
 import { StyledTextarea } from './StyledTextarea'
-import { useState, type ChangeEvent, useRef } from 'react'
-import { StyledSelect, StyledSelectItem } from '../select'
-import { StyledFormControl } from 'src/components/miscellaneous/StyledFormControl'
 
 const meta = {
     title: 'Inputs/Styled Textarea',
     component: StyledTextarea,
     tags: ['autodocs'],
-    argTypes: {},
-    args: { placeholder: 'This is placeholder text' },
+    args: {
+        containerClassName: 'max-w-[600px]',
+        id: 'textarea',
+        label: 'Label',
+        description: 'Description message',
+        placeholder: 'Type here...',
+        variant: 'active',
+    },
+    argTypes: {
+        variant: {
+            control: 'select',
+            options: ['active', 'view_only', 'not_editable'],
+        },
+    },
 } satisfies Meta<typeof StyledTextarea>
 
 export default meta
 type Story = StoryObj<typeof StyledTextarea>
 
-export const Textarea: Story = {
-    args: { ...meta.args },
-    render: () => <StyledTextareaExample />,
+//NOTE: to fix the any type for the args the component needs a refactor for its type definition
+// which then makes it so that you have to refactor the code, so I skipped it for now
+
+export const Active: Story = {
+    render: (args: any) => {
+        const [value, setValue] = useState('')
+
+        return <StyledTextarea {...args} value={value} onChange={(e) => setValue(e.target.value)} />
+    },
 }
 
-const StyledTextareaExample = () => {
-    const minChars = 5
-    const maxChars = 50
+export const WithCounter: Story = {
+    args: {
+        counter: true,
+        counterLimit: 160,
+        maxLength: 500,
+    },
+    render: (args: any) => {
+        const [value, setValue] = useState('')
 
-    const ref = useRef<HTMLTextAreaElement>(null)
+        return <StyledTextarea {...args} value={value} onChange={(e) => setValue(e.target.value)} />
+    },
+}
 
-    const selectOptions = [
-        { title: 'Van Henry title', content: 'Van Henry content' },
-        { title: 'April Tucker title', content: 'April Tucker content' },
-        { title: 'Ralph Hubbard title', content: 'Ralph Hubbard content' },
-    ]
+export const Error: Story = {
+    render: (args: any) => {
+        const [value, setValue] = useState('')
 
-    const [selectedOption, setSelectedOption] = useState(selectOptions[0])
+        const minChars = 5
+        const maxChars = 50
 
-    const [firstValue, setFirstValue] = useState(selectedOption?.content)
-    const [secondValue, setSecondValue] = useState('')
-    const [thirdValue, setThirdValue] = useState('')
-    const [fourthValue, setFourthValue] = useState('')
+        const hasError = value.length < minChars || value.length > maxChars
 
-    const onChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-        setSecondValue(e.target.value)
-    }
+        const errorMessage =
+            value.length < minChars
+                ? `Minimum ${minChars} characters required`
+                : `Maximum ${maxChars} characters exceeded`
 
-    return (
-        <div className='flex flex-col items-center gap-4'>
-            <div>
-                <div className='flex justify-center align-middle text-xl font-semibold underline'>Active</div>
-                <StyledFormControl className='w-full pb-5'>
-                    <StyledSelect
-                        dataTest='Test-alpha'
-                        size='medium'
-                        value={selectedOption?.title}
-                        onChange={(e) => {
-                            const target: string = e.target.value as string
-                            const option = selectOptions.find((o) => o.title === target)
-                            if (option) {
-                                setSelectedOption(option)
-                                setFirstValue(option.content)
-                            }
-                        }}
-                    >
-                        {selectOptions.map((option, i) => (
-                            <StyledSelectItem key={i} value={option.title}>
-                                {option.title}
-                            </StyledSelectItem>
-                        ))}
-                    </StyledSelect>
-                </StyledFormControl>
+        return (
+            <StyledTextarea
+                {...args}
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                error={hasError}
+                errorMessage={hasError ? errorMessage : undefined}
+                maxLength={maxChars}
+            />
+        )
+    },
+}
+
+export const Disabled: Story = {
+    args: {
+        disabled: true,
+        value: 'Disabled content',
+    },
+}
+
+export const ViewOnly: Story = {
+    args: {
+        variant: 'view_only',
+        value: 'This content is view only. It cannot be edited.',
+    },
+}
+
+export const NotEditable: Story = {
+    args: {
+        variant: 'not_editable',
+        value: 'This content is not editable but styled differently.',
+    },
+}
+
+export const AutoResize: Story = {
+    args: {
+        minRows: 2,
+        maxRows: 6,
+    },
+    render: (args: any) => {
+        const [value, setValue] = useState('Start typing multiple lines...\n\n')
+
+        return <StyledTextarea {...args} value={value} onChange={(e) => setValue(e.target.value)} />
+    },
+}
+
+export const WithExternalRef: Story = {
+    render: (args: any) => {
+        const ref = useRef<HTMLTextAreaElement>(null)
+        const [value, setValue] = useState('')
+
+        return (
+            <div className='flex flex-col gap-2'>
                 <StyledTextarea
-                    {...meta.args}
-                    dataTest='test1'
-                    id='1'
-                    variant='active'
-                    label='Label Text'
-                    description='Description message'
-                    value={firstValue}
-                    maxRows={5}
-                    onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setFirstValue(e.target.value)}
-                />
-                <div className='mt-1 rounded bg-gray-50 p-4'>
-                    <p className='text-xs font-semibold'>Preview</p>
-                    <div className='max-w-[400px] truncate rounded bg-gray-300 p-4'>{firstValue}</div>
-                </div>
-            </div>
-
-            <div>
-                <div className='flex justify-center align-middle text-xl font-semibold underline'>
-                    Active with counter
-                </div>
-                <div className='flex gap-2'>
-                    <StyledTextarea
-                        dataTest='test2'
-                        id='2'
-                        variant='active'
-                        label='Label Text'
-                        description='Description message'
-                        value={thirdValue}
-                        counter={true}
-                        counterLimit={160}
-                        maxLength={1000}
-                        onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setThirdValue(e.target.value)}
-                    />
-                    <StyledTextarea
-                        dataTest='test2'
-                        id='2'
-                        variant='active'
-                        label='Label Text'
-                        description='Description message'
-                        value={thirdValue}
-                        onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setThirdValue(e.target.value)}
-                    />
-                </div>
-            </div>
-
-            <div>
-                <div className='flex justify-center align-middle text-xl font-semibold underline'>Error</div>
-                <StyledTextarea
-                    dataTest='test33'
-                    id='33'
-                    variant='active'
-                    value={secondValue}
-                    onChange={onChange}
-                    label='Label Text'
-                    maxLength={50}
-                    error={secondValue.length < minChars || secondValue.length >= maxChars}
-                    errorMessage={
-                        secondValue.length < minChars ? 'Minimum number of chars is 5' : 'Maximum number of chars is 50'
-                    }
-                    description='Description message'
-                    minRows={1}
-                    maxRows={7}
-                />
-            </div>
-
-            <div>
-                <div className='flex justify-center align-middle text-xl font-semibold underline'>
-                    With external ref
-                </div>
-                <StyledTextarea
-                    dataTest='test3'
-                    id='3'
+                    {...args}
                     refLink={ref}
-                    variant='active'
-                    value={fourthValue}
-                    onChange={(e: ChangeEvent<HTMLTextAreaElement>) => {
-                        setFourthValue(e.target.value)
-                    }}
-                    label='Label Text'
-                    maxLength={50}
+                    value={value}
                     counter
-                    counterLimit={160}
-                    description='Description message'
+                    counterLimit={120}
+                    onChange={(e) => setValue(e.target.value)}
                 />
-                <div className='font-semibold'>Height of the textarea with ref is: {ref.current?.style.height}</div>
+                <div className='text-sm'>Current height: {ref.current?.style.height}</div>
             </div>
+        )
+    },
+}
 
-            <div>
-                <div className='flex justify-center align-middle text-xl font-semibold underline'>Disabled</div>
-                <StyledTextarea
-                    dataTest='test4'
-                    id='4'
-                    variant='active'
-                    label='Label Text'
-                    disabled={true}
-                    description='Description message'
-                />
-            </div>
+export const FocusInteraction: Story = {
+    render: (args: any) => {
+        const [value, setValue] = useState('')
+        return <StyledTextarea {...args} value={value} onChange={(e) => setValue(e.target.value)} />
+    },
+    play: async ({ canvas, userEvent }) => {
+        const textarea = canvas.getByRole('textbox')
 
-            <div>
-                <div className='flex justify-center align-middle text-xl font-semibold underline'>View only</div>
-                <StyledTextarea
-                    dataTest='test5'
-                    id='5'
-                    variant='view_only'
-                    label='Label Text'
-                    description='Description message'
-                    value='Lorem ipsum dolor sit amet, ne sea eius verterem, facilis epicurei vis ut, omnis utinam in pro. Id corpora periculis Lorem ipsum dolor sit amet, ne sea eius verterem, facilis epicurei vis ut, omnis utinam in pro. Id corpora periculis Lorem ipsum dolor sit amet, ne sea eius verterem, facilis epicurei vis ut, omnis utinam in pro. Id corpora periculis Lorem ipsum dolor sit amet, ne sea eius verterem, facilis epicurei vis ut, omnis utinam in pro. Id corpora periculis'
-                />
-            </div>
+        await userEvent.click(textarea)
 
-            <div>
-                <div className='flex justify-center align-middle text-xl font-semibold underline'>Not editable</div>
-                <StyledTextarea
-                    dataTest='test6'
-                    id='6'
-                    variant='not_editable'
-                    label='Label Text'
-                    description='Description message'
-                    value='Lorem ipsum dolor sit amet, ne sea eius verterem, facilis epicurei vis ut, omnis utinam in pro. Id corpora periculis Lorem ipsum dolor sit amet, ne sea eius verterem, facilis epicurei vis ut, omnis utinam in pro. Id corpora periculis Lorem ipsum dolor sit amet, ne sea eius verterem, facilis epicurei vis ut, omnis utinam in pro. Id corpora periculis'
-                />
-            </div>
-        </div>
-    )
+        await expect(textarea).toHaveFocus()
+    },
+}
+
+export const MaxRowsOverflow: Story = {
+    args: {
+        minRows: 2,
+        maxRows: 4,
+    },
+    render: (args: any) => {
+        const [value, setValue] = useState(Array(20).fill('Long content line').join('\n'))
+
+        return <StyledTextarea {...args} value={value} onChange={(e) => setValue(e.target.value)} />
+    },
+}
+
+export const LongSingleLine: Story = {
+    render: (args: any) => {
+        const [value, setValue] = useState(
+            'Looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong',
+        )
+
+        return <StyledTextarea {...args} value={value} onChange={(e) => setValue(e.target.value)} />
+    },
+}
+
+export const CounterLimitMismatch: Story = {
+    args: {
+        counter: true,
+        counterLimit: 50,
+        maxLength: 200,
+    },
+    render: (args: any) => {
+        const [value, setValue] = useState('')
+
+        return <StyledTextarea {...args} value={value} onChange={(e) => setValue(e.target.value)} />
+    },
+}
+
+export const NoLabel: Story = {
+    args: {
+        id: undefined,
+        label: '',
+        description: 'Only description provided',
+    },
+    render: (args: any) => {
+        const [value, setValue] = useState('')
+        return <StyledTextarea {...args} value={value} onChange={(e) => setValue(e.target.value)} />
+    },
+}
+
+export const LargeContentStress: Story = {
+    render: (args) => {
+        const [value] = useState(Array(200).fill('Lorem ipsum dolor sit amet').join('\n'))
+
+        return <StyledTextarea {...args} value={value} />
+    },
 }

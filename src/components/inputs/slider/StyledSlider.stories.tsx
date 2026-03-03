@@ -1,7 +1,5 @@
-import { Stack, Typography } from '@mui/material'
-import type { Meta } from '@storybook/react-vite'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { StyledSlider } from './StyledSlider'
-import { useState, type SyntheticEvent } from 'react'
 
 const meta = {
     title: 'Inputs/Styled Slider',
@@ -9,6 +7,7 @@ const meta = {
     tags: ['autodocs'],
     argTypes: {},
     args: {
+        className: 'max-w-[600px]',
         size: 'medium',
         max: 10,
         min: 1,
@@ -59,51 +58,54 @@ const meta = {
 } satisfies Meta<typeof StyledSlider>
 
 export default meta
+type Story = StoryObj<typeof StyledSlider>
 
-export const Slider = (): JSX.Element => {
-    const [value, setValue] = useState<number>(0)
+export const Default: Story = {
+    args: {},
+    render: (args) => (
+        <label className='flex flex-col font-semibold text-base text-delta-800'>
+            Default Slider
+            <StyledSlider {...args} />
+        </label>
+    ),
+}
 
-    const handleChange = (_event: Event | SyntheticEvent<Element, Event>, newValue: number | number[]) => {
-        setValue(newValue as number)
-    }
+export const Disabled: Story = {
+    args: { disabled: true },
+    render: (args) => (
+        <label className='flex flex-col font-semibold text-base text-delta-800'>
+            Disabled Slider
+            <StyledSlider {...args} />
+        </label>
+    ),
+}
 
-    return (
-        <>
-            <Stack mt={2} mb={4} className='w-[700px]'>
-                <Typography variant='h6'>Standard Slider</Typography>
-                <StyledSlider
-                    dataTest='standard-slider'
-                    {...meta.args}
-                    value={value}
-                    onChangeCommitted={handleChange}
-                />
-            </Stack>
-            <Stack mt={2}>
-                <Typography variant='h6'>Disabled Slider</Typography>
-                <StyledSlider dataTest='disabled-slider' {...meta.args} disabled value={value} />
-            </Stack>
-            <Stack mt={2} mb={4} className='w-[700px]'>
-                <Typography variant='h6'>Error Slider</Typography>
-                <StyledSlider
-                    dataTest='standard-slider'
-                    {...meta.args}
-                    error={true}
-                    errorText='Custom error msg'
-                    helperText='My helper text'
-                    value={value}
-                    onChangeCommitted={handleChange}
-                />
-            </Stack>
-            <Stack mt={2} className='h-[400px]'>
-                <Typography variant='h6'>Vertical Slider</Typography>
-                <StyledSlider
-                    dataTest='vertical-slider'
-                    {...meta.args}
-                    orientation='vertical'
-                    value={value}
-                    onChangeCommitted={handleChange}
-                />
-            </Stack>
-        </>
-    )
+export const HelperText: Story = {
+    args: { helperText: 'Custom helper text here' },
+    render: (args) => (
+        <label className='flex flex-col font-semibold text-base text-delta-800'>
+            Slider With Helper Text
+            <StyledSlider {...args} />
+        </label>
+    ),
+}
+
+export const Error: Story = {
+    args: { error: true, errorText: 'Custom Error text here' },
+    render: (args) => (
+        <label className='flex flex-col font-semibold text-base text-delta-800'>
+            Slider With Error Text
+            <StyledSlider {...args} />
+        </label>
+    ),
+}
+
+export const Vertical: Story = {
+    args: { orientation: 'vertical' },
+    render: (args) => (
+        <label className='flex flex-col gap-4 font-semibold text-base text-delta-800 h-[600px]'>
+            Vertical Slider
+            <StyledSlider {...args} />
+        </label>
+    ),
 }
