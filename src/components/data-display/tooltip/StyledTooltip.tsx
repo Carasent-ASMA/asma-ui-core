@@ -10,7 +10,6 @@ export const StyledTooltip = (props: TooltipProps) => {
             TransitionComponent={Fade}
             TransitionProps={{ timeout: 300 }}
             enterDelay={300}
-            leaveDelay={300}
             placement='top'
             componentsProps={{
                 ...componentsProps,
