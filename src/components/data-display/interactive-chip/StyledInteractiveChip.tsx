@@ -7,12 +7,13 @@ import { StyledRadio } from 'src/components/inputs/radio-button/StyledRadio'
 export interface StyledInteractiveChipProps extends ComponentProps<typeof StyledChip> {
     type?: 'checkbox' | 'radio'
     checked?: (CheckboxProps | RadioProps)['checked']
+    size?: 'small' | 'medium'
 }
 
 export const StyledInteractiveChip: FC<StyledInteractiveChipProps> = forwardRef<
     HTMLDivElement,
     StyledInteractiveChipProps
->(({ type = 'checkbox', checked, ...props }, ref) => {
+>(({ type = 'checkbox', checked, size = 'small', ...props }, ref) => {
     const isCheckboxControl = type === 'checkbox'
 
     const ControlComponent = isCheckboxControl ? StyledCheckbox : StyledRadio
@@ -33,7 +34,7 @@ export const StyledInteractiveChip: FC<StyledInteractiveChipProps> = forwardRef<
                     dataTest={props.dataTest}
                     disableRipple
                     checked={checked}
-                    size={'small'}
+                    size={size}
                     sx={{ pointerEvents: 'none' }}
                 />
             }

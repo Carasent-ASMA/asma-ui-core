@@ -25,6 +25,7 @@ export const DynamicInteractiveChipGroup = forwardRef(
             renderLabel,
             getOptionTooltip,
             loading,
+            size,
         } = props
         const { containerRef, wrapDisabled } = useWrap({ dependencyList: [options, options.length] })
 
@@ -143,7 +144,7 @@ export const DynamicInteractiveChipGroup = forwardRef(
                                                 classes={
                                                     wrapDisabled
                                                         ? {
-                                                              root: 'border-none bg-transparent w-full flex justify-start h-full',
+                                                              root: 'border-none outline-none bg-transparent w-full flex justify-start h-full min-h-[40px] shadow-none',
                                                               label: 'block whitespace-normal break-words overflow-visible',
                                                           }
                                                         : {
@@ -155,6 +156,7 @@ export const DynamicInteractiveChipGroup = forwardRef(
                                                 type={multiple ? 'checkbox' : 'radio'}
                                                 dataTest={`ic-${String(optionValue)}`}
                                                 checked={checked}
+                                                size={size}
                                                 onClick={() => handleClick(o)}
                                                 label={renderLabel ? renderLabel(o) : getOptionLabel(o)}
                                             />
