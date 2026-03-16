@@ -48,6 +48,12 @@ $checkbox-sizes: (
         --cb-border-w: 0px;
     }
 
+    &.Indeterminate .Checkbox {
+        background-color: var(--colors-gama-500);
+        border: none;
+        --cb-border-w: 0px;
+    }
+
     &[data-unchecked] .Checkbox {
         background-color: transparent;
         border: var(--cb-border-w) solid var(--colors-delta-500);
@@ -59,6 +65,12 @@ $checkbox-sizes: (
     }
 
     &[data-disabled]:is([data-checked], [data-indeterminate]) .Checkbox {
+        background-color: var(--colors-delta-200);
+        border: none;
+        --cb-border-w: 0px;
+    }
+
+    &[data-disabled].Indeterminate .Checkbox {
         background-color: var(--colors-delta-200);
         border: none;
         --cb-border-w: 0px;
@@ -160,6 +172,7 @@ $checkbox-sizes: (
     box-sizing: border-box;
 
     --cb-border-w: 2px;
+    --cb-indicator-color: #fff;
 
     @include checkbox-size('medium');
 
@@ -178,6 +191,20 @@ $checkbox-sizes: (
             pointer-events: none;
         }
     }
+    .CheckboxWrapper[data-indeterminate] &::after,
+    &.Indeterminate::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 62%;
+        height: 2.5px;
+        transform: translate(-50%, -50%);
+        border-radius: 999px;
+        background-color: var(--cb-indicator-color);
+        z-index: 2;
+        pointer-events: none;
+    }
 }
 
 .Indicator {
@@ -190,4 +217,15 @@ $checkbox-sizes: (
     z-index: 1;
     position: relative;
     pointer-events: none;
+}
+
+.CheckboxWrapper[data-indeterminate],
+.CheckboxWrapper.Indeterminate {
+    .Indicator svg {
+        display: none;
+    }
+}
+
+.CheckboxWrapper.ReadOnly .Checkbox {
+    --cb-indicator-color: var(--colors-delta-500);
 }

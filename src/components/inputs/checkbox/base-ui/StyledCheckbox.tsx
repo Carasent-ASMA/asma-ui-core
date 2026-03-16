@@ -14,18 +14,18 @@ type StyledCheckboxProps = {
     onChange?: (event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => void
 } & Omit<React.ComponentProps<typeof Checkbox.Root>, 'children'>
 
-export const IndeterminateIcon = ({ className }: { className?: string }) => (
-    <svg viewBox='0 0 24 24' className={className} fill='none'>
+export const IndeterminateIcon = (props: SVGProps<SVGSVGElement>) => (
+    <svg viewBox='0 0 24 24' width='100%' height='100%' fill='none' {...props}>
         <title>Indeterminate icon</title>
-        <rect x='5.5' y='10.5' width='13' height='2.75' fill='currentColor' />
+        <path d='M6 12H18' stroke='currentColor' strokeWidth={props.strokeWidth ?? 3} strokeLinecap='round' />
     </svg>
 )
 
 export const CheckIcon = (props: SVGProps<SVGSVGElement>) => (
     <svg
         viewBox='0 0 24 24'
-        width='24'
-        height='24'
+        width='100%'
+        height='100%'
         fill='none'
         stroke='currentColor'
         strokeWidth={2}
@@ -58,13 +58,18 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
         styles['CheckboxWrapper'],
         !isHideWrapper && styles[`size-${size}`],
         isHideWrapper && styles['HideWrapper'],
+        indeterminate && styles['Indeterminate'],
         readOnly && styles['ReadOnly'],
         isRippleEnabled && styles['CheckboxHover'],
         className,
     )
 
-    const checkboxClasses = cn('styled-checkbox-inner', styles['Checkbox'], styles[`size-${size}`])
-
+    const checkboxClasses = cn(
+        'styled-checkbox-inner',
+        styles['Checkbox'],
+        styles[`size-${size}`],
+        indeterminate && styles['Indeterminate'],
+    )
     const CheckboxIcon = indeterminate ? IndeterminateIcon : CheckIcon
 
     const rippleRef = React.useRef<HTMLSpanElement>(null)
@@ -83,8 +88,9 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
     )
 
     useEffect(() => {
+        const rippleNode = rippleRef.current
         return () => {
-            rippleRef.current?.replaceChildren()
+            rippleNode?.replaceChildren()
         }
     }, [])
 
