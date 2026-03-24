@@ -1,4 +1,3 @@
-import React from 'react'
 import type { Meta } from '@storybook/react'
 import { StyledInputField } from 'src/components/inputs/input-field'
 import { StyledFormLabel } from 'src/components/data-display/form-label'
@@ -14,7 +13,6 @@ const meta = {
 export default meta
 
 export const FormInputs = () => {
-    console.log('render')
     return (
         <div>
             <h2>Not filled</h2>
