@@ -122,6 +122,10 @@
         "react": "^18.*",
         "react-dom": "^18.*"
     },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Carasent-ASMA/asma-ui-core"
+    },
     "resolutions": {
         "@types/node": "18.0.3",
         "node": "18.17.0"

@@ -1,0 +1,1 @@
+../../../.github/agents/debug-assistant.agent.md

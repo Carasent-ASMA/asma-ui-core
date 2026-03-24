@@ -1,0 +1,1 @@
+../../../../.github/instructions/yaml.instructions.md

@@ -1,0 +1,1 @@
+../../../.github/agents/devils-advocate.agent.md
