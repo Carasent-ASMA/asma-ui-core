@@ -1,0 +1,1 @@
+../../../.github/agents/repo-architect.agent.md

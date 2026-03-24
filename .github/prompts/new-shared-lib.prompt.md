@@ -1,0 +1,1 @@
+../../../.github/prompts/new-shared-lib.prompt.md

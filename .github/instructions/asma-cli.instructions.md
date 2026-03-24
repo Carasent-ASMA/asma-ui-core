@@ -1,0 +1,1 @@
+../../../.github/instructions/asma-cli.instructions.md
