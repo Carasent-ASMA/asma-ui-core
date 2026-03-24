@@ -14,6 +14,7 @@ const meta = {
 export default meta
 
 export const FormInputs = () => {
+    console.log('render')
     return (
         <div>
             <h2>Not filled</h2>
