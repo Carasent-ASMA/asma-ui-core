@@ -82,7 +82,6 @@ export const StyledSwitch = forwardRef<HTMLButtonElement, StyledSwitchProps>(
                 disabled={disabled}
                 readOnly={readOnly}
                 required={required}
-                value={value}
                 id={id}
                 name={id}
                 data-testid={dataTest}

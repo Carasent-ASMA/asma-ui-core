@@ -31,7 +31,7 @@ The pipeline will automatically bump version and create changelog after merge to
 
 ```tsx
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-import { defaultTheme, customPalettes } from 'asma-core-ui';
+import { defaultTheme, customPalettes } from 'asma-ui-core';
 
 const dataTheme = window.document.body.attributes.getNamedItem('data-theme');
 
@@ -64,7 +64,7 @@ const theme = createTheme(defaultTheme, {
 ## Using Components in App
 
 ```tsx
-import { StyledButton } from 'asma-core-ui';
+import { StyledButton } from 'asma-ui-core';
 
 ...
 

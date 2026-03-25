@@ -39,7 +39,7 @@ type TextAreaActiveProps = {
     errorMessage?: string
     maxLength?: number
     counter?: boolean
-    refLink?: React.RefObject<HTMLTextAreaElement> | null | undefined
+    refLink?: React.RefObject<HTMLTextAreaElement | null> | null | undefined
     counterLimit?: number
 }
 type TextareaConditionalProps = TextAreaActiveProps | TextAreaNotEditableProps

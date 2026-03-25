@@ -111,10 +111,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                         }
                     }}
                     filterSelectedOptions={false}
-                    isOptionEqualToValue={
-                        ((option, value) => isOptionEqualToValue(option, value)) ||
-                        autocompleteProps?.isOptionEqualToValue
-                    }
+                    isOptionEqualToValue={autocompleteProps?.isOptionEqualToValue ?? isOptionEqualToValue}
                     autoHeight
                     multiple={multiple}
                     renderTags={(tagValues) => {

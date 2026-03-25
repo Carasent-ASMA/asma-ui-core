@@ -2,7 +2,7 @@ import type { Meta } from '@storybook/react'
 import type { StoryObj } from '@storybook/react'
 import { StyledRadio } from './StyledRadio'
 import { StyledRadioGroup } from './StyledRadioGroup'
-import { StyledFormControlLabel } from 'asma-core-ui'
+import { StyledFormControlLabel } from 'asma-ui-core'
 import React from 'react'
 
 const meta = {

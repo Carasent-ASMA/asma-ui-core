@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import type { Meta } from '@storybook/react'
+import type { ChangeEvent } from 'react'
 import { StyledSearchField } from 'src/components/inputs/search-field/StyledSearchField'
 
 const meta = {
@@ -21,7 +22,7 @@ export const SearchField = () => {
             dataTest={'test-search-field'}
             label={'Search component'}
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
             onClear={() => setSearchQuery('')}
         />
     )
