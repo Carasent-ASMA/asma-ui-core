@@ -13,7 +13,7 @@ jobs:
           - task: NodeTool@0
             displayName: 'Install Node.js'
             inputs:
-                versionSpec: '16.x'
+                versionSpec: '24.x'
 
           - checkout: self
             persistCredentials: true
