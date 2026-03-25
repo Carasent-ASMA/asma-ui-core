@@ -1,1 +1,1 @@
-../../../.github/agents/debug-assistant.agent.md
+../../../../.github/agents/debug-assistant.agent.md

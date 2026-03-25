@@ -1,1 +1,1 @@
-../../../.github/instructions/asma-cli.instructions.md
+../../../../.github/instructions/asma-cli.instructions.md

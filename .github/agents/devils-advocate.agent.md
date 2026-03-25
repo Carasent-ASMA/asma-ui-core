@@ -1,1 +1,1 @@
-../../../.github/agents/devils-advocate.agent.md
+../../../../.github/agents/devils-advocate.agent.md

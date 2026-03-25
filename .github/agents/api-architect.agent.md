@@ -1,1 +1,1 @@
-../../../.github/agents/api-architect.agent.md
+../../../../.github/agents/api-architect.agent.md

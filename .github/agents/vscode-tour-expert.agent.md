@@ -1,1 +1,1 @@
-../../../.github/agents/vscode-tour-expert.agent.md
+../../../../.github/agents/vscode-tour-expert.agent.md

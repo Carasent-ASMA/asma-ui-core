@@ -1,1 +1,1 @@
-../../../.github/instructions/playwright-typescript.instructions.md
+../../../../.github/instructions/playwright-typescript.instructions.md

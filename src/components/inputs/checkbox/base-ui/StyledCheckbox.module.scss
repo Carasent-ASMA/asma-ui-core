@@ -1,10 +1,12 @@
+@use 'sass:map';
+
 $checkbox-sizes: (
     medium: 42px,
     small: 38px,
 );
 
 @mixin checkbox-dimensions($size) {
-    $dim: map-get($checkbox-sizes, $size);
+    $dim: map.get($checkbox-sizes, $size);
     width: $dim;
     height: $dim;
 }
