@@ -1,6 +1,6 @@
-import { useLayoutEffect, useRef, useState, type DependencyList } from 'react'
+import { useLayoutEffect, useRef, useState, type DependencyList, type RefObject } from 'react'
 
-export const useWrap = ({ dependencyList = [] }: { dependencyList?: DependencyList }) => {
+export const useWrap = ({ dependencyList = [] }: { dependencyList?: DependencyList }): { wrapDisabled: boolean; containerRef: RefObject<HTMLDivElement>; } => {
     const containerRef = useRef<HTMLDivElement>(null)
     const [wrapDisabled, setWrapDisabled] = useState(false)
 

@@ -14,14 +14,14 @@ type StyledCheckboxProps = {
     onChange?: (event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => void
 } & Omit<React.ComponentProps<typeof Checkbox.Root>, 'children'>
 
-export const IndeterminateIcon = (props: SVGProps<SVGSVGElement>) => (
+export const IndeterminateIcon = (props: SVGProps<SVGSVGElement>): React.JSX.Element => (
     <svg viewBox='0 0 24 24' width='100%' height='100%' fill='none' {...props}>
         <title>Indeterminate icon</title>
         <path d='M6 12H18' stroke='currentColor' strokeWidth={props.strokeWidth ?? 3} strokeLinecap='round' />
     </svg>
 )
 
-export const CheckIcon = (props: SVGProps<SVGSVGElement>) => (
+export const CheckIcon = (props: SVGProps<SVGSVGElement>): React.JSX.Element => (
     <svg
         viewBox='0 0 24 24'
         width='100%'

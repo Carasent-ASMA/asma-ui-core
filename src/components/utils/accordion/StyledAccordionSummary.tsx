@@ -29,7 +29,7 @@ export const StyledAccordionSummary = ({
         <AccordionSummary
             {...rest}
             className={clsx(
-            expandChevronRight ? 'flex-row justify-between items-center w-full' : 'flex-row-reverse gap-2.5', className)}
+            expandChevronRight ? 'w-full flex-row items-center justify-between' : 'flex-row-reverse gap-2.5', className)}
             expandIcon={<ChevronDownIcon className='text-delta-800' width={chevronSize} height={chevronSize} />}
             sx={{
                 minHeight: height,
