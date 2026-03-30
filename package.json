@@ -1,9 +1,9 @@
 {
-    "name": "asma-core-ui",
+    "name": "asma-ui-core",
     "publishConfig": {
         "access": "public"
     },
-    "version": "3.2.24",
+    "version": "0.0.1",
     "type": "module",
     "files": [
         "dist/**/*",
@@ -13,13 +13,13 @@
     "keywords": [],
     "author": "asma-team",
     "types": "./dist/index.d.ts",
-    "main": "./dist/asma-core-ui.es.js",
-    "module": "./dist/asma-core-ui.es.js",
+    "main": "./dist/asma-ui-core.es.js",
+    "module": "./dist/asma-ui-core.es.js",
     "exports": {
         ".": {
             "import": {
                 "types": "./dist/index.d.ts",
-                "default": "./dist/asma-core-ui.es.js"
+                "default": "./dist/asma-ui-core.es.js"
             }
         },
         "./dist/style.css": "./dist/style.css",
@@ -27,7 +27,7 @@
     },
     "scripts": {
         "dev": "vite",
-        "build": "npx tsc && rm -rf ./dist && vite build",
+        "build": "pnpm exec tsc && rm -rf ./dist && vite build",
         "preview": "vite preview",
         "lint": "eslint src/**/*.{ts,tsx} --cache",
         "version": "echo $npm_package_version",
@@ -45,6 +45,9 @@
         "changeset:status": "changeset status"
     },
     "license": "UNLICENSED",
+    "engines": {
+        "node": ">=24 <25"
+    },
     "dependencies": {
         "@base-ui/react": "^1.2.0",
         "@emotion/react": "^11.11.1",
@@ -57,7 +60,7 @@
         "lodash-es": "^4.17.21",
         "material-ui-popup-state": "^5.0.10",
         "react-quill": "^2.0.0",
-        "sass": "^1.77.5"
+        "sass": "^1.98.0"
     },
     "devDependencies": {
         "@changesets/cli": "^2.26.2",
@@ -113,7 +116,7 @@
         "tailwindcss": "^3.3.2",
         "ts-morph": "^27.0.2",
         "tsx": "^4.21.0",
-        "typescript": "^5.8.2",
+        "typescript": "^6.0.2",
         "typescript-eslint": "^8.50.0",
         "typescript-plugin-css-modules": "^5.0.1",
         "vite": "^7.3.0",
@@ -124,13 +127,17 @@
     "peerDependencies": {
         "@emotion/react": "^11.*",
         "@emotion/styled": "^11.*",
-        "@mui/material": "^5.*",
-        "immer": "^9.*",
-        "react": "^18.*",
-        "react-dom": "^18.*"
+        "@mui/material": "^7.3.9",
+        "immer": "^11.1.4",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Carasent-ASMA/asma-ui-core.git"
     },
     "resolutions": {
-        "@types/node": "18.0.3",
-        "node": "18.17.0"
+        "@types/node": "25.5.0",
+        "node": "24.14.1"
     }
 }

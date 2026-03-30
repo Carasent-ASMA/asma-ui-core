@@ -5,7 +5,7 @@ import { CloseIcon } from 'src/components/icons'
 
 export type StyledChipProps = ChipProps & { dataTest: string; readOnly?: boolean }
 
-export const StyledChip: React.FC<StyledChipProps> = forwardRef<HTMLDivElement, StyledChipProps>(
+export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
     ({ dataTest, readOnly, onDelete, ...props }, ref) => (
         <Chip
             {...props}

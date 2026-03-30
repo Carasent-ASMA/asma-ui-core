@@ -1,5 +1,5 @@
 ---
-'asma-core-ui': patch
+'asma-ui-core': patch
 ---
 
 ASMA-3148-styled-date-picker-ui-optimizations

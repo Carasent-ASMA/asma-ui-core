@@ -1,4 +1,4 @@
-import { CloseIcon, SearchIcon, StyledInputField, type TextFieldProps } from 'asma-core-ui'
+import { CloseIcon, SearchIcon, StyledInputField, type TextFieldProps } from 'asma-ui-core'
 import type { FC } from 'react'
 import { useState, type ComponentProps } from 'react'
 import { cn } from 'src/helpers/cn'

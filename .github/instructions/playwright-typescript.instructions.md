@@ -1,0 +1,1 @@
+../../../../.github/instructions/playwright-typescript.instructions.md

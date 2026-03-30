@@ -4,29 +4,16 @@ import { StyledSelectAutocomplete } from '../../select-autocomplete'
 import type { StyledDynamicSelectProps, DynamicSelectOption, StyledDynamicSelectComponent } from '../types'
 import { LoadingIcon, PlusIconCircle, CheckIcon } from 'asma-ui-icons'
 import { DynamicInteractiveChipGroup } from './DynamicInteractiveChipGroup'
-import { forwardRef } from 'react'
+import { forwardRef, useCallback, useState } from 'react'
 import { cn } from 'src/helpers/cn'
+import type { AutocompleteCloseReason } from '@mui/material'
 
 export const DynamicSelectAutocomplete = forwardRef(
     <TOption extends DynamicSelectOption>(
         props: StyledDynamicSelectProps<TOption>,
         ref: React.Ref<HTMLInputElement>,
     ) => {
-        const getOptionLabel = (option: TOption | string) => {
-            if (typeof option === 'object') {
-                return option?.[labelKey as keyof TOption]?.toString() || ''
-            }
-            return option?.toString() || ''
-        }
-
-        const getOptionValue = (option: TOption | null) => {
-            if (typeof option === 'object') return option?.[valueKey as keyof TOption]
-            return option
-        }
-
-        const isOptionEqualToValue = (option: TOption | null, value: TOption | null): boolean => {
-            return getOptionValue(option) === getOptionValue(value)
-        }
+        const [open, setOpen] = useState(false)
 
         const {
             options,
@@ -54,12 +41,53 @@ export const DynamicSelectAutocomplete = forwardRef(
         } = props
         const typingDisabled = options.length < 11
 
+        const getOptionLabel = (option: TOption | string) => {
+            if (typeof option === 'object') {
+                return option?.[labelKey as keyof TOption]?.toString() || ''
+            }
+            return option?.toString() || ''
+        }
+
+        const getOptionValue = useCallback(
+            (option: TOption | null) => {
+                if (typeof option === 'object') return option?.[valueKey as keyof TOption]
+                return option
+            },
+            [valueKey],
+        )
+
+        const isOptionEqualToValue = useCallback(
+            (option: TOption | null, value: TOption | null): boolean => {
+                return getOptionValue(option) === getOptionValue(value)
+            },
+            [getOptionValue],
+        )
+
+        const handleOpen = useCallback(
+            (event: React.SyntheticEvent) => {
+                setOpen(true)
+                autocompleteProps?.onOpen?.(event)
+            },
+            [autocompleteProps],
+        )
+
+        const handleClose = useCallback(
+            (event: React.SyntheticEvent, reason: AutocompleteCloseReason) => {
+                setOpen(false)
+                autocompleteProps?.onClose?.(event, reason)
+            },
+            [autocompleteProps],
+        )
+
         if (multiple && readOnly) return <DynamicInteractiveChipGroup<TOption> {...props} />
 
         return (
             <div className='flex w-full flex-col gap-y-1'>
                 {title && <span className='text-base font-semibold text-delta-800'>{title}</span>}
                 <StyledSelectAutocomplete
+                    open={open}
+                    onOpen={handleOpen}
+                    onClose={handleClose}
                     disableCloseOnSelect={multiple}
                     dataTest={dataTest}
                     disabled={disabled || loading}
@@ -72,7 +100,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                     options={options}
                     fullWidth
                     classes={{
-                        listbox: 'h-full',
+                        listbox: 'h-full max-h-[300px]',
                     }}
                     getOptionLabel={getOptionLabel || autocompleteProps?.getOptionLabel}
                     onChange={(_, value) => {
@@ -83,10 +111,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                         }
                     }}
                     filterSelectedOptions={false}
-                    isOptionEqualToValue={
-                        ((option, value) => isOptionEqualToValue(option, value)) ||
-                        autocompleteProps?.isOptionEqualToValue
-                    }
+                    isOptionEqualToValue={autocompleteProps?.isOptionEqualToValue ?? isOptionEqualToValue}
                     autoHeight
                     multiple={multiple}
                     renderTags={(tagValues) => {
@@ -123,7 +148,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                                         dataTest='remaining-count-tag-chip'
                                         label={`+${remainingCount}`}
                                         variant='outlined'
-                                        readOnly
+                                        onClick={handleOpen}
                                     />
                                 )}
                             </div>

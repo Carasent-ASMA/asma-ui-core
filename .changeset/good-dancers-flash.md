@@ -1,5 +1,5 @@
 ---
-'asma-core-ui': patch
+'asma-ui-core': patch
 ---
 
 fix/export-time-picker

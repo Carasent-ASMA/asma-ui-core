@@ -3,7 +3,6 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'node:path'
 import dts from 'vite-plugin-dts'
-import tsConfigPaths from 'vite-tsconfig-paths'
 import terser from '@rollup/plugin-terser'
 import * as packageJson from './package.json'
 import path from 'node:path'
@@ -20,7 +19,6 @@ export default defineConfig({
         react({
             jsxRuntime: 'automatic',
         }),
-        tsConfigPaths(),
         dts({
             insertTypesEntry: true,
             //rollupTypes: true,
@@ -28,12 +26,15 @@ export default defineConfig({
         }),
         reactDocgenTypescript(),
     ],
+    resolve: {
+        tsconfigPaths: true,
+    },
     build: {
         lib: {
             entry: resolve('src', 'index.ts'),
-            name: 'asma-core-ui',
+            name: 'asma-ui-core',
             formats: ['es'],
-            fileName: (format) => `asma-core-ui.${format}.js`,
+            fileName: (format) => `asma-ui-core.${format}.js`,
         },
         rollupOptions: {
             external: [...Object.keys(packageJson.peerDependencies), ...Object.keys(packageJson.devDependencies)],

@@ -1,7 +1,7 @@
 import React from 'react'
 import type { Meta } from '@storybook/react-vite'
 import { StyledPopover } from './StyledPopover'
-import { StyledButton, StyledTypography } from 'asma-core-ui'
+import { StyledButton, StyledTypography } from 'asma-ui-core'
 
 const meta = {
     title: 'Utils/Styled Popover',

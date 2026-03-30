@@ -1,4 +1,4 @@
-import type { AriaRole } from 'node_modules/@types/react'
+import type { AriaRole } from 'react'
 import { within, type UserEventObject } from 'storybook/test'
 
 export const getAutocomplete = (canvasElement: HTMLElement) => {

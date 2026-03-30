@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useRef, type ChangeEvent, type ReactNode } from 'react'
+import React, { useEffect, useId, useRef, type ChangeEvent, type MutableRefObject, type ReactNode } from 'react'
 import styles from './StyledTextarea.module.scss'
 
 export interface TextareaCommonProps {
@@ -38,7 +38,7 @@ export interface TextAreaActiveProps {
     errorMessage?: string
     maxLength?: number
     counter?: boolean
-    refLink?: React.RefObject<HTMLTextAreaElement> | null | undefined
+    refLink?: MutableRefObject<HTMLTextAreaElement | null> | null | undefined
     counterLimit?: number
 }
 type TextareaConditionalProps = TextAreaActiveProps | TextAreaNotEditableProps

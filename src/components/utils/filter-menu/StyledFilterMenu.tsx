@@ -69,12 +69,14 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
     hideLabel,
 }) => {
     const { onAnchorClick, onClose, anchorEl } = useAnchor()
+    const customAnchor = anchorNode?.({ isOpen: !!anchorEl, onClose })
 
     return (
         <>
-            <div className='relative h-fit w-fit'>
-                {anchorNode ? (
-                    React.cloneElement(anchorNode({ isOpen: !!anchorEl, onClose }) as React.ReactElement, {
+            <div className='w-fit h-fit relative'>
+                {anchorNode &&
+                React.isValidElement<{ onClick?: (e: React.MouseEvent<HTMLElement>) => void }>(customAnchor) ? (
+                    React.cloneElement(customAnchor, {
                         onClick: onAnchorClick,
                     })
                 ) : (
