@@ -4,7 +4,7 @@ import type { Meta } from '@storybook/react-vite'
 import { StyledDialog } from '../StyledDialog'
 import { StyledDialogActions } from '../StyledDialogActions'
 import { StyledButton } from '../../../inputs/button/StyledButton'
-import { EditSquareIcon } from 'src/components/icons'
+import { EditSquareIcon } from 'asma-ui-icons'
 
 const meta = {
     title: 'Feedback/Dialog',

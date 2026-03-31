@@ -1,5 +1,5 @@
 import { Alert, type AlertProps } from '@mui/material'
-import { CheckOutlineIcon } from 'src/components/icons'
+import { CheckOutlineIcon } from 'asma-ui-icons'
 
 export const StyledAlert = (props: AlertProps): JSX.Element => {
     return (

@@ -4,7 +4,7 @@ import { Stack, type DrawerProps, List, ListItem, ListItemButton, ListItemIcon, 
 import { StyledTypography } from 'src/components/data-display/typography'
 import { StyledButton } from 'src/components/inputs/button'
 import { useState, type FC } from 'react'
-import { InboxOutboxIcon, PeopleIcon } from 'src/components/icons'
+import { InboxOutboxIcon, PeopleIcon } from 'asma-ui-icons'
 
 const meta = {
     title: 'Navigation/Styled Drawer',

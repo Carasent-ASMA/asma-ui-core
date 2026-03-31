@@ -1,7 +1,7 @@
 import { AccordionSummary } from '@mui/material'
 import type { AccordionSummaryProps } from '@mui/material'
 import clsx from 'clsx'
-import { ChevronDownIcon } from 'src/components/icons'
+import { ChevronDownIcon } from 'asma-ui-icons'
 
 export type StyledAccordionSummarySize = 'small' | 'large'
 

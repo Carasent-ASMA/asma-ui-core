@@ -1,7 +1,7 @@
 import { Select, type SelectChangeEvent, type SelectProps } from '@mui/material'
 import { Icon } from '@iconify/react'
 import clsx from 'clsx'
-import { CloseIcon } from 'src/components/icons'
+import { CloseIcon } from 'asma-ui-icons'
 import { StyledFormHelperText } from 'src'
 import { ErrorOutlineIcon } from 'asma-ui-icons'
 

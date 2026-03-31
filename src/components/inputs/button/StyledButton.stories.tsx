@@ -2,7 +2,7 @@ import { Icon } from '@iconify/react'
 import { Stack } from '@mui/material'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
-import { ChevronDownIcon } from 'src/components/icons'
+import { ChevronDownIcon } from 'asma-ui-icons'
 import { expect } from 'storybook/test'
 import { StyledButton } from './StyledButton'
 

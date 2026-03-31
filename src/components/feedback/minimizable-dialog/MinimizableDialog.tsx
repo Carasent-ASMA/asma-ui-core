@@ -1,4 +1,4 @@
-import { CloseIcon, DotsVerticalIcon, KeyboardCapslockIcon, MinimizeIcon } from 'src/components/icons'
+import { CloseIcon, DotsVerticalIcon, KeyboardCapslockIcon, MinimizeIcon } from 'asma-ui-icons'
 import { StyledButton } from 'src/components/inputs/button'
 import React, { useState } from 'react'
 import clsx from 'clsx'

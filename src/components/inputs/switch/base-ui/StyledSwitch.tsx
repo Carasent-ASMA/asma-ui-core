@@ -2,8 +2,8 @@
 import React, { forwardRef, useState } from 'react'
 import { Switch } from '@base-ui/react/switch'
 import styles from './StyledSwitch.module.scss'
-import type { IIcon } from 'src/components/icons'
 import { IconTemplate } from 'src/components/icons/IconTemplate'
+import type { IIcon } from 'src/components/icons'
 
 type StyledSwitchProps = {
     checked?: boolean

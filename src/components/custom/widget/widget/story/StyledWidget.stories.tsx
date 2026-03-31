@@ -1,6 +1,6 @@
 import type { Meta } from '@storybook/react-vite'
 import { StyledWidget } from '../StyledWidget'
-import { InboxOutboxOutlineIcon } from 'src/components/icons'
+import { InboxOutboxOutlineIcon } from 'asma-ui-icons'
 import { useState } from 'react'
 
 const meta: Meta = {

@@ -1,7 +1,7 @@
 import { Chip, type ChipProps } from '@mui/material'
 import type React from 'react'
 import { forwardRef } from 'react'
-import { CloseIcon } from 'src/components/icons'
+import { CloseIcon } from 'asma-ui-icons'
 
 export type StyledChipProps = ChipProps & { dataTest: string; readOnly?: boolean }
 
