@@ -7,11 +7,7 @@ const config: StorybookConfig = {
         '@storybook/addon-links',
         '@storybook/addon-essentials',
         '@storybook/addon-interactions',
-        '@storybook/addon-styling',
-        '@storybook/addons',
-        '@storybook/manager-api',
-        'storybook-addon-themes',
-        '@storybook/preset-create-react-app',
+        '@storybook/addon-themes',
         '@storybook/addon-mdx-gfm',
     ],
     framework: {
@@ -21,9 +17,6 @@ const config: StorybookConfig = {
                 viteConfigPath: './vite.config.ts',
             },
         },
-    },
-    docs: {
-        autodocs: 'tag',
     },
     core: {},
     typescript: {
