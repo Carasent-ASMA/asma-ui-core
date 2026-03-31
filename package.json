@@ -13,6 +13,8 @@
     "keywords": [],
     "author": "asma-team",
     "types": "./dist/index.d.ts",
+    "main": "./dist/asma-ui-core.es.js",
+    "module": "./dist/asma-ui-core.es.js",
     "exports": {
         ".": {
             "types": "./dist/index.d.ts",
@@ -64,7 +66,7 @@
         "@chromatic-com/storybook": "^5.1.1",
         "@eslint/js": "^9.39.2",
         "@faker-js/faker": "^8.0.2",
-        "@joshwooding/vite-plugin-react-docgen-typescript": "^0.6.3",
+        "@joshwooding/vite-plugin-react-docgen-typescript": "^0.7.0",
         "@rollup/plugin-terser": "^0.4.3",
         "@storybook/addon-a11y": "10.3.3",
         "@storybook/addon-docs": "10.3.3",
