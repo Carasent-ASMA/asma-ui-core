@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
 import dts from 'vite-plugin-dts'
+import tsConfigPaths from 'vite-tsconfig-paths'
 import terser from '@rollup/plugin-terser'
 import * as packageJson from './package.json'
 
@@ -11,6 +12,7 @@ export default defineConfig({
         react({
             jsxRuntime: 'automatic',
         }),
+        tsConfigPaths(),
         dts({
             insertTypesEntry: true,
             //rollupTypes: true,
@@ -18,9 +20,6 @@ export default defineConfig({
         }),
         // cssInjectedByJsPlugin(),
     ],
-    resolve: {
-        tsconfigPaths: true,
-    },
     build: {
         lib: {
             entry: resolve('src', 'index.ts'),
