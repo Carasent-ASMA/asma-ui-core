@@ -19,7 +19,7 @@ jobs:
           - task: NodeTool@0
             displayName: 'Install Node.js'
             inputs:
-                versionSpec: '16.x'
+                                versionSpec: '24.x'
 
           - script: |
                 ls -la
