@@ -10,7 +10,7 @@ const config: StorybookConfig = {
         '@storybook/addon-themes',
         '@storybook/addon-vitest',
         '@chromatic-com/storybook',
-        'storybook-addon-pseudo-states'
+        'storybook-addon-pseudo-states',
     ],
     framework: {
         name: '@storybook/react-vite',
@@ -23,17 +23,12 @@ const config: StorybookConfig = {
     docs: {},
     core: { disableTelemetry: true },
     typescript: {
-        check: true,
         reactDocgen: 'react-docgen-typescript',
         reactDocgenTypescriptOptions: {
             shouldExtractLiteralValuesFromEnum: true,
             shouldRemoveUndefinedFromOptional: true,
             savePropValueAsString: true,
-            propFilter: (prop) =>
-                prop.parent
-                    ? // ? /@material-ui/.test(prop.parent.fileName) || !/node_modules/.test(prop.parent.fileName)
-                      !/node_modules/.test(prop.parent.fileName)
-                    : true,
+            propFilter: (prop) => (prop.parent ? !/node_modules\/(?!@mui)/.test(prop.parent.fileName) : true),
             compilerOptions: {
                 allowSyntheticDefaultImports: false,
             },

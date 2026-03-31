@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-export function useWindowWidthSize(): number {
+function useWindowWidthSize(): number {
     const [windowSize, setWindowSize] = useState(window.innerWidth)
 
     const handleSize = () => {
@@ -18,7 +18,7 @@ export function useWindowWidthSize(): number {
     return windowSize
 }
 
-export const mobileView = (windowWidth: number | undefined): boolean => {
+const mobileView = (windowWidth: number | undefined): boolean => {
     /**
      * if return allways false it will breack mf widgets.
      */

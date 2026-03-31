@@ -1,5 +1,5 @@
-import { EmptyPageIcon } from 'asma-ui-icons'
 import type { FC } from 'react'
+import EmptyPageIcon from './EmptyPageIcon'
 
 export const StyledEmptyPage: FC<{ emptyText: string; isEmpty?: boolean; className?: string }> = ({
     emptyText,
