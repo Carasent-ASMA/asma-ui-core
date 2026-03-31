@@ -1,8 +1,14 @@
 import { useRef, useState } from 'react'
-import type { Meta } from '@storybook/react-vite'
+import { type Meta } from '@storybook/react-vite'
 import { StyledDynamicSelect } from './StyledDynamicSelect'
 import { StyledSwitch } from '../switch'
-import { StyledButton, StyledFormControlLabel, StyledFormLabel, StyledInputField, StyledInteractiveChip } from 'src'
+import {
+    StyledButton,
+    StyledFormControlLabel,
+    StyledFormLabel,
+    StyledInputField,
+    StyledInteractiveChip,
+} from 'asma-ui-core'
 
 const meta: Meta = {
     title: 'Inputs/Styled Dynamic Select',
