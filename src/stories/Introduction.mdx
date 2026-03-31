@@ -66,6 +66,37 @@ export const ClickFires: Story = {
 }
 ```
 
+```tsx
+export const InteractiveClick: Story = {
+    render: (args) => {
+        const ClickWrapper: React.FC<typeof args> = (localArgs) => {
+            const [count, setCount] = useState(0)
+            return (
+                <div>
+                    <StyledButton {...localArgs} onClick={() => setCount((c) => c + 1)}>
+                        Click me
+                    </StyledButton>
+                    <div data-testid='clicked-count'>clicked: {count}</div>
+                </div>
+            )
+        }
+        return <ClickWrapper {...args} />
+    },
+
+    play: async ({ canvas, userEvent }) => {
+        const button = canvas.getByRole('button', { name: /click me/i })
+        const counter = canvas.getByTestId('clicked-count')
+        await expect(counter).toHaveTextContent('clicked: 0')
+
+        await userEvent.click(button)
+        await expect(counter).toHaveTextContent('clicked: 1')
+
+        await userEvent.click(button)
+        await expect(counter).toHaveTextContent('clicked: 2')
+    },
+}
+```
+
 ---
 
 ### 3) Accessibility Stories (REQUIRED)
@@ -89,6 +120,35 @@ export const KeyboardAccessible: Story = {
         btn.focus()
         await userEvent.keyboard('{Enter}')
         await userEvent.keyboard(' ')
+    },
+}
+```
+
+```tsx
+export const KeyboardActivation: Story = {
+    render: (args) => {
+        const Wrapper: React.FC<typeof args> = (localArgs) => {
+            const [pressed, setPressed] = useState(false)
+            return (
+                <div>
+                    <StyledButton {...localArgs} onClick={() => setPressed(true)}>
+                        Activate
+                    </StyledButton>
+                    <div data-testid='activated'>{pressed ? 'activated' : 'idle'}</div>
+                </div>
+            )
+        }
+        return <Wrapper {...args} />
+    },
+    play: async ({ canvas, userEvent }) => {
+        const button = canvas.getByRole('button', { name: /activate/i })
+        const activated = canvas.getByTestId('activated')
+
+        button.focus()
+        await expect(button).toHaveFocus()
+        await userEvent.keyboard('{Enter}')
+        await userEvent.keyboard(' ')
+        await expect(activated).toHaveTextContent('activated')
     },
 }
 ```
@@ -136,7 +196,7 @@ We test **user guarantees**, not code paths.
 
 A correct test answers:
 
-> If this breaks in production — will CI fail?
+> If this breaks in production will CI fail?
 
 If the answer is no → the story is useless.
 
@@ -204,7 +264,7 @@ Use predictable story names so developers immediately know intent.
 - 1 interaction story
 - 1 accessibility story
 
-Without these — the component is incomplete.
+Without these the component is incomplete.
 
 ---
 
