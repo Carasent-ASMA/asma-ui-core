@@ -179,7 +179,7 @@ export const KeyboardActivation: Story = {
 export const IconOnlyAccessibility: Story = {
     args: {
         children: undefined,
-        startIcon: <ChevronDownIcon />,
+        startIcon: <ChevronDownIcon width={24} height={24} />,
         'aria-label': 'Open menu',
     },
     play: async ({ canvas }) => {
