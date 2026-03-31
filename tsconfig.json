@@ -9,7 +9,7 @@
         "types": ["vite/client", "node"],
         "paths": {
             "*": ["./*"],
-            "@": ["./src/*"],
+            "@/*": ["./src/*"],
             "asma-ui-core": ["./src/index.ts"]
         },
         "target": "ESNext",
@@ -40,6 +40,14 @@
         "verbatimModuleSyntax": true,
         "useUnknownInCatchVariables": true
     },
-    "exclude": ["dist", "node_modules", ".storybook", "src/stories", "src/**/*.stories.ts", "src/**/*.stories.tsx"],
+    "exclude": [
+        "dist",
+        "node_modules",
+        ".storybook",
+        "src/stories",
+        "src/**/story/**",
+        "src/**/*.stories.ts",
+        "src/**/*.stories.tsx"
+    ],
     "include": ["src"]
 }

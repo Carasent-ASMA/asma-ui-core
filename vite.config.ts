@@ -3,7 +3,6 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'node:path'
 import dts from 'vite-plugin-dts'
-import terser from '@rollup/plugin-terser'
 import * as packageJson from './package.json'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -36,9 +35,9 @@ export default defineConfig({
             formats: ['es'],
             fileName: (format) => `asma-ui-core.${format}.js`,
         },
-        rollupOptions: {
+        rolldownOptions: {
             external: [...Object.keys(packageJson.peerDependencies), ...Object.keys(packageJson.devDependencies)],
-            plugins: [terser],
+            output: { minify: true },
             // output: {
             //     //globals: {
             //     //    react: 'React',

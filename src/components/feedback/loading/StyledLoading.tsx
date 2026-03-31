@@ -1,6 +1,6 @@
+import { LoadingIcon } from 'asma-ui-icons'
 import clsx from 'clsx'
 import type { FC } from 'react'
-import { LoadingIcon } from 'src/components/icons'
 
 interface StyledLoadingProps {
     isLoading: boolean
