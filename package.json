@@ -25,7 +25,7 @@
         "./tw-configs/twConfigs.json": "./tw-configs/twConfigs.json"
     },
     "scripts": {
-        "chromatic": "chromatic",
+        "chromatic": "npx chromatic --config-file chromatic.config.json",
         "dev": "vite",
         "build": "pnpm exec tsc && rm -rf ./dist && vite build",
         "preview": "vite preview",
