@@ -1,5 +1,5 @@
 ---
-'asma-core-ui': minor
+'asma-ui-core': minor
 ---
 
 Added handyman icon

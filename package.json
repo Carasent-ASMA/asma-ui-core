@@ -1,9 +1,9 @@
 {
-    "name": "asma-core-ui",
+    "name": "asma-ui-core",
     "publishConfig": {
         "access": "public"
     },
-    "version": "3.2.30",
+    "version": "0.0.1",
     "type": "module",
     "files": [
         "dist/**/*",
@@ -13,13 +13,13 @@
     "keywords": [],
     "author": "asma-team",
     "types": "./dist/index.d.ts",
-    "main": "./dist/asma-core-ui.es.js",
-    "module": "./dist/asma-core-ui.es.js",
+    "main": "./dist/asma-ui-core.es.js",
+    "module": "./dist/asma-ui-core.es.js",
     "exports": {
         ".": {
             "import": {
                 "types": "./dist/index.d.ts",
-                "default": "./dist/asma-core-ui.es.js"
+                "default": "./dist/asma-ui-core.es.js"
             }
         },
         "./dist/style.css": "./dist/style.css",

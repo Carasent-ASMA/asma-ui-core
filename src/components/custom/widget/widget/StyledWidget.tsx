@@ -1,4 +1,4 @@
-import { StyledButton, StyledEmptyPage, StyledLink, StyledLoading, StyledWidgetTitle } from 'asma-core-ui'
+import { StyledButton, StyledEmptyPage, StyledLink, StyledLoading, StyledWidgetTitle } from 'asma-ui-core'
 import { useEffect, type PropsWithChildren, type ReactNode } from 'react'
 import style from './StyledWidget.module.scss'
 import { useState } from 'react'
@@ -67,7 +67,7 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
     const showFooter = showLink || showViewMore
 
     return (
-        <div className={`${style['asma-core-ui-styled-widget']} ${isEmpty ? style['empty-state'] : ''}`}>
+        <div className={`${style['asma-ui-core-styled-widget']} ${isEmpty ? style['empty-state'] : ''}`}>
             <div className={style['widget-header-left']}>
                 {icon}
                 <StyledWidgetTitle>{title}</StyledWidgetTitle>

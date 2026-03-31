@@ -1,7 +1,7 @@
 import React from 'react'
 import type { Meta } from '@storybook/react'
 import { StyledPopover } from './StyledPopover'
-import { StyledButton, StyledTypography } from 'asma-core-ui'
+import { StyledButton, StyledTypography } from 'asma-ui-core'
 
 const meta = {
     title: 'Utils/Styled Popover',
@@ -14,18 +14,18 @@ const meta = {
 export default meta
 
 export const Popover = () => {
-    const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
+    const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null)
 
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-        setAnchorEl(event.currentTarget);
-    };
+        setAnchorEl(event.currentTarget)
+    }
 
     const handleClose = () => {
-        setAnchorEl(null);
-    };
+        setAnchorEl(null)
+    }
 
-    const open = Boolean(anchorEl);
-    const id = open ? 'simple-popover' : undefined;
+    const open = Boolean(anchorEl)
+    const id = open ? 'simple-popover' : undefined
 
     return (
         <>
@@ -52,4 +52,3 @@ export const Popover = () => {
         </>
     )
 }
-

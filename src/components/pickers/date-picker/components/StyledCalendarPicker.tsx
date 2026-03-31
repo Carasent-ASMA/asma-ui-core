@@ -1,10 +1,9 @@
-import { DayPicker, type CaptionProps, type DropdownProps } from 'react-day-picker'
+import { DayPicker, type DropdownProps } from 'react-day-picker'
 
 import type { DatePickerProps } from '../types'
 import { Popover, type PopoverProps } from '@mui/material'
 import { useState } from 'react'
 import { StyledCalendarPickerFooter } from './StyledCalendarPickerFooter'
-import { CustomCaption } from './StyledCalendarPickerCaption'
 import { StyledCalendarPickerSelectMonth } from './StyledCalendarPickerSelectMonth'
 import { StyledCalendarPickerSelectYear } from './StyledCalendarPickerSelectYear'
 import { enGB } from 'date-fns/locale'
@@ -22,8 +21,17 @@ export const StyledCalendarPicker: React.FC<{
     const isNb = locale?.code === 'nb'
     const isOneMonthView = (numberOfMonths || 1) < 2
     //
-    const removeSelection = (e: React.MouseEvent) =>
-        selected && datePickerProps?.onSelect?.(undefined, new Date(Date.now()), {}, e)
+    const removeSelection = (e: React.MouseEvent) => {
+        if (!selected || !datePickerProps.onSelect) return
+        ;(
+            datePickerProps.onSelect as (
+                value: undefined,
+                triggerDate: Date,
+                modifiers: Record<string, boolean>,
+                event: React.MouseEvent,
+            ) => void
+        )(undefined, new Date(Date.now()), {}, e)
+    }
     return (
         <Popover
             open={open}
@@ -76,18 +84,8 @@ export const StyledCalendarPicker: React.FC<{
                     caption_end: isOneMonthView ? '' : style['caption_end'],
                 }}
                 components={{
-                    // IconLeft: () => <ChevronLeftIcon className='h-4 w-4' />,
-                    // IconRight: () => <ChevronRightIcon className='h-4 w-4' />,
-                    Caption: (props: CaptionProps) => (
-                        <CustomCaption {...props} setMonth={setMonth} month={month} isNb={isNb} />
-                    ),
-                    Dropdown: (props: DropdownProps) => {
-                        return props.name === 'months' ? (
-                            <StyledCalendarPickerSelectMonth {...props} />
-                        ) : (
-                            <StyledCalendarPickerSelectYear {...props} />
-                        )
-                    },
+                    MonthsDropdown: (props: DropdownProps) => <StyledCalendarPickerSelectMonth {...props} />,
+                    YearsDropdown: (props: DropdownProps) => <StyledCalendarPickerSelectYear {...props} />,
                 }}
                 footer={
                     <StyledCalendarPickerFooter

@@ -15,5 +15,5 @@ jobs:
     uses: Carasent-ASMA/asma-workflows/.github/workflows/reusable-npm-publish.yml@master
     with:
       publish_npm: true
-      package_name: "asma-core-ui"
+      package_name: "asma-ui-core"
     secrets: inherit

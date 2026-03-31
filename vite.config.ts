@@ -23,9 +23,9 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve('src', 'index.ts'),
-            name: 'asma-core-ui',
+            name: 'asma-ui-core',
             formats: ['es'],
-            fileName: (format) => `asma-core-ui.${format}.js`,
+            fileName: (format) => `asma-ui-core.${format}.js`,
         },
         rollupOptions: {
             external: [...Object.keys(packageJson.peerDependencies), ...Object.keys(packageJson.devDependencies)],

@@ -1,17 +1,7 @@
-import { type CaptionProps, Caption } from 'react-day-picker'
-
-import { type Dispatch, type SetStateAction } from 'react'
+import { MonthCaption, type MonthCaptionProps } from 'react-day-picker'
 import style from './StyledCalendarPicker.module.scss'
 
-export function CustomCaption(
-    props: CaptionProps & {
-        month: Date | undefined
-        setMonth: Dispatch<SetStateAction<Date | undefined>>
-        isNb: boolean
-    },
-) {
-    const { month } = props
-
+export function CustomCaption(props: MonthCaptionProps) {
     return (
         <div
             className={style['rdp-custom-caption']}
@@ -23,7 +13,7 @@ export function CustomCaption(
                 marginLeft: '16px',
             }}
         >
-            {month && <Caption displayMonth={month} />}
+            <MonthCaption {...props} />
         </div>
     )
 }
