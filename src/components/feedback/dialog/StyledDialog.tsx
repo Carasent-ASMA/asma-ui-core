@@ -5,7 +5,8 @@ import { StyledButton } from '../../inputs/button/StyledButton'
 import type { ReactNode } from 'react'
 import style from './StyledDialog.module.scss'
 import { CloseIcon } from 'asma-ui-icons'
-import { useIsMobileView } from 'src/hooks/useWindowWidthSize.hook'
+import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
+
 export interface IStyledDialogProps extends DialogProps {
     onCloseText?: ReactNode
     showCloseIcon?: boolean
@@ -25,7 +26,8 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     dialogHeaderNode,
     ...rest
 }) => {
-    const isMobile = useIsMobileView()
+    const isMobile = useMobileMediaQuery()
+
     return (
         <Dialog
             data-testid={dataTest}

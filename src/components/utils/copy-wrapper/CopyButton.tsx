@@ -1,7 +1,7 @@
 import { ContentCopyIcon } from 'asma-ui-icons'
 import { type FC, type ReactNode } from 'react'
 import { StyledButton, StyledTooltip, type MessageProps } from 'src'
-import { useIsMobileView } from 'src/hooks/useWindowWidthSize.hook'
+import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
 
 export const CopyButton: FC<{
     className?: string
@@ -11,7 +11,7 @@ export const CopyButton: FC<{
     text?: string
 }> = ({ className, contentToCopy, locale, messageInfo, text }) => {
     const title = locale === 'en' ? 'Copy' : 'Kopier'
-    const isMobile = useIsMobileView()
+    const isMobile = useMobileMediaQuery()
 
     return (
         <StyledTooltip title={title}>
@@ -23,9 +23,12 @@ export const CopyButton: FC<{
                     variant='text'
                     startIcon={<ContentCopyIcon width={20} height={20} />}
                     onClick={() => {
-                        navigator.clipboard.writeText(contentToCopy).then(() => {
-                            messageInfo(locale === 'no' ? 'Kopiert til utklippstavle' : 'Copied to clipboard')
-                        })
+                        navigator.clipboard
+                            .writeText(contentToCopy)
+                            .then(() => {
+                                messageInfo(locale === 'no' ? 'Kopiert til utklippstavle' : 'Copied to clipboard')
+                            })
+                            .catch((e) => console.error('Copying failed with this error: ', e))
                     }}
                 >
                     {!isMobile && (text ?? title)}
