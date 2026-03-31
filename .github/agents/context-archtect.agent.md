@@ -1,1 +1,1 @@
-../../../.github/agents/context-archtect.agent.md
+../../../../.github/agents/context-archtect.agent.md

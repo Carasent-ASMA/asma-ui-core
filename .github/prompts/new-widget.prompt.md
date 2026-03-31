@@ -1,1 +1,1 @@
-../../../.github/prompts/new-widget.prompt.md
+../../../../.github/prompts/new-widget.prompt.md

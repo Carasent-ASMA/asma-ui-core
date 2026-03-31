@@ -1,1 +1,1 @@
-../../../.github/agents/repo-architect.agent.md
+../../../../.github/agents/repo-architect.agent.md

@@ -1,1 +1,1 @@
-../../../.github/prompts/new-shared-lib.prompt.md
+../../../../.github/prompts/new-shared-lib.prompt.md

@@ -1,1 +1,1 @@
-../../../.github/agents/mcp-expert.agent.md
+../../../../.github/agents/mcp-expert.agent.md
