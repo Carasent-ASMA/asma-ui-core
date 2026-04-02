@@ -89,10 +89,10 @@ export const StyledInputField: React.FC<
                 },
                 '& .MuiFormHelperText-root': {
                     fontSize: '14px',
+                    marginLeft: 0,
                 },
                 '& .MuiFormHelperText-root.Mui-error': {
                     color: 'var(--colors-error-500) !important',
-                    marginLeft: 0,
                 },
                 '& .MuiInputBase-colorPrimary.Mui-disabled fieldset': {
                     borderColor: 'var(--colors-delta-300) !important',
