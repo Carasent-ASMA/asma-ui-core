@@ -20,6 +20,7 @@ export type StyledLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
  * @param size -  'large' | 'small'
  * @param refLink -  ref to component
  * @param dataTest -  data-test tag
+ * @param classTest - test jsDoc
  */
 
 export const StyledLink: React.FC<StyledLinkProps> = ({
