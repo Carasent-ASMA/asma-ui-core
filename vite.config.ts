@@ -6,6 +6,21 @@ import tsConfigPaths from 'vite-tsconfig-paths'
 import terser from '@rollup/plugin-terser'
 import * as packageJson from './package.json'
 
+const externalPackages = new Set([
+    ...Object.keys(packageJson.peerDependencies ?? {}),
+    ...Object.keys(packageJson.devDependencies ?? {}),
+])
+
+const isExternalPackage = (id: string) => {
+    for (const packageName of externalPackages) {
+        if (id === packageName || id.startsWith(`${packageName}/`)) {
+            return true
+        }
+    }
+
+    return false
+}
+
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [
@@ -28,7 +43,7 @@ export default defineConfig({
             fileName: (format) => `asma-ui-core.${format}.js`,
         },
         rollupOptions: {
-            external: [...Object.keys(packageJson.peerDependencies), ...Object.keys(packageJson.devDependencies)],
+            external: isExternalPackage,
             output: {
                 //globals: {
                 //    react: 'React',
