@@ -29,9 +29,9 @@
         "dev": "vite",
         "build": "pnpm exec tsc && rm -rf ./dist && vite build",
         "preview": "vite preview",
-        "lint": "eslint src/**/*.{js,jsx,ts,tsx}",
+        "lint": "eslint --ext .js,.jsx,.ts,.tsx src",
         "version": "echo $npm_package_version",
-        "lint:fix": "eslint --fix src/**/*.{jsx,ts,tsx}",
+        "lint:fix": "eslint --fix --ext .jsx,.ts,.tsx src",
         "prettier": "prettier --write src//**/*.{ts,tsx,scss} --config ./.prettierrc",
         "storybook": "storybook dev -p 6006",
         "storybook:no-browser": "storybook dev -p 6006 --no-open",
@@ -48,23 +48,19 @@
     "license": "UNLICENSED",
     "dependencies": {
         "@base-ui-components/react": "1.0.0-beta.4",
-        "@emotion/react": "^11.11.1",
-        "@emotion/styled": "^11.11.0",
         "@fontsource/material-icons": "^5.0.4",
         "@iconify/react": "^4.1.1",
-        "@mui/material": "^5.13.7",
         "@tanstack/react-table": "^8.10.0",
         "asma-ui-icons": "^0.0.35",
         "clsx": "^1.2.1",
         "date-fns": "^2.30.0",
         "lodash-es": "^4.17.21",
-        "material-ui-popup-state": "^5.0.10",
         "notistack": "^3.0.2",
-        "react-day-picker": "^8.8.2",
-        "react-quill": "^2.0.0",
         "sass": "^1.77.5"
     },
     "devDependencies": {
+        "@emotion/react": "^11.11.1",
+        "@emotion/styled": "^11.11.0",
         "@changesets/cli": "^2.26.2",
         "@faker-js/faker": "^8.0.2",
         "@rollup/plugin-terser": "^0.4.3",
@@ -102,6 +98,7 @@
         "prop-types": "^15.8.1",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
+        "react-quill": "^2.0.0",
         "rollup-plugin-typescript2": "^0.35.0",
         "storybook": "^7.6.9",
         "storybook-addon-themes": "^6.1.0",
@@ -112,15 +109,16 @@
         "typescript-plugin-css-modules": "^5.0.1",
         "vite": "^4.3.9",
         "vite-plugin-dts": "^3.1.1",
-        "vite-tsconfig-paths": "^4.2.0"
+        "vite-tsconfig-paths": "^4.2.0",
+        "@mui/material": "^5.18.0"
     },
     "peerDependencies": {
         "@emotion/react": "^11.*",
         "@emotion/styled": "^11.*",
-        "@mui/material": "^5.*",
+        "@mui/material": "^5.18.0",
         "immer": "^9.*",
-        "react": "^18.*",
-        "react-dom": "^18.*"
+        "react": "^18.0.0 || ^19.0.0",
+        "react-dom": "^18.0.0 || ^19.0.0"
     },
     "repository": {
         "type": "git",
