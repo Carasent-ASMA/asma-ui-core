@@ -4,6 +4,7 @@ import clsx from 'clsx'
 import { useEffect, useRef, useState } from 'react'
 import style from './StyledSelectAutocomplete.module.scss'
 import { cn } from 'src/helpers/cn'
+import { CloseIcon } from 'asma-ui-icons'
 
 /**
  *
@@ -145,6 +146,17 @@ export function StyledSelectAutocomplete<
                         minHeight: '23px !important',
                     },
                 }}
+                slotProps={{
+                    clearIndicator: {
+                        disableRipple: true,
+                        disableFocusRipple: true,
+                    },
+                }}
+                clearIcon={
+                    <span className='rounded-full items-center justify-center min-w-6 min-h-6 cursor-pointer flex bg-delta-50 cursor-pointer'>
+                        <CloseIcon width={20} height={20} className='text-delta-700' />
+                    </span>
+                }
             />
         </div>
     )

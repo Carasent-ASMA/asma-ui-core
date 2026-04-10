@@ -1,8 +1,9 @@
-import { ErrorOutlineIcon, Skeleton, StyledChip, StyledInteractiveChip, StyledTooltip } from 'src'
+import { ErrorOutlineIcon, Skeleton, StyledButton, StyledChip, StyledInteractiveChip, StyledTooltip } from 'src'
 import type { DynamicSelectOption, StyledDynamicSelectComponent, StyledDynamicSelectProps } from '../types'
 import { cn } from 'src/helpers/cn'
 import { useWrap } from '../helpers/useWrap'
 import { forwardRef } from 'react'
+import { CloseIcon } from 'asma-ui-icons'
 
 export const DynamicInteractiveChipGroup = forwardRef(
     <TOption extends DynamicSelectOption>(
@@ -18,6 +19,7 @@ export const DynamicInteractiveChipGroup = forwardRef(
             title,
             disabled,
             onChange,
+            required,
             error,
             helperText,
             valueKey = 'value',
@@ -26,6 +28,7 @@ export const DynamicInteractiveChipGroup = forwardRef(
             getOptionTooltip,
             loading,
             size,
+            locale = 'en',
         } = props
         const { containerRef, wrapDisabled } = useWrap({ dependencyList: [options, options.length] })
 
@@ -45,9 +48,12 @@ export const DynamicInteractiveChipGroup = forwardRef(
             return getOptionValue(option) === getOptionValue(value)
         }
 
+        const hasValue = multiple ? Array.isArray(value) && value.length > 0 : value !== null && value !== undefined
+
         const handleClick = (option: TOption) => {
             if (!multiple) {
                 const newValue = isOptionEqualToValue(option, value) ? null : option
+                if (newValue === null) return
                 onChange(newValue)
                 return
             }
@@ -169,12 +175,28 @@ export const DynamicInteractiveChipGroup = forwardRef(
                         <span>-</span>
                     )}
                 </div>
-                {!readOnly && (
-                    <div className={cn('text-sm/5 text-delta-600 flex items-center gap-1', error && 'text-error-500')}>
-                        {error && <ErrorOutlineIcon width={20} height={20} className='min-w-5' />}
-                        <span className='line-clamp-1'>{helperText || (error && !helperText && 'Required')}</span>
-                    </div>
+                {!required && hasValue && !readOnly && (
+                    <StyledButton
+                        dataTest='clear-selection-btn'
+                        variant='text'
+                        startIcon={
+                            size === 'medium' ? (
+                                <CloseIcon height={24} width={24} className='size-6' />
+                            ) : (
+                                <CloseIcon height={20} width={20} className='size-5' />
+                            )
+                        }
+                        className='w-fit'
+                        size={size}
+                        onClick={() => (multiple ? onChange([]) : onChange(null))}
+                    >
+                        {locale === 'en' ? 'Clear selection' : 'Fjern valget'}
+                    </StyledButton>
                 )}
+                <div className={cn('text-sm/5 text-delta-600 flex items-center gap-1', error && 'text-error-500')}>
+                    {error && <ErrorOutlineIcon width={20} height={20} className='min-w-5' />}
+                    <span className='line-clamp-1'>{helperText || (error && !helperText && 'Required')}</span>
+                </div>
             </div>
         )
     },
