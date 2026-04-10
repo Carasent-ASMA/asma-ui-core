@@ -21,7 +21,7 @@ export const DynamicSelectAutocomplete = forwardRef(
             value,
             readOnly,
             multiple,
-            disableClearable,
+            required,
             onChange,
             size,
             title,
@@ -96,7 +96,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                     readOnly={readOnly}
                     value={value}
                     size={size}
-                    disableClearable={disableClearable}
+                    disableClearable={required}
                     options={options}
                     fullWidth
                     classes={{
