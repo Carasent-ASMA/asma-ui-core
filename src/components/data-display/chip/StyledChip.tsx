@@ -19,6 +19,7 @@ export const StyledChip: React.FC<StyledChipProps> = forwardRef<HTMLDivElement, 
                     backgroundColor: 'white',
                     borderColor: 'var(--colors-delta-300)',
                     color: 'var(--colors-delta-800)',
+                    fontSize: '14px',
                 },
                 ...(readOnly
                     ? {
