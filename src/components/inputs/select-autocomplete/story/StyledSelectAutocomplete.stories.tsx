@@ -1,10 +1,9 @@
 import type { StoryObj, Meta } from '@storybook/react-vite'
 import { StyledSelectAutocomplete, type StyledSelectAutocompleteProps } from '../StyledSelectAutocomplete'
 import { ControlledAutocomplete, top100Films, type Film } from './components/StyledSelectAutocompleteExample'
-import { useMemo, useState, type FC } from 'react'
+import { useMemo, useState, type AriaRole, type FC } from 'react'
 import { StyledInputField } from '../../input-field'
-import { expect, within } from 'storybook/test'
-import { openAutocomplete, selectOption } from './test-utils/autocomplete'
+import { expect, within, type UserEventObject } from 'storybook/test'
 import { generateOptions, withRenderCounter } from './test-utils/perf'
 
 declare global {
@@ -37,6 +36,19 @@ const getAutocomplete = (canvasElement: HTMLElement) => {
     const input = canvas.getByRole('combobox')
 
     return { canvas, input }
+}
+
+const openAutocomplete = async (input: HTMLElement, userEvent: UserEventObject): Promise<void> => {
+    await userEvent.click(input)
+}
+
+const selectOption = async (
+    canvas: { findByRole: (role: AriaRole, opts: { name: string }) => Promise<HTMLElement> },
+    userEvent: UserEventObject,
+    name: string,
+): Promise<void> => {
+    const option = await canvas.findByRole('option', { name })
+    await userEvent.click(option)
 }
 
 export const OpensOnClick: Story = {
