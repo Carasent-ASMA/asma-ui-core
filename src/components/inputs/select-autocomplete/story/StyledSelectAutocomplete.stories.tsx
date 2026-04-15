@@ -4,7 +4,7 @@ import { ControlledAutocomplete, top100Films, type Film } from './components/Sty
 import { useMemo, useState, type FC } from 'react'
 import { StyledInputField } from '../../input-field'
 import { expect, within } from 'storybook/test'
-import { getAutocomplete, openAutocomplete, selectOption } from './test-utils/autocomplete'
+import { openAutocomplete, selectOption } from './test-utils/autocomplete'
 import { generateOptions, withRenderCounter } from './test-utils/perf'
 
 declare global {
@@ -31,6 +31,13 @@ const meta = {
 
 export default meta
 type Story = StoryObj<typeof StyledSelectAutocomplete<Film, true, false, false>>
+
+const getAutocomplete = (canvasElement: HTMLElement) => {
+    const canvas = within(canvasElement.ownerDocument.body)
+    const input = canvas.getByRole('combobox')
+
+    return { canvas, input }
+}
 
 export const OpensOnClick: Story = {
     render: (args) => <ControlledAutocomplete {...args} />,

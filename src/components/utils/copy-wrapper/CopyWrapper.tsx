@@ -38,9 +38,12 @@ export const CopyWrapper: FC<
                         onClick={(e) => {
                             e.preventDefault()
                             e.stopPropagation()
-                            navigator.clipboard.writeText(contentToCopy).then(() => {
-                                messageInfo(locale === 'no' ? 'Kopiert til utklippstavle' : 'Copied to clipboard')
-                            })
+                            navigator.clipboard
+                                .writeText(contentToCopy)
+                                .then(() => {
+                                    messageInfo(locale === 'no' ? 'Kopiert til utklippstavle' : 'Copied to clipboard')
+                                })
+                                .catch((e) => console.error('Copying failed with this: ', e))
                         }}
                         startIcon={<ContentCopyIcon width={20} height={20} />}
                     />

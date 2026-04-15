@@ -28,7 +28,7 @@ export const CopyButton: FC<{
                             .then(() => {
                                 messageInfo(locale === 'no' ? 'Kopiert til utklippstavle' : 'Copied to clipboard')
                             })
-                            .catch((e) => console.error('Copying failed with this error: ', e))
+                            .catch((e) => console.error('Copying failed with this: ', e))
                     }}
                 >
                     {!isMobile && (text ?? title)}

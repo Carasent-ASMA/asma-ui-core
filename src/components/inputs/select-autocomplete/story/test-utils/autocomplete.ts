@@ -1,12 +1,13 @@
 import type { AriaRole } from 'react'
-import { within, type UserEventObject } from 'storybook/test'
+import { type UserEventObject } from 'storybook/test'
 
-export const getAutocomplete = (canvasElement: HTMLElement) => {
-    const canvas = within(canvasElement.ownerDocument.body)
-    const input = canvas.getByRole('combobox')
-
-    return { canvas, input }
-}
+// NOTE: ts errors
+// export const getAutocomplete = (canvasElement: HTMLElement) => {
+//     const canvas = within(canvasElement.ownerDocument.body)
+//     const input = canvas.getByRole('combobox')
+//
+//     return { canvas, input }
+// }
 
 export const openAutocomplete = async (input: HTMLElement, userEvent: UserEventObject): Promise<void> => {
     await userEvent.click(input)

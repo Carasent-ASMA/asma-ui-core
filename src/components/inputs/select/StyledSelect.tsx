@@ -1,6 +1,5 @@
 import { Select, type SelectChangeEvent, type SelectProps } from '@mui/material'
 import { Icon } from '@iconify/react'
-import clsx from 'clsx'
 import { CloseIcon } from 'asma-ui-icons'
 import { StyledFormHelperText } from 'src'
 import { ErrorOutlineIcon } from 'asma-ui-icons'
@@ -31,13 +30,12 @@ export const StyledSelect: React.FC<StyledSelectProps> = ({ dataTest, allowClear
                 data-testid={dataTest}
                 error={error}
                 value={props.value}
-                IconComponent={(props) => (
+                IconComponent={() => (
                     <Icon
-                        {...props}
                         icon='material-symbols:expand-more-rounded'
                         width={24}
                         height={24}
-                        className={clsx(props.className, 'select-custom-icon')}
+                        className={'select-custom-icon'}
                     />
                 )}
                 endAdornment={

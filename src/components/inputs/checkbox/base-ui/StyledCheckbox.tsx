@@ -64,12 +64,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
         className,
     )
 
-    const checkboxClasses = cn(
-        'styled-checkbox-inner',
-        styles['Checkbox'],
-        styles[`size-${size}`],
-        indeterminate && styles['Indeterminate'],
-    )
+    const checkboxClasses = cn(styles['Checkbox'], styles[`size-${size}`], indeterminate && styles['Indeterminate'])
     const CheckboxIcon = indeterminate ? IndeterminateIcon : CheckIcon
 
     const rippleRef = React.useRef<HTMLSpanElement>(null)

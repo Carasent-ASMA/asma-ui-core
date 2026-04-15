@@ -52,7 +52,7 @@ export const DynamicInteractiveChipGroup = forwardRef(
                 return
             }
 
-            const currentValues = value || []
+            const currentValues = value ?? []
             const exists = currentValues.find((v) => isOptionEqualToValue(v, option))
             const newValues = exists
                 ? currentValues.filter((v) => !isOptionEqualToValue(v, option))

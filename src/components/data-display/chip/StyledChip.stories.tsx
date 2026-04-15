@@ -43,7 +43,7 @@ export const Deletable: Story = {
 export const Hovered: Story = {
     args: { label: 'Hovered', onClick: fn() },
     parameters: { pseudo: { hover: true } },
-    play: async ({ canvas, canvasElement, userEvent }) => {
+    play: async ({ canvas, userEvent }) => {
         const chip = canvas.getByRole('button', { name: 'Hovered' })
 
         // const user = userEvent.setup({ document: canvasElement.ownerDocument })
