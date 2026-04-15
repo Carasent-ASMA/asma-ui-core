@@ -50,7 +50,7 @@ export default defineConfig({
         },
         rolldownOptions: {
             external: isExternalPackage,
-            output: { minify: true },
+            output: { minify: true, strictExecutionOrder: true },
         },
     },
     test: {
