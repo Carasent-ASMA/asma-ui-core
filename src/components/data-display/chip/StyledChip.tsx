@@ -16,13 +16,14 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
             sx={{
                 border: '1px solid',
                 backgroundColor: 'white',
-                borderColor: 'var(--colors-delta-200)',
+                borderColor: 'var(--colors-delta-300)',
                 color: 'var(--colors-delta-800)',
+                fontSize: '14px',
                 ...(readOnly
                     ? {
                           pointerEvents: 'none',
                           '&:hover': {
-                              borderColor: 'var(--colors-delta-200)',
+                              borderColor: 'var(--colors-delta-300)',
                               backgroundColor: 'white',
                           },
                       }

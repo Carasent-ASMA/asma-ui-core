@@ -55,6 +55,7 @@ export const InteractiveSelectStory: React.FC = () => {
     const [size, setSize] = useState<'small' | 'medium'>('medium')
     const [overrideRenderLabel, setOverrideRenderLabel] = useState(false)
     const [noOptionsText, setNoOptionsText] = useState('No options')
+    const [required, setRequired] = useState(false)
     const [maxTags, setMaxTags] = useState<number | undefined>()
 
     const selectRefs = useRef<Record<string, HTMLInputElement | null>>({})
@@ -117,6 +118,7 @@ export const InteractiveSelectStory: React.FC = () => {
                                     size={size}
                                     disabled={disabled}
                                     error={error}
+                                    required={required}
                                     helperText={helperText}
                                     valueKey='id'
                                     labelKey='name'
@@ -138,6 +140,7 @@ export const InteractiveSelectStory: React.FC = () => {
                                     loading={loading}
                                     title={title}
                                     disabled={disabled}
+                                    required={required}
                                     error={error}
                                     helperText={helperText}
                                     valueKey='id'
@@ -220,6 +223,18 @@ export const InteractiveSelectStory: React.FC = () => {
                                 dataTest='disabled-switch'
                                 checked={disabled}
                                 onChange={() => setDisabled(!disabled)}
+                            />
+                        }
+                    />
+
+                    <StyledFormControlLabel
+                        label='Toggle required'
+                        className='w-fit'
+                        control={
+                            <StyledSwitch
+                                dataTest='required-switch'
+                                checked={required}
+                                onChange={() => setRequired(!required)}
                             />
                         }
                     />

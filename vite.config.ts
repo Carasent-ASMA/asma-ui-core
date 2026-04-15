@@ -9,6 +9,21 @@ import { fileURLToPath } from 'node:url'
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin'
 import { playwright } from '@vitest/browser-playwright'
 
+const externalPackages = new Set([
+    ...Object.keys(packageJson.peerDependencies ?? {}),
+    ...Object.keys(packageJson.devDependencies ?? {}),
+])
+
+const isExternalPackage = (id: string) => {
+    for (const packageName of externalPackages) {
+        if (id === packageName || id.startsWith(`${packageName}/`)) {
+            return true
+        }
+    }
+
+    return false
+}
+
 const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url))
 
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
@@ -34,7 +49,7 @@ export default defineConfig({
             fileName: (format) => `asma-ui-core.${format}.js`,
         },
         rolldownOptions: {
-            external: [...Object.keys(packageJson.peerDependencies), ...Object.keys(packageJson.devDependencies)],
+            external: isExternalPackage,
             output: { minify: true },
         },
     },
