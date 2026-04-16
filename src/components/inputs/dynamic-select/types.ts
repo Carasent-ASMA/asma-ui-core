@@ -50,6 +50,8 @@ type DynamicSelectCommonProps<TOption extends DynamicSelectOption> = {
     required?: boolean
     /** Supplementary text rendered below the input. Shown as-is, or falls back to `'Required'` when `error=true` and no text is provided. */
     helperText?: React.ReactNode
+    /** Completely removes the helper text block below the autocomplete */
+    disableHelperText?: boolean
     /**
      * Key of `TOption` used as the option's identity for comparison and as the chip/tag key.
      * Defaults to `'value'`. Only applicable when `TOption` is an object.
