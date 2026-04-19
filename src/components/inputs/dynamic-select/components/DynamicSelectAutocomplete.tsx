@@ -29,6 +29,7 @@ export const DynamicSelectAutocomplete = forwardRef(
             placeholder,
             disabled,
             helperText,
+            disableHelperText,
             error,
             valueKey = 'value',
             labelKey = 'label',
@@ -244,7 +245,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                             {...params}
                             inputRef={ref}
                             error={error}
-                            helperText={helperText || ' '}
+                            helperText={disableHelperText ? '' : helperText || ' '}
                             variant='outlined'
                             label=''
                             placeholder={placeholder}

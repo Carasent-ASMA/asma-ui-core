@@ -129,6 +129,7 @@ export const InteractiveSelectStory: React.FC = () => {
                             ) : (
                                 <StyledDynamicSelect
                                     ref={setSelectRef(key)}
+                                    disableHelperText={false}
                                     dataTest={key}
                                     multiple={false}
                                     options={!empty ? _options : []}
