@@ -1,10 +1,9 @@
 // components/StyledSwitch/StyledSwitch.tsx
 import React, { forwardRef, useState } from 'react'
-import { Switch } from '@base-ui-components/react/switch'
+import { Switch } from '@base-ui/react/switch'
 import styles from './StyledSwitch.module.scss'
-import type { IIcon } from 'src/components/icons'
 import { IconTemplate } from 'src/components/icons/IconTemplate'
-import { cn } from 'src/helpers/cn'
+import type { IIcon } from 'src/components/icons'
 
 type StyledSwitchProps = {
     checked?: boolean
@@ -15,7 +14,7 @@ type StyledSwitchProps = {
     required?: boolean
     id?: string
     dataTest?: string
-    value?: React.InputHTMLAttributes<HTMLInputElement>['value'] | unknown
+    // value?: React.InputHTMLAttributes<HTMLInputElement>['value']
 } & Omit<React.ComponentProps<typeof Switch.Root>, 'children'>
 
 export type SwitchProps = StyledSwitchProps
@@ -48,7 +47,7 @@ export const StyledSwitch = forwardRef<HTMLButtonElement, StyledSwitchProps>(
             disabled,
             readOnly,
             required,
-            value,
+            // value,
             id,
             dataTest,
             ...rest
@@ -63,19 +62,21 @@ export const StyledSwitch = forwardRef<HTMLButtonElement, StyledSwitchProps>(
             if (!isControlled) setChecked(newChecked)
             onChange?.(
                 {
-                    target: { checked: newChecked, name: id, value: value },
+                    target: { checked: newChecked, name: id },
                 } as React.ChangeEvent<HTMLInputElement>,
                 newChecked,
             )
         }
 
         const stateProps = isControlled ? { checked } : { defaultChecked }
-        const iconClass = cn(styles['iconContent'], checked ? styles['checked'] : styles['unchecked'])
+        const iconClass = styles['iconContent']
 
         return (
             <Switch.Root
                 {...rest}
                 {...stateProps}
+                nativeButton
+                render={<button />}
                 ref={ref}
                 className={styles['switch']}
                 onCheckedChange={handleChange}

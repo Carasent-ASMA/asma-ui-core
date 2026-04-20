@@ -11,7 +11,7 @@ import type { PopoverProps } from '@mui/material'
  * @param popoverContent
  */
 
-type StyledFilterMenuProps = {
+interface StyledFilterMenuProps {
     dataTest: string
     filterIsActive: boolean
     popoverContent: ((props: { isOpen: boolean; onClose: () => void }) => ReactNode) | ReactNode
@@ -73,7 +73,7 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
 
     return (
         <>
-            <div className='w-fit h-fit relative'>
+            <div className='relative h-fit w-fit'>
                 {anchorNode &&
                 React.isValidElement<{ onClick?: (e: React.MouseEvent<HTMLElement>) => void }>(customAnchor) ? (
                     React.cloneElement(customAnchor, {
@@ -91,14 +91,14 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
                         size={size}
                         dataTest={dataTest}
                     >
-                        {!hideLabel && (label || 'Filter')}
+                        {!hideLabel && (label ?? 'Filter')}
                     </StyledButton>
                 )}
                 {filterIsActive && (
                     <div
                         className={clsx(
-                            'h-2 w-2 bg-gama-400 rounded-full absolute',
-                            size === 'large' ? 'top-2 right-2' : 'top-1 right-1',
+                            'absolute h-2 w-2 rounded-full bg-gama-400',
+                            size === 'large' ? 'right-2 top-2' : 'right-1 top-1',
                         )}
                     ></div>
                 )}
@@ -109,18 +109,18 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
                 anchorEl={anchorEl}
                 onClose={onClose}
                 anchorOrigin={
-                    popoverProps?.anchorOrigin || {
+                    popoverProps?.anchorOrigin ?? {
                         vertical: 'bottom',
                         horizontal: 'right',
                     }
                 }
                 transformOrigin={
-                    popoverProps?.transformOrigin || {
+                    popoverProps?.transformOrigin ?? {
                         vertical: 'top',
                         horizontal: 'right',
                     }
                 }
-                className={popoverProps?.className || 'my-1'}
+                className={popoverProps?.className ?? 'my-1'}
             >
                 {isReactNode(popoverContent) ? popoverContent : popoverContent({ isOpen: !!anchorEl, onClose })}
             </StyledPopover>

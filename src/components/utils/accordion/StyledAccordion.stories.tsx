@@ -1,10 +1,10 @@
-import type { Meta } from '@storybook/react'
-import { StyledAccordion } from './StyledAccordion'
-import { AccordionDetails, Typography } from '@mui/material'
-import { StyledAccordionSummary } from './StyledAccordionSummary'
-import { StyledButton } from 'src/components/inputs/button'
+import { Typography } from '@mui/material'
+import type { Meta } from '@storybook/react-vite'
 import { StyledWidgetTitle } from 'src/components/custom/widget/widget-title/StyledWidgetTitle'
+import { StyledButton } from 'src/components/inputs/button'
+import { StyledAccordion } from './StyledAccordion'
 import { StyledAccordionDetails } from './StyledAccordionDetails'
+import { StyledAccordionSummary } from './StyledAccordionSummary'
 
 const meta: Meta = {
     title: 'Utils/Accordion',
@@ -18,9 +18,9 @@ const meta: Meta = {
 
 export default meta
 
-export const Accordion = () => (
+export const Accordion = (): JSX.Element => (
     <>
-        <StyledAccordion className='max-w-[600px] mb-4'>
+        <StyledAccordion className='mb-4 max-w-[600px]'>
             <div className='relative flex items-center justify-between pr-4'>
                 <StyledAccordionSummary size={'large'} sx={{ flexDirection: 'row-reverse', gap: '10px' }}>
                     <StyledWidgetTitle>Header lorem ipsum</StyledWidgetTitle>

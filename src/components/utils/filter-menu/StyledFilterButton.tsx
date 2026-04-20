@@ -7,7 +7,7 @@ import clsx from 'clsx'
  * @param filterIsActive - needed to determine whether or not to show the dot in the top right corner indicating some changes were made
  */
 
-type StyledFilterMenuProps = {
+interface StyledFilterMenuProps {
     filterIsActive: boolean
     label?: string
     hideLabel?: boolean
@@ -23,7 +23,7 @@ export const StyledFilterButton: React.FC<StyledButtonProps & StyledFilterMenuPr
 }) => {
     return (
         <>
-            <div className='w-fit h-fit relative'>
+            <div className='relative h-fit w-fit'>
                 <StyledButton
                     {...props}
                     type='button'
@@ -31,13 +31,13 @@ export const StyledFilterButton: React.FC<StyledButtonProps & StyledFilterMenuPr
                     variant={variant}
                     size={size}
                 >
-                    {!hideLabel && (label || 'Filter')}
+                    {!hideLabel && (label ?? 'Filter')}
                 </StyledButton>
                 {filterIsActive && (
                     <div
                         className={clsx(
-                            'h-2 w-2 bg-gama-400 rounded-full absolute',
-                            size === 'large' ? 'top-2 right-2' : 'top-1 right-1',
+                            'absolute h-2 w-2 rounded-full bg-gama-400',
+                            size === 'large' ? 'right-2 top-2' : 'right-1 top-1',
                         )}
                     ></div>
                 )}

@@ -1,46 +1,44 @@
-import { useEffect, useGlobals } from '@storybook/addons'
-import { withThemeByClassName } from '@storybook/addon-styling'
 import 'tailwindcss/tailwind.css'
 import './normalize.css'
 import '../src/styles/index.css'
+import type { Preview, ReactRenderer } from '@storybook/react-vite'
+import { withThemeByDataAttribute } from '@storybook/addon-themes'
 
-export const parameters = {
-    // themes: {
-    //     default: 'default',
-    //     list: [
-    //         { name: 'default', class: 'theme-default', color: 'blue' },
-    //         { name: 'fretex', class: 'theme-fretex', color: 'red' },
-    //         { name: 'greenish', class: 'theme-greenish', color: 'green' },
-    //     ],
-    // },
-    actions: { argTypesRegex: '^on[A-Z].*' },
-    controls: {
-        expanded: true, // Adds the description and default columns
-        matchers: {
-            color: /(background|color)$/i,
-            date: /Date$/,
+import { INITIAL_VIEWPORTS } from 'storybook/viewport'
+
+const preview: Preview = {
+    decorators: [
+        withThemeByDataAttribute<ReactRenderer>({
+            themes: {
+                default: 'default',
+                fretex: 'fretex',
+                greenish: 'greenish',
+            },
+            defaultTheme: 'default',
+            attributeName: 'data-theme',
+        }),
+    ],
+    parameters: {
+        controls: {
+            expanded: true,
+            matchers: {
+                color: /(background|color)$/i,
+                date: /Date$/,
+            },
+        },
+
+        viewport: {
+            options: INITIAL_VIEWPORTS,
+        },
+
+        a11y: {
+            // 'todo' - show a11y violations in the test UI only
+            // 'error' - fail CI on a11y violations
+            // 'off' - skip a11y checks entirely
+            test: 'todo',
         },
     },
+    tags: ['autodocs'],
 }
 
-export const useTheme = (StoryFn) => {
-    const [globals] = useGlobals()
-
-    useEffect(() => {
-        document.body.setAttribute('data-theme', globals.theme)
-    }, [globals])
-
-    return StoryFn()
-}
-
-export const decorators = [
-    useTheme,
-    withThemeByClassName({
-        themes: {
-            default: 'default',
-            fretex: 'fretex',
-            greenish: 'greenish',
-        },
-        defaultTheme: 'greenish',
-    }),
-]
+export default preview

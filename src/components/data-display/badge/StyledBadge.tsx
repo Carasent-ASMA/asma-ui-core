@@ -3,7 +3,7 @@ import { Badge, type BadgeProps } from '@mui/material'
 export const StyledBadge: React.FC<BadgeProps & { dataTest: string }> = ({ color = 'primary', dataTest, ...props }) => (
     <Badge
         color={color}
-        data-test={dataTest}
+        data-testid={dataTest}
         {...props}
         sx={{
             '& .MuiBadge-colorPrimary': {

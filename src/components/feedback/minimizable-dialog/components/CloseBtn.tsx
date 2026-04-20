@@ -1,6 +1,6 @@
 import React from 'react'
 import { StyledTooltip } from 'src/components/data-display/tooltip'
-import { CloseIcon } from 'src/components/icons'
+import { CloseIcon } from 'asma-ui-icons'
 import { StyledButton } from 'src/components/inputs/button'
 
 export const CloseBtn: React.FC<{

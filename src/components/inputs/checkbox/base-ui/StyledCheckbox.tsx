@@ -1,5 +1,5 @@
 import React, { useEffect, type SVGProps } from 'react'
-import { Checkbox } from '@base-ui-components/react/checkbox'
+import { Checkbox } from '@base-ui/react'
 import styles from './StyledCheckbox.module.scss'
 import { cn } from 'src/helpers/cn'
 
@@ -14,14 +14,14 @@ type StyledCheckboxProps = {
     onChange?: (event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => void
 } & Omit<React.ComponentProps<typeof Checkbox.Root>, 'children'>
 
-export const IndeterminateIcon = (props: SVGProps<SVGSVGElement>) => (
+export const IndeterminateIcon = (props: SVGProps<SVGSVGElement>): React.JSX.Element => (
     <svg viewBox='0 0 24 24' width='100%' height='100%' fill='none' {...props}>
         <title>Indeterminate icon</title>
         <path d='M6 12H18' stroke='currentColor' strokeWidth={props.strokeWidth ?? 3} strokeLinecap='round' />
     </svg>
 )
 
-export const CheckIcon = (props: SVGProps<SVGSVGElement>) => (
+export const CheckIcon = (props: SVGProps<SVGSVGElement>): React.JSX.Element => (
     <svg
         viewBox='0 0 24 24'
         width='100%'
@@ -50,7 +50,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
     className,
     onChange,
     ...props
-}) => {
+}): JSX.Element => {
     const isHideWrapper = !!hideWrapper
     const isRippleEnabled = !disableRipple && !isHideWrapper && !disabled && !readOnly
 
@@ -64,12 +64,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
         className,
     )
 
-    const checkboxClasses = cn(
-        'styled-checkbox-inner',
-        styles['Checkbox'],
-        styles[`size-${size}`],
-        indeterminate && styles['Indeterminate'],
-    )
+    const checkboxClasses = cn(styles['Checkbox'], styles[`size-${size}`], indeterminate && styles['Indeterminate'])
     const CheckboxIcon = indeterminate ? IndeterminateIcon : CheckIcon
 
     const rippleRef = React.useRef<HTMLSpanElement>(null)
@@ -80,8 +75,16 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
             if (!isRippleEnabled) return
 
             const ripple = document.createElement('span')
-            ripple.className = styles['CheckboxRipple'] || ''
-            ripple.addEventListener('animationend', () => ripple.remove(), { once: true })
+            if (styles['CheckboxRipple']) {
+                ripple.className = styles['CheckboxRipple']
+            }
+            ripple.addEventListener(
+                'animationend',
+                () => {
+                    ripple.remove()
+                },
+                { once: true },
+            )
             rippleRef.current?.appendChild(ripple)
         },
         [isRippleEnabled],
@@ -108,7 +111,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
     return (
         <Checkbox.Root
             className={wrapperClasses}
-            data-test={dataTest}
+            data-testid={dataTest}
             checked={checked}
             disabled={disabled}
             readOnly={readOnly}

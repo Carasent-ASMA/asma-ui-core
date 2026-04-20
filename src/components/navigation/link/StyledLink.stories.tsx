@@ -1,4 +1,4 @@
-import type { Meta } from '@storybook/react'
+import type { Meta } from '@storybook/react-vite'
 
 import { StyledLink } from './StyledLink'
 
@@ -20,7 +20,7 @@ const meta = {
 
 export default meta
 
-export const Link = () => {
+export const Link = (): JSX.Element => {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <StyledLink {...meta.args} />

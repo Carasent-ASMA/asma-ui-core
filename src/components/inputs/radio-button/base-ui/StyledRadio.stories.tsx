@@ -1,9 +1,8 @@
-import type { Meta } from '@storybook/react'
-import type { StoryObj } from '@storybook/react'
-import { StyledRadio } from './StyledRadio'
-import { StyledRadioGroup } from './StyledRadioGroup'
-import { StyledFormControlLabel } from 'asma-ui-core'
-import React from 'react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
+import { useState } from 'react'
+import { expect } from 'storybook/test'
+import { StyledRadio, type StyledRadioProps } from './StyledRadio'
+import { StyledRadioGroup, type StyledRadioGroupProps } from './StyledRadioGroup'
 
 const meta = {
     title: 'base-ui/Styled Radio',
@@ -16,68 +15,218 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof StyledRadio>
 
-export const Radio: Story = {
-    args: { ...meta.args },
-    render: () => <StyledRadioExample />,
+const RadioWrapper = ({
+    label,
+    groupArgs,
+    radioArgs,
+}: {
+    label: string
+    groupArgs: Omit<StyledRadioGroupProps, 'children'>
+    radioArgs: Omit<StyledRadioProps, 'ref'>
+}) => {
+    const [selected, setSelected] = useState<string | number | boolean | null>(groupArgs.defaultValue ?? null)
+
+    return (
+        <StyledRadioGroup
+            {...groupArgs}
+            value={selected}
+            onValueChange={(value) => {
+                setSelected(value as string | number | boolean | null)
+            }}
+        >
+            {/* <StyledFormControlLabel label={label} control={<StyledRadio {...radioArgs} />} /> */}
+            <label className='flex items-center'>
+                <StyledRadio {...radioArgs} />
+                {label}
+            </label>
+        </StyledRadioGroup>
+    )
 }
 
-const StyledRadioExample = () => {
-    return (
-        <div className='flex flex-col gap-4'>
-            <StyledRadioGroup dataTest='radio-group' defaultValue='one' name='radio-buttons-group'>
-                <span>Standard group</span>
-                <StyledRadio dataTest='one' value='one' />
-                <StyledFormControlLabel label='two' control={<StyledRadio dataTest='two' value='two' />} />
-                <StyledFormControlLabel label='two' disabled control={<StyledRadio dataTest='two' value='two' />} />
-                <StyledFormControlLabel label='three' control={<StyledRadio dataTest='three' value='three' />} />
-                <StyledFormControlLabel
-                    label='four'
-                    control={<StyledRadio dataTest='four' size='small' value='four' />}
-                />
-            </StyledRadioGroup>
+export const Unchecked_Default: Story = {
+    args: { value: true },
+    render: (args) => <RadioWrapper label='Unchecked' groupArgs={{ name: 'unchecked-default' }} radioArgs={args} />,
+}
 
-            <StyledRadioGroup
-                dataTest='radio-group-helpertext'
-                name='radio-buttons-helpertext'
-                className='flex flex-col'
-                helperText='Some custom helperText'
-            >
-                <span className='text-base font-semibold text-delta-800'>Radio buttons*</span>
-                <StyledFormControlLabel
-                    label='Gain proficiency in implementing age-appropriate educational activities and lesson plans.'
-                    control={<StyledRadio dataTest='two' value='two' size='small' />}
-                />
-                <StyledFormControlLabel
-                    label='Successfully lead classroom activities, including circle time, storytime, and arts'
-                    control={<StyledRadio dataTest='three' value='three' size='small' />}
-                />
-                <StyledFormControlLabel
-                    label='Participate in parent-teacher conferences and communicate effectively with families about student progress and development.'
-                    control={<StyledRadio dataTest='four' size='small' value='four' />}
-                />
-            </StyledRadioGroup>
+export const Unchecked_Focused: Story = {
+    args: { value: true },
+    render: (args) => <RadioWrapper label='Focused' groupArgs={{ name: 'unchecked-focused' }} radioArgs={args} />,
+    play: async ({ canvas }) => {
+        const radio = canvas.getByRole('radio', { name: 'Focused' })
+        radio.focus()
 
-            <StyledRadioGroup
-                dataTest='radio-group-error'
-                name='radio-buttons-error'
-                className='flex flex-col'
-                error
-                errorText='Required'
-            >
-                <span className='text-base font-semibold text-delta-800'>Radio buttons*</span>
-                <StyledFormControlLabel
-                    label='Gain proficiency in implementing age-appropriate educational activities and lesson plans.'
-                    control={<StyledRadio dataTest='two' value='two' size='small' />}
-                />
-                <StyledFormControlLabel
-                    label='Successfully lead classroom activities, including circle time, storytime, and arts'
-                    control={<StyledRadio dataTest='three' value='three' size='small' />}
-                />
-                <StyledFormControlLabel
-                    label='Participate in parent-teacher conferences and communicate effectively with families about student progress and development.'
-                    control={<StyledRadio dataTest='four' size='small' value='four' />}
-                />
-            </StyledRadioGroup>
-        </div>
-    )
+        await expect(radio).toHaveFocus()
+    },
+}
+
+export const Unchecked_Disabled: Story = {
+    args: { value: true, disabled: true },
+    render: (args) => <RadioWrapper label='Disabled' groupArgs={{ name: 'unchecked-disabled' }} radioArgs={args} />,
+    play: async ({ canvas, userEvent }) => {
+        const radio = canvas.getByRole('radio', { name: 'Disabled' })
+
+        await expect(radio).not.toBeChecked()
+
+        await expect(() => userEvent.click(radio)).rejects.toThrow(/pointer-events: none/)
+
+        await expect(radio).not.toBeChecked()
+    },
+}
+
+export const Checked_Default: Story = {
+    args: { value: true },
+    render: (args) => (
+        <RadioWrapper label='Checked' groupArgs={{ name: 'checked-default', defaultValue: true }} radioArgs={args} />
+    ),
+}
+
+export const Checked_Focused: Story = {
+    args: { value: true },
+    render: (args) => (
+        <RadioWrapper label='Focused' groupArgs={{ name: 'checked-focused', defaultValue: true }} radioArgs={args} />
+    ),
+    play: async ({ canvas }) => {
+        const radio = canvas.getByRole('radio', { name: 'Focused' })
+        radio.focus()
+
+        await expect(radio).toHaveFocus()
+    },
+}
+
+export const Checked_Disabled: Story = {
+    args: { value: true, disabled: true },
+    render: (args) => (
+        <RadioWrapper label='Disabled' groupArgs={{ name: 'checked-disabled', defaultValue: true }} radioArgs={args} />
+    ),
+    play: async ({ canvas, userEvent }) => {
+        const radio = canvas.getByRole('radio', { name: 'Disabled' })
+
+        await expect(radio).toBeChecked()
+
+        await expect(() => userEvent.click(radio)).rejects.toThrow(/pointer-events: none/)
+
+        await expect(radio).toBeChecked()
+    },
+}
+
+export const Group: Story = {
+    args: { size: 'small' },
+    render: (args) => {
+        return (
+            <>
+                <div id='group-example-label' className='text-delta-800 text-base font-semibold'>
+                    Line length is how many characters are on a single line of text. For shorter lines of text, the
+                    ideal length is 20 to 40 characters?
+                </div>
+
+                <StyledRadioGroup
+                    aria-labelledby='group-example-label'
+                    name='radio-group'
+                    helperText='Custom helper text for radio group'
+                >
+                    <label className='flex items-center'>
+                        <StyledRadio {...args} value='Nursing assistant' />
+                        Nursing assistant
+                    </label>
+
+                    <label className='flex items-center'>
+                        <StyledRadio {...args} value='Medical assistant' />
+                        Medical assistant
+                    </label>
+
+                    <label className='flex items-center'>
+                        <StyledRadio {...args} value='Tech assistant' />
+                        Tech assistant
+                    </label>
+
+                    <label className='flex items-center'>
+                        <StyledRadio {...args} value='Tax assistant' />
+                        Tax assistant
+                    </label>
+
+                    <label className='flex items-center'>
+                        <StyledRadio {...args} value='Diet assistant' />
+                        Diet assistant
+                    </label>
+                </StyledRadioGroup>
+            </>
+        )
+    },
+}
+
+export const ErrorText: Story = {
+    args: { size: 'small' },
+    render: (args) => {
+        return (
+            <>
+                <div id='group-example-label' className='text-delta-800 text-base font-semibold'>
+                    Line length is how many characters are on a single line of text. For shorter lines of text, the
+                    ideal length is 20 to 40 characters?
+                </div>
+
+                <StyledRadioGroup
+                    aria-labelledby='group-example-label'
+                    name='radio-group'
+                    error
+                    errorText='Custom error text here'
+                >
+                    <label className='flex items-center'>
+                        <StyledRadio {...args} value='Nursing assistant' />
+                        Nursing assistant
+                    </label>
+
+                    <label className='flex items-center'>
+                        <StyledRadio {...args} value='Medical assistant' />
+                        Medical assistant
+                    </label>
+
+                    <label className='flex items-center'>
+                        <StyledRadio {...args} value='Tech assistant' />
+                        Tech assistant
+                    </label>
+
+                    <label className='flex items-center'>
+                        <StyledRadio {...args} value='Tax assistant' />
+                        Tax assistant
+                    </label>
+
+                    <label className='flex items-center'>
+                        <StyledRadio {...args} value='Diet assistant' />
+                        Diet assistant
+                    </label>
+                </StyledRadioGroup>
+            </>
+        )
+    },
+}
+
+export const DefaultErrorText: Story = {
+    args: { error: true, size: 'small' },
+    render: (args) => {
+        return (
+            <>
+                <div id='group-example-label' className='text-delta-800 text-base font-semibold'>
+                    Line length is how many characters are on a single line of text. For shorter lines of text, the
+                    ideal length is 20 to 40 characters?
+                </div>
+
+                <StyledRadioGroup aria-labelledby='group-example-label' name='radio-group' error>
+                    <label className='flex items-center'>
+                        <StyledRadio {...args} value='Nursing assistant' />
+                        Nursing assistant
+                    </label>
+
+                    <label className='flex items-center'>
+                        <StyledRadio {...args} value='Medical assistant' />
+                        Medical assistant
+                    </label>
+
+                    <label className='flex items-center'>
+                        <StyledRadio {...args} value='Tech assistant' />
+                        Tech assistant
+                    </label>
+                </StyledRadioGroup>
+            </>
+        )
+    },
 }

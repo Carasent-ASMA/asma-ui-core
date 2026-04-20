@@ -1,9 +1,9 @@
 import React, { forwardRef, useRef, useCallback } from 'react'
-import { Radio } from '@base-ui-components/react/radio'
+import { Radio } from '@base-ui/react/radio'
 import styles from './StyledRadio.module.scss'
 import { cn } from 'src/helpers/cn'
 
-type StyledRadioProps = {
+export type StyledRadioProps = {
     value?: string | number | boolean
     dataTest?: string
     className?: string
@@ -29,17 +29,27 @@ export const StyledRadio = forwardRef<HTMLButtonElement, StyledRadioProps>(
             e.stopPropagation()
             if (!rippleRef.current) return
             const ripple = document.createElement('span')
-            ripple.className = styles['RadioRipple'] || ''
-            ripple.addEventListener('animationend', () => ripple.remove(), { once: true })
+            if (styles['RadioRipple']) {
+                ripple.className = styles['RadioRipple']
+            }
+            ripple.addEventListener(
+                'animationend',
+                () => {
+                    ripple.remove()
+                },
+                { once: true },
+            )
             rippleRef.current.appendChild(ripple)
         }, [])
 
         return (
             <Radio.Root
                 {...rest}
+                nativeButton
+                render={<button />}
                 ref={ref}
                 value={value}
-                data-test={dataTest}
+                data-testid={dataTest}
                 className={wrapperClasses}
                 disabled={disabled}
                 onPointerDown={handlePointerDown}

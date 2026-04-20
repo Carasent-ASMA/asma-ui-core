@@ -1,10 +1,26 @@
-import { Autocomplete, Paper, type AutocompleteProps, type ChipTypeMap } from '@mui/material'
 import { Icon } from '@iconify/react'
+import { Autocomplete, Paper, type AutocompleteProps, type ChipTypeMap } from '@mui/material'
 import clsx from 'clsx'
-import { useEffect, useRef, useState } from 'react'
-import style from './StyledSelectAutocomplete.module.scss'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { cn } from 'src/helpers/cn'
+import style from './StyledSelectAutocomplete.module.scss'
 import { CloseIcon } from 'asma-ui-icons'
+
+export type StyledSelectAutocompleteProps<
+    T,
+    // Multiple extends boolean | undefined = false,
+    Multiple extends boolean | undefined,
+    // DisableClearable extends boolean | undefined = false,
+    DisableClearable extends boolean | undefined,
+    // FreeSolo extends boolean | undefined = false,
+    FreeSolo extends boolean | undefined,
+    ChipComponent extends React.ElementType = ChipTypeMap['defaultComponent'],
+> = AutocompleteProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent> & {
+    dataTest: string
+    autoHeight?: boolean
+    getOptionLabel?: (option: T) => string
+    wrapperClassName?: string
+}
 
 /**
  *
@@ -24,21 +40,19 @@ export function StyledSelectAutocomplete<
     getOptionLabel,
     wrapperClassName,
     ...props
-}: AutocompleteProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent> & {
-    dataTest: string
-    autoHeight?: boolean
-    getOptionLabel?: (option: T) => string
-    wrapperClassName?: string
-}) {
+}: StyledSelectAutocompleteProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent>): JSX.Element {
     const [maxHeight, setMaxHeight] = useState<number | 'auto'>('auto')
     const selectRef = useRef<HTMLDivElement>(null)
 
-    useEffect(() => {
+    useLayoutEffect(() => {
+        if (!autoHeight) return
+
         const selectHeight = selectRef.current?.getBoundingClientRect().height ?? 0
         const selectTop = selectRef.current?.getBoundingClientRect().top ?? 0
         const viewportHeight = window.innerHeight
         const availableHeight = viewportHeight - selectTop - selectHeight - 40
-        autoHeight && setMaxHeight(availableHeight > 0 ? availableHeight : 'auto')
+
+        setMaxHeight(availableHeight > 0 ? availableHeight : 'auto')
     }, [autoHeight])
 
     const listboxProps = autoHeight
@@ -83,10 +97,10 @@ export function StyledSelectAutocomplete<
                               />
                           )
                 }
-                data-test={dataTest}
+                data-testid={dataTest}
                 PaperComponent={({ children }) => (
                     <Paper
-                        data-test={`paper-${dataTest}`}
+                        data-testid={`paper-${dataTest}`}
                         sx={{
                             padding: '0 !important',
                             marginTop: '0px !important',
@@ -105,7 +119,7 @@ export function StyledSelectAutocomplete<
                     </Paper>
                 )}
                 renderOption={
-                    props?.renderOption ||
+                    props?.renderOption ??
                     ((props, option, { selected }) => (
                         <li {...props}>
                             <span
@@ -128,8 +142,8 @@ export function StyledSelectAutocomplete<
                                 )}
                             </span>
 
-                            <span className='flex-1 text-sm truncate'>
-                                {getOptionLabel?.(option) || defaultGetOptionLabel(option)}
+                            <span className='flex-1 truncate text-sm'>
+                                {getOptionLabel?.(option) ?? defaultGetOptionLabel(option)}
                             </span>
                         </li>
                     ))
@@ -153,7 +167,7 @@ export function StyledSelectAutocomplete<
                     },
                 }}
                 clearIcon={
-                    <span className='rounded-full items-center justify-center min-w-6 min-h-6 cursor-pointer flex bg-delta-50 cursor-pointer'>
+                    <span className='flex min-h-6 min-w-6 cursor-pointer items-center justify-center rounded-full bg-delta-50'>
                         <CloseIcon width={20} height={20} className='text-delta-700' />
                     </span>
                 }

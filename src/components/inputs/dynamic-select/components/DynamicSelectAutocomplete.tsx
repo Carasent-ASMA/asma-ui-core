@@ -83,8 +83,8 @@ export const DynamicSelectAutocomplete = forwardRef(
         if (multiple && readOnly) return <DynamicInteractiveChipGroup<TOption> {...props} />
 
         return (
-            <div className='flex flex-col gap-y-1 w-full'>
-                {title && <span className='text-delta-800 text-base font-semibold'>{title}</span>}
+            <div className='flex w-full flex-col gap-y-1'>
+                {title && <span className='text-base font-semibold text-delta-800'>{title}</span>}
                 <StyledSelectAutocomplete
                     open={open}
                     onOpen={handleOpen}
@@ -139,9 +139,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                                                 return
                                             }
 
-                                            const newValues = (value as TOption[]).filter(
-                                                (v) => !isOptionEqualToValue(v, option),
-                                            )
+                                            const newValues = value!.filter((v) => !isOptionEqualToValue(v, option))
                                             onChange(newValues)
                                         }}
                                     />
@@ -177,7 +175,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                                     key={props.id}
                                     onClick={!disabled ? props.onClick : undefined}
                                     className={cn(
-                                        'flex h-full gap-x-1 hover:bg-gama-50 cursor-pointer bg-white text-sm/5',
+                                        'flex h-full cursor-pointer gap-x-1 bg-white text-sm/5 hover:bg-gama-50',
                                         disabled && 'cursor-not-allowed bg-delta-50 hover:bg-delta-50',
                                     )}
                                     aria-disabled={disabled}
@@ -194,7 +192,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                                             {renderLabel ? (
                                                 renderLabel(option)
                                             ) : (
-                                                <span className='text-sm text-delta-700 h-fit py-[10px]'>
+                                                <span className='h-fit py-[10px] text-sm text-delta-700'>
                                                     {getOptionLabel(option)}
                                                 </span>
                                             )}
@@ -212,7 +210,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                                 {...props}
                                 key={props.id}
                                 className={cn(
-                                    'flex h-full gap-x-1 hover:bg-gama-50 px-2 cursor-pointer text-sm/5',
+                                    'flex h-full cursor-pointer gap-x-1 px-2 text-sm/5 hover:bg-gama-50',
                                     disabled && 'cursor-not-allowed bg-delta-50 hover:bg-delta-50',
                                 )}
                                 onClick={!disabled ? props.onClick : undefined}
@@ -220,10 +218,10 @@ export const DynamicSelectAutocomplete = forwardRef(
                             >
                                 <StyledTooltip arrow title={tooltipTitle}>
                                     <>
-                                        <span className='py-[10px] min-w-5 w-5 h-full'>
+                                        <span className='h-full w-5 min-w-5 py-[10px]'>
                                             {isSelected && (
                                                 <CheckIcon
-                                                    className='size-5 text-gama-500 min-h-5 min-w-5'
+                                                    className='size-5 min-h-5 min-w-5 text-gama-500'
                                                     height={20}
                                                     width={20}
                                                 />
@@ -232,7 +230,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                                         {renderLabel ? (
                                             renderLabel(option)
                                         ) : (
-                                            <span className='text-sm text-delta-700 py-[10px]'>
+                                            <span className='py-[10px] text-sm text-delta-700'>
                                                 {getOptionLabel(option)}
                                             </span>
                                         )}

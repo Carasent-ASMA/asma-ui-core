@@ -1,5 +1,5 @@
 import React from 'react'
-import type { Meta } from '@storybook/react'
+import type { Meta } from '@storybook/react-vite'
 import { StyledPopover } from './StyledPopover'
 import { StyledButton, StyledTypography } from 'asma-ui-core'
 
@@ -13,7 +13,7 @@ const meta = {
 
 export default meta
 
-export const Popover = () => {
+export const Popover = (): JSX.Element => {
     const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null)
 
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {

@@ -1,6 +1,6 @@
 import { DialogContent, type DialogContentProps } from '@mui/material'
 import style from './StyledDialogContent.module.scss'
-export const StyledDialogContent = ({ children, classes, className, ...rest }: DialogContentProps) => {
+export const StyledDialogContent = ({ children, classes, className, ...rest }: DialogContentProps): JSX.Element => {
     return (
         <DialogContent
             {...rest}

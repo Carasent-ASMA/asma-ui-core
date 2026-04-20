@@ -1,26 +1,24 @@
 import { Chip, type ChipProps } from '@mui/material'
 import type React from 'react'
 import { forwardRef } from 'react'
-import { CloseIcon } from 'src/components/icons'
+import { CloseIcon } from 'asma-ui-icons'
 
 export type StyledChipProps = ChipProps & { dataTest: string; readOnly?: boolean }
 
-export const StyledChip: React.FC<StyledChipProps> = forwardRef<HTMLDivElement, StyledChipProps>(
+export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
     ({ dataTest, readOnly, onDelete, ...props }, ref) => (
         <Chip
             {...props}
             ref={ref}
-            data-test={dataTest}
+            data-testid={dataTest}
             deleteIcon={readOnly ? undefined : <CloseIcon height={18} width={18} className='min-w-[18px]' />}
             onDelete={readOnly ? undefined : onDelete}
             sx={{
-                ...{
-                    border: '1px solid',
-                    backgroundColor: 'white',
-                    borderColor: 'var(--colors-delta-300)',
-                    color: 'var(--colors-delta-800)',
-                    fontSize: '14px',
-                },
+                border: '1px solid',
+                backgroundColor: 'white',
+                borderColor: 'var(--colors-delta-300)',
+                color: 'var(--colors-delta-800)',
+                fontSize: '14px',
                 ...(readOnly
                     ? {
                           pointerEvents: 'none',

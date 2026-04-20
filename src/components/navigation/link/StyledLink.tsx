@@ -36,14 +36,14 @@ export const StyledLink: React.FC<StyledLinkProps> = ({
 }) => {
     let textSize = style['styled-link-large']
     switch (size) {
+        case 'large':
+            textSize = style['styled-link-large']
+            break
         case 'small':
             textSize = style['styled-link-small']
             break
         case 'xs':
             textSize = style['styled-link-xs']
-            break
-        default:
-            textSize = style['styled-link-large']
             break
     }
 
@@ -59,7 +59,7 @@ export const StyledLink: React.FC<StyledLinkProps> = ({
     return (
         <a
             {...otherProps}
-            data-test={dataTest}
+            data-testid={dataTest}
             ref={reflink}
             href={href}
             className={clsx(style['styled-link'], textSize, className)}

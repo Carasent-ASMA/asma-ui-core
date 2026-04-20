@@ -1,306 +1,240 @@
-import type { Meta } from '@storybook/react'
-
-import { StyledButton } from './StyledButton'
-import { Stack } from '@mui/material'
 import { Icon } from '@iconify/react'
-import { ChevronDownIcon } from 'src/components/icons'
-import style from './StyledButtonStories.module.scss'
+import { Stack } from '@mui/material'
+import type { Meta, StoryObj } from '@storybook/react-vite'
+import { useState } from 'react'
+import { ChevronDownIcon } from 'asma-ui-icons'
+import { expect } from 'storybook/test'
+import { StyledButton } from './StyledButton'
 
 const meta: Meta<typeof StyledButton> = {
     title: 'Inputs/Styled Button',
     component: StyledButton,
     tags: ['autodocs'],
-    argTypes: {},
+    argTypes: {
+        error: { control: 'boolean' },
+        size: {
+            control: 'radio',
+            options: ['small', 'medium', 'large'],
+        },
+        variant: {
+            control: 'select',
+            options: ['contained', 'outlined', 'text', 'textGray', 'textWhite'],
+        },
+    },
     args: { children: 'Button label' },
 }
 
 export default meta
+type Story = StoryObj<typeof StyledButton>
 
-export const Buttons = () => (
-    <Stack direction='column' spacing={2}>
-        <h2 className={style['header']}>Buttons Common Enabled</h2>
-        <CommonEnabledButtons />
-        {/*  */}
-        <h2 className={style['header']}>Buttons Common Disabled</h2>
-        <CommonEnabledButtons disabled={true} />
-        {/*  */}
-        <h2 className={style['header']}>Buttons Common Size Small</h2>
-        <CommonEnabledButtons size={'small'} />
-        {/*  */}
-        <h2 className={style['header']}>Buttons Common Size Small Disabled</h2>
-        <CommonEnabledButtons size={'small'} disabled />
-        {/*  */}
-        <h2 className={style['header']}>Buttons Error Enabled</h2>
-        <CommonEnabledButtons error />
-        {/*  */}
-        <h2 className={style['header']}>Buttons Error Disabled</h2>
-        <CommonEnabledButtons error disabled />
-        <h2 className={style['header']}>Buttons Error Size Small</h2>
-        <CommonEnabledButtons size={'small'} error />
-        {/*  */}
-        <h2 className={style['header']}>Buttons Error Size Small Disabled</h2>
-        <CommonEnabledButtons error size={'small'} disabled />
-        {/*  */}
-    </Stack>
-)
+export const Default: Story = {
+    args: {
+        variant: 'contained',
+    },
+}
 
-const CommonEnabledButtons: React.FC<{
-    disabled?: boolean
-    size?: 'small' | 'large'
-    error?: boolean
-}> = ({ disabled = false, size = 'large', error = false }) => {
-    const izSmall = size === 'small'
-    return (
-        <div className={style['buttons-module']}>
-            <div className={style['buttons-module__table-borders']}>
-                <div className={style['buttons-module__table-header-button-type']}>{izSmall ? 'Small' : 'Medium'}</div>
-                <div className={style['buttons-module__table-header-button-state']}>
-                    {disabled ? 'Disabled' : 'Enabled'}
+export const Variants: Story = {
+    render: (args) => (
+        <Stack direction='row' spacing={2}>
+            <StyledButton {...args} variant='contained'>
+                Contained
+            </StyledButton>
+            <StyledButton {...args} variant='outlined'>
+                Outlined
+            </StyledButton>
+            <StyledButton {...args} variant='text'>
+                Text
+            </StyledButton>
+            <StyledButton {...args} variant='textGray'>
+                Text Gray
+            </StyledButton>
+            <StyledButton {...args} variant='textWhite'>
+                Text White
+            </StyledButton>
+        </Stack>
+    ),
+}
+
+export const WithIcons: Story = {
+    render: (args) => (
+        <Stack direction='row' spacing={2} alignItems='center'>
+            <StyledButton
+                {...args}
+                variant='contained'
+                startIcon={<Icon icon='mdi:filter-variant' width={20} height={20} />}
+            >
+                With start
+            </StyledButton>
+
+            <StyledButton {...args} variant='contained' endIcon={<ChevronDownIcon width={20} height={20} />}>
+                With end
+            </StyledButton>
+
+            <StyledButton
+                {...args}
+                variant='contained'
+                startIcon={<Icon icon='mdi:filter-variant' width={20} height={20} />}
+            >
+                <span style={{ display: 'inline-block', maxWidth: 80 }}>Very long label that should truncate</span>
+            </StyledButton>
+        </Stack>
+    ),
+}
+
+export const Sizes: Story = {
+    render: (args) => (
+        <Stack direction='row' spacing={2} alignItems='center'>
+            <StyledButton {...args} size='small'>
+                Small
+            </StyledButton>
+            <StyledButton {...args} size='medium'>
+                Medium
+            </StyledButton>
+            <StyledButton {...args} size='large'>
+                Large
+            </StyledButton>
+        </Stack>
+    ),
+}
+
+export const Disabled: Story = {
+    args: { disabled: true },
+    play: async ({ canvas, userEvent }) => {
+        const button = canvas.getByRole('button', { name: /button label/i })
+        await expect(button).toBeDisabled()
+
+        await userEvent.click(button)
+        await expect(button).toBeDisabled()
+        await expect(button).not.toHaveFocus()
+    },
+}
+
+export const Error: Story = {
+    args: { error: true },
+    play: async ({ canvas }) => {
+        const button = canvas.getByRole('button', { name: /button label/i })
+        await expect(button).toBeInTheDocument()
+
+        const computed = window.getComputedStyle(button)
+        await expect(computed.backgroundColor).toBe('rgb(225, 7, 0)')
+    },
+}
+
+export const InteractiveClick: Story = {
+    render: (args) => {
+        const ClickWrapper: React.FC<typeof args> = (localArgs) => {
+            const [count, setCount] = useState(0)
+            return (
+                <div>
+                    <StyledButton {...localArgs} onClick={() => setCount((c) => c + 1)}>
+                        Click me
+                    </StyledButton>
+                    <div data-testid='clicked-count'>clicked: {count}</div>
                 </div>
-            </div>
-            <div className={style['buttons-module__table-row']}>
-                <div className={style['buttons-module__text']}>Contained</div>
-                <div className={style['buttons-module__table-row-borders']}>
-                    <Stack direction='row' spacing={4}>
-                        <StyledButton
-                            dataTest='test'
-                            error={error}
-                            size={size}
-                            disabled={disabled}
-                            {...meta.args}
-                            variant='contained'
-                        />
-                        <StyledButton
-                            dataTest='test'
-                            error={error}
-                            size={size}
-                            disabled={disabled}
-                            {...meta.args}
-                            variant='contained'
-                            startIcon={
-                                <Icon
-                                    icon='mdi:filter-variant'
-                                    className=''
-                                    width={izSmall ? 20 : 24}
-                                    height={izSmall ? 20 : 24}
-                                />
-                            }
-                        >
-                            <div>Button label</div>
-                        </StyledButton>
-                        <StyledButton
-                            dataTest='test'
-                            error={error}
-                            size={size}
-                            disabled={disabled}
-                            {...meta.args}
-                            variant='contained'
-                            endIcon={<ChevronDownIcon width={izSmall ? 20 : 24} height={izSmall ? 20 : 24} />}
-                        />
-                        <StyledButton
-                            dataTest='test'
-                            error={error}
-                            size={size}
-                            disabled={disabled}
-                            variant='contained'
-                            startIcon={
-                                <Icon icon='mdi:filter-variant' width={izSmall ? 20 : 24} height={izSmall ? 20 : 24} />
-                            }
-                        />
-                    </Stack>
+            )
+        }
+        return <ClickWrapper {...args} />
+    },
+
+    play: async ({ canvas, userEvent }) => {
+        const button = canvas.getByRole('button', { name: /click me/i })
+        const counter = canvas.getByTestId('clicked-count')
+        await expect(counter).toHaveTextContent('clicked: 0')
+
+        await userEvent.click(button)
+        await expect(counter).toHaveTextContent('clicked: 1')
+
+        await userEvent.click(button)
+        await expect(counter).toHaveTextContent('clicked: 2')
+    },
+}
+
+export const KeyboardActivation: Story = {
+    render: (args) => {
+        const Wrapper: React.FC<typeof args> = (localArgs) => {
+            const [pressed, setPressed] = useState(false)
+            return (
+                <div>
+                    <StyledButton {...localArgs} onClick={() => setPressed(true)}>
+                        Activate
+                    </StyledButton>
+                    <div data-testid='activated'>{pressed ? 'activated' : 'idle'}</div>
                 </div>
-            </div>
-            <div className={style['buttons-module__table-row']}>
-                <div className={style['buttons-module__text']}>Outlined</div>
-                <div className={style['buttons-module__table-row-borders']}>
-                    <Stack direction='row' spacing={4}>
-                        <StyledButton
-                            error={error}
-                            size={size}
-                            disabled={disabled}
-                            {...meta.args}
-                            variant='outlined'
-                            dataTest='test'
-                        />
-                        <StyledButton
-                            dataTest='test'
-                            error={error}
-                            size={size}
-                            disabled={disabled}
-                            {...meta.args}
-                            variant='outlined'
-                            startIcon={
-                                <Icon icon='mdi:filter-variant' width={izSmall ? 20 : 24} height={izSmall ? 20 : 24} />
-                            }
-                        />
-                        <StyledButton
-                            dataTest='test'
-                            error={error}
-                            size={size}
-                            disabled={disabled}
-                            {...meta.args}
-                            variant='outlined'
-                            endIcon={<ChevronDownIcon width={izSmall ? 20 : 24} height={izSmall ? 20 : 24} />}
-                        />
-                        <StyledButton
-                            dataTest='test'
-                            error={error}
-                            size={size}
-                            disabled={disabled}
-                            variant='outlined'
-                            startIcon={
-                                <Icon icon='mdi:filter-variant' width={izSmall ? 20 : 24} height={izSmall ? 20 : 24} />
-                            }
-                        />
-                    </Stack>
-                </div>
-            </div>
-            <div className={style['buttons-module__table-row']}>
-                <div className={style['buttons-module__text']}>Text</div>
-                <div className={style['buttons-module__table-row-borders']}>
-                    <Stack direction='row' spacing={4}>
-                        <StyledButton
-                            dataTest='test'
-                            error={error}
-                            size={size}
-                            disabled={disabled}
-                            {...meta.args}
-                            variant='text'
-                        />
-                        <StyledButton
-                            dataTest='test'
-                            error={error}
-                            size={size}
-                            disabled={disabled}
-                            {...meta.args}
-                            variant='text'
-                            color='common'
-                            startIcon={
-                                <Icon icon='mdi:filter-variant' width={izSmall ? 20 : 24} height={izSmall ? 20 : 24} />
-                            }
-                        />
-                        <StyledButton
-                            dataTest='test'
-                            error={error}
-                            size={size}
-                            disabled={disabled}
-                            {...meta.args}
-                            variant='text'
-                            endIcon={<ChevronDownIcon width={izSmall ? 20 : 24} height={izSmall ? 20 : 24} />}
-                        />
-                        <StyledButton
-                            dataTest='test'
-                            error={error}
-                            size={size}
-                            disabled={disabled}
-                            variant='text'
-                            startIcon={
-                                <Icon icon='mdi:filter-variant' width={izSmall ? 20 : 24} height={izSmall ? 20 : 24} />
-                            }
-                        />
-                    </Stack>
-                </div>
-            </div>
-            {!error && (
-                <div className={style['buttons-module__table-row']}>
-                    <div className={style['buttons-module__text']}>Text Gray</div>
-                    <div className={style['buttons-module__table-row-borders']}>
-                        <Stack direction='row' spacing={4}>
-                            <StyledButton dataTest='test' size={size} disabled={disabled} variant='textGray'>
-                                Button label
-                            </StyledButton>
-                            <StyledButton
-                                dataTest='test'
-                                size={size}
-                                disabled={disabled}
-                                variant='textGray'
-                                color='common'
-                                startIcon={
-                                    <Icon
-                                        icon='mdi:filter-variant'
-                                        width={izSmall ? 20 : 24}
-                                        height={izSmall ? 20 : 24}
-                                    />
-                                }
-                            >
-                                Button label
-                            </StyledButton>
-                            <StyledButton
-                                dataTest='test'
-                                size={size}
-                                disabled={disabled}
-                                variant='textGray'
-                                endIcon={<ChevronDownIcon width={izSmall ? 20 : 24} height={izSmall ? 20 : 24} />}
-                            >
-                                Button label
-                            </StyledButton>
-                            <StyledButton
-                                dataTest='test'
-                                size={size}
-                                disabled={disabled}
-                                variant='textGray'
-                                startIcon={
-                                    <Icon
-                                        icon='mdi:filter-variant'
-                                        width={izSmall ? 20 : 24}
-                                        height={izSmall ? 20 : 24}
-                                    />
-                                }
-                            ></StyledButton>
+            )
+        }
+        return <Wrapper {...args} />
+    },
+    play: async ({ canvas, userEvent }) => {
+        const button = canvas.getByRole('button', { name: /activate/i })
+        const activated = canvas.getByTestId('activated')
+
+        button.focus()
+        await expect(button).toHaveFocus()
+        await userEvent.keyboard('{Enter}')
+        await userEvent.keyboard(' ')
+        await expect(activated).toHaveTextContent('activated')
+    },
+}
+
+export const IconOnlyAccessibility: Story = {
+    args: {
+        children: undefined,
+        startIcon: <ChevronDownIcon width={24} height={24} />,
+        'aria-label': 'Open menu',
+    },
+    play: async ({ canvas }) => {
+        const btn = canvas.getByRole('button', { name: /open menu/i })
+        await expect(btn).toBeInTheDocument()
+    },
+}
+
+export const FocusVisible: Story = {
+    args: { children: 'Focus me' },
+    play: async ({ canvas, userEvent }) => {
+        const btn = canvas.getByRole('button', { name: /focus me/i })
+
+        await userEvent.tab()
+        await expect(btn).toHaveFocus()
+    },
+}
+
+export const Gallery: Story = {
+    render: (args) => {
+        const variants = ['contained', 'outlined', 'text', 'textGray', 'textWhite'] as const
+        const sizes = ['small', 'medium', 'large'] as const
+        const states = [
+            { label: 'default', props: {} },
+            { label: 'error', props: { error: true } },
+            { label: 'disabled', props: { disabled: true } },
+        ]
+
+        return (
+            <Stack spacing={4}>
+                {states.map((state) => (
+                    <div key={state.label}>
+                        <h3 style={{ marginBottom: 8 }}>{state.label}</h3>
+                        <Stack spacing={3}>
+                            {sizes.map((size) => (
+                                <Stack key={size} direction='row' spacing={2} alignItems='center'>
+                                    {variants.map((variant) => (
+                                        <StyledButton
+                                            key={`${state.label}-${size}-${variant}`}
+                                            {...args}
+                                            {...state.props}
+                                            size={size}
+                                            variant={variant}
+                                            startIcon={<Icon icon='mdi:filter-variant' width={18} height={18} />}
+                                            endIcon={<ChevronDownIcon width={18} height={18} />}
+                                        >
+                                            {variant}
+                                        </StyledButton>
+                                    ))}
+                                </Stack>
+                            ))}
                         </Stack>
                     </div>
-                </div>
-            )}
-            {!error && (
-                <div className={style['buttons-module__table-row']}>
-                    <div className={style['buttons-module__text']}>Text White</div>
-                    <div className={style['buttons-module__table-row-borders']}>
-                        <Stack direction='row' spacing={4}>
-                            <StyledButton dataTest='test' size={size} disabled={disabled} variant='textWhite'>
-                                Button label
-                            </StyledButton>
-                            <StyledButton
-                                dataTest='test'
-                                size={size}
-                                disabled={disabled}
-                                variant='textWhite'
-                                color='common'
-                                startIcon={
-                                    <Icon
-                                        icon='mdi:filter-variant'
-                                        width={izSmall ? 20 : 24}
-                                        height={izSmall ? 20 : 24}
-                                    />
-                                }
-                            >
-                                Button label
-                            </StyledButton>
-                            <StyledButton
-                                dataTest='test'
-                                size={size}
-                                disabled={disabled}
-                                variant='textWhite'
-                                endIcon={<ChevronDownIcon width={izSmall ? 20 : 24} height={izSmall ? 20 : 24} />}
-                            >
-                                Button label
-                            </StyledButton>
-                            <StyledButton
-                                dataTest='test'
-                                size={size}
-                                disabled={disabled}
-                                variant='textWhite'
-                                startIcon={
-                                    <Icon
-                                        icon='mdi:filter-variant'
-                                        width={izSmall ? 20 : 24}
-                                        height={izSmall ? 20 : 24}
-                                    />
-                                }
-                            ></StyledButton>
-                        </Stack>
-                    </div>
-                </div>
-            )}
-        </div>
-    )
+                ))}
+            </Stack>
+        )
+    },
 }

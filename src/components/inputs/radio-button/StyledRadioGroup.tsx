@@ -1,3 +1,5 @@
 import { RadioGroup, type RadioGroupProps } from '@mui/material'
 
-export const StyledRadioGroup = ({dataTest, ...props}: RadioGroupProps & { dataTest: string }) => <RadioGroup data-test={dataTest} {...props} />
+export const StyledRadioGroup = ({ dataTest, ...props }: RadioGroupProps & { dataTest: string }): JSX.Element => (
+    <RadioGroup data-testid={dataTest} {...props} />
+)

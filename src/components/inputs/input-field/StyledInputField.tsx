@@ -1,6 +1,6 @@
 import { TextField, type TextFieldProps } from '@mui/material'
 import { ErrorOutlineIcon } from 'asma-ui-icons'
-import { CloseIcon } from 'src/components/icons'
+import { CloseIcon } from 'asma-ui-icons'
 /**
  *
  * @inputRef
@@ -16,11 +16,12 @@ export const StyledInputField: React.FC<
         dataTest: string
     }
 > = ({ allowClear, onClear, readOnly, disabled, error, helperText, dataTest, ...props }) => {
+    const disabledOrReadonly = (disabled ?? false) || (readOnly ?? false)
     return (
         <TextField
             {...props}
-            data-test={dataTest}
-            disabled={disabled || readOnly}
+            data-testid={dataTest}
+            disabled={disabledOrReadonly}
             error={error}
             helperText={
                 readOnly ? null : error ? (
@@ -32,26 +33,26 @@ export const StyledInputField: React.FC<
                     helperText
                 )
             }
-            type={props.type || 'mui-input'}
-            InputProps={
-                allowClear && props.value
-                    ? {
-                          ...props.InputProps,
-                          endAdornment: (
-                              <div
-                                  className='z-40 hover:bg-gama-100 duration-300 absolute right-4 p-[2px] rounded-full flex items-center justify-center'
-                                  onClick={(e) => {
-                                      e.stopPropagation()
-                                      e.preventDefault()
-                                      onClear?.()
-                                  }}
-                              >
-                                  <CloseIcon width={18} height={18} />
-                              </div>
-                          ),
-                      }
-                    : props.InputProps
-            }
+            type={props.type ?? 'mui-input'}
+            InputProps={{
+                ...props.InputProps,
+                endAdornment:
+                    allowClear && props.value ? (
+                        <div
+                            role='button'
+                            className='absolute right-4 z-40 flex items-center justify-center rounded-full p-[2px] duration-300 hover:bg-gama-100'
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                e.preventDefault()
+                                onClear?.()
+                            }}
+                        >
+                            <CloseIcon width={18} height={18} />
+                        </div>
+                    ) : (
+                        props.InputProps?.endAdornment
+                    ),
+            }}
             sx={{
                 '& input:-webkit-autofill, & .MuiInputBase-root:has(> input:-webkit-autofill)': {
                     backgroundColor: '#e8f0fe !important',
@@ -100,8 +101,14 @@ export const StyledInputField: React.FC<
                 '& label.Mui-focused': {
                     color: 'var(--colors-gama-500) !important',
                 },
+                '& label.Mui-error': {
+                    color: 'var(--colors-error-500) !important',
+                },
                 '& label.Mui-focused.MuiInputLabel-shrink': {
                     color: 'var(--colors-gama-500) !important',
+                },
+                '& label.Mui-error.MuiInputLabel-shrink': {
+                    color: 'var(--colors-error-500) !important',
                 },
                 '& label': {
                     color: 'var(--colors-delta-500) !important',

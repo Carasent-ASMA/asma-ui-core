@@ -1,7 +1,7 @@
 import { Tooltip, type TooltipProps } from '@mui/material'
 import Fade from '@mui/material/Fade'
 
-export const StyledTooltip = (props: TooltipProps) => {
+export const StyledTooltip = (props: TooltipProps): JSX.Element => {
     const { componentsProps, ...rest } = props
     const userTooltip = componentsProps?.tooltip
 
@@ -15,7 +15,7 @@ export const StyledTooltip = (props: TooltipProps) => {
                 ...componentsProps,
                 tooltip: {
                     ...(userTooltip ?? {}),
-                    style: { ...(userTooltip?.style || {}) },
+                    style: { ...(userTooltip?.style ?? {}) },
                     sx: {
                         borderRadius: '3px',
                         '& .MuiTooltip-arrow': { color: '#363E4A' },

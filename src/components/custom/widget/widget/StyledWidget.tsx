@@ -1,12 +1,11 @@
 import { StyledButton, StyledEmptyPage, StyledLink, StyledLoading, StyledWidgetTitle } from 'asma-ui-core'
-import { useEffect, type PropsWithChildren, type ReactNode } from 'react'
+import { useState, type PropsWithChildren, type ReactNode } from 'react'
 import style from './StyledWidget.module.scss'
-import { useState } from 'react'
 
-import ChevronUpIcon from '../icons/ChevronUpIcon'
 import ChevronDownIcon from '../icons/ChevronDownIcon'
+import ChevronUpIcon from '../icons/ChevronUpIcon'
 
-export type StyledWidgetProps = {
+export interface StyledWidgetProps {
     title: string
     icon?: ReactNode
     headerRight?: ReactNode
@@ -46,25 +45,16 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
     headerRight,
     headerRightClassName,
 }) => {
-    const [expanded, setExpanded] = useState(false)
-
-    useEffect(() => {
+    const [expanded, setExpanded] = useState(() => {
         if (persistKey) {
             const val = localStorage.getItem(persistKey)
-            setExpanded(val === 'true' ? true : false)
+            return val === 'true' ? true : false
         }
-    }, [persistKey])
-
-    useEffect(() => {
-        if (persistKey) {
-            localStorage.setItem(persistKey, String(expanded))
-        }
-    }, [expanded, persistKey])
+        return false
+    })
 
     const showLink = !!link && !link.hide
-    const showViewMore = !!viewMore && !viewMore?.hide
-
-    const showFooter = showLink || showViewMore
+    const showViewMore = !!viewMore && !viewMore.hide
 
     return (
         <div className={`${style['asma-ui-core-styled-widget']} ${isEmpty ? style['empty-state'] : ''}`}>
@@ -85,7 +75,7 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
 
             {showViewMore && (
                 <div className={style['widget-footer']}>
-                    {!!viewMore && !viewMore?.hide ? (
+                    {!viewMore.hide ? (
                         <StyledButton
                             disabled={viewMore.disabled}
                             dataTest='view-more'
@@ -99,7 +89,10 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
                             }
                             onClick={() => {
                                 setExpanded(!expanded)
-                                viewMore?.onClick?.()
+                                if (persistKey) {
+                                    localStorage.setItem(persistKey, String(!expanded))
+                                }
+                                viewMore.onClick?.()
                             }}
                         >
                             {expanded ? viewMore.viewLessText : viewMore.viewMoreText}

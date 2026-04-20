@@ -9,7 +9,7 @@ import styles from './MinimizableDialogV2.module.scss'
 import type { IMinimizableDialogV2Props } from './types'
 import { useTranslations } from './useTranslations'
 import { useControlledProps } from './useControlledProps'
-import { useIsMobileView } from 'src/hooks/useWindowWidthSize.hook'
+import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
 
 export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) => {
     const {
@@ -33,7 +33,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
         style,
     } = props
 
-    const isMobile = useIsMobileView()
+    const isMobile = useMobileMediaQuery()
 
     const t = useTranslations(locale)
 
@@ -50,8 +50,11 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                 style={{ zIndex: 51, ...style }}
                 className={cn(styles['minimized-dialog'], !minimized && styles['hidden'], classNameOverrides.minimized)}
             >
-                <div className={clsx('flex items-center justify-between', !minimized && 'hidden')} data-test={dataTest}>
-                    <div className='truncate max-w-[303px] text-lg font-semibold text-delta-800 pr-1'>
+                <div
+                    className={clsx('flex items-center justify-between', !minimized && 'hidden')}
+                    data-testid={dataTest}
+                >
+                    <div className='max-w-[303px] truncate pr-1 text-lg font-semibold text-delta-800'>
                         <StyledTooltip title={title} placement='top'>
                             <div className='truncate'>{title}</div>
                         </StyledTooltip>
@@ -60,7 +63,9 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                         <MinimizeBtn
                             type='expand'
                             visibility={showExpandIcon}
-                            onClick={() => setMinimized(!minimized)}
+                            onClick={() => {
+                                setMinimized(!minimized)
+                            }}
                             tooltipTitle={t.expand}
                         />
 
@@ -71,8 +76,10 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
             {/* Maximized */}
             {fullScreen && !minimized && (
                 <div
-                    className='z-[52] fixed inset-0 bg-[rgb(98,110,126)] bg-opacity-70'
-                    onClick={() => setFullScreen(false)}
+                    className='fixed inset-0 z-[52] bg-[rgb(98,110,126)] bg-opacity-70'
+                    onClick={() => {
+                        setFullScreen(false)
+                    }}
                 />
             )}
             <div
@@ -84,16 +91,16 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                     classNameOverrides.maximized,
                     fullScreen &&
                         !minimized &&
-                        'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[1000px] h-[95dvh] duration-0 z-[53]',
+                        'fixed left-1/2 top-1/2 z-[53] h-[95dvh] w-full max-w-[1000px] -translate-x-1/2 -translate-y-1/2 duration-0',
                 )}
             >
-                <div className={cn('flex flex-col px-4 border-b-[1px] border-delta-200', isMobile ? 'py-3' : 'py-4')}>
+                <div className={cn('flex flex-col border-b-[1px] border-delta-200 px-4', isMobile ? 'py-3' : 'py-4')}>
                     <div className='flex items-center justify-between'>
                         {!label ? (
                             <div
                                 className={cn(
                                     'font-semibold text-delta-800',
-                                    isMobile ? 'text-xl line-clamp-2' : 'text-2xl line-clamp-1',
+                                    isMobile ? 'line-clamp-2 text-xl' : 'line-clamp-1 text-2xl',
                                 )}
                             >
                                 {title}
@@ -107,13 +114,17 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                             <MinimizeBtn
                                 visibility={showMinimizeIcon && !isMobile}
                                 type='minimize'
-                                onClick={() => setMinimized(!minimized)}
+                                onClick={() => {
+                                    setMinimized(!minimized)
+                                }}
                                 tooltipTitle={t.minimize}
                             />
                             <FullScreenBtn
                                 showFullScreenIcon={enableFullscreen && !isMobile}
                                 fullScreen={fullScreen}
-                                onClick={() => setFullScreen(!fullScreen)}
+                                onClick={() => {
+                                    setFullScreen(!fullScreen)
+                                }}
                                 tooltipTitle={fullScreen ? t.exitFullscreen : t.fullscreen}
                             />
                             <CloseBtn showCloseIcon={showCloseIcon} onClick={onClose} tooltipTitle={t.close} />
@@ -124,7 +135,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                         <div
                             className={cn(
                                 'font-semibold text-delta-800',
-                                isMobile ? 'text-xl line-clamp-2' : 'text-2xl line-clamp-1',
+                                isMobile ? 'line-clamp-2 text-xl' : 'line-clamp-1 text-2xl',
                             )}
                         >
                             {title}

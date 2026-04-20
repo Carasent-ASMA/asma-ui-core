@@ -1,7 +1,13 @@
 import type { IIcon } from '../Icons.types'
 import { IconTemplate } from '../IconTemplate'
 
-export const InboxOutboxOutlineIcon: React.FC<IIcon> = ({ width = 20, height = 20, className = '', onClick, color }) => {
+export const InboxOutboxOutlineIcon: React.FC<IIcon> = ({
+    width = 20,
+    height = 20,
+    className = '',
+    onClick,
+    color,
+}) => {
     return (
         <IconTemplate
             icon='mdi:inbox-outline'

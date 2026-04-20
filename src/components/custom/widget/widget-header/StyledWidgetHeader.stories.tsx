@@ -1,7 +1,7 @@
 import React from 'react'
 //import style from './StyledWidgetHeader.module.scss'
 import { StyledWidgetHeader } from './StyledWidgetHeader'
-import type { Meta } from '@storybook/react'
+import type { Meta } from '@storybook/react-vite'
 import { StyledButton } from 'src/components/inputs/button'
 import { CloseIcon } from 'asma-ui-icons'
 
@@ -18,12 +18,12 @@ const meta = {
 
 export default meta
 
-export const WidgetHeader = () => {
+export const WidgetHeader = (): JSX.Element => {
     return (
         <StyledWidgetHeader
             title='Widget header example'
             actions={
-                <div className='w-full flex justify-between'>
+                <div className='flex w-full justify-between'>
                     <StyledButton
                         dataTest='clear-selected-button'
                         variant='text'
