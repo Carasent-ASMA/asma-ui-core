@@ -86,6 +86,7 @@ export const DynamicInteractiveChipGroup = forwardRef(
                 {title && <span className='text-base font-semibold text-delta-800'>{title}</span>}
                 {/* HACK for calculating overflow layout */}
                 <div
+                    aria-hidden
                     ref={containerRef}
                     className='pointer-events-none absolute left-0 top-0 flex flex-wrap gap-2 text-sm opacity-0'
                     style={{ width: '100%' }}

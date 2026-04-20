@@ -8,6 +8,7 @@ export interface StyledInteractiveChipProps extends ComponentProps<typeof Styled
     type?: 'checkbox' | 'radio'
     checked?: (CheckboxProps | RadioProps)['checked']
     size?: 'small' | 'medium'
+    ariaLabel?: string
 }
 
 export const StyledInteractiveChip: FC<StyledInteractiveChipProps> = forwardRef<
@@ -26,20 +27,22 @@ export const StyledInteractiveChip: FC<StyledInteractiveChipProps> = forwardRef<
         boxShadow: '0 0 0 1px inset var(--colors-gama-300)',
     }
 
+    const accessibleName = props.ariaLabel ?? (typeof props.label === 'string' ? props.label : undefined)
+
     return (
         <StyledChip
             ref={ref}
+            aria-label={accessibleName}
             avatar={
                 <ControlComponent
                     dataTest={props.dataTest}
-                    // aria-label={props.label}
                     disableRipple
                     checked={checked}
                     size={size}
                     sx={{ pointerEvents: 'none' }}
-                    // inputProps={{
-                    //     'aria-label': props.label,
-                    // }}
+                    inputProps={{
+                        'aria-label': accessibleName,
+                    }}
                 />
             }
             clickable
