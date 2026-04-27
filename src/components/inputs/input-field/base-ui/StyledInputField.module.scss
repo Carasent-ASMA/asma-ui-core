@@ -1,0 +1,569 @@
+@mixin transition($props...) {
+    transition: $props;
+}
+
+@mixin flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@mixin visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+@mixin helper-text($color) {
+    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+    text-align: left;
+    margin: 3px 14px 0 14px;
+    font-size: 0.75rem;
+    line-height: 1.66;
+    letter-spacing: 0.03333em;
+    color: $color;
+}
+
+@mixin underline($height, $bg, $z: 1) {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: $height;
+    background: $bg;
+    z-index: $z;
+}
+
+// sizes for outlined variant
+$sizes-outlined: (
+    large: (
+        min-height: 56px,
+        py: 14px,
+    ),
+    small: (
+        min-height: 40px,
+        py: 8.5px,
+    ),
+);
+
+$transition-base: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+$transition-fast: 0.15s;
+
+//layout
+.FieldRoot {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+
+    &.FullWidth {
+        width: 100%;
+    }
+
+    &.AutoWidth {
+        width: 160px;
+        display: inline-flex;
+
+        .Container {
+            width: 100%;
+        }
+
+        .Input {
+            flex: 0 0 100%;
+            width: 100%;
+        }
+    }
+}
+
+// container
+.Container {
+    position: relative;
+    box-sizing: border-box;
+    display: flex;
+    align-items: flex-start;
+    background: #fff;
+    color: var(--colors-delta-800);
+    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+    cursor: text;
+
+    &.outlined,
+    &.standard {
+        font-size: 16px;
+    }
+
+    // size variants for outlined
+    @each $name, $cfg in $sizes-outlined {
+        &.outlined.#{$name} {
+            min-height: map-get($cfg, min-height);
+            padding: map-get($cfg, py) 14px;
+        }
+    }
+
+    // standard variant
+    &.standard {
+        padding: 4px 0 5px 0;
+        min-height: auto;
+        margin-top: 16px;
+
+        .Label {
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%) scale(1);
+
+            &--active {
+                top: -16px;
+                transform: translateY(0) scale(0.75);
+            }
+        }
+
+        &:hover:not(.Disabled):not(.Readonly) .UnderlineHover {
+            opacity: 1;
+        }
+
+        &.Readonly {
+            background: transparent;
+
+            .Label {
+                color: var(--colors-delta-800);
+            }
+        }
+    }
+
+    &.Multiline {
+        align-items: flex-start;
+        flex-wrap: wrap;
+
+        .Input {
+            flex: 1 1 auto;
+            min-width: 100px;
+            resize: none;
+            overflow: hidden;
+            box-sizing: border-box;
+            min-height: 1.4375em;
+        }
+
+        .Adornment.Start {
+            position: relative;
+            left: auto;
+            top: auto;
+            transform: none;
+
+            flex: 0 1 auto;
+            max-width: 100%;
+
+            pointer-events: all;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            align-items: center;
+            align-self: center;
+            margin-right: 4px;
+        }
+
+        &.HasStartAdornment .Input {
+            padding-top: 0;
+        }
+    }
+
+    // input
+    .Input {
+        flex: 1;
+        border: 0;
+        outline: none;
+        background: transparent;
+        font: inherit;
+        letter-spacing: 0.00938em;
+        resize: none;
+        line-height: 1.4375em;
+        min-width: 0;
+        width: 100%;
+        padding: 0;
+        padding-left: 0;
+
+        @include transition(padding-left $transition-base);
+
+        &::placeholder {
+            color: var(--colors-delta-500);
+        }
+
+        &.Multiline {
+            width: 100%;
+            resize: none;
+            overflow: hidden;
+            box-sizing: border-box;
+
+            &.scrollable {
+                overflow-y: auto;
+
+                scrollbar-width: thin;
+                scrollbar-color: #9ca3af transparent;
+
+                &::-webkit-scrollbar {
+                    width: 6px;
+                }
+
+                &::-webkit-scrollbar-thumb {
+                    background: #9ca3af;
+                    border-radius: 4px;
+                }
+            }
+        }
+    }
+
+    // states
+    &.HasLabel {
+        .Input::placeholder {
+            opacity: 0;
+            @include transition(opacity $transition-base);
+        }
+
+        &.Focused,
+        &:focus-within {
+            .Input::placeholder {
+                opacity: 1;
+            }
+        }
+    }
+
+    &.HasStartAdornment {
+        .Label {
+            transform: translate(0, 8px) scale(1);
+
+            &--active {
+                transform: translate(0, -9px) scale(0.75);
+            }
+        }
+
+        &.SearchInput {
+            width: 100%;
+            .Input {
+                padding-left: 20px;
+            }
+            .Label {
+                transform: translate(18px, 8px) scale(1);
+
+                &--active {
+                    transform: translate(0, -9px) scale(0.75);
+                }
+            }
+            &.Focused,
+            &.Filled {
+                .Input {
+                    padding-left: 0;
+                }
+            }
+        }
+
+        &.standard {
+            .Label {
+                left: 32px;
+                &--active {
+                    left: 14px;
+                }
+            }
+        }
+    }
+    &.HasEndAdornment {
+        .Input {
+            padding-right: 16px;
+        }
+    }
+
+    // hover and focus states
+    &:not(.Disabled):not(.Readonly) {
+        &:hover .Outline:not(.ErrorOutline) {
+            border-width: 2px;
+            border-color: var(--colors-gama-300);
+        }
+
+        &:focus-within .Outline:not(.ErrorOutline) {
+            border-width: 2px;
+            border-color: var(--colors-gama-400);
+        }
+    }
+
+    // error state
+    &.Error {
+        &:hover,
+        &:focus-within {
+            .Outline,
+            .ErrorOutline {
+                border-width: 2px;
+            }
+        }
+    }
+
+    // disabled state
+    &.Disabled {
+        cursor: default;
+
+        .Outline {
+            border-color: var(--colors-delta-300);
+        }
+
+        .Label {
+            color: var(--colors-delta-300);
+        }
+
+        .Input {
+            color: var(--colors-delta-300);
+            pointer-events: none;
+        }
+
+        .Underline {
+            background: var(--colors-delta-300);
+        }
+    }
+
+    // readonly state
+    &.Readonly {
+        background: var(--colors-delta-10);
+        cursor: default;
+
+        .Input {
+            background: transparent;
+            color: var(--colors-delta-800);
+            pointer-events: none;
+        }
+
+        &.outlined {
+            .Outline {
+                border-color: var(--colors-delta-200);
+            }
+
+            .Label {
+                color: var(--colors-delta-800);
+            }
+        }
+    }
+
+    // search input — offsets the label right to leave room for the external search icon
+    &.SearchInput {
+        .Label {
+            // left(14px) + translate(20px) = 34px, matching paddingLeft: 34px on the container
+            transform: translate(20px, 9px) scale(1);
+        }
+
+        &.Focused .Label,
+        &.Filled .Label {
+            transform: translate(0, -9px) scale(0.75);
+            left: 14px;
+        }
+    }
+}
+
+// label
+.Label {
+    position: absolute;
+    top: 0;
+    left: 14px;
+    right: 18px;
+    transform: translateY(9px) scale(1);
+    transform-origin: top left;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--colors-delta-500);
+    pointer-events: none;
+    transition:
+        transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        top 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        left 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        right 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+    text-align: left;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+    &--active {
+        transform: translateY(-9px) scale(0.75);
+        right: 10px;
+        font-size: 1rem;
+        line-height: 1.4375em;
+        letter-spacing: 0.00938em;
+        text-align: left;
+
+        &.Label--focused {
+            color: var(--colors-gama-500);
+        }
+
+        &.Label--error {
+            color: var(--colors-error-500);
+        }
+    }
+
+    .Asterisk {
+        margin-left: 2px;
+        color: inherit;
+        @include transition(color $transition-base);
+    }
+}
+
+.ActionButtons {
+    position: absolute;
+    right: 0.5rem;
+    bottom: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+
+    .Clear {
+        @include flex-center;
+        border: none;
+        background: none;
+        color: var(--colors-delta-700);
+        cursor: pointer;
+        padding: 0;
+        outline: none;
+
+        &:focus-visible .ClearWrapper::before,
+        &:hover .ClearWrapper::before {
+            width: 22px;
+            height: 22px;
+        }
+    }
+
+    .ClearWrapper {
+        position: relative;
+        @include flex-center;
+
+        &::before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            background: var(--colors-delta-100);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            @include transition(width $transition-fast, height $transition-fast, background $transition-fast);
+            inset: 50% auto auto 50%;
+        }
+    }
+    .ClearIcon {
+        width: 1.25rem;
+        height: 1.25rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .EndAdornment {
+        @include flex-center;
+    }
+}
+
+// outline & legend
+.Outline {
+    box-sizing: border-box;
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    padding: 0;
+    pointer-events: none;
+    border: 1px solid var(--colors-delta-500);
+    border-radius: 4px;
+    background: transparent;
+    padding-left: 8px;
+}
+
+.ErrorOutline {
+    border-color: var(--colors-error-500);
+    border-width: 1px;
+}
+
+.Legend {
+    float: unset;
+    padding: 0;
+    margin: 0;
+    line-height: 0;
+    height: 0;
+    max-width: 0.01px;
+    @include transition(max-width $transition-base);
+    white-space: nowrap;
+    overflow: hidden;
+    display: block;
+
+    &Active {
+        max-width: 100%;
+
+        .LegendLabel {
+            opacity: 1;
+            visibility: visible;
+        }
+    }
+}
+
+.LegendLabel {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-family: inherit;
+    padding: 0 5.5px;
+    opacity: 0;
+    visibility: hidden;
+
+    &--required {
+        padding: 0 7.5px;
+    }
+}
+
+.Adornment {
+    display: flex;
+    align-items: center;
+
+    &.Start {
+        position: absolute;
+        left: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+    }
+
+    .Container.standard &.Start {
+        left: 4px;
+    }
+}
+
+// underline (standard)
+.Underline {
+    @include underline(1px, var(--colors-delta-500));
+
+    &Hover {
+        @include underline(2px, var(--colors-delta-900));
+        opacity: 0;
+        @include transition(opacity $transition-base);
+    }
+
+    &Active {
+        @include underline(2px, var(--colors-gama-400), 2);
+        transform: scaleX(0);
+        transform-origin: center;
+        @include transition(transform $transition-base, background-color $transition-fast);
+
+        &.UnderlineFocused {
+            transform: scaleX(1);
+        }
+    }
+
+    &Error {
+        @include underline(2px, var(--colors-error-500), 2);
+    }
+}
+
+.HelperText {
+    @include helper-text(var(--colors-delta-600));
+
+    &Error {
+        @include helper-text(var(--colors-error-500));
+    }
+}
+
+// accessibility
+.srOnly {
+    @include visually-hidden;
+}

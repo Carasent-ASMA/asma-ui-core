@@ -1,0 +1,63 @@
+// Breakpoint mixins — SCSS layer for asma-ui-core consumers.
+//
+// Source of truth: asma-types/src/breakpoints.ts
+// SCSS cannot import TypeScript, so values are kept in sync manually.
+// When changing a breakpoint value, update breakpoints.ts first, then here.
+//
+// Ranges:
+//   mobile         : ≤ 743px
+//   tablet         : 744px – 1023px
+//   tablet-desktop : 1024px – 1279px
+//   desktop        : ≥ 1280px
+
+// ── Variables ────────────────────────────────────────────────────────────────
+$bp-mobile-max:          743px;
+$bp-tablet-min:          744px;
+$bp-tablet-max:         1023px;
+$bp-tablet-desktop-min: 1024px;
+$bp-tablet-desktop-max: 1279px;
+$bp-desktop-min:        1280px;
+
+// ── Mixins ───────────────────────────────────────────────────────────────────
+
+/// Mobile only (≤ 743px)
+@mixin mobile {
+    @media (max-width: $bp-mobile-max) {
+        @content;
+    }
+}
+
+/// Tablet only (744px – 1023px)
+@mixin tablet {
+    @media (min-width: $bp-tablet-min) and (max-width: $bp-tablet-max) {
+        @content;
+    }
+}
+
+/// Tablet-desktop only (1024px – 1279px)
+@mixin tablet-desktop {
+    @media (min-width: $bp-tablet-desktop-min) and (max-width: $bp-tablet-desktop-max) {
+        @content;
+    }
+}
+
+/// Desktop and above (≥ 1280px)
+@mixin desktop {
+    @media (min-width: $bp-desktop-min) {
+        @content;
+    }
+}
+
+/// Mobile + tablet combined (≤ 1023px)
+@mixin mobile-or-tablet {
+    @media (max-width: $bp-tablet-max) {
+        @content;
+    }
+}
+
+/// Everything below desktop (≤ 1279px) — matches isCompactView
+@mixin compact {
+    @media (max-width: $bp-tablet-desktop-max) {
+        @content;
+    }
+}
