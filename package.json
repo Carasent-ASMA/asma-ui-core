@@ -8,7 +8,8 @@
     "files": [
         "dist/**/*",
         "dist/style.css",
-        "tw-configs/**/*"
+        "tw-configs/**/*",
+        "src/styles/**/*"
     ],
     "keywords": [],
     "author": "asma-team",
@@ -23,7 +24,8 @@
             }
         },
         "./dist/style.css": "./dist/style.css",
-        "./tw-configs/twConfigs.json": "./tw-configs/twConfigs.json"
+        "./tw-configs/twConfigs.json": "./tw-configs/twConfigs.json",
+        "./src/styles/breakpoints": "./src/styles/_breakpoints.scss"
     },
     "scripts": {
         "dev": "vite",
