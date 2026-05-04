@@ -1,9 +1,11 @@
 import { Tabs, type TabsProps } from '@mui/material'
 import type { FC } from 'react'
+import { cn } from 'src/helpers/cn'
 
-export const StyledTabs: FC<TabsProps> = (props) => (
+export const StyledTabs: FC<TabsProps> = ({ className, ...props }) => (
     <Tabs
         {...props}
+        className={cn('rounded-t-lg border-b border-delta-200 bg-white px-4', className)}
         TabIndicatorProps={{
             style: { background: 'var(--colors-gama-500)', color: 'var(--colors-gama-500)' },
         }}

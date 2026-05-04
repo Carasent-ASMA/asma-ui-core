@@ -10,7 +10,7 @@ export const StyledTab: FC<TabProps> = (props) => (
                 color: 'var(--colors-gama-500)',
             },
             '&.MuiTab-textColorPrimary': {
-                color: 'var(--colors-gray-500)',
+                color: 'var(--colors-gray-600)',
             },
             '&.MuiTab-textColorPrimary.Mui-disabled': {
                 color: 'var(--colors-gray-300)',
