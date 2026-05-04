@@ -2,7 +2,10 @@ import { Tabs, type TabsProps } from '@mui/material'
 import type { FC } from 'react'
 import { cn } from 'src/helpers/cn'
 
-/** Styled wrapper for MUI Tabs with consistent theming tokens */
+/**
+ * Styled wrapper for MUI Tabs with consistent theming tokens.
+ * Provides customized styling for tab indicators, scroll buttons, and inactive states.
+ */
 export const StyledTabs: FC<TabsProps> = ({ className, ...props }) => (
     <Tabs
         {...props}
