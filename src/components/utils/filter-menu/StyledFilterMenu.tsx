@@ -90,6 +90,7 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
                         onClick={onAnchorClick}
                         size={size}
                         dataTest={dataTest}
+                        data-popover-open={!!anchorEl || undefined}
                     >
                         {!hideLabel && (label || 'Filter')}
                     </StyledButton>

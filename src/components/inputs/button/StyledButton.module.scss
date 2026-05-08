@@ -31,7 +31,8 @@
             border-color: var(--colors-button-#{$type}-#{$color}-hover-border-color) #{!important};
         }
 
-        &:focus {
+        &:focus,
+        &[data-popover-open] {
             outline-offset: -2px #{!important};
             color: var(--colors-button-#{$type}-#{$color}-focused-text-color) #{!important};
             background-color: var(--colors-button-#{$type}-#{$color}-focused-bg-color) #{!important};
