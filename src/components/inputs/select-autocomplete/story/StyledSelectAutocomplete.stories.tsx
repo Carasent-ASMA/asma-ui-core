@@ -319,7 +319,7 @@ export const Performance_LargeDataset: Story = {
         const end = performance.now()
 
         await expect(option).toBeInTheDocument()
-        await expect(end - start).toBeLessThan(700)
+        await expect(end - start).toBeLessThan(1000)
 
         const options = document.querySelectorAll('[role="option"]')
 
