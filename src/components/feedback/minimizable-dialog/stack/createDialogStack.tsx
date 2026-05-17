@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, type ReactNode, useEffect } from 'react'
+import React, { createContext, useContext, useState, useCallback, type ReactNode, useSyncExternalStore } from 'react'
 
 export type DialogConfigMap = Record<string, { dependencies?: readonly string[]; order?: number }>
 
@@ -20,20 +20,17 @@ interface DialogStackContextType<Config extends DialogConfigMap> {
     getDialogState(id: DialogId<Config>): DialogState<DialogId<Config>> | undefined
 }
 
+const subscribeResize = (callback: () => void) => {
+    window.addEventListener('resize', callback)
+    return () => window.removeEventListener('resize', callback)
+}
+
 function useWindowWidth() {
-    const [width, setWidth] = useState(() => window.innerWidth)
-
-    useEffect(() => {
-        const handler = () => {
-            setWidth(window.innerWidth)
-        }
-        window.addEventListener('resize', handler)
-        return () => {
-            window.removeEventListener('resize', handler)
-        }
-    }, [])
-
-    return width
+    return useSyncExternalStore(
+        subscribeResize,
+        () => window.innerWidth,
+        () => 0,
+    )
 }
 
 const GAP = 16

@@ -1,0 +1,60 @@
+///
+/// Breakpoint mixins — single source of truth for SCSS consumers.
+///
+/// @remarks
+/// These values mirror `breakpoints` in `asma-types/src/interfaces/breakpoints.ts`.
+/// If you change values here, update that file too.
+///
+/// Layout ranges:
+///   mobile:         <= 743px
+///   tablet:          744px – 1023px
+///   tablet-desktop: 1024px – 1279px
+///   desktop:        >= 1280px
+///   compact:        <= 1279px  (mobile + tablet + tablet-desktop)
+///
+
+// ── Breakpoint values (must stay in sync with asma-types breakpoints.ts) ────
+
+$mobile-max: 743px;
+$tablet-min: 744px;
+$tablet-max: 1023px;
+$tablet-desktop-min: 1024px;
+$tablet-desktop-max: 1279px;
+$desktop-min: 1280px;
+
+// ── Mixins ───────────────────────────────────────────────────────────────────
+
+/// Targets mobile viewports only (max-width: 743px).
+@mixin mobile {
+    @media (max-width: #{$mobile-max}) {
+        @content;
+    }
+}
+
+/// Targets tablet viewports only (744px – 1023px).
+@mixin tablet {
+    @media (min-width: #{$tablet-min}) and (max-width: #{$tablet-max}) {
+        @content;
+    }
+}
+
+/// Targets tablet-desktop viewports only (1024px – 1279px).
+@mixin tablet-desktop {
+    @media (min-width: #{$tablet-desktop-min}) and (max-width: #{$tablet-desktop-max}) {
+        @content;
+    }
+}
+
+/// Targets desktop viewports only (min-width: 1280px).
+@mixin desktop {
+    @media (min-width: #{$desktop-min}) {
+        @content;
+    }
+}
+
+/// Targets all non-desktop viewports (max-width: 1279px).
+@mixin compact {
+    @media (max-width: #{$tablet-desktop-max}) {
+        @content;
+    }
+}
