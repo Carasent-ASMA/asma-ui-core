@@ -1,8 +1,9 @@
-import { StyledTypography } from 'src/components/data-display/typography'
-import { StyledFormControl } from 'src/components/miscellaneous/StyledFormControl'
-import { StyledInputField } from 'src/components/inputs/input-field'
-import { StyledSelectAutocomplete } from '../../StyledSelectAutocomplete'
 import { useState } from 'react'
+import { StyledChip } from 'src/components/data-display/chip'
+import { StyledTypography } from 'src/components/data-display/typography'
+import { StyledInputField } from 'src/components/inputs/input-field'
+import { StyledFormControl } from 'src/components/miscellaneous/StyledFormControl'
+import { StyledSelectAutocomplete } from '../../StyledSelectAutocomplete'
 
 const top100Films = [
     { title: 'The Shawshank Redemption', year: 1994 },
@@ -150,6 +151,16 @@ export const StyledSelectAutocompleteExample: React.FC = () => {
                     }}
                     // defaultValue={[top100Films[13]]}
                     getOptionLabel={(option) => option?.title || ''}
+                    renderTags={(tagValue, getTagProps) =>
+                        tagValue.map((option, index) => (
+                            <StyledChip
+                                {...getTagProps({ index })}
+                                dataTest={`selected-chip-${option.year}`}
+                                label={option.title}
+                                variant='outlined'
+                            />
+                        ))
+                    }
                     renderInput={(params) => (
                         <StyledInputField
                             dataTest='test'
