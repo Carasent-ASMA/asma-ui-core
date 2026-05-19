@@ -1,11 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { StyledCheckbox } from './StyledCheckbox'
-import { useState } from 'react'
 
 const meta = {
     title: 'base-ui/Checkbox',
     component: StyledCheckbox,
-    tags: [],
+    tags: ['autodocs'],
     argTypes: {},
     args: {},
 } satisfies Meta<typeof StyledCheckbox>
@@ -15,89 +14,90 @@ type Story = StoryObj<typeof StyledCheckbox>
 
 export const Checkbox: Story = {
     args: { ...meta.args },
-    render: () => <CheckboxExample />,
+    render: () => <CheckboxTablesExample />,
 }
 
-const CheckboxExample = () => {
-    const [checked, setChecked] = useState(false)
+const COLUMN_NAMES = ['Enabled', 'Hovered', 'Focused', 'Disabled', 'Read only']
+const ROW_NAMES = ['Green', 'Blue', 'Fretex']
 
+const ROW_THEME_BY_NAME: Record<string, 'greenish' | 'default' | 'fretex'> = {
+    Green: 'greenish',
+    Blue: 'default',
+    Fretex: 'fretex',
+}
+
+type ColumnProps = Partial<React.ComponentProps<typeof StyledCheckbox>> & {
+    'data-focus-visible'?: string
+    'data-hovered'?: string
+}
+
+const COLUMN_CHECKBOX_PROPS: Record<string, ColumnProps> = {
+    Hovered: { 'data-hovered': '' },
+    Focused: { 'data-focus-visible': '' },
+    Disabled: { disabled: true },
+    'Read only': { readOnly: true },
+}
+
+type CheckboxTableProps = {
+    title: string
+    checkboxProps?: Partial<React.ComponentProps<typeof StyledCheckbox>>
+}
+
+const CheckboxStateTable = ({ title, checkboxProps }: CheckboxTableProps) => {
     return (
-        <div className='flex flex-col'>
-            <div>
-                <StyledCheckbox dataTest='test' hideWrapper />
-            </div>
-            <div>
-                <StyledCheckbox dataTest='test' size='small' hideWrapper />
-            </div>
-            <div className='flex'>
-                <StyledCheckbox dataTest='test' checked={checked} onChange={(_, checked) => setChecked(checked)} />
-                <StyledCheckbox dataTest='test' checked={false} />
-                <StyledCheckbox dataTest='test' indeterminate />
-                <StyledCheckbox dataTest='test' disableRipple />
-                <StyledCheckbox dataTest='test' readOnly checked={true} />
-                <StyledCheckbox dataTest='test' readOnly indeterminate />
-            </div>
-            <div className='flex'>
-                <StyledCheckbox size='small' dataTest='test' checked={true} />
-                <StyledCheckbox size='small' dataTest='test' checked={false} />
-                <StyledCheckbox size='small' dataTest='test' indeterminate />
-                <StyledCheckbox size='small' dataTest='test' />
-                <StyledCheckbox size='small' dataTest='test' readOnly checked={true} />
-            </div>
-            <div className='flex'>
-                <StyledCheckbox size='small' disabled dataTest='test' checked={true} />
-                <StyledCheckbox size='small' disabled dataTest='test' checked={false} />
-                <StyledCheckbox size='small' disabled dataTest='test' indeterminate />
-                <StyledCheckbox size='small' disabled dataTest='test' />
-            </div>
-            <div className='flex'>
-                <StyledCheckbox disabled dataTest='test' checked={true} />
-                <StyledCheckbox disabled dataTest='test' checked={false} />
-                <StyledCheckbox disabled dataTest='test' indeterminate />
-                <StyledCheckbox disabled dataTest='test' />
-            </div>
-            <IndeterminateGroup />
-        </div>
+        <table className='w-full table-fixed border-collapse text-delta-600 font-semibold text-lg'>
+            <thead className='bg-delta-10 h-[96px]'>
+                <tr>
+                    <th className='box-border text-delta-800 text-2xl w-[200px] p-6 border border-solid border-delta-200 text-left'>
+                        {title}
+                    </th>
+                    {COLUMN_NAMES.map((columnName) => (
+                        <th key={columnName} className='box-border w-[140px] p-6 border border-solid border-delta-200'>
+                            {columnName}
+                        </th>
+                    ))}
+                </tr>
+            </thead>
+            <tbody>
+                {ROW_NAMES.map((rowName) => (
+                    <tr key={rowName} className='h-[96px]'>
+                        <th scope='row' className='box-border p-6 border border-solid border-delta-200 text-left'>
+                            {rowName}
+                        </th>
+                        {COLUMN_NAMES.map((columnName) => (
+                            <td
+                                key={`${rowName}-${columnName}`}
+                                className='box-border border border-solid border-delta-200'
+                            >
+                                <div
+                                    className='flex items-center justify-center'
+                                    data-theme={ROW_THEME_BY_NAME[rowName]}
+                                >
+                                    <StyledCheckbox
+                                        dataTest={`${title}-${rowName}-${columnName}`}
+                                        size='medium'
+                                        {...checkboxProps}
+                                        {...COLUMN_CHECKBOX_PROPS[columnName]}
+                                    />
+                                    <span className='text-sm font-normal text-delta-800'>Label</span>
+                                </div>
+                            </td>
+                        ))}
+                    </tr>
+                ))}
+            </tbody>
+        </table>
     )
 }
 
-const IndeterminateGroup = () => {
-    const [checkedItems, setCheckedItems] = useState([false, false, false])
-
-    const parentIndeterminate = checkedItems.some(Boolean) && !checkedItems.every(Boolean)
-
-    const handleChildChange = (index: number) => (checked: boolean) => {
-        setCheckedItems((prev) => {
-            const newItems = [...prev]
-            newItems[index] = checked
-            return newItems
-        })
-    }
-
+const CheckboxTablesExample = () => {
     return (
-        <div className='p-4'>
-            <div className='flex items-center gap-2'>
-                <StyledCheckbox
-                    dataTest='parent-checkbox'
-                    checked={checkedItems.every(Boolean)}
-                    indeterminate={parentIndeterminate}
-                    onCheckedChange={(checked: boolean) => {
-                        setCheckedItems(checkedItems.map(() => checked))
-                    }}
-                />
-            </div>
+        <div className='flex flex-col gap-10'>
+            <CheckboxStateTable title='Unchecked' />
 
-            <div className='ml-6 mt-2 space-y-2'>
-                {checkedItems.map((checked, index) => (
-                    <div key={index} className='flex items-center gap-2'>
-                        <StyledCheckbox
-                            dataTest={`child-checkbox-${index}`}
-                            checked={checked}
-                            onCheckedChange={handleChildChange(index)}
-                        />
-                    </div>
-                ))}
-            </div>
+            <CheckboxStateTable title='Checked' checkboxProps={{ checked: true }} />
+
+            <CheckboxStateTable title='Indeterminate' checkboxProps={{ indeterminate: true }} />
         </div>
     )
 }
