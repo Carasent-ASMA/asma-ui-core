@@ -26,7 +26,7 @@ const meta = {
             tagValue.map((option, index) => (
                 <StyledChip
                     {...getTagProps({ index })}
-                    dataTest={`selected-chip-${option.year}`}
+                    dataTest={`selected-chip-${option.title}`}
                     label={option.title}
                     variant='outlined'
                 />
@@ -131,7 +131,9 @@ export const RemovesChip: Story = {
         const chip = canvas.getByRole('button', { name: /The Godfather/i })
         await expect(chip).toBeInTheDocument()
 
-        const deleteIcon = canvas.getByTestId('CancelIcon')
+        const deleteIcon = canvas.getByTestId(
+            `selected-chip-${top100Films.find((f) => f.title === 'The Godfather')?.title}-delete`,
+        )
         await userEvent.click(deleteIcon)
 
         await expect(canvas.queryByText('The Godfather')).not.toBeInTheDocument()
@@ -141,7 +143,7 @@ export const RemovesChip: Story = {
 export const AriaExpandedLifecycle: Story = {
     render: (args) => <ControlledAutocomplete {...args} />,
     play: async ({ canvasElement, userEvent }) => {
-        const { canvas, input } = getAutocomplete(canvasElement)
+        const { input } = getAutocomplete(canvasElement)
 
         await expect(input).toHaveAttribute('aria-expanded', 'false')
 
@@ -158,7 +160,7 @@ export const AriaExpandedLifecycle: Story = {
 export const ActiveDescendant: Story = {
     render: (args) => <ControlledAutocomplete {...args} />,
     play: async ({ canvasElement, userEvent }) => {
-        const { canvas, input } = getAutocomplete(canvasElement)
+        const { input } = getAutocomplete(canvasElement)
 
         input.focus()
         await expect(input).toHaveFocus()
