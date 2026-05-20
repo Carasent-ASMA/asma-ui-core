@@ -1,7 +1,7 @@
 import React from 'react'
 import type { SVGProps } from 'react'
 
-export function WorkIcon(props: SVGProps<SVGSVGElement>) {
+export function WorkIcon(props: SVGProps<SVGSVGElement>): JSX.Element {
     return (
         <svg xmlns='http://www.w3.org/2000/svg' width='1em' height='1em' viewBox='0 0 24 24' {...props}>
             <path

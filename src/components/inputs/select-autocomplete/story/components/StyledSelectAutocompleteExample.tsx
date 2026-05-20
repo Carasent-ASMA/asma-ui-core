@@ -1,10 +1,8 @@
-import { StyledTypography } from 'src/components/data-display/typography'
-import { StyledFormControl } from 'src/components/miscellaneous/StyledFormControl'
-import { StyledInputField } from 'src/components/inputs/input-field'
-import { StyledSelectAutocomplete } from '../../StyledSelectAutocomplete'
 import { useState } from 'react'
+import { StyledInputField } from 'src/components/inputs/input-field'
+import { StyledSelectAutocomplete, type StyledSelectAutocompleteProps } from '../../StyledSelectAutocomplete'
 
-const top100Films = [
+export const top100Films = [
     { title: 'The Shawshank Redemption', year: 1994 },
     { title: 'The Godfather', year: 1972 },
     { title: 'The Godfather: Part II', year: 1974 },
@@ -131,42 +129,22 @@ const top100Films = [
     { title: 'Monty Python and the Holy Grail', year: 1975 },
 ]
 
-export const StyledSelectAutocompleteExample: React.FC = () => {
-    const [value, setValue] = useState<{ title: string; year: number }[]>([])
+export interface Film {
+    title: string
+    year: number
+}
+
+export const ControlledAutocomplete = (args: StyledSelectAutocompleteProps<Film, true, false, false>): JSX.Element => {
+    const [value, setValue] = useState<Film[]>([])
+
     return (
-        <div>
-            <StyledTypography variant='h6'>SelectAutocomplete Example</StyledTypography>
-            <StyledFormControl fullWidth>
-                <StyledSelectAutocomplete
-                    disableCloseOnSelect
-                    dataTest='dataTest-autocomplete'
-                    // multiple
-                    size='small'
-                    id='tags-standard'
-                    options={top100Films}
-                    value={value}
-                    onChange={(_e, val) => {
-                        setValue(val)
-                    }}
-                    // defaultValue={[top100Films[13]]}
-                    getOptionLabel={(option) => option?.title || ''}
-                    renderInput={(params) => (
-                        <StyledInputField
-                            dataTest='test'
-                            {...params}
-                            error={!value.length}
-                            variant='outlined'
-                            label=''
-                            placeholder='Favorites'
-                        />
-                    )}
-                    autoHeight
-                    multiple={true}
-                    // use on KeyDown if you want disable text typing
-                    // onKeyDown={(e) => e.preventDefault()}
-                    //open={true}
-                />
-            </StyledFormControl>
-        </div>
+        <StyledSelectAutocomplete
+            {...args}
+            options={top100Films}
+            value={value}
+            onChange={(_, val) => setValue(val)}
+            getOptionLabel={(option) => option?.title || ''}
+            renderInput={(params) => <StyledInputField {...params} dataTest='input' placeholder='Favorites' />}
+        />
     )
 }

@@ -8,7 +8,7 @@ import { FilterIconOff } from 'src/components/icons/filter-icon-off'
 
 type FilteredEmptyStateLocale = 'en' | 'no'
 
-export type StyledFilteredEmptyStateProps = {
+export interface StyledFilteredEmptyStateProps {
     dataTest: string
     emptyText?: string
     locale?: FilteredEmptyStateLocale

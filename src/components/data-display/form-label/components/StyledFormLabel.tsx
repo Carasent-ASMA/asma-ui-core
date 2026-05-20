@@ -6,7 +6,7 @@ export const StyledFormLabel: React.FC<IStyledFormLabel> = ({ title, onClick, cl
     const styles = getStyles({ size })
 
     return (
-        <div className={clsx(styles, className)} onClick={onClick} data-test={dataTest}>
+        <div className={clsx(styles, className)} onClick={onClick} data-testid={dataTest}>
             {title}
         </div>
     )

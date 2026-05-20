@@ -10,7 +10,7 @@ const meta = {
 
 export default meta
 
-export const DialogMinimizable = () => {
+export const DialogMinimizable = (): JSX.Element => {
     const [open, setOpen] = useState(false)
     const [fullScreen, setFullScreen] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
@@ -60,15 +60,15 @@ export const DialogMinimizable = () => {
                 btnContainerClassName='w-full'
                 footerClassName='gap-2 pl-8'
                 footerInfo={
-                    <div className='flex items-center justify-between gap-4 w-full'>
+                    <div className='flex w-full items-center justify-between gap-4'>
                         <div className='flex flex-col gap-0.5'>
-                            <span className='text-delta-800 text-sm font-semibold'>Sist optdatert</span>
+                            <span className='text-sm font-semibold text-delta-800'>Sist optdatert</span>
                             <span className='text-sm'>03.04.2024 kl. 14.13</span>
                             <span className='text-sm'>av KristianAO</span>
                         </div>
 
                         <div className='flex flex-col gap-1'>
-                            <span className='text-delta-800 text-sm font-semibold'>Lagt til i registeret</span>
+                            <span className='text-sm font-semibold text-delta-800'>Lagt til i registeret</span>
                             <span className='text-sm'>05.04.2024 kl. 14.13</span>
                             <span className='text-sm'>av Kristian Thyholdt</span>
                         </div>
@@ -77,8 +77,8 @@ export const DialogMinimizable = () => {
             >
                 {(props) => (
                     <>
-                        <div className='text-delta-800 px-4'>{JSON.stringify(props)}</div>
-                        <div className='flex flex-col gap-y-3 p-4 overflow-y-scroll'>
+                        <div className='px-4 text-delta-800'>{JSON.stringify(props)}</div>
+                        <div className='flex flex-col gap-y-3 overflow-y-scroll p-4'>
                             <div>
                                 Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum
                                 has been the industry's standard dummy text ever since the 1500s, when an unknown

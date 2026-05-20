@@ -6,7 +6,7 @@ import clsx from 'clsx'
 
 export type StyledButtonType = 'contained' | 'outlined' | 'text' | 'textGray'
 
-type commonProps = {
+interface commonProps {
     refLink?: React.Ref<HTMLButtonElement>
     size?: 'large' | 'small' | 'medium'
     startIcon?: ReactNode
@@ -14,15 +14,15 @@ type commonProps = {
     dataTest: string
 }
 
-type variantTextGrayProps = {
+interface variantTextGrayProps {
     variant?: 'textGray'
     error?: never
 }
-type variantTextWhiteProps = {
+interface variantTextWhiteProps {
     variant?: 'textWhite'
     error?: never
 }
-type buttonStandartVariantsProps = {
+interface buttonStandartVariantsProps {
     variant?:
         | 'contained'
         | 'outlined'
@@ -81,7 +81,7 @@ export const StyledButton = ({
     dataTest,
     error,
     ...otherProps
-}: StyledButtonProps) => {
+}: StyledButtonProps): JSX.Element => {
     const isLarge = size === 'large' || size === 'medium'
 
     // setup className
@@ -98,7 +98,7 @@ export const StyledButton = ({
                 className,
             )}
             ref={refLink}
-            data-test={dataTest}
+            data-testid={dataTest}
         >
             {startIcon}
             {children && (

@@ -1,11 +1,11 @@
 import { AccordionSummary } from '@mui/material'
 import type { AccordionSummaryProps } from '@mui/material'
 import clsx from 'clsx'
-import { ChevronDownIcon } from 'src/components/icons'
+import { ChevronDownIcon } from 'asma-ui-icons'
 
-export type StyledAccordionSummarySize = 'small' | 'large'
+type StyledAccordionSummarySize = 'small' | 'large'
 
-export interface StyledAccordionSummaryProps extends AccordionSummaryProps {
+interface StyledAccordionSummaryProps extends AccordionSummaryProps {
     size?: StyledAccordionSummarySize
     expandChevronRight?: boolean
 }
@@ -17,7 +17,7 @@ export const StyledAccordionSummary = ({
     sx,
     children,
     ...rest
-}: StyledAccordionSummaryProps) => {
+}: StyledAccordionSummaryProps): JSX.Element => {
     const isSmall = size === 'small'
 
     const height = isSmall ? 48 : 72
@@ -29,7 +29,7 @@ export const StyledAccordionSummary = ({
         <AccordionSummary
             {...rest}
             className={clsx(
-            expandChevronRight ? 'flex-row justify-between items-center w-full' : 'flex-row-reverse gap-2.5', className)}
+            expandChevronRight ? 'w-full flex-row items-center justify-between' : 'flex-row-reverse gap-2.5', className)}
             expandIcon={<ChevronDownIcon className='text-delta-800' width={chevronSize} height={chevronSize} />}
             sx={{
                 minHeight: height,

@@ -1,4 +1,5 @@
-import type { Meta } from '@storybook/react'
+import React from 'react'
+import type { Meta } from '@storybook/react-vite'
 import { StyledInputField } from 'src/components/inputs/input-field'
 import { StyledFormLabel } from 'src/components/data-display/form-label'
 
@@ -12,12 +13,12 @@ const meta = {
 
 export default meta
 
-export const FormInputs = () => {
+export const FormInputs = (): JSX.Element => {
     return (
         <div>
             <h2>Not filled</h2>
             <StyledFormLabel title='Enabled' size='xl' />
-            <div className={'flex flex-col gap-5 max-w-lg '}>
+            <div className={'flex max-w-lg flex-col gap-5'}>
                 <StyledInputField autoComplete='off' size='small' dataTest='not-filled' />
                 <StyledInputField
                     autoComplete='off'
