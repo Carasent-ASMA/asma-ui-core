@@ -10,6 +10,7 @@
 
 .watermark {
     display: flex;
+    box-sizing: content-box;
     user-select: none;
     align-items: center;
     justify-content: center;
