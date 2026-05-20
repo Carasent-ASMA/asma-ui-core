@@ -3,8 +3,9 @@ import type { Meta } from '@storybook/react-vite'
 import ChevronDownIcon from 'src/components/custom/widget/icons/ChevronDownIcon'
 
 import { StyledAIDisclosure } from '.'
-import type { ReactNode } from 'node_modules/@types/react'
+
 import { InfoOutlineIcon } from 'node_modules/asma-ui-icons/dist'
+import type { ReactNode } from 'node_modules/@types/react'
 
 const TOOLTIP = 'Error message reworded for clarity. Meaning unchanged.'
 
@@ -124,11 +125,13 @@ function StaticDisclosurePreview(props: { label?: string; tooltip?: string; isOp
 
 function GuidanceCard() {
     return (
-        <section className='rounded-lg border border-solid border-[#8ED0D0] bg-[#E8F6F6] p-6'>
+        <section className='rounded-lg border border-solid border-[#8ED0D0] bg-[#E8F6F6] p-6 w-fit'>
             <div className='flex items-start gap-4'>
-                <InfoOutlineIcon height={24} width={24} color='#168181' />
+                <div>
+                    <InfoOutlineIcon height={24} width={24} color='#168181' />
+                </div>
 
-                <div className='flex max-w-[760px] flex-col gap-6 text-base leading-6 text-delta-800'>
+                <div className='flex max-w-[500px] flex-col gap-6 text-base leading-6 text-delta-800'>
                     <div className='space-y-2'>
                         <h3 className='text-base font-semibold leading-6 m-0'>When to use</h3>
 

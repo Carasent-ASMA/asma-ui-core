@@ -32,11 +32,11 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                           },
                       }
                     : {
-                          '&:hover': {
+                          '&:hover, &[data-hovered]': {
                               borderColor: 'var(--colors-gama-200)',
                               backgroundColor: 'var(--colors-gama-50)',
                           },
-                          '&:focus': {
+                          '&:focus, &[data-focus]': {
                               outline: 'none',
                               borderColor: 'var(--colors-gama-400)',
                               backgroundColor: 'var(--colors-gama-50)',
