@@ -9,6 +9,7 @@ export * from './components/data-display/tooltip'
 export * from './components/icons'
 export * from './components/data-display/typography'
 export * from './components/data-display/form-label'
+export * from './components/data-display/ai-disclosure'
 // feedback
 export * from './components/feedback/dialog'
 export * from './components/feedback/empty-page/StyledEmptyPage'
