@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Accordion } from '@base-ui-components/react/accordion'
+import { Accordion } from '@base-ui/react'
 import { cn } from 'src/helpers/cn'
 import styles from './StyledAccordion.module.scss'
 
@@ -19,7 +19,7 @@ export const StyledAccordion = ({
     defaultExpanded,
     onChange,
     ...props
-}: StyledAccordionProps) => {
+}: StyledAccordionProps): JSX.Element => {
     const value = 'item'
 
     const accordionProps = {
@@ -36,9 +36,7 @@ export const StyledAccordion = ({
 
     return (
         <Accordion.Root {...accordionProps}>
-            <Accordion.Item value={value}>
-                {children}
-            </Accordion.Item>
+            <Accordion.Item value={value}>{children}</Accordion.Item>
         </Accordion.Root>
     )
 }

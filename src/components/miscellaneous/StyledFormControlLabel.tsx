@@ -1,6 +1,6 @@
 import { FormControlLabel, type FormControlLabelProps } from '@mui/material'
 
-export const StyledFormControlLabel = ({ sx, ...props }: FormControlLabelProps) => (
+export const StyledFormControlLabel = ({ sx, ...props }: FormControlLabelProps): JSX.Element => (
     <FormControlLabel
         {...props}
         sx={{

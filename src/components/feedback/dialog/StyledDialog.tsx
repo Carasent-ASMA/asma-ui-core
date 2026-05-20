@@ -4,8 +4,9 @@ import type { DialogProps } from '@mui/material/Dialog'
 import { StyledButton } from '../../inputs/button/StyledButton'
 import type { ReactNode } from 'react'
 import style from './StyledDialog.module.scss'
-import { CloseIcon } from 'src/components/icons'
-import { useIsMobileView } from 'src/hooks/useWindowWidthSize.hook'
+import { CloseIcon } from 'asma-ui-icons'
+import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
+
 export interface IStyledDialogProps extends DialogProps {
     onCloseText?: ReactNode
     showCloseIcon?: boolean
@@ -25,10 +26,12 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     dialogHeaderNode,
     ...rest
 }) => {
-    const isMobile = useIsMobileView()
+    const isMobile = useMobileMediaQuery()
+
     return (
         <Dialog
-            data-test={dataTest}
+            data-testid={dataTest}
+            aria-label={dataTest}
             style={{
                 zIndex: 999,
                 ...rest.style,
@@ -52,7 +55,9 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                                     size='small'
                                     endIcon={<CloseIcon width={20} height={20} />}
                                     onClick={(event) => {
-                                        rest.onClose ? rest.onClose(event, 'escapeKeyDown') : null
+                                        if (rest.onClose) {
+                                            rest.onClose(event, 'escapeKeyDown')
+                                        }
                                     }}
                                     style={{ color: 'var(--colors-grey-800)', paddingRight: '6px', paddingLeft: '6px' }}
                                 >

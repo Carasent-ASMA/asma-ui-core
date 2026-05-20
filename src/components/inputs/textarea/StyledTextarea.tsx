@@ -1,8 +1,7 @@
-import React, { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from 'react'
-import { useAutosizeTextArea } from './useAutosizeTextArea'
+import React, { useEffect, useId, useRef, type ChangeEvent, type MutableRefObject, type ReactNode } from 'react'
 import styles from './StyledTextarea.module.scss'
 
-type TextareaCommonProps = {
+export interface TextareaCommonProps {
     id?: string
     value?: string
     label?: ReactNode
@@ -13,7 +12,7 @@ type TextareaCommonProps = {
     dataTest?: string
 }
 
-type TextAreaNotEditableProps = {
+export interface TextAreaNotEditableProps {
     variant?: 'not_editable' | 'view_only'
     minRows?: never
     maxRows?: never
@@ -28,7 +27,7 @@ type TextAreaNotEditableProps = {
     counterLimit?: never
 }
 
-type TextAreaActiveProps = {
+export interface TextAreaActiveProps {
     variant?: 'active'
     minRows?: number
     maxRows?: number
@@ -39,13 +38,16 @@ type TextAreaActiveProps = {
     errorMessage?: string
     maxLength?: number
     counter?: boolean
-    refLink?: React.MutableRefObject<HTMLTextAreaElement | null> | null | undefined
+    refLink?: MutableRefObject<HTMLTextAreaElement | null> | null | undefined
     counterLimit?: number
 }
 type TextareaConditionalProps = TextAreaActiveProps | TextAreaNotEditableProps
 type StyledTextAreaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement> &
     TextareaCommonProps &
     TextareaConditionalProps
+
+type TextareaTypes = 'active' | 'error'
+type textTypes = 'active' | 'error' | 'disabled'
 
 /**
  * Developer: bularga.alexandru@carasent.com
@@ -84,47 +86,60 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
     ...otherProps
 }) => {
     const textAreaInnerRef = useRef<HTMLTextAreaElement>(null)
-    const textAreaRef = refLink ? refLink : textAreaInnerRef
+    const textAreaRef = refLink ?? textAreaInnerRef
     const counterEnabled = !!(counter && counterLimit)
 
-    const [mounted, setMounted] = useState(false)
+    const descriptionId = useId()
+    const counterId = useId()
+    const internalId = useId()
+    const textAreaId = id ?? internalId
 
     useEffect(() => {
-        setMounted(true)
-    }, [])
+        if (textAreaRef.current) {
+            const textArea = textAreaRef.current
+            const computedStyle = window.getComputedStyle(textArea)
+            const additionalBottomPadding = parseFloat(computedStyle.paddingBottom)
+            textArea.style.height = 'auto'
 
-    useAutosizeTextArea(textAreaRef.current, value, minRows, maxRows, mounted, counterEnabled)
+            const rowHeight = parseFloat(computedStyle.lineHeight)
+            const paddingTop = parseFloat(computedStyle.paddingTop)
+            const heightWithoutPaddings = textArea.scrollHeight - paddingTop
+            const rows = Math.ceil(heightWithoutPaddings / rowHeight)
+
+            if (rows > maxRows) {
+                textArea.style.height = `${rowHeight * maxRows + paddingTop + additionalBottomPadding}px`
+            } else {
+                textArea.style.height = `${textArea.scrollHeight + additionalBottomPadding}px`
+            }
+        }
+    }, [textAreaRef, value, minRows, maxRows, counterEnabled])
 
     if (maxRows < minRows) {
         minRows = maxRows
     }
 
-    const [charsCount, setCharsCount] = useState<number>(value.length)
-
-    useEffect(() => {
-        setCharsCount(value.length)
-    }, [value])
-
-    type TextareaTypes = 'active' | 'error'
     const textareaType: TextareaTypes = error ? 'error' : 'active'
 
-    type textTypes = 'active' | 'error' | 'disabled'
     const textType: textTypes = error ? 'error' : disabled ? 'disabled' : 'active'
 
     return (
-        <div className={`flex flex-col gap-1 relative ${containerClassName}`} data-test={dataTest}>
-            <label htmlFor={id} className={`${styles['label']} ${styles[textType]} ${labelClassName}`}>
+        <div className={`relative flex flex-col gap-1 ${containerClassName}`} data-testid={dataTest}>
+            <label htmlFor={textAreaId} className={`${styles['label']} ${styles[textType]} ${labelClassName}`}>
                 {label}
             </label>
-            <span className={`${styles['description']} ${styles[textType]}`}>{error ? errorMessage : description}</span>
+            <span id={descriptionId} className={`${styles['description']} ${styles[textType]}`}>
+                {error ? errorMessage : description}
+            </span>
             {variant === 'view_only' ? (
-                <div className='font-roboto text-sm font-normal pt-3 text-gray-700'>{value}</div>
+                <div className='pt-3 font-roboto text-sm font-normal text-gray-700'>{value}</div>
             ) : variant === 'not_editable' ? (
-                <div className='font-roboto text-sm font-normal rounded p-3 bg-gray-200 text-gray-700'>{value}</div>
+                <div className='rounded bg-gray-200 p-3 font-roboto text-sm font-normal text-gray-700'>{value}</div>
             ) : (
                 <textarea
                     {...otherProps}
-                    id={id}
+                    aria-describedby={`${descriptionId} ${counterId}`}
+                    aria-invalid={error}
+                    id={textAreaId}
                     ref={textAreaRef}
                     className={`${styles['textarea']} ${styles[textareaType]} ${className} ${
                         counterEnabled ? 'pb-[32px]' : ''
@@ -136,9 +151,15 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
                 />
             )}
             {counterEnabled && (
-                <div className='flex justify-end absolute bottom-3 right-3 text-[10px] font-roboto h-[15px] pointer-events-none'>
-                    {charsCount}/{counterLimit}
-                </div>
+                <>
+                    <div className='pointer-events-none absolute bottom-3 right-3 flex h-[15px] justify-end font-roboto text-[10px]'>
+                        {value.length}/{counterLimit}
+                    </div>
+
+                    <div id={counterId} aria-live='polite' className='sr-only'>
+                        {counterLimit - value.length} characters remaining
+                    </div>
+                </>
             )}
         </div>
     )

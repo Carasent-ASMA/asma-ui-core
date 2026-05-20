@@ -52,6 +52,14 @@
     }
 }
 
+.RadioWrapper:focus-visible .Radio::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    outline: 2px solid var(--colors-gama-400);
+}
+
 %ripple-base {
     position: absolute;
     left: 0;
@@ -138,14 +146,6 @@
     [data-disabled][data-unchecked] &,
     [data-disabled][data-checked] & {
         border-color: var(--colors-delta-300);
-    }
-
-    :focus-visible > &::before {
-        content: '';
-        position: absolute;
-        inset: -4px;
-        border-radius: 50%;
-        outline: 2px solid var(--colors-gama-400);
     }
 }
 
