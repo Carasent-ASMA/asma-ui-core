@@ -1,0 +1,60 @@
+.root {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding-left: 4px;
+    padding-right: 4px;
+    font-family: Roboto;
+    color: var(--colors-delta-700);
+}
+
+.watermark {
+    display: flex;
+    user-select: none;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid var(--colors-delta-700);
+    border-radius: 12px;
+    padding: 3px 4px;
+}
+
+.watermarkText {
+    font-size: 10px;
+    font-weight: 600;
+    font-style: normal;
+    line-height: 12px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    leading-trim: both;
+    text-edge: cap;
+}
+
+.label {
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0.24px;
+}
+
+.trigger {
+    margin: 0;
+    display: inline-flex;
+    cursor: pointer;
+    appearance: none;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    color: inherit;
+}
+
+.chevron {
+    transform-origin: center;
+    transform: rotate(0deg);
+    transition: transform 0.3s ease-in-out;
+}
+
+.chevronOpen {
+    transform: rotate(180deg);
+}
