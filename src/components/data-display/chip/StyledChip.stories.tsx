@@ -3,7 +3,7 @@ import { fn } from 'storybook/test'
 
 import { StyledChip } from './StyledChip'
 import { StyledInteractiveChip } from '../interactive-chip'
-import { DotsVerticalIcon, ChevronUpIcon, ChevronDownIcon } from '../../icons'
+import { DotsVerticalIcon, ChevronDownIcon } from '../../icons'
 
 const meta: Meta = {
     title: 'DataDisplay/Chip',
