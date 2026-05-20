@@ -1,8 +1,10 @@
 import type { Meta } from '@storybook/react-vite'
 
 import ChevronDownIcon from 'src/components/custom/widget/icons/ChevronDownIcon'
+import { StyledTooltip } from 'src/components/data-display/tooltip'
 
 import { StyledAIDisclosure } from '.'
+import styles from './StyledAIDisclosure.module.scss'
 
 import { InfoOutlineIcon } from 'node_modules/asma-ui-icons/dist'
 import type { ReactNode } from 'node_modules/@types/react'
@@ -37,7 +39,7 @@ const meta = {
 
 export default meta
 
-type DocumentationGridRow = {
+interface DocumentationGridRow {
     label: string
     content: ReactNode
     valueClassName?: string
@@ -81,10 +83,8 @@ function SectionTitle(props: { children: ReactNode }) {
 
 function WatermarkPreview() {
     return (
-        <div className='flex select-none items-center justify-center rounded-xl border border-solid border-delta-700 px-1 py-[3px]'>
-            <span className='[leading-trim:both] [text-edge:cap] text-[10px] font-semibold uppercase leading-[12px] tracking-[0.5px] text-delta-700'>
-                AI
-            </span>
+        <div className={styles['watermark']}>
+            <span className={styles['watermarkText']}>AI</span>
         </div>
     )
 }
@@ -92,32 +92,38 @@ function WatermarkPreview() {
 function StaticDisclosurePreview(props: { label?: string; tooltip?: string; isOpen?: boolean }) {
     const { label, tooltip, isOpen = false } = props
 
+    const chevron = tooltip ? (
+        <StyledTooltip
+            arrow
+            disableFocusListener
+            disableHoverListener
+            disableTouchListener
+            open={isOpen}
+            title={tooltip}
+        >
+            <button
+                aria-expanded={isOpen}
+                aria-label='Toggle AI disclosure tooltip'
+                className={styles['trigger']}
+                type='button'
+            >
+                <ChevronDownIcon
+                    className={`${styles['chevron']} ${isOpen ? styles['chevronOpen'] : ''}`}
+                    height={16}
+                    width={16}
+                />
+            </button>
+        </StyledTooltip>
+    ) : null
+
     return (
-        <div className='relative flex items-start overflow-visible px-1'>
-            {isOpen && tooltip ? (
-                <div className='absolute left-[33px] top-[-48px] z-10 flex w-[204px] flex-col items-start'>
-                    <div className='rounded-[3px] bg-[#363E4A] px-2 py-1 text-xs leading-4 tracking-[0.24px] text-white shadow-[0_1px_6px_rgba(0,0,0,0.15)] whitespace-pre-line'>
-                        {tooltip}
-                    </div>
-
-                    <div className='flex w-full px-4'>
-                        <div className='h-0 w-0 border-x-[6px] border-x-transparent border-t-[6px] border-t-[#363E4A]' />
-                    </div>
-                </div>
-            ) : null}
-
-            <div className='flex items-center gap-1 text-delta-700'>
+        <div className='flex items-start overflow-visible px-1'>
+            <div className={styles['root']}>
                 <WatermarkPreview />
 
-                {label ? <span className='text-xs tracking-[0.24px]'>{label}</span> : null}
+                {label ? <span className={styles['label']}>{label}</span> : null}
 
-                {tooltip ? (
-                    <ChevronDownIcon
-                        className={`origin-center transition-transform duration-300 ease-in-out ${isOpen ? 'rotate-180' : 'rotate-0'}`}
-                        height={16}
-                        width={16}
-                    />
-                ) : null}
+                {chevron}
             </div>
         </div>
     )
@@ -125,7 +131,7 @@ function StaticDisclosurePreview(props: { label?: string; tooltip?: string; isOp
 
 function GuidanceCard() {
     return (
-        <section className='rounded-lg border border-solid border-[#8ED0D0] bg-[#E8F6F6] p-6 w-fit'>
+        <section className='w-fit rounded-lg border border-solid border-[#8ED0D0] bg-[#E8F6F6] p-6'>
             <div className='flex items-start gap-4'>
                 <div>
                     <InfoOutlineIcon height={24} width={24} color='#168181' />
@@ -133,7 +139,7 @@ function GuidanceCard() {
 
                 <div className='flex max-w-[500px] flex-col gap-6 text-base leading-6 text-delta-800'>
                     <div className='space-y-2'>
-                        <h3 className='text-base font-semibold leading-6 m-0'>When to use</h3>
+                        <h3 className='m-0 text-base font-semibold leading-6'>When to use</h3>
 
                         <p>
                             Use the AI-disclosure component whenever content has been created, modified, or simplified
@@ -149,7 +155,7 @@ function GuidanceCard() {
                     </div>
 
                     <div className='space-y-2'>
-                        <h3 className='text-base font-semibold leading-6 m-0'>When not to use</h3>
+                        <h3 className='m-0 text-base font-semibold leading-6'>When not to use</h3>
                         <p>
                             Do not use this component as a generic AI feature label or marketing badge. It should only
                             appear when AI has directly acted on a specific piece of content in context. Avoid showing
@@ -158,7 +164,7 @@ function GuidanceCard() {
                     </div>
 
                     <div className='space-y-2'>
-                        <h3 className='text-base font-semibold leading-6 m-0'>Placement and alignment</h3>
+                        <h3 className='m-0 text-base font-semibold leading-6'>Placement and alignment</h3>
                         <p>
                             The component is always aligned to the left edge of its container and placed at the bottom
                             of the content block it refers to, directly below the AI-processed text or element.
@@ -267,7 +273,7 @@ function DocumentationPage() {
     )
 }
 
-export const Documentation = () => {
+export const Documentation = (): JSX.Element => {
     return <DocumentationPage />
 }
 
@@ -277,7 +283,7 @@ Documentation.parameters = {
     },
 }
 
-export const AIDisclosure = () => {
+export const AIDisclosure = (): JSX.Element => {
     return (
         <div className='p-20'>
             <StyledAIDisclosure label='Simplified with AI' tooltip={TOOLTIP} />
@@ -285,7 +291,7 @@ export const AIDisclosure = () => {
     )
 }
 
-export const RenderingVariants = () => {
+export const RenderingVariants = (): JSX.Element => {
     return (
         <div className='min-h-screen bg-white px-6 py-8 font-roboto'>
             <div className='max-w-[570px]'>
