@@ -46,6 +46,7 @@ export default defineConfig({
             entry: resolve('src', 'index.ts'),
             name: 'asma-ui-core',
             formats: ['es'],
+            cssFileName: 'style',
             fileName: (format) => `asma-ui-core.${format}.js`,
         },
         rolldownOptions: {
