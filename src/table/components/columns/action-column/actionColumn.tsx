@@ -12,7 +12,7 @@ export function generateActionsColumn<TData>(options: {
     customActionsColumnProps?: Partial<ColumnDef<TData, unknown>>
     rowActionsState?: (row: Row<TData>) => RowActionsState | undefined
     locale?: 'en' | 'no'
-}) {
+}): ColumnDef<TData, unknown> {
     const { headerPin, actions, customActionsNode, rowHeight, customActionsColumnProps, rowActionsState, locale } =
         options
 
@@ -30,7 +30,7 @@ export function generateActionsColumn<TData>(options: {
             actions || customActionsNode ? (
                 <div
                     className={'flex items-center justify-end gap-x-1'}
-                    style={{ height: rowHeight ? rowHeight : 'auto' }}
+                    style={{ height: rowHeight ?? 'auto' }}
                 >
                     {customActionsNode && <div>{customActionsNode?.(cell)}</div>}
                     {actions && <RowActionMenu tableData={cell} actions={actions} rowActionsState={rowActionsState} />}

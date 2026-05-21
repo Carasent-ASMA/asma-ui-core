@@ -1,2 +1,1 @@
-export * from './StyledAlert'
-export * from './StyledAlertTitle'
+export * from '../snack-bar/StyledAlert'

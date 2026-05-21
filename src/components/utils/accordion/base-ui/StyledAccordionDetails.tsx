@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Accordion } from '@base-ui-components/react/accordion'
+import { Accordion } from '@base-ui/react/accordion'
 import styles from './StyledAccordion.module.scss'
 import { clsx } from 'clsx'
 
@@ -12,7 +12,7 @@ export const StyledAccordionDetails = ({
     className,
     contentClassName,
     ...props
-}: StyledAccordionDetailsProps) => (
+}: StyledAccordionDetailsProps): JSX.Element => (
     <Accordion.Panel {...props} className={clsx(styles['Panel'], className)}>
         <div className={clsx(styles['Content'], contentClassName)}>{children}</div>
     </Accordion.Panel>

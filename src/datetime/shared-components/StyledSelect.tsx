@@ -1,7 +1,6 @@
-import { Select, type SelectChangeEvent, type SelectProps } from '@mui/material'
+import { Select, type SelectProps } from '@mui/material'
 import clsx from 'clsx'
 import { ExpandIcon } from './ExpandIcon'
-import { CloseIcon } from './CloseIcon'
 
 /**
  *
@@ -24,8 +23,14 @@ export const StyledSelect: React.FC<
         {...props}
         data-test={dataTest}
         value={props.value}
-        IconComponent={(props) => (
-            <ExpandIcon {...props} width={24} height={24} className={clsx(props.className, 'select-custom-icon')} />
+        IconComponent={({ className, ...iconProps }: { className?: string }) => (
+            <ExpandIcon
+                {...iconProps}
+                width={24}
+                height={24}
+                className={clsx(className)}
+                style={{ marginTop: '-3.5px' }}
+            />
         )}
         sx={{
             '.MuiOutlinedInput-notchedOutline': {
@@ -42,9 +47,6 @@ export const StyledSelect: React.FC<
             },
             '&.Mui-focused::after': {
                 borderColor: 'transparent',
-            },
-            '& .select-custom-icon': {
-                marginTop: '-3.5px !important',
             },
             transition: 'none',
             '&::before': {

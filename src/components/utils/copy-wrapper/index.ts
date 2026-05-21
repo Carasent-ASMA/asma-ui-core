@@ -1,2 +1,3 @@
 export * from './CopyButton'
-export * from './CopyWrapper'
+export { CopyWrapper } from './CopyWrapper'
+export type { MessageProps as CopyWrapperMessageProps } from './CopyWrapper'

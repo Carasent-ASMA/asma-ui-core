@@ -18,7 +18,7 @@ export function useWindowWidthSize(): number {
     return windowSize
 }
 
-export const mobileView = (windowWidth: number | undefined) => {
+export const mobileView = (windowWidth: number | undefined): boolean => {
     /**
      * if return allways false it will breack mf widgets.
      */
@@ -26,7 +26,7 @@ export const mobileView = (windowWidth: number | undefined) => {
     return windowWidth <= 768
 }
 
-export function useIsMobileView() {
+export function useIsMobileView(): boolean {
     const windowsSize = useWindowWidthSize()
 
     const result = mobileView(windowsSize)
@@ -34,7 +34,7 @@ export function useIsMobileView() {
     return result
 }
 
-export function useIsTabletView() {
+export function useIsTabletView(): boolean {
     const windowsSize = useWindowWidthSize()
 
     const result = tabletView(windowsSize)
@@ -42,7 +42,7 @@ export function useIsTabletView() {
     return result
 }
 
-export const tabletView = (windowWidth: number | undefined) => {
+export const tabletView = (windowWidth: number | undefined): boolean => {
     if (!windowWidth) return window.innerWidth < 1400
     return windowWidth <= 1400
 }

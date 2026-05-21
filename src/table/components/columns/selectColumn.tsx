@@ -1,11 +1,11 @@
 import type { MouseEvent } from 'react'
 import type { CellContext, HeaderContext } from '@tanstack/react-table'
-import { SELECT_COLUMN_ID } from '../../types'
+import { SELECT_COLUMN_ID, type ColumnDef } from '../../types'
 import style from '../StyledTable.module.scss'
 import { StyledCheckbox } from 'src/table/shared-components/StyledCheckbox'
 import { StyledTooltip } from 'src/table/shared-components/tooltip'
 
-export function selectColumn<TData>(isFixed: boolean, rowHeight?: number) {
+export function selectColumn<TData>(isFixed: boolean, rowHeight?: number): ColumnDef<TData, unknown> {
     return {
         id: SELECT_COLUMN_ID,
         minSize: 38,
@@ -15,7 +15,7 @@ export function selectColumn<TData>(isFixed: boolean, rowHeight?: number) {
             return (
                 <button
                     type='button'
-                    className='pl-2 flex size-full items-center justify-start'
+                    className='flex size-full items-center justify-start pl-2'
                     onClick={() => table.toggleAllRowsSelected()}
                 >
                     <StyledCheckbox
@@ -34,8 +34,8 @@ export function selectColumn<TData>(isFixed: boolean, rowHeight?: number) {
             return (
                 <button
                     type='button'
-                    style={{ height: rowHeight ? rowHeight : 'auto' }}
-                    className='pl-2 flex w-full items-center justify-start m-0 p-0'
+                    style={{ height: rowHeight ?? 'auto' }}
+                    className='m-0 flex w-full items-center justify-start p-0 pl-2'
                     aria-disabled={disabled}
                     onClick={() => {
                         if (disabled) return

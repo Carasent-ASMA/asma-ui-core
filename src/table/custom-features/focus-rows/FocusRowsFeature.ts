@@ -20,7 +20,7 @@ export const FocusedRowsFeature: TableFeature = {
     getDefaultOptions: <TData extends RowData>(table: Table<TData>): FocusedRowsOptions => {
         return {
             onChangeFocusedRow: makeStateUpdater('focusedRow', table),
-        } as FocusedRowsOptions
+        }
     },
 
     createTable: <TData extends RowData>(table: Table<TData>): void => {

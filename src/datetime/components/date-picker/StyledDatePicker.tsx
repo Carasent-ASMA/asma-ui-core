@@ -8,7 +8,7 @@ import { Drawer } from '@mui/material'
 import { StyledDayPicker } from './components/StyledDayPicker'
 import { useBackNavigationClose } from 'src/datetime/hooks/useBackNavigationClose.hook'
 
-export const StyledDatePicker = (props: DatePickerProps) => {
+export const StyledDatePicker = (props: DatePickerProps): JSX.Element => {
     const isMobile = useIsMobileView()
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | HTMLDivElement | null>(null)
     const [positionAbove, setPositionAbove] = useState(false)
@@ -48,7 +48,7 @@ export const StyledDatePicker = (props: DatePickerProps) => {
                     sx={{ zIndex: 1300 }}
                     className='z-[1300]'
                 >
-                    <div className='max-w-[360px] mx-auto'>
+                    <div className='mx-auto max-w-[360px]'>
                         <StyledDayPicker
                             datePickerProps={{ ...sharedProps }}
                             popoverProps={{ open: !!anchorEl, anchorEl, onClose }}

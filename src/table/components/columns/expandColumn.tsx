@@ -1,8 +1,8 @@
 import { type CellContext } from '@tanstack/react-table'
-import { EXPAND_COLUMN_ID } from '../../types'
+import { EXPAND_COLUMN_ID, type ColumnDef } from '../../types'
 import { ChevronDownIcon } from 'src/table/shared-components/ChevronDownIcon'
 
-export function generateExpandColumn<TData>(isFixed: boolean, rowHeight?: number) {
+export function generateExpandColumn<TData>(isFixed: boolean, rowHeight?: number): ColumnDef<TData, unknown> {
     return {
         id: EXPAND_COLUMN_ID,
         minSize: 50,
@@ -16,9 +16,9 @@ export function generateExpandColumn<TData>(isFixed: boolean, rowHeight?: number
             const canExpand = cell.row.getCanExpand()
             return canExpand ? (
                 <span
-                    className='flex w-full outline-none focus:outline-none items-center justify-center'
+                    className='flex w-full items-center justify-center outline-none focus:outline-none'
                     onClick={() => cell.row.getToggleExpandedHandler()()}
-                    style={{ height: rowHeight ? rowHeight : 'auto' }}
+                    style={{ height: rowHeight ?? 'auto' }}
                 >
                     <ChevronDownIcon
                         width={24}

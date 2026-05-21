@@ -23,23 +23,18 @@ export const TimePickerColumn: React.FC<TimePickerColumnProps> = ({ type, value,
                 const idx = isHours ? _index : _index * 5
                 const isSelected = value && idx === (isHours ? getHours(value) : getMinutes(value))
                 const isNow = currentTime == idx
-                const className = isSelected
-                    ? styles['styled-time-picker-root_cell__cell-selected']
-                    : isNow
-                    ? `${styles['styled-time-picker-root_cell__cell-now']} styled-time-picker-root_cell__cell-now`
-                    : ''
 
                 return (
                     <div
                         key={idx}
                         role='button'
                         className={clsx(
-                            className,
                             styles['styled-time-picker-root_cell'],
-                            isSelected && 'styled-time-picker-root_cell__cell-selected',
+                            isNow && styles['styled-time-picker-root_cell__cell-now'],
+                            isSelected && styles['styled-time-picker-root_cell__cell-selected'],
                         )}
                         onClick={() => {
-                            onSelect(set(value || new Date(), isHours ? { hours: idx } : { minutes: idx }))
+                            onSelect(set(value ?? new Date(), isHours ? { hours: idx } : { minutes: idx }))
                         }}
                     >
                         {idx.toString().padStart(2, '0')}

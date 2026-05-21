@@ -15,8 +15,8 @@ export const StyledInputField: React.FC<
     <TextField
         {...props}
         data-test={dataTest}
-        disabled={disabled || readOnly}
-        type={props.type || 'mui-input'}
+        disabled={Boolean(disabled) || Boolean(readOnly)}
+        type={props.type ?? 'mui-input'}
         sx={{
             '& input:-webkit-autofill, & .MuiInputBase-root:has(> input:-webkit-autofill)': {
                 backgroundColor: '#e8f0fe !important',

@@ -2,13 +2,13 @@ import { useMemo } from 'react'
 
 const pageSizeStorageKeySuffix = ':page-size'
 
-export const getPersistedPageSizeKey = (uniqueKey?: string) => {
+export const getPersistedPageSizeKey = (uniqueKey?: string): string| undefined => {
     if (!uniqueKey) return undefined
 
     return `${uniqueKey}${pageSizeStorageKeySuffix}`
 }
 
-export const usePersistedPageSize = (uniqueKey?: string) => {
+export const usePersistedPageSize = (uniqueKey?: string): number| undefined => {
     const persistedPageSize = useMemo<number | undefined>(() => {
         const storageKey = getPersistedPageSizeKey(uniqueKey)
 

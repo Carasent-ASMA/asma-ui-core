@@ -14,15 +14,15 @@ export function TableRowCountSelect<TData>({
 }: {
     locale: 'en' | 'no'
     table: Table<TData>
-}) {
+}): JSX.Element {
     const { anchorEl, open, handleClose, handleOpen } = useToggleMenuVisibility()
     const pageSize = table.getState().pagination.pageSize
     const isNo = locale === 'no'
 
-    const popoverOrigin = useMemo(
+    const popoverOrigin = useMemo<{ anchorOrigin: PopoverOrigin; transformOrigin: PopoverOrigin }>(
         () => ({
-            anchorOrigin: { vertical: -5, horizontal: 'center' } as PopoverOrigin,
-            transformOrigin: { vertical: 'bottom', horizontal: 'center' } as PopoverOrigin,
+            anchorOrigin: { vertical: -5, horizontal: 'center' },
+            transformOrigin: { vertical: 'bottom', horizontal: 'center' },
         }),
         [],
     )
@@ -87,7 +87,7 @@ export function TableRowCountSelect<TData>({
                         }}
                         selected={pageSize === size}
                     >
-                        <span className={'text-delta-700 text-sm font-normal'}>
+                        <span className={'text-sm font-normal text-delta-700'}>
                             {size} {isNo ? 'rader' : 'rows'}
                         </span>
                     </StyledMenuItem>

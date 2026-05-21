@@ -3,7 +3,7 @@ import { cn } from 'src/datetime/helpers/cn'
 import { OutlineErrorRounded } from 'src/datetime/shared-components/OutlineErrorRounded'
 import { StyledTooltip } from 'src/datetime/shared-components/StyledTooltip'
 
-export const HelperTextWithTooltip = ({ text, hasError }: { text: React.ReactNode; hasError: boolean }) => {
+export const HelperTextWithTooltip = ({ text, hasError }: { text: React.ReactNode; hasError: boolean }): JSX.Element => {
     if (typeof text !== 'string') return <>{text}</>
 
     const maxLength = hasError ? 35 : 40
@@ -17,7 +17,7 @@ export const HelperTextWithTooltip = ({ text, hasError }: { text: React.ReactNod
             </div>
 
             <span
-                className='flex-1 text-left leading-4 break-words pt-[2px]'
+                className='flex-1 break-words pt-[2px] text-left leading-4'
                 style={{
                     display: '-webkit-box',
                     WebkitLineClamp: 2,

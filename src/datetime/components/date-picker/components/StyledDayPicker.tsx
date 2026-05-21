@@ -27,7 +27,7 @@ export const StyledDayPicker: React.FC<{
         numberOfMonths,
         disabledDays,
         onClear,
-        title, // consume it here if you remove calendar picker will have tooltip with this title
+        title: _title, // consume it here if you remove calendar picker will have tooltip with this title
         ...dayPickerPropsRest
     } = datePickerProps
 
@@ -35,9 +35,9 @@ export const StyledDayPicker: React.FC<{
 
     const startDate = datePickerProps.mode === 'range' ? datePickerProps.selected?.from : datePickerProps.selected
 
-    const [month, setMonth] = useState<Date | undefined>(startDate || new Date())
+    const [month, setMonth] = useState<Date | undefined>(startDate ?? new Date())
     const isNb = locale.code === 'nb'
-    const isOneMonthView = (numberOfMonths || 1) < 2
+    const isOneMonthView = (numberOfMonths ?? 1) < 2
 
     const disallowPast = 'disallowPast' in datePickerProps ? datePickerProps.disallowPast : undefined
     const disallowFuture = 'disallowFuture' in datePickerProps ? datePickerProps.disallowFuture : undefined
@@ -85,7 +85,7 @@ export const StyledDayPicker: React.FC<{
                 datePickerProps.onSelect(
                     newSelectedDate,
                     newSelectedDate,
-                    {} as Modifiers,
+                    {},
                     {} as React.MouseEvent<Element, MouseEvent>,
                 )
             }
@@ -101,8 +101,8 @@ export const StyledDayPicker: React.FC<{
             captionLayout='dropdown'
             weekStartsOn={1}
             locale={locale}
-            startMonth={new Date(datePickerProps.fromYear || 1900, 0)}
-            endMonth={new Date(datePickerProps.toYear || 2100, 11)}
+            startMonth={new Date(datePickerProps.fromYear ?? 1900, 0)}
+            endMonth={new Date(datePickerProps.toYear ?? 2100, 11)}
             data-test='calendar-picker'
             showWeekNumber
             showOutsideDays={showOutsideDays}

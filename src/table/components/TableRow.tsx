@@ -19,7 +19,7 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
     row: Row<TData>
     columnWindow: ColumnWindow
     index: number
-}) {
+}): JSX.Element {
     const {
         loading,
         getRowClassName,
@@ -102,7 +102,7 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
 
     const positionedCells = row.getVisibleCells().map((cell, idx, allCells) => ({
         ...cell,
-        left: allCells.slice(0, idx).reduce((acc, col) => acc + (col.column.getSize() || 0), 0),
+        left: allCells.slice(0, idx).reduce((acc, col) => acc + (col.column.getSize() ?? 0), 0),
     }))
 
     const centerCells = useMemo(
@@ -119,12 +119,12 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
     const rightCells = useMemo(
         () => {
             const pinnedRightCells = positionedCells.filter(
-                (cell) => cell.column.columnDef.fixedRight || cell.column.id === ACTIONS_COLUMN_ID,
+                (cell) => Boolean(cell.column.columnDef.fixedRight) || cell.column.id === ACTIONS_COLUMN_ID,
             )
 
             return pinnedRightCells.map((cell, index, allCells) => ({
                 ...cell,
-                right: allCells.slice(index + 1).reduce((acc, col) => acc + (col.column.getSize() || 0), 0),
+                right: allCells.slice(index + 1).reduce((acc, col) => acc + (col.column.getSize() ?? 0), 0),
             }))
         },
         [positionedCells],
@@ -189,7 +189,7 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
                                 ? getRowClassName?.(row)
                                 : style['fixed-right-cell-default-background']),
                         isExpandedRow && style['expanded_row'],
-                        (singleSelection || row.isFocused()) && style['single-selection'],
+                        (Boolean(singleSelection) || row.isFocused()) && style['single-selection'],
                     )}
                     style={{
                         left: isFixedLeft ? cell.left : undefined,
@@ -318,8 +318,7 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
             {row.getIsExpanded() && (
                 <>
                     {customSubRowData &&
-                        renderSubRows &&
-                        renderSubRows({
+                        renderSubRows?.({
                             rows: customSubRowData.get(row.original.id.toString()) ?? [],
                             row: row.original,
                         })}
@@ -329,7 +328,7 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
     )
 }
 
-export const Checkmark = () => (
+export const Checkmark = (): JSX.Element => (
     <svg
         xmlns='http://www.w3.org/2000/svg'
         width='20'

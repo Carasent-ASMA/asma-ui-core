@@ -20,12 +20,12 @@ export function TableFooter<
     table: Table<TData>
     styledTableProps: StyledTableProps<TData, TCustomData>
     canShowStickyFooter: boolean
-}) {
+}): JSX.Element | null {
     const totalRowCount = table.getRowCount()
-    const pageCount = table.getPageCount() || 1
+    const pageCount = table.getPageCount() ?? 1
     const footerNode = styledTableProps.footer?.(table)
     const hasFooterNode = footerNode !== null && footerNode !== undefined && footerNode !== false
-    const locale = styledTableProps.locale || 'en'
+    const locale = styledTableProps.locale ?? 'en'
     const hasEnoughRowsForFooter = totalRowCount >= MIN_ROWS_FOR_FOOTER
 
     if (styledTableProps.hideFooter || !hasEnoughRowsForFooter) return null
@@ -41,12 +41,7 @@ export function TableFooter<
     return (
         <div
             className={canShowStickyFooter ? style['table-footer--sticky'] : style['table-footer--inline']}
-            style={
-                (paginationAlignLeft && {
-                    justifyContent: 'flex-start',
-                }) ||
-                {}
-            }
+            style={paginationAlignLeft ? { justifyContent: 'flex-start' } : undefined}
         >
             {!paginationAlignLeft && footerNode}
             {shouldShowControls && (

@@ -1,7 +1,7 @@
 import { Tooltip, type TooltipProps } from '@mui/material'
 import Fade from '@mui/material/Fade'
 
-export const StyledTooltip = (props: TooltipProps) => (
+export const StyledTooltip = (props: TooltipProps): JSX.Element => (
     <Tooltip
         TransitionComponent={Fade}
         TransitionProps={{ timeout: 300 }}

@@ -64,7 +64,7 @@ declare module '@tanstack/react-table' {
         pinnedHeaderText?: string
     }
     interface TableMeta<TData extends RowData> {
-        locale?: 'no' | 'en'
+        locale?: 'no' | 'en' | (TData extends never ? never : never)
     }
 
     interface ColumnDefBase<TData extends RowData, TValue = unknown> extends ColumnDefExtensions<TData, TValue> {
@@ -95,12 +95,12 @@ export const isCustomAction = <TData>(
     return (action as ICustomAction<TData>).component !== undefined
 }
 
-type IFooter<TData> = {
+interface IFooter<TData> {
     footer?: (table: Table<TData>) => ReactNode
     hideFooter?: never
 }
 
-type IHideFooter = {
+interface IHideFooter {
     footer?: never
     hideFooter?: boolean
 }

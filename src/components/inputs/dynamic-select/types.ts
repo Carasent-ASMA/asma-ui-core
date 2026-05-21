@@ -10,19 +10,19 @@ export type DynamicSelectOptionObject = {
 } & object
 export type DynamicSelectOption = DynamicSelectOptionPrimitive | (DynamicSelectOptionObject & object)
 
-type SingleDynamicSelectProps<TOption extends DynamicSelectOption> = {
+interface SingleDynamicSelectProps<TOption extends DynamicSelectOption> {
     multiple?: false
     value: TOption | null
     onChange: (value: TOption | null) => void
 }
 
-type MultipleDynamicSelectProps<TOption extends DynamicSelectOption> = {
+interface MultipleDynamicSelectProps<TOption extends DynamicSelectOption> {
     multiple: true
     value: TOption[] | null
     onChange: (value: TOption[] | null) => void
 }
 
-type DynamicSelectCommonProps<TOption extends DynamicSelectOption> = {
+interface DynamicSelectCommonProps<TOption extends DynamicSelectOption> {
     /** Unique identifier used as the root `data-test` attribute for QA selectors. */
     dataTest: string
     /** The full list of selectable options. Determines which UI is rendered: 1–5 → chip group, 0 or 6+ → autocomplete. */

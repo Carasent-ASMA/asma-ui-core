@@ -8,7 +8,7 @@ interface RootContextType {
 
 const RootContext = createContext<RootContextType | undefined>(undefined)
 
-export const RootContextProvider: FunctionComponent<PropsWithChildren> = ({ children }) => {
+export const RootContextProvider: FunctionComponent<PropsWithChildren> = ({ children }): JSX.Element => {
     const [isResizing, setIsResizing] = useState(false)
 
     const enableResizingFlag = () => setIsResizing(true)
@@ -23,7 +23,7 @@ export const RootContextProvider: FunctionComponent<PropsWithChildren> = ({ chil
     return <RootContext.Provider value={context}>{children}</RootContext.Provider>
 }
 
-export const useRootContext = () => {
+export const useRootContext = (): RootContextType => {
     const context = useContext(RootContext)
 
     if (!context) {

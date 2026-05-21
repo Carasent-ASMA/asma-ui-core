@@ -1,4 +1,4 @@
-export const getTimeFromValue = (value: string, existingDate?: Date) => {
+export const getTimeFromValue = (value: string, existingDate?: Date): Date| null => {
     const parts = value.split(':')
     const h = Number(parts[0])
     const m = Number(parts[1])

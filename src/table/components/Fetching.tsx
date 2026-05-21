@@ -5,7 +5,7 @@ import style from './StyledTable.module.scss'
 
 export const Fetching: React.FC<{ fetching?: boolean }> = ({ fetching = false }) => {
     return fetching ? (
-        <div className='absolute z-10 bg-white/40 left-0 top-0 right-0 bottom-0 flex items-center justify-center '>
+        <div className='absolute bottom-0 left-0 right-0 top-0 z-10 flex items-center justify-center bg-white/40'>
             <LoadingIcon className={style['loading-icon']} width={50} height={50} />
         </div>
     ) : null

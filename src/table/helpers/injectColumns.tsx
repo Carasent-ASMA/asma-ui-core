@@ -18,7 +18,7 @@ export const injectColumns = <
     TCustomData = Record<string, unknown>,
 >(
     props: StyledTableProps<TData, TCustomData>,
-) => {
+): void => {
     const {
         columns,
         actions,

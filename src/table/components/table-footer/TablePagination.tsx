@@ -16,15 +16,15 @@ export function TablePagination<TData>({
 }: {
     locale: 'en' | 'no'
     table: Table<TData>
-}) {
+}): JSX.Element {
     const { anchorEl, open, handleClose, handleOpen } = useToggleMenuVisibility()
     const tablePaginationRef = useRef<HTMLDivElement | null>(null)
     const isNo = locale === 'no'
 
-    const popoverOrigin = useMemo(
+    const popoverOrigin = useMemo<{ anchorOrigin: PopoverOrigin; transformOrigin: PopoverOrigin }>(
         () => ({
-            anchorOrigin: { vertical: -5, horizontal: 'center' } as PopoverOrigin,
-            transformOrigin: { vertical: 'bottom', horizontal: 'center' } as PopoverOrigin,
+            anchorOrigin: { vertical: -5, horizontal: 'center' },
+            transformOrigin: { vertical: 'bottom', horizontal: 'center' },
         }),
         [],
     )
@@ -33,9 +33,9 @@ export function TablePagination<TData>({
         const asmaTableClass = styleTable['asma-ui-table-styled-table']
         const tableContainer = tablePaginationRef.current?.closest(`.${asmaTableClass}`)
 
-        const scrollContainer = tableContainer?.querySelector(
+        const scrollContainer = tableContainer?.querySelector<HTMLElement>(
             `.${styleTable['table-scroll']}, .${styleTable['table-wrapper']}`,
-        ) as HTMLElement
+        )
 
         if (scrollContainer) {
             scrollContainer.scrollTo({ top: 0, behavior: 'smooth' })
@@ -104,7 +104,7 @@ export function TablePagination<TData>({
                         }}
                         selected={page === currentPage}
                     >
-                        <span className={'text-delta-700 text-sm font-normal'}>
+                        <span className={'text-sm font-normal text-delta-700'}>
                             {isNo ? 'Side' : 'Page'} {page}
                         </span>
                     </StyledMenuItem>

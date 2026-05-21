@@ -59,7 +59,7 @@ export function HeaderActionMenu<TData>({
 }: {
     headerData: HeaderContext<TData, TData>
     locale?: 'en' | 'no'
-}) {
+}): JSX.Element {
     const { anchorEl, open, handleClose, handleOpen } = useToggleMenuVisibility()
 
     const isAnyColumnHidden = headerData.table
@@ -186,7 +186,7 @@ export function HeaderActionMenu<TData>({
                                                         hideWrapper
                                                     />
                                                 </span>
-                                                <span className='text-sm text-delta-700 font-roboto'>
+                                                <span className='font-roboto text-sm text-delta-700'>
                                                     {column.columnDef.pinnedHeaderText ??
                                                         (typeof column.columnDef.header === 'string'
                                                             ? column.columnDef.header

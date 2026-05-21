@@ -9,7 +9,7 @@ import type { DayPickerProps as ReactDayPickerProps, Matcher } from 'react-day-p
 import { cn } from 'src/datetime/helpers/cn'
 import { HelperTextWithTooltip } from './HelperTextWithTooltip'
 
-export type IBaseDatePickerInput = {
+export interface IBaseDatePickerInput {
     dataTest: string
     inputClassName?: string
     disabled: boolean
@@ -64,17 +64,16 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
 
     const { validationError, handleValidation, errHelperText, clearValidation } = useDatePickerValidation()
     const { maskRef } = useDatePickerMask()
-    const [value, setValue] = useState(selected ? getValue(selected, dateFormat) : '')
+    const selectedValue = selected ? getValue(selected, dateFormat) : ''
+    const [value, setValue] = useState(selectedValue)
+    const [isDirty, setIsDirty] = useState(false)
 
     const defaultHelper = locale?.code?.startsWith('nb') ? 'DD/MM/ÅÅÅÅ' : 'DD/MM/YYYY'
     const effectiveDefaultHelper = hideDefaultHelperText ? undefined : defaultHelper
 
     const hasError = !!(validationError || error)
-    const rawText = hasError ? errorText || errHelperText : helperText ?? effectiveDefaultHelper
-
-    useEffect(() => {
-        setValue(selected ? getValue(selected, dateFormat) : '')
-    }, [selected, dateFormat])
+    const rawText = hasError ? (errorText ?? errHelperText) : helperText ?? effectiveDefaultHelper
+    const inputValue = isDirty ? value : selectedValue
 
     useEffect(() => {
         if (!selected) {
@@ -104,12 +103,13 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
         clearValidation,
     ])
 
-    const digits = value.replace(/\D/g, '')
+    const digits = inputValue.replace(/\D/g, '')
     const hasDigits = digits.length > 0
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const raw = e.target.value
         const onlyDigits = raw.replace(/\D/g, '')
+        setIsDirty(true)
         setValue(onlyDigits.length ? raw : '')
     }
 
@@ -139,8 +139,9 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
     ])
 
     const handleBlur = () => {
+        const nextValue = isDirty ? value : selectedValue
         const isErrorNow = handleValidation({
-            value,
+            value: nextValue,
             disabledDays,
             localeCode: locale?.code,
             disallowPast,
@@ -150,13 +151,16 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
         })
         if (isErrorNow) return
 
-        const onlyDigits = value.replace(/\D/g, '')
+        const onlyDigits = nextValue.replace(/\D/g, '')
         if (!onlyDigits.length) {
+            setIsDirty(false)
+            setValue('')
             onInputChange?.(undefined)
             return
         }
 
-        const parsed = parse(value, 'dd/MM/yyyy', new Date())
+        const parsed = parse(nextValue, 'dd/MM/yyyy', new Date())
+        setIsDirty(false)
         onInputChange?.(isValidDateFns(parsed) ? parsed : undefined)
     }
 
@@ -166,7 +170,7 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
 
     return (
         <div className='cursor-default'>
-            {title && <div className='pb-1 font-semibold font-roboto text-delta-800'>{title}</div>}
+            {title && <div className='pb-1 font-roboto font-semibold text-delta-800'>{title}</div>}
 
             <div className='flex gap-1' style={{ height }}>
                 <div style={{ width }}>
@@ -180,7 +184,7 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
                             inputRef={!readOnly ? maskRef : undefined}
                             placeholder={!readOnly && !hasDigits ? '  /  /    ' : undefined}
                             size='small'
-                            value={readOnly ? value.replaceAll('/', '.') : value}
+                            value={readOnly ? inputValue.replaceAll('/', '.') : inputValue}
                             className={inputClassName}
                             style={{ width }}
                             error={hasError}

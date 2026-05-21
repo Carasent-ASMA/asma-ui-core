@@ -1,5 +1,5 @@
 import { CloseIcon, SearchIcon, StyledInputField, type TextFieldProps } from 'asma-ui-core'
-import type { FunctionComponent } from 'react'
+import type { FC } from 'react'
 import { useState, type ComponentProps } from 'react'
 import { cn } from 'src/helpers/cn'
 
@@ -7,7 +7,7 @@ export type StyledSearchFieldProps = ComponentProps<typeof StyledInputField> & {
     label: Required<TextFieldProps['label']>
 }
 
-export const StyledSearchField = (({ value, onClear, ...props }) => {
+export const StyledSearchField: FC<StyledSearchFieldProps> = ({ value, onClear, ...props }) => {
     const [isFocused, setIsFocused] = useState<boolean>(false)
 
     const hasInteraction = isFocused || value
@@ -18,8 +18,12 @@ export const StyledSearchField = (({ value, onClear, ...props }) => {
                 size='small'
                 variant='outlined'
                 value={value}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => setIsFocused(false)}
+                onFocus={() => {
+                    setIsFocused(true)
+                }}
+                onBlur={() => {
+                    setIsFocused(false)
+                }}
                 InputProps={{
                     className: cn('transition-[padding] duration-300', hasInteraction ? 'pl-0' : 'pl-5'),
                     sx: {
@@ -31,11 +35,12 @@ export const StyledSearchField = (({ value, onClear, ...props }) => {
                     },
                     endAdornment: value ? (
                         <div
+                            data-testid='styled-search-clear-icon'
                             className={cn(
-                                'cursor-pointer bg-delta-50 rounded-full',
+                                'cursor-pointer rounded-full bg-delta-50',
                                 'flex items-center justify-center',
                                 'transform-gpu transition-all duration-300 ease-in-out',
-                                value ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none',
+                                value ? 'scale-100 opacity-100' : 'pointer-events-none scale-75 opacity-0',
                             )}
                             style={{
                                 width: 24,
@@ -74,15 +79,17 @@ export const StyledSearchField = (({ value, onClear, ...props }) => {
             />
 
             <SearchIcon
+                data-testid='styled-search-icon'
                 width={24}
                 height={24}
                 className={cn(
                     'absolute left-2 top-1/2 -translate-y-1/2',
                     'transform-gpu transition-all duration-300 ease-in-out',
-                    hasInteraction ? 'opacity-0 scale-75 pointer-events-none' : 'opacity-100 scale-100',
+                    hasInteraction ? 'pointer-events-none scale-75 opacity-0' : 'scale-100 opacity-100',
+                    props.error && 'top-1/3',
                 )}
                 color='var(--colors-delta-700)'
             />
         </div>
     )
-}) satisfies FunctionComponent<StyledSearchFieldProps>
+}

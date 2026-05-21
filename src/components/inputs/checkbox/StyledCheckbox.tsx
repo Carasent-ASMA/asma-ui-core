@@ -3,7 +3,7 @@ import { Checkbox, type CheckboxProps } from '@mui/material'
 export const StyledCheckbox: React.FC<CheckboxProps & { dataTest: string }> = ({ dataTest, ...props }) => (
     <Checkbox
         {...props}
-        data-test={dataTest}
+        data-testid={dataTest}
         sx={{
             ...props.sx,
             '&.MuiCheckbox-root': {

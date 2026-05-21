@@ -1,7 +1,7 @@
 import { MenuItem, type MenuItemProps } from '@mui/material'
 import clsx from 'clsx'
 
-export const StyledMenuItem = (props: MenuItemProps) => (
+export const StyledMenuItem = (props: MenuItemProps): JSX.Element => (
     <MenuItem
         {...props}
         classes={{

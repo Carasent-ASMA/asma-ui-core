@@ -23,6 +23,10 @@
     color: var(--colors-gray-700);
 }
 
+.custom-caption {
+    text-transform: capitalize;
+}
+
 .nav {
     @apply flex gap-[8px] items-center;
 }
@@ -163,7 +167,7 @@
         @apply hidden;
     }
 
-    & :global(.rdp-custom-caption) {
+    & .custom-caption {
         @apply opacity-0 pointer-events-none;
     }
 }

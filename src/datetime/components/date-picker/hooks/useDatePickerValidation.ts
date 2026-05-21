@@ -69,7 +69,7 @@ export const useDatePickerValidation = () => {
             }
 
             //1. check for format DD/MM/YYYY
-            const m = value.match(formatRegex)
+            const m = formatRegex.exec(value)
             if (!m) {
                 setError(true)
                 setErrHelperText(msgs[lang].invalidFormat)

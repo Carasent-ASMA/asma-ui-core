@@ -16,7 +16,7 @@ type CommonDatePickerProps = {
     required?: boolean
 } & CalendarProps
 
-export type DatePickerSingleFieldProps = {
+export interface DatePickerSingleFieldProps {
     label?: string
     title?: string
     helperText?: React.ReactNode
@@ -30,7 +30,7 @@ export type DatePickerSingleFieldProps = {
     hideDefaultHelperText?: boolean
 }
 
-export type DatePickerRangeFieldProps = {
+export interface DatePickerRangeFieldProps {
     labelFrom?: string
     labelTo?: string
     titleFrom?: string

@@ -1,5 +1,6 @@
 import { closeSnackbar, enqueueSnackbar } from 'notistack'
 import type { ReactNode } from 'react'
+
 import type { MessageProps } from './types'
 
 export function processMessageInfo(messageInfo: string | ReactNode, options?: MessageProps): () => void {
@@ -15,7 +16,5 @@ export function processMessageInfo(messageInfo: string | ReactNode, options?: Me
         ...options,
     })
 
-    return () => {
-        return closeSnackbar(options?.id)
-    }
+    return () => closeSnackbar(options?.id)
 }

@@ -1,5 +1,5 @@
 import { flexRender, type Header } from '@tanstack/react-table'
-import { useMemo, useRef } from 'react'
+import { useMemo } from 'react'
 import clsx from 'clsx'
 import style from '../StyledTable.module.scss'
 import { DropUpIcon } from 'src/table/shared-components/DropUpIcon'
@@ -27,9 +27,8 @@ export function TableHeaderCell<
     left: number
     right?: number
     tableWidth: number | null
-}) {
+}): JSX.Element {
     const { hideHeader = false, enableResizing = false, actions, customActionsNode } = styledTableProps
-    const ref = useRef<HTMLTableCellElement | null>(null)
     const { isResizing, enableResizingFlag, disableResizingFlag } = useRootContext()
 
     const isFixed = header.column.columnDef.fixedLeft
@@ -52,7 +51,6 @@ export function TableHeaderCell<
 
     return (
         <th
-            ref={ref}
             key={header.id}
             colSpan={header.colSpan}
             className={clsx(
@@ -67,14 +65,14 @@ export function TableHeaderCell<
                 isFixedRight && style['t-cell__fixed-right'],
             )}
             style={{
-                ...getTableHeaderStyle({ enableResizing, header, element: ref.current, tableWidth }),
+                ...getTableHeaderStyle({ enableResizing, header, tableWidth }),
                 ...(isFixed && { left }),
                 ...(isFixedRight && { right }),
             }}
         >
             <div
                 className={clsx(
-                    'flex items-center justify-left',
+                    'flex items-center justify-start',
                     hideHeader ? style['hide-table-header'] : style['show-table-header'],
                     header.column.getCanSort() && style['sortable-column'],
                     header.column.columnDef.className,
@@ -141,8 +139,14 @@ function handleMouseUp<TData, TCustomData = Record<string, unknown>>({
 
         if (storedDimensions) {
             try {
-                parsedDimensions = JSON.parse(storedDimensions)
-            } catch (error) {
+                const parsed = JSON.parse(storedDimensions) as unknown
+
+                if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+                    parsedDimensions = Object.fromEntries(
+                        Object.entries(parsed).filter((entry): entry is [string, number] => typeof entry[1] === 'number'),
+                    )
+                }
+            } catch {
                 console.warn('Failed to parse stored dimensions. Resetting.')
                 parsedDimensions = {}
             }

@@ -40,7 +40,7 @@ export const StyledDefaultSnackbar = forwardRef<HTMLDivElement, StyledDefaultSna
                 <div className={styles['header']}>
                     <div className={clsx(styles['title'], styles[`title_${severity}`])}>
                         {SEVERITY_ICONS[severity]}
-                        <span>{title || severity}</span>
+                        <span>{title ?? severity}</span>
                     </div>
 
                     <IconButton aria-label='close' color='inherit' sx={{ p: '2px' }} onClick={() => closeSnackbar(id)}>

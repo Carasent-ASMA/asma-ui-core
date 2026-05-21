@@ -2,7 +2,7 @@ import { MenuItem } from '@mui/material'
 import type { MenuItemProps } from '@mui/material'
 import { CheckIcon } from '../CheckIcon'
 
-export const StyledMenuItem = (props: MenuItemProps) => (
+export const StyledMenuItem = (props: MenuItemProps): JSX.Element => (
     <MenuItem
         classes={{ root: 'flex gap-x-1' }}
         sx={{

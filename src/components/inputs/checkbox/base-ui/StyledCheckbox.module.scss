@@ -33,10 +33,12 @@ $checkbox-sizes: (
     background: transparent;
     border: none;
 
-    @include checkbox-dimensions(medium);
-
     &.size-small {
         @include checkbox-dimensions(small);
+    }
+
+    &.size-medium {
+        @include checkbox-dimensions(medium);
     }
 
     &[data-disabled] {
@@ -78,7 +80,8 @@ $checkbox-sizes: (
         --cb-border-w: 0px;
     }
 
-    &:focus-visible {
+    &:focus-visible,
+    &[data-focus-visible] {
         outline: none;
     }
 }
@@ -156,7 +159,8 @@ $checkbox-sizes: (
         transform: translate(-50%, -50%) scale(0.7);
     }
 
-    &:hover::after {
+    &:hover::after,
+    &[data-hovered]::after {
         opacity: 0.07;
         transform: translate(-50%, -50%) scale(1);
     }
@@ -182,7 +186,8 @@ $checkbox-sizes: (
         @include checkbox-size('small');
     }
 
-    .CheckboxWrapper:focus-visible & {
+    .CheckboxWrapper:focus-visible &,
+    .CheckboxWrapper[data-focus-visible] & {
         &::before {
             content: '';
             position: absolute;

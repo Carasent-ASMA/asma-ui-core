@@ -37,7 +37,7 @@ export const TimePickerInput: React.FC<
     const inputRef = useMask({
         mask: 'xx:xx',
         replacement: {
-            x: /[0-9]/,
+            x: /\d/,
         },
         showMask: false,
     })
@@ -51,7 +51,7 @@ export const TimePickerInput: React.FC<
 
     return (
         <div style={{ height: readOnly ? '40px' : '75px' }}>
-            {title && <div className='pb-1 font-semibold font-roboto text-delta-800'>{title}</div>}
+            {title && <div className='pb-1 font-roboto font-semibold text-delta-800'>{title}</div>}
             <StyledInputField
                 inputRef={inputRef}
                 autoComplete='off'
@@ -89,7 +89,7 @@ export const TimePickerInput: React.FC<
                 }}
                 value={localValue}
                 sx={{
-                    maxWidth: width || 130,
+                    maxWidth: width ?? 130,
                     width,
                     minWidth: width,
                 }}

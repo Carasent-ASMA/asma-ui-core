@@ -34,14 +34,28 @@ export const DynamicInteractiveChipGroup = forwardRef(
 
         const getOptionLabel = (option: TOption) => {
             if (typeof option === 'object') {
-                return option?.[labelKey as keyof TOption]?.toString() || ''
+                return option?.[labelKey as keyof TOption]?.toString() ?? ''
             }
-            return option?.toString() || ''
+            return option?.toString() ?? ''
         }
 
         const getOptionValue = (option: TOption | null) => {
             if (typeof option === 'object') return option?.[valueKey as keyof TOption]
             return option
+        }
+
+        const getOptionValueText = (option: TOption | null): string => {
+            const optionValue = getOptionValue(option)
+
+            if (optionValue == null) {
+                return ''
+            }
+
+            if (typeof optionValue === 'string' || typeof optionValue === 'number' || typeof optionValue === 'boolean') {
+                return String(optionValue)
+            }
+
+            return option == null ? '' : getOptionLabel(option)
         }
 
         const isOptionEqualToValue = (option: TOption | null, value: TOption | null): boolean => {
@@ -58,7 +72,7 @@ export const DynamicInteractiveChipGroup = forwardRef(
                 return
             }
 
-            const currentValues = (value as TOption[] | null) || []
+            const currentValues = value ?? []
             const exists = currentValues.find((v) => isOptionEqualToValue(v, option))
             const newValues = exists
                 ? currentValues.filter((v) => !isOptionEqualToValue(v, option))
@@ -82,41 +96,38 @@ export const DynamicInteractiveChipGroup = forwardRef(
         })
 
         return (
-            <div data-test={`${dataTest}-dynamic-radio-group`} className='flex flex-col gap-y-1 relative'>
-                {title && <span className='text-delta-800 text-base font-semibold'>{title}</span>}
+            <div data-testid={`${dataTest}-dynamic-radio-group`} className='relative flex flex-col gap-y-1'>
+                {title && <span className='text-base font-semibold text-delta-800'>{title}</span>}
                 {/* HACK for calculating overflow layout */}
                 <div
+                    aria-hidden
                     ref={containerRef}
-                    className='absolute top-0 left-0 opacity-0 pointer-events-none flex flex-wrap gap-2 text-sm'
+                    className='pointer-events-none absolute left-0 top-0 flex flex-wrap gap-2 text-sm opacity-0'
                     style={{ width: '100%' }}
                 >
                     {visibleOptions.map((o) => {
-                        const optionValue = getOptionValue(o)
-
                         return (
                             <StyledInteractiveChip
-                                key={String(optionValue)}
+                                key={getOptionValueText(o)}
                                 className='w-fit'
                                 readOnly={readOnly}
                                 type={multiple ? 'checkbox' : 'radio'}
-                                dataTest={`ic-${String(optionValue)}-hidden`}
+                                dataTest={`ic-${getOptionValueText(o)}-hidden`}
                                 label={renderLabel ? renderLabel(o) : getOptionLabel(o)}
                             />
                         )
                     })}
                 </div>
 
-                <div className={cn('flex gap-2 flex-wrap', wrapDisabled && 'flex-col gap-1')}>
+                <div className={cn('flex flex-wrap gap-2', wrapDisabled && 'flex-col gap-1')}>
                     {loading ? (
                         <div className='flex flex-wrap gap-2'>
-                            <Skeleton className='w-[60px] h-[32px]' />
-                            <Skeleton className='w-[60px] h-[32px]' />
-                            <Skeleton className='w-[60px] h-[32px]' />
+                            <Skeleton className='h-[32px] w-[60px]' />
+                            <Skeleton className='h-[32px] w-[60px]' />
+                            <Skeleton className='h-[32px] w-[60px]' />
                         </div>
                     ) : visibleOptions?.length ? (
                         visibleOptions.map((o, index) => {
-                            const optionValue = getOptionValue(o)
-
                             const checked = !!(multiple
                                 ? value?.find((v) => isOptionEqualToValue(v, o))
                                 : isOptionEqualToValue(value, o))
@@ -130,23 +141,23 @@ export const DynamicInteractiveChipGroup = forwardRef(
                                 !optionDisabled && !readOnly && index === firstActiveIndex ? ref : undefined
 
                             return (
-                                <StyledTooltip key={String(optionValue)} title={tooltipTitle} arrow>
+                                <StyledTooltip key={getOptionValueText(o)} title={tooltipTitle} arrow>
                                     <span className={cn(optionDisabled && 'cursor-not-allowed')}>
                                         {readOnly && !wrapDisabled ? (
                                             <StyledChip
                                                 ref={inputRef}
-                                                disabled={disabled || optionDisabled}
+                                                disabled={Boolean(disabled) || optionDisabled}
                                                 classes={{
                                                     root: 'min-h-[32px] h-full',
                                                 }}
                                                 className='w-fit text-sm'
-                                                dataTest={`ic-${String(optionValue)}`}
+                                                dataTest={`ic-${getOptionValueText(o)}`}
                                                 label={renderLabel ? renderLabel(o) : getOptionLabel(o)}
                                             />
                                         ) : (
                                             <StyledInteractiveChip
                                                 ref={inputRef}
-                                                disabled={disabled || optionDisabled}
+                                                disabled={Boolean(disabled) || optionDisabled}
                                                 classes={
                                                     wrapDisabled
                                                         ? {
@@ -160,7 +171,7 @@ export const DynamicInteractiveChipGroup = forwardRef(
                                                 className='w-fit text-sm'
                                                 readOnly={readOnly}
                                                 type={multiple ? 'checkbox' : 'radio'}
-                                                dataTest={`ic-${String(optionValue)}`}
+                                                dataTest={`ic-${getOptionValueText(o)}`}
                                                 checked={checked}
                                                 size={size}
                                                 onClick={() => handleClick(o)}
@@ -193,9 +204,9 @@ export const DynamicInteractiveChipGroup = forwardRef(
                         {locale === 'en' ? 'Clear selection' : 'Fjern valget'}
                     </StyledButton>
                 )}
-                <div className={cn('text-sm/5 text-delta-600 flex items-center gap-1', error && 'text-error-500')}>
+                <div className={cn('flex items-center gap-1 text-sm/5 text-delta-600', error && 'text-error-500')}>
                     {error && <ErrorOutlineIcon width={20} height={20} className='min-w-5' />}
-                    <span className='line-clamp-1'>{helperText || (error && !helperText && 'Required')}</span>
+                    <span className='line-clamp-1'>{helperText ?? (error ? 'Required' : undefined)}</span>
                 </div>
             </div>
         )

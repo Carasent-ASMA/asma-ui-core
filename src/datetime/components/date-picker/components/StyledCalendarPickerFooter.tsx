@@ -31,7 +31,11 @@ export const StyledCalendarPickerFooter: React.FC<{
                 dataTest=''
                 variant='text'
                 onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-                    onClear ? onClear() : removeSelection(event)
+                    if (onClear) {
+                        onClear()
+                    } else {
+                        removeSelection(event)
+                    }
                     // to reset picker navigation
                     setMonth(new Date(Date.now()))
                 }}
@@ -41,14 +45,16 @@ export const StyledCalendarPickerFooter: React.FC<{
             >
                 {isNb ? 'Nullstill' : 'Clear'}
             </StyledButton>
-            <div className='rdp-custom-caption-navigation' style={{ display: 'flex', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 8 }}>
                 <StyledButton
                     dataTest=''
                     variant='outlined'
                     size='small'
                     disabled={!previousMonth}
                     onClick={() => {
-                        previousMonth && setMonth(previousMonth)
+                        if (previousMonth) {
+                            setMonth(previousMonth)
+                        }
                     }}
                     style={{ minWidth: '25px' }}
                 >
@@ -71,7 +77,9 @@ export const StyledCalendarPickerFooter: React.FC<{
                     size='small'
                     disabled={!nextMonth}
                     onClick={() => {
-                        nextMonth && setMonth(nextMonth)
+                        if (nextMonth) {
+                            setMonth(nextMonth)
+                        }
                     }}
                     style={{ minWidth: '25px' }}
                 >

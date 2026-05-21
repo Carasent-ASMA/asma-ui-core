@@ -1,6 +1,6 @@
 import { MenuItem, type MenuItemProps } from '@mui/material'
 
-export const StyledSelectItem = (item: MenuItemProps) => {
+export const StyledSelectItem = (item: MenuItemProps): JSX.Element => {
     return (
         <MenuItem
             {...item}

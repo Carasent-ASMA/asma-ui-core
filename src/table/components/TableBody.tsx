@@ -19,7 +19,7 @@ export function TableBody<
     table: Table<TData>
     styledTableProps: StyledTableProps<TData, TCustomData>
     columnWindow: ColumnWindow
-}) {
+}): JSX.Element | null {
     const { columns, data, loading, enableDnd, rowHeight } = styledTableProps
     const colSpan = table.getAllLeafColumns().length || columns.length || 1
 

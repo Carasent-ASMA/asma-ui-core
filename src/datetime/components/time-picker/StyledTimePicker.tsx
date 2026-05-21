@@ -1,36 +1,37 @@
 import { format, isBefore, isValid } from 'date-fns'
-import PopupState from 'material-ui-popup-state'
-import { useEffect, useState, type ChangeEvent } from 'react'
+import PopupStateProvider from 'material-ui-popup-state'
+import { useState, type ChangeEvent } from 'react'
 import { ClickAwayListener } from '@mui/material'
 import { TimePickerPopper } from './TimePickerPopper'
 import { getTimeFromValue } from './helpers/getTimeFromValue'
 import { TimePickerInput } from './TimePickerInput'
-import type { IPopupStateType, StyledTimePickerProps } from './types'
+import type { PopupState } from 'material-ui-popup-state/hooks'
+import type { StyledTimePickerProps } from './types'
 
 export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
     const { value, onSelect, notBeforeTime } = props
-    const [localValue, setLocalValue] = useState(value ? format(value, 'HH:mm') : '')
+    const externalValue = value ? format(value, 'HH:mm') : ''
+    const [localValue, setLocalValue] = useState(externalValue)
+    const [isDirty, setIsDirty] = useState(false)
     const [isValidTime, setIsValidTime] = useState(true)
-
-    const [isValidEndTime, setIsValidEndTime] = useState(true)
-
-    useEffect(() => {
-        setLocalValue(value ? format(value, 'HH:mm') : '')
-    }, [value])
+    const resolvedLocalValue = isDirty ? localValue : externalValue
 
     const checkValidEndTime = (next?: Date) => {
-        const ok = !next || !notBeforeTime || !isValid(notBeforeTime) || !isBefore(next, notBeforeTime)
-        setIsValidEndTime(ok)
-        return ok
+        return !next || !notBeforeTime || !isValid(notBeforeTime) || !isBefore(next, notBeforeTime)
     }
 
-    useEffect(() => {
-        checkValidEndTime(value)
-    }, [value, notBeforeTime])
+    const parsedLocalTime = resolvedLocalValue.length === 5 ? getTimeFromValue(resolvedLocalValue, value) : null
+    const isValidEndTime = parsedLocalTime ? checkValidEndTime(parsedLocalTime) : true
 
-    const handleChange = (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>, popupState: IPopupStateType) => {
+    const closePopup = (popupState: PopupState): void => {
+        const close = (popupState as { close?: (() => void) }).close
+        close?.()
+    }
+
+    const handleChange = (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>, popupState: PopupState) => {
         const nextValue = e.target.value
 
+        setIsDirty(true)
         setLocalValue(nextValue)
 
         if (nextValue.length !== 5) {
@@ -43,7 +44,6 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
         if (!validTime) {
             onSelect(undefined)
             setIsValidTime(false)
-            setIsValidEndTime(true)
             return
         }
 
@@ -52,7 +52,8 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
 
         if (isNotBeforeStartTime) {
             onSelect(validTime)
-            popupState.close()
+            setIsDirty(false)
+            closePopup(popupState)
         } else {
             onSelect(undefined)
         }
@@ -61,25 +62,34 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
     const handleSelect = (selectedTime: Date | undefined /* , popupState?: IPopupStateType */) => {
         setIsValidTime(true)
 
-        if (checkValidEndTime(selectedTime)) onSelect(selectedTime)
+        if (checkValidEndTime(selectedTime)) {
+            onSelect(selectedTime)
+            setLocalValue(selectedTime ? format(selectedTime, 'HH:mm') : '')
+            setIsDirty(false)
+            return
+        }
+
+        onSelect(undefined)
         setLocalValue(selectedTime ? format(selectedTime, 'HH:mm') : '')
+        setIsDirty(true)
     }
 
     const handleClear = () => {
         onSelect(undefined)
         setLocalValue('')
+        setIsDirty(false)
         setIsValidTime(true)
     }
 
     return (
-        <PopupState variant='popper' popupId='time-picker-popper'>
+        <PopupStateProvider variant='popper' popupId='time-picker-popper'>
             {(popupState) => {
                 if (props.disabled || props.readOnly)
                     return (
                         <TimePickerInput
                             {...props}
                             popupState={popupState}
-                            localValue={localValue}
+                            localValue={resolvedLocalValue}
                             isValidTime={isValidTime}
                             isValidEndTime={isValidEndTime}
                             handleChange={(e) => handleChange(e, popupState)}
@@ -87,13 +97,13 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
                     )
 
                 return (
-                    <ClickAwayListener mouseEvent='onMouseDown' onClickAway={() => popupState.close()}>
-                        <div className='w-auto h-auto relative'>
-                            <div className='flex items-center justify-center h-fit m-0 p-0'>
+                    <ClickAwayListener mouseEvent='onMouseDown' onClickAway={() => closePopup(popupState)}>
+                        <div className='relative h-auto w-auto'>
+                            <div className='m-0 flex h-fit items-center justify-center p-0'>
                                 <TimePickerInput
                                     {...props}
                                     popupState={popupState}
-                                    localValue={localValue}
+                                    localValue={resolvedLocalValue}
                                     isValidTime={isValidTime}
                                     isValidEndTime={isValidEndTime}
                                     handleChange={(e) => handleChange(e, popupState)}
@@ -111,6 +121,6 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
                     </ClickAwayListener>
                 )
             }}
-        </PopupState>
+        </PopupStateProvider>
     )
 }

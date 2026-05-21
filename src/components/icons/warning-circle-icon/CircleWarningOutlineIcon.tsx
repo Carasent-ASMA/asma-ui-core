@@ -1,6 +1,6 @@
 import type { SVGProps } from 'react'
 
-export function CircleWarningOutlineIcon(props: SVGProps<SVGSVGElement>) {
+export function CircleWarningOutlineIcon(props: SVGProps<SVGSVGElement>): JSX.Element {
     return (
         <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16 ' {...props}>
             <g fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5'>

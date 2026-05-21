@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import type { Table } from '@tanstack/react-table'
 
-export function usePersistColumnOrder<TData = unknown>(table: Table<TData>, key?: string | null) {
+export function usePersistColumnOrder<TData = unknown>(table: Table<TData>, key?: string | null): void {
     const order = table.getState().columnOrder
 
     useEffect(() => {

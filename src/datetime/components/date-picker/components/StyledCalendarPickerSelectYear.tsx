@@ -3,7 +3,7 @@ import { StyledFormControl } from 'src/datetime/shared-components/StyledFormCont
 import { StyledSelect } from 'src/datetime/shared-components/StyledSelect'
 import { StyledSelectItem } from 'src/datetime/shared-components/StyledSelectItem'
 import styles from './StyledCalendarPickerSelectPeriod.module.scss'
-export function StyledCalendarPickerSelectYear(props: DropdownProps) {
+export function StyledCalendarPickerSelectYear(props: DropdownProps): JSX.Element {
     const { options = [], onChange, value, disabled, className, style, name } = props
     const ariaLabel = props['aria-label']
 

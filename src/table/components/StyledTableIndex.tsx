@@ -22,7 +22,7 @@ import { useElementHeightPx } from './columns/helpers/useElementHeightPx'
 import style from './StyledTable.module.scss'
 import { useColumnVirtualizer } from 'src/table/hooks/useColumnVirtualizer'
 
-type RowWithId = { id: string | number }
+interface RowWithId { id: string | number }
 
 function DndProvider<TData extends RowWithId>({
     enabled,
@@ -82,8 +82,8 @@ export const StyledTable = <TData extends RowWithId, TCustomData = Record<string
         getTableState?: (tableState: TableState) => void
         setData?: (callback: (data: TData[]) => TData[]) => void
     },
-) => {
-    const options = useMemo(() => ({ ...props, rowHeight: props.rowHeight || 48 }), [props])
+): JSX.Element => {
+    const options = useMemo(() => ({ ...props, rowHeight: props.rowHeight ?? 48 }), [props])
 
     const { className, tableClassName, height, noRowsOverlay, data, enableDnd, setData, loading } = options
 

@@ -1,6 +1,6 @@
 import { MenuItem, type MenuItemProps } from '@mui/material'
 import { Icon } from '@iconify/react'
-export const StyledSelectItem = (item: MenuItemProps) => {
+export const StyledSelectItem = (item: MenuItemProps): JSX.Element => {
     return (
         <MenuItem
             {...item}

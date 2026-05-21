@@ -5,7 +5,7 @@ import type { ReactNode } from 'react'
     * @param notBeforeTime - Start time of the range. Selected time must be after this value.
 */
 
-export type StyledTimePickerProps = {
+export interface StyledTimePickerProps {
     value?: Date
     onSelect: (date: Date | undefined) => void
     placeholder?: string

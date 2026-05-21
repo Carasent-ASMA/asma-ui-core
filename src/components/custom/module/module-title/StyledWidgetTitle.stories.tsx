@@ -1,4 +1,4 @@
-import type { Meta } from '@storybook/react'
+import type { Meta } from '@storybook/react-vite'
 import { StyledModuleTitle } from './StyledModuleTitle'
 
 const meta = {
@@ -11,9 +11,9 @@ const meta = {
 
 export default meta
 
-export const ModuleTitle = () => {
+export const ModuleTitle = (): JSX.Element => {
     return (
-        <div className='max-w-sm '>
+        <div className='max-w-sm'>
             <StyledModuleTitle dataTest='anonyme-schema'>Anonyme skjema</StyledModuleTitle>
         </div>
     )

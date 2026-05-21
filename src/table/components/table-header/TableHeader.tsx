@@ -23,7 +23,7 @@ export function TableHeader<
     tableCanResize: boolean
     tableWidth: number | null
     columnWindow: ColumnWindow
-}) {
+}): JSX.Element {
     const { stickyHeader = false, tableHeaderRef, tableHeaderStyle = {} } = styledTableProps
     const headerGroups = table.getHeaderGroups()
 
@@ -44,7 +44,7 @@ export function TableHeader<
             {headerGroups.map((headerGroup) => {
                 const positionedHeaders = headerGroup.headers.map((header, index, allHeaders) => ({
                     header,
-                    left: allHeaders.slice(0, index).reduce((acc, col) => acc + (col.column.getSize() || 0), 0),
+                    left: allHeaders.slice(0, index).reduce((acc, col) => acc + (col.column.getSize() ?? 0), 0),
                 }))
 
                 const leftHeaders = positionedHeaders.filter(({ header }) => header.column.columnDef.fixedLeft)
@@ -55,12 +55,14 @@ export function TableHeader<
                         header.column.id !== ACTIONS_COLUMN_ID,
                 )
                 const rightHeaders = positionedHeaders
-                    .filter(({ header }) => header.column.columnDef.fixedRight || header.column.id === ACTIONS_COLUMN_ID)
+                    .filter(
+                        ({ header }) => Boolean(header.column.columnDef.fixedRight) || header.column.id === ACTIONS_COLUMN_ID,
+                    )
                 const hasActionsColumn = rightHeaders.some(({ header }) => header.column.id === ACTIONS_COLUMN_ID)
                 const rightHeadersWithOffsets = rightHeaders.map((headerItem, index, allHeaders) => ({
                     ...headerItem,
                     right:
-                        allHeaders.slice(index + 1).reduce((acc, col) => acc + (col.header.column.getSize() || 0), 0) +
+                        allHeaders.slice(index + 1).reduce((acc, col) => acc + (col.header.column.getSize() ?? 0), 0) +
                         (hasActionsColumn ? -1 : 0),
                 }))
 

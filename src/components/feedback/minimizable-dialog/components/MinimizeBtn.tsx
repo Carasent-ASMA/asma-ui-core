@@ -1,5 +1,5 @@
 import { StyledTooltip } from 'src/components/data-display/tooltip'
-import { KeyboardCapslockIcon, MinimizeIcon } from 'src/components/icons'
+import { KeyboardCapslockIcon, MinimizeIcon } from 'asma-ui-icons'
 import { StyledButton } from 'src/components/inputs/button'
 
 export const MinimizeBtn: React.FC<{

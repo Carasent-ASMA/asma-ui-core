@@ -5,7 +5,10 @@ import type { FC } from 'react'
 import { DotsHorizontalIcon } from 'src/table/shared-components/DotsHorizontalIcon'
 import { DND_HANDLE_COLUMN_ID, type CellContext, type ColumnDef } from 'src/table/types'
 
-export function generateDndHandleColumn<TData>(custom_props?: ColumnDef<TData, unknown>, rowHeight?: number) {
+export function generateDndHandleColumn<TData>(
+    custom_props?: ColumnDef<TData, unknown>,
+    rowHeight?: number,
+): ColumnDef<TData, unknown> {
     return {
         enableHiding: false,
         enableSorting: false,
@@ -21,7 +24,7 @@ export const RowDragHandleCell: FC<
         rowId: string
         rowHeight?: number
     }
-> = ({ rowId, rowHeight, ...rest }) => {
+> = ({ rowId, rowHeight, ...rest }): JSX.Element => {
     const { attributes, listeners } = useSortable({ id: rowId, ...rest })
 
     return (
@@ -29,13 +32,13 @@ export const RowDragHandleCell: FC<
             {...attributes}
             {...listeners}
             style={{
-                height: rowHeight ? rowHeight : 'auto',
+                height: rowHeight ?? 'auto',
             }}
         >
             <DotsHorizontalIcon
                 width={24}
                 height={24}
-                className={clsx(rest.disabled ? 'text-delta-300 cursor-not-allowed' : 'text-delta-800 cursor-grab')}
+                className={clsx(rest.disabled ? 'cursor-not-allowed text-delta-300' : 'cursor-grab text-delta-800')}
             />
         </div>
     )

@@ -1,8 +1,8 @@
 import { ChevronDownIcon } from 'src/table/shared-components/ChevronDownIcon'
 import { StyledButton } from 'src/table/shared-components/button'
-import { SHOW_FULL_TEXT_ID, type CellContext } from 'src/table/types'
+import { SHOW_FULL_TEXT_ID, type CellContext, type ColumnDef } from 'src/table/types'
 
-export function generateShowFullTextColumn<TData>(isFixed: boolean, rowHeight?: number) {
+export function generateShowFullTextColumn<TData>(isFixed: boolean, rowHeight?: number): ColumnDef<TData, unknown> {
     return {
         id: SHOW_FULL_TEXT_ID,
         minSize: 38,
@@ -22,7 +22,7 @@ function ShowFullTextCell<TData>({ info, rowHeight }: { info: CellContext<TData,
     const canRenderSubRows = info.row.getCanExpand()
 
     return (
-        <div className='flex w-full items-center justify-center' style={{ height: rowHeight ? rowHeight : 'auto' }}>
+        <div className='flex w-full items-center justify-center' style={{ height: rowHeight ?? 'auto' }}>
             <StyledButton
                 dataTest='expand-text-button'
                 size='small'

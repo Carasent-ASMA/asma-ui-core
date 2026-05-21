@@ -4,10 +4,9 @@ import { ACTIONS_COLUMN_ID } from 'src/table/types'
 export const getTableHeaderStyle = <TData>(props: {
     enableResizing: boolean
     header: Header<TData, unknown>
-    element: HTMLTableCellElement | null
     tableWidth: number | null
-}) => {
-    const { header, enableResizing, tableWidth /* element */ } = props
+}): { width: string | number | undefined; maxWidth: string | number | undefined; minWidth: string | number | undefined; } => {
+    const { header, enableResizing, tableWidth } = props
 
     let columnWidth: number | string = header.getSize()
 
@@ -27,7 +26,7 @@ export const getTableHeaderStyle = <TData>(props: {
         }
 
         // setup full width for last user created column
-        if (lastColumn && lastColumn.id === header.id) {
+        if (lastColumn?.id === header.id) {
             let size
 
             if (tableWidth) {
@@ -36,7 +35,7 @@ export const getTableHeaderStyle = <TData>(props: {
                 size = '100%'
             }
 
-            const minSize = header.column.columnDef.minSize || 0
+            const minSize = header.column.columnDef.minSize ?? 0
 
             if (typeof size === 'string') {
                 columnWidth = size
@@ -48,9 +47,9 @@ export const getTableHeaderStyle = <TData>(props: {
         }
 
         return {
-            width: columnWidth || header.column.columnDef.size,
-            maxWidth: columnWidth || header.column.columnDef.maxSize,
-            minWidth: columnWidth || header.column.columnDef.minSize,
+            width: columnWidth ?? header.column.columnDef.size,
+            maxWidth: columnWidth ?? header.column.columnDef.maxSize,
+            minWidth: columnWidth ?? header.column.columnDef.minSize,
         }
     }
 
@@ -60,8 +59,8 @@ export const getTableHeaderStyle = <TData>(props: {
 
     // the column MinSize && MaxSize set by the user has the highest priority
     return {
-        width: columnWidth || header.column.columnDef.size,
-        maxWidth: header.column.columnDef.maxSize || columnWidth,
-        minWidth: header.column.columnDef.minSize || columnWidth,
+        width: columnWidth ?? header.column.columnDef.size,
+        maxWidth: header.column.columnDef.maxSize ?? columnWidth,
+        minWidth: header.column.columnDef.minSize ?? columnWidth,
     }
 }

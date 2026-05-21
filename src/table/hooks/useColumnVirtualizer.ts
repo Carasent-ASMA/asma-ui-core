@@ -3,7 +3,7 @@ import { useVirtualizer } from '@tanstack/react-virtual'
 import type { MutableRefObject } from 'react'
 import { ACTIONS_COLUMN_ID } from 'src'
 
-export type ColumnWindow = {
+export interface ColumnWindow {
     indexes: number[]
     paddingLeft: number
     paddingRight: number
@@ -17,7 +17,7 @@ export function useColumnVirtualizer<TData extends { id: string | number }>({
     table: Table<TData>
     scrollRef?: MutableRefObject<HTMLDivElement | null>
     isMobileView: boolean
-}) {
+}): { columnWindow: { indexes: number[]; paddingLeft: number; paddingRight: number; }; } {
     const centerColumns = table
         .getVisibleLeafColumns()
         .filter((column) => !column.columnDef.fixedLeft && !column.columnDef.fixedRight && column.id !== ACTIONS_COLUMN_ID)

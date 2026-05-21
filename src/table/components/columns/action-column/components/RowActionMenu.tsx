@@ -18,11 +18,12 @@ export function RowActionMenu<TData>({
     tableData: CellContext<TData, TData>
     actions: (row: Row<TData>) => (IAction<TData> | ICustomAction<TData>)[]
     rowActionsState?: (row: Row<TData>) => RowActionsState | undefined
-}) {
+}): JSX.Element {
     const { anchorEl, open, handleClose, handleOpen } = useToggleMenuVisibility()
     const allActions = actions(tableData.row)
     const state = rowActionsState?.(tableData.row) ?? { state: 'enabled' as const }
-    const locale = tableData.table.options.meta?.locale
+    const meta = tableData.table.options.meta as { locale?: 'en' | 'no' } | undefined
+    const locale = meta?.locale
     const noActionsLabel = locale === 'no' ? 'Ingen handlinger tilgjengelig' : 'No actions available'
 
     const allHidden = useMemo(() => {
@@ -43,7 +44,7 @@ export function RowActionMenu<TData>({
         return () => window.clearTimeout(t)
     }, [disabledTooltipOpen])
 
-    if (!shouldShowButton) return <div className='flex justify-center items-center w-[40px]' />
+    if (!shouldShowButton) return <div className='flex w-[40px] items-center justify-center' />
 
     const disabled = state.state === 'disabled'
 
@@ -76,13 +77,13 @@ export function RowActionMenu<TData>({
     )
 
     return (
-        <div className='flex justify-center items-center w-[40px]'>
+        <div className='flex w-[40px] items-center justify-center'>
             <div className='flex items-center justify-center'>
                 {state.state === 'disabled' ? (
                     <StyledTooltip
                         title={state.tooltipTitle}
                         arrow
-                        placement={state.tooltipPlacement || 'top'}
+                        placement={state.tooltipPlacement ?? 'top'}
                         open={disabledTooltipOpen}
                         onOpen={() => setDisabledTooltipOpen(true)}
                         onClose={() => setDisabledTooltipOpen(false)}
@@ -147,7 +148,7 @@ export function RowActionMenu<TData>({
                                         key={index}
                                         title={action?.tooltipTitle}
                                         arrow
-                                        placement={action?.tooltipPlacement || 'left'}
+                                        placement={action?.tooltipPlacement ?? 'left'}
                                     >
                                         <span>
                                             <StyledMenuItem

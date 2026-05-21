@@ -1,8 +1,9 @@
 import type { AlertColor } from '@mui/material'
 import clsx from 'clsx'
+import { Icon } from '@iconify/react'
 import { SnackbarContent, type CustomContentProps, useSnackbar } from 'notistack'
 import { forwardRef } from 'react'
-import { CloseIcon, LoadingIcon } from 'src/components/icons'
+
 import { omit } from 'src/helpers'
 
 interface StyledInfoSnackbarProps extends CustomContentProps {
@@ -20,33 +21,36 @@ export const StyledInfoSnackbar = forwardRef<HTMLDivElement, StyledInfoSnackbarP
         'hideIconVariant',
         'iconVariant',
         'persist',
-    ])
+    ] as const)
 
     const { closeSnackbar } = useSnackbar()
-
-    const handleClose = () => closeSnackbar(id)
-
     const isLoading = type === 'loading'
 
     return (
         <SnackbarContent ref={ref} role='alert' {...other}>
             <div
                 className={clsx(
-                    'relative flex items-center justify-center w-full',
+                    'relative flex w-full items-center justify-center',
                     isLoading && 'pl-8',
                     closeButton && 'pr-8',
                 )}
             >
-                {type === 'loading' ? (
-                    <LoadingIcon width={20} height={20} className='left-0 absolute top-1/2 -translate-y-1/2' />
+                {isLoading ? (
+                    <Icon
+                        icon='line-md:loading-twotone-loop'
+                        width={20}
+                        height={20}
+                        className='absolute left-0 top-1/2 -translate-y-1/2'
+                    />
                 ) : null}
                 <div>{message}</div>
                 {closeButton ? (
-                    <CloseIcon
-                        onClick={() => handleClose()}
+                    <Icon
+                        icon='ic:baseline-close'
+                        onClick={() => closeSnackbar(id)}
                         width={20}
                         height={20}
-                        className='right-0 absolute top-1/2 -translate-y-1/2'
+                        className='absolute right-0 top-1/2 -translate-y-1/2'
                     />
                 ) : null}
             </div>

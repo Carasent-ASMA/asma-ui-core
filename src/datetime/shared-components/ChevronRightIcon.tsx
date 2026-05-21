@@ -1,7 +1,7 @@
 import React from 'react'
 import type { SVGProps } from 'react'
 
-export function ChevronRightIcon(props: SVGProps<SVGSVGElement>) {
+export function ChevronRightIcon(props: SVGProps<SVGSVGElement>): JSX.Element {
     return (
         <svg xmlns='http://www.w3.org/2000/svg' width='20px' height='20px' viewBox='0 0 24 24' {...props}>
             <path fill='currentColor' d='M8.59 16.58L13.17 12L8.59 7.41L10 6l6 6l-6 6z'></path>

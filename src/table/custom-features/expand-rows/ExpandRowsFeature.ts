@@ -20,7 +20,7 @@ export const ExpandedRowsFeature: TableFeature = {
     getDefaultOptions: <TData extends RowData>(table: Table<TData>): ExpandedRowsOptions => {
         return {
             onChangeExpandedRows: makeStateUpdater('expandedRows', table),
-        } as ExpandedRowsOptions
+        }
     },
 
     createTable: <TData extends RowData>(table: Table<TData>): void => {

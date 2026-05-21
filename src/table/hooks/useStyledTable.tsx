@@ -1,6 +1,7 @@
 import {
     useReactTable,
     type Row,
+    type Table,
     getCoreRowModel,
     getExpandedRowModel,
     getFilteredRowModel,
@@ -25,7 +26,7 @@ export const useStyledTable = <
     TCustomData = Record<string, unknown>,
 >(
     props: StyledTableProps<TData, TCustomData>,
-) => {
+): { table: Table<TData> } => {
     const {
         columns,
         data,
@@ -64,7 +65,7 @@ export const useStyledTable = <
         getSortedRowModel: getSortedRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         getRowId:
-            rest.getRowId ||
+            rest.getRowId ??
             ((row: TData, _index: number, parent?: Row<TData>) =>
                 parent ? [parent.id, row.id].join('.') : row.id.toString()),
         defaultColumn: props.enableResizing

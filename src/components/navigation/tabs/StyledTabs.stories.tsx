@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { type TabsProps } from '@mui/material'
 import { useState, type FC } from 'react'
 import { StyledTabs } from './StyledTabs'

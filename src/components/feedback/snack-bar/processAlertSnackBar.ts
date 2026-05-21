@@ -1,6 +1,6 @@
 import { enqueueSnackbar } from 'notistack'
 
-export function processAlertSnackBar(message: string) {
+export function processAlertSnackBar(message: string): void {
     enqueueSnackbar({
         message,
         variant: 'alert',

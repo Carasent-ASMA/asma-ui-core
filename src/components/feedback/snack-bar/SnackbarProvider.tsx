@@ -1,19 +1,18 @@
 import type { AlertColor } from '@mui/material'
-import { SnackbarProvider as NotistackProvider, type SnackbarProviderProps } from 'notistack'
-import { StyledAlertSnackbar } from 'src/components/feedback/snack-bar/StyledAlertSnackbar'
+import { SnackbarProvider as NotistackProvider, type SnackbarMessage, type SnackbarProviderProps } from 'notistack'
+
+import { StyledAlertSnackbar } from './StyledAlertSnackbar'
+import { StyledDefaultSnackbar } from './components/StyledDefaultSnackbar'
 import { StyledInfoSnackbar } from './components/StyledInfoSnackbar'
 
-/**
- * @ignore
- * @internal
- */
-export const SnackbarProvider = (props: SnackbarProviderProps) => {
+export const SnackbarProvider = (props: SnackbarProviderProps): JSX.Element => {
     return (
         <NotistackProvider
             {...props}
             Components={{
                 alert: StyledAlertSnackbar,
                 info: StyledInfoSnackbar,
+                default: StyledDefaultSnackbar,
             }}
             autoHideDuration={6000}
             anchorOrigin={{
@@ -22,8 +21,8 @@ export const SnackbarProvider = (props: SnackbarProviderProps) => {
             }}
             domRoot={document.body}
             maxSnack={3}
-            classes={{ root: 'min-w-fit' }}
-            className='w-fit min-w-fit max-w-fit '
+            classes={{ root: 'min-w-fit flex justify-center' }}
+            className='w-fit min-w-fit max-w-fit'
         >
             {props.children}
         </NotistackProvider>
@@ -32,26 +31,19 @@ export const SnackbarProvider = (props: SnackbarProviderProps) => {
 
 declare module 'notistack' {
     interface VariantOverrides {
+        default: {
+            severity: AlertColor
+            title?: SnackbarMessage
+        }
         alert: {
-            /**
-             * The className to apply to the alert.
-             */
             alertClassName?: string
-            /**
-             * The variant to use.
-             * @default 'standard'
-             */
             alertVariant?: 'standard' | 'filled' | 'outlined'
-            /**
-             * The severity of the alert. This defines the color and icon used.
-             * @default 'success'
-             */
             severity?: AlertColor
-            /**
-             * If true, the alert is closable.
-             * @default false
-             */
             closeButton?: boolean
+        }
+        info: {
+            closeButton?: boolean
+            type?: 'loading'
         }
     }
 }

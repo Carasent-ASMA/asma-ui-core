@@ -17,7 +17,7 @@ export const TimePickerPopper: React.FC<StyledTimePickerProps & { popupState: Po
     return (
         <Popper
             {...bindPopper(popupState)}
-            className={clsx('shadow-tailwind', styles['shadow-mui'])}
+            className={clsx(styles['shadow-mui'])}
             transition
             style={{ zIndex: '1300', position: 'absolute' }}
         >

@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-export const usePersistedColumnOrder = (persistColumnOrderKey?: string) => {
+export const usePersistedColumnOrder = (persistColumnOrderKey?: string): string[]| undefined => {
     const persistedColumnOrder = useMemo<string[] | undefined>(() => {
         if (!persistColumnOrderKey) return undefined
         try {

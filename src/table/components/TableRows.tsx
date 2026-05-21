@@ -16,7 +16,7 @@ export function TableRows<
     styledTableProps: StyledTableProps<TData, TCustomData>
     table: Table<TData>
     columnWindow: ColumnWindow
-}) {
+}): JSX.Element {
     const rows = styledTableProps.hideFooter ? table.getExpandedRowModel().rows : table.getRowModel().rows
 
     return (
