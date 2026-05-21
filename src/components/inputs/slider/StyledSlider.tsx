@@ -1,5 +1,5 @@
 import { Slider, type SliderProps } from '@mui/material'
-import { ErrorOutlineIcon } from 'asma-ui-icons'
+import { ErrorOutlineIcon } from 'src/components/icons'
 import clsx from 'clsx'
 import { StyledFormHelperText } from 'src'
 

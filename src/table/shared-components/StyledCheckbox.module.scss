@@ -1,0 +1,235 @@
+$checkbox-sizes: (
+    medium: 42px,
+    small: 38px,
+);
+
+@mixin checkbox-dimensions($size) {
+    $dim: map-get($checkbox-sizes, $size);
+    width: $dim;
+    height: $dim;
+}
+
+@mixin checkbox-size($size) {
+    border-radius: 2px;
+
+    @if $size == 'medium' {
+        width: 18px;
+        height: 18px;
+    } @else if $size == 'small' {
+        width: 15px;
+        height: 15px;
+    }
+}
+
+.CheckboxWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-sizing: border-box;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+
+    &.size-small {
+        @include checkbox-dimensions(small);
+    }
+
+    &.size-medium {
+        @include checkbox-dimensions(medium);
+    }
+
+    &[data-disabled] {
+        cursor: default;
+        pointer-events: none;
+    }
+
+    &:is([data-checked], [data-indeterminate]) .Checkbox {
+        background-color: var(--colors-gama-500);
+        border: none;
+        --cb-border-w: 0px;
+    }
+
+    &.Indeterminate .Checkbox {
+        background-color: var(--colors-gama-500);
+        border: none;
+        --cb-border-w: 0px;
+    }
+
+    &[data-unchecked] .Checkbox {
+        background-color: transparent;
+        border: var(--cb-border-w) solid var(--colors-delta-500);
+    }
+
+    &[data-disabled][data-unchecked] .Checkbox {
+        background-color: transparent;
+        border: var(--cb-border-w) solid var(--colors-delta-200);
+    }
+
+    &[data-disabled]:is([data-checked], [data-indeterminate]) .Checkbox {
+        background-color: var(--colors-delta-200);
+        border: none;
+        --cb-border-w: 0px;
+    }
+
+    &[data-disabled].Indeterminate .Checkbox {
+        background-color: var(--colors-delta-200);
+        border: none;
+        --cb-border-w: 0px;
+    }
+
+    &:focus-visible {
+        outline: none;
+    }
+}
+
+.CheckboxWrapper.ReadOnly {
+    pointer-events: none;
+    cursor: default;
+
+    .Checkbox {
+        background-color: white;
+        border: var(--cb-border-w) solid var(--colors-delta-500);
+        --cb-border-w: 2px;
+
+        .Indicator {
+            color: var(--colors-delta-500);
+        }
+    }
+}
+
+.HideWrapper {
+    width: auto;
+    height: auto;
+    padding: 0;
+    overflow: visible;
+}
+
+%ripple-base {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.CheckboxRippleContainer {
+    @extend %ripple-base;
+    overflow: hidden;
+    border-radius: 50%;
+}
+
+.CheckboxRipple {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: var(--colors-gama-500);
+    border-radius: 50%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.25;
+    animation: ripple 400ms ease-out forwards;
+    z-index: 0;
+}
+
+@keyframes ripple {
+    to {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.025;
+    }
+}
+
+.CheckboxHover {
+    &::after {
+        content: '';
+        @extend %ripple-base;
+        width: 42px;
+        height: 42px;
+        background: var(--colors-gama-300);
+        border-radius: 50%;
+        top: 50%;
+        left: 50%;
+        opacity: 0;
+        transition: opacity 0.2s, transform 0.2s;
+        transform: translate(-50%, -50%) scale(0.7);
+    }
+
+    &:hover::after {
+        opacity: 0.07;
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    &.size-small::after {
+        width: 38px;
+        height: 38px;
+    }
+}
+
+.Checkbox {
+    position: relative;
+    overflow: visible;
+    padding: 0;
+    box-sizing: border-box;
+
+    --cb-border-w: 2px;
+    --cb-indicator-color: #fff;
+
+    @include checkbox-size('medium');
+
+    &.size-small {
+        @include checkbox-size('small');
+    }
+
+    .CheckboxWrapper:focus-visible & {
+        &::before {
+            content: '';
+            position: absolute;
+            inset: calc(-2px - var(--cb-border-w));
+            border-radius: 4px;
+            outline: 2px solid var(--colors-gama-400);
+            outline-offset: 0;
+            pointer-events: none;
+        }
+    }
+
+    .CheckboxWrapper[data-indeterminate] &::after,
+    &.Indeterminate::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 62%;
+        height: 2.5px;
+        transform: translate(-50%, -50%);
+        border-radius: 999px;
+        background-color: var(--cb-indicator-color);
+        z-index: 2;
+        pointer-events: none;
+    }
+
+}
+
+.Indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: white;
+    z-index: 1;
+    position: relative;
+    pointer-events: none;
+}
+
+.CheckboxWrapper[data-indeterminate],
+.CheckboxWrapper.Indeterminate {
+    .Indicator svg {
+        display: none;
+    }
+}
+
+.CheckboxWrapper.ReadOnly .Checkbox {
+    --cb-indicator-color: var(--colors-delta-500);
+}

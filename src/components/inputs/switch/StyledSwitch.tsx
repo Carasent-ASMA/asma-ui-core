@@ -1,5 +1,5 @@
 import { Switch, type SwitchProps as _SwitchProps } from '@mui/material'
-import { CheckIcon } from 'asma-ui-icons'
+import { CheckIcon } from 'src/components/icons'
 import { IndeterminateIcon } from 'src/components/icons/Indeterminate icon'
 
 export type SwitchProps = _SwitchProps

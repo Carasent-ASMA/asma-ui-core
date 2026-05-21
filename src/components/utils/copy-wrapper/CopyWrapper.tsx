@@ -1,4 +1,4 @@
-import { ContentCopyIcon } from 'asma-ui-icons'
+import { ContentCopyIcon } from 'src/components/icons'
 import { type FC, type PropsWithChildren, type ReactNode } from 'react'
 import { StyledTooltip } from 'src/components/data-display/tooltip'
 import type { MessageProps } from 'src/components/feedback/snack-bar/components/types'

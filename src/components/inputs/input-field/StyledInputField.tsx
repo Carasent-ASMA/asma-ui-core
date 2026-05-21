@@ -1,5 +1,5 @@
 import { TextField, type TextFieldProps } from '@mui/material'
-import { ErrorOutlineIcon } from 'asma-ui-icons'
+import { ErrorOutlineIcon } from 'src/components/icons'
 import { CloseIcon } from 'src/components/icons'
 /**
  *

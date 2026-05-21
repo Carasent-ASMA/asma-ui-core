@@ -3,7 +3,7 @@ import { Icon } from '@iconify/react'
 import clsx from 'clsx'
 import { CloseIcon } from 'src/components/icons'
 import { StyledFormHelperText } from 'src'
-import { ErrorOutlineIcon } from 'asma-ui-icons'
+import { ErrorOutlineIcon } from 'src/components/icons'
 
 /**
  *

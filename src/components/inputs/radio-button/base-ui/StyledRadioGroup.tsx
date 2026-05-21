@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react'
 import { RadioGroup } from '@base-ui-components/react/radio-group'
 import { StyledFormHelperText } from 'src'
-import { ErrorOutlineIcon } from 'asma-ui-icons'
+import { ErrorOutlineIcon } from 'src/components/icons'
 import clsx from 'clsx'
 
 type StyledRadioGroupProps = {

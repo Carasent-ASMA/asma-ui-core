@@ -3,7 +3,7 @@ import type { DynamicSelectOption, StyledDynamicSelectComponent, StyledDynamicSe
 import { cn } from 'src/helpers/cn'
 import { useWrap } from '../helpers/useWrap'
 import { forwardRef } from 'react'
-import { CloseIcon } from 'asma-ui-icons'
+import { CloseIcon } from 'src/components/icons'
 
 export const DynamicInteractiveChipGroup = forwardRef(
     <TOption extends DynamicSelectOption>(

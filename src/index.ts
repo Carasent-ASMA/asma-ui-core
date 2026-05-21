@@ -14,8 +14,8 @@ export * from './components/feedback/dialog'
 export * from './components/feedback/empty-page/StyledEmptyPage'
 export * from './components/feedback/filtered-empty-state'
 export * from './components/feedback/loading/StyledLoading'
-// export * from './components/feedback/alert'
-// export * from './components/feedback/snack-bar'
+export * from './components/feedback/alert'
+export * from './components/feedback/snack-bar'
 // inputs
 export * from './components/inputs/button'
 export * from './components/inputs/checkbox'
@@ -32,8 +32,8 @@ export * from './components/inputs/label'
 export * from './components/inputs/dynamic-select'
 
 // pickers
-// export * from './components/pickers/date-picker'
-// export * from './components/pickers/time-picker'
+export * from './datetime/components/date-picker'
+export * from './datetime/components/time-picker'
 
 // miscellaneous
 export * from './components/miscellaneous/StyledFormControl'
@@ -49,7 +49,7 @@ export * from './components/navigation/tabs'
 // surfaces
 export * from './components/utils/accordion'
 // table
-// export * from './components/table'
+export * from './table'
 // utils
 export * from './components/utils/popover'
 export * from './components/utils/filter-menu'

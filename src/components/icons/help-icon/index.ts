@@ -1,0 +1,1 @@
+export { HelpIcon } from './HelpIcon'

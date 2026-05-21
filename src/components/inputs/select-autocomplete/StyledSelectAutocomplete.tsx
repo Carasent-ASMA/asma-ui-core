@@ -4,7 +4,7 @@ import clsx from 'clsx'
 import { useEffect, useRef, useState } from 'react'
 import style from './StyledSelectAutocomplete.module.scss'
 import { cn } from 'src/helpers/cn'
-import { CloseIcon } from 'asma-ui-icons'
+import { CloseIcon } from 'src/components/icons'
 
 /**
  *
