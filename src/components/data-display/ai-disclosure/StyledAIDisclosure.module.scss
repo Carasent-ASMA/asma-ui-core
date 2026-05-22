@@ -10,7 +10,7 @@
 
 .watermark {
     display: flex;
-    box-sizing: content-box;
+    box-sizing: border-box;
     user-select: none;
     align-items: center;
     justify-content: center;
@@ -18,8 +18,8 @@
     border: 1px solid var(--colors-delta-700);
     border-radius: 12px;
     padding: 3px 4px;
-    width: 9px;
-    height: 5px;
+    width: 19px;
+    height: 13px;
 }
 
 .watermarkText {
