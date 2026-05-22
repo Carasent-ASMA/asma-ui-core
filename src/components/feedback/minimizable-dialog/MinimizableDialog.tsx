@@ -52,6 +52,19 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     if (!open) return null
 
     const fullScreen = fullScreenState ?? fullscreen
+    const isFullScreenActive = fullScreen && !minimized
+
+    const fullScreenDialogStyle: React.CSSProperties | undefined = isFullScreenActive
+        ? {
+              right: 'auto',
+              bottom: 'auto',
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: 'min(1000px, calc(100vw - 32px))',
+              height: '95dvh',
+          }
+        : undefined
 
     const showPrimaryButton = primaryButtonText ?? primaryButtonLoading
 
@@ -63,7 +76,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
 
     return (
         <>
-            {fullScreen && !minimized && <div className='fixed inset-0 z-[51] bg-[rgb(98,110,126)] bg-opacity-70' />}
+            {isFullScreenActive && <div className='fixed inset-0 z-[51] bg-[rgb(98,110,126)] bg-opacity-70' />}
 
             <div style={{ zIndex: 51 }} className={cn(styles['dialog'], !minimized && styles['hidden'])}>
                 <div className={clsx('flex items-center justify-between', !minimized && 'hidden')} data-testid={dataTest}>
@@ -103,13 +116,12 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                 </div>
             </div>
             <div
+                style={fullScreenDialogStyle}
                 className={cn(
                     'fixed bottom-4 right-4 z-[51] rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)] transition-all duration-300',
-                    className && !minimized ? className : '',
+                    className && !minimized && !fullScreen ? className : '',
                     minimized && '!h-0 !w-0 opacity-0 duration-0',
-                    fullScreen &&
-                        !minimized &&
-                        'fixed left-1/2 top-1/2 h-[95dvh] w-full max-w-[1000px] -translate-x-1/2 -translate-y-1/2 duration-0',
+                    isFullScreenActive && 'fixed duration-0',
                 )}
                 data-testid={dataTest}
             >
@@ -155,11 +167,15 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                                             dataTest='fullscreen-button'
                                             variant='textGray'
                                             size='small'
-                                            onClick={() => {
+                                            onClick={(event) => {
                                                 if (fullScreenState !== undefined && handleFullScreenState) {
                                                     handleFullScreenState()
                                                 } else {
                                                     setFullscreen(!fullscreen)
+                                                }
+
+                                                if (event.detail !== 0) {
+                                                    event.currentTarget.blur()
                                                 }
                                             }}
                                             endIcon={
