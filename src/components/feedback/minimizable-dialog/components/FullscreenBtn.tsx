@@ -18,7 +18,13 @@ export const FullScreenBtn: FC<{
                     dataTest='fullscreen-button'
                     variant='textGray'
                     size='small'
-                    onClick={onClick}
+                    onClick={(event) => {
+                        onClick()
+
+                        if (event.detail !== 0) {
+                            event.currentTarget.blur()
+                        }
+                    }}
                     endIcon={
                         fullScreen ? (
                             <ArrowShrink width={20} height={20} color='text-delta-700' />
