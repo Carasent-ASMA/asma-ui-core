@@ -2,9 +2,10 @@ import { Autocomplete, Paper, type AutocompleteProps, type ChipTypeMap, type SxP
 import clsx from 'clsx'
 import { useLayoutEffect, useRef, useState } from 'react'
 import { StyledCheckbox } from 'src'
+import { StyledChip } from '../../data-display/chip'
 import { cn } from 'src/helpers/cn'
 import style from './StyledSelectAutocomplete.module.scss'
-import { CheckIcon, ChevronDownIcon, CloseIcon } from 'asma-ui-icons'
+import { CheckIcon, ChevronDownIcon, CloseIcon, PlusIconCircle } from 'asma-ui-icons'
 
 type StyledSelectAutocompleteMultipleValue<
     T,
@@ -79,6 +80,7 @@ export function StyledSelectAutocomplete<
     popupIcon,
     readOnly,
     renderOption,
+    renderTags,
     sx,
     value,
     ...props
@@ -93,6 +95,9 @@ export function StyledSelectAutocomplete<
     >
     type AutocompleteOnChangeParameters = Parameters<AutocompleteOnChange>
     type MultipleValue = StyledSelectAutocompleteMultipleValue<T, DisableClearable, FreeSolo, ChipComponent>
+    type AutocompleteRenderTags = NonNullable<
+        StyledSelectAutocompleteBaseProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent>['renderTags']
+    >
 
     const getMultipleValue = (candidate: unknown): MultipleValue => {
         return (Array.isArray(candidate) ? candidate : []) as MultipleValue
@@ -193,6 +198,24 @@ export function StyledSelectAutocomplete<
         )
     }
 
+    const defaultRenderTags: AutocompleteRenderTags = (tagValue, getTagProps) => {
+        return tagValue.map((option, index) => {
+            const tagProps = getTagProps({ index })
+            const chipProps: Omit<typeof tagProps, 'key'> = tagProps
+            const optionLabel = getOptionLabel?.(option) ?? defaultGetOptionLabel(option)
+
+            return (
+                <StyledChip
+                    {...chipProps}
+                    key={`selected-chip-${optionLabel}-${index}`}
+                    dataTest={`selected-chip-${optionLabel}`}
+                    label={optionLabel}
+                    variant='outlined'
+                />
+            )
+        })
+    }
+
     return (
         <div className={cn(style['styledSelectAutocompleteWrapper'], wrapperClassName)} ref={selectRef}>
             <Autocomplete
@@ -208,12 +231,13 @@ export function StyledSelectAutocomplete<
                 className={clsx('!text-sm', className)}
                 onChange={handleChange}
                 options={options}
+                renderTags={renderTags ?? (multiple ? defaultRenderTags : undefined)}
                 popupIcon={
-                    readOnly
-                        ? null
-                        : (popupIcon ?? (
-                              <ChevronDownIcon width={24} height={24} className={clsx(style['select-custom-icon'])} />
-                          ))
+                    readOnly ? null : (popupIcon ?? multiple) ? (
+                        <PlusIconCircle width={24} height={24} />
+                    ) : (
+                        <ChevronDownIcon width={24} height={24} className={clsx(style['select-custom-icon'])} />
+                    )
                 }
                 readOnly={readOnly}
                 data-testid={dataTest}
@@ -260,7 +284,7 @@ export function StyledSelectAutocomplete<
                                     onChange={handleSelectAllChange}
                                     aria-label={selectAllLabel ?? 'Select all'}
                                 />
-                                <span className='truncate text-[10px] text-xs font-semibold uppercase text-delta-600'>
+                                <span className='truncate text-[10px] font-semibold uppercase text-delta-600'>
                                     {selectAllLabel ?? 'Select all'}
                                 </span>
                             </div>
@@ -279,7 +303,10 @@ export function StyledSelectAutocomplete<
                                 <li
                                     {...rest}
                                     key={optionKey}
-                                    className={cn(props.className, 'flex items-center gap-x-[10px] border-0 border-b border-solid border-delta-200')}
+                                    className={cn(
+                                        props.className,
+                                        'flex items-center gap-x-[10px] border-0 border-b border-solid border-delta-200',
+                                    )}
                                 >
                                     <StyledCheckbox
                                         dataTest={`${dataTest}-${defaultGetOptionLabel(option)}-checkbox`}

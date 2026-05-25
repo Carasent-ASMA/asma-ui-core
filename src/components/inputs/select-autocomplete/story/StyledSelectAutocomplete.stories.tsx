@@ -5,7 +5,6 @@ import { useMemo, useState, type AriaRole, type FC } from 'react'
 import { StyledInputField } from '../../input-field'
 import { expect, within, type UserEventObject } from 'storybook/test'
 import { generateOptions, withRenderCounter } from './test-utils/perf'
-import { StyledChip } from 'src/components/data-display/chip'
 
 declare global {
     interface Window {
@@ -21,21 +20,6 @@ const meta = {
         autoHeight: true,
         multiple: true,
         size: 'small',
-        //@ts-expect-error it's unknown but for this case we know it's Film
-        renderTags: (tagValue: Film[], getTagProps) =>
-            tagValue.map((option, index) => {
-                const { key, ...props } = getTagProps({ index })
-
-                return (
-                    <StyledChip
-                        {...props}
-                        key={key}
-                        dataTest={`selected-chip-${option.title}`}
-                        label={option.title}
-                        variant='outlined'
-                    />
-                )
-            }),
     },
     argTypes: {
         autoHeight: { control: 'boolean' },
