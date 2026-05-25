@@ -2,6 +2,20 @@ import { Tabs, type SxProps, type TabsProps, type Theme } from '@mui/material'
 import type { FC } from 'react'
 import { cn } from 'src/helpers/cn'
 
+type StyledTabsProps = TabsProps & {
+    size?: 'default' | 'small'
+}
+
+type StyledTabsSx = Exclude<SxProps<Theme>, readonly unknown[]>
+
+function isSxArray(value: SxProps<Theme> | undefined): value is readonly StyledTabsSx[] {
+    return Array.isArray(value)
+}
+
+function isSingleSx(value: SxProps<Theme> | undefined): value is StyledTabsSx {
+    return value != null && !Array.isArray(value)
+}
+
 const defaultSx: SxProps<Theme> = {
     '& .MuiTabs-scroller': {
         borderBottom: '1px solid var(--colors-delta-200)',
@@ -43,12 +57,34 @@ const defaultSx: SxProps<Theme> = {
     },
 }
 
+const smallSx: SxProps<Theme> = {
+    minHeight: 36,
+    '& .MuiTab-root': {
+        height: 36,
+        minHeight: 36,
+        paddingLeft: '12px',
+        paddingRight: '12px',
+        paddingTop: '8px',
+        paddingBottom: '8px',
+    },
+}
+
 /**
  * Styled wrapper for MUI Tabs with consistent theming tokens.
  * Provides customized styling for tab indicators, scroll buttons, and inactive states.
  */
-export const StyledTabs: FC<TabsProps> = ({ className, sx, ...props }) => {
-    const mergedSx = (sx == null ? defaultSx : [defaultSx, sx]) as SxProps<Theme>
+export const StyledTabs: FC<StyledTabsProps> = ({ className, size = 'default', sx, ...props }) => {
+    const mergedSx: StyledTabsSx[] = [defaultSx]
+
+    if (size === 'small') {
+        mergedSx.push(smallSx)
+    }
+
+    if (isSxArray(sx)) {
+        mergedSx.push(...sx)
+    } else if (isSingleSx(sx)) {
+        mergedSx.push(sx)
+    }
 
     return (
         <Tabs

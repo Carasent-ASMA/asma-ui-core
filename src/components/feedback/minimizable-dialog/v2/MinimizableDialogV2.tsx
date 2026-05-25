@@ -40,6 +40,20 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
     const modalRef = useRef<HTMLDivElement>(null)
 
     const { minimized, setMinimized, fullScreen, setFullScreen } = useControlledProps(props)
+    const isFullScreenActive = fullScreen && !minimized
+
+    const fullScreenDialogStyle: React.CSSProperties | undefined = isFullScreenActive
+        ? {
+              right: 'auto',
+              bottom: 'auto',
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+                            width: 'min(1000px, calc(100vw - 32px))',
+                            maxWidth: 'min(1000px, calc(100vw - 32px))',
+              height: '95dvh',
+          }
+        : undefined
 
     if (!open) return null
 
@@ -74,7 +88,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                 </div>
             </div>
             {/* Maximized */}
-            {fullScreen && !minimized && (
+            {isFullScreenActive && (
                 <div
                     className='fixed inset-0 z-[52] bg-[rgb(98,110,126)] bg-opacity-70'
                     onClick={() => {
@@ -83,15 +97,14 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                 />
             )}
             <div
-                style={{ zIndex: 51, ...style }}
+                style={{ zIndex: 51, ...style, ...fullScreenDialogStyle }}
                 ref={modalRef}
                 className={cn(
                     styles['dialog'],
                     minimized && styles['hidden'],
-                    classNameOverrides.maximized,
-                    fullScreen &&
-                        !minimized &&
-                        'fixed left-1/2 top-1/2 z-[53] h-[95dvh] w-full max-w-[1000px] -translate-x-1/2 -translate-y-1/2 duration-0',
+                    !fullScreen && classNameOverrides.maximized,
+                    fullScreen && classNameOverrides.fullscreen,
+                    isFullScreenActive && 'fixed z-[53] duration-0',
                 )}
             >
                 <div className={cn('flex flex-col border-b-[1px] border-delta-200 px-4', isMobile ? 'py-3' : 'py-4')}>

@@ -443,7 +443,7 @@ const PreviewOnlyItem = ({ title }: PreviewOnlyItemProps): JSX.Element => {
 
 const SaveStateLabelBlock = (): JSX.Element => {
     return (
-        <div className='inline-flex flex-col gap-4 rounded border border-dashed border-[#9747FF] p-4'>
+        <div className='inline-flex flex-col gap-4 rounded border border-dashed border-[#9747FF] p-4 w-fit'>
             {SAVE_STATE_ROWS.map((row) => {
                 return (
                     <div key={row.id} className='flex items-center gap-10'>
