@@ -23,24 +23,32 @@ const meta = {
         size: 'small',
         //@ts-expect-error it's unknown but for this case we know it's Film
         renderTags: (tagValue: Film[], getTagProps) =>
-            tagValue.map((option, index) => (
-                <StyledChip
-                    {...getTagProps({ index })}
-                    dataTest={`selected-chip-${option.title}`}
-                    label={option.title}
-                    variant='outlined'
-                />
-            )),
+            tagValue.map((option, index) => {
+                const { key, ...props } = getTagProps({ index })
+
+                return (
+                    <StyledChip
+                        {...props}
+                        key={key}
+                        dataTest={`selected-chip-${option.title}`}
+                        label={option.title}
+                        variant='outlined'
+                    />
+                )
+            }),
     },
     argTypes: {
         autoHeight: { control: 'boolean' },
+        allowSelectAll: { control: 'boolean' },
         multiple: { control: 'boolean' },
+        selectAllLabel: { control: 'text' },
         size: { control: 'radio', options: ['small', 'medium'] },
     },
 } satisfies Meta<typeof StyledSelectAutocomplete>
 
 export default meta
 type Story = StoryObj<typeof StyledSelectAutocomplete<Film, true, false, false>>
+type SingleStory = StoryObj<typeof StyledSelectAutocomplete<Film, false, false, false>>
 
 const getAutocomplete = (canvasElement: HTMLElement) => {
     const canvas = within(canvasElement.ownerDocument.body)
@@ -71,6 +79,42 @@ export const OpensOnClick: Story = {
 
         const listbox = await canvas.findByRole('listbox')
         await expect(listbox).toBeInTheDocument()
+    },
+}
+
+export const SingleSelectVariant: SingleStory = {
+    render: () => {
+        const singleSelectOptions = top100Films.slice(0, 3)
+
+        const Wrapper = () => {
+            const [value, setValue] = useState<Film | null>(null)
+
+            return (
+                <StyledSelectAutocomplete
+                    autoHeight
+                    dataTest='single-autocomplete'
+                    options={singleSelectOptions}
+                    size='small'
+                    value={value}
+                    onChange={(_, nextValue) => setValue(nextValue)}
+                    getOptionLabel={(option) => option.title}
+                    renderInput={(params) => (
+                        <StyledInputField {...params} dataTest='input' placeholder='Pick one film' />
+                    )}
+                />
+            )
+        }
+
+        return <Wrapper />
+    },
+    play: async ({ canvasElement, userEvent }) => {
+        const { canvas, input } = getAutocomplete(canvasElement)
+
+        await openAutocomplete(input, userEvent)
+        await selectOption(canvas, userEvent, 'The Godfather')
+
+        await expect(input).toHaveValue('The Godfather')
+        await expect(canvas.queryByTestId('single-autocomplete-select-all')).not.toBeInTheDocument()
     },
 }
 
@@ -116,6 +160,54 @@ export const StaysOpenOnSelect: Story = {
         await selectOption(canvas, userEvent, 'The Godfather')
 
         await expect(canvas.getByRole('listbox')).toBeInTheDocument()
+    },
+}
+
+export const SelectAllTogglesAllOptions: Story = {
+    args: {
+        allowSelectAll: true,
+        selectAllLabel: 'Select every film',
+    },
+    render: (args) => {
+        const selectAllOptions = top100Films.slice(0, 3)
+
+        const Wrapper = () => {
+            const [value, setValue] = useState<Film[]>([])
+
+            return (
+                <StyledSelectAutocomplete
+                    {...args}
+                    multiple
+                    disableCloseOnSelect
+                    options={selectAllOptions}
+                    value={value}
+                    onChange={(_, nextValue) => setValue(nextValue)}
+                    getOptionLabel={(option) => option.title}
+                    renderInput={(params) => <StyledInputField {...params} dataTest='input' placeholder='Favorites' />}
+                />
+            )
+        }
+
+        return <Wrapper />
+    },
+    play: async ({ canvasElement, userEvent }) => {
+        const { canvas, input } = getAutocomplete(canvasElement)
+
+        await openAutocomplete(input, userEvent)
+
+        const selectAllCheckbox = await canvas.findByRole('checkbox', { name: 'Select every film' })
+
+        await userEvent.click(selectAllCheckbox)
+
+        await expect(canvas.getByRole('button', { name: /The Shawshank Redemption/i })).toBeInTheDocument()
+        await expect(canvas.getByRole('button', { name: /The Godfather/i })).toBeInTheDocument()
+        await expect(canvas.getByRole('button', { name: /The Godfather: Part II/i })).toBeInTheDocument()
+
+        await userEvent.click(selectAllCheckbox)
+
+        await expect(canvas.queryByRole('button', { name: /The Shawshank Redemption/i })).not.toBeInTheDocument()
+        await expect(canvas.queryByRole('button', { name: /The Godfather/i })).not.toBeInTheDocument()
+        await expect(canvas.queryByRole('button', { name: /The Godfather: Part II/i })).not.toBeInTheDocument()
     },
 }
 
