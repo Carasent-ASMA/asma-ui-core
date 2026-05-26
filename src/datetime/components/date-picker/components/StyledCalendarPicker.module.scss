@@ -1,5 +1,15 @@
 .styled-calendar-day-picker {
     @apply font-roboto m-0 #{!important};
+    --rdp-day-width: 40px;
+    --rdp-day-height: 40px;
+    --rdp-day_button-width: 40px;
+    --rdp-day_button-height: 40px;
+    --rdp-week_number-width: 40px;
+    --rdp-week_number-height: 40px;
+    --rdp-nav-height: 32px;
+}
+
+.localeNb {
 }
 
 .months {
@@ -23,12 +33,8 @@
     color: var(--colors-gray-700);
 }
 
-.custom-caption {
-    text-transform: capitalize;
-}
-
 .nav {
-    @apply flex gap-[8px] items-center;
+    @apply hidden;
 }
 
 .nav_button {
@@ -49,19 +55,6 @@
     @apply flex text-[14px] leading-[20px];
 }
 
-.head_row > td:first-child {
-    @apply bg-delta-50 rounded-t-[4px];
-    &:after {
-        @apply content-['W'] h-[20px];
-    }
-}
-
-.locale-nb {
-    .head_row > td:first-child::after {
-        content: 'U';
-    }
-}
-
 .head_cell {
     @apply capitalize w-[40px] h-[40px] flex items-center justify-center font-normal;
     color: var(--colors-gray-600);
@@ -73,14 +66,6 @@
 
 .row {
     @apply flex w-full;
-}
-
-.row > td:first-child {
-    @apply bg-delta-50 w-[40px] text-delta-700 p-2 mr-1 flex items-center justify-center text-[14px] font-normal;
-}
-
-.row:last-child > td:first-child {
-    @apply rounded-b-[4px];
 }
 
 .cell {
@@ -113,18 +98,20 @@
 }
 
 .day_today {
-    @apply text-[16px] leading-[24px] bg-gama-50 font-bold text-delta-800 border-2 border-gama-400 hover:bg-gama-100 #{!important};
+    .day {
+        @apply text-[16px] leading-[24px] bg-gama-50 font-bold text-delta-800 border-2 border-gama-400 hover:bg-gama-100 #{!important};
 
-    &:hover {
-        @apply bg-gama-100 #{!important};
+        &:hover {
+            @apply bg-gama-100 #{!important};
+        }
     }
 
-    &.day_selected {
+    &.day_selected .day {
         @apply bg-gama-500 #{!important};
     }
 
-    &.day_selected.rdp-day_range_end {
-        @apply bg-gama-500 text-white #{!important};
+    &.day_selected .day {
+        @apply text-white #{!important};
     }
 }
 
@@ -133,12 +120,24 @@
     outline: 2px solid white #{!important};
     outline-offset: -4px #{!important};
 
+    .day {
+        @apply bg-gama-500 text-white #{!important};
+
+        &:hover {
+            @apply bg-gama-600 text-white #{!important};
+        }
+    }
+
     &:hover {
         @apply bg-gama-600 text-white #{!important};
     }
 
     &.day_selected.rdp-day_range_end.day_outside {
         @apply bg-gama-600 text-white #{!important};
+
+        .day {
+            @apply bg-gama-600 text-white #{!important};
+        }
     }
 
     &.day_range_middle {
@@ -147,11 +146,21 @@
 }
 
 .day_outside {
-    @apply text-delta-600 font-normal;
+    .day {
+        @apply text-delta-600 font-normal;
+    }
 }
 
 .day_disabled {
-    @apply text-delta-300 font-normal cursor-not-allowed  #{!important};
+    .day {
+        @apply text-delta-300 font-normal cursor-not-allowed  #{!important};
+    }
+}
+
+.day_range_middle {
+    .day {
+        @apply bg-gama-50 text-delta-800 rounded-none border-none outline-none shadow-none hover:bg-gama-100 #{!important};
+    }
 }
 
 .day_hidden {
@@ -159,7 +168,15 @@
 }
 
 .weeknumber {
-    @apply flex items-end justify-center absolute top-[11.3px];
+    @apply bg-delta-50 w-[40px] mr-1 text-delta-700 font-normal text-[14px] p-2 text-center align-middle;
+}
+
+.weeknumber-header {
+    @apply bg-delta-50 w-[40px] h-[40px] mr-1 text-gray-600 text-[14px] leading-[20px] font-normal text-center align-middle rounded-t-[4px] flex items-center justify-center;
+}
+
+.row:last-child .weeknumber {
+    @apply rounded-b-[4px];
 }
 
 .caption_end {
@@ -167,7 +184,7 @@
         @apply hidden;
     }
 
-    & .custom-caption {
+    & :global(.rdp-custom-caption) {
         @apply opacity-0 pointer-events-none;
     }
 }
