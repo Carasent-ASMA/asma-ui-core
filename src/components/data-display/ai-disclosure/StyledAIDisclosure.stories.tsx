@@ -1,13 +1,12 @@
 import type { Meta } from '@storybook/react-vite'
+import type { ReactNode } from 'react'
 
 import ChevronDownIcon from 'src/components/custom/widget/icons/ChevronDownIcon'
+import { InfoOutlineIcon } from 'src/components/icons'
 import { StyledTooltip } from 'src/components/data-display/tooltip'
 
 import { StyledAIDisclosure } from '.'
 import styles from './StyledAIDisclosure.module.scss'
-
-import { InfoOutlineIcon } from 'node_modules/asma-ui-icons/dist'
-import type { ReactNode } from 'node_modules/@types/react'
 
 const TOOLTIP = 'Error message reworded for clarity. Meaning unchanged.'
 

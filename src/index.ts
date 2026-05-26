@@ -35,6 +35,7 @@ export * from './components/inputs/dynamic-select'
 // pickers
 export * from './datetime/components/date-picker'
 export * from './datetime/components/time-picker'
+export * from './datetime/helpers/date.helper'
 
 // miscellaneous
 export * from './components/miscellaneous/StyledFormControl'

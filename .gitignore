@@ -35,3 +35,7 @@ dist
 configs/env.ts
 
 .eslintcache
+.lint-exit.txt
+.lint-output.txt
+.storybook-exit.txt
+.storybook-output.txt

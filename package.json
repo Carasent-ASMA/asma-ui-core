@@ -18,21 +18,27 @@
     "keywords": [],
     "author": "asma-team",
     "types": "./dist/index.d.ts",
-    "main": "./dist/asma-ui-core.es.js",
-    "module": "./dist/asma-ui-core.es.js",
+    "typesVersions": {
+        "*": {
+            "icons": ["dist/src/components/icons/index.d.ts"],
+            "icons/*": ["dist/src/components/icons/*/index.d.ts"]
+        }
+    },
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
     "exports": {
         ".": {
             "types": "./dist/index.d.ts",
-            "import": "./dist/asma-ui-core.es.js",
-            "default": "./dist/asma-ui-core.es.js"
+            "import": "./dist/index.js",
+            "default": "./dist/index.js"
         },
         "./icons": {
-            "types": "./dist/index.d.ts",
-            "default": "./dist/icons/index.js"
+            "types": "./dist/src/components/icons/index.d.ts",
+            "default": "./dist/components/icons/index.js"
         },
         "./icons/*": {
-            "types": "./dist/index.d.ts",
-            "default": "./dist/icons/*/index.js"
+            "types": "./dist/src/components/icons/*/index.d.ts",
+            "default": "./dist/components/icons/*/index.js"
         },
         "./dist/style.css": "./dist/style.css",
         "./tw-configs/twConfigs.json": "./tw-configs/twConfigs.json",
@@ -97,11 +103,10 @@
         "@storybook/test-runner": "^0.24.3",
         "@types/lodash-es": "^4.17.7",
         "@types/node": "^24.12.4",
-        "@types/react": "^18.0.37",
-        "@types/react-dom": "^18.0.11",
+        "@types/react": "^18.3.23",
+        "@types/react-dom": "^18.3.1",
         "@vitejs/plugin-react": "^6.0.1",
         "@vitest/browser-playwright": "^4.0.16",
-        "asma-ui-icons": "^0.3.7",
         "autoprefixer": "^10.4.27",
         "axe-playwright": "^1.2.3",
         "chromatic": "^13.3.4",
@@ -114,10 +119,9 @@
         "eslint-plugin-react-you-might-not-need-an-effect": "^0.7.0",
         "eslint-plugin-regexp": "^2.10.0",
         "eslint-plugin-storybook": "10.3.3",
-        "notistack": "^3.0.2",
         "playwright": "^1.57.0",
-        "react": "^18.2.0",
-        "react-dom": "^18.2.0",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
         "react-quill": "^2.0.0",
         "rollup-plugin-typescript2": "^0.35.0",
         "storybook-addon-themes": "^6.1.0",

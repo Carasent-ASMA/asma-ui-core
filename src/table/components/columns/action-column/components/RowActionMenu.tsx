@@ -22,8 +22,7 @@ export function RowActionMenu<TData>({
     const { anchorEl, open, handleClose, handleOpen } = useToggleMenuVisibility()
     const allActions = actions(tableData.row)
     const state = rowActionsState?.(tableData.row) ?? { state: 'enabled' as const }
-    const meta = tableData.table.options.meta as { locale?: 'en' | 'no' } | undefined
-    const locale = meta?.locale
+    const locale = tableData.table.options.meta?.locale
     const noActionsLabel = locale === 'no' ? 'Ingen handlinger tilgjengelig' : 'No actions available'
 
     const allHidden = useMemo(() => {

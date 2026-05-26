@@ -1,7 +1,7 @@
 import React, { useMemo, useState, type ReactNode } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent } from 'storybook/test'
-import { EditSquareIcon } from 'asma-ui-icons'
+import { EditSquareIcon } from 'src/components/icons'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { MinimizableDialogV2 } from '../v2'
 import { StyledDialogActions, StyledDialogContent } from '../../dialog'

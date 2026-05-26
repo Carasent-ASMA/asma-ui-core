@@ -4,7 +4,7 @@ import type { DialogProps } from '@mui/material/Dialog'
 import { StyledButton } from '../../inputs/button/StyledButton'
 import type { ReactNode } from 'react'
 import style from './StyledDialog.module.scss'
-import { CloseIcon } from 'asma-ui-icons'
+import { CloseIcon } from 'src/components/icons'
 import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
 
 export interface IStyledDialogProps extends DialogProps {

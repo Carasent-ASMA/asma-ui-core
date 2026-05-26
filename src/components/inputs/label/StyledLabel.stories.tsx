@@ -6,7 +6,7 @@ import {
     SaveIcon,
     VisibilityOutlineIcon,
     WarningAmberOutlineIcon,
-} from 'asma-ui-icons'
+} from 'src/components/icons'
 
 import { StyledButton } from '../../inputs/button'
 import { StyledLabel } from './StyledLabel'

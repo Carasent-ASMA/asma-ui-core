@@ -1,7 +1,7 @@
 import React, { useMemo, useState, type ReactNode } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, screen, userEvent, waitForElementToBeRemoved } from 'storybook/test'
-import { EditSquareIcon } from 'asma-ui-icons'
+import { EditSquareIcon } from 'src/components/icons'
 import { StyledButton } from '../../../inputs/button/StyledButton'
 import { StyledDialog } from '../StyledDialog'
 import { StyledDialogActions } from '../StyledDialogActions'

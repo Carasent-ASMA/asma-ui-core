@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { FilterIcon } from 'asma-ui-icons'
+import { FilterIcon } from 'src/components/icons'
 import { StyledButton } from 'src/components/inputs/button'
 import { expect, waitFor, within } from 'storybook/test'
 import { StyledTooltip } from './StyledTooltip'

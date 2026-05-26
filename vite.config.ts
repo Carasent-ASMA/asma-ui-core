@@ -1,5 +1,5 @@
-import { readdirSync } from 'node:fs'
-import { dirname, posix, resolve } from 'node:path'
+import { readFileSync, readdirSync } from 'node:fs'
+import { relative, resolve } from 'node:path'
 import react from '@vitejs/plugin-react'
 /// <reference types="vitest/config" />
 import { defineConfig } from 'vitest/config'
@@ -10,13 +10,13 @@ import { fileURLToPath } from 'node:url'
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin'
 import { playwright } from '@vitest/browser-playwright'
 
-type AssetEmitterContext = {
+interface AssetEmitterContext {
     emitFile: (file: { type: 'asset'; fileName: string; source: string }) => void
 }
 
 const externalPackages = new Set([
     ...Object.keys(packageJson.peerDependencies ?? {}),
-    'notistack',
+    ...Object.keys(packageJson.dependencies ?? {}),
     'react/jsx-runtime',
     'react/jsx-dev-runtime',
 ])
@@ -41,12 +41,10 @@ const collectIconDirectoryNames = (directory: string): string[] => {
         .sort()
 }
 
-const createCompatibilityWrapper = (fromFileName: string): string => {
-    const relativeMainBundlePath = posix.relative(dirname(fromFileName), 'asma-ui-core.es.js')
+const createJavascriptWrapperSource = (indexFilePath: string): string => {
+    const source = readFileSync(indexFilePath, 'utf8')
 
-    return `export * from "${
-        relativeMainBundlePath.startsWith('.') ? relativeMainBundlePath : `./${relativeMainBundlePath}`
-    }";\n`
+    return source.replace(/from\s+(['"])(\.\/[^'"]+)\1/g, 'from $1$2.js$1')
 }
 
 const emitIconCompatibilityAssets = () => ({
@@ -60,17 +58,17 @@ const emitIconCompatibilityAssets = () => ({
 
         this.emitFile({
             type: 'asset',
-            fileName: 'icons/index.js',
-            source: createCompatibilityWrapper('icons/index.js'),
+            fileName: 'components/icons/index.js',
+            source: createJavascriptWrapperSource(resolve(iconsSourceDirectory, 'index.ts')),
         })
 
         for (const iconDirectoryName of collectIconDirectoryNames(iconsSourceDirectory)) {
-            const fileName = `icons/${iconDirectoryName}/index.js`
+            const iconIndexFilePath = resolve(iconsSourceDirectory, iconDirectoryName, 'index.ts')
 
             this.emitFile({
                 type: 'asset',
-                fileName,
-                source: createCompatibilityWrapper(fileName),
+                fileName: relative(resolve('src'), iconIndexFilePath).replace(/\.ts$/, '.js'),
+                source: createJavascriptWrapperSource(iconIndexFilePath),
             })
         }
     },
@@ -107,12 +105,15 @@ export default defineConfig({
             external: isExternalPackage,
             plugins: [emitIconCompatibilityAssets()],
             output: {
+                entryFileNames: '[name].js',
                 globals: {
                     react: 'React',
                     'react/jsx-runtime': 'react/jsx-runtime',
                     'react/jsx-dev-runtime': 'react/jsx-dev-runtime',
                     'react-dom': 'ReactDOM',
                 },
+                preserveModules: true,
+                preserveModulesRoot: 'src',
             },
         },
     },
