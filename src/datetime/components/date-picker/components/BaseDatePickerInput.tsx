@@ -64,16 +64,18 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
 
     const { validationError, handleValidation, errHelperText, clearValidation } = useDatePickerValidation()
     const { maskRef } = useDatePickerMask()
-    const selectedValue = selected ? getValue(selected, dateFormat) : ''
-    const [value, setValue] = useState(selectedValue)
-    const [isDirty, setIsDirty] = useState(false)
+    const [value, setValue] = useState(selected ? getValue(selected, dateFormat) : '')
 
     const defaultHelper = locale?.code?.startsWith('nb') ? 'DD/MM/ÅÅÅÅ' : 'DD/MM/YYYY'
     const effectiveDefaultHelper = hideDefaultHelperText ? undefined : defaultHelper
 
     const hasError = !!(validationError || error)
     const rawText = hasError ? (errorText ?? errHelperText) : helperText ?? effectiveDefaultHelper
-    const inputValue = isDirty ? value : selectedValue
+
+    useEffect(() => {
+        setValue(selected ? getValue(selected, dateFormat) : '')
+    }, [selected, dateFormat])
+
 
     useEffect(() => {
         if (!selected) {
@@ -103,13 +105,12 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
         clearValidation,
     ])
 
-    const digits = inputValue.replace(/\D/g, '')
+    const digits = value.replace(/\D/g, '')
     const hasDigits = digits.length > 0
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const raw = e.target.value
         const onlyDigits = raw.replace(/\D/g, '')
-        setIsDirty(true)
         setValue(onlyDigits.length ? raw : '')
     }
 
@@ -139,9 +140,8 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
     ])
 
     const handleBlur = () => {
-        const nextValue = isDirty ? value : selectedValue
         const isErrorNow = handleValidation({
-            value: nextValue,
+            value,
             disabledDays,
             localeCode: locale?.code,
             disallowPast,
@@ -151,16 +151,13 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
         })
         if (isErrorNow) return
 
-        const onlyDigits = nextValue.replace(/\D/g, '')
+        const onlyDigits = value.replace(/\D/g, '')
         if (!onlyDigits.length) {
-            setIsDirty(false)
-            setValue('')
             onInputChange?.(undefined)
             return
         }
 
-        const parsed = parse(nextValue, 'dd/MM/yyyy', new Date())
-        setIsDirty(false)
+        const parsed = parse(value, 'dd/MM/yyyy', new Date())
         onInputChange?.(isValidDateFns(parsed) ? parsed : undefined)
     }
 
@@ -184,7 +181,7 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
                             inputRef={!readOnly ? maskRef : undefined}
                             placeholder={!readOnly && !hasDigits ? '  /  /    ' : undefined}
                             size='small'
-                            value={readOnly ? inputValue.replaceAll('/', '.') : inputValue}
+                            value={readOnly ? value.replaceAll('/', '.') : value}
                             className={inputClassName}
                             style={{ width }}
                             error={hasError}

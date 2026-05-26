@@ -1,7 +1,6 @@
 import type { MonthCaptionProps } from 'react-day-picker'
 import { StyledButton } from 'src/datetime/shared-components/button'
 import { CloseIcon } from 'src/datetime/shared-components/CloseIcon'
-import styles from './StyledCalendarPicker.module.scss'
 
 export function CustomCaption(
     props: MonthCaptionProps & {
@@ -14,7 +13,7 @@ export function CustomCaption(
     return (
         <div
             {...divProps}
-            className={styles['custom-caption']}
+            className='rdp-custom-caption capitalize'
             style={{
                 ...divProps.style,
                 display: 'flex',
