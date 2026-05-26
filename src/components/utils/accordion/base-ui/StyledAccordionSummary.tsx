@@ -34,7 +34,13 @@ export const StyledAccordionSummary = ({
 
     return (
         <Accordion.Header className={clsx(styles['Header'], headerClassName)}>
-            <Accordion.Trigger {...rest} className={clsx(styles['Trigger'], className)} style={styleVars}>
+            <Accordion.Trigger
+                {...rest}
+                nativeButton={false}
+                render={<div />}
+                className={clsx(styles['Trigger'], className)}
+                style={styleVars}
+            >
                 {expandChevronRight ? (
                     <>
                         {children}

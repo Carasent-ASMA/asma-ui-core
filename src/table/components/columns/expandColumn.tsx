@@ -11,7 +11,7 @@ export function generateExpandColumn<TData>(isFixed: boolean, rowHeight?: number
         enableHiding: false,
         enableSorting: false,
         header: () => null,
-        cell: ({ cell }: CellContext<TData, TData>) => {
+        cell: ({ cell }: CellContext<TData, unknown>) => {
             const isExpanded = cell.row.getIsExpanded()
             const canExpand = cell.row.getCanExpand()
             return canExpand ? (

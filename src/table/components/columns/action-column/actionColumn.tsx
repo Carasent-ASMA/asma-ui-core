@@ -7,7 +7,7 @@ import { ACTIONS_COLUMN_ID, type ColumnDef, type IAction, type ICustomAction, ty
 export function generateActionsColumn<TData>(options: {
     headerPin: boolean
     actions?: (row: Row<TData>) => (IAction<TData> | ICustomAction<TData>)[]
-    customActionsNode?: (row: CellContext<TData, TData>) => ReactNode
+    customActionsNode?: (row: CellContext<TData, unknown>) => ReactNode
     rowHeight?: number
     customActionsColumnProps?: Partial<ColumnDef<TData, unknown>>
     rowActionsState?: (row: Row<TData>) => RowActionsState | undefined
@@ -23,10 +23,10 @@ export function generateActionsColumn<TData>(options: {
         accessorFn: (row: TData) => {
             return row
         },
-        header: (props: HeaderContext<TData, TData>) => {
+        header: (props: HeaderContext<TData, unknown>) => {
             return headerPin ? <HeaderActionMenu headerData={props} locale={locale} /> : null
         },
-        cell: (cell: CellContext<TData, TData>) =>
+        cell: (cell: CellContext<TData, unknown>) =>
             actions || customActionsNode ? (
                 <div
                     className={'flex items-center justify-end gap-x-1'}
