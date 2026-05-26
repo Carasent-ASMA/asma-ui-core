@@ -1,10 +1,43 @@
-import { Icon } from '@iconify/react'
-import { Autocomplete, Paper, type AutocompleteProps, type ChipTypeMap } from '@mui/material'
+import { Autocomplete, Paper, type AutocompleteProps, type ChipTypeMap, type SxProps, type Theme } from '@mui/material'
 import clsx from 'clsx'
 import { useLayoutEffect, useRef, useState } from 'react'
+import { StyledCheckbox } from 'src'
+import { StyledChip } from '../../data-display/chip'
 import { cn } from 'src/helpers/cn'
-import { CloseIcon } from 'src/components/icons'
+import { CloseIcon, CheckIcon, ChevronDownIcon, PlusIconCircle } from 'src/components/icons'
 import style from './StyledSelectAutocomplete.module.scss'
+
+type StyledSelectAutocompleteMultipleValue<
+    T,
+    DisableClearable extends boolean | undefined,
+    FreeSolo extends boolean | undefined,
+    ChipComponent extends React.ElementType,
+> = NonNullable<AutocompleteProps<T, true, DisableClearable, FreeSolo, ChipComponent>['value']>
+
+type StyledSelectAutocompleteBaseProps<
+    T,
+    Multiple extends boolean | undefined,
+    DisableClearable extends boolean | undefined,
+    FreeSolo extends boolean | undefined,
+    ChipComponent extends React.ElementType,
+> = Omit<AutocompleteProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent>, 'multiple'> & {
+    dataTest: string
+    autoHeight?: boolean
+    getOptionLabel?: (option: T) => string
+    wrapperClassName?: string
+}
+
+type StyledSelectAutocompleteConditionalProps<Multiple extends boolean | undefined> = Multiple extends true
+    ? {
+          multiple: true
+          allowSelectAll?: boolean
+          selectAllLabel?: string
+      }
+    : {
+          multiple?: Multiple
+          allowSelectAll?: never
+          selectAllLabel?: never
+      }
 
 export type StyledSelectAutocompleteProps<
     T,
@@ -15,12 +48,8 @@ export type StyledSelectAutocompleteProps<
     // FreeSolo extends boolean | undefined = false,
     FreeSolo extends boolean | undefined,
     ChipComponent extends React.ElementType = ChipTypeMap['defaultComponent'],
-> = AutocompleteProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent> & {
-    dataTest: string
-    autoHeight?: boolean
-    getOptionLabel?: (option: T) => string
-    wrapperClassName?: string
-}
+> = StyledSelectAutocompleteBaseProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent> &
+    StyledSelectAutocompleteConditionalProps<Multiple>
 
 /**
  *
@@ -39,10 +68,42 @@ export function StyledSelectAutocomplete<
     autoHeight,
     getOptionLabel,
     wrapperClassName,
+    multiple,
+    allowSelectAll,
+    selectAllLabel,
+    className,
+    defaultValue,
+    isOptionEqualToValue,
+    ListboxProps,
+    onChange,
+    options,
+    popupIcon,
+    readOnly,
+    renderOption,
+    renderTags,
+    sx,
+    value,
     ...props
 }: StyledSelectAutocompleteProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent>): JSX.Element {
     const [maxHeight, setMaxHeight] = useState<number | 'auto'>('auto')
     const selectRef = useRef<HTMLDivElement>(null)
+    const shouldShowSelectAll = multiple === true && allowSelectAll === true && !readOnly
+    const isControlled = value !== undefined
+
+    type AutocompleteOnChange = NonNullable<
+        StyledSelectAutocompleteBaseProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent>['onChange']
+    >
+    type AutocompleteOnChangeParameters = Parameters<AutocompleteOnChange>
+    type MultipleValue = StyledSelectAutocompleteMultipleValue<T, DisableClearable, FreeSolo, ChipComponent>
+    type AutocompleteRenderTags = NonNullable<
+        StyledSelectAutocompleteBaseProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent>['renderTags']
+    >
+
+    const getMultipleValue = (candidate: unknown): MultipleValue => {
+        return (Array.isArray(candidate) ? candidate : []) as MultipleValue
+    }
+
+    const [uncontrolledValue, setUncontrolledValue] = useState<MultipleValue>(() => getMultipleValue(defaultValue))
 
     useLayoutEffect(() => {
         if (!autoHeight) return
@@ -60,9 +121,9 @@ export function StyledSelectAutocomplete<
               style: {
                   maxHeight: maxHeight === 'auto' ? 'auto' : `${maxHeight}px`,
               },
-              ...props.ListboxProps,
+              ...ListboxProps,
           }
-        : props.ListboxProps
+        : ListboxProps
 
     const defaultGetOptionLabel = (option: T) => {
         if (typeof option === 'object' && option !== null && 'label' in option) {
@@ -71,33 +132,126 @@ export function StyledSelectAutocomplete<
         return String(option)
     }
 
+    const isOptionDisabled = (option: T): boolean => {
+        return typeof option === 'object' && option !== null && 'disabled' in option && Boolean(option.disabled)
+    }
+
+    const defaultListboxSx = {
+        padding: 0,
+        '& .MuiAutocomplete-option': {
+            paddingLeft: multiple ? '12px !important' : '6px !important',
+        },
+    }
+
+    const listboxSx: SxProps<Theme> = listboxProps?.sx
+        ? ([defaultListboxSx, listboxProps.sx] as SxProps<Theme>)
+        : defaultListboxSx
+
+    const currentMultipleValue = shouldShowSelectAll ? getMultipleValue(isControlled ? value : uncontrolledValue) : []
+    const selectableOptions = shouldShowSelectAll ? options.filter((option) => !isOptionDisabled(option)) : options
+
+    const isOptionSelected = (option: T, selectedOption: unknown): boolean => {
+        const optionIsObject = typeof option === 'object' && option !== null
+        const selectedOptionIsObject = typeof selectedOption === 'object' && selectedOption !== null
+
+        if (optionIsObject !== selectedOptionIsObject) {
+            return false
+        }
+
+        if (!optionIsObject && typeof option !== typeof selectedOption) {
+            return false
+        }
+
+        if (isOptionEqualToValue) {
+            return isOptionEqualToValue(option, selectedOption as T)
+        }
+
+        return option === selectedOption
+    }
+
+    const selectedOptionCount = shouldShowSelectAll
+        ? selectableOptions.filter((option) =>
+              currentMultipleValue.some((selectedOption) => isOptionSelected(option, selectedOption)),
+          ).length
+        : 0
+
+    const allOptionsSelected =
+        shouldShowSelectAll && selectableOptions.length > 0 && selectedOptionCount === selectableOptions.length
+
+    const someOptionsSelected = shouldShowSelectAll && selectedOptionCount > 0 && !allOptionsSelected
+
+    const handleChange: AutocompleteOnChange = (event, nextValue, reason, details) => {
+        if (shouldShowSelectAll && !isControlled) {
+            setUncontrolledValue(getMultipleValue(nextValue))
+        }
+
+        onChange?.(event, nextValue, reason, details)
+    }
+    const handleSelectAllChange = (_event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
+        const nextValue = (checked ? [...selectableOptions] : []) as MultipleValue
+
+        handleChange(
+            _event,
+            nextValue as AutocompleteOnChangeParameters[1],
+            checked ? 'selectOption' : 'clear',
+            undefined,
+        )
+    }
+
+    const defaultRenderTags: AutocompleteRenderTags = (tagValue, getTagProps) => {
+        return tagValue.map((option, index) => {
+            const tagProps = getTagProps({ index })
+            const chipProps: Omit<typeof tagProps, 'key'> = tagProps
+            const optionLabel = getOptionLabel?.(option) ?? defaultGetOptionLabel(option)
+
+            return (
+                <StyledChip
+                    {...chipProps}
+                    key={`selected-chip-${optionLabel}-${index}`}
+                    dataTest={`selected-chip-${optionLabel}`}
+                    label={optionLabel}
+                    variant='outlined'
+                />
+            )
+        })
+    }
+
     return (
         <div className={cn(style['styledSelectAutocompleteWrapper'], wrapperClassName)} ref={selectRef}>
             <Autocomplete
                 {...props}
+                multiple={multiple as Multiple}
+                defaultValue={shouldShowSelectAll ? undefined : defaultValue}
                 getOptionLabel={getOptionLabel}
+                isOptionEqualToValue={isOptionEqualToValue}
                 ListboxProps={{
                     ...listboxProps,
-                    sx: {
-                        '& .MuiAutocomplete-option': {
-                            paddingLeft: '6px !important',
-                        },
-                    },
+                    sx: listboxSx,
                 }}
-                className={clsx('!text-sm', props.className)}
+                className={clsx('!text-sm', className)}
+                onChange={handleChange}
+                options={options}
+                renderTags={renderTags ?? (multiple ? defaultRenderTags : undefined)}
                 popupIcon={
-                    props.readOnly
-                        ? null
-                        : props.popupIcon ?? (
-                              <Icon
-                                  icon='material-symbols:expand-more-rounded'
-                                  width={24}
-                                  height={24}
-                                  className={clsx(style['select-custom-icon'])}
-                              />
-                          )
+                    readOnly ? null : (popupIcon ?? multiple) ? (
+                        <PlusIconCircle width={24} height={24} />
+                    ) : (
+                        <ChevronDownIcon width={24} height={24} className={clsx(style['select-custom-icon'])} />
+                    )
                 }
+                readOnly={readOnly}
                 data-testid={dataTest}
+                value={
+                    shouldShowSelectAll
+                        ? (currentMultipleValue as AutocompleteProps<
+                              T,
+                              Multiple,
+                              DisableClearable,
+                              FreeSolo,
+                              ChipComponent
+                          >['value'])
+                        : value
+                }
                 PaperComponent={({ children }) => (
                     <Paper
                         data-testid={`paper-${dataTest}`}
@@ -115,41 +269,75 @@ export function StyledSelectAutocomplete<
                             },
                         }}
                     >
+                        {shouldShowSelectAll && selectableOptions.length > 0 && (
+                            <div
+                                className='flex items-center gap-x-[10px] border-[1px] border-b border-solid border-delta-200 bg-delta-50 py-2 pl-3 text-xs'
+                                onMouseDown={(e) => e.preventDefault()}
+                                role='presentation'
+                            >
+                                <StyledCheckbox
+                                    size='small'
+                                    dataTest={`${dataTest}-select-all`}
+                                    checked={allOptionsSelected}
+                                    indeterminate={someOptionsSelected}
+                                    hideWrapper
+                                    onChange={handleSelectAllChange}
+                                    aria-label={selectAllLabel ?? 'Select all'}
+                                />
+                                <span className='truncate text-[10px] font-semibold uppercase text-delta-600'>
+                                    {selectAllLabel ?? 'Select all'}
+                                </span>
+                            </div>
+                        )}
                         {children}
                     </Paper>
                 )}
                 renderOption={
-                    props?.renderOption ??
-                    ((props, option, { selected }) => (
-                        <li {...props}>
-                            <span
-                                style={{
-                                    width: '24px',
-                                    height: '22px',
-                                    paddingRight: '4px',
-                                    justifyContent: 'center',
-                                    alignContent: 'center',
-                                    display: 'flex',
-                                }}
-                            >
-                                {selected && (
-                                    <Icon
-                                        icon='mdi:tick'
-                                        width={20}
-                                        height={20}
-                                        style={{ color: 'var(--colors-gama-500)' }}
-                                    />
-                                )}
-                            </span>
+                    renderOption ??
+                    ((props, option, { selected }) => {
+                        const rest: Omit<typeof props, 'key'> = props
+                        const optionKey = props.id ?? defaultGetOptionLabel(option)
 
-                            <span className='flex-1 truncate text-sm'>
-                                {getOptionLabel?.(option) ?? defaultGetOptionLabel(option)}
-                            </span>
-                        </li>
-                    ))
+                        if (multiple) {
+                            return (
+                                <li
+                                    {...rest}
+                                    key={optionKey}
+                                    className={cn(
+                                        props.className,
+                                        'flex items-center gap-x-[10px] border-0 border-b border-solid border-delta-200',
+                                    )}
+                                >
+                                    <StyledCheckbox
+                                        dataTest={`${dataTest}-${defaultGetOptionLabel(option)}-checkbox`}
+                                        checked={selected}
+                                        size='small'
+                                        hideWrapper
+                                    />
+                                    <span className='flex-1 truncate py-2 text-sm text-delta-700'>
+                                        {getOptionLabel?.(option) ?? defaultGetOptionLabel(option)}
+                                    </span>
+                                </li>
+                            )
+                        }
+
+                        return (
+                            <li {...rest} key={optionKey} className={cn(props.className, 'flex items-center gap-x-1')}>
+                                <span className='w-5'>
+                                    {selected && (
+                                        <CheckIcon width={20} height={20} style={{ color: 'var(--colors-gama-500)' }} />
+                                    )}
+                                </span>
+
+                                <span className='flex-1 truncate py-2 text-sm text-delta-700'>
+                                    {getOptionLabel?.(option) ?? defaultGetOptionLabel(option)}
+                                </span>
+                            </li>
+                        )
+                    })
                 }
                 sx={{
-                    ...props.sx,
+                    ...sx,
                     '& .MuiOutlinedInput-notchedOutline': {
                         borderColor: 'var(--colors-gama-500) !important',
                     },
