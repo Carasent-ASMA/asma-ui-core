@@ -12,10 +12,10 @@ export const useWrap = ({ dependencyList = [] }: { dependencyList?: DependencyLi
             const chips = Array.from(container.children) as HTMLElement[]
 
             const hasOversizedChip = chips.some((chip) => {
-                const label = chip.querySelector('.MuiChip-label') as HTMLElement | null
+                const label = chip.querySelector('.MuiChip-label')
                 if (!label) return false
 
-                const root = chip.querySelector('.MuiButtonBase-root') as HTMLElement | null
+                const root = chip.querySelector('.MuiButtonBase-root')
 
                 const isOverflowingWidth = label.scrollWidth > container.clientWidth
                 const isWrapped = root ? label.scrollHeight > root.clientHeight : false

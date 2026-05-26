@@ -23,6 +23,7 @@
         "jsx": "preserve",
         "module": "ESNext",
         "moduleResolution": "bundler",
+        "allowArbitraryExtensions": true,
         "allowSyntheticDefaultImports": true,
         "resolveJsonModule": true,
         "strictNullChecks": true,
@@ -41,5 +42,15 @@
         "useUnknownInCatchVariables": true
     },
     "exclude": ["dist", "node_modules"],
-    "include": ["src"]
+    "include": [
+        "tailwind.config.ts",
+        "tw-configs/**/*.json",
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "src/**/*.scss",
+        "**/*.module.scss",
+        "vite.config.ts",
+        "package.json",
+        "src/styles/**/*.json"
+    ]
 }

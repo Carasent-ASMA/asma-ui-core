@@ -1,0 +1,82 @@
+@mixin button($type, $color) {
+    border-color: transparent;
+    border-width: 1px;
+    border-style: solid;
+    &.#{$type}.#{$color} {
+        cursor: pointer;
+        border-radius: 4px;
+        border-width: 1px;
+        border-style: solid;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 300ms ease-in-out;
+        color: var(--colors-button-#{$type}-#{$color}-text-color) #{!important};
+        background-color: var(--colors-button-#{$type}-#{$color}-bg-color) #{!important};
+        border-color: var(--colors-button-#{$type}-#{$color}-border-color) #{!important};
+
+        &:active {
+            color: var(--colors-button-#{$type}-#{$color}-active-text-color) #{!important};
+            background-color: var(--colors-button-#{$type}-#{$color}-active-bg-color) #{!important};
+            border-color: var(--colors-button-#{$type}-#{$color}-active-border-color) #{!important};
+            outline: none #{!important};
+        }
+
+        &:hover {
+            color: var(--colors-button-#{$type}-#{$color}-hover-text-color) #{!important};
+            background-color: var(--colors-button-#{$type}-#{$color}-hover-bg-color) #{!important};
+            border-color: var(--colors-button-#{$type}-#{$color}-hover-border-color) #{!important};
+        }
+
+        &:focus {
+            outline-offset: -2px #{!important};
+            color: var(--colors-button-#{$type}-#{$color}-focused-text-color) #{!important};
+            background-color: var(--colors-button-#{$type}-#{$color}-focused-bg-color) #{!important};
+            outline: 2px solid var(--colors-button-#{$type}-#{$color}-focused-border-color) #{!important};
+            transition: none #{!important};
+            &.asma-core-ui-button.#{contained} {
+                box-shadow: inset 0 0 0 2px white;
+            }
+        }
+
+        &:disabled {
+            cursor: default;
+            color: var(--colors-button-#{$type}-#{$color}-disabled-text-color) #{!important};
+            background-color: var(--colors-button-#{$type}-#{$color}-disabled-bg-color) #{!important};
+            border-color: var(--colors-button-#{$type}-#{$color}-disabled-border-color) #{!important};
+        }
+    }
+
+    &.medium {
+        @apply h-[38px];
+        padding-left: 4px;
+        padding-right: 4px;
+    }
+    &.small {
+        @apply h-[32px];
+        padding-left: 4px;
+        padding-right: 4px;
+    }
+    &.large {
+        @apply h-[40px];
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+}
+
+.asma-core-ui-button {
+    @include button('contained', 'common');
+    @include button('contained', 'error');
+
+    @include button('outlined', 'common');
+    @include button('outlined', 'error');
+
+    @include button('text', 'common');
+    @include button('text', 'error');
+
+    @include button('textGray', 'common');
+
+    @include button('textWhite', 'common');
+}

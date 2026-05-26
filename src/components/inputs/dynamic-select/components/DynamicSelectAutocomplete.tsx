@@ -2,7 +2,7 @@ import { StyledCheckbox, StyledChip, StyledTooltip } from 'src'
 import { StyledInputField } from '../../input-field'
 import { StyledSelectAutocomplete } from '../../select-autocomplete'
 import type { StyledDynamicSelectProps, DynamicSelectOption, StyledDynamicSelectComponent } from '../types'
-import { LoadingIcon, PlusIconCircle, CheckIcon } from 'asma-ui-icons'
+import { LoadingIcon, PlusIconCircle, CheckIcon } from 'src/components/icons'
 import { DynamicInteractiveChipGroup } from './DynamicInteractiveChipGroup'
 import { forwardRef, useCallback, useState } from 'react'
 import { cn } from 'src/helpers/cn'
@@ -44,9 +44,9 @@ export const DynamicSelectAutocomplete = forwardRef(
 
         const getOptionLabel = (option: TOption | string) => {
             if (typeof option === 'object') {
-                return option?.[labelKey as keyof TOption]?.toString() || ''
+                return option?.[labelKey as keyof TOption]?.toString() ?? ''
             }
-            return option?.toString() || ''
+            return option?.toString() ?? ''
         }
 
         const getOptionValue = useCallback(
@@ -63,6 +63,20 @@ export const DynamicSelectAutocomplete = forwardRef(
             },
             [getOptionValue],
         )
+
+        const getOptionValueText = (option: TOption | null): string => {
+            const optionValue = getOptionValue(option)
+
+            if (optionValue == null) {
+                return ''
+            }
+
+            if (typeof optionValue === 'string' || typeof optionValue === 'number' || typeof optionValue === 'boolean') {
+                return String(optionValue)
+            }
+
+            return option == null ? '' : getOptionLabel(option)
+        }
 
         const handleOpen = useCallback(
             (event: React.SyntheticEvent) => {
@@ -91,7 +105,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                     onClose={handleClose}
                     disableCloseOnSelect={multiple}
                     dataTest={dataTest}
-                    disabled={disabled || loading}
+                    disabled={Boolean(disabled) || Boolean(loading)}
                     noOptionsText={noOptionsText}
                     loading={loading}
                     readOnly={readOnly}
@@ -103,7 +117,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                     classes={{
                         listbox: 'h-full max-h-[300px]',
                     }}
-                    getOptionLabel={getOptionLabel || autocompleteProps?.getOptionLabel}
+                    getOptionLabel={autocompleteProps?.getOptionLabel ?? getOptionLabel}
                     onChange={(_, value) => {
                         if (multiple) {
                             onChange(value as TOption[] | null)
@@ -116,23 +130,23 @@ export const DynamicSelectAutocomplete = forwardRef(
                     autoHeight
                     multiple={multiple}
                     renderTags={(tagValues) => {
-                        const limit = maxTags || options.length
+                        const limit = maxTags ?? options.length
                         const limitedTags = tagValues.slice(0, limit)
                         const remainingCount = tagValues.length - limit
                         return (
                             <div className='flex flex-wrap gap-2'>
                                 {limitedTags.map((option) => (
                                     <StyledChip
-                                        key={getOptionValue(option)?.toString()}
-                                        dataTest={`${getOptionValue(option)}-chip`}
+                                        key={getOptionValueText(option)}
+                                        dataTest={`${getOptionValueText(option)}-chip`}
                                         readOnly={readOnly}
                                         variant='outlined'
-                                        label={renderLabel ? renderLabel(option) : getOptionLabel(option) || ''}
+                                        label={renderLabel ? renderLabel(option) : getOptionLabel(option)}
                                         classes={{
                                             root: 'h-fit w-fit min-h-[32px]',
                                             label: 'block whitespace-normal',
                                         }}
-                                        disabled={disabled || loading}
+                                        disabled={Boolean(disabled) || Boolean(loading)}
                                         onDelete={() => {
                                             if (!multiple) {
                                                 onChange(null)
@@ -184,7 +198,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                                         <>
                                             <StyledCheckbox
                                                 disabled={disabled}
-                                                dataTest={`${getOptionValue(option)}-checkbox`}
+                                                dataTest={`${getOptionValueText(option)}-checkbox`}
                                                 size='small'
                                                 className='min-w-[36px]'
                                                 checked={isSelected}
@@ -245,7 +259,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                             {...params}
                             inputRef={ref}
                             error={error}
-                            helperText={disableHelperText ? '' : helperText || ' '}
+                            helperText={disableHelperText ? '' : (helperText ?? ' ')}
                             variant='outlined'
                             label=''
                             placeholder={placeholder}
@@ -254,7 +268,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                             autoComplete={typingDisabled ? 'off' : 'on'}
                             InputProps={{
                                 ...params.InputProps,
-                                startAdornment: startAdornment || params.InputProps.startAdornment,
+                                startAdornment: startAdornment ?? params.InputProps.startAdornment,
                                 style: typingDisabled ? { caretColor: 'transparent' } : {},
                             }}
                             inputProps={{

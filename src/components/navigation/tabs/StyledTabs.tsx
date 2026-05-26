@@ -6,6 +6,16 @@ type StyledTabsProps = TabsProps & {
     size?: 'default' | 'small'
 }
 
+type StyledTabsSx = Exclude<SxProps<Theme>, readonly unknown[]>
+
+function isSxArray(value: SxProps<Theme> | undefined): value is readonly StyledTabsSx[] {
+    return Array.isArray(value)
+}
+
+function isSingleSx(value: SxProps<Theme> | undefined): value is StyledTabsSx {
+    return value != null && !Array.isArray(value)
+}
+
 const defaultSx: SxProps<Theme> = {
     '& .MuiTabs-scroller': {
         borderBottom: '1px solid var(--colors-delta-200)',
@@ -64,11 +74,17 @@ const smallSx: SxProps<Theme> = {
  * Provides customized styling for tab indicators, scroll buttons, and inactive states.
  */
 export const StyledTabs: FC<StyledTabsProps> = ({ className, size = 'default', sx, ...props }) => {
-    const mergedSx: SxProps<Theme> = [
-        defaultSx,
-        ...(size === 'small' ? [smallSx] : []),
-        ...(sx ? (Array.isArray(sx) ? sx : [sx]) : []),
-    ]
+    const mergedSx: StyledTabsSx[] = [defaultSx]
+
+    if (size === 'small') {
+        mergedSx.push(smallSx)
+    }
+
+    if (isSxArray(sx)) {
+        mergedSx.push(...sx)
+    } else if (isSingleSx(sx)) {
+        mergedSx.push(sx)
+    }
 
     return (
         <Tabs

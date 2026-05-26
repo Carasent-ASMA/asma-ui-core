@@ -3,7 +3,7 @@ import type { DynamicSelectOption, StyledDynamicSelectComponent, StyledDynamicSe
 import { cn } from 'src/helpers/cn'
 import { useWrap } from '../helpers/useWrap'
 import { forwardRef } from 'react'
-import { CloseIcon } from 'asma-ui-icons'
+import { CloseIcon } from 'src/components/icons'
 
 export const DynamicInteractiveChipGroup = forwardRef(
     <TOption extends DynamicSelectOption>(
@@ -34,14 +34,28 @@ export const DynamicInteractiveChipGroup = forwardRef(
 
         const getOptionLabel = (option: TOption) => {
             if (typeof option === 'object') {
-                return option?.[labelKey as keyof TOption]?.toString() || ''
+                return option?.[labelKey as keyof TOption]?.toString() ?? ''
             }
-            return option?.toString() || ''
+            return option?.toString() ?? ''
         }
 
         const getOptionValue = (option: TOption | null) => {
             if (typeof option === 'object') return option?.[valueKey as keyof TOption]
             return option
+        }
+
+        const getOptionValueText = (option: TOption | null): string => {
+            const optionValue = getOptionValue(option)
+
+            if (optionValue == null) {
+                return ''
+            }
+
+            if (typeof optionValue === 'string' || typeof optionValue === 'number' || typeof optionValue === 'boolean') {
+                return String(optionValue)
+            }
+
+            return option == null ? '' : getOptionLabel(option)
         }
 
         const isOptionEqualToValue = (option: TOption | null, value: TOption | null): boolean => {
@@ -92,15 +106,13 @@ export const DynamicInteractiveChipGroup = forwardRef(
                     style={{ width: '100%' }}
                 >
                     {visibleOptions.map((o) => {
-                        const optionValue = getOptionValue(o)
-
                         return (
                             <StyledInteractiveChip
-                                key={String(optionValue)}
+                                key={getOptionValueText(o)}
                                 className='w-fit'
                                 readOnly={readOnly}
                                 type={multiple ? 'checkbox' : 'radio'}
-                                dataTest={`ic-${String(optionValue)}-hidden`}
+                                dataTest={`ic-${getOptionValueText(o)}-hidden`}
                                 label={renderLabel ? renderLabel(o) : getOptionLabel(o)}
                             />
                         )
@@ -116,8 +128,6 @@ export const DynamicInteractiveChipGroup = forwardRef(
                         </div>
                     ) : visibleOptions?.length ? (
                         visibleOptions.map((o, index) => {
-                            const optionValue = getOptionValue(o)
-
                             const checked = !!(multiple
                                 ? value?.find((v) => isOptionEqualToValue(v, o))
                                 : isOptionEqualToValue(value, o))
@@ -131,23 +141,23 @@ export const DynamicInteractiveChipGroup = forwardRef(
                                 !optionDisabled && !readOnly && index === firstActiveIndex ? ref : undefined
 
                             return (
-                                <StyledTooltip key={String(optionValue)} title={tooltipTitle} arrow>
+                                <StyledTooltip key={getOptionValueText(o)} title={tooltipTitle} arrow>
                                     <span className={cn(optionDisabled && 'cursor-not-allowed')}>
                                         {readOnly && !wrapDisabled ? (
                                             <StyledChip
                                                 ref={inputRef}
-                                                disabled={disabled || optionDisabled}
+                                                disabled={Boolean(disabled) || optionDisabled}
                                                 classes={{
                                                     root: 'min-h-[32px] h-full',
                                                 }}
                                                 className='w-fit text-sm'
-                                                dataTest={`ic-${String(optionValue)}`}
+                                                dataTest={`ic-${getOptionValueText(o)}`}
                                                 label={renderLabel ? renderLabel(o) : getOptionLabel(o)}
                                             />
                                         ) : (
                                             <StyledInteractiveChip
                                                 ref={inputRef}
-                                                disabled={disabled || optionDisabled}
+                                                disabled={Boolean(disabled) || optionDisabled}
                                                 classes={
                                                     wrapDisabled
                                                         ? {
@@ -161,7 +171,7 @@ export const DynamicInteractiveChipGroup = forwardRef(
                                                 className='w-fit text-sm'
                                                 readOnly={readOnly}
                                                 type={multiple ? 'checkbox' : 'radio'}
-                                                dataTest={`ic-${String(optionValue)}`}
+                                                dataTest={`ic-${getOptionValueText(o)}`}
                                                 checked={checked}
                                                 size={size}
                                                 onClick={() => handleClick(o)}
@@ -196,7 +206,7 @@ export const DynamicInteractiveChipGroup = forwardRef(
                 )}
                 <div className={cn('flex items-center gap-1 text-sm/5 text-delta-600', error && 'text-error-500')}>
                     {error && <ErrorOutlineIcon width={20} height={20} className='min-w-5' />}
-                    <span className='line-clamp-1'>{helperText || (error && !helperText && 'Required')}</span>
+                    <span className='line-clamp-1'>{helperText ?? (error ? 'Required' : undefined)}</span>
                 </div>
             </div>
         )

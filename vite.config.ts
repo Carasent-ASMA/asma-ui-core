@@ -1,7 +1,8 @@
-/// <reference types="vitest/config" />
-import { defineConfig } from 'vite'
+import { readFileSync, readdirSync } from 'node:fs'
+import { relative, resolve } from 'node:path'
 import react from '@vitejs/plugin-react'
-import { resolve } from 'node:path'
+/// <reference types="vitest/config" />
+import { defineConfig } from 'vitest/config'
 import dts from 'vite-plugin-dts'
 import * as packageJson from './package.json'
 import path from 'node:path'
@@ -9,9 +10,15 @@ import { fileURLToPath } from 'node:url'
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin'
 import { playwright } from '@vitest/browser-playwright'
 
+interface AssetEmitterContext {
+    emitFile: (file: { type: 'asset'; fileName: string; source: string }) => void
+}
+
 const externalPackages = new Set([
     ...Object.keys(packageJson.peerDependencies ?? {}),
-    ...Object.keys(packageJson.devDependencies ?? {}),
+    ...Object.keys(packageJson.dependencies ?? {}),
+    'react/jsx-runtime',
+    'react/jsx-dev-runtime',
 ])
 
 const isExternalPackage = (id: string) => {
@@ -24,9 +31,51 @@ const isExternalPackage = (id: string) => {
     return false
 }
 
-const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url))
+const iconsSourceDirectory = resolve('src', 'components', 'icons')
 
-// More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
+const collectIconDirectoryNames = (directory: string): string[] => {
+    return readdirSync(directory, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory())
+        .map((entry) => entry.name)
+        .filter((entryName) => readdirSync(resolve(directory, entryName)).includes('index.ts'))
+        .sort()
+}
+
+const createJavascriptWrapperSource = (indexFilePath: string): string => {
+    const source = readFileSync(indexFilePath, 'utf8')
+
+    return source.replace(/from\s+(['"])(\.\/[^'"]+)\1/g, 'from $1$2.js$1')
+}
+
+const emitIconCompatibilityAssets = () => ({
+    name: 'emit-icon-compatibility-assets',
+    generateBundle(this: AssetEmitterContext) {
+        this.emitFile({
+            type: 'asset',
+            fileName: 'style.css',
+            source: '@import "./asma-ui-core.css";\n',
+        })
+
+        this.emitFile({
+            type: 'asset',
+            fileName: 'components/icons/index.js',
+            source: createJavascriptWrapperSource(resolve(iconsSourceDirectory, 'index.ts')),
+        })
+
+        for (const iconDirectoryName of collectIconDirectoryNames(iconsSourceDirectory)) {
+            const iconIndexFilePath = resolve(iconsSourceDirectory, iconDirectoryName, 'index.ts')
+
+            this.emitFile({
+                type: 'asset',
+                fileName: relative(resolve('src'), iconIndexFilePath).replace(/\.ts$/, '.js'),
+                source: createJavascriptWrapperSource(iconIndexFilePath),
+            })
+        }
+    },
+})
+
+const currentDirectory = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url))
+
 export default defineConfig({
     plugins: [
         react({
@@ -39,19 +88,33 @@ export default defineConfig({
         }),
     ],
     resolve: {
-        tsconfigPaths: true,
+        alias: {
+            src: path.resolve(currentDirectory, 'src'),
+            'asma-ui-core': path.resolve(currentDirectory, 'src', 'index.ts'),
+        },
     },
     build: {
+        minify: 'esbuild',
         lib: {
             entry: resolve('src', 'index.ts'),
             name: 'asma-ui-core',
             formats: ['es'],
-            cssFileName: 'style',
             fileName: (format) => `asma-ui-core.${format}.js`,
         },
-        rolldownOptions: {
+        rollupOptions: {
             external: isExternalPackage,
-            output: { minify: true },
+            plugins: [emitIconCompatibilityAssets()],
+            output: {
+                entryFileNames: '[name].js',
+                globals: {
+                    react: 'React',
+                    'react/jsx-runtime': 'react/jsx-runtime',
+                    'react/jsx-dev-runtime': 'react/jsx-dev-runtime',
+                    'react-dom': 'ReactDOM',
+                },
+                preserveModules: true,
+                preserveModulesRoot: 'src',
+            },
         },
     },
     test: {
@@ -59,10 +122,8 @@ export default defineConfig({
             {
                 extends: true,
                 plugins: [
-                    // The plugin will run tests for the stories defined in your Storybook config
-                    // See options at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon#storybooktest
                     storybookTest({
-                        configDir: path.join(dirname, '.storybook'),
+                        configDir: path.join(currentDirectory, '.storybook'),
                     }),
                 ],
                 test: {

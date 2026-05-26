@@ -1,4 +1,4 @@
-import { ContentCopyIcon } from 'asma-ui-icons'
+import { ContentCopyIcon } from 'src/components/icons'
 import { type FC, type ReactNode } from 'react'
 import { StyledButton, StyledTooltip, type MessageProps } from 'src'
 import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'

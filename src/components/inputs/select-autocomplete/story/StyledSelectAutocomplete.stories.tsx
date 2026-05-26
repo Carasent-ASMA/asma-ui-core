@@ -1,7 +1,8 @@
+import type { AutocompleteRenderInputParams } from '@mui/material'
 import type { StoryObj, Meta } from '@storybook/react-vite'
 import { StyledSelectAutocomplete, type StyledSelectAutocompleteProps } from '../StyledSelectAutocomplete'
 import { ControlledAutocomplete, top100Films, type Film } from './components/StyledSelectAutocompleteExample'
-import { useMemo, useState, type AriaRole, type FC } from 'react'
+import { useMemo, useState, type AriaRole, type FC, type SyntheticEvent } from 'react'
 import { StyledInputField } from '../../input-field'
 import { expect, within, type UserEventObject } from 'storybook/test'
 import { generateOptions, withRenderCounter } from './test-utils/perf'
@@ -360,9 +361,11 @@ export const Performance_RenderCount: Story = {
                     multiple
                     options={top100Films}
                     value={value}
-                    onChange={(_, v) => setValue(v)}
-                    getOptionLabel={(o) => o.title}
-                    renderInput={(params) => <StyledInputField {...params} dataTest='input' />}
+                    onChange={(_event: SyntheticEvent, nextValue: Film[]) => setValue(nextValue)}
+                    getOptionLabel={(option: Film) => option.title}
+                    renderInput={(params: AutocompleteRenderInputParams) => (
+                        <StyledInputField {...params} dataTest='input' />
+                    )}
                 />
             )
         }

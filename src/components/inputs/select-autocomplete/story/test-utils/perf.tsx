@@ -1,10 +1,12 @@
-import type { FC } from 'react'
+import type { Attributes, FC, ReactElement } from 'react'
 import type { Film } from '../components/StyledSelectAutocompleteExample'
 
-export const withRenderCounter = <T,>(Component: FC<T>): { Wrapped: (props: T & JSX.IntrinsicAttributes) => React.JSX.Element; getRenderCount: () => number; } => {
+export const withRenderCounter = <T,>(
+    Component: FC<T>,
+): { Wrapped: (props: T & Attributes) => ReactElement; getRenderCount: () => number } => {
     let renders = 0
 
-    const Wrapped = (props: T & JSX.IntrinsicAttributes) => {
+    const Wrapped = (props: T & Attributes) => {
         renders++
         return <Component {...props} />
     }

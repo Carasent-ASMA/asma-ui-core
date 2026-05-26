@@ -1,9 +1,8 @@
 import { Select, type SelectChangeEvent, type SelectProps } from '@mui/material'
 import { Icon } from '@iconify/react'
-import { CloseIcon } from 'asma-ui-icons'
 import { StyledFormHelperText } from 'src'
-import { ErrorOutlineIcon } from 'asma-ui-icons'
 import clsx from 'clsx'
+import { CloseIcon, ErrorOutlineIcon } from 'src/components/icons'
 
 export type StyledSelectProps = SelectProps & {
     allowClear?: boolean
@@ -31,12 +30,13 @@ export const StyledSelect: React.FC<StyledSelectProps> = ({ dataTest, allowClear
                 data-testid={dataTest}
                 error={error}
                 value={props.value}
-                IconComponent={(props) => (
+                IconComponent={({ className }: { className?: string }) => (
                     <Icon
                         icon='material-symbols:expand-more-rounded'
                         width={24}
                         height={24}
-                        className={clsx(props.className, 'select-custom-icon')}
+                        className={clsx(className)}
+                        style={{ marginTop: '-3.5px' }}
                     />
                 )}
                 endAdornment={
@@ -73,9 +73,6 @@ export const StyledSelect: React.FC<StyledSelectProps> = ({ dataTest, allowClear
                     },
                     '&:hover .MuiOutlinedInput-notchedOutline': {
                         border: '2px solid var(--colors-gama-300) !important',
-                    },
-                    '& .select-custom-icon': {
-                        marginTop: '-3.5px !important',
                     },
                     ...props.sx,
                 }}

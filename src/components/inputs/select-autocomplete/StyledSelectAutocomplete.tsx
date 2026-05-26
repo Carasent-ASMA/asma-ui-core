@@ -4,8 +4,8 @@ import { useLayoutEffect, useRef, useState } from 'react'
 import { StyledCheckbox } from 'src'
 import { StyledChip } from '../../data-display/chip'
 import { cn } from 'src/helpers/cn'
+import { CloseIcon, CheckIcon, ChevronDownIcon, PlusIconCircle } from 'src/components/icons'
 import style from './StyledSelectAutocomplete.module.scss'
-import { CheckIcon, ChevronDownIcon, CloseIcon, PlusIconCircle } from 'asma-ui-icons'
 
 type StyledSelectAutocompleteMultipleValue<
     T,

@@ -1,0 +1,63 @@
+import { bindPopper, type PopupState } from 'material-ui-popup-state/hooks'
+import { TimePickerBody } from './components/TimePickerBody'
+import { Fade, Paper, Popper } from '@mui/material'
+import type { StyledTimePickerProps } from './types'
+
+import { EraserIcon } from 'src/datetime/shared-components/EraserIcon'
+import { CheckIcon } from 'src/datetime/shared-components/CheckIcon'
+import clsx from 'clsx'
+import styles from './StyledTimePicker.module.scss'
+import { StyledButton } from 'src/datetime/shared-components/button'
+
+export const TimePickerPopper: React.FC<StyledTimePickerProps & { popupState: PopupState; handleClear: () => void }> = (
+    props,
+) => {
+    const { popupState, dataTest, value, onSelect, handleClear } = props
+
+    return (
+        <Popper
+            {...bindPopper(popupState)}
+            className={clsx(styles['shadow-mui'])}
+            transition
+            style={{ zIndex: '1300', position: 'absolute' }}
+        >
+            {({ TransitionProps }) => (
+                <Fade {...TransitionProps} timeout={350}>
+                    <Paper style={{ paddingBottom: '1px' }}>
+                        <TimePickerBody dataTest={`${dataTest}-time-picker-body`} value={value} onSelect={onSelect} />
+                        <div
+                            style={{
+                                display: 'flex',
+                                marginTop: '12px',
+                                marginBottom: '12px',
+                                justifyContent: 'space-between',
+                            }}
+                        >
+                            <StyledButton
+                                dataTest='time-picker-erase-button'
+                                data-testid='time-picker-erase-button'
+                                variant='text'
+                                onClick={handleClear}
+                                size='small'
+                                disabled={!value}
+                                style={{ minWidth: '40px', marginLeft: '10px' }}
+                            >
+                                <EraserIcon width={24} height={24} />
+                            </StyledButton>
+                            <StyledButton
+                                dataTest='time-picker-confirm-button'
+                                data-testid='time-picker-confirm-button'
+                                variant='contained'
+                                size='small'
+                                onClick={() => popupState.close()}
+                                style={{ minWidth: '40px', marginRight: '16px' }}
+                            >
+                                <CheckIcon width={20} height={20} />
+                            </StyledButton>
+                        </div>
+                    </Paper>
+                </Fade>
+            )}
+        </Popper>
+    )
+}

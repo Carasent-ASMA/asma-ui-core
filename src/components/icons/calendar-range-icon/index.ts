@@ -1,1 +1,1 @@
-export * from './CalendarIcon'
+export * from './CalendarRangeIcon'

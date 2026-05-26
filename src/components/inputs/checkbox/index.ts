@@ -1,1 +1,1 @@
-export * from './base-ui/StyledCheckbox'
+export { StyledCheckbox } from './base-ui/StyledCheckbox'

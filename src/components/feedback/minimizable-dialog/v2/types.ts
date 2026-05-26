@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 export type ILocale = 'en' | 'no'
 
-export type IMinimizableDialogV2Props = {
+export interface IMinimizableDialogV2Props {
     open: boolean
     onClose: () => void
     actionNode?: React.ReactNode

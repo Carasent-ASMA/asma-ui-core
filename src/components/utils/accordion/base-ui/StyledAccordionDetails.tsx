@@ -12,7 +12,7 @@ export const StyledAccordionDetails = ({
     className,
     contentClassName,
     ...props
-}: StyledAccordionDetailsProps) => (
+}: StyledAccordionDetailsProps): JSX.Element => (
     <Accordion.Panel {...props} className={clsx(styles['Panel'], className)}>
         <div className={clsx(styles['Content'], contentClassName)}>{children}</div>
     </Accordion.Panel>

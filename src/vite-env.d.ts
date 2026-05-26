@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 
 declare module '*.json' {
-    const value: { [key: string]: any }
+    const value: Record<string, any>
     export default value
 }

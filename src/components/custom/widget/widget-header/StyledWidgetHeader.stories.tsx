@@ -3,7 +3,7 @@ import React from 'react'
 import { StyledWidgetHeader } from './StyledWidgetHeader'
 import type { Meta } from '@storybook/react-vite'
 import { StyledButton } from 'src/components/inputs/button'
-import { CloseIcon } from 'asma-ui-icons'
+import { CloseIcon } from 'src/components/icons'
 
 const meta = {
     title: 'Widgets/StyledWidgetHeader',

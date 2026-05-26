@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react'
 
-export type IFloatingWindowProps = {
+export interface IFloatingWindowProps {
     fullScreen: boolean
 }
 
-export type IMinimizableDialogProps = {
+export interface IMinimizableDialogProps {
     onCloseText?: string
     onMinimizeText?: string
     onExpandText?: string

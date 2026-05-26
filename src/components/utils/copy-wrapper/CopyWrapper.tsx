@@ -1,5 +1,5 @@
 import type { AlertColor } from '@mui/material'
-import { ContentCopyIcon } from 'asma-ui-icons'
+import { ContentCopyIcon } from 'src/components/icons'
 import type { SnackbarProviderProps } from 'notistack'
 import { type FC, type PropsWithChildren, type ReactNode } from 'react'
 import { StyledTooltip } from 'src/components/data-display/tooltip'

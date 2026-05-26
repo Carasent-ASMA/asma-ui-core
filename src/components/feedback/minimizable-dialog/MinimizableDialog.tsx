@@ -1,4 +1,3 @@
-import { CloseIcon, DotsVerticalIcon, KeyboardCapslockIcon, MinimizeIcon } from 'asma-ui-icons'
 import { StyledButton } from 'src/components/inputs/button'
 import React, { useState } from 'react'
 import clsx from 'clsx'
@@ -11,7 +10,7 @@ import { StyledTooltip } from 'src/components/data-display/tooltip'
 import { ArrowShrink } from 'src/components/icons/arrow-shrink'
 import type { IMinimizableDialogProps } from './types'
 import { isArray, isFunction } from 'lodash-es'
-import { LoadingIcon } from 'asma-ui-icons'
+import { CloseIcon, DotsVerticalIcon, KeyboardCapslockIcon, LoadingIcon, MinimizeIcon } from 'src/components/icons'
 
 export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     onCloseText = '',

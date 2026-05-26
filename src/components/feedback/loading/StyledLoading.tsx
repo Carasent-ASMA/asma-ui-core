@@ -1,4 +1,4 @@
-import { LoadingIcon } from 'asma-ui-icons'
+import { LoadingIcon } from 'src/components/icons'
 import clsx from 'clsx'
 import type { FC } from 'react'
 
