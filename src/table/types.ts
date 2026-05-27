@@ -117,7 +117,11 @@ export type StyledTableProps<TData, TCustomData> = {
     locale?: 'no' | 'en'
     height?: string | number
     actions?: (row: Row<TData>) => (IAction<TData> | ICustomAction<TData>)[]
-    customActionsNode?: (row: CellContext<TData, TData>) => ReactNode
+    /**
+     * Receives the actions cell context for the internal actions column.
+     * Use row.original and the row APIs instead of getValue(), because this column stores an unknown accessor value.
+     */
+    customActionsNode?: (row: CellContext<TData, unknown>) => ReactNode
     customSubRowData?: Map<string, TCustomData[]>
     headerPin?: boolean
     expandArrow?: boolean

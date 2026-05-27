@@ -15,7 +15,7 @@ export function RowActionMenu<TData>({
     actions,
     rowActionsState,
 }: {
-    tableData: CellContext<TData, TData>
+    tableData: CellContext<TData, unknown>
     actions: (row: Row<TData>) => (IAction<TData> | ICustomAction<TData>)[]
     rowActionsState?: (row: Row<TData>) => RowActionsState | undefined
 }): JSX.Element {

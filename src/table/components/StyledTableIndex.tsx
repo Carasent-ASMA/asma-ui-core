@@ -22,7 +22,9 @@ import { useElementHeightPx } from './columns/helpers/useElementHeightPx'
 import style from './StyledTable.module.scss'
 import { useColumnVirtualizer } from 'src/table/hooks/useColumnVirtualizer'
 
-interface RowWithId { id: string | number }
+interface RowWithId {
+    id: string | number
+}
 
 function DndProvider<TData extends RowWithId>({
     enabled,
@@ -109,7 +111,7 @@ export const StyledTable = <TData extends RowWithId, TCustomData = Record<string
         useProxyHorizontalScrollSync(enableProxyHScroll)
 
     useLayoutEffect(() => {
-        const host = canShowStickyFooter ? wrapperRef.current : tableXRef.current ?? tableScrollRef.current
+        const host = canShowStickyFooter ? wrapperRef.current : (tableXRef.current ?? tableScrollRef.current)
 
         if (!host) {
             setHasInternalOverflow(false)
@@ -156,7 +158,14 @@ export const StyledTable = <TData extends RowWithId, TCustomData = Record<string
         const availableRowsAreaPx = Math.max(0, rowsAreaPx - reservedHeightPx)
 
         return Math.floor(availableRowsAreaPx / rowHeightPx)
-    }, [canShowStickyFooter, inlineFooterHeightPx, inlineHeaderHeightPx, inlineHScrollHeightPx, rowHeightPx, rowsAreaPx])
+    }, [
+        canShowStickyFooter,
+        inlineFooterHeightPx,
+        inlineHeaderHeightPx,
+        inlineHScrollHeightPx,
+        rowHeightPx,
+        rowsAreaPx,
+    ])
 
     const isShortTable = !canShowStickyFooter && visibleRows > 0 && visibleRows <= rowsFit
     const shouldExpandEmptyBody = !canShowStickyFooter && showNoRowsOverlay
@@ -165,8 +174,8 @@ export const StyledTable = <TData extends RowWithId, TCustomData = Record<string
         canShowStickyFooter
             ? style['table-wrapper']
             : isShortTable || shouldExpandEmptyBody
-            ? style['table-wrapper--proxy-bottom']
-            : style['table-wrapper--proxy'],
+              ? style['table-wrapper--proxy-bottom']
+              : style['table-wrapper--proxy'],
         fetching && style['table-wrapper-fetching'],
         showNoRowsOverlay && style['table-wrapper--no-rows'],
         className,
@@ -204,17 +213,19 @@ export const StyledTable = <TData extends RowWithId, TCustomData = Record<string
     }, [showNoRowsOverlay, noRowsOverlayTop])
 
     const TableMarkup = (
-        <table className={style['styled-table']} style={{ width: table.getTotalSize(), minWidth: '100%' }}>
-            <TableHeader
-                table={table}
-                styledTableProps={options}
-                tableCanResize={!!options.enableColumnResizing}
-                tableWidth={null}
-                columnWindow={columnWindow}
-            />
+        <div className={style['table-content']}>
+            <table className={style['styled-table']} style={{ width: table.getTotalSize(), minWidth: '100%' }}>
+                <TableHeader
+                    table={table}
+                    styledTableProps={options}
+                    tableCanResize={!!options.enableColumnResizing}
+                    tableWidth={null}
+                    columnWindow={columnWindow}
+                />
+                <TableBody table={table} styledTableProps={options} columnWindow={columnWindow} />
+            </table>
             <Fetching fetching={!!fetching} />
-            <TableBody table={table} styledTableProps={options} columnWindow={columnWindow} />
-        </table>
+        </div>
     )
 
     const NoRowsOverlay = showNoRowsOverlay ? (
@@ -237,7 +248,7 @@ export const StyledTable = <TData extends RowWithId, TCustomData = Record<string
                     <OverlayShell enabled={canShowStickyFooter} className={style['table-shell']}>
                         <div ref={wrapperRef} className={tableWrapperClass}>
                             {canShowStickyFooter ? (
-                               TableMarkup
+                                TableMarkup
                             ) : (
                                 <div ref={tableScrollRef} className={cn(style['table-scroll'])}>
                                     <div
@@ -246,7 +257,6 @@ export const StyledTable = <TData extends RowWithId, TCustomData = Record<string
                                     >
                                         {TableMarkup}
                                     </div>
-
 
                                     <div ref={hScrollRef} className={style['table-hscroll']}>
                                         <div ref={hScrollContentRef} className={style['table-hscroll__content']} />
@@ -268,8 +278,7 @@ export const StyledTable = <TData extends RowWithId, TCustomData = Record<string
                                 </div>
                             )}
 
-                                                                {NoRowsOverlay}
-
+                            {NoRowsOverlay}
                         </div>
                     </OverlayShell>
 

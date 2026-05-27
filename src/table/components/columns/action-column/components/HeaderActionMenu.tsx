@@ -57,7 +57,7 @@ export function HeaderActionMenu<TData>({
     headerData,
     locale,
 }: {
-    headerData: HeaderContext<TData, TData>
+    headerData: HeaderContext<TData, unknown>
     locale?: 'en' | 'no'
 }): JSX.Element {
     const { anchorEl, open, handleClose, handleOpen } = useToggleMenuVisibility()

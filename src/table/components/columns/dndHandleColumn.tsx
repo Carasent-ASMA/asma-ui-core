@@ -13,7 +13,7 @@ export function generateDndHandleColumn<TData>(
         enableHiding: false,
         enableSorting: false,
         header: () => null,
-        cell: ({ row }: CellContext<TData, TData>) => <RowDragHandleCell rowId={row.id} rowHeight={rowHeight} />,
+        cell: ({ row }: CellContext<TData, unknown>) => <RowDragHandleCell rowId={row.id} rowHeight={rowHeight} />,
         ...custom_props,
         id: DND_HANDLE_COLUMN_ID,
     }

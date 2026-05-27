@@ -11,14 +11,14 @@ export function generateShowFullTextColumn<TData>(isFixed: boolean, rowHeight?: 
         enableHiding: false,
         enableSorting: false,
         header: () => null,
-        cell: (info: CellContext<TData, TData>) => {
+        cell: (info: CellContext<TData, unknown>) => {
             return <ShowFullTextCell info={info} rowHeight={rowHeight} />
         },
         fixedLeft: isFixed,
     }
 }
 
-function ShowFullTextCell<TData>({ info, rowHeight }: { info: CellContext<TData, TData>; rowHeight?: number }) {
+function ShowFullTextCell<TData>({ info, rowHeight }: { info: CellContext<TData, unknown>; rowHeight?: number }) {
     const canRenderSubRows = info.row.getCanExpand()
 
     return (
