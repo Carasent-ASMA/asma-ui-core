@@ -61,6 +61,6 @@ export const injectColumns = <
         columns.unshift(generateDndHandleColumn(customDndColumnProps, rowHeight))
     }
     if (enableRowSelection && !columns.find((col) => col.id === SELECT_COLUMN_ID)) {
-        columns.unshift(selectColumn(isFixed, rowHeight))
+        columns.unshift(selectColumn(isFixed, rowHeight, locale))
     }
 }
