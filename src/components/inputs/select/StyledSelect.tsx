@@ -1,8 +1,7 @@
 import { Select, type SelectChangeEvent, type SelectProps } from '@mui/material'
-import { Icon } from '@iconify/react'
 import { StyledFormHelperText } from 'src'
 import clsx from 'clsx'
-import { CloseIcon, ErrorOutlineIcon } from 'src/components/icons'
+import { ChevronDownIcon, CloseIcon, ErrorOutlineIcon } from 'src/components/icons'
 
 export type StyledSelectProps = SelectProps & {
     allowClear?: boolean
@@ -31,13 +30,7 @@ export const StyledSelect: React.FC<StyledSelectProps> = ({ dataTest, allowClear
                 error={error}
                 value={props.value}
                 IconComponent={({ className }: { className?: string }) => (
-                    <Icon
-                        icon='material-symbols:expand-more-rounded'
-                        width={24}
-                        height={24}
-                        className={clsx(className)}
-                        style={{ marginTop: '-3.5px' }}
-                    />
+                    <ChevronDownIcon width={24} height={24} className={clsx(className, '-mt-[3.5px]')} />
                 )}
                 endAdornment={
                     allowClear && props.value ? (

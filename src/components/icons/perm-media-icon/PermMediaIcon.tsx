@@ -1,15 +1,25 @@
 import type { IIcon } from '../Icons.types'
-import { IconTemplate } from '../IconTemplate'
+import { getSvgIconStyle } from '../iconStyle'
 
 export const PermMediaIcon: React.FC<IIcon> = ({ width = 20, height = 20, className = '', onClick, color }) => {
+    const style = getSvgIconStyle(color, false)
+
     return (
-        <IconTemplate
-            icon='material-symbols:perm-media'
+        <svg
+            xmlns='http://www.w3.org/2000/svg'
             width={width}
             height={height}
+            viewBox='0 0 24 24'
             className={className}
             onClick={onClick}
-            color={color}
-        />
+            style={style}
+            aria-hidden='true'
+            focusable='false'
+        >
+            <path
+                fill='currentColor'
+                d='M3 21q-.825 0-1.412-.587T1 19V6h2v13h17v2zm4-4q-.825 0-1.412-.587T5 15V4q0-.825.588-1.412T7 2h5l2 2h7q.825 0 1.413.588T23 6v9q0 .825-.587 1.413T21 17zm2-4h10l-3.45-4.5l-2.3 3l-1.55-2z'
+            />
+        </svg>
     )
 }

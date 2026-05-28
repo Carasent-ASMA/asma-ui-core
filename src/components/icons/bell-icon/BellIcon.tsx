@@ -1,15 +1,25 @@
 import type { IIcon } from '../Icons.types'
-import { IconTemplate } from '../IconTemplate'
+import { getSvgIconStyle } from '../iconStyle'
 
 export const BellIcon: React.FC<IIcon> = ({ width = 20, height = 20, className = '', onClick, color }) => {
+    const style = getSvgIconStyle(color, false)
+
     return (
-        <IconTemplate
-            icon='mdi:bell'
+        <svg
+            xmlns='http://www.w3.org/2000/svg'
             width={width}
             height={height}
+            viewBox='0 0 24 24'
             className={className}
             onClick={onClick}
-            color={color}
-        />
+            style={style}
+            aria-hidden='true'
+            focusable='false'
+        >
+            <path
+                fill='currentColor'
+                d='M21 19v1H3v-1l2-2v-6c0-3.1 2.03-5.83 5-6.71V4a2 2 0 0 1 2-2a2 2 0 0 1 2 2v.29c2.97.88 5 3.61 5 6.71v6zm-7 2a2 2 0 0 1-2 2a2 2 0 0 1-2-2'
+            />
+        </svg>
     )
 }

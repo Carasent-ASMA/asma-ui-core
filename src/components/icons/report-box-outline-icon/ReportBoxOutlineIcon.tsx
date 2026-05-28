@@ -1,15 +1,25 @@
 import type { IIcon } from '../Icons.types'
-import { IconTemplate } from '../IconTemplate'
+import { getSvgIconStyle } from '../iconStyle'
 
 export const ReportBoxOutlineIcon: React.FC<IIcon> = ({ width = 20, height = 20, className = '', onClick, color }) => {
+    const style = getSvgIconStyle(color, false)
+
     return (
-        <IconTemplate
-            icon='mdi:report-box-outline'
+        <svg
+            xmlns='http://www.w3.org/2000/svg'
             width={width}
             height={height}
+            viewBox='0 0 24 24'
             className={className}
             onClick={onClick}
-            color={color}
-        />
+            style={style}
+            aria-hidden='true'
+            focusable='false'
+        >
+            <path
+                fill='currentColor'
+                d='M9 17H7v-7h2zm4 0h-2V7h2zm4 0h-2v-4h2zm2 2H5V5h14v14.1M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2'
+            />
+        </svg>
     )
 }

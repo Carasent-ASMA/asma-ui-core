@@ -1,8 +1,7 @@
-import { Icon } from '@iconify/react'
 import { Stack } from '@mui/material'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
-import { ChevronDownIcon } from 'src/components/icons'
+import { ChevronDownIcon, FilterIcon } from 'src/components/icons'
 import { expect } from 'storybook/test'
 import { StyledButton } from './StyledButton'
 
@@ -58,11 +57,7 @@ export const Variants: Story = {
 export const WithIcons: Story = {
     render: (args) => (
         <Stack direction='row' spacing={2} alignItems='center'>
-            <StyledButton
-                {...args}
-                variant='contained'
-                startIcon={<Icon icon='mdi:filter-variant' width={20} height={20} />}
-            >
+            <StyledButton {...args} variant='contained' startIcon={<FilterIcon width={20} height={20} />}>
                 With start
             </StyledButton>
 
@@ -70,11 +65,7 @@ export const WithIcons: Story = {
                 With end
             </StyledButton>
 
-            <StyledButton
-                {...args}
-                variant='contained'
-                startIcon={<Icon icon='mdi:filter-variant' width={20} height={20} />}
-            >
+            <StyledButton {...args} variant='contained' startIcon={<FilterIcon width={20} height={20} />}>
                 <span style={{ display: 'inline-block', maxWidth: 80 }}>Very long label that should truncate</span>
             </StyledButton>
         </Stack>
@@ -223,7 +214,7 @@ export const Gallery: Story = {
                                             {...state.props}
                                             size={size}
                                             variant={variant}
-                                            startIcon={<Icon icon='mdi:filter-variant' width={18} height={18} />}
+                                            startIcon={<FilterIcon width={18} height={18} />}
                                             endIcon={<ChevronDownIcon width={18} height={18} />}
                                         >
                                             {variant}

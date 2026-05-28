@@ -20,8 +20,12 @@
     "types": "./dist/index.d.ts",
     "typesVersions": {
         "*": {
-            "icons": ["dist/src/components/icons/index.d.ts"],
-            "icons/*": ["dist/src/components/icons/*/index.d.ts"]
+            "icons": [
+                "dist/src/components/icons/index.d.ts"
+            ],
+            "icons/*": [
+                "dist/src/components/icons/*/index.d.ts"
+            ]
         }
     },
     "main": "./dist/index.js",
@@ -68,15 +72,14 @@
         "node": ">=24 <25"
     },
     "dependencies": {
+        "@base-ui-components/react": "1.0.0-beta.4",
         "@base-ui/react": "^1.3.0",
         "@dnd-kit/core": "^6.1.0",
         "@dnd-kit/modifiers": "^7.0.0",
         "@dnd-kit/sortable": "^8.0.0",
         "@dnd-kit/utilities": "^3.2.2",
-        "@base-ui-components/react": "1.0.0-beta.4",
         "@fontsource/material-icons": "^5.0.4",
         "@react-input/mask": "^1.2.5",
-        "@iconify/react": "^4.1.1",
         "@tanstack/react-table": "^8.21.3",
         "@tanstack/react-virtual": "^3.13.21",
         "clsx": "^1.2.1",
@@ -124,9 +127,9 @@
         "react-dom": "^18.3.1",
         "react-quill": "^2.0.0",
         "rollup-plugin-typescript2": "^0.35.0",
-        "storybook-addon-themes": "^6.1.0",
         "storybook": "10.3.3",
         "storybook-addon-pseudo-states": "^10.3.3",
+        "storybook-addon-themes": "^6.1.0",
         "tailwind-scrollbar": "^3.1.0",
         "tailwindcss": "^3.3.2",
         "ts-morph": "^27.0.2",

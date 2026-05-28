@@ -1,5 +1,5 @@
 import { MenuItem, type MenuItemProps } from '@mui/material'
-import { Icon } from '@iconify/react'
+import { CheckIcon } from 'src/components/icons'
 export const StyledSelectItem = (item: MenuItemProps): JSX.Element => {
     return (
         <MenuItem
@@ -16,9 +16,7 @@ export const StyledSelectItem = (item: MenuItemProps): JSX.Element => {
             }}
         >
             <span style={{ width: '24px', justifyContent: 'center', display: 'flex' }}>
-                {item.selected && (
-                    <Icon icon='mdi:tick' width={22} height={22} style={{ color: 'var(--colors-gama-500)' }} />
-                )}
+                {item.selected && <CheckIcon width={22} height={22} style={{ color: 'var(--colors-gama-500)' }} />}
             </span>
             <span>{item.children}</span>
         </MenuItem>

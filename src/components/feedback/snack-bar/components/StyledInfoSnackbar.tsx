@@ -1,10 +1,10 @@
 import type { AlertColor } from '@mui/material'
 import clsx from 'clsx'
-import { Icon } from '@iconify/react'
 import { SnackbarContent, type CustomContentProps, useSnackbar } from 'notistack'
 import { forwardRef } from 'react'
 
 import { omit } from 'src/helpers'
+import { CloseIcon, LoadingIcon } from 'src/components/icons'
 
 interface StyledInfoSnackbarProps extends CustomContentProps {
     severity?: AlertColor
@@ -36,17 +36,11 @@ export const StyledInfoSnackbar = forwardRef<HTMLDivElement, StyledInfoSnackbarP
                 )}
             >
                 {isLoading ? (
-                    <Icon
-                        icon='line-md:loading-twotone-loop'
-                        width={20}
-                        height={20}
-                        className='absolute left-0 top-1/2 -translate-y-1/2'
-                    />
+                    <LoadingIcon width={20} height={20} className='absolute left-0 top-1/2 -translate-y-1/2' />
                 ) : null}
                 <div>{message}</div>
                 {closeButton ? (
-                    <Icon
-                        icon='ic:baseline-close'
+                    <CloseIcon
                         onClick={() => closeSnackbar(id)}
                         width={20}
                         height={20}

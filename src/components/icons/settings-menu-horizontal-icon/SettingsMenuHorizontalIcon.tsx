@@ -1,6 +1,5 @@
-import React from 'react'
 import type { IIcon } from '../Icons.types'
-import { IconTemplate } from '../IconTemplate'
+import { getSvgIconStyle } from '../iconStyle'
 
 export const SettingsMenuHorizontalIcon: React.FC<IIcon> = ({
     width = 20,
@@ -9,14 +8,27 @@ export const SettingsMenuHorizontalIcon: React.FC<IIcon> = ({
     onClick,
     color,
 }) => {
+    const style = getSvgIconStyle(color, false)
+
     return (
-        <IconTemplate
-            icon='streamline:interface-setting-menu-1-button-parallel-horizontal-lines-menu-navigation-three-hamburger'
+        <svg
+            xmlns='http://www.w3.org/2000/svg'
             width={width}
             height={height}
+            viewBox='0 0 14 14'
             className={className}
             onClick={onClick}
-            color={color}
-        />
+            style={style}
+            aria-hidden='true'
+            focusable='false'
+        >
+            <path
+                fill='none'
+                stroke='currentColor'
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                d='M13.5 2H.5m13 5H.5m13 5H.5'
+            />
+        </svg>
     )
 }

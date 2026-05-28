@@ -6,6 +6,3 @@ export interface IIcon {
     color?: string
     vFlip?: boolean
 }
-export interface IIconTemplate extends IIcon {
-    icon: string
-}

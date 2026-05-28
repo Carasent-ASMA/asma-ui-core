@@ -1,9 +1,9 @@
 import { IconButton, type AlertColor } from '@mui/material'
 import clsx from 'clsx'
-import { Icon } from '@iconify/react'
 import { SnackbarContent, type CustomContentProps, useSnackbar, type SnackbarMessage } from 'notistack'
 import { forwardRef } from 'react'
 import { omit } from 'src/helpers'
+import { CloseIcon } from 'src/components/icons'
 
 import { CheckOutlineIcon } from './CheckOutlineIcon'
 import { ErrorOutlineIcon } from './ErrorOutlineIcon'
@@ -44,7 +44,7 @@ export const StyledDefaultSnackbar = forwardRef<HTMLDivElement, StyledDefaultSna
                     </div>
 
                     <IconButton aria-label='close' color='inherit' sx={{ p: '2px' }} onClick={() => closeSnackbar(id)}>
-                        <Icon icon='ic:baseline-close' width={20} height={20} color={'#49525F'} />
+                        <CloseIcon width={20} height={20} color='#49525F' />
                     </IconButton>
                 </div>
 
