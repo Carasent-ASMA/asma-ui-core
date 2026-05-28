@@ -6,7 +6,7 @@ import { StyledMenuList } from './StyledMenuList'
 import { StyledButton } from 'src/components/inputs/button'
 import { StyledTypography } from 'src/components/data-display/typography'
 import { StyledMenuItem } from './StyledMenuItem'
-import { Icon } from '@iconify/react'
+import { CloudIcon, ContentCopyIcon, ContentCutIcon, ContentPasteIcon } from 'src/components/icons'
 
 const meta = {
     title: 'Navigation/Styled Menu',
@@ -78,7 +78,7 @@ const StyledMenuExample: FC<{ args: Partial<MenuProps> }> = ({ args }) => {
                 <StyledMenuList className='bg-gama-50'>
                     <StyledMenuItem>
                         <ListItemIcon>
-                            <Icon icon='mdi:content-cut' fontSize='small' />
+                            <ContentCutIcon width={20} height={20} />
                         </ListItemIcon>
                         <ListItemText>Cut</ListItemText>
                         <StyledTypography variant='body2' color='text.secondary'>
@@ -87,7 +87,7 @@ const StyledMenuExample: FC<{ args: Partial<MenuProps> }> = ({ args }) => {
                     </StyledMenuItem>
                     <StyledMenuItem>
                         <ListItemIcon>
-                            <Icon icon='mdi:content-copy' fontSize='small' />
+                            <ContentCopyIcon width={20} height={20} />
                         </ListItemIcon>
                         <ListItemText>Copy</ListItemText>
                         <StyledTypography variant='body2' color='text.secondary'>
@@ -96,7 +96,7 @@ const StyledMenuExample: FC<{ args: Partial<MenuProps> }> = ({ args }) => {
                     </StyledMenuItem>
                     <StyledMenuItem>
                         <ListItemIcon>
-                            <Icon icon='mdi:content-paste' fontSize='small' />
+                            <ContentPasteIcon width={20} height={20} />
                         </ListItemIcon>
                         <ListItemText>Paste</ListItemText>
                         <StyledTypography variant='body2' color='text.secondary'>
@@ -106,7 +106,7 @@ const StyledMenuExample: FC<{ args: Partial<MenuProps> }> = ({ args }) => {
                     <Divider />
                     <StyledMenuItem>
                         <ListItemIcon>
-                            <Icon icon='mdi:cloud' fontSize='small' />
+                            <CloudIcon width={20} height={20} />
                         </ListItemIcon>
                         <ListItemText>Web Clipboard</ListItemText>
                     </StyledMenuItem>

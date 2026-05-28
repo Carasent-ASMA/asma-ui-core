@@ -2,7 +2,7 @@
 import React, { forwardRef, useState } from 'react'
 import { Switch } from '@base-ui/react/switch'
 import styles from './StyledSwitch.module.scss'
-import { IconTemplate } from 'src/components/icons/IconTemplate'
+import { getSvgIconStyle } from 'src/components/icons/iconStyle'
 import type { IIcon } from 'src/components/icons'
 
 type StyledSwitchProps = {
@@ -26,15 +26,25 @@ const IndeterminateIcon = ({ className }: { className?: string }) => (
 )
 
 const CheckIconSwitch: React.FC<IIcon> = ({ width = 11, height = 11, className = '', onClick, color }) => {
+    const style = getSvgIconStyle(color)
+
     return (
-        <IconTemplate
-            icon='fa-solid:check'
+        <svg
+            xmlns='http://www.w3.org/2000/svg'
             width={width}
             height={height}
+            viewBox='0 0 448 512'
             className={className}
             onClick={onClick}
-            color={color}
-        />
+            style={style}
+            aria-hidden='true'
+            focusable='false'
+        >
+            <path
+                fill='currentColor'
+                d='M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7L393.4 105.4c12.5-12.5 32.8-12.5 45.2 0'
+            />
+        </svg>
     )
 }
 

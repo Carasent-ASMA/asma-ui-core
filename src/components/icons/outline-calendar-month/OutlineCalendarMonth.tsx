@@ -1,15 +1,25 @@
 import type { IIcon } from '../Icons.types'
-import { IconTemplate } from '../IconTemplate'
+import { getSvgIconStyle } from '../iconStyle'
 
 export const OutlineCalendarMonth: React.FC<IIcon> = ({ width = 20, height = 20, className = '', onClick, color }) => {
+    const style = getSvgIconStyle(color, false)
+
     return (
-        <IconTemplate
-            icon='ic:outline-calendar-month'
+        <svg
+            xmlns='http://www.w3.org/2000/svg'
             width={width}
             height={height}
+            viewBox='0 0 24 24'
             className={className}
             onClick={onClick}
-            color={color}
-        />
+            style={style}
+            aria-hidden='true'
+            focusable='false'
+        >
+            <path
+                fill='currentColor'
+                d='M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2m0 16H5V10h14zm0-12H5V6h14zM9 14H7v-2h2zm4 0h-2v-2h2zm4 0h-2v-2h2zm-8 4H7v-2h2zm4 0h-2v-2h2zm4 0h-2v-2h2z'
+            />
+        </svg>
     )
 }
