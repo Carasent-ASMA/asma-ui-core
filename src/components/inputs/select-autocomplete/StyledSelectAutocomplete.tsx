@@ -267,10 +267,18 @@ export function StyledSelectAutocomplete<
                             '& li[aria-selected=true].MuiAutocomplete-option.Mui-focused': {
                                 background: 'var(--colors-gama-50) !important',
                             },
+                            '&:has([data-select-all-header]:hover) .MuiAutocomplete-option.Mui-focused': {
+                                background: 'transparent !important',
+                            },
+                            '&:has([data-select-all-header]:hover) li[aria-selected=true].MuiAutocomplete-option.Mui-focused':
+                                {
+                                    background: 'var(--colors-gama-50) !important',
+                                },
                         }}
                     >
                         {shouldShowSelectAll && selectableOptions.length > 0 && (
                             <div
+                                data-select-all-header
                                 className='flex items-center gap-x-[10px] border-[1px] border-b border-solid border-delta-200 bg-delta-50 py-2 pl-3 text-xs'
                                 onMouseDown={(e) => e.preventDefault()}
                                 role='presentation'
