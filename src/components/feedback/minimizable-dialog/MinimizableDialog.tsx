@@ -255,7 +255,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                             )}{' '}
                             {footerInfo}
                             {showButtons ? (
-                                <div className={cn('flex justify-end gap-x-4', btnContainerClassName)}>
+                                <div className={cn('flex justify-end gap-x-2', btnContainerClassName)}>
                                     {secondaryButtonText && onSecondaryButtonClick && (
                                         <StyledButton
                                             dataTest='cancel-button'
@@ -282,7 +282,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                             {showButtons ? (
                                 <div
                                     className={cn(
-                                        'flex justify-end gap-x-4 border-t-[1px] border-delta-200 p-4',
+                                        'flex justify-end gap-x-2 border-t-[1px] border-delta-200 p-4',
                                         btnContainerClassName,
                                     )}
                                 >
