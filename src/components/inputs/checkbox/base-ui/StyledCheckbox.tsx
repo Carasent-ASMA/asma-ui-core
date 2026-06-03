@@ -1,5 +1,5 @@
 import React, { useEffect, type SVGProps } from 'react'
-import { Checkbox } from '@base-ui/react'
+import { Checkbox } from '@base-ui/react/checkbox'
 import styles from './StyledCheckbox.module.scss'
 import { cn } from 'src/helpers/cn'
 

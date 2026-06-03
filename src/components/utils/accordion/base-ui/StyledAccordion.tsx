@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Accordion } from '@base-ui/react'
+import { Accordion } from '@base-ui/react/accordion'
 import { cn } from 'src/helpers/cn'
 import styles from './StyledAccordion.module.scss'
 

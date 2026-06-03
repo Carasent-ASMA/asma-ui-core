@@ -1,7 +1,7 @@
 import React, { useEffect, type SVGProps } from 'react'
 import styles from './StyledCheckbox.module.scss'
 import { cn } from 'src/table/helpers/cn'
-import { Checkbox } from '@base-ui-components/react/checkbox'
+import { Checkbox } from '@base-ui/react/checkbox'
 
 type StyledCheckboxProps = {
     dataTest: string
