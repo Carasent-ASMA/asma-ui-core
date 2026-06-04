@@ -15,8 +15,11 @@ export const StyledInputField: React.FC<
         readOnly?: boolean
         dataTest: string
     }
-> = ({ allowClear, onClear, readOnly, disabled, error, helperText, dataTest, ...props }) => {
+> = ({ allowClear, onClear, readOnly, disabled, error, helperText, dataTest, slotProps: userSlotProps, ...props }) => {
     const disabledOrReadonly = (disabled ?? false) || (readOnly ?? false)
+    interface InputSlot { endAdornment?: React.ReactNode; startAdornment?: React.ReactNode }
+    const userInputSlot = userSlotProps?.input as InputSlot | undefined
+
     return (
         <TextField
             {...props}
@@ -34,24 +37,27 @@ export const StyledInputField: React.FC<
                 )
             }
             type={props.type ?? 'mui-input'}
-            InputProps={{
-                ...props.InputProps,
-                endAdornment:
-                    allowClear && props.value ? (
-                        <div
-                            role='button'
-                            className='absolute right-4 z-40 flex items-center justify-center rounded-full p-[2px] duration-300 hover:bg-gama-100'
-                            onClick={(e) => {
-                                e.stopPropagation()
-                                e.preventDefault()
-                                onClear?.()
-                            }}
-                        >
-                            <CloseIcon width={18} height={18} />
-                        </div>
-                    ) : (
-                        props.InputProps?.endAdornment
-                    ),
+            slotProps={{
+                ...userSlotProps,
+                input: {
+                    ...userInputSlot,
+                    endAdornment:
+                        allowClear && props.value ? (
+                            <div
+                                role='button'
+                                className='absolute right-4 z-40 flex items-center justify-center rounded-full p-[2px] duration-300 hover:bg-gama-100'
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    e.preventDefault()
+                                    onClear?.()
+                                }}
+                            >
+                                <CloseIcon width={18} height={18} />
+                            </div>
+                        ) : (
+                            userInputSlot?.endAdornment
+                        ),
+                },
             }}
             sx={{
                 '& input:-webkit-autofill, & .MuiInputBase-root:has(> input:-webkit-autofill)': {

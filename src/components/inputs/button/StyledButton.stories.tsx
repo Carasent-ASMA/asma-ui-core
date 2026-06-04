@@ -56,7 +56,7 @@ export const Variants: Story = {
 
 export const WithIcons: Story = {
     render: (args) => (
-        <Stack direction='row' spacing={2} alignItems='center'>
+        <Stack direction='row' spacing={2} sx={{ alignItems: 'center' }}>
             <StyledButton {...args} variant='contained' startIcon={<FilterIcon width={20} height={20} />}>
                 With start
             </StyledButton>
@@ -74,7 +74,7 @@ export const WithIcons: Story = {
 
 export const Sizes: Story = {
     render: (args) => (
-        <Stack direction='row' spacing={2} alignItems='center'>
+        <Stack direction='row' spacing={2} sx={{ alignItems: 'center' }}>
             <StyledButton {...args} size='small'>
                 Small
             </StyledButton>
@@ -206,7 +206,7 @@ export const Gallery: Story = {
                         <h3 style={{ marginBottom: 8 }}>{state.label}</h3>
                         <Stack spacing={3}>
                             {sizes.map((size) => (
-                                <Stack key={size} direction='row' spacing={2} alignItems='center'>
+                                <Stack key={size} direction='row' spacing={2} sx={{ alignItems: 'center' }}>
                                     {variants.map((variant) => (
                                         <StyledButton
                                             key={`${state.label}-${size}-${variant}`}

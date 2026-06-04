@@ -58,7 +58,8 @@ export const DynamicSelectAutocomplete = forwardRef(
         )
 
         const isOptionEqualToValue = useCallback(
-            (option: TOption | null, value: TOption | null): boolean => {
+            (option: TOption, value: TOption | string): boolean => {
+                if (typeof value === 'string') return false
                 return getOptionValue(option) === getOptionValue(value)
             },
             [getOptionValue],
@@ -129,46 +130,49 @@ export const DynamicSelectAutocomplete = forwardRef(
                     isOptionEqualToValue={autocompleteProps?.isOptionEqualToValue ?? isOptionEqualToValue}
                     autoHeight
                     multiple={multiple}
-                    renderTags={(tagValues) => {
-                        const limit = maxTags ?? options.length
-                        const limitedTags = tagValues.slice(0, limit)
-                        const remainingCount = tagValues.length - limit
-                        return (
-                            <div className='flex flex-wrap gap-2'>
-                                {limitedTags.map((option) => (
-                                    <StyledChip
-                                        key={getOptionValueText(option)}
-                                        dataTest={`${getOptionValueText(option)}-chip`}
-                                        readOnly={readOnly}
-                                        variant='outlined'
-                                        label={renderLabel ? renderLabel(option) : getOptionLabel(option)}
-                                        classes={{
-                                            root: 'h-fit w-fit min-h-[32px]',
-                                            label: 'block whitespace-normal',
-                                        }}
-                                        disabled={Boolean(disabled) || Boolean(loading)}
-                                        onDelete={() => {
-                                            if (!multiple) {
-                                                onChange(null)
-                                                return
-                                            }
-
-                                            const newValues = value!.filter((v) => !isOptionEqualToValue(v, option))
-                                            onChange(newValues)
-                                        }}
-                                    />
-                                ))}
-                                {remainingCount > 0 && (
-                                    <StyledChip
-                                        dataTest='remaining-count-tag-chip'
-                                        label={`+${remainingCount}`}
-                                        variant='outlined'
-                                        onClick={handleOpen}
-                                    />
-                                )}
-                            </div>
-                        )
-                    }}
+                    renderValue={
+                        multiple
+                            ? (tagValues) => {
+                                  if (!Array.isArray(tagValues)) return null
+                                  const typedValues = tagValues as TOption[]
+                                  const limit = maxTags ?? options.length
+                                  const limitedTags = typedValues.slice(0, limit)
+                                  const remainingCount = typedValues.length - limit
+                                  return (
+                                      <div className='flex flex-wrap gap-2'>
+                                          {limitedTags.map((option) => (
+                                              <StyledChip
+                                                  key={getOptionValueText(option)}
+                                                  dataTest={`${getOptionValueText(option)}-chip`}
+                                                  readOnly={readOnly}
+                                                  variant='outlined'
+                                                  label={renderLabel ? renderLabel(option) : getOptionLabel(option)}
+                                                  classes={{
+                                                      root: 'h-fit w-fit min-h-[32px]',
+                                                      label: 'block whitespace-normal',
+                                                  }}
+                                                  disabled={Boolean(disabled) || Boolean(loading)}
+                                                  onDelete={() => {
+                                                      const newValues = (value as TOption[]).filter(
+                                                          (v) => !isOptionEqualToValue(v, option),
+                                                      )
+                                                      onChange(newValues)
+                                                  }}
+                                              />
+                                          ))}
+                                          {remainingCount > 0 && (
+                                              <StyledChip
+                                                  dataTest='remaining-count-tag-chip'
+                                                  label={`+${remainingCount}`}
+                                                  variant='outlined'
+                                                  onClick={handleOpen}
+                                              />
+                                          )}
+                                      </div>
+                                  )
+                              }
+                            : undefined
+                    }
                     popupIcon={
                         loading ? (
                             <LoadingIcon height={24} width={24} />
@@ -216,7 +220,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                             )
                         }
 
-                        const isSelected = isOptionEqualToValue(value, option)
+                        const isSelected = value != null && isOptionEqualToValue(value, option)
 
                         return (
                             /** biome-ignore lint/a11y/useKeyWithClickEvents: <onClick props is still passed so we need to block it for disabled options> */
@@ -266,14 +270,20 @@ export const DynamicSelectAutocomplete = forwardRef(
                             readOnly={readOnly}
                             onKeyDown={typingDisabled ? (e) => e.preventDefault() : undefined}
                             autoComplete={typingDisabled ? 'off' : 'on'}
-                            InputProps={{
-                                ...params.InputProps,
-                                startAdornment: startAdornment ?? params.InputProps.startAdornment,
-                                style: typingDisabled ? { caretColor: 'transparent' } : {},
-                            }}
-                            inputProps={{
-                                ...params.inputProps,
-                                style: typingDisabled ? { caretColor: 'transparent' } : {},
+                            slotProps={{
+                                ...params.slotProps,
+                                input: {
+                                    ...(params.slotProps?.input ?? {}),
+                                    startAdornment:
+                                        startAdornment ??
+                                        (params.slotProps?.input as { startAdornment?: React.ReactNode } | undefined)
+                                            ?.startAdornment,
+                                    style: typingDisabled ? { caretColor: 'transparent' } : {},
+                                },
+                                htmlInput: {
+                                    ...(params.slotProps?.htmlInput ?? {}),
+                                    style: typingDisabled ? { caretColor: 'transparent' } : {},
+                                },
                             }}
                         />
                     )}

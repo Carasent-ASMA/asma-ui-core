@@ -1,16 +1,19 @@
-import { Fade, Tooltip, type TooltipProps } from '@mui/material'
+import { Fade, Tooltip, type SxProps, type Theme, type TooltipProps } from '@mui/material'
+
+interface TooltipSlotObj extends React.HTMLAttributes<HTMLDivElement> {
+    sx?: SxProps<Theme>
+}
 
 export const StyledTooltip = (props: TooltipProps): JSX.Element => {
-    const { componentsProps, ...rest } = props
-    const userTooltip = componentsProps?.tooltip
+    const { slotProps, ...rest } = props
+    const userTooltip = slotProps?.tooltip as TooltipSlotObj | undefined
 
     return (
         <Tooltip
-            TransitionComponent={Fade}
-            TransitionProps={{ timeout: 300 }}
-            placement='top'
-            componentsProps={{
-                ...componentsProps,
+            slots={{ transition: Fade }}
+            slotProps={{
+                ...slotProps,
+                transition: { timeout: 300, ...(slotProps?.transition ?? {}) },
                 tooltip: {
                     ...(userTooltip ?? {}),
                     style: { ...(userTooltip?.style ?? {}) },
@@ -31,6 +34,7 @@ export const StyledTooltip = (props: TooltipProps): JSX.Element => {
                     },
                 },
             }}
+            placement='top'
             {...rest}
         />
     )

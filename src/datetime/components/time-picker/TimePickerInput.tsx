@@ -71,21 +71,23 @@ export const TimePickerInput: React.FC<
                     />
                 }
                 onChange={handleChange}
-                InputProps={{
-                    ref: inputRootRef,
-                    onMouseDown: (e: ReactMouseEvent<HTMLElement>) => {
-                        if (!disabled && !readOnly) popupState.open(e)
+                slotProps={{
+                    input: {
+                        ref: inputRootRef,
+                        onMouseDown: (e: ReactMouseEvent<HTMLElement>) => {
+                            if (!disabled && !readOnly) popupState.open(e)
+                        },
+                        endAdornment: (
+                            <ClockOutlineIcon
+                                width={24}
+                                height={24}
+                                onClick={(event: ReactMouseEvent<SVGSVGElement>) => {
+                                    event.stopPropagation()
+                                    if (!disabled && !readOnly) popupState.open(event)
+                                }}
+                            />
+                        ),
                     },
-                    endAdornment: (
-                        <ClockOutlineIcon
-                            width={24}
-                            height={24}
-                            onClick={(event: ReactMouseEvent<SVGSVGElement>) => {
-                                event.stopPropagation()
-                                if (!disabled && !readOnly) popupState.open(event)
-                            }}
-                        />
-                    ),
                 }}
                 value={localValue}
                 sx={{

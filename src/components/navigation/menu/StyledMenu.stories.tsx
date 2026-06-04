@@ -41,7 +41,7 @@ const StyledMenuExample: FC<{ args: Partial<MenuProps> }> = ({ args }) => {
 
     return (
         <>
-            <Stack mt={2} mb={4}>
+            <Stack sx={{ mt: 2, mb: 4 }}>
                 <StyledTypography variant='h6'>Standard Menu</StyledTypography>
                 <StyledButton
                     dataTest='test'
@@ -61,8 +61,8 @@ const StyledMenuExample: FC<{ args: Partial<MenuProps> }> = ({ args }) => {
                     anchorEl={anchorEl}
                     open={open}
                     onClose={handleClose}
-                    MenuListProps={{
-                        'aria-labelledby': 'basic-button',
+                    slotProps={{
+                        list: { 'aria-labelledby': 'basic-button' },
                     }}
                 >
                     <StyledMenuItem onClick={handleClose} selected>
@@ -73,7 +73,7 @@ const StyledMenuExample: FC<{ args: Partial<MenuProps> }> = ({ args }) => {
                 </StyledMenu>
             </Stack>
 
-            <Stack mt={2}>
+            <Stack sx={{ mt: 2 }}>
                 <StyledTypography variant='h6'>Standard Icon Menu</StyledTypography>
                 <StyledMenuList className='bg-gama-50'>
                     <StyledMenuItem>

@@ -90,8 +90,12 @@ export const StyledTabs: FC<StyledTabsProps> = ({ className, size = 'default', s
         <Tabs
             {...props}
             className={cn('relative rounded-t-lg bg-white px-4', className)}
-            TabIndicatorProps={{
-                style: { background: 'var(--colors-gama-500)', color: 'var(--colors-gama-500)' },
+            slotProps={{
+                ...props.slotProps,
+                indicator: {
+                    style: { background: 'var(--colors-gama-500)', color: 'var(--colors-gama-500)' },
+                    ...(props.slotProps?.indicator ?? {}),
+                },
             }}
             sx={mergedSx}
         />

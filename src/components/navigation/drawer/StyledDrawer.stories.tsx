@@ -38,7 +38,7 @@ const StyledDrawerExample: FC<{ args: Partial<DrawerProps> }> = ({ args }) => {
     }
 
     return (
-        <Stack mt={2} mb={4}>
+        <Stack sx={{ mt: 2, mb: 4 }}>
             <StyledTypography variant='h6'>Standard Drawer</StyledTypography>
             <StyledButton
                 dataTest='test'

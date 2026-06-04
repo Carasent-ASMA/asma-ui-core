@@ -3,11 +3,9 @@ import Fade from '@mui/material/Fade'
 
 export const StyledTooltip = (props: TooltipProps): JSX.Element => (
     <Tooltip
-        TransitionComponent={Fade}
-        TransitionProps={{ timeout: 300 }}
-        arrow
-        placement='top'
-        componentsProps={{
+        slots={{ transition: Fade }}
+        slotProps={{
+            transition: { timeout: 300 },
             tooltip: {
                 sx: {
                     borderRadius: '3px !important',
@@ -27,6 +25,8 @@ export const StyledTooltip = (props: TooltipProps): JSX.Element => (
                 },
             },
         }}
+        arrow
+        placement='top'
         {...props}
     />
 )
