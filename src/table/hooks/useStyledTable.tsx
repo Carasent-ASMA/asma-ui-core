@@ -51,12 +51,12 @@ export const useStyledTable = <
         meta: { locale: locale ?? 'en' },
         initialState: {
             pagination: { pageIndex: 0, pageSize: resolvedPageSize },
+            columnOrder,
+            ...initialState,
             columnVisibility: {
                 ...initialState?.columnVisibility,
                 [SELECT_COLUMN_ID]: false,
             },
-            columnOrder,
-            ...initialState,
         },
         enableRowSelection,
         getCoreRowModel: getCoreRowModel(),

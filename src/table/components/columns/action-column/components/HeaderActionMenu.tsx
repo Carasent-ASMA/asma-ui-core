@@ -205,7 +205,14 @@ export function HeaderActionMenu<TData>({
                         dataTest='reset-order-button'
                         variant='text'
                         size='small'
-                        onClick={() => headerData.table.resetColumnOrder()}
+                        onClick={() => {
+                            headerData.table.resetColumnOrder()
+                            filteredList.forEach((col) => {
+                                if (col.getCanHide()) {
+                                    col.toggleVisibility(true)
+                                }
+                            })
+                        }}
                     >
                         {t.reset_order}
                     </StyledButton>
