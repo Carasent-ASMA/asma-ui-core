@@ -42,6 +42,11 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
     const { minimized, setMinimized, fullScreen, setFullScreen } = useControlledProps(props)
     const isFullScreenActive = fullScreen && !minimized
 
+    const handleClose = () => {
+        setMinimized(false)
+        onClose()
+    }
+
     const fullScreenDialogStyle: React.CSSProperties | undefined = isFullScreenActive
         ? {
               right: 'auto',
@@ -83,7 +88,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                             tooltipTitle={t.expand}
                         />
 
-                        <CloseBtn showCloseIcon={showCloseIcon} onClick={onClose} tooltipTitle={t.close} />
+                        <CloseBtn showCloseIcon={showCloseIcon} onClick={handleClose} tooltipTitle={t.close} />
                     </div>
                 </div>
             </div>
@@ -140,7 +145,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                                 }}
                                 tooltipTitle={fullScreen ? t.exitFullscreen : t.fullscreen}
                             />
-                            <CloseBtn showCloseIcon={showCloseIcon} onClick={onClose} tooltipTitle={t.close} />
+                            <CloseBtn showCloseIcon={showCloseIcon} onClick={handleClose} tooltipTitle={t.close} />
                         </div>
                     </div>
 
