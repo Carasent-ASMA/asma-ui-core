@@ -1,4 +1,5 @@
-import { Autocomplete, Paper, type AutocompleteProps, type ChipTypeMap, type SxProps, type Theme } from '@mui/material'
+import { Autocomplete, Paper, type AutocompleteProps, type ChipTypeMap } from '@mui/material'
+import { mergeSlotProps } from '@mui/material/utils'
 import clsx from 'clsx'
 import { useLayoutEffect, useRef, useState } from 'react'
 import { StyledCheckbox } from 'src'
@@ -6,6 +7,24 @@ import { StyledChip } from '../../data-display/chip'
 import { cn } from 'src/helpers/cn'
 import { CloseIcon, CheckIcon, ChevronDownIcon, PlusIconCircle } from 'src/components/icons'
 import style from './StyledSelectAutocomplete.module.scss'
+
+type ListboxSlotProps<T, Multiple extends boolean | undefined, DisableClearable extends boolean | undefined, FreeSolo extends boolean | undefined, ChipComponent extends React.ElementType> =
+    NonNullable<
+        NonNullable<AutocompleteProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent>['slotProps']>['listbox']
+    >
+
+function mergeAutocompleteListboxSlotProps<
+    T,
+    Multiple extends boolean | undefined,
+    DisableClearable extends boolean | undefined,
+    FreeSolo extends boolean | undefined,
+    ChipComponent extends React.ElementType,
+>(
+    external: ListboxSlotProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent> | undefined,
+    defaults: React.HTMLAttributes<HTMLUListElement> & { sx?: object },
+): ListboxSlotProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent> {
+    return mergeSlotProps(external, defaults)
+}
 
 type StyledSelectAutocompleteMultipleValue<
     T,
@@ -74,17 +93,17 @@ export function StyledSelectAutocomplete<
     className,
     defaultValue,
     isOptionEqualToValue,
-    ListboxProps,
     onChange,
     options,
     popupIcon,
     readOnly,
     renderOption,
-    renderTags,
+    renderValue,
     sx,
     value,
     ...props
 }: StyledSelectAutocompleteProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent>): JSX.Element {
+    const { slots: userSlots, slotProps: userSlotProps, ...remainingProps } = props
     const [maxHeight, setMaxHeight] = useState<number | 'auto'>('auto')
     const selectRef = useRef<HTMLDivElement>(null)
     const shouldShowSelectAll = multiple === true && allowSelectAll === true && !readOnly
@@ -95,8 +114,8 @@ export function StyledSelectAutocomplete<
     >
     type AutocompleteOnChangeParameters = Parameters<AutocompleteOnChange>
     type MultipleValue = StyledSelectAutocompleteMultipleValue<T, DisableClearable, FreeSolo, ChipComponent>
-    type AutocompleteRenderTags = NonNullable<
-        StyledSelectAutocompleteBaseProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent>['renderTags']
+    type AutocompleteRenderValue = NonNullable<
+        StyledSelectAutocompleteBaseProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent>['renderValue']
     >
 
     const getMultipleValue = (candidate: unknown): MultipleValue => {
@@ -116,15 +135,6 @@ export function StyledSelectAutocomplete<
         setMaxHeight(availableHeight > 0 ? availableHeight : 'auto')
     }, [autoHeight])
 
-    const listboxProps = autoHeight
-        ? {
-              style: {
-                  maxHeight: maxHeight === 'auto' ? 'auto' : `${maxHeight}px`,
-              },
-              ...ListboxProps,
-          }
-        : ListboxProps
-
     const defaultGetOptionLabel = (option: T) => {
         if (typeof option === 'object' && option !== null && 'label' in option) {
             return (option as { label: string }).label
@@ -143,9 +153,9 @@ export function StyledSelectAutocomplete<
         },
     }
 
-    const listboxSx: SxProps<Theme> = listboxProps?.sx
-        ? ([defaultListboxSx, listboxProps.sx] as SxProps<Theme>)
-        : defaultListboxSx
+    const autoHeightListboxStyle: React.CSSProperties | undefined = autoHeight
+        ? { maxHeight: maxHeight === 'auto' ? 'auto' : `${maxHeight}px` }
+        : undefined
 
     const currentMultipleValue = shouldShowSelectAll ? getMultipleValue(isControlled ? value : uncontrolledValue) : []
     const selectableOptions = shouldShowSelectAll ? options.filter((option) => !isOptionDisabled(option)) : options
@@ -198,10 +208,12 @@ export function StyledSelectAutocomplete<
         )
     }
 
-    const defaultRenderTags: AutocompleteRenderTags = (tagValue, getTagProps) => {
-        return tagValue.map((option, index) => {
-            const tagProps = getTagProps({ index })
-            const chipProps: Omit<typeof tagProps, 'key'> = tagProps
+    const defaultRenderValue: AutocompleteRenderValue = (tagValue, getItemProps) => {
+        if (!Array.isArray(tagValue)) return null
+        // defaultRenderValue is only wired up when multiple=true (non-freeSolo), so casting to T[] is safe
+        return (tagValue as T[]).map((option, index) => {
+            const itemProps = getItemProps({ index })
+            const chipProps: Omit<typeof itemProps, 'key'> = itemProps
             const optionLabel = getOptionLabel?.(option) ?? defaultGetOptionLabel(option)
 
             return (
@@ -216,22 +228,23 @@ export function StyledSelectAutocomplete<
         })
     }
 
+    const defaultListboxSlotProps = {
+        sx: defaultListboxSx,
+        ...(autoHeightListboxStyle ? { style: autoHeightListboxStyle } : {}),
+    }
+
     return (
         <div className={cn(style['styledSelectAutocompleteWrapper'], wrapperClassName)} ref={selectRef}>
             <Autocomplete
-                {...props}
+                {...remainingProps}
                 multiple={multiple as Multiple}
                 defaultValue={shouldShowSelectAll ? undefined : defaultValue}
                 getOptionLabel={getOptionLabel}
                 isOptionEqualToValue={isOptionEqualToValue}
-                ListboxProps={{
-                    ...listboxProps,
-                    sx: listboxSx,
-                }}
                 className={clsx('!text-sm', className)}
                 onChange={handleChange}
                 options={options}
-                renderTags={renderTags ?? (multiple ? defaultRenderTags : undefined)}
+                renderValue={renderValue ?? (multiple ? defaultRenderValue : undefined)}
                 popupIcon={
                     readOnly ? null : (popupIcon ?? multiple) ? (
                         <PlusIconCircle width={24} height={24} />
@@ -252,54 +265,57 @@ export function StyledSelectAutocomplete<
                           >['value'])
                         : value
                 }
-                PaperComponent={({ children }) => (
-                    <Paper
-                        data-testid={`paper-${dataTest}`}
-                        sx={{
-                            padding: '0 !important',
-                            marginTop: '0px !important',
-                            '& .MuiAutocomplete-option.Mui-focused': {
-                                background: 'var(--colors-delta-50) !important',
-                            },
-                            '& li[aria-selected=true]': {
-                                background: 'var(--colors-gama-50) !important',
-                            },
-                            '& li[aria-selected=true].MuiAutocomplete-option.Mui-focused': {
-                                background: 'var(--colors-gama-50) !important',
-                            },
-                            '&:has([data-select-all-header]:hover) .MuiAutocomplete-option.Mui-focused': {
-                                background: 'transparent !important',
-                            },
-                            '&:has([data-select-all-header]:hover) li[aria-selected=true].MuiAutocomplete-option.Mui-focused':
-                                {
+                slots={{
+                    ...userSlots,
+                    paper: ({ children }) => (
+                        <Paper
+                            data-testid={`paper-${dataTest}`}
+                            sx={{
+                                padding: '0 !important',
+                                marginTop: '0px !important',
+                                '& .MuiAutocomplete-option.Mui-focused': {
+                                    background: 'var(--colors-delta-50) !important',
+                                },
+                                '& li[aria-selected=true]': {
                                     background: 'var(--colors-gama-50) !important',
                                 },
-                        }}
-                    >
-                        {shouldShowSelectAll && selectableOptions.length > 0 && (
-                            <div
-                                data-select-all-header
-                                className='flex items-center gap-x-[10px] border-[1px] border-b border-solid border-delta-200 bg-delta-50 py-2 pl-3 text-xs'
-                                onMouseDown={(e) => e.preventDefault()}
-                                role='presentation'
-                            >
-                                <StyledCheckbox
-                                    size='small'
-                                    dataTest={`${dataTest}-select-all`}
-                                    checked={allOptionsSelected}
-                                    indeterminate={someOptionsSelected}
-                                    hideWrapper
-                                    onChange={handleSelectAllChange}
-                                    aria-label={selectAllLabel ?? 'Select all'}
-                                />
-                                <span className='truncate text-[10px] font-semibold uppercase text-delta-600'>
-                                    {selectAllLabel ?? 'Select all'}
-                                </span>
-                            </div>
-                        )}
-                        {children}
-                    </Paper>
-                )}
+                                '& li[aria-selected=true].MuiAutocomplete-option.Mui-focused': {
+                                    background: 'var(--colors-gama-50) !important',
+                                },
+                                '&:has([data-select-all-header]:hover) .MuiAutocomplete-option.Mui-focused': {
+                                    background: 'transparent !important',
+                                },
+                                '&:has([data-select-all-header]:hover) li[aria-selected=true].MuiAutocomplete-option.Mui-focused':
+                                    {
+                                        background: 'var(--colors-gama-50) !important',
+                                    },
+                            }}
+                        >
+                            {shouldShowSelectAll && selectableOptions.length > 0 && (
+                                <div
+                                    data-select-all-header
+                                    className='flex items-center gap-x-[10px] border-[1px] border-b border-solid border-delta-200 bg-delta-50 py-2 pl-3 text-xs'
+                                    onMouseDown={(e) => e.preventDefault()}
+                                    role='presentation'
+                                >
+                                    <StyledCheckbox
+                                        size='small'
+                                        dataTest={`${dataTest}-select-all`}
+                                        checked={allOptionsSelected}
+                                        indeterminate={someOptionsSelected}
+                                        hideWrapper
+                                        onChange={handleSelectAllChange}
+                                        aria-label={selectAllLabel ?? 'Select all'}
+                                    />
+                                    <span className='truncate text-[10px] font-semibold uppercase text-delta-600'>
+                                        {selectAllLabel ?? 'Select all'}
+                                    </span>
+                                </div>
+                            )}
+                            {children}
+                        </Paper>
+                    ),
+                }}
                 renderOption={
                     renderOption ??
                     ((props, option, { selected }) => {
@@ -357,10 +373,13 @@ export function StyledSelectAutocomplete<
                     },
                 }}
                 slotProps={{
+                    ...userSlotProps,
                     clearIndicator: {
                         disableRipple: true,
                         disableFocusRipple: true,
+                        ...(userSlotProps?.clearIndicator ?? {}),
                     },
+                    listbox: mergeAutocompleteListboxSlotProps(userSlotProps?.listbox, defaultListboxSlotProps),
                 }}
                 clearIcon={
                     <span className='flex min-h-6 min-w-6 cursor-pointer items-center justify-center rounded-full bg-delta-50'>

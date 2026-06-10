@@ -1,5 +1,5 @@
 import type { Table } from '@tanstack/react-table'
-import { Popover, type PopoverOrigin } from '@mui/material'
+import { MenuList, Popover, type PopoverOrigin } from '@mui/material'
 import { useMemo, useCallback } from 'react'
 import { useToggleMenuVisibility } from 'src/table/hooks/useToggleMenuVisibility.hook'
 import { ChevronDownIcon } from 'src/table/shared-components/ChevronDownIcon'
@@ -74,24 +74,26 @@ export function TableRowCountSelect<TData>({
                 onClose={handleClose}
                 anchorOrigin={popoverOrigin.anchorOrigin}
                 transformOrigin={popoverOrigin.transformOrigin}
-                classes={{ paper: 'border border-solid border-delta-200 py-2' }}
+                classes={{ paper: 'border border-solid border-delta-200' }}
             >
-                {amountOfRowsOptions.map((size) => (
-                    <StyledMenuItem
-                        key={size}
-                        onClick={(e) => {
-                            e.stopPropagation()
-                            e.preventDefault()
+                <MenuList>
+                    {amountOfRowsOptions.map((size) => (
+                        <StyledMenuItem
+                            key={size}
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                e.preventDefault()
 
-                            handleRowsChange(size)
-                        }}
-                        selected={pageSize === size}
-                    >
-                        <span className={'text-sm font-normal text-delta-700'}>
-                            {size} {isNo ? 'rader' : 'rows'}
-                        </span>
-                    </StyledMenuItem>
-                ))}
+                                handleRowsChange(size)
+                            }}
+                            selected={pageSize === size}
+                        >
+                            <span className={'text-sm font-normal text-delta-700'}>
+                                {size} {isNo ? 'rader' : 'rows'}
+                            </span>
+                        </StyledMenuItem>
+                    ))}
+                </MenuList>
             </Popover>
         </>
     )

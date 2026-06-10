@@ -1,4 +1,5 @@
 import React, { useMemo, useState, type ReactNode } from 'react'
+import type { BackdropProps } from '@mui/material'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, screen, userEvent, waitForElementToBeRemoved } from 'storybook/test'
 import { EditSquareIcon } from 'src/components/icons'
@@ -135,17 +136,20 @@ function DialogStoryFrame(props: StoryArgs) {
                 dialogLabel={dialogLabel}
                 dialogTitle={dialogTitle}
                 dialogHeaderNode={headerNode}
-                PaperProps={{
-                    sx: {
-                        display: 'flex',
-                        flexDirection: 'column',
-                        overflow: 'auto',
-                        minHeight: '360px',
-                        maxWidth: '680px',
-                        width: '100%',
-                        maxHeight: '100%',
-                        height: '100%',
+                slotProps={{
+                    paper: {
+                        sx: {
+                            display: 'flex',
+                            flexDirection: 'column',
+                            overflow: 'auto',
+                            minHeight: '360px',
+                            maxWidth: '680px',
+                            width: '100%',
+                            maxHeight: '100%',
+                            height: '100%',
+                        },
                     },
+                    backdrop: { 'data-testid': 'dialog-backdrop' } as Partial<BackdropProps>,
                 }}
             >
                 {content}
@@ -201,12 +205,9 @@ export const BackdropClickCloses: Story = {
     render: (args) => <DialogStoryFrame {...args} />,
     play: async ({}) => {
         const dialog = await screen.findByRole('dialog')
+        const backdrop = await screen.findByTestId('dialog-backdrop')
 
-        //NOTE:  hacky relying on mui class name
-        const backdrop = document.querySelector('.MuiBackdrop-root')
-        await expect(backdrop).toBeTruthy()
-
-        await userEvent.click(backdrop as Element)
+        await userEvent.click(backdrop)
         await waitForElementToBeRemoved(dialog)
     },
 }

@@ -41,7 +41,7 @@ export default meta
 type Story = StoryObj<typeof StyledTooltip>
 
 export const Default: Story = {
-    args: { title: 'Default', componentsProps: { tooltip: { style: { maxWidth: '50px' } } } },
+    args: { title: 'Default', slotProps: { tooltip: { style: { maxWidth: '50px' } } } },
 }
 
 export const Arrow: Story = {

@@ -187,14 +187,16 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
                             error={hasError}
                             onBlur={!readOnly ? handleBlur : undefined}
                             helperText={null}
-                            FormHelperTextProps={{ sx: { m: 0 } }}
-                            inputProps={{
-                                ...(readOnly
-                                    ? {}
-                                    : {
-                                          inputMode: 'numeric',
-                                          style: { fontFamily: 'monospace' },
-                                      }),
+                            slotProps={{
+                                formHelperText: { sx: { m: 0 } },
+                                htmlInput: {
+                                    ...(readOnly
+                                        ? {}
+                                        : {
+                                              inputMode: 'numeric' as const,
+                                              style: { fontFamily: 'monospace' },
+                                          }),
+                                },
                             }}
                             onChange={onChange}
                         />

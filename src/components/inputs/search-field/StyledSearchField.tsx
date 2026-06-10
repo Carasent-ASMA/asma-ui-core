@@ -24,50 +24,52 @@ export const StyledSearchField: FC<StyledSearchFieldProps> = ({ value, onClear, 
                 onBlur={() => {
                     setIsFocused(false)
                 }}
-                InputProps={{
-                    className: cn('transition-[padding] duration-300', hasInteraction ? 'pl-0' : 'pl-5'),
-                    sx: {
-                        '& input': {
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
+                slotProps={{
+                    input: {
+                        className: cn('transition-[padding] duration-300', hasInteraction ? 'pl-0' : 'pl-5'),
+                        sx: {
+                            '& input': {
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                            },
                         },
+                        endAdornment: value ? (
+                            <div
+                                data-testid='styled-search-clear-icon'
+                                className={cn(
+                                    'cursor-pointer rounded-full bg-delta-50',
+                                    'flex items-center justify-center',
+                                    'transform-gpu transition-all duration-300 ease-in-out',
+                                    value ? 'scale-100 opacity-100' : 'pointer-events-none scale-75 opacity-0',
+                                )}
+                                style={{
+                                    width: 24,
+                                    height: 24,
+                                    flexShrink: 0,
+                                }}
+                                onClick={(e) => {
+                                    e.preventDefault()
+                                    e.stopPropagation()
+                                    onClear?.()
+                                }}
+                            >
+                                <CloseIcon
+                                    width={20}
+                                    height={20}
+                                    color='var(--colors-delta-700)'
+                                    className='pointer-events-none'
+                                />
+                            </div>
+                        ) : null,
                     },
-                    endAdornment: value ? (
-                        <div
-                            data-testid='styled-search-clear-icon'
-                            className={cn(
-                                'cursor-pointer rounded-full bg-delta-50',
-                                'flex items-center justify-center',
-                                'transform-gpu transition-all duration-300 ease-in-out',
-                                value ? 'scale-100 opacity-100' : 'pointer-events-none scale-75 opacity-0',
-                            )}
-                            style={{
-                                width: 24,
-                                height: 24,
-                                flexShrink: 0,
-                            }}
-                            onClick={(e) => {
-                                e.preventDefault()
-                                e.stopPropagation()
-                                onClear?.()
-                            }}
-                        >
-                            <CloseIcon
-                                width={20}
-                                height={20}
-                                color='var(--colors-delta-700)'
-                                className='pointer-events-none'
-                            />
-                        </div>
-                    ) : null,
-                }}
-                InputLabelProps={{
-                    sx: {
-                        transform: 'translate(34px, 9px) scale(1)',
-                        width: hasInteraction ? undefined : 'calc(100% - 42px)',
-                        '&.MuiInputLabel-shrink': {
-                            transform: 'translate(16px, -9px) scale(0.75)',
+                    inputLabel: {
+                        sx: {
+                            transform: 'translate(34px, 9px) scale(1)',
+                            width: hasInteraction ? undefined : 'calc(100% - 42px)',
+                            '&.MuiInputLabel-shrink': {
+                                transform: 'translate(16px, -9px) scale(0.75)',
+                            },
                         },
                     },
                 }}

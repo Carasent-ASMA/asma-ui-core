@@ -40,8 +40,8 @@ export const StyledInteractiveChip: FC<StyledInteractiveChipProps> = forwardRef<
                     checked={checked}
                     size={size}
                     sx={{ pointerEvents: 'none' }}
-                    inputProps={{
-                        'aria-label': accessibleName,
+                    slotProps={{
+                        input: { 'aria-label': accessibleName },
                     }}
                 />
             }
