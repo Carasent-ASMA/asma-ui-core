@@ -1,4 +1,5 @@
-import { Autocomplete, Paper, type AutocompleteProps, type ChipTypeMap, type SxProps, type Theme } from '@mui/material'
+import { Autocomplete, Paper, type AutocompleteProps, type ChipTypeMap } from '@mui/material'
+import { mergeSlotProps } from '@mui/material/utils'
 import clsx from 'clsx'
 import { useLayoutEffect, useRef, useState } from 'react'
 import { StyledCheckbox } from 'src'
@@ -6,6 +7,24 @@ import { StyledChip } from '../../data-display/chip'
 import { cn } from 'src/helpers/cn'
 import { CloseIcon, CheckIcon, ChevronDownIcon, PlusIconCircle } from 'src/components/icons'
 import style from './StyledSelectAutocomplete.module.scss'
+
+type ListboxSlotProps<T, Multiple extends boolean | undefined, DisableClearable extends boolean | undefined, FreeSolo extends boolean | undefined, ChipComponent extends React.ElementType> =
+    NonNullable<
+        NonNullable<AutocompleteProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent>['slotProps']>['listbox']
+    >
+
+function mergeAutocompleteListboxSlotProps<
+    T,
+    Multiple extends boolean | undefined,
+    DisableClearable extends boolean | undefined,
+    FreeSolo extends boolean | undefined,
+    ChipComponent extends React.ElementType,
+>(
+    external: ListboxSlotProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent> | undefined,
+    defaults: React.HTMLAttributes<HTMLUListElement> & { sx?: object },
+): ListboxSlotProps<T, Multiple, DisableClearable, FreeSolo, ChipComponent> {
+    return mergeSlotProps(external, defaults)
+}
 
 type StyledSelectAutocompleteMultipleValue<
     T,
@@ -116,9 +135,6 @@ export function StyledSelectAutocomplete<
         setMaxHeight(availableHeight > 0 ? availableHeight : 'auto')
     }, [autoHeight])
 
-    type UserListboxSlotProps = React.HTMLAttributes<HTMLUListElement> & { sx?: SxProps<Theme> }
-    const userListboxProps = userSlotProps?.listbox as UserListboxSlotProps | undefined
-
     const defaultGetOptionLabel = (option: T) => {
         if (typeof option === 'object' && option !== null && 'label' in option) {
             return (option as { label: string }).label
@@ -137,13 +153,9 @@ export function StyledSelectAutocomplete<
         },
     }
 
-    const listboxSx: SxProps<Theme> = userListboxProps?.sx
-        ? ([defaultListboxSx, userListboxProps.sx] as SxProps<Theme>)
-        : defaultListboxSx
-
-    const listboxStyle: React.CSSProperties | undefined = autoHeight
-        ? { maxHeight: maxHeight === 'auto' ? 'auto' : `${maxHeight}px`, ...userListboxProps?.style }
-        : userListboxProps?.style
+    const autoHeightListboxStyle: React.CSSProperties | undefined = autoHeight
+        ? { maxHeight: maxHeight === 'auto' ? 'auto' : `${maxHeight}px` }
+        : undefined
 
     const currentMultipleValue = shouldShowSelectAll ? getMultipleValue(isControlled ? value : uncontrolledValue) : []
     const selectableOptions = shouldShowSelectAll ? options.filter((option) => !isOptionDisabled(option)) : options
@@ -214,6 +226,11 @@ export function StyledSelectAutocomplete<
                 />
             )
         })
+    }
+
+    const defaultListboxSlotProps = {
+        sx: defaultListboxSx,
+        ...(autoHeightListboxStyle ? { style: autoHeightListboxStyle } : {}),
     }
 
     return (
@@ -362,11 +379,7 @@ export function StyledSelectAutocomplete<
                         disableFocusRipple: true,
                         ...(userSlotProps?.clearIndicator ?? {}),
                     },
-                    listbox: {
-                        ...userListboxProps,
-                        ...(listboxStyle ? { style: listboxStyle } : {}),
-                        sx: listboxSx,
-                    },
+                    listbox: mergeAutocompleteListboxSlotProps(userSlotProps?.listbox, defaultListboxSlotProps),
                 }}
                 clearIcon={
                     <span className='flex min-h-6 min-w-6 cursor-pointer items-center justify-center rounded-full bg-delta-50'>

@@ -153,7 +153,8 @@ export const DynamicSelectAutocomplete = forwardRef(
                                                   }}
                                                   disabled={Boolean(disabled) || Boolean(loading)}
                                                   onDelete={() => {
-                                                      const newValues = (value as TOption[]).filter(
+                                                      if (!Array.isArray(value)) return
+                                                      const newValues = value.filter(
                                                           (v) => !isOptionEqualToValue(v, option),
                                                       )
                                                       onChange(newValues)
