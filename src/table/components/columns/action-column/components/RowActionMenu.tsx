@@ -1,6 +1,6 @@
 import { useToggleMenuVisibility } from 'src/table/hooks/useToggleMenuVisibility.hook'
 import type { CellContext, Row } from '@tanstack/react-table'
-import { Popover } from '@mui/material'
+import { MenuList, Popover } from '@mui/material'
 import { DotsVerticalIcon } from 'src/table/shared-components/DotsVerticalIcon'
 
 import { StyledMenuItem } from 'src/table/shared-components/StyledMenuItem'
@@ -132,46 +132,48 @@ export function RowActionMenu<TData>({
                                 <span>{noActionsLabel}</span>
                             </div>
                         ) : (
-                            allActions.map((action, index) => {
-                                if (isCustomAction(action)) {
-                                    const CustomComponent = action.component(tableData.row, handleClose)
-                                    return React.isValidElement(CustomComponent) ? (
-                                        <React.Fragment key={index}>{CustomComponent}</React.Fragment>
-                                    ) : null
-                                }
+                            <MenuList disablePadding>
+                                {allActions.map((action, index) => {
+                                    if (isCustomAction(action)) {
+                                        const CustomComponent = action.component(tableData.row, handleClose)
+                                        return React.isValidElement(CustomComponent) ? (
+                                            <React.Fragment key={index}>{CustomComponent}</React.Fragment>
+                                        ) : null
+                                    }
 
-                                if (action.hide) return null
+                                    if (action.hide) return null
 
-                                return (
-                                    <StyledTooltip
-                                        key={index}
-                                        title={action?.tooltipTitle}
-                                        arrow
-                                        placement={action?.tooltipPlacement ?? 'left'}
-                                    >
-                                        <span>
-                                            <StyledMenuItem
-                                                className={action.className}
-                                                disabled={action.disabled}
-                                                onClick={() => {
-                                                    if (action.disabled) return
-                                                    action.onClick?.(tableData.row)
-                                                }}
-                                                onMouseDown={(e) => {
-                                                    e.stopPropagation()
-                                                    e.preventDefault()
-                                                }}
-                                                onMouseUp={(e) => {
-                                                    e.stopPropagation()
-                                                    e.preventDefault()
-                                                }}
-                                            >
-                                                {action.label}
-                                            </StyledMenuItem>
-                                        </span>
-                                    </StyledTooltip>
-                                )
-                            })
+                                    return (
+                                        <StyledTooltip
+                                            key={index}
+                                            title={action?.tooltipTitle}
+                                            arrow
+                                            placement={action?.tooltipPlacement ?? 'left'}
+                                        >
+                                            <span>
+                                                <StyledMenuItem
+                                                    className={action.className}
+                                                    disabled={action.disabled}
+                                                    onClick={() => {
+                                                        if (action.disabled) return
+                                                        action.onClick?.(tableData.row)
+                                                    }}
+                                                    onMouseDown={(e) => {
+                                                        e.stopPropagation()
+                                                        e.preventDefault()
+                                                    }}
+                                                    onMouseUp={(e) => {
+                                                        e.stopPropagation()
+                                                        e.preventDefault()
+                                                    }}
+                                                >
+                                                    {action.label}
+                                                </StyledMenuItem>
+                                            </span>
+                                        </StyledTooltip>
+                                    )
+                                })}
+                            </MenuList>
                         )}
                     </Popover>
                 )}

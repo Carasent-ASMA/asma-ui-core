@@ -2,7 +2,7 @@ import type { Table } from '@tanstack/react-table'
 import { useToggleMenuVisibility } from 'src/table/hooks/useToggleMenuVisibility.hook'
 import styleTable from '../StyledTable.module.scss'
 import { useMemo, useRef, useCallback } from 'react'
-import { Popover, type PopoverOrigin } from '@mui/material'
+import { MenuList, Popover, type PopoverOrigin } from '@mui/material'
 import { ChevronDownIcon } from 'src/table/shared-components/ChevronDownIcon'
 import { ChevronRightIcon } from 'src/table/shared-components/ChevronRightIcon'
 import { ChevronLeftIcon } from 'src/table/shared-components/ChevronLeftIcon'
@@ -91,24 +91,26 @@ export function TablePagination<TData>({
                 onClose={handleClose}
                 anchorOrigin={popoverOrigin.anchorOrigin}
                 transformOrigin={popoverOrigin.transformOrigin}
-                classes={{ paper: 'border border-solid border-delta-200 py-2' }}
+                classes={{ paper: 'border border-solid border-delta-200' }}
             >
-                {pages.map((page) => (
-                    <StyledMenuItem
-                        key={page}
-                        onClick={(e) => {
-                            e.stopPropagation()
-                            e.preventDefault()
+                <MenuList>
+                    {pages.map((page) => (
+                        <StyledMenuItem
+                            key={page}
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                e.preventDefault()
 
-                            handlePageChange(page)
-                        }}
-                        selected={page === currentPage}
-                    >
-                        <span className={'text-sm font-normal text-delta-700'}>
-                            {isNo ? 'Side' : 'Page'} {page}
-                        </span>
-                    </StyledMenuItem>
-                ))}
+                                handlePageChange(page)
+                            }}
+                            selected={page === currentPage}
+                        >
+                            <span className={'text-sm font-normal text-delta-700'}>
+                                {isNo ? 'Side' : 'Page'} {page}
+                            </span>
+                        </StyledMenuItem>
+                    ))}
+                </MenuList>
             </Popover>
             <StyledTooltip title={currentPage === 1 ? '' : isNo ? 'Forrige side' : 'Previous Page'}>
                 <div>
