@@ -29,7 +29,6 @@ export const StyledTooltip = (props: TooltipProps): JSX.Element => {
                 transition: mergeSlotProps(slotProps?.transition, { timeout: 300 }),
                 tooltip: mergeSlotProps(slotProps?.tooltip, { sx: defaultTooltipSx }),
             }}
-
         />
     )
 }

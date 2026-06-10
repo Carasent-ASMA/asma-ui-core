@@ -24,8 +24,8 @@ export const StyledTooltip = (props: TooltipProps): JSX.Element => {
         <Tooltip
             enterDelay={500}
             placement='top'
-            {...rest}  // сначала пользовательские пропы
-            slots={{ transition: Fade, ...rest.slots }}  // потом дефолты поверх
+            {...rest}
+            slots={{ transition: Fade, ...rest.slots }}
             slotProps={{
                 ...slotProps,
                 transition: mergeSlotProps(slotProps?.transition, { timeout: 300 }),
