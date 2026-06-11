@@ -45,9 +45,13 @@ export const TimePickerInput: React.FC<
     const hasError = !isValidTime || !isValidEndTime || !!error
     const inputRootRef = useRef<HTMLDivElement | null>(null)
 
+
     useEffect(() => {
-        if (inputRootRef.current) popupState.setAnchorEl(inputRootRef.current)
-    }, [popupState])
+        if (inputRootRef.current) {
+            popupState.setAnchorEl(inputRootRef.current)
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     return (
         <div style={{ height: readOnly ? '40px' : '75px' }}>
