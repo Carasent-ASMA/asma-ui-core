@@ -2,6 +2,7 @@ import React, { useState, type ReactNode } from 'react'
 import { StyledButton } from '../../inputs/button'
 import { FilterIcon } from '../../icons'
 import { StyledPopover } from '../popover'
+import { useDynamicToolbarLayout } from '../../custom/module/header-layout/DynamicToolbarLayoutContext'
 import clsx from 'clsx'
 import type { PopoverProps } from '@mui/material'
 
@@ -9,6 +10,7 @@ import type { PopoverProps } from '@mui/material'
  * Custom props:
  * @param filterIsActive - needed to determine whether or not to show the dot in the top right corner indicating some changes were made
  * @param popoverContent
+ * @param hideLabel - icon-only mode. When omitted, follows the surrounding DynamicToolbar layout (filterIconOnly).
  */
 
 interface StyledFilterMenuProps {
@@ -69,6 +71,8 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
     hideLabel,
 }) => {
     const { onAnchorClick, onClose, anchorEl } = useAnchor()
+    const { filterIconOnly } = useDynamicToolbarLayout()
+    const isLabelHidden = hideLabel ?? filterIconOnly
     const customAnchor = anchorNode?.({ isOpen: !!anchorEl, onClose })
 
     return (
@@ -92,7 +96,7 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
                         dataTest={dataTest}
                         data-popover-open={!!anchorEl || undefined}
                     >
-                        {!hideLabel && (label ?? 'Filter')}
+                        {!isLabelHidden && (label ?? 'Filter')}
                     </StyledButton>
                 )}
                 {filterIsActive && (
