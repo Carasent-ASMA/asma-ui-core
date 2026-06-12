@@ -62,6 +62,7 @@ export * from './components/custom/widget/widget-header/StyledWidgetHeader'
 export * from './components/custom/widget/widget/StyledWidget'
 //modules
 export * from './components/custom/module/module-title/StyledModuleTitle'
+export * from './components/custom/module/header-layout'
 export * from './components/feedback/minimizable-dialog'
 
 export { Fade, Paper, ClickAwayListener, Popper, Avatar, Skeleton, Container, Stack, FormLabel } from '@mui/material'

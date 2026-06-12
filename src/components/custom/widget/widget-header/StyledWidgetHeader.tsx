@@ -10,10 +10,12 @@ export const StyledWidgetHeader: React.FC<{
     containerClassname?: string
     actionsClassname?: string
 }> = ({ actions, title, containerClassname, actionsClassname }) => {
+    const hasTitle = title != null && title !== ''
+
     return (
-        <div className={cn(style['styled-widget-header'], containerClassname)}>
-            <StyledWidgetTitle>{title}</StyledWidgetTitle>
-            <div className={actionsClassname}>{actions}</div>
+        <div className={cn(style['styled-widget-header'], containerClassname, !hasTitle && actions && '!block')}>
+            {hasTitle && <StyledWidgetTitle>{title}</StyledWidgetTitle>}
+            <div className={cn(actionsClassname, !hasTitle && 'w-full')}>{actions}</div>
         </div>
     )
 }

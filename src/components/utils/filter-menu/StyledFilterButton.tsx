@@ -1,10 +1,12 @@
 import { StyledButton, type StyledButtonProps } from '../../inputs/button'
 import { FilterIcon } from '../../icons'
+import { useDynamicToolbarLayout } from '../../custom/module/header-layout/DynamicToolbarLayoutContext'
 import clsx from 'clsx'
 
 /**
  * Custom props:
  * @param filterIsActive - needed to determine whether or not to show the dot in the top right corner indicating some changes were made
+ * @param hideLabel - icon-only mode. When omitted, follows the surrounding DynamicToolbar layout (filterIconOnly).
  */
 
 interface StyledFilterMenuProps {
@@ -16,11 +18,14 @@ interface StyledFilterMenuProps {
 export const StyledFilterButton: React.FC<StyledButtonProps & StyledFilterMenuProps> = ({
     filterIsActive,
     label,
-    hideLabel = false,
+    hideLabel,
     size = 'large',
     variant = 'outlined',
     ...props
 }) => {
+    const { filterIconOnly } = useDynamicToolbarLayout()
+    const isLabelHidden = hideLabel ?? filterIconOnly
+
     return (
         <>
             <div className='relative h-fit w-fit'>
@@ -31,7 +36,7 @@ export const StyledFilterButton: React.FC<StyledButtonProps & StyledFilterMenuPr
                     variant={variant}
                     size={size}
                 >
-                    {!hideLabel && (label ?? 'Filter')}
+                    {!isLabelHidden && (label ?? 'Filter')}
                 </StyledButton>
                 {filterIsActive && (
                     <div
