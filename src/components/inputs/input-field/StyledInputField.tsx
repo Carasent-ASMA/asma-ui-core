@@ -96,6 +96,8 @@ export const StyledInputField: React.FC<
                 },
                 '& .MuiFormHelperText-root': {
                     fontSize: '14px',
+                    lineHeight: '24px',
+                    height: '24px',
                     marginLeft: 0,
                 },
                 '& .MuiFormHelperText-root.Mui-error': {
