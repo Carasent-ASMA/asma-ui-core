@@ -1,63 +1,88 @@
 .container {
-    @apply flex min-w-[344px] max-w-md flex-col gap-1 rounded-xl border border-solid border-[color:var(--colors-border-secondary)] bg-[color:var(--colors-background-primary)] p-4 text-[color:var(--colors-text-primary)] shadow-md;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 8px 12px 16px;
+    border-radius: 4px;
+    width: 400px;
+    height: auto;
+    box-shadow: 0 4px 40px 0 rgba(34, 33, 51, 0.4);
+    border: 1px solid transparent;
 }
 
 .header {
-    @apply flex items-start justify-between gap-3;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .title {
-    @apply flex items-center gap-2 text-sm font-semibold capitalize;
-}
-
-.title_info {
-    @apply text-[color:var(--colors-text-info)];
-}
-
-.title_error {
-    @apply text-[color:var(--colors-text-error)];
-}
-
-.title_success {
-    @apply text-[color:var(--colors-text-success)];
-}
-
-.title_warning {
-    @apply text-[color:var(--colors-text-warning)];
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: capitalize;
 }
 
 .message {
-    @apply whitespace-pre-wrap break-words pl-8 text-sm;
+    flex: 1;
+    padding: 2px 0;
+    font-size: 14px;
+    font-weight: 400;
 }
 
-.message_info {
-    @apply text-[color:var(--colors-text-primary)];
-}
-
-.message_error {
-    @apply text-[color:var(--colors-text-primary)];
-}
-
-.message_success {
-    @apply text-[color:var(--colors-text-primary)];
-}
-
-.message_warning {
-    @apply text-[color:var(--colors-text-primary)];
-}
-
+/* ---- Severity Variants ---- */
 .info {
-    @apply border-[color:var(--colors-border-info)];
+    background-color: #f0faff;
+    border-color: #bae8fd;
 }
 
 .error {
-    @apply border-[color:var(--colors-border-error)];
+    background-color: #fcf3f3;
+    border-color: #f6b9b9;
 }
 
 .success {
-    @apply border-[color:var(--colors-border-success)];
+    background-color: #e9fbf0;
+    border-color: #a1ebbd;
 }
 
 .warning {
-    @apply border-[color:var(--colors-border-warning)];
+    background-color: #fdf8de;
+    border-color: #f0c800;
+}
+
+/* ---- Title Colors ---- */
+.title_info {
+    color: #1563bc;
+}
+
+.title_error {
+    color: #b6120d;
+}
+
+.title_success {
+    color: #0b7c36;
+}
+
+.title_warning {
+    color: #816d09;
+}
+
+/* ---- Message Colors ---- */
+.message_info {
+    color: #1255a1;
+}
+
+.message_error {
+    color: #9d0f0f;
+}
+
+.message_success {
+    color: #085e29;
+}
+
+.message_warning {
+    color: #5f5107;
 }

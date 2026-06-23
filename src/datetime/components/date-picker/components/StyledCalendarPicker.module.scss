@@ -9,8 +9,7 @@
     --rdp-nav-height: 32px;
 }
 
-.localeNb {
-}
+.localeNb {}
 
 .months {
     @apply flex flex-col gap-[14px] mt-[16px] mb-[16px];
@@ -153,7 +152,7 @@
 
 .day_disabled {
     .day {
-        @apply text-delta-300 font-normal cursor-not-allowed  #{!important};
+        @apply text-delta-300 font-normal cursor-not-allowed #{!important};
     }
 }
 
