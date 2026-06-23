@@ -28,9 +28,9 @@ export const StyledInputField: React.FC<
             error={error}
             helperText={
                 readOnly ? null : error ? (
-                    <span className='inline-flex items-center gap-1'>
-                        <ErrorOutlineIcon width={20} height={20} className='min-w-5' />
-                        {helperText ?? 'Required'}
+                    <span className='flex items-start gap-1'>
+                        <ErrorOutlineIcon width={20} height={20} className='min-w-5 shrink-0 translate-y-[2px]' />
+                        <span className='min-w-0 flex-1'>{helperText ?? 'Required'}</span>
                     </span>
                 ) : (
                     helperText
@@ -97,8 +97,10 @@ export const StyledInputField: React.FC<
                 '& .MuiFormHelperText-root': {
                     fontSize: '14px',
                     lineHeight: '24px',
-                    height: '24px',
+                    minHeight: '24px',
                     marginLeft: 0,
+                    whiteSpace: 'normal',
+                    wordBreak: 'break-word',
                 },
                 '& .MuiFormHelperText-root.Mui-error': {
                     color: 'var(--colors-error-500) !important',

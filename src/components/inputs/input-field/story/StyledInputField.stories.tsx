@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 
 import { StyledInputField } from '../StyledInputField'
 import { expect } from 'storybook/test'
-import { StyledFormLabel } from 'src/components/data-display/form-label'
 
 const meta: Meta<typeof StyledInputField> = {
     title: 'Inputs/InputField',
