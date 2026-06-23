@@ -64,7 +64,7 @@ export interface DynamicToolbarProps {
 
 const DEFAULT_COMPACT_BREAKPOINT_PX = 744
 const DEFAULT_RESERVE_BULK_ACTIONS_WIDTH_PX = 0
-const DEFAULT_MAX_VISIBLE_BULK_ACTIONS = 3
+const DEFAULT_MAX_VISIBLE_BULK_ACTIONS = 2
 
 /** Responsive breakpoints for bulk actions visibility based on container width */
 const BULK_ACTIONS_BREAKPOINTS = [
@@ -109,10 +109,15 @@ export function DynamicToolbar(props: DynamicToolbarProps): ReactElement {
     const { register, widths } = useWidthRegistry()
     const isMobile = useMobileMediaQuery()
 
-    const responsiveMaxVisibleBulkActions = useMemo(
+    const compactMaxVisibleBulkActions = useMemo(
         () => getResponsiveMaxVisibleBulkActions(containerWidth, maxVisibleBulkActions),
         [containerWidth, maxVisibleBulkActions],
     )
+
+    const reserveMaxVisibleBulkActions =
+        !isMobile && containerWidth >= DEFAULT_COMPACT_BREAKPOINT_PX
+            ? maxVisibleBulkActions
+            : compactMaxVisibleBulkActions
 
     const isSelectionMode = selectedCount > 0
     const showPageActions = !isSelectionMode
@@ -143,9 +148,9 @@ export function DynamicToolbar(props: DynamicToolbarProps): ReactElement {
                 DEFAULT_RESERVE_BULK_ACTIONS_WIDTH_PX,
                 bulkActions,
                 resolveActionWidth,
-                responsiveMaxVisibleBulkActions,
+                reserveMaxVisibleBulkActions,
             ),
-        [bulkActions, resolveActionWidth, responsiveMaxVisibleBulkActions],
+        [bulkActions, resolveActionWidth, reserveMaxVisibleBulkActions],
     )
 
     const layoutResolution = useMemo(
@@ -163,7 +168,7 @@ export function DynamicToolbar(props: DynamicToolbarProps): ReactElement {
                 hasTrailingUtility: false,
                 pageActions,
                 bulkActions,
-                maxVisibleBulkActions: responsiveMaxVisibleBulkActions,
+                maxVisibleBulkActions: reserveMaxVisibleBulkActions,
                 measured,
             }),
         [
@@ -173,7 +178,7 @@ export function DynamicToolbar(props: DynamicToolbarProps): ReactElement {
             filter,
             isMobile,
             isSelectionMode,
-            responsiveMaxVisibleBulkActions,
+            reserveMaxVisibleBulkActions,
             measured,
             pageActions,
             search,
@@ -260,14 +265,17 @@ export function DynamicToolbar(props: DynamicToolbarProps): ReactElement {
             planBulkToolbarActions({
                 actions: bulkActions,
                 availableWidth: bulkActionsAvailableWidth,
-                maxVisibleBulkActions: responsiveMaxVisibleBulkActions,
+                maxVisibleBulkActions:
+                    layoutMode === 'compact' ? compactMaxVisibleBulkActions : maxVisibleBulkActions,
                 resolveActionWidth,
                 moreButtonWidthPx: measured.moreButtonWidthPx,
             }),
         [
             bulkActions,
             bulkActionsAvailableWidth,
-            responsiveMaxVisibleBulkActions,
+            compactMaxVisibleBulkActions,
+            layoutMode,
+            maxVisibleBulkActions,
             resolveActionWidth,
             measured.moreButtonWidthPx,
         ],

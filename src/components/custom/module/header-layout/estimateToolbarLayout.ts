@@ -8,15 +8,15 @@ import {
 
 const CLUSTER_GAP_PX = 8
 const INLINE_ROW_GAP_PX = 12
-const SEARCH_FIELD_PX = 168
+const SEARCH_FIELD_PX = 160
 const LEADING_UTILITY_PX = 44
 const FILTER_WITH_LABEL_PX = 92
 const FILTER_ICON_ONLY_PX = 44
 const TRAILING_WITH_LABEL_PX = 148
 const TRAILING_ICON_ONLY_PX = 44
 const SELECTION_INDICATOR_PX = 168
-const TITLE_CHAR_PX = 11
-const TITLE_MIN_PX = 96
+const TITLE_CHAR_PX = 9
+const TITLE_MIN_PX = 56
 const TITLE_MAX_PX = 360
 /** Char-count stand-in for JSX titles, which cannot be measured from text. */
 const TITLE_JSX_FALLBACK_CHARS = 12
@@ -85,6 +85,10 @@ function titleTextLength(title?: ToolbarSlot): number {
 
 export function estimateTitleAreaWidth(title?: ToolbarSlot): number {
     const length = titleTextLength(title)
+    if (length === 0) {
+        return 0
+    }
+
     const textWidth = length > 0 ? length * TITLE_CHAR_PX + 24 : 0
 
     return Math.min(TITLE_MAX_PX, Math.max(TITLE_MIN_PX, textWidth))
@@ -96,6 +100,10 @@ export function estimateTitleAreaWidth(title?: ToolbarSlot): number {
  * falling back to the character-count estimate before measurement.
  */
 export function resolveTitleAreaWidth(title: ToolbarSlot | undefined, measuredTitleWidthPx?: number): number {
+    if (typeof title === 'string') {
+        return estimateTitleAreaWidth(title)
+    }
+
     if (measuredTitleWidthPx != null && measuredTitleWidthPx > 0) {
         return Math.min(TITLE_MAX_PX, measuredTitleWidthPx)
     }
@@ -333,9 +341,11 @@ export function resolveToolbarLayout(options: {
                 measured,
             })
 
+        const titleSelectionGap = title ? INLINE_ROW_GAP_PX : 0
         const selectionInlineWidth =
             titleWidth +
             slots.selectionIndicator +
+            titleSelectionGap +
             utilitiesWidth({
                 filterIconOnly: false,
                 trailingIconOnly: true,
@@ -371,8 +381,7 @@ export function resolveToolbarLayout(options: {
     }[] = [
         { filterIconOnly: false, trailingIconOnly: false, pageActionsWidthPx: pageWithLabels },
         { filterIconOnly: false, trailingIconOnly: true, pageActionsWidthPx: pageWithLabels },
-        { filterIconOnly: false, trailingIconOnly: true, pageActionsWidthPx: pageIconOnly },
-        { filterIconOnly: true, trailingIconOnly: true, pageActionsWidthPx: pageIconOnly },
+        { filterIconOnly: true, trailingIconOnly: true, pageActionsWidthPx: pageWithLabels },
     ]
 
     for (const step of inlineSteps) {

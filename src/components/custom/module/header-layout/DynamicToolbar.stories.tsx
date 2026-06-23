@@ -117,7 +117,7 @@ const meta = {
     args: {
         title: 'Workspaces',
         helperText: 'Dynamic toolbar improves efficiency',
-        maxVisibleBulkActions: 3,
+        maxVisibleBulkActions: 2,
     },
 } satisfies Meta<typeof DynamicToolbar>
 
@@ -244,7 +244,7 @@ export const CompactSelectionMode: Story = {
 
 /**
  * Bulk actions overflow.
- * When >maxVisibleBulkActions (default 3), excess goes to "More" menu.
+ * When >maxVisibleBulkActions (default 2), excess goes to "More" menu.
  */
 export const BulkOverflowRule: Story = {
     render: () => (

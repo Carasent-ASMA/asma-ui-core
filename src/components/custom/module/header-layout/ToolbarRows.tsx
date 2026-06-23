@@ -2,6 +2,7 @@ import type { ReactElement, ReactNode } from 'react'
 import { StyledButton } from 'src/components/inputs/button'
 import { CloseIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
+import { StyledWidgetTitle } from '../../widget/widget-title/StyledWidgetTitle'
 import type { PlannedToolbarActions } from './planToolbarActions'
 import { hasPlannedActions, ToolbarActionGroup } from './ToolbarActionGroup'
 import { formatSelectionLabel, type ToolbarTranslations } from './useTranslations'
@@ -93,7 +94,7 @@ export function SearchSlot({
                 '[&_.MuiFormControl-root]:w-full',
                 expanded
                     ? 'min-w-0 flex-1 [&_.MuiFormControl-root]:max-w-none'
-                    : 'w-[min(240px,40vw)] max-w-[280px] shrink-0',
+                    : 'w-40 shrink-0',
             )}
         >
             {search}
@@ -119,8 +120,16 @@ export function FadeSlot({ visible, children }: { visible: boolean; children: Re
 export function TitleText({ title, measureRef }: { title: ToolbarSlot; measureRef?: MeasureRef }): JSX.Element {
     /* `measureRef` reads scrollWidth, so the natural title width is known even
      * while the rendered title is truncated. */
+    if (typeof title === 'string') {
+        return (
+            <StyledWidgetTitle ref={measureRef} className='!min-w-0 truncate'>
+                {title}
+            </StyledWidgetTitle>
+        )
+    }
+
     return (
-        <div ref={measureRef} className='min-w-0 truncate text-2xl font-semibold text-delta-800'>
+        <div ref={measureRef} className='min-w-0 truncate'>
             {title}
         </div>
     )
