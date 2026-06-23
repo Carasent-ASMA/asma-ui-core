@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, type ComponentType, type SVGProps } from 'react'
 import type { Meta } from '@storybook/react-vite'
-import * as Icons from '../components/icons'
-import { StyledSearchField } from '../components/inputs/search-field'
+import * as Icons from '..'
+import { StyledSearchField } from '../../inputs/search-field'
 
 /**
  * A flat registry of all icon components exported by asma-ui-core.
@@ -9,18 +9,18 @@ import { StyledSearchField } from '../components/inputs/search-field'
  * Each entry maps the export name (e.g. "BellIcon") to the underlying
  * React component so Storybook can render every available icon.
  */
-const iconEntries = (Object.entries(Icons) as [string, React.ComponentType<React.SVGProps<SVGSVGElement>>][]).filter(
+const iconEntries = (Object.entries(Icons) as [string, ComponentType<SVGProps<SVGSVGElement>>][]).filter(
     ([, value]) => typeof value === 'function',
 )
 
 const meta = {
-    title: '*/Icons',
+    title: 'Icons/All Icons',
     tags: [],
 } satisfies Meta
 
 export default meta
 
-export const AllIcons = (): JSX.Element => {
+export const AllIcons = () => {
     const [search, setSearch] = useState('')
 
     const filteredEntries = useMemo(() => {

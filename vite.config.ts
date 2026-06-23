@@ -84,7 +84,15 @@ export default defineConfig({
         dts({
             insertTypesEntry: true,
             //rollupTypes: true,
-            exclude: ['node_modules/**/*', 'src/stories/**', 'src/**/*.stories.tsx', 'src/components/**/makeData.ts'],
+            exclude: [
+                'node_modules/**/*',
+                'src/stories/**',
+                'src/datetime/stories/**',
+                'src/table/stories/**',
+                'src/components/icons/stories/**',
+                'src/**/*.stories.tsx',
+                'src/components/**/makeData.ts',
+            ],
         }),
     ],
     resolve: {
