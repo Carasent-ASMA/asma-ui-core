@@ -165,6 +165,17 @@ import {
     CheckReadIcon,
     ManageSearchIcon,
     ArrowShrinkIcon,
+    ListViewOutlineIcon,
+    ContentCutIcon,
+    ContentPasteIcon,
+    CloudIcon,
+    GridViewOutlineIcon,
+    VisibilityOffOutlineIcon,
+    HubIcon,
+    HubIconFilled,
+    WidgetIcon,
+    WidgetIconFilled,
+    RocketLaunchIcon,
 } from '..'
 
 export const useIconsList = ({ filterText, height, width }: { filterText: string; height: number; width: number }) => {
@@ -213,7 +224,7 @@ export const useIconsList = ({ filterText, height, width }: { filterText: string
         },
         {
             name: 'FindReplacePeopleIcon',
-            component: <FindReplacePeopleIcon className='w-[26px] h-[26px]' />,
+            component: <FindReplacePeopleIcon className='h-[26px] w-[26px]' />,
             clipboardText: '<FindReplacePeopleIcon />',
             tags: ['find replace people'],
         },
@@ -1165,6 +1176,72 @@ export const useIconsList = ({ filterText, height, width }: { filterText: string
             component: <ArrowShrinkIcon height={height} width={width} />,
             clipboardText: '<ArrowShrinkIcon />',
             tags: ['arrow shrink icon'],
+        },
+        {
+            name: 'ListViewOutlineIcon',
+            component: <ListViewOutlineIcon height={height} width={width} />,
+            clipboardText: '<ListViewOutlineIcon />',
+            tags: ['list view outline'],
+        },
+        {
+            name: 'ContentCutIcon',
+            component: <ContentCutIcon height={height} width={width} />,
+            clipboardText: '<ContentCutIcon />',
+            tags: ['content cut', 'cut'],
+        },
+        {
+            name: 'ContentPasteIcon',
+            component: <ContentPasteIcon height={height} width={width} />,
+            clipboardText: '<ContentPasteIcon />',
+            tags: ['content paste', 'paste'],
+        },
+        {
+            name: 'CloudIcon',
+            component: <CloudIcon height={height} width={width} />,
+            clipboardText: '<CloudIcon />',
+            tags: ['cloud'],
+        },
+        {
+            name: 'GridViewOutlineIcon',
+            component: <GridViewOutlineIcon height={height} width={width} />,
+            clipboardText: '<GridViewOutlineIcon />',
+            tags: ['grid view outline'],
+        },
+        {
+            name: 'VisibilityOffOutlineIcon',
+            component: <VisibilityOffOutlineIcon height={height} width={width} />,
+            clipboardText: '<VisibilityOffOutlineIcon />',
+            tags: ['visibility off outline', 'hide'],
+        },
+        {
+            name: 'HubIcon',
+            component: <HubIcon height={height} width={width} />,
+            clipboardText: '<HubIcon />',
+            tags: ['hub'],
+        },
+        {
+            name: 'HubIconFilled',
+            component: <HubIconFilled height={height} width={width} />,
+            clipboardText: '<HubIconFilled />',
+            tags: ['hub filled'],
+        },
+        {
+            name: 'WidgetIcon',
+            component: <WidgetIcon height={height} width={width} />,
+            clipboardText: '<WidgetIcon />',
+            tags: ['widget'],
+        },
+        {
+            name: 'WidgetIconFilled',
+            component: <WidgetIconFilled height={height} width={width} />,
+            clipboardText: '<WidgetIconFilled />',
+            tags: ['widget filled'],
+        },
+        {
+            name: 'RocketLaunchIcon',
+            component: <RocketLaunchIcon height={height} width={width} />,
+            clipboardText: '<RocketLaunchIcon />',
+            tags: ['rocket launch', 'launch'],
         },
     ]
 
