@@ -28,8 +28,7 @@ const defaultSx: SxProps<Theme> = {
         display: 'none',
         justifyContent: 'center',
         alignItems: 'center',
-        position: 'relative',
-        top: 2,
+        alignSelf: 'center',
         '& svg': {
             fontSize: 24,
             color: 'var(--colors-delta-700)',
