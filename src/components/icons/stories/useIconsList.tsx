@@ -176,9 +176,25 @@ import {
     WidgetIcon,
     WidgetIconFilled,
     RocketLaunchIcon,
+    LoadCurrentIcon,
 } from '..'
 
-export const useIconsList = ({ filterText, height, width }: { filterText: string; height: number; width: number }) => {
+export const useIconsList = ({
+    filterText,
+    height,
+    width,
+}: {
+    filterText: string
+    height: number
+    width: number
+}): {
+    icons: {
+        name: string
+        component: React.JSX.Element
+        clipboardText: string
+        tags: string[]
+    }[]
+} => {
     const icons = [
         {
             name: 'HelpIcon',
@@ -1242,6 +1258,12 @@ export const useIconsList = ({ filterText, height, width }: { filterText: string
             component: <RocketLaunchIcon height={height} width={width} />,
             clipboardText: '<RocketLaunchIcon />',
             tags: ['rocket launch', 'launch'],
+        },
+        {
+            name: 'LoadCurrentIcon',
+            component: <LoadCurrentIcon height={height} width={width} />,
+            clipboardText: '<RocketLaunchIcon />',
+            tags: ['road current'],
         },
     ]
 
