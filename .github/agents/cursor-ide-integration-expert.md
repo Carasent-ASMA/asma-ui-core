@@ -1,0 +1,1 @@
+../../../../.github/agents/cursor-ide-integration-expert.md
