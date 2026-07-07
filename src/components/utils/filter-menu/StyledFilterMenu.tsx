@@ -30,11 +30,15 @@ const useAnchor = () => {
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
 
     const onOpen = (e: React.MouseEvent<HTMLElement>) => {
-        setAnchorEl(() => e.currentTarget)
+        /* Capture the element before setState: React nulls `e.currentTarget`
+         * once the handler returns, so reading it lazily (inside an updater)
+         * can yield null and the popover silently fails to open. */
+        const anchor = e.currentTarget
+        setAnchorEl(anchor)
     }
 
     const onClose = () => {
-        setAnchorEl(() => null)
+        setAnchorEl(null)
     }
 
     const onAnchorClick = (e: React.MouseEvent<HTMLElement>) => {
