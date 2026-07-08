@@ -5,7 +5,7 @@ export const StyledTab: FC<TabProps> = (props) => (
     <Tab
         {...props}
         sx={{
-            textTransform: 'capitalize',
+            textTransform: 'none',
             letterSpacing: 'normal',
             '&.MuiTab-textColorPrimary.Mui-selected': {
                 color: 'var(--colors-gama-500)',
