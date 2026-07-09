@@ -78,6 +78,7 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
     const { filterIconOnly } = useDynamicToolbarLayout()
     const isLabelHidden = hideLabel ?? filterIconOnly
     const customAnchor = anchorNode?.({ isOpen: !!anchorEl, onClose })
+    const popoverId = React.useId()
 
     return (
         <>
@@ -98,7 +99,9 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
                         onClick={onAnchorClick}
                         size={size}
                         dataTest={dataTest}
-                        data-popover-open={!!anchorEl || undefined}
+                        aria-haspopup='true'
+                        aria-expanded={!!anchorEl}
+                        aria-controls={anchorEl ? popoverId : undefined}
                     >
                         {!isLabelHidden && (label ?? 'Filter')}
                     </StyledButton>
@@ -114,6 +117,7 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
             </div>
             <StyledPopover
                 {...popoverProps}
+                id={popoverId}
                 open={!!anchorEl}
                 anchorEl={anchorEl}
                 onClose={onClose}
