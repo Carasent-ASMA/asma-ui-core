@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 
 import { StyledFilterMenu } from './StyledFilterMenu'
 import { useEffect, useState } from 'react'
-import { MenuItem } from '@mui/material'
+import { MenuList, MenuItem } from '@mui/material'
 import { StyledCheckbox } from '../../inputs/checkbox'
 import { StyledFormControlLabel } from '../../miscellaneous/StyledFormControlLabel'
 
@@ -75,7 +75,7 @@ const FilterMenuExample = () => {
                 dataTest='filter-menu-example'
                 popoverContent={
                     (/* { isOpen, onClose } */) => (
-                        <>
+                        <MenuList>
                             {mockData.map(({ key, label, checked }) => (
                                 <MenuItem key={key} className={`${checked ? 'bg-gama-50' : ''} h-12`}>
                                     <StyledFormControlLabel
@@ -86,7 +86,7 @@ const FilterMenuExample = () => {
                                     />
                                 </MenuItem>
                             ))}
-                        </>
+                        </MenuList>
                     )
                 }
             />
@@ -96,7 +96,7 @@ const FilterMenuExample = () => {
                 dataTest='filter-menu-example-2'
                 size='small'
                 popoverContent={
-                    <>
+                    <MenuList>
                         {mockData.map(({ key, label, checked }) => (
                             <MenuItem key={key} className={`${checked ? 'bg-primary-50' : ''} h-12`}>
                                 <StyledFormControlLabel
@@ -107,7 +107,7 @@ const FilterMenuExample = () => {
                                 />
                             </MenuItem>
                         ))}
-                    </>
+                    </MenuList>
                 }
             />
         </div>

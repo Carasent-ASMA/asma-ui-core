@@ -32,13 +32,19 @@
         }
 
         &:focus,
-        &[data-popover-open] {
-            outline-offset: -2px #{!important};
+        &[aria-expanded='true'] {
             color: var(--colors-button-#{$type}-#{$color}-focused-text-color) #{!important};
             background-color: var(--colors-button-#{$type}-#{$color}-focused-bg-color) #{!important};
-            outline: 2px solid var(--colors-button-#{$type}-#{$color}-focused-border-color) #{!important};
-            &.asma-ui-core-button.#{contained} {
-                box-shadow: inset 0 0 0 2px white;
+            @if $type == 'outlined' {
+                outline: none #{!important};
+                border-color: var(--colors-button-#{$type}-#{$color}-focused-border-color) #{!important};
+                box-shadow: inset 0 0 0 1px var(--colors-button-#{$type}-#{$color}-focused-border-color) #{!important};
+            } @else {
+                outline-offset: -2px #{!important};
+                outline: 2px solid var(--colors-button-#{$type}-#{$color}-focused-border-color) #{!important};
+                @if $type == 'contained' {
+                    box-shadow: inset 0 0 0 2px white;
+                }
             }
         }
 
