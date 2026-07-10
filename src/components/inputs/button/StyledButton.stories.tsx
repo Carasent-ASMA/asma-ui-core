@@ -1,4 +1,4 @@
-import { Stack } from '@mui/material'
+import { Stack } from 'src/components/mui-compat'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
 import { ChevronDownIcon, FilterIcon } from 'src/components/icons'

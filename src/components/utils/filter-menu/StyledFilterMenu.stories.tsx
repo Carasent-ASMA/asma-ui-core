@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 
 import { StyledFilterMenu } from './StyledFilterMenu'
 import { useEffect, useState } from 'react'
-import { MenuList, MenuItem } from '@mui/material'
+import { StyledMenuList as MenuList, StyledMenuItem as MenuItem } from 'src/components/navigation/menu'
 import { StyledCheckbox } from '../../inputs/checkbox'
 import { StyledFormControlLabel } from '../../miscellaneous/StyledFormControlLabel'
 
