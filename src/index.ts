@@ -69,6 +69,15 @@ export * from './components/feedback/minimizable-dialog'
 // hooks
 export * from './hooks/usePopupState'
 
-// MUI-free reimplementations (TASK-102); Fade + Popper remain on MUI until Phase 3.
-export { Paper, ClickAwayListener, Avatar, Skeleton, Container, Stack, FormLabel } from './components/mui-compat'
-export { Fade, Popper } from '@mui/material'
+// MUI-free reimplementations (TASK-102/403).
+export {
+    Paper,
+    ClickAwayListener,
+    Avatar,
+    Skeleton,
+    Container,
+    Stack,
+    FormLabel,
+    Fade,
+    Popper,
+} from './components/mui-compat'
