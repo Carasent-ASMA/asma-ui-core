@@ -1,4 +1,4 @@
-import type { AutocompleteProps } from '@mui/material'
+import type { StyledSelectAutocompleteProps } from '../select-autocomplete'
 import type React from 'react'
 
 export type DynamicSelectOptionPrimitive = string | number | boolean
@@ -76,7 +76,7 @@ interface DynamicSelectCommonProps<TOption extends DynamicSelectOption> {
     startAdornment?: React.ReactNode
     /** Escape hatch to pass any MUI `Autocomplete` prop directly. Applied on top of internal defaults in the autocomplete variant. */
     autocompleteProps?: Partial<
-        AutocompleteProps<TOption, boolean | undefined, boolean | undefined, boolean | undefined>
+        StyledSelectAutocompleteProps<TOption, boolean | undefined, boolean | undefined, boolean | undefined>
     >
     /**
      * When `true`, renders loading skeletons (chip group) or disables the input (autocomplete)

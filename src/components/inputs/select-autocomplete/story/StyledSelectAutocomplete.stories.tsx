@@ -1,4 +1,4 @@
-import type { AutocompleteRenderInputParams } from '@mui/material'
+import type { AutocompleteRenderInputParams } from '../StyledSelectAutocomplete'
 import type { StoryObj, Meta } from '@storybook/react-vite'
 import { StyledSelectAutocomplete, type StyledSelectAutocompleteProps } from '../StyledSelectAutocomplete'
 import { ControlledAutocomplete, top100Films, type Film } from './components/StyledSelectAutocompleteExample'
