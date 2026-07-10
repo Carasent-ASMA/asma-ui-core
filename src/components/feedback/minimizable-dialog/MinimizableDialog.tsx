@@ -9,7 +9,6 @@ import { ArrowExpand } from 'src/components/icons/arrow-expand'
 import { StyledTooltip } from 'src/components/data-display/tooltip'
 import { ArrowShrink } from 'src/components/icons/arrow-shrink'
 import type { IMinimizableDialogProps } from './types'
-import { isArray, isFunction } from 'lodash-es'
 import { CloseIcon, DotsVerticalIcon, KeyboardCapslockIcon, LoadingIcon, MinimizeIcon } from 'src/components/icons'
 
 export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
@@ -217,7 +216,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                         {typeof children === 'function' ? children({ fullScreen }) : children}
                     </div>
 
-                    {(((isArray(extraActions) && extraActions.length) || isFunction(extraActions)) &&
+                    {(((Array.isArray(extraActions) && extraActions.length) || typeof extraActions === 'function') &&
                         extraActionsText) ||
                     footerInfo ? (
                         <div
@@ -226,7 +225,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                                 footerClassName,
                             )}
                         >
-                            {isArray(extraActions) && extraActions.length && extraActionsText ? (
+                            {Array.isArray(extraActions) && extraActions.length && extraActionsText ? (
                                 <>
                                     <StyledButton
                                         dataTest='extra-actions-button'
@@ -247,7 +246,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                                 </>
                             ) : (
                                 extraActionsText &&
-                                isFunction(extraActions) && (
+                                typeof extraActions === 'function' && (
                                     <StyledButton dataTest='extra-action-button' variant='text' onClick={extraActions}>
                                         {extraActionsText}
                                     </StyledButton>

@@ -1,11 +1,11 @@
 import { format, isBefore, isValid } from 'date-fns'
-import PopupStateProvider from 'material-ui-popup-state'
+import { PopupState as PopupStateProvider } from 'src/hooks/usePopupState'
 import { useState, type ChangeEvent } from 'react'
 import { ClickAwayListener } from '@mui/material'
 import { TimePickerPopper } from './TimePickerPopper'
 import { getTimeFromValue } from './helpers/getTimeFromValue'
 import { TimePickerInput } from './TimePickerInput'
-import type { PopupState } from 'material-ui-popup-state/hooks'
+import type { PopupState } from 'src/hooks/usePopupState'
 import type { StyledTimePickerProps } from './types'
 
 export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {

@@ -1,10 +1,10 @@
 import type { StyledTimePickerProps } from './types'
-import { type PopupState } from 'material-ui-popup-state/hooks'
+import { type PopupState } from 'src/hooks/usePopupState'
 import { HelperText } from './components/HelperText'
 import { useRef, type ChangeEvent, useEffect, type MouseEvent as ReactMouseEvent } from 'react'
 import { StyledInputField } from 'src/datetime/shared-components/StyledInputField'
 import { ClockOutlineIcon } from 'src/datetime/shared-components/ClockOutlineIcon'
-import { useMask } from '@react-input/mask'
+import { useInputMask } from 'src/helpers/inputMask'
 
 export const TimePickerInput: React.FC<
     StyledTimePickerProps & {
@@ -34,11 +34,9 @@ export const TimePickerInput: React.FC<
         readOnly,
     } = props
 
-    const inputRef = useMask({
+    const inputRef = useInputMask({
         mask: 'xx:xx',
-        replacement: {
-            x: /\d/,
-        },
+        maskChar: 'x',
         showMask: false,
     })
 
