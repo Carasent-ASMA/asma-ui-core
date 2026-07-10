@@ -86,6 +86,9 @@ export const StyledTooltip = ({
             offset(arrow ? 8 : 6),
             flip({ padding: 8 }),
             shift({ padding: 8 }),
+            // Floating UI's arrow middleware takes the arrow ref by design; the react-compiler ref
+            // rule false-positives on passing it here.
+            // eslint-disable-next-line react-hooks/refs
             ...(arrow ? [arrowMiddleware({ element: arrowRef })] : []),
         ],
     })
