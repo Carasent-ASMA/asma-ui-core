@@ -5,7 +5,7 @@ import { StyledFormControlLabel } from 'src/components/miscellaneous/StyledFormC
 import { expect } from 'storybook/test'
 
 const meta = {
-    title: 'base-ui/Styled Switch',
+    title: 'Inputs/Styled Switch',
     component: StyledSwitch,
     tags: [],
     argTypes: {

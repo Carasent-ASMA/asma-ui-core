@@ -129,6 +129,14 @@ export default defineConfig({
         projects: [
             {
                 extends: true,
+                test: {
+                    name: 'unit',
+                    environment: 'node',
+                    include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
+                },
+            },
+            {
+                extends: true,
                 plugins: [
                     storybookTest({
                         configDir: path.join(currentDirectory, '.storybook'),

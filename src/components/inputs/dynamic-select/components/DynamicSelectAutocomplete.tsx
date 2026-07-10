@@ -6,7 +6,6 @@ import { LoadingIcon, PlusIconCircle, CheckIcon } from 'src/components/icons'
 import { DynamicInteractiveChipGroup } from './DynamicInteractiveChipGroup'
 import { forwardRef, useCallback, useState } from 'react'
 import { cn } from 'src/helpers/cn'
-import type { AutocompleteCloseReason } from '@mui/material'
 
 export const DynamicSelectAutocomplete = forwardRef(
     <TOption extends DynamicSelectOption>(
@@ -80,7 +79,7 @@ export const DynamicSelectAutocomplete = forwardRef(
         }
 
         const handleOpen = useCallback(
-            (event: React.SyntheticEvent) => {
+            (event?: React.SyntheticEvent) => {
                 setOpen(true)
                 autocompleteProps?.onOpen?.(event)
             },
@@ -88,7 +87,7 @@ export const DynamicSelectAutocomplete = forwardRef(
         )
 
         const handleClose = useCallback(
-            (event: React.SyntheticEvent, reason: AutocompleteCloseReason) => {
+            (event?: React.SyntheticEvent, reason?: string) => {
                 setOpen(false)
                 autocompleteProps?.onClose?.(event, reason)
             },
@@ -100,7 +99,7 @@ export const DynamicSelectAutocomplete = forwardRef(
         return (
             <div className='flex w-full flex-col gap-y-1'>
                 {title && <span className='text-base font-semibold text-delta-800'>{title}</span>}
-                <StyledSelectAutocomplete
+                <StyledSelectAutocomplete<TOption, boolean, boolean, false>
                     open={open}
                     onOpen={handleOpen}
                     onClose={handleClose}
@@ -134,7 +133,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                         multiple
                             ? (tagValues) => {
                                   if (!Array.isArray(tagValues)) return null
-                                  const typedValues = tagValues as TOption[]
+                                  const typedValues = tagValues
                                   const limit = maxTags ?? options.length
                                   const limitedTags = typedValues.slice(0, limit)
                                   const remainingCount = typedValues.length - limit

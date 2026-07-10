@@ -1,7 +1,6 @@
 import { useNavigation, type Matcher } from 'react-day-picker'
 import { isDate, isValid } from 'date-fns'
 import type { Dispatch, SetStateAction } from 'react'
-import { compact, isArray, isObject } from 'lodash-es'
 
 import { ChevronLeftIcon } from 'src/datetime/shared-components/ChevronLeftIcon'
 import { ChevronRightIcon } from 'src/datetime/shared-components/ChevronRightIcon'
@@ -21,9 +20,9 @@ export const StyledCalendarPickerFooter: React.FC<{
     const eraserDisabled =
         !!required ||
         selected === null ||
-        (isArray(selected) && selected.length === 0) ||
+        (Array.isArray(selected) && selected.length === 0) ||
         (isDate(selected) && !isValid(selected)) ||
-        (isObject(selected) && !compact(Object.values(selected)).length)
+        (typeof selected === 'object' && selected !== null && !Object.values(selected).filter(Boolean).length)
 
     return (
         <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'space-between' }}>

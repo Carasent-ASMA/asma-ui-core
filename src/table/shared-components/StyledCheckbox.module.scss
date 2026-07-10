@@ -184,7 +184,7 @@ $checkbox-sizes: (
         @include checkbox-size('small');
     }
 
-    .CheckboxWrapper:focus-visible & {
+    .CheckboxWrapper:has(input:focus-visible) & {
         &::before {
             content: '';
             position: absolute;

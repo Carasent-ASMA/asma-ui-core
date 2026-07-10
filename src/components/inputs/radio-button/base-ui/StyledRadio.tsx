@@ -1,18 +1,29 @@
-import React, { forwardRef, useRef, useCallback } from 'react'
-import { Radio } from '@base-ui/react/radio'
+import React, { forwardRef, useCallback, useRef, type ChangeEvent, type InputHTMLAttributes } from 'react'
 import styles from './StyledRadio.module.scss'
 import { cn } from 'src/helpers/cn'
+import { useRadioGroupContext, type RadioValue } from './RadioGroupContext'
 
 export type StyledRadioProps = {
-    value?: string | number | boolean
+    value?: RadioValue
     dataTest?: string
     className?: string
     size?: 'small' | 'medium'
     error?: boolean
-} & Omit<React.ComponentProps<typeof Radio.Root>, 'value' | 'className'>
+    checked?: boolean
+    onChange?: (event: ChangeEvent<HTMLInputElement>, checked: boolean) => void
+} & Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'className' | 'size' | 'checked' | 'onChange' | 'type'>
 
-export const StyledRadio = forwardRef<HTMLButtonElement, StyledRadioProps>(
-    ({ value, dataTest, className, size = 'medium', error, disabled, ...rest }, ref) => {
+/**
+ * Native `<input type="radio">` (replaces `@base-ui/react`). Uses the surrounding
+ * `StyledRadioGroup` context for name/selection when present, else the standalone `checked` prop.
+ * SCSS module (ripple/pseudo-elements — GUD-003) is driven via `data-*` from React. TASK-201.
+ */
+export const StyledRadio = forwardRef<HTMLInputElement, StyledRadioProps>(
+    ({ value, dataTest, className, size = 'medium', error, disabled, checked, onChange, ...rest }, ref) => {
+        const group = useRadioGroupContext()
+        const isChecked = group ? group.value === value : !!checked
+        const isDisabled = disabled ?? group?.disabled ?? false
+
         const wrapperClasses = cn(
             styles['RadioWrapper'],
             styles['RadioHover'],
@@ -20,45 +31,48 @@ export const StyledRadio = forwardRef<HTMLButtonElement, StyledRadioProps>(
             className,
             error && styles['Error'],
         )
-
         const radioClasses = cn(styles['Radio'], size === 'small' && styles['size-small'])
 
         const rippleRef = useRef<HTMLSpanElement>(null)
-
         const handlePointerDown = useCallback((e: React.PointerEvent) => {
             e.stopPropagation()
             if (!rippleRef.current) return
             const ripple = document.createElement('span')
-            if (styles['RadioRipple']) {
-                ripple.className = styles['RadioRipple']
-            }
-            ripple.addEventListener(
-                'animationend',
-                () => {
-                    ripple.remove()
-                },
-                { once: true },
-            )
+            if (styles['RadioRipple']) ripple.className = styles['RadioRipple']
+            ripple.addEventListener('animationend', () => ripple.remove(), { once: true })
             rippleRef.current.appendChild(ripple)
         }, [])
 
+        const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+            if (group) group.onSelect(value ?? null)
+            onChange?.(event, event.target.checked)
+        }
+
         return (
-            <Radio.Root
-                {...rest}
-                nativeButton
-                render={<button />}
-                ref={ref}
-                value={value}
-                data-testid={dataTest}
+            <label
                 className={wrapperClasses}
-                disabled={disabled}
+                data-testid={dataTest}
                 onPointerDown={handlePointerDown}
+                data-checked={isChecked ? '' : undefined}
+                data-unchecked={!isChecked ? '' : undefined}
+                data-disabled={isDisabled ? '' : undefined}
             >
+                <input
+                    {...rest}
+                    ref={ref}
+                    type='radio'
+                    className='sr-only'
+                    name={group?.name ?? rest.name}
+                    value={value === undefined || value === null ? undefined : String(value)}
+                    checked={isChecked}
+                    disabled={isDisabled}
+                    onChange={handleChange}
+                />
                 <span className={styles['RadioRippleContainer']} ref={rippleRef} />
                 <span className={radioClasses}>
-                    <Radio.Indicator className={styles['Indicator']} />
+                    <span className={styles['Indicator']} />
                 </span>
-            </Radio.Root>
+            </label>
         )
     },
 )

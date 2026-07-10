@@ -76,7 +76,7 @@ export const StyledSearchField: FC<StyledSearchFieldProps> = ({ value, onClear, 
                 {...props}
                 sx={{
                     ...(props.fullWidth ? { width: '100%' } : { width: 160 }),
-                    ...props.sx,
+                    ...(props.sx as object),
                 }}
             />
 

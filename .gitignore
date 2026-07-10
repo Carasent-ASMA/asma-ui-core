@@ -34,6 +34,11 @@ storybook-static
 dist
 configs/env.ts
 
+# visual regression (VRT) — reports are transient; baselines under __screenshots__ ARE committed
+playwright-report
+test-results
+visual-tests/.baseline-static
+
 .eslintcache
 .lint-exit.txt
 .lint-output.txt

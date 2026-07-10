@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { StyledDrawer } from './StyledDrawer'
-import { Stack, type DrawerProps, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material'
+import { StyledDrawer, type DrawerProps } from './StyledDrawer'
 import { StyledTypography } from 'src/components/data-display/typography'
 import { StyledButton } from 'src/components/inputs/button'
 import { useState, type FC } from 'react'
@@ -38,7 +37,7 @@ const StyledDrawerExample: FC<{ args: Partial<DrawerProps> }> = ({ args }) => {
     }
 
     return (
-        <Stack sx={{ mt: 2, mb: 4 }}>
+        <div className='mb-8 mt-4 flex flex-col'>
             <StyledTypography variant='h6'>Standard Drawer</StyledTypography>
             <StyledButton
                 dataTest='test'
@@ -51,18 +50,23 @@ const StyledDrawerExample: FC<{ args: Partial<DrawerProps> }> = ({ args }) => {
             >
                 Dashboard
             </StyledButton>
-            <StyledDrawer {...meta.args} {...args} id='basic-drawer' anchor='right' open={open} onClose={handleClose}>
-                <List>
+            <StyledDrawer {...meta.args} {...args} anchor='right' open={open} onClose={handleClose}>
+                <ul className='m-0 w-64 list-none p-0'>
                     {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-                        <ListItem key={text} disablePadding>
-                            <ListItemButton>
-                                <ListItemIcon>{index % 2 === 0 ? <InboxOutboxIcon /> : <PeopleIcon />}</ListItemIcon>
-                                <ListItemText primary={text} />
-                            </ListItemButton>
-                        </ListItem>
+                        <li key={text}>
+                            <button
+                                type='button'
+                                className='flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-delta-50'
+                            >
+                                <span className='flex'>
+                                    {index % 2 === 0 ? <InboxOutboxIcon /> : <PeopleIcon />}
+                                </span>
+                                <span>{text}</span>
+                            </button>
+                        </li>
                     ))}
-                </List>
+                </ul>
             </StyledDrawer>
-        </Stack>
+        </div>
     )
 }

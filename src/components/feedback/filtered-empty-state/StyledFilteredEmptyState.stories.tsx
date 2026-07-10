@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 
-import { Stack } from '@mui/material'
+import { Stack } from 'src/components/mui-compat'
 
 import { StyledFilteredEmptyState } from './StyledFilteredEmptyState'
 

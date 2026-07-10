@@ -25,7 +25,7 @@ import type {
     ExpandedRowsOptions,
     ExpandedRowsTableState,
 } from './custom-features/expand-rows'
-import type { TooltipProps } from '@mui/material'
+import type { TooltipProps } from 'src/components/data-display/tooltip/StyledTooltip'
 import type {
     FocusedRowsOptions,
     FocusedRowsTableState,

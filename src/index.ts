@@ -69,4 +69,15 @@ export * from './components/feedback/minimizable-dialog'
 // hooks
 export * from './hooks/usePopupState'
 
-export { Fade, Paper, ClickAwayListener, Popper, Avatar, Skeleton, Container, Stack, FormLabel } from '@mui/material'
+// MUI-free reimplementations (TASK-102/403).
+export {
+    Paper,
+    ClickAwayListener,
+    Avatar,
+    Skeleton,
+    Container,
+    Stack,
+    FormLabel,
+    Fade,
+    Popper,
+} from './components/mui-compat'

@@ -1,0 +1,27 @@
+// ponytail: enter/exit opacity tweens via @keyframes — not Tailwind-expressible (GUD-003).
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fade-out {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+.fadeIn {
+    animation: fade-in var(--fade-duration, 225ms) ease-in-out;
+}
+
+.fadeOut {
+    animation: fade-out var(--fade-duration, 225ms) ease-in-out forwards;
+}

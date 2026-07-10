@@ -5,7 +5,7 @@ import { StyledRadio, type StyledRadioProps } from './StyledRadio'
 import { StyledRadioGroup, type StyledRadioGroupProps } from './StyledRadioGroup'
 
 const meta = {
-    title: 'base-ui/Styled Radio',
+    title: 'Inputs/Styled Radio',
     component: StyledRadio,
     tags: [],
     argTypes: {},

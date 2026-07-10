@@ -1,4 +1,4 @@
-import { Popover } from '@mui/material'
+import { StyledPopover as Popover } from 'src/components/utils/popover'
 import type { HeaderContext } from '@tanstack/react-table'
 import { useToggleMenuVisibility } from 'src/table/hooks/useToggleMenuVisibility.hook'
 import { PinIcon } from 'src/table/shared-components/PinIcon'
@@ -24,7 +24,7 @@ import { cn } from 'src/table/helpers/cn'
 import { StyledTooltip } from 'src/table/shared-components/tooltip'
 import { useTranslations } from 'src/table/hooks/useTranslations'
 import { StyledButton } from 'src/table/shared-components/button'
-import { compact } from 'lodash-es'
+import { compact } from 'src/helpers/arrays'
 import type { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities'
 
 function SortableColumnItem({
@@ -112,11 +112,13 @@ export function HeaderActionMenu<TData>({
                 }}
                 open={open}
                 onClose={handleClose}
-                sx={{
-                    '& .MuiPaper-root': {
-                        maxHeight: 'calc(7 * 36px)',
-                        overflowY: 'auto',
-                        scrollbarWidth: 'thin',
+                slotProps={{
+                    paper: {
+                        sx: {
+                            maxHeight: 'calc(7 * 36px)',
+                            overflowY: 'auto',
+                            scrollbarWidth: 'thin',
+                        },
                     },
                 }}
             >

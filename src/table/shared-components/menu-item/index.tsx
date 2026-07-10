@@ -1,25 +1,38 @@
-import { MenuItem } from '@mui/material'
-import type { MenuItemProps } from '@mui/material'
+import type { MouseEvent, ReactNode } from 'react'
+import { cn } from 'src/table/helpers/cn'
 import { CheckIcon } from '../CheckIcon'
 
-export const StyledMenuItem = (props: MenuItemProps): JSX.Element => (
-    <MenuItem
-        classes={{ root: 'flex gap-x-1' }}
-        sx={{
-            padding: '8px',
-            '&.Mui-selected': {
-                backgroundColor: 'var(--colors-gama-50)',
-                '&:hover': { backgroundColor: 'var(--colors-gama-50)' },
-            },
-        }}
-        {...props}
+export interface MenuItemProps {
+    children?: ReactNode
+    selected?: boolean
+    disabled?: boolean
+    className?: string
+    onClick?: (event: MouseEvent<HTMLLIElement>) => void
+}
+
+/**
+ * Table menu item with a leading check column (replaces MUI `MenuItem`). Native `role="menuitem"`.
+ * TASK-404.
+ */
+export const StyledMenuItem = ({ children, selected, disabled, className, onClick }: MenuItemProps): JSX.Element => (
+    <li
+        role='menuitem'
+        aria-disabled={disabled ? true : undefined}
+        tabIndex={-1}
+        onClick={disabled ? undefined : onClick}
+        className={cn(
+            'flex items-center gap-x-1 p-2 outline-none',
+            disabled ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-delta-50',
+            selected && 'bg-gama-50 hover:bg-gama-50',
+            className,
+        )}
     >
         <CheckIcon
             width={24}
             height={24}
-            color={props.selected ? 'var(--colors-gama-500)' : 'transparent'}
+            color={selected ? 'var(--colors-gama-500)' : 'transparent'}
             style={{ transition: 'color 0.2s ease' }}
         />
-        {props.children}
-    </MenuItem>
+        {children}
+    </li>
 )

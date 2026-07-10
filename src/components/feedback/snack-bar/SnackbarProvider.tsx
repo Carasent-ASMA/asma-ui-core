@@ -1,4 +1,4 @@
-import type { AlertColor } from '@mui/material'
+import type { AlertColor } from './StyledAlert'
 import { SnackbarProvider as NotistackProvider, type SnackbarMessage, type SnackbarProviderProps } from 'notistack'
 
 import { StyledAlertSnackbar } from './StyledAlertSnackbar'

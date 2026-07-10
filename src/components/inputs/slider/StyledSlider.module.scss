@@ -1,0 +1,90 @@
+// ponytail: native <input type=range> thumb/track pseudo-elements are not Tailwind-expressible
+// (::-webkit-slider-thumb / ::-moz-range-thumb) — GUD-003 exception. Layout/color stay in Tailwind.
+
+.SliderInput {
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    appearance: none;
+    -webkit-appearance: none;
+    // The input itself is transparent and click-through; only the thumb catches the pointer,
+    // so two stacked inputs (range mode) can each be grabbed independently.
+    pointer-events: none;
+    cursor: pointer;
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.Horizontal {
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
+    height: 16px;
+}
+
+.Vertical {
+    left: 50%;
+    transform: translateX(-50%);
+    top: 0;
+    bottom: 0;
+    height: 100%;
+    width: 16px;
+    writing-mode: vertical-lr;
+    direction: rtl; // bottom = min, top = max
+}
+
+@mixin thumb {
+    appearance: none;
+    -webkit-appearance: none;
+    pointer-events: auto;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: none;
+    background-color: var(--colors-gama-500);
+    box-shadow: none;
+    cursor: pointer;
+    transition: box-shadow 0.15s ease;
+}
+
+.SliderInput::-webkit-slider-thumb {
+    @include thumb;
+}
+.SliderInput::-moz-range-thumb {
+    @include thumb;
+}
+
+.SliderInput:focus-visible::-webkit-slider-thumb {
+    box-shadow: 0 0 0 8px rgba(var(--colors-gama-500-rgb, 20 120 90), 0.16);
+}
+.SliderInput:focus-visible::-moz-range-thumb {
+    box-shadow: 0 0 0 8px rgba(var(--colors-gama-500-rgb, 20 120 90), 0.16);
+}
+
+.Small {
+    &::-webkit-slider-thumb {
+        width: 12px;
+        height: 12px;
+    }
+    &::-moz-range-thumb {
+        width: 12px;
+        height: 12px;
+    }
+}
+
+.Disabled {
+    cursor: default;
+    &::-webkit-slider-thumb {
+        background-color: var(--colors-delta-200);
+        cursor: default;
+    }
+    &::-moz-range-thumb {
+        background-color: var(--colors-delta-200);
+        cursor: default;
+    }
+}

@@ -1,4 +1,3 @@
-import type PopupState from 'material-ui-popup-state'
 import type { ReactNode } from 'react'
 
 /** 
@@ -22,4 +21,4 @@ export interface StyledTimePickerProps {
     notBeforeTime?: Date
 }
 
-export type IPopupStateType = ReturnType<typeof PopupState>
+export type IPopupStateType = JSX.Element

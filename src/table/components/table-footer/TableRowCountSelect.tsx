@@ -1,5 +1,6 @@
 import type { Table } from '@tanstack/react-table'
-import { MenuList, Popover, type PopoverOrigin } from '@mui/material'
+import { StyledPopover as Popover, type PopoverOrigin } from 'src/components/utils/popover'
+import { StyledMenuList as MenuList } from 'src/components/navigation/menu'
 import { useMemo, useCallback } from 'react'
 import { useToggleMenuVisibility } from 'src/table/hooks/useToggleMenuVisibility.hook'
 import { ChevronDownIcon } from 'src/table/shared-components/ChevronDownIcon'
@@ -64,6 +65,7 @@ export function TableRowCountSelect<TData>({
                 anchorEl={anchorEl}
                 slotProps={{
                     paper: {
+                        className: 'border border-solid border-delta-200',
                         sx: {
                             width: anchorEl ? anchorEl.clientWidth : undefined,
                             maxHeight: 288,
@@ -74,7 +76,6 @@ export function TableRowCountSelect<TData>({
                 onClose={handleClose}
                 anchorOrigin={popoverOrigin.anchorOrigin}
                 transformOrigin={popoverOrigin.transformOrigin}
-                classes={{ paper: 'border border-solid border-delta-200' }}
             >
                 <MenuList>
                     {amountOfRowsOptions.map((size) => (
