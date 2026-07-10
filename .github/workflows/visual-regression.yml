@@ -1,0 +1,30 @@
+name: 'Visual Regression'
+
+on: push
+
+jobs:
+    vrt:
+        name: Run visual regression
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v5
+            - uses: actions/setup-node@v6
+              with:
+                  node-version: 24.14.0
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: latest
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+            # Builds storybook-static on the host, captures/compares inside the pinned Playwright
+            # container (same code path as local `pnpm vrt`). Docker is preinstalled on ubuntu-latest.
+            - name: Run visual regression
+              run: bash scripts/vrt.sh check
+            - name: Upload diff report
+              if: failure()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: vrt-report
+                  path: playwright-report/
+                  retention-days: 14
