@@ -1,7 +1,12 @@
 import { Children, type CSSProperties, type HTMLAttributes } from 'react'
-import type { DialogActionsProps } from '@mui/material'
 import clsx from 'clsx'
 import { resolveSx } from 'src/helpers/sx'
+
+interface DialogActionsProps extends HTMLAttributes<HTMLDivElement> {
+    sx?: unknown
+    classes?: Record<string, string>
+    disableSpacing?: boolean
+}
 
 /**
  * MUI-free dialog actions: a right-aligned flex row of buttons; on mobile each button wrapper
@@ -22,7 +27,7 @@ export const StyledDialogActions = ({
             data-testid='styled-dialog-actions'
             className='m-0 flex justify-center p-0'
             style={mergedStyle}
-            {...(rest as HTMLAttributes<HTMLDivElement>)}
+            {...(rest)}
         >
             <div className={clsx('flex w-full justify-end gap-2 p-4', className)}>
                 {Children.map(children, (child) => (

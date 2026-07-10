@@ -1,5 +1,5 @@
 import { Children, createElement, Fragment, isValidElement, type CSSProperties, type ReactNode } from 'react'
-import type { StackProps } from '@mui/material'
+import type { StackProps } from './types'
 import clsx from 'clsx'
 import { resolveSx } from 'src/helpers/sx'
 

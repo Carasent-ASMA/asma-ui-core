@@ -1,9 +1,24 @@
-import type { CSSProperties, ReactNode } from 'react'
-import type { BadgeProps } from '@mui/material'
+import type { CSSProperties, ElementType, HTMLAttributes, ReactNode } from 'react'
 import clsx from 'clsx'
 import { resolveSx } from 'src/helpers/sx'
 
 type StyledBadgeSize = 'medium' | 'small'
+
+interface BadgeProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'color'> {
+    badgeContent?: ReactNode
+    color?: string
+    max?: number
+    showZero?: boolean
+    variant?: 'standard' | 'dot'
+    invisible?: boolean
+    anchorOrigin?: { vertical: 'top' | 'bottom'; horizontal: 'left' | 'right' }
+    overlap?: 'rectangular' | 'circular'
+    component?: ElementType
+    classes?: Record<string, string>
+    slots?: Record<string, unknown>
+    slotProps?: unknown
+    sx?: unknown
+}
 
 type StyledBadgeProps = BadgeProps & {
     dataTest: string

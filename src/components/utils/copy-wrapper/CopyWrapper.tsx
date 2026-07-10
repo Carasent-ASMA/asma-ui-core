@@ -1,4 +1,4 @@
-import type { AlertColor } from '@mui/material'
+import type { AlertColor } from 'src/components/feedback/snack-bar/StyledAlert'
 import { ContentCopyIcon } from 'src/components/icons'
 import type { SnackbarProviderProps } from 'notistack'
 import { type FC, type PropsWithChildren, type ReactNode } from 'react'

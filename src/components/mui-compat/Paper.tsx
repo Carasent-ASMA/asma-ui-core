@@ -1,5 +1,5 @@
 import { createElement, type CSSProperties } from 'react'
-import type { PaperProps } from '@mui/material'
+import type { PaperProps } from './types'
 import clsx from 'clsx'
 import { resolveSx } from 'src/helpers/sx'
 

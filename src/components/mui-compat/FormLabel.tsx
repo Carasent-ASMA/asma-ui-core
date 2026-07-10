@@ -1,5 +1,5 @@
 import { type CSSProperties } from 'react'
-import type { FormLabelProps } from '@mui/material'
+import type { FormLabelProps } from './types'
 import clsx from 'clsx'
 import { resolveSx } from 'src/helpers/sx'
 

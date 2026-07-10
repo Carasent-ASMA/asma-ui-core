@@ -1,5 +1,5 @@
 import { type CSSProperties } from 'react'
-import type { SkeletonProps } from '@mui/material'
+import type { SkeletonProps } from './types'
 import clsx from 'clsx'
 import { resolveSx } from 'src/helpers/sx'
 

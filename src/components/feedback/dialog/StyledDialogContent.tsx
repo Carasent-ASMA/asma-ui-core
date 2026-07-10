@@ -1,7 +1,12 @@
 import type { CSSProperties, HTMLAttributes } from 'react'
-import type { DialogContentProps } from '@mui/material'
 import clsx from 'clsx'
 import { resolveSx } from 'src/helpers/sx'
+
+interface DialogContentProps extends HTMLAttributes<HTMLDivElement> {
+    sx?: unknown
+    classes?: Record<string, string>
+    dividers?: boolean
+}
 
 /**
  * MUI-free dialog content: a scrollable `<div>` with the previous SCSS metrics as Tailwind,
@@ -26,7 +31,7 @@ export const StyledDialogContent = ({
                 className,
             )}
             style={mergedStyle}
-            {...(rest as HTMLAttributes<HTMLDivElement>)}
+            {...(rest)}
         >
             {children}
         </div>

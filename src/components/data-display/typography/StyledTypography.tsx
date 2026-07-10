@@ -1,7 +1,19 @@
-import { createElement, type CSSProperties } from 'react'
-import type { TypographyProps } from '@mui/material'
+import { createElement, type CSSProperties, type ElementType, type HTMLAttributes, type ReactNode } from 'react'
 import clsx from 'clsx'
 import { resolveSx } from 'src/helpers/sx'
+
+export interface TypographyProps extends Omit<HTMLAttributes<HTMLElement>, 'color'> {
+    variant?: string
+    variantMapping?: Record<string, string>
+    align?: CSSProperties['textAlign']
+    noWrap?: boolean
+    gutterBottom?: boolean
+    color?: string
+    component?: ElementType
+    sx?: unknown
+    classes?: Record<string, string>
+    children?: ReactNode
+}
 
 // MUI default variant → element map (subtitle*→h6, body*→p; button/caption/overline fall back to span).
 const VARIANT_MAPPING: Record<string, string> = {

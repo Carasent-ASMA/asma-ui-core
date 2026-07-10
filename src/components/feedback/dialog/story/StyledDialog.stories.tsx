@@ -1,5 +1,4 @@
 import React, { useMemo, useState, type ReactNode } from 'react'
-import type { BackdropProps } from '@mui/material'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, screen, userEvent, waitForElementToBeRemoved } from 'storybook/test'
 import { EditSquareIcon } from 'src/components/icons'
@@ -149,7 +148,7 @@ function DialogStoryFrame(props: StoryArgs) {
                             height: '100%',
                         },
                     },
-                    backdrop: { 'data-testid': 'dialog-backdrop' } as Partial<BackdropProps>,
+                    backdrop: { 'data-testid': 'dialog-backdrop' } as Record<string, unknown>,
                 }}
             >
                 {content}
