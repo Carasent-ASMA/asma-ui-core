@@ -11,6 +11,7 @@ type StyledCheckboxProps = {
     disableRipple?: boolean
     hideWrapper?: boolean
     className?: string
+    checkboxClassName?: string
     onChange?: (event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => void
 } & Omit<React.ComponentProps<typeof Checkbox.Root>, 'children'>
 
@@ -48,6 +49,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
     disableRipple,
     hideWrapper,
     className,
+    checkboxClassName,
     onChange,
     ...props
 }): JSX.Element => {
@@ -64,7 +66,12 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
         className,
     )
 
-    const checkboxClasses = cn(styles['Checkbox'], styles[`size-${size}`], indeterminate && styles['Indeterminate'])
+    const checkboxClasses = cn(
+        styles['Checkbox'],
+        styles[`size-${size}`],
+        indeterminate && styles['Indeterminate'],
+        checkboxClassName,
+    )
     const CheckboxIcon = indeterminate ? IndeterminateIcon : CheckIcon
 
     const rippleRef = React.useRef<HTMLSpanElement>(null)
