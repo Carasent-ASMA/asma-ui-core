@@ -31,23 +31,27 @@ export interface StyledPopoverProps {
     className?: string
     sx?: unknown
     slotProps?: { paper?: { className?: string; sx?: unknown } }
+    onClick?: (event: React.MouseEvent<HTMLDivElement>) => void
     children?: ReactNode
 }
 
 const DEFAULT_ANCHOR: PopoverOrigin = { vertical: 'bottom', horizontal: 'left' }
+const DEFAULT_TRANSFORM: PopoverOrigin = { vertical: 'top', horizontal: 'left' }
 
-// Map MUI's anchorOrigin to a Floating UI placement (side from vertical, alignment from horizontal).
-// ponytail: this reads anchorOrigin only — the common paired-origin convention. Exotic
-// anchor/transform combos are a known ceiling; upgrade path is a full origin→placement solver.
-const toPlacement = (anchor: PopoverOrigin): Placement => {
+// Map MUI's anchor/transform origins to a Floating UI placement. The transform origin (the
+// popover's own edge placed at the anchor point) determines the side — inverted, since a popover
+// whose *bottom* meets the anchor sits *above* it — and the anchor's horizontal gives alignment.
+// ponytail: covers the paired-origin conventions in use (below/above + start/center/end); numeric
+// pixel origins fall back to the anchor's vertical. Full pixel-offset parity is the upgrade path.
+const toPlacement = (anchor: PopoverOrigin, transform: PopoverOrigin): Placement => {
     const side =
-        anchor.vertical === 'top'
+        transform.vertical === 'bottom'
             ? 'top'
-            : anchor.vertical === 'bottom'
+            : transform.vertical === 'top'
               ? 'bottom'
-              : anchor.horizontal === 'right'
-                ? 'right'
-                : 'left'
+              : anchor.vertical === 'top'
+                ? 'top'
+                : 'bottom'
     const align = anchor.horizontal === 'left' ? '-start' : anchor.horizontal === 'right' ? '-end' : ''
     return `${side}${align}`
 }
@@ -63,13 +67,18 @@ export const StyledPopover = ({
     anchorEl,
     onClose,
     anchorOrigin = DEFAULT_ANCHOR,
+    transformOrigin = DEFAULT_TRANSFORM,
     id,
     className,
     sx,
     slotProps,
+    onClick,
     children,
 }: StyledPopoverProps): JSX.Element | null => {
-    const placement = useMemo(() => toPlacement(anchorOrigin), [anchorOrigin])
+    const placement = useMemo(
+        () => toPlacement(anchorOrigin, transformOrigin),
+        [anchorOrigin, transformOrigin],
+    )
 
     const { refs, floatingStyles, context } = useFloating({
         open,
@@ -92,7 +101,7 @@ export const StyledPopover = ({
                 ref={floatingRef}
                 id={id}
                 style={{ ...floatingStyles, ...resolveSx(sx), ...resolveSx(slotProps?.paper?.sx) }}
-                {...getFloatingProps()}
+                {...getFloatingProps({ onClick })}
                 className={cn(
                     'z-[1300] overflow-auto rounded bg-white shadow-lg',
                     className ?? 'my-1',

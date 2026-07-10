@@ -2,7 +2,8 @@ import type { Table } from '@tanstack/react-table'
 import { useToggleMenuVisibility } from 'src/table/hooks/useToggleMenuVisibility.hook'
 import styleTable from '../StyledTable.module.scss'
 import { useMemo, useRef, useCallback } from 'react'
-import { MenuList, Popover, type PopoverOrigin } from '@mui/material'
+import { StyledPopover as Popover, type PopoverOrigin } from 'src/components/utils/popover'
+import { StyledMenuList as MenuList } from 'src/components/navigation/menu'
 import { ChevronDownIcon } from 'src/table/shared-components/ChevronDownIcon'
 import { ChevronRightIcon } from 'src/table/shared-components/ChevronRightIcon'
 import { ChevronLeftIcon } from 'src/table/shared-components/ChevronLeftIcon'
@@ -81,6 +82,7 @@ export function TablePagination<TData>({
                 anchorEl={anchorEl}
                 slotProps={{
                     paper: {
+                        className: 'border border-solid border-delta-200',
                         sx: {
                             width: anchorEl ? anchorEl.clientWidth : undefined,
                             maxHeight: 288,
@@ -91,7 +93,6 @@ export function TablePagination<TData>({
                 onClose={handleClose}
                 anchorOrigin={popoverOrigin.anchorOrigin}
                 transformOrigin={popoverOrigin.transformOrigin}
-                classes={{ paper: 'border border-solid border-delta-200' }}
             >
                 <MenuList>
                     {pages.map((page) => (

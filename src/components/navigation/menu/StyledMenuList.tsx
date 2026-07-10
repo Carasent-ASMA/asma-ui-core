@@ -6,6 +6,8 @@ export interface StyledMenuListProps {
     className?: string
     /** Focus the first enabled item on mount (MUI Menu autoFocus behaviour). */
     autoFocus?: boolean
+    /** Drop the default vertical padding (MUI `disablePadding`). */
+    disablePadding?: boolean
     onClick?: (event: MouseEvent<HTMLUListElement>) => void
     onKeyDown?: (event: KeyboardEvent<HTMLUListElement>) => void
 }
@@ -21,6 +23,7 @@ export const StyledMenuList = ({
     children,
     className,
     autoFocus,
+    disablePadding,
     onClick,
     onKeyDown,
 }: StyledMenuListProps): JSX.Element => {
@@ -50,7 +53,7 @@ export const StyledMenuList = ({
         <ul
             ref={listRef}
             role='menu'
-            className={cn('m-0 list-none py-1 outline-none', className)}
+            className={cn('m-0 list-none outline-none', disablePadding ? 'py-0' : 'py-1', className)}
             onClick={onClick}
             onKeyDown={handleKeyDown}
         >

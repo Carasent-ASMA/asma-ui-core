@@ -1,4 +1,4 @@
-import { Menu } from '@mui/material'
+import { StyledMenu } from 'src/components/navigation/menu'
 import type { Row } from '@tanstack/react-table'
 import { useToggleMenuVisibility } from 'src/table/hooks/useToggleMenuVisibility.hook'
 import { ChevronRightIcon } from 'src/table/shared-components/ChevronRightIcon'
@@ -27,7 +27,7 @@ export const SubMenuExample = <TData,>({ row }: { row: Row<TData> }) => {
                     <ChevronRightIcon color='var(--colors-delta-700)' height={20} width={20} />
                 </div>
             </StyledMenuItem>
-            <Menu
+            <StyledMenu
                 onClose={handleClose}
                 open={open}
                 anchorEl={anchorEl}
@@ -43,7 +43,7 @@ export const SubMenuExample = <TData,>({ row }: { row: Row<TData> }) => {
                 <StyledMenuItem onClick={() => console.log(row)}>New</StyledMenuItem>
                 <StyledMenuItem onClick={() => console.log(row)}>Used</StyledMenuItem>
                 <StyledMenuItem onClick={() => console.log(row)}>Refurbished</StyledMenuItem>
-            </Menu>
+            </StyledMenu>
         </>
     )
 }

@@ -1,6 +1,7 @@
 import { useToggleMenuVisibility } from 'src/table/hooks/useToggleMenuVisibility.hook'
 import type { CellContext, Row } from '@tanstack/react-table'
-import { MenuList, Popover } from '@mui/material'
+import { StyledPopover as Popover } from 'src/components/utils/popover'
+import { StyledMenuList as MenuList } from 'src/components/navigation/menu'
 import { DotsVerticalIcon } from 'src/table/shared-components/DotsVerticalIcon'
 
 import { StyledMenuItem } from 'src/table/shared-components/StyledMenuItem'

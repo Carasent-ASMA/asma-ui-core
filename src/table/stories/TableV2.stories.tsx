@@ -1,4 +1,4 @@
-import { Typography } from '@mui/material'
+import { StyledTypography } from 'src/components/data-display/typography'
 import type { Meta } from '@storybook/react-vite'
 import { useEffect, useRef, useState } from 'react'
 import { type Table as TanstackTable } from '@tanstack/react-table'
@@ -78,7 +78,7 @@ export const TableV2 = () => {
     return (
         <div className='mx-auto max-w-[1200px] flex flex-col gap-10'>
             <div className='flex justify-between gap-5'>
-                <Typography variant='h6'>Standard Table</Typography>
+                <StyledTypography variant='h6'>Standard Table</StyledTypography>
                 <input
                     value={globalFilter ?? ''}
                     onChange={(e) => setGlobalFilter(String(e.target.value))}

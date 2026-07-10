@@ -1,4 +1,4 @@
-import { Popover } from '@mui/material'
+import { StyledPopover as Popover } from 'src/components/utils/popover'
 import type { HeaderContext } from '@tanstack/react-table'
 import { useToggleMenuVisibility } from 'src/table/hooks/useToggleMenuVisibility.hook'
 import { PinIcon } from 'src/table/shared-components/PinIcon'
@@ -112,11 +112,13 @@ export function HeaderActionMenu<TData>({
                 }}
                 open={open}
                 onClose={handleClose}
-                sx={{
-                    '& .MuiPaper-root': {
-                        maxHeight: 'calc(7 * 36px)',
-                        overflowY: 'auto',
-                        scrollbarWidth: 'thin',
+                slotProps={{
+                    paper: {
+                        sx: {
+                            maxHeight: 'calc(7 * 36px)',
+                            overflowY: 'auto',
+                            scrollbarWidth: 'thin',
+                        },
                     },
                 }}
             >
