@@ -24,7 +24,7 @@ export type PopoverCloseReason = 'backdropClick' | 'escapeKeyDown'
 export interface StyledPopoverProps {
     open: boolean
     anchorEl?: Element | null
-    onClose?: (event: Event | undefined, reason?: PopoverCloseReason) => void
+    onClose?: (event: object, reason?: PopoverCloseReason) => void
     anchorOrigin?: PopoverOrigin
     transformOrigin?: PopoverOrigin
     id?: string
@@ -87,7 +87,7 @@ export const StyledPopover = ({
         elements: { reference: anchorEl ?? undefined },
         middleware: [offset(4), flip({ padding: 8 }), shift({ padding: 8 })],
         onOpenChange: (next, event, reason) => {
-            if (!next) onClose?.(event, reason === 'escape-key' ? 'escapeKeyDown' : 'backdropClick')
+            if (!next) onClose?.(event ?? {}, reason === 'escape-key' ? 'escapeKeyDown' : 'backdropClick')
         },
     })
 

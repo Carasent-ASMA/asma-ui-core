@@ -6,7 +6,7 @@ import {
     type OnSelectHandler,
 } from 'react-day-picker'
 import type { DatePickerProps } from '../types'
-import { type PopoverProps } from '@mui/material'
+import { type StyledPopoverProps as PopoverProps } from 'src/components/utils/popover'
 import { useState } from 'react'
 import { StyledCalendarPickerFooter } from './StyledCalendarPickerFooter'
 import { CustomCaption } from './StyledCalendarPickerCaption'

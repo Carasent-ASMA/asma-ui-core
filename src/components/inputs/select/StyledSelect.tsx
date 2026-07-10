@@ -5,6 +5,7 @@ import {
     useEffect,
     useRef,
     useState,
+    type CSSProperties,
     type KeyboardEvent,
     type ReactElement,
     type ReactNode,
@@ -52,6 +53,9 @@ export interface StyledSelectProps {
     renderValue?: (value: unknown) => ReactNode
     fullWidth?: boolean
     className?: string
+    style?: CSSProperties
+    /** Accepted for API parity; the design always renders outlined. */
+    variant?: string
     sx?: unknown
     labelId?: string
     children?: ReactNode
@@ -81,6 +85,7 @@ export const StyledSelect = ({
     renderValue,
     fullWidth,
     className,
+    style,
     sx,
     children,
     MenuProps,
@@ -169,7 +174,10 @@ export const StyledSelect = ({
     }
 
     return (
-        <div className={cn('group relative inline-flex flex-col', fullWidth && 'w-full', className)} style={resolveSx(sx)}>
+        <div
+            className={cn('group relative inline-flex flex-col', fullWidth && 'w-full', className)}
+            style={{ ...resolveSx(sx), ...style }}
+        >
             <button
                 ref={triggerRef}
                 type='button'

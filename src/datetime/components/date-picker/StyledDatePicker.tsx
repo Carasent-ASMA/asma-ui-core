@@ -4,7 +4,7 @@ import type { DatePickerProps } from './types'
 import { setPickerPosition } from './helpers'
 import { DatePickerInputIndex } from './components/DatePickerInputIndex'
 import { useIsMobileView } from 'src/datetime/hooks/useWindowWidthSize.hook'
-import { Drawer } from '@mui/material'
+import { StyledDrawer as Drawer } from 'src/components/navigation/drawer'
 import { StyledDayPicker } from './components/StyledDayPicker'
 import { useBackNavigationClose } from 'src/datetime/hooks/useBackNavigationClose.hook'
 

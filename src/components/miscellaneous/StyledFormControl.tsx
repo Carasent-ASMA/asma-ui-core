@@ -1,4 +1,4 @@
-import { useId, useMemo, useState, type ReactNode } from 'react'
+import { useId, useMemo, useState, type CSSProperties, type ReactNode } from 'react'
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
 import type { FieldSize } from '../inputs/field-styles'
@@ -14,6 +14,7 @@ export interface FormControlProps {
     /** Accepted for API parity; the design always renders outlined. */
     variant?: string
     className?: string
+    style?: CSSProperties
     sx?: unknown
     id?: string
 }
@@ -31,6 +32,7 @@ export const StyledFormControl = ({
     size = 'medium',
     fullWidth,
     className,
+    style,
     sx,
     id,
 }: FormControlProps): JSX.Element => {
@@ -57,7 +59,7 @@ export const StyledFormControl = ({
         <FormControlContext.Provider value={context}>
             <div
                 className={cn('relative inline-flex flex-col', fullWidth && 'w-full', className)}
-                style={resolveSx(sx)}
+                style={{ ...resolveSx(sx), ...style }}
             >
                 {children}
             </div>

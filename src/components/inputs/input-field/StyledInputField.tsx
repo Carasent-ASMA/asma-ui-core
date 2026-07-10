@@ -21,7 +21,8 @@ interface InputSlot {
     endAdornment?: ReactNode
     className?: string
     style?: CSSProperties
-    ref?: Ref<HTMLInputElement>
+    // MUI's input slot ref lands on the InputBase root (a div); allow either.
+    ref?: Ref<HTMLInputElement | HTMLDivElement>
     [key: string]: unknown
 }
 
@@ -57,12 +58,14 @@ export interface StyledInputFieldProps {
     variant?: string
     fullWidth?: boolean
     className?: string
+    style?: CSSProperties
     sx?: unknown
     inputRef?: Ref<HTMLInputElement | HTMLTextAreaElement>
     slotProps?: {
         input?: InputSlot
         htmlInput?: HtmlInputSlot
         inputLabel?: HTMLAttributes<HTMLLabelElement> & Record<string, unknown>
+        formHelperText?: { sx?: unknown; className?: string }
     }
     /** Legacy MUI adornment slot (still used by ~22 call sites). */
     InputProps?: InputSlot
@@ -106,6 +109,7 @@ export const StyledInputField = ({
     size = 'medium',
     fullWidth,
     className,
+    style,
     sx,
     inputRef,
     slotProps,
@@ -132,7 +136,7 @@ export const StyledInputField = ({
     // does this); prefer an explicit `inputRef`, else fall back to it.
     const { ref: htmlInputRef, ...htmlInputRest } = slotProps?.htmlInput ?? {}
     const resolvedRef = (inputRef ?? htmlInputRef) as Ref<HTMLInputElement & HTMLTextAreaElement>
-    const { className: inputSlotClass, style: inputSlotStyle } = slotProps?.input ?? {}
+    const { className: inputSlotClass, style: inputSlotStyle, ref: inputSlotRef } = slotProps?.input ?? {}
 
     const shrink = focused || hasValue || Boolean(placeholder) || Boolean(startAdornment)
 
@@ -182,8 +186,11 @@ export const StyledInputField = ({
     )
 
     return (
-        <div className={cn('group relative inline-flex flex-col', fullWidth && 'w-full', className)} style={resolveSx(sx)}>
-            <div className='relative flex items-center'>
+        <div
+            className={cn('group relative inline-flex flex-col', fullWidth && 'w-full', className)}
+            style={{ ...resolveSx(sx), ...style }}
+        >
+            <div className='relative flex items-center' ref={inputSlotRef}>
                 {multiline ? (
                     <textarea
                         {...(sharedProps as unknown as TextareaHTMLAttributes<HTMLTextAreaElement>)}
@@ -247,7 +254,9 @@ export const StyledInputField = ({
                     className={cn(
                         'm-0 min-h-6 text-sm leading-6',
                         error ? 'flex items-start gap-1 text-error-500' : 'text-delta-600',
+                        slotProps?.formHelperText?.className,
                     )}
+                    style={resolveSx(slotProps?.formHelperText?.sx)}
                 >
                     {error && <ErrorOutlineIcon width={20} height={20} className='min-w-5 shrink-0 translate-y-[2px]' />}
                     <span className='min-w-0 flex-1'>{error ? helperText || 'Required' : helperText}</span>
