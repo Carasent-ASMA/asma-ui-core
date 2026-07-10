@@ -1,157 +1,258 @@
-import { TextField, type TextFieldProps } from '@mui/material'
-import { ErrorOutlineIcon } from 'src/components/icons'
-import { CloseIcon } from 'src/components/icons'
-/**
- *
- * @inputRef
- * inputRef to get Node of Input Element inside
- *
- * type='mui-input' is temporary, remove it after deleting antd from all projects. Antd lib overwrites styles for type[text]
- */
-export const StyledInputField: React.FC<
-    TextFieldProps & {
-        allowClear?: boolean
-        onClear?: () => void
-        readOnly?: boolean
-        dataTest: string
+import {
+    useId,
+    useState,
+    type ChangeEvent,
+    type CSSProperties,
+    type FocusEvent,
+    type HTMLAttributes,
+    type ReactNode,
+    type Ref,
+    type TextareaHTMLAttributes,
+    type InputHTMLAttributes,
+} from 'react'
+import { CloseIcon, ErrorOutlineIcon } from 'src/components/icons'
+import { cn } from 'src/helpers/cn'
+import { resolveSx } from 'src/helpers/sx'
+import { floatingLabelClass, outlineClass, type FieldSize } from '../field-styles'
+import styles from './StyledInputField.module.scss'
+
+interface InputSlot {
+    startAdornment?: ReactNode
+    endAdornment?: ReactNode
+    className?: string
+    style?: CSSProperties
+    ref?: Ref<HTMLInputElement>
+    [key: string]: unknown
+}
+
+type HtmlInputSlot = InputHTMLAttributes<HTMLInputElement> & { ref?: Ref<HTMLInputElement> }
+
+export interface StyledInputFieldProps {
+    dataTest: string
+    label?: ReactNode
+    value?: string | number
+    defaultValue?: string | number
+    onChange?: (event: ChangeEvent<HTMLInputElement>) => void
+    onBlur?: (event: FocusEvent<HTMLInputElement>) => void
+    onFocus?: (event: FocusEvent<HTMLInputElement>) => void
+    error?: boolean
+    helperText?: ReactNode
+    disabled?: boolean
+    readOnly?: boolean
+    required?: boolean
+    allowClear?: boolean
+    onClear?: () => void
+    type?: string
+    placeholder?: string
+    name?: string
+    id?: string
+    autoComplete?: string
+    autoFocus?: boolean
+    multiline?: boolean
+    rows?: number
+    minRows?: number
+    maxRows?: number
+    size?: FieldSize
+    /** Accepted for API parity; the design always renders outlined. */
+    variant?: string
+    fullWidth?: boolean
+    className?: string
+    sx?: unknown
+    inputRef?: Ref<HTMLInputElement | HTMLTextAreaElement>
+    slotProps?: {
+        input?: InputSlot
+        htmlInput?: HtmlInputSlot
+        inputLabel?: HTMLAttributes<HTMLLabelElement> & Record<string, unknown>
     }
-> = ({ allowClear, onClear, readOnly, disabled, error, helperText, dataTest, slotProps: userSlotProps, ...props }) => {
-    const disabledOrReadonly = (disabled ?? false) || (readOnly ?? false)
-    interface InputSlot { endAdornment?: React.ReactNode; startAdornment?: React.ReactNode }
-    const userInputSlot = userSlotProps?.input as InputSlot | undefined
+    /** Legacy MUI adornment slot (still used by ~22 call sites). */
+    InputProps?: InputSlot
+    onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void
+}
+
+/**
+ * Outlined text field with a floating label (replaces MUI `TextField`). Self-contained: manages its
+ * own focus/value state to drive the shared field styling ([[field-styles]]); supports multiline,
+ * start/end adornments, an optional clear button, and error/helper text. Public props preserved
+ * (DEC-003). TASK-401.
+ *
+ * ponytail: `variant` is accepted but always renders outlined, and multiline uses fixed `rows`
+ * (no auto-grow to `maxRows`) — known ceilings; Chromatic in CI is the visual gate.
+ */
+export const StyledInputField = ({
+    dataTest,
+    label,
+    value,
+    defaultValue,
+    onChange,
+    onBlur,
+    onFocus,
+    error,
+    helperText,
+    disabled,
+    readOnly,
+    required,
+    allowClear,
+    onClear,
+    type = 'text',
+    placeholder,
+    name,
+    id,
+    autoComplete,
+    autoFocus,
+    multiline,
+    rows,
+    minRows,
+    maxRows: _maxRows,
+    size = 'medium',
+    fullWidth,
+    className,
+    sx,
+    inputRef,
+    slotProps,
+    InputProps,
+    onKeyDown,
+    variant: _variant,
+}: StyledInputFieldProps): JSX.Element => {
+    const generatedId = useId()
+    const fieldId = id ?? generatedId
+    const [focused, setFocused] = useState(false)
+    const [hasValueUncontrolled, setHasValueUncontrolled] = useState(
+        defaultValue != null && defaultValue !== '',
+    )
+
+    const isControlled = value !== undefined
+    const hasValue = isControlled ? value !== '' && value != null : hasValueUncontrolled
+    const disabledOrReadonly = Boolean(disabled) || Boolean(readOnly)
+
+    const startAdornment = slotProps?.input?.startAdornment ?? InputProps?.startAdornment
+    const userEndAdornment = slotProps?.input?.endAdornment ?? InputProps?.endAdornment
+    const showClear = Boolean(allowClear && hasValue && !disabledOrReadonly)
+
+    // The MUI input slot lets callers pass their own ref via `slotProps.htmlInput.ref` (Autocomplete
+    // does this); prefer an explicit `inputRef`, else fall back to it.
+    const { ref: htmlInputRef, ...htmlInputRest } = slotProps?.htmlInput ?? {}
+    const resolvedRef = (inputRef ?? htmlInputRef) as Ref<HTMLInputElement & HTMLTextAreaElement>
+    const { className: inputSlotClass, style: inputSlotStyle } = slotProps?.input ?? {}
+
+    const shrink = focused || hasValue || Boolean(placeholder) || Boolean(startAdornment)
+
+    const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {
+        if (readOnly) return
+        if (!isControlled) setHasValueUncontrolled(event.target.value !== '')
+        onChange?.(event)
+    }
+    const handleFocus = (event: FocusEvent<HTMLInputElement>): void => {
+        setFocused(true)
+        onFocus?.(event)
+    }
+    const handleBlur = (event: FocusEvent<HTMLInputElement>): void => {
+        setFocused(false)
+        onBlur?.(event)
+    }
+
+    const sharedProps = {
+        ...htmlInputRest,
+        id: fieldId,
+        name,
+        placeholder: shrink ? placeholder : undefined,
+        disabled: disabledOrReadonly,
+        readOnly,
+        required,
+        autoComplete,
+        autoFocus,
+        value,
+        defaultValue,
+        'aria-invalid': error ? true : undefined,
+        onChange: handleChange,
+        onFocus: handleFocus,
+        onBlur: handleBlur,
+        onKeyDown,
+    }
+
+    const inputClasses = cn(
+        styles['Input'],
+        'peer w-full rounded-lg bg-transparent text-delta-800 outline-none placeholder:text-delta-500',
+        'disabled:text-delta-300',
+        readOnly && 'bg-delta-10 text-delta-800',
+        size === 'small' ? 'text-sm' : 'text-base',
+        multiline ? 'resize-none px-3 py-2' : size === 'small' ? 'h-9 px-3' : 'h-12 px-3',
+        startAdornment && 'pl-10',
+        (showClear || !!userEndAdornment) && 'pr-10',
+        inputSlotClass,
+    )
 
     return (
-        <TextField
-            {...props}
-            data-testid={dataTest}
-            disabled={disabledOrReadonly}
-            error={error}
-            helperText={
-                readOnly ? null : error ? (
-                    <span className='flex items-start gap-1'>
-                        <ErrorOutlineIcon width={20} height={20} className='min-w-5 shrink-0 translate-y-[2px]' />
-                        <span className='min-w-0 flex-1'>{helperText ?? 'Required'}</span>
-                    </span>
+        <div className={cn('group relative inline-flex flex-col', fullWidth && 'w-full', className)} style={resolveSx(sx)}>
+            <div className='relative flex items-center'>
+                {multiline ? (
+                    <textarea
+                        {...(sharedProps as unknown as TextareaHTMLAttributes<HTMLTextAreaElement>)}
+                        ref={resolvedRef}
+                        data-testid={dataTest}
+                        rows={rows ?? minRows ?? 3}
+                        className={inputClasses}
+                        style={inputSlotStyle}
+                    />
                 ) : (
-                    helperText
-                )
-            }
-            type={props.type ?? 'mui-input'}
-            slotProps={{
-                ...userSlotProps,
-                input: {
-                    ...userInputSlot,
-                    endAdornment:
-                        allowClear && props.value ? (
-                            <div
-                                role='button'
-                                className='absolute right-4 z-40 flex items-center justify-center rounded-full p-[2px] duration-300 hover:bg-gama-100'
-                                onClick={(e) => {
-                                    e.stopPropagation()
-                                    e.preventDefault()
-                                    onClear?.()
-                                }}
-                            >
-                                <CloseIcon width={18} height={18} />
-                            </div>
-                        ) : (
-                            userInputSlot?.endAdornment
-                        ),
-                },
-            }}
-            sx={{
-                '& input:-webkit-autofill, & .MuiInputBase-root:has(> input:-webkit-autofill)': {
-                    backgroundColor: '#e8f0fe !important',
-                },
-                '& input': {
-                    backgroundColor: 'transparent',
-                },
-                '& .MuiInputBase-root': {
-                    backgroundColor: 'transparent',
-                },
-                '& .MuiInputBase-colorPrimary fieldset': {
-                    borderColor: 'var(--colors-delta-500) !important',
-                },
-                '& .MuiInputBase-colorPrimary.Mui-focused fieldset': {
-                    borderColor: 'var(--colors-gama-400) !important',
-                },
-                '& .MuiInputBase-colorPrimary.Mui-focused::after': {
-                    borderColor: 'var(--colors-gama-400) !important',
-                },
-                '& .MuiInputBase-colorPrimary.Mui-focused:hover fieldset': {
-                    borderColor: 'var(--colors-gama-400) !important',
-                },
-                '& .MuiInputBase-colorPrimary:hover fieldset': {
-                    borderColor: 'var(--colors-gama-300) !important',
-                    borderWidth: '2px !important',
-                },
-                '& .MuiInputBase-colorPrimary.Mui-disabled:hover fieldset': {
-                    borderWidth: '1px !important',
-                },
-                '& .MuiInputBase-colorPrimary.Mui-error fieldset': {
-                    borderColor: 'var(--colors-error-500) !important',
-                },
-                '& .MuiInputBase-colorPrimary.Mui-error:hover fieldset': {
-                    borderColor: 'var(--colors-error-500) !important',
-                },
-                '& .MuiFormHelperText-root': {
-                    fontSize: '14px',
-                    lineHeight: '24px',
-                    minHeight: '24px',
-                    marginLeft: 0,
-                    whiteSpace: 'normal',
-                    wordBreak: 'break-word',
-                },
-                '& .MuiFormHelperText-root.Mui-error': {
-                    color: 'var(--colors-error-500) !important',
-                },
-                '& .MuiInputBase-colorPrimary.Mui-disabled fieldset': {
-                    borderColor: 'var(--colors-delta-300) !important',
-                },
-                '& label.Mui-focused': {
-                    color: 'var(--colors-gama-500) !important',
-                },
-                '& label.Mui-error': {
-                    color: 'var(--colors-error-500) !important',
-                },
-                '& label.Mui-focused.MuiInputLabel-shrink': {
-                    color: 'var(--colors-gama-500) !important',
-                },
-                '& label.Mui-error.MuiInputLabel-shrink': {
-                    color: 'var(--colors-error-500) !important',
-                },
-                '& label': {
-                    color: 'var(--colors-delta-500) !important',
-                },
-                '& label.MuiInputLabel-shrink': {
-                    color: 'var(--colors-delta-800) !important',
-                },
-                '& label.Mui-disabled': {
-                    color: 'var(--colors-gray-300) !important',
-                },
-                '& .MuiOutlinedInput-input::placeholder': {
-                    color: 'var(--colors-delta-500) !important',
-                    opacity: '1 !important',
-                },
-                '& .MuiOutlinedInput-input.Mui-disabled': {
-                    WebkitTextFillColor: 'var(--colors-delta-300) !important',
-                },
-                ...(readOnly && {
-                    '& .MuiOutlinedInput-input.Mui-disabled': {
-                        WebkitTextFillColor: 'var(--colors-delta-800) !important',
-                    },
-                    '& .MuiInputBase-colorPrimary.Mui-disabled': {
-                        backgroundColor: 'var(--colors-delta-10) !important',
-                    },
-                    '& .MuiInputBase-colorPrimary.Mui-disabled fieldset': {
-                        borderColor: 'var(--colors-delta-200) !important',
-                    },
-                    '& label.Mui-disabled': {
-                        color: 'var(--colors-gray-800) !important',
-                    },
-                }),
-                ...props.sx,
-            }}
-        />
+                    <input
+                        {...(sharedProps)}
+                        ref={resolvedRef}
+                        data-testid={dataTest}
+                        type={type}
+                        className={inputClasses}
+                        style={inputSlotStyle}
+                    />
+                )}
+
+                {label && (
+                    <label
+                        htmlFor={fieldId}
+                        className={cn(
+                            floatingLabelClass({ shrink, focused, error, disabled, size }),
+                            slotProps?.inputLabel?.className,
+                        )}
+                        style={resolveSx(slotProps?.inputLabel?.['sx'])}
+                    >
+                        {label}
+                        {required && ' *'}
+                    </label>
+                )}
+
+                {startAdornment && (
+                    <span className='absolute left-3 flex items-center text-delta-500'>{startAdornment}</span>
+                )}
+                {showClear ? (
+                    <div
+                        role='button'
+                        data-testid={`${dataTest}-clear`}
+                        className='absolute right-3 z-40 flex items-center justify-center rounded-full p-[2px] duration-300 hover:bg-gama-100'
+                        onClick={(event) => {
+                            event.stopPropagation()
+                            event.preventDefault()
+                            if (!isControlled) setHasValueUncontrolled(false)
+                            onClear?.()
+                        }}
+                    >
+                        <CloseIcon width={18} height={18} />
+                    </div>
+                ) : (
+                    userEndAdornment && <span className='absolute right-3 flex items-center'>{userEndAdornment}</span>
+                )}
+
+                <div className={outlineClass({ focused, error, disabled, readOnly })} />
+            </div>
+
+            {!readOnly && helperText != null && (
+                <p
+                    className={cn(
+                        'm-0 min-h-6 text-sm leading-6',
+                        error ? 'flex items-start gap-1 text-error-500' : 'text-delta-600',
+                    )}
+                >
+                    {error && <ErrorOutlineIcon width={20} height={20} className='min-w-5 shrink-0 translate-y-[2px]' />}
+                    <span className='min-w-0 flex-1'>{error ? helperText || 'Required' : helperText}</span>
+                </p>
+            )}
+        </div>
     )
 }

@@ -1,0 +1,9 @@
+// ponytail: :-webkit-autofill is a pseudo-class Tailwind has no variant for — GUD-003 exception.
+// Everything else (label float, border states, placeholder) stays in Tailwind on the elements.
+
+.Input:-webkit-autofill,
+.Input:-webkit-autofill:hover,
+.Input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px #e8f0fe inset;
+    box-shadow: 0 0 0 1000px #e8f0fe inset;
+}
