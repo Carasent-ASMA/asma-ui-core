@@ -1,7 +1,6 @@
-// components/StyledSwitch/StyledSwitch.tsx
-import React, { forwardRef, useState } from 'react'
-import { Switch } from '@base-ui/react/switch'
+import React, { forwardRef, useState, type ButtonHTMLAttributes } from 'react'
 import styles from './StyledSwitch.module.scss'
+import { cn } from 'src/helpers/cn'
 import { getSvgIconStyle } from 'src/components/icons/iconStyle'
 import type { IIcon } from 'src/components/icons'
 
@@ -14,8 +13,8 @@ type StyledSwitchProps = {
     required?: boolean
     id?: string
     dataTest?: string
-    // value?: React.InputHTMLAttributes<HTMLInputElement>['value']
-} & Omit<React.ComponentProps<typeof Switch.Root>, 'children'>
+    className?: string
+} & Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onChange' | 'type'>
 
 export type SwitchProps = StyledSwitchProps
 
@@ -25,29 +24,31 @@ const IndeterminateIcon = ({ className }: { className?: string }) => (
     </svg>
 )
 
-const CheckIconSwitch: React.FC<IIcon> = ({ width = 11, height = 11, className = '', onClick, color }) => {
-    const style = getSvgIconStyle(color)
+const CheckIconSwitch: React.FC<IIcon> = ({ width = 11, height = 11, className = '', onClick, color }) => (
+    <svg
+        xmlns='http://www.w3.org/2000/svg'
+        width={width}
+        height={height}
+        viewBox='0 0 448 512'
+        className={className}
+        onClick={onClick}
+        style={getSvgIconStyle(color)}
+        aria-hidden='true'
+        focusable='false'
+    >
+        <path
+            fill='currentColor'
+            d='M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7L393.4 105.4c12.5-12.5 32.8-12.5 45.2 0'
+        />
+    </svg>
+)
 
-    return (
-        <svg
-            xmlns='http://www.w3.org/2000/svg'
-            width={width}
-            height={height}
-            viewBox='0 0 448 512'
-            className={className}
-            onClick={onClick}
-            style={style}
-            aria-hidden='true'
-            focusable='false'
-        >
-            <path
-                fill='currentColor'
-                d='M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7L393.4 105.4c12.5-12.5 32.8-12.5 45.2 0'
-            />
-        </svg>
-    )
-}
-
+/**
+ * Native `<button role="switch">` toggle (replaces `@base-ui/react`). Drives the SCSS module's
+ * `data-checked`/`data-unchecked`/`data-disabled` selectors from React; the visual track/thumb stay
+ * in SCSS (transitions/pseudo-elements — GUD-003). Public props + `onChange(event, checked)`
+ * unchanged. TASK-201.
+ */
 export const StyledSwitch = forwardRef<HTMLButtonElement, StyledSwitchProps>(
     (
         {
@@ -57,9 +58,9 @@ export const StyledSwitch = forwardRef<HTMLButtonElement, StyledSwitchProps>(
             disabled,
             readOnly,
             required,
-            // value,
             id,
             dataTest,
+            className,
             ...rest
         },
         ref,
@@ -68,36 +69,35 @@ export const StyledSwitch = forwardRef<HTMLButtonElement, StyledSwitchProps>(
         const isControlled = controlledChecked !== undefined
         const checked = isControlled ? controlledChecked : uncontrolledChecked
 
-        const handleChange = (newChecked: boolean) => {
-            if (!isControlled) setChecked(newChecked)
-            onChange?.(
-                {
-                    target: { checked: newChecked, name: id },
-                } as React.ChangeEvent<HTMLInputElement>,
-                newChecked,
-            )
+        const handleToggle = () => {
+            if (readOnly || disabled) return
+            const next = !checked
+            if (!isControlled) setChecked(next)
+            onChange?.({ target: { checked: next, name: id } } as React.ChangeEvent<HTMLInputElement>, next)
         }
 
-        const stateProps = isControlled ? { checked } : { defaultChecked }
         const iconClass = styles['iconContent']
 
         return (
-            <Switch.Root
+            <button
                 {...rest}
-                {...stateProps}
-                nativeButton
-                render={<button />}
                 ref={ref}
-                className={styles['switch']}
-                onCheckedChange={handleChange}
+                type='button'
+                role='switch'
+                aria-checked={checked}
+                aria-readonly={readOnly}
+                aria-required={required}
+                className={cn(styles['switch'], className)}
+                onClick={handleToggle}
                 disabled={disabled}
-                readOnly={readOnly}
-                required={required}
                 id={id}
                 name={id}
                 data-testid={dataTest}
+                data-checked={checked ? '' : undefined}
+                data-unchecked={!checked ? '' : undefined}
+                data-disabled={disabled ? '' : undefined}
             >
-                <Switch.Thumb className={styles['thumb']}>
+                <span className={styles['thumb']}>
                     <span className={styles['icon']}>
                         {checked ? (
                             <CheckIconSwitch className={iconClass} />
@@ -105,8 +105,8 @@ export const StyledSwitch = forwardRef<HTMLButtonElement, StyledSwitchProps>(
                             <IndeterminateIcon className={iconClass} />
                         )}
                     </span>
-                </Switch.Thumb>
-            </Switch.Root>
+                </span>
+            </button>
         )
     },
 )

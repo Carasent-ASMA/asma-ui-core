@@ -1,41 +1,6 @@
-.styled-dialog-root {
-    display: flex;
-    align-items: top;
-}
-.styled-top-header {
-    display: flex;
-    width: 100%;
-    padding: 16px 16px 0px;
-    justify-content: space-between;
-}
+// ponytail: ::backdrop is a pseudo-element Tailwind 3.3 has no variant for — GUD-003 exception.
+// Everything else (layout/spacing/colour) stays in Tailwind on the element.
 
-.styled-dialog-close {
-    display: flex;
-    justify-content: flex-end;
-    flex-grow: 1;
-    column-gap: 8px;
-}
-
-.styled-dialog-info {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    gap: 2px;
-}
-
-.styled-dialog-label {
-    display: flex;
-    align-items: center;
-    height: 32px;
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 20px;
-    color: var(--colors-grey-700);
-}
-.styled-dialog-title {
-    display: flex;
-    font-weight: 600;
-    font-size: 24px;
-    line-height: 32px;
-    color: var(--colors-grey-800);
+.StyledDialog::backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
 }

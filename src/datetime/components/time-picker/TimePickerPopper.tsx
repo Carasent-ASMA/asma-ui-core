@@ -1,4 +1,4 @@
-import { bindPopper, type PopupState } from 'material-ui-popup-state/hooks'
+import { bindPopper, type PopupState } from 'src/hooks/usePopupState'
 import { TimePickerBody } from './components/TimePickerBody'
 import { Fade, Paper, Popper } from '@mui/material'
 import type { StyledTimePickerProps } from './types'

@@ -197,7 +197,7 @@ const InteractiveTabs = () => {
     const [value, setValue] = useState<number | false>(0)
 
     return (
-        <StyledTabs value={value} onChange={(_, newValue) => setValue(newValue)} className='max-w-fit'>
+        <StyledTabs value={value} onChange={(_, newValue) => setValue(newValue as number)} className='max-w-fit'>
             {INTERACTIVE_TABS.map(({ label, disabled }, index) => (
                 <StyledTab key={index} label={label} disabled={disabled} className={TAB_BASE_CLASS} />
             ))}
@@ -211,7 +211,7 @@ const ScrollableTabs = () => {
     return (
         <StyledTabs
             value={value}
-            onChange={(_, newValue) => setValue(newValue)}
+            onChange={(_, newValue) => setValue(newValue as number)}
             variant='scrollable'
             scrollButtons='auto'
             className='max-w-[600px]'

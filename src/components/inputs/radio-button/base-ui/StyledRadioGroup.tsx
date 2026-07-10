@@ -1,42 +1,63 @@
-import React, { forwardRef, useId } from 'react'
-import { RadioGroup } from '@base-ui/react/radio-group'
+import React, { forwardRef, useId, useMemo, useState, type HTMLAttributes } from 'react'
 import { StyledFormHelperText } from 'src'
 import { ErrorOutlineIcon } from 'src/components/icons'
 import clsx from 'clsx'
+import { RadioGroupContext, type RadioValue } from './RadioGroupContext'
 
 export type StyledRadioGroupProps = {
-    value?: string | number | boolean | null
-    defaultValue?: string | number | boolean | null
-    onValueChange?: (value: string | number | boolean | null) => void
+    value?: RadioValue
+    defaultValue?: RadioValue
+    onValueChange?: (value: RadioValue) => void
     disabled?: boolean
     dataTest?: string
     error?: boolean
     errorText?: string
     helperText?: string
     children: React.ReactNode
-} & Omit<React.ComponentProps<typeof RadioGroup>, 'children' | 'defaultValue' | 'value'>
+    name?: string
+} & Omit<HTMLAttributes<HTMLDivElement>, 'defaultValue' | 'onChange'>
 
+/**
+ * Native radio group (replaces `@base-ui/react`): a `role="radiogroup"` container that shares
+ * name/selection with its `StyledRadio` children via context, controlled or uncontrolled, plus the
+ * error/helper text row. TASK-201.
+ */
 export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps>(
-    ({ value, defaultValue, onValueChange, dataTest, error, errorText, helperText, children, ...rest }, ref) => {
+    ({ value, defaultValue, onValueChange, disabled, dataTest, error, errorText, helperText, children, name, ...rest }, ref) => {
         const helperId = useId()
         const errorId = useId()
+        const generatedName = useId()
+        const groupName = name ?? generatedName
+
+        const isControlled = value !== undefined
+        const [uncontrolled, setUncontrolled] = useState<RadioValue>(defaultValue ?? null)
+        const selected = isControlled ? value : uncontrolled
+
+        const onSelect = (next: RadioValue) => {
+            if (!isControlled) setUncontrolled(next)
+            onValueChange?.(next)
+        }
+
+        const contextValue = useMemo(
+            () => ({ name: groupName, value: selected, disabled, onSelect }),
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+            [groupName, selected, disabled],
+        )
 
         const showHelperText = (error ?? false) || (helperText ?? false)
         const helperTextToDisplay = error ? errorText ?? 'Required' : helperText
         const describedById = showHelperText ? (error ? errorId : helperId) : undefined
 
         return (
-            <RadioGroup
+            <div
                 {...rest}
+                ref={ref}
+                role='radiogroup'
                 data-testid={dataTest}
                 aria-describedby={describedById}
                 aria-invalid={error}
-                ref={ref}
-                value={value}
-                defaultValue={defaultValue}
-                onValueChange={onValueChange}
             >
-                {children}
+                <RadioGroupContext.Provider value={contextValue}>{children}</RadioGroupContext.Provider>
 
                 {showHelperText && (
                     <StyledFormHelperText
@@ -51,7 +72,7 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
                         {helperTextToDisplay}
                     </StyledFormHelperText>
                 )}
-            </RadioGroup>
+            </div>
         )
     },
 )

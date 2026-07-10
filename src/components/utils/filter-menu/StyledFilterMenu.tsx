@@ -1,10 +1,9 @@
 import React, { useState, type ReactNode } from 'react'
 import { StyledButton } from '../../inputs/button'
 import { FilterIcon } from '../../icons'
-import { StyledPopover } from '../popover'
+import { StyledPopover, type StyledPopoverProps } from '../popover'
 import { useDynamicToolbarLayout } from '../../custom/module/header-layout/DynamicToolbarLayoutContext'
 import clsx from 'clsx'
-import type { PopoverProps } from '@mui/material'
 
 /**
  * Custom props:
@@ -20,7 +19,7 @@ interface StyledFilterMenuProps {
     disabled?: boolean
     size?: 'small' | 'large' | 'medium'
     variant?: 'contained' | 'outlined' | 'text' | 'textGray'
-    popoverProps?: Omit<PopoverProps, 'open' | 'anchorEl' | 'onClose'>
+    popoverProps?: Omit<StyledPopoverProps, 'open' | 'anchorEl' | 'onClose' | 'children'>
     anchorNode?: (props: { isOpen: boolean; onClose: () => void }) => ReactNode
     label?: string
     hideLabel?: boolean

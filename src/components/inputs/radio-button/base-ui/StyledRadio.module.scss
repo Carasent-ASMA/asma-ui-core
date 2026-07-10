@@ -52,7 +52,7 @@
     }
 }
 
-.RadioWrapper:focus-visible .Radio::before {
+.RadioWrapper:has(input:focus-visible) .Radio::before {
     content: '';
     position: absolute;
     inset: -4px;

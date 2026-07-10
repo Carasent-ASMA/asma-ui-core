@@ -1,5 +1,4 @@
-import React, { useEffect, type SVGProps } from 'react'
-import { Checkbox } from '@base-ui/react/checkbox'
+import React, { useEffect, useRef, type ChangeEvent, type SVGProps } from 'react'
 import styles from './StyledCheckbox.module.scss'
 import { cn } from 'src/helpers/cn'
 
@@ -12,8 +11,8 @@ type StyledCheckboxProps = {
     hideWrapper?: boolean
     className?: string
     checkboxClassName?: string
-    onChange?: (event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => void
-} & Omit<React.ComponentProps<typeof Checkbox.Root>, 'children'>
+    onChange?: (event: ChangeEvent<HTMLInputElement>, checked: boolean) => void
+} & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'size' | 'checked' | 'type'>
 
 export const IndeterminateIcon = (props: SVGProps<SVGSVGElement>): JSX.Element => (
     <svg viewBox='0 0 24 24' width='100%' height='100%' fill='none' {...props}>
@@ -39,6 +38,12 @@ export const CheckIcon = (props: SVGProps<SVGSVGElement>): JSX.Element => (
     </svg>
 )
 
+/**
+ * Native `<input type="checkbox">` checkbox (replaces `@base-ui/react`). A visually-hidden input
+ * carries state + a11y; the visual box, ripple, and indeterminate bar come from the SCSS module
+ * (kept: `@keyframes`/pseudo-elements aren't Tailwind-expressible — GUD-003), whose `data-*`
+ * selectors are driven from React here. Public props unchanged. TASK-201.
+ */
 export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
     dataTest,
     size = 'medium',
@@ -55,6 +60,12 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
 }): JSX.Element => {
     const isHideWrapper = !!hideWrapper
     const isRippleEnabled = !disableRipple && !isHideWrapper && !disabled && !readOnly
+    const inputRef = useRef<HTMLInputElement>(null)
+    const rippleRef = useRef<HTMLSpanElement>(null)
+
+    useEffect(() => {
+        if (inputRef.current) inputRef.current.indeterminate = indeterminate
+    }, [indeterminate])
 
     const wrapperClasses = cn(
         styles['CheckboxWrapper'],
@@ -65,7 +76,6 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
         isRippleEnabled && styles['CheckboxHover'],
         className,
     )
-
     const checkboxClasses = cn(
         styles['Checkbox'],
         styles[`size-${size}`],
@@ -74,24 +84,13 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
     )
     const CheckboxIcon = indeterminate ? IndeterminateIcon : CheckIcon
 
-    const rippleRef = React.useRef<HTMLSpanElement>(null)
-
     const handlePointerDown = React.useCallback(
         (e: React.PointerEvent) => {
             e.stopPropagation()
             if (!isRippleEnabled) return
-
             const ripple = document.createElement('span')
-            if (styles['CheckboxRipple']) {
-                ripple.className = styles['CheckboxRipple']
-            }
-            ripple.addEventListener(
-                'animationend',
-                () => {
-                    ripple.remove()
-                },
-                { once: true },
-            )
+            if (styles['CheckboxRipple']) ripple.className = styles['CheckboxRipple']
+            ripple.addEventListener('animationend', () => ripple.remove(), { once: true })
             rippleRef.current?.appendChild(ripple)
         },
         [isRippleEnabled],
@@ -99,42 +98,40 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
 
     useEffect(() => {
         const rippleNode = rippleRef.current
-        return () => {
-            rippleNode?.replaceChildren()
-        }
+        return () => rippleNode?.replaceChildren()
     }, [])
 
-    const handleCheckedChange = React.useCallback(
-        (val: boolean) => {
-            if (readOnly) return
-            const fakeEvent = {
-                target: { name: props.name, value: props.value, checked: val },
-            } as React.ChangeEvent<HTMLInputElement>
-            onChange?.(fakeEvent, val)
-        },
-        [onChange, props.name, props.value, readOnly],
-    )
+    const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+        if (readOnly) return
+        onChange?.(event, event.target.checked)
+    }
+
+    // Drive the SCSS module's state selectors (base-ui used to set these data-* attributes).
+    const stateAttrs = {
+        'data-checked': checked && !indeterminate ? '' : undefined,
+        'data-unchecked': !checked && !indeterminate ? '' : undefined,
+        'data-indeterminate': indeterminate ? '' : undefined,
+        'data-disabled': disabled ? '' : undefined,
+    }
 
     return (
-        <Checkbox.Root
-            className={wrapperClasses}
-            data-testid={dataTest}
-            checked={checked}
-            disabled={disabled}
-            readOnly={readOnly}
-            indeterminate={indeterminate}
-            onPointerDown={handlePointerDown}
-            onCheckedChange={handleCheckedChange}
-            {...props}
-        >
-            {!isHideWrapper && isRippleEnabled && (
-                <span ref={rippleRef} className={styles['CheckboxRippleContainer']} />
-            )}
+        <label className={wrapperClasses} data-testid={dataTest} onPointerDown={handlePointerDown} {...stateAttrs}>
+            <input
+                ref={inputRef}
+                type='checkbox'
+                className='sr-only'
+                checked={checked}
+                disabled={disabled}
+                readOnly={readOnly}
+                onChange={handleChange}
+                {...props}
+            />
+            {!isHideWrapper && isRippleEnabled && <span ref={rippleRef} className={styles['CheckboxRippleContainer']} />}
             <span className={checkboxClasses}>
-                <Checkbox.Indicator className={styles['Indicator']}>
+                <span className={styles['Indicator']}>
                     <CheckboxIcon strokeWidth={size === 'small' ? 3 : 2} />
-                </Checkbox.Indicator>
+                </span>
             </span>
-        </Checkbox.Root>
+        </label>
     )
 }

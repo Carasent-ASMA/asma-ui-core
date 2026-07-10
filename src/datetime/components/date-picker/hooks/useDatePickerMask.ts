@@ -1,12 +1,9 @@
-import { useMask } from '@react-input/mask'
-import type { MutableRefObject } from "node_modules/@types/react";
+import { useInputMask } from 'src/helpers/inputMask'
 
-export const useDatePickerMask = (): { maskRef: MutableRefObject<HTMLInputElement | null>; } => {
-    const maskRef = useMask({
+export const useDatePickerMask = (): { maskRef: (element: HTMLInputElement | null) => void } => {
+    const maskRef = useInputMask({
         mask: '  /  /    ',
-        replacement: {
-            ' ': /\d/,
-        },
+        maskChar: ' ',
         showMask: true,
     })
 

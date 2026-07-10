@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { StyledMenu } from './StyledMenu'
-import { Stack, type MenuProps, Divider, ListItemIcon, ListItemText } from '@mui/material'
+import { StyledMenu, type MenuProps } from './StyledMenu'
 import { useState, type FC } from 'react'
 import { StyledMenuList } from './StyledMenuList'
 import { StyledButton } from 'src/components/inputs/button'
@@ -41,7 +40,7 @@ const StyledMenuExample: FC<{ args: Partial<MenuProps> }> = ({ args }) => {
 
     return (
         <>
-            <Stack sx={{ mt: 2, mb: 4 }}>
+            <div className='mb-8 mt-4 flex flex-col'>
                 <StyledTypography variant='h6'>Standard Menu</StyledTypography>
                 <StyledButton
                     dataTest='test'
@@ -61,9 +60,6 @@ const StyledMenuExample: FC<{ args: Partial<MenuProps> }> = ({ args }) => {
                     anchorEl={anchorEl}
                     open={open}
                     onClose={handleClose}
-                    slotProps={{
-                        list: { 'aria-labelledby': 'basic-button' },
-                    }}
                 >
                     <StyledMenuItem onClick={handleClose} selected>
                         Profile
@@ -71,47 +67,41 @@ const StyledMenuExample: FC<{ args: Partial<MenuProps> }> = ({ args }) => {
                     <StyledMenuItem onClick={handleClose}>My account</StyledMenuItem>
                     <StyledMenuItem onClick={handleClose}>Logout</StyledMenuItem>
                 </StyledMenu>
-            </Stack>
+            </div>
 
-            <Stack sx={{ mt: 2 }}>
+            <div className='mt-4 flex flex-col'>
                 <StyledTypography variant='h6'>Standard Icon Menu</StyledTypography>
                 <StyledMenuList className='bg-gama-50'>
                     <StyledMenuItem>
-                        <ListItemIcon>
+                        <span className='mr-3 flex'>
                             <ContentCutIcon width={20} height={20} />
-                        </ListItemIcon>
-                        <ListItemText>Cut</ListItemText>
-                        <StyledTypography variant='body2' color='text.secondary'>
-                            ⌘X
-                        </StyledTypography>
+                        </span>
+                        <span className='flex-1'>Cut</span>
+                        <span className='text-delta-500'>⌘X</span>
                     </StyledMenuItem>
                     <StyledMenuItem>
-                        <ListItemIcon>
+                        <span className='mr-3 flex'>
                             <ContentCopyIcon width={20} height={20} />
-                        </ListItemIcon>
-                        <ListItemText>Copy</ListItemText>
-                        <StyledTypography variant='body2' color='text.secondary'>
-                            ⌘C
-                        </StyledTypography>
+                        </span>
+                        <span className='flex-1'>Copy</span>
+                        <span className='text-delta-500'>⌘C</span>
                     </StyledMenuItem>
                     <StyledMenuItem>
-                        <ListItemIcon>
+                        <span className='mr-3 flex'>
                             <ContentPasteIcon width={20} height={20} />
-                        </ListItemIcon>
-                        <ListItemText>Paste</ListItemText>
-                        <StyledTypography variant='body2' color='text.secondary'>
-                            ⌘V
-                        </StyledTypography>
+                        </span>
+                        <span className='flex-1'>Paste</span>
+                        <span className='text-delta-500'>⌘V</span>
                     </StyledMenuItem>
-                    <Divider />
+                    <hr className='my-1 border-delta-200' />
                     <StyledMenuItem>
-                        <ListItemIcon>
+                        <span className='mr-3 flex'>
                             <CloudIcon width={20} height={20} />
-                        </ListItemIcon>
-                        <ListItemText>Web Clipboard</ListItemText>
+                        </span>
+                        <span className='flex-1'>Web Clipboard</span>
                     </StyledMenuItem>
                 </StyledMenuList>
-            </Stack>
+            </div>
         </>
     )
 }

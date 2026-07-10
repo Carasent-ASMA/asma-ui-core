@@ -1,5 +1,6 @@
 import type { DropdownProps } from 'react-day-picker'
-import { capitalize } from 'lodash-es'
+
+const capitalize = (value: string): string => value.charAt(0).toUpperCase() + value.slice(1).toLowerCase()
 
 import { StyledFormControl } from 'src/datetime/shared-components/StyledFormControl'
 import { StyledSelect } from 'src/datetime/shared-components/StyledSelect'

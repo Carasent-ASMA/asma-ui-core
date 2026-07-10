@@ -1,4 +1,4 @@
-import { ClickAwayListener } from '@mui/material'
+import { ClickAwayListener } from 'src/components/mui-compat'
 import { createContext, type ReactNode, useContext, useEffect, useMemo, useState } from 'react'
 
 /**

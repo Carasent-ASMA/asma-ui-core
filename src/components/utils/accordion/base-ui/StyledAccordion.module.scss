@@ -60,11 +60,6 @@
     overflow: hidden;
     color: var(--colors-delta-800);
     transition: height 0.2s ease-out;
-
-    &[data-starting-style],
-    &[data-ending-style] {
-        height: 0;
-    }
 }
 
 .Content {

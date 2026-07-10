@@ -24,7 +24,7 @@ import { cn } from 'src/table/helpers/cn'
 import { StyledTooltip } from 'src/table/shared-components/tooltip'
 import { useTranslations } from 'src/table/hooks/useTranslations'
 import { StyledButton } from 'src/table/shared-components/button'
-import { compact } from 'lodash-es'
+import { compact } from 'src/helpers/arrays'
 import type { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities'
 
 function SortableColumnItem({

@@ -3,7 +3,6 @@ import type { Meta } from '@storybook/react-vite'
 import { useEffect, useRef, useState } from 'react'
 import { type Table as TanstackTable } from '@tanstack/react-table'
 import { makeData, makeParticipantsData, type Participant, type Person } from './helpers/makeData'
-import { cloneDeep } from 'lodash-es'
 import { useStyledTableColumns } from './components/styled-table/useTableColumns'
 import React from 'react'
 import { RenderSubRows } from './components/styled-table/RenderSubRows'
@@ -185,7 +184,7 @@ export const TableV2 = () => {
                     setRowSelection(e)
                 }}
                 onRowClick={(e, row) => {
-                    console.info('e', e, cloneDeep(row.original))
+                    console.info('e', e, structuredClone(row.original))
                 }}
                 enableGlobalFilter={true}
                 enableRowSelection={true}

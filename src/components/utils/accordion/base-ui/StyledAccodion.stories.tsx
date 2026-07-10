@@ -1,4 +1,3 @@
-import { Typography } from '@mui/material'
 import type { Meta } from '@storybook/react-vite'
 import { useState } from 'react'
 import { StyledWidgetTitle } from 'src/components/custom/widget/widget-title/StyledWidgetTitle'
@@ -7,7 +6,7 @@ import { StyledAccordionDetails } from './StyledAccordionDetails'
 import { StyledAccordionSummary } from './StyledAccordionSummary'
 
 const meta: Meta<typeof StyledAccordion> = {
-    title: 'Utils/Accordion/BaseUi',
+    title: 'Utils/Accordion',
     component: StyledAccordion,
     tags: [],
     args: {
@@ -35,7 +34,7 @@ export const Accordion = {
                     </div>
 
                     <StyledAccordionDetails>
-                        <Typography>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</Typography>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
                     </StyledAccordionDetails>
                 </StyledAccordion>
             </div>
