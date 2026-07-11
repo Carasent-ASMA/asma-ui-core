@@ -255,6 +255,7 @@ exports[`asma-ui-core public API surface > keeps every runtime export of the pac
   "UnknownDocumentOutlineRoundedIcon",
   "UnlockIcon",
   "UploadIcon",
+  "VirtualList",
   "VisibilityOffOutlineIcon",
   "VisibilityOutlineIcon",
   "WandStarsIcon",
