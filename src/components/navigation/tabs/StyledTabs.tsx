@@ -21,7 +21,10 @@ import { TabsContext, type TabValue } from './TabsContext'
 
 export interface StyledTabsProps {
     value?: TabValue
-    onChange?: (event: SyntheticEvent, value: TabValue) => void
+    // Method syntax (not `(event, value) => void`) is deliberate: it restores MUI `Tabs.onChange`'s
+    // bivariant `value` parameter (DEC-003), so consumers can type the handler's value as `string`,
+    // an enum, etc. despite `TabValue` being `unknown` — without resorting to `any`.
+    onChange?(event: SyntheticEvent, value: TabValue): void
     variant?: 'standard' | 'scrollable' | 'fullWidth'
     scrollButtons?: 'auto' | boolean
     centered?: boolean

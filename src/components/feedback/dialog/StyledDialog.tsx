@@ -25,9 +25,19 @@ export interface IStyledDialogProps {
     fullScreen?: boolean
     scroll?: 'paper' | 'body'
     disableEscapeKeyDown?: boolean
+    /**
+     * Accepted for MUI `Dialog` parity (DEC-003). Focus is trapped by the native `<dialog>`
+     * `showModal()`, so this MUI `Modal` prop is a typed no-op.
+     */
+    disableEnforceFocus?: boolean
     className?: string
     style?: CSSProperties
     sx?: unknown
+    /**
+     * MUI `Dialog` `classes` parity (DEC-003). The native `<dialog>` is the paper, so `classes.paper`
+     * is merged onto it; `classes.root` is accepted as a typed no-op (no separate root element).
+     */
+    classes?: { paper?: string; root?: string }
     PaperProps?: DialogPaperProps
     slotProps?: { paper?: DialogPaperProps; backdrop?: Record<string, unknown> }
     onCloseText?: ReactNode
@@ -69,6 +79,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     className,
     style: styleProp,
     sx,
+    classes,
     PaperProps,
     slotProps,
     onCloseText,
@@ -119,6 +130,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                 scroll === 'body' ? 'overflow-y-auto' : 'flex flex-col',
                 className,
                 paper.className,
+                classes?.paper,
             )}
             style={{
                 zIndex: 999,

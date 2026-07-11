@@ -15,6 +15,11 @@ export interface DrawerProps {
     className?: string
     sx?: unknown
     PaperProps?: { className?: string; sx?: unknown }
+    /**
+     * Accepted for MUI `Drawer` parity (DEC-003). The panel always stays mounted so the slide
+     * transition can play, so `keepMounted` is effectively always-on — this prop is a typed no-op.
+     */
+    ModalProps?: { keepMounted?: boolean }
     children?: ReactNode
 }
 

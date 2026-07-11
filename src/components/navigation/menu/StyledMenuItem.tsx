@@ -7,6 +7,8 @@ export interface StyledMenuItemProps {
     onClick?: (event: MouseEvent<HTMLLIElement>) => void
     disabled?: boolean
     selected?: boolean
+    /** Compact vertical padding (MUI `MenuItem` `dense` parity, DEC-003). */
+    dense?: boolean
     value?: unknown
     className?: string
     classes?: { root?: string; selected?: string }
@@ -24,6 +26,7 @@ export const StyledMenuItem = ({
     onClick,
     disabled,
     selected,
+    dense,
     className,
     classes,
     sx,
@@ -50,7 +53,8 @@ export const StyledMenuItem = ({
             onClick={disabled ? undefined : onClick}
             onKeyDown={handleKeyDown}
             className={cn(
-                'flex items-center px-3 py-2.5 outline-none',
+                'flex items-center px-3 outline-none',
+                dense ? 'py-1.5' : 'py-2.5',
                 disabled ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-delta-50',
                 selected && cn('bg-gama-50', classes?.selected),
                 classes?.root,
