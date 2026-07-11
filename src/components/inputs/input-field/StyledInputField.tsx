@@ -179,9 +179,14 @@ export const StyledInputField = ({
         'disabled:text-delta-300',
         readOnly && 'bg-delta-10 text-delta-800',
         size === 'small' ? 'text-sm' : 'text-base',
-        multiline ? 'resize-none px-3 py-2' : size === 'small' ? 'h-9 px-3' : 'h-12 px-3',
-        startAdornment && 'pl-10',
-        (showClear || !!userEndAdornment) && 'pr-10',
+        multiline ? 'resize-none py-2' : size === 'small' ? 'h-9' : 'h-12',
+        // Set each horizontal padding with exactly ONE utility. `px-3` + `pl-10`/`pr-10` are
+        // conflicting shorthands; since `cn()` no longer runs tailwind-merge (dropped in the
+        // MUI-removal Phase 0), both survive and the winner depends on stylesheet order — across the
+        // MFE bundles `px-3` wins, so the adornment overlaps the caret. Choosing the side explicitly
+        // avoids the conflict entirely.
+        startAdornment ? 'pl-10' : 'pl-3',
+        showClear || !!userEndAdornment ? 'pr-10' : 'pr-3',
         inputSlotClass,
     )
 

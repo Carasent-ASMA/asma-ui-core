@@ -123,8 +123,8 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
             onClick={handleClick}
             className={cn(
                 style['StyledDialog'],
-                // eslint-disable-next-line better-tailwindcss/no-unregistered-classes
-                'text-delta-800 m-auto max-h-[calc(100%-64px)] overflow-hidden rounded-2xl border-0 bg-white p-0 shadow-xl',
+
+                'm-auto max-h-[calc(100%-64px)] overflow-hidden rounded-2xl border-0 bg-white p-0 text-delta-800 shadow-xl',
                 isFullScreen
                     ? 'h-full max-h-full w-full max-w-full rounded-none'
                     : cn('w-[calc(100%-64px)]', fullWidth ? 'w-[calc(100%-64px)]' : 'w-auto'),
