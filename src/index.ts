@@ -57,6 +57,7 @@ export * from './table'
 export * from './components/utils/popover'
 export * from './components/utils/filter-menu'
 export * from './components/utils/copy-wrapper'
+export * from './components/utils/virtual-list'
 //widgets
 export * from './components/custom/widget/widget-title/StyledWidgetTitle'
 export * from './components/custom/widget/widget-header/StyledWidgetHeader'
