@@ -1,4 +1,4 @@
-import type { MouseEvent, ReactNode } from 'react'
+import type { CSSProperties, MouseEvent, ReactNode } from 'react'
 import { cn } from 'src/helpers/cn'
 import { StyledPopover, type PopoverOrigin, type StyledPopoverProps } from '../../utils/popover'
 import { StyledMenuList } from './StyledMenuList'
@@ -13,6 +13,8 @@ export interface MenuProps {
     className?: string
     sx?: unknown
     classes?: { paper?: string; list?: string }
+    /** MUI `Menu` `slotProps.paper` parity (DEC-003): styles/classes forwarded to the menu paper. */
+    slotProps?: { paper?: { className?: string; sx?: unknown; style?: CSSProperties } }
     autoFocus?: boolean
     onClick?: (event: MouseEvent<HTMLUListElement>) => void
     children?: ReactNode
@@ -40,6 +42,7 @@ export const StyledMenu = ({
     className,
     sx,
     classes,
+    slotProps,
     autoFocus = true,
     onClick,
     children,
@@ -53,7 +56,13 @@ export const StyledMenu = ({
         id={id}
         className={className}
         sx={sx}
-        slotProps={{ paper: { className: cn('rounded', classes?.paper), sx: MENU_PAPER_STYLE } }}
+        slotProps={{
+            paper: {
+                className: cn('rounded', classes?.paper, slotProps?.paper?.className),
+                sx: [MENU_PAPER_STYLE, slotProps?.paper?.sx],
+                style: slotProps?.paper?.style,
+            },
+        }}
     >
         <StyledMenuList autoFocus={autoFocus} className={classes?.list} onClick={onClick}>
             {children}

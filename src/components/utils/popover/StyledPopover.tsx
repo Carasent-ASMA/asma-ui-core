@@ -30,7 +30,7 @@ export interface StyledPopoverProps {
     id?: string
     className?: string
     sx?: unknown
-    slotProps?: { paper?: { className?: string; sx?: unknown } }
+    slotProps?: { paper?: { className?: string; sx?: unknown; style?: React.CSSProperties } }
     onClick?: (event: React.MouseEvent<HTMLDivElement>) => void
     children?: ReactNode
 }
@@ -100,7 +100,12 @@ export const StyledPopover = ({
             <div
                 ref={floatingRef}
                 id={id}
-                style={{ ...floatingStyles, ...resolveSx(sx), ...resolveSx(slotProps?.paper?.sx) }}
+                style={{
+                    ...floatingStyles,
+                    ...resolveSx(sx),
+                    ...resolveSx(slotProps?.paper?.sx),
+                    ...slotProps?.paper?.style,
+                }}
                 {...getFloatingProps({ onClick })}
                 className={cn(
                     'z-[1300] overflow-auto rounded bg-white shadow-lg',
