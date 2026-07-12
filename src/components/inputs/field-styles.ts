@@ -26,7 +26,7 @@ export const outlineClass = ({ focused, error, disabled, readOnly }: FieldState)
                 ? 'border-2 border-error-500'
                 : focused
                   ? 'border-2 border-gama-400'
-                  : 'border-delta-500 group-hover:border-2 group-hover:border-delta-300',
+                  : 'border-delta-500 group-hover:border-2',
     )
 
 /**

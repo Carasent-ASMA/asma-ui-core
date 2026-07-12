@@ -175,7 +175,7 @@ export const StyledInputField = ({
 
     const inputClasses = cn(
         styles['Input'],
-        'peer w-full rounded-lg bg-transparent text-delta-800 outline-none placeholder:text-delta-500',
+        'peer box-border w-full rounded-lg border-0 bg-transparent text-delta-800 outline-none placeholder:text-delta-500',
         'disabled:text-delta-300',
         readOnly && 'bg-delta-10 text-delta-800',
         size === 'small' ? 'text-sm' : 'text-base',

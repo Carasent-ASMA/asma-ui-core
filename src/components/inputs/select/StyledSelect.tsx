@@ -189,7 +189,7 @@ export const StyledSelect = ({
                 disabled={isDisabled}
                 {...getReferenceProps()}
                 className={cn(
-                    'relative flex w-full items-center justify-between rounded-lg bg-transparent px-3 text-left text-delta-800 outline-none',
+                    'relative flex w-full items-center justify-between rounded-lg border-0 bg-transparent px-3 text-left text-delta-800 outline-none',
                     fieldSize === 'small' ? 'h-9 text-sm' : 'h-12 text-base',
                     isDisabled && 'cursor-not-allowed text-delta-300',
                     readOnly && 'pointer-events-none',
@@ -231,7 +231,7 @@ export const StyledSelect = ({
                         {...getFloatingProps()}
                         onKeyDown={handleKeyDown}
                         className={cn(
-                            'z-[1300] max-h-72 overflow-auto rounded-lg border border-delta-300 bg-white py-1 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
+                            'z-[1300] m-0 max-h-72 list-none overflow-auto rounded-lg border border-delta-300 bg-white px-0 py-1 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
                             MenuProps?.className,
                         )}
                     >
