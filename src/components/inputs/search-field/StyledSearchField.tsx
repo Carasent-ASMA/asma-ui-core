@@ -64,13 +64,12 @@ export const StyledSearchField: FC<StyledSearchFieldProps> = ({ value, onClear, 
                         ) : null,
                     },
                     inputLabel: {
-                        sx: {
-                            transform: 'translate(34px, 9px) scale(1)',
-                            width: hasInteraction ? undefined : 'calc(100% - 42px)',
-                            '&.MuiInputLabel-shrink': {
-                                transform: 'translate(16px, -9px) scale(0.75)',
-                            },
-                        },
+                        // The MUI-free StyledInputField floats the label itself (shrink → top border) and
+                        // ignores MUI sx selectors like `&.MuiInputLabel-shrink`. At rest the label acts as
+                        // the placeholder, so nudge it right to clear the leading search icon; once focused
+                        // or filled the icon fades out and the label floats up, so the offset is dropped.
+                        className: hasInteraction ? undefined : 'ml-6',
+                        sx: { width: hasInteraction ? undefined : 'calc(100% - 42px)' },
                     },
                 }}
                 {...props}
