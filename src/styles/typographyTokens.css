@@ -1,0 +1,12 @@
+:root {
+    /* Typography scale — single source of truth.
+       Body base bumped 14px -> 16px for readability/accessibility (WCAG). */
+    --font-size-body-base: 16px; /* body/base: buttons, labels, chips, cells, menus, toasts */
+    --font-size-body-sm: 14px; /* small: tooltips, timestamps, captions (was 12px) */
+    --font-size-body-lg: 18px; /* large: default tabs */
+    --font-size-label-caps: 12px; /* uppercase micro labels: table header (was 10px) */
+
+    --line-height-body-base: 24px;
+    --line-height-body-sm: 20px;
+    --line-height-body-lg: 24px;
+}

@@ -17,6 +17,9 @@ function isSingleSx(value: SxProps<Theme> | undefined): value is StyledTabsSx {
 }
 
 const defaultSx: SxProps<Theme> = {
+    '& .MuiTab-root': {
+        fontSize: 'var(--font-size-body-lg)',
+    },
     '& .MuiTabs-scroller': {
         borderBottom: '1px solid var(--colors-delta-200)',
     },
@@ -59,6 +62,7 @@ const defaultSx: SxProps<Theme> = {
 const smallSx: SxProps<Theme> = {
     minHeight: 36,
     '& .MuiTab-root': {
+        fontSize: 'var(--font-size-body-base)',
         height: 36,
         minHeight: 36,
         paddingLeft: '12px',

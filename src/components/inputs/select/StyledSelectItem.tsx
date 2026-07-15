@@ -6,7 +6,7 @@ export const StyledSelectItem = (item: MenuItemProps): JSX.Element => {
             {...item}
             sx={{
                 '&.MuiMenuItem-root': {
-                    fontSize: '14px !important',
+                    fontSize: 'var(--font-size-body-base) !important',
                     gap: '4px',
                     px: 1,
                 },
