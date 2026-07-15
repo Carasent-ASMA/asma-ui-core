@@ -22,7 +22,7 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                 backgroundColor: 'white',
                 borderColor: 'var(--colors-delta-300)',
                 color: 'var(--colors-delta-800)',
-                fontSize: '14px',
+                fontSize: 'var(--font-size-body-base)',
                 ...(readOnly
                     ? {
                           pointerEvents: 'none',

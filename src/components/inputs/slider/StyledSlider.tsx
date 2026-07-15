@@ -37,7 +37,7 @@ export const StyledSlider = ({ dataTest, error, errorText, helperText, ...props 
                     },
                     markLabel: {
                         className: clsx(
-                            'ml-1 text-sm font-semibold text-delta-600',
+                            'ml-1 text-base font-semibold text-delta-600',
                             props.orientation === 'vertical' && 'mb-1',
                         ),
                         ...props.slotProps?.markLabel,
@@ -69,7 +69,7 @@ export const StyledSlider = ({ dataTest, error, errorText, helperText, ...props 
             {showHelperText && (
                 <StyledFormHelperText
                     className={clsx(
-                        'm-0 flex items-center gap-1 pt-1 text-sm',
+                        'm-0 flex items-center gap-1 pt-1 text-base',
                         error ? 'text-error-500' : 'text-delta-600',
                     )}
                 >

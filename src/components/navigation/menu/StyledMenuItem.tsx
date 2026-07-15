@@ -6,10 +6,11 @@ export const StyledMenuItem = (props: MenuItemProps): JSX.Element => (
         {...props}
         classes={{
             selected: 'bg-gama-50',
-            root: clsx('px-3 py-2.5 hover:bg-delta-50', props.classes?.root),
+            root: clsx('h-10 pl-4 pr-2 hover:bg-delta-50', props.classes?.root),
             ...props.classes,
         }}
         sx={{
+            fontSize: 'var(--font-size-body-base)',
             '&.Mui-disabled': {
                 pointerEvents: 'auto',
                 cursor: 'not-allowed',

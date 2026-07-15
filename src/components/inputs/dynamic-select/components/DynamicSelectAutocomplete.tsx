@@ -211,7 +211,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                                             {renderLabel ? (
                                                 renderLabel(option)
                                             ) : (
-                                                <span className='h-fit py-[10px] text-sm text-delta-700'>
+                                                <span className='h-fit py-[10px] text-base text-delta-700'>
                                                     {getOptionLabel(option)}
                                                 </span>
                                             )}
@@ -249,7 +249,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                                         {renderLabel ? (
                                             renderLabel(option)
                                         ) : (
-                                            <span className='py-[10px] text-sm text-delta-700'>
+                                            <span className='py-[10px] text-base text-delta-700'>
                                                 {getOptionLabel(option)}
                                             </span>
                                         )}
