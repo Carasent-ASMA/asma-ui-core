@@ -1,3 +1,4 @@
+import React from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
 import { StyledFormControl } from 'src/components/miscellaneous/StyledFormControl'
@@ -52,6 +53,80 @@ const Controlled = (args: StyledSelectProps) => {
             </StyledSelect>
         </StyledFormControl>
     )
+}
+
+/**
+ * Trigger state gallery (field node 15561-37391): rows = State, columns = Value (Empty/Filled).
+ * Hover forced via the root `group` + `pseudo-hover`. Focused/Open are React-driven and interactive —
+ * see SelectOption / AriaLifecycle.
+ */
+export const Gallery: Story = {
+    render: () => {
+        const th: React.CSSProperties = {
+            padding: 16,
+            border: '1px solid #bdc4cf',
+            textAlign: 'left',
+            fontWeight: 600,
+            color: '#49525f',
+            background: '#f0f2f4',
+            whiteSpace: 'nowrap',
+        }
+        const td: React.CSSProperties = { padding: 16, border: '1px solid #bdc4cf', verticalAlign: 'top' }
+        const STATES: { label: string; props: Partial<StyledSelectProps> }[] = [
+            { label: 'Default', props: {} },
+            { label: 'Hovered', props: { className: 'pseudo-hover' } },
+            { label: 'Error', props: { error: true, errorText: 'Error text' } },
+            { label: 'Disabled', props: { disabled: true } },
+        ]
+        const COLS = [
+            { key: 'empty', label: 'Empty', value: '' },
+            { key: 'filled', label: 'Filled', value: '1' },
+        ] as const
+        return (
+            <table style={{ borderCollapse: 'collapse' }}>
+                <thead>
+                    <tr>
+                        <th style={th}>State \ Value</th>
+                        {COLS.map((c) => (
+                            <th key={c.key} style={th}>
+                                {c.label}
+                            </th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody>
+                    {STATES.map((s) => (
+                        <tr key={s.label}>
+                            <th scope='row' style={th}>
+                                {s.label}
+                            </th>
+                            {COLS.map((c) => (
+                                <td key={c.key} style={td}>
+                                    <div style={{ width: 220 }}>
+                                        <StyledFormControl>
+                                            <StyledSelect
+                                                dataTest={`gallery-${s.label}-${c.key}`}
+                                                value={c.value}
+                                                placeholder='Select'
+                                                fullWidth
+                                                {...s.props}
+                                            >
+                                                {options.map((o) => (
+                                                    <StyledSelectItem key={o.id} value={o.id}>
+                                                        {o.title}
+                                                    </StyledSelectItem>
+                                                ))}
+                                            </StyledSelect>
+                                        </StyledFormControl>
+                                    </div>
+                                </td>
+                            ))}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        )
+    },
 }
 
 export const SelectOption: Story = {
@@ -307,6 +382,9 @@ export const RapidOpenClose: Story = {
         await expect(listbox).toBeInTheDocument()
     },
 }
+
+// Multiple-select is covered by StyledSelectAutocomplete — the single-select StyledSelect no longer
+// showcases a `multiple` story here (the prop remains for MUI API parity).
 
 // FIXME: this one is finicky because of the document selector, maybe will just remove it
 // export const PortalCleanup: Story = {

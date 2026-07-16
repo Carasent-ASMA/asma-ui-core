@@ -5,7 +5,7 @@ const dateSpec: InputMaskSpec = { mask: '  /  /    ', maskChar: ' ', showMask: t
 const timeSpec: InputMaskSpec = { mask: 'xx:xx', maskChar: 'x', showMask: false }
 
 describe('formatMaskedValue — date mask "  /  /    " (showMask)', () => {
-    it('returns empty value when no digits remain, so the input placeholder shows', () => {
+    it('returns empty when no digits remain so the focused placeholder can show the scaffold', () => {
         expect(formatMaskedValue('', 0, dateSpec)).toEqual({ value: '', caret: 0 })
         expect(formatMaskedValue('a', 1, dateSpec)).toEqual({ value: '', caret: 0 })
     })

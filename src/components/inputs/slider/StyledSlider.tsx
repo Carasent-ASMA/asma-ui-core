@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode, SyntheticEvent } from 'react'
+import { useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode, type SyntheticEvent } from 'react'
 import { ErrorOutlineIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
 import { StyledFormHelperText } from 'src/components/miscellaneous/StyledFormHelperText'
@@ -90,7 +90,8 @@ export const StyledSlider = ({
     onChangeCommitted,
 }: StyledSliderProps): JSX.Element => {
     const isVertical = orientation === 'vertical'
-    const current = value ?? defaultValue ?? min
+    const [uncontrolledValue, setUncontrolledValue] = useState<SliderValue>(defaultValue ?? min)
+    const current = value ?? uncontrolledValue
     const pair = asPair(current)
     const isRange = pair !== null
 
@@ -116,23 +117,42 @@ export const StyledSlider = ({
         return isVertical ? { bottom: `${pct}%` } : { left: `${pct}%` }
     }
 
+    const handleTrackPointerDown = (event: ReactPointerEvent<HTMLDivElement>): void => {
+        if (disabled) return
+        const rect = event.currentTarget.getBoundingClientRect()
+        const ratio = isVertical
+            ? 1 - (event.clientY - rect.top) / rect.height
+            : (event.clientX - rect.left) / rect.width
+        const stepped = min + Math.round(Math.min(1, Math.max(0, ratio)) * ((max - min) / step)) * step
+        const nextValue = Math.min(max, Math.max(min, stepped))
+        const thumbIndex = isRange
+            ? Math.abs((pair?.[1] ?? min) - nextValue) < Math.abs((pair?.[0] ?? min) - nextValue)
+                ? 1
+                : 0
+            : 0
+        emit(onChange, event, nextValue, thumbIndex)
+    }
+
     const emit = (
         handler: StyledSliderProps['onChange'] | StyledSliderProps['onChangeCommitted'],
         event: SyntheticEvent,
         rawValue: number,
         thumbIndex: number,
     ): void => {
-        if (!handler) return
+        let nextValue: SliderValue = rawValue
         if (!isRange) {
-            ;(handler)(event, rawValue, 0)
-            return
+            nextValue = rawValue
+        } else {
+            const next: [number, number] = [pair?.[0] ?? 0, pair?.[1] ?? 0]
+            next[thumbIndex] = rawValue
+            // Keep thumbs from crossing (MUI clamps the moving thumb to its neighbour).
+            if (thumbIndex === 0 && next[0] > next[1]) next[0] = next[1]
+            if (thumbIndex === 1 && next[1] < next[0]) next[1] = next[0]
+            nextValue = next
         }
-        const next: [number, number] = [pair?.[0] ?? 0, pair?.[1] ?? 0]
-        next[thumbIndex] = rawValue
-        // Keep thumbs from crossing (MUI clamps the moving thumb to its neighbour).
-        if (thumbIndex === 0 && next[0] > next[1]) next[0] = next[1]
-        if (thumbIndex === 1 && next[1] < next[0]) next[1] = next[0]
-        ;(handler)(event, next, thumbIndex)
+        if (value === undefined) setUncontrolledValue(nextValue)
+        if (!handler) return
+        ;(handler)(event, nextValue, thumbIndex)
     }
 
     const renderInput = (thumbIndex: number, thumbValue: number): JSX.Element => (
@@ -150,6 +170,7 @@ export const StyledSlider = ({
             className={cn(
                 styles['SliderInput'],
                 isVertical ? styles['Vertical'] : styles['Horizontal'],
+                !isVertical && 'z-0',
                 size === 'small' && styles['Small'],
                 disabled && styles['Disabled'],
                 classes?.thumb,
@@ -164,17 +185,25 @@ export const StyledSlider = ({
     return (
         <div
             className={cn(
-                'flex',
-                isVertical ? 'h-full w-8 flex-col items-center' : 'w-full flex-col',
+                'relative flex',
+                isVertical ? 'h-full w-8 flex-col items-center' : 'mt-px w-full flex-col',
                 classes?.root,
                 className,
             )}
         >
             <div className={cn('relative', isVertical ? 'h-full w-8' : 'h-4 w-full')}>
                 {/* Inset the visual track by half a thumb (8px) so marks align with thumb centers. */}
-                <div className={cn('absolute', isVertical ? 'inset-y-2 left-1/2 w-1 -translate-x-1/2' : 'inset-x-2 top-1/2 h-1 -translate-y-1/2')}>
+                <div
+                    onPointerDown={handleTrackPointerDown}
+                    className={cn(
+                        'absolute',
+                        isVertical
+                            ? 'inset-y-2 left-1/2 h-[calc(100%-4px)] w-1 -translate-x-1/2'
+                            : 'inset-x-2 top-[calc(50%+6px)] h-1 w-[calc(100%-4px)] -translate-y-1/2',
+                    )}
+                >
                     {/* Rail */}
-                    <div className={cn('absolute inset-0 rounded-full bg-delta-200', classes?.rail, slotProps?.rail?.className)} />
+                    <div className={cn('absolute inset-0 rounded-full bg-delta-50', classes?.rail, slotProps?.rail?.className)} />
                     {/* Filled track */}
                     <div
                         className={cn(
@@ -192,10 +221,13 @@ export const StyledSlider = ({
                             <span
                                 key={mark.value}
                                 className={cn(
-                                    'absolute h-2 w-2 -translate-x-1/2 rounded-full border',
+                                    'absolute z-10 box-border h-2 w-2 -translate-x-1/2 rounded-full border border-solid',
                                     isVertical ? 'left-1/2 translate-y-1/2' : 'top-1/2 -translate-y-1/2',
                                     active
-                                        ? cn('border-gama-500', disabled ? 'bg-delta-200' : 'bg-gama-500', classes?.markActive)
+                                        ? cn(
+                                              disabled ? 'border-delta-200 bg-delta-200' : 'border-gama-500 bg-gama-500',
+                                              classes?.markActive,
+                                          )
                                         : cn('border-delta-300 bg-white', classes?.mark),
                                 )}
                                 style={markPosStyle(mark.value)}
@@ -209,13 +241,20 @@ export const StyledSlider = ({
 
             {/* Mark labels */}
             {markList.some((m) => m.label != null) && (
-                <div className={cn('relative', isVertical ? 'h-full w-full' : 'mt-1 h-5 w-full')}>
+                <div
+                    className={cn(
+                        isVertical
+                            ? 'pointer-events-none absolute inset-0 w-full'
+                            : 'relative mt-[14px] h-5 w-[calc(100%-4px)]',
+                    )}
+                >
                     {markList.map((mark) =>
                         mark.label == null ? null : (
                             <span
                                 key={mark.value}
                                 className={cn(
-                                    'absolute -translate-x-1/2 text-sm font-semibold',
+                                    'absolute text-sm font-semibold',
+                                    isVertical ? 'left-[37px]' : '-translate-x-1/2',
                                     isMarkActive(mark.value) ? cn('text-delta-800', classes?.markLabelActive) : 'text-delta-600',
                                     classes?.markLabel,
                                     slotProps?.markLabel?.className,

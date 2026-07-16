@@ -4,14 +4,29 @@ import { cn } from 'src/helpers/cn'
 import { getSvgIconStyle } from 'src/components/icons/iconStyle'
 import type { IIcon } from 'src/components/icons'
 
+/**
+ * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#9197-92635
+ * Figma "Switch" / `_BASE_Switch` (track 38×22, knob 18, touch 54×32). Figma **Selected** (true/false)
+ * ← `checked`/`defaultChecked`; Figma **State** (Enabled/Hovered/Focused/Error/Disabled/Read-only)
+ * ← native hover/focus + `error`/`disabled`/`readOnly`. On = `gama-500` #168181, Off = `delta-400` #a2acbb.
+ */
 type StyledSwitchProps = {
+    /** @figmaProp Selected = true→"true" | false→"false" (controlled) */
     checked?: boolean
+    /** @figmaProp Selected = initial (uncontrolled) */
     defaultChecked?: boolean
     onChange?: (event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => void
+    /** @figmaProp State = true→"Disabled" */
     disabled?: boolean
+    /** @figmaProp State = true→"Read-only" */
     readOnly?: boolean
+    /** @figmaProp none — a11y */
     required?: boolean
+    /** @figmaProp State = true→"Error" */
+    error?: boolean
+    /** @figmaProp none — a11y id */
     id?: string
+    /** @figmaProp none — test hook */
     dataTest?: string
     className?: string
 } & Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onChange' | 'type'>
@@ -58,9 +73,11 @@ export const StyledSwitch = forwardRef<HTMLButtonElement, StyledSwitchProps>(
             disabled,
             readOnly,
             required,
+            error,
             id,
             dataTest,
             className,
+            onClick,
             ...rest
         },
         ref,
@@ -69,11 +86,12 @@ export const StyledSwitch = forwardRef<HTMLButtonElement, StyledSwitchProps>(
         const isControlled = controlledChecked !== undefined
         const checked = isControlled ? controlledChecked : uncontrolledChecked
 
-        const handleToggle = () => {
+        const handleToggle = (event: React.MouseEvent<HTMLButtonElement>) => {
             if (readOnly || disabled) return
             const next = !checked
             if (!isControlled) setChecked(next)
             onChange?.({ target: { checked: next, name: id } } as React.ChangeEvent<HTMLInputElement>, next)
+            onClick?.(event)
         }
 
         const iconClass = styles['iconContent']
@@ -96,6 +114,8 @@ export const StyledSwitch = forwardRef<HTMLButtonElement, StyledSwitchProps>(
                 data-checked={checked ? '' : undefined}
                 data-unchecked={!checked ? '' : undefined}
                 data-disabled={disabled ? '' : undefined}
+                data-readonly={readOnly ? '' : undefined}
+                data-error={error ? '' : undefined}
             >
                 <span className={styles['thumb']}>
                     <span className={styles['icon']}>

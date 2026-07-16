@@ -30,9 +30,13 @@ tsconfig.tsbuildinfo
 *.bak
 
 storybook-static
+storybook-static-golden
 .yarn
 dist
 configs/env.ts
+
+# codebase-memory-mcp graph cache (generated artifact, not source)
+.codebase-memory
 
 # visual regression (VRT) — reports are transient; baselines under __screenshots__ ARE committed
 playwright-report

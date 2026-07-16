@@ -4,11 +4,20 @@ import { resolveSx } from 'src/helpers/sx'
 
 type StyledBadgeSize = 'medium' | 'small'
 
+/**
+ * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#15181-43817
+ * Figma "Badge". Number badge = solid gama-500 pill, white Helper-Semibold 14px (h20/px6/r20);
+ * `dot` variant = 8px dot (Unread/Filters). `color` selects the badge palette (primary→teal number
+ * badge, error→soft error-100/error-600); other colors are app extensions with no Figma type.
+ */
 interface BadgeProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'color'> {
+    /** @figmaProp Badge content (the number/label) */
     badgeContent?: ReactNode
+    /** @figmaProp Type/colour = primary→number badge (gama-500) | error→error-100/600 | others = app */
     color?: string
     max?: number
     showZero?: boolean
+    /** @figmaProp Type = dot→"Unread/Filters" (8px) | standard→number badge */
     variant?: 'standard' | 'dot'
     invisible?: boolean
     anchorOrigin?: { vertical: 'top' | 'bottom'; horizontal: 'left' | 'right' }
@@ -16,7 +25,7 @@ interface BadgeProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'color'> {
     component?: ElementType
     classes?: Record<string, string>
     slots?: Record<string, unknown>
-    slotProps?: unknown
+    slotProps?: { badge?: { className?: string; style?: CSSProperties } }
     sx?: unknown
 }
 
@@ -25,15 +34,17 @@ type StyledBadgeProps = BadgeProps & {
     size?: StyledBadgeSize
 }
 
-// MUI default-palette badge colours; `primary` keeps this library's custom green (was the MuiBadge-colorPrimary sx override).
-const COLOR_CLASS: Record<string, string> = {
-    primary: 'bg-[#D9F256] text-[#0A3D3D] border border-solid border-[#C1E600]',
-    default: 'bg-[#e0e0e0] text-[rgba(0,0,0,0.87)]',
-    secondary: 'bg-[#9c27b0] text-white',
-    error: 'bg-[#d32f2f] text-white',
-    info: 'bg-[#0288d1] text-white',
-    success: 'bg-[#2e7d32] text-white',
-    warning: 'bg-[#ed6c02] text-white',
+// Badge colours. Figma "Badge" (node 15181-43817): the number badge is a solid gama-500 pill with
+// white text (Filters number); Error is a soft error-100 pill with error-600 text. default/secondary/
+// info/success/warning have no Figma badge type — kept as app extensions.
+const COLOR_STYLE: Record<string, CSSProperties> = {
+    primary: { backgroundColor: 'var(--colors-gama-500)', color: '#fff' },
+    default: { backgroundColor: 'var(--colors-delta-200)', color: 'var(--colors-delta-800)' },
+    secondary: { backgroundColor: 'var(--colors-delta-600)', color: '#fff' },
+    error: { backgroundColor: 'var(--colors-error-100)', color: 'var(--colors-error-600)' },
+    info: { backgroundColor: 'var(--colors-info-500)', color: '#fff' },
+    success: { backgroundColor: 'var(--colors-success-700)', color: '#fff' },
+    warning: { backgroundColor: 'var(--colors-warning-700)', color: '#fff' },
 }
 
 // Rectangular anchor placement (MUI default). vertical-horizontal → position + translate + origin.
@@ -69,7 +80,7 @@ export const StyledBadge = ({
     overlap: _overlap,
     classes: _classes,
     slots: _slots,
-    slotProps: _slotProps,
+    slotProps,
     component: _component,
     ...props
 }: StyledBadgeProps): JSX.Element => {
@@ -99,17 +110,22 @@ export const StyledBadge = ({
             {!hidden && (
                 <span
                     className={clsx(
-                        'absolute z-[1] box-border flex flex-row flex-wrap content-center items-center justify-center whitespace-nowrap font-roboto font-medium leading-none',
+                        // Figma badge: Helper Semibold 14/20, pill radius; dots are 8px.
+                        'absolute z-[1] box-border flex flex-row flex-wrap content-center items-center justify-center whitespace-nowrap font-roboto font-semibold leading-none',
                         ANCHOR_CLASS[`${vertical}-${horizontal}`],
                         isDot
-                            ? 'h-[6px] w-[6px] min-w-[6px] rounded-[3px] p-0'
+                            ? 'h-[8px] w-[8px] min-w-[8px] rounded-full p-0'
                             : size === 'small'
-                              ? 'h-[16px] w-max min-w-[16px] rounded-[10px] px-[4px] text-[0.75rem]'
-                              : 'h-[20px] min-w-[20px] rounded-[10px] px-[6px] text-[0.75rem]',
-                        COLOR_CLASS[color] ?? COLOR_CLASS['default'],
+                              ? 'h-[16px] w-max min-w-[16px] rounded-[20px] px-[4px] text-[0.75rem]'
+                              : 'h-[20px] min-w-[20px] rounded-[20px] px-[6px] text-sm',
                         className,
+                        slotProps?.badge?.className,
                     )}
-                    style={badgeSlotStyle}
+                    style={{
+                        ...(COLOR_STYLE[color] ?? COLOR_STYLE['default']),
+                        ...badgeSlotStyle,
+                        ...slotProps?.badge?.style,
+                    }}
                 >
                     {displayContent}
                 </span>

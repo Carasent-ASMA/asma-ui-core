@@ -53,7 +53,8 @@ export const StyledMenuList = ({
         <ul
             ref={listRef}
             role='menu'
-            className={cn('m-0 list-none outline-none', disablePadding ? 'py-0' : 'py-1', className)}
+            className={cn('m-0 list-none px-0 outline-none', disablePadding ? 'py-0' : 'py-2', className)}
+            style={{ fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}
             onClick={onClick}
             onKeyDown={handleKeyDown}
         >

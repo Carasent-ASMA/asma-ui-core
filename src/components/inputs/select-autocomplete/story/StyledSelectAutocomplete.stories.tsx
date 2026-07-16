@@ -16,6 +16,14 @@ declare global {
 const meta = {
     title: 'Inputs/Styled Select Autocomplete',
     component: StyledSelectAutocomplete,
+    parameters: {
+        docs: {
+            description: {
+                component:
+                    'Figma: [Autocomplete](https://www.figma.com/design/wXrXt5uKNNzV2DnQCgyYZH/Design-System?node-id=20474-27966) / Recipients pattern node 35715-151456.',
+            },
+        },
+    },
     args: {
         dataTest: 'autocomplete',
         autoHeight: true,
@@ -184,15 +192,16 @@ export const SelectAllTogglesAllOptions: Story = {
 
         await userEvent.click(selectAllCheckbox)
 
-        await expect(canvas.getByRole('button', { name: /The Shawshank Redemption/i })).toBeInTheDocument()
-        await expect(canvas.getByRole('button', { name: /The Godfather/i })).toBeInTheDocument()
-        await expect(canvas.getByRole('button', { name: /The Godfather: Part II/i })).toBeInTheDocument()
+        // Exact names: /The Godfather/ would also match "The Godfather: Part II" (two chips).
+        await expect(canvas.getByRole('button', { name: 'The Shawshank Redemption' })).toBeInTheDocument()
+        await expect(canvas.getByRole('button', { name: 'The Godfather' })).toBeInTheDocument()
+        await expect(canvas.getByRole('button', { name: 'The Godfather: Part II' })).toBeInTheDocument()
 
         await userEvent.click(selectAllCheckbox)
 
-        await expect(canvas.queryByRole('button', { name: /The Shawshank Redemption/i })).not.toBeInTheDocument()
-        await expect(canvas.queryByRole('button', { name: /The Godfather/i })).not.toBeInTheDocument()
-        await expect(canvas.queryByRole('button', { name: /The Godfather: Part II/i })).not.toBeInTheDocument()
+        await expect(canvas.queryByRole('button', { name: 'The Shawshank Redemption' })).not.toBeInTheDocument()
+        await expect(canvas.queryByRole('button', { name: 'The Godfather' })).not.toBeInTheDocument()
+        await expect(canvas.queryByRole('button', { name: 'The Godfather: Part II' })).not.toBeInTheDocument()
     },
 }
 

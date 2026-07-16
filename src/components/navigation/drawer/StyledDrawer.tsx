@@ -50,6 +50,7 @@ export const StyledDrawer: FC<DrawerProps> = ({
     className,
     sx,
     PaperProps,
+    ModalProps,
     children,
 }) => {
     const isTemporary = variant === 'temporary'
@@ -63,6 +64,8 @@ export const StyledDrawer: FC<DrawerProps> = ({
         return () => document.removeEventListener('keydown', onKey)
     }, [open, isTemporary, onClose])
 
+    if (isTemporary && !open && !ModalProps?.keepMounted) return null
+
     return (
         <FloatingPortal>
             {isTemporary && !hideBackdrop && open && (
@@ -75,7 +78,8 @@ export const StyledDrawer: FC<DrawerProps> = ({
                 role={isTemporary ? 'dialog' : undefined}
                 aria-hidden={!open}
                 className={cn(
-                    'fixed z-[1200] overflow-auto bg-white shadow-lg transition-transform duration-300',
+                    'fixed z-[1200] overflow-auto bg-white transition-transform duration-300',
+                    open && 'shadow-lg',
                     EDGE_CLASS[anchor],
                     !open && cn(CLOSED_TRANSFORM[anchor], 'pointer-events-none'),
                     className,

@@ -6,7 +6,7 @@ import { StyledAccordionDetails } from './StyledAccordionDetails'
 import { StyledAccordionSummary } from './StyledAccordionSummary'
 
 const meta: Meta<typeof StyledAccordion> = {
-    title: 'Utils/Accordion',
+    title: 'Utils/Accordion/BaseUi',
     component: StyledAccordion,
     tags: [],
     args: {

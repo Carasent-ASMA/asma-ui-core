@@ -1,5 +1,4 @@
 import React, { forwardRef, useId, useMemo, useState, type HTMLAttributes } from 'react'
-import { StyledFormHelperText } from 'src'
 import { ErrorOutlineIcon } from 'src/components/icons'
 import clsx from 'clsx'
 import { RadioGroupContext, type RadioValue } from './RadioGroupContext'
@@ -48,6 +47,14 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
         const helperTextToDisplay = error ? errorText ?? 'Required' : helperText
         const describedById = showHelperText ? (error ? errorId : helperId) : undefined
 
+        // Let consumers pick the layout direction: our default `flex-col` is emitted through
+        // `tailwind (important:true)` where `.flex-col` is authored after `.flex-row`, so a
+        // consumer's `flex-row` in `className` would otherwise always lose. Only add the default
+        // when the caller hasn't set a direction. `items-start` stops each labelled radio from being
+        // stretched to the group's full width by the default `align-items: stretch` — the user asked
+        // for fit-width radios that sit on one line rather than full-width rows on separate lines.
+        const hasDirection = /\bflex-(?:row|col)\b/.test(rest.className ?? '')
+
         return (
             <div
                 {...rest}
@@ -56,21 +63,22 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
                 data-testid={dataTest}
                 aria-describedby={describedById}
                 aria-invalid={error}
+                className={clsx('flex items-start', !hasDirection && 'flex-col', rest.className)}
             >
                 <RadioGroupContext.Provider value={contextValue}>{children}</RadioGroupContext.Provider>
 
                 {showHelperText && (
-                    <StyledFormHelperText
+                    <p
                         id={error ? errorId : helperId}
                         role={error ? 'alert' : 'status'}
                         className={clsx(
-                            'm-0 flex items-center gap-1 pt-1 text-sm',
-                            error ? 'text-error-500' : 'text-delta-600',
+                            'm-0 flex min-h-5 items-center gap-1 pt-1 text-sm leading-5 tracking-[0.03333em]',
+                            error ? 'font-medium text-error-500' : 'text-delta-600',
                         )}
                     >
                         {error && <ErrorOutlineIcon width={20} height={20} />}
                         {helperTextToDisplay}
-                    </StyledFormHelperText>
+                    </p>
                 )}
             </div>
         )

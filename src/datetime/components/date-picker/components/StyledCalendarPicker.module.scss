@@ -68,7 +68,7 @@
 }
 
 .cell {
-    @apply text-[16px] leading-[20px] w-[40px] relative text-delta-800;
+    @apply relative w-[40px] border-0 bg-transparent p-0 text-[16px] leading-[20px] text-delta-800;
 
     &.has {
         @apply bg-gama-50;
@@ -84,7 +84,7 @@
 }
 
 .day {
-    @apply h-[40px] w-[40px] p-0 font-bold rounded-[4px];
+    @apply h-[40px] w-[40px] rounded-[4px] border-0 bg-transparent p-0 font-bold #{!important};
 
     &:hover {
         @apply bg-delta-50;

@@ -7,22 +7,30 @@ import clsx from 'clsx'
 export type StyledButtonType = 'contained' | 'outlined' | 'text' | 'textGray'
 
 interface commonProps {
+    /** @figmaProp none — ref */
     refLink?: React.Ref<HTMLButtonElement>
+    /** @figmaProp Size = medium→"Medium" (h40, text16/24) | small→"Small" (h32, text14/20) | large→"Medium" (no distinct Figma size) */
     size?: 'large' | 'small' | 'medium'
+    /** @figmaProp none — behavioral (renders inside the button; Figma "Icon left" 24/20px slot) */
     startIcon?: ReactNode
+    /** @figmaProp none — behavioral (renders inside the button; Figma "Icon right" 24/20px slot) */
     endIcon?: ReactNode
+    /** @figmaProp none — test hook */
     dataTest: string
 }
 
 interface variantTextGrayProps {
+    /** @figmaProp Type = textGray→"Quaternary" (transparent bg, text-icon/body #49525f) */
     variant?: 'textGray'
     error?: never
 }
 interface variantTextWhiteProps {
+    /** @figmaProp none — app-specific variant, no Figma counterpart */
     variant?: 'textWhite'
     error?: never
 }
 interface buttonStandartVariantsProps {
+    /** @figmaProp Type = contained→"Primary (Contained)" | outlined→"Secondary (Outlined)" | text→"Tertiary" (teal text) | textGray→"Quaternary" (gray text) | textWhite→none */
     variant?:
         | 'contained'
         | 'outlined'
@@ -34,6 +42,7 @@ interface buttonStandartVariantsProps {
         | 'medium'
         | 'error'
         | 'common'
+    /** @figmaProp Danger = true→"on" | false→"off" */
     error?: boolean
 }
 
@@ -58,6 +67,11 @@ export type StyledButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & 
 /**
  * Developer: daria.bogatiriov@carasent.com
  *
+ * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#13431-18852
+ * @remarks Figma "Button" component. Figma property → React prop mapping is annotated
+ * per-prop with `@figmaProp` (Type→variant, Size→size, Danger→error). The Figma "State"
+ * property (Enabled/Hovered/Focused/Pressed/Disabled) is derived at runtime from the
+ * native button pseudo-states + the `disabled` attribute, not a prop.
  * @remarks for icon button add only startIcon prop
  * @remarks for error button no textGray variant
  *

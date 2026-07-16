@@ -1,10 +1,21 @@
+import React from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { expect } from 'storybook/test'
 import { StyledCheckbox } from './StyledCheckbox'
+import { StyledFormControlLabel } from 'src/components/miscellaneous/StyledFormControlLabel'
 
 const meta = {
-    title: 'Inputs/Checkbox',
+    title: 'base-ui/Checkbox',
     component: StyledCheckbox,
     tags: ['autodocs'],
+    parameters: {
+        docs: {
+            description: {
+                component:
+                    'Figma: [Checkbox](https://www.figma.com/design/wXrXt5uKNNzV2DnQCgyYZH/Design-System?node-id=15385-19713) — box 18×18, touch 42×42.',
+            },
+        },
+    },
     argTypes: {},
     args: {},
 } satisfies Meta<typeof StyledCheckbox>
@@ -17,7 +28,44 @@ export const Checkbox: Story = {
     render: () => <CheckboxTablesExample />,
 }
 
-const COLUMN_NAMES = ['Enabled', 'Hovered', 'Focused', 'Disabled', 'Read only']
+/** Live: controlled checkbox whose state drives the label; clicking toggles it. */
+export const Interactive: Story = {
+    render: function InteractiveCheckbox() {
+        const [checked, setChecked] = React.useState(false)
+        return (
+            <StyledFormControlLabel
+                label={checked ? 'Checked' : 'Unchecked'}
+                control={
+                    <StyledCheckbox
+                        dataTest='checkbox-interactive'
+                        checked={checked}
+                        onChange={(_, next) => setChecked(next)}
+                    />
+                }
+            />
+        )
+    },
+    play: async ({ canvas, userEvent }) => {
+        const box = canvas.getByRole('checkbox')
+        await expect(box).not.toBeChecked()
+        await userEvent.click(box)
+        await expect(box).toBeChecked()
+        await userEvent.click(box)
+        await expect(box).not.toBeChecked()
+    },
+}
+
+/** Figma Checkbox+Label composite with 8px control-to-label gap. */
+export const CheckboxWithLabel: Story = {
+    render: () => (
+        <StyledFormControlLabel
+            label='Label'
+            control={<StyledCheckbox dataTest='checkbox-label-story' defaultChecked />}
+        />
+    ),
+}
+
+const COLUMN_NAMES = ['Enabled', 'Hovered', 'Focused', 'Error', 'Disabled', 'Read only']
 const ROW_NAMES = ['Green', 'Blue', 'Fretex']
 
 const ROW_THEME_BY_NAME: Record<string, 'greenish' | 'default' | 'fretex'> = {
@@ -34,6 +82,7 @@ type ColumnProps = Partial<React.ComponentProps<typeof StyledCheckbox>> & {
 const COLUMN_CHECKBOX_PROPS: Record<string, ColumnProps> = {
     Hovered: { 'data-hovered': '' },
     Focused: { 'data-focus-visible': '' },
+    Error: { error: true },
     Disabled: { disabled: true },
     'Read only': { readOnly: true },
 }

@@ -1,11 +1,7 @@
-import { useInputMask } from 'src/helpers/inputMask'
+import { DATE_INPUT_MASK, useInputMask } from 'src/helpers/inputMask'
 
 export const useDatePickerMask = (): { maskRef: (element: HTMLInputElement | null) => void } => {
-    const maskRef = useInputMask({
-        mask: '  /  /    ',
-        maskChar: ' ',
-        showMask: true,
-    })
+    const maskRef = useInputMask(DATE_INPUT_MASK)
 
     return { maskRef }
 }

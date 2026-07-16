@@ -105,8 +105,7 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
         clearValidation,
     ])
 
-    const digits = value.replace(/\D/g, '')
-    const hasDigits = digits.length > 0
+    const hasDigits = /\d/.test(value)
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const raw = e.target.value

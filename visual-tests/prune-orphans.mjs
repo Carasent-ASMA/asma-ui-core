@@ -17,7 +17,9 @@ const live = new Set(
         .map((e) => `${e.id}.png`),
 )
 
-const orphans = readdirSync(screenshotsDir).filter((f) => f.endsWith('.png') && !live.has(f))
+const orphans = readdirSync(screenshotsDir).filter(
+    (f) => f.endsWith('.png') && !/--(?:calendar-|popper-|time-)?open\.png$/.test(f) && !live.has(f),
+)
 for (const f of orphans) {
     rmSync(path.join(screenshotsDir, f))
     console.log(`pruned orphan baseline: ${f}`)

@@ -19,7 +19,13 @@ import { resolveSx } from 'src/helpers/sx'
 import { ChevronLeftIcon, ChevronRightIcon } from 'src/components/icons'
 import { TabsContext, type TabValue } from './TabsContext'
 
+/**
+ * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#15981-35855
+ * The tablist. `value` marks which child `StyledTab` is Figma **Active**; `size` maps to Figma
+ * **Size** (`default`→Medium 48px, `small`→40px). The animated 2px underline is `gama-500`.
+ */
 export interface StyledTabsProps {
+    /** @figmaProp Active — selects the matching child tab */
     value?: TabValue
     // Method syntax (not `(event, value) => void`) is deliberate: it restores MUI `Tabs.onChange`'s
     // bivariant `value` parameter (DEC-003), so consumers can type the handler's value as `string`,
@@ -55,7 +61,11 @@ export const StyledTabs: FC<StyledTabsProps> = ({
 }) => {
     const scrollerRef = useRef<HTMLDivElement>(null)
     const nodesRef = useRef<Map<TabValue, HTMLButtonElement>>(new Map())
-    const [indicator, setIndicator] = useState<{ left: number; width: number }>({ left: 0, width: 0 })
+    const [indicator, setIndicator] = useState<{ left: number; width: number; disabled: boolean }>({
+        left: 0,
+        width: 0,
+        disabled: false,
+    })
     const [overflow, setOverflow] = useState({ left: false, right: false })
 
     const isScrollable = variant === 'scrollable'
@@ -73,7 +83,13 @@ export const StyledTabs: FC<StyledTabsProps> = ({
     const measure = useCallback(() => {
         const node = nodesRef.current.get(value)
         const scroller = scrollerRef.current
-        if (node) setIndicator({ left: node.offsetLeft, width: node.offsetWidth })
+        if (node)
+            setIndicator({
+                left: node.offsetLeft,
+                width: node.offsetWidth,
+                // Figma: a disabled active tab's underline is delta-300, not the gama-500 indicator.
+                disabled: node.disabled || node.getAttribute('aria-disabled') === 'true',
+            })
         if (scroller) {
             const { scrollLeft, scrollWidth, clientWidth } = scroller
             setOverflow({ left: scrollLeft > 1, right: scrollLeft + clientWidth < scrollWidth - 1 })
@@ -116,7 +132,7 @@ export const StyledTabs: FC<StyledTabsProps> = ({
     )
 
     const scrollButtonClass =
-        'flex h-10 w-10 shrink-0 items-center justify-center self-center rounded-[10%] border border-delta-500 text-delta-700 transition-colors hover:bg-gama-50 disabled:invisible'
+        'flex h-10 w-10 shrink-0 items-center justify-center self-center rounded-[10%] border border-solid border-delta-500 text-delta-700 transition-colors hover:bg-gama-50 disabled:invisible'
 
     return (
         <TabsContext.Provider value={contextValue}>
@@ -142,7 +158,7 @@ export const StyledTabs: FC<StyledTabsProps> = ({
                     onKeyDown={handleKeyDown}
                     onScroll={measure}
                     className={cn(
-                        'relative flex border-b border-delta-200 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+                        'relative flex border-x-0 border-b border-t-0 border-solid border-delta-200 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
                         isScrollable ? 'flex-1 overflow-x-auto' : 'w-full',
                         variant === 'fullWidth' && '[&>*]:flex-1',
                         centered && 'justify-center',
@@ -156,7 +172,10 @@ export const StyledTabs: FC<StyledTabsProps> = ({
                     )}
                     <span
                         aria-hidden
-                        className='absolute bottom-0 h-0.5 bg-gama-500 transition-all duration-300'
+                        className={cn(
+                            'absolute bottom-0 h-0.5 transition-all duration-300',
+                            indicator.disabled ? 'bg-delta-300' : 'bg-gama-500',
+                        )}
                         style={{ left: indicator.left, width: indicator.width }}
                     />
                 </div>

@@ -24,20 +24,6 @@ export function StyledCalendarPickerSelectMonth(props: DropdownProps): JSX.Eleme
                 value={value ?? ''}
                 onChange={(event: unknown) => onChange?.(event as React.ChangeEvent<HTMLSelectElement>)}
                 MenuProps={{ className: styles['styled-calendar-picker-select-period-menu'] }}
-                sx={{
-                    '&::before': {
-                        borderBottom: 'none',
-                    },
-                    '&:hover::before': {
-                        borderBottom: 'none',
-                    },
-                    '&:hover:not(.Mui-disabled, .Mui-error)::before': {
-                        borderBottom: 'none',
-                    },
-                    '&:focus::before': {
-                        borderBottom: 'none',
-                    },
-                }}
             >
                 {options.map((option) => (
                     <StyledSelectItem key={option.value} value={option.value} disabled={option.disabled}>

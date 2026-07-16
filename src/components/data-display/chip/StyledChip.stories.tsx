@@ -1,5 +1,6 @@
-import type { Meta } from '@storybook/react-vite'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { fn } from 'storybook/test'
+import { expect } from 'storybook/test'
 
 import { StyledChip } from './StyledChip'
 import { StyledInteractiveChip } from '../interactive-chip'
@@ -9,6 +10,14 @@ const meta: Meta = {
     title: 'DataDisplay/Chip',
     component: StyledChip,
     tags: [],
+    parameters: {
+        docs: {
+            description: {
+                component:
+                    'Figma: [_BASE_Tag / Chips Tags](https://www.figma.com/design/wXrXt5uKNNzV2DnQCgyYZH/Design-System?node-id=13248-31089) — medium h=32, radius=25, gap=4.',
+            },
+        },
+    },
     args: { dataTest: 'chip', label: 'Default label', variant: 'filled' },
     argTypes: {
         disabled: { control: 'boolean' },
@@ -99,9 +108,6 @@ const CELL_CHIPS_CONFIG: Record<string, RowConfig> = {
                             </div>
                         ),
                         onDelete: undefined,
-                        classes: {
-                            label: 'pr-1',
-                        },
                     },
                 ],
             },
@@ -118,32 +124,24 @@ const CELL_CHIPS_CONFIG: Record<string, RowConfig> = {
     },
 
     'User tag': {
+        avatar: <Avatar />,
         label: (
-            <div className='flex items-center gap-x-1 text-delta-800'>
-                <Avatar />
-                <span className='truncate text-sm'>First Name Surname</span>•<span className='text-xs'> 12612</span>
-            </div>
+            <span className='flex items-center gap-x-1 text-delta-800'>
+                <span className='truncate text-sm'>First Name Surname</span>
+                <span className='text-xs'>• 12612</span>
+            </span>
         ),
         onDelete: fn(),
-        classes: {
-            label: 'pl-1',
-        },
     },
 
     'Group tag': {
         label: <GroupTagLabel />,
         onDelete: fn(),
-        classes: {
-            label: 'pl-1',
-        },
         cells: {
             'Read only': {
                 chips: [
                     {
                         label: <GroupTagLabel withChevron={false} />,
-                        classes: {
-                            label: '',
-                        },
                     },
                 ],
             },
@@ -263,4 +261,23 @@ const ChipStateTable = () => {
 
 export const Chip = () => {
     return <ChipStateTable />
+}
+
+export const FigmaPaddingMedium: StoryObj = {
+    render: () => (
+        <StyledChip
+            dataTest='figma-chip-padding'
+            avatar={<Avatar />}
+            label='First Name Surname'
+            onDelete={fn()}
+        />
+    ),
+    play: async ({ canvasElement }) => {
+        const chip = canvasElement.querySelector('[data-testid="figma-chip-padding"]')
+        await expect(chip).toBeTruthy()
+        const style = getComputedStyle(chip as HTMLElement)
+        await expect(style.padding).toBe('4px')
+        await expect(style.borderRadius).toBe('25px')
+        await expect(style.height).toBe('32px')
+    },
 }

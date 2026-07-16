@@ -1,19 +1,26 @@
-import { StyledTypography } from 'src/components/data-display/typography'
 import type { Meta } from '@storybook/react-vite'
-import { useEffect, useRef, useState } from 'react'
 import { type Table as TanstackTable } from '@tanstack/react-table'
-import { makeData, makeParticipantsData, type Participant, type Person } from './helpers/makeData'
-import { useStyledTableColumns } from './components/styled-table/useTableColumns'
-import React from 'react'
-import { RenderSubRows } from './components/styled-table/RenderSubRows'
-import { getRowActions } from './components/styled-table/getRowActions'
-import style from './StyledTableStories.module.scss'
+import { useEffect, useRef, useState } from 'react'
+import { StyledTypography } from 'src/components/data-display/typography'
+import { cn } from 'src/helpers'
 import { StyledTable } from 'src/table/components/StyledTableIndex'
 import { StyledButton } from 'src/table/shared-components/button'
-import { cn } from 'src/helpers'
+import { getRowActions } from './components/styled-table/getRowActions'
+import { RenderSubRows } from './components/styled-table/RenderSubRows'
+import { useStyledTableColumns } from './components/styled-table/useTableColumns'
+import { makeData, makeParticipantsData, type Participant, type Person } from './helpers/makeData'
+import style from './StyledTableStories.module.scss'
 
 const meta: Meta = {
     title: 'Table/TableV2',
+    parameters: {
+        docs: {
+            description: {
+                component:
+                    'Figma: [Tables](https://www.figma.com/design/wXrXt5uKNNzV2DnQCgyYZH/Design-System?node-id=11291-102403).',
+            },
+        },
+    },
     component: StyledTable,
     tags: [],
     argTypes: {},

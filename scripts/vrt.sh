@@ -25,7 +25,7 @@ docker info >/dev/null 2>&1 || {
 [ "${VRT_SKIP_BUILD:-}" = "1" ] || pnpm build-storybook
 
 ARGS=()
-[ "$MODE" = "accept" ] && ARGS+=(--update-snapshots)
+[ "$MODE" = "accept" ] && ARGS+=(--update-snapshots=all)
 
 # accept: prune stale baselines (deleted/renamed stories) BEFORE capture, so the in-suite orphan
 # check passes when re-baselining. Doing it afterwards wouldn't work — a failed orphan check makes

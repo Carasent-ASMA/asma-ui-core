@@ -2,8 +2,8 @@ import type { Meta } from '@storybook/react-vite'
 import type { ReactNode } from 'react'
 
 import ChevronDownIcon from 'src/components/custom/widget/icons/ChevronDownIcon'
-import { InfoOutlineIcon } from 'src/components/icons'
 import { StyledTooltip } from 'src/components/data-display/tooltip'
+import { InfoOutlineIcon } from 'src/components/icons'
 
 import { StyledAIDisclosure } from '.'
 import styles from './StyledAIDisclosure.module.scss'

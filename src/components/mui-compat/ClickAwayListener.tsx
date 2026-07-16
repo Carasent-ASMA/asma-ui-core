@@ -32,9 +32,11 @@ export const ClickAwayListener = ({
     onClickAway,
     mouseEvent = 'onClick',
     touchEvent = 'onTouchEnd',
+    disableReactTree = false,
 }: ClickAwayListenerProps): ReactElement => {
     const nodeRef = useRef<Element | null>(null)
     const callbackRef = useRef(onClickAway)
+    const syntheticEventRef = useRef(false)
 
     useEffect(() => {
         callbackRef.current = onClickAway
@@ -43,7 +45,15 @@ export const ClickAwayListener = ({
     useEffect(() => {
         const handler = (event: Event) => {
             const node = nodeRef.current
-            if (node && event.target instanceof Node && !node.contains(event.target)) {
+            const insideReactTree = syntheticEventRef.current
+            syntheticEventRef.current = false
+
+            if (
+                node &&
+                event.target instanceof Node &&
+                !node.contains(event.target) &&
+                (disableReactTree || !insideReactTree)
+            ) {
                 callbackRef.current(event as MouseEvent | TouchEvent)
             }
         }
@@ -57,7 +67,7 @@ export const ClickAwayListener = ({
         return () => {
             for (const name of names) document.removeEventListener(name, handler)
         }
-    }, [mouseEvent, touchEvent])
+    }, [disableReactTree, mouseEvent, touchEvent])
 
     const setRef = useCallback(
         (node: Element | null) => {
@@ -71,6 +81,18 @@ export const ClickAwayListener = ({
         [children],
     )
 
+    const childProps = children.props as Record<string, unknown>
+    const syntheticHandlers = [mouseEvent, touchEvent]
+        .filter((name): name is MouseEventName | TouchEventName => name !== false)
+        .reduce<Record<string, (event: unknown) => void>>((handlers, name) => {
+            handlers[name] = (event) => {
+                syntheticEventRef.current = true
+                const childHandler = childProps[name]
+                if (typeof childHandler === 'function') childHandler(event)
+            }
+            return handlers
+        }, {})
+
     // eslint-disable-next-line react-hooks/refs -- setRef is a stable callback ref that only writes; no ref value is read during render
-    return cloneElement(children, { ref: setRef })
+    return cloneElement(children, { ref: setRef, ...syntheticHandlers })
 }

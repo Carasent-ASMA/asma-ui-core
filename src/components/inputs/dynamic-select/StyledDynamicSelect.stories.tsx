@@ -43,6 +43,12 @@ const meta: Meta<typeof StyledDynamicSelect> = {
     component: StyledDynamicSelect,
     parameters: {
         layout: 'fullscreen',
+        docs: {
+            description: {
+                component:
+                    'Figma: [Chips select / Dynamic select](https://www.figma.com/design/wXrXt5uKNNzV2DnQCgyYZH/Design-System?node-id=31009-173666) — chip mode ≤5 options.',
+            },
+        },
     },
     args: {
         multiple: false,

@@ -115,7 +115,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                     options={options}
                     fullWidth
                     classes={{
-                        listbox: 'h-full max-h-[300px]',
+                        listbox: 'max-h-[300px]',
                     }}
                     getOptionLabel={autocompleteProps?.getOptionLabel ?? getOptionLabel}
                     onChange={(_, value) => {
@@ -137,39 +137,42 @@ export const DynamicSelectAutocomplete = forwardRef(
                                   const limit = maxTags ?? options.length
                                   const limitedTags = typedValues.slice(0, limit)
                                   const remainingCount = typedValues.length - limit
-                                  return (
-                                      <div className='flex flex-wrap gap-2'>
-                                          {limitedTags.map((option) => (
-                                              <StyledChip
-                                                  key={getOptionValueText(option)}
-                                                  dataTest={`${getOptionValueText(option)}-chip`}
-                                                  readOnly={readOnly}
-                                                  variant='outlined'
-                                                  label={renderLabel ? renderLabel(option) : getOptionLabel(option)}
-                                                  classes={{
-                                                      root: 'h-fit w-fit min-h-[32px]',
-                                                      label: 'block whitespace-normal',
-                                                  }}
-                                                  disabled={Boolean(disabled) || Boolean(loading)}
-                                                  onDelete={() => {
-                                                      if (!Array.isArray(value)) return
-                                                      const newValues = value.filter(
-                                                          (v) => !isOptionEqualToValue(v, option),
-                                                      )
-                                                      onChange(newValues)
-                                                  }}
-                                              />
-                                          ))}
-                                          {remainingCount > 0 && (
-                                              <StyledChip
-                                                  dataTest='remaining-count-tag-chip'
-                                                  label={`+${remainingCount}`}
-                                                  variant='outlined'
-                                                  onClick={handleOpen}
-                                              />
-                                          )}
-                                      </div>
-                                  )
+                                  // Return the chips as an ARRAY (not a wrapping <div>) so the field
+                                  // treats them as its adornment list — the shell then flex-wraps and
+                                  // grows to the chips' real height (incl. wrapped multi-line labels),
+                                  // instead of pinning them absolutely inside a fixed 40px row.
+                                  return [
+                                      ...limitedTags.map((option) => (
+                                          <StyledChip
+                                              key={getOptionValueText(option)}
+                                              dataTest={`${getOptionValueText(option)}-chip`}
+                                              readOnly={readOnly}
+                                              variant='outlined'
+                                              label={renderLabel ? renderLabel(option) : getOptionLabel(option)}
+                                              classes={{
+                                                  root: 'h-fit w-fit min-h-[32px]',
+                                                  label: 'block whitespace-normal',
+                                              }}
+                                              disabled={Boolean(disabled) || Boolean(loading)}
+                                              onDelete={() => {
+                                                  if (!Array.isArray(value)) return
+                                                  const newValues = value.filter(
+                                                      (v) => !isOptionEqualToValue(v, option),
+                                                  )
+                                                  onChange(newValues)
+                                              }}
+                                          />
+                                      )),
+                                      remainingCount > 0 ? (
+                                          <StyledChip
+                                              key='remaining-count'
+                                              dataTest='remaining-count-tag-chip'
+                                              label={`+${remainingCount}`}
+                                              variant='outlined'
+                                              onClick={handleOpen}
+                                          />
+                                      ) : null,
+                                  ]
                               }
                             : undefined
                     }
@@ -193,8 +196,10 @@ export const DynamicSelectAutocomplete = forwardRef(
                                     key={props.id}
                                     onClick={!disabled ? props.onClick : undefined}
                                     className={cn(
-                                        'flex h-full cursor-pointer gap-x-1 bg-white text-sm/5 hover:bg-gama-50',
-                                        disabled && 'cursor-not-allowed bg-delta-50 hover:bg-delta-50',
+                                        // Figma Menus item: Body Base 16/lh24.
+                                        'flex min-h-10 cursor-pointer items-center gap-x-1 bg-white px-2 text-base aria-selected:bg-gama-50 hover:bg-gama-50',
+                                        disabled &&
+                                            'cursor-not-allowed bg-delta-50 aria-selected:!bg-delta-50 hover:!bg-delta-50 [&_*]:cursor-not-allowed',
                                     )}
                                     aria-disabled={disabled}
                                 >
@@ -204,13 +209,18 @@ export const DynamicSelectAutocomplete = forwardRef(
                                                 disabled={disabled}
                                                 dataTest={`${getOptionValueText(option)}-checkbox`}
                                                 size='small'
-                                                className='min-w-[36px]'
+                                                // Decorative: the whole row `<li>` toggles selection. Without
+                                                // `pointer-events-none` the checkbox is a `<label>` wrapping an
+                                                // `<input>`, so clicking it fires the row's onClick TWICE (the
+                                                // click + the label's forwarded input click) → the toggle cancels
+                                                // out and nothing selects. Letting clicks pass through fixes it.
+                                                className='pointer-events-none min-w-[36px]'
                                                 checked={isSelected}
                                             />
                                             {renderLabel ? (
                                                 renderLabel(option)
                                             ) : (
-                                                <span className='h-fit py-[10px] text-sm text-delta-700'>
+                                                <span className='h-fit text-base text-delta-700'>
                                                     {getOptionLabel(option)}
                                                 </span>
                                             )}
@@ -228,15 +238,17 @@ export const DynamicSelectAutocomplete = forwardRef(
                                 {...props}
                                 key={props.id}
                                 className={cn(
-                                    'flex h-full cursor-pointer gap-x-1 px-2 text-sm/5 hover:bg-gama-50',
-                                    disabled && 'cursor-not-allowed bg-delta-50 hover:bg-delta-50',
+                                    // Figma Menus item: Body Base 16/lh24.
+                                    'flex min-h-10 cursor-pointer items-center gap-x-1 px-2 text-base aria-selected:bg-gama-50 hover:bg-gama-50',
+                                    disabled &&
+                                        'cursor-not-allowed bg-delta-50 aria-selected:!bg-delta-50 hover:!bg-delta-50 [&_*]:cursor-not-allowed',
                                 )}
                                 onClick={!disabled ? props.onClick : undefined}
                                 aria-disabled={disabled}
                             >
                                 <StyledTooltip arrow title={tooltipTitle}>
                                     <>
-                                        <span className='h-full w-5 min-w-5 py-[10px]'>
+                                        <span className='w-5 min-w-5'>
                                             {isSelected && (
                                                 <CheckIcon
                                                     className='size-5 min-h-5 min-w-5 text-gama-500'
@@ -248,7 +260,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                                         {renderLabel ? (
                                             renderLabel(option)
                                         ) : (
-                                            <span className='py-[10px] text-sm text-delta-700'>
+                                            <span className='text-base text-delta-700'>
                                                 {getOptionLabel(option)}
                                             </span>
                                         )}

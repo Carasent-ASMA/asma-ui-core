@@ -22,10 +22,13 @@ export interface MaskedResult {
     caret: number
 }
 
+/** Date picker mask — shared by `useDatePickerMask` and display formatting. */
+export const DATE_INPUT_MASK: InputMaskSpec = { mask: '  /  /    ', maskChar: ' ', showMask: true }
+
 /**
  * Pure formatter: distributes the digits of `raw` over the mask slots and computes the caret
- * position that follows the last digit typed before `caretInRaw`. Zero digits always yield an
- * empty value so the input's placeholder shows.
+ * position that follows the last digit typed before `caretInRaw`. Zero digits yield an empty value
+ * so the date field can show its scaffold as a placeholder only while focused.
  */
 export const formatMaskedValue = (raw: string, caretInRaw: number, spec: InputMaskSpec): MaskedResult => {
     const { mask, maskChar, showMask } = spec
@@ -77,13 +80,17 @@ export const useInputMask = ({ mask, maskChar, showMask }: InputMaskSpec): ((ele
         cleanupRef.current = null
         if (!element) return
 
+        const spec = { mask, maskChar, showMask }
+        const sync = (): void => {
+            const { value, caret } = formatMaskedValue(element.value, element.selectionStart ?? element.value.length, spec)
+            if (element.value !== value) element.value = value
+            element.setSelectionRange(caret, caret)
+        }
+        sync()
+
         const onInput = (event: Event) => {
             const input = event.target as HTMLInputElement
-            const { value, caret } = formatMaskedValue(input.value, input.selectionStart ?? input.value.length, {
-                mask,
-                maskChar,
-                showMask,
-            })
+            const { value, caret } = formatMaskedValue(input.value, input.selectionStart ?? input.value.length, spec)
             if (input.value !== value) input.value = value
             input.setSelectionRange(caret, caret)
         }

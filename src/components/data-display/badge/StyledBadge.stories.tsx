@@ -6,6 +6,14 @@ const meta: Meta = {
     title: 'DataDisplay/Badge',
     component: StyledBadge,
     tags: [],
+    parameters: {
+        docs: {
+            description: {
+                component:
+                    'Figma: [Badge](https://www.figma.com/design/wXrXt5uKNNzV2DnQCgyYZH/Design-System?node-id=15181-43817) — h=20, pill radius 20px.',
+            },
+        },
+    },
     args: {},
     argTypes: {
         color: {

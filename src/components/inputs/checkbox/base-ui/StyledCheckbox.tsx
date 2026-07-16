@@ -2,27 +2,41 @@ import React, { useEffect, useRef, type ChangeEvent, type SVGProps } from 'react
 import styles from './StyledCheckbox.module.scss'
 import { cn } from 'src/helpers/cn'
 
+/**
+ * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#15385-19713
+ * Figma "Checkbox" (box 20px, 40px touch). Figma **Type** (Unchecked/Indeterminate/Checked) ←
+ * `checked`/`indeterminate`; Figma **State** (Enabled/Hovered/Focused/Disabled/Read-only) ← native
+ * hover/focus + `disabled`/`readOnly`/`error`. Checked/indeterminate box = `gama-500` #168181,
+ * unchecked border = `delta-500`; Error = box border `error-500` #e10700 (node 41325-207511/207527).
+ */
 type StyledCheckboxProps = {
+    /** @figmaProp none — test hook */
     dataTest: string
+    /** @figmaProp none — app size (Figma box is 20px) */
     size?: 'small' | 'medium'
+    /** @figmaProp Type = true→"Checked" | false→"Unchecked" */
     checked?: boolean
+    /** @figmaProp Type = true→"Indeterminate" */
     indeterminate?: boolean
+    /** @figmaProp State = true→"Error" (box border → error-500) */
+    error?: boolean
     disableRipple?: boolean
     hideWrapper?: boolean
     className?: string
     checkboxClassName?: string
     onChange?: (event: ChangeEvent<HTMLInputElement>, checked: boolean) => void
 } & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'size' | 'checked' | 'type'>
+// @figmaProp disabled → State="Disabled" · readOnly → State="Read-only" (from InputHTMLAttributes)
 
 export const IndeterminateIcon = (props: SVGProps<SVGSVGElement>): JSX.Element => (
-    <svg viewBox='0 0 24 24' width='100%' height='100%' fill='none' {...props}>
-        <title>Indeterminate icon</title>
+    <svg aria-hidden='true' viewBox='0 0 24 24' width='100%' height='100%' fill='none' {...props}>
         <path d='M6 12H18' stroke='currentColor' strokeWidth={props.strokeWidth ?? 3} strokeLinecap='round' />
     </svg>
 )
 
 export const CheckIcon = (props: SVGProps<SVGSVGElement>): JSX.Element => (
     <svg
+        aria-hidden='true'
         viewBox='0 0 24 24'
         width='100%'
         height='100%'
@@ -33,7 +47,6 @@ export const CheckIcon = (props: SVGProps<SVGSVGElement>): JSX.Element => (
         strokeLinejoin='round'
         {...props}
     >
-        <title>Check icon</title>
         <path d='M4 12l5 5L20 6' />
     </svg>
 )
@@ -49,6 +62,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
     size = 'medium',
     disabled,
     readOnly,
+    error,
     indeterminate = false,
     checked,
     disableRipple,
@@ -56,6 +70,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
     className,
     checkboxClassName,
     onChange,
+    onClick,
     ...props
 }): JSX.Element => {
     const isHideWrapper = !!hideWrapper
@@ -73,6 +88,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
         isHideWrapper && styles['HideWrapper'],
         indeterminate && styles['Indeterminate'],
         readOnly && styles['ReadOnly'],
+        error && styles['Error'],
         isRippleEnabled && styles['CheckboxHover'],
         className,
     )
@@ -115,7 +131,13 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
     }
 
     return (
-        <label className={wrapperClasses} data-testid={dataTest} onPointerDown={handlePointerDown} {...stateAttrs}>
+        <label
+            className={wrapperClasses}
+            data-testid={dataTest}
+            onPointerDown={handlePointerDown}
+            onClick={onClick as React.MouseEventHandler<HTMLLabelElement> | undefined}
+            {...stateAttrs}
+        >
             <input
                 ref={inputRef}
                 type='checkbox'

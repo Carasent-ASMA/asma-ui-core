@@ -40,21 +40,52 @@
         opacity: 0.9;
     }
 
+    // Figma Disabled (nodes 9197-93212/93217): track uses explicit tokens (not an opacity fade) —
+    // unchecked delta-300, checked gama-300.
     &[data-disabled] {
-        opacity: 0.5;
         cursor: default;
         pointer-events: none;
+    }
+    &[data-disabled][data-unchecked] {
+        background-color: var(--colors-delta-300);
+    }
+    &[data-disabled][data-checked] {
+        background-color: var(--colors-gama-300);
+    }
+
+    // Figma Read-only (node 41325-201587): near-white delta-10 track with a delta-300 outline
+    // (inset shadow keeps the 38×22 size). Knob position still driven by data-checked.
+    &[data-readonly] {
+        cursor: default;
+    }
+    &[data-readonly][data-unchecked],
+    &[data-readonly][data-checked] {
+        background-color: var(--colors-delta-10);
+        box-shadow: inset 0 0 0 1px var(--colors-delta-300);
+    }
+
+    &[data-error]:focus-visible::before {
+        outline-color: var(--colors-error-500);
+    }
+
+    &[data-error][data-unchecked] {
+        box-shadow: 0 0 0 2px var(--colors-error-500);
+    }
+
+    &[data-error][data-checked] {
+        box-shadow: 0 0 0 2px var(--colors-error-500);
     }
 
     &:focus-visible {
         outline: none;
+        // Figma Focused (node 9197-93213): 2px gama-400 ring with a 2px white gap from the track.
         &::before {
             content: '';
             inset: 0;
             position: absolute;
             border-radius: inherit;
             outline: 2px solid var(--colors-gama-400);
-            outline-offset: 1px;
+            outline-offset: 2px;
         }
     }
 }

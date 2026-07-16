@@ -31,6 +31,7 @@ export const Skeleton = ({
     const mergedStyle: CSSProperties = {
         width,
         height: height ?? (variant === 'text' ? 'auto' : undefined),
+        backgroundColor: 'rgba(0,0,0,0.11)',
         ...resolveSx(sx),
         ...style,
     }
@@ -38,7 +39,7 @@ export const Skeleton = ({
     return (
         <span
             className={clsx(
-                'block bg-[rgba(0,0,0,0.11)]',
+                'block',
                 animation !== false && 'animate-pulse',
                 VARIANT_CLASS[variant] ?? '',
                 className,

@@ -28,10 +28,17 @@ interface TooltipSlotProps {
     arrow?: unknown
 }
 
+/**
+ * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#14680-25248
+ * Figma "Tooltip" (Theme=Day): delta-800 #363e4a body, px8/py4, radius 3, Helper 14px/lh20 white,
+ * max-width 320, optional arrow (9 placements). Float drop-shadow.
+ */
 export interface TooltipProps {
     title: ReactNode
     children: ReactElement
+    /** @figmaProp Arrow placement (Top/Bottom/Left/Right × start/middle/end) */
     placement?: Placement
+    /** @figmaProp Arrow = true→"Arrow" | false→"None" */
     arrow?: boolean
     enterDelay?: number
     leaveDelay?: number
@@ -41,6 +48,7 @@ export interface TooltipProps {
     disableHoverListener?: boolean
     disableFocusListener?: boolean
     disableTouchListener?: boolean
+    offsetDistance?: number
     className?: string
     slotProps?: TooltipSlotProps
 }
@@ -63,6 +71,7 @@ export const StyledTooltip = ({
     onClose,
     disableHoverListener,
     disableFocusListener,
+    offsetDistance,
     className,
     slotProps,
 }: TooltipProps): JSX.Element => {
@@ -83,7 +92,7 @@ export const StyledTooltip = ({
         placement,
         whileElementsMounted: autoUpdate,
         middleware: [
-            offset(arrow ? 8 : 6),
+            offset(offsetDistance ?? (arrow ? 8 : 6)),
             flip({ padding: 8 }),
             shift({ padding: 8 }),
             // Floating UI's arrow middleware takes the arrow ref by design; the react-compiler ref
@@ -119,10 +128,17 @@ export const StyledTooltip = ({
                 <FloatingPortal>
                     <div
                         ref={refs.setFloating}
-                        style={{ ...floatingStyles, ...slotProps?.tooltip?.style, ...resolveSx(slotProps?.tooltip?.sx) }}
                         {...getFloatingProps()}
+                        style={{
+                            ...floatingStyles,
+                            fontFamily: 'Roboto, Helvetica, Arial, sans-serif',
+                            ...slotProps?.tooltip?.style,
+                            ...resolveSx(slotProps?.tooltip?.sx),
+                        }}
                         className={cn(
-                            'z-[1500] flex items-center break-words rounded-[3px] bg-[#363E4A] px-2 py-1 text-xs leading-4 tracking-[0.24px] text-white shadow-[0px_1px_4px_0px_rgba(0,0,0,0.25)]',
+                            // Figma Tooltip (node 14680-25248): delta-800 bg, px8/py4, r3, Helper 14/20 (ls 0),
+                            // max-width 320, Float shadow 0 1 6 rgba(0,0,0,.15).
+                            'z-[1500] block max-w-[320px] break-words whitespace-normal rounded-[3px] bg-[#363E4A] px-2 py-1 text-sm leading-5 text-white shadow-[0px_1px_6px_0px_rgba(0,0,0,0.15)]',
                             className,
                             slotProps?.tooltip?.className,
                         )}

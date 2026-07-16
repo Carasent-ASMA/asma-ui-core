@@ -90,6 +90,12 @@ export const TimePickerInput: React.FC<
                             />
                         ),
                     },
+                    formHelperText: {
+                        className: hasError
+                            ? 'ml-0 mr-[14px] mt-1 leading-[23.24px]'
+                            : 'mx-[14px] mt-1 leading-[23.24px]',
+                        hideErrorIcon: true,
+                    },
                 }}
                 value={localValue}
                 sx={{

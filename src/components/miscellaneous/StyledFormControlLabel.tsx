@@ -63,11 +63,13 @@ export const StyledFormControlLabel = ({
                 PLACEMENT_CLASS[labelPlacement],
                 className,
             )}
-            style={resolveSx(sx)}
+            style={{ fontFamily: 'Roboto, Helvetica, Arial, sans-serif', ...resolveSx(sx) }}
         >
             {injected}
             {label != null && (
-                <span className={cn('text-sm leading-5', isDisabled && 'text-delta-300')}>{label}</span>
+                <span className={cn('text-sm leading-5 tracking-[0.00938em]', isDisabled && 'text-delta-300')}>
+                    {label}
+                </span>
             )}
         </label>
     )

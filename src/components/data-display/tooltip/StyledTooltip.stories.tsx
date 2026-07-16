@@ -8,6 +8,14 @@ const meta: Meta = {
     title: 'DataDisplay/Tooltip',
     component: StyledTooltip,
     tags: [],
+    parameters: {
+        docs: {
+            description: {
+                component:
+                    'Figma: [Tooltip](https://www.figma.com/design/wXrXt5uKNNzV2DnQCgyYZH/Design-System?node-id=14680-25248).',
+            },
+        },
+    },
     argTypes: {
         placement: {
             control: 'select',

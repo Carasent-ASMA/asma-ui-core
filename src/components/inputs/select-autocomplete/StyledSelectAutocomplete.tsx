@@ -2,6 +2,7 @@ import {
     useMemo,
     useRef,
     useState,
+    type CSSProperties,
     type HTMLAttributes,
     type KeyboardEvent,
     type ReactNode,
@@ -10,7 +11,6 @@ import {
 import {
     autoUpdate,
     flip,
-    FloatingFocusManager,
     FloatingPortal,
     offset,
     shift,
@@ -18,11 +18,11 @@ import {
     useDismiss,
     useFloating,
     useInteractions,
-    useListNavigation,
     useMergeRefs,
     useRole,
 } from '@floating-ui/react'
 import { cn } from 'src/helpers/cn'
+import { TOP_LAYER_PROPS, TOP_LAYER_RESET_STYLE, useTopLayerRef } from 'src/hooks/useTopLayer.hook'
 import { CheckIcon, ChevronDownIcon, CloseIcon, PlusIconCircle } from 'src/components/icons'
 import { StyledCheckbox } from 'src/components/inputs/checkbox/base-ui/StyledCheckbox'
 import { StyledChip } from 'src/components/data-display/chip'
@@ -45,11 +45,11 @@ export interface AutocompleteRenderInputParams {
     fullWidth?: boolean
     value: string
     onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
-    onFocus: () => void
+    onFocus?: () => void
     onKeyDown: (event: KeyboardEvent<HTMLInputElement>) => void
     slotProps: {
-        htmlInput: Record<string, unknown> & { ref: React.Ref<HTMLInputElement> }
-        input: { startAdornment?: ReactNode; endAdornment?: ReactNode }
+        htmlInput: Record<string, unknown> & { ref?: React.Ref<HTMLInputElement> }
+        input: { ref: React.Ref<HTMLDivElement>; startAdornment?: ReactNode; endAdornment?: ReactNode }
     }
 }
 
@@ -73,17 +73,32 @@ type AutocompleteValue<T, Multiple, DisableClearable, FreeSolo> = Multiple exten
 
 // The generic signature (T, Multiple, DisableClearable, FreeSolo) is preserved for call-site
 // compatibility; the runtime only branches on `multiple`.
+/**
+ * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#20474-29075
+ * Figma "Autocomplete". The trigger is the outlined **Input field** (shared `field-styles`: 40px,
+ * border enabled delta-500/`#7a899e`, hover gama-300, focus gama-400 `#1ca1a1`, error error-500),
+ * so the field **State** (Enabled/Hovered/Focused/Error/Read-only) ← focus/open + `error`/`readOnly`/
+ * `disabled`. **Filled** ← selected value(s): single fills the input text, multiple renders **Tag
+ * chips** (`StyledChip`: h32, radius25, label 16/delta-700 — node 20475-29954). The dropdown is the
+ * **Menus** surface (node 16073-19226): rounded-lg, border delta-300, Menus shadow. Popup indicator =
+ * `+` (`PlusIconCircle`, multiple) or chevron (single); clear = `CloseIcon`. Non-annotated props are
+ * behavioral / MUI `Autocomplete` API-parity (DEC-002/DEC-003).
+ */
 export interface StyledSelectAutocompleteProps<
     T,
     Multiple extends boolean | undefined = false,
     DisableClearable extends boolean | undefined = false,
     FreeSolo extends boolean | undefined = false,
 > {
+    /** @figmaProp none — test hook */
     dataTest: string
+    /** @figmaProp options → dropdown list rows (Menus items / Recipient list items) */
     options: readonly T[]
+    /** @figmaProp none — renders the Figma "Input field" trigger (field State/Filled live here) */
     renderInput: (params: AutocompleteRenderInputParams) => ReactNode
     // Input value is a loose union (the runtime accepts any shape); onChange stays precise via the
     // conditional AutocompleteValue, which also keeps the Multiple/DisableClearable/FreeSolo generics live.
+    /** @figmaProp Filled — single: input text; multiple: Tag chips (StyledChip) */
     value?: SingleValue<T> | MultiValue<T> | string | undefined
     defaultValue?: SingleValue<T> | MultiValue<T> | string | undefined
     onChange?: (
@@ -101,9 +116,13 @@ export interface StyledSelectAutocompleteProps<
     loading?: boolean
     loadingText?: ReactNode
     noOptionsText?: ReactNode
+    /** @figmaProp State = true→"Disabled" */
     disabled?: boolean
+    /** @figmaProp State = true→"Read-only" (chips lose their delete button; no popup/clear icons) */
     readOnly?: boolean
+    /** @figmaProp none — FieldSize (both render the 40px field) */
     size?: 'small' | 'medium'
+    /** @figmaProp Clear (trigger clear button) */
     disableClearable?: boolean
     freeSolo?: boolean
     open?: boolean
@@ -112,17 +131,22 @@ export interface StyledSelectAutocompleteProps<
     disableCloseOnSelect?: boolean
     inputValue?: string
     onInputChange?: (event: SyntheticEvent | null, value: string, reason: AutocompleteInputChangeReason) => void
+    /** @figmaProp popup indicator — defaults to `+` (PlusIconCircle) when multiple, else chevron */
     popupIcon?: ReactNode
     autoHeight?: boolean
+    /** @figmaProp Filled shape — true renders Tag chips + `+` indicator (Figma "multiple select") */
     multiple?: Multiple
     allowSelectAll?: boolean
     selectAllLabel?: string
     fullWidth?: boolean
     /** Accepted for MUI parity; single-select already omits selected options via filtering. */
     filterSelectedOptions?: boolean
+    getOptionDisabled?: (option: T) => boolean
     classes?: { root?: string; paper?: string; listbox?: string }
     className?: string
     wrapperClassName?: string
+    /** Style/class the portalled listbox (MUI `slotProps.popper` parity); e.g. raise its z-index above an overlay. */
+    slotProps?: { popper?: { className?: string; style?: CSSProperties } }
     sx?: unknown
 }
 
@@ -165,8 +189,12 @@ export function StyledSelectAutocomplete<
     readOnly,
     size = 'small',
     disableClearable,
+    disableCloseOnSelect,
     popupIcon,
+    autoHeight,
     multiple,
+    allowSelectAll,
+    selectAllLabel = 'Select all',
     fullWidth,
     classes,
     inputValue: controlledInput,
@@ -176,6 +204,8 @@ export function StyledSelectAutocomplete<
     onClose,
     className,
     wrapperClassName,
+    getOptionDisabled,
+    slotProps,
 }: StyledSelectAutocompleteProps<T, Multiple, DisableClearable, FreeSolo>): JSX.Element {
     const isMultiple = multiple === true
     const getLabel = getOptionLabel ?? objectLabel
@@ -198,6 +228,11 @@ export function StyledSelectAutocomplete<
 
     const [activeIndex, setActiveIndex] = useState<number | null>(null)
     const listRef = useRef<(HTMLElement | null)[]>([])
+    const inputRef = useRef<HTMLInputElement>(null)
+    // Popup box sizing driven off the reference (input) rect via the `size` middleware. Kept in state
+    // (not written imperatively) so React owns the style and can't clobber it between position updates.
+    const [popperWidth, setPopperWidth] = useState<number | null>(null)
+    const [popperMaxHeight, setPopperMaxHeight] = useState<number | null>(null)
 
     const selectedArray: T[] = isMultiple ? (Array.isArray(value) ? (value) : []) : []
     const singleValue = !isMultiple ? ((value as SingleValue<T>) ?? null) : null
@@ -205,46 +240,43 @@ export function StyledSelectAutocomplete<
     const isSelected = (option: T): boolean =>
         isMultiple ? selectedArray.some((v) => isEqual(option, v)) : singleValue !== null && isEqual(option, singleValue)
 
-    // Filtering: multiple keeps every option visible (selection shown via check); single filters by label.
     const filtered = useMemo(() => {
         const base = [...options]
         if (filterOptions) return filterOptions(base, { inputValue })
-        if (!inputValue || isMultiple) return base
+        const selectedLabel = !isMultiple && singleValue !== null ? getLabel(singleValue).toLowerCase() : null
+        if (!inputValue || inputValue.toLowerCase() === selectedLabel) return base
         const needle = inputValue.toLowerCase()
         return base.filter((option) => getLabel(option).toLowerCase().includes(needle))
         // getLabel is stable enough for this memo; options/inputValue are the real inputs.
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [options, inputValue, isMultiple, filterOptions])
+    }, [options, inputValue, filterOptions, value])
+    const visibleOptions = useMemo(() => filtered.slice(0, 100), [filtered])
 
     const { refs, floatingStyles, context } = useFloating({
         open,
         onOpenChange: setOpen,
         placement: 'bottom-start',
+        strategy: 'fixed',
         whileElementsMounted: autoUpdate,
         middleware: [
             offset(4),
             flip({ padding: 8 }),
             shift({ padding: 8 }),
             sizeMiddleware({
-                apply({ rects, elements, availableHeight }) {
-                    elements.floating.style.minWidth = `${rects.reference.width}px`
-                    elements.floating.style.maxHeight = `${Math.min(availableHeight - 8, 320)}px`
+                apply({ rects, availableHeight }) {
+                    // Match the popup width to the input exactly (not min-width — no wider, no narrower).
+                    setPopperWidth(rects.reference.width)
+                    setPopperMaxHeight(autoHeight ? availableHeight - 8 : Math.min(availableHeight - 8, 320))
                 },
             }),
         ],
     })
     const dismiss = useDismiss(context)
     const role = useRole(context, { role: 'listbox' })
-    const listNav = useListNavigation(context, {
-        listRef,
-        activeIndex,
-        onNavigate: setActiveIndex,
-        virtual: true,
-        loop: true,
-    })
-    const { getReferenceProps, getFloatingProps, getItemProps } = useInteractions([dismiss, role, listNav])
-    const inputRef = useMergeRefs([refs.setReference])
-    const floatingRef = useMergeRefs([refs.setFloating])
+    const { getReferenceProps, getFloatingProps, getItemProps } = useInteractions([dismiss, role])
+    const referenceRef = useMergeRefs([refs.setReference])
+    // Promote the listbox into the top layer so it paints above a modal <dialog> regardless of z-index.
+    const floatingRef = useMergeRefs([useTopLayerRef(refs.setFloating)])
 
     const emitChange = (event: SyntheticEvent, option: T): void => {
         if (isMultiple) {
@@ -256,6 +288,9 @@ export function StyledSelectAutocomplete<
                 exists ? 'removeOption' : 'selectOption',
                 { option },
             )
+            setInputValue(event, '', 'reset')
+            // MUI parity: selecting closes the popup unless the caller opts out (default false).
+            if (!disableCloseOnSelect) setOpen(false)
         } else {
             onChange?.(event, option as never, 'selectOption', { option })
             setInputValue(event, getLabel(option), 'reset')
@@ -269,16 +304,39 @@ export function StyledSelectAutocomplete<
     }
 
     const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>): void => {
-        if (event.key === 'Enter' && open && activeIndex != null && filtered[activeIndex] != null) {
+        if (event.key === 'Enter' && open && activeIndex != null && visibleOptions[activeIndex] != null) {
             event.preventDefault()
-            const option = filtered[activeIndex]
+            const option = visibleOptions[activeIndex]
             if (!isOptionObjectDisabled(option)) emitChange(event, option)
-        } else if (event.key === 'ArrowDown' && !open) {
-            setOpen(true)
+        } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+            event.preventDefault()
+            if (!open) {
+                setActiveIndex(null)
+                setOpen(true)
+                return
+            }
+            if (visibleOptions.length === 0) return
+            const direction = event.key === 'ArrowDown' ? 1 : -1
+            setActiveIndex((index) =>
+                index == null
+                    ? direction > 0
+                        ? 0
+                        : visibleOptions.length - 1
+                    : (index + direction + visibleOptions.length) % visibleOptions.length,
+            )
         }
     }
 
     const showClear = !disableClearable && !readOnly && !disabled && (isMultiple ? selectedArray.length > 0 : singleValue !== null)
+
+    // The dropdown indicator (chevron / plus) must itself open the popup. `onMouseDown` +
+    // preventDefault keeps focus on the input (no blur-then-refocus flicker) before we toggle.
+    const togglePopupFromIcon = (event: React.MouseEvent): void => {
+        event.preventDefault()
+        if (disabled || readOnly) return
+        inputRef.current?.focus()
+        setOpen(!open)
+    }
 
     const tags = isMultiple
         ? (renderValue
@@ -295,7 +353,7 @@ export function StyledSelectAutocomplete<
         : undefined
 
     const endAdornment = (
-        <span className='flex items-center'>
+        <span className='flex items-center gap-1'>
             {loading && <LoadingIcon width={20} height={20} className='animate-spin' />}
             {showClear && (
                 <span
@@ -310,9 +368,24 @@ export function StyledSelectAutocomplete<
                     <CloseIcon width={20} height={20} className='text-delta-700' />
                 </span>
             )}
-            {readOnly ? null : (popupIcon ?? (isMultiple ? <PlusIconCircle width={24} height={24} /> : (
-                <ChevronDownIcon width={24} height={24} className={cn(style['select-custom-icon'], 'transition-transform', open && 'rotate-180')} />
-            )))}
+            {readOnly ? null : (
+                <span
+                    role='button'
+                    aria-label='toggle'
+                    aria-expanded={open}
+                    data-testid={`${dataTest}-popup-indicator`}
+                    className='flex cursor-pointer items-center'
+                    onMouseDown={togglePopupFromIcon}
+                >
+                    {popupIcon ?? (isMultiple ? <PlusIconCircle width={24} height={24} /> : (
+                        <ChevronDownIcon
+                            width={24}
+                            height={24}
+                            className={cn(style['select-custom-icon'], 'text-delta-700 transition-transform', open && 'rotate-180')}
+                        />
+                    ))}
+                </span>
+            )}
         </span>
     )
 
@@ -325,47 +398,68 @@ export function StyledSelectAutocomplete<
             setInputValue(event, event.target.value, 'input')
             if (!open) setOpen(true)
         },
-        onFocus: () => setOpen(true),
         onKeyDown: handleKeyDown,
         slotProps: {
             htmlInput: {
                 ...getReferenceProps(),
                 ref: inputRef,
+                onClick: () => setOpen(true),
                 role: 'combobox',
                 'aria-autocomplete': 'list',
                 'aria-expanded': open,
+                'aria-activedescendant':
+                    open && activeIndex != null ? `${dataTest}-option-${activeIndex}` : undefined,
                 autoComplete: 'off',
                 readOnly,
             },
-            input: { startAdornment: tags, endAdornment },
+            input: { ref: referenceRef, startAdornment: tags, endAdornment },
         },
     }
 
-    const defaultRenderOption = (props: OptionLiProps, option: T, state: AutocompleteRenderOptionState): ReactNode => (
-        <li
-            {...props}
-            className={cn(
-                'flex cursor-pointer items-center gap-x-1 px-2 text-sm text-delta-700',
-                'aria-selected:bg-gama-50 data-[active]:bg-delta-50',
-                isMultiple && 'border-0 border-b border-solid border-delta-200',
-            )}
-        >
-            {isMultiple ? (
-                <StyledCheckbox dataTest={`${dataTest}-${getLabel(option)}-checkbox`} checked={state.selected} size='small' hideWrapper />
-            ) : (
-                <span className='w-5'>{state.selected && <CheckIcon width={20} height={20} className='text-gama-500' />}</span>
-            )}
-            <span className='flex-1 truncate py-2'>{getLabel(option)}</span>
-        </li>
-    )
+    const defaultRenderOption = (props: OptionLiProps, option: T, state: AutocompleteRenderOptionState): ReactNode => {
+        const { key, ...optionProps } = props
+        return (
+            <li
+                key={key}
+                {...optionProps}
+                className={cn(
+                    // Figma Menus item: Body Base 16/lh24, text-icon/body delta-700.
+                    'box-border flex min-h-10 cursor-pointer items-center gap-x-3 px-3 py-1.5 text-base text-delta-700 first:-mt-1',
+                    'aria-selected:bg-gama-50 data-[active]:bg-gama-50 data-[active]:text-delta-800',
+                    // Disabled options never take the gama highlight (hover or keyboard) and read as muted.
+                    'aria-disabled:cursor-default aria-disabled:!bg-transparent aria-disabled:text-delta-300',
+                    isMultiple && 'border-0 border-b border-solid border-delta-200',
+                )}
+            >
+                {isMultiple ? (
+                    <StyledCheckbox
+                        dataTest={`${dataTest}-${getLabel(option)}-checkbox`}
+                        checked={state.selected}
+                        size='small'
+                        hideWrapper
+                    />
+                ) : (
+                    <span className='w-5'>
+                        {state.selected && <CheckIcon width={20} height={20} className='text-gama-500' />}
+                    </span>
+                )}
+                <span className='flex-1 truncate'>{getLabel(option)}</span>
+            </li>
+        )
+    }
 
     const renderRow = (option: T, index: number): ReactNode => {
-        const optionDisabled = isOptionObjectDisabled(option)
+        const optionDisabled = getOptionDisabled?.(option) ?? isOptionObjectDisabled(option)
         const props: OptionLiProps = {
             ...getItemProps({
+                // MUI parity: keep the field focused on option click (otherwise the outline drops
+                // from the focused state to the grey resting border).
+                onMouseDown: (event) => event.preventDefault(),
                 onClick: (event) => {
                     if (!optionDisabled) emitChange(event, option)
                 },
+                // Don't highlight a disabled option on hover.
+                onMouseMove: () => setActiveIndex(optionDisabled ? null : index),
             }),
             key: `${getLabel(option)}-${index}`,
             ref: (node: HTMLLIElement | null) => {
@@ -386,28 +480,64 @@ export function StyledSelectAutocomplete<
             {renderInput(renderInputParams)}
             {open && (
                 <FloatingPortal>
-                    <FloatingFocusManager context={context} modal={false} initialFocus={-1} returnFocus={false}>
-                        <ul
-                            ref={floatingRef}
-                            style={floatingStyles}
-                            {...getFloatingProps()}
-                            className={cn(
-                                'z-[1300] m-0 list-none overflow-auto rounded-lg border border-delta-200 bg-white py-0 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
-                                classes?.listbox,
+                    <ul
+                        ref={floatingRef}
+                        {...TOP_LAYER_PROPS}
+                        style={{
+                            ...TOP_LAYER_RESET_STYLE,
+                            ...floatingStyles,
+                            // Exact input-matched width (overrides the UA `[popover]{width:fit-content}`).
+                            width: popperWidth ?? undefined,
+                            maxHeight: popperMaxHeight ?? undefined,
+                            fontFamily: 'Roboto, Helvetica, Arial, sans-serif',
+                            ...slotProps?.popper?.style,
+                        }}
+                        {...getFloatingProps()}
+                        className={cn(
+                            // Figma Autocomplete dropdown = the Menus surface (node 16073-19226): rounded-lg,
+                            // border/outline delta-300 (#bdc4cf), Menus shadow. Matches StyledSelect/StyledMenu.
+                            'z-[1300] m-0 list-none overflow-auto rounded-lg border border-solid border-delta-300 bg-white p-0 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
+                            classes?.listbox,
+                            slotProps?.popper?.className,
+                        )}
+                    >
+                            {allowSelectAll && isMultiple && (
+                                <li
+                                    role='option'
+                                    aria-selected={options.length > 0 && selectedArray.length === options.length}
+                                            className='flex min-h-12 items-center gap-x-1 border-0 border-b border-solid border-delta-200 px-4 text-sm text-delta-700'
+                                >
+                                    <StyledCheckbox
+                                        dataTest={`${dataTest}-select-all`}
+                                        aria-label={selectAllLabel}
+                                        checked={options.length > 0 && selectedArray.length === options.length}
+                                        size='small'
+                                        hideWrapper
+                                        onChange={(event) => {
+                                            event.stopPropagation()
+                                            const allSelected = options.length > 0 && selectedArray.length === options.length
+                                            onChange?.(
+                                                event,
+                                                (allSelected ? [] : options) as never,
+                                                allSelected ? 'clear' : 'selectOption',
+                                                undefined,
+                                            )
+                                        }}
+                                    />
+                                    <span className='flex-1 truncate py-2'>{selectAllLabel}</span>
+                                </li>
                             )}
-                        >
                             {loading ? (
                                 <li className='px-3 py-2 text-sm text-delta-600'>{loadingText}</li>
-                            ) : filtered.length === 0 ? (
+                            ) : visibleOptions.length === 0 ? (
                                 <li className='px-3 py-2 text-sm text-delta-600'>{noOptionsText}</li>
                             ) : (
                                 // Per-item ref callbacks populate the Floating UI listRef for keyboard nav;
                                 // the react-compiler ref rule false-positives on the callback in map.
                                 // eslint-disable-next-line react-hooks/refs
-                                filtered.map(renderRow)
+                                visibleOptions.map(renderRow)
                             )}
-                        </ul>
-                    </FloatingFocusManager>
+                    </ul>
                 </FloatingPortal>
             )}
         </div>

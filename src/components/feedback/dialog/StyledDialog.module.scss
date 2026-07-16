@@ -2,5 +2,29 @@
 // Everything else (layout/spacing/colour) stays in Tailwind on the element.
 
 .StyledDialog::backdrop {
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: transparent;
+}
+
+// Force a persistent, always-visible scrollbar on the scrollable content area.
+// We style ONLY the WebKit pseudo-elements and deliberately do NOT set the standard
+// `scrollbar-width` / `scrollbar-color`: when those are present Chromium switches to the
+// standard (overlay) rail and ignores `::-webkit-scrollbar`, which on Linux/headless is
+// hidden until interaction — so a horizontal bar never shows even when content overflows.
+.StyledDialog [data-test='styled-dialog-content'] {
+    scrollbar-gutter: stable;
+}
+
+.StyledDialog [data-test='styled-dialog-content']::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+.StyledDialog [data-test='styled-dialog-content']::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.StyledDialog [data-test='styled-dialog-content']::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.45);
+    border: 2px solid rgba(255, 255, 255, 0.7);
+    border-radius: 6px;
 }

@@ -25,7 +25,7 @@ export const StyledDialogActions = ({
     return (
         <div
             data-testid='styled-dialog-actions'
-            className='m-0 flex justify-center p-0'
+            className='m-0 flex shrink-0 justify-center p-0'
             style={mergedStyle}
             {...(rest)}
         >

@@ -13,6 +13,7 @@ import {
 } from '@floating-ui/react'
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
+import { TOP_LAYER_PROPS, TOP_LAYER_RESET_STYLE, useTopLayerRef } from 'src/hooks/useTopLayer.hook'
 
 export interface PopoverOrigin {
     vertical: 'top' | 'center' | 'bottom' | number
@@ -83,6 +84,7 @@ export const StyledPopover = ({
     const { refs, floatingStyles, context } = useFloating({
         open,
         placement,
+        strategy: 'fixed',
         whileElementsMounted: autoUpdate,
         elements: { reference: anchorEl ?? undefined },
         middleware: [offset(4), flip({ padding: 8 }), shift({ padding: 8 })],
@@ -93,14 +95,17 @@ export const StyledPopover = ({
 
     const dismiss = useDismiss(context, { outsidePress: true, escapeKey: true })
     const { getFloatingProps } = useInteractions([dismiss])
-    const floatingRef = useMergeRefs([refs.setFloating])
+    // Promote into the top layer so it paints above a modal <dialog> regardless of z-index.
+    const floatingRef = useMergeRefs([useTopLayerRef(refs.setFloating)])
 
     return open ? (
         <FloatingPortal>
             <div
                 ref={floatingRef}
                 id={id}
+                {...TOP_LAYER_PROPS}
                 style={{
+                    ...TOP_LAYER_RESET_STYLE,
                     ...floatingStyles,
                     ...resolveSx(sx),
                     ...resolveSx(slotProps?.paper?.sx),

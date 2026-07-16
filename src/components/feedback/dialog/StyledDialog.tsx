@@ -1,4 +1,12 @@
-import { useEffect, useRef, type CSSProperties, type ReactNode, type SyntheticEvent } from 'react'
+import {
+    useEffect,
+    useLayoutEffect,
+    useRef,
+    type CSSProperties,
+    type HTMLAttributes,
+    type ReactNode,
+    type SyntheticEvent,
+} from 'react'
 import { StyledButton } from '../../inputs/button/StyledButton'
 import { CloseIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
@@ -11,10 +19,17 @@ export type DialogMaxWidth = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
 
 interface DialogPaperProps {
     className?: string
+    style?: CSSProperties
     sx?: unknown
     ref?: React.Ref<HTMLDialogElement>
 }
 
+/**
+ * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#15820-18954
+ * Figma "Dialog": white paper radius 8 with the Dialogue-popup shadow (#22213366, 0 4 40) over a
+ * bg/modal #626e7eb2 overlay. Header = optional label (Helper, delta-600) + title (Page title 24
+ * SemiBold, delta-800) + close button. `fullScreen`/mobile drops the radius and fills the viewport.
+ */
 export interface IStyledDialogProps {
     open: boolean
     onClose?: (event: SyntheticEvent | Event, reason: DialogCloseReason) => void
@@ -41,8 +56,11 @@ export interface IStyledDialogProps {
     PaperProps?: DialogPaperProps
     slotProps?: { paper?: DialogPaperProps; backdrop?: Record<string, unknown> }
     onCloseText?: ReactNode
+    /** @figmaProp none — behavioral */
     showCloseIcon?: boolean
+    /** @figmaProp header Label (Helper 14, delta-600) */
     dialogLabel?: ReactNode
+    /** @figmaProp header Title (Page title 24 SemiBold, delta-800) */
     dialogTitle?: ReactNode
     dialogHeaderNode?: ReactNode
 }
@@ -90,94 +108,157 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
 }) => {
     const isMobile = useMobileMediaQuery()
     const dialogRef = useRef<HTMLDialogElement>(null)
+    const escapeHandledRef = useRef(false)
     const isFullScreen = isMobile ? true : fullScreen
 
-    // Sync the `open` prop with the native modal state.
-    useEffect(() => {
+    useLayoutEffect(() => {
         const node = dialogRef.current
         if (!node) return
-        if (open && !node.open) node.showModal()
-        else if (!open && node.open) node.close()
+        if (open && !node.open) {
+            node.showModal()
+        }
+    }, [open])
+
+    useEffect(() => {
+        if (!open) return
+
+        const bodyOverflow = document.body.style.overflow
+        const documentOverflow = document.documentElement.style.overflow
+        document.body.style.overflow = 'hidden'
+        document.documentElement.style.overflow = 'hidden'
+
+        return () => {
+            document.body.style.overflow = bodyOverflow
+            document.documentElement.style.overflow = documentOverflow
+        }
     }, [open])
 
     const paper = { ...PaperProps, ...slotProps?.paper }
     const maxWidthPx = maxWidth === false ? undefined : MAX_WIDTH_PX[maxWidth]
+    const {
+        className: backdropClassName,
+        style: backdropStyle,
+        onClick: backdropOnClick,
+        ...backdropProps
+    } = (slotProps?.backdrop ?? {}) as HTMLAttributes<HTMLDivElement>
+
+    const requestEscapeClose = (event: SyntheticEvent | Event): void => {
+        if (escapeHandledRef.current) return
+        escapeHandledRef.current = true
+        window.setTimeout(() => {
+            escapeHandledRef.current = false
+        }, 0)
+        onClose?.(event, 'escapeKeyDown')
+    }
 
     const handleCancel = (event: React.SyntheticEvent<HTMLDialogElement>): void => {
         // Native ESC / cancel — never auto-close; let the consumer flip `open`.
         event.preventDefault()
-        if (!disableEscapeKeyDown) onClose?.(event, 'escapeKeyDown')
+        if (!disableEscapeKeyDown) requestEscapeClose(event)
     }
 
-    const handleClick = (event: React.MouseEvent<HTMLDialogElement>): void => {
-        // A click whose target is the <dialog> itself lands on the ::backdrop, not the content.
-        if (event.target === dialogRef.current) onClose?.(event, 'backdropClick')
-    }
+    if (!open) return null
 
     return (
         <dialog
             ref={dialogRef}
+            tabIndex={-1}
             data-testid={dataTest}
             aria-label={dataTest}
             onCancel={handleCancel}
-            onClick={handleClick}
+            onKeyDown={(event) => {
+                if (event.key !== 'Escape' || disableEscapeKeyDown) return
+                event.preventDefault()
+                requestEscapeClose(event)
+            }}
             className={cn(
                 style['StyledDialog'],
-
-                'm-auto max-h-[calc(100%-64px)] overflow-hidden rounded-2xl border-0 bg-white p-0 text-delta-800 shadow-xl',
-                isFullScreen
-                    ? 'h-full max-h-full w-full max-w-full rounded-none'
-                    : cn('w-[calc(100%-64px)]', fullWidth ? 'w-[calc(100%-64px)]' : 'w-auto'),
-                // `open:` gates the display utility on the `[open]` attribute `showModal()` sets. A
-                // plain `flex` (author origin) overrides the UA `dialog:not([open]){display:none}`
-                // rule, leaving CLOSED dialogs visible in-flow; emitting no display when closed lets
-                // the UA rule hide them (robust vs. `!important`/`@layer` host utilities).
-                scroll === 'body' ? 'overflow-y-auto' : 'open:flex open:flex-col',
+                'fixed inset-0 m-0 h-full max-h-none w-full max-w-none items-center justify-center overflow-hidden border-0 bg-transparent p-0 outline-none open:flex',
+                scroll === 'body' && 'overflow-y-auto',
                 className,
-                paper.className,
-                classes?.paper,
+                classes?.root,
             )}
             style={{
                 zIndex: 999,
-                ...(maxWidthPx && !isFullScreen ? { maxWidth: maxWidthPx } : {}),
                 ...resolveSx(sx),
-                ...resolveSx(paper.sx),
                 ...styleProp,
             }}
         >
-            {(!!dialogLabel || !!dialogTitle || showCloseIcon) && (
-                <div className='flex w-full justify-between px-4 pt-4'>
-                    <div className='flex flex-col justify-start gap-0.5'>
-                        {dialogLabel && (
-                            <div className='flex h-8 items-center text-sm font-normal leading-5 text-[var(--colors-grey-700)]'>
-                                {dialogLabel}
-                            </div>
-                        )}
-                        {dialogTitle && (
-                            <div className='flex text-2xl font-semibold leading-8 text-[var(--colors-grey-800)]'>
-                                {dialogTitle}
+            <div
+                {...backdropProps}
+                // Figma overlay bg/modal = #626e7eb2 (delta-600 @ ~70%), not plain black.
+                className={cn('absolute inset-0 bg-[#626e7eb2]', backdropClassName)}
+                style={backdropStyle}
+                onClick={(event) => {
+                    backdropOnClick?.(event)
+                    if (!event.defaultPrevented) onClose?.(event, 'backdropClick')
+                }}
+            />
+            <div
+                className={cn(
+                    // Figma dialog: radius 8, Dialogue-popup shadow (#22213366, 0 4 40).
+                    // `min-w-0`/`min-h-0`: the paper is a flex child of the centering container; without
+                    // them its automatic min-size = content min-content, which overrides `maxWidth` and
+                    // lets wide content blow past the modal width (clipped, no scrollbar). With min-w-0 the
+                    // paper honours maxWidth so the content overflows and shows a horizontal scrollbar.
+                    'relative z-[1] flex min-h-0 min-w-0 overflow-hidden rounded-lg border-0 bg-white p-0 text-delta-800 shadow-[0px_4px_40px_0px_#22213366]',
+                    scroll === 'paper' && 'flex-col',
+                    isFullScreen && 'rounded-none',
+                    paper.className,
+                    classes?.paper,
+                )}
+                style={{
+                    ...(!isFullScreen && maxWidthPx ? { maxWidth: maxWidthPx } : {}),
+                    ...(isFullScreen
+                        ? { width: '100%', maxWidth: '100%', height: '100%', maxHeight: '100%' }
+                        : { width: fullWidth ? 'calc(100% - 64px)' : 'auto', maxHeight: '100%' }),
+                    ...resolveSx(paper.sx),
+                    ...paper.style,
+                    ...(isFullScreen
+                        ? { width: '100%', maxWidth: '100%', height: '100%', maxHeight: '100%' }
+                        : { maxHeight: 'calc(100% - 64px)' }),
+                }}
+            >
+                {(!!dialogLabel || !!dialogTitle || showCloseIcon) && (
+                    <div className='box-border flex w-full min-w-0 max-w-full justify-between px-4 pt-4'>
+                        <div className='flex min-w-0 flex-1 flex-col justify-start gap-0.5'>
+                            {dialogLabel && (
+                                <div className='flex h-8 items-center text-sm font-normal leading-5 text-delta-600'>
+                                    {dialogLabel}
+                                </div>
+                            )}
+                            {dialogTitle && (
+                                // Figma dialog title = Page title 24/32 SemiBold, text delta-800.
+                                <div className='flex text-2xl font-semibold leading-8 text-delta-800'>
+                                    {dialogTitle}
+                                </div>
+                            )}
+                        </div>
+                        {showCloseIcon && (
+                            <div className='flex min-w-0 max-w-full shrink-0 justify-end gap-2'>
+                                {dialogHeaderNode}
+                                <StyledButton
+                                    dataTest={`close-button-${dataTest}`}
+                                    variant='textGray'
+                                    size='small'
+                                    endIcon={<CloseIcon width={20} height={20} />}
+                                    className='max-w-full shrink-0 whitespace-nowrap'
+                                    onClick={(event) => onClose?.(event, 'escapeKeyDown')}
+                                    style={{
+                                        color: 'var(--colors-delta-800)',
+                                        paddingRight: '6px',
+                                        paddingLeft: '6px',
+                                    }}
+                                >
+                                    {onCloseText}
+                                </StyledButton>
                             </div>
                         )}
                     </div>
-                    {showCloseIcon && (
-                        <div className='flex flex-grow justify-end gap-2'>
-                            {dialogHeaderNode}
-                            <StyledButton
-                                dataTest={`close-button-${dataTest}`}
-                                variant='textGray'
-                                size='small'
-                                endIcon={<CloseIcon width={20} height={20} />}
-                                onClick={(event) => onClose?.(event, 'escapeKeyDown')}
-                                style={{ color: 'var(--colors-grey-800)', paddingRight: '6px', paddingLeft: '6px' }}
-                            >
-                                {onCloseText}
-                            </StyledButton>
-                        </div>
-                    )}
-                </div>
-            )}
+                )}
 
-            {children}
+                {children}
+            </div>
         </dialog>
     )
 }

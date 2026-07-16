@@ -6,10 +6,18 @@ import { useAccordionContext } from './AccordionContext'
 
 export type StyledAccordionSummarySize = 'small' | 'large'
 
+/**
+ * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#21228-37809
+ * The accordion header. Figma: rounded-8 white container (border/outline delta-300), 16px padding,
+ * title = Section title 18px SemiBold delta-800 with a 24px chevron. Figma places the chevron to the
+ * **left** of the title; `expandChevronRight` opts into the right-hand (MUI-style) placement.
+ */
 export interface StyledAccordionSummaryProps
     extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type'> {
     headerClassName?: string
+    /** @figmaProp size = large→"Default" (72px, 18px title) | small→48px, 14px */
     size?: StyledAccordionSummarySize
+    /** @figmaProp Chevron placement — Figma default is left; true = right (MUI parity) */
     expandChevronRight?: boolean
     sx?: React.CSSProperties
 }
@@ -41,6 +49,7 @@ export const StyledAccordionSummary = ({
     } as React.CSSProperties
 
     const chevron = <ChevronDownIcon className={clsx(styles['TriggerIcon'], expandChevronRight && styles['TriggerIconRight'])} data-state-icon />
+    const content = <span className='m-0 flex flex-grow items-center'>{children}</span>
 
     return (
         <h3 className={clsx(styles['Header'], headerClassName)}>
@@ -59,15 +68,16 @@ export const StyledAccordionSummary = ({
                 style={styleVars}
                 data-panel-open={open ? '' : undefined}
             >
+                {/* Figma places the chevron LEFT of the title (default); `expandChevronRight` opts into right. */}
                 {expandChevronRight ? (
                     <>
-                        {children}
+                        {content}
                         {chevron}
                     </>
                 ) : (
                     <>
                         {chevron}
-                        {children}
+                        {content}
                     </>
                 )}
             </button>

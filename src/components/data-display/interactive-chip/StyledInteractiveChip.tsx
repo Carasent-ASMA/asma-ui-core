@@ -2,6 +2,9 @@ import { forwardRef, type ComponentProps } from 'react'
 import { StyledChip } from '../chip'
 import { StyledCheckbox } from 'src/components/inputs/checkbox/base-ui/StyledCheckbox'
 import { StyledRadio } from 'src/components/inputs/radio-button/base-ui/StyledRadio'
+import { cn } from 'src/helpers/cn'
+
+import styles from './StyledInteractiveChip.module.scss'
 
 export interface StyledInteractiveChipProps extends ComponentProps<typeof StyledChip> {
     type?: 'checkbox' | 'radio'
@@ -17,6 +20,12 @@ const SELECTED_CHIP_STYLE = {
     backgroundColor: 'var(--colors-gama-50)',
     boxShadow: '0 0 0 1px inset var(--colors-gama-400)',
 }
+
+// Figma _BASE_Tag Checkbox/Radio (nodes 18832-25686 / 18832-25900): the chip is `padding-left: 0`
+// but the control is a 40px-wide box whose centring leaves ~10px between the chip border and the
+// box/circle. Our control slot is compact (24px), which left almost no inset — so we add an explicit
+// left padding to restore the Figma gap. (sx wins over StyledChip's computed padding.)
+const CONTROL_CHIP_STYLE = { paddingLeft: '6px' }
 
 /**
  * A `StyledChip` whose avatar is a native checkbox or radio (base-ui controls now render their own
@@ -40,7 +49,7 @@ export const StyledInteractiveChip = forwardRef<HTMLDivElement, StyledInteractiv
                 size={size}
                 readOnly={props.readOnly}
                 aria-label={accessibleName}
-                className='pointer-events-none'
+                className={cn('pointer-events-none', styles['control'])}
             />
         ) : (
             <StyledRadio
@@ -48,7 +57,7 @@ export const StyledInteractiveChip = forwardRef<HTMLDivElement, StyledInteractiv
                 checked={checked}
                 size={size}
                 aria-label={accessibleName}
-                className='pointer-events-none'
+                className={cn('pointer-events-none', styles['control'])}
             />
         )
 
@@ -60,7 +69,11 @@ export const StyledInteractiveChip = forwardRef<HTMLDivElement, StyledInteractiv
                 clickable
                 tabIndex={0}
                 {...props}
-                sx={isSelectedRadio ? { ...SELECTED_CHIP_STYLE, ...(props.sx as object) } : props.sx}
+                sx={{
+                    ...CONTROL_CHIP_STYLE,
+                    ...(isSelectedRadio ? SELECTED_CHIP_STYLE : {}),
+                    ...(props.sx as object),
+                }}
             />
         )
     },

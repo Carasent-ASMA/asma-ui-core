@@ -1,7 +1,8 @@
-import { CloseIcon, SearchIcon, StyledInputField, type TextFieldProps } from 'asma-ui-core'
+import { CloseIcon, SearchIcon, type TextFieldProps } from 'asma-ui-core'
 import type { FC } from 'react'
 import { useState, type ComponentProps } from 'react'
 import { cn } from 'src/helpers/cn'
+import { StyledInputField } from '../input-field/StyledInputField'
 
 export type StyledSearchFieldProps = ComponentProps<typeof StyledInputField> & {
     label: Required<TextFieldProps['label']>
@@ -11,6 +12,7 @@ export const StyledSearchField: FC<StyledSearchFieldProps> = ({ value, onClear, 
     const [isFocused, setIsFocused] = useState<boolean>(false)
 
     const hasInteraction = isFocused || value
+    const inputPaddingLeft = isFocused ? 0 : value ? 14 : 20
 
     return (
         <div className='relative w-full'>
@@ -25,15 +27,21 @@ export const StyledSearchField: FC<StyledSearchFieldProps> = ({ value, onClear, 
                     setIsFocused(false)
                 }}
                 slotProps={{
-                    input: {
-                        className: cn('transition-[padding] duration-300', hasInteraction ? 'pl-0' : 'pl-5'),
-                        sx: {
-                            '& input': {
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                            },
+                    htmlInput: {
+                        style: {
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            paddingLeft: inputPaddingLeft,
+                            ...(value ? { paddingRight: 40 } : {}),
                         },
+                    },
+                    input: {
+                        className: cn(
+                            'transition-[padding] duration-300',
+                            isFocused ? 'pl-0' : value ? 'pl-[14px]' : 'pl-5',
+                            props.readOnly && 'text-black/[0.38]',
+                        ),
                         endAdornment: value ? (
                             <div
                                 data-testid='styled-search-clear-icon'
@@ -42,6 +50,7 @@ export const StyledSearchField: FC<StyledSearchFieldProps> = ({ value, onClear, 
                                     'flex items-center justify-center',
                                     'transform-gpu transition-all duration-300 ease-in-out',
                                     value ? 'scale-100 opacity-100' : 'pointer-events-none scale-75 opacity-0',
+                                    props.readOnly && '-translate-x-[6.5px]',
                                 )}
                                 style={{
                                     width: 24,
@@ -64,12 +73,12 @@ export const StyledSearchField: FC<StyledSearchFieldProps> = ({ value, onClear, 
                         ) : null,
                     },
                     inputLabel: {
-                        // The MUI-free StyledInputField floats the label itself (shrink → top border) and
-                        // ignores MUI sx selectors like `&.MuiInputLabel-shrink`. At rest the label acts as
-                        // the placeholder, so nudge it right to clear the leading search icon; once focused
-                        // or filled the icon fades out and the label floats up, so the offset is dropped.
-                        className: hasInteraction ? undefined : 'ml-6',
-                        sx: { width: hasInteraction ? undefined : 'calc(100% - 42px)' },
+                        // At rest the label doubles as the placeholder; nudge it right to clear the leading
+                        // search icon. Base floatingLabelClass already centers it vertically and floats it on
+                        // shrink (both match v3.34.0 — verified by inputs-inputfield--default), so we override
+                        // horizontal offset only.
+                        className: hasInteraction ? undefined : 'ml-5',
+                        style: { width: hasInteraction ? undefined : 'calc(100% - 42px)' },
                     },
                 }}
                 {...props}
@@ -87,6 +96,8 @@ export const StyledSearchField: FC<StyledSearchFieldProps> = ({ value, onClear, 
                     'absolute left-2 top-1/2 -translate-y-1/2',
                     'transform-gpu transition-all duration-300 ease-in-out',
                     hasInteraction ? 'pointer-events-none scale-75 opacity-0' : 'scale-100 opacity-100',
+                    // The icon is positioned against the outer wrapper, which grows when the error helper
+                    // text appears; nudge it up so it stays centered in the input box (matches v3.34.0).
                     props.error && 'top-1/3',
                 )}
                 color='var(--colors-delta-700)'

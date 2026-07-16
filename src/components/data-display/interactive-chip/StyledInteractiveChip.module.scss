@@ -1,0 +1,15 @@
+// Compact checkbox/radio inside tag chips (Figma _BASE_Tag Show Checkbox/Radio, 24×24 start slot).
+.control {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+
+    :global(label) {
+        margin: 0;
+        transform: scale(0.63);
+        transform-origin: center;
+    }
+}
