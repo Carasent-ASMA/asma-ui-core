@@ -177,6 +177,7 @@ import {
     WidgetIconFilled,
     RocketLaunchIcon,
     LoadCurrentIcon,
+    RotateAutoIcon,
 } from '..'
 
 export const useIconsList = ({
@@ -1264,6 +1265,12 @@ export const useIconsList = ({
             component: <LoadCurrentIcon height={height} width={width} />,
             clipboardText: '<RocketLaunchIcon />',
             tags: ['road current'],
+        },
+        {
+            name: 'RotateAutoIcon',
+            component: <RotateAutoIcon height={height} width={width} />,
+            clipboardText: '<RotateAutoIcon />',
+            tags: ['rotate auto', 'text refresh', 'a refresh'],
         },
     ]
 
