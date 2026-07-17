@@ -309,16 +309,18 @@ export function resolveToolbarLayout(options: {
 
         const trailingFlag = (iconOnly: boolean) => (isSelectionMode ? true : iconOnly)
 
-        if (rowFits({ filterIconOnly: false, trailingIconOnly: false, pageActionsWidthPx: pageWithLabels })) {
-            return { mode: 'compact', filterIconOnly: false, trailingIconOnly: trailingFlag(false) }
-        }
+        const compactSteps = [
+            { filterIconOnly: false, trailingIconOnly: false, pageActionsWidthPx: pageWithLabels },
+            { filterIconOnly: true, trailingIconOnly: false, pageActionsWidthPx: pageWithLabels },
+            { filterIconOnly: true, trailingIconOnly: true, pageActionsWidthPx: pageWithLabels },
+            { filterIconOnly: true, trailingIconOnly: true, pageActionsWidthPx: pageIconOnly },
+        ]
 
-        if (rowFits({ filterIconOnly: false, trailingIconOnly: true, pageActionsWidthPx: pageWithLabels })) {
-            return { mode: 'compact', filterIconOnly: false, trailingIconOnly: true }
-        }
-
-        if (rowFits({ filterIconOnly: false, trailingIconOnly: true, pageActionsWidthPx: pageIconOnly })) {
-            return { mode: 'compact', filterIconOnly: false, trailingIconOnly: true }
+        for (const step of compactSteps) {
+            const trailingIconOnly = trailingFlag(step.trailingIconOnly)
+            if (rowFits({ ...step, trailingIconOnly })) {
+                return { mode: 'compact', filterIconOnly: step.filterIconOnly, trailingIconOnly }
+            }
         }
 
         return { mode: 'compact', filterIconOnly: true, trailingIconOnly: true }
@@ -380,7 +382,7 @@ export function resolveToolbarLayout(options: {
         pageActionsWidthPx: number
     }[] = [
         { filterIconOnly: false, trailingIconOnly: false, pageActionsWidthPx: pageWithLabels },
-        { filterIconOnly: false, trailingIconOnly: true, pageActionsWidthPx: pageWithLabels },
+        { filterIconOnly: true, trailingIconOnly: false, pageActionsWidthPx: pageWithLabels },
         { filterIconOnly: true, trailingIconOnly: true, pageActionsWidthPx: pageWithLabels },
     ]
 
@@ -390,24 +392,17 @@ export function resolveToolbarLayout(options: {
         }
     }
 
-    const utilityRowWithLabels = utilitiesWidth({
-        filterIconOnly: false,
-        trailingIconOnly: false,
-        pageActionsWidthPx: pageWithLabels,
-        searchBeforeFilter: true,
-    })
-    if (width >= utilityRowWithLabels) {
-        return { mode: 'stacked', filterIconOnly: false, trailingIconOnly: false }
-    }
+    const stackedSteps = [
+        { filterIconOnly: false, trailingIconOnly: false, pageActionsWidthPx: pageWithLabels },
+        { filterIconOnly: true, trailingIconOnly: false, pageActionsWidthPx: pageWithLabels },
+        { filterIconOnly: true, trailingIconOnly: true, pageActionsWidthPx: pageWithLabels },
+        { filterIconOnly: true, trailingIconOnly: true, pageActionsWidthPx: pageIconOnly },
+    ]
 
-    const utilityRowIconsOnly = utilitiesWidth({
-        filterIconOnly: true,
-        trailingIconOnly: true,
-        pageActionsWidthPx: pageIconOnly,
-        searchBeforeFilter: true,
-    })
-    if (width >= utilityRowIconsOnly) {
-        return { mode: 'stacked', filterIconOnly: true, trailingIconOnly: true }
+    for (const step of stackedSteps) {
+        if (width >= utilitiesWidth({ ...step, searchBeforeFilter: true })) {
+            return { mode: 'stacked', filterIconOnly: step.filterIconOnly, trailingIconOnly: step.trailingIconOnly }
+        }
     }
 
     return { mode: 'compact', filterIconOnly: true, trailingIconOnly: true }

@@ -281,9 +281,9 @@ export const SingleOverflowShowsDirectly: Story = {
 }
 
 /**
- * Labels collapse right-to-left at narrow widths.
+ * Labels collapse left-to-right at narrow widths.
  */
-export const LabelsCollapseRightToLeft: Story = {
+export const LabelsCollapseLeftToRight: Story = {
     render: () => <ToolbarDemo width={820} />,
 }
 
