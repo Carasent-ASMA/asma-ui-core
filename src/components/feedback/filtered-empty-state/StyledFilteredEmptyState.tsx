@@ -53,17 +53,17 @@ export const StyledFilteredEmptyState: FC<StyledFilteredEmptyStateProps> = ({
     resetButtonText,
     onResetFilters,
     actionIcon = <FilterIconOff width={24} height={24} color='currentColor' />,
-    className ,
-    emptyPageClassName ,
-    filterContentClassName ,
-    resetButtonClassName ,
+    className,
+    emptyPageClassName,
+    filterContentClassName,
+    resetButtonClassName,
 }) => {
     const translations = msgs[locale] ?? msgs.en
     const resolvedEmptyText = emptyText ?? translations.emptyText
     const displayFilterTitle = filterTitle ?? translations.filterTitle
     const description = filteredByDefault
         ? translations.defaultFilteredDescription
-        : filteredDescription ?? translations.filteredDescription
+        : (filteredDescription ?? translations.filteredDescription)
     const resolvedResetButtonText = resetButtonText ?? translations.resetButtonText
 
     return (
@@ -87,7 +87,7 @@ export const StyledFilteredEmptyState: FC<StyledFilteredEmptyStateProps> = ({
                             dataTest={`${dataTest}-reset`}
                             onClick={onResetFilters}
                             startIcon={actionIcon}
-                            className={cn('inline-flex items-center text-gama-700 hover:text-gama-800', resetButtonClassName)}
+                            className={resetButtonClassName}
                         >
                             <span>{resolvedResetButtonText}</span>
                         </StyledButton>
