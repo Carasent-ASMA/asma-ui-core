@@ -8,6 +8,25 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+    /*
+     * Native Popover API elements (our top-layer overlays: StyledPopover / StyledSelect /
+     * StyledSelectAutocomplete, and thus StyledMenu + the date-picker calendar) ship UA-default
+     * chrome — a solid border, 0.25em padding, `inset: 0` + `margin: auto`. Neutralise it so each
+     * component controls its own look (otherwise a popover that doesn't set a border shows the black
+     * UA outline — e.g. the calendar). `:where()` keeps 0 specificity, so any component class
+     * (border-delta-300, py-1, …) or inline style still wins. Prevents this class of regression for
+     * every current and future top-layer popover.
+     */
+    :where([popover]) {
+        margin: 0;
+        inset: auto;
+        border: 0;
+        padding: 0;
+        background: transparent;
+    }
+}
+
 @layer utilities {
     .border-solid {
         border-style: solid;

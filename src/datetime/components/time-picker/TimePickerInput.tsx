@@ -83,6 +83,9 @@ export const TimePickerInput: React.FC<
                             <ClockOutlineIcon
                                 width={24}
                                 height={24}
+                                // DS field trailing icon = delta-700 (matches select/autocomplete chevrons
+                                // + search-field icons); delta-800 read as near-black. Muted when disabled.
+                                className={disabled ? 'text-delta-300' : 'text-delta-700'}
                                 onClick={(event: ReactMouseEvent<SVGSVGElement>) => {
                                     event.stopPropagation()
                                     if (!disabled && !readOnly) popupState.open(event)

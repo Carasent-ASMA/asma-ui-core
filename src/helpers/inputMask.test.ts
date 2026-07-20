@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatMaskedValue, type InputMaskSpec } from './inputMask'
+import { DATE_INPUT_FONT_FAMILY, DATE_INPUT_MASK, formatMaskedValue, type InputMaskSpec } from './inputMask'
 
 const dateSpec: InputMaskSpec = { mask: '  /  /    ', maskChar: ' ', showMask: true }
 const timeSpec: InputMaskSpec = { mask: 'xx:xx', maskChar: 'x', showMask: false }
@@ -28,6 +28,22 @@ describe('formatMaskedValue — date mask "  /  /    " (showMask)', () => {
     it('keeps the caret before the literal after deleting a digit-adjacent literal', () => {
         // previous value '12/  /    ', backspace at caret 3 removed the '/'
         expect(formatMaskedValue('12  /    ', 2, dateSpec)).toEqual({ value: '12/  /    ', caret: 2 })
+    })
+})
+
+describe('date input mask ↔ font coupling (regression guard)', () => {
+    it('keeps the date mask a space scaffold', () => {
+        // The scaffold spaces ARE the empty day/month/year slots — the mask must contain them.
+        expect(DATE_INPUT_MASK.maskChar).toBe(' ')
+        expect(DATE_INPUT_MASK.mask).toBe('  /  /    ')
+        expect([...DATE_INPUT_MASK.mask].filter((c) => c === ' ')).toHaveLength(8)
+    })
+
+    it('renders the space-scaffold field in a fixed-width font so the mask spaces stay visible', () => {
+        // Regression: a proportional font (e.g. Roboto) collapses the space slots to hairlines and
+        // the mask "loses its spaces". A space maskChar therefore REQUIRES a monospace font.
+        expect(DATE_INPUT_MASK.maskChar).toBe(' ')
+        expect(DATE_INPUT_FONT_FAMILY).toMatch(/mono/i)
     })
 })
 

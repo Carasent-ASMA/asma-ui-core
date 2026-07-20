@@ -31,6 +31,10 @@ const POSITION_CLASS: Record<string, string> = {
  * Positioned auto-hiding toast (replaces MUI `Snackbar`). Portalled, fixed to the `anchorOrigin`
  * corner; auto-hides after `autoHideDuration` (null disables). Public props preserved (DEC-003).
  * TASK-402.
+ *
+ * Positioning primitive — no standalone Figma node. The DS severity toast is
+ * `StyledDefaultSnackbar` (Figma "System notification-toast"); consumers pass it via `children`.
+ * The built-in dark pill is only a bare MUI-compat fallback; radius aligned to the DS 4px token.
  */
 export const StyledSnackbar = ({
     open = false,
@@ -55,7 +59,7 @@ export const StyledSnackbar = ({
         <FloatingPortal>
             <div className={cn('fixed z-[1400] flex items-center gap-2', position, className)}>
                 {children ?? (
-                    <div className='flex items-center gap-2 rounded-lg bg-delta-800 px-4 py-3 text-sm text-white shadow-lg'>
+                    <div className='flex items-center gap-2 rounded bg-delta-800 px-4 py-3 text-sm text-white shadow-lg'>
                         {message}
                         {action}
                     </div>

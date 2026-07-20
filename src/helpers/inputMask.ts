@@ -26,6 +26,16 @@ export interface MaskedResult {
 export const DATE_INPUT_MASK: InputMaskSpec = { mask: '  /  /    ', maskChar: ' ', showMask: true }
 
 /**
+ * Font family the editable date input MUST render in. `DATE_INPUT_MASK` is a *space scaffold*
+ * (its `maskChar` is `' '`), so the field relies on a fixed-width font: with a proportional font
+ * (e.g. Roboto) the empty day/year space slots collapse to hairlines and the mask visibly loses
+ * its spaces (a real regression once shipped). A monospace font keeps every slot the same width so
+ * the `dd / mm / yyyy` columns stay aligned. This is coupled to the space `maskChar` — the two are
+ * asserted together in `inputMask.test.ts`; do not switch this to a proportional font.
+ */
+export const DATE_INPUT_FONT_FAMILY = 'monospace'
+
+/**
  * Pure formatter: distributes the digits of `raw` over the mask slots and computes the caret
  * position that follows the last digit typed before `caretInRaw`. Zero digits yield an empty value
  * so the date field can show its scaffold as a placeholder only while focused.

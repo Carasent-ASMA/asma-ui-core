@@ -16,6 +16,9 @@ export const DatePickerButton: React.FC<DatePickerButtonProps> = ({ onClick, dis
             dataTest='DatePickerButton'
             startIcon={<OutlineCalendarMonth width={24} height={24} />}
             variant='outlined'
+            // Forward `disabled` to the native <button> so it's actually non-focusable/non-clickable
+            // with the disabled styling — not just a click guard — when the date picker is disabled.
+            disabled={disabled}
             onClick={(event: React.MouseEvent<HTMLButtonElement>) => !disabled && onClick(event)}
             className={cn(disabled && 'cursor-not-allowed')}
         />

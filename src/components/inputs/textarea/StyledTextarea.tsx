@@ -3,9 +3,12 @@ import styles from './StyledTextarea.module.scss'
 
 export interface TextareaCommonProps {
     id?: string
+    /** @figmaProp Filled — the field text (Body Base 16/lh24, delta-800). */
     value?: string
+    /** @figmaProp Title (Body Base SemiBold 16, delta-800) above the field. */
     label?: ReactNode
     labelClassName?: string
+    /** @figmaProp Description / helper text (Helper 14/lh20, delta-600). */
     description?: ReactNode
     containerClassName?: string
     className?: string
@@ -31,9 +34,12 @@ export interface TextAreaActiveProps {
     variant?: 'active'
     minRows?: number
     maxRows?: number
+    /** @figmaProp State = true→"Disabled" (delta-300 border/text) */
     disabled?: boolean
+    /** @figmaProp Placeholder text (resting, delta-500) */
     placeholder?: string
     onChange?: (e: ChangeEvent<HTMLTextAreaElement>) => void
+    /** @figmaProp State = true→"Error" (border/text error-500) */
     error?: boolean
     errorMessage?: string
     maxLength?: number
@@ -50,9 +56,22 @@ type TextareaTypes = 'active' | 'error'
 type textTypes = 'active' | 'error' | 'disabled'
 
 /**
+ * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#15561-37391
+ * Figma has no standalone "Text area" component — a multiline text control inherits the **Input
+ * field** outlined styling (shared with `StyledInputField`/`field-styles`): radius 4, field text
+ * **Body Base 16/lh24 delta-800**; border **enabled delta-500 #7a899e**, **hover gama-300 #60bdbd
+ * (2px)**, **focus gama-400 #1ca1a1 (2px)**, **error error-500 #e10700**, **disabled delta-300**.
+ * Title = **Body Base SemiBold 16 delta-800**; description/helper = **Helper 14/lh20 delta-600**.
+ * State (Enabled/Hover/Focus/Error/Disabled) ← native + `error`/`disabled`; the `not_editable`/
+ * `view_only` variants are the read-only presentations. Colours live in the textarea-only
+ * `--colors-input-*` token layer (now referencing the semantic delta/gama tokens, so all themes
+ * recolour). Non-annotated props are behavioral.
+ *
  * Developer: bularga.alexandru@carasent.com
  *
  * Custom props:
+ * @figmaProp variant — active (editable field) | view_only | not_editable (read-only presentations)
+ * @figmaProp error — State = true→"Error" (border/text error-500)
  * @param variant -  'not_editable' | 'view_only' | 'active'
  * @param error -  boolean
  * @param errorMessage -  string
@@ -95,23 +114,22 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
     const textAreaId = id ?? internalId
 
     useEffect(() => {
-        if (textAreaRef.current) {
-            const textArea = textAreaRef.current
-            const computedStyle = window.getComputedStyle(textArea)
-            const additionalBottomPadding = parseFloat(computedStyle.paddingBottom)
-            textArea.style.height = 'auto'
+        const textArea = textAreaRef.current
+        if (!textArea) return
+        const computedStyle = window.getComputedStyle(textArea)
+        const rowHeight = parseFloat(computedStyle.lineHeight) || 24
+        const paddingTop = parseFloat(computedStyle.paddingTop)
+        const paddingBottom = parseFloat(computedStyle.paddingBottom)
 
-            const rowHeight = parseFloat(computedStyle.lineHeight)
-            const paddingTop = parseFloat(computedStyle.paddingTop)
-            const heightWithoutPaddings = textArea.scrollHeight - paddingTop
-            const rows = Math.ceil(heightWithoutPaddings / rowHeight)
-
-            if (rows > maxRows) {
-                textArea.style.height = `${rowHeight * maxRows + paddingTop + additionalBottomPadding}px`
-            } else {
-                textArea.style.height = `${textArea.scrollHeight + additionalBottomPadding}px`
-            }
-        }
+        // Measure the natural content height, then size to a whole number of rows clamped to
+        // [minRows, maxRows]. `scrollHeight` already includes BOTH paddings — the box is `border-box`,
+        // so `rows*rowHeight + paddingTop + paddingBottom` is the exact height (no extra bottom gap,
+        // and short text keeps the minRows height instead of collapsing/resizing on the first line).
+        textArea.style.height = 'auto'
+        const contentHeight = textArea.scrollHeight - paddingTop - paddingBottom
+        const contentRows = Math.max(1, Math.ceil(contentHeight / rowHeight))
+        const rows = Math.min(Math.max(contentRows, minRows), maxRows)
+        textArea.style.height = `${rows * rowHeight + paddingTop + paddingBottom}px`
     }, [textAreaRef, value, minRows, maxRows, counterEnabled])
 
     if (maxRows < minRows) {
@@ -131,9 +149,9 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
                 {error ? errorMessage : description}
             </span>
             {variant === 'view_only' ? (
-                <div className='pt-3 font-roboto text-sm font-normal text-gray-700'>{value}</div>
+                <div className='pt-3 font-roboto text-base font-normal text-delta-700'>{value}</div>
             ) : variant === 'not_editable' ? (
-                <div className='rounded bg-gray-200 p-3 font-roboto text-sm font-normal text-gray-700'>{value}</div>
+                <div className='rounded bg-delta-50 p-3 font-roboto text-base font-normal text-delta-700'>{value}</div>
             ) : (
                 <textarea
                     {...otherProps}

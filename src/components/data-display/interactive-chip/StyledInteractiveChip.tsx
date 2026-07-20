@@ -6,10 +6,24 @@ import { cn } from 'src/helpers/cn'
 
 import styles from './StyledInteractiveChip.module.scss'
 
+/**
+ * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#13248-31089
+ * Figma "Tag Chip" **Type=Checkbox** (node 18832-25686 / selected 18869-29068) and **Type=Radio**
+ * (18832-25900 / selected 18869-29122). It is a `StyledChip` (h32, radius25, border delta-300, label
+ * Body Base 16 delta-700; hover gama-200 + gama-25, focus gama-400 — all inherited) whose start slot
+ * is a native checkbox/radio. Figma **State** (Enabled/Hovered/Focused/Read-only/Disabled) ← native
+ * + `readOnly`/`disabled`; **Selected** ← `checked`. A selected **radio** additionally gets the teal
+ * chip border/fill (gama-400 / gama-50); a selected **checkbox** only checks its box (matching Figma).
+ * Non-annotated props are behavioral / forwarded to `StyledChip`.
+ */
 export interface StyledInteractiveChipProps extends ComponentProps<typeof StyledChip> {
+    /** @figmaProp Type = "Checkbox" | "Radio" (the start-slot control) */
     type?: 'checkbox' | 'radio'
+    /** @figmaProp Selected = true→"on" | false→"off" */
     checked?: boolean
+    /** @figmaProp none — app size (Figma Tag Chip is a single 32px height) */
     size?: 'small' | 'medium'
+    /** @figmaProp none — accessible name for the control */
     ariaLabel?: string
 }
 

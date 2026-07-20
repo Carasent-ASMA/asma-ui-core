@@ -2,49 +2,51 @@
 [data-theme='fretex'],
 [data-theme='greenish'] {
     /* input Active */
-    --colors-input-active-placeholder-color: var(--colors-gray-500);
+    --colors-input-active-placeholder-color: var(--colors-delta-500);
     --colors-input-active-bg-color: #ffffff;
-    --colors-input-active-hover-bg-color: var(--colors-gray-10);
-    --colors-input-active-active-bg-color: var(--colors-gray-10);
-    --colors-input-active-focus-bg-color: var(--colors-gray-10);
+    --colors-input-active-hover-bg-color: var(--colors-delta-10);
+    --colors-input-active-active-bg-color: var(--colors-delta-10);
+    --colors-input-active-focus-bg-color: var(--colors-delta-10);
     --colors-input-active-disabled-bg-color: transparent;
-    --colors-input-active-text-color: var(--colors-gray-800);
-    --colors-input-active-hover-text-color: var(--colors-gray-800);
-    --colors-input-active-active-text-color: var(--colors-gray-800);
-    --colors-input-active-focus-text-color: var(--colors-gray-800);
-    --colors-input-active-disabled-text-color: var(--colors-gray-300);
-    --colors-input-active-outline-color: var(--colors-gray-500);
-    --colors-input-active-hover-outline-color: var(--colors-gray-800);
-    --colors-input-active-active-outline-color: var(--colors-gray-800);
-    --colors-input-active-focus-outline-color: var(--colors-gama-500);
-    --colors-input-active-disabled-outline-color: var(--colors-gray-300);
+    --colors-input-active-text-color: var(--colors-delta-800);
+    --colors-input-active-hover-text-color: var(--colors-delta-800);
+    --colors-input-active-active-text-color: var(--colors-delta-800);
+    --colors-input-active-focus-text-color: var(--colors-delta-800);
+    --colors-input-active-disabled-text-color: var(--colors-delta-300);
+    /* Figma Input field (node 15561-37391): enabled border delta-500 #7a899e; hover border/hover
+       gama-300 #60bdbd (2px); focus border/focus gama-400 #1ca1a1 (2px); disabled delta-300. */
+    --colors-input-active-outline-color: var(--colors-delta-500);
+    --colors-input-active-hover-outline-color: var(--colors-gama-300);
+    --colors-input-active-active-outline-color: var(--colors-gama-400);
+    --colors-input-active-focus-outline-color: var(--colors-gama-400);
+    --colors-input-active-disabled-outline-color: var(--colors-delta-300);
     --input-active-cursor: text;
     --input-active-hover-cursor: text;
     --input-active-active-cursor: text;
     --input-active-focus-cursor: text;
     --input-active-disabled-cursor: default;
     --input-active-outline-width: 1px;
-    --input-active-hover-outline-width: 1px;
-    --input-active-active-outline-width: 1px;
+    --input-active-hover-outline-width: 2px;
+    --input-active-active-outline-width: 2px;
     --input-active-focus-outline-width: 2px;
     --input-active-disabled-outline-width: 1px;
     /* Input Error */
-    --colors-input-error-placeholder-color: var(--colors-error-700);
+    --colors-input-error-placeholder-color: var(--colors-error-500);
     --colors-input-error-bg-color: var(--colors-error-100);
     --colors-input-error-hover-bg-color: var(--colors-error-100);
     --colors-input-error-active-bg-color: var(--colors-error-100);
     --colors-input-error-focus-bg-color: var(--colors-error-100);
     --colors-input-error-disabled-bg-color: var(--colors-error-100);
-    --colors-input-error-text-color: var(--colors-error-700);
-    --colors-input-error-hover-text-color: var(--colors-error-700);
-    --colors-input-error-active-text-color: var(--colors-error-700);
-    --colors-input-error-focus-text-color: var(--colors-error-700);
-    --colors-input-error-disabled-text-color: var(--colors-error-700);
-    --colors-input-error-outline-color: var(--colors-error-700);
-    --colors-input-error-hover-outline-color: var(--colors-error-700);
-    --colors-input-error-active-outline-color: var(--colors-error-700);
-    --colors-input-error-focus-outline-color: var(--colors-error-700);
-    --colors-input-error-disabled-outline-color: var(--colors-error-700);
+    --colors-input-error-text-color: var(--colors-error-500);
+    --colors-input-error-hover-text-color: var(--colors-error-500);
+    --colors-input-error-active-text-color: var(--colors-error-500);
+    --colors-input-error-focus-text-color: var(--colors-error-500);
+    --colors-input-error-disabled-text-color: var(--colors-error-500);
+    --colors-input-error-outline-color: var(--colors-error-500);
+    --colors-input-error-hover-outline-color: var(--colors-error-500);
+    --colors-input-error-active-outline-color: var(--colors-error-500);
+    --colors-input-error-focus-outline-color: var(--colors-error-500);
+    --colors-input-error-disabled-outline-color: var(--colors-error-500);
     --input-error-cursor: text;
     --input-error-hover-cursor: text;
     --input-error-active-cursor: text;
@@ -56,17 +58,17 @@
     --input-error-focus-outline-width: 2px;
     --input-error-disabled-outline-width: 1px;
     /* input notEditable */
-    --colors-input-notEditable-placeholder-color: var(--colors-gray-800);
-    --colors-input-notEditable-bg-color: var(--colors-gray-50);
-    --colors-input-notEditable-hover-bg-color: var(--colors-gray-50);
-    --colors-input-notEditable-active-bg-color: var(--colors-gray-50);
-    --colors-input-notEditable-focus-bg-color: var(--colors-gray-50);
-    --colors-input-notEditable-disabled-bg-color: var(--colors-gray-50);
-    --colors-input-notEditable-text-color: var(--colors-gray-800);
-    --colors-input-active-hover-text-color: var(--colors-gray-800);
-    --colors-input-notEditable-active-text-color: var(--colors-gray-800);
-    --colors-input-notEditable-focus-text-color: var(--colors-gray-800);
-    --colors-input-notEditable-disabled-text-color: var(--colors-gray-300);
+    --colors-input-notEditable-placeholder-color: var(--colors-delta-800);
+    --colors-input-notEditable-bg-color: var(--colors-delta-50);
+    --colors-input-notEditable-hover-bg-color: var(--colors-delta-50);
+    --colors-input-notEditable-active-bg-color: var(--colors-delta-50);
+    --colors-input-notEditable-focus-bg-color: var(--colors-delta-50);
+    --colors-input-notEditable-disabled-bg-color: var(--colors-delta-50);
+    --colors-input-notEditable-text-color: var(--colors-delta-800);
+    --colors-input-active-hover-text-color: var(--colors-delta-800);
+    --colors-input-notEditable-active-text-color: var(--colors-delta-800);
+    --colors-input-notEditable-focus-text-color: var(--colors-delta-800);
+    --colors-input-notEditable-disabled-text-color: var(--colors-delta-300);
     --input-notEditable-cursor: default;
     --input-notEditable-hover-cursor: default;
     --input-notEditable-active-cursor: default;
@@ -79,24 +81,24 @@
     --input-notEditable-disabled-outline-width: 0px;
     /* input disabled */
     --colors-input-disabled-disabled-outline-width: 1px;
-    --colors-input-disabled-disabled-outline-color: var(--colors-gray-300);
-    --colors-input-disabled-disabled-text-color: var(--colors-gray-300);
-    --colors-input-disabled-placeholder-color: var(--colors-gray-300);
+    --colors-input-disabled-disabled-outline-color: var(--colors-delta-300);
+    --colors-input-disabled-disabled-text-color: var(--colors-delta-300);
+    --colors-input-disabled-placeholder-color: var(--colors-delta-300);
     --colors-input-disabled-disabled-bg-color: #ffffff;
     --input-disabled-disabled-outline-width: 1px;
 
     /* input readOnly */
-    --colors-input-readOnly-placeholder-color: var(--colors-gray-800);
+    --colors-input-readOnly-placeholder-color: var(--colors-delta-800);
     --colors-input-readOnly-bg-color: transparent;
     --colors-input-readOnly-hover-bg-color: transparent;
     --colors-input-readOnly-active-bg-color: transparent;
     --colors-input-readOnly-focus-bg-color: transparent;
     --colors-input-readOnly-disabled-bg-color: transparent;
-    --colors-input-readOnly-text-color: var(--colors-gray-800);
-    --colors-input-active-hover-text-color: var(--colors-gray-800);
-    --colors-input-readOnly-active-text-color: var(--colors-gray-800);
-    --colors-input-readOnly-focus-text-color: var(--colors-gray-800);
-    --colors-input-readOnly-active-text-color: var(--colors-gray-300);
+    --colors-input-readOnly-text-color: var(--colors-delta-800);
+    --colors-input-active-hover-text-color: var(--colors-delta-800);
+    --colors-input-readOnly-active-text-color: var(--colors-delta-800);
+    --colors-input-readOnly-focus-text-color: var(--colors-delta-800);
+    --colors-input-readOnly-active-text-color: var(--colors-delta-300);
     --input-readOnly-cursor: text;
     --input-readOnly-hover-cursor: text;
     --input-readOnly-active-cursor: text;
@@ -108,15 +110,15 @@
     --input-readOnly-focus-outline-width: 0px;
     --input-readOnly-disabled-outline-width: 0px;
     /* input Label */
-    --colors-input-label-active-text-color: var(--colors-gray-800);
-    --colors-input-label-error-text-color: var(--colors-error-700);
-    --colors-input-label-disabled-text-color: var(--colors-gray-300);
-    --colors-input-label-notEditable-text-color: var(--colors-gray-800);
-    --colors-input-label-readOnly-text-color: var(--colors-gray-800);
+    --colors-input-label-active-text-color: var(--colors-delta-800);
+    --colors-input-label-error-text-color: var(--colors-error-500);
+    --colors-input-label-disabled-text-color: var(--colors-delta-300);
+    --colors-input-label-notEditable-text-color: var(--colors-delta-800);
+    --colors-input-label-readOnly-text-color: var(--colors-delta-800);
     /* input Description */
-    --colors-input-description-active-text-color: var(--colors-gray-600);
-    --colors-input-description-error-text-color: var(--colors-error-700);
-    --colors-input-description-disabled-text-color: var(--colors-gray-300);
-    --colors-input-description-notEditable-text-color: var(--colors-gray-600);
-    --colors-input-description-readOnly-text-color: var(--colors-gray-600);
+    --colors-input-description-active-text-color: var(--colors-delta-600);
+    --colors-input-description-error-text-color: var(--colors-error-500);
+    --colors-input-description-disabled-text-color: var(--colors-delta-300);
+    --colors-input-description-notEditable-text-color: var(--colors-delta-600);
+    --colors-input-description-readOnly-text-color: var(--colors-delta-600);
 }

@@ -1,3 +1,6 @@
+// Figma "System notification-toast" (Design-System wXrXt5uKNNzV2DnQCgyYZH#22249-56927).
+// Colors come from the semantic `alerts/*` + `delta` token layer (var(--colors-*)) so every brand
+// theme stays consistent — do not re-inline raw hex here.
 .container {
     display: flex;
     flex-direction: column;
@@ -6,6 +9,7 @@
     border-radius: 4px;
     width: 400px;
     height: auto;
+    // Figma "Dialogue-popup" elevation: #22213366 (delta @ 40%), offset 0 4, radius 40.
     box-shadow: 0 4px 40px 0 rgba(34, 33, 51, 0.4);
     border: 1px solid transparent;
 }
@@ -16,73 +20,78 @@
     align-items: center;
 }
 
+// Figma label = Body Base Semibold 16/24 (weight 600), severity accent colour.
 .title {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 14px;
-    font-weight: bold;
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 600;
     text-transform: capitalize;
 }
 
+// Figma text = Body Base 16/24 Regular, per-severity dark shade.
 .message {
     flex: 1;
     padding: 2px 0;
-    font-size: 14px;
+    font-size: 16px;
+    line-height: 24px;
     font-weight: 400;
 }
 
-/* ---- Severity Variants ---- */
+/* ---- Severity Variants (bg -50 / border -300, except warning border -500) ---- */
 .info {
-    background-color: #f0faff;
-    border-color: #bae8fd;
+    background-color: var(--colors-info-50);
+    border-color: var(--colors-info-300);
 }
 
 .error {
-    background-color: #fcf3f3;
-    border-color: #f6b9b9;
+    background-color: var(--colors-error-50);
+    border-color: var(--colors-error-300);
 }
 
 .success {
-    background-color: #e9fbf0;
-    border-color: #a1ebbd;
+    background-color: var(--colors-success-50);
+    border-color: var(--colors-success-300);
 }
 
 .warning {
-    background-color: #fdf8de;
-    border-color: #f0c800;
+    background-color: var(--colors-warning-50);
+    // Figma warning uses the -500 border (the -300 yellow is too faint on the -50 fill).
+    border-color: var(--colors-warning-500);
 }
 
-/* ---- Title Colors ---- */
+/* ---- Title Colors (severity -700, error -600) ---- */
 .title_info {
-    color: #1563bc;
+    color: var(--colors-info-700);
 }
 
 .title_error {
-    color: #b6120d;
+    color: var(--colors-error-600);
 }
 
 .title_success {
-    color: #0b7c36;
+    color: var(--colors-success-700);
 }
 
 .title_warning {
-    color: #816d09;
+    color: var(--colors-warning-700);
 }
 
-/* ---- Message Colors ---- */
+/* ---- Message Colors (severity -800, error -700) ---- */
 .message_info {
-    color: #1255a1;
+    color: var(--colors-info-800);
 }
 
 .message_error {
-    color: #9d0f0f;
+    color: var(--colors-error-700);
 }
 
 .message_success {
-    color: #085e29;
+    color: var(--colors-success-800);
 }
 
 .message_warning {
-    color: #5f5107;
+    color: var(--colors-warning-800);
 }

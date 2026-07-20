@@ -58,10 +58,17 @@ const toPlacement = (anchor: PopoverOrigin, transform: PopoverOrigin): Placement
 }
 
 /**
- * Anchored popover built on `@floating-ui/react` (replaces MUI `Popover`). Positions against
- * `anchorEl`, flips/shifts on collision, portalled, and closes on outside-press/escape mapping to
- * MUI's `onClose(event, reason)`. `anchorOrigin`/`transformOrigin`/`slotProps.paper` preserved
- * (DEC-003). TASK-302.
+ * @figmaNode none — no standalone Figma component
+ * Anchored-overlay **primitive** (replaces MUI `Popover`); the Figma DS has no "Popover" component,
+ * so the base paper uses the DS floating-surface defaults: white, radius **4** (Figma `menus`/
+ * `text-field` radius token), and the **Float** elevation (drop-shadow `0 1 12 rgba(0,0,0,.15)`).
+ * Styled consumers override the paper — `StyledMenu` adds the delta-300 border + Menus shadow
+ * (`0 2 4 rgba(34,33,51,.15)`), the date-picker calendar keeps this base. Rendered in the browser
+ * **top layer** (see `useTopLayerRef`) so it paints above a modal `<dialog>`.
+ *
+ * Positions against `anchorEl`, flips/shifts on collision, portalled, closes on outside-press/escape
+ * mapping to MUI's `onClose(event, reason)`. `anchorOrigin`/`transformOrigin`/`slotProps.paper`
+ * preserved (DEC-003). TASK-302.
  */
 export const StyledPopover = ({
     open,
@@ -113,7 +120,8 @@ export const StyledPopover = ({
                 }}
                 {...getFloatingProps({ onClick })}
                 className={cn(
-                    'z-[1300] overflow-auto rounded bg-white shadow-lg',
+                    // Figma DS floating surface: radius 4 (`menus` token) + Float shadow (0 1 12 rgba(0,0,0,.15)).
+                    'z-[1300] overflow-auto rounded bg-white shadow-[0px_1px_12px_0px_rgba(0,0,0,0.15)]',
                     className ?? 'my-1',
                     slotProps?.paper?.className,
                 )}

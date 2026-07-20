@@ -7,6 +7,14 @@ const meta = {
     title: 'Inputs/Styled Textarea',
     component: StyledTextarea,
     tags: ['autodocs'],
+    parameters: {
+        docs: {
+            description: {
+                component:
+                    'Figma: no standalone Text area — inherits the [Input field](https://www.figma.com/design/wXrXt5uKNNzV2DnQCgyYZH/Design-System?node-id=15561-37391) outlined styling (radius 4, Body Base 16 text, border delta-500 / hover gama-300 2px / focus gama-400 2px / error error-500), multiline.',
+            },
+        },
+    },
     args: {
         containerClassName: 'max-w-[600px]',
         id: 'textarea',

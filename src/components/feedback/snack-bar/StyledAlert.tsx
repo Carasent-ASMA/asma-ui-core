@@ -10,26 +10,46 @@ import { WarningAmberOutlineIcon } from './components/WarningAmberOutlineIcon'
 export type AlertColor = 'success' | 'info' | 'warning' | 'error'
 export type AlertVariant = 'standard' | 'filled' | 'outlined'
 
+/**
+ * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#22249-56917 (Design-System · "Inline notification")
+ *
+ * The DS defines a single "Default" inline-notification style: `alerts/{sev}-50` fill +
+ * `alerts/{sev}-300` border, a severity-`700` accent (icon + optional bold label) and a
+ * neutral `delta/800` body. `filled`/`outlined` have no DS counterpart (MUI-compat only).
+ */
 export interface AlertProps {
+    /** @figmaProp none — severity is applied in Figma by swapping the `alerts/{success|info|warning|error}` token set (no discrete component property); each value maps to that family's -50/-300/-700 shades */
     severity?: AlertColor
+    /** @figmaProp Property1 = standard→"Default"; filled/outlined = none (no DS variant — MUI-compat) */
     variant?: AlertVariant
+    /** @figmaProp none — maps the Figma "Icon" slot (severity glyph, 20px) */
     icon?: ReactNode | false
+    /** @figmaProp none — behavioral override of the severity glyph */
     iconMapping?: Partial<Record<AlertColor, ReactNode>>
+    /** @figmaProp none — behavioral (replaces the trailing Close slot) */
     action?: ReactNode
+    /** @figmaProp showClose = onClose defined → Close slot visible */
     onClose?: (event: MouseEvent<HTMLButtonElement>) => void
+    /** @figmaProp none — the "Text" body slot (Helper 14/lh20, delta/800) */
     children?: ReactNode
+    /** @figmaProp none — behavioral */
     className?: string
+    /** @figmaProp none — behavioral (inline style escape hatch) */
     sx?: unknown
+    /** @figmaProp none — a11y */
     role?: string
 }
 
 // Static per-variant/severity classes (kept literal so Tailwind's JIT keeps them).
+// `standard` is the DS "Inline notification": alerts/{sev}-50 fill + -300 border + neutral
+// delta-800 body (the severity accent lives on the icon, see ICON_CLASS). filled/outlined
+// have no DS reference and keep their MUI-compat styling.
 const VARIANT_CLASS: Record<AlertVariant, Record<AlertColor, string>> = {
     standard: {
-        success: 'bg-success-50 text-success-700',
-        info: 'bg-info-50 text-info-700',
-        warning: 'bg-warning-50 text-warning-700',
-        error: 'bg-error-50 text-error-700',
+        success: 'bg-success-50 border border-success-300 text-delta-800',
+        info: 'bg-info-50 border border-info-300 text-delta-800',
+        warning: 'bg-warning-50 border border-warning-500 text-delta-800',
+        error: 'bg-error-50 border border-error-300 text-delta-800',
     },
     filled: {
         success: 'bg-success-500 text-white',
@@ -45,11 +65,25 @@ const VARIANT_CLASS: Record<AlertVariant, Record<AlertColor, string>> = {
     },
 }
 
+// Severity accent for the leading icon. In `standard` the body is neutral (delta-800) so the
+// icon carries the severity-700 accent (matches the Figma bold label). filled inherits white;
+// outlined already colours its text severity-700 so the icon inherits.
+const ICON_CLASS: Record<AlertVariant, Record<AlertColor, string>> = {
+    standard: {
+        success: 'text-success-700',
+        info: 'text-info-700',
+        warning: 'text-warning-700',
+        error: 'text-error-700',
+    },
+    filled: { success: '', info: '', warning: '', error: '' },
+    outlined: { success: '', info: '', warning: '', error: '' },
+}
+
 const DEFAULT_ICON: Record<AlertColor, ReactNode> = {
-    success: <CheckOutlineIcon width={24} height={24} />,
-    info: <InfoOutlineIcon width={24} height={24} />,
-    warning: <WarningAmberOutlineIcon width={24} height={24} />,
-    error: <ErrorOutlineIcon width={24} height={24} />,
+    success: <CheckOutlineIcon width={20} height={20} />,
+    info: <InfoOutlineIcon width={20} height={20} />,
+    warning: <WarningAmberOutlineIcon width={20} height={20} />,
+    error: <ErrorOutlineIcon width={20} height={20} />,
 }
 
 /**
@@ -77,10 +111,10 @@ export const StyledAlert = ({
     return (
         <div
             role={role}
-            className={cn('flex items-center gap-2 rounded-lg px-4 py-2 text-sm', VARIANT_CLASS[variant][severity], className)}
+            className={cn('flex items-center gap-2 rounded px-2 py-1 text-sm', VARIANT_CLASS[variant][severity], className)}
             style={resolveSx(sx)}
         >
-            {shownIcon && <span className='flex shrink-0 items-center'>{shownIcon}</span>}
+            {shownIcon && <span className={cn('flex shrink-0 items-center', ICON_CLASS[variant][severity])}>{shownIcon}</span>}
             <span className='min-w-0 flex-1'>{children}</span>
             {action ??
                 (onClose && (
@@ -88,9 +122,9 @@ export const StyledAlert = ({
                         type='button'
                         aria-label='Close'
                         onClick={onClose}
-                        className='flex shrink-0 items-center justify-center rounded-full p-1 hover:bg-black/10'
+                        className='flex h-8 min-w-8 shrink-0 items-center justify-center rounded border-0 bg-transparent px-1.5 hover:bg-black/10'
                     >
-                        <CloseIcon width={18} height={18} />
+                        <CloseIcon width={20} height={20} />
                     </button>
                 ))}
         </div>
