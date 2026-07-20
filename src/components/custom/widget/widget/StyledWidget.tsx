@@ -5,6 +5,14 @@ import style from './StyledWidget.module.scss'
 import ChevronDownIcon from '../icons/ChevronDownIcon'
 import ChevronUpIcon from '../icons/ChevronUpIcon'
 
+/**
+ * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#36956-172116 (Design-System · "Widget")
+ *
+ * Widget card: `bg/widget` white, radius 8, padding 16, gap 16, DS **Container** shadow
+ * (#22213326 = `0 0 4 rgba(34,33,51,.15)`). Header (title via `StyledWidgetTitle` = Section title
+ * 18/28 delta-800) + content (composes aligned `StyledLoading`/`StyledEmptyPage`) + optional footer
+ * (aligned `StyledButton` view-more + `StyledLink`).
+ */
 export interface StyledWidgetProps {
     title: string
     titleNode?: ReactNode
