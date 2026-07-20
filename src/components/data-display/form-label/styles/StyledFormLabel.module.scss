@@ -1,5 +1,10 @@
+// Figma form-label / section-title typography. Colours come from the delta token layer
+// (var(--colors-delta-*)) so fretex/greenish theming stays correct — #49525f/#363e4a were the raw
+// default-theme delta-700/-800 values inlined; do not re-hardcode them.
+// md = Helper 14/20 Regular (delta-700); base = Body Base Semibold 16/24 (delta-800);
+// lg = Section title 18/28 SemiBold (delta-800); xl = 20/28 SemiBold (delta-800).
 .styled-label-md {
-    color: #49525f;
+    color: var(--colors-delta-700);
     font-size: 14px;
     font-style: normal;
     font-weight: 400;
@@ -7,7 +12,7 @@
     padding-bottom: 4px;
 }
 .styled-label-base {
-    color: #363e4a;
+    color: var(--colors-delta-800);
     font-style: normal;
     font-weight: 600;
     line-height: 24px;
@@ -16,7 +21,7 @@
 }
 
 .styled-label-lg {
-    color: #363e4a;
+    color: var(--colors-delta-800);
     font-size: 18px;
     font-style: normal;
     font-weight: 600;
@@ -24,7 +29,7 @@
 }
 
 .styled-label-xl {
-    color: #363e4a;
+    color: var(--colors-delta-800);
     font-size: 20px;
     font-style: normal;
     font-weight: 600;

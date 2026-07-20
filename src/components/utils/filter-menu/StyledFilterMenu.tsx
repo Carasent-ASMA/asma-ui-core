@@ -6,6 +6,12 @@ import { useDynamicToolbarLayout } from '../../custom/module/header-layout/Dynam
 import clsx from 'clsx'
 
 /**
+ * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#16741-35884 (Design-System · "Filter button")
+ *
+ * Composes the aligned `StyledButton` (Secondary/Outlined, filter icon 24/20) + `StyledPopover`
+ * (Menus surface). `filterIsActive` shows the DS "Filters applied" badge — an 8px `gama-400` dot at
+ * top-right. No own styling beyond that dot; all visuals come from the aligned primitives.
+ *
  * Custom props:
  * @param filterIsActive - needed to determine whether or not to show the dot in the top right corner indicating some changes were made
  * @param popoverContent

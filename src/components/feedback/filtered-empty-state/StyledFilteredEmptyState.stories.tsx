@@ -8,6 +8,14 @@ const meta = {
     title: 'Feedback/Filtered Empty State',
     component: StyledFilteredEmptyState,
     tags: ['autodocs'],
+    parameters: {
+        docs: {
+            description: {
+                component:
+                    'Figma: [Filters empty state](https://www.figma.com/design/wXrXt5uKNNzV2DnQCgyYZH/Design-System?node-id=37513-171511) — empty text delta-500 (14/20); title Helper Semibold 14/20 delta-800; description Helper 14/20 delta-600; reset = medium Tertiary button (gama-500).',
+            },
+        },
+    },
     args: {
         dataTest: 'filtered-empty-state',
         isFiltered: true,

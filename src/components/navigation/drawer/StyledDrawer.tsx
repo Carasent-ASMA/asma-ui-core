@@ -40,6 +40,11 @@ const CLOSED_TRANSFORM: Record<DrawerAnchor, string> = {
 /**
  * Sliding edge panel (replaces MUI `Drawer`). Portalled, slides from `anchor`, temporary variant
  * shows a backdrop and closes on backdrop-click / Escape. Public props preserved (DEC-003). TASK-304.
+ *
+ * @figmaNode none — no dedicated Figma drawer/side-sheet. As a modal edge-panel it reuses the DS
+ * **modal family** tokens established by `StyledDialog`: overlay `bg/modal` #626e7eb2 (delta-600 @70%)
+ * + Dialogue-popup elevation (#22213366, 0 4 40). Edge panels are flush (no radius); content is
+ * consumer-supplied.
  */
 export const StyledDrawer: FC<DrawerProps> = ({
     open = false,
@@ -70,7 +75,8 @@ export const StyledDrawer: FC<DrawerProps> = ({
         <FloatingPortal>
             {isTemporary && !hideBackdrop && open && (
                 <div
-                    className='fixed inset-0 z-[1200] bg-black/50'
+                    // Figma modal overlay bg/modal = #626e7eb2 (delta-600 @ ~70%), matching StyledDialog.
+                    className='fixed inset-0 z-[1200] bg-[#626e7eb2]'
                     onClick={(event) => onClose?.(event, 'backdropClick')}
                 />
             )}
@@ -79,7 +85,8 @@ export const StyledDrawer: FC<DrawerProps> = ({
                 aria-hidden={!open}
                 className={cn(
                     'fixed z-[1200] overflow-auto bg-white transition-transform duration-300',
-                    open && 'shadow-lg',
+                    // Dialogue-popup elevation (#22213366, 0 4 40), matching StyledDialog's modal surface.
+                    open && 'shadow-[0px_4px_40px_0px_#22213366]',
                     EDGE_CLASS[anchor],
                     !open && cn(CLOSED_TRANSFORM[anchor], 'pointer-events-none'),
                     className,

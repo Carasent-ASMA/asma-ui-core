@@ -2,6 +2,11 @@ import { ClickAwayListener } from 'src/components/mui-compat'
 import { createContext, type ReactNode, useContext, useEffect, useMemo, useState } from 'react'
 
 /**
+ * @figmaNode none — **headless behaviour primitive**, no Design-System visuals. It renders bare
+ * elements (`button`/`div[role=listbox]`/`div[role=option]`) that take a consumer `className`; all
+ * styling (Menus surface, item states) is supplied by the caller via the aligned `StyledMenu`/tokens.
+ * Nothing to align here — it carries no colours/dimensions of its own.
+ *
  * Headless single-select `Listbox` compound (`Listbox` + `.Button`/`.Options`/`.Option`) — a
  * dependency-free replacement for the small `@headlessui/react` `Listbox` surface. Preserves the
  * render-prop API (`{ open }` / `{ selected }`), click selection, outside-click close (via

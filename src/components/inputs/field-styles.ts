@@ -68,7 +68,6 @@ export const floatingLabelClass = ({
     error,
     disabled,
     readOnly,
-    size = 'medium',
 }: FieldState & { shrink: boolean; size?: FieldSize }): string =>
     cn(
         'pointer-events-none absolute left-[14px] z-10 max-w-[calc(100%-1.75rem)] truncate transition-all duration-150',
@@ -86,5 +85,7 @@ export const floatingLabelClass = ({
                     : 'text-delta-500',
         shrink
             ? 'top-0 -translate-y-1/2 bg-white px-1 text-xs leading-[16px] tracking-[0.24px]' // Figma Small 12/16, ls 0.24px
-            : cn('top-1/2 -translate-y-1/2', size === 'small' ? 'text-sm' : 'text-base leading-[23px] tracking-[0.00938em]'),
+            // Resting label doubles as the placeholder → must match the input text (Figma Body Base 16,
+            // `text-base`) at every `size`; a smaller size only changes height/padding, not text size.
+            : 'top-1/2 -translate-y-1/2 text-base leading-[23px] tracking-[0.00938em]',
     )

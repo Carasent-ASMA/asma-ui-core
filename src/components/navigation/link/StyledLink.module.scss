@@ -21,9 +21,11 @@
         color: var(--colors-gama-500) #{!important};
     }
 
+    // Figma "Focused / Pressed": 1px gama-400 rounded indicator (outline avoids layout shift),
+    // link text stays gama-500. See wXrXt5uKNNzV2DnQCgyYZH#14472-14572.
     &:not(.styled-link-disabled):focus {
         outline-offset: -1px #{!important};
-        outline: 1px solid var(--colors-gama-500) #{!important};
+        outline: 1px solid var(--colors-gama-400) #{!important};
         color: var(--colors-gama-500) #{!important};
     }
 }

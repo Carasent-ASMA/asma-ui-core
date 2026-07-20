@@ -74,6 +74,19 @@ const COLOR_MAP: Record<string, string> = {
  * default typography scale via Tailwind utilities, the variant→element mapping, and the
  * `align`/`noWrap`/`gutterBottom`/`color` props. `sx` is honoured via `resolveSx` (DEC-007).
  * Signature unchanged: still accepts `TypographyProps` (DEC-003).
+ *
+ * @figmaNode none — **MUI-compatibility shim, NOT a Design-System component.** Its `variant` scale
+ * (h1=6rem light, body1=1rem, MUI palette colours…) intentionally mirrors MUI v9 so pre-existing
+ * `<StyledTypography variant="…">` call-sites keep rendering identically. **Do not rescale it to the
+ * Figma type scale** — that would silently change every consumer.
+ *
+ * The authoritative ASMA Design-System type scale (Figma "Typography" `wXrXt5uKNNzV2DnQCgyYZH#23020-67726`)
+ * lives in the Tailwind text-* layer and is applied directly per component — it maps 1:1 onto the
+ * default Tailwind scale (Roboto, letter-spacing 0 unless noted):
+ *   Page title 24/32 → `text-2xl font-semibold` · Subtitle 20/28 → `text-xl font-semibold` ·
+ *   Section title 18/28 → `text-lg font-semibold` · Body Base 16/24 → `text-base` (+`font-semibold`) ·
+ *   Helper 14/20 → `text-sm` (+`font-semibold`) · Small 12/16 → `text-xs tracking-[0.24px]` ·
+ *   X-small uppercase 11/12 → `text-[11px] tracking-[0.55px] uppercase font-semibold`.
  */
 export const StyledTypography = (props: TypographyProps): JSX.Element => {
     const {

@@ -5,6 +5,14 @@ const meta = {
     title: 'Inputs/Styled Slider',
     component: StyledSlider,
     tags: ['autodocs'],
+    parameters: {
+        docs: {
+            description: {
+                component:
+                    'Figma: [Slider](https://www.figma.com/design/wXrXt5uKNNzV2DnQCgyYZH/Design-System?node-id=21289-39224) — rail delta-100 (4px), track/thumb/active-dots gama-500, scale numbers Body Base SemiBold 16 delta-700.',
+            },
+        },
+    },
     argTypes: {},
     args: {
         className: 'max-w-[600px]',
@@ -107,5 +115,19 @@ export const Vertical: Story = {
             Vertical Slider
             <StyledSlider {...args} />
         </label>
+    ),
+}
+
+// Regression guard: the thumb must land ON the mark/number at min, mid and max. A native range thumb
+// centres at T/2 … (width − T/2), so the visual track/marks are inset by half the thumb; if that
+// geometry drifts (e.g. wrong track width / input offset) the thumb slides left of the mark — worst
+// at max. These controlled positions lock that alignment in VRT.
+export const Positions: Story = {
+    render: (args) => (
+        <div className='flex max-w-[600px] flex-col gap-8'>
+            {[1, 5, 10].map((v) => (
+                <StyledSlider key={v} {...args} value={v} />
+            ))}
+        </div>
     ),
 }

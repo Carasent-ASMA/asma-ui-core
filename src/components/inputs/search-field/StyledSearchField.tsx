@@ -12,7 +12,10 @@ export const StyledSearchField: FC<StyledSearchFieldProps> = ({ value, onClear, 
     const [isFocused, setIsFocused] = useState<boolean>(false)
 
     const hasInteraction = isFocused || value
-    const inputPaddingLeft = isFocused ? 0 : value ? 14 : 20
+    // Rest: 20px clears the leading search icon. Once the field is engaged (focused or filled) the
+    // icon fades out, so the text sits at the field's natural 14px inset — aligned under the floated
+    // label. (Was `isFocused ? 0`, which jammed the text against the left border while typing.)
+    const inputPaddingLeft = hasInteraction ? 14 : 20
 
     return (
         <div className='relative w-full'>
@@ -39,7 +42,7 @@ export const StyledSearchField: FC<StyledSearchFieldProps> = ({ value, onClear, 
                     input: {
                         className: cn(
                             'transition-[padding] duration-300',
-                            isFocused ? 'pl-0' : value ? 'pl-[14px]' : 'pl-5',
+                            hasInteraction ? 'pl-[14px]' : 'pl-5',
                             props.readOnly && 'text-black/[0.38]',
                         ),
                         endAdornment: value ? (

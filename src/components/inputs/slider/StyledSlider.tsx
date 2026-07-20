@@ -28,6 +28,12 @@ interface SliderSlotProps {
     markLabel?: { className?: string }
 }
 
+/**
+ * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#21289-39224 (Design-System · "Slider" / linear scale)
+ *
+ * DS slider: rail `delta-100` (4px), filled track + thumb + active dots `gama-500`, inactive dots
+ * white/`delta-300`, scale numbers Body Base SemiBold 16/24 `delta-700`. Disabled → `delta-200`.
+ */
 export interface StyledSliderProps {
     dataTest: string
     min?: number
@@ -90,6 +96,10 @@ export const StyledSlider = ({
     onChangeCommitted,
 }: StyledSliderProps): JSX.Element => {
     const isVertical = orientation === 'vertical'
+    // A native range thumb centers at T/2 … (length − T/2). The visual track + marks must be inset by
+    // exactly half the thumb so 0%/100% land on the thumb-centre travel (else the thumb drifts left of
+    // the marks, worst at max). Thumb is 16px (medium) / 12px (small) — see StyledSlider.module.scss.
+    const halfThumb = size === 'small' ? 6 : 8
     const [uncontrolledValue, setUncontrolledValue] = useState<SliderValue>(defaultValue ?? min)
     const current = value ?? uncontrolledValue
     const pair = asPair(current)
@@ -192,18 +202,18 @@ export const StyledSlider = ({
             )}
         >
             <div className={cn('relative', isVertical ? 'h-full w-8' : 'h-4 w-full')}>
-                {/* Inset the visual track by half a thumb (8px) so marks align with thumb centers. */}
+                {/* Inset the visual track by half a thumb so marks align with the thumb-centre travel.
+                    Setting both edges (no width/height) auto-sizes the track to length − 2·halfThumb. */}
                 <div
                     onPointerDown={handleTrackPointerDown}
                     className={cn(
                         'absolute',
-                        isVertical
-                            ? 'inset-y-2 left-1/2 h-[calc(100%-4px)] w-1 -translate-x-1/2'
-                            : 'inset-x-2 top-[calc(50%+6px)] h-1 w-[calc(100%-4px)] -translate-y-1/2',
+                        isVertical ? 'left-1/2 w-1 -translate-x-1/2' : 'top-[calc(50%+6px)] h-1 -translate-y-1/2',
                     )}
+                    style={isVertical ? { top: halfThumb, bottom: halfThumb } : { left: halfThumb, right: halfThumb }}
                 >
-                    {/* Rail */}
-                    <div className={cn('absolute inset-0 rounded-full bg-delta-50', classes?.rail, slotProps?.rail?.className)} />
+                    {/* Rail — Figma unfilled track = delta-100 (#e7eaee), 4px. */}
+                    <div className={cn('absolute inset-0 rounded-full bg-delta-100', classes?.rail, slotProps?.rail?.className)} />
                     {/* Filled track */}
                     <div
                         className={cn(
@@ -242,20 +252,29 @@ export const StyledSlider = ({
             {/* Mark labels */}
             {markList.some((m) => m.label != null) && (
                 <div
+                    // Inset the label track by half the thumb so labels share the mark coordinate
+                    // system (marks live inside the half-thumb-inset track); else labels drift from
+                    // their dots — worst at the extremes.
                     className={cn(
-                        isVertical
-                            ? 'pointer-events-none absolute inset-0 w-full'
-                            : 'relative mt-[14px] h-5 w-[calc(100%-4px)]',
+                        isVertical ? 'pointer-events-none absolute inset-x-0' : 'relative mt-[14px] h-6',
                     )}
+                    style={
+                        isVertical
+                            ? { top: halfThumb, bottom: halfThumb }
+                            : { marginLeft: halfThumb, marginRight: halfThumb }
+                    }
                 >
                     {markList.map((mark) =>
                         mark.label == null ? null : (
                             <span
                                 key={mark.value}
                                 className={cn(
-                                    'absolute text-sm font-semibold',
-                                    isVertical ? 'left-[37px]' : '-translate-x-1/2',
-                                    isMarkActive(mark.value) ? cn('text-delta-800', classes?.markLabelActive) : 'text-delta-600',
+                                    // Figma scale numbers = Body Base SemiBold 16/24, text-icon/body
+                                    // (delta-700), uniform (no active/inactive color split).
+                                    // vertical: translate-y-1/2 centres the label on its tick (matches dots).
+                                    'absolute text-base font-semibold text-delta-700',
+                                    isVertical ? 'left-[37px] translate-y-1/2' : '-translate-x-1/2',
+                                    isMarkActive(mark.value) && classes?.markLabelActive,
                                     classes?.markLabel,
                                     slotProps?.markLabel?.className,
                                 )}

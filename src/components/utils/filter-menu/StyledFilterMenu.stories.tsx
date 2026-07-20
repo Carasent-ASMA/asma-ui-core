@@ -10,6 +10,14 @@ const meta: Meta<typeof StyledFilterMenu> = {
     title: 'Utils/Styled Filter Menu',
     component: StyledFilterMenu,
     tags: ['autodocs'],
+    parameters: {
+        docs: {
+            description: {
+                component:
+                    'Figma: [Filter button](https://www.figma.com/design/wXrXt5uKNNzV2DnQCgyYZH/Design-System?node-id=16741-35884) — Outlined button + Menus popover; `filterIsActive` shows an 8px gama-400 dot (top-right).',
+            },
+        },
+    },
     args: {},
 }
 

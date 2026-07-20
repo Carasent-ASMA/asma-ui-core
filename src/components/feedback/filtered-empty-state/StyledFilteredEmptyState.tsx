@@ -8,6 +8,13 @@ import { FilterIconOff } from 'src/components/icons/filter-icon-off'
 
 type FilteredEmptyStateLocale = 'en' | 'no'
 
+/**
+ * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#37513-171511 (Design-System · "Filters empty state")
+ *
+ * Composes `StyledEmptyPage` (delta-500 placeholder) + a reset block: title = Helper Semibold 14/20
+ * `delta-800`, description = Helper 14/20 `delta-600`, reset = **medium** Tertiary button (label
+ * Body Base Semibold 16/24 `gama-500` + 24px filter-off icon). Container gap 16, reset block gap 8.
+ */
 export interface StyledFilteredEmptyStateProps {
     dataTest: string
     emptyText?: string
@@ -77,17 +84,20 @@ export const StyledFilteredEmptyState: FC<StyledFilteredEmptyStateProps> = ({
 
             {isFiltered && (
                 <div className={cn('flex flex-col items-center gap-2', filterContentClassName)}>
-                    <div className='font-semibold text-delta-800'>{displayFilterTitle}</div>
-                    <div className='text-delta-600'>{description}</div>
+                    {/* Figma: title = Helper Semibold 14/20 delta-800, description = Helper 14/20 delta-600 */}
+                    <div className='text-sm font-semibold text-delta-800'>{displayFilterTitle}</div>
+                    <div className='text-sm text-delta-600'>{description}</div>
 
                     {onResetFilters && (
                         <StyledButton
-                            size='small'
+                            // Figma reset = medium Tertiary button; its text variant already renders the
+                            // primary accent (gama-500) — don't override the colour.
+                            size='medium'
                             variant='text'
                             dataTest={`${dataTest}-reset`}
                             onClick={onResetFilters}
                             startIcon={actionIcon}
-                            className={cn('inline-flex items-center text-gama-700 hover:text-gama-800', resetButtonClassName)}
+                            className={cn('inline-flex items-center', resetButtonClassName)}
                         >
                             <span>{resolvedResetButtonText}</span>
                         </StyledButton>

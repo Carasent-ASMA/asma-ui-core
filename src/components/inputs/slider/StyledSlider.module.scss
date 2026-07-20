@@ -19,8 +19,11 @@
 }
 
 .Horizontal {
-    left: -4px;
-    right: 4px;
+    // Span the container exactly so the native thumb centre travels T/2 … (width − T/2),
+    // matching the half-thumb-inset visual track/marks. (Was left:-4/right:4, which drifted the
+    // thumb left of the marks — worst at max.)
+    left: 0;
+    right: 0;
     top: 50%;
     transform: translateY(-50%);
     width: 100%;

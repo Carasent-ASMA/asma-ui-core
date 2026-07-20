@@ -2,12 +2,25 @@ import React, { type AnchorHTMLAttributes, type ReactNode } from 'react'
 import clsx from 'clsx'
 import style from './StyledLink.module.scss'
 
+/**
+ * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#14472-14569 (Design-System · "Link")
+ *
+ * Underlined SemiBold text link. Enabled/Visited = gama-500, Hover = gama-600, Pressed = gama-500,
+ * Disabled = delta-300; Focused/Pressed adds a 1px gama-400 rounded indicator (radius 4, px4/py2).
+ * State is derived at runtime from `:hover`/`:focus`/`disabled`, not a prop.
+ */
 export type StyledLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
+    /** @figmaProp State = true→"Disabled" (renders a non-interactive <span>, delta-300) */
     disabled?: boolean
+    /** @figmaProp Size = small→"Base" (14/20) | large→"Medium" (16/24); xs (12/20) = none (no DS size) */
     size?: 'small' | 'large' | 'xs'
+    /** @figmaProp none — ref */
     reflink?: React.Ref<HTMLAnchorElement>
+    /** @figmaProp none — test hook */
     dataTest?: string
+    /** @figmaProp none — deprecated content slot (use contentNode) */
     content?: ReactNode
+    /** @figmaProp none — the link label slot */
     contentNode?: ReactNode
 }
 /**

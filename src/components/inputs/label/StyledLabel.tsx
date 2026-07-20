@@ -2,11 +2,24 @@ import type { CSSProperties, FC, MouseEvent, ReactNode } from 'react'
 import style from './StyledLabel.module.scss'
 import clsx from 'clsx'
 
+/**
+ * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#15181-43701 (Design-System · "Label / Highlighting")
+ *
+ * Small uppercase highlighting/status pill: h16, px6, radius 3, X-small Semibold uppercase
+ * (11/12, ls 0.55px). The generic default is a gama label; highlighting variants
+ * (Good/Attention/Warning/Urgent = success/warning/orange/error -300 + black text) are applied by
+ * the consumer via `className`/`style` (Type is not a component property here).
+ */
 export interface StyledLabelProps {
+    /** @figmaProp none — the label text (auto-uppercased) */
     children: ReactNode
+    /** @figmaProp none — behavioral */
     onClick?: (event: MouseEvent<HTMLDivElement>) => void
+    /** @figmaProp Type — highlighting colour (bg/text) is applied here (success/warning/orange/error -300) */
     className?: string
+    /** @figmaProp none — test hook */
     dataTest: string
+    /** @figmaProp none — inline colour override for highlighting variants */
     style?: CSSProperties
 }
 const styledLabelCss = style['styled-label']
