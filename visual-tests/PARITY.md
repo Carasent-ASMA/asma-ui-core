@@ -2,6 +2,13 @@
 
 Golden source: `v3.34.0` (`e8c014993bc09b21b060e9129bcebeab34c8485d`).
 
+> **Golden re-cut plan (2026-07-21):** the Figma-parity work has intentionally moved the *look* away
+> from `v3.34.0`; a full-suite `vrt.sh check` is now green and the branch renders **are** the new
+> golden (baselines already captured — no re-baseline needed). The `v3.34.0` SHA stays the reference
+> label only until this branch merges. **At merge:** re-point this "Golden source" to the merge commit
+> / next version tag and re-run the index diff below to re-confirm coverage. Until then, `v3.34.0`
+> remains the catalog compatibility contract (every golden story ID must still exist).
+
 The MUI-removal branch must contain every story ID from the golden source. Story IDs,
 args, and render scenarios that existed at the golden source remain the compatibility
 contract while their component implementations move away from MUI.
@@ -9,10 +16,18 @@ contract while their component implementations move away from MUI.
 ## Catalog result
 
 - Golden stories: 210
-- Branch stories: 214
+- Branch stories: 246
 - Matched golden stories: 210
 - Missing golden stories: 0
-- New stories excluded from golden comparison: 4
+- New stories excluded from golden comparison: 36
+
+> **Recomputed 2026-07-21** from `storybook-static/index.json` (**246** story entries; **254** VRT
+> baseline frames — some stories emit multiple snapshots via `interactions.spec`). Branch-only =
+> 246 − 210 golden = **36** (every `*--gallery` matrix, `inputs-styled-slider--params-matrix`, the
+> Alert/Snackbar stories now in the gate, and the items below). Golden coverage (matched 210 /
+> missing 0) is asserted by the **green full-suite `vrt.sh check`** (exit 0, zero diffs) + **zero
+> orphan baselines** from `prune-orphans.mjs`; re-confirm with a fresh `v3.34.0`-vs-branch index diff
+> at merge.
 
 ## Restored compatibility stories
 
@@ -38,6 +53,18 @@ pre-rewrite image. Their baselines are captured from the corrected branch only a
 - `utils-virtual-list--fixed-size`
 - `utils-virtual-list--measured-rows`
 - `utils-virtual-list--variable-size`
+
+Figma-parity Gallery/matrix stories added since (branch-only, baselines captured from the corrected
+branch — non-exhaustive, regenerate per the Validation step): `inputs-styled-button--gallery`,
+`inputs-inputfield--gallery`, `base-ui-styled-radio--gallery`, `base-ui-styled-switch--gallery`,
+`inputs-select--gallery`, `navigation-link--gallery`, `navigation-styled-menu--gallery`,
+`datadisplay-formlabel--gallery`, and — **added 2026-07-21** —
+`inputs-styled-select-autocomplete--gallery`, `inputs-styled-textarea--gallery`,
+`utils-accordion-baseui--gallery`, `inputs-styled-slider--params-matrix`,
+`datadisplay-tooltip--gallery`, `datetime-timepicker--gallery`,
+`feedback-alert--default`, `feedback-alert--gallery`, `feedback-snackbar--default`,
+`feedback-snackbar--all-variants`, `feedback-snackbar--interactive` (Alert & Snackbar **promoted
+into the VRT gate** 2026-07-21 — previously catalog exceptions).
 
 ## Validation
 

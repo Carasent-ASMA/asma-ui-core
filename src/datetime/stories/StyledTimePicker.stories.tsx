@@ -1,6 +1,6 @@
 import type { Meta } from '@storybook/react-vite'
 import { add } from 'date-fns'
-import { useState } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { StyledTimePicker } from 'src/datetime/components/time-picker'
 
 const meta = {
@@ -81,6 +81,79 @@ export const TimePicker = () => {
                     />
                 </div>
             </div>
+        </div>
+    )
+}
+
+// ─── Gallery ────────────────────────────────────────────────────────────────
+// Figma has no distinct time-picker symbol — the trigger is the outlined Input field (node
+// 15561-37391) + a trailing clock icon (delta-700, delta-300 when disabled); the popper follows the
+// Menus surface. This gallery replicates the field State × Filled matrix (bordered), showing the
+// clock-icon treatment per state. Hover is forced via `inputClassName` (pseudo-state addon); the
+// open-popper (hour/minute columns) is exercised by the live `TimePicker` story + interaction capture.
+const FILLED_TIME = new Date(2024, 0, 1, 14, 30)
+const noopSelect = () => undefined
+
+export const Gallery = () => {
+    const cell: CSSProperties = { padding: 16, border: '1px solid #bdc4cf', verticalAlign: 'top', width: 260 }
+    const head: CSSProperties = {
+        ...cell,
+        width: 'auto',
+        textAlign: 'left',
+        fontWeight: 600,
+        color: '#49525f',
+        whiteSpace: 'nowrap',
+        background: '#f0f2f4',
+    }
+
+    const ROWS: { label: string; props: Record<string, unknown> }[] = [
+        { label: 'Enabled', props: {} },
+        { label: 'Hovered', props: { inputClassName: 'pseudo-hover' } },
+        { label: 'Error', props: { error: true, helperText: 'Error text' } },
+        { label: 'Disabled', props: { disabled: true } },
+        { label: 'Read-only', props: { readOnly: true } },
+    ]
+    const COLS = [
+        { key: 'off', label: 'Filled = off', value: undefined },
+        { key: 'on', label: 'Filled = on', value: FILLED_TIME },
+    ] as const
+
+    return (
+        <div>
+            <h3 style={{ marginBottom: 12 }}>Time picker — State × Filled</h3>
+            <table style={{ borderCollapse: 'collapse' }}>
+                <thead>
+                    <tr>
+                        <th style={head}>State \ Filled</th>
+                        {COLS.map((c) => (
+                            <th key={c.key} style={head}>
+                                {c.label}
+                            </th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody>
+                    {ROWS.map((row) => (
+                        <tr key={row.label}>
+                            <th scope='row' style={head}>
+                                {row.label}
+                            </th>
+                            {COLS.map((col) => (
+                                <td key={col.key} style={cell}>
+                                    <StyledTimePicker
+                                        dataTest={`gallery-${row.label}-${col.key}`}
+                                        label='Time'
+                                        placeholder='Time'
+                                        value={col.value}
+                                        onSelect={noopSelect}
+                                        {...row.props}
+                                    />
+                                </td>
+                            ))}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </div>
     )
 }
