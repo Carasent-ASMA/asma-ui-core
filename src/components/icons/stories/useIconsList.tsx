@@ -178,6 +178,7 @@ import {
     RocketLaunchIcon,
     LoadCurrentIcon,
     RotateAutoIcon,
+    MoveUpIcon,
 } from '..'
 
 export const useIconsList = ({
@@ -1271,6 +1272,12 @@ export const useIconsList = ({
             component: <RotateAutoIcon height={height} width={width} />,
             clipboardText: '<RotateAutoIcon />',
             tags: ['rotate auto', 'text refresh', 'a refresh'],
+        },
+        {
+            name: 'MoveUpIcon',
+            component: <MoveUpIcon height={height} width={width} />,
+            clipboardText: '<MoveUpIcon />',
+            tags: ['move up', 'upgrade', 'apply new versions'],
         },
     ]
 
