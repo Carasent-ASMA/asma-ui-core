@@ -65,10 +65,12 @@ export const StyledTab: FC<StyledTabProps> = ({ value, label, disabled, classNam
                 // label Medium 18px/lh28 (Section title) or Small 16px/lh24 (Body Base Semibold).
                 'inline-flex min-h-12 min-w-[90px] shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-t-lg border-0 bg-transparent px-4 py-3 tracking-normal outline-none transition-colors',
                 !hasTextSize && (ctx?.size === 'small' ? 'text-base' : 'text-lg'),
-                // Weight (Figma): active & disabled = SemiBold; a resting inactive tab is Medium and
-                // thickens to SemiBold on hover/focus.
+                // Weight (Figma): Small tabs use "Body Base Semibold" in every state, so they are
+                // always SemiBold. Medium/default tabs use "Section title" — SemiBold when
+                // active/disabled, but a resting inactive tab is Medium and thickens to SemiBold on
+                // hover/focus.
                 !hasFontWeight &&
-                    (selected || disabled
+                    (ctx?.size === 'small' || selected || disabled
                         ? 'font-semibold'
                         : 'font-medium hover:font-semibold focus-visible:font-semibold'),
                 !hasTextTransform && 'normal-case',
