@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { useRef, useState } from 'react'
+import { useRef, useState, type CSSProperties } from 'react'
 import { expect } from 'storybook/test'
 import { StyledTextarea } from './StyledTextarea'
 
@@ -205,5 +205,81 @@ export const LargeContentStress: Story = {
         const [value] = useState(Array(200).fill('Lorem ipsum dolor sit amet').join('\n'))
 
         return <StyledTextarea {...args} value={value} />
+    },
+}
+
+/**
+ * Gallery — the Textarea has no standalone Figma node; it inherits the Input field state matrix
+ * (node 15561-37391). This replicates that matrix: State (Enabled/Hovered/Focused/Error/Disabled/
+ * View-only/Not-editable) × Filled (off/on), with visible grid borders. Hover/Focus are forced via
+ * `storybook-addon-pseudo-states` classes so every state renders at rest.
+ */
+export const Gallery: Story = {
+    render: () => {
+        const cell: CSSProperties = { padding: 16, border: '1px solid #bdc4cf', verticalAlign: 'top', width: 320 }
+        const head: CSSProperties = {
+            ...cell,
+            width: 'auto',
+            textAlign: 'left',
+            fontWeight: 600,
+            color: '#49525f',
+            whiteSpace: 'nowrap',
+            background: '#f0f2f4',
+        }
+
+        const ROWS: { label: string; props: Record<string, unknown> }[] = [
+            { label: 'Enabled', props: { variant: 'active' } },
+            { label: 'Hovered', props: { variant: 'active', className: 'pseudo-hover' } },
+            { label: 'Focused', props: { variant: 'active', className: 'pseudo-focus' } },
+            { label: 'Error', props: { variant: 'active', error: true, errorMessage: 'Error text' } },
+            { label: 'Disabled', props: { variant: 'active', disabled: true } },
+            { label: 'View only', props: { variant: 'view_only' } },
+            { label: 'Not editable', props: { variant: 'not_editable' } },
+        ]
+
+        const COLS = [
+            { key: 'off', label: 'Filled = off', value: '', placeholder: 'Type here...' },
+            { key: 'on', label: 'Filled = on', value: 'Text value', placeholder: undefined },
+        ] as const
+
+        return (
+            <div>
+                <h3 style={{ marginBottom: 12 }}>Text area — State × Filled</h3>
+                <table style={{ borderCollapse: 'collapse' }}>
+                    <thead>
+                        <tr>
+                            <th style={head}>State \ Filled</th>
+                            {COLS.map((c) => (
+                                <th key={c.key} style={head}>
+                                    {c.label}
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {ROWS.map((row) => (
+                            <tr key={row.label}>
+                                <th scope='row' style={head}>
+                                    {row.label}
+                                </th>
+                                {COLS.map((col) => (
+                                    <td key={col.key} style={cell}>
+                                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                                        <StyledTextarea
+                                            {...(row.props as any)}
+                                            id={`gallery-${row.label}-${col.key}`}
+                                            label='Label'
+                                            placeholder={col.placeholder}
+                                            value={col.value}
+                                            onChange={() => undefined}
+                                        />
+                                    </td>
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        )
     },
 }

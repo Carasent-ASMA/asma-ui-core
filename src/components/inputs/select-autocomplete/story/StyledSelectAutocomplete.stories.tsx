@@ -2,7 +2,15 @@ import type { AutocompleteRenderInputParams } from '../StyledSelectAutocomplete'
 import type { StoryObj, Meta } from '@storybook/react-vite'
 import { StyledSelectAutocomplete, type StyledSelectAutocompleteProps } from '../StyledSelectAutocomplete'
 import { ControlledAutocomplete, top100Films, type Film } from './components/StyledSelectAutocompleteExample'
-import { useMemo, useState, type AriaRole, type FC, type SyntheticEvent } from 'react'
+import {
+    useMemo,
+    useState,
+    type AriaRole,
+    type ComponentProps,
+    type CSSProperties,
+    type FC,
+    type SyntheticEvent,
+} from 'react'
 import { StyledInputField } from '../../input-field'
 import { expect, within, type UserEventObject } from 'storybook/test'
 import { generateOptions, withRenderCounter } from './test-utils/perf'
@@ -456,5 +464,104 @@ export const Performance_MultipleChips: Story = {
 
         const chips = canvas.getAllByRole('button') // chips are buttons
         expect(chips.length).toBeGreaterThan(40)
+    },
+}
+
+// ─── Gallery ────────────────────────────────────────────────────────────────
+// Figma Autocomplete (node 20474-29075) draws State (Enabled/Hovered/Focused/Error/Read-only) ×
+// Filled (off = placeholder · on = tag chips). This gallery replicates that matrix with visible grid
+// borders. The trigger is a `StyledInputField`, so hover is forced via the pseudo-state class; the
+// live open/type/select behaviour is covered by the interaction stories above.
+const GalleryCell: FC<{
+    filled: boolean
+    error?: boolean
+    disabled?: boolean
+    readOnly?: boolean
+    fieldClassName?: string
+}> = ({ filled, error, disabled, readOnly, fieldClassName }) => {
+    const [value, setValue] = useState<Film[]>(filled ? top100Films.slice(0, 3) : [])
+
+    return (
+        <StyledSelectAutocomplete<Film, true, false, false>
+            dataTest='gallery-autocomplete'
+            multiple
+            size='small'
+            autoHeight
+            options={top100Films}
+            value={value}
+            onChange={(_, val) => setValue(val)}
+            disabled={disabled}
+            readOnly={readOnly}
+            getOptionLabel={(option) => option?.title || ''}
+            renderInput={(params) => (
+                <StyledInputField
+                    {...params}
+                    dataTest='gallery-autocomplete-input'
+                    label='Recipients'
+                    placeholder='Favorites'
+                    error={error}
+                    className={fieldClassName}
+                />
+            )}
+        />
+    )
+}
+
+export const Gallery: Story = {
+    render: () => {
+        const cell: CSSProperties = { padding: 16, border: '1px solid #bdc4cf', verticalAlign: 'top', width: 340 }
+        const head: CSSProperties = {
+            ...cell,
+            width: 'auto',
+            textAlign: 'left',
+            fontWeight: 600,
+            color: '#49525f',
+            whiteSpace: 'nowrap',
+            background: '#f0f2f4',
+        }
+
+        const ROWS: { label: string; props: Partial<ComponentProps<typeof GalleryCell>> }[] = [
+            { label: 'Enabled', props: {} },
+            { label: 'Hovered', props: { fieldClassName: 'pseudo-hover' } },
+            { label: 'Error', props: { error: true } },
+            { label: 'Disabled', props: { disabled: true } },
+            { label: 'Read-only', props: { readOnly: true } },
+        ]
+        const COLS = [
+            { key: 'off', label: 'Filled = off', filled: false },
+            { key: 'on', label: 'Filled = on', filled: true },
+        ] as const
+
+        return (
+            <div>
+                <h3 style={{ marginBottom: 12 }}>Autocomplete — State × Filled</h3>
+                <table style={{ borderCollapse: 'collapse' }}>
+                    <thead>
+                        <tr>
+                            <th style={head}>State \ Filled</th>
+                            {COLS.map((c) => (
+                                <th key={c.key} style={head}>
+                                    {c.label}
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {ROWS.map((row) => (
+                            <tr key={row.label}>
+                                <th scope='row' style={head}>
+                                    {row.label}
+                                </th>
+                                {COLS.map((col) => (
+                                    <td key={col.key} style={cell}>
+                                        <GalleryCell filled={col.filled} {...row.props} />
+                                    </td>
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        )
     },
 }
