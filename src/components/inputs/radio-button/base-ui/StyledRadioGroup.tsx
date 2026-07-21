@@ -43,7 +43,7 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
                         id={error ? errorId : helperId}
                         role={error ? 'alert' : 'status'}
                         className={clsx(
-                            'm-0 flex items-center gap-1 pt-1 text-sm',
+                            'm-0 flex min-h-6 items-center gap-1 pt-1 text-sm',
                             error ? 'text-error-500' : 'text-delta-600',
                         )}
                     >

@@ -1,6 +1,12 @@
 import { TextField, type TextFieldProps } from '@mui/material'
 import { ErrorOutlineIcon } from 'src/components/icons'
 import { CloseIcon } from 'src/components/icons'
+
+interface InputSlot {
+    endAdornment?: React.ReactNode
+    startAdornment?: React.ReactNode
+}
+
 /**
  *
  * @inputRef
@@ -17,7 +23,6 @@ export const StyledInputField: React.FC<
     }
 > = ({ allowClear, onClear, readOnly, disabled, error, helperText, dataTest, slotProps: userSlotProps, ...props }) => {
     const disabledOrReadonly = (disabled ?? false) || (readOnly ?? false)
-    interface InputSlot { endAdornment?: React.ReactNode; startAdornment?: React.ReactNode }
     const userInputSlot = userSlotProps?.input as InputSlot | undefined
 
     return (
@@ -27,7 +32,7 @@ export const StyledInputField: React.FC<
             disabled={disabledOrReadonly}
             error={error}
             helperText={
-                readOnly ? null : error ? (
+                error ? (
                     <span className='flex items-start gap-1'>
                         <ErrorOutlineIcon width={20} height={20} className='min-w-5 shrink-0 translate-y-[2px]' />
                         <span className='min-w-0 flex-1'>{helperText ?? 'Required'}</span>
