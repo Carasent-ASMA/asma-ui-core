@@ -45,6 +45,16 @@ export type { ToolbarSlot } from './ToolbarRows'
 export type { ToolbarLocale } from './useTranslations'
 export { useDynamicToolbarLayout } from './DynamicToolbarLayoutContext'
 
+/**
+ * @figmaNode none — bespoke **responsive orchestration** layout (no single DS component). It measures
+ * slots and plans which actions fit (inline vs overflow "More"), then renders rows composed entirely
+ * of aligned primitives: title via `StyledWidgetTitle` (Section title 18/28 delta-800), helper
+ * `text-sm delta-700`, actions via `StyledButton`/`StyledFilterMenu`/Menu, and the search slot. It
+ * owns only layout (flex/gap) — no colours of its own; token-clean/theme-safe.
+ *
+ * VRT: story frames are skipped in the harness (ResizeObserver-driven width planning makes captures
+ * oscillate — see visual-tests/PARITY.md); behaviour is covered by the interaction suite.
+ */
 export interface DynamicToolbarProps {
     title?: ToolbarSlot
     helperText?: ToolbarSlot

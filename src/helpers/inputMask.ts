@@ -79,6 +79,25 @@ export const formatMaskedValue = (raw: string, caretInRaw: number, spec: InputMa
 }
 
 /**
+ * Set an input's value via the **native prototype setter**, bypassing React's per-instance patched
+ * setter. React patches the instance `value` setter to update its internal value-tracker; if the mask
+ * assigns `input.value = …` directly, the tracker is updated too, so React's change-detection sees
+ * "no change" and never fires `onChange` — leaving a controlled `value` state empty while the DOM
+ * shows the masked text (typed dates were then lost on the next re-render/blur). Using the native
+ * setter leaves the tracker stale, so React detects the diff and fires `onChange`. Do NOT replace
+ * this with `input.value = …`.
+ */
+const nativeInputValueSetter =
+    typeof HTMLInputElement !== 'undefined'
+        ? Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set
+        : undefined
+
+const setMaskedValue = (input: HTMLInputElement, value: string): void => {
+    if (nativeInputValueSetter) nativeInputValueSetter.call(input, value)
+    else input.value = value
+}
+
+/**
  * Ref-callback hook applying `formatMaskedValue` on every native `input` event, before React's
  * delegated onChange reads the value — a drop-in for `useMask` from `@react-input/mask`.
  */
@@ -93,7 +112,7 @@ export const useInputMask = ({ mask, maskChar, showMask }: InputMaskSpec): ((ele
         const spec = { mask, maskChar, showMask }
         const sync = (): void => {
             const { value, caret } = formatMaskedValue(element.value, element.selectionStart ?? element.value.length, spec)
-            if (element.value !== value) element.value = value
+            if (element.value !== value) setMaskedValue(element, value)
             element.setSelectionRange(caret, caret)
         }
         sync()
@@ -101,7 +120,7 @@ export const useInputMask = ({ mask, maskChar, showMask }: InputMaskSpec): ((ele
         const onInput = (event: Event) => {
             const input = event.target as HTMLInputElement
             const { value, caret } = formatMaskedValue(input.value, input.selectionStart ?? input.value.length, spec)
-            if (input.value !== value) input.value = value
+            if (input.value !== value) setMaskedValue(input, value)
             input.setSelectionRange(caret, caret)
         }
 

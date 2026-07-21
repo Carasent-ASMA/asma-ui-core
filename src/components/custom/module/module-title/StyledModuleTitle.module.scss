@@ -1,9 +1,11 @@
+// Figma DS "Page title" — Roboto SemiBold 24/32, text-icon/title-label (delta-800). Main page
+// heading, used once per page. (Was 24/40, weight 700, raw #17232e; delta-800 is theme-safe.)
 .styled-module-title {
     margin-bottom: 20px;
     font-size: 24px;
-    line-height: 40px;
-    font-weight: 700;
-    color: #17232e;
+    line-height: 32px;
+    font-weight: 600;
+    color: var(--colors-delta-800);
 
     @media (min-width: 768px) {
         margin-bottom: 8px;

@@ -88,7 +88,7 @@ const ToolbarDemo = ({
                     <StyledFilterButton
                         dataTest='dynamic-toolbar-filter'
                         filterIsActive={false}
-                        size='small'
+                        size='medium'
                         label='Filter'
                     />
                 }
@@ -148,7 +148,7 @@ const WorkspacesToolbarDemo = ({ width, selectedCount = 0 }: { width: number; se
                     <StyledFilterButton
                         dataTest='dynamic-toolbar-filter'
                         filterIsActive={false}
-                        size='small'
+                        size='medium'
                         label='Filter'
                     />
                 }
@@ -344,7 +344,7 @@ export const LongSelectionLabel: Story = {
                         <StyledFilterButton
                             dataTest='filter'
                             filterIsActive={false}
-                            size='small'
+                            size='medium'
                             label='Filter'
                         />
                     }

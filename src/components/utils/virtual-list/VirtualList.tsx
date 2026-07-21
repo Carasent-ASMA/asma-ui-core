@@ -25,6 +25,10 @@ export interface TVirtualListProps<TItem> {
 }
 
 /**
+ * @figmaNode none — **headless windowing primitive** (no DS visuals). It only owns a scroll
+ * container + absolutely-positioned row wrappers; all row appearance is the consumer's `renderItem`.
+ * Nothing to align — it carries no colours/dimensions of its own.
+ *
  * Windowed vertical list on top of `@tanstack/react-virtual`. Covers both the fixed-size and the
  * variable-size case (`itemSize` as number or per-index function), and content-driven row heights
  * via `measureRows` — no imperative reset calls needed when a row changes height. The component

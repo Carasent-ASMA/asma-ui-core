@@ -108,7 +108,18 @@ export const StyledSlider = ({
     const showHelperText = (error ?? false) || Boolean(helperText)
     const helperTextToDisplay = error ? errorText ?? 'Required' : helperText
 
-    const markList: SliderMark[] = Array.isArray(marks) ? marks : []
+    // Match MUI's mark resolution (pre-rewrite parity):
+    // - `marks === true` auto-generates a dot at every step: min + step·i for i in 0…floor((max-min)/step).
+    // - an explicit array is used as-is.
+    // Either way, marks outside [min, max] are dropped (MUI filters before render) so raising `min` /
+    // lowering `max` removes those dots instead of clamping them into a pile at the 0%/100% edges.
+    const generatedMarks: SliderMark[] =
+        marks === true && Number.isFinite(step) && step > 0 && max > min
+            ? Array.from({ length: Math.floor((max - min) / step) + 1 }, (_, i) => ({ value: min + step * i }))
+            : Array.isArray(marks)
+              ? marks
+              : []
+    const markList: SliderMark[] = generatedMarks.filter((mark) => mark.value >= min && mark.value <= max)
 
     const lo = isRange ? Math.min(pair[0], pair[1]) : min
     const hi = isRange ? Math.max(pair[0], pair[1]) : (current as number)

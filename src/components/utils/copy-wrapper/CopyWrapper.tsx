@@ -17,6 +17,11 @@ export type MessageProps = SnackbarProviderProps & {
     type?: 'loading'
 }
 
+/**
+ * @figmaNode none — bespoke copy affordance (no DS component). Wraps `children` with a copy button
+ * that appears on hover; composes the aligned `StyledButton` (Tertiary/text, ContentCopyIcon 20) +
+ * `StyledTooltip`. Only own styling = the `gama-500` hover accent (token). Token-clean/theme-safe.
+ */
 export const CopyWrapper: FC<
     PropsWithChildren<{
         className?: string

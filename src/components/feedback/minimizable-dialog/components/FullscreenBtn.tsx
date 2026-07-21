@@ -1,7 +1,6 @@
 import type { FC } from 'react'
 import { StyledButton, StyledTooltip } from 'src'
-import { ArrowExpand } from 'src/components/icons/arrow-expand'
-import { ArrowShrink } from 'src/components/icons/arrow-shrink'
+import { ArrowExpandIcon, ArrowShrinkIcon } from 'src/components/icons'
 
 export const FullScreenBtn: FC<{
     fullScreen: boolean
@@ -27,9 +26,9 @@ export const FullScreenBtn: FC<{
                     }}
                     endIcon={
                         fullScreen ? (
-                            <ArrowShrink width={20} height={20} color='text-delta-700' />
+                            <ArrowShrinkIcon width={20} height={20} color='text-delta-700' />
                         ) : (
-                            <ArrowExpand width={20} height={20} color='text-delta-700' />
+                            <ArrowExpandIcon width={20} height={20} color='text-delta-700' />
                         )
                     }
                 />

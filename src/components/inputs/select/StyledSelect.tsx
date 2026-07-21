@@ -284,7 +284,11 @@ export const StyledSelect = ({
                     <ChevronDownIcon
                         width={24}
                         height={24}
-                        className={cn('shrink-0 text-delta-700 transition-transform', open && 'rotate-180')}
+                        className={cn(
+                            'shrink-0 transition-transform',
+                            isDisabled ? 'text-delta-300' : 'text-delta-700',
+                            open && 'rotate-180',
+                        )}
                     />
                 </span>
                 {!isStandard && (

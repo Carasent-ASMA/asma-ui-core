@@ -377,7 +377,7 @@ export function StyledSelectAutocomplete<
                     className='flex cursor-pointer items-center'
                     onMouseDown={togglePopupFromIcon}
                 >
-                    {popupIcon ?? (isMultiple ? <PlusIconCircle width={24} height={24} /> : (
+                    {popupIcon ?? (isMultiple ? <PlusIconCircle width={24} height={24} className='text-delta-700' /> : (
                         <ChevronDownIcon
                             width={24}
                             height={24}

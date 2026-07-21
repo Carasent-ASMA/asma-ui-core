@@ -9,11 +9,11 @@ export const getChipPadding = (
     if (size === 'small') {
         if (hasStart && hasDelete) return { top: '4px', right: '4px', bottom: '4px', left: '4px' }
         if (hasDelete) return { top: '2px', right: '2px', bottom: '2px', left: '8px' }
-        if (hasStart) return { top: '2px', right: '8px', bottom: '2px', left: '0' }
+        if (hasStart) return { top: '2px', right: '8px', bottom: '2px', left: '4px' }
         return { top: '2px', right: '8px', bottom: '2px', left: '8px' }
     }
     if (hasStart && hasDelete) return { top: '4px', right: '4px', bottom: '4px', left: '4px' }
     if (hasDelete) return { top: '4px', right: '4px', bottom: '4px', left: '12px' }
-    if (hasStart) return { top: '4px', right: '12px', bottom: '4px', left: '0' }
+    if (hasStart) return { top: '4px', right: '12px', bottom: '4px', left: '4px' }
     return { top: '4px', right: '12px', bottom: '4px', left: '12px' }
 }

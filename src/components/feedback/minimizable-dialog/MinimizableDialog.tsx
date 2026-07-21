@@ -5,11 +5,17 @@ import { cn } from 'src/helpers/cn'
 import styles from './MinimizableDialog.module.scss'
 import { StyledMenu, StyledMenuItem } from 'src/components/navigation/menu'
 import { useToggleMenuVisibility } from 'src/hooks/useToggleMenuVisibility.hook'
-import { ArrowExpand } from 'src/components/icons/arrow-expand'
 import { StyledTooltip } from 'src/components/data-display/tooltip'
-import { ArrowShrink } from 'src/components/icons/arrow-shrink'
 import type { IMinimizableDialogProps } from './types'
-import { CloseIcon, DotsVerticalIcon, KeyboardCapslockIcon, LoadingIcon, MinimizeIcon } from 'src/components/icons'
+import {
+    ArrowExpandIcon,
+    ArrowShrinkIcon,
+    CloseIcon,
+    DotsVerticalIcon,
+    KeyboardCapslockIcon,
+    LoadingIcon,
+    MinimizeIcon,
+} from 'src/components/icons'
 
 export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     onCloseText = '',
@@ -178,9 +184,9 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                                             }}
                                             endIcon={
                                                 fullScreen ? (
-                                                    <ArrowShrink width={20} height={20} color='text-delta-700' />
+                                                    <ArrowShrinkIcon width={20} height={20} color='text-delta-700' />
                                                 ) : (
-                                                    <ArrowExpand width={20} height={20} color='text-delta-700' />
+                                                    <ArrowExpandIcon width={20} height={20} color='text-delta-700' />
                                                 )
                                             }
                                         >
