@@ -647,6 +647,24 @@ export const MultiplePrimitiveOptions: Story = {
     },
 }
 
+/**
+ * Read-only single select in the autocomplete path (>5 options): clicking the input must NOT open the
+ * dropdown. This is the reported regression — read-only should be display-only, never openable.
+ */
+export const ReadOnlyAutocompleteDoesNotOpen: Story = {
+    render: () => <SelectFrame title='Status' options={createOptions(12)} readOnly />,
+    play: async ({ canvasElement }) => {
+        const { canvas, input } = getAutocomplete(canvasElement)
+
+        await userEvent.click(input)
+        await expect(canvas.queryByRole('listbox')).not.toBeInTheDocument()
+
+        input.focus()
+        await userEvent.keyboard('{ArrowDown}')
+        await expect(canvas.queryByRole('listbox')).not.toBeInTheDocument()
+    },
+}
+
 export const LongLabelsAndDisabledOptions: Story = {
     render: () => <SelectFrame title='Plans' options={longLabelOptions} />,
 }

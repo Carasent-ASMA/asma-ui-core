@@ -214,6 +214,10 @@ export function StyledSelectAutocomplete<
     const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
     const open = controlledOpen ?? uncontrolledOpen
     const setOpen = (next: boolean): void => {
+        // Read-only / disabled fields are display-only: no path (click, keyboard, icon, typing) may
+        // open the popup. Closing is always allowed. Gating here is the single root cause — the input's
+        // onClick and ArrowDown handler both call setOpen(true) and previously ignored readOnly.
+        if (next && (readOnly || disabled)) return
         if (controlledOpen === undefined) setUncontrolledOpen(next)
         if (next) onOpen?.()
         else onClose?.()

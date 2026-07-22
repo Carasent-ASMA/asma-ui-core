@@ -383,6 +383,23 @@ export const RapidOpenClose: Story = {
     },
 }
 
+/**
+ * Read-only trigger must not open the listbox. The trigger is `pointer-events-none` (so a click can't
+ * reach it) AND `useClick` is disabled, and the keyboard opener (ArrowDown) bails on `readOnly`.
+ */
+export const ReadOnlyDoesNotOpen: Story = {
+    render: (args) => <Controlled {...args} readOnly />,
+    play: async ({ canvasElement, userEvent }) => {
+        const canvas = within(canvasElement.ownerDocument.body)
+
+        const trigger = canvas.getByRole('combobox')
+        trigger.focus()
+        await userEvent.keyboard('{ArrowDown}')
+
+        await expect(canvas.queryByRole('listbox')).not.toBeInTheDocument()
+    },
+}
+
 // Multiple-select is covered by StyledSelectAutocomplete — the single-select StyledSelect no longer
 // showcases a `multiple` story here (the prop remains for MUI API parity).
 

@@ -119,6 +119,40 @@ export const SingleSelectVariant: SingleStory = {
     },
 }
 
+/**
+ * Read-only must not open the popper: neither clicking the input nor pressing ArrowDown should
+ * mount the `listbox`. Read-only is a display state (selected value(s) shown, no interaction).
+ */
+export const ReadOnlyDoesNotOpen: SingleStory = {
+    render: () => {
+        const Wrapper = () => {
+            const [value] = useState<Film | null>(top100Films?.[0] || null)
+            return (
+                <StyledSelectAutocomplete
+                    dataTest='readonly-autocomplete'
+                    readOnly
+                    options={top100Films.slice(0, 3)}
+                    size='small'
+                    value={value}
+                    getOptionLabel={(option) => option.title}
+                    renderInput={(params) => <StyledInputField {...params} dataTest='input' />}
+                />
+            )
+        }
+        return <Wrapper />
+    },
+    play: async ({ canvasElement, userEvent }) => {
+        const { canvas, input } = getAutocomplete(canvasElement)
+
+        await userEvent.click(input)
+        await expect(canvas.queryByRole('listbox')).not.toBeInTheDocument()
+
+        input.focus()
+        await userEvent.keyboard('{ArrowDown}')
+        await expect(canvas.queryByRole('listbox')).not.toBeInTheDocument()
+    },
+}
+
 export const FiltersWhenTyping: Story = {
     render: (args) => <ControlledAutocomplete {...args} />,
     play: async ({ canvasElement, userEvent }) => {
