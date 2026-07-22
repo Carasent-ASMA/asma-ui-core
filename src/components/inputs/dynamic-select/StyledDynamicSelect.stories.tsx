@@ -30,6 +30,15 @@ const createOptions = (count: number): Option[] =>
         { id: '12', name: 'Rejected' },
     ].slice(0, count)
 
+// >10 options with a mix of enabled/disabled — exercises the type-ahead autocomplete path at a
+// realistic scale (the small stories cap at 12, which doesn't surface the per-row render cost).
+const createManyOptions = (count: number): Option[] =>
+    Array.from({ length: count }, (_, i) => ({
+        id: `${i + 1}`,
+        name: `Member ${String(i + 1).padStart(2, '0')}`,
+        disabled: (i + 1) % 9 === 0,
+    }))
+
 const longLabelOptions: Option[] = [
     { id: '1', name: 'Short label' },
     { id: '2', name: 'A much longer label to verify wrapping and truncation behavior in chips' },
@@ -578,6 +587,63 @@ export const MultipleSelectAutocomplete: Story = {
 
         await expect(canvas.getByRole('button', { name: 'Active' })).toBeInTheDocument()
         await expect(canvas.getByRole('button', { name: 'Paused' })).toBeInTheDocument()
+    },
+}
+
+export const LargeMultipleSelectAutocomplete: Story = {
+    render: () => <SelectFrame title='Assignees' multiple options={createManyOptions(60)} maxTags={5} />,
+    play: async ({ canvasElement }) => {
+        const { canvas, input } = getAutocomplete(canvasElement)
+
+        await userEvent.click(input)
+        // Multi-select keeps the dropdown open on select. Toggle a few rows and confirm each row's
+        // selected state (which drives its checkbox) updates reactively — the symptom users hit at
+        // scale was a laggy, seemingly "static" checkbox. `aria-selected` is the row's reactive signal
+        // (the checkbox itself is decorative and has no accessible name in this path).
+        await userEvent.click(await canvas.findByRole('option', { name: 'Member 01' }))
+        await expect(await canvas.findByRole('option', { name: 'Member 01', selected: true })).toBeInTheDocument()
+
+        await userEvent.click(await canvas.findByRole('option', { name: 'Member 02' }))
+        await expect(await canvas.findByRole('option', { name: 'Member 02', selected: true })).toBeInTheDocument()
+
+        // Toggling back off is reactive too.
+        await userEvent.click(await canvas.findByRole('option', { name: 'Member 01' }))
+        await expect(await canvas.findByRole('option', { name: 'Member 01', selected: false })).toBeInTheDocument()
+    },
+}
+
+/**
+ * Primitive (string) options in the autocomplete path (>5). Guards that selection equality works for
+ * primitives — `isOptionEqualToValue` used to short-circuit `false` for string values, so nothing read
+ * as selected and re-selecting duplicated (the TiltakFilter regression: `options` is a `string[]`).
+ */
+export const MultiplePrimitiveOptions: Story = {
+    render: () => {
+        const CITIES = ['Oslo', 'Bergen', 'Trondheim', 'Stavanger', 'Tromsø', 'Drammen', 'Kristiansand']
+        const [val, setVal] = useState<string[] | null>([])
+        return (
+            <div className='max-w-xl p-6'>
+                <StyledDynamicSelect<string>
+                    dataTest='primitive-select'
+                    multiple
+                    title='Cities'
+                    options={CITIES}
+                    value={val}
+                    onChange={setVal}
+                />
+            </div>
+        )
+    },
+    play: async ({ canvasElement }) => {
+        const { canvas, input } = getAutocomplete(canvasElement)
+        await userEvent.click(input)
+        await userEvent.click(await canvas.findByRole('option', { name: 'Bergen' }))
+        // The clicked primitive option must now read as selected (was always false → never reflected).
+        await expect(await canvas.findByRole('option', { name: 'Bergen', selected: true })).toBeInTheDocument()
+        await userEvent.click(await canvas.findByRole('option', { name: 'Oslo' }))
+        await expect(await canvas.findByRole('option', { name: 'Oslo', selected: true })).toBeInTheDocument()
+        // Bergen stays selected (not duplicated/cleared).
+        await expect(await canvas.findByRole('option', { name: 'Bergen', selected: true })).toBeInTheDocument()
     },
 }
 

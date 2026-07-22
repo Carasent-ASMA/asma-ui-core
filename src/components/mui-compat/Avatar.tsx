@@ -27,12 +27,26 @@ export const Avatar = ({
     component: _component,
     ...rest
 }: AvatarProps): JSX.Element => {
-    const mergedStyle: CSSProperties = { ...resolveSx(sx), ...style }
+    // Defaults (size, font-size, background AND text colour) live in `style`, NOT as `w-/h-/text-/bg-`
+    // utility classes, so a caller's inline `style`/`sx` can override them. As Tailwind classes they WIN
+    // over inline styles in any consumer whose build marks utilities `!important`, forcing every avatar to
+    // 40px / 1.25rem / grey #bdbdbd and ignoring per-instance values (e.g. InitialsAvatar's 24px box, 10px
+    // initials and its computed type colour — which is why all avatars rendered grey) — a regression vs
+    // MUI's Avatar, whose defaults were overridable. DEC-003.
+    const mergedStyle: CSSProperties = {
+        width: 40,
+        height: 40,
+        fontSize: '1.25rem',
+        backgroundColor: '#bdbdbd',
+        color: '#fff',
+        ...resolveSx(sx),
+        ...style,
+    }
 
     return (
         <div
             className={clsx(
-                'relative flex h-[40px] w-[40px] shrink-0 items-center justify-center overflow-hidden bg-[#bdbdbd] font-roboto text-[1.25rem] text-white',
+                'relative flex shrink-0 items-center justify-center overflow-hidden font-roboto',
                 VARIANT_CLASS[variant] ?? VARIANT_CLASS['circular'],
                 className,
             )}

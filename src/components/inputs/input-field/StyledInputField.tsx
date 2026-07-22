@@ -150,6 +150,11 @@ export const StyledInputField = ({
     const fieldId = id ?? generatedId
     const helperId = `${fieldId}-helper-text`
     const textareaRef = useRef<HTMLTextAreaElement | null>(null)
+    // Measures a custom end adornment (e.g. the autocomplete's clear + chevron) so the single-line
+    // input can reserve exactly enough right padding — the fixed `data-end-adornment` 40px only fits
+    // one icon, so wider adornments let long values scroll underneath them (ASMA select overflow).
+    const endAdornmentRef = useRef<HTMLSpanElement | null>(null)
+    const [endAdornmentPad, setEndAdornmentPad] = useState<number | undefined>(undefined)
     const [focused, setFocused] = useState(false)
     const [hasValueUncontrolled, setHasValueUncontrolled] = useState(
         defaultValue != null && defaultValue !== '',
@@ -221,15 +226,39 @@ export const StyledInputField = ({
         : isAdornmentList
           ? { boxSizing: 'border-box', ...inputSlotStyle, minHeight: 40 }
           : inputSlotStyle
-    const singleLineHtmlInputStyle: CSSProperties | undefined =
-        isSingleLineShell && htmlInputStyle
-            ? { ...htmlInputStyle, height: undefined, minHeight: undefined, maxHeight: undefined }
-            : htmlInputStyle
+    const singleLineHtmlInputStyle: CSSProperties | undefined = isSingleLineShell
+        ? {
+              ...htmlInputStyle,
+              height: undefined,
+              minHeight: undefined,
+              maxHeight: undefined,
+              // Reserve room for a measured custom end adornment so the value truncates/scrolls before
+              // it instead of underneath (fixed `data-end-adornment` 40px only clears a single icon).
+              ...(endAdornmentPad != null ? { paddingRight: endAdornmentPad } : {}),
+          }
+        : htmlInputStyle
+
+    useLayoutEffect(() => {
+        if (!isSingleLineShell) {
+            setEndAdornmentPad((prev) => (prev === undefined ? prev : undefined))
+            return
+        }
+        const el = endAdornmentRef.current
+        // width of the adornment + its 14px right inset + a small gap.
+        const next = el ? Math.ceil(el.getBoundingClientRect().width) + 20 : undefined
+        setEndAdornmentPad((prev) => (prev === next ? prev : next))
+    })
+    // With a label the resting (un-shrunk) label sits in the placeholder position, so the HTML
+    // placeholder must stay hidden until the label floats up (`shrink`) — otherwise the two texts
+    // overlap. With no label there is nothing to overlap, so the placeholder should show at rest like
+    // a plain input. Gating purely on `shrink` wrongly hid the placeholder for label-less fields.
+    const showPlaceholder = shrink || !label
+
     const sharedProps = {
         ...htmlInputPropsWithoutStyle,
         style: isSingleLineShell ? singleLineHtmlInputStyle : htmlInputStyle,
         name,
-        placeholder: shrink ? placeholder : undefined,
+        placeholder: showPlaceholder ? placeholder : undefined,
         disabled,
         readOnly,
         required,
@@ -309,8 +338,13 @@ export const StyledInputField = ({
                     {hasStartAdornment && (
                         <span
                             className={cn(
-                                'flex items-center text-delta-500',
-                                isAdornmentList ? 'contents' : 'absolute left-3',
+                                'items-center text-delta-500',
+                                // `flex` must live only in the non-adornment branch: pairing it with
+                                // `contents` puts two `display` utilities on one element, and when a
+                                // consumer's Tailwind marks utilities `!important` (or orders `flex`
+                                // after `contents`), `flex` wins — the wrapper never dissolves and the
+                                // chip adornment list can't flex-wrap. See [[ui-core-adornment-contents-flex-conflict]].
+                                isAdornmentList ? 'contents' : 'absolute left-3 flex',
                             )}
                         >
                             {startAdornment}
@@ -353,7 +387,10 @@ export const StyledInputField = ({
                         userEndAdornment && (
                             // `inset-y-0 items-center` keeps the indicator vertically centred in the field
                             // even after the chip adornment list grows to multiple rows (Figma icon-right).
-                            <span className='absolute inset-y-0 right-[14px] flex max-w-[calc(100%-28px)] items-center gap-1'>
+                            <span
+                                ref={endAdornmentRef}
+                                className='absolute inset-y-0 right-[14px] flex max-w-[calc(100%-28px)] items-center gap-1'
+                            >
                                 {userEndAdornment}
                             </span>
                         )

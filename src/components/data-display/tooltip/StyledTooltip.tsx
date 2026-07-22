@@ -59,7 +59,17 @@ export interface TooltipProps {
  * renders the child alone (MUI parity). Preserves the `#363E4A` design and the `title`/`placement`/
  * `arrow`/`enterDelay`/`open`/`slotProps` surface (DEC-003). TASK-301.
  */
-export const StyledTooltip = ({
+export const StyledTooltip = (props: TooltipProps): JSX.Element => {
+    // Fast path: with no tooltip text there is nothing to show, so render the child alone and — crucially —
+    // mount NONE of the `@floating-ui` hooks below. Callers wrap large lists (e.g. every autocomplete
+    // option row) in a tooltip whose `title` is usually null; instantiating useFloating/useHover/… per
+    // row is what made those lists lag. Hooks can't be conditional, so the machinery lives in an inner
+    // component that is only mounted when there is a title. (MUI parity: empty title → child alone.)
+    if (props.title == null || props.title === '') return props.children
+    return <TooltipWithFloating {...props} />
+}
+
+const TooltipWithFloating = ({
     title,
     children,
     placement = 'top',
@@ -118,8 +128,6 @@ export const StyledTooltip = ({
         children,
         getReferenceProps({ ref: childRef, ...(children.props as Record<string, unknown>) }),
     )
-
-    if (title == null || title === '') return reference
 
     return (
         <>

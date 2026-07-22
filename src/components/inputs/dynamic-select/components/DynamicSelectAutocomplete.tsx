@@ -57,10 +57,13 @@ export const DynamicSelectAutocomplete = forwardRef(
         )
 
         const isOptionEqualToValue = useCallback(
-            (option: TOption, value: TOption | string): boolean => {
-                if (typeof value === 'string') return false
-                return getOptionValue(option) === getOptionValue(value)
-            },
+            // Compare by resolved value for BOTH primitives and objects. The old `typeof value ===
+            // 'string' → false` short-circuit broke primitive-string options (documented as supported):
+            // every check returned false, so nothing ever read as selected and re-selecting duplicated.
+            // `getOptionValue` already returns the primitive as-is, so string===string works; an object
+            // option vs a stray typed string still compares unequal (its valueKey never equals the string).
+            (option: TOption, value: TOption | string): boolean =>
+                getOptionValue(option) === getOptionValue(value as TOption),
             [getOptionValue],
         )
 
@@ -183,12 +186,14 @@ export const DynamicSelectAutocomplete = forwardRef(
                             <PlusIconCircle height={24} width={24} />
                         ) : undefined
                     }
-                    renderOption={(props, option) => {
+                    renderOption={(props, option, state) => {
                         const disabled = typeof option === 'object' ? !!option?.disabled : false
                         const tooltipTitle = getOptionTooltip ? getOptionTooltip(option) : null
 
                         if (multiple) {
-                            const isSelected = !!value?.find((l) => isOptionEqualToValue(l, option))
+                            // Reuse the selected flag the autocomplete already computed for this row
+                            // instead of re-scanning `value` per option (avoids O(options × selected)).
+                            const isSelected = state.selected
                             return (
                                 /** biome-ignore lint/a11y/useKeyWithClickEvents: <onClick props is still passed so we need to block it for disabled options> */
                                 <li
@@ -230,7 +235,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                             )
                         }
 
-                        const isSelected = value != null && isOptionEqualToValue(value, option)
+                        const isSelected = state.selected
 
                         return (
                             /** biome-ignore lint/a11y/useKeyWithClickEvents: <onClick props is still passed so we need to block it for disabled options> */

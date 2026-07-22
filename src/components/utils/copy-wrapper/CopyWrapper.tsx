@@ -33,8 +33,12 @@ export const CopyWrapper: FC<
     return (
         <div className={cn('flex items-center hover:text-gama-500', style['copy-wrapper'], className)}>
             {children}
-            <StyledTooltip title={locale === 'no' ? 'Kopier' : 'Copy'} className={style['hidden-copy']}>
-                <div>
+            <StyledTooltip title={locale === 'no' ? 'Kopier' : 'Copy'}>
+                {/* `hidden-copy` (invisible until `.copy-wrapper:hover`) must sit on the button's own
+                    wrapper — a descendant of `.copy-wrapper`. Passing it to StyledTooltip's `className`
+                    landed it on the portalled tooltip popup instead (outside `.copy-wrapper`, so the
+                    hover selector never matched → button showed at all times). */}
+                <div className={style['hidden-copy']}>
                     <StyledButton
                         dataTest='copy-button'
                         size='small'

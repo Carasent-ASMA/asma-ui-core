@@ -219,10 +219,19 @@ $checkbox-sizes: (
     justify-content: center;
     width: 100%;
     height: 100%;
-    color: white;
+    // Transparent by default so the checkmark is invisible when unchecked. It was `white`, which only
+    // *looked* hidden on a white page — as soon as anything painted a background behind the box (a
+    // row-hover highlight, the disabled fill), the white check showed and an empty box read as checked.
+    // Turn it visible only for the checked/indeterminate states (mirrors the base-ui checkbox).
+    color: transparent;
     z-index: 1;
     position: relative;
     pointer-events: none;
+}
+
+.CheckboxWrapper:is([data-checked], [data-indeterminate]) .Indicator,
+.CheckboxWrapper.Indeterminate .Indicator {
+    color: white;
 }
 
 .CheckboxWrapper[data-indeterminate],

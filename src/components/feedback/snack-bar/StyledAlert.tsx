@@ -55,7 +55,10 @@ const VARIANT_CLASS: Record<AlertVariant, Record<AlertColor, string>> = {
         success: 'bg-success-500 text-white',
         info: 'bg-info-500 text-white',
         warning: 'bg-warning-500 text-white',
-        error: 'bg-error-500 text-white',
+        // error-500 (#e10700) is a near-neon red; the MUI Alert this replaced used a muted red, so the
+        // filled error toast (processServerError) read as too harsh. error-600 (#b6120d) is the DS's
+        // deeper error red — a filled-surface-appropriate shade closer to the previous look.
+        error: 'bg-error-600 text-white',
     },
     outlined: {
         success: 'border border-success-500 text-success-700',
@@ -77,6 +80,15 @@ const ICON_CLASS: Record<AlertVariant, Record<AlertColor, string>> = {
     },
     filled: { success: '', info: '', warning: '', error: '' },
     outlined: { success: '', info: '', warning: '', error: '' },
+}
+
+// The DS "standard" inline-notification keeps its compact padding (Figma-aligned). `filled`/`outlined`
+// are MUI-compat surfaces (e.g. the processServerError toast) and were cramped at `px-2 py-1` (4/8px)
+// vs the MUI Alert's ~6/16px — give them comfortable padding so they don't read as a thin bar.
+const PADDING_CLASS: Record<AlertVariant, string> = {
+    standard: 'px-2 py-1',
+    filled: 'px-4 py-2',
+    outlined: 'px-4 py-2',
 }
 
 const DEFAULT_ICON: Record<AlertColor, ReactNode> = {
@@ -111,7 +123,7 @@ export const StyledAlert = ({
     return (
         <div
             role={role}
-            className={cn('flex items-center gap-2 rounded px-2 py-1 text-sm', VARIANT_CLASS[variant][severity], className)}
+            className={cn('flex items-center gap-2 rounded text-sm', PADDING_CLASS[variant], VARIANT_CLASS[variant][severity], className)}
             style={resolveSx(sx)}
         >
             {shownIcon && <span className={cn('flex shrink-0 items-center', ICON_CLASS[variant][severity])}>{shownIcon}</span>}
