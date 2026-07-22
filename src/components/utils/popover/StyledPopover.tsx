@@ -13,7 +13,7 @@ import {
 } from '@floating-ui/react'
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
-import { TOP_LAYER_PROPS, TOP_LAYER_RESET_STYLE, useTopLayerRef } from 'src/hooks/useTopLayer.hook'
+import { getOpenModalDialogAncestor, TOP_LAYER_PROPS, TOP_LAYER_RESET_STYLE, useTopLayerRef } from 'src/hooks/useTopLayer.hook'
 
 export interface PopoverOrigin {
     vertical: 'top' | 'center' | 'bottom' | number
@@ -104,9 +104,12 @@ export const StyledPopover = ({
     const { getFloatingProps } = useInteractions([dismiss])
     // Promote into the top layer so it paints above a modal <dialog> regardless of z-index.
     const floatingRef = useMergeRefs([useTopLayerRef(refs.setFloating)])
+    // Portal INTO the anchor's modal <dialog> (if any): a body-portalled popover stays inert under a
+    // modal dialog (clicks fall through) even when top-layer-promoted. See getOpenModalDialogAncestor.
+    const portalRoot = useMemo(() => (open ? getOpenModalDialogAncestor(anchorEl) : undefined), [open, anchorEl])
 
     return open ? (
-        <FloatingPortal>
+        <FloatingPortal root={portalRoot}>
             <div
                 ref={floatingRef}
                 id={id}

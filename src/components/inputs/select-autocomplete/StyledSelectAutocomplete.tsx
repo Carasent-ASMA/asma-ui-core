@@ -22,7 +22,7 @@ import {
     useRole,
 } from '@floating-ui/react'
 import { cn } from 'src/helpers/cn'
-import { TOP_LAYER_PROPS, TOP_LAYER_RESET_STYLE, useTopLayerRef } from 'src/hooks/useTopLayer.hook'
+import { getOpenModalDialogAncestor, TOP_LAYER_PROPS, TOP_LAYER_RESET_STYLE, useTopLayerRef } from 'src/hooks/useTopLayer.hook'
 import { CheckIcon, ChevronDownIcon, CloseIcon, PlusIconCircle } from 'src/components/icons'
 import { StyledCheckbox } from 'src/components/inputs/checkbox/base-ui/StyledCheckbox'
 import { StyledChip } from 'src/components/data-display/chip'
@@ -277,6 +277,12 @@ export function StyledSelectAutocomplete<
     const referenceRef = useMergeRefs([refs.setReference])
     // Promote the listbox into the top layer so it paints above a modal <dialog> regardless of z-index.
     const floatingRef = useMergeRefs([useTopLayerRef(refs.setFloating)])
+    // When the trigger sits inside a modal <dialog>, portal the listbox INTO that dialog: top-layer
+    // promotion fixes painting but the dialog still marks a body-portalled popover inert (clicks fall
+    // through). A descendant of the open dialog is not inert, so options become selectable again.
+    // The reference (input) is always mounted before the popup opens, so its ref is populated here.
+    // eslint-disable-next-line react-hooks/refs
+    const portalRoot = useMemo(() => (open ? getOpenModalDialogAncestor(refs.reference.current) : undefined), [open, refs])
 
     const emitChange = (event: SyntheticEvent, option: T): void => {
         if (isMultiple) {
@@ -479,7 +485,7 @@ export function StyledSelectAutocomplete<
         <div className={cn(style['styledSelectAutocompleteWrapper'], !fullWidth && 'w-auto', wrapperClassName, className)}>
             {renderInput(renderInputParams)}
             {open && (
-                <FloatingPortal>
+                <FloatingPortal root={portalRoot}>
                     <ul
                         ref={floatingRef}
                         {...TOP_LAYER_PROPS}

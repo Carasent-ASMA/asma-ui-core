@@ -17,6 +17,7 @@ import {
     cloneElement,
     isValidElement,
     useEffect,
+    useMemo,
     useRef,
     useState,
     type CSSProperties,
@@ -27,7 +28,7 @@ import {
 import { ChevronDownIcon, CloseIcon, ErrorOutlineIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
-import { TOP_LAYER_PROPS, TOP_LAYER_RESET_STYLE, useTopLayerRef } from 'src/hooks/useTopLayer.hook'
+import { getOpenModalDialogAncestor, TOP_LAYER_PROPS, TOP_LAYER_RESET_STYLE, useTopLayerRef } from 'src/hooks/useTopLayer.hook'
 import { useFormControlContext } from '../../miscellaneous/FormControlContext'
 import { StyledFormHelperText } from '../../miscellaneous/StyledFormHelperText'
 import { outlineClass, type FieldSize } from '../field-styles'
@@ -151,6 +152,11 @@ export const StyledSelect = ({
     const triggerRef = useMergeRefs([refs.setReference])
     // Promote the listbox into the top layer so it paints above a modal <dialog> regardless of z-index.
     const listboxRef = useMergeRefs([useTopLayerRef(refs.setFloating), listRef])
+    // Portal the listbox INTO the trigger's modal <dialog> (if any): top-layer promotion fixes
+    // painting but a body-portalled popover is still marked inert by the dialog, so option clicks
+    // fall through. A descendant of the open dialog is not inert. See getOpenModalDialogAncestor.
+    // eslint-disable-next-line react-hooks/refs
+    const portalRoot = useMemo(() => (open ? getOpenModalDialogAncestor(refs.reference.current) : undefined), [open, refs])
 
     // Report state into the surrounding FormControl so the label floats.
     useEffect(() => ctx?.setFocused(open || focused), [open, focused, ctx])
@@ -297,7 +303,7 @@ export const StyledSelect = ({
             </button>
 
             {open && (
-                <FloatingPortal>
+                <FloatingPortal root={portalRoot}>
                     <ul
                         ref={listboxRef}
                         role='listbox'

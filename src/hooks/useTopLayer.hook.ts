@@ -26,6 +26,26 @@ export const TOP_LAYER_PROPS = { popover: 'manual' } as const
  */
 export const TOP_LAYER_RESET_STYLE: CSSProperties = { margin: 0, inset: 'auto' }
 
+/**
+ * Find the nearest **open modal** `<dialog>` ancestor of a reference node, or `undefined`.
+ *
+ * A native modal `<dialog>` (`showModal()`) marks every node **outside its own subtree** as `inert`
+ * — including a popover we promote into the top layer. An inert popover still *paints* (so it looks
+ * fine, even on top), but it is skipped by hit-testing: pointer clicks fall through to the dialog
+ * behind it and options can't be selected. Promoting to the top layer only fixes painting/z-order,
+ * NOT inertness. The one place a popover is both unclipped *and* interactive is **inside the modal
+ * dialog's own subtree** (top layer → escapes the dialog's `overflow:hidden`; descendant of the
+ * dialog → not inert). So when the trigger lives inside a modal dialog, the floating element must
+ * portal into that dialog rather than `document.body`. Returns `undefined` for the non-dialog case
+ * (and for non-modal containers like `MinimizableDialog`, which are plain z-indexed `<div>`s), so
+ * the caller falls back to the default body portal.
+ */
+export function getOpenModalDialogAncestor(node: unknown): HTMLElement | undefined {
+    if (!(node instanceof Element)) return undefined
+    const dialog = node.closest('dialog')
+    return dialog instanceof HTMLDialogElement && dialog.open ? dialog : undefined
+}
+
 type RefSetter = (node: HTMLElement | null) => void
 
 /**

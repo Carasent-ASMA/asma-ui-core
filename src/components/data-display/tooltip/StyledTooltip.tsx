@@ -65,7 +65,11 @@ export const StyledTooltip = (props: TooltipProps): JSX.Element => {
     // option row) in a tooltip whose `title` is usually null; instantiating useFloating/useHover/… per
     // row is what made those lists lag. Hooks can't be conditional, so the machinery lives in an inner
     // component that is only mounted when there is a title. (MUI parity: empty title → child alone.)
-    if (props.title == null || props.title === '') return props.children
+    // Treat any falsy title (except the number 0, a legitimate label) as "no tooltip" — MUI parity.
+    // Call sites use the `title={condition && 'text'}` idiom, which yields `false` when the condition
+    // is off; without catching `false` here the machinery mounts and, with `arrow`, paints a stray
+    // empty dark bubble + arrow on hover.
+    if (!props.title && props.title !== 0) return props.children
     return <TooltipWithFloating {...props} />
 }
 
