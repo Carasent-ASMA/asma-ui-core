@@ -29,7 +29,8 @@ export const StyledSelectItem = ({
         tabIndex={-1}
         onClick={disabled ? undefined : onClick}
         className={cn(
-            'flex items-center gap-1 px-2 py-2.5 text-sm outline-none',
+            // Figma Menus item (node 16073-19226) label = Body Base 16/lh24 (`text-base`), not 14px.
+            'flex items-center gap-1 px-2 py-2.5 text-base outline-none',
             disabled ? 'cursor-not-allowed text-delta-300' : 'cursor-pointer hover:bg-delta-50',
             selected && 'bg-gama-50',
             className,

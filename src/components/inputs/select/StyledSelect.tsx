@@ -28,7 +28,12 @@ import {
 import { ChevronDownIcon, CloseIcon, ErrorOutlineIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
-import { getOpenModalDialogAncestor, TOP_LAYER_PROPS, TOP_LAYER_RESET_STYLE, useTopLayerRef } from 'src/hooks/useTopLayer.hook'
+import {
+    getOpenModalDialogAncestor,
+    TOP_LAYER_PROPS,
+    TOP_LAYER_RESET_STYLE,
+    useTopLayerRef,
+} from 'src/hooks/useTopLayer.hook'
 import { useFormControlContext } from '../../miscellaneous/FormControlContext'
 import { StyledFormHelperText } from '../../miscellaneous/StyledFormHelperText'
 import { outlineClass, type FieldSize } from '../field-styles'
@@ -53,7 +58,12 @@ export interface StyledSelectProps {
     /** @figmaProp Filled (initial, uncontrolled) */
     defaultValue?: unknown
     onChange?: (event: SelectChangeEvent, child: ReactNode) => void
-    /** @figmaProp none — FieldSize (both render the 40px field; small uses text-sm) */
+    /**
+     * @figmaProp none — accepted for MUI `Select` / DEC-003 drop-in parity, but **no longer affects
+     * rendering**: the trigger value is Body Base 16px and the field is 40px at every size (a smaller
+     * size only changed text before; Figma field text is 16/lh24 regardless). Kept so `size="small"`
+     * call sites still compile. Ignored on purpose (not destructured, like `labelId`).
+     */
     size?: FieldSize
     /** @figmaProp State = true→"Error" */
     error?: boolean
@@ -92,7 +102,6 @@ export const StyledSelect = ({
     value,
     defaultValue,
     onChange,
-    size,
     error,
     errorText,
     allowClear,
@@ -112,7 +121,6 @@ export const StyledSelect = ({
     MenuProps,
 }: StyledSelectProps): JSX.Element => {
     const ctx = useFormControlContext()
-    const fieldSize: FieldSize = size ?? ctx?.size ?? 'medium'
     const isStandard = variant === 'standard'
     const isError = error ?? ctx?.error ?? false
     const isDisabled = disabled ?? ctx?.disabled ?? false
@@ -155,23 +163,24 @@ export const StyledSelect = ({
     // Portal the listbox INTO the trigger's modal <dialog> (if any): top-layer promotion fixes
     // painting but a body-portalled popover is still marked inert by the dialog, so option clicks
     // fall through. A descendant of the open dialog is not inert. See getOpenModalDialogAncestor.
-    // eslint-disable-next-line react-hooks/refs
-    const portalRoot = useMemo(() => (open ? getOpenModalDialogAncestor(refs.reference.current) : undefined), [open, refs])
+
+    const portalRoot = useMemo(
+        () => (open ? getOpenModalDialogAncestor(refs.reference.current) : undefined),
+        [open, refs],
+    )
 
     // Report state into the surrounding FormControl so the label floats.
     useEffect(() => ctx?.setFocused(open || focused), [open, focused, ctx])
-    useEffect(() => ctx?.setFilled(hasValue || Boolean(placeholder) || Boolean(displayEmpty)), [
-        hasValue,
-        placeholder,
-        displayEmpty,
-        ctx,
-    ])
+    useEffect(
+        () => ctx?.setFilled(hasValue || Boolean(placeholder) || Boolean(displayEmpty)),
+        [hasValue, placeholder, displayEmpty, ctx],
+    )
 
     const selectValue = (next: unknown, child: ReactNode): void => {
         const selected = multiple
-            ? (Array.isArray(currentValue) && currentValue.includes(next)
-                  ? currentValue.filter((item) => item !== next)
-                  : [...(Array.isArray(currentValue) ? currentValue : []), next])
+            ? Array.isArray(currentValue) && currentValue.includes(next)
+                ? currentValue.filter((item) => item !== next)
+                : [...(Array.isArray(currentValue) ? currentValue : []), next]
             : next
         if (!isControlled) setUncontrolled(selected)
         onChange?.({ target: { value: selected, name } }, child)
@@ -256,12 +265,8 @@ export const StyledSelect = ({
                 style={{ minWidth: hasValue && !isStandard ? 105 : undefined }}
                 className={cn(
                     'relative flex w-full items-center justify-between bg-transparent text-left text-delta-800 outline-none',
-                    isStandard
-                        ? cn('min-w-0 border-0 px-0', fieldSize === 'small' ? 'h-10 text-sm' : 'h-10 text-base')
-                        : cn(
-                              'rounded-lg border-0 px-3',
-                              fieldSize === 'small' ? 'h-10 text-sm' : 'h-10 text-base',
-                          ),
+                    // Figma field text = Body Base 16/lh24 (`text-base`), h40 (matches StyledInputField/field-styles).
+                    isStandard ? 'h-10 min-w-0 border-0 px-0 text-base' : 'h-10 rounded-lg border-0 px-3 text-base',
                     isDisabled && 'cursor-not-allowed text-delta-300',
                     readOnly && 'pointer-events-none',
                 )}
@@ -298,7 +303,14 @@ export const StyledSelect = ({
                     />
                 </span>
                 {!isStandard && (
-                    <div className={outlineClass({ focused: open || focused, error: isError, disabled: isDisabled, readOnly })} />
+                    <div
+                        className={outlineClass({
+                            focused: open || focused,
+                            error: isError,
+                            disabled: isDisabled,
+                            readOnly,
+                        })}
+                    />
                 )}
             </button>
 
@@ -309,7 +321,11 @@ export const StyledSelect = ({
                         role='listbox'
                         aria-label={name}
                         {...TOP_LAYER_PROPS}
-                        style={{ ...TOP_LAYER_RESET_STYLE, ...floatingStyles, fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}
+                        style={{
+                            ...TOP_LAYER_RESET_STYLE,
+                            ...floatingStyles,
+                            fontFamily: 'Roboto, Helvetica, Arial, sans-serif',
+                        }}
                         {...getFloatingProps()}
                         onKeyDown={handleKeyDown}
                         className={cn(

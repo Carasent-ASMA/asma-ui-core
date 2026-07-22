@@ -400,6 +400,24 @@ export const ReadOnlyDoesNotOpen: Story = {
     },
 }
 
+/**
+ * Figma parity: both the trigger value and every option are Body Base 16px (Menus item node
+ * 16073-19226 / Input field 15561-37391) — at every `size`, including `small` (a no-op for text).
+ */
+export const OptionAndValueAre16px: Story = {
+    render: (args) => <Controlled {...args} size='small' />,
+    play: async ({ canvasElement, userEvent }) => {
+        const canvas = within(canvasElement.ownerDocument.body)
+
+        const trigger = canvas.getByRole('combobox')
+        await expect(getComputedStyle(trigger).fontSize).toBe('16px')
+
+        await userEvent.click(trigger)
+        const option = await canvas.findByRole('option', { name: 'Van Henry' })
+        await expect(getComputedStyle(option).fontSize).toBe('16px')
+    },
+}
+
 // Multiple-select is covered by StyledSelectAutocomplete — the single-select StyledSelect no longer
 // showcases a `multiple` story here (the prop remains for MUI API parity).
 
