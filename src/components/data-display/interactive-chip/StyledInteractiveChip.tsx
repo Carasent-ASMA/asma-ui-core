@@ -27,13 +27,14 @@ export interface StyledInteractiveChipProps extends ComponentProps<typeof Styled
     ariaLabel?: string
 }
 
-// Radio-selected chips get a stronger gama border/fill. Applied as flat sx → inline style so it
-// wins over StyledChip's base border class without tailwind-merge (dropped in Phase 0).
-const SELECTED_CHIP_STYLE = {
-    borderColor: 'var(--colors-gama-400)',
-    backgroundColor: 'var(--colors-gama-50)',
-    boxShadow: '0 0 0 1px inset var(--colors-gama-400)',
-}
+// Figma Tag Chip Radio Selected (18869-29122) = 2px gama-400 border + gama-25 fill (same when
+// hovered). Tailwind runs in `important: true` mode, so the base `border-delta-300`/`bg-white`
+// utilities — and, on hover, `hover:border-gama-200` — are `!important` and beat any inline style.
+// That's why the old inline `sx` treatment was silently dead (only its box-shadow survived). We win
+// deterministically with arbitrary-variant classes carrying (0,3,0) specificity via the chip's
+// always-present `data-testid`+`role=button`, outranking the base/hover/focus/active utilities.
+const SELECTED_RADIO_CLASS =
+    '[&[data-testid][role=button]]:border-2 [&[data-testid][role=button]]:border-gama-400 [&[data-testid][role=button]]:bg-gama-25'
 
 // Figma _BASE_Tag Checkbox/Radio (nodes 18832-25686 / 18832-25900): the chip is `padding-left: 0`
 // but the control is a 40px-wide box whose centring leaves ~10px between the chip border and the
@@ -45,9 +46,6 @@ const CONTROL_CHIP_STYLE = { paddingLeft: '6px' }
  * A `StyledChip` whose avatar is a native checkbox or radio (base-ui controls now render their own
  * checked/read-only colours, so the old nested `.MuiChip-avatar .Mui*` `sx` is gone). Public props
  * preserved (DEC-003). TASK-101a.
- *
- * ponytail: a selected radio chip uses inline style for its border, so it shows no hover recolour
- * while selected — a minor known ceiling; upgrade path is REFACTOR-001 (className-based slots).
  */
 export const StyledInteractiveChip = forwardRef<HTMLDivElement, StyledInteractiveChipProps>(
     ({ type = 'checkbox', checked, size = 'small', ariaLabel, ...props }, ref) => {
@@ -83,9 +81,9 @@ export const StyledInteractiveChip = forwardRef<HTMLDivElement, StyledInteractiv
                 clickable
                 tabIndex={0}
                 {...props}
+                className={cn(isSelectedRadio && SELECTED_RADIO_CLASS, props.className)}
                 sx={{
                     ...CONTROL_CHIP_STYLE,
-                    ...(isSelectedRadio ? SELECTED_CHIP_STYLE : {}),
                     ...(props.sx as object),
                 }}
             />
