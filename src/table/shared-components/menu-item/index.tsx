@@ -21,7 +21,7 @@ export const StyledMenuItem = ({ children, selected, disabled, className, onClic
         tabIndex={-1}
         onClick={disabled ? undefined : onClick}
         className={cn(
-            'flex items-center gap-x-1 p-2 outline-none',
+            'flex items-center gap-x-1 p-2 text-base text-delta-700 outline-none',
             disabled ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-delta-50',
             selected && 'bg-gama-50 hover:bg-gama-50',
             className,

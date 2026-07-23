@@ -14,7 +14,7 @@
  */
 
 /** The layout axes a component default can occupy and a consumer can legitimately override. */
-export type ClassAxis = 'padding' | 'padding-x' | 'padding-y' | 'margin' | 'width' | 'display'
+export type ClassAxis = 'padding' | 'padding-x' | 'padding-y' | 'margin' | 'width' | 'max-width' | 'display'
 
 // Each pattern matches a Tailwind utility on that axis, with an optional `!` important prefix.
 // `padding-x` also matches the `p-` shorthand (it sets horizontal padding too); likewise `padding-y`.
@@ -24,6 +24,7 @@ const AXIS_PATTERN: Record<ClassAxis, RegExp> = {
     'padding-y': /(?:^|\s)!?p[ytb]?-/, // vertical-affecting only (p / py / pt / pb)
     margin: /(?:^|\s)!?-?m[xytrblse]?-/, // any margin utility (allows the negative `-m…` prefix)
     width: /(?:^|\s)!?w-/,
+    'max-width': /(?:^|\s)!?max-w-/,
     display: /(?:^|\s)!?(?:block|inline-block|inline-flex|inline|flex|grid|contents|hidden|table)(?:\s|$)/,
 }
 

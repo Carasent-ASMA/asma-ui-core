@@ -60,6 +60,12 @@ describe('consumerOverrides — reliable overrides without tailwind-merge', () =
             expect(consumerOverrides('w-full', 'width')).toBe(true)
             expect(consumerOverrides('min-w-0', 'width')).toBe(false)
         })
+        it('matches max-width utilities', () => {
+            expect(consumerOverrides('max-w-fit', 'max-width')).toBe(true)
+            expect(consumerOverrides('max-w-full', 'max-width')).toBe(true)
+            expect(consumerOverrides('w-fit max-w-xs', 'max-width')).toBe(true)
+            expect(consumerOverrides('w-full', 'max-width')).toBe(false)
+        })
         it('matches display utilities as whole words only', () => {
             expect(consumerOverrides('flex items-center', 'display')).toBe(true)
             expect(consumerOverrides('grid', 'display')).toBe(true)

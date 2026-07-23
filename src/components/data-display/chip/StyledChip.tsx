@@ -1,6 +1,7 @@
 import { forwardRef, type CSSProperties, type MouseEvent, type ReactElement, type ReactNode } from 'react'
 import { CloseIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
+import { consumerOverrides } from 'src/helpers/classOverride'
 import { resolveSx } from 'src/helpers/sx'
 
 import { getChipPadding } from './chipPadding'
@@ -117,6 +118,12 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
             onDelete?.(event)
         }
 
+        // MUI Chip shrink-wraps by default; `max-w-full` caps truncation in constrained rows. `cn` is
+        // plain clsx (no tailwind-merge), so drop each default when the consumer sets that axis — e.g.
+        // `className='max-w-fit'` must beat the hardcoded `max-w-full` (ParcelAttachmentChip).
+        const consumerSetsWidth = consumerOverrides(className, 'width')
+        const consumerSetsMaxWidth = consumerOverrides(className, 'max-width')
+
         return (
             <div
                 ref={ref}
@@ -131,7 +138,9 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                 onMouseUp={disabled || readOnly ? undefined : onMouseUp}
                 className={cn(
                     // Figma _BASE_Tag (node 14312-26020): label Body Base 16px/lh24, text-icon/body #49525f (delta-700), border/outline #bdc4cf (delta-300), radius 25, gap 4.
-                    'box-border inline-flex max-w-full items-center gap-1 rounded-[25px] border border-solid border-delta-300 bg-white text-base text-delta-700',
+                    'box-border inline-flex items-center gap-1 rounded-[25px] border border-solid border-delta-300 bg-white text-base text-delta-700',
+                    !consumerSetsWidth && 'w-fit',
+                    !consumerSetsMaxWidth && 'max-w-full',
                     size === 'small' ? 'h-6' : 'h-8',
                     readOnly && 'pointer-events-none',
                     disabled && 'pointer-events-none opacity-[0.38]',
