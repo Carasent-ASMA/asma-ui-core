@@ -38,6 +38,8 @@ export const DynamicSelectAutocomplete = forwardRef(
             autocompleteProps,
             loading,
             maxTags,
+            onFocus,
+            onBlur,
         } = props
         const typingDisabled = options.length < 11
 
@@ -285,6 +287,8 @@ export const DynamicSelectAutocomplete = forwardRef(
                             label=''
                             placeholder={placeholder}
                             readOnly={readOnly}
+                            onFocus={onFocus}
+                            onBlur={onBlur}
                             onKeyDown={typingDisabled ? (e) => e.preventDefault() : undefined}
                             autoComplete={typingDisabled ? 'off' : 'on'}
                             slotProps={{

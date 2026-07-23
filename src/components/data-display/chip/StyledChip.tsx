@@ -47,6 +47,9 @@ export interface StyledChipProps {
     /** @figmaProp Clear element (present → chip shows the delete/Clear button) */
     onDelete?: (event: MouseEvent<HTMLElement>) => void
     onClick?: (event: MouseEvent<HTMLElement>) => void
+    /** Forwarded to the chip root — e.g. `stopPropagation` so a chip click in a row doesn't select the row. */
+    onMouseDown?: (event: MouseEvent<HTMLDivElement>) => void
+    onMouseUp?: (event: MouseEvent<HTMLDivElement>) => void
     className?: string
     classes?: ChipClasses
     sx?: unknown
@@ -78,6 +81,8 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
             deleteIcon,
             onDelete,
             onClick,
+            onMouseDown,
+            onMouseUp,
             className,
             classes,
             sx,
@@ -122,6 +127,8 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                 role={interactive ? 'button' : undefined}
                 tabIndex={interactive ? tabIndex ?? 0 : tabIndex}
                 onClick={disabled || readOnly ? undefined : onClick}
+                onMouseDown={disabled || readOnly ? undefined : onMouseDown}
+                onMouseUp={disabled || readOnly ? undefined : onMouseUp}
                 className={cn(
                     // Figma _BASE_Tag (node 14312-26020): label Body Base 16px/lh24, text-icon/body #49525f (delta-700), border/outline #bdc4cf (delta-300), radius 25, gap 4.
                     'box-border inline-flex max-w-full items-center gap-1 rounded-[25px] border border-solid border-delta-300 bg-white text-base text-delta-700',

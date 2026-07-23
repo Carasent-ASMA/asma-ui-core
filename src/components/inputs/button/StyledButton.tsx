@@ -94,6 +94,7 @@ export const StyledButton = ({
     endIcon,
     dataTest,
     error,
+    style: styleProp,
     ...otherProps
 }: StyledButtonProps): JSX.Element => {
     const isLarge = size === 'large' || size === 'medium'
@@ -111,6 +112,12 @@ export const StyledButton = ({
                 BtnStyles[size],
                 className,
             )}
+            // A button with a text label must fit its content: as a flex item in a tight row it would
+            // otherwise shrink below the icon+label, and since the label is `overflow:hidden` + centered
+            // the text clips on BOTH sides ("Apply new versions" → "ply new versic") and the icon gets
+            // squeezed. flex-shrink:0 keeps text buttons at content width; icon-only buttons (no
+            // children) keep the default shrink + square min-width:40px, so toolbars aren't disturbed.
+            style={children ? { flexShrink: 0, ...styleProp } : styleProp}
             ref={refLink}
             data-testid={dataTest}
         >

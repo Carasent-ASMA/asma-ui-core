@@ -78,6 +78,13 @@ interface DynamicSelectCommonProps<TOption extends DynamicSelectOption> {
     getOptionTooltip?: (option: TOption) => React.ReactNode
     /** Node prepended inside the autocomplete text input (e.g. a search icon). */
     startAdornment?: React.ReactNode
+    /**
+     * Forwarded to the underlying autocomplete text input (autocomplete variant only), so
+     * validation/side-effects belong on the field itself instead of a wrapper element — e.g.
+     * clear an error `onFocus`, validate `onBlur`. Merged with the field's own focus handling.
+     */
+    onFocus?: React.FocusEventHandler<HTMLInputElement>
+    onBlur?: React.FocusEventHandler<HTMLInputElement>
     /** Escape hatch to pass any MUI `Autocomplete` prop directly. Applied on top of internal defaults in the autocomplete variant. */
     autocompleteProps?: Partial<
         StyledSelectAutocompleteProps<TOption, boolean | undefined, boolean | undefined, boolean | undefined>

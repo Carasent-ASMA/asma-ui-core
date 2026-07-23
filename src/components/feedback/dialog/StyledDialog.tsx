@@ -197,17 +197,22 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
             <div
                 className={cn(
                     // Figma dialog: radius 8, Dialogue-popup shadow (#22213366, 0 4 40).
-                    // `min-w-0`/`min-h-0`: the paper is a flex child of the centering container; without
-                    // them its automatic min-size = content min-content, which overrides `maxWidth` and
-                    // lets wide content blow past the modal width (clipped, no scrollbar). With min-w-0 the
-                    // paper honours maxWidth so the content overflows and shows a horizontal scrollbar.
-                    'relative z-[1] flex min-h-0 min-w-0 overflow-hidden rounded-lg border-0 bg-white p-0 text-delta-800 shadow-[0px_4px_40px_0px_#22213366]',
+                    'relative z-[1] flex overflow-hidden rounded-lg border-0 bg-white p-0 text-delta-800 shadow-[0px_4px_40px_0px_#22213366]',
                     scroll === 'paper' && 'flex-col',
                     isFullScreen && 'rounded-none',
                     paper.className,
                     classes?.paper,
                 )}
                 style={{
+                    // `minWidth/minHeight: 0`: the paper is a flex child of the centering container; without
+                    // this its automatic min-size = content min-content, which overrides `maxWidth` and lets
+                    // wide content blow past the modal width. Set as an INLINE DEFAULT (not the `min-w-0`
+                    // Tailwind class): ui-core's utilities compile `!important`, and an `!important` class
+                    // would beat a consumer's inline `slotProps.paper.sx` min-width/height. As an inline
+                    // default placed before `resolveSx(paper.sx)`, a consumer's paper `sx` sizing overrides
+                    // it (later inline wins), while a plain dialog still honours `maxWidth`.
+                    minWidth: 0,
+                    minHeight: 0,
                     ...(!isFullScreen && maxWidthPx ? { maxWidth: maxWidthPx } : {}),
                     ...(isFullScreen
                         ? { width: '100%', maxWidth: '100%', height: '100%', maxHeight: '100%' }

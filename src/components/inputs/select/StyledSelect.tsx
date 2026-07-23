@@ -21,6 +21,7 @@ import {
     useRef,
     useState,
     type CSSProperties,
+    type FocusEventHandler,
     type KeyboardEvent,
     type ReactElement,
     type ReactNode,
@@ -89,6 +90,9 @@ export interface StyledSelectProps {
     labelId?: string
     children?: ReactNode
     MenuProps?: { className?: string }
+    /** Forwarded to the trigger button, merged with the internal focus tracking (e.g. validate on blur). */
+    onFocus?: FocusEventHandler<HTMLButtonElement>
+    onBlur?: FocusEventHandler<HTMLButtonElement>
 }
 
 /**
@@ -119,6 +123,8 @@ export const StyledSelect = ({
     variant,
     children,
     MenuProps,
+    onFocus,
+    onBlur,
 }: StyledSelectProps): JSX.Element => {
     const ctx = useFormControlContext()
     const isStandard = variant === 'standard'
@@ -260,8 +266,14 @@ export const StyledSelect = ({
                 aria-disabled={isDisabled ? true : undefined}
                 disabled={isDisabled}
                 {...getReferenceProps({ onKeyDown: handleTriggerKeyDown })}
-                onFocus={() => setFocused(true)}
-                onBlur={() => setFocused(false)}
+                onFocus={(event) => {
+                    setFocused(true)
+                    onFocus?.(event)
+                }}
+                onBlur={(event) => {
+                    setFocused(false)
+                    onBlur?.(event)
+                }}
                 style={{ minWidth: hasValue && !isStandard ? 105 : undefined }}
                 className={cn(
                     'relative flex w-full items-center justify-between bg-transparent text-left text-delta-800 outline-none',

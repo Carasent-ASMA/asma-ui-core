@@ -1,5 +1,6 @@
 import { useEffect, useRef, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react'
 import { cn } from 'src/helpers/cn'
+import { consumerOverrides } from 'src/helpers/classOverride'
 
 export interface StyledMenuListProps {
     children?: ReactNode
@@ -29,6 +30,13 @@ export const StyledMenuList = ({
 }: StyledMenuListProps): JSX.Element => {
     const listRef = useRef<HTMLUListElement>(null)
 
+    // `cn` is plain clsx (tailwind-merge was dropped in Phase 0), so a consumer's padding utility in
+    // `className` can't override the hardcoded defaults below: both end up in the class list and
+    // Tailwind emits the axis utilities (`px`/`py`) after the `p` shorthand, so `px-0`/`py-2` beat a
+    // consumer `p-4` on source order (→ 0 horizontal padding). Drop our defaults when the consumer
+    // sets any padding so their className takes effect (e.g. ToolbarFilterPopover's `p-4`).
+    const hasCustomPadding = consumerOverrides(className, 'padding')
+
     useEffect(() => {
         if (autoFocus) focusableItems(listRef.current)[0]?.focus()
     }, [autoFocus])
@@ -53,7 +61,12 @@ export const StyledMenuList = ({
         <ul
             ref={listRef}
             role='menu'
-            className={cn('m-0 list-none px-0 outline-none', disablePadding ? 'py-0' : 'py-2', className)}
+            className={cn(
+                'm-0 list-none outline-none',
+                !hasCustomPadding && 'px-0',
+                !hasCustomPadding && (disablePadding ? 'py-0' : 'py-2'),
+                className,
+            )}
             style={{ fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}
             onClick={onClick}
             onKeyDown={handleKeyDown}

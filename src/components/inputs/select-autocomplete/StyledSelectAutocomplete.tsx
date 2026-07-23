@@ -108,6 +108,8 @@ export interface StyledSelectAutocompleteProps<
         details?: { option: T },
     ) => void
     getOptionLabel?: (option: T) => string
+    /** Stable React key per option, independent of the label — required when labels can collide. */
+    getOptionKey?: (option: T) => string | number
     isOptionEqualToValue?: (option: T, value: T) => boolean
     renderOption?: (props: OptionLiProps, option: T, state: AutocompleteRenderOptionState) => ReactNode
     renderValue?: (value: MultiValue<T>, getItemProps: (opts: { index: number }) => OptionLiProps) => ReactNode
@@ -178,6 +180,7 @@ export function StyledSelectAutocomplete<
     value,
     onChange,
     getOptionLabel,
+    getOptionKey,
     isOptionEqualToValue,
     renderOption,
     renderValue,
@@ -353,7 +356,7 @@ export function StyledSelectAutocomplete<
               ? renderValue(selectedArray, ({ index }) => ({ 'data-index': index }))
               : selectedArray.map((option, index) => (
                     <StyledChip
-                        key={`${getLabel(option)}-${index}`}
+                        key={getOptionKey ? getOptionKey(option) : `${getLabel(option)}-${index}`}
                         dataTest={`selected-chip-${getLabel(option)}`}
                         label={getLabel(option)}
                         readOnly={readOnly}
@@ -471,7 +474,7 @@ export function StyledSelectAutocomplete<
                 // Don't highlight a disabled option on hover.
                 onMouseMove: () => setActiveIndex(optionDisabled ? null : index),
             }),
-            key: `${getLabel(option)}-${index}`,
+            key: getOptionKey ? String(getOptionKey(option)) : `${getLabel(option)}-${index}`,
             ref: (node: HTMLLIElement | null) => {
                 listRef.current[index] = node
             },

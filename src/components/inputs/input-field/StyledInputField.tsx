@@ -296,7 +296,10 @@ export const StyledInputField = ({
               ? 'w-full resize-none overflow-hidden p-0 pl-0 pr-0 leading-[23px]'
               : cn('w-full', styles['Input--singleLine']),
         'disabled:text-delta-300',
-        readOnly && 'bg-delta-50 text-delta-800',
+        // Read-only fill lives on the shell (below) so it covers the whole box incl. the multiline
+        // padding; keep the field itself transparent to avoid a `bg-transparent`/`bg-delta-50` clash
+        // (cn here is plain clsx, no tailwind-merge, so a competing bg is order-dependent/flaky).
+        readOnly && 'text-delta-800',
         inputSlotClass,
     )
     const singleLineDataProps =
@@ -329,6 +332,9 @@ export const StyledInputField = ({
                                 styles['AdornmentList'],
                                 userEndAdornment && styles['AdornmentList--endAdornment'],
                             ),
+                        // Read-only surface: fill the whole box (matches the delta-200 border, radius 4).
+                        // On the shell (not the input) so it also covers the multiline field's padding.
+                        readOnly && 'rounded bg-delta-50',
                     )}
                     ref={mergedInputSlotRef}
                     onMouseDown={inputSlotOnMouseDown}
@@ -435,27 +441,27 @@ export const StyledInputField = ({
             </div>
 
             {!readOnly && (helperText != null || error) && (
-                <p
+                <div
                     id={helperId}
                     className={cn(
-                        // Figma "Helper" 14/lh20; non-error color text-icon/helper delta/600 #626e7e
-                        'm-0 text-sm leading-5 tracking-[0.03333em]',
-                        !slotProps?.formHelperText && 'mr-[14px] mt-[3px] min-h-6',
-                        error
-                            ? cn(
-                                  'text-error-500',
-                                  !slotProps?.formHelperText?.hideErrorIcon && 'flex items-start gap-1',
-                              )
-                            : 'text-delta-600',
+                        // Figma "Helper text" row (15561-37857 / 34634-148726): 24px tall, pt 4px, gap 4px.
+                        !slotProps?.formHelperText &&
+                            'box-border mr-[14px] min-h-[24px] pt-1',
+                        error &&
+                            !slotProps?.formHelperText?.hideErrorIcon &&
+                            'flex items-start gap-1 text-error-500',
+                        !error && 'text-delta-600',
                         slotProps?.formHelperText?.className,
                     )}
                     style={resolveSx(slotProps?.formHelperText?.sx)}
                 >
                     {error && !slotProps?.formHelperText?.hideErrorIcon && (
-                        <ErrorOutlineIcon width={20} height={20} className='min-w-5 shrink-0 translate-y-[2px]' />
+                        <ErrorOutlineIcon width={20} height={20} className='min-w-5 shrink-0' />
                     )}
-                    {error ? (helperText ?? 'Required') : helperText}
-                </p>
+                    <span className='text-sm leading-5 tracking-[0.03333em]'>
+                        {error ? (helperText ?? 'Required') : helperText}
+                    </span>
+                </div>
             )}
         </div>
     )

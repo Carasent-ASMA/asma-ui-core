@@ -8,6 +8,9 @@ export type StyledRadioGroupProps = {
     defaultValue?: RadioValue
     onValueChange?: (value: RadioValue) => void
     disabled?: boolean
+    /** Non-interactive but not visually disabled (e.g. a submitted/read-only questionnaire): the
+     * current selection is shown but can't change. */
+    readOnly?: boolean
     dataTest?: string
     error?: boolean
     errorText?: string
@@ -22,7 +25,7 @@ export type StyledRadioGroupProps = {
  * error/helper text row. TASK-201.
  */
 export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps>(
-    ({ value, defaultValue, onValueChange, disabled, dataTest, error, errorText, helperText, children, name, ...rest }, ref) => {
+    ({ value, defaultValue, onValueChange, disabled, readOnly, dataTest, error, errorText, helperText, children, name, ...rest }, ref) => {
         const helperId = useId()
         const errorId = useId()
         const generatedName = useId()
@@ -33,6 +36,7 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
         const selected = isControlled ? value : uncontrolled
 
         const onSelect = (next: RadioValue) => {
+            if (readOnly) return
             if (!isControlled) setUncontrolled(next)
             onValueChange?.(next)
         }
@@ -63,7 +67,15 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
                 data-testid={dataTest}
                 aria-describedby={describedById}
                 aria-invalid={error}
-                className={clsx('flex items-start', !hasDirection && 'flex-col', rest.className)}
+                aria-readonly={readOnly || undefined}
+                // readOnly: keep the normal (non-disabled) look but block interaction — selection can't
+                // change (onSelect early-returns) and clicks/focus are inert.
+                className={clsx(
+                    'flex items-start',
+                    !hasDirection && 'flex-col',
+                    readOnly && 'pointer-events-none',
+                    rest.className,
+                )}
             >
                 <RadioGroupContext.Provider value={contextValue}>{children}</RadioGroupContext.Provider>
 

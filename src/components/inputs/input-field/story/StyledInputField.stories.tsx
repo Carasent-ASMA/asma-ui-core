@@ -100,9 +100,16 @@ export const Error: Story = {
     play: async ({ canvas }) => {
         const input = canvas.getByTestId('storybook-input')
         const shell = canvas.getByTestId('storybook-input-shell')
+        const helper = canvas.getByText('Required field').parentElement!
 
         await expect(shell.getBoundingClientRect().height).toBe(40)
         await expect(input.getBoundingClientRect().height).toBe(40)
+        // Figma helper row: 4px below field, 24px total row height (node 15561-37857).
+        await expect(getComputedStyle(helper).paddingTop).toBe('4px')
+        await expect(helper.getBoundingClientRect().height).toBe(24)
+        await expect(helper.getBoundingClientRect().top - shell.getBoundingClientRect().bottom).toBe(0)
+        const icon = helper.querySelector('svg')!
+        await expect(icon.getBoundingClientRect().top - shell.getBoundingClientRect().bottom).toBe(4)
     },
 }
 

@@ -12,6 +12,9 @@ export interface StyledMenuItemProps {
     /** @figmaProp content — Type (Only Label / Icon / Checkbox / Check mark) via composition */
     children?: ReactNode
     onClick?: (event: MouseEvent<HTMLLIElement>) => void
+    /** Forwarded to the `<li>` — e.g. `stopPropagation` so a menu-item mousedown doesn't dismiss the menu. */
+    onMouseDown?: (event: MouseEvent<HTMLLIElement>) => void
+    onMouseUp?: (event: MouseEvent<HTMLLIElement>) => void
     /** @figmaProp State = true→"Disabled" */
     disabled?: boolean
     /** @figmaProp State = true→"Selected" */
@@ -33,6 +36,8 @@ export interface StyledMenuItemProps {
 export const StyledMenuItem = ({
     children,
     onClick,
+    onMouseDown,
+    onMouseUp,
     disabled,
     selected,
     dense,
@@ -60,6 +65,8 @@ export const StyledMenuItem = ({
             data-test={dataTest}
             data-testid={dataTestId}
             onClick={disabled ? undefined : onClick}
+            onMouseDown={disabled ? undefined : onMouseDown}
+            onMouseUp={disabled ? undefined : onMouseUp}
             onKeyDown={handleKeyDown}
             className={cn(
                 // Figma Menus item (node 16073-19226): h40, py8, label Body Base 16px text-icon/body

@@ -1,4 +1,12 @@
-import { useId, useMemo, useState, type CSSProperties, type ReactNode } from 'react'
+import {
+    useId,
+    useMemo,
+    useState,
+    type CSSProperties,
+    type FocusEventHandler,
+    type MouseEventHandler,
+    type ReactNode,
+} from 'react'
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
 import type { FieldSize } from '../inputs/field-styles'
@@ -17,6 +25,11 @@ export interface FormControlProps {
     style?: CSSProperties
     sx?: unknown
     id?: string
+    /** Forwarded to the container element (focus/blur bubble from inner controls) — e.g. clear a
+     * validation error on focus, validate on blur, without a separate wrapper element. */
+    onFocus?: FocusEventHandler<HTMLDivElement>
+    onBlur?: FocusEventHandler<HTMLDivElement>
+    onClick?: MouseEventHandler<HTMLDivElement>
 }
 
 /**
@@ -35,6 +48,9 @@ export const StyledFormControl = ({
     style,
     sx,
     id,
+    onFocus,
+    onBlur,
+    onClick,
 }: FormControlProps): JSX.Element => {
     const generatedId = useId()
     const [focused, setFocused] = useState(false)
@@ -60,6 +76,9 @@ export const StyledFormControl = ({
             <div
                 className={cn('relative inline-flex flex-col', fullWidth && 'w-full', className)}
                 style={{ ...resolveSx(sx), ...style }}
+                onFocus={onFocus}
+                onBlur={onBlur}
+                onClick={onClick}
             >
                 {children}
             </div>

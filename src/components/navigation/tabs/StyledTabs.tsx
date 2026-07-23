@@ -15,6 +15,7 @@ import {
 } from 'react'
 import type { StyledTabProps } from './StyledTab'
 import { cn } from 'src/helpers/cn'
+import { consumerOverrides } from 'src/helpers/classOverride'
 import { resolveSx } from 'src/helpers/sx'
 import { ChevronLeftIcon, ChevronRightIcon } from 'src/components/icons'
 import { TabsContext, type TabValue } from './TabsContext'
@@ -126,6 +127,12 @@ export const StyledTabs: FC<StyledTabsProps> = ({
 
     const showButtons = isScrollable && scrollButtons !== false && (scrollButtons === true || overflow.left || overflow.right)
 
+    // The tablist card carries a Figma 16px inset (`px-4`) by default. But `cn` is plain clsx (no
+    // tailwind-merge), so a consumer `className='px-0'` would NOT win — both land and Tailwind's fixed
+    // ordering keeps `px-4`. Drop the default when the consumer supplies any horizontal padding so the
+    // override is reliable (same pattern as StyledMenuList). See ui-core-mui-free-migration SKILL.
+    const consumerSetsPadding = consumerOverrides(className, 'padding-x')
+
     const contextValue = useMemo(
         () => ({ value, size, onSelect, register }),
         [value, size, onSelect, register],
@@ -137,7 +144,7 @@ export const StyledTabs: FC<StyledTabsProps> = ({
     return (
         <TabsContext.Provider value={contextValue}>
             <div
-                className={cn('relative flex items-center rounded-t-lg bg-white px-4', className)}
+                className={cn('relative flex items-center rounded-t-lg bg-white', !consumerSetsPadding && 'px-4', className)}
                 style={resolveSx(sx)}
             >
                 {showButtons && (
