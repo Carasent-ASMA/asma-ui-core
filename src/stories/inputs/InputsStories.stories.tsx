@@ -1,5 +1,6 @@
 import React from 'react'
-import type { Meta } from '@storybook/react-vite'
+import type { Meta, StoryObj } from '@storybook/react-vite'
+import { expect } from 'storybook/test'
 import { StyledInputField } from 'src/components/inputs/input-field'
 import { StyledFormLabel } from 'src/components/data-display/form-label'
 
@@ -93,4 +94,16 @@ export const FormInputs = (): JSX.Element => {
             </div>
         </div>
     )
+}
+
+/** Every outlined single-line field in the matrix must measure 40px (Figma standard). */
+export const FormInputsHeightConsistency: StoryObj<typeof StyledInputField> = {
+    render: () => <FormInputs />,
+    play: async ({ canvas }) => {
+        const shells = canvas.getAllByTestId('not-filled-shell')
+        await expect(shells.length).toBeGreaterThan(0)
+        for (const shell of shells) {
+            await expect(shell.getBoundingClientRect().height).toBe(40)
+        }
+    },
 }

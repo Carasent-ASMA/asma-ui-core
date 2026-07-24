@@ -1,13 +1,12 @@
 import { StyledInputField } from 'src/datetime/shared-components/StyledInputField'
 import { DatePickerButton } from './DatePickerButton'
 import { useDatePickerMask } from '../hooks/useDatePickerMask'
+import { DATE_INPUT_FONT_FAMILY } from 'src/helpers/inputMask'
 import { useEffect, useState } from 'react'
 import { getValue } from '../helpers'
 import { useDatePickerValidation } from '../hooks/useDatePickerValidation'
 import { parse, isValid as isValidDateFns } from 'date-fns'
 import type { DayPickerProps as ReactDayPickerProps, Matcher } from 'react-day-picker'
-import { cn } from 'src/datetime/helpers/cn'
-import { HelperTextWithTooltip } from './HelperTextWithTooltip'
 
 export interface IBaseDatePickerInput {
     dataTest: string
@@ -66,15 +65,24 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
     const { maskRef } = useDatePickerMask()
     const [value, setValue] = useState(selected ? getValue(selected, dateFormat) : '')
 
+    // Keep `value` in sync with `selected`/`dateFormat` without an effect — the React-recommended
+    // "adjusting state during render" pattern (https://react.dev/learn/you-might-not-need-an-effect
+    // #adjusting-some-state-when-a-prop-changes). `value` is also locally editable (see `onChange`
+    // below, driven by user keystrokes), so it can't be purely derived on every render; it only
+    // needs to re-sync when the controlling props actually change (e.g. a date picked on the
+    // calendar, or the parent resetting `selected`) — same change-detection as the effect it
+    // replaces (both compare `selected`/`dateFormat` by reference).
+    const [syncedProps, setSyncedProps] = useState({ selected, dateFormat })
+    if (selected !== syncedProps.selected || dateFormat !== syncedProps.dateFormat) {
+        setSyncedProps({ selected, dateFormat })
+        setValue(selected ? getValue(selected, dateFormat) : '')
+    }
+
     const defaultHelper = locale?.code?.startsWith('nb') ? 'DD/MM/ÅÅÅÅ' : 'DD/MM/YYYY'
     const effectiveDefaultHelper = hideDefaultHelperText ? undefined : defaultHelper
 
     const hasError = !!(validationError || error)
     const rawText = hasError ? (errorText ?? errHelperText) : helperText ?? effectiveDefaultHelper
-
-    useEffect(() => {
-        setValue(selected ? getValue(selected, dateFormat) : '')
-    }, [selected, dateFormat])
 
 
     useEffect(() => {
@@ -105,8 +113,7 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
         clearValidation,
     ])
 
-    const digits = value.replace(/\D/g, '')
-    const hasDigits = digits.length > 0
+    const hasDigits = /\d/.test(value)
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const raw = e.target.value
@@ -162,7 +169,6 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
     }
 
     const width = readOnly ? 120 : 160
-    const bottomSpace = 34
     const height = readOnly ? 40 : 75
 
     return (
@@ -186,36 +192,29 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
                             style={{ width }}
                             error={hasError}
                             onBlur={!readOnly ? handleBlur : undefined}
-                            helperText={null}
+                            // Render the helper/error through the InputField's own helper row (single
+                            // source — don't reinvent it); `rawText` is the resolved default/helper/error.
+                            helperText={rawText}
                             slotProps={{
-                                formHelperText: { sx: { m: 0 } },
+                                formHelperText: { sx: { marginTop: '4px', marginLeft: 0, marginRight: 0 } },
                                 htmlInput: {
+                                    // The editable field renders the space-scaffold mask ('  /  /    '),
+                                    // so it MUST use a monospace font — see DATE_INPUT_FONT_FAMILY. With a
+                                    // proportional font (Roboto) the day/year space slots collapse to
+                                    // hairlines and the mask visibly loses its spaces (regression).
                                     ...(readOnly
                                         ? {}
-                                        : {
-                                              inputMode: 'numeric' as const,
-                                              style: { fontFamily: 'monospace' },
-                                          }),
+                                        : { inputMode: 'numeric' as const, style: { fontFamily: DATE_INPUT_FONT_FAMILY } }),
                                 },
                             }}
                             onChange={onChange}
                         />
                     </div>
-                    {!readOnly && (
-                        <div
-                            className={cn('pt-1 text-[14px]', hasError ? 'text-error-500' : 'text-delta-600')}
-                            style={{
-                                maxWidth: width,
-                                maxHeight: bottomSpace,
-                                lineHeight: '16px',
-                            }}
-                        >
-                            <HelperTextWithTooltip text={rawText} hasError={hasError} />
-                        </div>
-                    )}
                 </div>
 
-                {!hideCalendar && !readOnly && <DatePickerButton onClick={onClick} disabled={!!rest.disabled} />}
+                {!hideCalendar && !readOnly && (
+                    <DatePickerButton onClick={onClick} disabled={!!rest.disabled} localeCode={locale?.code} />
+                )}
             </div>
         </div>
     )

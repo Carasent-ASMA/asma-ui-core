@@ -1,13 +1,23 @@
 import { format, isBefore, isValid } from 'date-fns'
-import PopupStateProvider from 'material-ui-popup-state'
+import { PopupState as PopupStateProvider } from 'src/hooks/usePopupState'
 import { useState, type ChangeEvent } from 'react'
-import { ClickAwayListener } from '@mui/material'
+import { ClickAwayListener } from 'src/components/mui-compat'
 import { TimePickerPopper } from './TimePickerPopper'
 import { getTimeFromValue } from './helpers/getTimeFromValue'
 import { TimePickerInput } from './TimePickerInput'
-import type { PopupState } from 'material-ui-popup-state/hooks'
+import type { PopupState } from 'src/hooks/usePopupState'
 import type { StyledTimePickerProps } from './types'
 
+/**
+ * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#15561-37391
+ * Figma has no distinct time-picker-popover component — the trigger is the outlined **Input field**
+ * (`field-styles`: 40px, border delta-500 / hover gama-300 / focus gama-400 / error error-500) with
+ * a trailing **clock icon** (delta-700 like the select/search field icons; delta-300 when disabled).
+ * The dropdown follows the **Menus** surface (delta-300 border + Menus shadow `0 2 4 rgba(34,33,51,
+ * .15)`): scrollable hour/minute columns of 36px cells — hover delta-50, "now" gama-50 (like the
+ * calendar "today"), selected gama-500 white — plus an eraser + confirm footer. State (Enabled/Focus/
+ * Error/Disabled) ← the field. Non-annotated props are behavioral.
+ */
 export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
     const { value, onSelect, notBeforeTime } = props
     const externalValue = value ? format(value, 'HH:mm') : ''

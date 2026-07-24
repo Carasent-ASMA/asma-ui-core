@@ -4,6 +4,10 @@ import { useDynamicToolbarLayout } from '../../custom/module/header-layout/Dynam
 import clsx from 'clsx'
 
 /**
+ * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#16741-35884 (Design-System · "Filter button") — button-only variant
+ * of `StyledFilterMenu` (no popover). Aligned `StyledButton` (Outlined) + the "Filters applied" badge:
+ * an 8px `gama-400` dot at top-right when `filterIsActive`.
+ *
  * Custom props:
  * @param filterIsActive - needed to determine whether or not to show the dot in the top right corner indicating some changes were made
  * @param hideLabel - icon-only mode. When omitted, follows the surrounding DynamicToolbar layout (filterIconOnly).
@@ -32,6 +36,7 @@ export const StyledFilterButton: React.FC<StyledButtonProps & StyledFilterMenuPr
                 <StyledButton
                     {...props}
                     type='button'
+                    aria-label={isLabelHidden ? (label ?? 'Filter') : undefined}
                     startIcon={<FilterIcon width={size === 'large' ? 24 : 20} height={size === 'large' ? 24 : 20} />}
                     variant={variant}
                     size={size}

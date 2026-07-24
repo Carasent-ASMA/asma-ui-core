@@ -1,5 +1,10 @@
+// Figma "Label / Highlighting" (wXrXt5uKNNzV2DnQCgyYZH#15181-43701): h16, px6, radius 3,
+// text = "X-small Semibold uppercase" (Roboto SemiBold 11/12, letter-spacing 5% = 0.55px).
+// Colour default is the generic gama label; highlighting consumers override bg + text via className.
 .styled-label {
-    font-size: 10px;
+    font-size: 11px;
+    line-height: 12px;
+    letter-spacing: 0.55px;
     font-weight: 600;
     display: flex;
     align-items: center;

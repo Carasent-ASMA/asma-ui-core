@@ -18,6 +18,6 @@ const translations = {
     },
 }
 
-export function useTranslations(locale: ILocale = 'en') {
+export function useTranslations(locale: ILocale = 'en'): typeof translations.en {
     return useMemo(() => translations[locale] ?? translations.en, [locale])
 }

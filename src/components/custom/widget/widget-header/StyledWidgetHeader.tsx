@@ -4,6 +4,10 @@ import { StyledWidgetTitle } from '../widget-title/StyledWidgetTitle'
 import style from './StyledWidgetHeader.module.scss'
 import { cn } from 'src/helpers/cn'
 
+/**
+ * @figmaNode none — layout wrapper (padding 16, space-between): DS `StyledWidgetTitle` (Section title
+ * 18/28 delta-800) + right-aligned actions slot. No colours of its own.
+ */
 export const StyledWidgetHeader: React.FC<{
     actions?: ReactNode
     title?: string

@@ -1,8 +1,16 @@
-import type { AutocompleteRenderInputParams } from '@mui/material'
+import type { AutocompleteRenderInputParams } from '../StyledSelectAutocomplete'
 import type { StoryObj, Meta } from '@storybook/react-vite'
 import { StyledSelectAutocomplete, type StyledSelectAutocompleteProps } from '../StyledSelectAutocomplete'
 import { ControlledAutocomplete, top100Films, type Film } from './components/StyledSelectAutocompleteExample'
-import { useMemo, useState, type AriaRole, type FC, type SyntheticEvent } from 'react'
+import {
+    useMemo,
+    useState,
+    type AriaRole,
+    type ComponentProps,
+    type CSSProperties,
+    type FC,
+    type SyntheticEvent,
+} from 'react'
 import { StyledInputField } from '../../input-field'
 import { expect, within, type UserEventObject } from 'storybook/test'
 import { generateOptions, withRenderCounter } from './test-utils/perf'
@@ -16,6 +24,14 @@ declare global {
 const meta = {
     title: 'Inputs/Styled Select Autocomplete',
     component: StyledSelectAutocomplete,
+    parameters: {
+        docs: {
+            description: {
+                component:
+                    'Figma: [Autocomplete](https://www.figma.com/design/wXrXt5uKNNzV2DnQCgyYZH/Design-System?node-id=20474-27966) / Recipients pattern node 35715-151456.',
+            },
+        },
+    },
     args: {
         dataTest: 'autocomplete',
         autoHeight: true,
@@ -103,6 +119,40 @@ export const SingleSelectVariant: SingleStory = {
     },
 }
 
+/**
+ * Read-only must not open the popper: neither clicking the input nor pressing ArrowDown should
+ * mount the `listbox`. Read-only is a display state (selected value(s) shown, no interaction).
+ */
+export const ReadOnlyDoesNotOpen: SingleStory = {
+    render: () => {
+        const Wrapper = () => {
+            const [value] = useState<Film | null>(top100Films?.[0] || null)
+            return (
+                <StyledSelectAutocomplete
+                    dataTest='readonly-autocomplete'
+                    readOnly
+                    options={top100Films.slice(0, 3)}
+                    size='small'
+                    value={value}
+                    getOptionLabel={(option) => option.title}
+                    renderInput={(params) => <StyledInputField {...params} dataTest='input' />}
+                />
+            )
+        }
+        return <Wrapper />
+    },
+    play: async ({ canvasElement, userEvent }) => {
+        const { canvas, input } = getAutocomplete(canvasElement)
+
+        await userEvent.click(input)
+        await expect(canvas.queryByRole('listbox')).not.toBeInTheDocument()
+
+        input.focus()
+        await userEvent.keyboard('{ArrowDown}')
+        await expect(canvas.queryByRole('listbox')).not.toBeInTheDocument()
+    },
+}
+
 export const FiltersWhenTyping: Story = {
     render: (args) => <ControlledAutocomplete {...args} />,
     play: async ({ canvasElement, userEvent }) => {
@@ -184,15 +234,18 @@ export const SelectAllTogglesAllOptions: Story = {
 
         await userEvent.click(selectAllCheckbox)
 
-        await expect(canvas.getByRole('button', { name: /The Shawshank Redemption/i })).toBeInTheDocument()
-        await expect(canvas.getByRole('button', { name: /The Godfather/i })).toBeInTheDocument()
-        await expect(canvas.getByRole('button', { name: /The Godfather: Part II/i })).toBeInTheDocument()
+        // The chip itself is not a button (a delete-only chip is a plain container, StyledChip's
+        // `interactive` rule); only its delete control is, named "Remove <title>". Exact names:
+        // /The Godfather/ would also match "The Godfather: Part II" (two chips).
+        await expect(canvas.getByRole('button', { name: 'Remove The Shawshank Redemption' })).toBeInTheDocument()
+        await expect(canvas.getByRole('button', { name: 'Remove The Godfather' })).toBeInTheDocument()
+        await expect(canvas.getByRole('button', { name: 'Remove The Godfather: Part II' })).toBeInTheDocument()
 
         await userEvent.click(selectAllCheckbox)
 
-        await expect(canvas.queryByRole('button', { name: /The Shawshank Redemption/i })).not.toBeInTheDocument()
-        await expect(canvas.queryByRole('button', { name: /The Godfather/i })).not.toBeInTheDocument()
-        await expect(canvas.queryByRole('button', { name: /The Godfather: Part II/i })).not.toBeInTheDocument()
+        await expect(canvas.queryByRole('button', { name: 'Remove The Shawshank Redemption' })).not.toBeInTheDocument()
+        await expect(canvas.queryByRole('button', { name: 'Remove The Godfather' })).not.toBeInTheDocument()
+        await expect(canvas.queryByRole('button', { name: 'Remove The Godfather: Part II' })).not.toBeInTheDocument()
     },
 }
 
@@ -447,5 +500,104 @@ export const Performance_MultipleChips: Story = {
 
         const chips = canvas.getAllByRole('button') // chips are buttons
         expect(chips.length).toBeGreaterThan(40)
+    },
+}
+
+// ─── Gallery ────────────────────────────────────────────────────────────────
+// Figma Autocomplete (node 20474-29075) draws State (Enabled/Hovered/Focused/Error/Read-only) ×
+// Filled (off = placeholder · on = tag chips). This gallery replicates that matrix with visible grid
+// borders. The trigger is a `StyledInputField`, so hover is forced via the pseudo-state class; the
+// live open/type/select behaviour is covered by the interaction stories above.
+const GalleryCell: FC<{
+    filled: boolean
+    error?: boolean
+    disabled?: boolean
+    readOnly?: boolean
+    fieldClassName?: string
+}> = ({ filled, error, disabled, readOnly, fieldClassName }) => {
+    const [value, setValue] = useState<Film[]>(filled ? top100Films.slice(0, 3) : [])
+
+    return (
+        <StyledSelectAutocomplete<Film, true, false, false>
+            dataTest='gallery-autocomplete'
+            multiple
+            size='small'
+            autoHeight
+            options={top100Films}
+            value={value}
+            onChange={(_, val) => setValue(val)}
+            disabled={disabled}
+            readOnly={readOnly}
+            getOptionLabel={(option) => option?.title || ''}
+            renderInput={(params) => (
+                <StyledInputField
+                    {...params}
+                    dataTest='gallery-autocomplete-input'
+                    label='Recipients'
+                    placeholder='Favorites'
+                    error={error}
+                    className={fieldClassName}
+                />
+            )}
+        />
+    )
+}
+
+export const Gallery: Story = {
+    render: () => {
+        const cell: CSSProperties = { padding: 16, border: '1px solid #bdc4cf', verticalAlign: 'top', width: 340 }
+        const head: CSSProperties = {
+            ...cell,
+            width: 'auto',
+            textAlign: 'left',
+            fontWeight: 600,
+            color: '#49525f',
+            whiteSpace: 'nowrap',
+            background: '#f0f2f4',
+        }
+
+        const ROWS: { label: string; props: Partial<ComponentProps<typeof GalleryCell>> }[] = [
+            { label: 'Enabled', props: {} },
+            { label: 'Hovered', props: { fieldClassName: 'pseudo-hover' } },
+            { label: 'Error', props: { error: true } },
+            { label: 'Disabled', props: { disabled: true } },
+            { label: 'Read-only', props: { readOnly: true } },
+        ]
+        const COLS = [
+            { key: 'off', label: 'Filled = off', filled: false },
+            { key: 'on', label: 'Filled = on', filled: true },
+        ] as const
+
+        return (
+            <div>
+                <h3 style={{ marginBottom: 12 }}>Autocomplete — State × Filled</h3>
+                <table style={{ borderCollapse: 'collapse' }}>
+                    <thead>
+                        <tr>
+                            <th style={head}>State \ Filled</th>
+                            {COLS.map((c) => (
+                                <th key={c.key} style={head}>
+                                    {c.label}
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {ROWS.map((row) => (
+                            <tr key={row.label}>
+                                <th scope='row' style={head}>
+                                    {row.label}
+                                </th>
+                                {COLS.map((col) => (
+                                    <td key={col.key} style={cell}>
+                                        <GalleryCell filled={col.filled} {...row.props} />
+                                    </td>
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        )
     },
 }

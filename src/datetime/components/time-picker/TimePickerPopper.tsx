@@ -1,6 +1,6 @@
-import { bindPopper, type PopupState } from 'material-ui-popup-state/hooks'
+import { bindPopper, type PopupState } from 'src/hooks/usePopupState'
 import { TimePickerBody } from './components/TimePickerBody'
-import { Fade, Paper, Popper } from '@mui/material'
+import { Fade, Paper, Popper } from 'src/components/mui-compat'
 import type { StyledTimePickerProps } from './types'
 
 import { EraserIcon } from 'src/datetime/shared-components/EraserIcon'
@@ -17,13 +17,13 @@ export const TimePickerPopper: React.FC<StyledTimePickerProps & { popupState: Po
     return (
         <Popper
             {...bindPopper(popupState)}
-            className={clsx(styles['shadow-mui'])}
             transition
             style={{ zIndex: '1300', position: 'absolute' }}
         >
             {({ TransitionProps }) => (
                 <Fade {...TransitionProps} timeout={350}>
-                    <Paper style={{ paddingBottom: '1px' }}>
+                    {/* DS Menus dropdown surface (delta-300 border + Menus shadow), not the heavy MUI elevation. */}
+                    <Paper elevation={0} className={clsx(styles['time-picker-surface'])} style={{ paddingBottom: '1px' }}>
                         <TimePickerBody dataTest={`${dataTest}-time-picker-body`} value={value} onSelect={onSelect} />
                         <div
                             style={{

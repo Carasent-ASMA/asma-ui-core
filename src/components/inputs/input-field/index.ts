@@ -1,2 +1,2 @@
 export * from './StyledInputField'
-export { type TextFieldProps } from '@mui/material'
+export type { StyledInputFieldProps as TextFieldProps } from './StyledInputField'

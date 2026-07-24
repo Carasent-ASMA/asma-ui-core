@@ -24,7 +24,7 @@ export function useColumnVirtualizer<TData extends { id: string | number }>({
 
     const columnVirtualizer = useVirtualizer<HTMLDivElement, HTMLTableCellElement>({
         count: centerColumns.length,
-        getScrollElement: () => scrollRef?.current || null,
+        getScrollElement: () => scrollRef?.current ?? null,
         estimateSize: (index) => centerColumns[index]?.getSize?.() ?? 120,
         horizontal: true,
         overscan: 2,

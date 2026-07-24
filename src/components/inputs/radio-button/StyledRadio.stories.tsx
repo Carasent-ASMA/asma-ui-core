@@ -1,11 +1,9 @@
-import type { Meta } from '@storybook/react-vite'
-import type { StoryObj } from '@storybook/react-vite'
-import { StyledRadio } from './StyledRadio'
-import { StyledRadioGroup } from './StyledRadioGroup'
-import { StyledFormControlLabel } from 'asma-ui-core'
-import { useState } from 'react'
-import type { RadioProps } from '@mui/material'
+import type { Meta, StoryObj } from '@storybook/react-vite'
+import { useState, type ComponentProps } from 'react'
 import { expect } from 'storybook/test'
+import { StyledFormControlLabel } from 'src/components/miscellaneous/StyledFormControlLabel'
+import { StyledRadio } from './base-ui/StyledRadio'
+import { StyledRadioGroup } from './base-ui/StyledRadioGroup'
 
 const meta = {
     title: 'Inputs/Styled Radio',
@@ -18,7 +16,10 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof StyledRadio>
 
-const RadioWrapper = ({ label, ...args }: RadioProps & { dataTest: string; label: string }) => {
+const RadioWrapper = ({
+    label,
+    ...args
+}: ComponentProps<typeof StyledRadio> & { label: string }) => {
     const [selected, setSelected] = useState(args.checked ?? false)
 
     return (
@@ -41,7 +42,6 @@ export const Unchecked_Focused: Story = {
     play: async ({ canvas }) => {
         const radio = canvas.getByRole('radio', { name: 'Focused' })
         radio.focus()
-
         await expect(radio).toHaveFocus()
     },
 }
@@ -51,11 +51,8 @@ export const Unchecked_Disabled: Story = {
     render: (args) => <RadioWrapper label='Disabled' {...args} />,
     play: async ({ canvas, userEvent }) => {
         const radio = canvas.getByRole('radio', { name: 'Disabled' })
-
         await expect(radio).not.toBeChecked()
-
         await expect(() => userEvent.click(radio)).rejects.toThrow(/pointer-events: none/)
-
         await expect(radio).not.toBeChecked()
     },
 }
@@ -71,7 +68,6 @@ export const Checked_Focused: Story = {
     play: async ({ canvas }) => {
         const radio = canvas.getByRole('radio', { name: 'Focused' })
         radio.focus()
-
         await expect(radio).toHaveFocus()
     },
 }
@@ -81,11 +77,8 @@ export const Checked_Disabled: Story = {
     render: (args) => <RadioWrapper label='Disabled' {...args} />,
     play: async ({ canvas, userEvent }) => {
         const radio = canvas.getByRole('radio', { name: 'Disabled' })
-
         await expect(radio).toBeChecked()
-
         await expect(() => userEvent.click(radio)).rejects.toThrow(/pointer-events: none/)
-
         await expect(radio).toBeChecked()
     },
 }
@@ -98,19 +91,19 @@ export const Group: Story = {
                 <RadioWrapper
                     label='One'
                     {...args}
-                    value={'one'}
+                    value='one'
                     onChange={(_, val) => setSelected(val ? 'one' : '')}
                 />
                 <RadioWrapper
                     label='Two'
                     {...args}
-                    value={'two'}
+                    value='two'
                     onChange={(_, val) => setSelected(val ? 'two' : '')}
                 />
                 <RadioWrapper
                     label='Three'
                     {...args}
-                    value={'three'}
+                    value='three'
                     onChange={(_, val) => setSelected(val ? 'three' : '')}
                 />
             </StyledRadioGroup>

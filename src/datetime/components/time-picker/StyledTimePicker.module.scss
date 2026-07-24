@@ -1,10 +1,11 @@
 .styled-time-picker-root {
-    @apply flex max-h-56 overflow-hidden border-gray-800 #{!important};
+    @apply flex max-h-56 overflow-hidden #{!important};
     .styled-time-picker-root_column {
         @apply overflow-y-scroll scrollbar-thin w-full p-1.5 pb-0  #{!important};
     }
     .styled-time-picker-root_cell {
-        @apply bg-white w-9 h-9 text-sm hover:bg-gray-100 cursor-pointer rounded-lg flex items-center place-content-center;
+        // Cell hover = DS menu hover delta-50; now = gama-50 (like calendar "today"); selected = gama-500.
+        @apply bg-white w-9 h-9 text-sm hover:bg-delta-50 cursor-pointer rounded-lg flex items-center place-content-center;
         &.styled-time-picker-root_cell__cell-now {
             @apply bg-gama-50 hover:bg-gama-50;
         }
@@ -14,7 +15,8 @@
     }
 }
 
-.shadow-mui {
-    box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14),
-        0px 3px 14px 2px rgba(0, 0, 0, 0.12) !important;
+// DS Menus dropdown surface (matches Select/Menu): delta-300 border + Menus shadow, on the Paper.
+.time-picker-surface {
+    @apply border border-solid border-delta-300 rounded-lg bg-white #{!important};
+    box-shadow: 0px 2px 4px 0px rgba(34, 33, 51, 0.15) !important;
 }

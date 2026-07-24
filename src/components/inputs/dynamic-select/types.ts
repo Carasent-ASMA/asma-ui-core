@@ -1,4 +1,4 @@
-import type { AutocompleteProps } from '@mui/material'
+import type { StyledSelectAutocompleteProps } from '../select-autocomplete'
 import type React from 'react'
 
 export type DynamicSelectOptionPrimitive = string | number | boolean
@@ -11,44 +11,48 @@ export type DynamicSelectOptionObject = {
 export type DynamicSelectOption = DynamicSelectOptionPrimitive | (DynamicSelectOptionObject & object)
 
 interface SingleDynamicSelectProps<TOption extends DynamicSelectOption> {
+    /** @figmaProp Selection mode = "Single select" row (radio chips / single-value field). */
     multiple?: false
+    /** @figmaProp Filled — the single selected option (fills the field / checks the chip). */
     value: TOption | null
     onChange: (value: TOption | null) => void
 }
 
 interface MultipleDynamicSelectProps<TOption extends DynamicSelectOption> {
+    /** @figmaProp Selection mode = "Multiple select" row (checkbox chips / tag chips + `+`). */
     multiple: true
+    /** @figmaProp Filled — selected options (tag chips in the field / checked chips). */
     value: TOption[] | null
     onChange: (value: TOption[] | null) => void
 }
 
 interface DynamicSelectCommonProps<TOption extends DynamicSelectOption> {
-    /** Unique identifier used as the root `data-test` attribute for QA selectors. */
+    /** @figmaProp none — test hook */
     dataTest: string
-    /** The full list of selectable options. Determines which UI is rendered: 1–5 → chip group, 0 or 6+ → autocomplete. */
+    /** @figmaProp option-count column — 1–5 → Chips select, 6–10 → Select (dropdown), 11+ → Autocomplete. */
     options: TOption[]
-    /** When `true`, the component is non-interactive and only shows selected value(s) as plain chip(s). */
+    /** @figmaProp State = true→"Read-only" (non-interactive; selected value(s) shown as plain chips). */
     readOnly?: boolean
     /** Prevents the built-in clear button from appearing even when a value is set. Applies to autocomplete only. */
     disableClearable?: boolean
-    /** Optional label rendered above the input/chip group. */
+    /** @figmaProp Title (Body Base SemiBold 16, text-icon/title-label delta-800) above the control. */
     title?: string
-    /** Controls the visual size of chips and buttons. Defaults to `'medium'`. */
+    /** @figmaProp none — app size (chips/buttons). Defaults to `'medium'`. */
     size?: 'small' | 'medium'
     /** Placeholder text shown in the autocomplete input when no value is selected. */
     placeholder?: string
-    /** Disables all interactions. */
+    /** @figmaProp State = true→"Disabled" */
     disabled?: boolean
-    /** Text shown in the autocomplete dropdown when no options match the search query. */
+    /** @figmaProp Empty-state text in the dropdown when no options match the search. */
     noOptionsText?: string
-    /** When `true`, shows the error style and renders an error icon next to the helper text. */
+    /** @figmaProp State = true→"Error" (error border/icon + red helper row). */
     error?: boolean
     /**
-     * When `true`, hides the "Clear selection" button in the chip group.
+     * @figmaProp Required — hides the chip-group "Clear selection" link (must keep a value).
      * Use this when the field must always have a value.
      */
     required?: boolean
-    /** Supplementary text rendered below the input. Shown as-is, or falls back to `'Required'` when `error=true` and no text is provided. */
+    /** @figmaProp Helper text (Helper 14/lh20; falls back to "Required" when `error` and no text). */
     helperText?: React.ReactNode
     /** Completely removes the helper text block below the autocomplete */
     disableHelperText?: boolean
@@ -63,8 +67,8 @@ interface DynamicSelectCommonProps<TOption extends DynamicSelectOption> {
      */
     labelKey?: TOption extends object ? keyof TOption : never
     /**
-     * Custom label renderer. When provided, its return value is used instead of the
-     * plain string resolved from `labelKey`. Useful for rich content (icons, avatars, etc.).
+     * @figmaProp Complex label — rich option content (the Figma "Complex … with long labels and
+     * helper text" rows: title + description, avatars, icons). Overrides the `labelKey` string.
      */
     renderLabel?: (option: TOption) => React.ReactNode
     /**
@@ -74,9 +78,16 @@ interface DynamicSelectCommonProps<TOption extends DynamicSelectOption> {
     getOptionTooltip?: (option: TOption) => React.ReactNode
     /** Node prepended inside the autocomplete text input (e.g. a search icon). */
     startAdornment?: React.ReactNode
+    /**
+     * Forwarded to the underlying autocomplete text input (autocomplete variant only), so
+     * validation/side-effects belong on the field itself instead of a wrapper element — e.g.
+     * clear an error `onFocus`, validate `onBlur`. Merged with the field's own focus handling.
+     */
+    onFocus?: React.FocusEventHandler<HTMLInputElement>
+    onBlur?: React.FocusEventHandler<HTMLInputElement>
     /** Escape hatch to pass any MUI `Autocomplete` prop directly. Applied on top of internal defaults in the autocomplete variant. */
     autocompleteProps?: Partial<
-        AutocompleteProps<TOption, boolean | undefined, boolean | undefined, boolean | undefined>
+        StyledSelectAutocompleteProps<TOption, boolean | undefined, boolean | undefined, boolean | undefined>
     >
     /**
      * When `true`, renders loading skeletons (chip group) or disables the input (autocomplete)

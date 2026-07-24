@@ -8,6 +8,7 @@ export const getStyles = ({ size }: { size: IFormLabelSize }): string | undefine
             return styles['styled-label-lg']
         case 'xl':
             return styles['styled-label-xl']
+        case 'base':
         default:
             return styles['styled-label-base']
     }

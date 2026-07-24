@@ -1,8 +1,10 @@
+// Figma "Section title" — Roboto SemiBold 18/28, text-icon/title-label (delta-800).
+// (Was lh 20.7 + raw gray-800; delta-800 is theme-safe under fretex/greenish.)
 .styled-widget-title {
     font-size: 18px;
     font-style: normal;
     font-weight: 600;
-    line-height: 20.7px;
-    color: var(--colors-gray-800);
+    line-height: 28px;
+    color: var(--colors-delta-800);
     min-width: fit-content;
 }

@@ -10,7 +10,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: var(--font-size-body-base);
+        // font-size / line-height are size-conditional (Figma: Medium 16/24, Small 14/20) — see size blocks below
         font-weight: 600;
         transition: color 300ms ease-in-out, background-color 300ms ease-in-out, border-color 300ms ease-in-out,
             box-shadow 300ms ease-in-out;
@@ -56,20 +56,28 @@
         }
     }
 
+    // Sizes — Figma node 13431-18852. Medium/Small are the canonical Figma sizes;
+    // "large" has no distinct Figma size and mirrors Medium.
     &.medium {
-        @apply h-[38px];
-        padding-left: 4px;
-        padding-right: 4px;
-    }
-    &.small {
-        @apply h-[32px];
-        padding-left: 4px;
-        padding-right: 4px;
-    }
-    &.large {
-        @apply h-[40px];
+        @apply h-[40px] min-w-[40px];
         padding-left: 8px;
         padding-right: 8px;
+        font-size: 16px;
+        line-height: 24px;
+    }
+    &.small {
+        @apply h-[32px] min-w-[32px];
+        padding-left: 6px;
+        padding-right: 6px;
+        font-size: 14px;
+        line-height: 20px;
+    }
+    &.large {
+        @apply h-[40px] min-w-[40px];
+        padding-left: 8px;
+        padding-right: 8px;
+        font-size: 16px;
+        line-height: 24px;
     }
 }
 

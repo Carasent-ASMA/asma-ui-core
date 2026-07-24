@@ -20,10 +20,11 @@
     cursor: pointer;
     transition: background-color 0.3s;
 
+    // Read-only is non-interactive (like disabled), so hover/active must NOT recolour it.
     &[data-unchecked] {
         background-color: var(--colors-delta-400);
 
-        &:hover:not([data-disabled]) {
+        &:hover:not([data-disabled]):not([data-readonly]) {
             background-color: var(--colors-delta-500);
         }
     }
@@ -31,30 +32,62 @@
     &[data-checked] {
         background-color: var(--colors-gama-500);
 
-        &:hover:not([data-disabled]) {
+        &:hover:not([data-disabled]):not([data-readonly]) {
             background-color: var(--colors-gama-600);
         }
     }
 
-    &:not([data-disabled]):active .iconContent {
+    &:not([data-disabled]):not([data-readonly]):active .iconContent {
         opacity: 0.9;
     }
 
+    // Figma Disabled (nodes 9197-93212/93217): track uses explicit tokens (not an opacity fade) —
+    // unchecked delta-300, checked gama-300.
     &[data-disabled] {
-        opacity: 0.5;
         cursor: default;
         pointer-events: none;
+    }
+    &[data-disabled][data-unchecked] {
+        background-color: var(--colors-delta-300);
+    }
+    &[data-disabled][data-checked] {
+        background-color: var(--colors-gama-300);
+    }
+
+    // Figma Read-only (nodes 41325-201583/201587): near-white delta-10 track with a delta-300
+    // outline (inset shadow keeps the 38×22 size). The knob itself gets a delta-500 outline (see
+    // .thumb below) and the dash/check is delta-500. Knob position still driven by data-checked.
+    &[data-readonly] {
+        cursor: default;
+    }
+    &[data-readonly][data-unchecked],
+    &[data-readonly][data-checked] {
+        background-color: var(--colors-delta-10);
+        box-shadow: inset 0 0 0 1px var(--colors-delta-300);
+    }
+
+    &[data-error]:focus-visible::before {
+        outline-color: var(--colors-error-500);
+    }
+
+    // Figma Error (nodes 41325-201565/201569): the track keeps its normal colour (delta-400 off /
+    // gama-500 on) with a 2px white border AND a 2px error-500 ring — i.e. a white gap sits between
+    // the track and the red ring. Layer two box-shadows (white then error) so the track stays 38×22.
+    &[data-error][data-unchecked],
+    &[data-error][data-checked] {
+        box-shadow: 0 0 0 2px white, 0 0 0 4px var(--colors-error-500);
     }
 
     &:focus-visible {
         outline: none;
+        // Figma Focused (node 9197-93213): 2px gama-400 ring with a 2px white gap from the track.
         &::before {
             content: '';
             inset: 0;
             position: absolute;
             border-radius: inherit;
             outline: 2px solid var(--colors-gama-400);
-            outline-offset: 1px;
+            outline-offset: 2px;
         }
     }
 }
@@ -74,6 +107,12 @@
 
     .switch[data-checked] & {
         transform: translateX(calc(var(--switch-w) - var(--switch-h)));
+    }
+
+    // Figma Read-only (nodes 41325-201583/201587): the knob (inner circle) carries a 1px delta-500
+    // outline. Inset shadow keeps the 18px knob size.
+    .switch[data-readonly] & {
+        box-shadow: inset 0 0 0 1px var(--colors-delta-500);
     }
 }
 
@@ -108,6 +147,14 @@
     }
 
     .switch[data-unchecked]:hover:not([data-disabled]) & {
+        color: var(--colors-delta-500);
+    }
+
+    // Figma Read-only (nodes 41325-201583/201587): the knob dash/check is delta-500 grey in BOTH
+    // selected states — not gama-500 (on) / delta-400 (off). Higher specificity wins over the
+    // checked/unchecked rules above.
+    .switch[data-readonly][data-checked] &,
+    .switch[data-readonly][data-unchecked] & {
         color: var(--colors-delta-500);
     }
 }

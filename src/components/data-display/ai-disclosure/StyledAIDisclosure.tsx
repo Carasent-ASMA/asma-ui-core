@@ -5,8 +5,15 @@ import { StyledTooltip } from 'src/components/data-display/tooltip'
 
 import styles from './StyledAIDisclosure.module.scss'
 
+/**
+ * @figmaNode none — bespoke "AI" disclosure watermark (no Design-System component). Token-clean and
+ * theme-safe: container/watermark border `delta-700`, label = Small 12/16 (ls 0.24px), watermark pill
+ * = 10px SemiBold uppercase in a `delta-700` 12-radius border. Tooltip via the aligned `StyledTooltip`.
+ */
 export const StyledAIDisclosure: FunctionComponent<{
+    /** @figmaProp none — the disclosure label (Small 12/16) */
     label?: string
+    /** @figmaProp none — optional tooltip body (via StyledTooltip) */
     tooltip?: string
 }> = ({ label, tooltip }): JSX.Element => {
     const [isTooltipOpen, setIsTooltipOpen] = useState(false)
@@ -22,6 +29,8 @@ export const StyledAIDisclosure: FunctionComponent<{
             {tooltip && (
                 <StyledTooltip
                     arrow
+                    className='-left-[3px] -top-[14px] font-medium'
+                    offsetDistance={16}
                     disableFocusListener
                     disableHoverListener
                     disableTouchListener

@@ -10,7 +10,7 @@ import { CheckIcon } from 'src/table/shared-components/CheckIcon'
  *
  */
 
-export const useStyledTableColumns = () => {
+export const useStyledTableColumns = (): { columns: ColumnDef<Person, Person>[] } => {
     const columns = useMemo<ColumnDef<Person, Person>[]>(
         () => [
             {
@@ -40,7 +40,7 @@ export const useStyledTableColumns = () => {
                     const proxy = info.row.original
                     return (
                         <div className='flex items-center gap-5 py-[14px]'>
-                            <div className='text-sm text-black'>{proxy.firstName}</div>
+                            <div className='text-base text-black'>{proxy.firstName}</div>
                         </div>
                     )
                 },
@@ -62,7 +62,7 @@ export const useStyledTableColumns = () => {
                             {info.row.getCanExpand() && (
                                 <button onClick={info.row.getToggleExpandedHandler()}>expand here</button>
                             )}
-                            <div className='text-sm text-black'>{proxy.lastName}</div>
+                            <div className='text-base text-black'>{proxy.lastName}</div>
                         </div>
                     )
                 },
@@ -107,7 +107,7 @@ export const useStyledTableColumns = () => {
                     const proxy = info.row.original
                     return (
                         <div className='flex items-center gap-5 py-[14px]'>
-                            <div className='text-sm text-black'>{proxy.lastName}</div>
+                            <div className='text-base text-black'>{proxy.lastName}</div>
                         </div>
                     )
                 },
@@ -121,7 +121,7 @@ export const useStyledTableColumns = () => {
                     const proxy = info.row.original
                     return (
                         <div className='flex items-center gap-5 py-[14px]'>
-                            <div className='text-sm text-black'>{proxy.lastName}</div>
+                            <div className='text-base text-black'>{proxy.lastName}</div>
                         </div>
                     )
                 },
@@ -135,7 +135,7 @@ export const useStyledTableColumns = () => {
                     const proxy = info.row.original
                     return (
                         <div className='flex items-center gap-5 py-[14px]'>
-                            <div className='text-sm text-black'>{proxy.lastName}</div>
+                            <div className='text-base text-black'>{proxy.lastName}</div>
                         </div>
                     )
                 },
@@ -149,7 +149,7 @@ export const useStyledTableColumns = () => {
                     const proxy = info.row.original
                     return (
                         <div className='flex items-center gap-5 py-[14px]'>
-                            <div className='text-sm text-black'>{proxy.lastName}</div>
+                            <div className='text-base text-black'>{proxy.lastName}</div>
                         </div>
                     )
                 },
@@ -163,7 +163,7 @@ export const useStyledTableColumns = () => {
                     const proxy = info.row.original
                     return (
                         <div className='flex items-center gap-5 py-[14px]'>
-                            <div className='text-sm text-black'>{proxy.lastName}</div>
+                            <div className='text-base text-black'>{proxy.lastName}</div>
                         </div>
                     )
                 },
@@ -177,7 +177,7 @@ export const useStyledTableColumns = () => {
                     const proxy = info.row.original
                     return (
                         <div className='flex items-center gap-5 py-[14px]'>
-                            <div className='text-sm text-black'>{proxy.lastName}</div>
+                            <div className='text-base text-black'>{proxy.lastName}</div>
                         </div>
                     )
                 },

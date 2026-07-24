@@ -30,6 +30,15 @@ const createOptions = (count: number): Option[] =>
         { id: '12', name: 'Rejected' },
     ].slice(0, count)
 
+// >10 options with a mix of enabled/disabled — exercises the type-ahead autocomplete path at a
+// realistic scale (the small stories cap at 12, which doesn't surface the per-row render cost).
+const createManyOptions = (count: number): Option[] =>
+    Array.from({ length: count }, (_, i) => ({
+        id: `${i + 1}`,
+        name: `Member ${String(i + 1).padStart(2, '0')}`,
+        disabled: (i + 1) % 9 === 0,
+    }))
+
 const longLabelOptions: Option[] = [
     { id: '1', name: 'Short label' },
     { id: '2', name: 'A much longer label to verify wrapping and truncation behavior in chips' },
@@ -43,6 +52,12 @@ const meta: Meta<typeof StyledDynamicSelect> = {
     component: StyledDynamicSelect,
     parameters: {
         layout: 'fullscreen',
+        docs: {
+            description: {
+                component:
+                    'Figma: [Chips select / Dynamic select](https://www.figma.com/design/wXrXt5uKNNzV2DnQCgyYZH/Design-System?node-id=31009-173666) — chip mode ≤5 options.',
+            },
+        },
     },
     args: {
         multiple: false,
@@ -515,29 +530,29 @@ const getAutocomplete = (canvasElement: HTMLElement) => {
 export const SingleSelectChipGroup: Story = {
     render: () => <SelectFrame title='Status' options={createOptions(5)} />,
     play: async ({ canvas }) => {
-        const chip = canvas.getByRole('button', { name: 'Paused' })
+        // Single-select renders radio chips (`DynamicInteractiveChipGroup` type={multiple?
+        // 'checkbox':'radio'}) — the chip root itself carries `role="radio"`/`aria-checked` (its inner
+        // radio visual is `decorative`/`aria-hidden`, avoiding an axe `nested-interactive` violation).
+        const chip = canvas.getByRole('radio', { name: 'Paused' })
 
         await userEvent.click(chip)
 
-        const radio = canvas.getByRole('radio', { name: 'Paused' })
-        await expect(radio).toBeChecked()
+        await expect(chip).toBeChecked()
     },
 }
 
 export const MultipleSelectChipGroup: Story = {
     render: () => <SelectFrame title='Assignees' multiple options={createOptions(5)} />,
     play: async ({ canvas }) => {
-        const activeChip = canvas.getByRole('button', { name: 'Active' })
-        const pausedChip = canvas.getByRole('button', { name: 'Paused' })
+        // Multi-select renders checkbox chips — same role="checkbox" pattern as SingleSelectChipGroup's radio.
+        const activeChip = canvas.getByRole('checkbox', { name: 'Active' })
+        const pausedChip = canvas.getByRole('checkbox', { name: 'Paused' })
 
         await userEvent.click(activeChip)
         await userEvent.click(pausedChip)
 
-        const activeCheckbox = canvas.getByRole('checkbox', { name: 'Active' })
-        const pausedCheckbox = canvas.getByRole('checkbox', { name: 'Paused' })
-
-        await expect(activeCheckbox).toBeChecked()
-        await expect(pausedCheckbox).toBeChecked()
+        await expect(activeChip).toBeChecked()
+        await expect(pausedChip).toBeChecked()
     },
 }
 
@@ -570,8 +585,86 @@ export const MultipleSelectAutocomplete: Story = {
         await userEvent.type(input, 'Paused')
         await userEvent.click(await canvas.findByRole('option', { name: 'Paused' }))
 
-        await expect(canvas.getByRole('button', { name: 'Active' })).toBeInTheDocument()
-        await expect(canvas.getByRole('button', { name: 'Paused' })).toBeInTheDocument()
+        // Selected-value tag chips are delete-only `StyledChip`s (no `onClick`/`clickable`), so the
+        // chip itself carries no role — only its delete control does, named "Remove <label>" (see
+        // StyledChip's `interactive` rule: a delete-only chip is a plain container, MUI parity).
+        await expect(canvas.getByRole('button', { name: 'Remove Active' })).toBeInTheDocument()
+        await expect(canvas.getByRole('button', { name: 'Remove Paused' })).toBeInTheDocument()
+    },
+}
+
+export const LargeMultipleSelectAutocomplete: Story = {
+    render: () => <SelectFrame title='Assignees' multiple options={createManyOptions(60)} maxTags={5} />,
+    play: async ({ canvasElement }) => {
+        const { canvas, input } = getAutocomplete(canvasElement)
+
+        await userEvent.click(input)
+        // Multi-select keeps the dropdown open on select. Toggle a few rows and confirm each row's
+        // selected state (which drives its checkbox) updates reactively — the symptom users hit at
+        // scale was a laggy, seemingly "static" checkbox. `aria-selected` is the row's reactive signal
+        // (the checkbox itself is decorative and has no accessible name in this path).
+        await userEvent.click(await canvas.findByRole('option', { name: 'Member 01' }))
+        await expect(await canvas.findByRole('option', { name: 'Member 01', selected: true })).toBeInTheDocument()
+
+        await userEvent.click(await canvas.findByRole('option', { name: 'Member 02' }))
+        await expect(await canvas.findByRole('option', { name: 'Member 02', selected: true })).toBeInTheDocument()
+
+        // Toggling back off is reactive too.
+        await userEvent.click(await canvas.findByRole('option', { name: 'Member 01' }))
+        await expect(await canvas.findByRole('option', { name: 'Member 01', selected: false })).toBeInTheDocument()
+    },
+}
+
+/**
+ * Primitive (string) options in the autocomplete path (>5). Guards that selection equality works for
+ * primitives — `isOptionEqualToValue` used to short-circuit `false` for string values, so nothing read
+ * as selected and re-selecting duplicated (the TiltakFilter regression: `options` is a `string[]`).
+ */
+export const MultiplePrimitiveOptions: Story = {
+    render: () => {
+        const CITIES = ['Oslo', 'Bergen', 'Trondheim', 'Stavanger', 'Tromsø', 'Drammen', 'Kristiansand']
+        const [val, setVal] = useState<string[] | null>([])
+        return (
+            <div className='max-w-xl p-6'>
+                <StyledDynamicSelect<string>
+                    dataTest='primitive-select'
+                    multiple
+                    title='Cities'
+                    options={CITIES}
+                    value={val}
+                    onChange={setVal}
+                />
+            </div>
+        )
+    },
+    play: async ({ canvasElement }) => {
+        const { canvas, input } = getAutocomplete(canvasElement)
+        await userEvent.click(input)
+        await userEvent.click(await canvas.findByRole('option', { name: 'Bergen' }))
+        // The clicked primitive option must now read as selected (was always false → never reflected).
+        await expect(await canvas.findByRole('option', { name: 'Bergen', selected: true })).toBeInTheDocument()
+        await userEvent.click(await canvas.findByRole('option', { name: 'Oslo' }))
+        await expect(await canvas.findByRole('option', { name: 'Oslo', selected: true })).toBeInTheDocument()
+        // Bergen stays selected (not duplicated/cleared).
+        await expect(await canvas.findByRole('option', { name: 'Bergen', selected: true })).toBeInTheDocument()
+    },
+}
+
+/**
+ * Read-only single select in the autocomplete path (>5 options): clicking the input must NOT open the
+ * dropdown. This is the reported regression — read-only should be display-only, never openable.
+ */
+export const ReadOnlyAutocompleteDoesNotOpen: Story = {
+    render: () => <SelectFrame title='Status' options={createOptions(12)} readOnly />,
+    play: async ({ canvasElement }) => {
+        const { canvas, input } = getAutocomplete(canvasElement)
+
+        await userEvent.click(input)
+        await expect(canvas.queryByRole('listbox')).not.toBeInTheDocument()
+
+        input.focus()
+        await userEvent.keyboard('{ArrowDown}')
+        await expect(canvas.queryByRole('listbox')).not.toBeInTheDocument()
     },
 }
 

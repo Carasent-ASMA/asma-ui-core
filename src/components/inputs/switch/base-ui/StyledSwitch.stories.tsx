@@ -8,6 +8,14 @@ const meta = {
     title: 'base-ui/Styled Switch',
     component: StyledSwitch,
     tags: [],
+    parameters: {
+        docs: {
+            description: {
+                component:
+                    'Figma: [Switch / _BASE_Switch](https://www.figma.com/design/wXrXt5uKNNzV2DnQCgyYZH/Design-System?node-id=9197-92635) — track 38×22, touch 54×32.',
+            },
+        },
+    },
     argTypes: {
         checked: { control: 'boolean' },
         defaultChecked: { control: 'boolean' },
@@ -98,5 +106,112 @@ export const Checked_Disabled: Story = {
         await expect(() => userEvent.click(switchEl)).rejects.toThrow(/pointer-events: none/)
 
         await expect(switchEl).toBeChecked()
+    },
+}
+
+/** Live: controlled switch whose state drives the label; clicking toggles it. */
+export const Interactive: Story = {
+    render: function InteractiveSwitch(args) {
+        const [checked, setChecked] = React.useState(false)
+        return (
+            <StyledFormControlLabel
+                label={checked ? 'On' : 'Off'}
+                control={
+                    <StyledSwitch
+                        {...args}
+                        dataTest='switch-interactive'
+                        checked={checked}
+                        onChange={(_, next) => setChecked(next)}
+                    />
+                }
+            />
+        )
+    },
+    play: async ({ canvas, userEvent }) => {
+        const el = canvas.getByRole('switch')
+        await expect(el).toHaveAttribute('aria-checked', 'false')
+        await userEvent.click(el)
+        await expect(el).toHaveAttribute('aria-checked', 'true')
+        await userEvent.click(el)
+        await expect(el).toHaveAttribute('aria-checked', 'false')
+    },
+}
+
+/**
+ * Full Figma variant table (node 9197-92635): rows = State, columns = Selected (Off/On).
+ * Hover/Focus are CSS-driven, so `storybook-addon-pseudo-states` forces them via `pseudo-hover` /
+ * `pseudo-focus-visible` element classes.
+ */
+export const Gallery: Story = {
+    render: () => {
+        const th: React.CSSProperties = {
+            padding: 16,
+            border: '1px solid #bdc4cf',
+            textAlign: 'left',
+            fontWeight: 600,
+            color: '#49525f',
+            background: '#f0f2f4',
+            whiteSpace: 'nowrap',
+        }
+        const td: React.CSSProperties = { padding: 16, border: '1px solid #bdc4cf', textAlign: 'center' }
+        const STATES: { label: string; props: Partial<SwitchProps> }[] = [
+            { label: 'Enabled', props: {} },
+            { label: 'Hovered', props: { className: 'pseudo-hover' } },
+            { label: 'Focused', props: { className: 'pseudo-focus-visible' } },
+            { label: 'Error', props: { error: true } },
+            { label: 'Disabled', props: { disabled: true } },
+            { label: 'Read-only', props: { readOnly: true } },
+        ]
+        const COLS = [
+            { key: 'off', label: 'Off', checked: false },
+            { key: 'on', label: 'On', checked: true },
+        ] as const
+        return (
+            <table style={{ borderCollapse: 'collapse' }}>
+                <thead>
+                    <tr>
+                        <th style={th}>State \ Selected</th>
+                        {COLS.map((c) => (
+                            <th key={c.key} style={th}>
+                                {c.label}
+                            </th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody>
+                    {STATES.map((s) => (
+                        <tr key={s.label}>
+                            <th scope='row' style={th}>
+                                {s.label}
+                            </th>
+                            {COLS.map((c) => (
+                                <td key={c.key} style={td}>
+                                    <StyledSwitch
+                                        dataTest={`gallery-${s.label}-${c.key}`}
+                                        defaultChecked={c.checked}
+                                        {...s.props}
+                                    />
+                                </td>
+                            ))}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        )
+    },
+}
+
+/** Figma composite Switch with left label + error ring. */
+export const CompositeLeftLabelError: Story = {
+    render: () => (
+        <StyledFormControlLabel
+            label='Groups view'
+            labelPlacement='start'
+            control={<StyledSwitch dataTest='switch-groups-error' error defaultChecked />}
+        />
+    ),
+    play: async ({ canvas }) => {
+        const switchEl = canvas.getByRole('switch')
+        await expect(switchEl).toHaveAttribute('data-error')
     },
 }

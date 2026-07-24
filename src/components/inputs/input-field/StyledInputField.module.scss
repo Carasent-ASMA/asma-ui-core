@@ -1,0 +1,62 @@
+// ponytail: :-webkit-autofill is a pseudo-class Tailwind has no variant for — GUD-003 exception.
+// Everything else (label float, border states, placeholder) stays in Tailwind on the elements.
+
+.Input:-webkit-autofill,
+.Input:-webkit-autofill:hover,
+.Input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px #e8f0fe inset;
+    box-shadow: 0 0 0 1000px #e8f0fe inset;
+}
+
+$field-height: 40px;
+
+// 40px input box only — label is a sibling, absolutely positioned outside this box when shrunk.
+.InputShell {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    height: $field-height;
+    min-height: $field-height;
+    max-height: $field-height;
+}
+
+.Input--singleLine {
+    box-sizing: border-box;
+    width: 100%;
+    height: $field-height;
+    min-height: $field-height;
+    max-height: $field-height;
+    margin: 0;
+    padding: 0 14px;
+    font-size: 16px;
+    line-height: 24px;
+    appearance: none;
+
+    &[data-start-adornment='true'] {
+        padding-left: 40px;
+    }
+
+    &[data-end-adornment='true'] {
+        padding-right: 40px;
+    }
+}
+
+// Chip/autocomplete adornment list = the Figma "filled" autocomplete field (node 20475-29954):
+// `py 16`, left inset 16 (Icon-left = two 8px spacings), chip gap 8, `flex-wrap` so chips wrap and the
+// field grows (min-height floors it at 40 when momentarily empty). Filled with a 32px chip row this is
+// 16 + 32 + 16 = 64px — Figma deliberately gives the chip field more vertical room than the 40px
+// (`py 8`) empty state. `--endAdornment` reserves the Figma right icon column (72px) so wrapping chips
+// never slide under the clear/add indicator.
+.AdornmentList {
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    min-height: $field-height;
+    padding: 16px;
+    gap: 8px;
+
+    &--endAdornment {
+        padding-right: 72px;
+    }
+}

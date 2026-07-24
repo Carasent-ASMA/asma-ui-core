@@ -4,7 +4,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 import type { ITemplate } from '../../service/types'
 import { CheckIcon } from 'src/table/shared-components/CheckIcon'
 
-export const useColumns = () => {
+export const useColumns = (): { columns: ColumnDef<ITemplate, ITemplate>[] } => {
     const columns = useMemo<ColumnDef<ITemplate, ITemplate>[]>(
         () => [
             {
@@ -32,7 +32,7 @@ export const useColumns = () => {
                 cell: (info) => {
                     const proxy = info.row.original
 
-                    return <div className='text-sm text-black py-[12px]'>{`${proxy.template_uuid}`}</div>
+                    return <div className='py-[12px] text-base text-black'>{`${proxy.template_uuid}`}</div>
                 },
             },
             {
@@ -48,7 +48,7 @@ export const useColumns = () => {
                             <div style={{ minWidth: 25, minHeight: 25 }}>
                                 {/* <QnrIcon width={20} height={20} color='blue' /> */}
                             </div>
-                            <div className='text-sm text-black'>
+                            <div className='text-base text-black'>
                                 {proxy.title}
                                 {proxy.title.length < 10 && proxy.template_uuid}
                                 {proxy.title.length < 10 && proxy.template_uuid}
@@ -70,7 +70,7 @@ export const useColumns = () => {
                             <div style={{ minWidth: 25, minHeight: 25 }}>
                                 {/* <QnrIcon width={20} height={20} color='blue' /> */}
                             </div>
-                            <div className='text-sm text-black'>{proxy.context}</div>
+                            <div className='text-base text-black'>{proxy.context}</div>
                         </div>
                     )
                 },
@@ -88,7 +88,7 @@ export const useColumns = () => {
                             <div style={{ minWidth: 25, minHeight: 25 }}>
                                 {/* <QnrIcon width={20} height={20} color='blue' /> */}
                             </div>
-                            <div className='text-sm text-black'>{proxy.archived ? 'true' : 'false'}</div>
+                            <div className='text-base text-black'>{proxy.archived ? 'true' : 'false'}</div>
                         </div>
                     )
                 },
@@ -106,7 +106,7 @@ export const useColumns = () => {
                             <div style={{ minWidth: 25, minHeight: 25 }}>
                                 {/* <QnrIcon width={20} height={20} color='blue' /> */}
                             </div>
-                            <div className='text-sm text-black'>{proxy.updated_at}</div>
+                            <div className='text-base text-black'>{proxy.updated_at}</div>
                         </div>
                     )
                 },
@@ -137,7 +137,7 @@ export const useColumns = () => {
                 cell: (info) => {
                     const proxy = info.row.original
 
-                    return <span className='text-sm text-black'>{`${proxy.template_uuid}`}</span>
+                    return <span className='text-base text-black'>{`${proxy.template_uuid}`}</span>
                 },
             },
             {
@@ -153,7 +153,7 @@ export const useColumns = () => {
                             <div style={{ minWidth: 25, minHeight: 25 }}>
                                 {/* <QnrIcon width={20} height={20} color='blue' /> */}
                             </div>
-                            <div className='text-sm text-black'>
+                            <div className='text-base text-black'>
                                 {proxy.title}
                                 {proxy.title.length < 10 && proxy.template_uuid}
                                 {proxy.title.length < 10 && proxy.template_uuid}
@@ -175,7 +175,7 @@ export const useColumns = () => {
                             <div style={{ minWidth: 25, minHeight: 25 }}>
                                 {/* <QnrIcon width={20} height={20} color='blue' /> */}
                             </div>
-                            <div className='text-sm text-black'>{proxy.context}</div>
+                            <div className='text-base text-black'>{proxy.context}</div>
                         </div>
                     )
                 },
@@ -193,7 +193,7 @@ export const useColumns = () => {
                             <div style={{ minWidth: 25, minHeight: 25 }}>
                                 {/* <QnrIcon width={20} height={20} color='blue' /> */}
                             </div>
-                            <div className='text-sm text-black'>{proxy.archived ? 'true' : 'false'}</div>
+                            <div className='text-base text-black'>{proxy.archived ? 'true' : 'false'}</div>
                         </div>
                     )
                 },
@@ -211,7 +211,7 @@ export const useColumns = () => {
                             <div style={{ minWidth: 25, minHeight: 25 }}>
                                 {/* <QnrIcon width={20} height={20} color='blue' /> */}
                             </div>
-                            <div className='text-sm text-black'>{proxy.updated_at}</div>
+                            <div className='text-base text-black'>{proxy.updated_at}</div>
                         </div>
                     )
                 },
@@ -242,7 +242,7 @@ export const useColumns = () => {
                 cell: (info) => {
                     const proxy = info.row.original
 
-                    return <span className='text-sm text-black'>{`${proxy.template_uuid}`}</span>
+                    return <span className='text-base text-black'>{`${proxy.template_uuid}`}</span>
                 },
             },
             {
@@ -258,7 +258,7 @@ export const useColumns = () => {
                             <div style={{ minWidth: 25, minHeight: 25 }}>
                                 {/* <QnrIcon width={20} height={20} color='blue' /> */}
                             </div>
-                            <div className='text-sm text-black'>
+                            <div className='text-base text-black'>
                                 {proxy.title}
                                 {proxy.title.length < 10 && proxy.template_uuid}
                                 {proxy.title.length < 10 && proxy.template_uuid}
@@ -280,7 +280,7 @@ export const useColumns = () => {
                             <div style={{ minWidth: 25, minHeight: 25 }}>
                                 {/* <QnrIcon width={20} height={20} color='blue' /> */}
                             </div>
-                            <div className='text-sm text-black'>{proxy.context}</div>
+                            <div className='text-base text-black'>{proxy.context}</div>
                         </div>
                     )
                 },
@@ -298,7 +298,7 @@ export const useColumns = () => {
                             <div style={{ minWidth: 25, minHeight: 25 }}>
                                 {/* <QnrIcon width={20} height={20} color='blue' /> */}
                             </div>
-                            <div className='text-sm text-black'>{proxy.archived ? 'true' : 'false'}</div>
+                            <div className='text-base text-black'>{proxy.archived ? 'true' : 'false'}</div>
                         </div>
                     )
                 },
@@ -316,7 +316,7 @@ export const useColumns = () => {
                             <div style={{ minWidth: 25, minHeight: 25 }}>
                                 {/* <QnrIcon width={20} height={20} color='blue' /> */}
                             </div>
-                            <div className='text-sm text-black'>{proxy.updated_at}</div>
+                            <div className='text-base text-black'>{proxy.updated_at}</div>
                         </div>
                     )
                 },
@@ -347,7 +347,7 @@ export const useColumns = () => {
                 cell: (info) => {
                     const proxy = info.row.original
 
-                    return <span className='text-sm text-black'>{`${proxy.template_uuid}`}</span>
+                    return <span className='text-base text-black'>{`${proxy.template_uuid}`}</span>
                 },
             },
             {
@@ -363,7 +363,7 @@ export const useColumns = () => {
                             <div style={{ minWidth: 25, minHeight: 25 }}>
                                 {/* <QnrIcon width={20} height={20} color='blue' /> */}
                             </div>
-                            <div className='text-sm text-black'>
+                            <div className='text-base text-black'>
                                 {proxy.title}
                                 {proxy.title.length < 10 && proxy.template_uuid}
                                 {proxy.title.length < 10 && proxy.template_uuid}
@@ -385,7 +385,7 @@ export const useColumns = () => {
                             <div style={{ minWidth: 25, minHeight: 25 }}>
                                 {/* <QnrIcon width={20} height={20} color='blue' /> */}
                             </div>
-                            <div className='text-sm text-black'>{proxy.context}</div>
+                            <div className='text-base text-black'>{proxy.context}</div>
                         </div>
                     )
                 },
@@ -403,7 +403,7 @@ export const useColumns = () => {
                             <div style={{ minWidth: 25, minHeight: 25 }}>
                                 {/* <QnrIcon width={20} height={20} color='blue' /> */}
                             </div>
-                            <div className='text-sm text-black'>{proxy.archived ? 'true' : 'false'}</div>
+                            <div className='text-base text-black'>{proxy.archived ? 'true' : 'false'}</div>
                         </div>
                     )
                 },
@@ -421,7 +421,7 @@ export const useColumns = () => {
                             <div style={{ minWidth: 25, minHeight: 25 }}>
                                 {/* <QnrIcon width={20} height={20} color='blue' /> */}
                             </div>
-                            <div className='text-sm text-black'>{proxy.updated_at}</div>
+                            <div className='text-base text-black'>{proxy.updated_at}</div>
                         </div>
                     )
                 },
@@ -434,7 +434,7 @@ export const useColumns = () => {
             //         const proxy = info.row.original
             //         return (
             //             <div className='flex items-center gap-5'>
-            //                 <div className='text-sm text-black'>{proxy.lastName}</div>
+            //                 <div className='text-base text-black'>{proxy.lastName}</div>
             //             </div>
             //         )
             //     },
@@ -467,7 +467,7 @@ export const useColumns = () => {
             //         const proxy = info.row.original
             //         return (
             //             <div className='flex items-center gap-5'>
-            //                 <div className='text-sm text-black'>{proxy.lastName}</div>
+            //                 <div className='text-base text-black'>{proxy.lastName}</div>
             //             </div>
             //         )
             //     },

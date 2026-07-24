@@ -6,8 +6,8 @@ export const usePersistedColumnOrder = (persistColumnOrderKey?: string): string[
         try {
             const raw = localStorage.getItem(persistColumnOrderKey)
             if (!raw) return undefined
-            const parsed = JSON.parse(raw)
-            return Array.isArray(parsed) ? parsed : undefined
+            const parsed: unknown = JSON.parse(raw)
+            return Array.isArray(parsed) ? (parsed as string[]) : undefined
         } catch {
             return undefined
         }

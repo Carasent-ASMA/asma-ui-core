@@ -1,15 +1,16 @@
-import { Menu } from '@mui/material'
+import type { ReactElement } from 'react'
+import { StyledMenu } from 'src/components/navigation/menu'
 import type { Row } from '@tanstack/react-table'
 import { useToggleMenuVisibility } from 'src/table/hooks/useToggleMenuVisibility.hook'
 import { ChevronRightIcon } from 'src/table/shared-components/ChevronRightIcon'
 import { StyledMenuItem } from 'src/table/shared-components/StyledMenuItem'
 
-const preventEventPropagation = (e: React.MouseEvent) => {
+const preventEventPropagation = (e: React.MouseEvent): void => {
     e.preventDefault()
     e.stopPropagation()
 }
 
-export const SubMenuExample = <TData,>({ row }: { row: Row<TData> }) => {
+export const SubMenuExample = <TData,>({ row }: { row: Row<TData> }): ReactElement => {
     const { open, handleClose, handleOpen, anchorEl } = useToggleMenuVisibility()
 
     return (
@@ -22,12 +23,12 @@ export const SubMenuExample = <TData,>({ row }: { row: Row<TData> }) => {
                 onMouseDown={preventEventPropagation}
                 onMouseUp={preventEventPropagation}
             >
-                <div className='flex gap-x-2 item-center'>
+                <div className='flex items-center gap-x-2'>
                     Status
                     <ChevronRightIcon color='var(--colors-delta-700)' height={20} width={20} />
                 </div>
             </StyledMenuItem>
-            <Menu
+            <StyledMenu
                 onClose={handleClose}
                 open={open}
                 anchorEl={anchorEl}
@@ -43,7 +44,7 @@ export const SubMenuExample = <TData,>({ row }: { row: Row<TData> }) => {
                 <StyledMenuItem onClick={() => console.log(row)}>New</StyledMenuItem>
                 <StyledMenuItem onClick={() => console.log(row)}>Used</StyledMenuItem>
                 <StyledMenuItem onClick={() => console.log(row)}>Refurbished</StyledMenuItem>
-            </Menu>
+            </StyledMenu>
         </>
     )
 }

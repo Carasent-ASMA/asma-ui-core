@@ -1,0 +1,58 @@
+name: 'Lint & Accessibility'
+
+on: push
+
+jobs:
+    lint:
+        name: ESLint (incl. jsx-a11y)
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v5
+            - uses: actions/setup-node@v6
+              with:
+                  node-version: 24.14.0
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: latest
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+            - name: Run ESLint
+              run: pnpm lint
+
+    a11y:
+        name: Storybook accessibility (axe, via addon-a11y)
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v5
+            # `ubuntu-latest` ships ~20GB of preinstalled SDKs this job never touches (.NET,
+            # Android, GHC, extra hosted-tool-cache Node/Python/Go versions). node_modules + the
+            # Playwright Chromium/headless-shell download + Storybook's own vitest browser-mode
+            # dep cache can tip a near-full runner over the edge — a 2026-07-24 run died mid-test
+            # with "No space left on device". Reclaim the unused SDKs up front instead
+            # (best-effort; `|| true` so a missing path on a future runner image doesn't fail the
+            # job).
+            - name: Free disk space
+              run: |
+                  echo "Before:" && df -h /
+                  sudo rm -rf /usr/share/dotnet /usr/local/lib/android "$AGENT_TOOLSDIRECTORY" /opt/ghc /usr/local/share/boost || true
+                  docker image prune -af || true
+                  echo "After:" && df -h /
+            - uses: actions/setup-node@v6
+              with:
+                  node-version: 24.14.0
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: latest
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+            - name: Install Playwright browsers
+              run: pnpm exec playwright install --with-deps chromium
+            # Runs every story through @storybook/addon-a11y's axe checks inside the addon-vitest
+            # browser-mode project (see vite.config.ts `test.projects` → 'storybook'). The `a11y.test`
+            # parameter in `.storybook/preview.ts` controls severity fleet-wide: 'todo' (current) reports
+            # violations without failing the build — see the asma-ui-core-accessibility plan (Phase 1
+            # baseline burn-down) for when this flips to 'error' and gates CI.
+            - name: Run Storybook accessibility tests
+              run: pnpm test-storybook

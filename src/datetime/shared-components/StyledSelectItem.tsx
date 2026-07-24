@@ -1,19 +1,3 @@
-import { MenuItem, type MenuItemProps } from '@mui/material'
-
-export const StyledSelectItem = (item: MenuItemProps): JSX.Element => {
-    return (
-        <MenuItem
-            {...item}
-            sx={{
-                '&.MuiMenuItem-root': {
-                    fontSize: '14px !important',
-                },
-                '&.Mui-selected': {
-                    backgroundColor: 'var(--colors-gama-50) !important',
-                },
-            }}
-        >
-            {item.children}
-        </MenuItem>
-    )
-}
+// Datetime select options use the core MUI-free StyledSelectItem (TASK-403). Re-exported to keep
+// the datetime-local import path stable.
+export { StyledSelectItem, type StyledSelectItemProps } from 'src/components/inputs/select/StyledSelectItem'

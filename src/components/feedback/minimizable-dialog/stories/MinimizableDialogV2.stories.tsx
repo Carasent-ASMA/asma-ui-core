@@ -24,6 +24,12 @@ const meta = {
     component: MinimizableDialogV2,
     parameters: {
         layout: 'fullscreen',
+        docs: {
+            description: {
+                component:
+                    'Figma: [Dialog minimized](https://www.figma.com/design/wXrXt5uKNNzV2DnQCgyYZH/Design-System?node-id=20049-111828) — reuses the DS modal family (Dialogue-popup shadow, bg/modal overlay, Page title 24 delta-800, delta-200 divider); minimized bar = radius 8 + Section title 18 delta-800.',
+            },
+        },
     },
     argTypes: {
         open: { control: 'boolean' },

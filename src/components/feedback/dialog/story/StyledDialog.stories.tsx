@@ -1,5 +1,4 @@
 import React, { useMemo, useState, type ReactNode } from 'react'
-import type { BackdropProps } from '@mui/material'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, screen, userEvent, waitForElementToBeRemoved } from 'storybook/test'
 import { EditSquareIcon } from 'src/components/icons'
@@ -24,6 +23,12 @@ const meta = {
     component: StyledDialog,
     parameters: {
         layout: 'fullscreen',
+        docs: {
+            description: {
+                component:
+                    'Figma: [Dialog](https://www.figma.com/design/wXrXt5uKNNzV2DnQCgyYZH/Design-System?node-id=15820-18954) — modal radius 8px, typical width 400px.',
+            },
+        },
     },
     argTypes: {
         open: { control: 'boolean' },
@@ -53,6 +58,7 @@ const dialogBody = (
             fontSize: 18,
             maxHeight: '100%',
             overflow: 'auto',
+            outline: 'none',
             scrollbarWidth: 'thin',
         }}
     >
@@ -141,7 +147,7 @@ function DialogStoryFrame(props: StoryArgs) {
                         sx: {
                             display: 'flex',
                             flexDirection: 'column',
-                            overflow: 'auto',
+                            overflow: 'hidden',
                             minHeight: '360px',
                             maxWidth: '680px',
                             width: '100%',
@@ -149,7 +155,7 @@ function DialogStoryFrame(props: StoryArgs) {
                             height: '100%',
                         },
                     },
-                    backdrop: { 'data-testid': 'dialog-backdrop' } as Partial<BackdropProps>,
+                    backdrop: { 'data-testid': 'dialog-backdrop' } as Record<string, unknown>,
                 }}
             >
                 {content}
@@ -169,10 +175,10 @@ function DialogStoryFrame(props: StoryArgs) {
 export const Default: Story = {
     render: (args) => <DialogStoryFrame {...args} />,
     play: async ({ canvas }) => {
-        const dialog = screen.getByRole('dialog')
+        const dialogRemoved = waitForElementToBeRemoved(() => screen.queryByRole('dialog'))
         await userEvent.click(screen.getByTestId('dialog-save-button'))
 
-        await waitForElementToBeRemoved(dialog)
+        await dialogRemoved
 
         // keep the open button available for reruns / visual inspection
         await expect(canvas.getByTestId('dialog-open-button')).toBeInTheDocument()
@@ -195,20 +201,20 @@ export const ClosedByDefault: Story = {
 export const EscapeCloses: Story = {
     render: (args) => <DialogStoryFrame {...args} />,
     play: async () => {
-        const dialog = screen.getByRole('dialog')
+        const dialogRemoved = waitForElementToBeRemoved(() => screen.queryByRole('dialog'))
         await userEvent.keyboard('{Escape}')
-        await waitForElementToBeRemoved(dialog)
+        await dialogRemoved
     },
 }
 
 export const BackdropClickCloses: Story = {
     render: (args) => <DialogStoryFrame {...args} />,
     play: async ({}) => {
-        const dialog = await screen.findByRole('dialog')
+        const dialogRemoved = waitForElementToBeRemoved(() => screen.queryByRole('dialog'))
         const backdrop = await screen.findByTestId('dialog-backdrop')
 
         await userEvent.click(backdrop)
-        await waitForElementToBeRemoved(dialog)
+        await dialogRemoved
     },
 }
 
@@ -260,4 +266,23 @@ export const LongContentScrollable: Story = {
             </DialogStoryFrame>
         )
     },
+}
+
+/** Wide, non-wrapping content must show a horizontal scrollbar (not clip or hide it). */
+export const HorizontalScroll: Story = {
+    render: (args) => (
+        <DialogStoryFrame
+            {...args}
+            dialogTitle='Wide content'
+            dialogLabel='Horizontal scroll'
+            dialogHeaderNode={undefined}
+        >
+            <StyledDialogContent>
+                <div style={{ width: 1200, whiteSpace: 'nowrap' }}>
+                    This single row is 1200px wide — wider than the dialog — so the content area must scroll
+                    horizontally and keep the scrollbar visible: {Array.from({ length: 24 }, (_, i) => `col-${i + 1}`).join(' · ')}
+                </div>
+            </StyledDialogContent>
+        </DialogStoryFrame>
+    ),
 }

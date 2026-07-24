@@ -15,6 +15,7 @@ export const CloseBtn: React.FC<{
             <div>
                 <StyledButton
                     dataTest='close-button'
+                    aria-label={tooltipTitle}
                     variant='textGray'
                     size='small'
                     onClick={onClick}

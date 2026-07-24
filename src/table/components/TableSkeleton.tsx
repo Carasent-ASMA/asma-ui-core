@@ -1,4 +1,4 @@
-import { Skeleton } from '@mui/material'
+import { Skeleton } from 'src/components/mui-compat'
 import { Fragment, type FunctionComponent } from 'react'
 
 import styles from './TableSkeleton.module.scss'

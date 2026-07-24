@@ -1,16 +1,22 @@
 import { StyledButton } from 'src/components/inputs/button'
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import clsx from 'clsx'
 import { cn } from 'src/helpers/cn'
 import styles from './MinimizableDialog.module.scss'
 import { StyledMenu, StyledMenuItem } from 'src/components/navigation/menu'
 import { useToggleMenuVisibility } from 'src/hooks/useToggleMenuVisibility.hook'
-import { ArrowExpand } from 'src/components/icons/arrow-expand'
+import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
 import { StyledTooltip } from 'src/components/data-display/tooltip'
-import { ArrowShrink } from 'src/components/icons/arrow-shrink'
 import type { IMinimizableDialogProps } from './types'
-import { isArray, isFunction } from 'lodash-es'
-import { CloseIcon, DotsVerticalIcon, KeyboardCapslockIcon, LoadingIcon, MinimizeIcon } from 'src/components/icons'
+import {
+    ArrowExpandIcon,
+    ArrowShrinkIcon,
+    CloseIcon,
+    DotsVerticalIcon,
+    KeyboardCapslockIcon,
+    LoadingIcon,
+    MinimizeIcon,
+} from 'src/components/icons'
 
 export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     onCloseText = '',
@@ -47,11 +53,16 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     const [minimized, setMinimized] = useState(false)
     const [fullscreen, setFullscreen] = useState(false)
     const { open: extraActionsOpen, anchorEl, handleOpen, handleClose } = useToggleMenuVisibility()
-
-    if (!open) return null
+    const panelRef = useRef<HTMLDivElement>(null)
 
     const fullScreen = fullScreenState ?? fullscreen
     const isFullScreenActive = fullScreen && !minimized
+
+    // Only the fullscreen state shows a page-covering backdrop (below) and is actually modal — the
+    // default corner-docked panel is a non-modal floating widget that must NOT trap focus.
+    useFocusTrap(open && isFullScreenActive, panelRef, onClose)
+
+    if (!open) return null
 
     const fullScreenDialogStyle: React.CSSProperties | undefined = isFullScreenActive
         ? {
@@ -64,6 +75,14 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
               height: '95dvh',
           }
         : undefined
+
+    const fullScreenTooltipTitle = fullScreen
+        ? locale === 'en'
+            ? 'Exit full screen'
+            : 'Avslutt fullskjerm'
+        : locale === 'en'
+          ? 'Full screen'
+          : 'Fullskjerm'
 
     const showPrimaryButton = primaryButtonText ?? primaryButtonLoading
 
@@ -86,6 +105,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                                 <div>
                                     <StyledButton
                                         dataTest='minimize-button'
+                                        aria-label={!onExpandText ? (locale === 'en' ? 'Expand' : 'Utvid') : undefined}
                                         variant='text'
                                         size='small'
                                         onClick={toggleMinimized}
@@ -101,6 +121,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                                 <div>
                                     <StyledButton
                                         dataTest='close-button'
+                                        aria-label={!onCloseText ? (locale === 'en' ? 'Close' : 'Lukk') : undefined}
                                         variant='textGray'
                                         size='small'
                                         onClick={onClose}
@@ -115,7 +136,13 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                 </div>
             </div>
             <div
+                ref={panelRef}
                 style={fullScreenDialogStyle}
+                // Semantic dialog identity only while actually modal (backdrop shown) — the corner-
+                // docked state is a non-modal widget and shouldn't announce as a dialog.
+                role={isFullScreenActive ? 'dialog' : undefined}
+                aria-modal={isFullScreenActive ? true : undefined}
+                aria-label={isFullScreenActive && typeof title === 'string' ? title : undefined}
                 className={cn(
                     'fixed bottom-4 right-4 z-[51] rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)] transition-all duration-300',
                     className && !minimized && !fullScreen ? className : '',
@@ -139,6 +166,9 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                                     <div>
                                         <StyledButton
                                             dataTest='minimize-button'
+                                            aria-label={
+                                                !onMinimizeText ? (locale === 'en' ? 'Minimize' : 'Minimer') : undefined
+                                            }
                                             variant='textGray'
                                             size='small'
                                             onClick={toggleMinimized}
@@ -150,20 +180,11 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                                 </StyledTooltip>
                             )}
                             {enableFullscreen && showFullScreenIcon && (
-                                <StyledTooltip
-                                    title={
-                                        fullScreen
-                                            ? locale === 'en'
-                                                ? 'Exit full screen'
-                                                : 'Avslutt fullskjerm'
-                                            : locale === 'en'
-                                            ? 'Full screen'
-                                            : 'Fullskjerm'
-                                    }
-                                >
+                                <StyledTooltip title={fullScreenTooltipTitle}>
                                     <div>
                                         <StyledButton
                                             dataTest='fullscreen-button'
+                                            aria-label={!onFullScreenText ? fullScreenTooltipTitle : undefined}
                                             variant='textGray'
                                             size='small'
                                             onClick={(event) => {
@@ -179,9 +200,9 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                                             }}
                                             endIcon={
                                                 fullScreen ? (
-                                                    <ArrowShrink width={20} height={20} color='text-delta-700' />
+                                                    <ArrowShrinkIcon width={20} height={20} color='text-delta-700' />
                                                 ) : (
-                                                    <ArrowExpand width={20} height={20} color='text-delta-700' />
+                                                    <ArrowExpandIcon width={20} height={20} color='text-delta-700' />
                                                 )
                                             }
                                         >
@@ -196,6 +217,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                                     <div>
                                         <StyledButton
                                             dataTest='close-button'
+                                            aria-label={!onCloseText ? (locale === 'en' ? 'Close' : 'Lukk') : undefined}
                                             variant='textGray'
                                             size='small'
                                             onClick={onClose}
@@ -217,7 +239,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                         {typeof children === 'function' ? children({ fullScreen }) : children}
                     </div>
 
-                    {(((isArray(extraActions) && extraActions.length) || isFunction(extraActions)) &&
+                    {(((Array.isArray(extraActions) && extraActions.length) || typeof extraActions === 'function') &&
                         extraActionsText) ||
                     footerInfo ? (
                         <div
@@ -226,7 +248,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                                 footerClassName,
                             )}
                         >
-                            {isArray(extraActions) && extraActions.length && extraActionsText ? (
+                            {Array.isArray(extraActions) && extraActions.length && extraActionsText ? (
                                 <>
                                     <StyledButton
                                         dataTest='extra-actions-button'
@@ -247,7 +269,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                                 </>
                             ) : (
                                 extraActionsText &&
-                                isFunction(extraActions) && (
+                                typeof extraActions === 'function' && (
                                     <StyledButton dataTest='extra-action-button' variant='text' onClick={extraActions}>
                                         {extraActionsText}
                                     </StyledButton>

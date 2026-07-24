@@ -1,6 +1,6 @@
 import { RangePickerExample } from './RangePickerCompactExample'
 import { useToggleMenuVisibility } from 'src/datetime/hooks/useToggleMenuVisibility.hook'
-import { Popover } from '@mui/material'
+import { StyledPopover as Popover } from 'src/components/utils/popover'
 import { StyledButton } from 'src/datetime/shared-components/button'
 
 export const NestedRangePickerExample: React.FC = () => {

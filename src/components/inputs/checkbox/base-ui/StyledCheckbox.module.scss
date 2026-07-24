@@ -1,7 +1,8 @@
 @use 'sass:map';
 
+// Figma Checkbox (node 15385-19713): box 20px inside a 40px touch/hover target.
 $checkbox-sizes: (
-    medium: 42px,
+    medium: 40px,
     small: 38px,
 );
 
@@ -15,8 +16,8 @@ $checkbox-sizes: (
     border-radius: 2px;
 
     @if $size == 'medium' {
-        width: 18px;
-        height: 18px;
+        width: 20px; // Figma checkbox box = 20px
+        height: 20px;
     } @else if $size == 'small' {
         width: 15px;
         height: 15px;
@@ -86,6 +87,21 @@ $checkbox-sizes: (
     }
 }
 
+// Figma Error state (nodes 41325-207511/207527): box border = border/field-error #e10700 (error-500).
+// Unchecked keeps a transparent fill with a red border; checked/indeterminate keep the gama-500 fill
+// and gain a 2px red border.
+.CheckboxWrapper.Error {
+    &[data-unchecked] .Checkbox {
+        border-color: var(--colors-error-500);
+    }
+
+    &:is([data-checked], [data-indeterminate]) .Checkbox,
+    &.Indeterminate .Checkbox {
+        border: 2px solid var(--colors-error-500);
+        --cb-border-w: 2px;
+    }
+}
+
 .CheckboxWrapper.ReadOnly {
     pointer-events: none;
     cursor: default;
@@ -148,8 +164,8 @@ $checkbox-sizes: (
     &::after {
         content: '';
         @extend %ripple-base;
-        width: 42px;
-        height: 42px;
+        width: 40px; // matches Figma 40px touch/hover target
+        height: 40px;
         background: var(--colors-gama-300);
         border-radius: 50%;
         top: 50%;
@@ -160,8 +176,15 @@ $checkbox-sizes: (
     }
 
     &:hover::after,
-    &[data-hovered]::after {
+    &[data-hovered]::after,
+    &:has(input[data-hovered])::after {
         opacity: 0.07;
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    &:has(input:focus-visible)::after,
+    &:has(input[data-focus-visible])::after {
+        opacity: 0.12;
         transform: translate(-50%, -50%) scale(1);
     }
 
@@ -186,28 +209,15 @@ $checkbox-sizes: (
         @include checkbox-size('small');
     }
 
-    .CheckboxWrapper:focus-visible &,
-    .CheckboxWrapper[data-focus-visible] & {
-        &::before {
-            content: '';
-            position: absolute;
-            inset: calc(-2px - var(--cb-border-w));
-            border-radius: 4px;
-            outline: 2px solid var(--colors-gama-400);
-            outline-offset: 0;
-            pointer-events: none;
-        }
-    }
     .CheckboxWrapper[data-indeterminate] &::after,
     &.Indeterminate::after {
         content: '';
         position: absolute;
         top: 50%;
         left: 50%;
-        width: 62%;
-        height: 2.5px;
+        width: 10px;
+        height: 2px;
         transform: translate(-50%, -50%);
-        border-radius: 999px;
         background-color: var(--cb-indicator-color);
         z-index: 2;
         pointer-events: none;
@@ -220,10 +230,15 @@ $checkbox-sizes: (
     justify-content: center;
     width: 100%;
     height: 100%;
-    color: white;
+    color: transparent;
     z-index: 1;
     position: relative;
     pointer-events: none;
+}
+
+.CheckboxWrapper:is([data-checked], [data-indeterminate]) .Indicator,
+.CheckboxWrapper.Indeterminate .Indicator {
+    color: white;
 }
 
 .CheckboxWrapper[data-indeterminate],

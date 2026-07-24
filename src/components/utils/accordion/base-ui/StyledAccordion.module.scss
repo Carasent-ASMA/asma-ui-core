@@ -33,7 +33,10 @@
     padding-top: 0px;
     background-color: transparent;
     border: none;
+    // Figma accordion title = Section title 18px SemiBold, text delta-800 (node 21230-38064).
     font-size: var(--trigger-font-size);
+    font-weight: 600;
+    color: var(--colors-delta-800);
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
@@ -60,11 +63,6 @@
     overflow: hidden;
     color: var(--colors-delta-800);
     transition: height 0.2s ease-out;
-
-    &[data-starting-style],
-    &[data-ending-style] {
-        height: 0;
-    }
 }
 
 .Content {

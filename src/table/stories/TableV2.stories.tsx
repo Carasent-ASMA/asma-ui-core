@@ -1,20 +1,26 @@
-import { Typography } from '@mui/material'
 import type { Meta } from '@storybook/react-vite'
-import { useEffect, useRef, useState } from 'react'
 import { type Table as TanstackTable } from '@tanstack/react-table'
-import { makeData, makeParticipantsData, type Participant, type Person } from './helpers/makeData'
-import { cloneDeep } from 'lodash-es'
-import { useStyledTableColumns } from './components/styled-table/useTableColumns'
-import React from 'react'
-import { RenderSubRows } from './components/styled-table/RenderSubRows'
-import { getRowActions } from './components/styled-table/getRowActions'
-import style from './StyledTableStories.module.scss'
+import { useEffect, useRef, useState } from 'react'
+import { StyledTypography } from 'src/components/data-display/typography'
+import { cn } from 'src/helpers'
 import { StyledTable } from 'src/table/components/StyledTableIndex'
 import { StyledButton } from 'src/table/shared-components/button'
-import { cn } from 'src/helpers'
+import { getRowActions } from './components/styled-table/getRowActions'
+import { RenderSubRows } from './components/styled-table/RenderSubRows'
+import { useStyledTableColumns } from './components/styled-table/useTableColumns'
+import { makeData, makeParticipantsData, type Participant, type Person } from './helpers/makeData'
+import style from './StyledTableStories.module.scss'
 
 const meta: Meta = {
     title: 'Table/TableV2',
+    parameters: {
+        docs: {
+            description: {
+                component:
+                    'Figma: [Tables](https://www.figma.com/design/wXrXt5uKNNzV2DnQCgyYZH/Design-System?node-id=11291-102403).',
+            },
+        },
+    },
     component: StyledTable,
     tags: [],
     argTypes: {},
@@ -79,7 +85,7 @@ export const TableV2 = () => {
     return (
         <div className='mx-auto max-w-[1200px] flex flex-col gap-10'>
             <div className='flex justify-between gap-5'>
-                <Typography variant='h6'>Standard Table</Typography>
+                <StyledTypography variant='h6'>Standard Table</StyledTypography>
                 <input
                     value={globalFilter ?? ''}
                     onChange={(e) => setGlobalFilter(String(e.target.value))}
@@ -185,7 +191,7 @@ export const TableV2 = () => {
                     setRowSelection(e)
                 }}
                 onRowClick={(e, row) => {
-                    console.info('e', e, cloneDeep(row.original))
+                    console.info('e', e, structuredClone(row.original))
                 }}
                 enableGlobalFilter={true}
                 enableRowSelection={true}

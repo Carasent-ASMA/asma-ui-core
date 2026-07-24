@@ -1,5 +1,5 @@
 import type { DatePickerProps } from '../types'
-import { Popover, type PopoverProps } from '@mui/material'
+import { StyledPopover as Popover, type StyledPopoverProps as PopoverProps } from 'src/components/utils/popover'
 import { StyledDayPicker } from './StyledDayPicker'
 
 export const StyledCalendarPicker: React.FC<{

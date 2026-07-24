@@ -1,12 +1,17 @@
 import React, { useState, type ReactNode } from 'react'
 import { StyledButton } from '../../inputs/button'
 import { FilterIcon } from '../../icons'
-import { StyledPopover } from '../popover'
+import { StyledPopover, type StyledPopoverProps } from '../popover'
 import { useDynamicToolbarLayout } from '../../custom/module/header-layout/DynamicToolbarLayoutContext'
 import clsx from 'clsx'
-import type { PopoverProps } from '@mui/material'
 
 /**
+ * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#16741-35884 (Design-System · "Filter button")
+ *
+ * Composes the aligned `StyledButton` (Secondary/Outlined, filter icon 24/20) + `StyledPopover`
+ * (Menus surface). `filterIsActive` shows the DS "Filters applied" badge — an 8px `gama-400` dot at
+ * top-right. No own styling beyond that dot; all visuals come from the aligned primitives.
+ *
  * Custom props:
  * @param filterIsActive - needed to determine whether or not to show the dot in the top right corner indicating some changes were made
  * @param popoverContent
@@ -20,7 +25,7 @@ interface StyledFilterMenuProps {
     disabled?: boolean
     size?: 'small' | 'large' | 'medium'
     variant?: 'contained' | 'outlined' | 'text' | 'textGray'
-    popoverProps?: Omit<PopoverProps, 'open' | 'anchorEl' | 'onClose'>
+    popoverProps?: Omit<StyledPopoverProps, 'open' | 'anchorEl' | 'onClose' | 'children'>
     anchorNode?: (props: { isOpen: boolean; onClose: () => void }) => ReactNode
     label?: string
     hideLabel?: boolean
@@ -99,6 +104,7 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
                         onClick={onAnchorClick}
                         size={size}
                         dataTest={dataTest}
+                        aria-label={isLabelHidden ? (label ?? 'Filter') : undefined}
                         aria-haspopup='true'
                         aria-expanded={!!anchorEl}
                         aria-controls={anchorEl ? popoverId : undefined}

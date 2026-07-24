@@ -1,57 +1,98 @@
-import React, { forwardRef, useId } from 'react'
-import { RadioGroup } from '@base-ui/react/radio-group'
-import { StyledFormHelperText } from 'src'
+import React, { forwardRef, useId, useMemo, useState, type HTMLAttributes } from 'react'
 import { ErrorOutlineIcon } from 'src/components/icons'
 import clsx from 'clsx'
+import { RadioGroupContext, type RadioValue } from './RadioGroupContext'
 
 export type StyledRadioGroupProps = {
-    value?: string | number | boolean | null
-    defaultValue?: string | number | boolean | null
-    onValueChange?: (value: string | number | boolean | null) => void
+    value?: RadioValue
+    defaultValue?: RadioValue
+    onValueChange?: (value: RadioValue) => void
     disabled?: boolean
+    /** Non-interactive but not visually disabled (e.g. a submitted/read-only questionnaire): the
+     * current selection is shown but can't change. */
+    readOnly?: boolean
     dataTest?: string
     error?: boolean
     errorText?: string
     helperText?: string
     children: React.ReactNode
-} & Omit<React.ComponentProps<typeof RadioGroup>, 'children' | 'defaultValue' | 'value'>
+    name?: string
+} & Omit<HTMLAttributes<HTMLDivElement>, 'defaultValue' | 'onChange'>
 
+/**
+ * Native radio group (replaces `@base-ui/react`): a `role="radiogroup"` container that shares
+ * name/selection with its `StyledRadio` children via context, controlled or uncontrolled, plus the
+ * error/helper text row. TASK-201.
+ */
 export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps>(
-    ({ value, defaultValue, onValueChange, dataTest, error, errorText, helperText, children, ...rest }, ref) => {
+    ({ value, defaultValue, onValueChange, disabled, readOnly, dataTest, error, errorText, helperText, children, name, ...rest }, ref) => {
         const helperId = useId()
         const errorId = useId()
+        const generatedName = useId()
+        const groupName = name ?? generatedName
+
+        const isControlled = value !== undefined
+        const [uncontrolled, setUncontrolled] = useState<RadioValue>(defaultValue ?? null)
+        const selected = isControlled ? value : uncontrolled
+
+        const onSelect = (next: RadioValue) => {
+            if (readOnly) return
+            if (!isControlled) setUncontrolled(next)
+            onValueChange?.(next)
+        }
+
+        const contextValue = useMemo(
+            () => ({ name: groupName, value: selected, disabled, onSelect }),
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+            [groupName, selected, disabled],
+        )
 
         const showHelperText = (error ?? false) || (helperText ?? false)
         const helperTextToDisplay = error ? errorText ?? 'Required' : helperText
         const describedById = showHelperText ? (error ? errorId : helperId) : undefined
 
+        // Let consumers pick the layout direction: our default `flex-col` is emitted through
+        // `tailwind (important:true)` where `.flex-col` is authored after `.flex-row`, so a
+        // consumer's `flex-row` in `className` would otherwise always lose. Only add the default
+        // when the caller hasn't set a direction. `items-start` stops each labelled radio from being
+        // stretched to the group's full width by the default `align-items: stretch` — the user asked
+        // for fit-width radios that sit on one line rather than full-width rows on separate lines.
+        const hasDirection = /\bflex-(?:row|col)\b/.test(rest.className ?? '')
+
         return (
-            <RadioGroup
+            <div
                 {...rest}
+                ref={ref}
+                role='radiogroup'
                 data-testid={dataTest}
                 aria-describedby={describedById}
                 aria-invalid={error}
-                ref={ref}
-                value={value}
-                defaultValue={defaultValue}
-                onValueChange={onValueChange}
+                aria-readonly={readOnly ? true : undefined}
+                // readOnly: keep the normal (non-disabled) look but block interaction — selection can't
+                // change (onSelect early-returns) and clicks/focus are inert.
+                className={clsx(
+                    'flex items-start',
+                    !hasDirection && 'flex-col',
+                    readOnly && 'pointer-events-none',
+                    rest.className,
+                )}
             >
-                {children}
+                <RadioGroupContext.Provider value={contextValue}>{children}</RadioGroupContext.Provider>
 
                 {showHelperText && (
-                    <StyledFormHelperText
+                    <p
                         id={error ? errorId : helperId}
                         role={error ? 'alert' : 'status'}
                         className={clsx(
-                            'm-0 flex min-h-6 items-center gap-1 pt-1 text-sm',
-                            error ? 'text-error-500' : 'text-delta-600',
+                            'm-0 flex min-h-5 items-center gap-1 pt-1 text-sm leading-5 tracking-[0.03333em]',
+                            error ? 'font-medium text-error-500' : 'text-delta-600',
                         )}
                     >
                         {error && <ErrorOutlineIcon width={20} height={20} />}
                         {helperTextToDisplay}
-                    </StyledFormHelperText>
+                    </p>
                 )}
-            </RadioGroup>
+            </div>
         )
     },
 )

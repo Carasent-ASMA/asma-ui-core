@@ -1,5 +1,6 @@
 import type { DropdownProps } from 'react-day-picker'
-import { capitalize } from 'lodash-es'
+
+const capitalize = (value: string): string => value.charAt(0).toUpperCase() + value.slice(1).toLowerCase()
 
 import { StyledFormControl } from 'src/datetime/shared-components/StyledFormControl'
 import { StyledSelect } from 'src/datetime/shared-components/StyledSelect'
@@ -15,28 +16,17 @@ export function StyledCalendarPickerSelectMonth(props: DropdownProps): JSX.Eleme
                 dataTest='StyledCalendarPickerSelectMonth'
                 size='small'
                 variant='standard'
-                name={name}
-                aria-label={ariaLabel}
+                // `StyledSelect` has no raw `aria-label` prop (it derives its own name from
+                // `labelId`/`name`) — the `aria-label` react-day-picker passes in was being silently
+                // dropped, leaving the trigger nameless (axe `button-name`). Route it through `name`,
+                // which the field's own fallback already uses as its accessible-name source.
+                name={ariaLabel ?? name}
                 disabled={disabled}
                 className={className}
                 style={style}
                 value={value ?? ''}
                 onChange={(event: unknown) => onChange?.(event as React.ChangeEvent<HTMLSelectElement>)}
                 MenuProps={{ className: styles['styled-calendar-picker-select-period-menu'] }}
-                sx={{
-                    '&::before': {
-                        borderBottom: 'none',
-                    },
-                    '&:hover::before': {
-                        borderBottom: 'none',
-                    },
-                    '&:hover:not(.Mui-disabled, .Mui-error)::before': {
-                        borderBottom: 'none',
-                    },
-                    '&:focus::before': {
-                        borderBottom: 'none',
-                    },
-                }}
             >
                 {options.map((option) => (
                     <StyledSelectItem key={option.value} value={option.value} disabled={option.disabled}>

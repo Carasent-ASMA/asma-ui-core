@@ -1,9 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { StyledCheckbox } from './StyledCheckbox'
-import { StyledFormControlLabel } from 'src/components/miscellaneous/StyledFormControlLabel'
-import type { CheckboxProps } from '@mui/material'
-import { useState } from 'react'
+import { useState, type ComponentProps } from 'react'
 import { expect } from 'storybook/test'
+import { StyledFormControlLabel } from 'src/components/miscellaneous/StyledFormControlLabel'
+import { StyledCheckbox } from './base-ui/StyledCheckbox'
 
 const meta = {
     title: 'Inputs/Checkbox',
@@ -16,7 +15,10 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof StyledCheckbox>
 
-const CheckboxWrapper = ({ label, ...args }: CheckboxProps & { dataTest: string; label: string }) => {
+const CheckboxWrapper = ({
+    label,
+    ...args
+}: ComponentProps<typeof StyledCheckbox> & { label: string }) => {
     const [checked, setChecked] = useState(args.checked ?? false)
 
     return (
@@ -36,7 +38,6 @@ export const Unchecked_Hover: Story = {
     render: (args) => <CheckboxWrapper label='Hover' {...args} />,
     play: async ({ canvas, userEvent }) => {
         const checkbox = canvas.getByRole('checkbox', { name: 'Hover' })
-
         await userEvent.hover(checkbox)
     },
 }
@@ -46,7 +47,6 @@ export const Unchecked_Focused: Story = {
     play: async ({ canvas }) => {
         const checkbox = canvas.getByRole('checkbox', { name: 'Focused' })
         checkbox.focus()
-
         await expect(checkbox).toHaveFocus()
     },
 }
@@ -66,7 +66,6 @@ export const Checked_Hover: Story = {
     render: (args) => <CheckboxWrapper label='Hover' {...args} />,
     play: async ({ canvas, userEvent }) => {
         const checkbox = canvas.getByRole('checkbox', { name: 'Hover' })
-
         await userEvent.hover(checkbox)
     },
 }
@@ -77,7 +76,6 @@ export const Checked_Focused: Story = {
     play: async ({ canvas }) => {
         const checkbox = canvas.getByRole('checkbox', { name: 'Focused' })
         checkbox.focus()
-
         await expect(checkbox).toHaveFocus()
     },
 }
@@ -97,7 +95,6 @@ export const Indeterminate_Hover: Story = {
     render: (args) => <CheckboxWrapper label='Hover' {...args} />,
     play: async ({ canvas, userEvent }) => {
         const checkbox = canvas.getByRole('checkbox', { name: 'Hover' })
-
         await userEvent.hover(checkbox)
     },
 }
@@ -108,7 +105,6 @@ export const Indeterminate_Focused: Story = {
     play: async ({ canvas }) => {
         const checkbox = canvas.getByRole('checkbox', { name: 'Focused' })
         checkbox.focus()
-
         await expect(checkbox).toHaveFocus()
     },
 }

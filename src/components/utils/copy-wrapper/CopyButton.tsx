@@ -18,6 +18,9 @@ export const CopyButton: FC<{
             <div>
                 <StyledButton
                     dataTest='copy-button'
+                    // On mobile the text child below is omitted (icon-only) — without this the button
+                    // has no accessible name at all on that breakpoint.
+                    aria-label={text ?? title}
                     className={className}
                     size='small'
                     variant='text'

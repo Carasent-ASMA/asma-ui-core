@@ -20,6 +20,7 @@ export const MinimizeBtn: React.FC<{
                     <div>
                         <StyledButton
                             dataTest='toggle-minimize-btn'
+                            aria-label={tooltipTitle}
                             variant='text'
                             size='small'
                             onClick={onClick}
@@ -37,6 +38,7 @@ export const MinimizeBtn: React.FC<{
                     <div>
                         <StyledButton
                             dataTest='toggle-minimize-btn'
+                            aria-label={tooltipTitle}
                             variant='textGray'
                             size='small'
                             onClick={onClick}

@@ -1,7 +1,8 @@
+import React from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
 import { StyledFormControl } from 'src/components/miscellaneous/StyledFormControl'
-import { expect, within } from 'storybook/test'
+import { expect, waitFor, within } from 'storybook/test'
 import { StyledSelect, type StyledSelectProps } from '../StyledSelect'
 import { StyledSelectItem } from '../StyledSelectItem'
 
@@ -37,7 +38,10 @@ const Controlled = (args: StyledSelectProps) => {
             <StyledSelect
                 {...args}
                 dataTest='select'
-                labelId='select'
+                // `labelId` claims an external label to point `aria-labelledby` at — this story
+                // renders none, so that reference resolved to nothing (axe `button-name`); `name`
+                // exercises the same fallback chain against a name that genuinely exists instead.
+                name='Select a person'
                 value={value}
                 onChange={(e, child) => {
                     setValue(e.target.value as string)
@@ -52,6 +56,81 @@ const Controlled = (args: StyledSelectProps) => {
             </StyledSelect>
         </StyledFormControl>
     )
+}
+
+/**
+ * Trigger state gallery (field node 15561-37391): rows = State, columns = Value (Empty/Filled).
+ * Hover forced via the root `group` + `pseudo-hover`. Focused/Open are React-driven and interactive —
+ * see SelectOption / AriaLifecycle.
+ */
+export const Gallery: Story = {
+    render: () => {
+        const th: React.CSSProperties = {
+            padding: 16,
+            border: '1px solid #bdc4cf',
+            textAlign: 'left',
+            fontWeight: 600,
+            color: '#49525f',
+            background: '#f0f2f4',
+            whiteSpace: 'nowrap',
+        }
+        const td: React.CSSProperties = { padding: 16, border: '1px solid #bdc4cf', verticalAlign: 'top' }
+        const STATES: { label: string; props: Partial<StyledSelectProps> }[] = [
+            { label: 'Default', props: {} },
+            { label: 'Hovered', props: { className: 'pseudo-hover' } },
+            { label: 'Error', props: { error: true, errorText: 'Error text' } },
+            { label: 'Disabled', props: { disabled: true } },
+        ]
+        const COLS = [
+            { key: 'empty', label: 'Empty', value: '' },
+            { key: 'filled', label: 'Filled', value: '1' },
+        ] as const
+        return (
+            <table style={{ borderCollapse: 'collapse' }}>
+                <thead>
+                    <tr>
+                        <th style={th}>State \ Value</th>
+                        {COLS.map((c) => (
+                            <th key={c.key} style={th}>
+                                {c.label}
+                            </th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody>
+                    {STATES.map((s) => (
+                        <tr key={s.label}>
+                            <th scope='row' style={th}>
+                                {s.label}
+                            </th>
+                            {COLS.map((c) => (
+                                <td key={c.key} style={td}>
+                                    <div style={{ width: 220 }}>
+                                        <StyledFormControl>
+                                            <StyledSelect
+                                                dataTest={`gallery-${s.label}-${c.key}`}
+                                                name={`${s.label} ${c.label}`}
+                                                value={c.value}
+                                                placeholder='Select'
+                                                fullWidth
+                                                {...s.props}
+                                            >
+                                                {options.map((o) => (
+                                                    <StyledSelectItem key={o.id} value={o.id}>
+                                                        {o.title}
+                                                    </StyledSelectItem>
+                                                ))}
+                                            </StyledSelect>
+                                        </StyledFormControl>
+                                    </div>
+                                </td>
+                            ))}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        )
+    },
 }
 
 export const SelectOption: Story = {
@@ -82,6 +161,13 @@ export const KeyboardNavigation: Story = {
 
         const listbox = await canvas.findByRole('listbox')
         await expect(listbox).toBeInTheDocument()
+
+        // Opening moves focus to the first option via `requestAnimationFrame` (StyledSelect's
+        // `handleTriggerKeyDown`) — a real async step `findByRole` above doesn't wait for (it only
+        // waits for the listbox to exist in the DOM). Without this wait, a further `{ArrowDown}` sent
+        // before the RAF fires still lands on the trigger (re-opening a no-op, and losing a navigation
+        // step) instead of the listbox — flaky depending on RAF timing under test load.
+        await waitFor(() => expect(canvasElement.ownerDocument.activeElement).toHaveAttribute('role', 'option'))
 
         await userEvent.keyboard('{ArrowDown}')
         await userEvent.keyboard('{ArrowDown}')
@@ -116,7 +202,7 @@ export const ClearBehavior: Story = {
 export const DisabledBehavior: Story = {
     render: (args) => (
         <StyledFormControl>
-            <StyledSelect {...args} disabled value='1'>
+            <StyledSelect {...args} dataTest='select-disabled' name='Select disabled' disabled value='1'>
                 {options.map((o) => (
                     <StyledSelectItem key={o.id} value={o.id}>
                         {o.title}
@@ -168,6 +254,10 @@ export const FocusReturnAfterSelect: Story = {
         await expect(trigger).toHaveFocus()
 
         await userEvent.keyboard('{ArrowDown}')
+
+        // Same RAF-timing wait as KeyboardNavigation — see its comment.
+        await waitFor(() => expect(canvasElement.ownerDocument.activeElement).toHaveAttribute('role', 'option'))
+
         await userEvent.keyboard('{ArrowDown}')
         await userEvent.keyboard('{Enter}')
 
@@ -217,10 +307,40 @@ export const SelectingSameValue: Story = {
     },
 }
 
+export const MultipleSelectBehavior: Story = {
+    render: (args) => (
+        <StyledFormControl>
+            <StyledSelect {...args} multiple value={['1']}>
+                {options.map((o) => (
+                    <StyledSelectItem key={o.id} value={o.id}>
+                        {o.title}
+                    </StyledSelectItem>
+                ))}
+            </StyledSelect>
+        </StyledFormControl>
+    ),
+    play: async ({ canvasElement, userEvent }) => {
+        const canvas = within(canvasElement.ownerDocument.body)
+
+        const trigger = canvas.getByRole('combobox')
+
+        await userEvent.click(trigger)
+
+        const option = await canvas.findByRole('option', {
+            name: 'April Tucker',
+        })
+
+        await userEvent.click(option)
+
+        // Should remain open in multi mode
+        await expect(canvas.getByRole('listbox')).toBeInTheDocument()
+    },
+}
+
 export const EmptyOptions: Story = {
     render: (args) => (
         <StyledFormControl>
-            <StyledSelect {...args} value=''></StyledSelect>
+            <StyledSelect {...args} dataTest='select-empty' name='Select empty' value=''></StyledSelect>
         </StyledFormControl>
     ),
     play: async ({ canvasElement, userEvent }) => {
@@ -264,7 +384,7 @@ export const DynamicOptionsChange: Story = {
                     </button>
 
                     <StyledFormControl>
-                        <StyledSelect {...args} value='1'>
+                        <StyledSelect {...args} dataTest='select-dynamic' name='Select dynamic' value='1'>
                             {items.map((o) => (
                                 <StyledSelectItem key={o.id} value={o.id}>
                                     {o.title}
@@ -308,35 +428,43 @@ export const RapidOpenClose: Story = {
     },
 }
 
-export const MultipleSelectBehavior: Story = {
-    render: (args) => (
-        <StyledFormControl>
-            <StyledSelect {...args} multiple value={['1']}>
-                {options.map((o) => (
-                    <StyledSelectItem key={o.id} value={o.id}>
-                        {o.title}
-                    </StyledSelectItem>
-                ))}
-            </StyledSelect>
-        </StyledFormControl>
-    ),
+/**
+ * Read-only trigger must not open the listbox. The trigger is `pointer-events-none` (so a click can't
+ * reach it) AND `useClick` is disabled, and the keyboard opener (ArrowDown) bails on `readOnly`.
+ */
+export const ReadOnlyDoesNotOpen: Story = {
+    render: (args) => <Controlled {...args} readOnly />,
     play: async ({ canvasElement, userEvent }) => {
         const canvas = within(canvasElement.ownerDocument.body)
 
         const trigger = canvas.getByRole('combobox')
+        trigger.focus()
+        await userEvent.keyboard('{ArrowDown}')
 
-        await userEvent.click(trigger)
-
-        const option = await canvas.findByRole('option', {
-            name: 'April Tucker',
-        })
-
-        await userEvent.click(option)
-
-        // Should remain open in multi mode
-        await expect(canvas.getByRole('listbox')).toBeInTheDocument()
+        await expect(canvas.queryByRole('listbox')).not.toBeInTheDocument()
     },
 }
+
+/**
+ * Figma parity: both the trigger value and every option are Body Base 16px (Menus item node
+ * 16073-19226 / Input field 15561-37391) — at every `size`, including `small` (a no-op for text).
+ */
+export const OptionAndValueAre16px: Story = {
+    render: (args) => <Controlled {...args} size='small' />,
+    play: async ({ canvasElement, userEvent }) => {
+        const canvas = within(canvasElement.ownerDocument.body)
+
+        const trigger = canvas.getByRole('combobox')
+        await expect(getComputedStyle(trigger).fontSize).toBe('16px')
+
+        await userEvent.click(trigger)
+        const option = await canvas.findByRole('option', { name: 'Van Henry' })
+        await expect(getComputedStyle(option).fontSize).toBe('16px')
+    },
+}
+
+// Multiple-select is covered by StyledSelectAutocomplete — the single-select StyledSelect no longer
+// showcases a `multiple` story here (the prop remains for MUI API parity).
 
 // FIXME: this one is finicky because of the document selector, maybe will just remove it
 // export const PortalCleanup: Story = {

@@ -57,6 +57,7 @@ export * from './table'
 export * from './components/utils/popover'
 export * from './components/utils/filter-menu'
 export * from './components/utils/copy-wrapper'
+export * from './components/utils/virtual-list'
 //widgets
 export * from './components/custom/widget/widget-title/StyledWidgetTitle'
 export * from './components/custom/widget/widget-header/StyledWidgetHeader'
@@ -69,4 +70,15 @@ export * from './components/feedback/minimizable-dialog'
 // hooks
 export * from './hooks/usePopupState'
 
-export { Fade, Paper, ClickAwayListener, Popper, Avatar, Skeleton, Container, Stack, FormLabel } from '@mui/material'
+// MUI-free reimplementations (TASK-102/403).
+export {
+    Paper,
+    ClickAwayListener,
+    Avatar,
+    Skeleton,
+    Container,
+    Stack,
+    FormLabel,
+    Fade,
+    Popper,
+} from './components/mui-compat'

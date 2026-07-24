@@ -21,6 +21,7 @@ export const StyledSelectExample: React.FC = () => {
             <StyledFormControl fullWidth>
                 <StyledSelect
                     dataTest='Test_y'
+                    name='Select size small'
                     size='small'
                     value={value}
                     onChange={(e) => {

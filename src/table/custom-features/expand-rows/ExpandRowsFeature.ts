@@ -40,7 +40,11 @@ export const ExpandedRowsFeature: TableFeature = {
                 const newExpandedRows = new Set(old)
 
                 const id = row.id
-                newExpanded ? newExpandedRows.add(id) : newExpandedRows.delete(id)
+                if (newExpanded) {
+                    newExpandedRows.add(id)
+                } else {
+                    newExpandedRows.delete(id)
+                }
                 const newState = functionalUpdate(() => newExpandedRows, old)
                 return newState
             }

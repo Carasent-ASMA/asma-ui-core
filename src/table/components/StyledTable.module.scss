@@ -20,7 +20,7 @@
         --table-hscroll-h: 12px;
     }
 
-    @apply w-full;
+    @apply w-full text-base;
     display: flex;
     flex-direction: column;
 
@@ -202,6 +202,7 @@
         .t-cell {
             overflow: hidden;
             vertical-align: top;
+            // Figma Body Base 16/lh24 — table content (FIGMA-PARITY.md typography table)
             font-size: 16px;
             line-height: 24px;
             color: var(--colors-gray-700);

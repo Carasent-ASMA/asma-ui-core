@@ -1,4 +1,4 @@
-import type { AlertColor } from '@mui/material'
+import type { AlertColor } from '../StyledAlert'
 import clsx from 'clsx'
 import { SnackbarContent, type CustomContentProps, useSnackbar } from 'notistack'
 import { forwardRef } from 'react'

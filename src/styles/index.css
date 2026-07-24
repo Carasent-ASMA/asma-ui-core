@@ -9,6 +9,44 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+    /*
+     * Native Popover API elements (our top-layer overlays: StyledPopover / StyledSelect /
+     * StyledSelectAutocomplete, and thus StyledMenu + the date-picker calendar) ship UA-default
+     * chrome — a solid border, 0.25em padding, `inset: 0` + `margin: auto`. Neutralise it so each
+     * component controls its own look (otherwise a popover that doesn't set a border shows the black
+     * UA outline — e.g. the calendar). `:where()` keeps 0 specificity, so any component class
+     * (border-delta-300, py-1, …) or inline style still wins. Prevents this class of regression for
+     * every current and future top-layer popover.
+     */
+    :where([popover]) {
+        margin: 0;
+        inset: auto;
+        border: 0;
+        padding: 0;
+        background: transparent;
+    }
+}
+
+/*
+ * Respect OS-level "reduce motion" (WCAG 2.3.3) across every component in one place instead of
+ * gating each `transition-*`/`animate-*` Tailwind class individually. Left unlayered (not
+ * `@tailwind utilities`) with `!important` — the standard technique for this rule (e.g. web.dev's
+ * "one rule to reduce motion") — so it wins over any Tailwind transition/animation/duration utility
+ * regardless of that utility's own layer/specificity. Near-zero (not `0s`/`none`) keeps
+ * `transitionend`/`animationend` still firing for any code awaiting them.
+ */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
 @layer utilities {
     .border-solid {
         border-style: solid;

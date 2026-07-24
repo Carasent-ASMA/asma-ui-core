@@ -19,9 +19,9 @@ export const usePersistedPageSize = (uniqueKey?: string): number| undefined => {
 
             if (!raw) return undefined
 
-            const parsed = JSON.parse(raw)
+            const parsed: unknown = JSON.parse(raw)
 
-            return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined
+            return typeof parsed === 'number' && Number.isInteger(parsed) && parsed > 0 ? parsed : undefined
         } catch {
             return undefined
         }

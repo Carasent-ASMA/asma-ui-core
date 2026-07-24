@@ -1,14 +1,22 @@
-import { Stack } from '@mui/material'
+import { Stack } from 'src/components/mui-compat'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
 import { ChevronDownIcon, FilterIcon } from 'src/components/icons'
 import { expect } from 'storybook/test'
-import { StyledButton } from './StyledButton'
+import { StyledButton, type StyledButtonProps } from './StyledButton'
 
 const meta: Meta<typeof StyledButton> = {
     title: 'Inputs/Styled Button',
     component: StyledButton,
     tags: ['autodocs'],
+    parameters: {
+        docs: {
+            description: {
+                component:
+                    'Figma: [Button](https://www.figma.com/design/wXrXt5uKNNzV2DnQCgyYZH/Design-System?node-id=13431-18852) — radius 4px, default height 40px.',
+            },
+        },
+    },
     argTypes: {
         error: { control: 'boolean' },
         size: {
@@ -189,40 +197,85 @@ export const FocusVisible: Story = {
     },
 }
 
+/**
+ * Full Figma variant matrix (node 13431-18852) rendered as a table:
+ * rows = Figma **Type** (+ **Danger**), columns = Figma **State**, one table per **Size**.
+ * Interaction states (Hovered/Focused/Pressed) are forced statically via
+ * `storybook-addon-pseudo-states` element classes (`pseudo-hover` / `pseudo-focus` / `pseudo-active`);
+ * Disabled uses the native `disabled` attribute. `textWhite` is excluded — it has no Figma counterpart.
+ */
 export const Gallery: Story = {
-    render: (args) => {
-        const variants = ['contained', 'outlined', 'text', 'textGray', 'textWhite'] as const
-        const sizes = ['small', 'medium', 'large'] as const
-        const states = [
-            { label: 'default', props: {} },
-            { label: 'error', props: { error: true } },
-            { label: 'disabled', props: { disabled: true } },
-        ]
+    render: () => {
+        // Figma "State" property -> how we force it statically
+        const STATES = [
+            { key: 'enabled', label: 'Enabled', className: '', disabled: false },
+            { key: 'hovered', label: 'Hovered', className: 'pseudo-hover', disabled: false },
+            { key: 'focused', label: 'Focused', className: 'pseudo-focus', disabled: false },
+            { key: 'pressed', label: 'Pressed', className: 'pseudo-active', disabled: false },
+            { key: 'disabled', label: 'Disabled', className: '', disabled: true },
+        ] as const
+
+        // Figma "Type" (+ "Danger") -> React variant/error. Quaternary has no Danger variant (matches error:never).
+        const ROWS = [
+            { figma: 'Primary (Contained)', variant: 'contained', danger: false },
+            { figma: 'Secondary (Outlined)', variant: 'outlined', danger: false },
+            { figma: 'Tertiary', variant: 'text', danger: false },
+            { figma: 'Quaternary', variant: 'textGray', danger: false },
+            { figma: 'Primary · Danger', variant: 'contained', danger: true },
+            { figma: 'Secondary · Danger', variant: 'outlined', danger: true },
+            { figma: 'Tertiary · Danger', variant: 'text', danger: true },
+        ] as const
+
+        const SIZES = [
+            { size: 'medium', label: 'Medium — h40 / text 16' },
+            { size: 'small', label: 'Small — h32 / text 14' },
+        ] as const
+
+        const cellStyle: React.CSSProperties = { padding: 12, border: '1px solid #bdc4cf', verticalAlign: 'middle' }
+        const headStyle: React.CSSProperties = { ...cellStyle, textAlign: 'left', fontWeight: 600, color: '#49525f', whiteSpace: 'nowrap', background: '#f0f2f4' }
 
         return (
-            <Stack spacing={4}>
-                {states.map((state) => (
-                    <div key={state.label}>
-                        <h3 style={{ marginBottom: 8 }}>{state.label}</h3>
-                        <Stack spacing={3}>
-                            {sizes.map((size) => (
-                                <Stack key={size} direction='row' spacing={2} sx={{ alignItems: 'center' }}>
-                                    {variants.map((variant) => (
-                                        <StyledButton
-                                            key={`${state.label}-${size}-${variant}`}
-                                            {...args}
-                                            {...state.props}
-                                            size={size}
-                                            variant={variant}
-                                            startIcon={<FilterIcon width={18} height={18} />}
-                                            endIcon={<ChevronDownIcon width={18} height={18} />}
-                                        >
-                                            {variant}
-                                        </StyledButton>
+            <Stack spacing={5}>
+                {SIZES.map(({ size, label }) => (
+                    <div key={size}>
+                        <h3 style={{ marginBottom: 12 }}>{label}</h3>
+                        <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+                            <thead>
+                                <tr>
+                                    <th style={headStyle}>Type \ State</th>
+                                    {STATES.map((s) => (
+                                        <th key={s.key} style={headStyle}>
+                                            {s.label}
+                                        </th>
                                     ))}
-                                </Stack>
-                            ))}
-                        </Stack>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {ROWS.map((row) => (
+                                    <tr key={row.figma}>
+                                        <th scope='row' style={headStyle}>
+                                            {row.figma}
+                                        </th>
+                                        {STATES.map((s) => {
+                                            const props = {
+                                                size,
+                                                variant: row.variant,
+                                                disabled: s.disabled,
+                                                className: s.className,
+                                                dataTest: `gallery-${size}-${row.variant}-${row.danger ? 'danger' : 'off'}-${s.key}`,
+                                                children: 'Button',
+                                                ...(row.danger ? { error: true } : {}),
+                                            } as StyledButtonProps
+                                            return (
+                                                <td key={s.key} style={cellStyle}>
+                                                    <StyledButton {...props} />
+                                                </td>
+                                            )
+                                        })}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 ))}
             </Stack>

@@ -31,7 +31,7 @@ export function ToolbarActionButton({
             dataTest={action.dataTest ?? `dynamic-toolbar-action-${action.id}`}
             variant={action.variant ?? (selectionTone ? 'text' : 'outlined')}
             error={action.tone === 'danger'}
-            size={action.size ?? 'small'}
+            size={action.size ?? 'large'}
             disabled={action.disabled}
             startIcon={action.icon}
             onClick={action.onClick}
@@ -53,7 +53,7 @@ export function MoreTriggerButton({
         <StyledButton
             dataTest='dynamic-toolbar-overflow-actions'
             variant='text'
-            size='small'
+            size='large'
             endIcon={<DotsVerticalIcon width={20} height={20} />}
             onClick={(event) => onOpen?.(event.currentTarget)}
             aria-label={overflowMenuLabel}

@@ -19,19 +19,21 @@ export const StyledIcons: FC<{ height?: number; width?: number }> = ({ height = 
                 label='Filter icons'
                 onChange={(e) => setFilterText(e.target.value)}
             />
-            <div className='flex h-full w-full flex-wrap items-center gap-5 bg-gray-100 p-5 mt-2'>
+            <div className='mt-2 flex h-full w-full flex-wrap items-center gap-5 bg-gray-100 p-5'>
                 <Toaster />
 
                 {icons.map((icon) => (
                     <Tippy content={icon?.name} interactive>
-                        <div
-                            className='cursor-pointer'
+                        <button
+                            type='button'
+                            aria-label={icon?.name}
+                            className='cursor-pointer border-0 bg-transparent'
                             onClick={() => {
                                 toast.success('Copied to clipboard')
                             }}
                         >
                             <CopyToClipboard text={icon?.clipboardText || ''}>{icon?.component}</CopyToClipboard>
-                        </div>
+                        </button>
                     </Tippy>
                 ))}
             </div>

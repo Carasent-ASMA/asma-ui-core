@@ -1,13 +1,16 @@
 import { addDays } from 'date-fns'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { StyledDatePicker } from 'src/datetime/components/date-picker'
 import { setMidnightTime, setZeroTime } from 'src/datetime/helpers'
 
 export const SinglePickerExample: React.FC = () => {
     const [date, setDate] = useState<Date>()
+    // `Date.now()` is impure during render (react-hooks/purity) — this demo only needs a stable
+    // "today" anchor for the disabled-days bounds below, computed once per mount.
+    const today = useMemo(() => new Date(), [])
 
     return (
-        <div className='pt-4 flex items-center gap-4'>
+        <div className='flex items-center gap-4 pt-4'>
             <StyledDatePicker
                 dataTest='StyledDatePicker'
                 // locale={enGB}
@@ -42,7 +45,7 @@ export const SinglePickerExample: React.FC = () => {
                 onInputChange={(date: Date | undefined) => setDate(date)}
                 label='Test Label '
                 disabledDays={{
-                    before: setZeroTime(addDays(new Date(Date.now()), 2)),
+                    before: setZeroTime(addDays(today, 2)),
                 }}
                 dateFormat='dd.MM.yyyy'
             />
@@ -58,8 +61,8 @@ export const SinglePickerExample: React.FC = () => {
                 onInputChange={(date: Date | undefined) => setDate(date)}
                 label='Test Label '
                 disabledDays={{
-                    before: setZeroTime(addDays(new Date(Date.now()), 2)),
-                    after: setMidnightTime(addDays(new Date(Date.now()), 4)),
+                    before: setZeroTime(addDays(today, 2)),
+                    after: setMidnightTime(addDays(today, 4)),
                 }}
                 dateFormat='dd.MM.yyyy'
             />

@@ -7,7 +7,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useRootContext } from 'src/table/context/RootContext'
 import type { ColumnWindow } from 'src/table/hooks/useColumnVirtualizer'
-import { compact } from 'lodash-es'
+import { compact } from 'src/helpers/arrays'
 
 export function TableRow<TData extends { id: string | number }, TCustomData = Record<string, unknown>>({
     styledTableProps,

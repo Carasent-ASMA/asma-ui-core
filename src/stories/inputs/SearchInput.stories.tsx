@@ -123,8 +123,12 @@ export const ReadOnly: Story = {
         const input = canvas.getByLabelText(/search/i)
         const clearBtn = canvas.getByTestId(/styled-search-clear-icon/i)
 
+        // `readOnly` (unlike `disabled`) does not remove an input from the focus order per the HTML
+        // spec — it stays focusable/tabbable so keyboard and screen-reader users can still read and
+        // select its value; only editing is blocked. No code path in StyledSearchField/StyledInputField
+        // calls `.blur()` on focus, so it correctly keeps focus here.
         input.focus()
-        await expect(input).not.toHaveFocus()
+        await expect(input).toHaveFocus()
 
         await expect(input).toHaveValue('value')
         await userEvent.click(clearBtn)

@@ -1,6 +1,16 @@
-import { useLayoutEffect, useRef } from 'react'
+import { useLayoutEffect, useRef, type RefObject } from 'react'
 
-export function useProxyHorizontalScrollSync(enabled: boolean) {
+interface ProxyHorizontalScrollSync {
+    // RefObject<T> already types `current` as `T | null` — an explicit `T | null` here would make
+    // this a DIFFERENT (wider) instantiation that a plain `<div ref={...}>` no longer accepts (see
+    // the JSX `ref` assignability note on useElementHeightPx.ts).
+    tableScrollRef: RefObject<HTMLDivElement>
+    tableXRef: RefObject<HTMLDivElement>
+    hScrollRef: RefObject<HTMLDivElement>
+    hScrollContentRef: RefObject<HTMLDivElement>
+}
+
+export function useProxyHorizontalScrollSync(enabled: boolean): ProxyHorizontalScrollSync {
     const tableScrollRef = useRef<HTMLDivElement | null>(null)
     const tableXRef = useRef<HTMLDivElement | null>(null)
     const hScrollRef = useRef<HTMLDivElement | null>(null)

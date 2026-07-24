@@ -29,7 +29,7 @@
 
 .caption_label {
     @apply hidden text-[16px] leading-[24px] font-medium;
-    color: var(--colors-gray-700);
+    color: var(--colors-delta-700);
 }
 
 .nav {
@@ -38,8 +38,8 @@
 
 .nav_button {
     @apply h-[28px] w-[28px] flex justify-center items-center rounded-[4px] border;
-    color: var(--colors-gray-700);
-    border-color: var(--colors-gray-500);
+    color: var(--colors-delta-700);
+    border-color: var(--colors-delta-500);
 }
 
 .nav_button_previous {
@@ -56,7 +56,7 @@
 
 .head_cell {
     @apply capitalize w-[40px] h-[40px] flex items-center justify-center font-normal;
-    color: var(--colors-gray-600);
+    color: var(--colors-delta-600);
 }
 
 .head_cell:not(:first-child) {
@@ -68,7 +68,8 @@
 }
 
 .cell {
-    @apply text-[16px] leading-[20px] w-[40px] relative text-delta-800;
+    // Figma Day number = Body Base 16/lh24, text delta-800.
+    @apply relative w-[40px] border-0 bg-transparent p-0 text-[16px] leading-[24px] text-delta-800;
 
     &.has {
         @apply bg-gama-50;
@@ -84,7 +85,8 @@
 }
 
 .day {
-    @apply h-[40px] w-[40px] p-0 font-bold rounded-[4px];
+    // Figma day number = SemiBold (600), not bold (700); hover fill delta-50.
+    @apply h-[40px] w-[40px] rounded-[4px] border-0 bg-transparent p-0 text-[16px] font-semibold leading-[24px] #{!important};
 
     &:hover {
         @apply bg-delta-50;
@@ -98,7 +100,7 @@
 
 .day_today {
     .day {
-        @apply text-[16px] leading-[24px] bg-gama-50 font-bold text-delta-800 border-2 border-gama-400 hover:bg-gama-100 #{!important};
+        @apply text-[16px] leading-[24px] bg-gama-50 font-semibold text-delta-800 border-2 border-gama-400 hover:bg-gama-100 #{!important};
 
         &:hover {
             @apply bg-gama-100 #{!important};
@@ -115,7 +117,9 @@
 }
 
 .day_selected {
-    @apply bg-gama-500 text-white rounded-[4px] shadow-lg #{!important};
+    // Figma Selected day = gama-500 fill, white text, radius 8, with a white inset ring
+    // (2px gama border + 4px white gap in Figma; approximated here with an inset white outline).
+    @apply bg-gama-500 text-white rounded-[8px] shadow-lg #{!important};
     outline: 2px solid white #{!important};
     outline-offset: -4px #{!important};
 
@@ -146,7 +150,8 @@
 
 .day_outside {
     .day {
-        @apply text-delta-600 font-normal;
+        // Figma "Other month" = Regular weight, delta-600 (needs !important to beat the base .day semibold).
+        @apply text-delta-600 font-normal #{!important};
     }
 }
 
@@ -171,7 +176,7 @@
 }
 
 .weeknumber-header {
-    @apply bg-delta-50 w-[40px] h-[40px] mr-1 text-gray-600 text-[14px] leading-[20px] font-normal text-center align-middle rounded-t-[4px] flex items-center justify-center;
+    @apply bg-delta-50 w-[40px] h-[40px] mr-1 text-delta-600 text-[14px] leading-[20px] font-normal text-center align-middle rounded-t-[4px] flex items-center justify-center;
 }
 
 .row:last-child .weeknumber {

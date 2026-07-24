@@ -13,8 +13,7 @@ export const KEY_SELECTION_INDICATOR = 'selection-indicator'
 export const KEY_MORE_BUTTON = 'more-button'
 export const filterKey = (iconOnly: boolean): string => `slot:filter:${iconOnly ? 'icon' : 'label'}`
 export const trailingKey = (iconOnly: boolean): string => `slot:trailing:${iconOnly ? 'icon' : 'label'}`
-export const actionKey = (id: string, showLabel: boolean): string =>
-    `action:${id}:${showLabel ? 'label' : 'icon'}`
+export const actionKey = (id: string, showLabel: boolean): string => `action:${id}:${showLabel ? 'label' : 'icon'}`
 
 /* React 18 types don't know the `inert` attribute yet. */
 const INERT_PROPS = { inert: '' } as unknown as HTMLAttributes<HTMLDivElement>
@@ -67,10 +66,7 @@ export function ToolbarMeasurementStrip({
                 </span>
 
                 {selectionIndicator && (
-                    <span
-                        ref={register(KEY_SELECTION_INDICATOR)}
-                        className='inline-flex shrink-0 whitespace-nowrap'
-                    >
+                    <span ref={register(KEY_SELECTION_INDICATOR)} className='inline-flex shrink-0 whitespace-nowrap'>
                         <SelectionIndicator
                             selectedCount={selectionIndicator.selectedCount}
                             onClearSelection={selectionIndicator.hasClear ? () => undefined : undefined}

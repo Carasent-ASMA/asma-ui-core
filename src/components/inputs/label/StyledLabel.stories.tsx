@@ -67,6 +67,14 @@ const HIGHLIGHTING_TABLE_ROWS = [
 export default {
     title: 'DataDisplay/Label',
     component: StyledLabel,
+    parameters: {
+        docs: {
+            description: {
+                component:
+                    'Figma: [Label / Highlighting](https://www.figma.com/design/wXrXt5uKNNzV2DnQCgyYZH/Design-System?node-id=15181-43701) — h16, px6, radius 3, X-small Semibold uppercase (11/12, ls 0.55px).',
+            },
+        },
+    },
 }
 
 const HighlightingLabelsTable = (): JSX.Element => {

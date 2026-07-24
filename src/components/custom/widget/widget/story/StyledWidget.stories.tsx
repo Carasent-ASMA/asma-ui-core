@@ -7,6 +7,14 @@ const meta: Meta = {
     title: 'Widgets/Widget',
     component: StyledWidget,
     tags: [],
+    parameters: {
+        docs: {
+            description: {
+                component:
+                    'Figma: [Widget](https://www.figma.com/design/wXrXt5uKNNzV2DnQCgyYZH/Design-System?node-id=36956-172116) — white card, radius 8, pad 16, gap 16, Container shadow 0 0 4 rgba(34,33,51,.15); title = Section title 18/28 delta-800.',
+            },
+        },
+    },
     argTypes: {},
     args: {},
 } satisfies Meta<typeof StyledWidget>

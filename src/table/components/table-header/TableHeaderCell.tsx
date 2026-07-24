@@ -49,10 +49,21 @@ export function TableHeaderCell<
         [header.headerGroup.headers, hasActionsColumn],
     )
 
+    const canSort = header.column.getCanSort()
+    const sortedDirection = header.column.getIsSorted()
+    const ariaSort = canSort
+        ? sortedDirection === 'asc'
+            ? 'ascending'
+            : sortedDirection === 'desc'
+              ? 'descending'
+              : 'none'
+        : undefined
+
     return (
         <th
             key={header.id}
             colSpan={header.colSpan}
+            aria-sort={ariaSort}
             className={clsx(
                 style['t-cell'],
                 hideHeader && style['hide-header'],
@@ -74,9 +85,11 @@ export function TableHeaderCell<
                 className={clsx(
                     'flex items-center justify-start',
                     hideHeader ? style['hide-table-header'] : style['show-table-header'],
-                    header.column.getCanSort() && style['sortable-column'],
+                    canSort && style['sortable-column'],
                     header.column.columnDef.className,
                 )}
+                role={canSort ? 'button' : undefined}
+                tabIndex={canSort ? 0 : undefined}
                 onClick={(e) => {
                     const sortingHandler = header.column.getToggleSortingHandler()
                     if (!isResizing && sortingHandler) {
@@ -84,6 +97,17 @@ export function TableHeaderCell<
                     }
                     disableResizingFlag()
                 }}
+                onKeyDown={
+                    canSort
+                        ? (e) => {
+                              if (e.key !== 'Enter' && e.key !== ' ') return
+                              e.preventDefault()
+                              const sortingHandler = header.column.getToggleSortingHandler()
+                              if (!isResizing && sortingHandler) sortingHandler(e)
+                              disableResizingFlag()
+                          }
+                        : undefined
+                }
             >
                 {flexRender(header.column.columnDef.header, header.getContext())}
                 {{

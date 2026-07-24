@@ -1,4 +1,4 @@
-export const TemplatesQueryString = () => `query MyQuery {
+export const TemplatesQueryString = (): string => `query MyQuery {
                                         templates {
                                             id
                                             context

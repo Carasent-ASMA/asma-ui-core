@@ -31,7 +31,23 @@ const msgs = {
 } as const
 
 const formatRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/
-export const useDatePickerValidation = () => {
+
+interface DatePickerValidation {
+    validationError: boolean
+    errHelperText: string
+    clearValidation: () => void
+    handleValidation: (args: {
+        value: string
+        disabledDays?: Matcher | Matcher[]
+        localeCode?: string
+        disallowPast?: boolean
+        disallowFuture?: boolean
+        required?: boolean
+        minDate?: Date
+    }) => boolean
+}
+
+export const useDatePickerValidation = (): DatePickerValidation => {
     const [validationError, setError] = useState(false)
     const [errHelperText, setErrHelperText] = useState('')
 

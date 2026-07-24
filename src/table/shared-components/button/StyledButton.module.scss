@@ -10,7 +10,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: var(--font-size-body-base);
+        font-size: 16px;
         font-weight: 600;
         transition: all 300ms ease-in-out;
         color: var(--colors-button-#{$type}-#{$color}-text-color) #{!important};

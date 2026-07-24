@@ -1,10 +1,10 @@
 import type { StyledTimePickerProps } from './types'
-import { type PopupState } from 'material-ui-popup-state/hooks'
+import { type PopupState } from 'src/hooks/usePopupState'
 import { HelperText } from './components/HelperText'
 import { useRef, type ChangeEvent, useEffect, type MouseEvent as ReactMouseEvent } from 'react'
 import { StyledInputField } from 'src/datetime/shared-components/StyledInputField'
 import { ClockOutlineIcon } from 'src/datetime/shared-components/ClockOutlineIcon'
-import { useMask } from '@react-input/mask'
+import { useInputMask } from 'src/helpers/inputMask'
 
 export const TimePickerInput: React.FC<
     StyledTimePickerProps & {
@@ -34,11 +34,9 @@ export const TimePickerInput: React.FC<
         readOnly,
     } = props
 
-    const inputRef = useMask({
+    const inputRef = useInputMask({
         mask: 'xx:xx',
-        replacement: {
-            x: /\d/,
-        },
+        maskChar: 'x',
         showMask: false,
     })
 
@@ -85,12 +83,21 @@ export const TimePickerInput: React.FC<
                             <ClockOutlineIcon
                                 width={24}
                                 height={24}
+                                // DS field trailing icon = delta-700 (matches select/autocomplete chevrons
+                                // + search-field icons); delta-800 read as near-black. Muted when disabled.
+                                className={disabled ? 'text-delta-300' : 'text-delta-700'}
                                 onClick={(event: ReactMouseEvent<SVGSVGElement>) => {
                                     event.stopPropagation()
                                     if (!disabled && !readOnly) popupState.open(event)
                                 }}
                             />
                         ),
+                    },
+                    formHelperText: {
+                        className: hasError
+                            ? 'ml-0 mr-[14px] mt-1 leading-[23.24px]'
+                            : 'mx-[14px] mt-1 leading-[23.24px]',
+                        hideErrorIcon: true,
                     },
                 }}
                 value={localValue}

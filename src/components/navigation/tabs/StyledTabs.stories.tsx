@@ -11,6 +11,14 @@ const meta = {
     title: 'Navigation/Styled Tabs',
     component: StyledTabs,
     tags: [],
+    parameters: {
+        docs: {
+            description: {
+                component:
+                    'Figma: [Tabs](https://www.figma.com/design/wXrXt5uKNNzV2DnQCgyYZH/Design-System?node-id=15981-35855) — tab min-height 48px, indicator 2px.',
+            },
+        },
+    },
     argTypes: {},
     args: {},
 } satisfies Meta<typeof StyledTabs>
@@ -39,7 +47,8 @@ export const Scrollable: Story = {
 
 const TAB_COLUMN_NAMES = ['Enabled', 'Hovered', 'Focused', 'Disabled'] as const
 const TAB_ROW_NAMES = ['Not active', 'Active'] as const
-const TAB_BASE_CLASS = 'font-semibold capitalize text-base'
+// Let the component apply the Figma label size (Medium 18px / Small 16px SemiBold); only keep casing.
+const TAB_BASE_CLASS = 'capitalize'
 
 type TabColumnName = (typeof TAB_COLUMN_NAMES)[number]
 type AddonType = 'unread-badge' | 'new-label' | 'styled-badge'
@@ -48,10 +57,11 @@ type TabsStateTableProps = {
     tabSize: 'default' | 'small'
 }
 
+// Force each Figma state in the gallery via pseudo-state classes so all states are visually verified.
 const COLUMN_TAB_PROPS: Record<TabColumnName, Partial<ComponentProps<typeof StyledTab>>> = {
     Enabled: {},
-    Hovered: {}, // Not implemented yet
-    Focused: {}, // Not implemented yet
+    Hovered: { className: 'pseudo-hover' },
+    Focused: { className: 'pseudo-focus-visible' },
     Disabled: { disabled: true },
 }
 
@@ -156,7 +166,7 @@ const TabsStateTable = ({ title, tabSize }: TabsStateTableProps) => {
                                             <StyledTab
                                                 label='Tab label'
                                                 {...COLUMN_TAB_PROPS[columnName]}
-                                                className={`font-semibold capitalize ${tabSize === 'small' ? 'text-sm' : 'text-base'}`}
+                                                className={`capitalize ${COLUMN_TAB_PROPS[columnName].className ?? ''}`}
                                             />
                                         </StyledTabs>
                                     </div>
@@ -197,7 +207,7 @@ const InteractiveTabs = () => {
     const [value, setValue] = useState<number | false>(0)
 
     return (
-        <StyledTabs value={value} onChange={(_, newValue) => setValue(newValue)} className='max-w-fit'>
+        <StyledTabs value={value} onChange={(_, newValue) => setValue(newValue as number)} className='max-w-fit'>
             {INTERACTIVE_TABS.map(({ label, disabled }, index) => (
                 <StyledTab key={index} label={label} disabled={disabled} className={TAB_BASE_CLASS} />
             ))}
@@ -211,7 +221,7 @@ const ScrollableTabs = () => {
     return (
         <StyledTabs
             value={value}
-            onChange={(_, newValue) => setValue(newValue)}
+            onChange={(_, newValue) => setValue(newValue as number)}
             variant='scrollable'
             scrollButtons='auto'
             className='max-w-[600px]'

@@ -25,10 +25,14 @@ export const TimePickerColumn: React.FC<TimePickerColumnProps> = ({ type, value,
                 const isNow = currentTime == idx
 
                 return (
-                    <div
+                    // Native <button>: was a <div role='button'> with no keyboard listener/tabIndex,
+                    // making the whole hour/minute grid unreachable by keyboard. Visible text content
+                    // (the padded number) is already the accessible name — no aria-label needed.
+                    <button
                         key={idx}
-                        role='button'
+                        type='button'
                         className={clsx(
+                            'border-0',
                             styles['styled-time-picker-root_cell'],
                             isNow && styles['styled-time-picker-root_cell__cell-now'],
                             isSelected && styles['styled-time-picker-root_cell__cell-selected'],
@@ -38,7 +42,7 @@ export const TimePickerColumn: React.FC<TimePickerColumnProps> = ({ type, value,
                         }}
                     >
                         {idx.toString().padStart(2, '0')}
-                    </div>
+                    </button>
                 )
             })}
         </div>
