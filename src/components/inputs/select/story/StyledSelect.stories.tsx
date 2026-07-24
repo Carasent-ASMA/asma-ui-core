@@ -307,6 +307,36 @@ export const SelectingSameValue: Story = {
     },
 }
 
+export const MultipleSelectBehavior: Story = {
+    render: (args) => (
+        <StyledFormControl>
+            <StyledSelect {...args} multiple value={['1']}>
+                {options.map((o) => (
+                    <StyledSelectItem key={o.id} value={o.id}>
+                        {o.title}
+                    </StyledSelectItem>
+                ))}
+            </StyledSelect>
+        </StyledFormControl>
+    ),
+    play: async ({ canvasElement, userEvent }) => {
+        const canvas = within(canvasElement.ownerDocument.body)
+
+        const trigger = canvas.getByRole('combobox')
+
+        await userEvent.click(trigger)
+
+        const option = await canvas.findByRole('option', {
+            name: 'April Tucker',
+        })
+
+        await userEvent.click(option)
+
+        // Should remain open in multi mode
+        await expect(canvas.getByRole('listbox')).toBeInTheDocument()
+    },
+}
+
 export const EmptyOptions: Story = {
     render: (args) => (
         <StyledFormControl>
