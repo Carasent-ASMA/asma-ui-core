@@ -56,6 +56,19 @@ export interface StyledChipProps {
     sx?: unknown
     tabIndex?: number
     'aria-label'?: string
+    /** Overrides the default `role="button"`/no-role logic — for `StyledInteractiveChip`'s
+     * checkbox/radio chip, whose inner control is `decorative`/`aria-hidden` (a real, even hidden,
+     * `<input>` nested inside this chip's own interactive root is an axe `nested-interactive`
+     * violation), so the chip root itself must carry the real checkbox/radio semantics. Unlike the
+     * `clickable`-driven `role="button"`, this is rendered **regardless of `readOnly`** — a read-only
+     * checkbox/radio still needs its role + checked state announced, just not `role="button"` (which
+     * implies operability). */
+    role?: 'checkbox' | 'radio'
+    /** Paired with `role` above — the checked state of a checkbox/radio chip. */
+    'aria-checked'?: boolean
+    /** Paired with `role` above — mirrors `readOnly` for AT that specifically looks for `aria-readonly`
+     * on a checkbox/radio (unlike `role="button"`, `aria-readonly` doesn't imply the role disappears). */
+    'aria-readonly'?: boolean
     /** @figmaProp State = present→"Hovered" (forced for state tables) */
     'data-hovered'?: string
     /** @figmaProp State = present→"Focused" (forced for state tables) */
@@ -89,6 +102,9 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
             sx,
             tabIndex,
             'aria-label': ariaLabel,
+            role: roleOverride,
+            'aria-checked': ariaChecked,
+            'aria-readonly': ariaReadonly,
             'data-hovered': dataHovered,
             'data-focus': dataFocus,
             // Accepted for API parity but cosmetically inert in this design.
@@ -142,7 +158,9 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                 aria-label={ariaLabel}
                 data-hovered={dataHovered}
                 data-focus={dataFocus}
-                role={interactive ? 'button' : undefined}
+                role={roleOverride ?? (interactive ? 'button' : undefined)}
+                aria-checked={roleOverride ? ariaChecked : undefined}
+                aria-readonly={roleOverride ? ariaReadonly : undefined}
                 tabIndex={interactive ? tabIndex ?? 0 : tabIndex}
                 onClick={disabled || readOnly ? undefined : onClick}
                 onKeyDown={disabled || readOnly ? undefined : handleKeyDown}

@@ -81,6 +81,9 @@ export const StyledInteractiveChip = forwardRef<HTMLDivElement, StyledInteractiv
             <StyledChip
                 ref={ref}
                 aria-label={accessibleName}
+                role={type}
+                aria-checked={Boolean(checked)}
+                aria-readonly={props.readOnly}
                 avatar={control}
                 clickable
                 tabIndex={0}

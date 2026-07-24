@@ -2,7 +2,7 @@ import React from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
 import { StyledFormControl } from 'src/components/miscellaneous/StyledFormControl'
-import { expect, within } from 'storybook/test'
+import { expect, waitFor, within } from 'storybook/test'
 import { StyledSelect, type StyledSelectProps } from '../StyledSelect'
 import { StyledSelectItem } from '../StyledSelectItem'
 
@@ -162,6 +162,13 @@ export const KeyboardNavigation: Story = {
         const listbox = await canvas.findByRole('listbox')
         await expect(listbox).toBeInTheDocument()
 
+        // Opening moves focus to the first option via `requestAnimationFrame` (StyledSelect's
+        // `handleTriggerKeyDown`) — a real async step `findByRole` above doesn't wait for (it only
+        // waits for the listbox to exist in the DOM). Without this wait, a further `{ArrowDown}` sent
+        // before the RAF fires still lands on the trigger (re-opening a no-op, and losing a navigation
+        // step) instead of the listbox — flaky depending on RAF timing under test load.
+        await waitFor(() => expect(canvasElement.ownerDocument.activeElement).toHaveAttribute('role', 'option'))
+
         await userEvent.keyboard('{ArrowDown}')
         await userEvent.keyboard('{ArrowDown}')
 
@@ -247,6 +254,10 @@ export const FocusReturnAfterSelect: Story = {
         await expect(trigger).toHaveFocus()
 
         await userEvent.keyboard('{ArrowDown}')
+
+        // Same RAF-timing wait as KeyboardNavigation — see its comment.
+        await waitFor(() => expect(canvasElement.ownerDocument.activeElement).toHaveAttribute('role', 'option'))
+
         await userEvent.keyboard('{ArrowDown}')
         await userEvent.keyboard('{Enter}')
 

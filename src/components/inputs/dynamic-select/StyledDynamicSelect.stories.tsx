@@ -530,29 +530,29 @@ const getAutocomplete = (canvasElement: HTMLElement) => {
 export const SingleSelectChipGroup: Story = {
     render: () => <SelectFrame title='Status' options={createOptions(5)} />,
     play: async ({ canvas }) => {
-        const chip = canvas.getByRole('button', { name: 'Paused' })
+        // Single-select renders radio chips (`DynamicInteractiveChipGroup` type={multiple?
+        // 'checkbox':'radio'}) — the chip root itself carries `role="radio"`/`aria-checked` (its inner
+        // radio visual is `decorative`/`aria-hidden`, avoiding an axe `nested-interactive` violation).
+        const chip = canvas.getByRole('radio', { name: 'Paused' })
 
         await userEvent.click(chip)
 
-        const radio = canvas.getByRole('radio', { name: 'Paused' })
-        await expect(radio).toBeChecked()
+        await expect(chip).toBeChecked()
     },
 }
 
 export const MultipleSelectChipGroup: Story = {
     render: () => <SelectFrame title='Assignees' multiple options={createOptions(5)} />,
     play: async ({ canvas }) => {
-        const activeChip = canvas.getByRole('button', { name: 'Active' })
-        const pausedChip = canvas.getByRole('button', { name: 'Paused' })
+        // Multi-select renders checkbox chips — same role="checkbox" pattern as SingleSelectChipGroup's radio.
+        const activeChip = canvas.getByRole('checkbox', { name: 'Active' })
+        const pausedChip = canvas.getByRole('checkbox', { name: 'Paused' })
 
         await userEvent.click(activeChip)
         await userEvent.click(pausedChip)
 
-        const activeCheckbox = canvas.getByRole('checkbox', { name: 'Active' })
-        const pausedCheckbox = canvas.getByRole('checkbox', { name: 'Paused' })
-
-        await expect(activeCheckbox).toBeChecked()
-        await expect(pausedCheckbox).toBeChecked()
+        await expect(activeChip).toBeChecked()
+        await expect(pausedChip).toBeChecked()
     },
 }
 
@@ -585,8 +585,11 @@ export const MultipleSelectAutocomplete: Story = {
         await userEvent.type(input, 'Paused')
         await userEvent.click(await canvas.findByRole('option', { name: 'Paused' }))
 
-        await expect(canvas.getByRole('button', { name: 'Active' })).toBeInTheDocument()
-        await expect(canvas.getByRole('button', { name: 'Paused' })).toBeInTheDocument()
+        // Selected-value tag chips are delete-only `StyledChip`s (no `onClick`/`clickable`), so the
+        // chip itself carries no role — only its delete control does, named "Remove <label>" (see
+        // StyledChip's `interactive` rule: a delete-only chip is a plain container, MUI parity).
+        await expect(canvas.getByRole('button', { name: 'Remove Active' })).toBeInTheDocument()
+        await expect(canvas.getByRole('button', { name: 'Remove Paused' })).toBeInTheDocument()
     },
 }
 

@@ -127,11 +127,15 @@ export const Checkbox_Default: Story = {
     render: (args) => <SingleChipDemo {...args} />,
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement)
-        const chip = canvas.getByRole('button', { name: 'Checkbox Chip' })
+        // The checkbox visual is `decorative`/`aria-hidden` (avoids an axe `nested-interactive`
+        // violation — a real, even hidden, `<input>` nested inside this chip's own interactive root
+        // still trips the rule) — the chip root itself carries `role="checkbox"` + `aria-checked`,
+        // the real (and now sole) a11y signal of the checked state.
+        const chip = canvas.getByRole('checkbox', { name: 'Checkbox Chip' })
 
         await userEvent.click(chip)
 
-        expect(canvas.getByRole('checkbox', { name: 'Checkbox Chip' })).toBeChecked()
+        expect(chip).toBeChecked()
     },
 }
 
@@ -145,7 +149,7 @@ export const Checkbox_Focused: Story = {
     render: (args) => <SingleChipDemo {...args} />,
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement)
-        const chip = canvas.getByRole('button', { name: 'Checkbox focused' })
+        const chip = canvas.getByRole('checkbox', { name: 'Checkbox focused' })
 
         chip.focus()
 
@@ -164,7 +168,9 @@ export const Checkbox_Readonly: Story = {
     render: (args) => <SingleChipDemo {...args} />,
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement)
-        expect(canvas.getByRole('checkbox', { name: 'Checkbox readonly' })).toBeChecked()
+        const chip = canvas.getByRole('checkbox', { name: 'Checkbox readonly' })
+        expect(chip).toBeChecked()
+        expect(chip).toHaveAttribute('aria-readonly', 'true')
     },
 }
 
@@ -183,11 +189,11 @@ export const Checkbox_WithReactNodeLabel: Story = {
     render: (args) => <SingleChipDemo {...args} />,
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement)
-        const chip = canvas.getByRole('button', { name: 'Complex label chip' })
+        const chip = canvas.getByRole('checkbox', { name: 'Complex label chip' })
 
         await userEvent.click(chip)
 
-        expect(canvas.getByRole('checkbox', { name: 'Complex label chip' })).toBeChecked()
+        expect(chip).toBeChecked()
     },
 }
 
@@ -196,7 +202,7 @@ export const Checkbox_Multiple: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement)
 
-        await userEvent.click(canvas.getByRole('button', { name: 'Paused' }))
+        await userEvent.click(canvas.getByRole('checkbox', { name: 'Paused' }))
 
         expect(canvas.getByRole('checkbox', { name: 'Paused' })).toBeChecked()
         expect(canvas.getByRole('checkbox', { name: 'Active' })).not.toBeChecked()
@@ -213,11 +219,11 @@ export const Radio_Default: Story = {
     render: (args) => <SingleChipDemo {...args} />,
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement)
-        const chip = canvas.getByRole('button', { name: 'Default radio' })
+        const chip = canvas.getByRole('radio', { name: 'Default radio' })
 
         await userEvent.click(chip)
 
-        expect(canvas.getByRole('radio', { name: 'Default radio' })).toBeChecked()
+        expect(chip).toBeChecked()
     },
 }
 
@@ -231,7 +237,7 @@ export const Radio_Focused: Story = {
     render: (args) => <SingleChipDemo {...args} />,
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement)
-        const chip = canvas.getByRole('button', { name: 'Focused radio' })
+        const chip = canvas.getByRole('radio', { name: 'Focused radio' })
 
         chip.focus()
 
@@ -250,7 +256,9 @@ export const Radio_Readonly: Story = {
     render: (args) => <SingleChipDemo {...args} />,
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement)
-        expect(canvas.getByRole('radio', { name: 'Radio readonly' })).toBeChecked()
+        const chip = canvas.getByRole('radio', { name: 'Radio readonly' })
+        expect(chip).toBeChecked()
+        expect(chip).toHaveAttribute('aria-readonly', 'true')
     },
 }
 
@@ -259,7 +267,7 @@ export const Radio_Multiple: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement)
 
-        await userEvent.click(canvas.getByRole('button', { name: 'Paused' }))
+        await userEvent.click(canvas.getByRole('radio', { name: 'Paused' }))
 
         expect(canvas.getByRole('radio', { name: 'Paused' })).toBeChecked()
         expect(canvas.getByRole('radio', { name: 'Active' })).not.toBeChecked()
@@ -282,10 +290,10 @@ export const Radio_WithReactNodeLabel: Story = {
     render: (args) => <SingleChipDemo {...args} />,
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement)
-        const chip = canvas.getByRole('button', { name: 'Complex radio chip' })
+        const chip = canvas.getByRole('radio', { name: 'Complex radio chip' })
 
         await userEvent.click(chip)
 
-        expect(canvas.getByRole('radio', { name: 'Complex radio chip' })).toBeChecked()
+        expect(chip).toBeChecked()
     },
 }

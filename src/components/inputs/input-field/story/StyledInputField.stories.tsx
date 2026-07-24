@@ -213,11 +213,17 @@ export const AriaDescribedBy: Story = {
         label: 'Email',
         helperText: 'name@example.com',
     },
-    play: async ({ canvas }) => {
+    play: async ({ canvas, canvasElement }) => {
         const input = canvas.getByLabelText('Email')
-        const helper = canvas.getByText('name@example.com')
 
-        await expect(input).toHaveAttribute('aria-describedby', helper.id)
+        // The `id` lives on the helper row's wrapper `<div>`; the visible text is in a nested
+        // `<span>` (Figma helper-row icon layout) — `getByText('name@example.com')` matches that
+        // inner `<span>`, which has no `id`, not the `id`-bearing wrapper. Resolve via the input's
+        // own `aria-describedby` instead of assuming which node `getByText` returns.
+        const describedById = input.getAttribute('aria-describedby')
+        expect(describedById).toBeTruthy()
+        const describedByEl = canvasElement.ownerDocument.getElementById(describedById ?? '')
+        expect(describedByEl).toHaveTextContent('name@example.com')
     },
 }
 
