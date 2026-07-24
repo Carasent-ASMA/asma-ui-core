@@ -261,8 +261,10 @@ export const FocusReturnAfterSelect: Story = {
         await userEvent.keyboard('{ArrowDown}')
         await userEvent.keyboard('{Enter}')
 
-        // Focus should return to trigger
-        await expect(trigger).toHaveFocus()
+        // Selecting closes the listbox and returns focus to the trigger via `requestAnimationFrame`
+        // (StyledSelect's `selectValue`) — same RAF-timing concern as the wait above, so the
+        // assertion needs to wait for it rather than check immediately.
+        await waitFor(() => expect(trigger).toHaveFocus())
     },
 }
 
