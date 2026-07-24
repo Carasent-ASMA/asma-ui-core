@@ -288,7 +288,6 @@ export function StyledSelectAutocomplete<
     // promotion fixes painting but the dialog still marks a body-portalled popover inert (clicks fall
     // through). A descendant of the open dialog is not inert, so options become selectable again.
     // The reference (input) is always mounted before the popup opens, so its ref is populated here.
-    // eslint-disable-next-line react-hooks/refs
     const portalRoot = useMemo(() => (open ? getOpenModalDialogAncestor(refs.reference.current) : undefined), [open, refs])
 
     const emitChange = (event: SyntheticEvent, option: T): void => {

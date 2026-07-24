@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-export const useBackNavigationClose = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
+export const useBackNavigationClose = ({ open, onClose }: { open: boolean; onClose: () => void }): null => {
     useEffect(() => {
         if (!open) return
 
@@ -11,7 +11,8 @@ export const useBackNavigationClose = ({ open, onClose }: { open: boolean; onClo
         return () => {
             window.removeEventListener('popstate', onClose)
 
-            if (window.history.state?.modal) {
+            const state = window.history.state as { modal?: boolean } | null
+            if (state?.modal) {
                 window.history.back()
             }
         }

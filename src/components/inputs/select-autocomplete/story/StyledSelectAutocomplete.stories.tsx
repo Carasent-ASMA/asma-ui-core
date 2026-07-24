@@ -234,16 +234,18 @@ export const SelectAllTogglesAllOptions: Story = {
 
         await userEvent.click(selectAllCheckbox)
 
-        // Exact names: /The Godfather/ would also match "The Godfather: Part II" (two chips).
-        await expect(canvas.getByRole('button', { name: 'The Shawshank Redemption' })).toBeInTheDocument()
-        await expect(canvas.getByRole('button', { name: 'The Godfather' })).toBeInTheDocument()
-        await expect(canvas.getByRole('button', { name: 'The Godfather: Part II' })).toBeInTheDocument()
+        // The chip itself is not a button (a delete-only chip is a plain container, StyledChip's
+        // `interactive` rule); only its delete control is, named "Remove <title>". Exact names:
+        // /The Godfather/ would also match "The Godfather: Part II" (two chips).
+        await expect(canvas.getByRole('button', { name: 'Remove The Shawshank Redemption' })).toBeInTheDocument()
+        await expect(canvas.getByRole('button', { name: 'Remove The Godfather' })).toBeInTheDocument()
+        await expect(canvas.getByRole('button', { name: 'Remove The Godfather: Part II' })).toBeInTheDocument()
 
         await userEvent.click(selectAllCheckbox)
 
-        await expect(canvas.queryByRole('button', { name: 'The Shawshank Redemption' })).not.toBeInTheDocument()
-        await expect(canvas.queryByRole('button', { name: 'The Godfather' })).not.toBeInTheDocument()
-        await expect(canvas.queryByRole('button', { name: 'The Godfather: Part II' })).not.toBeInTheDocument()
+        await expect(canvas.queryByRole('button', { name: 'Remove The Shawshank Redemption' })).not.toBeInTheDocument()
+        await expect(canvas.queryByRole('button', { name: 'Remove The Godfather' })).not.toBeInTheDocument()
+        await expect(canvas.queryByRole('button', { name: 'Remove The Godfather: Part II' })).not.toBeInTheDocument()
     },
 }
 

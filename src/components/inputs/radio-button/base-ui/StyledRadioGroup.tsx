@@ -67,7 +67,7 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
                 data-testid={dataTest}
                 aria-describedby={describedById}
                 aria-invalid={error}
-                aria-readonly={readOnly || undefined}
+                aria-readonly={readOnly ? true : undefined}
                 // readOnly: keep the normal (non-disabled) look but block interaction — selection can't
                 // change (onSelect early-returns) and clicks/focus are inert.
                 className={clsx(

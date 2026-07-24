@@ -10,7 +10,7 @@ import { CheckIcon } from 'src/table/shared-components/CheckIcon'
  *
  */
 
-export const useStyledTableColumns = () => {
+export const useStyledTableColumns = (): { columns: ColumnDef<Person, Person>[] } => {
     const columns = useMemo<ColumnDef<Person, Person>[]>(
         () => [
             {

@@ -15,6 +15,6 @@ const translations = {
     },
 }
 
-export function useTranslations(locale: 'no' | 'en' = 'en') {
+export function useTranslations(locale: 'no' | 'en' = 'en'): typeof translations.en {
     return useMemo(() => translations[locale] ?? translations.en, [locale])
 }

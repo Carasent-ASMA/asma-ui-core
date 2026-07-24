@@ -1,4 +1,4 @@
-export type PaddingSides = { top: string; right: string; bottom: string; left: string }
+export interface PaddingSides { top: string; right: string; bottom: string; left: string }
 
 /** ponytail: tailwind `important: true` beats inline `style` — setProperty wins */
 export const applyImportantPadding = (el: HTMLElement | null, padding: PaddingSides): void => {

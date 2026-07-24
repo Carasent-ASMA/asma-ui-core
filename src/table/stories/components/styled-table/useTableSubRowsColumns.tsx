@@ -5,7 +5,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { StyledCheckbox } from 'src/table/shared-components/StyledCheckbox'
 import { CheckIcon } from 'src/table/shared-components/CheckIcon'
 
-export const useTableSubRowsColumns = () => {
+export const useTableSubRowsColumns = (): { columns: ColumnDef<Participant, Participant>[] } => {
     const columns = useMemo<ColumnDef<Participant, Participant>[]>(
         () => [
             {

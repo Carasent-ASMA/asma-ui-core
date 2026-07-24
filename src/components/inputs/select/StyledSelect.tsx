@@ -84,8 +84,10 @@ export interface StyledSelectProps {
     fullWidth?: boolean
     className?: string
     style?: CSSProperties
-    /** Accepted for API parity; `standard` renders borderless (calendar month/year dropdowns). */
-    variant?: 'outlined' | 'standard' | string
+    /** Accepted for API parity; `standard` renders borderless (calendar month/year dropdowns).
+     * `string & {}` keeps 'outlined'/'standard' as autocomplete hints without TS treating them as
+     * redundant against the `string` fallback (other MUI variant values are accepted and ignored). */
+    variant?: 'outlined' | 'standard' | (string & {})
     sx?: unknown
     /** Sets `aria-labelledby` on the trigger — the field's real accessible-name source when a
      * visible label sits outside the control (MUI `Select` parity; genuinely wired, unlike `size`
@@ -192,7 +194,7 @@ export const StyledSelect = ({
         const selected = multiple
             ? Array.isArray(currentValue) && currentValue.includes(next)
                 ? currentValue.filter((item) => item !== next)
-                : [...(Array.isArray(currentValue) ? currentValue : []), next]
+                : [...(Array.isArray(currentValue) ? (currentValue as unknown[]) : []), next]
             : next
         if (!isControlled) setUncontrolled(selected)
         onChange?.({ target: { value: selected, name } }, child)
@@ -238,7 +240,13 @@ export const StyledSelect = ({
                     (child): child is ReactElement<StyledSelectItemProps> =>
                         isValidElement<StyledSelectItemProps>(child) && currentValue.includes(child.props.value),
                 )
-                .map((child) => child.props.children)
+                // Option labels are normally string/number; a richer ReactNode (icon + text) has no
+                // sensible string form for the trigger, so it contributes nothing rather than
+                // "[object Object]".
+                .map((child) => {
+                    const label = child.props.children
+                    return typeof label === 'string' || typeof label === 'number' ? String(label) : ''
+                })
                 .join(', ')
           : selectedChild?.props.children
 
@@ -293,6 +301,10 @@ export const StyledSelect = ({
                 // role/aria-haspopup/aria-expanded on the reference — spread it FIRST so our explicit,
                 // single-source-of-truth attributes below (bound to local `open`/`listboxId`) win instead
                 // of being silently shadowed by floating-ui's copy (JSX: later props override earlier).
+                // getReferenceProps merely MERGES this handler into the returned props object (standard
+                // @floating-ui/react usage, called during render by design) — it doesn't read a ref's
+                // `.current` synchronously, so this isn't the unsafe pattern the rule targets.
+                // eslint-disable-next-line react-hooks/refs
                 {...getReferenceProps({ onKeyDown: handleTriggerKeyDown })}
                 role='combobox'
                 aria-haspopup='listbox'

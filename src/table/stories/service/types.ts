@@ -1,4 +1,4 @@
-export type ITemplate = {
+export interface ITemplate {
     id: string
     context: string
     archived: string

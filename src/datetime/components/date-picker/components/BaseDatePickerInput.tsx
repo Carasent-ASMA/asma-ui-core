@@ -65,15 +65,24 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
     const { maskRef } = useDatePickerMask()
     const [value, setValue] = useState(selected ? getValue(selected, dateFormat) : '')
 
+    // Keep `value` in sync with `selected`/`dateFormat` without an effect — the React-recommended
+    // "adjusting state during render" pattern (https://react.dev/learn/you-might-not-need-an-effect
+    // #adjusting-some-state-when-a-prop-changes). `value` is also locally editable (see `onChange`
+    // below, driven by user keystrokes), so it can't be purely derived on every render; it only
+    // needs to re-sync when the controlling props actually change (e.g. a date picked on the
+    // calendar, or the parent resetting `selected`) — same change-detection as the effect it
+    // replaces (both compare `selected`/`dateFormat` by reference).
+    const [syncedProps, setSyncedProps] = useState({ selected, dateFormat })
+    if (selected !== syncedProps.selected || dateFormat !== syncedProps.dateFormat) {
+        setSyncedProps({ selected, dateFormat })
+        setValue(selected ? getValue(selected, dateFormat) : '')
+    }
+
     const defaultHelper = locale?.code?.startsWith('nb') ? 'DD/MM/ÅÅÅÅ' : 'DD/MM/YYYY'
     const effectiveDefaultHelper = hideDefaultHelperText ? undefined : defaultHelper
 
     const hasError = !!(validationError || error)
     const rawText = hasError ? (errorText ?? errHelperText) : helperText ?? effectiveDefaultHelper
-
-    useEffect(() => {
-        setValue(selected ? getValue(selected, dateFormat) : '')
-    }, [selected, dateFormat])
 
 
     useEffect(() => {

@@ -8,8 +8,9 @@ export function useWindowWidthSize(): number {
     }
 
     useEffect(() => {
-        handleSize()
-
+        // No initial handleSize() call: useState(window.innerWidth) above already captured the
+        // current width synchronously at mount — re-setting it here would be redundant (and trips
+        // react-hooks/set-state-in-effect). The effect only needs to subscribe to future changes.
         window.addEventListener('resize', handleSize)
 
         return () => window.removeEventListener('resize', handleSize)

@@ -2,16 +2,16 @@ import { useEffect, useState } from 'react'
 import type { ITemplate } from './types'
 import { TemplatesQuery } from './Templates.query'
 
-export const useFetchTemplates = () => {
+export const useFetchTemplates = (): { data: ITemplate[] } => {
     const [data, setData] = useState<ITemplate[]>([])
 
     useEffect(() => {
-        const getDatadata = async () => {
-            const response = await fetch(import.meta.env['STORYBOOK_PROXY_ENDPOINT'], {
+        const getDatadata = async (): Promise<void> => {
+            const response = await fetch(import.meta.env['STORYBOOK_PROXY_ENDPOINT'] as string, {
                 method: 'POST',
                 headers: {
                     'content-type': 'application/json',
-                    'x-hasura-admin-secret': import.meta.env['STORYBOOK_PROXY_SECRET'],
+                    'x-hasura-admin-secret': import.meta.env['STORYBOOK_PROXY_SECRET'] as string,
                 },
                 body: JSON.stringify(TemplatesQuery),
             })

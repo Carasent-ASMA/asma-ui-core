@@ -88,7 +88,7 @@ export const ClickAwayListener = ({
             handlers[name] = (event) => {
                 syntheticEventRef.current = true
                 const childHandler = childProps[name]
-                if (typeof childHandler === 'function') childHandler(event)
+                if (typeof childHandler === 'function') (childHandler as (event: unknown) => void)(event)
             }
             return handlers
         }, {})

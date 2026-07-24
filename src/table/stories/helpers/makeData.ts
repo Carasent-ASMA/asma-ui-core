@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 
-export type Person = {
+export interface Person {
     id: string
     firstName: string
     lastName: string
@@ -11,7 +11,7 @@ export type Person = {
     subRows?: Person[]
 }
 
-export type Participant = {
+export interface Participant {
     id: string
     fullName: string
     activityId: string
@@ -41,11 +41,11 @@ const newPerson = (): Person => {
             'relationship',
             'complicated',
             'single',
-        ])[0] as Person['status'],
+        ])[0]!,
     }
 }
 
-export function makeData(...lens: number[]) {
+export function makeData(...lens: number[]): Person[] {
     const makeDataLevel = (depth = 0): Person[] => {
         const len = lens[depth]
         if (!len) return []

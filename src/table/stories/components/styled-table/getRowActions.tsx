@@ -1,7 +1,14 @@
 import type { Person } from '../../helpers/makeData'
 import type { Row } from '@tanstack/react-table'
 
-export function getRowActions(row: Row<Person>) {
+interface RowAction {
+    label: string
+    hide?: boolean
+    className?: string
+    onClick: () => void
+}
+
+export function getRowActions(row: Row<Person>): RowAction[] {
     return [
         {
             label: row.original.progress > 50 ? 'Action 50' : 'Action less than 50',

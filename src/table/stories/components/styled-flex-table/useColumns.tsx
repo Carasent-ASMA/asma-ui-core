@@ -4,7 +4,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 import type { ITemplate } from '../../service/types'
 import { CheckIcon } from 'src/table/shared-components/CheckIcon'
 
-export const useColumns = () => {
+export const useColumns = (): { columns: ColumnDef<ITemplate, ITemplate>[] } => {
     const columns = useMemo<ColumnDef<ITemplate, ITemplate>[]>(
         () => [
             {
@@ -32,7 +32,7 @@ export const useColumns = () => {
                 cell: (info) => {
                     const proxy = info.row.original
 
-                    return <div className='text-base text-black py-[12px]'>{`${proxy.template_uuid}`}</div>
+                    return <div className='py-[12px] text-base text-black'>{`${proxy.template_uuid}`}</div>
                 },
             },
             {

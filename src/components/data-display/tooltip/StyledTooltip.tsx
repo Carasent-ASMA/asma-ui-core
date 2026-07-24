@@ -150,7 +150,7 @@ const TooltipWithFloating = ({
                         className={cn(
                             // Figma Tooltip (node 14680-25248): delta-800 bg, px8/py4, r3, Helper 14/20 (ls 0),
                             // max-width 320, Float shadow 0 1 6 rgba(0,0,0,.15).
-                            'z-[1500] block max-w-[320px] break-words whitespace-normal rounded-[3px] bg-[#363E4A] px-2 py-1 text-sm leading-5 text-white shadow-[0px_1px_6px_0px_rgba(0,0,0,0.15)]',
+                            'z-[1500] block max-w-[320px] whitespace-normal break-words rounded-[3px] bg-[#363E4A] px-2 py-1 text-sm leading-5 text-white shadow-[0px_1px_6px_0px_rgba(0,0,0,0.15)]',
                             className,
                             slotProps?.tooltip?.className,
                         )}

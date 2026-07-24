@@ -1,12 +1,19 @@
 import { useState } from 'react'
 import type { IMinimizableDialogV2Props } from './types'
 
+interface ControlledProps {
+    fullScreen: boolean
+    setFullScreen: (fullScreen: boolean) => void
+    minimized: boolean
+    setMinimized: (minimized: boolean) => void
+}
+
 export const useControlledProps = ({
     fullScreenState,
     handleFullScreenState,
     minimizedState,
     handleMinimizedState,
-}: IMinimizableDialogV2Props) => {
+}: IMinimizableDialogV2Props): ControlledProps => {
     const [_minimized, _setMinimized] = useState(false)
     const [_fullscreen, _setFullscreen] = useState(false)
 

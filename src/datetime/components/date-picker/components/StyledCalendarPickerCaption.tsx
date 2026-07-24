@@ -13,6 +13,10 @@ export function CustomCaption(
     return (
         <div
             {...divProps}
+            // `rdp-custom-caption` is a bespoke hook class (not Tailwind), styled via
+            // `:global(.rdp-custom-caption)` in StyledCalendarPicker.module.scss — the
+            // better-tailwindcss linter can't see CSS-module globals, hence the disable.
+            // eslint-disable-next-line better-tailwindcss/no-unregistered-classes
             className='rdp-custom-caption capitalize'
             style={{
                 ...divProps.style,

@@ -239,10 +239,11 @@ export const StyledInputField = ({
         : htmlInputStyle
 
     useLayoutEffect(() => {
-        if (!isSingleLineShell) {
-            setEndAdornmentPad((prev) => (prev === undefined ? prev : undefined))
-            return
-        }
+        // `endAdornmentPad` is only ever READ at its one call site above, itself gated on
+        // `isSingleLineShell` (`singleLineHtmlInputStyle`, used only when `isSingleLineShell`) — so
+        // there's nothing to reset when it flips false; skip the measurement rather than clear stale
+        // state that's already unreachable. Avoids a setState call in the effect body for that branch.
+        if (!isSingleLineShell) return
         const el = endAdornmentRef.current
         // width of the adornment + its 14px right inset + a small gap.
         const next = el ? Math.ceil(el.getBoundingClientRect().width) + 20 : undefined
@@ -460,7 +461,7 @@ export const StyledInputField = ({
                     className={cn(
                         // Figma "Helper text" row (15561-37857 / 34634-148726): 24px tall, pt 4px, gap 4px.
                         !slotProps?.formHelperText &&
-                            'box-border mr-[14px] min-h-[24px] pt-1',
+                            'mr-[14px] box-border min-h-[24px] pt-1',
                         error &&
                             !slotProps?.formHelperText?.hideErrorIcon &&
                             'flex items-start gap-1 text-error-500',

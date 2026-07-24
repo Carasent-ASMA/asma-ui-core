@@ -16,8 +16,8 @@ export const RenderSubRows: React.FC<{ subRows: Participant[]; rowHeight: number
                 height: `${subRows.length * (rowHeight + 0.8)}px`,
             }}
         >
-            <td className='absolute top-0 left-0 right-0 flex overflow-hidden h-full border-b border-solid border-b-delta-300 p-0'>
-                <div className='w-full p-0 m-0'>
+            <td className='absolute left-0 right-0 top-0 flex h-full overflow-hidden border-b border-solid border-b-delta-300 p-0'>
+                <div className='m-0 w-full p-0'>
                     <StyledTable<Participant>
                         data={subRows}
                         columns={columns}

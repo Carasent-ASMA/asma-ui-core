@@ -33,7 +33,7 @@ export const FocusedRowsFeature: TableFeature = {
             return table.options.onChangeFocusedRow?.(safeUpdater)
         }
 
-        table.focusRowById = async (rowId: string) => {
+        const focusRowByIdAsync = async (rowId: string): Promise<void> => {
             const rowIndex = table.getRowModel().rows.findIndex((r) => r.id === rowId)
 
             // If row is not in the current page, change the page first
@@ -62,6 +62,13 @@ export const FocusedRowsFeature: TableFeature = {
                 el.focus({ preventScroll: false })
                 el.scrollIntoView({ behavior: 'smooth', block: 'center' })
             }
+        }
+
+        // `focusRowById` is typed `(rowId: string) => void` (fire-and-forget, no caller awaits it) —
+        // the async body above is wrapped rather than assigned directly, so the property itself stays
+        // a synchronous void function and the unawaited promise is explicit (`void`), not implicit.
+        table.focusRowById = (rowId: string): void => {
+            void focusRowByIdAsync(rowId)
         }
     },
 

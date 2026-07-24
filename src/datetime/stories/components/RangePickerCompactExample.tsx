@@ -8,7 +8,7 @@ export const RangePickerExample: React.FC = () => {
     const [rangeCompact, setRangeCompact] = useState<DateRange>()
 
     return (
-        <div className='pt-4 flex flex-col gap-6'>
+        <div className='flex flex-col gap-6 pt-4'>
             <StyledDatePicker
                 mode='range'
                 dataTest='range-picker-example'
