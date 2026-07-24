@@ -126,7 +126,7 @@ export const Positions: Story = {
     render: (args) => (
         <div className='flex max-w-[600px] flex-col gap-8'>
             {[1, 5, 10].map((v) => (
-                <StyledSlider key={v} {...args} value={v} />
+                <StyledSlider key={v} {...args} ariaLabel={`Value ${v}`} value={v} />
             ))}
         </div>
     ),

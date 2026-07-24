@@ -62,7 +62,13 @@ export const IconButton: Story = {
         title: 'Icon button',
         children: (
             <div className='w-fit'>
-                <StyledButton dataTest='icon-btn' startIcon={<FilterIcon width={24} height={24} />} />
+                {/* An icon-only button's tooltip is a visible-only hint, not an accessible name on
+                    its own — it needs its own `aria-label` too (axe `button-name`). */}
+                <StyledButton
+                    dataTest='icon-btn'
+                    aria-label='Icon button'
+                    startIcon={<FilterIcon width={24} height={24} />}
+                />
             </div>
         ),
     },

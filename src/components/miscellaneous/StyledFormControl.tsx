@@ -73,6 +73,13 @@ export const StyledFormControl = ({
 
     return (
         <FormControlContext.Provider value={context}>
+            {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions --
+                Not a false positive to "fix" with role/tabIndex: this div wraps REAL interactive
+                children (inputs/selects), which are already independently keyboard-operable. onFocus/
+                onBlur only observe focus BUBBLING from those children (e.g. clear-error-on-focus,
+                validate-on-blur) — they don't make the wrapper itself a control. onClick is a passthrough
+                convenience. Giving the wrapper its own role='button'/tabIndex would misrepresent a
+                multi-control container as one control to assistive tech. */}
             <div
                 className={cn('relative inline-flex flex-col', fullWidth && 'w-full', className)}
                 style={{ ...resolveSx(sx), ...style }}

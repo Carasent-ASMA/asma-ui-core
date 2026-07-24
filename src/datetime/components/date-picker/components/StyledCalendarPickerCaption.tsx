@@ -25,6 +25,7 @@ export function CustomCaption(
             {children}
             <StyledButton
                 dataTest='close-button'
+                aria-label='Close'
                 variant='textGray'
                 onClick={(event: React.MouseEvent<HTMLButtonElement>) => onClose?.(event, 'backdropClick')}
                 startIcon={<CloseIcon height={20} width={20} />}

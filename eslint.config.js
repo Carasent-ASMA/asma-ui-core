@@ -3,7 +3,7 @@ import eslint from '@eslint/js'
 import { defineConfig, globalIgnores } from 'eslint/config'
 import eslintPluginBetterTailwindcss from 'eslint-plugin-better-tailwindcss'
 import deMorgan from 'eslint-plugin-de-morgan'
-// import jsxA11y from 'eslint-plugin-jsx-a11y'
+import jsxA11y from 'eslint-plugin-jsx-a11y'
 import reactPlugin from 'eslint-plugin-react'
 import reactHooksPlugin from 'eslint-plugin-react-hooks'
 import reactYouMightNotNeedAnEffect from 'eslint-plugin-react-you-might-not-need-an-effect'
@@ -91,17 +91,10 @@ export default defineConfig(
     reactHooksPlugin.configs.flat.recommended,
     reactYouMightNotNeedAnEffect.configs.recommended,
     regexpPlugin.configs['flat/recommended'],
-    // {
-    //     files: ['**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}'],
-    //     ...jsxA11y.flatConfigs.recommended,
-    //     languageOptions: {
-    //         ...jsxA11y.flatConfigs.recommended.languageOptions,
-    //         // globals: {
-    //         //   ...globals.serviceworker,
-    //         //   ...globals.browser,
-    //         // },
-    //     },
-    // },
+    {
+        files: ['**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}'],
+        ...jsxA11y.flatConfigs.recommended,
+    },
     // sonarjs.configs.recommended,
     deMorgan.configs.recommended,
     storybook.configs['flat/recommended'],

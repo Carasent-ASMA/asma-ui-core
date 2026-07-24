@@ -184,6 +184,11 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                 ...styleProp,
             }}
         >
+            {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions --
+                Mouse-only backdrop dismiss is the standard modal pattern (MUI/Radix/every dialog library):
+                WCAG 2.1.1 requires the FUNCTION be keyboard-operable, not this specific element — Escape
+                (handled on the native <dialog>, see handleCancel/requestEscapeClose above) is the
+                keyboard-equivalent close path. Making the scrim itself a tab stop would be a worse UX. */}
             <div
                 {...backdropProps}
                 // Figma overlay bg/modal = #626e7eb2 (delta-600 @ ~70%), not plain black.
@@ -244,6 +249,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                                 {dialogHeaderNode}
                                 <StyledButton
                                     dataTest={`close-button-${dataTest}`}
+                                    aria-label={!onCloseText ? 'Close' : undefined}
                                     variant='textGray'
                                     size='small'
                                     endIcon={<CloseIcon width={20} height={20} />}

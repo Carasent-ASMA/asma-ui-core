@@ -104,6 +104,7 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
                         onClick={onAnchorClick}
                         size={size}
                         dataTest={dataTest}
+                        aria-label={isLabelHidden ? (label ?? 'Filter') : undefined}
                         aria-haspopup='true'
                         aria-expanded={!!anchorEl}
                         aria-controls={anchorEl ? popoverId : undefined}

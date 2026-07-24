@@ -10,6 +10,7 @@ import type { IMinimizableDialogV2Props } from './types'
 import { useTranslations } from './useTranslations'
 import { useControlledProps } from './useControlledProps'
 import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
+import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
 
 export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) => {
     const {
@@ -46,6 +47,10 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
         setMinimized(false)
         onClose()
     }
+
+    // Only the fullscreen state shows a page-covering backdrop (below) and is actually modal — the
+    // default corner-docked panel is a non-modal floating widget that must NOT trap focus.
+    useFocusTrap(open && isFullScreenActive, modalRef, handleClose)
 
     const fullScreenDialogStyle: React.CSSProperties | undefined = isFullScreenActive
         ? {
@@ -94,6 +99,9 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
             </div>
             {/* Maximized */}
             {isFullScreenActive && (
+                // Mouse-only backdrop convenience; the keyboard-accessible equivalent is the
+                // FullScreenBtn toggle in the header (a real <button> via StyledButton).
+                // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
                 <div
                     className='fixed inset-0 z-[52] bg-[rgb(98,110,126)] bg-opacity-70'
                     onClick={() => {
@@ -104,6 +112,11 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
             <div
                 style={{ zIndex: 51, ...style, ...fullScreenDialogStyle }}
                 ref={modalRef}
+                // Semantic dialog identity only while actually modal (backdrop shown) — the corner-
+                // docked state is a non-modal widget and shouldn't announce as a dialog.
+                role={isFullScreenActive ? 'dialog' : undefined}
+                aria-modal={isFullScreenActive ? true : undefined}
+                aria-label={isFullScreenActive && typeof title === 'string' ? title : undefined}
                 className={cn(
                     styles['dialog'],
                     minimized && styles['hidden'],

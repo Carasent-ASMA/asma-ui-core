@@ -1,7 +1,8 @@
-import { useEffect, type FC, type ReactNode } from 'react'
+import { useEffect, useRef, type FC, type ReactNode } from 'react'
 import { FloatingPortal } from '@floating-ui/react'
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
+import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
 
 export type DrawerAnchor = 'left' | 'right' | 'top' | 'bottom'
 export type DrawerCloseReason = 'backdropClick' | 'escapeKeyDown'
@@ -59,6 +60,7 @@ export const StyledDrawer: FC<DrawerProps> = ({
     children,
 }) => {
     const isTemporary = variant === 'temporary'
+    const panelRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         if (!open || !isTemporary) return
@@ -69,11 +71,17 @@ export const StyledDrawer: FC<DrawerProps> = ({
         return () => document.removeEventListener('keydown', onKey)
     }, [open, isTemporary, onClose])
 
+    // Escape is already handled above (kept separate since it needs the real event/reason for
+    // `onClose`) — this only adds the Tab-cycling half of the trap for this backdrop-blocking modal.
+    useFocusTrap(open && isTemporary, panelRef)
+
     if (isTemporary && !open && !ModalProps?.keepMounted) return null
 
     return (
         <FloatingPortal>
             {isTemporary && !hideBackdrop && open && (
+                // Mouse-only backdrop dismiss; Escape (handled above) is the keyboard equivalent.
+                // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
                 <div
                     // Figma modal overlay bg/modal = #626e7eb2 (delta-600 @ ~70%), matching StyledDialog.
                     className='fixed inset-0 z-[1200] bg-[#626e7eb2]'
@@ -81,7 +89,9 @@ export const StyledDrawer: FC<DrawerProps> = ({
                 />
             )}
             <div
+                ref={panelRef}
                 role={isTemporary ? 'dialog' : undefined}
+                aria-modal={isTemporary && open ? true : undefined}
                 aria-hidden={!open}
                 className={cn(
                     'fixed z-[1200] overflow-auto bg-white transition-transform duration-300',

@@ -23,9 +23,15 @@ export function generateActionsColumn<TData>(options: {
         accessorFn: (row: TData) => {
             return row
         },
-        header: (props: HeaderContext<TData, unknown>) => {
-            return headerPin ? <HeaderActionMenu headerData={props} locale={locale} /> : null
-        },
+        header: (props: HeaderContext<TData, unknown>) =>
+            headerPin ? (
+                <HeaderActionMenu headerData={props} locale={locale} />
+            ) : (
+                // Visually blank by design (no pin menu here), but the <th> must still have an
+                // accessible name — an empty header cell leaves screen-reader table navigation unable
+                // to announce what this column is (axe `empty-table-header`).
+                <span className='sr-only'>{locale === 'no' ? 'Handlinger' : 'Actions'}</span>
+            ),
         cell: (cell: CellContext<TData, unknown>) =>
             actions || customActionsNode ? (
                 <div

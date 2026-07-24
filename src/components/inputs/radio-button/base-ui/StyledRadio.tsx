@@ -26,6 +26,15 @@ export type StyledRadioProps = {
     /** @figmaProp Selected = true→"on" | false→"off" */
     checked?: boolean
     onChange?: (event: ChangeEvent<HTMLInputElement>, checked: boolean) => void
+    /**
+     * Renders the identical visual circle/dot (same classes/data-attrs — no visual change) with NO
+     * real `<input>` at all, for use as a pure state indicator inside a widget that already owns
+     * selection itself (e.g. `StyledInteractiveChip`, whose `clickable` chip handles the click — this
+     * radio is `pointer-events-none` there already). A real `<input type="radio">` nested inside
+     * that chip's `role="button"` is a genuine axe `nested-interactive` violation; see
+     * `StyledCheckbox`'s identical `decorative` prop for the full rationale.
+     */
+    decorative?: boolean
 } & Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'className' | 'size' | 'checked' | 'onChange' | 'type'>
 // @figmaProp disabled → State="Disabled" (from InputHTMLAttributes; the group can also set it)
 
@@ -35,7 +44,10 @@ export type StyledRadioProps = {
  * SCSS module (ripple/pseudo-elements — GUD-003) is driven via `data-*` from React. TASK-201.
  */
 export const StyledRadio = forwardRef<HTMLInputElement, StyledRadioProps>(
-    ({ value, dataTest, className, size = 'medium', error, disabled, readOnly, checked, onChange, ...rest }, ref) => {
+    (
+        { value, dataTest, className, size = 'medium', error, disabled, readOnly, checked, onChange, decorative, ...rest },
+        ref,
+    ) => {
         const group = useRadioGroupContext()
         const isChecked = group ? group.value === value : !!checked
         const isDisabled = disabled ?? group?.disabled ?? false
@@ -66,6 +78,30 @@ export const StyledRadio = forwardRef<HTMLInputElement, StyledRadioProps>(
             onChange?.(event, event.target.checked)
         }
 
+        const visual = (
+            <>
+                <span className={styles['RadioRippleContainer']} ref={rippleRef} />
+                <span className={radioClasses}>
+                    <span className={styles['Indicator']} />
+                </span>
+            </>
+        )
+
+        if (decorative) {
+            return (
+                <span
+                    aria-hidden='true'
+                    className={wrapperClasses}
+                    data-testid={dataTest}
+                    data-checked={isChecked ? '' : undefined}
+                    data-unchecked={!isChecked ? '' : undefined}
+                    data-disabled={isDisabled ? '' : undefined}
+                >
+                    {visual}
+                </span>
+            )
+        }
+
         return (
             <label
                 className={wrapperClasses}
@@ -86,10 +122,7 @@ export const StyledRadio = forwardRef<HTMLInputElement, StyledRadioProps>(
                     disabled={isDisabled}
                     onChange={handleChange}
                 />
-                <span className={styles['RadioRippleContainer']} ref={rippleRef} />
-                <span className={radioClasses}>
-                    <span className={styles['Indicator']} />
-                </span>
+                {visual}
             </label>
         )
     },

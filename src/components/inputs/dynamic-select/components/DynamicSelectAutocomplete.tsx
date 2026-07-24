@@ -101,9 +101,15 @@ export const DynamicSelectAutocomplete = forwardRef(
 
         if (multiple && readOnly) return <DynamicInteractiveChipGroup<TOption> {...props} />
 
+        const titleId = title ? `${dataTest}-title` : undefined
+
         return (
             <div className='flex w-full flex-col gap-y-1'>
-                {title && <span className='text-base font-semibold text-delta-800'>{title}</span>}
+                {title && (
+                    <span id={titleId} className='text-base font-semibold text-delta-800'>
+                        {title}
+                    </span>
+                )}
                 <StyledSelectAutocomplete<TOption, boolean, boolean, false>
                     open={open}
                     onOpen={handleOpen}
@@ -197,9 +203,20 @@ export const DynamicSelectAutocomplete = forwardRef(
                             // instead of re-scanning `value` per option (avoids O(options × selected)).
                             const isSelected = state.selected
                             return (
-                                /** biome-ignore lint/a11y/useKeyWithClickEvents: <onClick props is still passed so we need to block it for disabled options> */
+                                // This <li role='option'> is a combobox descendant, not independently
+                                // focusable (no tabIndex). Keyboard selection is handled centrally on the
+                                // input via aria-activedescendant + Enter (see StyledSelectAutocomplete's
+                                // handleKeyDown); onClick here is mouse-only.
+                                // `props.role`/`props['aria-selected']` (from StyledSelectAutocomplete's
+                                // OptionLiProps) are invisible to static a11y analysis inside the spread —
+                                // restate them literally so `aria-disabled` is validated against `option`
+                                // (which supports it, unlike the <li>'s implicit `listitem` role) and
+                                // `role-has-required-aria-props` sees `aria-selected` is present.
+                                // eslint-disable-next-line jsx-a11y/click-events-have-key-events
                                 <li
                                     {...props}
+                                    role='option'
+                                    aria-selected={isSelected}
                                     key={props.id}
                                     onClick={!disabled ? props.onClick : undefined}
                                     className={cn(
@@ -216,12 +233,13 @@ export const DynamicSelectAutocomplete = forwardRef(
                                                 disabled={disabled}
                                                 dataTest={`${getOptionValueText(option)}-checkbox`}
                                                 size='small'
-                                                // Decorative: the whole row `<li>` toggles selection. Without
-                                                // `pointer-events-none` the checkbox is a `<label>` wrapping an
-                                                // `<input>`, so clicking it fires the row's onClick TWICE (the
-                                                // click + the label's forwarded input click) → the toggle cancels
-                                                // out and nothing selects. Letting clicks pass through fixes it.
-                                                className='pointer-events-none min-w-[36px]'
+                                                // Pure state indicator: the row `<li>` owns selection and
+                                                // carries the real accessible state via `aria-selected`
+                                                // (set above). `decorative` renders no <input> at all — a
+                                                // real one (even inert-ed with aria-hidden/tabIndex) is
+                                                // still a genuine axe `nested-interactive` violation.
+                                                decorative
+                                                className='min-w-[36px]'
                                                 checked={isSelected}
                                             />
                                             {renderLabel ? (
@@ -240,9 +258,14 @@ export const DynamicSelectAutocomplete = forwardRef(
                         const isSelected = state.selected
 
                         return (
-                            /** biome-ignore lint/a11y/useKeyWithClickEvents: <onClick props is still passed so we need to block it for disabled options> */
+                            // See the `multiple` branch above: not independently focusable, keyboard
+                            // selection handled centrally via aria-activedescendant + Enter; role and
+                            // aria-selected restated literally (both hidden inside the {...props} spread).
+                            // eslint-disable-next-line jsx-a11y/click-events-have-key-events
                             <li
                                 {...props}
+                                role='option'
+                                aria-selected={isSelected}
                                 key={props.id}
                                 className={cn(
                                     // Figma Menus item: Body Base 16/lh24.
@@ -303,6 +326,14 @@ export const DynamicSelectAutocomplete = forwardRef(
                                 },
                                 htmlInput: {
                                     ...(params.slotProps?.htmlInput ?? {}),
+                                    // `title` above renders as a plain <span> (not a real <label>, by
+                                    // design — it sits above the field, not as a floating label) with no
+                                    // programmatic connection to the input otherwise: `label=''` above
+                                    // means the field's own aria-label fallback never fires either, so
+                                    // without this the input has NO accessible name at all despite the
+                                    // visible title (axe `label`, the single largest violation source
+                                    // in this component's stories).
+                                    ...(titleId ? { 'aria-labelledby': titleId } : {}),
                                     style: typingDisabled ? { caretColor: 'transparent' } : {},
                                 },
                             }}

@@ -41,6 +41,7 @@ export const CopyWrapper: FC<
                 <div className={style['hidden-copy']}>
                     <StyledButton
                         dataTest='copy-button'
+                        aria-label={locale === 'no' ? 'Kopier' : 'Copy'}
                         size='small'
                         variant='text'
                         className='cursor-pointer'

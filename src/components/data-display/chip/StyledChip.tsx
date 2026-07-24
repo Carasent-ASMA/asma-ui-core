@@ -1,4 +1,4 @@
-import { forwardRef, type CSSProperties, type MouseEvent, type ReactElement, type ReactNode } from 'react'
+import { forwardRef, type CSSProperties, type KeyboardEvent, type MouseEvent, type ReactElement, type ReactNode } from 'react'
 import { CloseIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
 import { consumerOverrides } from 'src/helpers/classOverride'
@@ -118,6 +118,17 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
             onDelete?.(event)
         }
 
+        // A `clickable`/`onClick` chip gets `role='button' tabIndex=0` below — a <div> doesn't natively
+        // fire click on Enter/Space the way a real <button> does, so without this the chip would be a
+        // tab stop that does nothing on keyboard activation.
+        const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>): void => {
+            if (!interactive) return
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                onClick?.(event as unknown as MouseEvent<HTMLElement>)
+            }
+        }
+
         // MUI Chip shrink-wraps by default; `max-w-full` caps truncation in constrained rows. `cn` is
         // plain clsx (no tailwind-merge), so drop each default when the consumer sets that axis — e.g.
         // `className='max-w-fit'` must beat the hardcoded `max-w-full` (ParcelAttachmentChip).
@@ -134,6 +145,7 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                 role={interactive ? 'button' : undefined}
                 tabIndex={interactive ? tabIndex ?? 0 : tabIndex}
                 onClick={disabled || readOnly ? undefined : onClick}
+                onKeyDown={disabled || readOnly ? undefined : handleKeyDown}
                 onMouseDown={disabled || readOnly ? undefined : onMouseDown}
                 onMouseUp={disabled || readOnly ? undefined : onMouseUp}
                 className={cn(
@@ -175,7 +187,10 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                     <button
                         type='button'
                         data-testid={`${dataTest}-delete`}
-                        aria-label={typeof label === 'string' ? label : undefined}
+                        // "Remove <label>" (not the bare label) so it reads distinctly from the chip
+                        // itself; falls back to a generic "Remove" when `label` is a composite ReactNode
+                        // (not a plain string) — always some name rather than none (axe `button-name`).
+                        aria-label={typeof label === 'string' ? `Remove ${label}` : 'Remove'}
                         onClick={handleDelete}
                         disabled={disabled}
                         className={cn(

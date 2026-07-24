@@ -100,7 +100,14 @@ export function HeaderActionMenu<TData>({
 
     return (
         <div className={styles['actions-header-wrapper']}>
-            <button type='button' className={styles['actions-header']} onClick={handleOpen}>
+            <button
+                type='button'
+                aria-label={t.column_settings}
+                aria-haspopup='true'
+                aria-expanded={open}
+                className={styles['actions-header']}
+                onClick={handleOpen}
+            >
                 <PinIcon className={styles['pin-icon']} />
                 {isAnyColumnHidden && <div className={styles['pin-indicator']}></div>}
             </button>

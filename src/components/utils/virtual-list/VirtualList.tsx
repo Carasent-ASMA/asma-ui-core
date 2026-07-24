@@ -61,6 +61,10 @@ export const VirtualList = <TItem,>({
     return (
         <div
             ref={scrollRef}
+            // Keyboard-reachable when content overflows and scrolls (axe `scrollable-region-focusable`)
+            // — a generic, standalone primitive with no built-in alternative keyboard-scroll mechanism.
+            // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- see comment above
+            tabIndex={0}
             className={clsx('overflow-auto', className)}
             style={{ height, width }}
             data-testid={dataTest}

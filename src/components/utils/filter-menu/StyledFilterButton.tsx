@@ -36,6 +36,7 @@ export const StyledFilterButton: React.FC<StyledButtonProps & StyledFilterMenuPr
                 <StyledButton
                     {...props}
                     type='button'
+                    aria-label={isLabelHidden ? (label ?? 'Filter') : undefined}
                     startIcon={<FilterIcon width={size === 'large' ? 24 : 20} height={size === 'large' ? 24 : 20} />}
                     variant={variant}
                     size={size}

@@ -140,6 +140,16 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
 
     const textType: textTypes = error ? 'error' : disabled ? 'disabled' : 'active'
 
+    // The associated <label> contributes no accessible name when `label` is left empty (a
+    // supported, label-less state) — fall back to the description, then the placeholder, so the
+    // field still has a real name instead of only a `title` attribute (axe `label-title-only`).
+    const hasVisibleLabel = typeof label !== 'string' || label.trim() !== ''
+    const fallbackName = hasVisibleLabel
+        ? undefined
+        : typeof description === 'string' && description.trim() !== ''
+          ? description
+          : otherProps.placeholder
+
     return (
         <div className={`relative flex flex-col gap-1 ${containerClassName}`} data-testid={dataTest}>
             <label htmlFor={textAreaId} className={`${styles['label']} ${styles[textType]} ${labelClassName}`}>
@@ -157,6 +167,7 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
                     {...otherProps}
                     aria-describedby={`${descriptionId} ${counterId}`}
                     aria-invalid={error}
+                    aria-label={fallbackName}
                     id={textAreaId}
                     ref={textAreaRef}
                     className={`${styles['textarea']} ${styles[textareaType]} ${className} ${

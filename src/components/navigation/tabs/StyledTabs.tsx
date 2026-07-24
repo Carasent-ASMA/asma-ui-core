@@ -158,6 +158,9 @@ export const StyledTabs: FC<StyledTabsProps> = ({
                         <ChevronLeftIcon width={24} height={24} />
                     </button>
                 )}
+                {/* eslint-disable-next-line jsx-a11y/interactive-supports-focus -- false positive: per the
+                    WAI-ARIA Tabs pattern the tablist CONTAINER is never itself a tab stop; only the active
+                    tab is, via roving tabindex (StyledTab sets tabIndex={selected ? 0 : -1}). */}
                 <div
                     ref={scrollerRef}
                     role='tablist'

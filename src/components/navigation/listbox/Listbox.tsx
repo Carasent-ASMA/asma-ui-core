@@ -121,6 +121,10 @@ function ListboxOption<T>({
     }
 
     return (
+        // False positive: the rule can't statically prove the ternary always yields a number, but
+        // conditionally removing a disabled option from the tab order (vs a constant tabIndex=0) is
+        // the correct ARIA pattern here.
+        // eslint-disable-next-line jsx-a11y/interactive-supports-focus
         <div
             role='option'
             aria-selected={selected}

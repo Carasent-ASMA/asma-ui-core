@@ -63,7 +63,7 @@ export interface StyledSelectProps {
      * @figmaProp none — accepted for MUI `Select` / DEC-003 drop-in parity, but **no longer affects
      * rendering**: the trigger value is Body Base 16px and the field is 40px at every size (a smaller
      * size only changed text before; Figma field text is 16/lh24 regardless). Kept so `size="small"`
-     * call sites still compile. Ignored on purpose (not destructured, like `labelId`).
+     * call sites still compile. Ignored on purpose (not destructured).
      */
     size?: FieldSize
     /** @figmaProp State = true→"Error" */
@@ -87,6 +87,10 @@ export interface StyledSelectProps {
     /** Accepted for API parity; `standard` renders borderless (calendar month/year dropdowns). */
     variant?: 'outlined' | 'standard' | string
     sx?: unknown
+    /** Sets `aria-labelledby` on the trigger — the field's real accessible-name source when a
+     * visible label sits outside the control (MUI `Select` parity; genuinely wired, unlike `size`
+     * above). Without it (and no `name`/placeholder/value text), the trigger has no accessible name
+     * at all — a common gap when a floating/external label isn't referenced. */
     labelId?: string
     children?: ReactNode
     MenuProps?: { className?: string }
@@ -125,8 +129,10 @@ export const StyledSelect = ({
     MenuProps,
     onFocus,
     onBlur,
+    labelId,
 }: StyledSelectProps): JSX.Element => {
     const ctx = useFormControlContext()
+    const listboxId = `${dataTest}-listbox`
     const isStandard = variant === 'standard'
     const isError = error ?? ctx?.error ?? false
     const isDisabled = disabled ?? ctx?.disabled ?? false
@@ -196,6 +202,18 @@ export const StyledSelect = ({
         }
     }
 
+    // Shared by the mouse-only clear icon (below) and the Backspace/Delete keyboard equivalent on the
+    // trigger — the icon is `aria-hidden` (it's nested inside the trigger <button>, so it can't be an
+    // independent, valid Tab stop), so the keyboard path must reach the same logic another way (WCAG 2.1.1
+    // requires the FUNCTION be keyboard-operable, not literally the same element be focusable).
+    const handleClear = (): void => {
+        const cleared = multiple ? [] : ''
+        if (!isControlled) setUncontrolled(cleared)
+        onChange?.({ target: { value: cleared, name } }, null)
+        setOpen(false)
+        setFocused(false)
+    }
+
     const options = Children.map(children, (child) => {
         if (!isValidElement<StyledSelectItemProps>(child)) return child
         const itemValue = child.props.value
@@ -225,6 +243,17 @@ export const StyledSelect = ({
           : selectedChild?.props.children
 
     const handleTriggerKeyDown = (event: KeyboardEvent<HTMLButtonElement>): void => {
+        if (
+            (event.key === 'Backspace' || event.key === 'Delete') &&
+            allowClear &&
+            hasValue &&
+            !isDisabled &&
+            !readOnly
+        ) {
+            event.preventDefault()
+            handleClear()
+            return
+        }
         if ((event.key !== 'ArrowDown' && event.key !== 'ArrowUp') || isDisabled || readOnly) return
         event.preventDefault()
         setOpen(true)
@@ -260,12 +289,26 @@ export const StyledSelect = ({
                 ref={triggerRef}
                 type='button'
                 data-testid={dataTest}
+                // `getReferenceProps()` (from `useRole(context, { role: 'listbox' })`) sets its own
+                // role/aria-haspopup/aria-expanded on the reference — spread it FIRST so our explicit,
+                // single-source-of-truth attributes below (bound to local `open`/`listboxId`) win instead
+                // of being silently shadowed by floating-ui's copy (JSX: later props override earlier).
+                {...getReferenceProps({ onKeyDown: handleTriggerKeyDown })}
                 role='combobox'
                 aria-haspopup='listbox'
                 aria-expanded={open}
+                aria-controls={listboxId}
+                // `labelId` (external label) wins when present — same MUI `Select` intent as
+                // `aria-labelledby` taking precedence over `aria-label` per spec. Otherwise fall back
+                // to `name` (unconditionally, same as the listbox's own `aria-label={name}` below) so
+                // the trigger has a real name instead of relying entirely on whatever placeholder/
+                // value text happens to be visible — which is either absent (nameless trigger, the
+                // axe `button-name` bug) or, when present, an ambiguous name on its own (a screen
+                // reader announcing just the selected value, e.g. "Paused", doesn't say what the field is).
+                aria-labelledby={labelId}
+                aria-label={!labelId ? name : undefined}
                 aria-disabled={isDisabled ? true : undefined}
                 disabled={isDisabled}
-                {...getReferenceProps({ onKeyDown: handleTriggerKeyDown })}
                 onFocus={(event) => {
                     setFocused(true)
                     onFocus?.(event)
@@ -288,17 +331,18 @@ export const StyledSelect = ({
                 </span>
                 <span className='flex items-center gap-1'>
                     {allowClear && hasValue && !isDisabled && (
+                        // Mouse-only affordance, nested inside the trigger <button> — it can't be a
+                        // second, independently focusable control without invalid nested-interactive
+                        // semantics (a <button> may not contain interactive content). No `role='button'`
+                        // and `aria-hidden`: don't claim a Tab stop that isn't actually reachable. The
+                        // keyboard-equivalent path is Backspace/Delete on the trigger (handleTriggerKeyDown).
                         <span
-                            role='button'
+                            aria-hidden='true'
                             data-testid='select-clear-button'
                             className='flex items-center justify-center rounded-full p-[2px] hover:bg-gama-100'
                             onClick={(event) => {
                                 event.stopPropagation()
-                                const cleared = multiple ? [] : ''
-                                if (!isControlled) setUncontrolled(cleared)
-                                onChange?.({ target: { value: cleared, name } }, null)
-                                setOpen(false)
-                                setFocused(false)
+                                handleClear()
                             }}
                         >
                             <CloseIcon width={18} height={18} />
@@ -330,8 +374,14 @@ export const StyledSelect = ({
                 <FloatingPortal root={portalRoot}>
                     <ul
                         ref={listboxRef}
+                        id={listboxId}
                         role='listbox'
-                        aria-label={name}
+                        // Mirror the trigger's own name fallback (`labelId` wins, else `name`) — the
+                        // popup is a separate element from the trigger and needs its own accessible name
+                        // (axe `aria-input-field-name`); relying on `name` alone left it nameless for any
+                        // consumer using only an external `labelId` label, which is the common case.
+                        aria-labelledby={labelId}
+                        aria-label={!labelId ? name : undefined}
                         {...TOP_LAYER_PROPS}
                         style={{
                             ...TOP_LAYER_RESET_STYLE,

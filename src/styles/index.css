@@ -27,6 +27,25 @@
     }
 }
 
+/*
+ * Respect OS-level "reduce motion" (WCAG 2.3.3) across every component in one place instead of
+ * gating each `transition-*`/`animate-*` Tailwind class individually. Left unlayered (not
+ * `@tailwind utilities`) with `!important` — the standard technique for this rule (e.g. web.dev's
+ * "one rule to reduce motion") — so it wins over any Tailwind transition/animation/duration utility
+ * regardless of that utility's own layer/specificity. Near-zero (not `0s`/`none`) keeps
+ * `transitionend`/`animationend` still firing for any code awaiting them.
+ */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
 @layer utilities {
     .border-solid {
         border-style: solid;

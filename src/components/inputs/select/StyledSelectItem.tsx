@@ -22,6 +22,10 @@ export const StyledSelectItem = ({
     className,
     onClick,
 }: StyledSelectItemProps): JSX.Element => (
+    // Not independently focusable (tabIndex=-1) — keyboard selection is handled centrally by the
+    // parent listbox's onKeyDown (arrow keys move programmatic focus; Enter/Space calls
+    // document.activeElement.click(), see StyledSelect's handleKeyDown). onClick here is mouse-only.
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events
     <li
         role='option'
         aria-selected={selected ? true : undefined}

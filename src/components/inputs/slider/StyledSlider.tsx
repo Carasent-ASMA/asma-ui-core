@@ -52,6 +52,11 @@ export interface StyledSliderProps {
     error?: boolean
     errorText?: string
     helperText?: string
+    /** Accessible name for the thumb input(s) — there is no visible label to derive it from
+     * (axe `label`). A function receives the thumb index (0, or 0/1 for a two-thumb range) so each
+     * thumb of a range slider can get a distinct name. */
+    ariaLabel?: string | ((thumbIndex: number) => string)
+    ariaLabelledBy?: string
     onChange?: (event: SyntheticEvent, value: SliderValue, activeThumb: number) => void
     onChangeCommitted?: (event: SyntheticEvent, value: SliderValue) => void
 }
@@ -92,6 +97,8 @@ export const StyledSlider = ({
     error,
     errorText,
     helperText,
+    ariaLabel,
+    ariaLabelledBy,
     onChange,
     onChangeCommitted,
 }: StyledSliderProps): JSX.Element => {
@@ -188,6 +195,8 @@ export const StyledSlider = ({
             value={thumbValue}
             disabled={disabled}
             aria-orientation={orientation}
+            aria-label={typeof ariaLabel === 'function' ? ariaLabel(thumbIndex) : ariaLabel}
+            aria-labelledby={ariaLabelledBy}
             className={cn(
                 styles['SliderInput'],
                 isVertical ? styles['Vertical'] : styles['Horizontal'],

@@ -369,25 +369,29 @@ export function StyledSelectAutocomplete<
         <span className='flex items-center gap-1'>
             {loading && <LoadingIcon width={20} height={20} className='animate-spin' />}
             {showClear && (
-                <span
-                    role='button'
+                // Native <button>: was a <span role='button'> with no tabIndex/keydown — unreachable by
+                // keyboard. `onMouseDown` (not `onClick`) is deliberate — `preventDefault` stops the input
+                // from blurring before `clearValue` runs; buttons support `onMouseDown` the same way.
+                <button
+                    type='button'
+                    aria-label='Clear'
                     data-testid={`${dataTest}-clear`}
-                    className='flex min-h-6 min-w-6 cursor-pointer items-center justify-center rounded-full bg-delta-50'
+                    className='flex min-h-6 min-w-6 cursor-pointer items-center justify-center rounded-full border-0 bg-delta-50'
                     onMouseDown={(event) => {
                         event.preventDefault()
                         clearValue(event)
                     }}
                 >
                     <CloseIcon width={20} height={20} className='text-delta-700' />
-                </span>
+                </button>
             )}
             {readOnly ? null : (
-                <span
-                    role='button'
-                    aria-label='toggle'
+                <button
+                    type='button'
+                    aria-label='Toggle options'
                     aria-expanded={open}
                     data-testid={`${dataTest}-popup-indicator`}
-                    className='flex cursor-pointer items-center'
+                    className='flex cursor-pointer items-center border-0 bg-transparent'
                     onMouseDown={togglePopupFromIcon}
                 >
                     {popupIcon ?? (isMultiple ? <PlusIconCircle width={24} height={24} className='text-delta-700' /> : (
@@ -397,7 +401,7 @@ export function StyledSelectAutocomplete<
                             className={cn(style['select-custom-icon'], 'text-delta-700 transition-transform', open && 'rotate-180')}
                         />
                     ))}
-                </span>
+                </button>
             )}
         </span>
     )
@@ -445,11 +449,16 @@ export function StyledSelectAutocomplete<
                 )}
             >
                 {isMultiple ? (
+                    // Pure state indicator: this <li> owns selection and carries the real accessible
+                    // state via `aria-selected` (optionProps above). `decorative` renders no <input> at
+                    // all — a real one (even inert-ed) is still a genuine axe `nested-interactive`
+                    // violation. See DynamicSelectAutocomplete's equivalent fix (this exact pattern).
                     <StyledCheckbox
                         dataTest={`${dataTest}-${getLabel(option)}-checkbox`}
                         checked={state.selected}
                         size='small'
                         hideWrapper
+                        decorative
                     />
                 ) : (
                     <span className='w-5'>
@@ -515,10 +524,21 @@ export function StyledSelectAutocomplete<
                         )}
                     >
                             {allowSelectAll && isMultiple && (
-                                <li
-                                    role='option'
-                                    aria-selected={options.length > 0 && selectedArray.length === options.length}
-                                            className='flex min-h-12 items-center gap-x-1 border-0 border-b border-solid border-delta-200 px-4 text-sm text-delta-700'
+                                // Not one of the selectable options (never part of `visibleOptions`/
+                                // arrow-key nav) — it's a toggle-all action, so it must NOT claim
+                                // `role='option'` (that false premise was the actual cause of its
+                                // `nested-interactive` violation: `option` disallows interactive
+                                // descendants; a real, independently-focusable checkbox is perfectly
+                                // valid once it isn't wrapped in a role that says it can't be). But a
+                                // bare, roleless <li> isn't valid inside `role='listbox'` either (axe
+                                // `aria-required-children`/`listitem`) — `role='group'` is the ARIA-listbox-
+                                // valid child role that, unlike `option`, permits real interactive content.
+                                // A plain `<div>` hosts it (not `<li>` — ARIA-in-HTML doesn't allow
+                                // `role='group'` on `<li>`; `<div>` accepts any role, and `flex` layout
+                                // doesn't care about tag name, so this is visually identical).
+                                <div
+                                    role='group'
+                                    className='flex min-h-12 items-center gap-x-1 border-0 border-b border-solid border-delta-200 px-4 text-sm text-delta-700'
                                 >
                                     <StyledCheckbox
                                         dataTest={`${dataTest}-select-all`}
@@ -538,12 +558,19 @@ export function StyledSelectAutocomplete<
                                         }}
                                     />
                                     <span className='flex-1 truncate py-2'>{selectAllLabel}</span>
-                                </li>
+                                </div>
                             )}
                             {loading ? (
-                                <li className='px-3 py-2 text-sm text-delta-600'>{loadingText}</li>
+                                // Placeholder text, not a selectable option — `role='presentation'`
+                                // exempts it from `role='listbox'`'s required-children check (axe
+                                // `aria-required-children`), which a bare, roleless <li> doesn't satisfy.
+                                <li role='presentation' className='px-3 py-2 text-sm text-delta-600'>
+                                    {loadingText}
+                                </li>
                             ) : visibleOptions.length === 0 ? (
-                                <li className='px-3 py-2 text-sm text-delta-600'>{noOptionsText}</li>
+                                <li role='presentation' className='px-3 py-2 text-sm text-delta-600'>
+                                    {noOptionsText}
+                                </li>
                             ) : (
                                 // Per-item ref callbacks populate the Floating UI listRef for keyboard nav;
                                 // the react-compiler ref rule false-positives on the callback in map.

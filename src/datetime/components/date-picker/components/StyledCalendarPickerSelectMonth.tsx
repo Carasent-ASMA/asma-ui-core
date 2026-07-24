@@ -16,8 +16,11 @@ export function StyledCalendarPickerSelectMonth(props: DropdownProps): JSX.Eleme
                 dataTest='StyledCalendarPickerSelectMonth'
                 size='small'
                 variant='standard'
-                name={name}
-                aria-label={ariaLabel}
+                // `StyledSelect` has no raw `aria-label` prop (it derives its own name from
+                // `labelId`/`name`) — the `aria-label` react-day-picker passes in was being silently
+                // dropped, leaving the trigger nameless (axe `button-name`). Route it through `name`,
+                // which the field's own fallback already uses as its accessible-name source.
+                name={ariaLabel ?? name}
                 disabled={disabled}
                 className={className}
                 style={style}

@@ -203,7 +203,9 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
                     </div>
                 </div>
 
-                {!hideCalendar && !readOnly && <DatePickerButton onClick={onClick} disabled={!!rest.disabled} />}
+                {!hideCalendar && !readOnly && (
+                    <DatePickerButton onClick={onClick} disabled={!!rest.disabled} localeCode={locale?.code} />
+                )}
             </div>
         </div>
     )

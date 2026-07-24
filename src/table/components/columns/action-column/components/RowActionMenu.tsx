@@ -25,6 +25,7 @@ export function RowActionMenu<TData>({
     const state = rowActionsState?.(tableData.row) ?? { state: 'enabled' as const }
     const locale = tableData.table.options.meta?.locale
     const noActionsLabel = locale === 'no' ? 'Ingen handlinger tilgjengelig' : 'No actions available'
+    const rowActionsLabel = locale === 'no' ? 'Radhandlinger' : 'Row actions'
 
     const allHidden = useMemo(() => {
         return allActions.every((a) => ('component' in a ? false : a.hide))
@@ -50,7 +51,10 @@ export function RowActionMenu<TData>({
 
     const button = (
         <StyledButton
-            dataTest=''
+            dataTest='row-actions-button'
+            aria-label={rowActionsLabel}
+            aria-haspopup='true'
+            aria-expanded={open}
             variant='text'
             size='small'
             disabled={disabled}
@@ -88,6 +92,11 @@ export function RowActionMenu<TData>({
                         onOpen={() => setDisabledTooltipOpen(true)}
                         onClose={() => setDisabledTooltipOpen(false)}
                     >
+                        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions --
+                            not a control: `{button}` is a real (disabled) StyledButton — correctly
+                            excluded from the tab order by the native `disabled` attribute. This span only
+                            swallows the click/touch so a disabled button can still show its tooltip on
+                            hover/touch (disabled buttons don't reliably fire pointer events). */}
                         <span
                             className='cursor-not-allowed'
                             onTouchStart={(e) => {

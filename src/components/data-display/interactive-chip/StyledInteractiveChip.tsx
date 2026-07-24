@@ -53,6 +53,10 @@ export const StyledInteractiveChip = forwardRef<HTMLDivElement, StyledInteractiv
         const accessibleName = ariaLabel ?? (typeof props.label === 'string' ? props.label : undefined)
         const isSelectedRadio = !props.readOnly && !isCheckbox && Boolean(checked)
 
+        // Pure state indicator: the chip (`clickable`, below) owns the click — `pointer-events-none`
+        // already confirmed nothing here is meant to be independently operable. `decorative` renders
+        // no real `<input>` at all; one nested inside the chip's `role="button"` (even inert-ed) is a
+        // genuine axe `nested-interactive` violation — see StyledCheckbox's `decorative` prop.
         const control = isCheckbox ? (
             <StyledCheckbox
                 dataTest={props.dataTest}
@@ -60,7 +64,7 @@ export const StyledInteractiveChip = forwardRef<HTMLDivElement, StyledInteractiv
                 checked={checked}
                 size={size}
                 readOnly={props.readOnly}
-                aria-label={accessibleName}
+                decorative
                 className={cn('pointer-events-none', styles['control'])}
             />
         ) : (
@@ -68,7 +72,7 @@ export const StyledInteractiveChip = forwardRef<HTMLDivElement, StyledInteractiv
                 dataTest={props.dataTest}
                 checked={checked}
                 size={size}
-                aria-label={accessibleName}
+                decorative
                 className={cn('pointer-events-none', styles['control'])}
             />
         )

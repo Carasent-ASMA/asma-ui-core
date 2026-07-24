@@ -64,6 +64,10 @@ export const StyledMenu = ({
             },
         }}
     >
+        {/* eslint-disable-next-line jsx-a11y/no-autofocus -- false positive: this `autoFocus` is a custom
+            StyledMenuList prop (imperative `.focus()` in a useEffect, not the native HTML attribute the
+            rule targets) implementing the WAI-ARIA Menu pattern's recommended behaviour — focus the first
+            item when the menu opens. Not the page-load focus-steal the rule guards against. */}
         <StyledMenuList autoFocus={autoFocus} className={classes?.list} onClick={onClick}>
             {children}
         </StyledMenuList>

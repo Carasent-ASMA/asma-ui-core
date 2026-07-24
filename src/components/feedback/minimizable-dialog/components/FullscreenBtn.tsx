@@ -15,6 +15,7 @@ export const FullScreenBtn: FC<{
             <div>
                 <StyledButton
                     dataTest='fullscreen-button'
+                    aria-label={tooltipTitle}
                     variant='textGray'
                     size='small'
                     onClick={(event) => {

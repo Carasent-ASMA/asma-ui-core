@@ -15,8 +15,13 @@ export function generateExpandColumn<TData>(isFixed: boolean, rowHeight?: number
             const isExpanded = cell.row.getIsExpanded()
             const canExpand = cell.row.getCanExpand()
             return canExpand ? (
-                <span
-                    className='flex w-full items-center justify-center outline-none focus:outline-none'
+                // Native <button>: icon-only row-expand toggle, was a <span onClick> — unreachable by
+                // keyboard and had no accessible name/state for assistive tech.
+                <button
+                    type='button'
+                    aria-label={isExpanded ? 'Collapse row' : 'Expand row'}
+                    aria-expanded={isExpanded}
+                    className='flex w-full items-center justify-center border-0 bg-transparent outline-none focus:outline-none'
                     onClick={() => cell.row.getToggleExpandedHandler()()}
                     style={{ height: rowHeight ?? 'auto' }}
                 >
@@ -29,7 +34,7 @@ export function generateExpandColumn<TData>(isFixed: boolean, rowHeight?: number
                             transitionDuration: '500ms',
                         }}
                     />
-                </span>
+                </button>
             ) : null
         },
         fixedLeft: isFixed,

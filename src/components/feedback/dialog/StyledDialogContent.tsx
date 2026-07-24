@@ -25,6 +25,13 @@ export const StyledDialogContent = ({
     return (
         <div
             data-test='styled-dialog-content'
+            // Keyboard-reachable when content overflows and scrolls — without this a keyboard-only
+            // user has no way to scroll dialog content that contains no other focusable element (axe
+            // `scrollable-region-focusable`). Harmless when content doesn't overflow (a rarely-tabbed-
+            // to no-op); the header's close button still gets the dialog's initial auto-focus since it
+            // precedes this content in DOM order.
+            // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- see comment above
+            tabIndex={0}
             className={clsx(
                 // `min-w-0` is required so this flex child can shrink to the paper width instead of
                 // growing to its min-content width — otherwise wide content is clipped by the paper's

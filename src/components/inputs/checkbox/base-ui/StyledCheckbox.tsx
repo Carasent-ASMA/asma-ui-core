@@ -25,6 +25,17 @@ type StyledCheckboxProps = {
     className?: string
     checkboxClassName?: string
     onChange?: (event: ChangeEvent<HTMLInputElement>, checked: boolean) => void
+    /**
+     * Renders the identical visual box (same classes/data-attrs — no visual change) with NO real
+     * `<input>` at all, for use as a pure state indicator inside a widget that already owns
+     * selection itself (e.g. a multi-select `role="option"` row, whose own `aria-selected` is the
+     * real accessible state). A real `<input type="checkbox">` there is a genuine axe
+     * `nested-interactive` violation (a focusable, semantically-interactive element nested inside a
+     * non-focusable widget descendant) — `aria-hidden`/`tabIndex={-1}` do NOT satisfy that check, only
+     * removing the input does. Do not use this for a checkbox that is itself the control (nothing else
+     * would let a keyboard/AT user operate it).
+     */
+    decorative?: boolean
 } & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'size' | 'checked' | 'type'>
 // @figmaProp disabled → State="Disabled" · readOnly → State="Read-only" (from InputHTMLAttributes)
 
@@ -71,6 +82,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
     checkboxClassName,
     onChange,
     onClick,
+    decorative,
     ...props
 }): JSX.Element => {
     const isHideWrapper = !!hideWrapper
@@ -130,7 +142,38 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
         'data-disabled': disabled ? '' : undefined,
     }
 
+    // The visual box/icon (below) is identical in both modes — only the ROOT element and whether a
+    // real <input> exists differ. `decorative` renders no <input> at all: this is the only fix that
+    // actually satisfies axe `nested-interactive` (a real <input>, even `aria-hidden`+`tabIndex={-1}`,
+    // still has an inherently interactive/focusable semantic role, which the rule flags regardless of
+    // AT-tree visibility — confirmed empirically, see the a11y baseline report). Use this when the
+    // checkbox is a pure state indicator inside a widget that already owns selection itself.
+    const visual = (
+        <>
+            {!isHideWrapper && isRippleEnabled && <span ref={rippleRef} className={styles['CheckboxRippleContainer']} />}
+            <span className={checkboxClasses}>
+                <span className={styles['Indicator']}>
+                    <CheckboxIcon strokeWidth={size === 'small' ? 3 : 2} />
+                </span>
+            </span>
+        </>
+    )
+
+    if (decorative) {
+        return (
+            <span aria-hidden='true' className={wrapperClasses} data-testid={dataTest} {...stateAttrs}>
+                {visual}
+            </span>
+        )
+    }
+
     return (
+        // False positive: this is the native <label>-wraps-<input> pattern. The wrapped real
+        // <input type='checkbox'> below is the actual interactive/keyboard-operable element (Tab
+        // reaches it, Space toggles it); the browser natively delegates a label click to it. The
+        // onClick/onPointerDown here (ripple effect + optional consumer passthrough) ride on top of
+        // that native delegation and don't need their own keyboard handling.
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
         <label
             className={wrapperClasses}
             data-testid={dataTest}
@@ -148,12 +191,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
                 onChange={handleChange}
                 {...props}
             />
-            {!isHideWrapper && isRippleEnabled && <span ref={rippleRef} className={styles['CheckboxRippleContainer']} />}
-            <span className={checkboxClasses}>
-                <span className={styles['Indicator']}>
-                    <CheckboxIcon strokeWidth={size === 'small' ? 3 : 2} />
-                </span>
-            </span>
+            {visual}
         </label>
     )
 }

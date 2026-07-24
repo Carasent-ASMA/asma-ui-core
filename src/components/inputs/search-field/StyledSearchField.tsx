@@ -58,10 +58,14 @@ export const StyledSearchField: FC<StyledSearchFieldProps> = ({
                     },
                     input: {
                         endAdornment: value ? (
-                            <div
+                            // Native <button>: icon-only, was a <div onClick> with no accessible name or
+                            // keyboard access.
+                            <button
+                                type='button'
+                                aria-label='Clear'
                                 data-testid='styled-search-clear-icon'
                                 className={cn(
-                                    'cursor-pointer rounded-full bg-delta-50',
+                                    'cursor-pointer rounded-full border-0 bg-delta-50',
                                     'flex items-center justify-center',
                                     'transform-gpu transition-all duration-300 ease-in-out',
                                     value ? 'scale-100 opacity-100' : 'pointer-events-none scale-75 opacity-0',
@@ -84,7 +88,7 @@ export const StyledSearchField: FC<StyledSearchFieldProps> = ({
                                     color='var(--colors-delta-700)'
                                     className='pointer-events-none'
                                 />
-                            </div>
+                            </button>
                         ) : null,
                         startAdornment: !hasInteraction ? (
                             <span data-testid='styled-search-icon' className='flex items-center'>

@@ -24,14 +24,16 @@ export const StyledIcons: FC<{ height?: number; width?: number }> = ({ height = 
 
                 {icons.map((icon) => (
                     <Tippy content={icon?.name} interactive>
-                        <div
-                            className='cursor-pointer'
+                        <button
+                            type='button'
+                            aria-label={icon?.name}
+                            className='cursor-pointer border-0 bg-transparent'
                             onClick={() => {
                                 toast.success('Copied to clipboard')
                             }}
                         >
                             <CopyToClipboard text={icon?.clipboardText || ''}>{icon?.component}</CopyToClipboard>
-                        </div>
+                        </button>
                     </Tippy>
                 ))}
             </div>

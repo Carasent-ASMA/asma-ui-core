@@ -310,6 +310,11 @@ export const StyledInputField = ({
               }
             : {}
     return (
+        // Not independently interactive, same rationale as StyledFormControl: this wraps the REAL
+        // <input>/<textarea> below, already keyboard-operable on its own. `onClick` here is a
+        // documented passthrough (MUI TextField parity, e.g. stop clicks bubbling to a sortable
+        // header) — not a control needing its own tabIndex.
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
         <div
             className={cn('group relative inline-flex flex-col', className)}
             onClick={onClick}
@@ -322,6 +327,11 @@ export const StyledInputField = ({
             }}
         >
             <div className='relative overflow-visible'>
+                {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions -- not independently
+                    interactive: this shell wraps the REAL <input>/<textarea> below, which is already
+                    keyboard-operable on its own. `onMouseDown` is a passthrough (MUI-parity
+                    `slotProps.input.onMouseDown`) for mouse-specific shell behaviour, same as
+                    StyledFormControl's focus/blur bubbling — not a control needing its own tabIndex. */}
                 <div
                     className={cn(
                         'relative flex',
@@ -376,10 +386,14 @@ export const StyledInputField = ({
                     )}
 
                     {showClear ? (
-                        <div
-                            role='button'
+                        // Native <button>: keyboard-operable (Tab/Enter/Space) and has a role for free —
+                        // a `<div role='button'>` here had no tabIndex/keydown handler and was unreachable
+                        // by keyboard. `aria-label` is required since the only content is an icon.
+                        <button
+                            type='button'
+                            aria-label='Clear'
                             data-testid={`${dataTest}-clear`}
-                            className='absolute right-4 z-40 flex items-center justify-center rounded-full p-[2px] duration-300 hover:bg-gama-100'
+                            className='absolute right-4 z-40 flex items-center justify-center rounded-full border-0 bg-transparent p-[2px] duration-300 hover:bg-gama-100'
                             onClick={(event) => {
                                 event.stopPropagation()
                                 event.preventDefault()
@@ -388,7 +402,7 @@ export const StyledInputField = ({
                             }}
                         >
                             <CloseIcon width={18} height={18} />
-                        </div>
+                        </button>
                     ) : (
                         userEndAdornment && (
                             // `inset-y-0 items-center` keeps the indicator vertically centred in the field

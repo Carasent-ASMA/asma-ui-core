@@ -2,7 +2,7 @@ import { ErrorOutlineIcon, Skeleton, StyledButton, StyledChip, StyledInteractive
 import type { DynamicSelectOption, StyledDynamicSelectComponent, StyledDynamicSelectProps } from '../types'
 import { cn } from 'src/helpers/cn'
 import { useWrap } from '../helpers/useWrap'
-import { forwardRef } from 'react'
+import { forwardRef, useEffect } from 'react'
 import { CloseIcon } from 'src/components/icons'
 
 export const DynamicInteractiveChipGroup = forwardRef(
@@ -31,6 +31,14 @@ export const DynamicInteractiveChipGroup = forwardRef(
             locale = 'en',
         } = props
         const { containerRef, wrapDisabled } = useWrap({ dependencyList: [options, options.length] })
+
+        // The overflow-measurement clone below renders real interactive chips (checkbox/radio) —
+        // `inert` (not yet in this TS/React version's JSX attribute types, so set imperatively)
+        // actually removes them from the tab order, unlike `aria-hidden` alone (axe
+        // `aria-hidden-focus`: an aria-hidden subtree must not contain focusable content).
+        useEffect(() => {
+            if (containerRef.current) containerRef.current.inert = true
+        }, [containerRef])
 
         const getOptionLabel = (option: TOption) => {
             if (typeof option === 'object') {

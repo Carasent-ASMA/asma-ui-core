@@ -38,7 +38,10 @@ const Controlled = (args: StyledSelectProps) => {
             <StyledSelect
                 {...args}
                 dataTest='select'
-                labelId='select'
+                // `labelId` claims an external label to point `aria-labelledby` at — this story
+                // renders none, so that reference resolved to nothing (axe `button-name`); `name`
+                // exercises the same fallback chain against a name that genuinely exists instead.
+                name='Select a person'
                 value={value}
                 onChange={(e, child) => {
                     setValue(e.target.value as string)
@@ -106,6 +109,7 @@ export const Gallery: Story = {
                                         <StyledFormControl>
                                             <StyledSelect
                                                 dataTest={`gallery-${s.label}-${c.key}`}
+                                                name={`${s.label} ${c.label}`}
                                                 value={c.value}
                                                 placeholder='Select'
                                                 fullWidth
@@ -191,7 +195,7 @@ export const ClearBehavior: Story = {
 export const DisabledBehavior: Story = {
     render: (args) => (
         <StyledFormControl>
-            <StyledSelect {...args} disabled value='1'>
+            <StyledSelect {...args} dataTest='select-disabled' name='Select disabled' disabled value='1'>
                 {options.map((o) => (
                     <StyledSelectItem key={o.id} value={o.id}>
                         {o.title}
@@ -295,7 +299,7 @@ export const SelectingSameValue: Story = {
 export const EmptyOptions: Story = {
     render: (args) => (
         <StyledFormControl>
-            <StyledSelect {...args} value=''></StyledSelect>
+            <StyledSelect {...args} dataTest='select-empty' name='Select empty' value=''></StyledSelect>
         </StyledFormControl>
     ),
     play: async ({ canvasElement, userEvent }) => {
@@ -339,7 +343,7 @@ export const DynamicOptionsChange: Story = {
                     </button>
 
                     <StyledFormControl>
-                        <StyledSelect {...args} value='1'>
+                        <StyledSelect {...args} dataTest='select-dynamic' name='Select dynamic' value='1'>
                             {items.map((o) => (
                                 <StyledSelectItem key={o.id} value={o.id}>
                                     {o.title}
