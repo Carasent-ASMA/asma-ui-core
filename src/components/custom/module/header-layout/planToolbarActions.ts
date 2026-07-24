@@ -120,14 +120,14 @@ function sortOverflowActionsByPriority(actions: DynamicToolbarAction[]): Dynamic
     return [...actions].sort((first, second) => (second.priority ?? 0) - (first.priority ?? 0))
 }
 
-function collapseLabelsFromRight(
+function collapseLabelsFromLeft(
     planned: PlannedToolbarAction[],
     availableWidth: number,
     resolveActionWidth?: ResolveToolbarActionWidth,
 ): PlannedToolbarAction[] {
     const next = [...planned]
 
-    for (let index = next.length - 1; index >= 0 && plannedStripWidth(next) > availableWidth; index -= 1) {
+    for (let index = 0; index < next.length && plannedStripWidth(next) > availableWidth; index += 1) {
         const candidate = next[index]
         if (!candidate || !candidate.showLabel || candidate.action.canHideLabel === false) {
             continue
@@ -286,7 +286,7 @@ export function planToolbarActions(options: {
     }))
 
     if (collapseLabels) {
-        planned = collapseLabelsFromRight(planned, availableWidth, resolveActionWidth)
+        planned = collapseLabelsFromLeft(planned, availableWidth, resolveActionWidth)
     }
 
     const { inlineActions, overflowActions } = moveActionsToOverflow({

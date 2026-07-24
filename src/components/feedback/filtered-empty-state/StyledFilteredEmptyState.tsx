@@ -60,17 +60,17 @@ export const StyledFilteredEmptyState: FC<StyledFilteredEmptyStateProps> = ({
     resetButtonText,
     onResetFilters,
     actionIcon = <FilterIconOff width={24} height={24} color='currentColor' />,
-    className ,
-    emptyPageClassName ,
-    filterContentClassName ,
-    resetButtonClassName ,
+    className,
+    emptyPageClassName,
+    filterContentClassName,
+    resetButtonClassName,
 }) => {
     const translations = msgs[locale] ?? msgs.en
     const resolvedEmptyText = emptyText ?? translations.emptyText
     const displayFilterTitle = filterTitle ?? translations.filterTitle
     const description = filteredByDefault
         ? translations.defaultFilteredDescription
-        : filteredDescription ?? translations.filteredDescription
+        : (filteredDescription ?? translations.filteredDescription)
     const resolvedResetButtonText = resetButtonText ?? translations.resetButtonText
 
     return (

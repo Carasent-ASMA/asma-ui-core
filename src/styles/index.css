@@ -3,6 +3,7 @@
 @import 'color-variables/defaultTokens.css';
 @import 'color-variables/fretexTokens.css';
 @import 'color-variables/jadeTokens.css';
+@import 'typographyTokens.css';
 
 @tailwind base;
 @tailwind components;
