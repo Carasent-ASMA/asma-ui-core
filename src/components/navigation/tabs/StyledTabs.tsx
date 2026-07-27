@@ -125,7 +125,10 @@ export const StyledTabs: FC<StyledTabsProps> = ({
         tabs[nextIndex]?.focus()
     }
 
-    const showButtons = isScrollable && scrollButtons !== false && (scrollButtons === true || overflow.left || overflow.right)
+    const scrollButtonsEnabled = isScrollable && scrollButtons !== false
+    const alwaysShowScrollButtons = scrollButtons === true
+    const showLeftButton = scrollButtonsEnabled && (alwaysShowScrollButtons || overflow.left)
+    const showRightButton = scrollButtonsEnabled && (alwaysShowScrollButtons || overflow.right)
 
     // The tablist card carries a Figma 16px inset (`px-4`) by default. But `cn` is plain clsx (no
     // tailwind-merge), so a consumer `className='px-0'` would NOT win — both land and Tailwind's fixed
@@ -147,7 +150,7 @@ export const StyledTabs: FC<StyledTabsProps> = ({
                 className={cn('relative flex items-center rounded-t-lg bg-white', !consumerSetsPadding && 'px-4', className)}
                 style={resolveSx(sx)}
             >
-                {showButtons && (
+                {showLeftButton && (
                     <button
                         type='button'
                         aria-label='scroll tabs left'
@@ -189,7 +192,7 @@ export const StyledTabs: FC<StyledTabsProps> = ({
                         style={{ left: indicator.left, width: indicator.width }}
                     />
                 </div>
-                {showButtons && (
+                {showRightButton && (
                     <button
                         type='button'
                         aria-label='scroll tabs right'
