@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { expect, waitFor } from 'storybook/test'
 import type { ComponentProps, ReactNode } from 'react'
 import { useState } from 'react'
 
@@ -41,6 +42,26 @@ export const Interactive: Story = {
 
 export const Scrollable: Story = {
     render: () => <ScrollableTabs />,
+    play: async ({ canvasElement }) => {
+        await waitFor(() => {
+            expect(canvasElement.querySelector('[aria-label="scroll tabs right"]')).not.toBeNull()
+        })
+
+        const leftButton = canvasElement.querySelector('[aria-label="scroll tabs left"]')
+        const rightButton = canvasElement.querySelector('[aria-label="scroll tabs right"]')!
+
+        await expect(leftButton).toBeNull()
+        await expect(getComputedStyle(rightButton).display).not.toBe('none')
+
+        const tabList = canvasElement.querySelector<HTMLElement>('[role="tablist"]')!
+        tabList.scrollLeft = tabList.scrollWidth
+        tabList.dispatchEvent(new Event('scroll'))
+
+        await waitFor(() => {
+            expect(canvasElement.querySelector('[aria-label="scroll tabs left"]')).not.toBeNull()
+            expect(canvasElement.querySelector('[aria-label="scroll tabs right"]')).toBeNull()
+        })
+    },
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
