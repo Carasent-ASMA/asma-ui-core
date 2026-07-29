@@ -30,7 +30,7 @@ export const usePersistedColumnSizing = (uniqueKey?: string): ColumnSizingState 
         if (!storageKey || !uniqueKey) return undefined
 
         try {
-            return parseColumnSizing(localStorage.getItem(storageKey)) ?? parseColumnSizing(localStorage.getItem(uniqueKey))
+            return parseColumnSizing(localStorage.getItem(storageKey))
         } catch {
             return undefined
         }

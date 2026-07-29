@@ -77,7 +77,7 @@ export function HeaderActionMenu<TData>({
         if (overColumnFixed) return
 
         headerData.table.setColumnOrder((columnOrder) => {
-            const order = compact(columnOrder).length
+            const order = compact(columnOrder ?? []).length
                 ? columnOrder
                 : headerData.table.getAllLeafColumns().map((col) => col.id)
             const oldIndex = order.indexOf(active.id as string)

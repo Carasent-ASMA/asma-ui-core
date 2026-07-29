@@ -14,6 +14,8 @@ export function generateDndHandleColumn<TData>(
         enableSorting: false,
         header: () => null,
         cell: ({ row }: CellContext<TData, unknown>) => <RowDragHandleCell rowId={row.id} rowHeight={rowHeight} />,
+        minSize: 50,
+        size: 50,
         ...custom_props,
         id: DND_HANDLE_COLUMN_ID,
     }
