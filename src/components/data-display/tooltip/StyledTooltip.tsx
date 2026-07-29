@@ -1,3 +1,4 @@
+import { cloneElement, useRef, useState, type CSSProperties, type ReactElement, type ReactNode } from 'react'
 import {
     arrow as arrowMiddleware,
     autoUpdate,
@@ -15,16 +16,14 @@ import {
     useRole,
     type Placement,
 } from '@floating-ui/react'
-import { cloneElement, useMemo, useRef, useState, type CSSProperties, type ReactElement, type ReactNode } from 'react'
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
-import { getOpenModalDialogAncestor, TOP_LAYER_PROPS, TOP_LAYER_RESET_STYLE, useTopLayerRef } from 'src/hooks/useTopLayer.hook'
 
 const TOOLTIP_BG = '#363E4A'
 
 interface TooltipSlotProps {
     tooltip?: { sx?: unknown; className?: string; style?: CSSProperties }
-    popper?: { className?: string; style?: CSSProperties }
+    popper?: unknown
     transition?: unknown
     arrow?: unknown
 }
@@ -105,7 +104,6 @@ const TooltipWithFloating = ({
         open,
         onOpenChange: setOpen,
         placement,
-        strategy: 'fixed',
         whileElementsMounted: autoUpdate,
         middleware: [
             offset(offsetDistance ?? (arrow ? 8 : 6)),
@@ -128,27 +126,23 @@ const TooltipWithFloating = ({
     const role = useRole(context, { role: 'tooltip' })
     const { getReferenceProps, getFloatingProps } = useInteractions([hover, focus, dismiss, role])
 
-    const { ref: originalRef, ...childProps } = children.props as Record<string, unknown> & {
-        ref?: React.Ref<unknown>
-    }
-    const childRef = useMergeRefs([refs.setReference, originalRef])
-    const floatingRef = useMergeRefs([useTopLayerRef(refs.setFloating)])
-    const portalRoot = useMemo(() => (open ? getOpenModalDialogAncestor(refs.reference.current) : undefined), [open, refs])
-    const reference = cloneElement(children, getReferenceProps({ ...childProps, ref: childRef }))
+    // Merge our reference ref with any ref the child already carries (React 18 element.ref).
+    const childRef = useMergeRefs([refs.setReference, (children as { ref?: React.Ref<unknown> }).ref])
+    const reference = cloneElement(
+        children,
+        getReferenceProps({ ref: childRef, ...(children.props as Record<string, unknown>) }),
+    )
 
     return (
         <>
             {reference}
             {open && (
-                <FloatingPortal root={portalRoot}>
+                <FloatingPortal>
                     <div
-                        ref={floatingRef}
-                        {...TOP_LAYER_PROPS}
+                        ref={refs.setFloating}
                         {...getFloatingProps()}
                         style={{
-                            ...TOP_LAYER_RESET_STYLE,
                             ...floatingStyles,
-                            ...slotProps?.popper?.style,
                             fontFamily: 'Roboto, Helvetica, Arial, sans-serif',
                             ...slotProps?.tooltip?.style,
                             ...resolveSx(slotProps?.tooltip?.sx),
@@ -158,7 +152,6 @@ const TooltipWithFloating = ({
                             // max-width 320, Float shadow 0 1 6 rgba(0,0,0,.15).
                             'z-[1500] block max-w-[320px] whitespace-normal break-words rounded-[3px] bg-[#363E4A] px-2 py-1 text-sm leading-5 text-white shadow-[0px_1px_6px_0px_rgba(0,0,0,0.15)]',
                             className,
-                            slotProps?.popper?.className,
                             slotProps?.tooltip?.className,
                         )}
                     >
