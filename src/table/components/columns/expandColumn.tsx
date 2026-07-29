@@ -21,17 +21,21 @@ export function generateExpandColumn<TData>(isFixed: boolean, rowHeight?: number
                     type='button'
                     aria-label={isExpanded ? 'Collapse row' : 'Expand row'}
                     aria-expanded={isExpanded}
-                    className='flex w-full items-center justify-center border-0 bg-transparent outline-none focus:outline-none'
+                    className='flex w-full items-center justify-center border-0 bg-transparent p-0 outline-none focus:outline-none'
                     onClick={() => cell.row.getToggleExpandedHandler()()}
                     style={{ height: rowHeight ?? 'auto' }}
                 >
                     <ChevronDownIcon
+                        className='block size-6 shrink-0'
                         width={24}
                         height={24}
                         style={{
-                            rotate: isExpanded ? '180deg' : '0deg',
-                            transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
+                            transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                            transformBox: 'fill-box',
+                            transformOrigin: 'center',
+                            transitionProperty: 'transform',
                             transitionDuration: '500ms',
+                            transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
                         }}
                     />
                 </button>

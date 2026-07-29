@@ -18,9 +18,8 @@ export const injectColumns = <
     TCustomData = Record<string, unknown>,
 >(
     props: StyledTableProps<TData, TCustomData>,
-): void => {
+): StyledTableProps<TData, TCustomData>['columns'] => {
     const {
-        columns,
         actions,
         customActionsNode,
         headerPin = true,
@@ -34,6 +33,7 @@ export const injectColumns = <
         rowActionsState,
         locale,
     } = props
+    const columns = [...props.columns]
 
     const isFixed = columns.some((column) => column.fixedLeft === true)
 
@@ -63,4 +63,6 @@ export const injectColumns = <
     if (enableRowSelection && !columns.find((col) => col.id === SELECT_COLUMN_ID)) {
         columns.unshift(selectColumn(isFixed, rowHeight, locale))
     }
+
+    return columns
 }

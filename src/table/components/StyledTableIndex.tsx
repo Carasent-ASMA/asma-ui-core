@@ -85,11 +85,14 @@ export const StyledTable = <TData extends RowWithId, TCustomData = Record<string
         setData?: (callback: (data: TData[]) => TData[]) => void
     },
 ): JSX.Element => {
-    const options = useMemo(() => ({ ...props, rowHeight: props.rowHeight ?? 48 }), [props])
+    const options = useMemo(() => {
+        const resolvedProps = { ...props, rowHeight: props.rowHeight ?? 48 }
+
+        return { ...resolvedProps, columns: injectColumns(resolvedProps) }
+    }, [props])
 
     const { className, tableClassName, height, noRowsOverlay, data, enableDnd, setData, loading } = options
 
-    injectColumns(options)
     const { table } = useStyledTable(options)
 
     const hasRows = data.length > 0
