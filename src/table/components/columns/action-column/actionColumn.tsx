@@ -42,6 +42,7 @@ export function generateActionsColumn<TData>(options: {
                     {actions && <RowActionMenu tableData={cell} actions={actions} rowActionsState={rowActionsState} />}
                 </div>
             ) : null,
+        minSize: 50,
         size: 50,
         ...customActionsColumnProps,
     }

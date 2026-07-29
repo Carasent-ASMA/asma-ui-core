@@ -12,8 +12,8 @@ import type { OrderedColumnsOptions, OrderedColumnsTableState } from './types'
 export const OrderColumnsFeature: TableFeature = {
     getInitialState: (state): OrderedColumnsTableState => {
         return {
-            columnOrder: [],
             ...state,
+            columnOrder: state?.columnOrder ?? [],
         }
     },
     getDefaultOptions: <TData extends RowData>(table: Table<TData>): OrderedColumnsOptions => {

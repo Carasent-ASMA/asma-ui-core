@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { ColumnDef, Table } from '@tanstack/react-table'
 import { expect, userEvent, waitFor } from 'storybook/test'
@@ -57,8 +57,14 @@ const consumerColumns: ColumnDef<TableRow>[] = [
     { accessorKey: 'offers', header: 'Offers', size: 280 },
 ]
 
+const capturedTables: Table<TableRow>[] = []
+
 const TableFixture = (): JSX.Element => {
     const tableRef = useRef<Table<TableRow>>(null)
+
+    useEffect(() => {
+        if (tableRef.current) capturedTables.push(tableRef.current)
+    })
 
     return (
         <div className='w-[600px]'>
@@ -71,6 +77,7 @@ const TableFixture = (): JSX.Element => {
                 </button>
             </div>
             <StyledTable
+                actions={() => [{ label: 'Edit' }]}
                 columns={consumerColumns}
                 data={data}
                 enableColumnResizing
@@ -275,5 +282,16 @@ export const SizingPersistenceAndControlAlignment: Story = {
         await expect(scrollContainer!.scrollLeft).toBe(300)
         await expect(rowCheckboxBox!.getBoundingClientRect().left).toBe(scrolledCheckboxBounds.left)
         await expect(expandButton!.getBoundingClientRect().left).toBe(scrolledExpandBounds.left)
+
+        // Regression: without persisted order, columnOrder must default to an array —
+        // an explicit undefined crashed the header pin-menu drag (reading 'filter').
+        const tableInstance = capturedTables.at(-1)
+        await expect(tableInstance).toBeDefined()
+        await expect(Array.isArray(tableInstance!.getState().columnOrder)).toBe(true)
+        tableInstance!.setColumnOrder((order) => [...order].reverse())
+
+        // Regression: the resizable default minSize (100) must not inflate internal
+        // columns — the actions column stays at its own 50px width.
+        await expect(tableInstance!.getColumn('actions')!.getSize()).toBe(50)
     },
 }

@@ -61,7 +61,7 @@ export const useStyledTable = <
                 ...initialState?.columnVisibility,
                 [SELECT_COLUMN_ID]: false,
             },
-            columnOrder,
+            ...(columnOrder && { columnOrder }),
             ...initialState,
             ...(persistedColumnSizing && {
                 columnSizing: {
