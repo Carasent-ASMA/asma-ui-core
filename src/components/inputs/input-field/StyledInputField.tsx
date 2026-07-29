@@ -1,3 +1,4 @@
+import { useMergeRefs } from '@floating-ui/react'
 import {
     Children,
     useCallback,
@@ -14,7 +15,6 @@ import {
     type Ref,
     type TextareaHTMLAttributes,
 } from 'react'
-import { useMergeRefs } from '@floating-ui/react'
 import { CloseIcon, ErrorOutlineIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
@@ -222,9 +222,9 @@ export const StyledInputField = ({
     const { style: htmlInputStyle, ...htmlInputPropsWithoutStyle } = htmlInputRest
     const isSingleLineShell = !multiline && !isAdornmentList
     const shellStyle: CSSProperties | undefined = isSingleLineShell
-        ? { boxSizing: 'border-box', ...inputSlotStyle, height: 40, minHeight: 40, maxHeight: 40 }
+                ? { boxSizing: 'border-box', height: 40, minHeight: 40, maxHeight: 40, ...inputSlotStyle }
         : isAdornmentList
-          ? { boxSizing: 'border-box', ...inputSlotStyle, minHeight: 40 }
+                    ? { boxSizing: 'border-box', minHeight: 40, ...inputSlotStyle }
           : inputSlotStyle
     const singleLineHtmlInputStyle: CSSProperties | undefined = isSingleLineShell
         ? {
