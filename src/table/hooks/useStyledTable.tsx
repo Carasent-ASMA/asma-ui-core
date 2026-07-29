@@ -86,6 +86,7 @@ export const useStyledTable = <
                   ...defaultColumn,
               }
             : defaultColumn,
+        columnResizeMode: 'onChange',
         ...rest,
     })
 

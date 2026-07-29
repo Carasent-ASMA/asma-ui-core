@@ -28,7 +28,8 @@ export function TableHeaderCell<
     right?: number
     tableWidth: number | null
 }): JSX.Element {
-    const { hideHeader = false, enableResizing = false, actions, customActionsNode } = styledTableProps
+    const { hideHeader = false, actions, customActionsNode } = styledTableProps
+    const enableResizing = styledTableProps.enableResizing ?? Boolean(styledTableProps.enableColumnResizing)
     const { isResizing, enableResizingFlag, disableResizingFlag } = useRootContext()
 
     const isFixed = header.column.columnDef.fixedLeft
