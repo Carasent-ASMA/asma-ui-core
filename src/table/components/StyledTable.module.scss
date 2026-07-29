@@ -420,6 +420,13 @@
             padding: 0 5px;
             border-top: 0.5px solid var(--colors-delta-200);
             border-bottom: 0.5px solid var(--colors-delta-200);
+            &:first-child {
+                border-left: 0.5px solid transparent;
+            }
+
+            &:last-child {
+                border-right: 0.5px solid transparent;
+            }
 
             &.hide-header {
                 border: none;

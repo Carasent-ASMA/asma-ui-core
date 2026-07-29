@@ -20,6 +20,7 @@ export function generateShowFullTextColumn<TData>(isFixed: boolean, rowHeight?: 
 
 function ShowFullTextCell<TData>({ info, rowHeight }: { info: CellContext<TData, unknown>; rowHeight?: number }) {
     const canRenderSubRows = info.row.getCanExpand()
+    const isExpanded = info.row.isExpanded()
 
     return (
         <div className='flex w-full items-center justify-center' style={{ height: rowHeight ?? 'auto' }}>
@@ -27,26 +28,31 @@ function ShowFullTextCell<TData>({ info, rowHeight }: { info: CellContext<TData,
                 dataTest='expand-text-button'
                 size='small'
                 variant='textGray'
-                onClick={() => {
+                onClick={(event) => {
+                    event.stopPropagation()
                     if (canRenderSubRows) info.row.getToggleExpandedHandler()()
                     info.row.toggleExpand()
                 }}
-                onMouseDown={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
+                onMouseDown={(event) => {
+                    event.preventDefault()
+                    event.stopPropagation()
                 }}
-                onMouseUp={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
+                onMouseUp={(event) => {
+                    event.preventDefault()
+                    event.stopPropagation()
                 }}
                 startIcon={
                     <ChevronDownIcon
+                        className='block size-5 shrink-0'
                         width={20}
                         height={20}
                         style={{
-                            rotate: info.row.isExpanded() ? '180deg' : '0deg',
-                            transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
+                            transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                            transformBox: 'fill-box',
+                            transformOrigin: 'center',
+                            transitionProperty: 'transform',
                             transitionDuration: '500ms',
+                            transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
                             cursor: 'pointer',
                         }}
                     />

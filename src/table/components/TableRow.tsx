@@ -1,5 +1,5 @@
 import { flexRender, type Row } from '@tanstack/react-table'
-import { Fragment, useMemo, type CSSProperties, useEffect, useCallback } from 'react'
+import { Fragment, useMemo, type CSSProperties, useEffect, useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { ACTIONS_COLUMN_ID, type StyledTableProps } from '../types'
 import style from './StyledTable.module.scss'
 import clsx from 'clsx'
@@ -56,6 +56,26 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
     }
 
     const { isResizing, disableResizingFlag } = useRootContext()
+
+    const isRowExpanded = row.isExpanded()
+    const rowRef = useRef<HTMLTableRowElement | null>(null)
+    const [collapsedRowHeight, setCollapsedRowHeight] = useState<number | undefined>(undefined)
+
+    useLayoutEffect(() => {
+        if (!isRowExpanded && rowRef.current) {
+            setCollapsedRowHeight(rowRef.current.cells[0]?.clientHeight ?? rowRef.current.offsetHeight)
+        }
+    }, [isRowExpanded])
+
+    const setRowRef = useCallback(
+        (node: HTMLTableRowElement | null) => {
+            rowRef.current = node
+            if (!disabledDnd) setNodeRef(node)
+        },
+        [disabledDnd, setNodeRef],
+    )
+
+    const cellBandMinHeight = isRowExpanded ? (collapsedRowHeight ?? rowHeight) : rowHeight
 
     useEffect(() => {
         if (defaultExpanded && row.getCanExpand() && !row.getIsExpanded()) {
@@ -203,6 +223,7 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
                             display: 'flex',
                             alignItems: 'center',
                             minWidth: isFirstCell ? 32 : undefined,
+                            minHeight: cellBandMinHeight,
                             position: 'relative',
                         }}
                     >
@@ -230,6 +251,7 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
         [
             singleSelection,
             actions,
+            cellBandMinHeight,
             getRowClassName,
             hasRowClickHandler,
             hasActionsColumn,
@@ -257,7 +279,7 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
                     height: rowHeight ? `${rowHeight}px` : 'inherit',
                     ...(enableDnd && dndStyle),
                 }}
-                ref={disabledDnd ? undefined : setNodeRef}
+                ref={setRowRef}
                 onMouseUp={onMouseUp}
                 onMouseDown={(e) => {
                     if (e.detail > 1 && !hasRowClickHandler && textExpandArrow) {

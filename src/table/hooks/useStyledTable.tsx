@@ -17,7 +17,10 @@ import { usePersistColumnOrder } from '../custom-features/order-columns/usePersi
 import { usePersistedColumnOrder } from 'src/table/custom-features/order-columns/usePersistedColumnOrder'
 
 import { getPersistedPageSizeKey, usePersistedPageSize } from './usePersistedPageSize'
+import { usePersistColumnSizing, usePersistedColumnSizing } from './useColumnSizingPersistence'
 import { RowSelectionTooltipFeature } from 'src/table/custom-features/row-selection-tooltip/RowSelectionTooltipFeature'
+
+const DEFAULT_RESIZABLE_COLUMN_MIN_SIZE = 100
 
 export const useStyledTable = <
     TData extends {
@@ -37,10 +40,13 @@ export const useStyledTable = <
         locale,
         persistColumnOrderKey,
         uniqueKey,
+        defaultColumn,
         ...rest
     } = props
 
     const columnOrder = usePersistedColumnOrder(persistColumnOrderKey)
+    const columnSizingKey = props.enableColumnResizing ? uniqueKey : undefined
+    const persistedColumnSizing = usePersistedColumnSizing(columnSizingKey)
     const persistedPageSize = usePersistedPageSize(uniqueKey)
     const resolvedPageSize = persistedPageSize ?? pageSize ?? 50
 
@@ -57,6 +63,12 @@ export const useStyledTable = <
             },
             columnOrder,
             ...initialState,
+            ...(persistedColumnSizing && {
+                columnSizing: {
+                    ...initialState?.columnSizing,
+                    ...persistedColumnSizing,
+                },
+            }),
         },
         enableRowSelection,
         getCoreRowModel: getCoreRowModel(),
@@ -68,12 +80,12 @@ export const useStyledTable = <
             rest.getRowId ??
             ((row: TData, _index: number, parent?: Row<TData>) =>
                 parent ? [parent.id, row.id].join('.') : row.id.toString()),
-        defaultColumn: props.enableResizing
+        defaultColumn: props.enableColumnResizing
             ? {
-                  size: undefined,
-                  //   maxSize: Infinity,
+                  minSize: DEFAULT_RESIZABLE_COLUMN_MIN_SIZE,
+                  ...defaultColumn,
               }
-            : undefined,
+            : defaultColumn,
         ...rest,
     })
 
@@ -82,6 +94,7 @@ export const useStyledTable = <
     }
 
     usePersistColumnOrder(table, persistColumnOrderKey)
+    usePersistColumnSizing(table, columnSizingKey)
 
     const storageKey = getPersistedPageSizeKey(uniqueKey)
     const pageSizeState = table.getState().pagination?.pageSize

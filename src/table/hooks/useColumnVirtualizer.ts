@@ -9,6 +9,8 @@ export interface ColumnWindow {
     paddingRight: number
 }
 
+const COLUMN_VIRTUALIZATION_THRESHOLD = 20
+
 export function useColumnVirtualizer<TData extends { id: string | number }>({
     table,
     scrollRef,
@@ -30,7 +32,7 @@ export function useColumnVirtualizer<TData extends { id: string | number }>({
         overscan: 2,
     })
 
-    if (isMobileView) {
+    if (isMobileView || centerColumns.length <= COLUMN_VIRTUALIZATION_THRESHOLD) {
         return {
             columnWindow: {
                 indexes: centerColumns.map((_, i) => i),

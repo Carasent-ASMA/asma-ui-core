@@ -125,17 +125,11 @@ export function TableHeaderCell<
                                     e.stopPropagation()
                                     enableResizingFlag()
                                     header.getResizeHandler()(e)
-                                    window.addEventListener('mouseup', () =>
-                                        handleMouseUp({ styledTableProps, header }),
-                                    )
                                 },
                                 onTouchStart: (e) => {
                                     e.stopPropagation()
                                     enableResizingFlag()
                                     header.getResizeHandler()(e)
-                                    window.addEventListener('mouseup', () =>
-                                        handleMouseUp({ styledTableProps, header }),
-                                    )
                                 },
                                 className: `${style['resizer']} ${
                                     header.column.getIsResizing() ? style['isResizing'] : ''
@@ -146,38 +140,4 @@ export function TableHeaderCell<
             </div>
         </th>
     )
-}
-
-function handleMouseUp<TData, TCustomData = Record<string, unknown>>({
-    styledTableProps,
-    header,
-}: {
-    styledTableProps: StyledTableProps<TData, TCustomData>
-    header: Header<TData, unknown>
-}) {
-    if (styledTableProps.uniqueKey) {
-        const localStorageKey = styledTableProps.uniqueKey
-
-        const storedDimensions = localStorage.getItem(localStorageKey)
-        let parsedDimensions: Record<string, number> = {}
-
-        if (storedDimensions) {
-            try {
-                const parsed = JSON.parse(storedDimensions) as unknown
-
-                if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-                    parsedDimensions = Object.fromEntries(
-                        Object.entries(parsed).filter((entry): entry is [string, number] => typeof entry[1] === 'number'),
-                    )
-                }
-            } catch {
-                console.warn('Failed to parse stored dimensions. Resetting.')
-                parsedDimensions = {}
-            }
-        }
-
-        parsedDimensions[header.column.id] = header.column.getSize()
-
-        localStorage.setItem(localStorageKey, JSON.stringify(parsedDimensions))
-    }
 }
