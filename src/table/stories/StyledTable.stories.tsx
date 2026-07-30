@@ -43,7 +43,7 @@ const data: TableRow[] = [
 ]
 
 const consumerColumns: ColumnDef<TableRow>[] = [
-    { accessorKey: 'name', header: 'Name', fixedLeft: true, size: 280 },
+    { accessorKey: 'name', header: 'Workspace name', fixedLeft: true, size: 280 },
     {
         accessorKey: 'description',
         header: 'Description',
@@ -116,7 +116,7 @@ export const SizingPersistenceAndControlAlignment: Story = {
     render: () => <TableFixture />,
     play: async ({ canvasElement }) => {
         const nameHeader = Array.from(canvasElement.querySelectorAll<HTMLElement>('th')).find(
-            (header) => header.textContent === 'Name',
+            (header) => header.textContent === 'Workspace name',
         )
 
         await expect(nameHeader).toBeDefined()
@@ -208,7 +208,7 @@ export const SizingPersistenceAndControlAlignment: Story = {
         const initialScrollPositions = Array.from(canvasElement.querySelectorAll<HTMLElement>('div'))
             .filter((element) => element.scrollWidth > element.clientWidth)
             .map((element) => element.scrollLeft)
-        const expectedHeaders = ['Name', 'Description', 'Role', 'Updated date', 'Updated by', 'Added', 'Offers']
+        const expectedHeaders = ['Workspace name', 'Description', 'Role', 'Updated date', 'Updated by', 'Added', 'Offers']
         expectedHeaders.forEach((header) =>
             expect(initialHeaders).toContain(header),
         )
@@ -257,6 +257,14 @@ export const SizingPersistenceAndControlAlignment: Story = {
 
         await userEvent.click(canvasElement.querySelector('button:nth-of-type(1)')!)
         await waitFor(() => expect(nameHeader?.style.width).toBe('100px'))
+        const headerLayout = nameHeader?.firstElementChild as HTMLElement
+        const headerContent = headerLayout.firstElementChild as HTMLElement
+        const resizeHandle = headerLayout.lastElementChild as HTMLElement
+        await expect(headerContent.scrollWidth).toBeGreaterThan(headerContent.clientWidth)
+        await expect(getComputedStyle(headerContent).textOverflow).toBe('ellipsis')
+        await expect(
+            Math.abs(resizeHandle.getBoundingClientRect().right - nameHeader!.getBoundingClientRect().right),
+        ).toBeLessThanOrEqual(0.5)
 
         await userEvent.click(canvasElement.querySelector('button:nth-of-type(2)')!)
         await waitFor(() => {

@@ -109,7 +109,9 @@ export function TableHeaderCell<
                         : undefined
                 }
             >
-                {flexRender(header.column.columnDef.header, header.getContext())}
+                <div className={style['header-content']}>
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                </div>
                 {{
                     asc: <DropUpIcon className={style['sort-icon']} />,
                     desc: <DropDownIcon className={style['sort-icon']} />,
