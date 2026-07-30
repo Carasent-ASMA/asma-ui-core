@@ -10,6 +10,7 @@ interface StyledAccordionProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onC
     expanded?: boolean
     defaultExpanded?: boolean
     disabled?: boolean
+    variant?: 'outlined' | 'text'
     onChange?: (expanded: boolean) => void
 }
 
@@ -24,6 +25,7 @@ export const StyledAccordion = ({
     expanded,
     defaultExpanded,
     disabled,
+    variant = 'outlined',
     onChange,
     ...props
 }: StyledAccordionProps): JSX.Element => {
@@ -46,7 +48,7 @@ export const StyledAccordion = ({
     )
 
     return (
-        <div {...props} className={cn(styles['AccordionRoot'], className)}>
+        <div {...props} className={cn(styles['AccordionRoot'], className)} data-variant={variant}>
             <AccordionContext.Provider value={contextValue}>{children}</AccordionContext.Provider>
         </div>
     )

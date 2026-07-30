@@ -1,15 +1,28 @@
 .AccordionRoot {
     border-radius: 0.5rem;
-    box-shadow: inset 0 0 0 1px var(--colors-delta-300);
-
     background: #fff;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
     box-sizing: border-box;
-}
 
-.AccordionRoot:has(.Trigger:focus-visible) {
-    border-color: var(--colors-gama-400);
-    box-shadow: inset 0 0 0 2px var(--colors-gama-400);
+    &[data-variant='outlined'] {
+        box-shadow: inset 0 0 0 1px var(--colors-delta-300);
+
+        &:has(.Trigger:focus-visible) {
+            border-color: var(--colors-gama-400);
+            box-shadow: inset 0 0 0 2px var(--colors-gama-400);
+        }
+    }
+
+    &[data-variant='text'] {
+        background: transparent;
+        box-shadow: none;
+
+        &:has(.Trigger:focus-visible) {
+            box-shadow: none;
+            outline: 2px solid var(--colors-gama-400);
+            outline-offset: 2px;
+        }
+    }
 }
 
 .Trigger:focus-visible {
@@ -39,6 +52,13 @@
     color: var(--colors-delta-800);
     cursor: pointer;
     transition: background-color 0.2s ease;
+
+    [data-variant='text'] & {
+        color: var(--colors-gama-500);
+        font-size: 16px;
+        padding-left: 0;
+        padding-right: 0;
+    }
 }
 
 .TriggerIcon {
@@ -47,6 +67,10 @@
     width: var(--chevron-size);
     height: var(--chevron-size);
     transition: transform 150ms ease;
+
+    [data-variant='text'] & {
+        color: var(--colors-gama-500);
+    }
 }
 
 .TriggerIconRight {
@@ -68,4 +92,9 @@
 .Content {
     font-size: 14px;
     padding: 0.5rem 1rem 1rem 1rem;
+
+    [data-variant='text'] & {
+        padding-left: 0;
+        padding-right: 0;
+    }
 }

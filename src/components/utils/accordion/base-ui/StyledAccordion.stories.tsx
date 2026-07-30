@@ -16,7 +16,7 @@ const meta: Meta<typeof StyledAccordion> = {
 
 export default meta
 
-export const Accordion = {
+export const Outlined = {
     render: (): JSX.Element => {
         const [, setIsExpanded] = useState(true)
 
@@ -32,6 +32,29 @@ export const Accordion = {
                             <div>Button label</div>
                         </StyledButton>} */}
                     </div>
+
+                    <StyledAccordionDetails>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                    </StyledAccordionDetails>
+                </StyledAccordion>
+            </div>
+        )
+    },
+}
+
+export const Text = {
+    render: (): JSX.Element => {
+        const [, setIsExpanded] = useState(true)
+
+        return (
+            <div className='flex max-w-[600px] flex-col gap-4'>
+                <StyledAccordion variant='text' onChange={setIsExpanded}>
+                    <StyledAccordionSummary
+                        expandChevronRight
+                        sx={{ '--trigger-height': '40px' } as React.CSSProperties}
+                    >
+                        Header lorem ipsum
+                    </StyledAccordionSummary>
 
                     <StyledAccordionDetails>
                         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
@@ -59,7 +82,12 @@ interface AccordionVariant {
 const ACCORDION_VARIANTS: AccordionVariant[] = [
     { title: 'Default (large) · collapsed · chevron left', size: 'large' },
     { title: 'Default (large) · expanded · chevron left', size: 'large', defaultExpanded: true },
-    { title: 'Default (large) · expanded · chevron right', size: 'large', defaultExpanded: true, expandChevronRight: true },
+    {
+        title: 'Default (large) · expanded · chevron right',
+        size: 'large',
+        defaultExpanded: true,
+        expandChevronRight: true,
+    },
     { title: 'Default (large) · disabled', size: 'large', disabled: true },
     { title: 'Small · collapsed · chevron left', size: 'small' },
     { title: 'Small · expanded · chevron left', size: 'small', defaultExpanded: true },
