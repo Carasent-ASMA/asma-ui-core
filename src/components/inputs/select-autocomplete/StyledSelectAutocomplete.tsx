@@ -1,4 +1,5 @@
 import {
+    useEffect,
     useMemo,
     useRef,
     useState,
@@ -243,6 +244,14 @@ export function StyledSelectAutocomplete<
 
     const selectedArray: T[] = isMultiple ? (Array.isArray(value) ? (value) : []) : []
     const singleValue = !isMultiple ? ((value as SingleValue<T>) ?? null) : null
+    const singleValueInput = !isMultiple && singleValue !== null ? getLabel(singleValue) : ''
+
+    useEffect(() => {
+        if (controlledInput !== undefined || isMultiple) return
+
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setUncontrolledInput(singleValueInput)
+    }, [controlledInput, isMultiple, singleValueInput])
 
     const isSelected = (option: T): boolean =>
         isMultiple ? selectedArray.some((v) => isEqual(option, v)) : singleValue !== null && isEqual(option, singleValue)
