@@ -54,7 +54,7 @@ export interface IStyledDialogProps {
      */
     classes?: { paper?: string; root?: string }
     PaperProps?: DialogPaperProps
-    slotProps?: { paper?: DialogPaperProps; backdrop?: Record<string, unknown> }
+    slotProps?: { paper?: DialogPaperProps; backdrop?: Record<string, unknown>; transition?: { onExited?: () => void } }
     onCloseText?: ReactNode
     /** @figmaProp none — behavioral */
     showCloseIcon?: boolean
@@ -109,7 +109,15 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     const isMobile = useMobileMediaQuery()
     const dialogRef = useRef<HTMLDialogElement>(null)
     const escapeHandledRef = useRef(false)
+    const prevOpenRef = useRef(open)
     const isFullScreen = isMobile ? true : fullScreen
+
+    useEffect(() => {
+        if (prevOpenRef.current && !open) {
+            slotProps?.transition?.onExited?.()
+        }
+        prevOpenRef.current = open
+    }, [open, slotProps])
 
     useLayoutEffect(() => {
         const node = dialogRef.current
