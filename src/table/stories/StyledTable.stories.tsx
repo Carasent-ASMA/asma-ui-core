@@ -77,13 +77,13 @@ const TableFixture = (): JSX.Element => {
                 </button>
             </div>
             <StyledTable
-                actions={() => [{ label: 'Edit' }]}
                 columns={consumerColumns}
+                customActionsColumnProps={{ size: 80, enableResizing: false }}
                 data={data}
                 enableColumnResizing
                 enableRowSelection
                 expandArrow
-                headerPin={false}
+                headerPin
                 hideFooter
                 initialState={{ columnVisibility: { select: true } }}
                 rowHeight={48}
@@ -276,10 +276,28 @@ export const SizingPersistenceAndControlAlignment: Story = {
             (element) => getComputedStyle(element).overflowX === 'auto' && element.scrollWidth > element.clientWidth,
         )
         await expect(scrollContainer).toBeDefined()
+        const pinButton = canvasElement.querySelector<HTMLElement>('[aria-label="Column settings"]')
+        const actionsHeader = pinButton?.closest('th')
+        const actionsCell = canvasElement.querySelector<HTMLElement>('tbody tr td:last-child')
+        await expect(pinButton).not.toBeNull()
+        await expect(actionsHeader).not.toBeNull()
+        await expect(actionsCell).not.toBeNull()
+        const initialActionsHeaderBounds = actionsHeader!.getBoundingClientRect()
+        const initialActionsCellBounds = actionsCell!.getBoundingClientRect()
+        const pinBounds = pinButton!.getBoundingClientRect()
+        await expect(
+            Math.abs(
+                pinBounds.left +
+                    pinBounds.width / 2 -
+                    (initialActionsHeaderBounds.left + initialActionsHeaderBounds.width / 2),
+            ),
+        ).toBeLessThanOrEqual(0.5)
 
         scrollContainer!.scrollLeft = 300
         scrollContainer!.dispatchEvent(new Event('scroll'))
         await waitFor(() => expect(scrollContainer!.scrollLeft).toBe(300))
+        await expect(actionsHeader!.getBoundingClientRect().right).toBe(initialActionsHeaderBounds.right)
+        await expect(actionsCell!.getBoundingClientRect().right).toBe(initialActionsCellBounds.right)
 
         const scrolledCheckboxBounds = rowCheckboxBox!.getBoundingClientRect()
         const scrolledExpandBounds = expandButton!.getBoundingClientRect()
@@ -299,7 +317,7 @@ export const SizingPersistenceAndControlAlignment: Story = {
         tableInstance!.setColumnOrder((order) => [...order].reverse())
 
         // Regression: the resizable default minSize (100) must not inflate internal
-        // columns — the actions column stays at its own 50px width.
-        await expect(tableInstance!.getColumn('actions')!.getSize()).toBe(50)
+        // columns — the actions column keeps its explicit utility width.
+        await expect(tableInstance!.getColumn('actions')!.getSize()).toBe(80)
     },
 }

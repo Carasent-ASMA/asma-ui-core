@@ -273,13 +273,6 @@
                 box-shadow: none;
             }
 
-            &.action-cell--not-fixed {
-                position: static;
-                right: auto;
-                z-index: auto;
-                box-shadow: none;
-            }
-
             &.shadowed {
                 &.single-selection {
                     box-shadow:
@@ -445,13 +438,6 @@
                 box-shadow: var(--action-cell-shadow);
 
                 &.t-cell__actions--no-shadow {
-                    box-shadow: none;
-                }
-
-                &.t-cell__actions--not-fixed {
-                    position: static;
-                    right: auto;
-                    z-index: auto;
                     box-shadow: none;
                 }
             }

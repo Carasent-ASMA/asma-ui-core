@@ -28,13 +28,12 @@ export function TableHeaderCell<
     right?: number
     tableWidth: number | null
 }): JSX.Element {
-    const { hideHeader = false, enableResizing = false, actions, customActionsNode } = styledTableProps
+    const { hideHeader = false, enableResizing = false } = styledTableProps
     const { isResizing, enableResizingFlag, disableResizingFlag } = useRootContext()
 
     const isFixed = header.column.columnDef.fixedLeft
     const isFixedRight = Boolean(header.column.columnDef.fixedRight)
     const isActionsColumn = header.column.id === ACTIONS_COLUMN_ID
-    const shouldStickActionsCell = Boolean(actions) || Boolean(customActionsNode)
 
     const hasActionsColumn = useMemo(
         () => header.headerGroup.headers.some((hdr) => hdr.id === ACTIONS_COLUMN_ID),
@@ -67,11 +66,8 @@ export function TableHeaderCell<
             className={clsx(
                 style['t-cell'],
                 hideHeader && style['hide-header'],
-                // *
-                //  sticky actions
                 isActionsColumn && style['t-cell__actions'],
-                isActionsColumn && !shouldStickActionsCell && style['t-cell__actions--not-fixed'],
-                isActionsColumn && shouldStickActionsCell && hasFixedRightColumns && style['t-cell__actions--no-shadow'],
+                isActionsColumn && hasFixedRightColumns && style['t-cell__actions--no-shadow'],
                 isFixed && style['t-cell__fixed'],
                 isFixedRight && style['t-cell__fixed-right'],
             )}
