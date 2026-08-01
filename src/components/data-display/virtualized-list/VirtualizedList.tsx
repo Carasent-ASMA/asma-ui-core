@@ -58,7 +58,7 @@ export function VirtualizedList<TItem>({
     }
 
     return (
-        <div className={className} data-test={dataTest} ref={scrollRef}>
+        <div className={className} data-testid={dataTest} ref={scrollRef}>
             <div className='relative w-full' style={{ height: virtualizer.getTotalSize() }}>
                 {virtualizer.getVirtualItems().map((virtualItem) => {
                     const item = items[virtualItem.index]
