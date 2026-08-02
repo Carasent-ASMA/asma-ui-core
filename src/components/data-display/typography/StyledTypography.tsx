@@ -2,6 +2,8 @@ import { createElement, type CSSProperties, type ElementType, type HTMLAttribute
 import clsx from 'clsx'
 import { resolveSx } from 'src/helpers/sx'
 
+import styles from './StyledTypography.module.scss'
+
 export interface TypographyProps extends Omit<HTMLAttributes<HTMLElement>, 'color'> {
     variant?: string
     variantMapping?: Record<string, string>
@@ -30,22 +32,25 @@ const VARIANT_MAPPING: Record<string, string> = {
     inherit: 'p',
 }
 
-// MUI v9 default typography scale as Tailwind utilities (size / weight / line-height / letter-spacing).
-const VARIANT_CLASS: Record<string, string> = {
-    h1: 'text-[6rem] font-light leading-[1.167] tracking-[-0.01562em]',
-    h2: 'text-[3.75rem] font-light leading-[1.2] tracking-[-0.00833em]',
-    h3: 'text-[3rem] font-normal leading-[1.167] tracking-normal',
-    h4: 'text-[2.125rem] font-normal leading-[1.235] tracking-[0.00735em]',
-    h5: 'text-[1.5rem] font-normal leading-[1.334] tracking-normal',
-    h6: 'text-[1.25rem] font-medium leading-[1.6] tracking-[0.0075em]',
-    subtitle1: 'text-[1rem] font-normal leading-[1.75] tracking-[0.00938em]',
-    subtitle2: 'text-[0.875rem] font-medium leading-[1.57] tracking-[0.00714em]',
-    body1: 'text-[1rem] font-normal leading-[1.5] tracking-[0.00938em]',
-    body2: 'text-[0.875rem] font-normal leading-[1.43] tracking-[0.01071em]',
-    button: 'text-[0.875rem] font-medium leading-[1.75] tracking-[0.02857em] uppercase',
-    caption: 'text-[0.75rem] font-normal leading-[1.66] tracking-[0.03333em]',
-    overline: 'text-[0.75rem] font-normal leading-[2.66] tracking-[0.08333em] uppercase',
-    inherit: 'text-inherit font-[inherit] leading-[inherit] tracking-[inherit]',
+// MUI v9 default typography scale (size / weight / line-height / letter-spacing). These live in a CSS
+// module rather than as Tailwind utilities on purpose: this library builds Tailwind with
+// `important: true`, so utility-based defaults ship `!important` and no consumer can override them —
+// see the header of StyledTypography.module.scss for the full reasoning.
+const VARIANT_CLASS: Record<string, string | undefined> = {
+    h1: styles['variant-h1'],
+    h2: styles['variant-h2'],
+    h3: styles['variant-h3'],
+    h4: styles['variant-h4'],
+    h5: styles['variant-h5'],
+    h6: styles['variant-h6'],
+    subtitle1: styles['variant-subtitle1'],
+    subtitle2: styles['variant-subtitle2'],
+    body1: styles['variant-body1'],
+    body2: styles['variant-body2'],
+    button: styles['variant-button'],
+    caption: styles['variant-caption'],
+    overline: styles['variant-overline'],
+    inherit: styles['variant-inherit'],
 }
 
 // MUI default-palette resolutions for the theme-path `color` prop (no createTheme in this lib).
@@ -71,9 +76,21 @@ const COLOR_MAP: Record<string, string> = {
 
 /**
  * Native, MUI-free reimplementation of the previous `Typography` passthrough. Reproduces MUI v9's
- * default typography scale via Tailwind utilities, the variant→element mapping, and the
+ * default typography scale via `StyledTypography.module.scss`, the variant→element mapping, and the
  * `align`/`noWrap`/`gutterBottom`/`color` props. `sx` is honoured via `resolveSx` (DEC-007).
  * Signature unchanged: still accepts `TypographyProps` (DEC-003).
+ *
+ * **Overriding the type scale.** The variant defaults are plain CSS-module declarations carrying no
+ * `!important`, so any of these wins over them — pick whichever suits the call site:
+ *   - `sx={{ fontSize: '0.875rem', fontWeight: 600 }}` or `style={{ … }}` (inline; beats normal rules)
+ *   - `className='text-sm! font-semibold!'` (Tailwind `!` modifier)
+ *   - a consumer CSS-module class; add `!` to the utilities if the consumer's Tailwind sits in a
+ *     `@layer utilities` (layered normal declarations lose to this library's unlayered ones)
+ * Do **not** re-express these defaults as Tailwind utilities on the element: this library builds
+ * Tailwind with `important: true`, which would make the defaults unoverridable again. Full reasoning
+ * in the header of `StyledTypography.module.scss`.
+ *
+ * `classes` remains accepted-but-ignored for signature parity — it is not an override hook.
  *
  * @figmaNode none — **MUI-compatibility shim, NOT a Design-System component.** Its `variant` scale
  * (h1=6rem light, body1=1rem, MUI palette colours…) intentionally mirrors MUI v9 so pre-existing
@@ -120,7 +137,7 @@ export const StyledTypography = (props: TypographyProps): JSX.Element => {
         element as string,
         {
             className: clsx(
-                'm-0 font-roboto',
+                styles['root'],
                 VARIANT_CLASS[variant],
                 noWrap && 'overflow-hidden text-ellipsis whitespace-nowrap',
                 gutterBottom && 'mb-[0.35em]',

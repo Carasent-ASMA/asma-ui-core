@@ -1,0 +1,127 @@
+// MUI v9 default typography scale.
+//
+// Deliberately hand-written literal declarations — do NOT convert these to `@apply` or to Tailwind
+// classes on the element. This library builds Tailwind with `important: true` (tailwind.config.ts), so
+// every generated utility and every `@apply` expansion ships `!important`. When these *defaults* carry
+// `!important` they outrank every consumer override: `sx`/`style` become inline styles, which lose to
+// author `!important`, and a consumer's own class ties at (0,1,0) and is decided by stylesheet order.
+// The net effect was a component whose type scale could not be overridden at all.
+//
+// Literal declarations in a CSS module carry no `!important`, so normal cascade rules apply again and
+// `sx`, `style`, a `!`-suffixed Tailwind class, or a consumer CSS-module rule all win.
+//
+// Values are transcribed 1:1 from the Tailwind utilities these classes replaced (`font-light` = 300,
+// `font-normal` = 400, `font-medium` = 500, `tracking-normal` = 0), so computed styles are unchanged.
+
+// Unconditional base, applied for every variant. Declared before the variants so a variant wins on
+// source order where the two overlap (`inherit` re-declaring `font-family`).
+.root {
+    margin: 0;
+    font-family: Roboto;
+}
+
+.variant-h1 {
+    font-size: 6rem;
+    font-weight: 300;
+    line-height: 1.167;
+    letter-spacing: -0.01562em;
+}
+
+.variant-h2 {
+    font-size: 3.75rem;
+    font-weight: 300;
+    line-height: 1.2;
+    letter-spacing: -0.00833em;
+}
+
+.variant-h3 {
+    font-size: 3rem;
+    font-weight: 400;
+    line-height: 1.167;
+    letter-spacing: 0;
+}
+
+.variant-h4 {
+    font-size: 2.125rem;
+    font-weight: 400;
+    line-height: 1.235;
+    letter-spacing: 0.00735em;
+}
+
+.variant-h5 {
+    font-size: 1.5rem;
+    font-weight: 400;
+    line-height: 1.334;
+    letter-spacing: 0;
+}
+
+.variant-h6 {
+    font-size: 1.25rem;
+    font-weight: 500;
+    line-height: 1.6;
+    letter-spacing: 0.0075em;
+}
+
+.variant-subtitle1 {
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.75;
+    letter-spacing: 0.00938em;
+}
+
+.variant-subtitle2 {
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.57;
+    letter-spacing: 0.00714em;
+}
+
+.variant-body1 {
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0.00938em;
+}
+
+.variant-body2 {
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.43;
+    letter-spacing: 0.01071em;
+}
+
+.variant-button {
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.75;
+    letter-spacing: 0.02857em;
+    text-transform: uppercase;
+}
+
+.variant-caption {
+    font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 1.66;
+    letter-spacing: 0.03333em;
+}
+
+.variant-overline {
+    font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 2.66;
+    letter-spacing: 0.08333em;
+    text-transform: uppercase;
+}
+
+// Mirrors the utilities this replaced exactly, quirks included: `text-inherit` is a *colour* utility, so
+// this variant never set `font-size`/`font-weight` — it leaves both to inheritance rather than declaring
+// them. `font-family` is deliberately NOT declared here either: the utility it replaced (`font-[inherit]`)
+// was emitted *before* `font-roboto` in the old Tailwind output, so with both at `!important` and equal
+// specificity `font-roboto` won and `font-[inherit]` was dead. Declaring it here would flip that (`.root`
+// comes first in this file, so a variant would win) and change `variant="inherit"` rendering. Left out to
+// keep computed styles identical; make it a deliberate change if `inherit` should really inherit the family.
+.variant-inherit {
+    color: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
+}
