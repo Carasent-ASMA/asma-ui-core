@@ -20,8 +20,11 @@ import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
 import {
     floatingLabelClass,
+    floatingLabelLayoutStyle,
     notchedLegendClass,
     notchedOutlineClass,
+    singleLineInputLayoutStyle,
+    singleLineShellLayoutStyle,
     type FieldSize,
 } from '../field-styles'
 import styles from './StyledInputField.module.scss'
@@ -221,20 +224,45 @@ export const StyledInputField = ({
 
     const { style: htmlInputStyle, ...htmlInputPropsWithoutStyle } = htmlInputRest
     const isSingleLineShell = !multiline && !isAdornmentList
+
+    const {
+        height: _shellHeight,
+        minHeight: _shellMinHeight,
+        maxHeight: _shellMaxHeight,
+        paddingTop: _shellPaddingTop,
+        paddingBottom: _shellPaddingBottom,
+        ...inputSlotStyleSansLayout
+    } = inputSlotStyle ?? {}
+
     const shellStyle: CSSProperties | undefined = isSingleLineShell
-                ? { boxSizing: 'border-box', height: 40, minHeight: 40, maxHeight: 40, ...inputSlotStyle }
+        ? { ...inputSlotStyleSansLayout, ...singleLineShellLayoutStyle() }
         : isAdornmentList
-                    ? { boxSizing: 'border-box', minHeight: 40, ...inputSlotStyle }
+          ? { boxSizing: 'border-box', minHeight: 40, ...inputSlotStyle }
           : inputSlotStyle
+
+    const {
+        height: _inputHeight,
+        minHeight: _inputMinHeight,
+        maxHeight: _inputMaxHeight,
+        paddingTop: _inputPaddingTop,
+        paddingBottom: _inputPaddingBottom,
+        paddingLeft: _inputPaddingLeft,
+        paddingRight: htmlPaddingRight,
+        ...htmlInputStyleSansLayout
+    } = htmlInputStyle ?? {}
+
+    const singleLinePaddingRight =
+        htmlPaddingRight ??
+        endAdornmentPad ??
+        (showClear || userEndAdornment ? 40 : 14)
+
     const singleLineHtmlInputStyle: CSSProperties | undefined = isSingleLineShell
         ? {
-              ...htmlInputStyle,
-              height: undefined,
-              minHeight: undefined,
-              maxHeight: undefined,
-              // Reserve room for a measured custom end adornment so the value truncates/scrolls before
-              // it instead of underneath (fixed `data-end-adornment` 40px only clears a single icon).
-              ...(endAdornmentPad != null ? { paddingRight: endAdornmentPad } : {}),
+              ...htmlInputStyleSansLayout,
+              ...singleLineInputLayoutStyle({
+                  paddingLeft: hasStartAdornment ? 40 : 14,
+                  paddingRight: singleLinePaddingRight,
+              }),
           }
         : htmlInputStyle
 
@@ -447,6 +475,7 @@ export const StyledInputField = ({
                         style={{
                             ...resolveSx(slotProps?.inputLabel?.['sx']),
                             ...slotProps?.inputLabel?.style,
+                            ...floatingLabelLayoutStyle(shrink),
                         }}
                     >
                         {label}

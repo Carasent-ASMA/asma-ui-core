@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { cn } from 'src/helpers/cn'
-import { floatingLabelClass, type FieldSize } from '../inputs/field-styles'
+import { floatingLabelClass, floatingLabelLayoutStyle, type FieldSize } from '../inputs/field-styles'
 import { useFormControlContext } from './FormControlContext'
 
 export interface InputLabelProps {
@@ -50,6 +50,7 @@ export const StyledInputLabel = ({
                 }),
                 className,
             )}
+            style={floatingLabelLayoutStyle(isShrunk)}
         >
             {children}
             {isRequired && ' *'}
