@@ -121,9 +121,15 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
 
     useLayoutEffect(() => {
         const node = dialogRef.current
-        if (!node) return
-        if (open && !node.open) {
+        if (!node || !open) return
+        if (!node.open) {
             node.showModal()
+            // showModal() focuses the first focusable element (the header close button) — move focus
+            // back to the shell, which has tabIndex={-1} + outline-none, so no :focus ring paints.
+            node.focus({ preventScroll: true })
+            // Some engines defer showModal()'s first-focusable step until after this turn; re-assert
+            // focus next frame so it wins. Guard `node.open` in case the dialog closed in between.
+            requestAnimationFrame(() => node.open && node.focus({ preventScroll: true }))
         }
     }, [open])
 
