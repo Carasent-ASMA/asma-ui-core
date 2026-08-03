@@ -1,4 +1,43 @@
+import type { CSSProperties } from 'react'
 import { cn } from 'src/helpers/cn'
+
+/** Figma single-line outlined field height — pinned inline so duplicate app CSS cannot resize the box. */
+export const SINGLE_LINE_FIELD_HEIGHT_PX = 40
+
+/** Inline layout for the 40px input shell; spread caller styles first, then this. */
+export const singleLineShellLayoutStyle = (): CSSProperties => ({
+    boxSizing: 'border-box',
+    height: SINGLE_LINE_FIELD_HEIGHT_PX,
+    minHeight: SINGLE_LINE_FIELD_HEIGHT_PX,
+    maxHeight: SINGLE_LINE_FIELD_HEIGHT_PX,
+})
+
+export interface SingleLineInputLayoutOptions {
+    paddingLeft?: CSSProperties['paddingLeft']
+    paddingRight?: CSSProperties['paddingRight']
+}
+
+/** Inline layout for the single-line `<input>`; spread caller/htmlInput styles first, then this. */
+export const singleLineInputLayoutStyle = ({
+    paddingLeft = 14,
+    paddingRight = 14,
+}: SingleLineInputLayoutOptions = {}): CSSProperties => ({
+    boxSizing: 'border-box',
+    margin: 0,
+    paddingTop: 0,
+    paddingBottom: 0,
+    paddingLeft,
+    paddingRight,
+    height: SINGLE_LINE_FIELD_HEIGHT_PX,
+    minHeight: SINGLE_LINE_FIELD_HEIGHT_PX,
+    maxHeight: SINGLE_LINE_FIELD_HEIGHT_PX,
+    lineHeight: '24px',
+    fontSize: 16,
+})
+
+/** Label vertical anchor — inline so duplicate Tailwind `top-*` utilities cannot shift it. */
+export const floatingLabelLayoutStyle = (shrink: boolean): CSSProperties =>
+    shrink ? { top: 0, transform: 'translateY(-50%)' } : { top: '50%', transform: 'translateY(-50%)' }
 
 /**
  * Shared outlined-field styling so `StyledInputField`, `StyledInputLabel` (+ `StyledFormControl`)
@@ -70,7 +109,9 @@ export const floatingLabelClass = ({
     readOnly,
 }: FieldState & { shrink: boolean; size?: FieldSize }): string =>
     cn(
-        'pointer-events-none absolute left-[14px] z-10 max-w-[calc(100%-1.75rem)] truncate transition-all duration-150',
+        // ponytail: position lives in `floatingLabelLayoutStyle` (inline) — not `transition-all`, which
+        // animates mount-on-focus labels from a wrong resting point when duplicate app CSS shifts the shell.
+        'pointer-events-none absolute left-[14px] z-10 max-w-[calc(100%-1.75rem)] truncate transition-colors duration-150',
         // Colour precedence: disabled → error → focused → resting/shrunk.
         disabled
             ? 'text-delta-300'
@@ -84,8 +125,8 @@ export const floatingLabelClass = ({
                     ? 'text-delta-800'
                     : 'text-delta-500',
         shrink
-            ? 'top-0 -translate-y-1/2 bg-white px-1 text-xs leading-[16px] tracking-[0.24px]' // Figma Small 12/16, ls 0.24px
+            ? 'bg-white px-1 text-xs leading-[16px] tracking-[0.24px]' // Figma Small 12/16, ls 0.24px
             // Resting label doubles as the placeholder → must match the input text (Figma Body Base 16,
             // `text-base`) at every `size`; a smaller size only changes height/padding, not text size.
-            : 'top-1/2 -translate-y-1/2 text-base leading-[23px] tracking-[0.00938em]',
+            : 'text-base leading-[23px] tracking-[0.00938em]',
     )
