@@ -76,10 +76,7 @@ export const StyledTabs: FC<StyledTabsProps> = ({
         else nodesRef.current.delete(tabValue)
     }, [])
 
-    const onSelect = useCallback(
-        (event: SyntheticEvent, tabValue: TabValue) => onChange?.(event, tabValue),
-        [onChange],
-    )
+    const onSelect = useCallback((event: SyntheticEvent, tabValue: TabValue) => onChange?.(event, tabValue), [onChange])
 
     const measure = useCallback(() => {
         const node = nodesRef.current.get(value)
@@ -136,10 +133,7 @@ export const StyledTabs: FC<StyledTabsProps> = ({
     // override is reliable (same pattern as StyledMenuList). See ui-core-mui-free-migration SKILL.
     const consumerSetsPadding = consumerOverrides(className, 'padding-x')
 
-    const contextValue = useMemo(
-        () => ({ value, size, onSelect, register }),
-        [value, size, onSelect, register],
-    )
+    const contextValue = useMemo(() => ({ value, size, onSelect, register }), [value, size, onSelect, register])
 
     const scrollButtonClass =
         'flex h-10 w-10 shrink-0 items-center justify-center self-center rounded-[10%] border border-solid border-delta-500 text-delta-700 transition-colors hover:bg-gama-50 disabled:invisible'
@@ -147,7 +141,11 @@ export const StyledTabs: FC<StyledTabsProps> = ({
     return (
         <TabsContext.Provider value={contextValue}>
             <div
-                className={cn('relative flex items-center rounded-t-lg bg-white', !consumerSetsPadding && 'px-4', className)}
+                className={cn(
+                    'relative flex items-center rounded-t-lg bg-white',
+                    !consumerSetsPadding && 'px-4',
+                    className,
+                )}
                 style={resolveSx(sx)}
             >
                 {showLeftButton && (
@@ -171,7 +169,7 @@ export const StyledTabs: FC<StyledTabsProps> = ({
                     onKeyDown={handleKeyDown}
                     onScroll={measure}
                     className={cn(
-                        'relative flex border-x-0 border-b border-t-0 border-solid border-delta-200 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+                        'relative flex bg-[linear-gradient(to_top,var(--colors-delta-200)_1px,transparent_1px)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
                         isScrollable ? 'flex-1 overflow-x-auto' : 'w-full',
                         variant === 'fullWidth' && '[&>*]:flex-1',
                         centered && 'justify-center',
@@ -179,9 +177,7 @@ export const StyledTabs: FC<StyledTabsProps> = ({
                     )}
                 >
                     {Children.map(children, (child, index) =>
-                        isValidElement(child)
-                            ? cloneElement(child as ReactElement<StyledTabProps>, { index })
-                            : child,
+                        isValidElement(child) ? cloneElement(child as ReactElement<StyledTabProps>, { index }) : child,
                     )}
                     <span
                         aria-hidden
