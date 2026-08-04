@@ -1,4 +1,4 @@
-import type { ReactElement, ReactNode } from 'react'
+import type { CSSProperties, ReactElement, ReactNode } from 'react'
 import { StyledButton } from 'src/components/inputs/button'
 import { CloseIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
@@ -90,10 +90,10 @@ export function SearchSlot({
     return (
         <div
             ref={expanded ? undefined : measureRef}
+            style={expanded ? ({ '--dynamic-toolbar-search-width': '100%' } as CSSProperties) : undefined}
             className={cn(
-                '[&_.MuiFormControl-root]:w-full',
                 expanded
-                    ? 'min-w-0 flex-1 [&_.MuiFormControl-root]:max-w-none'
+                    ? 'min-w-0 flex-1'
                     : 'w-40 shrink-0',
             )}
         >

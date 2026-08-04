@@ -104,7 +104,7 @@ export const StyledSearchField: FC<StyledSearchFieldProps> = ({
                 }}
                 {...props}
                 sx={{
-                    ...(props.fullWidth ? { width: '100%' } : { width: 160 }),
+                    width: props.fullWidth ? '100%' : 'var(--dynamic-toolbar-search-width, 160px)',
                     ...(props.sx as object),
                 }}
             />

@@ -127,12 +127,24 @@ export const SizingPersistenceAndControlAlignment: Story = {
         const checkboxGlyphs = Array.from(
             canvasElement.querySelectorAll<HTMLElement>('[data-test="cell-select-all"], [data-test="cell-select"]'),
         )
-        const checkboxGlyphLefts = checkboxGlyphs.map((glyph) => glyph.getBoundingClientRect().left)
 
-        await expect(checkboxGlyphLefts.length).toBeGreaterThan(1)
-        checkboxGlyphLefts
-            .slice(1)
-            .forEach((left) => expect(Math.abs(left - checkboxGlyphLefts[0]!)).toBeLessThanOrEqual(0.5))
+        // Regression: in the shell every micro-app injects its own purged Tailwind sheet, and a
+        // late `.p-0 { padding: 0 !important }` used to strip the row wrapper's `pl-2` while the
+        // header kept its own — an 8px offset that depended on which apps loaded first. The select
+        // wrappers must stay aligned even with such a sheet present (scoped CSS-module geometry).
+        const hostileAppSheet = document.createElement('style')
+        hostileAppSheet.textContent = '.p-0{padding:0!important}'
+        document.head.appendChild(hostileAppSheet)
+        try {
+            const checkboxGlyphLefts = checkboxGlyphs.map((glyph) => glyph.getBoundingClientRect().left)
+
+            await expect(checkboxGlyphLefts.length).toBeGreaterThan(1)
+            checkboxGlyphLefts
+                .slice(1)
+                .forEach((left) => expect(Math.abs(left - checkboxGlyphLefts[0]!)).toBeLessThanOrEqual(0.5))
+        } finally {
+            hostileAppSheet.remove()
+        }
 
         const rowCheckboxBox = checkboxes[1]?.querySelector<HTMLElement>('[data-test="cell-select"] > span:last-child')
         await expect(rowCheckboxBox).not.toBeNull()

@@ -47,7 +47,7 @@ export function selectColumn<TData>(isFixed: boolean, rowHeight?: number, locale
                     tabIndex={0}
                     aria-label={labels.selectAll}
                     aria-checked={table.getIsSomeRowsSelected() ? 'mixed' : table.getIsAllRowsSelected()}
-                    className='flex size-full items-center justify-start pl-2'
+                    className={style['select-control']}
                     onClick={() => table.toggleAllRowsSelected()}
                     onMouseDown={stopMouseEvent}
                     onMouseUp={stopMouseEvent}
@@ -78,7 +78,7 @@ export function selectColumn<TData>(isFixed: boolean, rowHeight?: number, locale
                     aria-checked={cell.row.getIsSelected()}
                     aria-disabled={disabled}
                     style={{ height: rowHeight ?? 'auto' }}
-                    className='m-0 flex w-full items-center justify-start p-0 pl-2'
+                    className={style['select-control']}
                     onClick={() => {
                         if (disabled) return
                         cell.row.toggleSelected()
