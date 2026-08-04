@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import {
     autoUpdate,
     flip,
@@ -117,10 +117,21 @@ export const StyledPopover = ({
     const floatingRef = useMergeRefs([useTopLayerRef(refs.setFloating)])
     // Portal INTO the anchor's modal <dialog> (if any): a body-portalled popover stays inert under a
     // modal dialog (clicks fall through) even when top-layer-promoted. See getOpenModalDialogAncestor.
-    const portalRoot = useMemo(
-        () => (shouldMount ? getOpenModalDialogAncestor(anchorEl) : undefined),
-        [shouldMount, anchorEl],
-    )
+    //
+    // keepMounted: callers often clear `anchorEl` on close. Recalculating portalRoot as `undefined`
+    // (body) would remount FloatingPortal children and kill a menu-owned dialog that just opened
+    // (ShareDialog + attach menu). Sticky last dialog root avoids that remount.
+    const portalRootRef = useRef<HTMLElement | undefined>(undefined)
+    const portalRoot = useMemo(() => {
+        if (!shouldMount) {
+            portalRootRef.current = undefined
+            return undefined
+        }
+        const next = getOpenModalDialogAncestor(anchorEl)
+        if (next) portalRootRef.current = next
+        if (keepMounted && !open && portalRootRef.current) return portalRootRef.current
+        return next ?? portalRootRef.current
+    }, [shouldMount, anchorEl, keepMounted, open])
 
     // keepMounted leaves the node in the DOM across open/close — re-assert popover show/hide each flip
     // (useTopLayerRef only runs on attach, which doesn't re-fire when we stay mounted).
