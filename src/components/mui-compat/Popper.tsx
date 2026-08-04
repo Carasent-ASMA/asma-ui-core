@@ -1,4 +1,3 @@
-import { useState, type CSSProperties, type ReactNode } from 'react'
 import {
     autoUpdate,
     flip,
@@ -8,6 +7,7 @@ import {
     useMergeRefs,
     type Placement,
 } from '@floating-ui/react'
+import { useState, type CSSProperties, type ReactNode } from 'react'
 
 export interface PopperTransitionProps {
     in: boolean
