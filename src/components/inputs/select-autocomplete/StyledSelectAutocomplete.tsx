@@ -1,15 +1,4 @@
 import {
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-    type CSSProperties,
-    type HTMLAttributes,
-    type KeyboardEvent,
-    type ReactNode,
-    type SyntheticEvent,
-} from 'react'
-import {
     autoUpdate,
     flip,
     FloatingPortal,
@@ -22,11 +11,22 @@ import {
     useMergeRefs,
     useRole,
 } from '@floating-ui/react'
-import { cn } from 'src/helpers/cn'
-import { getOpenModalDialogAncestor, TOP_LAYER_PROPS, TOP_LAYER_RESET_STYLE, useTopLayerRef } from 'src/hooks/useTopLayer.hook'
+import {
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+    type CSSProperties,
+    type HTMLAttributes,
+    type KeyboardEvent,
+    type ReactNode,
+    type SyntheticEvent,
+} from 'react'
+import { StyledChip } from 'src/components/data-display/chip'
 import { CheckIcon, ChevronDownIcon, CloseIcon, PlusIconCircle } from 'src/components/icons'
 import { StyledCheckbox } from 'src/components/inputs/checkbox/base-ui/StyledCheckbox'
-import { StyledChip } from 'src/components/data-display/chip'
+import { cn } from 'src/helpers/cn'
+import { getOpenModalDialogAncestor, TOP_LAYER_PROPS, TOP_LAYER_RESET_STYLE, useTopLayerRef } from 'src/hooks/useTopLayer.hook'
 import { LoadingIcon } from 'src/table/shared-components/LoadingIcon'
 import style from './StyledSelectAutocomplete.module.scss'
 
@@ -441,21 +441,22 @@ export function StyledSelectAutocomplete<
         },
     }
 
+    // MUI Autocomplete put option chrome on the `li` props (`className` / `MuiAutocomplete-option`).
+    // Custom `renderOption` callers spread `{...props}` onto their `<li>` and expect flex, cursor,
+    // hover, and selected backgrounds from that — not only from `defaultRenderOption`.
+    const optionRowClassName = cn(
+        // Figma Menus item: Body Base 16/lh24, text-icon/body delta-700.
+        'box-border flex min-h-10 cursor-pointer items-center gap-x-3 px-3 py-1.5 text-base text-delta-700 first:-mt-1',
+        'aria-selected:bg-gama-50 data-[active]:bg-gama-50 data-[active]:text-delta-800',
+        // Disabled options never take the gama highlight (hover or keyboard) and read as muted.
+        'aria-disabled:cursor-default aria-disabled:!bg-transparent aria-disabled:text-delta-300',
+        isMultiple && 'border-0 border-b border-solid border-delta-200',
+    )
+
     const defaultRenderOption = (props: OptionLiProps, option: T, state: AutocompleteRenderOptionState): ReactNode => {
         const { key, ...optionProps } = props
         return (
-            <li
-                key={key}
-                {...optionProps}
-                className={cn(
-                    // Figma Menus item: Body Base 16/lh24, text-icon/body delta-700.
-                    'box-border flex min-h-10 cursor-pointer items-center gap-x-3 px-3 py-1.5 text-base text-delta-700 first:-mt-1',
-                    'aria-selected:bg-gama-50 data-[active]:bg-gama-50 data-[active]:text-delta-800',
-                    // Disabled options never take the gama highlight (hover or keyboard) and read as muted.
-                    'aria-disabled:cursor-default aria-disabled:!bg-transparent aria-disabled:text-delta-300',
-                    isMultiple && 'border-0 border-b border-solid border-delta-200',
-                )}
-            >
+            <li key={key} {...optionProps}>
                 {isMultiple ? (
                     // Pure state indicator: this <li> owns selection and carries the real accessible
                     // state via `aria-selected` (optionProps above). `decorative` renders no <input> at
@@ -500,6 +501,7 @@ export function StyledSelectAutocomplete<
             'aria-selected': isSelected(option),
             'aria-disabled': optionDisabled || undefined,
             'data-active': activeIndex === index ? '' : undefined,
+            className: optionRowClassName,
         }
         const state: AutocompleteRenderOptionState = { selected: isSelected(option), index, inputValue }
         return renderOption ? renderOption(props, option, state) : defaultRenderOption(props, option, state)

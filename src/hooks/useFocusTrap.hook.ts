@@ -20,12 +20,12 @@ export const useFocusTrap = (active: boolean, containerRef: RefObject<HTMLElemen
 
         const previouslyFocused = document.activeElement as HTMLElement | null
 
-        const focusFirst = (): void => {
-            const first = container.querySelector<HTMLElement>(FOCUSABLE_SELECTOR)
-            ;(first ?? container).focus()
+        // Same as StyledDialog after showModal(): focus the shell, not the first header control.
+        const focusShell = (): void => {
+            container.focus({ preventScroll: true })
         }
         // Deferred: the container may have just switched into the DOM/layout this render.
-        const raf = requestAnimationFrame(focusFirst)
+        const raf = requestAnimationFrame(focusShell)
 
         const handleKeyDown = (event: KeyboardEvent): void => {
             if (event.key === 'Escape') {
@@ -44,10 +44,14 @@ export const useFocusTrap = (active: boolean, containerRef: RefObject<HTMLElemen
             const last = focusable[focusable.length - 1]
             const activeElement = document.activeElement
 
-            if (event.shiftKey && activeElement === first) {
+            // Shell focus sits "before" the first control — Shift+Tab from either wraps to last.
+            if (event.shiftKey && (activeElement === first || activeElement === container)) {
                 event.preventDefault()
                 last?.focus()
             } else if (!event.shiftKey && activeElement === last) {
+                event.preventDefault()
+                first?.focus()
+            } else if (!event.shiftKey && activeElement === container) {
                 event.preventDefault()
                 first?.focus()
             }
