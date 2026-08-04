@@ -13,7 +13,12 @@ import {
 } from '@floating-ui/react'
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
-import { getOpenModalDialogAncestor, TOP_LAYER_PROPS, TOP_LAYER_RESET_STYLE, useTopLayerRef } from 'src/hooks/useTopLayer.hook'
+import {
+    getOpenModalDialogAncestor,
+    TOP_LAYER_PROPS,
+    TOP_LAYER_RESET_STYLE,
+    useTopLayerRef,
+} from 'src/hooks/useTopLayer.hook'
 
 export interface PopoverOrigin {
     vertical: 'top' | 'center' | 'bottom' | number
@@ -90,10 +95,7 @@ export const StyledPopover = ({
     children,
     keepMounted = false,
 }: StyledPopoverProps): JSX.Element | null => {
-    const placement = useMemo(
-        () => toPlacement(anchorOrigin, transformOrigin),
-        [anchorOrigin, transformOrigin],
-    )
+    const placement = useMemo(() => toPlacement(anchorOrigin, transformOrigin), [anchorOrigin, transformOrigin])
 
     const [hasOpened, setHasOpened] = useState(open)
     if (open && !hasOpened) setHasOpened(true)
