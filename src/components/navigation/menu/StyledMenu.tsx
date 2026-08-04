@@ -18,6 +18,8 @@ export interface MenuProps {
     autoFocus?: boolean
     onClick?: (event: MouseEvent<HTMLUListElement>) => void
     children?: ReactNode
+    /** MUI `Menu` `keepMounted` parity — see `StyledPopover.keepMounted`. */
+    keepMounted?: boolean
 }
 
 // Menu paper look (border + soft shadow) applied as flat sx → inline so it overrides StyledPopover's
@@ -46,6 +48,7 @@ export const StyledMenu = ({
     autoFocus = true,
     onClick,
     children,
+    keepMounted,
 }: MenuProps): JSX.Element => (
     <StyledPopover
         open={open}
@@ -56,6 +59,7 @@ export const StyledMenu = ({
         id={id}
         className={className}
         sx={sx}
+        keepMounted={keepMounted}
         slotProps={{
             paper: {
                 className: cn('rounded', classes?.paper, slotProps?.paper?.className),
