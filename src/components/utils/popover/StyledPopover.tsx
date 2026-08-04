@@ -40,12 +40,6 @@ export interface StyledPopoverProps {
      * dialog in the same tick it opens.
      */
     keepMounted?: boolean
-    /**
-     * MUI `keepMounted` parity: after the first open, keep children in the React tree while closed
-     * (hidden). Needed when a menu item owns a dialog — without this, closing the menu unmounts the
-     * dialog in the same tick it opens.
-     */
-    keepMounted?: boolean
 }
 
 const DEFAULT_ANCHOR: PopoverOrigin = { vertical: 'bottom', horizontal: 'left' }
@@ -95,16 +89,11 @@ export const StyledPopover = ({
     onClick,
     children,
     keepMounted = false,
-    keepMounted = false,
 }: StyledPopoverProps): JSX.Element | null => {
     const placement = useMemo(
         () => toPlacement(anchorOrigin, transformOrigin),
         [anchorOrigin, transformOrigin],
     )
-
-    const [hasOpened, setHasOpened] = useState(open)
-    if (open && !hasOpened) setHasOpened(true)
-    const shouldMount = open || (keepMounted && hasOpened)
 
     const [hasOpened, setHasOpened] = useState(open)
     if (open && !hasOpened) setHasOpened(true)
@@ -161,23 +150,6 @@ export const StyledPopover = ({
     if (!shouldMount) return null
 
     return (
-    // keepMounted leaves the node in the DOM across open/close — re-assert popover show/hide each flip
-    // (useTopLayerRef only runs on attach, which doesn't re-fire when we stay mounted).
-    useEffect(() => {
-        if (!shouldMount) return
-        const node = refs.floating.current
-        if (!node || typeof node.showPopover !== 'function') return
-        try {
-            if (open && !node.matches(':popover-open')) node.showPopover()
-            if (!open && node.matches(':popover-open')) node.hidePopover()
-        } catch {
-            // Popover API unavailable / element not eligible.
-        }
-    }, [open, shouldMount, refs.floating])
-
-    if (!shouldMount) return null
-
-    return (
         <FloatingPortal root={portalRoot}>
             <div
                 ref={floatingRef}
@@ -186,14 +158,11 @@ export const StyledPopover = ({
                 style={{
                     ...TOP_LAYER_RESET_STYLE,
                     ...(open ? floatingStyles : {}),
-                    ...(open ? floatingStyles : {}),
                     ...resolveSx(sx),
                     ...resolveSx(slotProps?.paper?.sx),
                     ...slotProps?.paper?.style,
                     ...(!open ? { display: 'none' } : null),
-                    ...(!open ? { display: 'none' } : null),
                 }}
-                {...(open ? getFloatingProps({ onClick }) : {})}
                 {...(open ? getFloatingProps({ onClick }) : {})}
                 className={cn(
                     // Figma DS floating surface: radius 4 (`menus` token) + Float shadow (0 1 12 rgba(0,0,0,.15)).
@@ -205,6 +174,5 @@ export const StyledPopover = ({
                 {children}
             </div>
         </FloatingPortal>
-    )
     )
 }
