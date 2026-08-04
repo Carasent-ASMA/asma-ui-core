@@ -534,3 +534,19 @@
         url('../assets/cursors/row-selection-disabled.svg') 12 12,
         not-allowed;
 }
+
+// Header and row checkbox wrappers of the select column. Scoped here on purpose: this geometry
+// previously came from Tailwind utilities (`p-0 pl-2`), and in the micro-frontend shell every app
+// injects its own generated Tailwind sheet — a sheet containing `.p-0` but not `.pl-2`, loaded
+// after core's, zeroed the row padding while the header kept its own, shifting checkboxes 8px
+// apart depending on which apps the user had visited. A CSS-module class cannot be overridden by
+// any app sheet, so header and rows always share the same offset.
+.select-control {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0 0 0 8px;
+}
