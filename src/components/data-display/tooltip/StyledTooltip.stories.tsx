@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { CSSProperties } from 'react'
 import { FilterIcon } from 'src/components/icons'
+import { StyledDialog } from 'src/components/feedback/dialog/StyledDialog'
 import { StyledButton } from 'src/components/inputs/button'
 import { expect, waitFor, within } from 'storybook/test'
 import { StyledTooltip } from './StyledTooltip'
@@ -97,6 +98,35 @@ export const Hovered: Story = {
         await userEvent.hover(button)
         await waitFor(() => {
             expect(canvas.getByRole('tooltip', { name: 'Tooltip' })).toBeInTheDocument()
+        })
+    },
+}
+
+export const InsideDialog: Story = {
+    render: () => (
+        <StyledDialog
+            open
+            onClose={() => undefined}
+            dataTest='tooltip-dialog'
+            dialogTitle='Tooltip dialog'
+            showCloseIcon={false}
+        >
+            <div style={{ padding: 24 }}>
+                <StyledTooltip title='Tooltip in dialog'>
+                    <div className='w-fit'>
+                        <StyledButton dataTest='dialog-hover-btn'>Hover inside dialog</StyledButton>
+                    </div>
+                </StyledTooltip>
+            </div>
+        </StyledDialog>
+    ),
+    play: async ({ canvasElement, userEvent }) => {
+        const canvas = within(canvasElement.ownerDocument.body)
+        const button = canvas.getByRole('button', { name: 'Hover inside dialog' })
+
+        await userEvent.hover(button)
+        await waitFor(() => {
+            expect(canvas.getByRole('tooltip', { name: 'Tooltip in dialog' })).toBeInTheDocument()
         })
     },
 }

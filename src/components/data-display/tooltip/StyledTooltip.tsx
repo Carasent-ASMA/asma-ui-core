@@ -18,6 +18,7 @@ import {
 } from '@floating-ui/react'
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
+import { getOpenModalDialogAncestor, TOP_LAYER_PROPS, TOP_LAYER_RESET_STYLE, useTopLayerRef } from 'src/hooks/useTopLayer.hook'
 
 const TOOLTIP_BG = '#363E4A'
 
@@ -104,6 +105,7 @@ const TooltipWithFloating = ({
         open,
         onOpenChange: setOpen,
         placement,
+        strategy: 'fixed',
         whileElementsMounted: autoUpdate,
         middleware: [
             offset(offsetDistance ?? (arrow ? 8 : 6)),
@@ -125,6 +127,8 @@ const TooltipWithFloating = ({
     const dismiss = useDismiss(context)
     const role = useRole(context, { role: 'tooltip' })
     const { getReferenceProps, getFloatingProps } = useInteractions([hover, focus, dismiss, role])
+    const floatingRef = useTopLayerRef(refs.setFloating)
+    const portalRoot = open ? getOpenModalDialogAncestor(refs.reference.current) : undefined
 
     // Merge our reference ref with any ref the child already carries (React 18 element.ref).
     const childRef = useMergeRefs([refs.setReference, (children as { ref?: React.Ref<unknown> }).ref])
@@ -137,11 +141,13 @@ const TooltipWithFloating = ({
         <>
             {reference}
             {open && (
-                <FloatingPortal>
+                <FloatingPortal root={portalRoot}>
                     <div
-                        ref={refs.setFloating}
+                        ref={floatingRef}
+                        {...TOP_LAYER_PROPS}
                         {...getFloatingProps()}
                         style={{
+                            ...TOP_LAYER_RESET_STYLE,
                             ...floatingStyles,
                             fontFamily: 'Roboto, Helvetica, Arial, sans-serif',
                             ...slotProps?.tooltip?.style,
