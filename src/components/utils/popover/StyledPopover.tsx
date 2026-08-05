@@ -98,6 +98,11 @@ export const StyledPopover = ({
     const [hasOpened, setHasOpened] = useState(open)
     if (open && !hasOpened) setHasOpened(true)
     const shouldMount = open || (keepMounted && hasOpened)
+    const anchoredPortalRoot = getOpenModalDialogAncestor(anchorEl)
+    const [portalRoot, setPortalRoot] = useState(anchoredPortalRoot)
+    // Retain the last root while a keepMounted popover closes. Its anchor is cleared in the same
+    // click that can open a child dialog; changing FloatingPortal's root would unmount that dialog.
+    if (anchorEl && portalRoot !== anchoredPortalRoot) setPortalRoot(anchoredPortalRoot)
 
     const { refs, floatingStyles, context } = useFloating({
         open,
@@ -116,11 +121,8 @@ export const StyledPopover = ({
     // Promote into the top layer so it paints above a modal <dialog> regardless of z-index.
     const floatingRef = useMergeRefs([useTopLayerRef(refs.setFloating)])
     // Portal INTO the anchor's modal <dialog> (if any): a body-portalled popover stays inert under a
-    // modal dialog (clicks fall through) even when top-layer-promoted. See getOpenModalDialogAncestor.
-    const portalRoot = useMemo(
-        () => (shouldMount ? getOpenModalDialogAncestor(anchorEl) : undefined),
-        [shouldMount, anchorEl],
-    )
+    // modal dialog (clicks fall through) even when top-layer-promoted. Keep that root after the
+    // anchor is cleared so mounted children are not remounted. See getOpenModalDialogAncestor.
 
     // keepMounted leaves the node in the DOM across open/close — re-assert popover show/hide each flip
     // (useTopLayerRef only runs on attach, which doesn't re-fire when we stay mounted).
