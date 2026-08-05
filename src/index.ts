@@ -67,6 +67,7 @@ export * from './components/custom/widget/widget/StyledWidget'
 export * from './components/custom/module/module-title/StyledModuleTitle'
 export * from './components/custom/module/header-layout'
 export * from './components/feedback/minimizable-dialog'
+export * from './components/custom/pathfinder-card/PathfinderCard'
 
 // hooks
 export * from './hooks/usePopupState'
