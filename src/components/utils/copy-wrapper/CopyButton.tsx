@@ -18,20 +18,23 @@ export const CopyButton: FC<{
             <div>
                 <StyledButton
                     dataTest='copy-button'
-                    // On mobile the text child below is omitted (icon-only) — without this the button
-                    // has no accessible name at all on that breakpoint.
                     aria-label={text ?? title}
                     className={className}
                     size='small'
                     variant='text'
                     startIcon={<ContentCopyIcon width={20} height={20} />}
-                    onClick={() => {
+                    onMouseDown={(e) => {
+                        e.stopPropagation()
+                    }}
+                    onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
                         navigator.clipboard
                             .writeText(contentToCopy)
                             .then(() => {
                                 messageInfo(locale === 'no' ? 'Kopiert til utklippstavle' : 'Copied to clipboard')
                             })
-                            .catch((e) => console.error('Copying failed with this: ', e))
+                            .catch((err) => console.error('Copying failed with this: ', err))
                     }}
                 >
                     {!isMobile && (text ?? title)}
