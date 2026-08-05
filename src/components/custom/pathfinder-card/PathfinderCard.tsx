@@ -228,7 +228,7 @@ export function PathfinderCard({
             ref={ref}
             className={cn(
                 'relative border-2 border-solid border-gama-300 bg-gama-25 transition-all duration-300 ease-in-out',
-                'rounded-[8px] min-[744px]:rounded-[100px]',
+                'rounded-lg min-[744px]:rounded-[100px]',
                 compact ? 'overflow-hidden' : 'overflow-visible',
                 className,
             )}
@@ -243,7 +243,7 @@ export function PathfinderCard({
                 }
             }}
         >
-            <div className={cn('flex min-w-0 items-center p-2', compact ? 'gap-y-0' : 'gap-y-2')}>
+            <div className={cn('flex min-w-0 items-center p-2', compact ? 'gap-y-0' : 'gap-y-1')}>
                 {leadSlot ? <div className='shrink-0'>{leadSlot}</div> : null}
 
                 <div className='min-w-0 flex-1 px-4'>
@@ -256,12 +256,18 @@ export function PathfinderCard({
                             ))}
                         </div>
                     ) : (
-                        <div className='flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2 overflow-visible'>
+                        <div className='flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1 overflow-visible'>
                             {sortedItems.map((item) => (
                                 <div key={item.id} className='shrink-0 whitespace-nowrap'>
                                     <ItemRenderer item={item} compact={compact} />
                                 </div>
                             ))}
+
+                            {actionSlot ? (
+                                <div className='shrink-0'>
+                                    <div ref={actionRef}>{actionSlot}</div>
+                                </div>
+                            ) : null}
                         </div>
                     )}
                 </div>
@@ -272,9 +278,9 @@ export function PathfinderCard({
             </div>
 
             <div aria-hidden className='pointer-events-none absolute left-0 top-0 -z-10 opacity-0'>
-                <div className='flex min-w-0 flex-nowrap items-center gap-x-3 whitespace-nowrap'>
+                <div className='flex min-w-0 flex-nowrap items-center gap-x-4 gap-y-1 whitespace-nowrap'>
                     {leadSlot ? (
-                        <div className='mr-3 shrink-0 pt-0.5'>
+                        <div className='shrink-0'>
                             <div ref={leadRef}>{leadSlot}</div>
                         </div>
                     ) : null}
