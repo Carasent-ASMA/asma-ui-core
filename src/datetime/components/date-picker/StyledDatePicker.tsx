@@ -52,13 +52,7 @@ export const StyledDatePicker = (props: DatePickerProps): JSX.Element => {
                 />
             )}
             {isMobile && (
-                <Drawer
-                    anchor={'bottom'}
-                    open={!!anchorEl}
-                    onClose={onClose}
-                    sx={{ zIndex: 1300 }}
-                    className='z-[1300]'
-                >
+                <Drawer anchor={'bottom'} open={!!anchorEl} onClose={onClose} anchorEl={anchorEl}>
                     {/* Bottom-sheet needs breathing room below the footer (+ device safe-area/home
                         indicator) — otherwise the calendar footer hugs the screen edge. */}
                     <div className='mx-auto max-w-[360px] px-2 pb-[max(1.5rem,env(safe-area-inset-bottom))]'>

@@ -3,6 +3,12 @@ import { FloatingPortal } from '@floating-ui/react'
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
+import {
+    getOpenModalDialogAncestor,
+    TOP_LAYER_PROPS,
+    TOP_LAYER_RESET_STYLE,
+    useTopLayerRef,
+} from 'src/hooks/useTopLayer.hook'
 
 export type DrawerAnchor = 'left' | 'right' | 'top' | 'bottom'
 export type DrawerCloseReason = 'backdropClick' | 'escapeKeyDown'
@@ -21,6 +27,8 @@ export interface DrawerProps {
      * transition can play, so `keepMounted` is effectively always-on — this prop is a typed no-op.
      */
     ModalProps?: { keepMounted?: boolean }
+    /** Trigger element — when inside a modal `<dialog>`, portal into it so the sheet is interactive. */
+    anchorEl?: Element | null
     children?: ReactNode
 }
 
@@ -57,10 +65,21 @@ export const StyledDrawer: FC<DrawerProps> = ({
     sx,
     PaperProps,
     ModalProps,
+    anchorEl,
     children,
 }) => {
     const isTemporary = variant === 'temporary'
-    const panelRef = useRef<HTMLDivElement>(null)
+    const portalRoot = getOpenModalDialogAncestor(anchorEl)
+    const inModalDialog = portalRoot !== undefined
+    const panelRef = useRef<HTMLDivElement | null>(null)
+    const setPanelRef = useTopLayerRef((node) => {
+        panelRef.current = node instanceof HTMLDivElement ? node : null
+    })
+    const assignPanelRef = inModalDialog
+        ? setPanelRef
+        : (node: HTMLDivElement | null) => {
+              panelRef.current = node
+          }
 
     useEffect(() => {
         if (!open || !isTemporary) return
@@ -75,10 +94,21 @@ export const StyledDrawer: FC<DrawerProps> = ({
     // `onClose`) — this only adds the Tab-cycling half of the trap for this backdrop-blocking modal.
     useFocusTrap(open && isTemporary, panelRef)
 
+    useEffect(() => {
+        if (!open || !inModalDialog) return
+        const node = panelRef.current
+        if (!node || typeof node.showPopover !== 'function') return
+        try {
+            if (!node.matches(':popover-open')) node.showPopover()
+        } catch {
+            // Popover API unavailable — degrade to z-index stacking.
+        }
+    }, [open, inModalDialog])
+
     if (isTemporary && !open && !ModalProps?.keepMounted) return null
 
     return (
-        <FloatingPortal>
+        <FloatingPortal root={portalRoot}>
             {isTemporary && !hideBackdrop && open && (
                 // Mouse-only backdrop dismiss; Escape (handled above) is the keyboard equivalent.
                 // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
@@ -89,7 +119,8 @@ export const StyledDrawer: FC<DrawerProps> = ({
                 />
             )}
             <div
-                ref={panelRef}
+                ref={assignPanelRef}
+                {...(inModalDialog ? TOP_LAYER_PROPS : {})}
                 role={isTemporary ? 'dialog' : undefined}
                 aria-modal={isTemporary && open ? true : undefined}
                 aria-hidden={!open}
@@ -102,7 +133,11 @@ export const StyledDrawer: FC<DrawerProps> = ({
                     className,
                     PaperProps?.className,
                 )}
-                style={{ ...resolveSx(sx), ...resolveSx(PaperProps?.sx) }}
+                style={{
+                    ...(inModalDialog ? TOP_LAYER_RESET_STYLE : {}),
+                    ...resolveSx(sx),
+                    ...resolveSx(PaperProps?.sx),
+                }}
             >
                 {children}
             </div>
