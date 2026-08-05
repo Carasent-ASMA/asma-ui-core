@@ -286,6 +286,13 @@ export const StyledInputField = ({
     const sharedProps = {
         ...htmlInputPropsWithoutStyle,
         style: isSingleLineShell ? singleLineHtmlInputStyle : htmlInputStyle,
+        // The id MUST land on the real control (MUI `TextField` put it on the `<input>` via InputBase):
+        // the floating `<label htmlFor>` below points at it, and the browser keys its autofill /
+        // autocomplete-history entries on the field's `name` — falling back to `id` when there is no
+        // name (Chromium `HTMLFormControlElement::NameForAutofill`). Dropping it left every call site
+        // that passes neither with no autofill key at all, so Chrome stopped saving and suggesting
+        // previously entered values. An explicit `slotProps.htmlInput.id` still wins (MUI parity).
+        id: htmlInputRest.id ?? fieldId,
         name,
         placeholder: showPlaceholder ? placeholder : undefined,
         disabled,
