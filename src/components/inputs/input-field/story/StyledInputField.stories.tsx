@@ -227,6 +227,42 @@ export const AriaDescribedBy: Story = {
     },
 }
 
+/**
+ * The `<input>` must always carry an `id` — the browser keys autofill / autocomplete-history entries
+ * on the field's `name`, falling back to the `id` attribute when there is no name (Chromium
+ * `HTMLFormControlElement::NameForAutofill`). Most call sites pass neither, so a missing `id` silently
+ * kills the browser's "previously entered value" dropdown, and the floating `<label htmlFor>` dangles.
+ */
+export const AutofillKeyAndLabelAssociation: Story = {
+    args: {
+        label: 'SMS code',
+    },
+    play: async ({ canvas, canvasElement }) => {
+        const input = canvas.getByTestId('storybook-input')
+        const generatedId = input.getAttribute('id')
+
+        // No `name`/`id` prop → the generated id is the only autofill key the browser can use.
+        await expect(generatedId).toBeTruthy()
+        // The visible floating label must resolve to that same control (click-to-focus + a11y).
+        const label = canvasElement.ownerDocument.querySelector(`label[for="${generatedId ?? ''}"]`)
+        await expect(label).toHaveTextContent('SMS code')
+    },
+}
+
+/** An explicit `id` reaches the real control (MUI `TextField` parity) — not just the label's `htmlFor`. */
+export const ExplicitId: Story = {
+    args: {
+        id: 'sms-code-field',
+        name: 'sms_code',
+    },
+    play: async ({ canvas }) => {
+        const input = canvas.getByTestId('storybook-input')
+
+        await expect(input).toHaveAttribute('id', 'sms-code-field')
+        await expect(input).toHaveAttribute('name', 'sms_code')
+    },
+}
+
 /** Figma _autocomplete chip-in-field pattern (Recipients section). */
 export const ChipAdornmentList: Story = {
     args: {
@@ -284,7 +320,14 @@ export const LiveTyping: Story = {
 export const Gallery: Story = {
     render: () => {
         const cell: React.CSSProperties = { padding: 16, border: '1px solid #bdc4cf', verticalAlign: 'top' }
-        const head: React.CSSProperties = { ...cell, textAlign: 'left', fontWeight: 600, color: '#49525f', whiteSpace: 'nowrap', background: '#f0f2f4' }
+        const head: React.CSSProperties = {
+            ...cell,
+            textAlign: 'left',
+            fontWeight: 600,
+            color: '#49525f',
+            whiteSpace: 'nowrap',
+            background: '#f0f2f4',
+        }
 
         const ROWS = [
             { label: 'Enabled', props: {} },
