@@ -39,7 +39,6 @@ export function SelectionIndicator({
             <StyledButton
                 dataTest='dynamic-toolbar-clear-selection'
                 variant='text'
-                size='small'
                 className='!min-w-0 !px-1 !font-semibold'
                 startIcon={onClearSelection ? <CloseIcon width={20} height={20} /> : undefined}
                 onClick={onClearSelection}
