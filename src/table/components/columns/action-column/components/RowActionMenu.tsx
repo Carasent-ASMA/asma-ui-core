@@ -64,8 +64,13 @@ export function RowActionMenu<TData>({
 
                 if (disabled) return
 
-                handleOpen(e)
-                tableData.row.onChangeFocused(true)
+                if (open) {
+                    handleClose()
+                    tableData.row.onChangeFocused(false)
+                } else {
+                    handleOpen(e)
+                    tableData.row.onChangeFocused(true)
+                }
             }}
             onMouseDown={(e) => {
                 e.stopPropagation()
@@ -128,12 +133,12 @@ export function RowActionMenu<TData>({
                             tableData.row.onChangeFocused(false)
                         }}
                         anchorOrigin={{
-                            horizontal: 'center',
+                            horizontal: 'right',
                             vertical: 'bottom',
                         }}
                         transformOrigin={{
-                            vertical: 'top',
                             horizontal: 'right',
+                            vertical: 'top',
                         }}
                     >
                         {showNoActions ? (
