@@ -193,6 +193,7 @@ export function HeaderActionMenu<TData>({
                                                         disableRipple
                                                         checked={column.getIsVisible()}
                                                         hideWrapper
+                                                        className='pointer-events-none'
                                                     />
                                                 </span>
                                                 <span className='font-roboto text-base text-delta-700'>
