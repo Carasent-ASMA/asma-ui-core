@@ -124,7 +124,7 @@
     outline-offset: -4px #{!important};
 
     .day {
-        @apply bg-gama-500 text-white #{!important};
+        @apply bg-gama-500 text-white rounded-[8px] #{!important};
 
         &:hover {
             @apply bg-gama-600 text-white #{!important};
@@ -148,7 +148,7 @@
     }
 }
 
-.day_outside {
+.day_outside:not(.day_selected) {
     .day {
         // Figma "Other month" = Regular weight, delta-600 (needs !important to beat the base .day semibold).
         @apply text-delta-600 font-normal #{!important};
