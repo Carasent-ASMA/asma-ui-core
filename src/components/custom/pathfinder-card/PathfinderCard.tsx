@@ -10,6 +10,7 @@ import React, {
 } from 'react'
 import { ChevronDownIcon, ChevronUpIcon } from 'src/components/icons'
 import { cn } from 'src/helpers'
+import styles from './Pathfinder.module.scss'
 
 export interface PathfinderCardItem {
     id: string
@@ -226,12 +227,7 @@ export function PathfinderCard({
     return (
         <div
             ref={ref}
-            className={cn(
-                'relative border-2 border-solid border-gama-300 bg-gama-25 transition-all duration-300 ease-in-out',
-                'rounded-lg min-[744px]:rounded-[100px]',
-                compact ? 'overflow-hidden' : 'overflow-visible',
-                className,
-            )}
+            className={cn(styles['root'], compact ? 'overflow-hidden' : 'overflow-visible', className)}
             aria-expanded={expanded}
             role='button'
             tabIndex={0}
@@ -243,12 +239,12 @@ export function PathfinderCard({
                 }
             }}
         >
-            <div className={cn('flex min-w-0 items-center p-2', compact ? 'gap-y-0' : 'gap-y-1')}>
+            <div className={cn(styles['shell'], compact ? styles['shellCompact'] : styles['shellExpanded'])}>
                 {leadSlot ? <div className='shrink-0'>{leadSlot}</div> : null}
 
-                <div className='min-w-0 flex-1 px-4'>
+                <div className={styles['content']}>
                     {compact ? (
-                        <div className='flex min-w-0 flex-nowrap items-center gap-x-4 overflow-hidden whitespace-nowrap'>
+                        <div className={styles['compactItems']}>
                             {collapsedVisibleItems.map((item) => (
                                 <div key={item.id} className='shrink-0 whitespace-nowrap'>
                                     <ItemRenderer item={item} compact={compact} />
@@ -256,7 +252,7 @@ export function PathfinderCard({
                             ))}
                         </div>
                     ) : (
-                        <div className='flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1 overflow-visible'>
+                        <div className={styles['expandedItems']}>
                             {sortedItems.map((item) => (
                                 <div key={item.id} className='shrink-0 whitespace-nowrap'>
                                     <ItemRenderer item={item} compact={compact} />
@@ -273,12 +269,12 @@ export function PathfinderCard({
                 </div>
             </div>
 
-            <div className='absolute right-4 top-1/2 z-20 flex-shrink-0 -translate-y-1/2 text-delta-700'>
+            <div className={styles['chevron']}>
                 {expanded ? <ChevronUpIcon className='size-6' /> : <ChevronDownIcon className='size-6' />}
             </div>
 
-            <div aria-hidden className='pointer-events-none absolute left-0 top-0 -z-10 opacity-0'>
-                <div className='flex min-w-0 flex-nowrap items-center gap-x-4 gap-y-1 whitespace-nowrap'>
+            <div aria-hidden className={styles['measureLayer']}>
+                <div className={styles['measureRow']}>
                     {leadSlot ? (
                         <div className='shrink-0'>
                             <div ref={leadRef}>{leadSlot}</div>
