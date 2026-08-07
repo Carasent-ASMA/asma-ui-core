@@ -313,7 +313,12 @@ export const DynamicSelectAutocomplete = forwardRef(
                             onFocus={onFocus}
                             onBlur={onBlur}
                             onKeyDown={typingDisabled ? (e) => e.preventDefault() : undefined}
-                            autoComplete={typingDisabled ? 'off' : 'on'}
+                            // Always off: this input owns its own option list, so the browser's
+                            // form-history dropdown would cover it — same as `StyledSelectAutocomplete`
+                            // and MUI's `useAutocomplete`. (The previous `typingDisabled ? 'off' : 'on'`
+                            // conflated this with MUI `Autocomplete`'s boolean `autoComplete` prop,
+                            // which means inline completion of the typed value — a different feature.)
+                            autoComplete='off'
                             slotProps={{
                                 ...params.slotProps,
                                 input: {

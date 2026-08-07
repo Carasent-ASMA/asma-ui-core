@@ -249,6 +249,51 @@ export const AutofillKeyAndLabelAssociation: Story = {
     },
 }
 
+/**
+ * A plain field says nothing about `autocomplete`, leaving the browser its default behaviour — that is
+ * what makes its suggestion dropdown work. Components that own an option list (select-autocomplete,
+ * dynamic select, date pickers) opt out by passing `autoComplete='off'` themselves.
+ */
+export const BrowserDefaultAutofill: Story = {
+    play: async ({ canvas }) => {
+        const input = canvas.getByTestId('storybook-input')
+
+        await expect(input).not.toHaveAttribute('autocomplete')
+        // The id still lands — it is what `htmlFor` and the browser's autofill key both need.
+        await expect(input.getAttribute('id')).toBeTruthy()
+    },
+}
+
+/**
+ * `autoComplete` and `name` are honoured from the `htmlInput` slot, not just as top-level props — that
+ * slot is how `StyledSelectAutocomplete` marks its combobox `'off'`, and a bare `autoComplete,` in
+ * `sharedProps` used to overwrite it with `undefined`.
+ */
+export const HtmlInputSlotAutoCompleteWins: Story = {
+    args: {
+        slotProps: { htmlInput: { autoComplete: 'off', name: 'from_slot' } },
+    },
+    play: async ({ canvas }) => {
+        const input = canvas.getByTestId('storybook-input')
+
+        await expect(input).toHaveAttribute('autocomplete', 'off')
+        await expect(input).toHaveAttribute('name', 'from_slot')
+    },
+}
+
+/** The top-level prop still wins over the slot, so a call site can override a wrapper's choice. */
+export const TopLevelAutoCompleteWins: Story = {
+    args: {
+        autoComplete: 'one-time-code',
+        slotProps: { htmlInput: { autoComplete: 'off' } },
+    },
+    play: async ({ canvas }) => {
+        const input = canvas.getByTestId('storybook-input')
+
+        await expect(input).toHaveAttribute('autocomplete', 'one-time-code')
+    },
+}
+
 /** An explicit `id` reaches the real control (MUI `TextField` parity) — not just the label's `htmlFor`. */
 export const ExplicitId: Story = {
     args: {
