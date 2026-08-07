@@ -83,6 +83,20 @@ export const OpensOnClick: Story = {
     },
 }
 
+/**
+ * The combobox input must carry `autocomplete="off"` (as MUI's `useAutocomplete` did) — otherwise the
+ * browser's form-history dropdown opens on top of the option list. It is declared on the `htmlInput`
+ * slot, which `StyledInputField` used to overwrite with its own `undefined` top-level prop.
+ */
+export const SuppressesBrowserAutofill: Story = {
+    render: (args) => <ControlledAutocomplete {...args} />,
+    play: async ({ canvasElement }) => {
+        const { input } = getAutocomplete(canvasElement)
+
+        await expect(input).toHaveAttribute('autocomplete', 'off')
+    },
+}
+
 export const SingleSelectVariant: SingleStory = {
     render: () => {
         const singleSelectOptions = top100Films.slice(0, 3)

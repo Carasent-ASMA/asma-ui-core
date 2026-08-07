@@ -76,6 +76,11 @@ export interface StyledInputFieldProps {
     placeholder?: string
     name?: string
     id?: string
+    /**
+     * Standard HTML `autocomplete`. Left unset the browser decides, which is what a plain text field
+     * wants; a component that owns its own suggestion list (a combobox) must pass `'off'` so the
+     * browser's dropdown doesn't cover it. Also readable from `slotProps.htmlInput.autoComplete`.
+     */
     autoComplete?: string
     autoFocus?: boolean
     multiline?: boolean
@@ -182,6 +187,15 @@ export const StyledInputField = ({
     const inputSlotOnMouseDown = slotProps?.input?.['onMouseDown'] as
         | React.MouseEventHandler<HTMLDivElement>
         | undefined
+
+    // `autoComplete` and `name` may arrive either as a top-level prop or on the htmlInput slot, and the
+    // slot is spread *before* the explicit keys below — so passing them bare would overwrite a slot
+    // value with `undefined`. That is what silenced `StyledSelectAutocomplete`'s combobox `'off'` (it
+    // declares it on the slot, as MUI's `useAutocomplete` did) and let the browser's form-history
+    // dropdown open over its option list. Both matter to autofill: browsers key those entries on
+    // `name`, falling back to `id`.
+    const resolvedAutoComplete = autoComplete ?? htmlInputRest.autoComplete
+    const resolvedName = name ?? htmlInputRest.name
 
     const shrink = focused || hasValue || hasStartAdornment
 
@@ -293,12 +307,12 @@ export const StyledInputField = ({
         // that passes neither with no autofill key at all, so Chrome stopped saving and suggesting
         // previously entered values. An explicit `slotProps.htmlInput.id` still wins (MUI parity).
         id: htmlInputRest.id ?? fieldId,
-        name,
+        name: resolvedName,
         placeholder: showPlaceholder ? placeholder : undefined,
         disabled,
         readOnly,
         required,
-        autoComplete,
+        autoComplete: resolvedAutoComplete,
         autoFocus,
         value,
         defaultValue,
