@@ -1,7 +1,7 @@
-import { useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode, type SyntheticEvent } from 'react'
+import { useId, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode, type SyntheticEvent } from 'react'
 import { ErrorOutlineIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
-import { StyledFormHelperText } from 'src/components/miscellaneous/StyledFormHelperText'
+import { warnMissingErrorMessage } from 'src/helpers/warnMissingErrorMessage'
 import styles from './StyledSlider.module.scss'
 
 export interface SliderMark {
@@ -52,6 +52,10 @@ export interface StyledSliderProps {
     error?: boolean
     errorText?: string
     helperText?: string
+    /**
+     * When true (default), the helper row stays mounted (`min-h-[24px]`) to avoid layout shift.
+     */
+    reserveHelperText?: boolean
     /** Accessible name for the thumb input(s) — there is no visible label to derive it from
      * (axe `label`). A function receives the thumb index (0, or 0/1 for a two-thumb range) so each
      * thumb of a range slider can get a distinct name. */
@@ -97,11 +101,13 @@ export const StyledSlider = ({
     error,
     errorText,
     helperText,
+    reserveHelperText = true,
     ariaLabel,
     ariaLabelledBy,
     onChange,
     onChangeCommitted,
 }: StyledSliderProps): JSX.Element => {
+    const helperId = useId()
     const isVertical = orientation === 'vertical'
     // A native range thumb centers at T/2 … (length − T/2). The visual track + marks must be inset by
     // exactly half the thumb so 0%/100% land on the thumb-centre travel (else the thumb drifts left of
@@ -112,8 +118,9 @@ export const StyledSlider = ({
     const pair = asPair(current)
     const isRange = pair !== null
 
-    const showHelperText = (error ?? false) || Boolean(helperText)
-    const helperTextToDisplay = error ? errorText ?? 'Required' : helperText
+    const message = error ? (errorText ?? helperText) : helperText
+    const showHelperSlot = reserveHelperText || message != null || Boolean(error)
+    warnMissingErrorMessage('StyledSlider', error, message)
 
     // Match MUI's mark resolution (pre-rewrite parity):
     // - `marks === true` auto-generates a dot at every step: min + step·i for i in 0…floor((max-min)/step).
@@ -197,6 +204,8 @@ export const StyledSlider = ({
             aria-orientation={orientation}
             aria-label={typeof ariaLabel === 'function' ? ariaLabel(thumbIndex) : ariaLabel}
             aria-labelledby={ariaLabelledBy}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={showHelperSlot ? helperId : undefined}
             className={cn(
                 styles['SliderInput'],
                 isVertical ? styles['Vertical'] : styles['Horizontal'],
@@ -307,13 +316,18 @@ export const StyledSlider = ({
                 </div>
             )}
 
-            {showHelperText && (
-                <StyledFormHelperText
-                    className={cn('m-0 flex items-center gap-1 pt-1 text-sm', error ? 'text-error-500' : 'text-delta-600')}
+            {showHelperSlot && (
+                <div
+                    id={helperId}
+                    role={error ? 'alert' : 'status'}
+                    className={cn(
+                        'm-0 flex min-h-[24px] items-center gap-1 pt-1 text-sm leading-5 tracking-[0.03333em]',
+                        error ? 'text-error-500' : 'text-delta-600',
+                    )}
                 >
-                    {error && <ErrorOutlineIcon width={20} height={20} />}
-                    {helperTextToDisplay}
-                </StyledFormHelperText>
+                    {error && <ErrorOutlineIcon width={20} height={20} className='min-w-5 shrink-0' />}
+                    <span>{message}</span>
+                </div>
             )}
         </div>
     )

@@ -18,6 +18,7 @@ import {
 import { CloseIcon, ErrorOutlineIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
+import { warnMissingErrorMessage } from 'src/helpers/warnMissingErrorMessage'
 import {
     floatingLabelClass,
     floatingLabelLayoutStyle,
@@ -65,6 +66,11 @@ export interface StyledInputFieldProps {
     error?: boolean
     /** @figmaProp Helper text element */
     helperText?: ReactNode
+    /**
+     * When true (default), the helper row stays mounted (`min-h-[24px]`) to avoid layout shift when
+     * hint ↔ error content swaps. Set false to mount the row only when there is content or an error.
+     */
+    reserveHelperText?: boolean
     /** @figmaProp State = true→"Disabled" */
     disabled?: boolean
     /** @figmaProp State = true→"Read only" */
@@ -127,6 +133,7 @@ export const StyledInputField = ({
     onFocus,
     error,
     helperText,
+    reserveHelperText = true,
     disabled,
     readOnly,
     required,
@@ -297,6 +304,10 @@ export const StyledInputField = ({
     // a plain input. Gating purely on `shrink` wrongly hid the placeholder for label-less fields.
     const showPlaceholder = shrink || !label
 
+    // readOnly never surfaces validation UI; otherwise reserve space by default (CLS).
+    const showHelperSlot = !readOnly && (reserveHelperText || helperText != null || Boolean(error))
+    warnMissingErrorMessage('StyledInputField', error, helperText)
+
     const sharedProps = {
         ...htmlInputPropsWithoutStyle,
         style: isSingleLineShell ? singleLineHtmlInputStyle : htmlInputStyle,
@@ -324,7 +335,9 @@ export const StyledInputField = ({
             htmlInputRest['aria-label'] ??
             (htmlInputRest['aria-labelledby'] ? undefined : typeof label === 'string' && label !== '' ? label : undefined),
         'aria-describedby':
-            !readOnly && (helperText != null || error) ? helperId : htmlInputRest['aria-describedby'],
+            !readOnly && (reserveHelperText || helperText != null || error)
+                ? helperId
+                : htmlInputRest['aria-describedby'],
         onChange: handleChange,
         onFocus: handleFocus,
         onBlur: handleBlur,
@@ -505,13 +518,14 @@ export const StyledInputField = ({
                 )}
             </div>
 
-            {!readOnly && (helperText != null || error) && (
+            {!readOnly && showHelperSlot && (
                 <div
                     id={helperId}
+                    role={error ? 'alert' : 'status'}
                     className={cn(
                         // Figma "Helper text" row (15561-37857 / 34634-148726): 24px tall, pt 4px, gap 4px.
-                        !slotProps?.formHelperText &&
-                            'mr-[14px] box-border min-h-[24px] pt-1',
+                        // Keep min-h even when slotProps.formHelperText overrides other styles.
+                        'mr-[14px] box-border min-h-[24px] pt-1',
                         error &&
                             !slotProps?.formHelperText?.hideErrorIcon &&
                             'flex items-start gap-1 text-error-500',
@@ -523,9 +537,7 @@ export const StyledInputField = ({
                     {error && !slotProps?.formHelperText?.hideErrorIcon && (
                         <ErrorOutlineIcon width={20} height={20} className='min-w-5 shrink-0' />
                     )}
-                    <span className='text-sm leading-5 tracking-[0.03333em]'>
-                        {error ? (helperText ?? 'Required') : helperText}
-                    </span>
+                    <span className='text-sm leading-5 tracking-[0.03333em]'>{helperText}</span>
                 </div>
             )}
         </div>

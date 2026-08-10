@@ -4,7 +4,7 @@ import { useDatePickerMask } from '../hooks/useDatePickerMask'
 import { DATE_INPUT_FONT_FAMILY } from 'src/helpers/inputMask'
 import { useEffect, useState } from 'react'
 import { getValue } from '../helpers'
-import { useDatePickerValidation } from '../hooks/useDatePickerValidation'
+import { useDatePickerValidation, defaultDatePickerValidationMessages } from '../hooks/useDatePickerValidation'
 import { parse, isValid as isValidDateFns } from 'date-fns'
 import type { DayPickerProps as ReactDayPickerProps, Matcher } from 'react-day-picker'
 
@@ -61,7 +61,8 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
         ...rest
     } = props
 
-    const { validationError, handleValidation, errHelperText, clearValidation } = useDatePickerValidation()
+    const { validationError, handleValidation, errHelperText, clearValidation } =
+        useDatePickerValidation(defaultDatePickerValidationMessages)
     const { maskRef } = useDatePickerMask()
     const [value, setValue] = useState(selected ? getValue(selected, dateFormat) : '')
 

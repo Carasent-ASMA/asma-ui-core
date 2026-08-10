@@ -305,7 +305,10 @@ export const DynamicSelectAutocomplete = forwardRef(
                             {...params}
                             inputRef={ref}
                             error={error}
-                            helperText={disableHelperText ? '' : (helperText ?? ' ')}
+                            // Slot is always reserved by StyledInputField (`reserveHelperText`);
+                            // no blank-space hack — pass through real copy (or nothing).
+                            helperText={disableHelperText ? undefined : helperText}
+                            reserveHelperText={!disableHelperText}
                             variant='outlined'
                             label=''
                             placeholder={placeholder}

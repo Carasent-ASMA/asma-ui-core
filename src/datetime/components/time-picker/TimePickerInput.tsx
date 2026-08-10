@@ -1,6 +1,6 @@
 import type { StyledTimePickerProps } from './types'
 import { type PopupState } from 'src/hooks/usePopupState'
-import { HelperText } from './components/HelperText'
+import { HelperText, defaultTimePickerHelperMessages } from './components/HelperText'
 import { useRef, type ChangeEvent, useEffect, type MouseEvent as ReactMouseEvent } from 'react'
 import { StyledInputField } from 'src/datetime/shared-components/StyledInputField'
 import { ClockOutlineIcon } from 'src/datetime/shared-components/ClockOutlineIcon'
@@ -70,6 +70,7 @@ export const TimePickerInput: React.FC<
                         error={hasError}
                         localization={locale}
                         helperText={helperText}
+                        messages={defaultTimePickerHelperMessages}
                     />
                 }
                 onChange={handleChange}

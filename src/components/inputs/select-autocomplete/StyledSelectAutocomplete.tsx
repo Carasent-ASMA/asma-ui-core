@@ -44,6 +44,8 @@ export interface AutocompleteRenderInputParams {
     disabled?: boolean
     size?: 'small' | 'medium'
     fullWidth?: boolean
+    error?: boolean
+    helperText?: ReactNode
     value: string
     onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
     onFocus?: () => void
@@ -123,6 +125,10 @@ export interface StyledSelectAutocompleteProps<
     disabled?: boolean
     /** @figmaProp State = true→"Read-only" (chips lose their delete button; no popup/clear icons) */
     readOnly?: boolean
+    /** Forwarded into `renderInput` params — the input owns the single helper slot. */
+    error?: boolean
+    /** Forwarded into `renderInput` params — do not render a second helper under the combobox. */
+    helperText?: ReactNode
     /** @figmaProp none — FieldSize (both render the 40px field) */
     size?: 'small' | 'medium'
     /** @figmaProp Clear (trigger clear button) */
@@ -191,6 +197,8 @@ export function StyledSelectAutocomplete<
     noOptionsText = 'No options',
     disabled,
     readOnly,
+    error,
+    helperText,
     size = 'small',
     disableClearable,
     disableCloseOnSelect,
@@ -418,6 +426,8 @@ export function StyledSelectAutocomplete<
         disabled,
         size,
         fullWidth: true,
+        error,
+        helperText,
         value: inputValue,
         onChange: (event) => {
             setInputValue(event, event.target.value, 'input')

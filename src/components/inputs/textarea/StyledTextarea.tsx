@@ -1,4 +1,5 @@
 import React, { useEffect, useId, useRef, type ChangeEvent, type MutableRefObject, type ReactNode } from 'react'
+import { warnMissingErrorMessage } from 'src/helpers/warnMissingErrorMessage'
 import styles from './StyledTextarea.module.scss'
 
 export interface TextareaCommonProps {
@@ -10,6 +11,10 @@ export interface TextareaCommonProps {
     labelClassName?: string
     /** @figmaProp Description / helper text (Helper 14/lh20, delta-600). */
     description?: ReactNode
+    /**
+     * When true (default), the description/helper row stays mounted to avoid layout shift.
+     */
+    reserveHelperText?: boolean
     containerClassName?: string
     className?: string
     dataTest?: string
@@ -89,6 +94,7 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
     label = '',
     labelClassName = '',
     description = '',
+    reserveHelperText = true,
     value = '',
     minRows = 3,
     maxRows = Infinity,
@@ -112,6 +118,9 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
     const counterId = useId()
     const internalId = useId()
     const textAreaId = id ?? internalId
+    const helperMessage = error ? errorMessage : description
+    const showHelperSlot = reserveHelperText || helperMessage != null || Boolean(error)
+    warnMissingErrorMessage('StyledTextarea', error, errorMessage)
 
     useEffect(() => {
         const textArea = textAreaRef.current
@@ -155,9 +164,15 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
             <label htmlFor={textAreaId} className={`${styles['label']} ${styles[textType]} ${labelClassName}`}>
                 {label}
             </label>
-            <span id={descriptionId} className={`${styles['description']} ${styles[textType]}`}>
-                {error ? errorMessage : description}
-            </span>
+            {showHelperSlot && (
+                <span
+                    id={descriptionId}
+                    role={error ? 'alert' : 'status'}
+                    className={`${styles['description']} ${styles[textType]} min-h-[24px]`}
+                >
+                    {helperMessage}
+                </span>
+            )}
             {variant === 'view_only' ? (
                 <div className='pt-3 font-roboto text-base font-normal text-delta-700'>{value}</div>
             ) : variant === 'not_editable' ? (
@@ -165,7 +180,11 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
             ) : (
                 <textarea
                     {...otherProps}
-                    aria-describedby={`${descriptionId} ${counterId}`}
+                    aria-describedby={
+                        [showHelperSlot ? descriptionId : null, counterEnabled ? counterId : null]
+                            .filter(Boolean)
+                            .join(' ') || undefined
+                    }
                     aria-invalid={error}
                     aria-label={fallbackName}
                     id={textAreaId}

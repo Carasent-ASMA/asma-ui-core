@@ -1,8 +1,9 @@
 import { ErrorOutlineIcon, Skeleton, StyledButton, StyledChip, StyledInteractiveChip, StyledTooltip } from 'src'
 import type { DynamicSelectOption, StyledDynamicSelectComponent, StyledDynamicSelectProps } from '../types'
 import { cn } from 'src/helpers/cn'
+import { warnMissingErrorMessage } from 'src/helpers/warnMissingErrorMessage'
 import { useWrap } from '../helpers/useWrap'
-import { forwardRef, useEffect } from 'react'
+import { forwardRef, useEffect, useId } from 'react'
 import { CloseIcon } from 'src/components/icons'
 
 export const DynamicInteractiveChipGroup = forwardRef(
@@ -30,6 +31,8 @@ export const DynamicInteractiveChipGroup = forwardRef(
             size,
             locale = 'en',
         } = props
+        const helperId = useId()
+        warnMissingErrorMessage('DynamicInteractiveChipGroup', error, helperText)
         const { containerRef, wrapDisabled } = useWrap({ dependencyList: [options, options.length] })
 
         // The overflow-measurement clone below renders real interactive chips (checkbox/radio) —
@@ -212,9 +215,16 @@ export const DynamicInteractiveChipGroup = forwardRef(
                         {locale === 'en' ? 'Clear selection' : 'Fjern valget'}
                     </StyledButton>
                 )}
-                <div className={cn('flex items-center gap-1 text-sm/5 text-delta-600', error && 'text-error-500')}>
+                <div
+                    id={helperId}
+                    role={error ? 'alert' : 'status'}
+                    className={cn(
+                        'flex min-h-[24px] items-center gap-1 pt-1 text-sm/5 text-delta-600',
+                        error && 'text-error-500',
+                    )}
+                >
                     {error && <ErrorOutlineIcon width={20} height={20} className='min-w-5' />}
-                    <span className='line-clamp-1'>{helperText ?? (error ? 'Required' : undefined)}</span>
+                    <span className='line-clamp-1'>{helperText}</span>
                 </div>
             </div>
         )

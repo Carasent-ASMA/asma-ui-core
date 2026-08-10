@@ -17,6 +17,7 @@ import {
     cloneElement,
     isValidElement,
     useEffect,
+    useId,
     useMemo,
     useRef,
     useState,
@@ -29,6 +30,7 @@ import {
 import { ChevronDownIcon, CloseIcon, ErrorOutlineIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
+import { warnMissingErrorMessage } from 'src/helpers/warnMissingErrorMessage'
 import {
     getOpenModalDialogAncestor,
     TOP_LAYER_PROPS,
@@ -36,7 +38,6 @@ import {
     useTopLayerRef,
 } from 'src/hooks/useTopLayer.hook'
 import { useFormControlContext } from '../../miscellaneous/FormControlContext'
-import { StyledFormHelperText } from '../../miscellaneous/StyledFormHelperText'
 import { outlineClass, type FieldSize } from '../field-styles'
 import type { StyledSelectItemProps } from './StyledSelectItem'
 
@@ -69,6 +70,13 @@ export interface StyledSelectProps {
     /** @figmaProp State = true→"Error" */
     error?: boolean
     errorText?: string
+    /** Helper/hint text under the trigger; when `error`, this (or `errorText`) is the message. */
+    helperText?: ReactNode
+    /**
+     * When true (default), the helper row stays mounted (`min-h-[24px]`) to avoid layout shift.
+     * Set false to mount only when there is content or an error.
+     */
+    reserveHelperText?: boolean
     /** @figmaProp Clear (trigger clear button) */
     allowClear?: boolean
     /** @figmaProp State = true→"Disabled" */
@@ -114,6 +122,8 @@ export const StyledSelect = ({
     onChange,
     error,
     errorText,
+    helperText,
+    reserveHelperText = true,
     allowClear,
     disabled,
     readOnly,
@@ -135,9 +145,13 @@ export const StyledSelect = ({
 }: StyledSelectProps): JSX.Element => {
     const ctx = useFormControlContext()
     const listboxId = `${dataTest}-listbox`
+    const helperId = useId()
     const isStandard = variant === 'standard'
     const isError = error ?? ctx?.error ?? false
     const isDisabled = disabled ?? ctx?.disabled ?? false
+    const message = isError ? (errorText ?? helperText) : helperText
+    const showHelperSlot = !readOnly && (reserveHelperText || message != null || isError)
+    warnMissingErrorMessage('StyledSelect', isError, message)
 
     const [open, setOpen] = useState(false)
     const [focused, setFocused] = useState(false)
@@ -319,6 +333,8 @@ export const StyledSelect = ({
                 // reader announcing just the selected value, e.g. "Paused", doesn't say what the field is).
                 aria-labelledby={labelId}
                 aria-label={!labelId ? name : undefined}
+                aria-invalid={isError ? true : undefined}
+                aria-describedby={showHelperSlot ? helperId : undefined}
                 aria-disabled={isDisabled ? true : undefined}
                 disabled={isDisabled}
                 onFocus={(event) => {
@@ -412,11 +428,18 @@ export const StyledSelect = ({
                 </FloatingPortal>
             )}
 
-            {isError && (
-                <StyledFormHelperText className='m-0 flex items-center gap-1 pt-1 text-sm text-error-500'>
-                    <ErrorOutlineIcon width={20} height={20} />
-                    {errorText ?? 'Required'}
-                </StyledFormHelperText>
+            {showHelperSlot && (
+                <div
+                    id={helperId}
+                    role={isError ? 'alert' : 'status'}
+                    className={cn(
+                        'm-0 mr-[14px] box-border flex min-h-[24px] items-center gap-1 pt-1 text-sm leading-5 tracking-[0.03333em]',
+                        isError ? 'text-error-500' : 'text-delta-600',
+                    )}
+                >
+                    {isError && <ErrorOutlineIcon width={20} height={20} className='min-w-5 shrink-0' />}
+                    <span>{message}</span>
+                </div>
             )}
         </div>
     )

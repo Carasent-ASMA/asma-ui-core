@@ -2,10 +2,19 @@ import { cn } from 'src/datetime/helpers/cn'
 import type { ReactNode } from 'react'
 import { OutlineErrorRounded } from 'src/datetime/shared-components/OutlineErrorRounded'
 
-const MESSAGES = {
+export type TimePickerHelperMessages = {
+    invalid: { en: string; no: string }
+    afterStartTime: { en: string; no: string }
+}
+
+/**
+ * Opt-in default EN/NO catalog for time-picker helper errors. Pass explicitly via `messages`
+ * when wiring the picker — apps should prefer their own i18n override.
+ */
+export const defaultTimePickerHelperMessages: TimePickerHelperMessages = {
     invalid: { en: 'Invalid time format', no: 'Ugyldig tidsformat' },
     afterStartTime: { en: 'Must be after start time', no: 'Må være etter starttid' },
-} as const
+}
 
 export const HelperText: React.FC<{
     isValidTime: boolean
@@ -13,12 +22,21 @@ export const HelperText: React.FC<{
     error?: boolean
     localization: 'en' | 'no'
     helperText?: ReactNode
-}> = ({ isValidTime, isValidEndTime, localization = 'en', error, helperText }) => {
+    /** Injectable message catalog; defaults to `defaultTimePickerHelperMessages`. */
+    messages?: TimePickerHelperMessages
+}> = ({
+    isValidTime,
+    isValidEndTime,
+    localization = 'en',
+    error,
+    helperText,
+    messages = defaultTimePickerHelperMessages,
+}) => {
     const hasError = !isValidTime || !isValidEndTime || !!error
     const text = !isValidTime
-        ? MESSAGES.invalid[localization]
+        ? messages.invalid[localization]
         : !isValidEndTime
-          ? MESSAGES.afterStartTime[localization]
+          ? messages.afterStartTime[localization]
           : helperText
 
     return (
