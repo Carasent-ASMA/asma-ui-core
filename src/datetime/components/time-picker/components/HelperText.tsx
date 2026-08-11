@@ -2,7 +2,7 @@ import { cn } from 'src/datetime/helpers/cn'
 import type { ReactNode } from 'react'
 import { OutlineErrorRounded } from 'src/datetime/shared-components/OutlineErrorRounded'
 
-export type TimePickerHelperMessages = {
+export interface TimePickerHelperMessages {
     invalid: { en: string; no: string }
     afterStartTime: { en: string; no: string }
 }

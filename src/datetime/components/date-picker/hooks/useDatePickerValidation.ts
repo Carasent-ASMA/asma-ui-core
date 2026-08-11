@@ -3,7 +3,7 @@ import { useCallback, useState } from 'react'
 import type { Matcher } from 'react-day-picker'
 import { buildDisabled, isDisabledDate } from '../helpers'
 
-export type DatePickerValidationMessages = {
+export interface DatePickerValidationMessages {
     required: string
     minDate: string
     invalidDay: string
@@ -16,7 +16,7 @@ export type DatePickerValidationMessages = {
     futureNotAllowed: string
 }
 
-export type DatePickerValidationMessageCatalog = {
+export interface DatePickerValidationMessageCatalog {
     en: DatePickerValidationMessages
     nb: DatePickerValidationMessages
 }
