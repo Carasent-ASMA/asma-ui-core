@@ -18,6 +18,7 @@ import {
 import { CloseIcon, ErrorOutlineIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
+import { useHelperAlertRole } from 'src/helpers/useHelperAlertRole'
 import { warnMissingErrorMessage } from 'src/helpers/warnMissingErrorMessage'
 import {
     floatingLabelClass,
@@ -307,6 +308,7 @@ export const StyledInputField = ({
     // readOnly never surfaces validation UI; otherwise reserve space by default (CLS).
     const showHelperSlot = !readOnly && (reserveHelperText || helperText != null || Boolean(error))
     warnMissingErrorMessage('StyledInputField', error, helperText)
+    const helperAlertRole = useHelperAlertRole(error)
 
     const sharedProps = {
         ...htmlInputPropsWithoutStyle,
@@ -521,7 +523,7 @@ export const StyledInputField = ({
             {!readOnly && showHelperSlot && (
                 <div
                     id={helperId}
-                    role={error ? 'alert' : 'status'}
+                    role={helperAlertRole}
                     className={cn(
                         // Figma "Helper text" row (15561-37857 / 34634-148726): 24px tall, pt 4px, gap 4px.
                         // Keep min-h even when slotProps.formHelperText overrides other styles.

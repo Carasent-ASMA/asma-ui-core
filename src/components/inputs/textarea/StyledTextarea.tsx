@@ -1,4 +1,5 @@
 import React, { useEffect, useId, useRef, type ChangeEvent, type MutableRefObject, type ReactNode } from 'react'
+import { useHelperAlertRole } from 'src/helpers/useHelperAlertRole'
 import { warnMissingErrorMessage } from 'src/helpers/warnMissingErrorMessage'
 import styles from './StyledTextarea.module.scss'
 
@@ -121,6 +122,7 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
     const helperMessage = error ? errorMessage : description
     const showHelperSlot = reserveHelperText || helperMessage != null || Boolean(error)
     warnMissingErrorMessage('StyledTextarea', error, errorMessage)
+    const helperAlertRole = useHelperAlertRole(error)
 
     useEffect(() => {
         const textArea = textAreaRef.current
@@ -167,7 +169,7 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
             {showHelperSlot && (
                 <span
                     id={descriptionId}
-                    role={error ? 'alert' : 'status'}
+                    role={helperAlertRole}
                     className={`${styles['description']} ${styles[textType]} min-h-[24px]`}
                 >
                     {helperMessage}

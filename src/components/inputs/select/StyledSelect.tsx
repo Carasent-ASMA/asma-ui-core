@@ -30,6 +30,7 @@ import {
 import { ChevronDownIcon, CloseIcon, ErrorOutlineIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
+import { useHelperAlertRole } from 'src/helpers/useHelperAlertRole'
 import { warnMissingErrorMessage } from 'src/helpers/warnMissingErrorMessage'
 import {
     getOpenModalDialogAncestor,
@@ -152,6 +153,7 @@ export const StyledSelect = ({
     const message = isError ? (errorText ?? helperText) : helperText
     const showHelperSlot = !readOnly && (reserveHelperText || message != null || isError)
     warnMissingErrorMessage('StyledSelect', isError, message)
+    const helperAlertRole = useHelperAlertRole(isError)
 
     const [open, setOpen] = useState(false)
     const [focused, setFocused] = useState(false)
@@ -431,7 +433,7 @@ export const StyledSelect = ({
             {showHelperSlot && (
                 <div
                     id={helperId}
-                    role={isError ? 'alert' : 'status'}
+                    role={helperAlertRole}
                     className={cn(
                         'm-0 mr-[14px] box-border flex min-h-[24px] items-center gap-1 pt-1 text-sm leading-5 tracking-[0.03333em]',
                         isError ? 'text-error-500' : 'text-delta-600',

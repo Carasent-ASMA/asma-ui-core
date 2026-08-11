@@ -1,6 +1,7 @@
 import { useId, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode, type SyntheticEvent } from 'react'
 import { ErrorOutlineIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
+import { useHelperAlertRole } from 'src/helpers/useHelperAlertRole'
 import { warnMissingErrorMessage } from 'src/helpers/warnMissingErrorMessage'
 import styles from './StyledSlider.module.scss'
 
@@ -121,6 +122,7 @@ export const StyledSlider = ({
     const message = error ? (errorText ?? helperText) : helperText
     const showHelperSlot = reserveHelperText || message != null || Boolean(error)
     warnMissingErrorMessage('StyledSlider', error, message)
+    const helperAlertRole = useHelperAlertRole(error)
 
     // Match MUI's mark resolution (pre-rewrite parity):
     // - `marks === true` auto-generates a dot at every step: min + step·i for i in 0…floor((max-min)/step).
@@ -319,7 +321,7 @@ export const StyledSlider = ({
             {showHelperSlot && (
                 <div
                     id={helperId}
-                    role={error ? 'alert' : 'status'}
+                    role={helperAlertRole}
                     className={cn(
                         'm-0 flex min-h-[24px] items-center gap-1 pt-1 text-sm leading-5 tracking-[0.03333em]',
                         error ? 'text-error-500' : 'text-delta-600',

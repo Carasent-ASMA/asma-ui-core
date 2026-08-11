@@ -1,5 +1,6 @@
 import React, { forwardRef, useId, useMemo, useState, type HTMLAttributes } from 'react'
 import { ErrorOutlineIcon } from 'src/components/icons'
+import { useHelperAlertRole } from 'src/helpers/useHelperAlertRole'
 import { warnMissingErrorMessage } from 'src/helpers/warnMissingErrorMessage'
 import clsx from 'clsx'
 import { RadioGroupContext, type RadioValue } from './RadioGroupContext'
@@ -71,6 +72,7 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
         const message = error ? (errorText ?? helperText) : helperText
         const showHelperSlot = !readOnly && (reserveHelperText || message != null || Boolean(error))
         warnMissingErrorMessage('StyledRadioGroup', error, message)
+        const helperAlertRole = useHelperAlertRole(error)
 
         // Let consumers pick the layout direction: our default `flex-col` is emitted through
         // `tailwind (important:true)` where `.flex-col` is authored after `.flex-row`, so a
@@ -103,7 +105,7 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
                 {showHelperSlot && (
                     <p
                         id={helperId}
-                        role={error ? 'alert' : 'status'}
+                        role={helperAlertRole}
                         className={clsx(
                             'm-0 flex min-h-[24px] items-center gap-1 pt-1 text-sm leading-5 tracking-[0.03333em]',
                             error ? 'font-medium text-error-500' : 'text-delta-600',
