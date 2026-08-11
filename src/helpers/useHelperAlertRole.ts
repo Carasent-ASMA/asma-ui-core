@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useState } from 'react'
 
 /**
  * REQ-005: error *appearance* is announced via `role="alert"`; a field that stays invalid across
@@ -12,18 +12,20 @@ export function resolveHelperAlertRole(isError: boolean, wasError: boolean): 'al
 
 export function useHelperAlertRole(isError: boolean | undefined): 'alert' | 'status' {
     const error = !!isError
-    // A ref (not state) on purpose: flipping via `setState` in an effect self-triggers an
-    // immediate follow-up render that downgrades "alert" to "status" before anything — a test's
-    // `await` between interaction and assertion, or a real screen reader's AX-tree flush — can
-    // ever observe it. Mutating a ref during the effect leaves "alert" committed in the DOM until
-    // the *next externally-caused* render (the actual next content/value change), which is when
-    // the downgrade is supposed to happen anyway.
-    const wasErrorRef = useRef(false)
-    const role = resolveHelperAlertRole(error, wasErrorRef.current)
+    // React's sanctioned "adjust state during render" bailout (not an effect, not a ref read
+    // during render — both were tried and rejected: an effect-driven downgrade self-triggers a
+    // follow-up render within the same `act()` flush an interaction test's `await` collapses
+    // before ever observing "alert"; reading a ref during render trips `react-hooks/refs`).
+    // `role` only recomputes when `error`'s boolean identity actually flips, so the commit that
+    // introduces the error keeps announcing "alert" for as long as nothing else re-renders it —
+    // which is exactly the render an assistive tech AX-tree flush or a test assertion observes.
+    const [prevError, setPrevError] = useState(error)
+    const [role, setRole] = useState<'alert' | 'status'>(resolveHelperAlertRole(error, false))
 
-    useEffect(() => {
-        wasErrorRef.current = error
-    }, [error])
+    if (error !== prevError) {
+        setPrevError(error)
+        setRole(resolveHelperAlertRole(error, prevError))
+    }
 
     return role
 }
