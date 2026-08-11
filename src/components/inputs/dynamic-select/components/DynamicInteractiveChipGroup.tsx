@@ -1,6 +1,7 @@
 import { ErrorOutlineIcon, Skeleton, StyledButton, StyledChip, StyledInteractiveChip, StyledTooltip } from 'src'
 import type { DynamicSelectOption, StyledDynamicSelectComponent, StyledDynamicSelectProps } from '../types'
 import { cn } from 'src/helpers/cn'
+import { useHelperAlertRole } from 'src/helpers/useHelperAlertRole'
 import { warnMissingErrorMessage } from 'src/helpers/warnMissingErrorMessage'
 import { useWrap } from '../helpers/useWrap'
 import { forwardRef, useEffect, useId } from 'react'
@@ -30,9 +31,11 @@ export const DynamicInteractiveChipGroup = forwardRef(
             loading,
             size,
             locale = 'en',
+            clearSelectionLabel,
         } = props
         const helperId = useId()
         warnMissingErrorMessage('DynamicInteractiveChipGroup', error, helperText)
+        const helperAlertRole = useHelperAlertRole(error)
         const { containerRef, wrapDisabled } = useWrap({ dependencyList: [options, options.length] })
 
         // The overflow-measurement clone below renders real interactive chips (checkbox/radio) —
@@ -212,12 +215,12 @@ export const DynamicInteractiveChipGroup = forwardRef(
                         size={size}
                         onClick={() => (multiple ? onChange([]) : onChange(null))}
                     >
-                        {locale === 'en' ? 'Clear selection' : 'Fjern valget'}
+                        {clearSelectionLabel ?? (locale === 'en' ? 'Clear selection' : 'Fjern valget')}
                     </StyledButton>
                 )}
                 <div
                     id={helperId}
-                    role={error ? 'alert' : 'status'}
+                    role={helperAlertRole}
                     className={cn(
                         'flex min-h-[24px] items-center gap-1 pt-1 text-sm/5 text-delta-600',
                         error && 'text-error-500',
