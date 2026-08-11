@@ -36,6 +36,7 @@ const DYNAMIC_TOOLBAR_STORIES = [
     'modules-dynamictoolbar--bulk-overflow-rule',
     'modules-dynamictoolbar--single-overflow-shows-directly',
     'modules-dynamictoolbar--labels-collapse-right-to-left',
+    'modules-dynamictoolbar--labels-collapse-left-to-right',
     'modules-dynamictoolbar--icon-only-mode',
     'modules-dynamictoolbar--normal-actions-hidden-in-selection',
     'modules-dynamictoolbar--disabled-actions',
