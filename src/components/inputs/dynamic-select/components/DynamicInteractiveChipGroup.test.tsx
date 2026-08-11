@@ -8,7 +8,7 @@ const baseProps = {
     options: ['a', 'b'],
     value: null,
     multiple: false as const,
-    onChange: () => {},
+    onChange: () => undefined,
 }
 
 // The "Clear selection" button only renders when a value is set and the field isn't required.
