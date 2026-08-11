@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef } from 'react'
 
 /**
  * REQ-005: error *appearance* is announced via `role="alert"`; a field that stays invalid across
@@ -12,16 +12,17 @@ export function resolveHelperAlertRole(isError: boolean, wasError: boolean): 'al
 
 export function useHelperAlertRole(isError: boolean | undefined): 'alert' | 'status' {
     const error = !!isError
-    const [wasError, setWasError] = useState(false)
-    const role = resolveHelperAlertRole(error, wasError)
+    // A ref (not state) on purpose: flipping via `setState` in an effect self-triggers an
+    // immediate follow-up render that downgrades "alert" to "status" before anything — a test's
+    // `await` between interaction and assertion, or a real screen reader's AX-tree flush — can
+    // ever observe it. Mutating a ref during the effect leaves "alert" committed in the DOM until
+    // the *next externally-caused* render (the actual next content/value change), which is when
+    // the downgrade is supposed to happen anyway.
+    const wasErrorRef = useRef(false)
+    const role = resolveHelperAlertRole(error, wasErrorRef.current)
 
     useEffect(() => {
-        // Deliberate one-tick cascade, not simple derived state: the DOM must actually commit
-        // with role="alert" once so assistive tech picks up the transition, then flip to "status"
-        // for as long as the field stays invalid — otherwise every reward-early re-render
-        // re-fires the live region.
-        // eslint-disable-next-line react-hooks/set-state-in-effect, react-you-might-not-need-an-effect/no-derived-state
-        setWasError(error)
+        wasErrorRef.current = error
     }, [error])
 
     return role
