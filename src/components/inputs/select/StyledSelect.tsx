@@ -149,10 +149,26 @@ export const StyledSelect = ({
         : currentValue !== undefined && currentValue !== '' && currentValue !== null
 
     const listRef = useRef<HTMLUListElement>(null)
+    // Own handle on the trigger element: the merged floating-ui ref below can't be read back, and the
+    // dismiss handler needs to hand focus to it.
+    const triggerElRef = useRef<HTMLButtonElement | null>(null)
+
+    // Every close except a selection unmounts the listbox while the open-effect below still holds DOM
+    // focus inside it, so focus would fall to <body> and the next Tab would restart from the top of
+    // the document (WCAG 2.4.3 / 2.4.7; the ARIA combobox pattern requires Escape to return focus to
+    // the trigger). `selectValue` already restores focus after a pick — this covers Escape, outside
+    // press and re-clicking the trigger. Focus the user has already moved elsewhere is left alone.
+    const handleOpenChange = (next: boolean): void => {
+        setOpen(next)
+        if (next) return
+        const active = document.activeElement
+        if (active && active !== document.body && !listRef.current?.contains(active)) return
+        triggerElRef.current?.focus()
+    }
 
     const { refs, floatingStyles, context } = useFloating({
         open,
-        onOpenChange: setOpen,
+        onOpenChange: handleOpenChange,
         placement: 'bottom-start',
         strategy: 'fixed',
         whileElementsMounted: autoUpdate,
@@ -171,7 +187,7 @@ export const StyledSelect = ({
     const dismiss = useDismiss(context)
     const role = useRole(context, { role: 'listbox' })
     const { getReferenceProps, getFloatingProps } = useInteractions([click, dismiss, role])
-    const triggerRef = useMergeRefs([refs.setReference])
+    const triggerRef = useMergeRefs([refs.setReference, triggerElRef])
     // Promote the listbox into the top layer so it paints above a modal <dialog> regardless of z-index.
     const listboxRef = useMergeRefs([useTopLayerRef(refs.setFloating), listRef])
     // Portal the listbox INTO the trigger's modal <dialog> (if any): top-layer promotion fixes
