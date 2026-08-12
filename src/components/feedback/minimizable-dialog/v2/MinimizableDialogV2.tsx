@@ -143,7 +143,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                         <div className='flex items-center gap-x-1'>
                             {actionNode}
                             <MinimizeBtn
-                                visibility={showMinimizeIcon && !isMobile}
+                                visibility={showMinimizeIcon && !isMobile && !fullScreen}
                                 type='minimize'
                                 onClick={() => {
                                     setMinimized(!minimized)
