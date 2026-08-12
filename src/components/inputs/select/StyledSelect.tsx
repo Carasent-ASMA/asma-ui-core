@@ -304,6 +304,14 @@ export const StyledSelect = ({
         }
     }
 
+    // `standard` reads as a button (calendar month/year), so its focused/open state mirrors
+    // StyledButton's: gama-50 fill + gama-500 label on top of the gama-400 ring. Each colour is an
+    // exclusive branch rather than a stacked override — Tailwind runs with `important: true`, so two
+    // colour utilities on one element are resolved by stylesheet order, not by JSX order.
+    const isButtonFocus = isStandard && (open || focused)
+    const triggerTextClass = isDisabled ? 'text-delta-300' : isButtonFocus ? 'text-gama-500' : 'text-delta-800'
+    const chevronRestingClass = isDisabled ? 'text-delta-300' : 'text-delta-700'
+
     return (
         <div
             className={cn('group relative inline-flex flex-col', fullWidth && 'w-full', className)}
@@ -347,13 +355,15 @@ export const StyledSelect = ({
                 }}
                 style={{ minWidth: hasValue && !isStandard ? 105 : undefined }}
                 className={cn(
-                    'relative flex w-full items-center justify-between bg-transparent text-left text-delta-800 outline-none',
+                    'relative flex w-full items-center justify-between text-left outline-none',
                     // Figma field text = Body Base 16/lh24 (`text-base`), h40 (matches StyledInputField/field-styles).
                     // `standard` shares the outlined geometry (h40, px-3, radius) — only its border is
                     // deferred to focus, via `borderless` on the outline overlay below.
-                    'h-10 rounded-lg border-0 px-3 text-base',
+                    'h-10 rounded-lg border-0 px-3 text-base transition-colors',
+                    isButtonFocus ? 'bg-gama-50' : 'bg-transparent',
+                    triggerTextClass,
                     isStandard && 'min-w-0',
-                    isDisabled && 'cursor-not-allowed text-delta-300',
+                    isDisabled && 'cursor-not-allowed',
                     readOnly && 'pointer-events-none',
                 )}
             >
@@ -384,7 +394,7 @@ export const StyledSelect = ({
                         height={24}
                         className={cn(
                             'shrink-0 transition-transform',
-                            isDisabled ? 'text-delta-300' : 'text-delta-700',
+                            isButtonFocus ? 'text-gama-500' : chevronRestingClass,
                             open && 'rotate-180',
                         )}
                     />
