@@ -51,21 +51,25 @@ interface FieldState {
     error?: boolean
     disabled?: boolean
     readOnly?: boolean
+    /** `variant="standard"`: same geometry as the outlined field, but the border is painted on focus only. */
+    borderless?: boolean
 }
 
 /** The border overlay (an absolutely-positioned sibling so width changes never reflow the input). */
-export const outlineClass = ({ focused, error, disabled, readOnly }: FieldState): string =>
+export const outlineClass = ({ focused, error, disabled, readOnly, borderless }: FieldState): string =>
     cn(
         'pointer-events-none absolute inset-0 rounded border border-solid transition-colors',
-        disabled
-            ? 'border-delta-300'
-            : readOnly
-              ? 'border-delta-200'
-              : error
-                ? cn('border-error-500', focused && 'border-2')
-                : focused
-                  ? 'border-2 border-gama-400' // Figma border/focus #1ca1a1 (node 15561-37298)
-                  : 'border-delta-500 group-hover:border-2 group-hover:border-gama-300', // Figma border/hover #60bdbd
+        borderless && !focused
+            ? 'border-transparent'
+            : disabled
+              ? 'border-delta-300'
+              : readOnly
+                ? 'border-delta-200'
+                : error
+                  ? cn('border-error-500', focused && 'border-2')
+                  : focused
+                    ? 'border-2 border-gama-400' // Figma border/focus #1ca1a1 (node 15561-37298)
+                    : 'border-delta-500 group-hover:border-2 group-hover:border-gama-300', // Figma border/hover #60bdbd
     )
 
 /** MUI-compatible fieldset outline used by text fields with floating labels. */

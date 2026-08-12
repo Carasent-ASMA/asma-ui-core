@@ -349,7 +349,10 @@ export const StyledSelect = ({
                 className={cn(
                     'relative flex w-full items-center justify-between bg-transparent text-left text-delta-800 outline-none',
                     // Figma field text = Body Base 16/lh24 (`text-base`), h40 (matches StyledInputField/field-styles).
-                    isStandard ? 'h-10 min-w-0 border-0 px-0 text-base' : 'h-10 rounded-lg border-0 px-3 text-base',
+                    // `standard` shares the outlined geometry (h40, px-3, radius) — only its border is
+                    // deferred to focus, via `borderless` on the outline overlay below.
+                    'h-10 rounded-lg border-0 px-3 text-base',
+                    isStandard && 'min-w-0',
                     isDisabled && 'cursor-not-allowed text-delta-300',
                     readOnly && 'pointer-events-none',
                 )}
@@ -386,16 +389,15 @@ export const StyledSelect = ({
                         )}
                     />
                 </span>
-                {!isStandard && (
-                    <div
-                        className={outlineClass({
-                            focused: open || focused,
-                            error: isError,
-                            disabled: isDisabled,
-                            readOnly,
-                        })}
-                    />
-                )}
+                <div
+                    className={outlineClass({
+                        focused: open || focused,
+                        error: isError,
+                        disabled: isDisabled,
+                        readOnly,
+                        borderless: isStandard,
+                    })}
+                />
             </button>
 
             {open && (
