@@ -1,6 +1,10 @@
 name: 'Visual Regression'
 
-on: push
+# Push keeps the per-branch signal; pull_request makes the check report on the PR itself so it
+# can be enforced as a required status check on master (a red VRT blocks the merge).
+on:
+    push:
+    pull_request:
 
 jobs:
     vrt:

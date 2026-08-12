@@ -283,6 +283,12 @@ export const EscapeCloses: Story = {
 
         await expect(canvas.queryByRole('listbox')).not.toBeInTheDocument()
         await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+
+        // Escape must hand focus back to the trigger: the open-effect parks focus on the selected
+        // option, so without StyledSelect's dismiss handler focus falls to <body> and the next Tab
+        // restarts from the top of the document. waitFor keeps the assertion independent of whether
+        // the restore lands synchronously with the dismiss or a render later.
+        await waitFor(() => expect(trigger).toHaveFocus())
     },
 }
 
