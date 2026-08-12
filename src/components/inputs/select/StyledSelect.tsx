@@ -190,6 +190,19 @@ export const StyledSelect = ({
         [hasValue, placeholder, displayEmpty, ctx],
     )
 
+    // Scroll (and focus) the selected option into view when the listbox opens — long year/month
+    // menus otherwise open at the top while the current value sits off-screen.
+    useEffect(() => {
+        if (!open) return
+        const id = requestAnimationFrame(() => {
+            const selected = listRef.current?.querySelector<HTMLElement>('[role="option"][aria-selected="true"]')
+            if (!selected) return
+            selected.scrollIntoView({ block: 'nearest' })
+            selected.focus()
+        })
+        return () => cancelAnimationFrame(id)
+    }, [open])
+
     const selectValue = (next: unknown, child: ReactNode): void => {
         const selected = multiple
             ? Array.isArray(currentValue) && currentValue.includes(next)
@@ -265,7 +278,10 @@ export const StyledSelect = ({
         if ((event.key !== 'ArrowDown' && event.key !== 'ArrowUp') || isDisabled || readOnly) return
         event.preventDefault()
         setOpen(true)
+        // Focus falls to the selected option via the open-effect above; if none selected, land on
+        // first (ArrowDown) / last (ArrowUp) so keyboard open still has a focus target.
         requestAnimationFrame(() => {
+            if (listRef.current?.querySelector('[role="option"][aria-selected="true"]')) return
             const items = listRef.current?.querySelectorAll<HTMLElement>('[role="option"]:not([aria-disabled="true"])')
             if (!items?.length) return
             items[event.key === 'ArrowUp' ? items.length - 1 : 0]?.focus()
