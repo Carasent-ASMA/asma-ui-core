@@ -18,7 +18,9 @@ export const TimePickerPopper: React.FC<StyledTimePickerProps & { popupState: Po
         <Popper
             {...bindPopper(popupState)}
             transition
-            style={{ zIndex: '1300', position: 'absolute' }}
+            // No `position` here: `Popper` picks the strategy itself (`fixed` when it has to join the
+            // top layer above a modal dialog), and an override would place the popper off-anchor.
+            style={{ zIndex: '1300' }}
         >
             {({ TransitionProps }) => (
                 <Fade {...TransitionProps} timeout={350}>
