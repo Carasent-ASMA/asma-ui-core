@@ -161,7 +161,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
 
                         <div className='flex items-center gap-x-1'>
                             {actionNode}
-                            {showMinimizeIcon && (
+                            {showMinimizeIcon && !fullScreen && (
                                 <StyledTooltip title={locale === 'en' ? 'Minimize' : 'Minimer'}>
                                     <div>
                                         <StyledButton
