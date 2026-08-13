@@ -50,6 +50,21 @@ export function getOpenModalDialogAncestor(node: unknown): HTMLElement | undefin
     return dialog instanceof HTMLDialogElement && dialog.open ? dialog : undefined
 }
 
+declare global {
+    interface Window {
+        // Set by the micro-app sandbox (see `asma-micro-app`'s `with` sandbox) to the UN-proxied
+        // global when `window` itself is a per-microapp Proxy. `asma-event-bus` uses the same escape
+        // hatch for the same reason — see `getRegistry` below.
+        rawWindow?: Window
+        __asmaOpenModalDialogRegistry__?: OpenModalDialogRegistry
+    }
+}
+
+interface OpenModalDialogRegistry {
+    dialogs: HTMLDialogElement[]
+    listeners: Set<() => void>
+}
+
 /**
  * Open modal `<dialog>`s in **top-layer order**: index 0 = first opened (bottom), last = topmost.
  *
@@ -60,16 +75,33 @@ export function getOpenModalDialogAncestor(node: unknown): HTMLElement | undefin
  * document order — for nested dialogs the two can disagree, and portalling into anything but the
  * topmost modal leaves the overlay both occluded and `inert`. So `StyledDialog` publishes here.
  *
- * Module-level state is sound in the micro-frontend fleet for the same reason notistack's own
- * `enqueueSnackbar` singleton is: `asma-ui-core` is a kernel lib (KERNEL_SPEC), served from one
- * import-map URL per React cohort, so every widget shares this instance.
+ * **Window-scoped, not module-scoped** (ASMA-7719 follow-up): `StyledDialog` (e.g. the Reject
+ * dialog, loaded as a remote widget via `EsmWidgetHost`) and the `SnackbarProvider`/`StyledSnackbar`
+ * reading this registry (hosted by the shell) routinely live in SEPARATE micro-frontend bundles.
+ * `import()`-ing a URL instantiates that module fresh per bundle unless the specifier is genuinely
+ * deduped by the browser's native-ESM loader via the kernel import map — and that only happens for
+ * `KERNEL_EXTERNAL=true` builds (CI/preview/prod), never plain local `vite dev`. A module-level array
+ * would silently give each bundle its own registry, so `registerOpenModalDialog` calls from one
+ * app's copy would never reach another app's `getTopmostOpenModalDialog` — reproducing this exact
+ * bug locally no matter how the fix is deployed. `EsmWidgetHost` mounts widgets via `import()` into
+ * the HOST's own `document` (no iframe), so `window` — unlike the JS module graph — genuinely is one
+ * shared object across every micro-frontend in the page; this mirrors `asma-event-bus`'s
+ * `window.ASMA_EVENT_BUS` singleton, including its `rawWindow` escape hatch for when the micro-app
+ * sandbox proxies `window` itself.
  */
-const openModalDialogs: HTMLDialogElement[] = []
-const openModalDialogListeners = new Set<() => void>()
+function getOpenModalDialogRegistry(): OpenModalDialogRegistry {
+    const globalWindow = typeof window === 'undefined' ? undefined : (window.rawWindow ?? window)
+    // No `window` at all (e.g. this module's own Node-environment unit tests) — module-scope is a
+    // safe fallback there since there is only ever one instance in that process.
+    if (!globalWindow) return (nodeFallbackRegistry ??= { dialogs: [], listeners: new Set() })
+
+    return (globalWindow.__asmaOpenModalDialogRegistry__ ??= { dialogs: [], listeners: new Set() })
+}
+let nodeFallbackRegistry: OpenModalDialogRegistry | undefined
 
 // Copy first: a listener may re-render a subscriber that unsubscribes mid-notify.
 const notifyOpenModalDialogListeners = (): void => {
-    for (const listener of [...openModalDialogListeners]) listener()
+    for (const listener of [...getOpenModalDialogRegistry().listeners]) listener()
 }
 
 /**
@@ -78,13 +110,14 @@ const notifyOpenModalDialogListeners = (): void => {
  * this from the same layout effect that opens the dialog.
  */
 export function registerOpenModalDialog(dialog: HTMLDialogElement): () => void {
-    openModalDialogs.push(dialog)
+    getOpenModalDialogRegistry().dialogs.push(dialog)
     notifyOpenModalDialogListeners()
 
     return () => {
-        const index = openModalDialogs.indexOf(dialog)
+        const { dialogs } = getOpenModalDialogRegistry()
+        const index = dialogs.indexOf(dialog)
         if (index === -1) return
-        openModalDialogs.splice(index, 1)
+        dialogs.splice(index, 1)
         notifyOpenModalDialogListeners()
     }
 }
@@ -95,8 +128,9 @@ export function registerOpenModalDialog(dialog: HTMLDialogElement): () => void {
  * than trusted, so a missed unregister can never strand an overlay in a detached subtree.
  */
 export function getTopmostOpenModalDialog(): HTMLDialogElement | undefined {
-    for (let index = openModalDialogs.length - 1; index >= 0; index -= 1) {
-        const dialog = openModalDialogs[index]
+    const { dialogs } = getOpenModalDialogRegistry()
+    for (let index = dialogs.length - 1; index >= 0; index -= 1) {
+        const dialog = dialogs[index]
         if (dialog?.isConnected && dialog.open) return dialog
     }
 
@@ -104,9 +138,9 @@ export function getTopmostOpenModalDialog(): HTMLDialogElement | undefined {
 }
 
 const subscribeToOpenModalDialogs = (listener: () => void): (() => void) => {
-    openModalDialogListeners.add(listener)
+    getOpenModalDialogRegistry().listeners.add(listener)
     return () => {
-        openModalDialogListeners.delete(listener)
+        getOpenModalDialogRegistry().listeners.delete(listener)
     }
 }
 
