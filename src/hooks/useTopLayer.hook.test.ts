@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 import { getTopmostOpenModalDialog, registerOpenModalDialog } from './useTopLayer.hook'
 
 /**
@@ -59,6 +59,69 @@ describe('open modal dialog registry', () => {
         unregisterNested()
         expect(getTopmostOpenModalDialog()).toBe(outer)
         unregisterOuter()
+    })
+
+    /**
+     * The registry has to land on the ONE window the whole page shares. A micro-app sandbox hands the
+     * app a per-app Proxy as `window`, so trusting it would strand the registry where the host's
+     * SnackbarProvider can never read it — silently restoring the bug for that app. The two sandbox
+     * flavours expose the real global differently: `asma-micro-app` publishes `rawWindow`, qiankun
+     * only lets the real `document` through. Both are exercised here because neither is reachable
+     * from the browser stories (they run outside any sandbox).
+     */
+    describe('resolves the shared global across micro-frontend sandboxes', () => {
+        const globals = globalThis as { window?: unknown; document?: unknown }
+
+        afterEach(() => {
+            delete globals.window
+            delete globals.document
+        })
+
+        /** Stand-in for a real window: only the registry slot matters to the code under test. */
+        const fakeWindow = (over: Record<string, unknown> = {}): Record<string, unknown> => ({ ...over })
+
+        it('prefers rawWindow — the asma-micro-app sandbox hatch', () => {
+            const real = fakeWindow()
+            const sandboxed = fakeWindow({ rawWindow: real })
+            globals.window = sandboxed
+            // A sandbox that proxies `document` too would still hand back the real one here.
+            globals.document = { defaultView: real }
+
+            const dialog = fakeDialog()
+            const unregister = registerOpenModalDialog(dialog)
+
+            expect(real['__asmaOpenModalDialogRegistry__']).toBeDefined()
+            expect(sandboxed['__asmaOpenModalDialogRegistry__']).toBeUndefined()
+            unregister()
+        })
+
+        it('falls back to document.defaultView — qiankun proxies window but not document', () => {
+            const real = fakeWindow()
+            // qiankun's proxy sandbox never sets `rawWindow`; its `get` trap returns the real document.
+            const sandboxed = fakeWindow()
+            globals.window = sandboxed
+            globals.document = { defaultView: real }
+
+            const dialog = fakeDialog()
+            const unregister = registerOpenModalDialog(dialog)
+
+            expect(real['__asmaOpenModalDialogRegistry__']).toBeDefined()
+            expect(sandboxed['__asmaOpenModalDialogRegistry__']).toBeUndefined()
+            unregister()
+        })
+
+        it('uses window itself when nothing proxies it — the shell and every plain page', () => {
+            const real = fakeWindow()
+            globals.window = real
+            globals.document = { defaultView: real }
+
+            const dialog = fakeDialog()
+            const unregister = registerOpenModalDialog(dialog)
+
+            expect(getTopmostOpenModalDialog()).toBe(dialog)
+            expect(real['__asmaOpenModalDialogRegistry__']).toBeDefined()
+            unregister()
+        })
     })
 
     it('skips a stale entry instead of stranding the overlay in a detached subtree', () => {

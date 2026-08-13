@@ -54,7 +54,8 @@ declare global {
     interface Window {
         // Set by the micro-app sandbox (see `asma-micro-app`'s `with` sandbox) to the UN-proxied
         // global when `window` itself is a per-microapp Proxy. `asma-event-bus` uses the same escape
-        // hatch for the same reason — see `getRegistry` below.
+        // hatch for the same reason. Only ONE of the two sandbox flavours publishes it — see
+        // `getOpenModalDialogRegistry` below for how qiankun's is escaped.
         rawWindow?: Window
         __asmaOpenModalDialogRegistry__?: OpenModalDialogRegistry
     }
@@ -90,10 +91,18 @@ interface OpenModalDialogRegistry {
  * sandbox proxies `window` itself.
  */
 function getOpenModalDialogRegistry(): OpenModalDialogRegistry {
-    const globalWindow = typeof window === 'undefined' ? undefined : (window.rawWindow ?? window)
-    // No `window` at all (e.g. this module's own Node-environment unit tests) — module-scope is a
-    // safe fallback there since there is only ever one instance in that process.
-    if (!globalWindow) return (nodeFallbackRegistry ??= { dialogs: [], listeners: new Set() })
+    // No DOM at all (e.g. this module's own Node-environment unit tests) — module-scope is a safe
+    // fallback there since there is only ever one instance in that process.
+    if (typeof window === 'undefined') return (nodeFallbackRegistry ??= { dialogs: [], listeners: new Set() })
+
+    // Reach the ONE window every micro-frontend in the page shares, escaping EITHER sandbox flavour.
+    // A sandboxed micro-app sees a per-app Proxy as `window`, so writing the registry there would
+    // strand it where the host's SnackbarProvider can never read it — the module-scope bug one level
+    // down. `asma-micro-app` publishes the un-proxied global as `rawWindow`; qiankun's proxy sandbox
+    // does NOT, but its `get` trap returns the REAL `document` (only `window`/`self`/`globalThis`/
+    // `top`/`parent` are trapped back to the Proxy), so `document.defaultView` escapes it. Outside a
+    // sandbox — and in the shell itself — all three resolve to the same object.
+    const globalWindow = window.rawWindow ?? document.defaultView ?? window
 
     return (globalWindow.__asmaOpenModalDialogRegistry__ ??= { dialogs: [], listeners: new Set() })
 }
