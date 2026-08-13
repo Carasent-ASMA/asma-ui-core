@@ -1,4 +1,4 @@
-import { useCallback, type CSSProperties } from 'react'
+import { useCallback, useSyncExternalStore, type CSSProperties } from 'react'
 
 /**
  * Promote a Floating UI element into the browser **top layer** so it paints above a native modal
@@ -48,6 +48,75 @@ export function getOpenModalDialogAncestor(node: unknown): HTMLElement | undefin
     if (!(node instanceof Element)) return undefined
     const dialog = node.closest('dialog')
     return dialog instanceof HTMLDialogElement && dialog.open ? dialog : undefined
+}
+
+/**
+ * Open modal `<dialog>`s in **top-layer order**: index 0 = first opened (bottom), last = topmost.
+ *
+ * `getOpenModalDialogAncestor` covers every overlay that has an *anchor* inside the dialog. A global,
+ * imperatively-raised overlay (the snackbar stack — `enqueueSnackbar` can fire from anywhere) has no
+ * anchor, so it needs the topmost open modal of the *document* instead. That order is NOT derivable
+ * from the DOM: top-layer paint order is `showModal()` CALL order, while `querySelectorAll` returns
+ * document order — for nested dialogs the two can disagree, and portalling into anything but the
+ * topmost modal leaves the overlay both occluded and `inert`. So `StyledDialog` publishes here.
+ *
+ * Module-level state is sound in the micro-frontend fleet for the same reason notistack's own
+ * `enqueueSnackbar` singleton is: `asma-ui-core` is a kernel lib (KERNEL_SPEC), served from one
+ * import-map URL per React cohort, so every widget shares this instance.
+ */
+const openModalDialogs: HTMLDialogElement[] = []
+const openModalDialogListeners = new Set<() => void>()
+
+// Copy first: a listener may re-render a subscriber that unsubscribes mid-notify.
+const notifyOpenModalDialogListeners = (): void => {
+    for (const listener of [...openModalDialogListeners]) listener()
+}
+
+/**
+ * Publish an open modal `<dialog>` as the current top-layer occupant. Call right after
+ * `showModal()`; the returned unregister must run before/as the dialog closes. `StyledDialog` wires
+ * this from the same layout effect that opens the dialog.
+ */
+export function registerOpenModalDialog(dialog: HTMLDialogElement): () => void {
+    openModalDialogs.push(dialog)
+    notifyOpenModalDialogListeners()
+
+    return () => {
+        const index = openModalDialogs.indexOf(dialog)
+        if (index === -1) return
+        openModalDialogs.splice(index, 1)
+        notifyOpenModalDialogListeners()
+    }
+}
+
+/**
+ * The modal `<dialog>` currently at the top of the browser top layer, or `undefined` when no ui-core
+ * modal is open. Stale entries (a dialog torn down without its cleanup running) are skipped rather
+ * than trusted, so a missed unregister can never strand an overlay in a detached subtree.
+ */
+export function getTopmostOpenModalDialog(): HTMLDialogElement | undefined {
+    for (let index = openModalDialogs.length - 1; index >= 0; index -= 1) {
+        const dialog = openModalDialogs[index]
+        if (dialog?.isConnected && dialog.open) return dialog
+    }
+
+    return undefined
+}
+
+const subscribeToOpenModalDialogs = (listener: () => void): (() => void) => {
+    openModalDialogListeners.add(listener)
+    return () => {
+        openModalDialogListeners.delete(listener)
+    }
+}
+
+/**
+ * Reactive {@link getTopmostOpenModalDialog} — re-renders the caller when a modal `<dialog>` opens or
+ * closes. Use as the portal root for an **anchorless** overlay that must clear an open modal
+ * (`SnackbarProvider`, `StyledSnackbar`); anchored overlays use {@link getOpenModalDialogAncestor}.
+ */
+export function useTopmostOpenModalDialog(): HTMLDialogElement | undefined {
+    return useSyncExternalStore(subscribeToOpenModalDialogs, getTopmostOpenModalDialog, () => undefined)
 }
 
 /**
