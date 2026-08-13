@@ -3,12 +3,7 @@ import { FloatingPortal } from '@floating-ui/react'
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
-import {
-    getOpenModalDialogAncestor,
-    TOP_LAYER_PROPS,
-    TOP_LAYER_RESET_STYLE,
-    useTopLayerRef,
-} from 'src/hooks/useTopLayer.hook'
+import { getOpenModalDialogAncestor } from 'src/hooks/useTopLayer.hook'
 
 export type DrawerAnchor = 'left' | 'right' | 'top' | 'bottom'
 export type DrawerCloseReason = 'backdropClick' | 'escapeKeyDown'
@@ -50,6 +45,9 @@ const CLOSED_TRANSFORM: Record<DrawerAnchor, string> = {
  * Sliding edge panel (replaces MUI `Drawer`). Portalled, slides from `anchor`, temporary variant
  * shows a backdrop and closes on backdrop-click / Escape. Public props preserved (DEC-003). TASK-304.
  *
+ * When the trigger is inside a modal `<dialog>`, portals into that dialog (inertness) and stacks with
+ * z-index — no nested Popover API (mobile Safari stacks nested `showPopover` under the dialog).
+ *
  * @figmaNode none — no dedicated Figma drawer/side-sheet. As a modal edge-panel it reuses the DS
  * **modal family** tokens established by `StyledDialog`: overlay `bg/modal` #626e7eb2 (delta-600 @70%)
  * + Dialogue-popup elevation (#22213366, 0 4 40). Edge panels are flush (no radius); content is
@@ -70,16 +68,7 @@ export const StyledDrawer: FC<DrawerProps> = ({
 }) => {
     const isTemporary = variant === 'temporary'
     const portalRoot = getOpenModalDialogAncestor(anchorEl)
-    const inModalDialog = portalRoot !== undefined
     const panelRef = useRef<HTMLDivElement | null>(null)
-    const setPanelRef = useTopLayerRef((node) => {
-        panelRef.current = node instanceof HTMLDivElement ? node : null
-    })
-    const assignPanelRef = inModalDialog
-        ? setPanelRef
-        : (node: HTMLDivElement | null) => {
-              panelRef.current = node
-          }
 
     useEffect(() => {
         if (!open || !isTemporary) return
@@ -93,17 +82,6 @@ export const StyledDrawer: FC<DrawerProps> = ({
     // Escape is already handled above (kept separate since it needs the real event/reason for
     // `onClose`) — this only adds the Tab-cycling half of the trap for this backdrop-blocking modal.
     useFocusTrap(open && isTemporary, panelRef)
-
-    useEffect(() => {
-        if (!open || !inModalDialog) return
-        const node = panelRef.current
-        if (!node || typeof node.showPopover !== 'function') return
-        try {
-            if (!node.matches(':popover-open')) node.showPopover()
-        } catch {
-            // Popover API unavailable — degrade to z-index stacking.
-        }
-    }, [open, inModalDialog])
 
     if (isTemporary && !open && !ModalProps?.keepMounted) return null
 
@@ -119,8 +97,7 @@ export const StyledDrawer: FC<DrawerProps> = ({
                 />
             )}
             <div
-                ref={assignPanelRef}
-                {...(inModalDialog ? TOP_LAYER_PROPS : {})}
+                ref={panelRef}
                 role={isTemporary ? 'dialog' : undefined}
                 aria-modal={isTemporary && open ? true : undefined}
                 aria-hidden={!open}
@@ -134,7 +111,6 @@ export const StyledDrawer: FC<DrawerProps> = ({
                     PaperProps?.className,
                 )}
                 style={{
-                    ...(inModalDialog ? TOP_LAYER_RESET_STYLE : {}),
                     ...resolveSx(sx),
                     ...resolveSx(PaperProps?.sx),
                 }}

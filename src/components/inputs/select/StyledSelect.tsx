@@ -31,6 +31,7 @@ import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
 import {
     getOpenModalDialogAncestor,
+    shouldUsePopoverTopLayer,
     TOP_LAYER_PROPS,
     TOP_LAYER_RESET_STYLE,
     useTopLayerRef,
@@ -188,16 +189,14 @@ export const StyledSelect = ({
     const role = useRole(context, { role: 'listbox' })
     const { getReferenceProps, getFloatingProps } = useInteractions([click, dismiss, role])
     const triggerRef = useMergeRefs([refs.setReference, triggerElRef])
-    // Promote the listbox into the top layer so it paints above a modal <dialog> regardless of z-index.
-    const listboxRef = useMergeRefs([useTopLayerRef(refs.setFloating), listRef])
-    // Portal the listbox INTO the trigger's modal <dialog> (if any): top-layer promotion fixes
-    // painting but a body-portalled popover is still marked inert by the dialog, so option clicks
-    // fall through. A descendant of the open dialog is not inert. See getOpenModalDialogAncestor.
-
+    // Portal INTO the trigger's modal <dialog> (if any) so the listbox isn't inert. Popover API
+    // only when body-portalled — nested showPopover inside a dialog breaks on mobile Safari.
     const portalRoot = useMemo(
         () => (open ? getOpenModalDialogAncestor(refs.reference.current) : undefined),
         [open, refs],
     )
+    const usePopoverLayer = shouldUsePopoverTopLayer(portalRoot)
+    const listboxRef = useMergeRefs([useTopLayerRef(refs.setFloating, usePopoverLayer), listRef])
 
     // Report state into the surrounding FormControl so the label floats.
     useEffect(() => ctx?.setFocused(open || focused), [open, focused, ctx])
@@ -438,9 +437,9 @@ export const StyledSelect = ({
                         // consumer using only an external `labelId` label, which is the common case.
                         aria-labelledby={labelId}
                         aria-label={!labelId ? name : undefined}
-                        {...TOP_LAYER_PROPS}
+                        {...(usePopoverLayer ? TOP_LAYER_PROPS : {})}
                         style={{
-                            ...TOP_LAYER_RESET_STYLE,
+                            ...(usePopoverLayer ? TOP_LAYER_RESET_STYLE : {}),
                             ...floatingStyles,
                             fontFamily: 'Roboto, Helvetica, Arial, sans-serif',
                         }}

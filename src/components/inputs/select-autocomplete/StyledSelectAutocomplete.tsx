@@ -26,7 +26,13 @@ import { StyledChip } from 'src/components/data-display/chip'
 import { CheckIcon, ChevronDownIcon, CloseIcon, PlusIconCircle } from 'src/components/icons'
 import { StyledCheckbox } from 'src/components/inputs/checkbox/base-ui/StyledCheckbox'
 import { cn } from 'src/helpers/cn'
-import { getOpenModalDialogAncestor, TOP_LAYER_PROPS, TOP_LAYER_RESET_STYLE, useTopLayerRef } from 'src/hooks/useTopLayer.hook'
+import {
+    getOpenModalDialogAncestor,
+    shouldUsePopoverTopLayer,
+    TOP_LAYER_PROPS,
+    TOP_LAYER_RESET_STYLE,
+    useTopLayerRef,
+} from 'src/hooks/useTopLayer.hook'
 import { LoadingIcon } from 'src/table/shared-components/LoadingIcon'
 import style from './StyledSelectAutocomplete.module.scss'
 
@@ -291,13 +297,10 @@ export function StyledSelectAutocomplete<
     const role = useRole(context, { role: 'listbox' })
     const { getReferenceProps, getFloatingProps, getItemProps } = useInteractions([dismiss, role])
     const referenceRef = useMergeRefs([refs.setReference])
-    // Promote the listbox into the top layer so it paints above a modal <dialog> regardless of z-index.
-    const floatingRef = useMergeRefs([useTopLayerRef(refs.setFloating)])
-    // When the trigger sits inside a modal <dialog>, portal the listbox INTO that dialog: top-layer
-    // promotion fixes painting but the dialog still marks a body-portalled popover inert (clicks fall
-    // through). A descendant of the open dialog is not inert, so options become selectable again.
-    // The reference (input) is always mounted before the popup opens, so its ref is populated here.
+    // Portal INTO the trigger's modal <dialog> when present (inertness). Popover API only for body portal.
     const portalRoot = useMemo(() => (open ? getOpenModalDialogAncestor(refs.reference.current) : undefined), [open, refs])
+    const usePopoverLayer = shouldUsePopoverTopLayer(portalRoot)
+    const floatingRef = useMergeRefs([useTopLayerRef(refs.setFloating, usePopoverLayer)])
 
     const emitChange = (event: SyntheticEvent, option: T): void => {
         if (isMultiple) {
@@ -514,9 +517,9 @@ export function StyledSelectAutocomplete<
                 <FloatingPortal root={portalRoot}>
                     <ul
                         ref={floatingRef}
-                        {...TOP_LAYER_PROPS}
+                        {...(usePopoverLayer ? TOP_LAYER_PROPS : {})}
                         style={{
-                            ...TOP_LAYER_RESET_STYLE,
+                            ...(usePopoverLayer ? TOP_LAYER_RESET_STYLE : {}),
                             ...floatingStyles,
                             // Exact input-matched width (overrides the UA `[popover]{width:fit-content}`).
                             width: popperWidth ?? undefined,

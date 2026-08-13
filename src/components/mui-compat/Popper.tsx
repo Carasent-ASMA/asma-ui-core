@@ -10,6 +10,7 @@ import {
 import { useState, type CSSProperties, type ReactNode } from 'react'
 import {
     getOpenModalDialogAncestor,
+    shouldUsePopoverTopLayer,
     TOP_LAYER_PROPS,
     TOP_LAYER_RESET_STYLE,
     useTopLayerRef,
@@ -54,9 +55,9 @@ const TOP_LAYER_WRAPPER_RESET: CSSProperties = {
  * `TransitionProps` (`in`/`onExited`) so a child `Fade` can animate and unmount. Public props
  * preserved (DEC-003). TASK-403.
  *
- * When `anchorEl` sits inside an open modal `<dialog>` the popper portals into that dialog and joins
- * the top layer instead of the default `document.body` portal — a body portal is both occluded by
- * the dialog and `inert`, so the popper looks dead on click. See `useTopLayer.hook`.
+ * Body-portalled instances join the browser **top layer** (nested under a filter `StyledPopover`
+ * otherwise paints under it). When `anchorEl` sits inside an open modal `<dialog>`, portal into
+ * that dialog and skip the Popover API — see `shouldUsePopoverTopLayer`.
  */
 export const Popper = ({
     open = false,
@@ -73,19 +74,18 @@ export const Popper = ({
     if (open && exited) setExited(false)
 
     const modalDialog = getOpenModalDialogAncestor(anchorEl)
+    const usePopoverLayer = shouldUsePopoverTopLayer(modalDialog)
 
     const { refs, floatingStyles, placement: resolvedPlacement } = useFloating({
         open,
         placement,
-        // The top layer resolves `fixed` against the viewport, which is the basis a promoted popover
-        // needs; outside a dialog the original `absolute` strategy is kept.
-        strategy: modalDialog ? 'fixed' : 'absolute',
+        // Fixed: top-layer popovers and in-dialog portals both position against the viewport/dialog.
+        strategy: 'fixed',
         whileElementsMounted: autoUpdate,
         elements: { reference: anchorEl ?? undefined },
         middleware: [flip({ padding: 8 }), shift({ padding: 8 })],
     })
-    const topLayerRef = useTopLayerRef(refs.setFloating)
-    const floatingRef = useMergeRefs([modalDialog ? topLayerRef : refs.setFloating])
+    const floatingRef = useMergeRefs([useTopLayerRef(refs.setFloating, usePopoverLayer)])
 
     // With a transition, stay mounted through the exit tween; otherwise unmount as soon as closed.
     const mounted = open || (transition ? !exited : false)
@@ -100,8 +100,8 @@ export const Popper = ({
         <div
             ref={floatingRef}
             id={id}
-            {...(modalDialog ? TOP_LAYER_PROPS : {})}
-            style={{ ...(modalDialog ? TOP_LAYER_WRAPPER_RESET : {}), ...floatingStyles, ...style }}
+            {...(usePopoverLayer ? TOP_LAYER_PROPS : {})}
+            style={{ ...(usePopoverLayer ? TOP_LAYER_WRAPPER_RESET : {}), ...floatingStyles, ...style }}
             className={className}
         >
             {content}
