@@ -2,21 +2,25 @@ import { useCallback, type CSSProperties } from 'react'
 
 /**
  * Promote a Floating UI element into the browser **top layer** so it paints above a native modal
- * `<dialog>`.
+ * `<dialog>` — but **only when the floating node is NOT already portalled into that dialog**.
  *
  * `StyledDialog` opens via `<dialog>.showModal()`, which puts the dialog in the top layer. The top
  * layer sits above the entire normal stacking context, so a popover/menu/listbox portalled to
  * `document.body` is occluded by the dialog **no matter how high its `z-index`** (and is `inert`
- * while the modal is open). The only way to render above it is to also join the top layer — which
- * the native Popover API does. We give the floating element `popover="manual"` (manual = we drive
- * open/close ourselves, no light-dismiss) and call `showPopover()` the moment it mounts; the top
- * layer stacks by call order, so a popover shown after the dialog lands on top.
+ * while the modal is open).
  *
- * Usage: spread {@link TOP_LAYER_PROPS} on the floating element, put {@link TOP_LAYER_RESET_STYLE}
- * before `...floatingStyles` in its `style`, use `strategy: 'fixed'` on `useFloating`, and pass
- * `refs.setFloating` to {@link useTopLayerRef} — attach the returned callback as the element `ref`
- * (merge with any others). Promoting on the ref callback (not a `useEffect`) guarantees it runs the
- * instant the node is connected, before paint.
+ * Two complementary fixes:
+ * 1. **Portal into the open modal `<dialog>`** (see {@link getOpenModalDialogAncestor}) — escapes
+ *    `inert` and paints inside the dialog's own top-layer entry via normal z-index.
+ * 2. **Popover API** (`popover="manual"` + `showPopover()`) — only when portalling to `document.body`
+ *    (e.g. nested under another top-layer `StyledPopover`). Nested `showPopover()` *inside* a modal
+ *    dialog is unreliable on mobile Safari: it either no-ops (UA keeps
+ *    `[popover]:not(:popover-open){display:none!important}` → looks like it never opened) or stacks
+ *    the popover *under* the dialog. Use {@link shouldUsePopoverTopLayer} to gate (1) vs (2).
+ *
+ * Usage when body-portalled: spread {@link TOP_LAYER_PROPS}, put {@link TOP_LAYER_RESET_STYLE} before
+ * `...floatingStyles`, `strategy: 'fixed'`, and pass `refs.setFloating` to {@link useTopLayerRef}.
+ * Promoting on the ref callback (not a `useEffect`) runs the instant the node is connected.
  */
 export const TOP_LAYER_PROPS = { popover: 'manual' } as const
 
@@ -34,11 +38,11 @@ export const TOP_LAYER_RESET_STYLE: CSSProperties = { margin: 0, inset: 'auto' }
  * fine, even on top), but it is skipped by hit-testing: pointer clicks fall through to the dialog
  * behind it and options can't be selected. Promoting to the top layer only fixes painting/z-order,
  * NOT inertness. The one place a popover is both unclipped *and* interactive is **inside the modal
- * dialog's own subtree** (top layer → escapes the dialog's `overflow:hidden`; descendant of the
- * dialog → not inert). So when the trigger lives inside a modal dialog, the floating element must
- * portal into that dialog rather than `document.body`. Returns `undefined` for the non-dialog case
- * (and for non-modal containers like `MinimizableDialog`, which are plain z-indexed `<div>`s), so
- * the caller falls back to the default body portal.
+ * dialog's own subtree** (descendant of the dialog → not inert; dialog is already fullscreen
+ * `inset-0`, so in-dialog `position:fixed` + z-index clears the paper without a nested Popover API
+ * entry). Returns `undefined` for the non-dialog case (and for non-modal containers like
+ * `MinimizableDialog`, which are plain z-indexed `<div>`s), so the caller falls back to the default
+ * body portal.
  */
 export function getOpenModalDialogAncestor(node: unknown): HTMLElement | undefined {
     if (!(node instanceof Element)) return undefined
@@ -46,23 +50,32 @@ export function getOpenModalDialogAncestor(node: unknown): HTMLElement | undefin
     return dialog instanceof HTMLDialogElement && dialog.open ? dialog : undefined
 }
 
+/**
+ * `true` when the floating node should join the top layer via the Popover API.
+ * `false` when it is (or will be) portalled into an open modal `<dialog>` — see hook docs.
+ */
+export function shouldUsePopoverTopLayer(portalRoot: HTMLElement | undefined | null): boolean {
+    return portalRoot == null
+}
+
 type RefSetter = (node: HTMLElement | null) => void
 
 /**
- * Returns a ref callback that wires the node into Floating UI (`setFloating`) and, on mount,
- * promotes it to the top layer via the Popover API. Degrades to plain z-index if unsupported.
+ * Returns a ref callback that wires the node into Floating UI (`setFloating`) and, when `enabled`,
+ * promotes it to the top layer via the Popover API. Pass `enabled: false` inside a modal dialog
+ * (see {@link shouldUsePopoverTopLayer}). Degrades to plain z-index if unsupported.
  */
-export function useTopLayerRef(setFloating: RefSetter): RefSetter {
+export function useTopLayerRef(setFloating: RefSetter, enabled = true): RefSetter {
     return useCallback(
         (node: HTMLElement | null) => {
             setFloating(node)
-            if (!node) return
+            if (!node || !enabled) return
             try {
                 if (typeof node.showPopover === 'function' && !node.matches(':popover-open')) node.showPopover()
             } catch {
                 // Popover API unavailable / element not eligible — degrade to plain z-index stacking.
             }
         },
-        [setFloating],
+        [setFloating, enabled],
     )
 }
