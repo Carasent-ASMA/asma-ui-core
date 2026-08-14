@@ -12,6 +12,7 @@ import { CloseIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
 import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
+import { registerOpenModalDialog } from 'src/hooks/useTopLayer.hook'
 import style from './StyledDialog.module.scss'
 
 export type DialogCloseReason = 'escapeKeyDown' | 'backdropClick'
@@ -132,6 +133,11 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
             // focus next frame so it wins. Guard `node.open` in case the dialog closed in between.
             requestAnimationFrame(() => node.open && node.focus({ preventScroll: true }))
         }
+
+        // showModal() put this dialog in the browser top layer, above every z-index in the page.
+        // Publish it so anchorless global overlays (the snackbar stack) can render INSIDE it instead
+        // of behind it — see useTopLayer.hook. Unregisters before the node leaves the DOM.
+        return registerOpenModalDialog(node)
     }, [open])
 
     useEffect(() => {
