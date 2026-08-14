@@ -37,6 +37,7 @@ export interface IStyledDialogProps {
     dataTest: string
     maxWidth?: DialogMaxWidth
     fullWidth?: boolean
+    /** Defaults to `true` on mobile (≤743px); pass `false` to keep the windowed paper there too. */
     fullScreen?: boolean
     scroll?: 'paper' | 'body'
     disableEscapeKeyDown?: boolean
@@ -110,7 +111,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     const dialogRef = useRef<HTMLDialogElement>(null)
     const escapeHandledRef = useRef(false)
     const prevOpenRef = useRef(open)
-    const isFullScreen = isMobile ? true : fullScreen
+    const isFullScreen = fullScreen ?? isMobile
 
     useEffect(() => {
         if (prevOpenRef.current && !open) {
