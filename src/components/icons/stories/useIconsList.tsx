@@ -179,6 +179,7 @@ import {
     LoadCurrentIcon,
     RotateAutoIcon,
     MoveUpIcon,
+    CallIcon,
 } from '..'
 
 export const useIconsList = ({
@@ -713,6 +714,12 @@ export const useIconsList = ({
             component: <BadgeIcon height={height} width={width} />,
             clipboardText: '<BadgeIcon />',
             tags: ['badge'],
+        },
+        {
+            name: 'CallIcon',
+            component: <CallIcon height={height} width={width} />,
+            clipboardText: '<CallIcon />',
+            tags: ['call', 'phone', 'telephone'],
         },
         {
             name: 'EditSquareIcon',
