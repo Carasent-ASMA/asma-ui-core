@@ -157,6 +157,7 @@ const TooltipWithFloating = ({
                             ...(usePopoverLayer ? TOP_LAYER_RESET_STYLE : {}),
                             ...floatingStyles,
                             fontFamily: 'Roboto, Helvetica, Arial, sans-serif',
+                            overflow: 'visible',
                             ...slotProps?.tooltip?.style,
                             ...resolveSx(slotProps?.tooltip?.sx),
                         }}
