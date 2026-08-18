@@ -1,9 +1,9 @@
-import { useEffect, useRef, type FC, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useRef, type CSSProperties, type FC, type ReactNode } from 'react'
 import { FloatingPortal } from '@floating-ui/react'
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
-import { getOpenModalDialogAncestor } from 'src/hooks/useTopLayer.hook'
+import { getOpenModalDialogAncestor, shouldUsePopoverTopLayer, TOP_LAYER_PROPS } from 'src/hooks/useTopLayer.hook'
 
 export type DrawerAnchor = 'left' | 'right' | 'top' | 'bottom'
 export type DrawerCloseReason = 'backdropClick' | 'escapeKeyDown'
@@ -41,6 +41,21 @@ const CLOSED_TRANSFORM: Record<DrawerAnchor, string> = {
     bottom: 'translate-y-full',
 }
 
+// The UA stylesheet gives every [popover] `inset:0; margin:auto; border:solid; padding:0.25em;
+// width/height:fit-content`. The Tailwind classes override what they set; these inline resets cover
+// only the box properties the drawer leaves unset, so joining the top layer changes stacking only.
+const UA_POPOVER_BOX_RESET: CSSProperties = { margin: 0, border: 'none', padding: 0 }
+// The backdrop's `inset-0` classes set no width/height, so the UA `fit-content` would collapse it
+// to 0×0 — restore `auto` so it stretches to the insets again.
+const UA_POPOVER_BACKDROP_RESET: CSSProperties = { ...UA_POPOVER_BOX_RESET, width: 'auto', height: 'auto' }
+// Per-anchor: neutralise the UA inset on the edge opposite the anchor and the UA size on the free axis.
+const UA_POPOVER_EDGE_RESET: Record<DrawerAnchor, CSSProperties> = {
+    left: { right: 'auto', width: 'auto' },
+    right: { left: 'auto', width: 'auto' },
+    top: { bottom: 'auto', height: 'auto' },
+    bottom: { top: 'auto', height: 'auto' },
+}
+
 /**
  * Sliding edge panel (replaces MUI `Drawer`). Portalled, slides from `anchor`, temporary variant
  * shows a backdrop and closes on backdrop-click / Escape. Public props preserved (DEC-003). TASK-304.
@@ -69,6 +84,31 @@ export const StyledDrawer: FC<DrawerProps> = ({
     const isTemporary = variant === 'temporary'
     const portalRoot = getOpenModalDialogAncestor(anchorEl)
     const panelRef = useRef<HTMLDivElement | null>(null)
+    const backdropRef = useRef<HTMLDivElement | null>(null)
+
+    const usesPopoverTopLayer = isTemporary && shouldUsePopoverTopLayer(portalRoot)
+
+    const promoteToTopLayer = (node: HTMLElement | null): void => {
+        if (!node || !open || !usesPopoverTopLayer) return
+        try {
+            if (typeof node.showPopover === 'function' && !node.matches(':popover-open')) node.showPopover()
+        } catch {
+            // Popover API unavailable / element not eligible — degrade to plain z-index stacking.
+        }
+    }
+
+    useLayoutEffect(() => {
+        if (!open || !usesPopoverTopLayer) return
+        for (const node of [backdropRef.current, panelRef.current]) {
+            try {
+                if (!node || typeof node.showPopover !== 'function') continue
+                if (node.matches(':popover-open')) node.hidePopover()
+                node.showPopover()
+            } catch {
+                // Popover API unavailable / element not eligible — degrade to plain z-index stacking.
+            }
+        }
+    }, [open, usesPopoverTopLayer])
 
     useEffect(() => {
         if (!open || !isTemporary) return
@@ -91,13 +131,23 @@ export const StyledDrawer: FC<DrawerProps> = ({
                 // Mouse-only backdrop dismiss; Escape (handled above) is the keyboard equivalent.
                 // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
                 <div
+                    ref={(node) => {
+                        backdropRef.current = node
+                        promoteToTopLayer(node)
+                    }}
+                    {...(usesPopoverTopLayer ? TOP_LAYER_PROPS : undefined)}
                     // Figma modal overlay bg/modal = #626e7eb2 (delta-600 @ ~70%), matching StyledDialog.
                     className='fixed inset-0 z-[1200] bg-[#626e7eb2]'
+                    style={usesPopoverTopLayer ? UA_POPOVER_BACKDROP_RESET : undefined}
                     onClick={(event) => onClose?.(event, 'backdropClick')}
                 />
             )}
             <div
-                ref={panelRef}
+                ref={(node) => {
+                    panelRef.current = node
+                    promoteToTopLayer(node)
+                }}
+                {...(usesPopoverTopLayer ? TOP_LAYER_PROPS : undefined)}
                 role={isTemporary ? 'dialog' : undefined}
                 aria-modal={isTemporary && open ? true : undefined}
                 aria-hidden={!open}
@@ -111,6 +161,7 @@ export const StyledDrawer: FC<DrawerProps> = ({
                     PaperProps?.className,
                 )}
                 style={{
+                    ...(usesPopoverTopLayer && { ...UA_POPOVER_BOX_RESET, ...UA_POPOVER_EDGE_RESET[anchor] }),
                     ...resolveSx(sx),
                     ...resolveSx(PaperProps?.sx),
                 }}
