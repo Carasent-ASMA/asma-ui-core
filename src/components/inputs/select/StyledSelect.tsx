@@ -31,6 +31,7 @@ import { ChevronDownIcon, CloseIcon, ErrorOutlineIcon } from 'src/components/ico
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
 import { useHelperAlertRole } from 'src/helpers/useHelperAlertRole'
+import { useHelperRowBudget } from 'src/helpers/useHelperRowBudget'
 import { warnMissingErrorMessage } from 'src/helpers/warnMissingErrorMessage'
 import {
     getOpenModalDialogAncestor,
@@ -78,6 +79,12 @@ export interface StyledSelectProps {
      * Set false to mount only when there is content or an error.
      */
     reserveHelperText?: boolean
+    /**
+     * When true (default), a message wider than the trigger runs past its right edge instead of
+     * wrapping — but only into space measured to be free (see [[helperTextRoom]]). Same contract as
+     * `StyledInputField`; set false to keep the message inside the trigger's own width.
+     */
+    expandHelperText?: boolean
     /** @figmaProp Clear (trigger clear button) */
     allowClear?: boolean
     /** @figmaProp State = true→"Disabled" */
@@ -125,6 +132,7 @@ export const StyledSelect = ({
     errorText,
     helperText,
     reserveHelperText = true,
+    expandHelperText = true,
     allowClear,
     disabled,
     readOnly,
@@ -154,6 +162,9 @@ export const StyledSelect = ({
     const showHelperSlot = !readOnly && (reserveHelperText || message != null || isError)
     warnMissingErrorMessage('StyledSelect', isError, message)
     const helperAlertRole = useHelperAlertRole(isError)
+
+    // REQ-013 — a message wider than the trigger borrows the free space beside it.
+    const { fieldRef, rowRef, rowStyle: helperRowStyle } = useHelperRowBudget(expandHelperText && showHelperSlot)
 
     const [open, setOpen] = useState(false)
     const [focused, setFocused] = useState(false)
@@ -306,6 +317,7 @@ export const StyledSelect = ({
 
     return (
         <div
+            ref={fieldRef}
             className={cn('group relative inline-flex flex-col', fullWidth && 'w-full', className)}
             style={{ fontFamily: 'Roboto, Helvetica, Arial, sans-serif', ...resolveSx(sx), ...style }}
         >
@@ -432,12 +444,14 @@ export const StyledSelect = ({
 
             {showHelperSlot && (
                 <div
+                    ref={rowRef}
                     id={helperId}
                     role={helperAlertRole}
                     className={cn(
                         'm-0 mr-[14px] box-border flex min-h-[24px] items-center gap-1 pt-1 text-sm leading-5 tracking-[0.03333em]',
                         isError ? 'text-error-500' : 'text-delta-600',
                     )}
+                    style={helperRowStyle}
                 >
                     {isError && <ErrorOutlineIcon width={20} height={20} className='min-w-5 shrink-0' />}
                     <span>{message}</span>

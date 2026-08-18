@@ -39,6 +39,40 @@ describe('StyledInputField helper-slot contract', () => {
         expect(html).toContain('aria-invalid="true"')
     })
 
+    /**
+     * The slot only prevents layout shift if both states occupy the same box. The error branch used
+     * to be the only one that got `flex`, which made the row 4px *shorter* with an error than with a
+     * hint — everything below the field nudged up on error and back down on recovery.
+     */
+    it('MUT-019: hint and error states share the same layout classes, so the row cannot resize', () => {
+        // Read the helper row's own class attribute; anchoring anywhere inside it would silently
+        // drop the classes that precede the anchor.
+        const layoutClasses = (html: string) => {
+            const slotTag = /<div[^>]*id="[^"]*-helper-text"[^>]*>/.exec(html)?.[0] ?? ''
+            const cls = /class="([^"]*)"/.exec(slotTag)?.[1] ?? ''
+            const tokens = cls.split(/\s+/)
+            return ['flex', 'items-start', 'gap-1', 'min-h-[24px]', 'pt-1', 'box-border'].filter((c) =>
+                tokens.includes(c),
+            )
+        }
+
+        const hint = renderToStaticMarkup(
+            createElement(StyledInputField, { dataTest: 'f', helperText: 'Ex: +47 12 34 56 78', label: 'Phone' }),
+        )
+        const errored = renderToStaticMarkup(
+            createElement(StyledInputField, {
+                dataTest: 'f',
+                error: true,
+                helperText: 'Invalid phone — Ex: +47 12 34 56 78',
+                label: 'Phone',
+            }),
+        )
+
+        expect(layoutClasses(hint)).toEqual(layoutClasses(errored))
+        expect(layoutClasses(hint)).toContain('flex')
+        expect(layoutClasses(hint)).toContain('min-h-[24px]')
+    })
+
     it('reserveHelperText=false omits the empty helper slot', () => {
         const html = renderToStaticMarkup(
             createElement(StyledInputField, {
