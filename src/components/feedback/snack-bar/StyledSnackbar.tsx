@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from 'react'
 import { FloatingPortal } from '@floating-ui/react'
 import { cn } from 'src/helpers/cn'
+import { useTopmostOpenModalDialog } from 'src/hooks/useTopLayer.hook'
 
 export interface SnackbarOrigin {
     vertical: 'top' | 'bottom'
@@ -46,6 +47,11 @@ export const StyledSnackbar = ({
     children,
     className,
 }: SnackbarProps): JSX.Element | null => {
+    // Anchorless overlay: portal into the topmost open modal `<dialog>` when there is one, so the
+    // toast clears the dialog's top-layer entry instead of being painted behind it (see
+    // useTopLayer.hook). `z-[1400]` below is what lifts it over the dialog's paper.
+    const portalRoot = useTopmostOpenModalDialog()
+
     useEffect(() => {
         if (!open || autoHideDuration == null) return
         const timer = setTimeout(() => onClose?.(null, 'timeout'), autoHideDuration)
@@ -56,7 +62,7 @@ export const StyledSnackbar = ({
 
     const position = POSITION_CLASS[`${anchorOrigin.vertical}-${anchorOrigin.horizontal}`]
     return (
-        <FloatingPortal>
+        <FloatingPortal root={portalRoot}>
             <div className={cn('fixed z-[1400] flex items-center gap-2', position, className)}>
                 {children ?? (
                     <div className='flex items-center gap-2 rounded bg-delta-800 px-4 py-3 text-sm text-white shadow-lg'>

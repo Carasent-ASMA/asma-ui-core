@@ -35,6 +35,7 @@ import { useHelperRowBudget } from 'src/helpers/useHelperRowBudget'
 import { warnMissingErrorMessage } from 'src/helpers/warnMissingErrorMessage'
 import {
     getOpenModalDialogAncestor,
+    shouldUsePopoverTopLayer,
     TOP_LAYER_PROPS,
     TOP_LAYER_RESET_STYLE,
     useTopLayerRef,
@@ -176,10 +177,26 @@ export const StyledSelect = ({
         : currentValue !== undefined && currentValue !== '' && currentValue !== null
 
     const listRef = useRef<HTMLUListElement>(null)
+    // Own handle on the trigger element: the merged floating-ui ref below can't be read back, and the
+    // dismiss handler needs to hand focus to it.
+    const triggerElRef = useRef<HTMLButtonElement | null>(null)
+
+    // Every close except a selection unmounts the listbox while the open-effect below still holds DOM
+    // focus inside it, so focus would fall to <body> and the next Tab would restart from the top of
+    // the document (WCAG 2.4.3 / 2.4.7; the ARIA combobox pattern requires Escape to return focus to
+    // the trigger). `selectValue` already restores focus after a pick — this covers Escape, outside
+    // press and re-clicking the trigger. Focus the user has already moved elsewhere is left alone.
+    const handleOpenChange = (next: boolean): void => {
+        setOpen(next)
+        if (next) return
+        const active = document.activeElement
+        if (active && active !== document.body && !listRef.current?.contains(active)) return
+        triggerElRef.current?.focus()
+    }
 
     const { refs, floatingStyles, context } = useFloating({
         open,
-        onOpenChange: setOpen,
+        onOpenChange: handleOpenChange,
         placement: 'bottom-start',
         strategy: 'fixed',
         whileElementsMounted: autoUpdate,
@@ -198,17 +215,15 @@ export const StyledSelect = ({
     const dismiss = useDismiss(context)
     const role = useRole(context, { role: 'listbox' })
     const { getReferenceProps, getFloatingProps } = useInteractions([click, dismiss, role])
-    const triggerRef = useMergeRefs([refs.setReference])
-    // Promote the listbox into the top layer so it paints above a modal <dialog> regardless of z-index.
-    const listboxRef = useMergeRefs([useTopLayerRef(refs.setFloating), listRef])
-    // Portal the listbox INTO the trigger's modal <dialog> (if any): top-layer promotion fixes
-    // painting but a body-portalled popover is still marked inert by the dialog, so option clicks
-    // fall through. A descendant of the open dialog is not inert. See getOpenModalDialogAncestor.
-
+    const triggerRef = useMergeRefs([refs.setReference, triggerElRef])
+    // Portal INTO the trigger's modal <dialog> (if any) so the listbox isn't inert. Popover API
+    // only when body-portalled — nested showPopover inside a dialog breaks on mobile Safari.
     const portalRoot = useMemo(
         () => (open ? getOpenModalDialogAncestor(refs.reference.current) : undefined),
         [open, refs],
     )
+    const usePopoverLayer = shouldUsePopoverTopLayer(portalRoot)
+    const listboxRef = useMergeRefs([useTopLayerRef(refs.setFloating, usePopoverLayer), listRef])
 
     // Report state into the surrounding FormControl so the label floats.
     useEffect(() => ctx?.setFocused(open || focused), [open, focused, ctx])
@@ -216,6 +231,19 @@ export const StyledSelect = ({
         () => ctx?.setFilled(hasValue || Boolean(placeholder) || Boolean(displayEmpty)),
         [hasValue, placeholder, displayEmpty, ctx],
     )
+
+    // Scroll (and focus) the selected option into view when the listbox opens — long year/month
+    // menus otherwise open at the top while the current value sits off-screen.
+    useEffect(() => {
+        if (!open) return
+        const id = requestAnimationFrame(() => {
+            const selected = listRef.current?.querySelector<HTMLElement>('[role="option"][aria-selected="true"]')
+            if (!selected) return
+            selected.scrollIntoView({ block: 'nearest' })
+            selected.focus()
+        })
+        return () => cancelAnimationFrame(id)
+    }, [open])
 
     const selectValue = (next: unknown, child: ReactNode): void => {
         const selected = multiple
@@ -292,7 +320,10 @@ export const StyledSelect = ({
         if ((event.key !== 'ArrowDown' && event.key !== 'ArrowUp') || isDisabled || readOnly) return
         event.preventDefault()
         setOpen(true)
+        // Focus falls to the selected option via the open-effect above; if none selected, land on
+        // first (ArrowDown) / last (ArrowUp) so keyboard open still has a focus target.
         requestAnimationFrame(() => {
+            if (listRef.current?.querySelector('[role="option"][aria-selected="true"]')) return
             const items = listRef.current?.querySelectorAll<HTMLElement>('[role="option"]:not([aria-disabled="true"])')
             if (!items?.length) return
             items[event.key === 'ArrowUp' ? items.length - 1 : 0]?.focus()
@@ -314,6 +345,14 @@ export const StyledSelect = ({
             ;(document.activeElement as HTMLElement | null)?.click()
         }
     }
+
+    // `standard` reads as a button (calendar month/year), so its focused/open state mirrors
+    // StyledButton's: gama-50 fill + gama-500 label on top of the gama-400 ring. Each colour is an
+    // exclusive branch rather than a stacked override — Tailwind runs with `important: true`, so two
+    // colour utilities on one element are resolved by stylesheet order, not by JSX order.
+    const isButtonFocus = isStandard && (open || focused)
+    const triggerTextClass = isDisabled ? 'text-delta-300' : isButtonFocus ? 'text-gama-500' : 'text-delta-800'
+    const chevronRestingClass = isDisabled ? 'text-delta-300' : 'text-delta-700'
 
     return (
         <div
@@ -361,10 +400,15 @@ export const StyledSelect = ({
                 }}
                 style={{ minWidth: hasValue && !isStandard ? 105 : undefined }}
                 className={cn(
-                    'relative flex w-full items-center justify-between bg-transparent text-left text-delta-800 outline-none',
+                    'relative flex w-full items-center justify-between text-left outline-none',
                     // Figma field text = Body Base 16/lh24 (`text-base`), h40 (matches StyledInputField/field-styles).
-                    isStandard ? 'h-10 min-w-0 border-0 px-0 text-base' : 'h-10 rounded-lg border-0 px-3 text-base',
-                    isDisabled && 'cursor-not-allowed text-delta-300',
+                    // `standard` shares the outlined geometry (h40, px-3, radius) — only its border is
+                    // deferred to focus, via `borderless` on the outline overlay below.
+                    'h-10 rounded-lg border-0 px-3 text-base transition-colors',
+                    isButtonFocus ? 'bg-gama-50' : 'bg-transparent',
+                    triggerTextClass,
+                    isStandard && 'min-w-0',
+                    isDisabled && 'cursor-not-allowed',
                     readOnly && 'pointer-events-none',
                 )}
             >
@@ -395,21 +439,20 @@ export const StyledSelect = ({
                         height={24}
                         className={cn(
                             'shrink-0 transition-transform',
-                            isDisabled ? 'text-delta-300' : 'text-delta-700',
+                            isButtonFocus ? 'text-gama-500' : chevronRestingClass,
                             open && 'rotate-180',
                         )}
                     />
                 </span>
-                {!isStandard && (
-                    <div
-                        className={outlineClass({
-                            focused: open || focused,
-                            error: isError,
-                            disabled: isDisabled,
-                            readOnly,
-                        })}
-                    />
-                )}
+                <div
+                    className={outlineClass({
+                        focused: open || focused,
+                        error: isError,
+                        disabled: isDisabled,
+                        readOnly,
+                        borderless: isStandard,
+                    })}
+                />
             </button>
 
             {open && (
@@ -424,9 +467,9 @@ export const StyledSelect = ({
                         // consumer using only an external `labelId` label, which is the common case.
                         aria-labelledby={labelId}
                         aria-label={!labelId ? name : undefined}
-                        {...TOP_LAYER_PROPS}
+                        {...(usePopoverLayer ? TOP_LAYER_PROPS : {})}
                         style={{
-                            ...TOP_LAYER_RESET_STYLE,
+                            ...(usePopoverLayer ? TOP_LAYER_RESET_STYLE : {}),
                             ...floatingStyles,
                             fontFamily: 'Roboto, Helvetica, Arial, sans-serif',
                         }}

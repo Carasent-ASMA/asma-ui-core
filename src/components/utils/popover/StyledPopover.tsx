@@ -13,7 +13,13 @@ import {
 } from '@floating-ui/react'
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
-import { getOpenModalDialogAncestor, TOP_LAYER_PROPS, TOP_LAYER_RESET_STYLE, useTopLayerRef } from 'src/hooks/useTopLayer.hook'
+import {
+    getOpenModalDialogAncestor,
+    shouldUsePopoverTopLayer,
+    TOP_LAYER_PROPS,
+    TOP_LAYER_RESET_STYLE,
+    useTopLayerRef,
+} from 'src/hooks/useTopLayer.hook'
 
 export interface PopoverOrigin {
     vertical: 'top' | 'center' | 'bottom' | number
@@ -69,8 +75,10 @@ const toPlacement = (anchor: PopoverOrigin, transform: PopoverOrigin): Placement
  * so the base paper uses the DS floating-surface defaults: white, radius **4** (Figma `menus`/
  * `text-field` radius token), and the **Float** elevation (drop-shadow `0 1 12 rgba(0,0,0,.15)`).
  * Styled consumers override the paper — `StyledMenu` adds the delta-300 border + Menus shadow
- * (`0 2 4 rgba(34,33,51,.15)`), the date-picker calendar keeps this base. Rendered in the browser
- * **top layer** (see `useTopLayerRef`) so it paints above a modal `<dialog>`.
+ * (`0 2 4 rgba(34,33,51,.15)`), the date-picker calendar keeps this base. Body-portalled instances
+ * join the browser **top layer** (see `useTopLayerRef`); when the anchor is inside a modal
+ * `<dialog>`, we portal into that dialog and skip the Popover API (mobile Safari nested top-layer
+ * bug — see `shouldUsePopoverTopLayer`).
  *
  * Positions against `anchorEl`, flips/shifts on collision, portalled, closes on outside-press/escape
  * mapping to MUI's `onClose(event, reason)`. `anchorOrigin`/`transformOrigin`/`slotProps.paper`
@@ -116,18 +124,25 @@ export const StyledPopover = ({
         },
     })
 
-    const dismiss = useDismiss(context, { outsidePress: true, escapeKey: true })
+    // Ignore presses on the anchor — external triggers (bindTrigger / ClickAway) open on the same
+    // tap that useDismiss would otherwise treat as outside-press, which races closed on touch devices.
+    const dismiss = useDismiss(context, {
+        outsidePress: (event) => {
+            const target = event.target
+            if (anchorEl instanceof Element && target instanceof Node && anchorEl.contains(target)) return false
+            return true
+        },
+        escapeKey: true,
+    })
     const { getFloatingProps } = useInteractions([dismiss])
-    // Promote into the top layer so it paints above a modal <dialog> regardless of z-index.
-    const floatingRef = useMergeRefs([useTopLayerRef(refs.setFloating)])
-    // Portal INTO the anchor's modal <dialog> (if any): a body-portalled popover stays inert under a
-    // modal dialog (clicks fall through) even when top-layer-promoted. Keep that root after the
-    // anchor is cleared so mounted children are not remounted. See getOpenModalDialogAncestor.
+    // Body portal → Popover API top layer. Inside a modal dialog → portal in + z-index only.
+    const usePopoverLayer = shouldUsePopoverTopLayer(portalRoot)
+    const floatingRef = useMergeRefs([useTopLayerRef(refs.setFloating, usePopoverLayer)])
 
     // keepMounted leaves the node in the DOM across open/close — re-assert popover show/hide each flip
     // (useTopLayerRef only runs on attach, which doesn't re-fire when we stay mounted).
     useEffect(() => {
-        if (!shouldMount) return
+        if (!shouldMount || !usePopoverLayer) return
         const node = refs.floating.current
         if (!node || typeof node.showPopover !== 'function') return
         try {
@@ -136,7 +151,7 @@ export const StyledPopover = ({
         } catch {
             // Popover API unavailable / element not eligible.
         }
-    }, [open, shouldMount, refs.floating])
+    }, [open, shouldMount, usePopoverLayer, refs.floating])
 
     if (!shouldMount) return null
 
@@ -145,9 +160,9 @@ export const StyledPopover = ({
             <div
                 ref={floatingRef}
                 id={id}
-                {...TOP_LAYER_PROPS}
+                {...(usePopoverLayer ? TOP_LAYER_PROPS : {})}
                 style={{
-                    ...TOP_LAYER_RESET_STYLE,
+                    ...(usePopoverLayer ? TOP_LAYER_RESET_STYLE : {}),
                     ...(open ? floatingStyles : {}),
                     ...resolveSx(sx),
                     ...resolveSx(slotProps?.paper?.sx),

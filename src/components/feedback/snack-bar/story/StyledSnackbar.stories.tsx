@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect } from 'storybook/test'
+import { useState } from 'react'
+import { expect, waitFor, within } from 'storybook/test'
 import { ChevronRightIcon } from '../../../icons'
+import { StyledDialog } from '../../dialog/StyledDialog'
 import { StyledButton } from '../../../inputs/button/StyledButton'
 import type { AlertColor } from '../StyledAlert'
 import { SnackbarProvider } from '../SnackbarProvider'
@@ -56,6 +58,23 @@ const toast = (severity: AlertColor, over: Partial<StyledDefaultSnackbarProps> =
         autoHideDuration: null,
         ...over,
     }) as unknown as StyledDefaultSnackbarProps
+
+/**
+ * Assert the browser really would deliver a click to `element` — the check that separates a fixed
+ * snackbar from a broken one.
+ *
+ * A modal `<dialog>` lives in the browser top layer and marks everything outside its subtree `inert`.
+ * `elementFromPoint` skips inert nodes, so it resolves to `element` only when it is BOTH painted above
+ * the dialog AND hit-testable; a body-portalled toast resolves to the dialog's backdrop instead, no
+ * matter how high its z-index. Retried because notistack slides the toast in over ~300ms.
+ */
+const expectHitTestable = async (element: HTMLElement): Promise<void> => {
+    await waitFor(() => {
+        const { left, top, width, height } = element.getBoundingClientRect()
+        const topmost = document.elementFromPoint(left + width / 2, top + height / 2)
+        expect(element.contains(topmost)).toBe(true)
+    })
+}
 
 const Section = ({ heading, children }: { heading: string; children: React.ReactNode }): JSX.Element => (
     <div className='flex flex-col gap-3'>
@@ -125,6 +144,131 @@ export const AllVariants: Story = {
         await expect(toasts.length).toBe(12)
         await expect(canvas.getAllByText('Success').length).toBeGreaterThan(0)
         await expect(canvas.getAllByText('Error').length).toBeGreaterThan(0)
+    },
+}
+
+/**
+ * Layering regression guard: a toast raised from inside an open `StyledDialog` — the Inbox "Send SMS"
+ * flow. The dialog is a native `<dialog>` in the browser **top layer**, which outranks every z-index
+ * in the page, so the toast has to render inside the dialog's own subtree to be seen at all. See
+ * `useTopLayer.hook` / `SnackbarProvider`.
+ */
+export const InsideDialog: Story = {
+    render: () => (
+        <StyledDialog open onClose={() => undefined} dataTest='snackbar-dialog' dialogTitle='Send SMS'>
+            <div className='p-6'>
+                <StyledButton
+                    dataTest='enqueue-in-dialog'
+                    variant='outlined'
+                    onClick={() =>
+                        processDefaultSnackbar(MESSAGE.success, {
+                            severity: 'success',
+                            title: TITLE.success,
+                            persist: true,
+                        })
+                    }
+                >
+                    Send SMS
+                </StyledButton>
+            </div>
+        </StyledDialog>
+    ),
+    play: async ({ canvasElement, userEvent }) => {
+        // The dialog portals out of the canvas root, so query the whole document.
+        const canvas = within(canvasElement.ownerDocument.body)
+        await userEvent.click(canvas.getByRole('button', { name: 'Send SMS' }))
+
+        const toast = await waitFor(() => canvas.getByRole('alert'))
+        // The mechanism: the stack is re-parented into the open modal rather than left in <body>.
+        await expect(canvas.getByTestId('snackbar-dialog').contains(toast)).toBe(true)
+        await expectHitTestable(within(toast).getByRole('button', { name: 'close' }))
+    },
+}
+
+// Nested dialogs must open SEQUENTIALLY to model reality: top-layer order is `showModal()` call
+// order, and mounting both in one commit inverts it (React runs the child's layout effect first, so
+// the inner dialog would open — and therefore stack — below the outer one).
+const NestedDialogsHarness = (): JSX.Element => {
+    const [nestedOpen, setNestedOpen] = useState(false)
+    const [outerOpen, setOuterOpen] = useState(true)
+
+    return (
+        <StyledDialog
+            open={outerOpen}
+            onClose={() => undefined}
+            dataTest='outer-dialog'
+            dialogTitle='Outer dialog'
+            showCloseIcon={false}
+        >
+            <div className='flex gap-3 p-6'>
+                <StyledButton dataTest='open-nested' variant='outlined' onClick={() => setNestedOpen(true)}>
+                    Open nested
+                </StyledButton>
+                <StyledButton dataTest='close-outer' variant='outlined' onClick={() => setOuterOpen(false)}>
+                    Close outer
+                </StyledButton>
+            </div>
+
+            <StyledDialog
+                open={nestedOpen}
+                onClose={() => undefined}
+                dataTest='nested-dialog'
+                dialogTitle='Nested dialog'
+                showCloseIcon={false}
+            >
+                <div className='flex gap-3 p-6'>
+                    <StyledButton
+                        dataTest='enqueue-nested'
+                        variant='outlined'
+                        onClick={() =>
+                            processDefaultSnackbar(MESSAGE.success, {
+                                severity: 'success',
+                                title: TITLE.success,
+                                persist: true,
+                            })
+                        }
+                    >
+                        Send SMS
+                    </StyledButton>
+                    <StyledButton dataTest='close-nested' variant='outlined' onClick={() => setNestedOpen(false)}>
+                        Close nested
+                    </StyledButton>
+                </div>
+            </StyledDialog>
+        </StyledDialog>
+    )
+}
+
+/**
+ * Layering regression guard: the stack must follow the **topmost** modal as dialogs unwind, and a toast
+ * must OUTLIVE the dialog it was raised from — the "SMS sent, dialog closes" flow. Only the topmost
+ * modal's subtree is non-inert, so hosting the stack in any other open dialog occludes it again.
+ */
+export const NestedDialogs: Story = {
+    render: () => <NestedDialogsHarness />,
+    play: async ({ canvasElement, userEvent }) => {
+        const canvas = within(canvasElement.ownerDocument.body)
+        await userEvent.click(canvas.getByRole('button', { name: 'Open nested' }))
+        await waitFor(() => expect(canvas.getByTestId('nested-dialog')).toBeInTheDocument())
+        await userEvent.click(canvas.getByRole('button', { name: 'Send SMS' }))
+
+        const toast = await waitFor(() => canvas.getByRole('alert'))
+        const closeButton = within(toast).getByRole('button', { name: 'close' })
+
+        // Raised from the nested dialog → hosted by the nested dialog, not the outer one.
+        await expect(canvas.getByTestId('nested-dialog').contains(toast)).toBe(true)
+        await expectHitTestable(closeButton)
+
+        // Nested dialog closes: the same toast node survives and follows the new topmost modal.
+        await userEvent.click(canvas.getByRole('button', { name: 'Close nested' }))
+        await waitFor(() => expect(canvas.getByTestId('outer-dialog').contains(toast)).toBe(true))
+        await expectHitTestable(closeButton)
+
+        // Last dialog closes: the toast is still the same live node, now back in <body>.
+        await userEvent.click(canvas.getByRole('button', { name: 'Close outer' }))
+        await waitFor(() => expect(canvas.queryByTestId('outer-dialog')).toBeNull())
+        await expect(canvas.getByRole('alert')).toBe(toast)
+        await expectHitTestable(closeButton)
     },
 }
 

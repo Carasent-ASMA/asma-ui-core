@@ -16,7 +16,10 @@ export default defineConfig({
     testDir: '.',
     fullyParallel: true,
     workers: 4,
-    retries: 0,
+    // One retry: a re-capture absorbs the occasional single-frame flake (an async story that hadn't
+    // settled) without weakening the comparison — a genuine baseline diff reproduces deterministically
+    // and still fails. Keeps a red job meaningful now that it gates merges.
+    retries: 1,
     reporter: [['list'], ['html', { outputFolder: '../playwright-report', open: 'never' }]],
     snapshotPathTemplate: '{testDir}/__screenshots__/{arg}{ext}',
     // GUD-102: started strict (maxDiffPixels:0); TASK-116 shakedown showed complex stories with

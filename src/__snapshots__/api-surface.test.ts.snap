@@ -22,6 +22,7 @@ exports[`asma-ui-core public API surface > keeps every runtime export of the pac
   "CalendarIcon",
   "CalendarRangeIcon",
   "CalendarRangeOutlineIcon",
+  "CallIcon",
   "CancelOutlineIcon",
   "CardIdIcon",
   "CardIdIconOutlined",
