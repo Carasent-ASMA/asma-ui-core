@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import { StyledButton } from 'src/components/inputs/button'
 import { DotsVerticalIcon } from 'src/components/icons'
 import { StyledMenu } from 'src/components/navigation/menu/StyledMenu'
@@ -96,10 +96,7 @@ export function ToolbarActionGroup({
 
             {showMoreMenu && (
                 <>
-                    <MoreTriggerButton
-                        overflowMenuLabel={overflowMenuLabel}
-                        onOpen={setAnchorEl}
-                    />
+                    <MoreTriggerButton overflowMenuLabel={overflowMenuLabel} onOpen={setAnchorEl} />
 
                     <StyledMenu
                         anchorEl={anchorEl}
@@ -108,25 +105,28 @@ export function ToolbarActionGroup({
                         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                     >
-                        {overflowActions.map((action) => (
-                            <StyledMenuItem
-                                key={action.id}
-                                disabled={action.disabled}
-                                onClick={() => {
-                                    setAnchorEl(null)
-                                    action.onClick()
-                                }}
-                            >
-                                <div
-                                    className={cn(
-                                        'flex items-center gap-2',
-                                        action.tone === 'danger' ? 'text-beta-500' : 'text-delta-700',
-                                    )}
+                        {overflowActions.map((action, index) => (
+                            <Fragment key={action.id}>
+                                {index > 0 && <hr className='m-0 border-0 border-t border-solid border-delta-200' />}
+
+                                <StyledMenuItem
+                                    disabled={action.disabled}
+                                    onClick={() => {
+                                        setAnchorEl(null)
+                                        action.onClick()
+                                    }}
                                 >
-                                    {action.icon}
-                                    <span>{action.label}</span>
-                                </div>
-                            </StyledMenuItem>
+                                    <div
+                                        className={cn(
+                                            'flex items-center gap-2',
+                                            action.tone === 'danger' ? 'text-beta-500' : 'text-delta-700',
+                                        )}
+                                    >
+                                        {action.icon}
+                                        <span>{action.label}</span>
+                                    </div>
+                                </StyledMenuItem>
+                            </Fragment>
                         ))}
                     </StyledMenu>
                 </>
