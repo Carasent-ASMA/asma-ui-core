@@ -8,6 +8,7 @@ exports[`asma-ui-core public API surface > keeps every runtime export of the pac
   "ArchiveIcon",
   "ArrowExpandIcon",
   "ArrowLeftIcon",
+  "ArrowRightIcon",
   "ArrowShrinkIcon",
   "AssignmentIcon",
   "AssignmentOutlineIcon",

@@ -18,8 +18,8 @@ type StoryArgs = {
 
 const FRAME_WIDTHS: Record<Breakpoint, number> = {
     mobile: 743,
-    tablet: 744,
-    desktop: 1024,
+    tablet: 1024,
+    desktop: 1440,
 }
 
 const AVATAR_SRC = 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=160&q=80'

@@ -206,7 +206,7 @@ export function PathfinderCard({
         if (expanded) return sortedItems
 
         const shellPaddingLeft = 24
-        const shellPaddingRight = 40
+        const shellPaddingRight = 24
         const reservedLead = leadSlot ? Math.max(leadReservePx, measurements.leadWidth + 12) : 0
         const reservedAction = actionSlot ? Math.max(actionReservePx, measurements.actionWidth) : 0
         const chevronReservePx = 24
