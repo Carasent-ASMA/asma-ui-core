@@ -409,7 +409,11 @@ export function StyledSelectAutocomplete<
                         <ChevronDownIcon
                             width={24}
                             height={24}
-                            className={cn(style['select-custom-icon'], 'text-delta-700 transition-transform', open && 'rotate-180')}
+                            className={cn(
+                                style['select-custom-icon'],
+                                open && style['select-custom-icon-open'],
+                                'text-delta-700',
+                            )}
                         />
                     ))}
                 </button>
