@@ -85,8 +85,8 @@ export const StyledFilteredEmptyState: FC<StyledFilteredEmptyStateProps> = ({
             {isFiltered && (
                 <div className={cn('flex flex-col items-center gap-2', filterContentClassName)}>
                     {/* Figma: title = Helper Semibold 14/20 delta-800, description = Helper 14/20 delta-600 */}
-                    <div className='text-sm font-semibold text-delta-800'>{displayFilterTitle}</div>
-                    <div className='text-sm text-delta-600'>{description}</div>
+                    <div className='text-lg font-semibold text-delta-800'>{displayFilterTitle}</div>
+                    <div className='text-delta-600'>{description}</div>
 
                     {onResetFilters && (
                         <StyledButton
