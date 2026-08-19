@@ -3,4 +3,14 @@
 }
 .select-custom-icon {
     margin-top: -0.5px !important;
+    // ponytail: rotate(0)→rotate(180) around the glyph. Tailwind `rotate-180` alone
+    // interpolates as a 360° matrix and lands pointing down.
+    transform-origin: center;
+    transform-box: fill-box;
+    transform: rotate(0deg);
+    transition: transform 150ms ease;
+}
+
+.select-custom-icon-open {
+    transform: rotate(180deg);
 }
