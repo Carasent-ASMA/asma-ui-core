@@ -1,16 +1,12 @@
 /**
- * How far the helper row (hint / error message) may run past the field's own right edge.
+ * How far the helper row (hint / error message) may run past the field's own right edge (REQ-013).
  *
- * A field is routinely narrower than its own validation message — a 160px phone input against
- * "Invalid phone — Ex: +47 12 34 56 78" (~259px). Wrapping that onto three lines grows the row and
- * pushes everything below it down, the exact shift the always-mounted slot exists to prevent
- * (DEC-B / REQ-004). The design answer is to let the message spill sideways instead — but only into
- * space that is provably free, so a field standing next to another one still wraps rather than
- * writing over its neighbour. That guard is what makes this safe to switch on for every field in the
- * fleet, including the error messages consumers compose themselves.
+ * A field is routinely narrower than its own message — a 160px phone input against
+ * "Invalid phone — Ex: +47 12 34 56 78". Wrapping grows the row and pushes the layout down, the very
+ * shift the always-mounted slot exists to prevent, so the message spills sideways instead — but only
+ * into space measured to be free, which is what makes it safe fleet-wide.
  *
- * Split out of the component so the geometry is testable without a layout engine: jsdom reports
- * every rect as zero, so none of this could be asserted from a rendered tree.
+ * Pure geometry, kept out of the component because jsdom reports every rect as zero.
  */
 
 /** The helper row's own right inset (`mr-[14px]`), which sits outside its `max-width` box. */
@@ -53,18 +49,12 @@ export function blockingLeftEdge(band: EdgeBox, neighbours: EdgeBox[]): number {
 }
 
 /**
- * Width budget for the helper row, given where the field starts and where its message must stop.
+ * Width budget for the helper row, or `undefined` for "leave the row alone" — which covers both an
+ * unmeasured field and nothing to borrow, and is exactly its pre-REQ-013 behaviour.
  *
- * `undefined` means **leave the row alone** — it covers both "unmeasured" (a zero-width field:
- * detached, `display:none`, jsdom) and "nothing to borrow", and leaving it alone is precisely its
- * old behaviour. That is what makes this safe to switch on everywhere: where there is no free space
- * the component emits no width style at all and cannot have changed anything.
- *
- * Capping at the field's own width instead would look equivalent and is not. A field root is
- * `inline-flex`, so when its helper row is its widest child the **root is sized by the row** — and
- * capping the row at the root's width caps it at exactly its own requirement. One sub-pixel of
- * font-metric drift (a different rendering container, say) then wraps a message that used to fit.
- * Caught by VRT on `inputs-select--gallery`, 2026-08-17.
+ * Returning the field's own width instead looks equivalent and is not: a field root is `inline-flex`,
+ * so a helper row that is its widest child *sizes* the root, and capping at that width caps the row
+ * at its own requirement — one sub-pixel of font-metric drift then wraps a message that used to fit.
  */
 export function helperRowMaxWidth(fieldLeft: number, fieldWidth: number, limitRight: number): number | undefined {
     if (!(fieldWidth > 0)) return undefined
