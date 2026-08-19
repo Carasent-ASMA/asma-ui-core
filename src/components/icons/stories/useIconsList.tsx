@@ -180,6 +180,7 @@ import {
     RotateAutoIcon,
     MoveUpIcon,
     CallIcon,
+    ArrowRightIcon,
 } from '..'
 
 export const useIconsList = ({
@@ -1285,6 +1286,12 @@ export const useIconsList = ({
             component: <MoveUpIcon height={height} width={width} />,
             clipboardText: '<MoveUpIcon />',
             tags: ['move up', 'upgrade', 'apply new versions'],
+        },
+        {
+            name: 'ArrowRightIcon',
+            component: <ArrowRightIcon height={height} width={width} />,
+            clipboardText: '<ArrowRightIcon />',
+            tags: ['arrow right icon'],
         },
     ]
 
