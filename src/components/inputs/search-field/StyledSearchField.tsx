@@ -34,8 +34,6 @@ export const StyledSearchField: FC<StyledSearchFieldProps> = ({
                 size='small'
                 variant='outlined'
                 value={value}
-                // A search field never shows a hint/error (Figma: no helper row) — opt out of the
-                // always-mounted helper slot so it doesn't reserve space no caller ever fills.
                 reserveHelperText={false}
                 // Figma: floating label only when focused/filled; at rest the label string is the placeholder.
                 label={hasInteraction ? label : undefined}

@@ -1,9 +1,5 @@
 import type { ReactNode } from 'react'
 
-/**
- * Transient ASMA-7729 guard: callers that set `error` without a message silently lose copy after
- * the `'Required'` fallback is removed. Drop once fix-forward clears those call sites.
- */
 export function warnMissingErrorMessage(
     component: string,
     error: boolean | undefined,

@@ -11,7 +11,6 @@ const baseProps = {
     onChange: () => undefined,
 }
 
-// The "Clear selection" button only renders when a value is set and the field isn't required.
 const withSelection = { ...baseProps, value: 'a' }
 
 describe('DynamicInteractiveChipGroup', () => {

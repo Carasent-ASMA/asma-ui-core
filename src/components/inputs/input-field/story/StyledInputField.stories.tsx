@@ -110,21 +110,15 @@ export const Error: Story = {
         await expect(helper.getBoundingClientRect().top - shell.getBoundingClientRect().bottom).toBe(0)
         const icon = helper.querySelector('svg')!
         await expect(icon.getBoundingClientRect().top - shell.getBoundingClientRect().bottom).toBe(4)
-        // MUT-003: error appearance announces via role=alert
         await expect(helper).toHaveAttribute('role', 'alert')
         await expect(input).toHaveAttribute('aria-invalid', 'true')
         await expect(input).toHaveAttribute('aria-describedby', helper.id)
     },
 }
 
-/**
- * Always-mounted helper slot (DEC-B / ASMA-7729): reserve 24px even with no copy so hint↔error
- * swaps never shift layout. MUT-002 kills if the slot mounts only when content exists.
- */
 export const ReservedHelperSlot: Story = {
     args: {
         label: 'Email',
-        // no helperText — slot still reserved by default
     },
     play: async ({ canvas, canvasElement }) => {
         const input = canvas.getByLabelText('Email')
@@ -137,9 +131,6 @@ export const ReservedHelperSlot: Story = {
     },
 }
 
-/**
- * MUT-001: no hardcoded `'Required'` when `error` has no message — slot stays empty (apps own copy).
- */
 export const ErrorWithoutMessage: Story = {
     args: {
         error: true,
@@ -157,7 +148,6 @@ export const ErrorWithoutMessage: Story = {
     },
 }
 
-/** Dense layouts may opt out of the reserved row. */
 export const ReserveHelperTextFalse: Story = {
     args: {
         label: 'Email',
@@ -171,9 +161,6 @@ export const ReserveHelperTextFalse: Story = {
     },
 }
 
-/**
- * Hint ↔ error is a content swap on the same always-mounted slot (stable id / describedby).
- */
 export const HintToErrorSwap: Story = {
     args: {
         label: 'Email',

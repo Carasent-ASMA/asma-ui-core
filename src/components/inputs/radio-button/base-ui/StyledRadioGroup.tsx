@@ -17,9 +17,6 @@ export type StyledRadioGroupProps = {
     error?: boolean
     errorText?: string
     helperText?: string
-    /**
-     * When true (default), the helper row stays mounted (`min-h-[24px]`) to avoid layout shift.
-     */
     reserveHelperText?: boolean
     children: React.ReactNode
     name?: string

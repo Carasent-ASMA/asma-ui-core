@@ -21,7 +21,6 @@ const stories = Object.values(index.entries).filter((e) => e.type === 'story')
 // These oscillate >1000px between consecutive frames (rAF/Floating-UI/ResizeObserver loops that
 // `animations: 'disabled'` cannot stop) — not benign AA, so a tolerance can't absorb them without
 // making the whole suite too loose. All are overlay/large-reference stories with low pixel-baseline
-// value (interaction states are covered by the addon-vitest interaction tests). RISK-101/102.
 const DYNAMIC_TOOLBAR_STORIES = [
     'modules-dynamictoolbar--full-view-normal-mode',
     'modules-dynamictoolbar--workspaces-toolbar-layout',
@@ -58,12 +57,6 @@ const SKIP = new Map<string, string>([
     ],
     [
         'data-display-styledtable--sizing-persistence-and-control-alignment',
-        // ASMA-7729 investigation: the story's own `play` clicks a row to expand it, then measures
-        // the settled layout — but StyledTableIndex.tsx's ResizeObserver-driven row-height
-        // recalculation (useElementHeightPx.ts) can still be mid-adjustment when the screenshot
-        // fires. Confirmed not a simple "screenshot races `play`" issue: explicitly waiting for
-        // Storybook's `storyFinished` event (play-function completion) before capturing did not
-        // make it deterministic — same ResizeObserver-oscillation class as DYNAMIC_TOOLBAR_STORIES.
         'ResizeObserver row-height recalculation races the screenshot after the row-expand interaction',
     ],
     ...DYNAMIC_TOOLBAR_STORIES.map(
@@ -71,12 +64,10 @@ const SKIP = new Map<string, string>([
     ),
 ])
 
-// Hermetic capture (REQ-101): serve only from our static server, block all external hosts.
 test.beforeEach(async ({ page }) => {
     await installVrtRouteBlock(page)
 })
 
-// DEC-VRT-007: fixed "today" so date/time-picker stories don't drift monthly.
 for (const story of stories) {
     if (SKIP.has(story.id)) continue
     test(story.id, async ({ page }) => {

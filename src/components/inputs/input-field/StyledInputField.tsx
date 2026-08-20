@@ -50,7 +50,6 @@ type HtmlInputSlot = InputHTMLAttributes<HTMLInputElement> & { ref?: Ref<HTMLInp
  * Error/Disabled/Read only) is driven by native focus/hover + the `error`/`disabled`/`readOnly`
  * props; **Filled** (on/off) is derived from `value`/`defaultValue`. **Unify** and **Mixed state**
  * are Figma-authoring properties with no React counterpart. Non-annotated props are behavioral /
- * MUI `TextField` API-parity (DEC-003).
  */
 export interface StyledInputFieldProps {
     /** @figmaProp none — test hook */
@@ -68,17 +67,7 @@ export interface StyledInputFieldProps {
     error?: boolean
     /** @figmaProp Helper text element */
     helperText?: ReactNode
-    /**
-     * When true (default), the helper row stays mounted (`min-h-[24px]`) to avoid layout shift when
-     * hint ↔ error content swaps. Set false to mount the row only when there is content or an error.
-     */
     reserveHelperText?: boolean
-    /**
-     * When true (default), a hint or error wider than the field runs past its right edge instead of
-     * wrapping — but only into space measured to be free (see [[helperTextRoom]]), so a field with a
-     * neighbour beside it wraps exactly as before. Set false to keep the message inside the field's
-     * own width no matter what.
-     */
     expandHelperText?: boolean
     /** @figmaProp State = true→"Disabled" */
     disabled?: boolean
@@ -127,7 +116,6 @@ export interface StyledInputFieldProps {
  * Outlined text field with a floating label (replaces MUI `TextField`). Self-contained: manages its
  * own focus/value state to drive the shared field styling ([[field-styles]]); supports multiline,
  * start/end adornments, an optional clear button, and error/helper text. Public props preserved
- * (DEC-003). TASK-401.
  *
  * ponytail: `variant` is accepted but always renders outlined, and multiline uses fixed `rows`
  * (no auto-grow to `maxRows`) — known ceilings; Chromatic in CI is the visual gate.
@@ -314,12 +302,10 @@ export const StyledInputField = ({
     // a plain input. Gating purely on `shrink` wrongly hid the placeholder for label-less fields.
     const showPlaceholder = shrink || !label
 
-    // readOnly never surfaces validation UI; otherwise reserve space by default (CLS).
     const showHelperSlot = !readOnly && (reserveHelperText || helperText != null || Boolean(error))
     warnMissingErrorMessage('StyledInputField', error, helperText)
     const helperAlertRole = useHelperAlertRole(error)
 
-    // REQ-013 — a message wider than the field borrows the free space beside it.
     const {
         fieldRef: rootRef,
         rowRef: helperRowRef,
@@ -544,23 +530,11 @@ export const StyledInputField = ({
                     role={helperAlertRole}
                     className={cn(
                         // Figma "Helper text" row (15561-37857 / 34634-148726): 24px tall, pt 4px, gap 4px.
-                        // Keep min-h even when slotProps.formHelperText overrides other styles.
-                        //
-                        // `flex items-start gap-1` is unconditional so both states have the same box
-                        // model. It used to apply only in the error branch, which made the row 4px
-                        // shorter with an error than without: as a flex container its height came from
-                        // the 20px children, while the hint branch was a block whose line box took the
-                        // inherited 24px line-height. Everything below the field then nudged up on
-                        // error and back down on recovery — the exact shift the always-mounted slot
-                        // exists to prevent (DEC-B / REQ-004).
                         'mr-[14px] box-border flex min-h-[24px] items-start gap-1 pt-1',
                         error && !slotProps?.formHelperText?.hideErrorIcon && 'text-error-500',
                         !error && 'text-delta-600',
                         slotProps?.formHelperText?.className,
                     )}
-                    // `helperRowStyle` is `max-content` + a measured cap: as wide as the message needs,
-                    // never wider than the space beside the field. Absent (unmeasured, or expansion
-                    // switched off) the row stretches to the field as it always has. Consumer `sx` wins.
                     style={{ ...helperRowStyle, ...resolveSx(slotProps?.formHelperText?.sx) }}
                 >
                     {error && !slotProps?.formHelperText?.hideErrorIcon && (

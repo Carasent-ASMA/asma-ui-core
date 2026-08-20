@@ -52,7 +52,6 @@ interface DynamicSelectCommonProps<TOption extends DynamicSelectOption> {
      * Use this when the field must always have a value.
      */
     required?: boolean
-    /** @figmaProp Helper text (Helper 14/lh20). Presentational only — pass a message when `error` is set. */
     helperText?: React.ReactNode
     /** Completely removes the helper text block below the autocomplete */
     disableHelperText?: boolean
@@ -107,10 +106,6 @@ interface DynamicSelectCommonProps<TOption extends DynamicSelectOption> {
      * or empty-state messaging when localized behavior is supported.
      */
     locale?: 'no' | 'en'
-    /**
-     * Overrides the chip-group "Clear selection" / "Fjern valget" button label.
-     * Additive escape hatch for consumers that need a different wording than the `locale` default.
-     */
     clearSelectionLabel?: string
 }
 

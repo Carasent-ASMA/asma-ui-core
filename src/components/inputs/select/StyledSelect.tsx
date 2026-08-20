@@ -53,7 +53,6 @@ export interface SelectChangeEvent<T = unknown> {
  * The trigger is the outlined **Input field** (shared `field-styles`: 40px, focus gama-400, hover
  * gama-300); the dropdown is **Menus** (node 16073-19226). Figma field **State** (Enabled/Hovered/
  * Focused/Error/Disabled/Read-only) ← open/focus + `error`/`disabled`/`readOnly`; **Filled** ← `value`.
- * Non-annotated props are behavioral / MUI `Select` API-parity (DEC-003).
  */
 export interface StyledSelectProps {
     /** @figmaProp none — test hook */
@@ -64,7 +63,6 @@ export interface StyledSelectProps {
     defaultValue?: unknown
     onChange?: (event: SelectChangeEvent, child: ReactNode) => void
     /**
-     * @figmaProp none — accepted for MUI `Select` / DEC-003 drop-in parity, but **no longer affects
      * rendering**: the trigger value is Body Base 16px and the field is 40px at every size (a smaller
      * size only changed text before; Figma field text is 16/lh24 regardless). Kept so `size="small"`
      * call sites still compile. Ignored on purpose (not destructured).
@@ -73,18 +71,8 @@ export interface StyledSelectProps {
     /** @figmaProp State = true→"Error" */
     error?: boolean
     errorText?: string
-    /** Helper/hint text under the trigger; when `error`, this (or `errorText`) is the message. */
     helperText?: ReactNode
-    /**
-     * When true (default), the helper row stays mounted (`min-h-[24px]`) to avoid layout shift.
-     * Set false to mount only when there is content or an error.
-     */
     reserveHelperText?: boolean
-    /**
-     * When true (default), a message wider than the trigger runs past its right edge instead of
-     * wrapping — but only into space measured to be free (see [[helperTextRoom]]). Same contract as
-     * `StyledInputField`; set false to keep the message inside the trigger's own width.
-     */
     expandHelperText?: boolean
     /** @figmaProp Clear (trigger clear button) */
     allowClear?: boolean
@@ -121,7 +109,6 @@ export interface StyledSelectProps {
 /**
  * Single-select dropdown (replaces MUI `Select`) — a trigger styled as the outlined field plus a
  * portalled `role="listbox"`. Reports open/filled into a surrounding `StyledFormControl` so its
- * `StyledInputLabel` floats. Public props preserved (DEC-003). Use inside `StyledFormControl`.
  * TASK-402.
  */
 export const StyledSelect = ({
@@ -164,7 +151,6 @@ export const StyledSelect = ({
     warnMissingErrorMessage('StyledSelect', isError, message)
     const helperAlertRole = useHelperAlertRole(isError)
 
-    // REQ-013 — a message wider than the trigger borrows the free space beside it.
     const { fieldRef, rowRef, rowStyle: helperRowStyle } = useHelperRowBudget(expandHelperText && showHelperSlot)
 
     const [open, setOpen] = useState(false)

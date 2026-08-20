@@ -8,7 +8,6 @@ const box = (left: number, top: number, width: number, height: number): EdgeBox 
     bottom: top + height,
 })
 
-/** A 160px phone field at x=100, helper row spanning y=140..164. */
 const HELPER_BAND = box(100, 140, 160, 24)
 
 describe('blockingLeftEdge', () => {
@@ -37,7 +36,6 @@ describe('blockingLeftEdge', () => {
         expect(blockingLeftEdge(HELPER_BAND, [box(0, 100, 80, 80)])).toBe(Number.POSITIVE_INFINITY)
     })
 
-    /** display:none siblings collapse to an empty rect at 0,0 and must not read as an obstacle. */
     it('ignores unrendered siblings', () => {
         expect(blockingLeftEdge(HELPER_BAND, [box(0, 0, 0, 0)])).toBe(Number.POSITIVE_INFINITY)
     })
@@ -54,10 +52,6 @@ describe('helperRowMaxWidth', () => {
         expect(helperRowMaxWidth(100, 160, 600)).toBe(486)
     })
 
-    /**
-     * `undefined` = "leave the row alone", which is its pre-REQ-013 behaviour. Anything else caps a
-     * row that had no reason to be capped — see the shrink-to-fit case below.
-     */
     it('leaves the row alone when its parent ends at the field itself', () => {
         expect(helperRowMaxWidth(100, 160, 260)).toBeUndefined()
     })
@@ -71,11 +65,6 @@ describe('helperRowMaxWidth', () => {
         expect(helperRowMaxWidth(100, 160, Number.POSITIVE_INFINITY)).toBeUndefined()
     })
 
-    /**
-     * The regression VRT caught: an `inline-flex` root that is *sized by its own helper row* reports
-     * a width equal to the row + inset. A cap derived from that width is a cap at the row's own
-     * requirement, and the first sub-pixel of font-metric drift wraps a message that used to fit.
-     */
     it('does not cap a field whose width comes from the row itself', () => {
         const rowNeeds = 86
         const fieldWidth = rowNeeds + 14
@@ -84,7 +73,6 @@ describe('helperRowMaxWidth', () => {
         expect(helperRowMaxWidth(fieldLeft, fieldWidth, fieldLeft + fieldWidth)).toBeUndefined()
     })
 
-    /** Zero width means unmeasured (detached, display:none, jsdom) — not "no room". */
     it('reports unmeasured fields as undefined so no width style is applied', () => {
         expect(helperRowMaxWidth(0, 0, 600)).toBeUndefined()
     })

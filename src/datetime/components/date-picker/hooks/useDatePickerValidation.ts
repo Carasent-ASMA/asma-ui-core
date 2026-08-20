@@ -21,10 +21,6 @@ export interface DatePickerValidationMessageCatalog {
     nb: DatePickerValidationMessages
 }
 
-/**
- * Opt-in default EN/NB catalog for date-picker validation. Pass explicitly into
- * `useDatePickerValidation(messages)` — apps should prefer their own i18n override.
- */
 export const defaultDatePickerValidationMessages: DatePickerValidationMessageCatalog = {
     en: {
         required: 'Required',

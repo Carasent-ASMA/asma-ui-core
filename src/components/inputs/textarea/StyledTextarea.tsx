@@ -12,9 +12,6 @@ export interface TextareaCommonProps {
     labelClassName?: string
     /** @figmaProp Description / helper text (Helper 14/lh20, delta-600). */
     description?: ReactNode
-    /**
-     * When true (default), the description/helper row stays mounted to avoid layout shift.
-     */
     reserveHelperText?: boolean
     containerClassName?: string
     className?: string

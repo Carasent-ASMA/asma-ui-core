@@ -7,10 +7,6 @@ export interface TimePickerHelperMessages {
     afterStartTime: { en: string; no: string }
 }
 
-/**
- * Opt-in default EN/NO catalog for time-picker helper errors. Pass explicitly via `messages`
- * when wiring the picker — apps should prefer their own i18n override.
- */
 export const defaultTimePickerHelperMessages: TimePickerHelperMessages = {
     invalid: { en: 'Invalid time format', no: 'Ugyldig tidsformat' },
     afterStartTime: { en: 'Must be after start time', no: 'Må være etter starttid' },
@@ -22,7 +18,6 @@ export const HelperText: React.FC<{
     error?: boolean
     localization: 'en' | 'no'
     helperText?: ReactNode
-    /** Injectable message catalog; defaults to `defaultTimePickerHelperMessages`. */
     messages?: TimePickerHelperMessages
 }> = ({
     isValidTime,

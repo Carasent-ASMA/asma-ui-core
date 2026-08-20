@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { resolveHelperAlertRole } from './useHelperAlertRole'
 
-/**
- * REQ-005 — error *appearance* announces via role="alert"; a field that stays invalid across
- * later renders must fall back to role="status" so it doesn't re-fire the live region on every
- * content swap (the ALT-002 "role=alert chatter" defect UX rejected at GATE-001).
- */
 describe('resolveHelperAlertRole (REQ-005)', () => {
     it('announces alert on the render where an error first appears', () => {
         expect(resolveHelperAlertRole(true, false)).toBe('alert')

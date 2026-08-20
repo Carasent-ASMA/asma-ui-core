@@ -53,9 +53,6 @@ export interface StyledSliderProps {
     error?: boolean
     errorText?: string
     helperText?: string
-    /**
-     * When true (default), the helper row stays mounted (`min-h-[24px]`) to avoid layout shift.
-     */
     reserveHelperText?: boolean
     /** Accessible name for the thumb input(s) — there is no visible label to derive it from
      * (axe `label`). A function receives the thumb index (0, or 0/1 for a two-thumb range) so each
@@ -78,7 +75,6 @@ const asPair = (value: SliderValue | undefined): [number, number] | null =>
  * Native range-input slider (replaces MUI `Slider`). Single value uses one `<input type="range">`;
  * a two-element `value` renders two stacked inputs (each thumb independently grabbable via
  * pointer-events on the thumb only). Marks, vertical orientation, `classes`/`slotProps` slots and
- * `onChange`/`onChangeCommitted` are preserved (DEC-003).
  *
  * ponytail: exact-pixel parity with MUI's thumb travel/animation is a known ceiling — Chromatic in
  * CI is the visual gate. Upgrade path: tune the 8px thumb inset if a diff shows misalignment.
