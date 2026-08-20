@@ -1,4 +1,4 @@
-import { Children, type CSSProperties, type HTMLAttributes } from 'react'
+import { type CSSProperties, type HTMLAttributes } from 'react'
 import clsx from 'clsx'
 import { resolveSx } from 'src/helpers/sx'
 
@@ -8,10 +8,7 @@ interface DialogActionsProps extends HTMLAttributes<HTMLDivElement> {
     disableSpacing?: boolean
 }
 
-/**
- * MUI-free dialog actions: a right-aligned flex row of buttons; on mobile each button wrapper
- * stretches full width (was a SCSS media query, now Tailwind `max-md:` arbitrary variant). TASK-101.
- */
+/** MUI-free dialog actions: a right-aligned flex row of buttons. TASK-101. */
 export const StyledDialogActions = ({
     children,
     className,
@@ -29,11 +26,7 @@ export const StyledDialogActions = ({
             style={mergedStyle}
             {...(rest)}
         >
-            <div className={clsx('flex w-full justify-end gap-2 p-4', className)}>
-                {Children.map(children, (child) => (
-                    <div className='max-md:flex-1 max-md:[&_button]:w-full'>{child}</div>
-                ))}
-            </div>
+            <div className={clsx('flex w-full justify-end gap-2 p-4', className)}>{children}</div>
         </div>
     )
 }
