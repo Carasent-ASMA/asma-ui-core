@@ -452,8 +452,8 @@ export function StyledSelectAutocomplete<
     // Custom `renderOption` callers spread `{...props}` onto their `<li>` and expect flex, cursor,
     // hover, and selected backgrounds from that — not only from `defaultRenderOption`.
     const optionRowClassName = cn(
-        // Figma Menus item: Body Base 16/lh24, text-icon/body delta-700.
-        'box-border flex min-h-10 cursor-pointer items-center gap-x-3 px-3 py-1.5 text-base text-delta-700 first:-mt-1',
+        // Figma Menus item: Body Base 16/lh24, text delta-800.
+        'box-border flex min-h-10 cursor-pointer items-center gap-x-3 px-3 py-1.5 text-base text-delta-800 first:-mt-1',
         'aria-selected:bg-gama-50 data-[active]:bg-gama-50 data-[active]:text-delta-800',
         // Disabled options never take the gama highlight (hover or keyboard) and read as muted.
         'aria-disabled:cursor-default aria-disabled:!bg-transparent aria-disabled:text-delta-300',
