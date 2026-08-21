@@ -223,6 +223,8 @@ export function PathfinderCard({
             itemWidths: measurements.itemWidths,
         })
     }, [expanded, sortedItems, width, leadSlot, actionSlot, leadReservePx, actionReservePx, measurements])
+    const shouldStackCompactItems = compact && collapsedVisibleItems.length < Math.min(2, sortedItems.length)
+    const compactItems = shouldStackCompactItems ? sortedItems.slice(0, 2) : collapsedVisibleItems
 
     return (
         <div
@@ -244,8 +246,8 @@ export function PathfinderCard({
 
                 <div className={styles['content']}>
                     {compact ? (
-                        <div className={styles['compactItems']}>
-                            {collapsedVisibleItems.map((item) => (
+                        <div className={cn(styles['compactItems'], shouldStackCompactItems && styles['compactItemsStacked'])}>
+                            {compactItems.map((item) => (
                                 <div key={item.id} className='shrink-0 whitespace-nowrap'>
                                     <ItemRenderer item={item} compact={compact} />
                                 </div>
