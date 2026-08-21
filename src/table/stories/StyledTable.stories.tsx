@@ -333,3 +333,69 @@ export const SizingPersistenceAndControlAlignment: Story = {
         await expect(tableInstance!.getColumn('actions')!.getSize()).toBe(80)
     },
 }
+
+const footerBoundaryColumns: ColumnDef<TableRow>[] = [
+    { accessorKey: 'name', header: 'Name' },
+    { accessorKey: 'role', header: 'Role' },
+]
+
+const makeFooterBoundaryRows = (count: number): TableRow[] =>
+    Array.from({ length: count }, (_, index) => ({
+        id: `${index + 1}`,
+        name: `Row ${index + 1}`,
+        role: 'User',
+        description: 'Description',
+        updatedDate: '14.07.2026 · 14:22',
+        updatedBy: 'User',
+        added: '30.12.2025 · 14:43',
+        offers: 'Offer',
+    }))
+
+/**
+ * ASMA-7980 regression: the 5-row footer threshold must hide only the pagination controls,
+ * never a custom `footer` node (Save/Cancel buttons vanished on tables with < 5 rows).
+ */
+export const FooterRowCountBoundary: Story = {
+    render: () => (
+        <div className='flex w-[500px] flex-col gap-6'>
+            {[4, 5, 6].map((rowCount) => (
+                <div key={rowCount} data-test={`footer-boundary-${rowCount}`}>
+                    <StyledTable
+                        columns={footerBoundaryColumns}
+                        data={makeFooterBoundaryRows(rowCount)}
+                        uniqueKey={`footer-boundary-${rowCount}`}
+                        footer={() => (
+                            <button type='button' data-test='custom-footer'>
+                                Save changes
+                            </button>
+                        )}
+                    />
+                </div>
+            ))}
+            <div data-test='footer-boundary-none'>
+                <StyledTable
+                    columns={footerBoundaryColumns}
+                    data={makeFooterBoundaryRows(4)}
+                    uniqueKey='footer-boundary-none'
+                />
+            </div>
+        </div>
+    ),
+    play: async ({ canvasElement }) => {
+        const section = (id: string): HTMLElement => canvasElement.querySelector<HTMLElement>(`[data-test="${id}"]`)!
+
+        // Under the threshold: the custom footer renders, pagination controls stay hidden.
+        await expect(section('footer-boundary-4').querySelector('[data-test="custom-footer"]')).not.toBeNull()
+        await expect(section('footer-boundary-4').querySelector('[data-test="table-rows-count-button"]')).toBeNull()
+
+        // At and above the threshold: custom footer AND pagination controls render, as before.
+        for (const rowCount of [5, 6]) {
+            const boundarySection = section(`footer-boundary-${rowCount}`)
+            await expect(boundarySection.querySelector('[data-test="custom-footer"]')).not.toBeNull()
+            await expect(boundarySection.querySelector('[data-test="table-rows-count-button"]')).not.toBeNull()
+        }
+
+        // Under the threshold without a custom footer: no footer element renders at all.
+        await expect(section('footer-boundary-none').querySelector('[class*="table-footer"]')).toBeNull()
+    },
+}

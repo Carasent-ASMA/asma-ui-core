@@ -28,12 +28,13 @@ export function TableFooter<
     const locale = styledTableProps.locale ?? 'en'
     const hasEnoughRowsForFooter = totalRowCount >= MIN_ROWS_FOR_FOOTER
 
-    if (styledTableProps.hideFooter || !hasEnoughRowsForFooter) return null
+    if (styledTableProps.hideFooter) return null
 
     const paginationAlignLeft = styledTableProps.paginationAlignLeft
     const shouldShowRowCountSelect = !styledTableProps.hideRowCountSelect
     const shouldShowPagination = pageCount > 1
-    const shouldShowControls = shouldShowRowCountSelect || shouldShowPagination
+    // The row-count threshold only hides the pagination controls; a custom footer node must always render.
+    const shouldShowControls = hasEnoughRowsForFooter && (shouldShowRowCountSelect || shouldShowPagination)
     const hasAnythingToRender = hasFooterNode || shouldShowControls
 
     if (!hasAnythingToRender) return null
