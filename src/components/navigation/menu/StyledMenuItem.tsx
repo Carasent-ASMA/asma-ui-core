@@ -74,7 +74,12 @@ export const StyledMenuItem = ({
                 'box-border flex items-center px-4 text-base outline-none',
                 dense ? 'min-h-8 py-1' : 'min-h-10 py-2',
                 // Figma Disabled menu item = muted text-icon/disabled (delta-300); enabled = text-icon/body (delta-700).
-                disabled ? 'cursor-not-allowed text-delta-300' : 'cursor-pointer text-delta-700 hover:bg-delta-50',
+                // The `aria-disabled:` variant (specificity 0,2,0) keeps the grey winning over any
+                // text-* colour a consumer passes via `className` (all utilities are `!important`,
+                // so plain classes resolve by stylesheet order, not by the `!` prefix).
+                disabled
+                    ? 'cursor-not-allowed text-delta-300 aria-disabled:text-delta-300'
+                    : 'cursor-pointer text-delta-700 hover:bg-delta-50',
                 selected && cn('bg-gama-50', classes?.selected),
                 classes?.root,
                 className,
