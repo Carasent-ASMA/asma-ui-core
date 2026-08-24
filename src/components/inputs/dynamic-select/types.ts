@@ -52,7 +52,6 @@ interface DynamicSelectCommonProps<TOption extends DynamicSelectOption> {
      * Use this when the field must always have a value.
      */
     required?: boolean
-    /** @figmaProp Helper text (Helper 14/lh20; falls back to "Required" when `error` and no text). */
     helperText?: React.ReactNode
     /** Completely removes the helper text block below the autocomplete */
     disableHelperText?: boolean
@@ -107,6 +106,7 @@ interface DynamicSelectCommonProps<TOption extends DynamicSelectOption> {
      * or empty-state messaging when localized behavior is supported.
      */
     locale?: 'no' | 'en'
+    clearSelectionLabel?: string
 }
 
 export type StyledDynamicSelectProps<TOption extends DynamicSelectOption> = DynamicSelectCommonProps<TOption> &

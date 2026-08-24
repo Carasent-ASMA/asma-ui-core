@@ -110,6 +110,71 @@ export const Error: Story = {
         await expect(helper.getBoundingClientRect().top - shell.getBoundingClientRect().bottom).toBe(0)
         const icon = helper.querySelector('svg')!
         await expect(icon.getBoundingClientRect().top - shell.getBoundingClientRect().bottom).toBe(4)
+        await expect(helper).toHaveAttribute('role', 'alert')
+        await expect(input).toHaveAttribute('aria-invalid', 'true')
+        await expect(input).toHaveAttribute('aria-describedby', helper.id)
+    },
+}
+
+export const ReservedHelperSlot: Story = {
+    args: {
+        label: 'Email',
+    },
+    play: async ({ canvas, canvasElement }) => {
+        const input = canvas.getByLabelText('Email')
+        const describedById = input.getAttribute('aria-describedby')
+        await expect(describedById).toBeTruthy()
+        const helper = canvasElement.ownerDocument.getElementById(describedById ?? '')
+        await expect(helper).toBeTruthy()
+        await expect(helper!.getBoundingClientRect().height).toBe(24)
+        await expect(helper).toHaveAttribute('role', 'status')
+    },
+}
+
+export const ErrorWithoutMessage: Story = {
+    args: {
+        error: true,
+        label: 'Email',
+    },
+    play: async ({ canvas, canvasElement }) => {
+        const input = canvas.getByLabelText('Email')
+        await expect(input).toHaveAttribute('aria-invalid', 'true')
+        const describedById = input.getAttribute('aria-describedby')
+        await expect(describedById).toBeTruthy()
+        const helper = canvasElement.ownerDocument.getElementById(describedById ?? '')
+        await expect(helper).toHaveAttribute('role', 'alert')
+        await expect(helper).not.toHaveTextContent('Required')
+        await expect(helper!.getBoundingClientRect().height).toBe(24)
+    },
+}
+
+export const ReserveHelperTextFalse: Story = {
+    args: {
+        label: 'Email',
+        reserveHelperText: false,
+    },
+    play: async ({ canvas }) => {
+        const input = canvas.getByLabelText('Email')
+        await expect(input).not.toHaveAttribute('aria-describedby')
+        await expect(canvas.queryByRole('status')).not.toBeInTheDocument()
+        await expect(canvas.queryByRole('alert')).not.toBeInTheDocument()
+    },
+}
+
+export const HintToErrorSwap: Story = {
+    args: {
+        label: 'Email',
+        helperText: 'name@example.com',
+        error: true,
+    },
+    play: async ({ canvas, canvasElement }) => {
+        const input = canvas.getByLabelText('Email')
+        const describedById = input.getAttribute('aria-describedby')
+        await expect(describedById).toBeTruthy()
+        const helper = canvasElement.ownerDocument.getElementById(describedById ?? '')
+        await expect(helper).toHaveAttribute('role', 'alert')
+        await expect(helper).toHaveTextContent('name@example.com')
+        await expect(helper!.getBoundingClientRect().height).toBeGreaterThanOrEqual(24)
     },
 }
 

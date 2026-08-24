@@ -34,6 +34,7 @@ export const StyledSearchField: FC<StyledSearchFieldProps> = ({
                 size='small'
                 variant='outlined'
                 value={value}
+                reserveHelperText={false}
                 // Figma: floating label only when focused/filled; at rest the label string is the placeholder.
                 label={hasInteraction ? label : undefined}
                 placeholder={!hasInteraction ? placeholderText : undefined}

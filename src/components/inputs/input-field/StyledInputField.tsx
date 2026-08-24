@@ -18,6 +18,9 @@ import {
 import { CloseIcon, ErrorOutlineIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
+import { useHelperAlertRole } from 'src/helpers/useHelperAlertRole'
+import { useHelperRowBudget } from 'src/helpers/useHelperRowBudget'
+import { warnMissingErrorMessage } from 'src/helpers/warnMissingErrorMessage'
 import {
     floatingLabelClass,
     floatingLabelLayoutStyle,
@@ -47,7 +50,6 @@ type HtmlInputSlot = InputHTMLAttributes<HTMLInputElement> & { ref?: Ref<HTMLInp
  * Error/Disabled/Read only) is driven by native focus/hover + the `error`/`disabled`/`readOnly`
  * props; **Filled** (on/off) is derived from `value`/`defaultValue`. **Unify** and **Mixed state**
  * are Figma-authoring properties with no React counterpart. Non-annotated props are behavioral /
- * MUI `TextField` API-parity (DEC-003).
  */
 export interface StyledInputFieldProps {
     /** @figmaProp none — test hook */
@@ -65,6 +67,8 @@ export interface StyledInputFieldProps {
     error?: boolean
     /** @figmaProp Helper text element */
     helperText?: ReactNode
+    reserveHelperText?: boolean
+    expandHelperText?: boolean
     /** @figmaProp State = true→"Disabled" */
     disabled?: boolean
     /** @figmaProp State = true→"Read only" */
@@ -112,7 +116,6 @@ export interface StyledInputFieldProps {
  * Outlined text field with a floating label (replaces MUI `TextField`). Self-contained: manages its
  * own focus/value state to drive the shared field styling ([[field-styles]]); supports multiline,
  * start/end adornments, an optional clear button, and error/helper text. Public props preserved
- * (DEC-003). TASK-401.
  *
  * ponytail: `variant` is accepted but always renders outlined, and multiline uses fixed `rows`
  * (no auto-grow to `maxRows`) — known ceilings; Chromatic in CI is the visual gate.
@@ -127,6 +130,8 @@ export const StyledInputField = ({
     onFocus,
     error,
     helperText,
+    reserveHelperText = true,
+    expandHelperText = true,
     disabled,
     readOnly,
     required,
@@ -297,6 +302,16 @@ export const StyledInputField = ({
     // a plain input. Gating purely on `shrink` wrongly hid the placeholder for label-less fields.
     const showPlaceholder = shrink || !label
 
+    const showHelperSlot = !readOnly && (reserveHelperText || helperText != null || Boolean(error))
+    warnMissingErrorMessage('StyledInputField', error, helperText)
+    const helperAlertRole = useHelperAlertRole(error)
+
+    const {
+        fieldRef: rootRef,
+        rowRef: helperRowRef,
+        rowStyle: helperRowStyle,
+    } = useHelperRowBudget(expandHelperText && showHelperSlot)
+
     const sharedProps = {
         ...htmlInputPropsWithoutStyle,
         style: isSingleLineShell ? singleLineHtmlInputStyle : htmlInputStyle,
@@ -324,7 +339,9 @@ export const StyledInputField = ({
             htmlInputRest['aria-label'] ??
             (htmlInputRest['aria-labelledby'] ? undefined : typeof label === 'string' && label !== '' ? label : undefined),
         'aria-describedby':
-            !readOnly && (helperText != null || error) ? helperId : htmlInputRest['aria-describedby'],
+            !readOnly && (reserveHelperText || helperText != null || error)
+                ? helperId
+                : htmlInputRest['aria-describedby'],
         onChange: handleChange,
         onFocus: handleFocus,
         onBlur: handleBlur,
@@ -366,6 +383,7 @@ export const StyledInputField = ({
         // header) — not a control needing its own tabIndex.
         // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
         <div
+            ref={rootRef}
             className={cn('group relative inline-flex flex-col', className)}
             onClick={onClick}
             style={{
@@ -505,27 +523,24 @@ export const StyledInputField = ({
                 )}
             </div>
 
-            {!readOnly && (helperText != null || error) && (
+            {!readOnly && showHelperSlot && (
                 <div
+                    ref={helperRowRef}
                     id={helperId}
+                    role={helperAlertRole}
                     className={cn(
                         // Figma "Helper text" row (15561-37857 / 34634-148726): 24px tall, pt 4px, gap 4px.
-                        !slotProps?.formHelperText &&
-                            'mr-[14px] box-border min-h-[24px] pt-1',
-                        error &&
-                            !slotProps?.formHelperText?.hideErrorIcon &&
-                            'flex items-start gap-1 text-error-500',
+                        'mr-[14px] box-border flex min-h-[24px] items-start gap-1 pt-1',
+                        error && !slotProps?.formHelperText?.hideErrorIcon && 'text-error-500',
                         !error && 'text-delta-600',
                         slotProps?.formHelperText?.className,
                     )}
-                    style={resolveSx(slotProps?.formHelperText?.sx)}
+                    style={{ ...helperRowStyle, ...resolveSx(slotProps?.formHelperText?.sx) }}
                 >
                     {error && !slotProps?.formHelperText?.hideErrorIcon && (
                         <ErrorOutlineIcon width={20} height={20} className='min-w-5 shrink-0' />
                     )}
-                    <span className='text-sm leading-5 tracking-[0.03333em]'>
-                        {error ? (helperText ?? 'Required') : helperText}
-                    </span>
+                    <span className='text-sm leading-5 tracking-[0.03333em]'>{helperText}</span>
                 </div>
             )}
         </div>

@@ -50,6 +50,8 @@ export interface AutocompleteRenderInputParams {
     disabled?: boolean
     size?: 'small' | 'medium'
     fullWidth?: boolean
+    error?: boolean
+    helperText?: ReactNode
     value: string
     onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
     onFocus?: () => void
@@ -89,7 +91,6 @@ type AutocompleteValue<T, Multiple, DisableClearable, FreeSolo> = Multiple exten
  * chips** (`StyledChip`: h32, radius25, label 16/delta-700 — node 20475-29954). The dropdown is the
  * **Menus** surface (node 16073-19226): rounded-lg, border delta-300, Menus shadow. Popup indicator =
  * `+` (`PlusIconCircle`, multiple) or chevron (single); clear = `CloseIcon`. Non-annotated props are
- * behavioral / MUI `Autocomplete` API-parity (DEC-002/DEC-003).
  */
 export interface StyledSelectAutocompleteProps<
     T,
@@ -129,6 +130,8 @@ export interface StyledSelectAutocompleteProps<
     disabled?: boolean
     /** @figmaProp State = true→"Read-only" (chips lose their delete button; no popup/clear icons) */
     readOnly?: boolean
+    error?: boolean
+    helperText?: ReactNode
     /** @figmaProp none — FieldSize (both render the 40px field) */
     size?: 'small' | 'medium'
     /** @figmaProp Clear (trigger clear button) */
@@ -167,10 +170,8 @@ const isOptionObjectDisabled = <T,>(option: T): boolean =>
     typeof option === 'object' && option !== null && 'disabled' in option && Boolean((option as { disabled?: unknown }).disabled)
 
 /**
- * Custom combobox (replaces MUI `Autocomplete`, DEC-002) built on `@floating-ui/react`. Supports
  * single + multiple selection (with tag chips + optional select-all), type-ahead filtering,
  * async `loading`, grouping, and the MUI `renderInput`/`renderOption`/`renderValue` callback
- * contracts. Public props/generics preserved (DEC-003). TASK-401.
  *
  * ponytail: `freeSolo` is accepted (arbitrary input is emitted via onInputChange) but not turned
  * into option values; exact keyboard-parity edge cases are Chromatic/axe-gated.
@@ -197,6 +198,8 @@ export function StyledSelectAutocomplete<
     noOptionsText = 'No options',
     disabled,
     readOnly,
+    error,
+    helperText,
     size = 'small',
     disableClearable,
     disableCloseOnSelect,
@@ -425,6 +428,8 @@ export function StyledSelectAutocomplete<
         disabled,
         size,
         fullWidth: true,
+        error,
+        helperText,
         value: inputValue,
         onChange: (event) => {
             setInputValue(event, event.target.value, 'input')

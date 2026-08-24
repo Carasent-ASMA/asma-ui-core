@@ -3,7 +3,25 @@ import { useCallback, useState } from 'react'
 import type { Matcher } from 'react-day-picker'
 import { buildDisabled, isDisabledDate } from '../helpers'
 
-const msgs = {
+export interface DatePickerValidationMessages {
+    required: string
+    minDate: string
+    invalidDay: string
+    invalidMonth: string
+    invalidYear: string
+    invalidDate: string
+    invalidFormat: string
+    dateDisabled: string
+    pastNotAllowed: string
+    futureNotAllowed: string
+}
+
+export interface DatePickerValidationMessageCatalog {
+    en: DatePickerValidationMessages
+    nb: DatePickerValidationMessages
+}
+
+export const defaultDatePickerValidationMessages: DatePickerValidationMessageCatalog = {
     en: {
         required: 'Required',
         minDate: 'End date must be after the start date',
@@ -28,7 +46,7 @@ const msgs = {
         pastNotAllowed: 'Dato i fortiden er ikke tillatt',
         futureNotAllowed: 'Dato i fremtiden er ikke tillatt',
     },
-} as const
+}
 
 const formatRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/
 
@@ -47,7 +65,9 @@ interface DatePickerValidation {
     }) => boolean
 }
 
-export const useDatePickerValidation = (): DatePickerValidation => {
+export const useDatePickerValidation = (
+    messages: DatePickerValidationMessageCatalog = defaultDatePickerValidationMessages,
+): DatePickerValidation => {
     const [validationError, setError] = useState(false)
     const [errHelperText, setErrHelperText] = useState('')
 
@@ -75,12 +95,13 @@ export const useDatePickerValidation = (): DatePickerValidation => {
             minDate?: Date
         }): boolean => {
             const lang = localeCode === 'nb' ? 'nb' : 'en'
+            const msgs = messages[lang]
             const digits = value.replace(/\D/g, '')
 
             // empty => required error only when explicitly enabled
             if (!digits.length) {
                 setError(!!required)
-                setErrHelperText(required ? msgs[lang].required : '')
+                setErrHelperText(required ? msgs.required : '')
                 return !!required
             }
 
@@ -88,7 +109,7 @@ export const useDatePickerValidation = (): DatePickerValidation => {
             const m = formatRegex.exec(value)
             if (!m) {
                 setError(true)
-                setErrHelperText(msgs[lang].invalidFormat)
+                setErrHelperText(msgs.invalidFormat)
                 return true
             }
 
@@ -99,21 +120,21 @@ export const useDatePickerValidation = (): DatePickerValidation => {
             // 1) DAY invalid => "Invalid day"
             if (dd < 1 || dd > 31) {
                 setError(true)
-                setErrHelperText(msgs[lang].invalidDay)
+                setErrHelperText(msgs.invalidDay)
                 return true
             }
 
             // - month invalid -> Invalid month
             if (mm < 1 || mm > 12) {
                 setError(true)
-                setErrHelperText(msgs[lang].invalidMonth)
+                setErrHelperText(msgs.invalidMonth)
                 return true
             }
 
             // - year invalid => Invalid year
             if (yyyy < 1900 || yyyy > 2100) {
                 setError(true)
-                setErrHelperText(msgs[lang].invalidYear)
+                setErrHelperText(msgs.invalidYear)
                 return true
             }
 
@@ -122,7 +143,7 @@ export const useDatePickerValidation = (): DatePickerValidation => {
             const calendarOk = d.getFullYear() === yyyy && d.getMonth() === mm - 1 && d.getDate() === dd
             if (!calendarOk) {
                 setError(true)
-                setErrHelperText(msgs[lang].invalidDate)
+                setErrHelperText(msgs.invalidDate)
                 return true
             }
 
@@ -130,13 +151,13 @@ export const useDatePickerValidation = (): DatePickerValidation => {
             const parsed = parse(canonical, 'dd/MM/yyyy', new Date())
             if (!isValidDateFns(parsed)) {
                 setError(true)
-                setErrHelperText(msgs[lang].invalidDate)
+                setErrHelperText(msgs.invalidDate)
                 return true
             }
 
             if (minDate && startOfDay(parsed) <= startOfDay(minDate)) {
                 setError(true)
-                setErrHelperText(msgs[lang].minDate)
+                setErrHelperText(msgs.minDate)
                 return true
             }
 
@@ -145,7 +166,7 @@ export const useDatePickerValidation = (): DatePickerValidation => {
             if (mergedDisabled.length) {
                 const policyHit = isDisabledDate({ parsedDate: parsed, disabledDays: mergedDisabled })
                 if (policyHit) {
-                    setErrHelperText(msgs[lang].dateDisabled)
+                    setErrHelperText(msgs.dateDisabled)
                     setError(true)
                     return true
                 }
@@ -154,7 +175,7 @@ export const useDatePickerValidation = (): DatePickerValidation => {
             clearValidation()
             return false
         },
-        [clearValidation],
+        [clearValidation, messages],
     )
     return { validationError, handleValidation, errHelperText, clearValidation }
 }

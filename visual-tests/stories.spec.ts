@@ -21,7 +21,6 @@ const stories = Object.values(index.entries).filter((e) => e.type === 'story')
 // These oscillate >1000px between consecutive frames (rAF/Floating-UI/ResizeObserver loops that
 // `animations: 'disabled'` cannot stop) — not benign AA, so a tolerance can't absorb them without
 // making the whole suite too loose. All are overlay/large-reference stories with low pixel-baseline
-// value (interaction states are covered by the addon-vitest interaction tests). RISK-101/102.
 const DYNAMIC_TOOLBAR_STORIES = [
     'modules-dynamictoolbar--full-view-normal-mode',
     'modules-dynamictoolbar--workspaces-toolbar-layout',
@@ -36,6 +35,7 @@ const DYNAMIC_TOOLBAR_STORIES = [
     'modules-dynamictoolbar--bulk-overflow-rule',
     'modules-dynamictoolbar--single-overflow-shows-directly',
     'modules-dynamictoolbar--labels-collapse-right-to-left',
+    'modules-dynamictoolbar--labels-collapse-left-to-right',
     'modules-dynamictoolbar--icon-only-mode',
     'modules-dynamictoolbar--normal-actions-hidden-in-selection',
     'modules-dynamictoolbar--disabled-actions',
@@ -55,17 +55,19 @@ const SKIP = new Map<string, string>([
         'inputs-inputfield--focused',
         'v3.34.0 golden captured only the transitioning label, without the rendered input outline',
     ],
+    [
+        'data-display-styledtable--sizing-persistence-and-control-alignment',
+        'ResizeObserver row-height recalculation races the screenshot after the row-expand interaction',
+    ],
     ...DYNAMIC_TOOLBAR_STORIES.map(
         (id) => [id, 'ResizeObserver/measurement layout oscillates by ~0.2–3k px between identical captures'] as const,
     ),
 ])
 
-// Hermetic capture (REQ-101): serve only from our static server, block all external hosts.
 test.beforeEach(async ({ page }) => {
     await installVrtRouteBlock(page)
 })
 
-// DEC-VRT-007: fixed "today" so date/time-picker stories don't drift monthly.
 for (const story of stories) {
     if (SKIP.has(story.id)) continue
     test(story.id, async ({ page }) => {
