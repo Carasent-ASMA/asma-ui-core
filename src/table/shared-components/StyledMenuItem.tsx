@@ -51,10 +51,12 @@ export const StyledMenuItem = ({
                 selected && 'bg-gama-50',
                 classes?.root,
                 className,
-                // Disabled = text-icon/disabled #bdc4cf (delta-300). `cn` here is plain clsx (no
-                // tailwind-merge), so `!` forces the grey to win over a custom action colour (e.g. a
-                // disabled destructive `text-error-500` item) regardless of stylesheet order.
-                disabled && '!text-delta-300',
+                // Disabled = text-icon/disabled #bdc4cf (delta-300). Every ui-core utility is compiled
+                // with `important: true`, so a `!` prefix cannot win — stylesheet order decides, and the
+                // base `text-delta-700` (and custom colours like `text-error-500`) come later in the file.
+                // The `aria-disabled:` variant compiles to `.…[aria-disabled=true]` (specificity 0,2,0),
+                // which beats any plain text-* utility regardless of order; `aria-disabled` is set above.
+                disabled && 'aria-disabled:text-delta-300',
             )}
         >
             {children}

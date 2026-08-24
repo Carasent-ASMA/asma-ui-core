@@ -22,6 +22,10 @@
     @apply flex min-w-0 flex-nowrap items-center gap-x-4 overflow-hidden whitespace-nowrap;
 }
 
+.compactItemsStacked {
+    @apply flex-col items-start gap-x-0 gap-y-0;
+}
+
 .expandedItems {
     @apply flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1 overflow-visible;
 }

@@ -20,7 +20,7 @@ import { forwardRef } from 'react'
  * `13248-31089`, Input field `15561-37391`, Menus `16073-19226`, Autocomplete `20474-27966`), so
  * parity here is the mode routing + the shared title/clear/helper chrome, not a bespoke visual.
  * Title = Body Base SemiBold 16 `text-icon/title-label` #363e4a (delta-800); dropdown option =
- * Menus item (`text-icon/body` delta-700, hover delta-50, selected gama-50). Non-annotated props
+ * Menus item (`text-icon/body` delta-800, hover delta-50, selected gama-50). Non-annotated props
  * are behavioral / MUI `Autocomplete` API-parity.
  *
  * **Rendering strategy:**
