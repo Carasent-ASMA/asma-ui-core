@@ -28,12 +28,14 @@ export function TableHeaderCell<
     right?: number
     tableWidth: number | null
 }): JSX.Element {
-    const { hideHeader = false, enableResizing = false } = styledTableProps
+    const { hideHeader = false, enableResizing = false, actions, customActionsNode } = styledTableProps
     const { isResizing, enableResizingFlag, disableResizingFlag } = useRootContext()
 
     const isFixed = header.column.columnDef.fixedLeft
     const isFixedRight = Boolean(header.column.columnDef.fixedRight)
     const isActionsColumn = header.column.id === ACTIONS_COLUMN_ID
+
+    const hasActionsContent = Boolean(actions) || Boolean(customActionsNode)
 
     const hasActionsColumn = useMemo(
         () => header.headerGroup.headers.some((hdr) => hdr.id === ACTIONS_COLUMN_ID),
@@ -67,7 +69,7 @@ export function TableHeaderCell<
                 style['t-cell'],
                 hideHeader && style['hide-header'],
                 isActionsColumn && style['t-cell__actions'],
-                isActionsColumn && hasFixedRightColumns && style['t-cell__actions--no-shadow'],
+                isActionsColumn && (!hasActionsContent || hasFixedRightColumns) && style['t-cell__actions--no-shadow'],
                 isFixed && style['t-cell__fixed'],
                 isFixedRight && style['t-cell__fixed-right'],
             )}
