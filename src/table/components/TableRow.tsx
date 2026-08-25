@@ -33,6 +33,7 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
         renderSubRows,
         defaultExpanded,
         actions,
+        customActionsNode,
         textExpandArrow,
         enableMultiRowSelection,
         enableRowSelection,
@@ -154,6 +155,7 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
         [rightCells],
     )
 
+    const hasActionsContent = Boolean(actions) || Boolean(customActionsNode)
 
     const hasFixedRightColumns = useMemo(
         () => rightCells.some((cell) => Boolean(cell.column.columnDef.fixedRight)),
@@ -189,7 +191,7 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
                         hasRowClickHandler && 'cursor-pointer',
                         tdClassName,
                         isActionsCell && style['action-cell'],
-                        isActionsCell && hasFixedRightColumns && style['action-cell--no-shadow'],
+                        isActionsCell && (!hasActionsContent || hasFixedRightColumns) && style['action-cell--no-shadow'],
                         isActionsCell && Boolean(actions) && leftCells.length && style['shadowed'],
                         isActionsCell &&
                             (getRowClassName?.(row) ? getRowClassName?.(row) : style['action-cell-default-background']),
@@ -255,6 +257,7 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
             leftCells,
             rightCells,
             row,
+            hasActionsContent,
             spaceForCheckmark,
             tdClassName,
         ],
