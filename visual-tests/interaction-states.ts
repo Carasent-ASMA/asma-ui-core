@@ -30,6 +30,17 @@ export const INTERACTION_CAPTURES: InteractionCapture[] = [
         },
     },
     {
+        storyId: 'datetime-timepicker--mobile',
+        screenshot: 'datetime-timepicker--mobile--open.png',
+        act: async (page) => {
+            // ≤768px switches StyledTimePicker from the popper to the bottom-sheet drawer;
+            // resizing after load re-renders via the useWindowWidthSize resize listener.
+            await page.setViewportSize({ width: 390, height: 844 })
+            await page.getByRole('textbox', { name: 'Time' }).first().click()
+            await page.getByTestId('time-picker-confirm-button').first().waitFor({ state: 'visible' })
+        },
+    },
+    {
         storyId: 'datetime-datetimecomponents--date-time-components',
         screenshot: 'datetime-datetimecomponents--date-time-components--calendar-open.png',
         act: async (page) => {

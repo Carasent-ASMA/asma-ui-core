@@ -8,14 +8,19 @@ export const TimePickerBody: React.FC<Omit<TimePickerBodyProps, 'anchorOrigin'>>
     const ref = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
-        const isSelected = ref.current?.querySelectorAll('div.styled-time-picker-root_cell__cell-selected').length
-        ref.current
-            ?.querySelectorAll(
-                isSelected
-                    ? 'div.styled-time-picker-root_cell__cell-selected'
-                    : 'div.styled-time-picker-root_cell__cell-now',
-            )
-            .forEach((e) => e.scrollIntoView())
+        // Center the selected (fallback: current) time in each column. Queries `data-cell` because
+        // CSS-module class names are hashed (the previous literal-class selector never matched).
+        // Scrolls the column via scrollTop instead of scrollIntoView so opening the picker can
+        // never scroll the page or the drawer around it.
+        const root = ref.current
+        if (!root) return
+        const selected = root.querySelectorAll<HTMLElement>('[data-cell="selected"]')
+        const targets = selected.length ? selected : root.querySelectorAll<HTMLElement>('[data-cell="now"]')
+        targets.forEach((cell) => {
+            const column = cell.parentElement
+            if (!column) return
+            column.scrollTop = cell.offsetTop - column.offsetTop - (column.clientHeight - cell.clientHeight) / 2
+        })
     }, [ref])
 
     return (

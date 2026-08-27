@@ -1,12 +1,25 @@
-import type { Meta } from '@storybook/react-vite'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { add } from 'date-fns'
 import { useState, type CSSProperties } from 'react'
 import { StyledTimePicker } from 'src/datetime/components/time-picker'
+import { TimePickerPanel } from 'src/datetime/components/time-picker/components/TimePickerPanel'
 
 const meta = {
     title: 'Datetime/TimePicker',
     component: StyledTimePicker,
     tags: [],
+    parameters: {
+        docs: {
+            description: {
+                component: [
+                    'Time input with a trailing clock icon (Figma field node 15561-37391) that opens scrollable',
+                    'hour/minute columns. On desktop the panel is a DS Menus popper; on mobile (≤768px) the same',
+                    'panel opens in a bottom-sheet drawer, matching the date picker — see the Mobile story.',
+                    'Brand theming (Green/Blue/Fretex) comes from the semantic `gama` tokens — see Color themes.',
+                ].join(' '),
+            },
+        },
+    },
 } satisfies Meta<typeof StyledTimePicker>
 
 export default meta
@@ -156,4 +169,67 @@ export const Gallery = () => {
             </table>
         </div>
     )
+}
+
+// ─── Color themes ───────────────────────────────────────────────────────────
+// The picker carries no theme props — the "now" (gama-50), selected (gama-500) and confirm-button
+// colors resolve from the semantic gama tokens, so `data-theme` on any ancestor re-brands it.
+const THEME_BY_NAME = {
+    Green: 'greenish',
+    Blue: 'default',
+    Fretex: 'fretex',
+} as const
+
+/** Filled field + open panel under each brand theme — selected cell and confirm button follow `gama`. */
+export const ColorThemes = () => (
+    <div className='flex flex-col gap-10'>
+        {Object.entries(THEME_BY_NAME).map(([name, theme]) => (
+            <div key={name} data-theme={theme} className='flex items-start gap-8'>
+                <span className='w-16 pt-2 text-sm font-semibold text-delta-600'>{name}</span>
+                <StyledTimePicker
+                    dataTest={`themed-input-${theme}`}
+                    label='Time'
+                    placeholder='Time'
+                    value={FILLED_TIME}
+                    onSelect={noopSelect}
+                />
+                {/* Static open panel on the DS Menus surface (mirrors time-picker-surface). */}
+                <div className='w-44 rounded-lg border border-solid border-delta-300 bg-white pb-px shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]'>
+                    <TimePickerPanel
+                        dataTest={`themed-panel-${theme}`}
+                        value={FILLED_TIME}
+                        onSelect={noopSelect}
+                        handleClear={noopSelect}
+                        onConfirm={noopSelect}
+                    />
+                </div>
+            </div>
+        ))}
+    </div>
+)
+
+// ─── Mobile ─────────────────────────────────────────────────────────────────
+const MobileExample = () => {
+    const [value, setValue] = useState<Date | undefined>()
+    return (
+        <StyledTimePicker
+            dataTest='mobile-time'
+            value={value}
+            onSelect={setValue}
+            label='Time'
+            placeholder='Time'
+            error={!value}
+            helperText={!value && 'Required'}
+        />
+    )
+}
+
+/**
+ * On viewports ≤768px the picker opens as a bottom-sheet drawer (backdrop, Escape/back-navigation
+ * dismissal) instead of the anchored popper — same split as the date picker. This story pins the
+ * Storybook viewport to a phone; on a desktop-sized canvas the same component renders the popper.
+ */
+export const Mobile: StoryObj<typeof StyledTimePicker> = {
+    globals: { viewport: { value: 'mobile1', isRotated: false } },
+    render: () => <MobileExample />,
 }
