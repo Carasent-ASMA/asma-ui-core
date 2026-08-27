@@ -10,14 +10,19 @@ import { StyledAlert, type AlertColor } from '../StyledAlert'
  * icon accent. Gallery reference node 33305-233709. `filled`/`outlined` have no DS node (MUI-compat).
  */
 const meta = {
-    title: 'Feedback/Alert',
+    title: 'Feedback/Inline Notification',
     component: StyledAlert,
     tags: [],
     parameters: {
         docs: {
             description: {
-                component:
-                    'Inline notification banner. `standard` is the DS variant (soft-tint + border + severity-700 icon); `filled`/`outlined` are MUI-compat only.',
+                component: [
+                    'Inline notification — a compact single-line notification embedded inside page content (not floating). Severities: **Info / Success / Warning / Error**, each with or without an action or close button.',
+                    '',
+                    '`standard` is the DS variant (soft-tint + border + severity-700 icon); `filled`/`outlined` are MUI-compat only.',
+                    '',
+                    'For floating notifications see **Feedback/Toast Notification** (severity cards, top-right) and **Feedback/Snackbar** (brand pill, bottom-center).',
+                ].join('\n'),
             },
         },
     },

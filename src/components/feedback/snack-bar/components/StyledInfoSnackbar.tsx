@@ -44,7 +44,7 @@ export const StyledInfoSnackbar = forwardRef<HTMLDivElement, StyledInfoSnackbarP
                         onClick={() => closeSnackbar(id)}
                         width={20}
                         height={20}
-                        className='absolute right-0 top-1/2 -translate-y-1/2'
+                        className='absolute right-0 top-1/2 -translate-y-1/2 cursor-pointer rounded hover:bg-white/20'
                     />
                 ) : null}
             </div>
