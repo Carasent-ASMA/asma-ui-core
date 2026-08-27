@@ -84,14 +84,23 @@ const Section = ({ heading, children }: { heading: string; children: React.React
 )
 
 const meta: Meta<typeof StyledDefaultSnackbar> = {
-    title: 'Feedback/Snackbar',
+    title: 'Feedback/Toast Notification',
     component: StyledDefaultSnackbar,
     parameters: {
         layout: 'padded',
         docs: {
             description: {
-                component:
+                component: [
                     'Figma: [System notification-toast](https://www.figma.com/design/wXrXt5uKNNzV2DnQCgyYZH/Design-System?node-id=22249-56927) — 400px card, radius 4px, `alerts/{severity}` token set (fill -50, border -300, warning border -500). Rendered via `SnackbarProvider` + `enqueueSnackbar` / `processDefaultSnackbar` (variant `default`).',
+                    '',
+                    'Usage rules:',
+                    '',
+                    '- Standalone system notifications with a severity: **Success / Info / Warning / Error**, each with or without an action.',
+                    '- Rendered in the **top-right corner of the UI, stacked** (max 3), in front of content — see the Placement in context story.',
+                    '- **Auto-dismisses after 6 seconds** (`SnackbarProvider` default); always manually closable.',
+                    '',
+                    'For the brand confirmation pill (bottom-centered) see **Feedback/Snackbar**; for notifications embedded in page content see **Feedback/Inline Notification**.',
+                ].join('\n'),
             },
         },
     },
@@ -270,6 +279,32 @@ export const NestedDialogs: Story = {
         await expect(canvas.getByRole('alert')).toBe(toast)
         await expectHitTestable(closeButton)
     },
+}
+
+/**
+ * Real-world placement: toasts render in the top-right corner of the UI, stacked in front of the
+ * page content — the layout `SnackbarProvider` produces (`anchorOrigin: top/right`, `maxSnack: 3`).
+ */
+export const PlacementInContext: Story = {
+    render: () => (
+        <div className='relative h-[560px] overflow-hidden rounded border border-solid border-delta-200 bg-white'>
+            {/* Fake app chrome, so the stack is seen in front of real content. */}
+            <div className='flex h-12 items-center border-0 border-b border-solid border-delta-200 bg-delta-10 px-4 font-semibold text-delta-800'>
+                Module title
+            </div>
+            <div className='flex flex-col gap-3 p-4'>
+                {Array.from({ length: 8 }, (_, index) => (
+                    <div key={index} className='h-8 rounded bg-delta-50' />
+                ))}
+            </div>
+
+            <div className='absolute right-4 top-16 flex flex-col items-end gap-2'>
+                <StyledDefaultSnackbar {...toast('success', { action: undefined })} />
+                <StyledDefaultSnackbar {...toast('info', { action: undefined })} />
+                <StyledDefaultSnackbar {...toast('error')} />
+            </div>
+        </div>
+    ),
 }
 
 /** Real usage: trigger positioned, auto-stacking toasts through `processDefaultSnackbar`. */
