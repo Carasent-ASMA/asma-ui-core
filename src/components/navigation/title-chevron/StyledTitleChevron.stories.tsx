@@ -14,12 +14,13 @@ const meta = {
                     'a clickable title row indicating that a card or list-item header navigates to another page, dialog or section',
                     '(calendars, network cards, pathfinder lists).',
                     '',
-                    'Behavior contract:',
+                    'Behavior contract (per the Figma pattern notes):',
                     '',
-                    '- The chevron is **always visible** — never revealed on hover.',
+                    '- The chevron is **always visible** — never revealed on hover — and sits flush against the text at rest.',
                     '- On hover/focus the row turns `gama-500` and the chevron shifts **+4px right** with no layout shift (transform only).',
                     '- The **entire row** (text + chevron) is one native `<button>` with a minimum **44px** tap target,',
                     '  full keyboard support (Enter/Space) and a visible `gama-400` focus ring.',
+                    '- Sizes match the Figma variants: **Base** 14/20 + 20px chevron (default), **Medium** 16/24 + 24px, **Subtitle** 20/28 + 28px.',
                     '- Long titles truncate to one line; the chevron never wraps or shrinks.',
                     '- Identical on desktop and mobile — the row spans its container, so the tap target grows with it.',
                 ].join('\n'),
@@ -83,16 +84,30 @@ export const Truncation: Story = {
     ),
 }
 
-/** `size='large'` (18/28, 24px chevron) for widget headings; default `medium` (16/24, 20px). */
+/** The Figma variant matrix — Size (Base / Medium / Subtitle) × State (Default / Hovered). */
 export const Sizes: Story = {
     render: () => (
-        <div className='flex w-80 flex-col gap-2'>
-            <StyledTitleChevron dataTest='title-chevron-medium' onClick={noop}>
-                Medium heading
-            </StyledTitleChevron>
-            <StyledTitleChevron dataTest='title-chevron-large' size='large' onClick={noop}>
-                Large heading
-            </StyledTitleChevron>
+        <div className='flex flex-col gap-4'>
+            {(['base', 'medium', 'subtitle'] as const).map((size) => (
+                <div key={size} className='flex items-center gap-10'>
+                    <span className='w-16 shrink-0 text-sm text-delta-600'>{size}</span>
+                    <div className='w-40'>
+                        <StyledTitleChevron dataTest={`title-chevron-${size}`} size={size} onClick={noop}>
+                            Title
+                        </StyledTitleChevron>
+                    </div>
+                    <div className='w-40'>
+                        <StyledTitleChevron
+                            dataTest={`title-chevron-${size}-hover`}
+                            size={size}
+                            onClick={noop}
+                            className='pseudo-hover'
+                        >
+                            Title
+                        </StyledTitleChevron>
+                    </div>
+                </div>
+            ))}
         </div>
     ),
 }
@@ -102,7 +117,7 @@ export const PlacementInContext: Story = {
     render: () => (
         <div className='flex w-96 flex-col gap-4'>
             <div className='rounded-lg border border-solid border-delta-200 bg-white px-4 py-3'>
-                <StyledTitleChevron dataTest='card-title' onClick={noop}>
+                <StyledTitleChevron dataTest='card-title' size='medium' onClick={noop}>
                     Ola Nordmann
                 </StyledTitleChevron>
                 <div className='text-sm text-delta-600'>Vernepleier · Avdeling Nord</div>
@@ -110,7 +125,12 @@ export const PlacementInContext: Story = {
             <ul className='m-0 list-none rounded-lg border border-solid border-delta-200 bg-white p-0'>
                 {['Kartlegginger', 'Aktiviteter', 'Dokumenter'].map((label, index) => (
                     <li key={label} className={index > 0 ? 'border-0 border-t border-solid border-delta-200' : ''}>
-                        <StyledTitleChevron dataTest={`list-title-${label}`} onClick={noop} className='px-4'>
+                        <StyledTitleChevron
+                            dataTest={`list-title-${label}`}
+                            size='medium'
+                            onClick={noop}
+                            className='px-4'
+                        >
                             {label}
                         </StyledTitleChevron>
                     </li>
