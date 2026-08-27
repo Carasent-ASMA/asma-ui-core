@@ -1,11 +1,14 @@
 .styled-time-picker-root {
     @apply flex max-h-56 overflow-hidden #{!important};
     .styled-time-picker-root_column {
-        @apply overflow-y-scroll scrollbar-thin w-full p-1.5 pb-0  #{!important};
+        // items-center: no-op in the fit-content desktop popper, centers the 36px cells in the
+        // full-width mobile bottom sheet.
+        @apply overflow-y-scroll scrollbar-thin w-full p-1.5 pb-0 flex flex-col items-center #{!important};
     }
     .styled-time-picker-root_cell {
         // Cell hover = DS menu hover delta-50; now = gama-50 (like calendar "today"); selected = gama-500.
-        @apply bg-white w-9 h-9 text-sm hover:bg-delta-50 cursor-pointer rounded-lg flex items-center place-content-center;
+        // shrink-0: the column is a flex scroll container — without it cells compress instead of scrolling.
+        @apply bg-white w-9 h-9 shrink-0 text-sm hover:bg-delta-50 cursor-pointer rounded-lg flex items-center place-content-center;
         &.styled-time-picker-root_cell__cell-now {
             @apply bg-gama-50 hover:bg-gama-50;
         }

@@ -31,6 +31,9 @@ export const TimePickerColumn: React.FC<TimePickerColumnProps> = ({ type, value,
                     <button
                         key={idx}
                         type='button'
+                        // Stable hook for the scroll-into-view effect in TimePickerBody — CSS-module
+                        // class names are hashed at build time, so they can't be queried literally.
+                        data-cell={isSelected ? 'selected' : isNow ? 'now' : undefined}
                         className={clsx(
                             'border-0',
                             styles['styled-time-picker-root_cell'],
