@@ -244,6 +244,7 @@ exports[`asma-ui-core public API surface > keeps every runtime export of the pac
   "StyledTabs",
   "StyledTextarea",
   "StyledTimePicker",
+  "StyledTitleChevron",
   "StyledTooltip",
   "StyledTypography",
   "StyledWidget",
