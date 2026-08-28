@@ -306,7 +306,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                             inputRef={ref}
                             error={error}
                             helperText={disableHelperText ? undefined : helperText}
-                            reserveHelperText={!disableHelperText}
+                            reserveHelperText={disableHelperText ? false : error !== undefined}
                             variant='outlined'
                             label=''
                             placeholder={placeholder}

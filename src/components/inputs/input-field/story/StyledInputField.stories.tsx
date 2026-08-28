@@ -119,6 +119,7 @@ export const Error: Story = {
 export const ReservedHelperSlot: Story = {
     args: {
         label: 'Email',
+        reserveHelperText: true,
     },
     play: async ({ canvas, canvasElement }) => {
         const input = canvas.getByLabelText('Email')

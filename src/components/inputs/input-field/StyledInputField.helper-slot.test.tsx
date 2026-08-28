@@ -12,9 +12,18 @@ describe('StyledInputField helper-slot contract', () => {
         expect(html).not.toContain('>Required</')
     })
 
-    it('MUT-002: always mounts the helper slot when reserveHelperText defaults to true', () => {
+    it('MUT-002: omits the empty helper slot by default (opt-in via reserveHelperText)', () => {
         const html = renderToStaticMarkup(
             createElement(StyledInputField, { dataTest: 'f', label: 'Email' }),
+        )
+        expect(html).not.toContain('role="status"')
+        expect(html).not.toContain('role="alert"')
+        expect(html).not.toContain('-helper-text')
+    })
+
+    it('MUT-002b: mounts the helper slot when reserveHelperText is true', () => {
+        const html = renderToStaticMarkup(
+            createElement(StyledInputField, { dataTest: 'f', label: 'Email', reserveHelperText: true }),
         )
         expect(html).toContain('role="status"')
         expect(html).toContain('min-h-[24px]')
@@ -62,12 +71,11 @@ describe('StyledInputField helper-slot contract', () => {
         expect(layoutClasses(hint)).toContain('min-h-[24px]')
     })
 
-    it('reserveHelperText=false omits the empty helper slot', () => {
+    it('default (no reserveHelperText) omits the empty helper slot', () => {
         const html = renderToStaticMarkup(
             createElement(StyledInputField, {
                 dataTest: 'f',
                 label: 'Email',
-                reserveHelperText: false,
             }),
         )
         expect(html).not.toContain('role="status"')

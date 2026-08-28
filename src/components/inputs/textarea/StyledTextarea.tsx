@@ -1,6 +1,5 @@
 import React, { useEffect, useId, useRef, type ChangeEvent, type MutableRefObject, type ReactNode } from 'react'
-import { useHelperAlertRole } from 'src/helpers/useHelperAlertRole'
-import { warnMissingErrorMessage } from 'src/helpers/warnMissingErrorMessage'
+import { useHelperSlot } from 'src/helpers/useHelperSlot'
 import styles from './StyledTextarea.module.scss'
 
 export interface TextareaCommonProps {
@@ -92,7 +91,7 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
     label = '',
     labelClassName = '',
     description = '',
-    reserveHelperText = true,
+    reserveHelperText,
     value = '',
     minRows = 3,
     maxRows = Infinity,
@@ -117,9 +116,7 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
     const internalId = useId()
     const textAreaId = id ?? internalId
     const helperMessage = error ? errorMessage : description
-    const showHelperSlot = reserveHelperText || helperMessage != null || Boolean(error)
-    warnMissingErrorMessage('StyledTextarea', error, errorMessage)
-    const helperAlertRole = useHelperAlertRole(error)
+    const { show: showHelperSlot, role: helperAlertRole } = useHelperSlot('StyledTextarea', error, helperMessage, reserveHelperText)
 
     useEffect(() => {
         const textArea = textAreaRef.current
