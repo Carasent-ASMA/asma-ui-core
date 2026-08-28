@@ -15,12 +15,12 @@ import {
     type Ref,
     type TextareaHTMLAttributes,
 } from 'react'
-import { CloseIcon, ErrorOutlineIcon } from 'src/components/icons'
+import { CloseIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
+import { HelperRow } from 'src/helpers/HelperRow'
 import { resolveSx } from 'src/helpers/sx'
-import { useHelperAlertRole } from 'src/helpers/useHelperAlertRole'
 import { useHelperRowBudget } from 'src/helpers/useHelperRowBudget'
-import { warnMissingErrorMessage } from 'src/helpers/warnMissingErrorMessage'
+import { useHelperSlot } from 'src/helpers/useHelperSlot'
 import {
     floatingLabelClass,
     floatingLabelLayoutStyle,
@@ -302,9 +302,7 @@ export const StyledInputField = ({
     // a plain input. Gating purely on `shrink` wrongly hid the placeholder for label-less fields.
     const showPlaceholder = shrink || !label
 
-    const showHelperSlot = !readOnly && (reserveHelperText === true || helperText != null || Boolean(error))
-    warnMissingErrorMessage('StyledInputField', error, helperText)
-    const helperAlertRole = useHelperAlertRole(error)
+    const { show: showHelperSlot, role: helperAlertRole } = useHelperSlot('StyledInputField', error, helperText, reserveHelperText, readOnly)
 
     const {
         fieldRef: rootRef,
@@ -338,10 +336,7 @@ export const StyledInputField = ({
         'aria-label':
             htmlInputRest['aria-label'] ??
             (htmlInputRest['aria-labelledby'] ? undefined : typeof label === 'string' && label !== '' ? label : undefined),
-        'aria-describedby':
-            !readOnly && (reserveHelperText || helperText != null || error)
-                ? helperId
-                : htmlInputRest['aria-describedby'],
+        'aria-describedby': showHelperSlot ? helperId : htmlInputRest['aria-describedby'],
         onChange: handleChange,
         onFocus: handleFocus,
         onBlur: handleBlur,
@@ -523,25 +518,17 @@ export const StyledInputField = ({
                 )}
             </div>
 
-            {!readOnly && showHelperSlot && (
-                <div
+            {showHelperSlot && (
+                <HelperRow
                     ref={helperRowRef}
                     id={helperId}
                     role={helperAlertRole}
-                    className={cn(
-                        // Figma "Helper text" row (15561-37857 / 34634-148726): 24px tall, pt 4px, gap 4px.
-                        'mr-[14px] box-border flex min-h-[24px] items-start gap-1 pt-1',
-                        error && !slotProps?.formHelperText?.hideErrorIcon && 'text-error-500',
-                        !error && 'text-delta-600',
-                        slotProps?.formHelperText?.className,
-                    )}
+                    error={error}
+                    message={helperText}
+                    hideErrorIcon={slotProps?.formHelperText?.hideErrorIcon}
+                    className={cn('mr-[14px] box-border items-start', slotProps?.formHelperText?.className)}
                     style={{ ...helperRowStyle, ...resolveSx(slotProps?.formHelperText?.sx) }}
-                >
-                    {error && !slotProps?.formHelperText?.hideErrorIcon && (
-                        <ErrorOutlineIcon width={20} height={20} className='min-w-5 shrink-0' />
-                    )}
-                    <span className='text-sm leading-5 tracking-[0.03333em]'>{helperText}</span>
-                </div>
+                />
             )}
         </div>
     )

@@ -1,8 +1,7 @@
 import { useId, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode, type SyntheticEvent } from 'react'
-import { ErrorOutlineIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
-import { useHelperAlertRole } from 'src/helpers/useHelperAlertRole'
-import { warnMissingErrorMessage } from 'src/helpers/warnMissingErrorMessage'
+import { HelperRow } from 'src/helpers/HelperRow'
+import { useHelperSlot } from 'src/helpers/useHelperSlot'
 import styles from './StyledSlider.module.scss'
 
 export interface SliderMark {
@@ -116,9 +115,7 @@ export const StyledSlider = ({
     const isRange = pair !== null
 
     const message = error ? (errorText ?? helperText) : helperText
-    const showHelperSlot = reserveHelperText === true || message != null || Boolean(error)
-    warnMissingErrorMessage('StyledSlider', error, message)
-    const helperAlertRole = useHelperAlertRole(error)
+    const { show: showHelperSlot, role: helperAlertRole } = useHelperSlot('StyledSlider', error, message, reserveHelperText)
 
     // Match MUI's mark resolution (pre-rewrite parity):
     // - `marks === true` auto-generates a dot at every step: min + step·i for i in 0…floor((max-min)/step).
@@ -315,17 +312,13 @@ export const StyledSlider = ({
             )}
 
             {showHelperSlot && (
-                <div
+                <HelperRow
                     id={helperId}
                     role={helperAlertRole}
-                    className={cn(
-                        'm-0 flex min-h-[24px] items-center gap-1 pt-1 text-sm leading-5 tracking-[0.03333em]',
-                        error ? 'text-error-500' : 'text-delta-600',
-                    )}
-                >
-                    {error && <ErrorOutlineIcon width={20} height={20} className='min-w-5 shrink-0' />}
-                    <span>{message}</span>
-                </div>
+                    error={error}
+                    message={message}
+                    className='m-0 items-center'
+                />
             )}
         </div>
     )
