@@ -130,7 +130,7 @@ export const StyledInputField = ({
     onFocus,
     error,
     helperText,
-    reserveHelperText = true,
+    reserveHelperText,
     expandHelperText = true,
     disabled,
     readOnly,

@@ -39,7 +39,7 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
             error,
             errorText,
             helperText,
-            reserveHelperText = true,
+            reserveHelperText,
             children,
             name,
             ...rest

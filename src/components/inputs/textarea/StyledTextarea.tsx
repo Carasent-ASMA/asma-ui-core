@@ -92,7 +92,7 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
     label = '',
     labelClassName = '',
     description = '',
-    reserveHelperText = true,
+    reserveHelperText,
     value = '',
     minRows = 3,
     maxRows = Infinity,

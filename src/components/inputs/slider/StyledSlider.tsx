@@ -98,7 +98,7 @@ export const StyledSlider = ({
     error,
     errorText,
     helperText,
-    reserveHelperText = true,
+    reserveHelperText,
     ariaLabel,
     ariaLabelledBy,
     onChange,

@@ -119,7 +119,7 @@ export const StyledSelect = ({
     error,
     errorText,
     helperText,
-    reserveHelperText = true,
+    reserveHelperText,
     expandHelperText = true,
     allowClear,
     disabled,
