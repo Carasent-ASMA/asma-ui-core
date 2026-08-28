@@ -53,16 +53,25 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
     useFocusTrap(open && isFullScreenActive, modalRef, handleClose)
 
     const fullScreenDialogStyle: React.CSSProperties | undefined = isFullScreenActive
-        ? {
-              right: 'auto',
-              bottom: 'auto',
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-                            width: 'min(1000px, calc(100vw - 32px))',
-                            maxWidth: 'min(1000px, calc(100vw - 32px))',
-              height: '95dvh',
-          }
+        ? isMobile
+            ? {
+                  inset: 0,
+                  maxHeight: '100dvh',
+                  maxWidth: '100dvw',
+                  transform: 'none',
+                  height: '100dvh',
+                  width: '100dvw',
+              }
+            : {
+                  right: 'auto',
+                  bottom: 'auto',
+                  left: '50%',
+                  top: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: 'min(1000px, calc(100vw - 32px))',
+                  maxWidth: 'min(1000px, calc(100vw - 32px))',
+                  height: '95dvh',
+              }
         : undefined
 
     if (!open) return null

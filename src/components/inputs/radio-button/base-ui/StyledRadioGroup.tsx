@@ -1,8 +1,7 @@
 import React, { forwardRef, useId, useMemo, useState, type HTMLAttributes } from 'react'
-import { ErrorOutlineIcon } from 'src/components/icons'
-import { useHelperAlertRole } from 'src/helpers/useHelperAlertRole'
-import { warnMissingErrorMessage } from 'src/helpers/warnMissingErrorMessage'
-import clsx from 'clsx'
+import { cn } from 'src/helpers/cn'
+import { HelperRow } from 'src/helpers/HelperRow'
+import { useHelperSlot } from 'src/helpers/useHelperSlot'
 import { RadioGroupContext, type RadioValue } from './RadioGroupContext'
 
 export type StyledRadioGroupProps = {
@@ -39,7 +38,7 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
             error,
             errorText,
             helperText,
-            reserveHelperText = true,
+            reserveHelperText,
             children,
             name,
             ...rest
@@ -67,9 +66,7 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
         )
 
         const message = error ? (errorText ?? helperText) : helperText
-        const showHelperSlot = !readOnly && (reserveHelperText || message != null || Boolean(error))
-        warnMissingErrorMessage('StyledRadioGroup', error, message)
-        const helperAlertRole = useHelperAlertRole(error)
+        const { show: showHelperSlot, role: helperAlertRole } = useHelperSlot('StyledRadioGroup', error, message, reserveHelperText, readOnly)
 
         // Let consumers pick the layout direction: our default `flex-col` is emitted through
         // `tailwind (important:true)` where `.flex-col` is authored after `.flex-row`, so a
@@ -90,7 +87,7 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
                 aria-readonly={readOnly ? true : undefined}
                 // readOnly: keep the normal (non-disabled) look but block interaction — selection can't
                 // change (onSelect early-returns) and clicks/focus are inert.
-                className={clsx(
+                className={cn(
                     'flex items-start',
                     !hasDirection && 'flex-col',
                     readOnly && 'pointer-events-none',
@@ -100,17 +97,13 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
                 <RadioGroupContext.Provider value={contextValue}>{children}</RadioGroupContext.Provider>
 
                 {showHelperSlot && (
-                    <p
+                    <HelperRow
                         id={helperId}
                         role={helperAlertRole}
-                        className={clsx(
-                            'm-0 flex min-h-[24px] items-center gap-1 pt-1 text-sm leading-5 tracking-[0.03333em]',
-                            error ? 'font-medium text-error-500' : 'text-delta-600',
-                        )}
-                    >
-                        {error && <ErrorOutlineIcon width={20} height={20} className='min-w-5 shrink-0' />}
-                        {message}
-                    </p>
+                        error={error}
+                        message={message}
+                        className={cn('m-0 items-center', error && 'font-medium')}
+                    />
                 )}
             </div>
         )

@@ -27,12 +27,12 @@ import {
     type ReactElement,
     type ReactNode,
 } from 'react'
-import { ChevronDownIcon, CloseIcon, ErrorOutlineIcon } from 'src/components/icons'
+import { ChevronDownIcon, CloseIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
+import { HelperRow } from 'src/helpers/HelperRow'
 import { resolveSx } from 'src/helpers/sx'
-import { useHelperAlertRole } from 'src/helpers/useHelperAlertRole'
 import { useHelperRowBudget } from 'src/helpers/useHelperRowBudget'
-import { warnMissingErrorMessage } from 'src/helpers/warnMissingErrorMessage'
+import { useHelperSlot } from 'src/helpers/useHelperSlot'
 import {
     getOpenModalDialogAncestor,
     shouldUsePopoverTopLayer,
@@ -119,7 +119,7 @@ export const StyledSelect = ({
     error,
     errorText,
     helperText,
-    reserveHelperText = true,
+    reserveHelperText,
     expandHelperText = true,
     allowClear,
     disabled,
@@ -142,14 +142,12 @@ export const StyledSelect = ({
 }: StyledSelectProps): JSX.Element => {
     const ctx = useFormControlContext()
     const listboxId = `${dataTest}-listbox`
-    const helperId = useId()
     const isStandard = variant === 'standard'
     const isError = error ?? ctx?.error ?? false
     const isDisabled = disabled ?? ctx?.disabled ?? false
     const message = isError ? (errorText ?? helperText) : helperText
-    const showHelperSlot = !readOnly && (reserveHelperText || message != null || isError)
-    warnMissingErrorMessage('StyledSelect', isError, message)
-    const helperAlertRole = useHelperAlertRole(isError)
+    const { show: showHelperSlot, role: helperAlertRole } = useHelperSlot('StyledSelect', isError, message, reserveHelperText, readOnly)
+    const helperId = useId()
 
     const { fieldRef, rowRef, rowStyle: helperRowStyle } = useHelperRowBudget(expandHelperText && showHelperSlot)
 
@@ -472,19 +470,15 @@ export const StyledSelect = ({
             )}
 
             {showHelperSlot && (
-                <div
+                <HelperRow
                     ref={rowRef}
                     id={helperId}
                     role={helperAlertRole}
-                    className={cn(
-                        'm-0 mr-[14px] box-border flex min-h-[24px] items-center gap-1 pt-1 text-sm leading-5 tracking-[0.03333em]',
-                        isError ? 'text-error-500' : 'text-delta-600',
-                    )}
+                    error={isError}
+                    message={message}
+                    className='m-0 mr-[14px] box-border items-center'
                     style={helperRowStyle}
-                >
-                    {isError && <ErrorOutlineIcon width={20} height={20} className='min-w-5 shrink-0' />}
-                    <span>{message}</span>
-                </div>
+                />
             )}
         </div>
     )
