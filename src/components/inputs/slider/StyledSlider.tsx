@@ -116,7 +116,7 @@ export const StyledSlider = ({
     const isRange = pair !== null
 
     const message = error ? (errorText ?? helperText) : helperText
-    const showHelperSlot = reserveHelperText || message != null || Boolean(error)
+    const showHelperSlot = reserveHelperText === true || message != null || Boolean(error)
     warnMissingErrorMessage('StyledSlider', error, message)
     const helperAlertRole = useHelperAlertRole(error)
 

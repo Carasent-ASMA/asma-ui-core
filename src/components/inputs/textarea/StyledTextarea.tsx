@@ -117,7 +117,7 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
     const internalId = useId()
     const textAreaId = id ?? internalId
     const helperMessage = error ? errorMessage : description
-    const showHelperSlot = reserveHelperText || helperMessage != null || Boolean(error)
+    const showHelperSlot = reserveHelperText === true || helperMessage != null || Boolean(error)
     warnMissingErrorMessage('StyledTextarea', error, errorMessage)
     const helperAlertRole = useHelperAlertRole(error)
 

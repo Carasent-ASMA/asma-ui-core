@@ -147,7 +147,7 @@ export const StyledSelect = ({
     const isError = error ?? ctx?.error ?? false
     const isDisabled = disabled ?? ctx?.disabled ?? false
     const message = isError ? (errorText ?? helperText) : helperText
-    const showHelperSlot = !readOnly && (reserveHelperText || message != null || isError)
+    const showHelperSlot = !readOnly && (reserveHelperText === true || message != null || isError)
     warnMissingErrorMessage('StyledSelect', isError, message)
     const helperAlertRole = useHelperAlertRole(isError)
 

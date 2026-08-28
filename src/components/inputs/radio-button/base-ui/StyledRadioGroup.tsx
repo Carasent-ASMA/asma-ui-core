@@ -67,7 +67,7 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
         )
 
         const message = error ? (errorText ?? helperText) : helperText
-        const showHelperSlot = !readOnly && (reserveHelperText || message != null || Boolean(error))
+        const showHelperSlot = !readOnly && (reserveHelperText === true || message != null || Boolean(error))
         warnMissingErrorMessage('StyledRadioGroup', error, message)
         const helperAlertRole = useHelperAlertRole(error)
 

@@ -302,7 +302,7 @@ export const StyledInputField = ({
     // a plain input. Gating purely on `shrink` wrongly hid the placeholder for label-less fields.
     const showPlaceholder = shrink || !label
 
-    const showHelperSlot = !readOnly && (reserveHelperText || helperText != null || Boolean(error))
+    const showHelperSlot = !readOnly && (reserveHelperText === true || helperText != null || Boolean(error))
     warnMissingErrorMessage('StyledInputField', error, helperText)
     const helperAlertRole = useHelperAlertRole(error)
 
