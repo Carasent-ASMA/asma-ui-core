@@ -460,7 +460,8 @@ export const StyledSelect = ({
                         {...getFloatingProps()}
                         onKeyDown={handleKeyDown}
                         className={cn(
-                            'z-[1300] m-0 max-h-72 list-none overflow-auto rounded-lg border border-solid border-delta-300 bg-white px-0 py-1 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
+                            // Figma Menus (node 34522-151497): the list is padded `8px 0` (was 4px).
+                            'z-[1300] m-0 max-h-72 list-none overflow-auto rounded-lg border border-solid border-delta-300 bg-white px-0 py-2 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
                             MenuProps?.className,
                         )}
                     >
