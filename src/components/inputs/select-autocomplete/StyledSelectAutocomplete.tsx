@@ -462,7 +462,10 @@ export function StyledSelectAutocomplete<
         'aria-selected:bg-gama-50 data-[active]:bg-gama-50 data-[active]:text-delta-800',
         // Disabled options never take the gama highlight (hover or keyboard) and read as muted.
         'aria-disabled:cursor-default aria-disabled:!bg-transparent aria-disabled:text-delta-300',
-        isMultiple && 'border-0 border-b border-solid border-delta-200',
+        // Figma Menus (node 34522-151497): every row carries a `border/separator` (#d3d8df =
+        // delta-200) bottom rule; the last one drops it so the list doesn't end in a stray line
+        // above the listbox padding. Single-select rows previously had no separator at all.
+        'border-0 border-b border-solid border-delta-200 last:border-b-0',
     )
 
     const defaultRenderOption = (props: OptionLiProps, option: T, state: AutocompleteRenderOptionState): ReactNode => {
@@ -486,7 +489,10 @@ export function StyledSelectAutocomplete<
                         {state.selected && <CheckIcon width={20} height={20} className='text-gama-500' />}
                     </span>
                 )}
-                <span className='flex-1 truncate'>{getLabel(option)}</span>
+                {/* Long labels wrap to a second line and only then ellipsise (ASMA-7847): one
+                    clipped line hid which organisation a row actually was. `break-words` mirrors
+                    Figma's `word-break: break-word`, so an unbroken name still wraps. */}
+                <span className='line-clamp-2 min-w-0 flex-1 break-words'>{getLabel(option)}</span>
             </li>
         )
     }
