@@ -462,10 +462,6 @@ export function StyledSelectAutocomplete<
         'aria-selected:bg-gama-50 data-[active]:bg-gama-50 data-[active]:text-delta-800',
         // Disabled options never take the gama highlight (hover or keyboard) and read as muted.
         'aria-disabled:cursor-default aria-disabled:!bg-transparent aria-disabled:text-delta-300',
-        // Figma Menus (node 34522-151497): every row carries a `border/separator` (#d3d8df =
-        // delta-200) bottom rule; the last one drops it so the list doesn't end in a stray line
-        // above the listbox padding. Single-select rows previously had no separator at all.
-        'border-0 border-b border-solid border-delta-200 last:border-b-0',
     )
 
     const defaultRenderOption = (props: OptionLiProps, option: T, state: AutocompleteRenderOptionState): ReactNode => {
@@ -549,6 +545,17 @@ export function StyledSelectAutocomplete<
                             // Figma Menus (node 34522-151497) pads the list `8px 0` — the rows run
                             // edge to edge horizontally, with 8px of breathing room top and bottom.
                             'z-[1300] m-0 list-none overflow-auto rounded-lg border border-solid border-delta-300 bg-white px-0 py-2 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
+                            // Figma Menus (node 34522-151497) separates the rows and leaves the last
+                            // one clean. Owned by the LISTBOX, not the row, for two reasons: a custom
+                            // `renderOption` that replaces `props.className` (a real pattern in
+                            // consumers) silently dropped the row-level rule, and — because the
+                            // separator and its last-row exclusion were two separate utilities — a page
+                            // that loaded a generic `.border-b` from one bundle without the
+                            // `last:border-b-0` rule from ours drew a stray line under the final
+                            // option. One structural rule cannot come apart like that: no stylesheet,
+                            // no separators at all, which still reads correctly.
+                            '[&>li:not(:last-child)]:border-0 [&>li:not(:last-child)]:border-b',
+                            '[&>li:not(:last-child)]:border-solid [&>li:not(:last-child)]:border-delta-200',
                             classes?.listbox,
                             slotProps?.popper?.className,
                         )}
