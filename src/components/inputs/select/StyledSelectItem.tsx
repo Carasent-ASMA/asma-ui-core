@@ -36,6 +36,8 @@ export const StyledSelectItem = ({
             // Figma Menus item (node 16073-19226) label = Body Base 16/lh24 (`text-base`), not 14px,
             // in text/delta-800 — same as the DynamicSelect option row (don't inherit page black).
             'flex items-center gap-1 px-2 py-2.5 text-base outline-none',
+            // Figma Menus (node 34522-151497): `border/separator` rule between rows, none after the last.
+            'border-0 border-b border-solid border-delta-200 last:border-b-0',
             disabled ? 'cursor-not-allowed text-delta-300' : 'cursor-pointer text-delta-800 hover:bg-delta-50',
             selected && 'bg-gama-50',
             className,
@@ -44,6 +46,7 @@ export const StyledSelectItem = ({
         <span className='flex w-6 justify-center'>
             {selected && <CheckIcon width={22} height={22} className='text-gama-500' />}
         </span>
-        <span className='min-w-0 flex-1 truncate'>{children}</span>
+        {/* Two lines, then ellipsis (ASMA-7847) — see StyledSelectAutocomplete's option label. */}
+        <span className='line-clamp-2 min-w-0 flex-1 break-words'>{children}</span>
     </li>
 )
