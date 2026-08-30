@@ -222,8 +222,6 @@ export const DynamicSelectAutocomplete = forwardRef(
                                     className={cn(
                                         // Figma Menus item: Body Base 16/lh24.
                                         'flex min-h-10 cursor-pointer items-center gap-x-1 bg-white px-2 text-base aria-selected:bg-gama-50 hover:bg-gama-50',
-                                        // Figma Menus (node 34522-151497): separator between rows, none after the last.
-                                        'border-0 border-b border-solid border-delta-200 last:border-b-0',
                                         disabled &&
                                             'cursor-not-allowed bg-delta-50 aria-selected:!bg-delta-50 hover:!bg-delta-50 [&_*]:cursor-not-allowed',
                                     )}
@@ -274,8 +272,6 @@ export const DynamicSelectAutocomplete = forwardRef(
                                 className={cn(
                                     // Figma Menus item: Body Base 16/lh24.
                                     'flex min-h-10 cursor-pointer items-center gap-x-1 px-2 text-base aria-selected:bg-gama-50 hover:bg-gama-50',
-                                    // Figma Menus (node 34522-151497): separator between rows, none after the last.
-                                    'border-0 border-b border-solid border-delta-200 last:border-b-0',
                                     disabled &&
                                         'cursor-not-allowed bg-delta-50 aria-selected:!bg-delta-50 hover:!bg-delta-50 [&_*]:cursor-not-allowed',
                                 )}
