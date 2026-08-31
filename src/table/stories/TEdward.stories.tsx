@@ -149,7 +149,7 @@ const useColumns = () => {
                 cell: (info) => {
                     return (
                         <div className={`flex items-start gap-[2px] ${id === 'col2' ? 'pl-4' : ''}`}>
-                            <div className='py-[14px]'>{info.row.original.text}</div>
+                            <div className='py-[12px]'>{info.row.original.text}</div>
                             {id === 'col1' && (
                                 // if you want Checkbox to be visible -> Use <p> instead of <div>
                                 <div className='mt-1'>

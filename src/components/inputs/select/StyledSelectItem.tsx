@@ -44,6 +44,7 @@ export const StyledSelectItem = ({
         <span className='flex w-6 justify-center'>
             {selected && <CheckIcon width={22} height={22} className='text-gama-500' />}
         </span>
-        <span className='min-w-0 flex-1 truncate'>{children}</span>
+        {/* Two lines, then ellipsis (ASMA-7847) — see StyledSelectAutocomplete's option label. */}
+        <span className='line-clamp-2 min-w-0 flex-1 break-words'>{children}</span>
     </li>
 )

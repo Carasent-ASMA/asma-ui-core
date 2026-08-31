@@ -27,12 +27,12 @@ import {
     type ReactElement,
     type ReactNode,
 } from 'react'
-import { ChevronDownIcon, CloseIcon, ErrorOutlineIcon } from 'src/components/icons'
+import { ChevronDownIcon, CloseIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
+import { HelperRow } from 'src/helpers/HelperRow'
 import { resolveSx } from 'src/helpers/sx'
-import { useHelperAlertRole } from 'src/helpers/useHelperAlertRole'
 import { useHelperRowBudget } from 'src/helpers/useHelperRowBudget'
-import { warnMissingErrorMessage } from 'src/helpers/warnMissingErrorMessage'
+import { useHelperSlot } from 'src/helpers/useHelperSlot'
 import {
     getOpenModalDialogAncestor,
     shouldUsePopoverTopLayer,
@@ -119,7 +119,7 @@ export const StyledSelect = ({
     error,
     errorText,
     helperText,
-    reserveHelperText = true,
+    reserveHelperText,
     expandHelperText = true,
     allowClear,
     disabled,
@@ -142,14 +142,12 @@ export const StyledSelect = ({
 }: StyledSelectProps): JSX.Element => {
     const ctx = useFormControlContext()
     const listboxId = `${dataTest}-listbox`
-    const helperId = useId()
     const isStandard = variant === 'standard'
     const isError = error ?? ctx?.error ?? false
     const isDisabled = disabled ?? ctx?.disabled ?? false
     const message = isError ? (errorText ?? helperText) : helperText
-    const showHelperSlot = !readOnly && (reserveHelperText || message != null || isError)
-    warnMissingErrorMessage('StyledSelect', isError, message)
-    const helperAlertRole = useHelperAlertRole(isError)
+    const { show: showHelperSlot, role: helperAlertRole } = useHelperSlot('StyledSelect', isError, message, reserveHelperText, readOnly)
+    const helperId = useId()
 
     const { fieldRef, rowRef, rowStyle: helperRowStyle } = useHelperRowBudget(expandHelperText && showHelperSlot)
 
@@ -462,7 +460,12 @@ export const StyledSelect = ({
                         {...getFloatingProps()}
                         onKeyDown={handleKeyDown}
                         className={cn(
-                            'z-[1300] m-0 max-h-72 list-none overflow-auto rounded-lg border border-solid border-delta-300 bg-white px-0 py-1 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
+                            // Figma Menus (node 34522-151497): the list is padded `8px 0` (was 4px)
+                            // and separates its rows from the container — see the equivalent rule on
+                            // StyledSelectAutocomplete's listbox for why it does not live on the row.
+                            'z-[1300] m-0 max-h-72 list-none overflow-auto rounded-lg border border-solid border-delta-300 bg-white px-0 py-2 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
+                            '[&>li:not(:last-child)]:border-0 [&>li:not(:last-child)]:border-b',
+                            '[&>li:not(:last-child)]:border-solid [&>li:not(:last-child)]:border-delta-200',
                             MenuProps?.className,
                         )}
                     >
@@ -472,19 +475,15 @@ export const StyledSelect = ({
             )}
 
             {showHelperSlot && (
-                <div
+                <HelperRow
                     ref={rowRef}
                     id={helperId}
                     role={helperAlertRole}
-                    className={cn(
-                        'm-0 mr-[14px] box-border flex min-h-[24px] items-center gap-1 pt-1 text-sm leading-5 tracking-[0.03333em]',
-                        isError ? 'text-error-500' : 'text-delta-600',
-                    )}
+                    error={isError}
+                    message={message}
+                    className='m-0 mr-[14px] box-border items-center'
                     style={helperRowStyle}
-                >
-                    {isError && <ErrorOutlineIcon width={20} height={20} className='min-w-5 shrink-0' />}
-                    <span>{message}</span>
-                </div>
+                />
             )}
         </div>
     )

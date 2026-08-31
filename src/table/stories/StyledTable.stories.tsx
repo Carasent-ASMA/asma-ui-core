@@ -43,12 +43,19 @@ const data: TableRow[] = [
 ]
 
 const consumerColumns: ColumnDef<TableRow>[] = [
-    { accessorKey: 'name', header: 'Workspace name', fixedLeft: true, size: 280 },
+    {
+        accessorKey: 'name',
+        header: 'Workspace name',
+        fixedLeft: true,
+        size: 280,
+        // consumer-style 12px gutters: 12 + 24 + 12 = 48 collapsed, grows on wrap
+        cell: ({ row }) => <div className='py-[12px]'>{row.original.name}</div>,
+    },
     {
         accessorKey: 'description',
         header: 'Description',
         size: 160,
-        cell: ({ row }) => <div className='py-[14px]'>{row.original.description}</div>,
+        cell: ({ row }) => <div>{row.original.description}</div>,
     },
     { accessorKey: 'role', header: 'Role', size: 300 },
     { accessorKey: 'updatedDate', header: 'Updated date', size: 160 },
@@ -160,6 +167,13 @@ export const SizingPersistenceAndControlAlignment: Story = {
 
         const bodyRows = Array.from(canvasElement.querySelectorAll<HTMLElement>('tbody tr'))
         await expect(bodyRows.length).toBeGreaterThanOrEqual(2)
+        // Collapsed rows stay 48 (Body Base 16/24 + 12px gutters). Rows after
+        // the first carry the 0.5px separator border, which snaps to 1px.
+        for (const [index, row] of bodyRows.entries()) {
+            const height = row.getBoundingClientRect().height
+            await expect(height, `collapsed row ${index} height`).toBeGreaterThanOrEqual(48)
+            await expect(height, `collapsed row ${index} height`).toBeLessThanOrEqual(49)
+        }
         const shortRow = bodyRows[1]!
         const shortRowArrow = shortRow.querySelector<HTMLElement>('[data-test="expand-text-button"]')
         await expect(shortRowArrow).not.toBeNull()
@@ -213,6 +227,12 @@ export const SizingPersistenceAndControlAlignment: Story = {
             }
         }
         const collapsedSnapshot = measureRowSnapshot()
+        const collapsedNameBand = Array.from(firstRow.querySelectorAll('td'))
+            .find((cell) => cell.textContent?.includes('First row with text'))!
+            .firstElementChild!.getBoundingClientRect()
+        const collapsedDescriptionBand = Array.from(firstRow.querySelectorAll('td'))
+            .find((cell) => cell.textContent === 'Description')!
+            .firstElementChild!.getBoundingClientRect()
         const expandIcon = expandButton!.querySelector<SVGElement>('svg')
         await expect(expandIcon).not.toBeNull()
         const initialIconBounds = expandIcon!.getBoundingClientRect()
@@ -238,6 +258,28 @@ export const SizingPersistenceAndControlAlignment: Story = {
             .filter((element) => element.scrollWidth > element.clientWidth)
             .map((element) => element.scrollLeft)
         const expandedSnapshot = measureRowSnapshot()
+        await expect(expandedSnapshot.rowHeight, 'wrapped expand grows downward').toBeGreaterThan(
+            collapsedSnapshot.rowHeight,
+        )
+        const wrappingCell = Array.from(firstRow.querySelectorAll('td')).find((cell) =>
+            cell.textContent?.includes('First row with text'),
+        )
+        await expect(wrappingCell).toBeDefined()
+        await expect(wrappingCell!.getBoundingClientRect().height).toBeGreaterThan(48)
+        const wrappingBand = wrappingCell!.firstElementChild as HTMLElement
+        await expect(Math.abs(wrappingBand.getBoundingClientRect().top - collapsedNameBand.top)).toBeLessThanOrEqual(
+            0.5,
+        )
+        const descriptionCell = Array.from(firstRow.querySelectorAll('td')).find(
+            (cell) => cell.textContent === 'Description',
+        )
+        await expect(descriptionCell).toBeDefined()
+        const descriptionBand = descriptionCell!.firstElementChild as HTMLElement
+        const descriptionBandRect = descriptionBand.getBoundingClientRect()
+        await expect(descriptionBandRect.height, 'short cell must not stretch to the expanded row').toBeLessThanOrEqual(
+            48.5,
+        )
+        await expect(Math.abs(descriptionBandRect.top - collapsedDescriptionBand.top)).toBeLessThanOrEqual(0.5)
         await expect(expandedSnapshot.checkboxCenterY).toBe(collapsedSnapshot.checkboxCenterY)
         expandedSnapshot.plainCellCenters.forEach((center, index) =>
             expect(Math.abs(center - collapsedSnapshot.plainCellCenters[index]!)).toBeLessThanOrEqual(0.5),
@@ -387,6 +429,11 @@ export const FooterRowCountBoundary: Story = {
         // Under the threshold: the custom footer renders, pagination controls stay hidden.
         await expect(section('footer-boundary-4').querySelector('[data-test="custom-footer"]')).not.toBeNull()
         await expect(section('footer-boundary-4').querySelector('[data-test="table-rows-count-button"]')).toBeNull()
+        for (const row of section('footer-boundary-4').querySelectorAll('tbody tr')) {
+            const height = row.getBoundingClientRect().height
+            await expect(height).toBeGreaterThanOrEqual(48)
+            await expect(height).toBeLessThanOrEqual(49)
+        }
 
         // At and above the threshold: custom footer AND pagination controls render, as before.
         for (const rowCount of [5, 6]) {

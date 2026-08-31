@@ -458,11 +458,10 @@ export function StyledSelectAutocomplete<
     // hover, and selected backgrounds from that — not only from `defaultRenderOption`.
     const optionRowClassName = cn(
         // Figma Menus item: Body Base 16/lh24, text delta-800.
-        'box-border flex min-h-10 cursor-pointer items-center gap-x-3 px-3 py-1.5 text-base text-delta-800 first:-mt-1',
+        'box-border flex min-h-10 cursor-pointer items-center gap-x-3 px-3 py-1.5 text-base text-delta-800',
         'aria-selected:bg-gama-50 data-[active]:bg-gama-50 data-[active]:text-delta-800',
         // Disabled options never take the gama highlight (hover or keyboard) and read as muted.
         'aria-disabled:cursor-default aria-disabled:!bg-transparent aria-disabled:text-delta-300',
-        isMultiple && 'border-0 border-b border-solid border-delta-200',
     )
 
     const defaultRenderOption = (props: OptionLiProps, option: T, state: AutocompleteRenderOptionState): ReactNode => {
@@ -486,7 +485,10 @@ export function StyledSelectAutocomplete<
                         {state.selected && <CheckIcon width={20} height={20} className='text-gama-500' />}
                     </span>
                 )}
-                <span className='flex-1 truncate'>{getLabel(option)}</span>
+                {/* Long labels wrap to a second line and only then ellipsise (ASMA-7847): one
+                    clipped line hid which organisation a row actually was. `break-words` mirrors
+                    Figma's `word-break: break-word`, so an unbroken name still wraps. */}
+                <span className='line-clamp-2 min-w-0 flex-1 break-words'>{getLabel(option)}</span>
             </li>
         )
     }
@@ -540,7 +542,20 @@ export function StyledSelectAutocomplete<
                         className={cn(
                             // Figma Autocomplete dropdown = the Menus surface (node 16073-19226): rounded-lg,
                             // border/outline delta-300 (#bdc4cf), Menus shadow. Matches StyledSelect/StyledMenu.
-                            'z-[1300] m-0 list-none overflow-auto rounded-lg border border-solid border-delta-300 bg-white p-0 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
+                            // Figma Menus (node 34522-151497) pads the list `8px 0` — the rows run
+                            // edge to edge horizontally, with 8px of breathing room top and bottom.
+                            'z-[1300] m-0 list-none overflow-auto rounded-lg border border-solid border-delta-300 bg-white px-0 py-2 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
+                            // Figma Menus (node 34522-151497) separates the rows and leaves the last
+                            // one clean. Owned by the LISTBOX, not the row, for two reasons: a custom
+                            // `renderOption` that replaces `props.className` (a real pattern in
+                            // consumers) silently dropped the row-level rule, and — because the
+                            // separator and its last-row exclusion were two separate utilities — a page
+                            // that loaded a generic `.border-b` from one bundle without the
+                            // `last:border-b-0` rule from ours drew a stray line under the final
+                            // option. One structural rule cannot come apart like that: no stylesheet,
+                            // no separators at all, which still reads correctly.
+                            '[&>li:not(:last-child)]:border-0 [&>li:not(:last-child)]:border-b',
+                            '[&>li:not(:last-child)]:border-solid [&>li:not(:last-child)]:border-delta-200',
                             classes?.listbox,
                             slotProps?.popper?.className,
                         )}

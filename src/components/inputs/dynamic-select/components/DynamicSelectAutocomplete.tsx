@@ -245,7 +245,9 @@ export const DynamicSelectAutocomplete = forwardRef(
                                             {renderLabel ? (
                                                 renderLabel(option)
                                             ) : (
-                                                <span className='h-fit text-base text-delta-800'>
+                                                // Two lines, then ellipsis (ASMA-7847). Unclamped,
+                                                // a long name grew the row without limit.
+                                                <span className='line-clamp-2 h-fit min-w-0 flex-1 break-words text-base text-delta-800'>
                                                     {getOptionLabel(option)}
                                                 </span>
                                             )}
@@ -290,7 +292,9 @@ export const DynamicSelectAutocomplete = forwardRef(
                                         {renderLabel ? (
                                             renderLabel(option)
                                         ) : (
-                                            <span className='text-base text-delta-800'>
+                                            // Two lines, then ellipsis (ASMA-7847). Unclamped,
+                                            // a long name grew the row without limit.
+                                            <span className='line-clamp-2 min-w-0 flex-1 break-words text-base text-delta-800'>
                                                 {getOptionLabel(option)}
                                             </span>
                                         )}
@@ -306,7 +310,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                             inputRef={ref}
                             error={error}
                             helperText={disableHelperText ? undefined : helperText}
-                            reserveHelperText={!disableHelperText}
+                            reserveHelperText={disableHelperText ? false : error !== undefined}
                             variant='outlined'
                             label=''
                             placeholder={placeholder}

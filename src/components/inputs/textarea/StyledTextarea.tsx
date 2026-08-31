@@ -1,6 +1,5 @@
 import React, { useEffect, useId, useRef, type ChangeEvent, type MutableRefObject, type ReactNode } from 'react'
-import { useHelperAlertRole } from 'src/helpers/useHelperAlertRole'
-import { warnMissingErrorMessage } from 'src/helpers/warnMissingErrorMessage'
+import { useHelperSlot } from 'src/helpers/useHelperSlot'
 import styles from './StyledTextarea.module.scss'
 
 export interface TextareaCommonProps {
@@ -63,7 +62,7 @@ type textTypes = 'active' | 'error' | 'disabled'
  * Figma has no standalone "Text area" component — a multiline text control inherits the **Input
  * field** outlined styling (shared with `StyledInputField`/`field-styles`): radius 4, field text
  * **Body Base 16/lh24 delta-800**; border **enabled delta-500 #7a899e**, **hover gama-300 #60bdbd
- * (2px)**, **focus gama-400 #1ca1a1 (2px)**, **error error-500 #e10700**, **disabled delta-300**.
+ * (2px)**, **focus gama-400 #1ca1a1 (3px)**, **error error-500 #e10700**, **disabled delta-300**.
  * Title = **Body Base SemiBold 16 delta-800**; description/helper = **Helper 14/lh20 delta-600**.
  * State (Enabled/Hover/Focus/Error/Disabled) ← native + `error`/`disabled`; the `not_editable`/
  * `view_only` variants are the read-only presentations. Colours live in the textarea-only
@@ -92,7 +91,7 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
     label = '',
     labelClassName = '',
     description = '',
-    reserveHelperText = true,
+    reserveHelperText,
     value = '',
     minRows = 3,
     maxRows = Infinity,
@@ -117,9 +116,7 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
     const internalId = useId()
     const textAreaId = id ?? internalId
     const helperMessage = error ? errorMessage : description
-    const showHelperSlot = reserveHelperText || helperMessage != null || Boolean(error)
-    warnMissingErrorMessage('StyledTextarea', error, errorMessage)
-    const helperAlertRole = useHelperAlertRole(error)
+    const { show: showHelperSlot, role: helperAlertRole } = useHelperSlot('StyledTextarea', error, helperMessage, reserveHelperText)
 
     useEffect(() => {
         const textArea = textAreaRef.current
