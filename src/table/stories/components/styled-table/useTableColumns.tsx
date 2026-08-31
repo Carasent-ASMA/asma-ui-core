@@ -23,7 +23,7 @@ export const useStyledTableColumns = (): { columns: ColumnDef<Person, Person>[] 
                 },
                 cell() {
                     return (
-                        <div className='py-[16px]'>
+                        <div className='py-[14px]'>
                             <CheckIcon color={'#7a899e'} width='20' cursor={'pointer'} />
                         </div>
                     )
@@ -39,7 +39,7 @@ export const useStyledTableColumns = (): { columns: ColumnDef<Person, Person>[] 
                 cell: (info) => {
                     const proxy = info.row.original
                     return (
-                        <div className='flex items-center gap-5 py-[14px]'>
+                        <div className='flex items-center gap-5 py-[12px]'>
                             <div className='text-base text-black'>{proxy.firstName}</div>
                         </div>
                     )
@@ -54,7 +54,7 @@ export const useStyledTableColumns = (): { columns: ColumnDef<Person, Person>[] 
                     const proxy = info.row.original
                     return (
                         <div
-                            className='flex items-center gap-5 py-[14px]'
+                            className='flex items-center gap-5 py-[12px]'
                             style={{
                                 paddingLeft: `${info.row.depth * 2}rem`,
                             }}
@@ -74,7 +74,7 @@ export const useStyledTableColumns = (): { columns: ColumnDef<Person, Person>[] 
                 header: 'About Me',
                 cell: () => {
                     return (
-                        <div className='py-[14px]'>
+                        <div className='py-[12px]'>
                             Lorem ipsum dolor sit, amet consectetur adipisicing elit. Corporis quas exercitationem sed
                             similique incidunt excepturi adipisci veritatis nemo et harum.
                         </div>
@@ -89,9 +89,9 @@ export const useStyledTableColumns = (): { columns: ColumnDef<Person, Person>[] 
                 header: 'About',
                 cell: () => {
                     return (
-                        <div className='py-[14px]'>
+                        <div className='py-[12px]'>
                             Lorem ipsum dolor sit, amet consectetur adipisicing elit. Corporis quas exercitationem sed
-                            similique incidunt excepturi adipisci veritatis nemo et harum.
+                                similique incidunt excepturi adipisci veritatis nemo et harum.
                         </div>
                     )
                     // return <PersonDescription cellContext={info} />
@@ -106,7 +106,7 @@ export const useStyledTableColumns = (): { columns: ColumnDef<Person, Person>[] 
                 cell: (info) => {
                     const proxy = info.row.original
                     return (
-                        <div className='flex items-center gap-5 py-[14px]'>
+                        <div className='flex items-center gap-5 py-[12px]'>
                             <div className='text-base text-black'>{proxy.lastName}</div>
                         </div>
                     )
@@ -120,7 +120,7 @@ export const useStyledTableColumns = (): { columns: ColumnDef<Person, Person>[] 
                 cell: (info) => {
                     const proxy = info.row.original
                     return (
-                        <div className='flex items-center gap-5 py-[14px]'>
+                        <div className='flex items-center gap-5 py-[12px]'>
                             <div className='text-base text-black'>{proxy.lastName}</div>
                         </div>
                     )
@@ -134,7 +134,7 @@ export const useStyledTableColumns = (): { columns: ColumnDef<Person, Person>[] 
                 cell: (info) => {
                     const proxy = info.row.original
                     return (
-                        <div className='flex items-center gap-5 py-[14px]'>
+                        <div className='flex items-center gap-5 py-[12px]'>
                             <div className='text-base text-black'>{proxy.lastName}</div>
                         </div>
                     )
@@ -148,7 +148,7 @@ export const useStyledTableColumns = (): { columns: ColumnDef<Person, Person>[] 
                 cell: (info) => {
                     const proxy = info.row.original
                     return (
-                        <div className='flex items-center gap-5 py-[14px]'>
+                        <div className='flex items-center gap-5 py-[12px]'>
                             <div className='text-base text-black'>{proxy.lastName}</div>
                         </div>
                     )
@@ -162,7 +162,7 @@ export const useStyledTableColumns = (): { columns: ColumnDef<Person, Person>[] 
                 cell: (info) => {
                     const proxy = info.row.original
                     return (
-                        <div className='flex items-center gap-5 py-[14px]'>
+                        <div className='flex items-center gap-5 py-[12px]'>
                             <div className='text-base text-black'>{proxy.lastName}</div>
                         </div>
                     )
@@ -176,7 +176,7 @@ export const useStyledTableColumns = (): { columns: ColumnDef<Person, Person>[] 
                 cell: (info) => {
                     const proxy = info.row.original
                     return (
-                        <div className='flex items-center gap-5 py-[14px]'>
+                        <div className='flex items-center gap-5 py-[12px]'>
                             <div className='text-base text-black'>{proxy.lastName}</div>
                         </div>
                     )
