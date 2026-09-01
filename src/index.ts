@@ -49,6 +49,7 @@ export * from './components/navigation/drawer'
 export * from './components/navigation/menu'
 export * from './components/navigation/link'
 export * from './components/navigation/tabs'
+export * from './components/navigation/title-chevron'
 export * from './components/navigation/listbox'
 // surfaces
 export * from './components/utils/accordion'
