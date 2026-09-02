@@ -90,7 +90,10 @@ export const CountryCodeSelect = ({
                 onClick={() => setOpen(true)}
                 style={{ height: SINGLE_LINE_FIELD_HEIGHT_PX }}
                 className={cn(
-                    'group relative flex shrink-0 items-center gap-2 rounded border-0 bg-transparent px-3 text-base outline-none',
+                    // Figma pins the trigger at 128 px (node 8523:109471 — trigger w=128, gap 10,
+                    // number input w=205). Fixed rather than hugging its text so the pair does not
+                    // resize when the calling code changes width (+1 vs +994).
+                    'group relative flex w-32 shrink-0 items-center gap-1.5 rounded border-0 bg-transparent px-3 text-base outline-none',
                     disabled ? 'cursor-not-allowed text-delta-300' : 'cursor-pointer text-delta-800',
                 )}
             >
@@ -104,9 +107,10 @@ export const CountryCodeSelect = ({
                     positioned and carries the consumer's surface class, so where that class paints
                     a background (`bg-white` on a tinted panel) anything left at the default
                     stacking level disappears behind it — which is how the flag went missing. */}
-                <span className='relative z-[1] flex items-center gap-2'>
+                <span className='relative z-[1] flex items-center gap-1.5'>
                     {renderFlag?.(value, 'eager')}
-                    <span>{selected === undefined ? '' : `+${selected.dialCode}`}</span>
+                    {/* 48 px slot per Figma, so the chevron keeps its place across codes. */}
+                    <span className='w-12 text-left'>{selected === undefined ? '' : `+${selected.dialCode}`}</span>
                     <ChevronDownIcon
                         width={20}
                         height={20}

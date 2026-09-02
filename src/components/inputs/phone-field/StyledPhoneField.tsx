@@ -127,7 +127,8 @@ export const StyledPhoneField = ({
                     {readOnlyText ?? displayValue}
                 </span>
             ) : (
-                <div className='flex items-start gap-2'>
+                // 10 px between the two controls (Figma: trigger ends at 128, input starts at 138).
+                <div className='flex items-start gap-2.5'>
                     <CountryCodeSelect
                         dataTest={`${dataTest}-country`}
                         countries={countries}
