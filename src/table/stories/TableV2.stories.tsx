@@ -2,6 +2,7 @@ import type { Meta } from '@storybook/react-vite'
 import { type Table as TanstackTable } from '@tanstack/react-table'
 import { useEffect, useRef, useState } from 'react'
 import { StyledTypography } from 'src/components/data-display/typography'
+import { SnackbarProvider } from 'src/components/feedback/snack-bar'
 import { cn } from 'src/helpers'
 import { StyledTable } from 'src/table/components/StyledTableIndex'
 import { StyledButton } from 'src/table/shared-components/button'
@@ -22,6 +23,7 @@ const meta: Meta = {
         },
     },
     component: StyledTable,
+    decorators: [(Story) => <SnackbarProvider><Story /></SnackbarProvider>],
     tags: [],
     argTypes: {},
     args: {
