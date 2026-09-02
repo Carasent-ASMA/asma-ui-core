@@ -268,6 +268,37 @@ export const LongContentScrollable: Story = {
     },
 }
 
+/**
+ * `scroll='body'` + `fullScreen` — the shape the storage document dialogs use. The paper must stack
+ * the header above the content across the full width; while `flex-col` was gated on
+ * `scroll === 'paper'` the paper stayed a flex ROW and the two sat side by side at ~half width each,
+ * squeezing an embedded document editor into the right half (ASMA-8069).
+ *
+ * Deliberately does NOT go through `DialogStoryFrame`, whose paper `sx` forces `flexDirection:
+ * 'column'` and would mask the regression.
+ */
+export const BodyScrollFullScreen: Story = {
+    render: () => (
+        <StyledDialog
+            dataTest='styled-dialog-body-scroll'
+            open
+            fullScreen
+            scroll='body'
+            onCloseText='Close'
+            dialogTitle='Body scroll, full screen'
+        >
+            <div data-testid='body-scroll-content' className='h-40 bg-delta-100 p-4'>
+                This content must span the full paper width, below the header — not beside it.
+            </div>
+        </StyledDialog>
+    ),
+    play: async () => {
+        const paper = (await screen.findByTestId('body-scroll-content')).parentElement
+        await expect(paper).not.toBeNull()
+        await expect(getComputedStyle(paper as HTMLElement).flexDirection).toBe('column')
+    },
+}
+
 /** Wide, non-wrapping content must show a horizontal scrollbar (not clip or hide it). */
 export const HorizontalScroll: Story = {
     render: (args) => (

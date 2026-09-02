@@ -223,8 +223,11 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
             <div
                 className={cn(
                     // Figma dialog: radius 8, Dialogue-popup shadow (#22213366, 0 4 40).
-                    'relative z-[1] flex overflow-hidden rounded-lg border-0 bg-white p-0 text-delta-800 shadow-[0px_4px_40px_0px_#22213366]',
-                    scroll === 'paper' && 'flex-col',
+                    // `flex-col` is unconditional (MUI `.MuiDialog-paper` parity): `scroll` decides
+                    // where overflow lives, never the paper's main axis. Gating it on `scroll==='paper'`
+                    // left a `scroll='body'` paper as a flex ROW, so the header bar and the content sat
+                    // side by side at ~half width each (ASMA-8069).
+                    'relative z-[1] flex flex-col overflow-hidden rounded-lg border-0 bg-white p-0 text-delta-800 shadow-[0px_4px_40px_0px_#22213366]',
                     isFullScreen && 'rounded-none',
                     paper.className,
                     classes?.paper,
