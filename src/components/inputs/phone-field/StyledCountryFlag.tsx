@@ -1,15 +1,14 @@
 import { cn } from 'src/helpers/cn'
 
 export interface StyledCountryFlagProps {
-    /** ISO 3166-1 alpha-2 code, e.g. `'NO'`. Case-insensitive. */
+    /** ISO 3166-1 alpha-2 code, e.g. `'NO'`. Rendered as `data-country` so tests can assert which flag appeared. */
     iso2: string
     /**
-     * Base URL of the flag directory the app serves, e.g. `'/flags/4x3'` — the file fetched is
-     * `<baseUrl>/<iso2>.svg`. Required because this package is loaded from the kernel CDN and
-     * cannot know where the consuming app hosts its static assets, so the artwork ships with the
-     * app and never with this library.
+     * URL of the flag artwork, resolved by the consumer. Required because this package is loaded
+     * from the kernel CDN and cannot know where the consuming app hosts its assets — so the
+     * artwork ships with the app, and the app's bundler is what turns it into an address.
      */
-    baseUrl: string
+    src: string
     className?: string
 }
 
@@ -25,11 +24,12 @@ export interface StyledCountryFlagProps {
  * 182 kB), so a sprite would charge every user the whole set to look at ten rows. Per-file with
  * `loading='lazy'` fetches only what is on screen — and Norway, the collapsed default, is 318 bytes.
  */
-export const StyledCountryFlag = ({ iso2, baseUrl, className }: StyledCountryFlagProps): JSX.Element => (
+export const StyledCountryFlag = ({ iso2, src, className }: StyledCountryFlagProps): JSX.Element => (
     // Decorative: every row and the trigger already name the country in text, so announcing the
     // flag would only repeat it.
     <img
-        src={`${baseUrl}/${iso2.toLowerCase()}.svg`}
+        src={src}
+        data-country={iso2.toLowerCase()}
         alt=''
         aria-hidden='true'
         loading='lazy'
