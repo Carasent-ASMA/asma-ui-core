@@ -8,7 +8,7 @@ export function processMessageInfo(messageInfo: string | ReactNode, options?: Me
         variant: 'info',
         message: messageInfo,
         autoHideDuration: 6000,
-        className: 'bg-gama-700 text-white !min-w-[100px] !max-w-[400px] rounded-md p-4 flex items-center',
+        className: 'flex h-10 items-center gap-1 rounded-lg bg-gama-700 pl-2 pr-1 text-sm text-white !min-w-[100px] !max-w-[400px]',
         anchorOrigin: {
             vertical: 'bottom',
             horizontal: 'center',
