@@ -145,8 +145,6 @@ function DialogStoryFrame(props: StoryArgs) {
                 slotProps={{
                     paper: {
                         sx: {
-                            display: 'flex',
-                            flexDirection: 'column',
                             overflow: 'hidden',
                             minHeight: '360px',
                             maxWidth: '680px',
