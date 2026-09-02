@@ -20,6 +20,8 @@ export interface CountryCodeSelectProps {
     renderFlag?: RenderCountryFlag
     /** `id` of the field label, so the trigger inherits the field's accessible name. */
     labelledBy?: string
+    /** Surface class shared with the number input so the pair matches. */
+    className?: string
 }
 
 /**
@@ -39,6 +41,7 @@ export const CountryCodeSelect = ({
     searchPlaceholder,
     renderFlag,
     labelledBy,
+    className,
 }: CountryCodeSelectProps): JSX.Element => {
     const [open, setOpen] = useState(false)
     // The popover needs the element as a value, and a ref cannot be read during render — so the
@@ -93,7 +96,10 @@ export const CountryCodeSelect = ({
             >
                 {/* The country trigger never paints the error state — Figma keeps its border
                     neutral and reddens only the number input, because the country is always valid. */}
-                <span aria-hidden='true' className={notchedOutlineClass({ disabled, notched: false })} />
+                <span
+                    aria-hidden='true'
+                    className={cn(notchedOutlineClass({ disabled, notched: false }), className)}
+                />
                 {renderFlag?.(value)}
                 <span className='z-[1]'>{selected === undefined ? '' : `+${selected.dialCode}`}</span>
                 <ChevronDownIcon

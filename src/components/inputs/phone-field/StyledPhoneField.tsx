@@ -1,5 +1,6 @@
 import { useId, type ReactNode } from 'react'
 import { cn } from 'src/helpers/cn'
+import type { FieldSize } from '../field-styles'
 import { StyledInputField } from '../input-field/StyledInputField'
 import { CountryCodeSelect } from './CountryCodeSelect'
 import type { PhoneCountryChoice, RenderCountryFlag } from './types'
@@ -49,6 +50,13 @@ export interface StyledPhoneFieldProps {
     searchPlaceholder: string
     id?: string
     name?: string
+    size?: FieldSize
+    /**
+     * Applied to the surface of **both** controls, so the pair cannot drift apart visually —
+     * e.g. `'bg-white'` where the field sits on a tinted panel.
+     */
+    fieldClassName?: string
+    helperTextClassName?: string
     className?: string
 }
 
@@ -94,6 +102,9 @@ export const StyledPhoneField = ({
     searchPlaceholder,
     id,
     name,
+    size = 'medium',
+    fieldClassName,
+    helperTextClassName,
     className,
 }: StyledPhoneFieldProps): JSX.Element => {
     const generatedId = useId()
@@ -127,6 +138,7 @@ export const StyledPhoneField = ({
                         searchPlaceholder={searchPlaceholder}
                         renderFlag={renderFlag}
                         labelledBy={label == null ? undefined : labelId}
+                        className={fieldClassName}
                     />
                     <StyledInputField
                         dataTest={`${dataTest}-number`}
@@ -146,7 +158,12 @@ export const StyledPhoneField = ({
                         // borrow-free-space behaviour it already implements.
                         helperText={helperText}
                         reserveHelperText={reserveHelperText}
-                        slotProps={{ htmlInput: { inputMode: 'tel', autoComplete: 'tel' } }}
+                        size={size}
+                        slotProps={{
+                            htmlInput: { inputMode: 'tel', autoComplete: 'tel' },
+                            input: { className: fieldClassName },
+                            formHelperText: { className: helperTextClassName },
+                        }}
                     />
                 </div>
             )}
