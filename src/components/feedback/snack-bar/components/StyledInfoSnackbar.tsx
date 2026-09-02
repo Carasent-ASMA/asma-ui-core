@@ -1,10 +1,10 @@
-import type { AlertColor } from '../StyledAlert'
 import clsx from 'clsx'
-import { SnackbarContent, type CustomContentProps, useSnackbar } from 'notistack'
+import { SnackbarContent, useSnackbar, type CustomContentProps } from 'notistack'
 import { forwardRef } from 'react'
+import type { AlertColor } from '../StyledAlert'
 
-import { omit } from 'src/helpers'
 import { CloseIcon, LoadingIcon } from 'src/components/icons'
+import { omit } from 'src/helpers'
 
 interface StyledInfoSnackbarProps extends CustomContentProps {
     severity?: AlertColor
@@ -30,22 +30,24 @@ export const StyledInfoSnackbar = forwardRef<HTMLDivElement, StyledInfoSnackbarP
         <SnackbarContent ref={ref} role='alert' {...other}>
             <div
                 className={clsx(
-                    'relative flex w-full items-center justify-center',
-                    isLoading && 'pl-8',
-                    closeButton && 'pr-8',
+                    'flex w-full items-center justify-center gap-1',
                 )}
             >
                 {isLoading ? (
-                    <LoadingIcon width={20} height={20} className='absolute left-0 top-1/2 -translate-y-1/2' />
+                    <LoadingIcon width={24} height={24}/>
                 ) : null}
-                <div>{message}</div>
+                <div className={typeof message === 'string' || typeof message === 'number' ? 'pl-1 pr-2' : undefined}>
+                    {message}
+                </div>
                 {closeButton ? (
-                    <CloseIcon
+                    <button
+                        aria-label='Close'
+                        className='grid size-8 cursor-pointer place-items-center rounded border-0 bg-transparent text-white transition-colors duration-300 ease-in-out hover:bg-gama-500 active:bg-gama-500'
                         onClick={() => closeSnackbar(id)}
-                        width={20}
-                        height={20}
-                        className='absolute right-0 top-1/2 -translate-y-1/2 cursor-pointer rounded hover:bg-white/20'
-                    />
+                        type='button'
+                    >
+                        <CloseIcon width={20} height={20} />
+                    </button>
                 ) : null}
             </div>
         </SnackbarContent>

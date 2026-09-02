@@ -12,7 +12,7 @@ type PillProps = ComponentProps<typeof StyledInfoSnackbar>
  * (see `processMessageInfo`) — the Figma "Snackbar": brand `gama-700` fill, white text,
  * max text line 400px.
  */
-const PILL_CLASS = 'bg-gama-700 text-white !min-w-[100px] !max-w-[400px] rounded-md p-4 flex items-center'
+const PILL_CLASS = 'flex h-10 items-center gap-1 rounded-lg bg-gama-700 pl-2 pr-1 text-sm text-white !min-w-[100px] w-fit !max-w-[400px]'
 
 // ponytail: StyledInfoSnackbar consumes notistack's `CustomContentProps` (delivered at runtime by
 // the provider). For a static gallery we only need the presentational fields, so the notistack-internal
@@ -84,8 +84,9 @@ export const WithAction: Story = {
         <StyledInfoSnackbar
             {...pill('snackbar-action', {
                 message: (
-                    <span className='flex items-center gap-3'>
-                        Message archived {undoAction}
+                    <span className='flex items-center gap-1'>
+                        <span className='pl-1 pr-2'>Message archived</span>
+                        {undoAction}
                     </span>
                 ),
                 closeButton: true,
@@ -94,7 +95,7 @@ export const WithAction: Story = {
     ),
 }
 
-/** Hover state: the close affordance highlights (`hover:bg-white/20`) and shows a pointer cursor. */
+/** Hover state: the close affordance highlights with `gama-500` and shows a pointer cursor. */
 export const Hover: Story = {
     parameters: { pseudo: { hover: true } },
     render: () => <StyledInfoSnackbar {...pill('snackbar-hover', { closeButton: true })} />,
@@ -129,7 +130,11 @@ export const ColorThemes: Story = {
 export const Interactive: Story = {
     render: () => (
         <div className='flex flex-wrap gap-3'>
-            <StyledButton dataTest='show-info' variant='outlined' onClick={() => message.info('Your changes have been saved.')}>
+            <StyledButton
+                dataTest='show-info'
+                variant='outlined'
+                onClick={() => message.info('Your changes have been saved.', { closeButton: true })}
+            >
                 message.info
             </StyledButton>
             <StyledButton
@@ -137,8 +142,9 @@ export const Interactive: Story = {
                 variant='outlined'
                 onClick={() =>
                     message.info(
-                        <span className='flex items-center gap-3'>
-                            Message archived {undoAction}
+                        <span className='flex items-center gap-1'>
+                            <span className='pl-1 pr-2'>Message archived</span>
+                            {undoAction}
                         </span>,
                         { closeButton: true },
                     )
@@ -156,7 +162,11 @@ export const Interactive: Story = {
             >
                 message.loading
             </StyledButton>
-            <StyledButton dataTest='show-error' variant='outlined' onClick={() => message.error('Something went wrong. Please try again.')}>
+            <StyledButton
+                dataTest='show-error'
+                variant='outlined'
+                onClick={() => message.error('Something went wrong. Please try again.')}
+            >
                 message.error
             </StyledButton>
         </div>
