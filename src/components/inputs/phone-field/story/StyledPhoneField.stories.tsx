@@ -94,12 +94,12 @@ export const Error: Story = {
         dataTest: 'phone',
         value: '12345678',
         error: true,
-        helperText: 'Invalid phone — Ex: +47 40 61 23 45',
+        helperText: 'Enter a valid phone number',
     },
     render: (args) => <Controlled {...args} />,
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement)
-        await expect(canvas.getByRole('alert')).toHaveTextContent('Invalid phone')
+        await expect(canvas.getByRole('alert')).toHaveTextContent('Enter a valid phone number')
         // Figma reddens the number input only — the country is always valid, so its
         // trigger keeps a neutral border.
         await expect(canvas.getByRole('textbox')).toHaveAttribute('aria-invalid', 'true')
