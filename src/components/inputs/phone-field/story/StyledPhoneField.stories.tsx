@@ -17,6 +17,22 @@ const countries = [
     { iso2: 'SE', dialCode: '46', name: 'Sweden' },
 ]
 
+/**
+ * Stand-in flag: a two-band swatch as a data URI, so the story needs no asset pipeline. Real
+ * consumers pass `StyledCountryFlag` with a bundler-resolved URL.
+ */
+const renderFlag = (iso2: string): JSX.Element => (
+    <img
+        src={`data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 16'%3e%3crect width='24' height='8' fill='%23ba0c2f'/%3e%3crect y='8' width='24' height='8' fill='%23002664'/%3e%3c/svg%3e`}
+        alt=''
+        aria-hidden='true'
+        data-country={iso2.toLowerCase()}
+        width={24}
+        height={16}
+        className='h-4 w-6 shrink-0 rounded-sm'
+    />
+)
+
 /** Stands in for `formatNationalAsYouType` so the story stays free of phone metadata. */
 const groupInPairs = (nationalNumber: string): string =>
     (nationalNumber.match(/\d{1,2}/g) ?? []).join(' ')
@@ -168,5 +184,36 @@ export const KeyboardSelection: Story = {
         await waitFor(async () => {
             await expect(canvas.getByRole('button')).toHaveTextContent('+61')
         })
+    },
+}
+
+/**
+ * Regression guard: the outline is absolutely positioned and carries the consumer's surface class,
+ * so on a tinted panel — where that class paints `bg-white` — anything left at the default stacking
+ * level vanishes behind it. The flag did exactly that, and only in this configuration, which is why
+ * none of the stories above caught it.
+ */
+export const OnTintedPanelWithFlag: Story = {
+    args: {
+        country: 'NO',
+        dataTest: 'phone',
+        value: '48103252',
+        size: 'small',
+        fieldClassName: 'bg-white',
+        renderFlag,
+    },
+    render: (args) => (
+        <div className='rounded bg-[#E8F6F6] p-4'>
+            <Controlled {...args} />
+        </div>
+    ),
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement)
+        const trigger = canvas.getByRole('button')
+        const flag = trigger.querySelector('img[data-country="no"]')
+
+        await expect(flag).not.toBeNull()
+        // Painted above the outline overlay, not behind it.
+        await expect(trigger.querySelector('.z-\\[1\\]')).toContainElement(flag as HTMLElement)
     },
 }

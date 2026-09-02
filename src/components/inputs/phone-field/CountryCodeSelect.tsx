@@ -100,13 +100,19 @@ export const CountryCodeSelect = ({
                     aria-hidden='true'
                     className={cn(notchedOutlineClass({ disabled, notched: false }), className)}
                 />
-                {renderFlag?.(value, 'eager')}
-                <span className='z-[1]'>{selected === undefined ? '' : `+${selected.dialCode}`}</span>
-                <ChevronDownIcon
-                    width={20}
-                    height={20}
-                    className={cn('z-[1] shrink-0 transition-transform', open && 'rotate-180')}
-                />
+                {/* One layer above the outline for ALL content. The outline is absolutely
+                    positioned and carries the consumer's surface class, so where that class paints
+                    a background (`bg-white` on a tinted panel) anything left at the default
+                    stacking level disappears behind it — which is how the flag went missing. */}
+                <span className='relative z-[1] flex items-center gap-2'>
+                    {renderFlag?.(value, 'eager')}
+                    <span>{selected === undefined ? '' : `+${selected.dialCode}`}</span>
+                    <ChevronDownIcon
+                        width={20}
+                        height={20}
+                        className={cn('shrink-0 transition-transform', open && 'rotate-180')}
+                    />
+                </span>
             </button>
 
             {isMobile ? (
