@@ -162,7 +162,7 @@ export const CountryCodeList = ({
                             span, so the name/code split has to happen in here. */}
                         <span className='flex w-full items-center justify-between gap-2'>
                             <span className='flex min-w-0 items-center gap-2'>
-                                {renderFlag?.(country.iso2)}
+                                {renderFlag?.(country.iso2, 'eager')}
                                 <span className='truncate'>{country.name}</span>
                             </span>
                             <span className='shrink-0 font-medium text-delta-800'>{`+${country.dialCode}`}</span>

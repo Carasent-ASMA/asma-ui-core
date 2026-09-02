@@ -100,7 +100,7 @@ export const CountryCodeSelect = ({
                     aria-hidden='true'
                     className={cn(notchedOutlineClass({ disabled, notched: false }), className)}
                 />
-                {renderFlag?.(value)}
+                {renderFlag?.(value, 'eager')}
                 <span className='z-[1]'>{selected === undefined ? '' : `+${selected.dialCode}`}</span>
                 <ChevronDownIcon
                     width={20}

@@ -19,5 +19,8 @@ export interface PhoneCountryChoice {
     name: string
 }
 
-/** Renders the flag for a country; see `StyledCountryFlag` for the sprite-backed default. */
-export type RenderCountryFlag = (iso2: string) => ReactNode
+/**
+ * Renders the flag for a country. `loading` is `'eager'` where the flag is on screen the moment it
+ * mounts (the collapsed trigger, and the rows of an already-open picker) — see `StyledCountryFlag`.
+ */
+export type RenderCountryFlag = (iso2: string, loading?: 'eager' | 'lazy') => ReactNode
