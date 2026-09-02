@@ -4,6 +4,8 @@ import { cn } from 'src/helpers/cn'
 
 export interface StyledSelectItemProps {
     value?: unknown
+    /** Needed when a parent listbox points `aria-activedescendant` at this row. */
+    id?: string
     children?: ReactNode
     selected?: boolean
     disabled?: boolean
@@ -17,6 +19,7 @@ export interface StyledSelectItemProps {
  */
 export const StyledSelectItem = ({
     children,
+    id,
     selected,
     disabled,
     className,
@@ -27,6 +30,7 @@ export const StyledSelectItem = ({
     // document.activeElement.click(), see StyledSelect's handleKeyDown). onClick here is mouse-only.
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events
     <li
+        id={id}
         role='option'
         aria-selected={selected ? true : undefined}
         aria-disabled={disabled ? true : undefined}
