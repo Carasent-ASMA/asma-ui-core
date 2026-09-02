@@ -1,6 +1,7 @@
 import { useId, type ReactNode } from 'react'
 import { cn } from 'src/helpers/cn'
 import type { FieldSize } from '../field-styles'
+import { StyledLink } from '../../navigation/link/StyledLink'
 import { StyledInputField } from '../input-field/StyledInputField'
 import { CountryCodeSelect } from './CountryCodeSelect'
 import type { PhoneCountryChoice, RenderCountryFlag } from './types'
@@ -34,6 +35,12 @@ export interface StyledPhoneFieldProps {
     readOnly?: boolean
     /** Pre-formatted international number for the read-only state, e.g. `'+47 48 01 23 45'`. */
     readOnlyText?: string
+    /**
+     * Click-to-call target for the read-only state, e.g. `phoneTelHref(value)` from
+     * `asma-core-helpers/phone`. Supplied by the consumer because building a `tel:` URI is a phone
+     * rule, and this library owns none — without it the number renders as plain text.
+     */
+    readOnlyHref?: string
     required?: boolean
     /** @figmaProp Placeholder of the number input */
     placeholder?: string
@@ -94,6 +101,7 @@ export const StyledPhoneField = ({
     disabled,
     readOnly,
     readOnlyText,
+    readOnlyHref,
     required,
     placeholder,
     formatNationalNumber,
@@ -123,8 +131,18 @@ export const StyledPhoneField = ({
             )}
 
             {readOnly === true ? (
-                <span data-testid={`${dataTest}-readonly`} className='py-2 text-base text-delta-800'>
-                    {readOnlyText ?? displayValue}
+                // Figma draws the read-only number as a link (gama-500, underlined), which is
+                // also what makes it dialable on a phone — so it is a real anchor, not styled text.
+                <span className='py-2 text-base text-delta-800'>
+                    {readOnlyHref === undefined ? (
+                        <span data-testid={`${dataTest}-readonly`}>{readOnlyText ?? displayValue}</span>
+                    ) : (
+                        <StyledLink
+                            dataTest={`${dataTest}-readonly`}
+                            href={readOnlyHref}
+                            contentNode={readOnlyText ?? displayValue}
+                        />
+                    )}
                 </span>
             ) : (
                 // 10 px between the two controls (Figma: trigger ends at 128, input starts at 138).

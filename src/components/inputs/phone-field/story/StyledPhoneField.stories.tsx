@@ -118,11 +118,33 @@ export const ReadOnly: Story = {
         value: '48012345',
         readOnly: true,
         readOnlyText: '+47 48 01 23 45',
+        // Real consumers pass `phoneTelHref(value)` from `asma-core-helpers/phone`.
+        readOnlyHref: 'tel:+4748012345',
     },
     render: (args) => <Controlled {...args} />,
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement)
         await expect(canvas.queryByRole('textbox')).toBeNull()
+
+        // Dialable, not just styled to look like a link.
+        const link = canvas.getByRole('link', { name: '+47 48 01 23 45' })
+        await expect(link).toHaveAttribute('href', 'tel:+4748012345')
+    },
+}
+
+/** Without an href the number is plain text — the library never invents a `tel:` URI itself. */
+export const ReadOnlyWithoutHref: Story = {
+    args: {
+        country: 'NO',
+        dataTest: 'phone',
+        value: '48012345',
+        readOnly: true,
+        readOnlyText: '+47 48 01 23 45',
+    },
+    render: (args) => <Controlled {...args} />,
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement)
+        await expect(canvas.queryByRole('link')).toBeNull()
         await expect(canvas.getByText('+47 48 01 23 45')).toBeVisible()
     },
 }
