@@ -26,6 +26,7 @@ import { useTranslations } from 'src/table/hooks/useTranslations'
 import { StyledButton } from 'src/table/shared-components/button'
 import { compact } from 'src/helpers/arrays'
 import type { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities'
+import { message } from 'src/components/feedback/snack-bar'
 
 function SortableColumnItem({
     id,
@@ -47,7 +48,7 @@ function SortableColumnItem({
     }
 
     return (
-        <div ref={setNodeRef} style={style}>
+        <div ref={setNodeRef} style={style} className={headerStyles['drag-item']}>
             {children({ attributes, listeners })}
         </div>
     )
@@ -122,7 +123,7 @@ export function HeaderActionMenu<TData>({
                 slotProps={{
                     paper: {
                         sx: {
-                            maxHeight: 'calc(7 * 36px)',
+                            maxHeight: 'calc(7 * 40px)',
                             overflowY: 'auto',
                             scrollbarWidth: 'thin',
                         },
@@ -147,13 +148,14 @@ export function HeaderActionMenu<TData>({
                             const dragDisabled = !!column.columnDef.fixedLeft || !!column.columnDef.fixedRight
                             const hidingDisabled = column.columnDef.enableHiding === false
 
-                            const tooltipTitle =
-                                dragDisabled || hidingDisabled ? (
-                                    <div>
-                                        {dragDisabled && t.column_reorder}
-                                        {hidingDisabled && t.column_hidden}
-                                    </div>
-                                ) : null
+                            let tooltipTitle: JSX.Element | string | null = null
+                            if (dragDisabled && hidingDisabled) {
+                                tooltipTitle = t.column_reorder_and_hidden
+                            } else if (dragDisabled) {
+                                tooltipTitle = t.column_reorder
+                            } else if (hidingDisabled) {
+                                tooltipTitle = t.column_hidden
+                            }
 
                             return (
                                 <SortableColumnItem key={column.id} id={column.id} disabled={dragDisabled}>
@@ -214,8 +216,11 @@ export function HeaderActionMenu<TData>({
                     <StyledButton
                         dataTest='reset-order-button'
                         variant='text'
-                        size='small'
-                        onClick={() => headerData.table.resetColumnOrder()}
+                        className='h-10'
+                        onClick={() => {
+                            headerData.table.resetColumnOrder()
+                            message.info(t.column_order_reset)
+                        }}
                     >
                         {t.reset_order}
                     </StyledButton>
