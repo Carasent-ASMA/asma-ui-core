@@ -275,3 +275,27 @@ export const OpensFromAnywhereOnTheTrigger: Story = {
         }
     },
 }
+
+/**
+ * Regression guard: `StyledPopover` deliberately ignores presses inside its anchor, and the anchor
+ * is the whole trigger — so without a toggle of its own the chevron could open the picker but never
+ * close it. Also pins focus coming back, since the shell that anchors the popover is a plain div.
+ */
+export const ChevronClosesAndReturnsFocus: Story = {
+    args: { country: 'NO', dataTest: 'phone', value: '', renderFlag },
+    render: (args) => <Controlled {...args} />,
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement)
+        const body = within(document.body)
+
+        await userEvent.click(canvas.getByTestId('phone-country'))
+        await waitFor(() => body.getByRole('listbox'))
+
+        await userEvent.click(canvas.getByTestId('phone-country-collapse'))
+        await waitFor(async () => {
+            await expect(body.queryByRole('listbox')).toBeNull()
+        })
+
+        await expect(canvas.getByTestId('phone-country')).toHaveFocus()
+    },
+}

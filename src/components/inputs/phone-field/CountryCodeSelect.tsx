@@ -57,6 +57,8 @@ export const CountryCodeSelect = ({
     // trigger is captured through a callback ref into state instead.
     const [triggerEl, setTriggerEl] = useState<HTMLElement | null>(null)
     const desktopInputRef = useRef<HTMLInputElement>(null)
+    const triggerButtonRef = useRef<HTMLButtonElement>(null)
+    const wasOpen = useRef(false)
     const isMobile = useMobileMediaQuery()
     const listId = `${useId()}-country-listbox`
 
@@ -66,8 +68,6 @@ export const CountryCodeSelect = ({
     const close = (): void => {
         setOpen(false)
         setQuery('')
-        // Return the caret to the trigger, or a keyboard user is dropped at the top of the document.
-        triggerEl?.focus()
     }
 
     const select = (iso2: string): void => {
@@ -89,6 +89,14 @@ export const CountryCodeSelect = ({
         // combobox. Done here rather than with `autoFocus`, which steals focus on any mount.
         if (open && !isMobile) desktopInputRef.current?.focus()
     }, [open, isMobile])
+
+    useEffect(() => {
+        // Hand focus back to the trigger once the picker closes, or a keyboard user is dropped at
+        // the top of the document. It has to happen here: the button only exists while closed, and
+        // the shell that anchors the popover is a plain div with nothing focusable about it.
+        if (wasOpen.current && !open) triggerButtonRef.current?.focus()
+        wasOpen.current = open
+    }, [open])
 
     const options = (
         <CountryCodeOptions
@@ -159,10 +167,22 @@ export const CountryCodeSelect = ({
                             aria-activedescendant={comboboxAria['aria-activedescendant']}
                             aria-autocomplete='list'
                         />
-                        <ChevronDownIcon width={20} height={20} className='ml-auto shrink-0 rotate-180' />
+                        {/* `StyledPopover` deliberately ignores presses inside its anchor, so the
+                            toggle has to live here — otherwise the chevron could never close it. */}
+                        <button
+                            type='button'
+                            data-testid={`${dataTest}-collapse`}
+                            aria-labelledby={labelledBy}
+                            aria-expanded
+                            onClick={close}
+                            className='ml-auto flex shrink-0 cursor-pointer border-0 bg-transparent p-0'
+                        >
+                            <ChevronDownIcon width={20} height={20} className='rotate-180' />
+                        </button>
                     </span>
                 ) : (
                     <button
+                        ref={triggerButtonRef}
                         type='button'
                         data-testid={dataTest}
                         disabled={disabled}
