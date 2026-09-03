@@ -8,9 +8,15 @@ import type { PhoneCountryChoice } from './types'
 export function matchesCountryQuery(country: PhoneCountryChoice, query: string): boolean {
     const trimmed = query.trim()
     if (trimmed.length === 0) return true
-    if (country.name.toLocaleLowerCase().includes(trimmed.toLocaleLowerCase())) return true
 
     const digits = trimmed.replace(/^\+/, '').replace(/\D/g, '')
+
+    // A query with neither digits nor letters — a bare `+` on the way to typing `+47`, say —
+    // carries no filter, so it must keep every row rather than empty the list.
+    if (digits.length === 0 && !/\p{L}/u.test(trimmed)) return true
+
+    if (country.name.toLocaleLowerCase().includes(trimmed.toLocaleLowerCase())) return true
+
     return digits.length > 0 && country.dialCode.startsWith(digits)
 }
 
