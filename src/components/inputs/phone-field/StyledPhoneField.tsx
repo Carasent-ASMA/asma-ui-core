@@ -140,6 +140,9 @@ export const StyledPhoneField = ({
                         <StyledLink
                             dataTest={`${dataTest}-readonly`}
                             href={readOnlyHref}
+                            // StyledLink insets its text by 4 px to give the focus outline room.
+                            // Pulled back so the number lines up with the label above it.
+                            className='-ml-1'
                             contentNode={readOnlyText ?? displayValue}
                         />
                     )}
