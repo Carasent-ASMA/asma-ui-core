@@ -1,12 +1,14 @@
-import { useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { ChevronDownIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
 import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
 import { StyledDialog } from '../../feedback/dialog/StyledDialog'
 import { StyledPopover } from '../../utils/popover/StyledPopover'
 import { notchedOutlineClass, SINGLE_LINE_FIELD_HEIGHT_PX } from '../field-styles'
-import { CountryCodeList } from './CountryCodeList'
+import { StyledSearchField } from '../search-field/StyledSearchField'
+import { CountryCodeOptions } from './CountryCodeOptions'
 import type { PhoneCountryChoice, RenderCountryFlag } from './types'
+import { useCountryPicker } from './useCountryPicker'
 
 export interface CountryCodeSelectProps {
     dataTest: string
@@ -14,8 +16,9 @@ export interface CountryCodeSelectProps {
     value: string
     onChange: (iso2: string) => void
     disabled?: boolean
-    /** Title of the country picker; supplied by the consumer — this library ships no copy. */
+    /** Title of the mobile picker sheet; supplied by the consumer — this library ships no copy. */
     selectCountryLabel: string
+    /** Placeholder of the mobile sheet's search box. Consumer-supplied. */
     searchPlaceholder: string
     renderFlag?: RenderCountryFlag
     /** `id` of the field label, so the trigger inherits the field's accessible name. */
@@ -27,9 +30,14 @@ export interface CountryCodeSelectProps {
 /**
  * Collapsed country trigger (flag + calling code + chevron) and the picker it opens.
  *
- * Two presentations, one list: an anchored popover on desktop and a full-screen dialog on mobile,
- * matching the Figma frames. The mobile break is `StyledDialog`'s own `fullScreen ?? isMobile`
- * default (≤743 px), so the two never disagree about what "mobile" means.
+ * Two presentations, one list and one keyboard contract ([[useCountryPicker]]):
+ *
+ * - **Desktop** — the trigger *is* the combobox. Opening it turns the calling-code slot into an
+ *   input and typing filters the list below, which is what Figma draws (the open trigger carries a
+ *   text cursor, and the menu holds rows only — node 8565:284950 has no search field).
+ * - **Mobile** — a full-screen sheet with its own search box, per node 8699:112423. The break is
+ *   `StyledDialog`'s own `fullScreen ?? isMobile` default (≤743 px), so the two never disagree
+ *   about what "mobile" means.
  */
 export const CountryCodeSelect = ({
     dataTest,
@@ -44,16 +52,20 @@ export const CountryCodeSelect = ({
     className,
 }: CountryCodeSelectProps): JSX.Element => {
     const [open, setOpen] = useState(false)
+    const [query, setQuery] = useState('')
     // The popover needs the element as a value, and a ref cannot be read during render — so the
     // trigger is captured through a callback ref into state instead.
-    const [triggerEl, setTriggerEl] = useState<HTMLButtonElement | null>(null)
+    const [triggerEl, setTriggerEl] = useState<HTMLElement | null>(null)
+    const desktopInputRef = useRef<HTMLInputElement>(null)
     const isMobile = useMobileMediaQuery()
     const listId = `${useId()}-country-listbox`
 
     const selected = countries.find((country) => country.iso2 === value)
+    const dialCode = selected === undefined ? '' : `+${selected.dialCode}`
 
     const close = (): void => {
         setOpen(false)
+        setQuery('')
         // Return the caret to the trigger, or a keyboard user is dropped at the top of the document.
         triggerEl?.focus()
     }
@@ -63,38 +75,55 @@ export const CountryCodeSelect = ({
         close()
     }
 
-    const list = (
-        <CountryCodeList
+    const picker = useCountryPicker({
+        countries,
+        selectedIso2: value,
+        query,
+        listId,
+        onSelect: select,
+        onDismiss: close,
+    })
+
+    useEffect(() => {
+        // The picker has just appeared and its whole purpose is search, so the caret belongs in the
+        // combobox. Done here rather than with `autoFocus`, which steals focus on any mount.
+        if (open && !isMobile) desktopInputRef.current?.focus()
+    }, [open, isMobile])
+
+    const options = (
+        <CountryCodeOptions
             dataTest={dataTest}
-            countries={countries}
+            visible={picker.visible}
             selectedIso2={value}
+            activeIndex={picker.activeIndex}
+            optionId={picker.optionId}
             onSelect={select}
-            onDismiss={close}
-            searchPlaceholder={searchPlaceholder}
-            renderFlag={renderFlag}
             listId={listId}
+            renderFlag={renderFlag}
         />
     )
 
+    const comboboxAria = {
+        'aria-activedescendant': picker.visible.length > 0 ? picker.optionId(picker.activeIndex) : undefined,
+        'aria-autocomplete': 'list' as const,
+        'aria-controls': listId,
+        'aria-expanded': true,
+    }
+
+    const openDesktopCombobox = open && !isMobile
+
     return (
         <>
-            <button
+            <div
                 ref={setTriggerEl}
-                type='button'
-                data-testid={dataTest}
-                disabled={disabled}
-                aria-haspopup='listbox'
-                aria-expanded={open}
-                aria-controls={open ? listId : undefined}
-                aria-labelledby={labelledBy}
-                onClick={() => setOpen(true)}
+                data-testid={`${dataTest}-shell`}
                 style={{ height: SINGLE_LINE_FIELD_HEIGHT_PX }}
                 className={cn(
                     // Figma pins the trigger at 128 px (node 8523:109471 — trigger w=128, gap 10,
                     // number input w=205). Fixed rather than hugging its text so the pair does not
                     // resize when the calling code changes width (+1 vs +994).
-                    'group relative flex w-32 shrink-0 items-center gap-1.5 rounded border-0 bg-transparent px-3 text-base outline-none',
-                    disabled ? 'cursor-not-allowed text-delta-300' : 'cursor-pointer text-delta-800',
+                    'group relative flex w-32 shrink-0 items-center gap-1.5 rounded px-3 text-base',
+                    disabled ? 'cursor-not-allowed text-delta-300' : 'text-delta-800',
                 )}
             >
                 {/* The country trigger never paints the error state — Figma keeps its border
@@ -103,21 +132,55 @@ export const CountryCodeSelect = ({
                     aria-hidden='true'
                     className={cn(notchedOutlineClass({ disabled, notched: false }), className)}
                 />
-                {/* One layer above the outline for ALL content. The outline is absolutely
-                    positioned and carries the consumer's surface class, so where that class paints
-                    a background (`bg-white` on a tinted panel) anything left at the default
-                    stacking level disappears behind it — which is how the flag went missing. */}
-                <span className='relative z-[1] flex items-center gap-1.5'>
+
+                {/* One layer above the outline for ALL content: the outline carries the consumer's
+                    surface class, so anything left at the default stacking level disappears behind
+                    a painted background. */}
+                <span className='relative z-[1] flex w-full items-center gap-1.5'>
                     {renderFlag?.(value, 'eager')}
-                    {/* 48 px slot per Figma, so the chevron keeps its place across codes. */}
-                    <span className='w-12 text-left'>{selected === undefined ? '' : `+${selected.dialCode}`}</span>
+
+                    {openDesktopCombobox ? (
+                        <input
+                            ref={desktopInputRef}
+                            role='combobox'
+                            data-testid={`${dataTest}-search`}
+                            className='w-12 min-w-0 border-0 bg-transparent p-0 text-base outline-none'
+                            value={query}
+                            placeholder={dialCode}
+                            onChange={(event) => setQuery(event.target.value)}
+                            onKeyDown={picker.handleKeyDown}
+                            // Spelled out rather than spread: jsx-a11y cannot see through a spread
+                            // and would flag the combobox as missing its required attributes.
+                            aria-controls={listId}
+                            aria-expanded
+                            aria-activedescendant={comboboxAria['aria-activedescendant']}
+                            aria-autocomplete='list'
+                        />
+                    ) : (
+                        <button
+                            type='button'
+                            data-testid={dataTest}
+                            disabled={disabled}
+                            aria-haspopup='listbox'
+                            aria-expanded={open}
+                            aria-labelledby={labelledBy}
+                            onClick={() => setOpen(true)}
+                            className={cn(
+                                'w-12 shrink-0 border-0 bg-transparent p-0 text-left text-base outline-none',
+                                disabled ? 'cursor-not-allowed' : 'cursor-pointer',
+                            )}
+                        >
+                            {dialCode}
+                        </button>
+                    )}
+
                     <ChevronDownIcon
                         width={20}
                         height={20}
-                        className={cn('shrink-0 transition-transform', open && 'rotate-180')}
+                        className={cn('ml-auto shrink-0 transition-transform', open && 'rotate-180')}
                     />
                 </span>
-            </button>
+            </div>
 
             {isMobile ? (
                 <StyledDialog
@@ -128,8 +191,22 @@ export const CountryCodeSelect = ({
                     showCloseIcon
                     fullWidth
                 >
-                    {/* Flex column so the list scrolls inside the sheet instead of the page. */}
-                    <div className='flex min-h-0 flex-1 flex-col'>{list}</div>
+                    <div className='flex min-h-0 flex-1 flex-col'>
+                        {/* Figma mobile sheet: 360 wide container, 328 wide search field — 16 px each side. */}
+                        <div className='shrink-0 p-4'>
+                            <StyledSearchField
+                                dataTest={`${dataTest}-search`}
+                                label={searchPlaceholder}
+                                value={query}
+                                onChange={(event) => setQuery(event.target.value)}
+                                onClear={() => setQuery('')}
+                                onKeyDown={picker.handleKeyDown}
+                                allowClear
+                                slotProps={{ htmlInput: comboboxAria }}
+                            />
+                        </div>
+                        {options}
+                    </div>
                 </StyledDialog>
             ) : (
                 <StyledPopover
@@ -138,7 +215,7 @@ export const CountryCodeSelect = ({
                     onClose={close}
                     slotProps={{ paper: { className: 'flex max-h-80 w-80 flex-col overflow-hidden' } }}
                 >
-                    {list}
+                    {options}
                 </StyledPopover>
             )}
         </>

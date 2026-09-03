@@ -161,6 +161,12 @@ export const CountryPickerOpen: Story = {
         const listbox = await waitFor(() => within(document.body).getByRole('listbox'))
         await expect(within(listbox).getAllByRole('option').length).toBe(countries.length)
         await expect(within(listbox).getByRole('option', { selected: true })).toHaveTextContent('Norway')
+
+        // Figma's desktop menu (node 8565:284950) holds rows only — typing happens in the trigger,
+        // which is therefore the combobox. A search box inside the popover would be the old shape.
+        const combobox = within(document.body).getByRole('combobox')
+        await expect(canvas.getByTestId('phone-country-shell')).toContainElement(combobox)
+        await expect(within(listbox).queryByRole('combobox')).toBeNull()
     },
 }
 
@@ -231,11 +237,12 @@ export const OnTintedPanelWithFlag: Story = {
     ),
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement)
-        const trigger = canvas.getByRole('button')
-        const flag = trigger.querySelector('img[data-country="no"]')
+        // The flag sits in the trigger shell beside the calling-code control, not inside it.
+        const shell = canvas.getByTestId('phone-country-shell')
+        const flag = shell.querySelector('img[data-country="no"]')
 
         await expect(flag).not.toBeNull()
         // Painted above the outline overlay, not behind it.
-        await expect(trigger.querySelector('.z-\\[1\\]')).toContainElement(flag as HTMLElement)
+        await expect(shell.querySelector('.z-\\[1\\]')).toContainElement(flag as HTMLElement)
     },
 }
