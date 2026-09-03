@@ -299,3 +299,26 @@ export const ChevronClosesAndReturnsFocus: Story = {
         await expect(canvas.getByTestId('phone-country')).toHaveFocus()
     },
 }
+
+/** The number input grows with its container but never past 200 px. */
+export const NumberInputWidthIsCapped: Story = {
+    args: { country: 'NO', dataTest: 'phone', value: '48012345', renderFlag },
+    // Rendered directly rather than through `Controlled`, whose 360 px box would leave the row no
+    // room to stretch — the guard would then hold for the wrong reason. Inline width because an
+    // arbitrary Tailwind value used only in a story is not guaranteed to be generated.
+    render: (args) => (
+        <div style={{ width: 900 }}>
+            <StyledPhoneField {...args} onCountryChange={() => undefined} onChange={() => undefined} />
+        </div>
+    ),
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement)
+        const root = canvas.getByRole('textbox').closest('.inline-flex') as HTMLElement
+        const row = root.parentElement as HTMLElement
+
+        // Assert the room exists FIRST — otherwise a narrow row would satisfy the cap for the
+        // wrong reason and the guard would prove nothing.
+        await expect(row.getBoundingClientRect().width).toBeGreaterThan(400)
+        await expect(root.getBoundingClientRect().width).toBeLessThanOrEqual(200)
+    },
+}

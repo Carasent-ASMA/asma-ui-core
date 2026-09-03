@@ -164,6 +164,10 @@ export const StyledPhoneField = ({
                     />
                     <StyledInputField
                         dataTest={`${dataTest}-number`}
+                        // Grows with the container but never past 200 px. Figma draws it at 205 on
+                        // desktop and 158 in the mobile body, so the cap only bites where the row
+                        // has room to spare — a phone number has no use for the extra width.
+                        className='max-w-[200px]'
                         id={fieldId}
                         name={name}
                         value={displayValue}
