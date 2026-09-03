@@ -135,11 +135,14 @@ export const CountryCodeSelect = ({
 
                 {/* One layer above the outline for ALL content: the outline carries the consumer's
                     surface class, so anything left at the default stacking level disappears behind
-                    a painted background. */}
-                <span className='relative z-[1] flex w-full items-center gap-1.5'>
-                    {renderFlag?.(value, 'eager')}
+                    a painted background.
 
-                    {openDesktopCombobox ? (
+                    Closed, the whole trigger is ONE button — flag, code and chevron included — so a
+                    click anywhere on it opens the picker. Making only the code slot clickable left
+                    the flag and the chevron dead, which is the obvious place to aim for. */}
+                {openDesktopCombobox ? (
+                    <span className='relative z-[1] flex w-full items-center gap-1.5'>
+                        {renderFlag?.(value, 'eager')}
                         <input
                             ref={desktopInputRef}
                             role='combobox'
@@ -156,30 +159,31 @@ export const CountryCodeSelect = ({
                             aria-activedescendant={comboboxAria['aria-activedescendant']}
                             aria-autocomplete='list'
                         />
-                    ) : (
-                        <button
-                            type='button'
-                            data-testid={dataTest}
-                            disabled={disabled}
-                            aria-haspopup='listbox'
-                            aria-expanded={open}
-                            aria-labelledby={labelledBy}
-                            onClick={() => setOpen(true)}
-                            className={cn(
-                                'w-12 shrink-0 border-0 bg-transparent p-0 text-left text-base outline-none',
-                                disabled ? 'cursor-not-allowed' : 'cursor-pointer',
-                            )}
-                        >
-                            {dialCode}
-                        </button>
-                    )}
-
-                    <ChevronDownIcon
-                        width={20}
-                        height={20}
-                        className={cn('ml-auto shrink-0 transition-transform', open && 'rotate-180')}
-                    />
-                </span>
+                        <ChevronDownIcon width={20} height={20} className='ml-auto shrink-0 rotate-180' />
+                    </span>
+                ) : (
+                    <button
+                        type='button'
+                        data-testid={dataTest}
+                        disabled={disabled}
+                        aria-haspopup='listbox'
+                        aria-expanded={open}
+                        aria-labelledby={labelledBy}
+                        onClick={() => setOpen(true)}
+                        className={cn(
+                            'relative z-[1] flex w-full items-center gap-1.5 border-0 bg-transparent p-0 text-base',
+                            disabled ? 'cursor-not-allowed text-delta-300' : 'cursor-pointer text-delta-800',
+                        )}
+                    >
+                        {renderFlag?.(value, 'eager')}
+                        <span className='w-12 text-left'>{dialCode}</span>
+                        <ChevronDownIcon
+                            width={20}
+                            height={20}
+                            className={cn('ml-auto shrink-0 transition-transform', open && 'rotate-180')}
+                        />
+                    </button>
+                )}
             </div>
 
             {isMobile ? (

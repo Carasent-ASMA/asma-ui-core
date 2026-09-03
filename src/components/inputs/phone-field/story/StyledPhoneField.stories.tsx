@@ -246,3 +246,32 @@ export const OnTintedPanelWithFlag: Story = {
         await expect(shell.querySelector('.z-\\[1\\]')).toContainElement(flag as HTMLElement)
     },
 }
+
+/**
+ * Regression guard: the flag and the chevron are the obvious places to aim for, so the whole
+ * closed trigger has to open the picker — not just the calling-code slot. Making the code slot the
+ * only button left the other two dead, and every story above still passed.
+ */
+export const OpensFromAnywhereOnTheTrigger: Story = {
+    args: { country: 'NO', dataTest: 'phone', value: '', renderFlag },
+    render: (args) => <Controlled {...args} />,
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement)
+        const body = within(document.body)
+        const shell = canvas.getByTestId('phone-country-shell')
+
+        for (const target of ['img[data-country]', 'svg']) {
+            const el = shell.querySelector(target)
+            await expect(el).not.toBeNull()
+
+            await userEvent.click(el as Element)
+            await waitFor(() => body.getByRole('listbox'))
+
+            // Close again so the next target starts from the same state.
+            await userEvent.keyboard('{Escape}')
+            await waitFor(async () => {
+                await expect(body.queryByRole('listbox')).toBeNull()
+            })
+        }
+    },
+}
