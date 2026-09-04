@@ -150,6 +150,7 @@ exports[`asma-ui-core public API surface > keeps every runtime export of the pac
   "OutlineCheckboxIconChecked",
   "OutlineCheckboxIconIndeterminate",
   "OutlineNotificationsIcon",
+  "PageHeader",
   "Paper",
   "PathfinderCard",
   "PdfIcon",

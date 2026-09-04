@@ -7,11 +7,17 @@ const translations = {
         more: 'More',
         clearSelection: 'Clear selection',
         selected: 'selected',
+        back: 'Back',
+        menu: 'Menu',
+        close: 'Close',
     },
     no: {
         more: 'Mer',
         clearSelection: 'Fjern valg',
         selected: 'valgt',
+        back: 'Tilbake',
+        menu: 'Meny',
+        close: 'Lukk',
     },
 }
 
