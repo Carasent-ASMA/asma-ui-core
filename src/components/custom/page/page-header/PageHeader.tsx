@@ -27,8 +27,9 @@ export interface PageHeaderProps {
     /**
      * Custom title node — for hosts that own the route heading element and its contracts
      * (e.g. the shell's `data-test="page-title"` h1 that remote widgets write into).
-     * Replaces the built-in heading; the slot owns heading semantics, clamping and tooltip.
-     * `title` is still used for the measurement key and skeleton sizing.
+     * Replaces the built-in heading; the slot owns heading semantics, clamping, tooltip and
+     * focus (`titleAs`/`focusTitleOnMount` are ignored). `title` still names the header for
+     * measurement and skeleton sizing.
      */
     titleSlot?: ReactNode
     /** Move focus to the heading on mount — call sites remount the header per route change. */
@@ -67,6 +68,9 @@ export interface PageHeaderProps {
 /** Below this container width the header uses the mobile ramp (Figma: Mobile 0–743px). */
 const COMPACT_BREAKPOINT_PX = 744
 const GAP_PX = 8
+/** The container's `px-4` on both sides — keep in sync with the root class. Planning must
+ * work with the content box, not the border box, or actions overflow near breakpoints. */
+const HORIZONTAL_PADDING_PX = 32
 /** Minimum room reserved for the title before actions may keep their labels. */
 const TITLE_MIN_RESERVE_PX = 120
 
@@ -77,14 +81,22 @@ const toToolbarAction = (action: PageHeaderAction): DynamicToolbarAction => {
         return rest
     }
 
+    /* The count must survive every presentation: visible button (chip + aria-label),
+     * collapsed icon-only button (aria-label), and the More overflow item (label text —
+     * the overflow menu renders `label`, not `render`). */
+    const labelWithCount = `${rest.label} (${badgeCount})`
+
     return {
         ...rest,
+        label: labelWithCount,
+        ariaLabel: labelWithCount,
         render: ({ showLabel }) => (
             <span className='relative inline-flex'>
-                <ToolbarActionButton action={rest} showLabel={showLabel} />
+                <ToolbarActionButton action={{ ...rest, ariaLabel: labelWithCount }} showLabel={showLabel} />
                 <span
+                    aria-hidden
                     className='absolute -right-2 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full border border-solid border-lime-500 bg-lime-300 px-1.5 text-sm font-semibold leading-5 text-gama-800'
-                    data-test={`${rest.dataTest ?? `page-header-action-${rest.id}`}-badge`}
+                    data-testid={`${rest.dataTest ?? `page-header-action-${rest.id}`}-badge`}
                 >
                     {badgeCount}
                 </span>
@@ -141,7 +153,10 @@ export function PageHeader({
 
     const toolbarActions = useMemo(() => actions.filter((a) => !a.hidden).map(toToolbarAction), [actions])
 
-    const leadingWidth = widths['page-header-leading'] ?? 0
+    const contentWidth = Math.max(0, containerWidth - HORIZONTAL_PADDING_PX)
+    /* Registry widths survive unmounts; only reserve leading space while a control exists. */
+    const hasLeading = leading != null || leadingSlot != null
+    const leadingWidth = hasLeading ? (widths['page-header-leading'] ?? 0) : 0
     const titleNaturalWidth = widths[KEY_TITLE] ?? 0
 
     /* Prioritise title space before secondary action labels: the title reserves its natural
@@ -150,10 +165,10 @@ export function PageHeader({
      * Figma — revisit if designs specify an exact title/actions ratio. */
     const titleReserve = Math.max(
         TITLE_MIN_RESERVE_PX,
-        Math.min(titleNaturalWidth, Math.floor(containerWidth * 0.5)),
+        Math.min(titleNaturalWidth, Math.floor(contentWidth * 0.5)),
     )
 
-    const actionsAvailableWidth = Math.max(0, containerWidth - leadingWidth - titleReserve - GAP_PX * 2)
+    const actionsAvailableWidth = Math.max(0, contentWidth - leadingWidth - titleReserve - GAP_PX * 2)
 
     const plan = useMemo(
         () =>
@@ -213,9 +228,9 @@ export function PageHeader({
         <div className='flex min-w-0 flex-1 flex-col justify-center'>
             <div className='flex min-w-0 items-center gap-2'>
                 {titleSlot != null ? (
-                    <span ref={register(KEY_TITLE, 'scroll')} className='min-w-0'>
+                    <div ref={register(KEY_TITLE, 'scroll')} className='min-w-0'>
                         {titleSlot}
-                    </span>
+                    </div>
                 ) : (
                 <HeadingTag
                     ref={headingRef}
@@ -252,6 +267,7 @@ export function PageHeader({
             ref={containerRef}
             data-testid={dataTest}
             data-compact={compact ? 'true' : 'false'}
+            aria-busy={loading || undefined}
             className={cn(
                 'flex w-full items-center gap-2 px-4',
                 compact ? 'min-h-[64px] py-3' : 'min-h-[72px] py-4',

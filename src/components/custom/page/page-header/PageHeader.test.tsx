@@ -53,6 +53,9 @@ describe('PageHeader (ASMA-7622)', () => {
 
         expect(html).toContain('>56<')
         expect(html).toContain('page-header-action-notifications-badge')
+        /* The count is part of the accessible name and survives into the More overflow,
+         * whose items render the plain label. */
+        expect(html).toContain('aria-label="Notifications (56)"')
     })
 
     it('gives the icon-only menu control an accessible name', () => {

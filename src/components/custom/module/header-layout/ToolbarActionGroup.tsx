@@ -35,7 +35,9 @@ export function ToolbarActionButton({
             disabled={action.disabled}
             startIcon={action.icon}
             onClick={action.onClick}
-            aria-label={showLabel ? undefined : accessibleLabel}
+            /* An explicit ariaLabel always wins (e.g. a badge count appended to the name);
+             * otherwise the visible label is the accessible name and needs no duplication. */
+            aria-label={showLabel && action.ariaLabel == null ? undefined : accessibleLabel}
         >
             {showLabel ? action.label : undefined}
         </StyledButton>
