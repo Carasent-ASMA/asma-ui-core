@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { beforeAll, describe, expect, it } from 'vitest'
-import { PageHeader, type PageHeaderAction } from './PageHeader'
+import { PageHeader, toToolbarAction, type PageHeaderAction } from './PageHeader'
 
 /* SSR in the Node test env: stub the browser globals StyledPopover probes. */
 beforeAll(() => {
@@ -56,6 +56,16 @@ describe('PageHeader (ASMA-7622)', () => {
         /* The count is part of the accessible name and survives into the More overflow,
          * whose items render the plain label. */
         expect(html).toContain('aria-label="Notifications (56)"')
+    })
+
+    it('never lets an icon-less action collapse its label into a blank button', () => {
+        /* The planner treats undefined canHideLabel as collapsible; the adapter must only
+         * allow collapse when an icon remains to represent the action. */
+        expect(toToolbarAction({ id: 'save', label: 'Save', onClick: noop }).canHideLabel).toBe(false)
+        expect(toToolbarAction(bellAction).canHideLabel).toBe(true)
+        expect(
+            toToolbarAction({ ...bellAction, canHideLabel: false }).canHideLabel,
+        ).toBe(false)
     })
 
     it('gives the icon-only menu control an accessible name', () => {

@@ -74,8 +74,15 @@ const HORIZONTAL_PADDING_PX = 32
 /** Minimum room reserved for the title before actions may keep their labels. */
 const TITLE_MIN_RESERVE_PX = 120
 
-const toToolbarAction = (action: PageHeaderAction): DynamicToolbarAction => {
-    const { badgeCount, ...rest } = action
+/** Maps a PageHeaderAction to the toolbar engine's action shape. Exported for tests. */
+export const toToolbarAction = (action: PageHeaderAction): DynamicToolbarAction => {
+    const { badgeCount, ...action_rest } = action
+    /* A label may only collapse when an icon remains — otherwise the button goes blank.
+     * The planner treats undefined canHideLabel as collapsible, so guard it here. */
+    const rest: DynamicToolbarAction = {
+        ...action_rest,
+        canHideLabel: action_rest.icon != null && action_rest.canHideLabel !== false,
+    }
 
     if (badgeCount == null || rest.render) {
         return rest
