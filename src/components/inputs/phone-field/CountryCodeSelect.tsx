@@ -107,11 +107,16 @@ export const CountryCodeSelect = ({
             optionId={picker.optionId}
             onSelect={select}
             listId={listId}
+            label={selectCountryLabel}
             renderFlag={renderFlag}
         />
     )
 
     const comboboxAria = {
+        // `role` included: `aria-expanded` and `aria-autocomplete` are only allowed on a combobox,
+        // and the sheet's search box is a `StyledSearchField` whose input defaults to a plain
+        // textbox — the desktop trigger below spells the same role out for itself.
+        role: 'combobox' as const,
         'aria-activedescendant': picker.visible.length > 0 ? picker.optionId(picker.activeIndex) : undefined,
         'aria-autocomplete': 'list' as const,
         'aria-controls': listId,
@@ -225,7 +230,12 @@ export const CountryCodeSelect = ({
                                 onChange={(event) => setQuery(event.target.value)}
                                 onClear={() => setQuery('')}
                                 onKeyDown={picker.handleKeyDown}
-                                allowClear
+                                // Deliberately no `allowClear`: that flag reaches `StyledInputField`
+                                // through the rest props and renders *its* clear button, while
+                                // `StyledSearchField` destructures `onClear` for its own adornment and
+                                // never forwards it — so the input's button calls an undefined handler
+                                // and the cross does nothing. The search field already renders a wired
+                                // clear whenever the value is non-empty.
                                 slotProps={{ htmlInput: comboboxAria }}
                             />
                         </div>

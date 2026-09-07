@@ -12,6 +12,8 @@ export interface CountryCodeOptionsProps {
     optionId: (index: number) => string
     onSelect: (iso2: string) => void
     listId: string
+    /** Accessible name for the list. Consumer copy, same string that titles the mobile sheet. */
+    label: string
     renderFlag?: RenderCountryFlag
     className?: string
 }
@@ -28,6 +30,7 @@ export const CountryCodeOptions = ({
     optionId,
     onSelect,
     listId,
+    label,
     renderFlag,
     className,
 }: CountryCodeOptionsProps): JSX.Element => {
@@ -44,6 +47,7 @@ export const CountryCodeOptions = ({
             ref={listRef}
             id={listId}
             role='listbox'
+            aria-label={label}
             data-testid={`${dataTest}-listbox`}
             className={cn('m-0 min-h-0 flex-1 list-none overflow-y-auto p-0', className)}
         >

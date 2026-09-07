@@ -322,3 +322,49 @@ export const NumberInputWidthIsCapped: Story = {
         await expect(root.getBoundingClientRect().width).toBeLessThanOrEqual(200)
     },
 }
+
+/**
+ * The mobile sheet's search box clears through its own cross.
+ *
+ * The first mobile-branch story, and the gap it closes is why the cross shipped dead: every
+ * other picker story runs at desktop width, where the trigger is the combobox and no
+ * `StyledSearchField` is rendered at all.
+ *
+ * The defect it guards is silent by construction. `StyledSearchField` supplies its clear
+ * adornment through `slotProps`, and this picker passes `slotProps` of its own for the combobox
+ * ARIA; the rest-props spread used to replace that object wholesale, taking the wired cross, the
+ * search icon and the input padding with it. What stayed visible was `StyledInputField`'s own
+ * `allowClear` button, calling an `onClear` the search field keeps for itself and never forwards.
+ * A cross was on screen throughout — it just did nothing.
+ */
+export const MobileSearchClears: Story = {
+    args: { country: 'NO', dataTest: 'phone', value: '' },
+    globals: { viewport: { value: 'mobile1', isRotated: false } },
+    render: (args) => <Controlled {...args} />,
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement)
+        await userEvent.click(canvas.getByRole('button', { expanded: false }))
+
+        // Assert the branch FIRST, and assert it on the sheet itself: below 744 px the picker is
+        // a dialog holding a search box, above it a popover anchored to the trigger. Without this
+        // the story would pass on the desktop branch and prove nothing about the sheet.
+        const body = within(document.body)
+        const dialog = await waitFor(() => body.getByRole('dialog'))
+        const search = within(dialog).getByRole('combobox')
+
+        await userEvent.type(search, '22')
+        await waitFor(async () => {
+            await expect(within(dialog).queryAllByRole('option').length).toBeLessThan(countries.length)
+        })
+
+        // Exactly one cross, and it is the search field's own wired adornment. The input's
+        // `allowClear` button would be `phone-country-search-clear` and is what used to be here.
+        await expect(within(dialog).queryByTestId('phone-country-search-clear')).toBeNull()
+        await userEvent.click(within(dialog).getByTestId('styled-search-clear-icon'))
+
+        await waitFor(async () => {
+            await expect(search).toHaveValue('')
+            await expect(within(dialog).getAllByRole('option')).toHaveLength(countries.length)
+        })
+    },
+}
