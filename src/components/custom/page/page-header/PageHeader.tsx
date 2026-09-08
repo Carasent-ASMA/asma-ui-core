@@ -1,3 +1,4 @@
+import { useMergeRefs } from '@floating-ui/react'
 import { useEffect, useMemo, useRef, useState, type ReactNode, type Ref } from 'react'
 import { ArrowLeftIcon, HamburgerIcon } from 'src/components/icons'
 import { StyledButton } from 'src/components/inputs/button'
@@ -151,20 +152,13 @@ export function PageHeader({
     const searchAreaRef = useRef<HTMLDivElement>(null)
     const restoreFocusRef = useRef<HTMLElement | null>(null)
     const isFirstRenderRef = useRef(true)
-    const [stuck, setStuck] = useState(false)
+    const [observedStuck, setObservedStuck] = useState(false)
 
     /* Container-width adaptive (not viewport): the same header works in any slot width.
      * Drives only the type ramp — the base height is identical at every width. */
     const compact = containerWidth > 0 && containerWidth < COMPACT_BREAKPOINT_PX
 
-    const setHeadingRef = (element: (HTMLDivElement & HTMLHeadingElement) | null): void => {
-        headingRef.current = element
-        if (typeof titleRef === 'function') {
-            titleRef(element)
-        } else if (titleRef != null) {
-            ;(titleRef as { current: HTMLHeadingElement | null }).current = element
-        }
-    }
+    const setHeadingRef = useMergeRefs([headingRef, titleRef])
 
     /* AC: focus moves to the route heading on every route change. The host passes the
      * route identity as focusKey; the first render never steals focus from the page. */
@@ -217,13 +211,16 @@ export function PageHeader({
     useEffect(() => {
         const sentinel = sentinelRef.current
         if (!sticky || !sentinel || typeof IntersectionObserver === 'undefined') {
-            setStuck(false)
             return
         }
-        const observer = new IntersectionObserver(([entry]) => setStuck(entry != null && !entry.isIntersecting))
+        const observer = new IntersectionObserver(([entry]) =>
+            setObservedStuck(entry != null && !entry.isIntersecting),
+        )
         observer.observe(sentinel)
         return () => observer.disconnect()
     }, [sticky])
+
+    const stuck = sticky && observedStuck
 
     const toolbarActions = useMemo(() => actions.filter((a) => !a.hidden).map(toToolbarAction), [actions])
 
