@@ -23,14 +23,36 @@ describe('PageHeader (ASMA-7622)', () => {
 
         expect(html).toContain('<h1')
         expect(html).toContain('Inbox and outbox')
-        expect(html).toContain('title="Inbox and outbox"')
+        /* The full string is the accessible name; the native tooltip is added only once the
+         * 2-line clamp is measured as actually truncating, so SSR carries no title attribute. */
+        expect(html).not.toContain('title="Inbox and outbox"')
     })
 
     it('owns the heading and exposes the host selector contract via titleDataTest', () => {
         const html = renderToStaticMarkup(<PageHeader title='Home' titleDataTest='page-title' />)
 
+        /* Both attribute styles: `data-test` is the hosts' and e2e suites' existing
+         * `page-title` contract, `data-testid` is the ui-core convention. */
         expect(html).toContain('data-test="page-title"')
+        expect(html).toContain('data-testid="page-title"')
         expect(html).toContain('<h1')
+    })
+
+    it('renders no heading for an empty title (an empty h1 is an a11y defect)', () => {
+        const html = renderToStaticMarkup(<PageHeader title='' titleDataTest='page-title' />)
+
+        expect(html).not.toContain('<h1')
+        expect(html).not.toContain('data-test="page-title"')
+    })
+
+    it('renders one heading element per state, so focus survives loading and search flips', () => {
+        /* The heading node identity must not depend on loading/search: a state flip that
+         * unmounts the focused heading drops the focus to <body>. */
+        for (const props of [{}, { loading: true }, { search: <input />, searchOpen: true }]) {
+            const html = renderToStaticMarkup(<PageHeader title='Documents' {...props} />)
+
+            expect(html.split('<h1').length - 1).toBe(1)
+        }
     })
 
     it('keeps the heading programmatically focusable for route-change focus', () => {

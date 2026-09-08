@@ -1,5 +1,5 @@
 import { useMergeRefs } from '@floating-ui/react'
-import { useEffect, useMemo, useRef, useState, type ReactNode, type Ref, type RefObject } from 'react'
+import { useMemo, useRef, type ReactNode, type Ref } from 'react'
 import { ArrowLeftIcon, HamburgerIcon } from 'src/components/icons'
 import { StyledButton } from 'src/components/inputs/button'
 import { cn } from 'src/helpers/cn'
@@ -10,8 +10,21 @@ import {
     type DynamicToolbarAction,
 } from '../../module/header-layout/planToolbarActions'
 import { ToolbarActionButton, ToolbarActionGroup } from '../../module/header-layout/ToolbarActionGroup'
-import { actionKey, KEY_MORE_BUTTON, KEY_TITLE, ToolbarMeasurementStrip } from '../../module/header-layout/ToolbarMeasurement'
+import {
+    actionKey,
+    KEY_LEADING,
+    KEY_MORE_BUTTON,
+    KEY_STATUS,
+    KEY_TITLE,
+    ToolbarMeasurementStrip,
+} from '../../module/header-layout/ToolbarMeasurement'
 import { useToolbarTranslations, type ToolbarLocale } from '../../module/header-layout/useTranslations'
+import {
+    useIsTitleClamped,
+    useSearchFocus,
+    useStickyScrollPadding,
+    useStuckOnScroll,
+} from './PageHeader.hooks'
 
 export interface PageHeaderAction extends DynamicToolbarAction {
     /** Count badge on the action button (e.g. unread notifications). */
@@ -23,16 +36,11 @@ export interface PageHeaderProps {
     title: string
     /** Heading element. Default `h1` (one PageHeader per route). */
     titleAs?: 'h1' | 'h2' | 'div'
-    /** `data-test` attribute on the heading, so hosts keep selector contracts (e.g. `page-title`). */
+    /** Heading test id, emitted as both `data-test` and `data-testid`. */
     titleDataTest?: string
-    /** Ref to the heading element, for hosts that focus or target it imperatively. */
+    /** Heading ref. For route-change focus pass `useRouteHeadingFocus(pathname)`
+     * from a component that survives the host's route changes. */
     titleRef?: Ref<HTMLHeadingElement>
-    /**
-     * Focus the heading whenever this value changes (pass the route pathname).
-     * The initial render never steals focus; a router integration that remounts
-     * the header per route can focus through `titleRef` instead.
-     */
-    focusKey?: string | number
     /** Context line under the title (subtitle, progress bar, …). */
     subtitle?: ReactNode
     /** Slot rendered right after the title (status chip, saved-state, help button, …). */
@@ -42,10 +50,7 @@ export interface PageHeaderProps {
     onLeadingClick?: () => void
     /** i18n label for the leading control; also its accessible name when icon-only. */
     leadingLabel?: string
-    /**
-     * Custom leading node — for hosts whose back/menu control is an injected widget
-     * (e.g. the shell's per-route Mf back buttons). Wins over `leading`; never overflows.
-     */
+    /** Custom leading node (e.g. an injected widget). Wins over `leading`; never overflows. */
     leadingSlot?: ReactNode
     /** Trailing actions, adaptive: labels collapse, low-priority actions overflow. */
     actions?: PageHeaderAction[]
@@ -67,8 +72,7 @@ export interface PageHeaderProps {
 /** Below this container width the header uses the mobile type ramp (Figma: Mobile 0–743px). */
 const COMPACT_BREAKPOINT_PX = 744
 const GAP_PX = 8
-/** The container's `px-4` on both sides — keep in sync with the root class. Planning must
- * work with the content box, not the border box, or actions overflow near breakpoints. */
+/** The container's `px-4` on both sides — keep in sync with the root class. */
 const HORIZONTAL_PADDING_PX = 32
 /** Minimum room reserved for the title before actions may keep their labels. */
 const TITLE_MIN_RESERVE_PX = 120
@@ -76,8 +80,7 @@ const TITLE_MIN_RESERVE_PX = 120
 /** Maps a PageHeaderAction to the toolbar engine's action shape. Exported for tests. */
 export const toToolbarAction = (action: PageHeaderAction): DynamicToolbarAction => {
     const { badgeCount, ...action_rest } = action
-    /* A label may only collapse when an icon remains — otherwise the button goes blank.
-     * The planner treats undefined canHideLabel as collapsible, so guard it here. */
+    /* A label may only collapse when an icon remains — otherwise the button goes blank. */
     const rest: DynamicToolbarAction = {
         ...action_rest,
         canHideLabel: action_rest.icon != null && action_rest.canHideLabel !== false,
@@ -87,9 +90,7 @@ export const toToolbarAction = (action: PageHeaderAction): DynamicToolbarAction 
         return rest
     }
 
-    /* The count must survive every presentation: visible button (chip + aria-label),
-     * collapsed icon-only button (aria-label), and the More overflow item (label text —
-     * the overflow menu renders `label`, not `render`). */
+    /* The count must survive every presentation: chip, aria-label and overflow label. */
     const labelWithCount = `${rest.label} (${badgeCount})`
 
     return {
@@ -111,131 +112,6 @@ export const toToolbarAction = (action: PageHeaderAction): DynamicToolbarAction 
     }
 }
 
-/* The route heading is a singleton per document, so the previously seen route key is
- * module state: it survives header remounts (hosts that mount one header per route)
- * and makes StrictMode's effect replay a no-op (same key twice in a row).
- * ponytail: assumes at most one focusKey-carrying PageHeader per document — true for
- * ASMA hosts; concurrent route headings would need per-root tracking. */
-let lastRouteFocusKey: string | number | undefined
-
-/** AC: focus moves to the route heading on every route change — never on first load. */
-function useRouteFocus(
-    focusKey: string | number | undefined,
-    headingRef: RefObject<HTMLElement>,
-): void {
-    useEffect(() => {
-        if (focusKey == null) {
-            return
-        }
-        const previous = lastRouteFocusKey
-        lastRouteFocusKey = focusKey
-        if (previous !== undefined && previous !== focusKey) {
-            headingRef.current?.focus()
-        }
-    }, [focusKey, headingRef])
-}
-
-/**
- * Search mode focus contract: opening moves focus into the search slot; closing
- * restores it to the element focused before search opened. The invoker often
- * unmounts in the same commit that opens search (actions are replaced by the
- * search row), so it is remembered through a focusin listener — reading
- * document.activeElement when searchOpen flips is too late (<body> is focused) —
- * and when it is gone by close time, focus falls back to the route heading.
- */
-function useSearchFocus(
-    hasSearch: boolean,
-    searchOpen: boolean,
-    searchAreaRef: RefObject<HTMLDivElement>,
-    headingRef: RefObject<HTMLElement>,
-): void {
-    const restoreFocusRef = useRef<HTMLElement | null>(null)
-
-    useEffect(() => {
-        if (!hasSearch) {
-            return
-        }
-        const remember = (event: FocusEvent) => {
-            const target = event.target as HTMLElement | null
-            if (target != null && !searchAreaRef.current?.contains(target)) {
-                restoreFocusRef.current = target
-            }
-        }
-        document.addEventListener('focusin', remember)
-        return () => document.removeEventListener('focusin', remember)
-    }, [hasSearch, searchAreaRef])
-
-    useEffect(() => {
-        if (searchOpen) {
-            searchAreaRef.current
-                ?.querySelector<HTMLElement>('input, textarea, [contenteditable="true"], button, [tabindex]')
-                ?.focus()
-        } else if (restoreFocusRef.current) {
-            const stored = restoreFocusRef.current
-            const target = stored.isConnected && stored !== document.body ? stored : headingRef.current
-            target?.focus()
-            restoreFocusRef.current = null
-        }
-    }, [searchOpen, searchAreaRef, headingRef])
-}
-
-/** Compact-on-scroll: the sentinel sits just above the sticky row; once it leaves the
- * (ancestor-clipped) viewport the header is stuck and renders compacted. */
-function useStuckOnScroll(sticky: boolean, sentinelRef: RefObject<HTMLDivElement>): boolean {
-    const [observedStuck, setObservedStuck] = useState(false)
-
-    useEffect(() => {
-        const sentinel = sentinelRef.current
-        if (!sticky || !sentinel || typeof IntersectionObserver === 'undefined') {
-            return
-        }
-        const observer = new IntersectionObserver(([entry]) =>
-            setObservedStuck(entry != null && !entry.isIntersecting),
-        )
-        observer.observe(sentinel)
-        return () => observer.disconnect()
-    }, [sticky, sentinelRef])
-
-    return sticky && observedStuck
-}
-
-const findScrollContainer = (element: HTMLElement): HTMLElement | null => {
-    for (let parent = element.parentElement; parent != null; parent = parent.parentElement) {
-        const { overflowY } = getComputedStyle(parent)
-        if (overflowY === 'auto' || overflowY === 'scroll') {
-            return parent
-        }
-    }
-    return document.documentElement
-}
-
-/** AC: prevent sticky headers from covering focused content. The header's real height
- * (which a 2-line title or subtitle can expand beyond any fixed value) is written as
- * scroll-padding-top on the nearest scroll container and kept current on resize. */
-function useStickyScrollPadding(sticky: boolean, containerRef: RefObject<HTMLDivElement>): void {
-    useEffect(() => {
-        const header = containerRef.current
-        if (!sticky || !header || typeof ResizeObserver === 'undefined') {
-            return
-        }
-        const scroller = findScrollContainer(header)
-        if (!scroller) {
-            return
-        }
-        const previous = scroller.style.scrollPaddingTop
-        const apply = () => {
-            scroller.style.scrollPaddingTop = `${Math.ceil(header.getBoundingClientRect().height)}px`
-        }
-        apply()
-        const observer = new ResizeObserver(apply)
-        observer.observe(header)
-        return () => {
-            observer.disconnect()
-            scroller.style.scrollPaddingTop = previous
-        }
-    }, [sticky, containerRef])
-}
-
 function LoadingSkeleton({ compact }: { compact: boolean }): JSX.Element {
     return (
         <div className='flex w-full min-w-0 items-center justify-between gap-2' aria-hidden>
@@ -247,10 +123,9 @@ function LoadingSkeleton({ compact }: { compact: boolean }): JSX.Element {
 
 export function PageHeader({
     title,
-    titleAs = 'h1',
+    titleAs: HeadingTag = 'h1',
     titleDataTest,
     titleRef,
-    focusKey,
     subtitle,
     status,
     leading,
@@ -276,35 +151,44 @@ export function PageHeader({
     const sentinelRef = useRef<HTMLDivElement>(null)
     const searchAreaRef = useRef<HTMLDivElement>(null)
 
-    /* Container-width adaptive (not viewport): the same header works in any slot width.
-     * Drives only the type ramp — the base height is identical at every width. */
+    /* Container-width adaptive (not viewport); drives only the type ramp. */
     const compact = containerWidth > 0 && containerWidth < COMPACT_BREAKPOINT_PX
 
     const setHeadingRef = useMergeRefs([headingRef, titleRef])
 
-    useRouteFocus(focusKey, headingRef)
+    const searchMode = searchOpen && search != null
+    /* Loading/search hide the title row visually, but the heading element stays
+     * (same node identity, so focus on it survives state flips). */
+    const headingHidden = loading || searchMode
+
     useSearchFocus(search != null, searchOpen, searchAreaRef, headingRef)
     const stuck = useStuckOnScroll(sticky, sentinelRef)
     useStickyScrollPadding(sticky, containerRef)
+    const titleClamped = useIsTitleClamped(headingRef, title, !headingHidden)
 
     const toolbarActions = useMemo(() => actions.filter((a) => !a.hidden).map(toToolbarAction), [actions])
 
     const contentWidth = Math.max(0, containerWidth - HORIZONTAL_PADDING_PX)
-    /* Registry widths survive unmounts; only reserve leading space while a control exists. */
+    /* Registry widths survive unmounts; only reserve slot space while a slot exists. */
     const hasLeading = leading != null || leadingSlot != null
-    const leadingWidth = hasLeading ? (widths['page-header-leading'] ?? 0) : 0
+    const hasStatus = status != null
+    const leadingWidth = hasLeading ? (widths[KEY_LEADING] ?? 0) : 0
+    const statusWidth = hasStatus ? (widths[KEY_STATUS] ?? 0) : 0
     const titleNaturalWidth = widths[KEY_TITLE] ?? 0
 
-    /* Prioritise title space before secondary action labels: the title reserves its natural
-     * width up to half the container (never less than the minimum reserve), the rest is
-     * offered to the action planner. ponytail: half-container cap is a heuristic, not from
-     * Figma — revisit if designs specify an exact title/actions ratio. */
+    /* Title reserves its natural width up to half the container; the rest goes to actions.
+     * ponytail: half-container cap is a heuristic, not from Figma. */
     const titleReserve = Math.max(
         TITLE_MIN_RESERVE_PX,
         Math.min(titleNaturalWidth, Math.floor(contentWidth * 0.5)),
     )
 
-    const actionsAvailableWidth = Math.max(0, contentWidth - leadingWidth - titleReserve - GAP_PX * 2)
+    /* One gap per rendered neighbour: leading | title row | status | actions. */
+    const gapCount = 1 + (hasLeading ? 1 : 0) + (hasStatus ? 1 : 0)
+    const actionsAvailableWidth = Math.max(
+        0,
+        contentWidth - leadingWidth - statusWidth - titleReserve - GAP_PX * gapCount,
+    )
 
     const plan = useMemo(
         () =>
@@ -320,91 +204,48 @@ export function PageHeader({
 
     const resolvedLeadingLabel = leadingLabel ?? (leading === 'menu' ? t.menu : t.back)
 
-    const leadingControl = leadingSlot != null ? (
-        <span ref={register('page-header-leading')} className='inline-flex shrink-0'>
-            {leadingSlot}
-        </span>
-    ) : leading == null ? null : (
-            <span ref={register('page-header-leading')} className='inline-flex shrink-0'>
-                {leading === 'menu' ? (
-                    <StyledButton
-                        dataTest={`${dataTest}-menu`}
-                        variant='text'
-                        size='large'
-                        onClick={onLeadingClick}
-                        aria-label={resolvedLeadingLabel}
-                        startIcon={<HamburgerIcon width={24} height={24} />}
-                    />
-                ) : compact ? (
-                    <StyledButton
-                        dataTest={`${dataTest}-back`}
-                        variant='text'
-                        size='large'
-                        onClick={onLeadingClick}
-                        aria-label={resolvedLeadingLabel}
-                        startIcon={<ArrowLeftIcon width={24} height={24} />}
-                    />
-                ) : (
-                    <StyledButton
-                        dataTest={`${dataTest}-back`}
-                        variant='outlined'
-                        size='large'
-                        onClick={onLeadingClick}
-                        startIcon={<ArrowLeftIcon width={20} height={20} />}
-                    >
-                        {resolvedLeadingLabel}
-                    </StyledButton>
-                )}
-            </span>
-        )
+    const leadingButton: ReactNode =
+        leadingSlot ?? (leading === 'menu' ? (
+            <StyledButton
+                dataTest={`${dataTest}-menu`}
+                variant='text'
+                size='large'
+                onClick={onLeadingClick}
+                aria-label={resolvedLeadingLabel}
+                startIcon={<HamburgerIcon width={24} height={24} />}
+            />
+        ) : leading === 'back' ? (
+            <StyledButton
+                dataTest={`${dataTest}-back`}
+                variant={compact ? 'text' : 'outlined'}
+                size='large'
+                onClick={onLeadingClick}
+                aria-label={compact ? resolvedLeadingLabel : undefined}
+                startIcon={<ArrowLeftIcon width={compact ? 24 : 20} height={compact ? 24 : 20} />}
+            >
+                {compact ? undefined : resolvedLeadingLabel}
+            </StyledButton>
+        ) : null)
 
-    const HeadingTag = titleAs
     const smallType = compact || stuck
 
-    const heading = (visuallyHidden: boolean): JSX.Element => (
+    /* One heading element for every state, so focus on it survives state transitions. */
+    const heading = title === '' ? null : (
         <HeadingTag
             ref={setHeadingRef}
             tabIndex={-1}
             data-test={titleDataTest}
-            title={visuallyHidden ? undefined : title}
+            data-testid={titleDataTest}
+            title={titleClamped ? title : undefined}
             className={cn(
-                visuallyHidden
-                    ? 'sr-only'
-                    : [
-                        /* AC: title wraps to a 2-line max, then truncates — at every width. Full
-                         * string stays in the DOM (clamp is visual only), so the accessible name
-                         * is always the complete title. */
-                        'm-0 line-clamp-2 min-w-0 break-words font-semibold text-delta-800 outline-none',
-                        smallType ? 'text-xl leading-7' : 'text-2xl leading-8',
-                    ],
+                /* 2-line clamp is visual only — the accessible name stays the full title. */
+                'm-0 line-clamp-2 min-w-0 break-words font-semibold text-delta-800 outline-none',
+                smallType ? 'text-xl leading-7' : 'text-2xl leading-8',
             )}
         >
             {title}
         </HeadingTag>
     )
-
-    const titleBlock = (
-        <div className='flex min-w-0 flex-1 flex-col justify-center'>
-            <div className='flex min-w-0 items-center gap-2'>
-                {/* An empty title renders no heading — an empty h1 is an a11y defect. */}
-                {title !== '' && heading(false)}
-                {status != null && <span className='shrink-0'>{status}</span>}
-            </div>
-            {/* Compact-on-scroll drops the context line so the stuck header takes minimal space. */}
-            {subtitle != null && !stuck && <div className='mt-0.5 min-w-0 text-sm text-delta-700'>{subtitle}</div>}
-        </div>
-    )
-
-    const searchRow = (
-        <div ref={searchAreaRef} className='flex w-full min-w-0 items-center gap-2'>
-            <div className='min-w-0 flex-1'>{search}</div>
-            <StyledButton dataTest={`${dataTest}-search-close`} variant='text' size='large' onClick={onSearchClose}>
-                {searchCloseLabel ?? t.close}
-            </StyledButton>
-        </div>
-    )
-
-    const searchMode = searchOpen && search != null
 
     return (
         <>
@@ -417,8 +258,7 @@ export function PageHeader({
                 data-stuck={stuck ? 'true' : 'false'}
                 aria-busy={loading || undefined}
                 className={cn(
-                    /* AC: the same base height across breakpoints; content (2-line title,
-                     * subtitle) may expand it. Compact-on-scroll tightens the stuck header. */
+                    /* Same base height across breakpoints; content may expand it. */
                     'flex w-full items-center gap-2 px-4',
                     stuck ? 'min-h-[56px] py-2 shadow-sm' : 'min-h-[64px] py-3',
                     sticky && 'sticky top-0 z-30 bg-delta-50',
@@ -433,30 +273,52 @@ export function PageHeader({
                     titleClassName={cn('font-semibold', smallType ? 'text-xl leading-7' : 'text-2xl leading-8')}
                 />
 
-                {/* The leading navigation control stays through every state (AC: keep Back/Menu
-                  * outside overflow — and outside loading/search replacement). */}
-                {leadingControl}
+                {/* Leading navigation stays through every state (never overflows/hides). */}
+                {leadingButton != null && (
+                    <span ref={register(KEY_LEADING)} className='inline-flex shrink-0'>
+                        {leadingButton}
+                    </span>
+                )}
 
-                {loading ? (
-                    <>
-                        {/* Preserve route-heading semantics while content loads. */}
-                        {title !== '' && heading(true)}
-                        <LoadingSkeleton compact={compact} />
-                    </>
-                ) : searchMode ? (
-                    <>
-                        {title !== '' && heading(true)}
-                        {searchRow}
-                    </>
-                ) : (
-                    <>
-                        {titleBlock}
-                        <ToolbarActionGroup
-                            plan={plan}
-                            overflowMenuLabel={t.more}
-                            registerActionWidth={(actionId, showLabel) => register(actionKey(actionId, showLabel))}
-                        />
-                    </>
+                {/* `sr-only` removes the hidden title from flex flow while keeping heading semantics. */}
+                <div className={cn(headingHidden ? 'sr-only' : 'flex min-w-0 flex-1 flex-col justify-center')}>
+                    <div className='flex min-w-0 items-center gap-2'>
+                        {/* An empty title renders no heading — an empty h1 is an a11y defect. */}
+                        {heading}
+                        {hasStatus && !headingHidden && (
+                            <span ref={register(KEY_STATUS)} className='inline-flex shrink-0 items-center'>
+                                {status}
+                            </span>
+                        )}
+                    </div>
+                    {/* Compact-on-scroll drops the context line so the stuck header takes minimal space. */}
+                    {!headingHidden && subtitle != null && !stuck && (
+                        <div className='mt-0.5 min-w-0 text-sm text-delta-700'>{subtitle}</div>
+                    )}
+                </div>
+
+                {loading && <LoadingSkeleton compact={compact} />}
+
+                {searchMode && (
+                    <div ref={searchAreaRef} className='flex w-full min-w-0 items-center gap-2'>
+                        <div className='min-w-0 flex-1'>{search}</div>
+                        <StyledButton
+                            dataTest={`${dataTest}-search-close`}
+                            variant='text'
+                            size='large'
+                            onClick={onSearchClose}
+                        >
+                            {searchCloseLabel ?? t.close}
+                        </StyledButton>
+                    </div>
+                )}
+
+                {!loading && !searchMode && (
+                    <ToolbarActionGroup
+                        plan={plan}
+                        overflowMenuLabel={t.more}
+                        registerActionWidth={(actionId, showLabel) => register(actionKey(actionId, showLabel))}
+                    />
                 )}
             </div>
         </>

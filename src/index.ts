@@ -73,6 +73,7 @@ export * from './components/custom/pathfinder-card/PathfinderCard'
 
 // hooks
 export * from './hooks/usePopupState'
+export * from './hooks/useRouteHeadingFocus'
 
 // MUI-free reimplementations (TASK-102/403).
 export {

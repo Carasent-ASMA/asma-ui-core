@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { BellOutlineIcon, PlusIcon, ShareIcon } from 'src/components/icons'
 import { StyledSearchField } from 'src/components/inputs/search-field'
+import { useRouteHeadingFocus } from 'src/hooks/useRouteHeadingFocus'
 import { PageHeader, type PageHeaderAction } from './PageHeader'
 
 const noop = () => undefined
@@ -256,7 +257,6 @@ export const StickyOnScroll: Story = {
         })
 
         scroller.scrollTop = 400
-        scroller.dispatchEvent(new Event('scroll'))
 
         await waitFor(async () => expect(header).toHaveAttribute('data-stuck', 'true'))
         await expect(
@@ -275,7 +275,6 @@ export const StickyOnScroll: Story = {
         })
 
         scroller.scrollTop = 0
-        scroller.dispatchEvent(new Event('scroll'))
         await waitFor(async () => expect(header).toHaveAttribute('data-stuck', 'false'))
     },
 }
@@ -495,11 +494,16 @@ export const AcceptanceTitleMeasurement: Story = {
     },
 }
 
-/** Focus moves to the route heading whenever focusKey changes (route navigation). */
+/**
+ * Route-change focus, owned by the host router through `useRouteHeadingFocus`:
+ * a persistent owner (this story's shell stand-in) requests the focus, the
+ * component only supplies a focusable heading through `titleRef`.
+ */
 export const AcceptanceRouteFocus: Story = {
     tags: ['!autodocs'],
     render: function RouteFocusStory() {
         const [route, setRoute] = useState('/inbox')
+        const headingRef = useRouteHeadingFocus(route)
 
         return (
             <Frame width={744}>
@@ -509,7 +513,7 @@ export const AcceptanceRouteFocus: Story = {
                 <PageHeader
                     title={route === '/inbox' ? 'Inbox' : 'Outbox'}
                     titleDataTest='page-title'
-                    focusKey={route}
+                    titleRef={headingRef}
                 />
             </Frame>
         )
@@ -518,13 +522,230 @@ export const AcceptanceRouteFocus: Story = {
         const canvas = within(canvasElement)
         const heading = await canvas.findByRole('heading', { level: 1 })
 
-        /* Initial render must not steal focus. */
+        /* Initial render must not steal focus. Instance-scoped ownership means this
+         * holds no matter what other headings were mounted before — module state
+         * would make it depend on story order. */
         await expect(heading).not.toHaveFocus()
 
         await userEvent.click(canvas.getByTestId('navigate'))
 
         await waitFor(async () => expect(canvas.getByRole('heading', { level: 1 })).toHaveFocus())
         await expect(canvas.getByRole('heading', { level: 1 })).toHaveTextContent('Outbox')
+    },
+}
+
+/**
+ * Regression: a heading that only exists *after* the navigation still gets the
+ * focus. The shell supplies titles through the `on_set_page_title` widget event,
+ * so a route change can commit with an empty title (and therefore no heading).
+ */
+export const AcceptanceRouteFocusLateTitle: Story = {
+    tags: ['!autodocs'],
+    render: function LateTitleStory() {
+        const [route, setRoute] = useState('/a')
+        const [title, setTitle] = useState('First page')
+        const headingRef = useRouteHeadingFocus(route)
+
+        return (
+            <Frame width={744}>
+                <button
+                    data-testid='navigate-without-title'
+                    onClick={() => {
+                        setRoute('/b')
+                        setTitle('')
+                    }}
+                >
+                    Navigate
+                </button>
+                <button data-testid='supply-title' onClick={() => setTitle('Title from widget event')}>
+                    Supply title
+                </button>
+                <PageHeader title={title} titleDataTest='page-title' titleRef={headingRef} />
+            </Frame>
+        )
+    },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement)
+
+        await userEvent.click(canvas.getByTestId('navigate-without-title'))
+        /* No heading exists yet — an empty h1 would be the a11y defect. */
+        await expect(canvas.queryByRole('heading', { level: 1 })).not.toBeInTheDocument()
+
+        await userEvent.click(canvas.getByTestId('supply-title'))
+
+        await waitFor(async () => {
+            const heading = canvas.getByRole('heading', { level: 1 })
+            expect(heading).toHaveTextContent('Title from widget event')
+            expect(heading).toHaveFocus()
+        })
+    },
+}
+
+/**
+ * Regression: the loading → loaded transition must not drop the focus the
+ * navigation just placed. One heading element serves every state, so the node
+ * that holds the focus is never unmounted by a state flip. Loading ends the way
+ * it does in production — a request resolving, with no user interaction that
+ * could move the focus itself.
+ */
+export const AcceptanceRouteFocusSurvivesLoading: Story = {
+    tags: ['!autodocs'],
+    render: function LoadingHandoffStory() {
+        const [route, setRoute] = useState('/a')
+        const [loading, setLoading] = useState(false)
+        const headingRef = useRouteHeadingFocus(route)
+
+        useEffect(() => {
+            if (!loading) {
+                return
+            }
+            const timer = setTimeout(() => setLoading(false), 50)
+            return () => clearTimeout(timer)
+        }, [loading])
+
+        return (
+            <Frame width={744}>
+                <button
+                    data-testid='navigate-loading'
+                    onClick={() => {
+                        setRoute('/b')
+                        setLoading(true)
+                    }}
+                >
+                    Navigate
+                </button>
+                <PageHeader title='Documents' titleDataTest='page-title' titleRef={headingRef} loading={loading} />
+            </Frame>
+        )
+    },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement)
+
+        await userEvent.click(canvas.getByTestId('navigate-loading'))
+
+        /* The heading is visually hidden while loading, but it is the focus target. */
+        await waitFor(async () => expect(canvas.getByRole('heading', { level: 1 })).toHaveFocus())
+
+        /* …and it keeps the focus once the content lands. */
+        await waitFor(async () => {
+            expect(canvas.getByTestId('page-header')).not.toHaveAttribute('aria-busy')
+            expect(canvas.getByRole('heading', { level: 1 })).toBeVisible()
+            expect(canvas.getByRole('heading', { level: 1 })).toHaveFocus()
+        })
+    },
+}
+
+/**
+ * Two route headings in one document stay independent: each host owns its own
+ * focus state, so neither swallows the other's route change.
+ */
+export const AcceptanceIndependentHeadings: Story = {
+    tags: ['!autodocs'],
+    render: function IndependentHeadingsStory() {
+        const [route, setRoute] = useState('/a')
+        const topbarRef = useRouteHeadingFocus(route)
+        const widgetRef = useRouteHeadingFocus(route)
+
+        return (
+            <Frame width={744}>
+                <button data-testid='navigate-both' onClick={() => setRoute('/b')}>
+                    Navigate
+                </button>
+                <PageHeader title='Shell topbar' titleRef={topbarRef} dataTest='topbar-header' />
+                <PageHeader title='Widget page' titleAs='h2' titleRef={widgetRef} dataTest='widget-header' />
+            </Frame>
+        )
+    },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement)
+
+        await userEvent.click(canvas.getByTestId('navigate-both'))
+
+        /* Both owners fired; the last one to run holds the focus — the point is that
+         * neither is silently skipped by state shared between them. */
+        await waitFor(async () => expect(canvas.getByRole('heading', { level: 2 })).toHaveFocus())
+        await expect(canvas.getByRole('heading', { level: 1 })).toBeVisible()
+    },
+}
+
+/**
+ * The status slot never shrinks, so the planner has to subtract its measured
+ * width. Two identical headers at the same width, one carrying a wide status
+ * pill: the budgeted one must keep fewer action labels. Drop the status width
+ * from the budget and both plan identically — this goes red.
+ */
+export const AcceptanceStatusIsBudgeted: Story = {
+    tags: ['!autodocs'],
+    render: () => (
+        <div className='flex flex-col gap-4'>
+            <Frame width={860}>
+                <PageHeader
+                    dataTest='header-with-status'
+                    title='Weekly plan'
+                    status={
+                        <span
+                            data-testid='wide-status'
+                            className='rounded-full border border-solid border-gama-100 bg-white px-3 py-1 text-sm'
+                            style={{ width: 320 }}
+                        >
+                            Workspace context: Rehabilitation
+                        </span>
+                    }
+                    actions={[primaryAction, ...secondaryActions]}
+                />
+            </Frame>
+            <Frame width={860}>
+                <PageHeader dataTest='header-plain' title='Weekly plan' actions={[primaryAction, ...secondaryActions]} />
+            </Frame>
+        </div>
+    ),
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement)
+
+        /** Visible (non-measurement) action buttons that still render their label. */
+        const labelledActions = (headerTestId: string) =>
+            [
+                ...canvas
+                    .getByTestId(headerTestId)
+                    .querySelectorAll('[data-testid^="dynamic-toolbar-action-"]:not([data-testid*="-measure-"])'),
+            ]
+                .map((button) => button.textContent?.trim() ?? '')
+                .filter(Boolean)
+
+        await expect(await canvas.findByTestId('wide-status')).toBeVisible()
+
+        await waitFor(async () =>
+            expect(labelledActions('header-with-status').length).toBeLessThan(
+                labelledActions('header-plain').length,
+            ),
+        )
+
+        /* The status pill keeps its full width — the title yields, not the status. */
+        await expect(canvas.getByTestId('wide-status').getBoundingClientRect().width).toBeGreaterThanOrEqual(320)
+    },
+}
+
+/** The native tooltip is offered only when the 2-line clamp actually hides text. */
+export const AcceptanceTooltipOnlyWhenClamped: Story = {
+    tags: ['!autodocs'],
+    render: () => (
+        <div className='flex flex-col gap-4'>
+            <Frame width={320}>
+                <PageHeader
+                    title='A page title long enough that the two-line clamp genuinely has to cut it off somewhere'
+                    titleDataTest='clamped-title'
+                />
+            </Frame>
+            <Frame width={744}>
+                <PageHeader title='Inbox' titleDataTest='short-title' />
+            </Frame>
+        </div>
+    ),
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement)
+
+        await waitFor(async () => expect(canvas.getByTestId('clamped-title')).toHaveAttribute('title'))
+        await expect(canvas.getByTestId('short-title')).not.toHaveAttribute('title')
     },
 }
 

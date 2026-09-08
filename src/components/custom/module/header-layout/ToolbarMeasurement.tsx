@@ -9,6 +9,7 @@ import type { ToolbarTranslations } from './useTranslations'
 export const KEY_TITLE = 'title'
 export const KEY_LEADING = 'slot:leading'
 export const KEY_SEARCH = 'slot:search'
+export const KEY_STATUS = 'slot:status'
 export const KEY_SELECTION_INDICATOR = 'selection-indicator'
 export const KEY_MORE_BUTTON = 'more-button'
 export const filterKey = (iconOnly: boolean): string => `slot:filter:${iconOnly ? 'icon' : 'label'}`
@@ -24,11 +25,8 @@ export interface SelectionIndicatorMeasurement {
     translations: ToolbarTranslations
 }
 
-/**
- * Invisible, inert strip rendering every action in both variants (label and
- * icon-only) plus the More trigger and selection indicator, so the planners
- * work with real rendered widths instead of font-dependent guesses.
- */
+/** Invisible strip rendering every action in both variants, so the planners
+ * work with real rendered widths instead of guesses. */
 export function ToolbarMeasurementStrip({
     actions,
     register,
@@ -41,11 +39,7 @@ export function ToolbarMeasurementStrip({
     register: WidthRegistry['register']
     overflowMenuLabel: string
     selectionIndicator?: SelectionIndicatorMeasurement
-    /**
-     * Title text measured as an unconstrained single line. Inline elements
-     * report `scrollWidth: 0`, so the natural title width must come from this
-     * nowrap copy instead of the visible (clamped) heading.
-     */
+    /** Title measured as an unconstrained single line (the visible heading is clamped). */
     title?: string
     /** Typography classes matching the visible heading, so the width is real. */
     titleClassName?: string
@@ -66,8 +60,7 @@ export function ToolbarMeasurementStrip({
                     </span>
                 )}
                 {actions.filter((action) => action.measureInStrip !== false).map((action) => {
-                    /* Measurement copies must not duplicate production test ids — hidden
-                     * clones would break findByTestId/e2e selectors targeting the real button. */
+                    /* Suffix test ids so hidden copies never duplicate the real button's. */
                     const measureTest = (variant: string) =>
                         `${action.dataTest ?? `dynamic-toolbar-action-${action.id}`}-measure-${variant}`
 

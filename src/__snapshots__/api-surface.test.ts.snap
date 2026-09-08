@@ -297,6 +297,7 @@ exports[`asma-ui-core public API surface > keeps every runtime export of the pac
   "useDatePickerValidation",
   "useDynamicToolbarLayout",
   "usePopupState",
+  "useRouteHeadingFocus",
   "useSnackbar",
 ]
 `;
