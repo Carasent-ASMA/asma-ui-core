@@ -1,5 +1,5 @@
 import { useMergeRefs } from '@floating-ui/react'
-import { useEffect, useMemo, useRef, useState, type ReactNode, type Ref } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode, type Ref, type RefObject } from 'react'
 import { ArrowLeftIcon, HamburgerIcon } from 'src/components/icons'
 import { StyledButton } from 'src/components/inputs/button'
 import { cn } from 'src/helpers/cn'
@@ -111,6 +111,131 @@ export const toToolbarAction = (action: PageHeaderAction): DynamicToolbarAction 
     }
 }
 
+/* The route heading is a singleton per document, so the previously seen route key is
+ * module state: it survives header remounts (hosts that mount one header per route)
+ * and makes StrictMode's effect replay a no-op (same key twice in a row).
+ * ponytail: assumes at most one focusKey-carrying PageHeader per document — true for
+ * ASMA hosts; concurrent route headings would need per-root tracking. */
+let lastRouteFocusKey: string | number | undefined
+
+/** AC: focus moves to the route heading on every route change — never on first load. */
+function useRouteFocus(
+    focusKey: string | number | undefined,
+    headingRef: RefObject<HTMLElement>,
+): void {
+    useEffect(() => {
+        if (focusKey == null) {
+            return
+        }
+        const previous = lastRouteFocusKey
+        lastRouteFocusKey = focusKey
+        if (previous !== undefined && previous !== focusKey) {
+            headingRef.current?.focus()
+        }
+    }, [focusKey, headingRef])
+}
+
+/**
+ * Search mode focus contract: opening moves focus into the search slot; closing
+ * restores it to the element focused before search opened. The invoker often
+ * unmounts in the same commit that opens search (actions are replaced by the
+ * search row), so it is remembered through a focusin listener — reading
+ * document.activeElement when searchOpen flips is too late (<body> is focused) —
+ * and when it is gone by close time, focus falls back to the route heading.
+ */
+function useSearchFocus(
+    hasSearch: boolean,
+    searchOpen: boolean,
+    searchAreaRef: RefObject<HTMLDivElement>,
+    headingRef: RefObject<HTMLElement>,
+): void {
+    const restoreFocusRef = useRef<HTMLElement | null>(null)
+
+    useEffect(() => {
+        if (!hasSearch) {
+            return
+        }
+        const remember = (event: FocusEvent) => {
+            const target = event.target as HTMLElement | null
+            if (target != null && !searchAreaRef.current?.contains(target)) {
+                restoreFocusRef.current = target
+            }
+        }
+        document.addEventListener('focusin', remember)
+        return () => document.removeEventListener('focusin', remember)
+    }, [hasSearch, searchAreaRef])
+
+    useEffect(() => {
+        if (searchOpen) {
+            searchAreaRef.current
+                ?.querySelector<HTMLElement>('input, textarea, [contenteditable="true"], button, [tabindex]')
+                ?.focus()
+        } else if (restoreFocusRef.current) {
+            const stored = restoreFocusRef.current
+            const target = stored.isConnected && stored !== document.body ? stored : headingRef.current
+            target?.focus()
+            restoreFocusRef.current = null
+        }
+    }, [searchOpen, searchAreaRef, headingRef])
+}
+
+/** Compact-on-scroll: the sentinel sits just above the sticky row; once it leaves the
+ * (ancestor-clipped) viewport the header is stuck and renders compacted. */
+function useStuckOnScroll(sticky: boolean, sentinelRef: RefObject<HTMLDivElement>): boolean {
+    const [observedStuck, setObservedStuck] = useState(false)
+
+    useEffect(() => {
+        const sentinel = sentinelRef.current
+        if (!sticky || !sentinel || typeof IntersectionObserver === 'undefined') {
+            return
+        }
+        const observer = new IntersectionObserver(([entry]) =>
+            setObservedStuck(entry != null && !entry.isIntersecting),
+        )
+        observer.observe(sentinel)
+        return () => observer.disconnect()
+    }, [sticky, sentinelRef])
+
+    return sticky && observedStuck
+}
+
+const findScrollContainer = (element: HTMLElement): HTMLElement | null => {
+    for (let parent = element.parentElement; parent != null; parent = parent.parentElement) {
+        const { overflowY } = getComputedStyle(parent)
+        if (overflowY === 'auto' || overflowY === 'scroll') {
+            return parent
+        }
+    }
+    return document.documentElement
+}
+
+/** AC: prevent sticky headers from covering focused content. The header's real height
+ * (which a 2-line title or subtitle can expand beyond any fixed value) is written as
+ * scroll-padding-top on the nearest scroll container and kept current on resize. */
+function useStickyScrollPadding(sticky: boolean, containerRef: RefObject<HTMLDivElement>): void {
+    useEffect(() => {
+        const header = containerRef.current
+        if (!sticky || !header || typeof ResizeObserver === 'undefined') {
+            return
+        }
+        const scroller = findScrollContainer(header)
+        if (!scroller) {
+            return
+        }
+        const previous = scroller.style.scrollPaddingTop
+        const apply = () => {
+            scroller.style.scrollPaddingTop = `${Math.ceil(header.getBoundingClientRect().height)}px`
+        }
+        apply()
+        const observer = new ResizeObserver(apply)
+        observer.observe(header)
+        return () => {
+            observer.disconnect()
+            scroller.style.scrollPaddingTop = previous
+        }
+    }, [sticky, containerRef])
+}
+
 function LoadingSkeleton({ compact }: { compact: boolean }): JSX.Element {
     return (
         <div className='flex w-full min-w-0 items-center justify-between gap-2' aria-hidden>
@@ -150,9 +275,6 @@ export function PageHeader({
     const headingRef = useRef<(HTMLDivElement & HTMLHeadingElement) | null>(null)
     const sentinelRef = useRef<HTMLDivElement>(null)
     const searchAreaRef = useRef<HTMLDivElement>(null)
-    const restoreFocusRef = useRef<HTMLElement | null>(null)
-    const isFirstRenderRef = useRef(true)
-    const [observedStuck, setObservedStuck] = useState(false)
 
     /* Container-width adaptive (not viewport): the same header works in any slot width.
      * Drives only the type ramp — the base height is identical at every width. */
@@ -160,67 +282,10 @@ export function PageHeader({
 
     const setHeadingRef = useMergeRefs([headingRef, titleRef])
 
-    /* AC: focus moves to the route heading on every route change. The host passes the
-     * route identity as focusKey; the first render never steals focus from the page. */
-    useEffect(() => {
-        if (isFirstRenderRef.current) {
-            isFirstRenderRef.current = false
-            return
-        }
-        if (focusKey != null) {
-            headingRef.current?.focus()
-        }
-    }, [focusKey])
-
-    /* Remember the last focused element outside the search area. Reading
-     * document.activeElement when searchOpen flips is too late — the invoker
-     * unmounts in the same commit that opens search, leaving <body> focused. */
-    const hasSearch = search != null
-    useEffect(() => {
-        if (!hasSearch) {
-            return
-        }
-        const remember = (event: FocusEvent) => {
-            const target = event.target as HTMLElement | null
-            if (target != null && !searchAreaRef.current?.contains(target)) {
-                restoreFocusRef.current = target
-            }
-        }
-        document.addEventListener('focusin', remember)
-        return () => document.removeEventListener('focusin', remember)
-    }, [hasSearch])
-
-    /* Search mode moves focus into the search slot and restores it on close. When the
-     * invoker unmounted while search was open (actions are replaced by the search row),
-     * focus falls back to the route heading instead of being lost to <body>. */
-    useEffect(() => {
-        if (searchOpen) {
-            searchAreaRef.current
-                ?.querySelector<HTMLElement>('input, textarea, [contenteditable="true"], button, [tabindex]')
-                ?.focus()
-        } else if (restoreFocusRef.current) {
-            const stored = restoreFocusRef.current
-            const target = stored.isConnected && stored !== document.body ? stored : headingRef.current
-            target?.focus()
-            restoreFocusRef.current = null
-        }
-    }, [searchOpen])
-
-    /* Compact-on-scroll: the sentinel sits just above the sticky row; once it leaves
-     * the (ancestor-clipped) viewport the header is stuck and renders compacted. */
-    useEffect(() => {
-        const sentinel = sentinelRef.current
-        if (!sticky || !sentinel || typeof IntersectionObserver === 'undefined') {
-            return
-        }
-        const observer = new IntersectionObserver(([entry]) =>
-            setObservedStuck(entry != null && !entry.isIntersecting),
-        )
-        observer.observe(sentinel)
-        return () => observer.disconnect()
-    }, [sticky])
-
-    const stuck = sticky && observedStuck
+    useRouteFocus(focusKey, headingRef)
+    useSearchFocus(search != null, searchOpen, searchAreaRef, headingRef)
+    const stuck = useStuckOnScroll(sticky, sentinelRef)
+    useStickyScrollPadding(sticky, containerRef)
 
     const toolbarActions = useMemo(() => actions.filter((a) => !a.hidden).map(toToolbarAction), [actions])
 
@@ -386,7 +451,11 @@ export function PageHeader({
                 ) : (
                     <>
                         {titleBlock}
-                        <ToolbarActionGroup plan={plan} overflowMenuLabel={t.more} />
+                        <ToolbarActionGroup
+                            plan={plan}
+                            overflowMenuLabel={t.more}
+                            registerActionWidth={(actionId, showLabel) => register(actionKey(actionId, showLabel))}
+                        />
                     </>
                 )}
             </div>

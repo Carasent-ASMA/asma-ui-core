@@ -72,11 +72,18 @@ export function ToolbarActionGroup({
     overflowMenuLabel,
     className,
     selectionTone = false,
+    registerActionWidth,
 }: {
     plan: PlannedToolbarActions
     overflowMenuLabel: string
     className?: string
     selectionTone?: boolean
+    /**
+     * Width-registry hookup for `measureInStrip: false` actions: their single visible
+     * mount is measured here, so the planner budgets the real rendered width and the
+     * `estimatedWidthPx` only bridges the gap until the first measurement.
+     */
+    registerActionWidth?: (actionId: string, showLabel: boolean) => (element: HTMLElement | null) => void
 }): JSX.Element | null {
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
     const { inlineActions, overflowActions, showMoreMenu } = plan
@@ -87,14 +94,30 @@ export function ToolbarActionGroup({
 
     return (
         <div className={cn('flex shrink-0 flex-nowrap items-center gap-2', className)}>
-            {inlineActions.map(({ action, showLabel }) => (
-                <ToolbarActionButton
-                    key={action.id}
-                    action={action}
-                    showLabel={showLabel}
-                    selectionTone={selectionTone}
-                />
-            ))}
+            {inlineActions.map(({ action, showLabel }) => {
+                const button = (
+                    <ToolbarActionButton
+                        key={action.id}
+                        action={action}
+                        showLabel={showLabel}
+                        selectionTone={selectionTone}
+                    />
+                )
+
+                if (registerActionWidth == null || action.measureInStrip !== false) {
+                    return button
+                }
+
+                return (
+                    <span
+                        key={action.id}
+                        ref={registerActionWidth(action.id, showLabel)}
+                        className='inline-flex shrink-0'
+                    >
+                        {button}
+                    </span>
+                )
+            })}
 
             {showMoreMenu && (
                 <>

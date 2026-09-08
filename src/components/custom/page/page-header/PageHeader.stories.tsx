@@ -213,21 +213,27 @@ export const MinimumWidth320: Story = {
 }
 
 /** Scrolled / sticky — pins to the top of the scroll container and compacts once stuck
- * (`data-stuck`): tighter padding, smaller type, subtitle hidden. `scroll-padding-top`
- * uses the compacted height, which the stuck header never exceeds with a 1-line title. */
+ * (`data-stuck`): tighter padding, smaller type, subtitle hidden. The component writes
+ * its measured height as scroll-padding-top on the scroll container, so keyboard focus
+ * never lands under the pinned header — even with a 2-line title taller than the base. */
 export const StickyOnScroll: Story = {
     render: () => (
         <Frame width={744}>
-            <div data-testid='sticky-scroll-container' className='h-64 overflow-y-auto [scroll-padding-top:56px]'>
+            <div data-testid='sticky-scroll-container' className='h-64 overflow-y-auto'>
                 <PageHeader
-                    title='Scrolled page'
+                    title='A deliberately long scrolled page title that wraps onto two full lines even when compacted'
                     subtitle='Context line — hidden while the header is stuck'
                     sticky
                     actions={[notificationsAction, primaryAction]}
                 />
                 <div className='flex flex-col gap-3 p-4'>
                     {Array.from({ length: 20 }, (_, index) => (
-                        <div key={index} className='rounded bg-delta-50 p-3 text-sm text-delta-700'>
+                        <div
+                            key={index}
+                            tabIndex={0}
+                            data-testid={`content-row-${index + 1}`}
+                            className='rounded bg-delta-50 p-3 text-sm text-delta-700'
+                        >
                             Content row {index + 1}
                         </div>
                     ))}
@@ -243,6 +249,12 @@ export const StickyOnScroll: Story = {
         await expect(header).toHaveAttribute('data-stuck', 'false')
         await expect(canvas.getByText('Context line — hidden while the header is stuck')).toBeVisible()
 
+        /* The measured header height (not a fixed constant) is the scroll padding. */
+        await waitFor(async () => {
+            const padding = Number.parseFloat(scroller.style.scrollPaddingTop)
+            expect(padding).toBeGreaterThanOrEqual(header.getBoundingClientRect().height - 1)
+        })
+
         scroller.scrollTop = 400
         scroller.dispatchEvent(new Event('scroll'))
 
@@ -250,6 +262,17 @@ export const StickyOnScroll: Story = {
         await expect(
             canvas.queryByText('Context line — hidden while the header is stuck'),
         ).not.toBeInTheDocument()
+
+        /* Keyboard focus below the fold must not end up covered by the pinned header:
+         * the browser honours scroll-padding-top when scrolling the focused element
+         * into view, so its top edge stays at or below the header's bottom edge. */
+        const rowAbove = canvas.getByTestId('content-row-2')
+        rowAbove.focus()
+        await waitFor(async () => {
+            const headerBottom = header.getBoundingClientRect().bottom
+            const rowTop = rowAbove.getBoundingClientRect().top
+            expect(rowTop).toBeGreaterThanOrEqual(headerBottom - 1)
+        })
 
         scroller.scrollTop = 0
         scroller.dispatchEvent(new Event('scroll'))
@@ -428,14 +451,18 @@ export const SearchMode: Story = {
 
 /* --- Browser acceptance tests (run via the storybook vitest project) --- */
 
-/** The natural title width is measured (not 0), so a long title pushes secondary
- * action labels to collapse — "prioritise title before secondary labels". */
+/** The natural title width is measured (not 0), so a long title pushes low-priority
+ * actions into overflow — "prioritise title before secondary labels". At 640px the
+ * measured title reserves half the container and Archive must overflow; with
+ * measurement broken (120px minimum reserve) even the collapsed actions all fit and
+ * no More menu appears — this test goes red. Role queries only see visible controls —
+ * the aria-hidden measurement strip is excluded. */
 export const AcceptanceTitleMeasurement: Story = {
     tags: ['!autodocs'],
     render: () => (
-        <Frame width={744}>
+        <Frame width={640}>
             <PageHeader
-                title='Physiotherapy follow-up after knee surgery and rehabilitation'
+                title='Physiotherapy follow-up after knee surgery and rehabilitation programme'
                 actions={[notificationsAction, primaryAction, ...secondaryActions]}
             />
         </Frame>
@@ -444,20 +471,27 @@ export const AcceptanceTitleMeasurement: Story = {
         const canvas = within(canvasElement)
         const heading = await canvas.findByRole('heading', { level: 1 })
 
-        /* The heading itself is clamped; its natural width comes from the nowrap
-         * measurement copy. If measurement were broken (scrollWidth = 0), the title
-         * would reserve only the 120px minimum and every label would stay visible. */
+        /* The measured title reserves ~half the container, so the planner must demote
+         * the lowest-priority action (Archive — icon-less, so it cannot collapse) into
+         * the More menu. With measurement broken (120px minimum reserve) every labelled
+         * action fits at this width and no More menu appears — this goes red. */
         await waitFor(async () => {
-            const overflowTrigger = canvas.queryByTestId('dynamic-toolbar-overflow-actions')
-            const shareButton = canvas.queryByText('Share')
-            /* With a properly measured long title at 744px, the planner must have
-             * demoted or collapsed at least one secondary action. */
-            expect(overflowTrigger != null || shareButton == null).toBe(true)
+            expect(canvas.queryByRole('button', { name: 'Archive' })).not.toBeInTheDocument()
+            expect(canvas.getByRole('button', { name: 'More' })).toBeVisible()
         })
 
+        /* The heading is visually clamped but keeps the full accessible name, and the
+         * kept actions stay visible. */
         await expect(heading).toHaveAccessibleName(
-            'Physiotherapy follow-up after knee surgery and rehabilitation',
+            'Physiotherapy follow-up after knee surgery and rehabilitation programme',
         )
+        await expect(canvas.getByRole('button', { name: 'New chat' })).toBeVisible()
+
+        /* Layout invariant: the visible action group must not intrude into the space
+         * the measured title reserved. */
+        const headingRect = heading.getBoundingClientRect()
+        const moreRect = canvas.getByRole('button', { name: 'More' }).getBoundingClientRect()
+        expect(moreRect.left).toBeGreaterThanOrEqual(headingRect.right)
     },
 }
 
