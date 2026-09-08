@@ -67,11 +67,13 @@ export * from './components/custom/widget/widget/StyledWidget'
 //modules
 export * from './components/custom/module/module-title/StyledModuleTitle'
 export * from './components/custom/module/header-layout'
+export * from './components/custom/page/page-header'
 export * from './components/feedback/minimizable-dialog'
 export * from './components/custom/pathfinder-card/PathfinderCard'
 
 // hooks
 export * from './hooks/usePopupState'
+export * from './hooks/useRouteHeadingFocus'
 
 // MUI-free reimplementations (TASK-102/403).
 export {
