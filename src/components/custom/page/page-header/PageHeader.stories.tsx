@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { BellOutlineIcon, PlusIcon, ShareIcon } from 'src/components/icons'
 import { StyledSearchField } from 'src/components/inputs/search-field'
 import { PageHeader, type PageHeaderAction } from './PageHeader'
@@ -59,11 +60,14 @@ const meta = {
                     'One shared page header for all systems (Ad Voca, Samhandling, Ad Opus, Genesis), ' +
                     'adaptive to the measured container width (ASMA-7622). Actions collapse labels and ' +
                     'overflow into "More" by priority; Back/Menu and the title never overflow. ' +
-                    'Accessibility: the title renders as the route h1 (`focusTitleOnMount` moves focus to it ' +
-                    'on route change), wraps to a 2-line max then truncates while the full string stays the ' +
-                    'accessible name, icon-only controls carry aria-labels, targets are ≥40×40px, and the ' +
-                    'badge conveys a number — never colour alone. With `sticky`, give the scroll container ' +
-                    '`scroll-padding-top` equal to the header height so pinned headers never cover focused content.',
+                    'Accessibility: the component owns the route h1 (`titleDataTest` keeps host selector ' +
+                    'contracts, `focusKey` moves focus to it on every route change), wraps to a 2-line max ' +
+                    'then truncates while the full string stays the accessible name, icon-only controls carry ' +
+                    'aria-labels, targets are ≥40×40px, and the badge conveys a number — never colour alone. ' +
+                    'The base height is identical at every width; content may expand it. With `sticky`, the ' +
+                    'header compacts once scrolled (`data-stuck`) — give the scroll container ' +
+                    '`scroll-padding-top` at least the compacted header height so pinned headers never cover ' +
+                    'focused content.',
             },
         },
     },
@@ -208,12 +212,19 @@ export const MinimumWidth320: Story = {
     ),
 }
 
-/** Scrolled / sticky — the header pins to the top of the scroll container on the page background. */
+/** Scrolled / sticky — pins to the top of the scroll container and compacts once stuck
+ * (`data-stuck`): tighter padding, smaller type, subtitle hidden. `scroll-padding-top`
+ * uses the compacted height, which the stuck header never exceeds with a 1-line title. */
 export const StickyOnScroll: Story = {
     render: () => (
         <Frame width={744}>
-            <div className='h-64 overflow-y-auto [scroll-padding-top:72px]'>
-                <PageHeader title='Scrolled page' sticky actions={[notificationsAction, primaryAction]} />
+            <div data-testid='sticky-scroll-container' className='h-64 overflow-y-auto [scroll-padding-top:56px]'>
+                <PageHeader
+                    title='Scrolled page'
+                    subtitle='Context line — hidden while the header is stuck'
+                    sticky
+                    actions={[notificationsAction, primaryAction]}
+                />
                 <div className='flex flex-col gap-3 p-4'>
                     {Array.from({ length: 20 }, (_, index) => (
                         <div key={index} className='rounded bg-delta-50 p-3 text-sm text-delta-700'>
@@ -224,6 +235,26 @@ export const StickyOnScroll: Story = {
             </div>
         </Frame>
     ),
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement)
+        const header = canvas.getByTestId('page-header')
+        const scroller = canvas.getByTestId('sticky-scroll-container')
+
+        await expect(header).toHaveAttribute('data-stuck', 'false')
+        await expect(canvas.getByText('Context line — hidden while the header is stuck')).toBeVisible()
+
+        scroller.scrollTop = 400
+        scroller.dispatchEvent(new Event('scroll'))
+
+        await waitFor(async () => expect(header).toHaveAttribute('data-stuck', 'true'))
+        await expect(
+            canvas.queryByText('Context line — hidden while the header is stuck'),
+        ).not.toBeInTheDocument()
+
+        scroller.scrollTop = 0
+        scroller.dispatchEvent(new Event('scroll'))
+        await waitFor(async () => expect(header).toHaveAttribute('data-stuck', 'false'))
+    },
 }
 
 /** Error / offline — expressed through the status slot, never colour alone. */
@@ -365,7 +396,7 @@ export const Loading: Story = {
     ),
 }
 
-/** Search mode (mobile) — the row is replaced by the search slot + Close. */
+/** Search mode (mobile) — the search slot + Close replace title/actions; nav stays. */
 export const SearchMode: Story = {
     render: function SearchModeStory() {
         const [open, setOpen] = useState(true)
@@ -375,6 +406,8 @@ export const SearchMode: Story = {
             <Frame width={360}>
                 <PageHeader
                     title='Home'
+                    leading='back'
+                    onLeadingClick={noop}
                     searchOpen={open}
                     onSearchClose={() => setOpen(false)}
                     search={
@@ -390,5 +423,152 @@ export const SearchMode: Story = {
                 />
             </Frame>
         )
+    },
+}
+
+/* --- Browser acceptance tests (run via the storybook vitest project) --- */
+
+/** The natural title width is measured (not 0), so a long title pushes secondary
+ * action labels to collapse — "prioritise title before secondary labels". */
+export const AcceptanceTitleMeasurement: Story = {
+    tags: ['!autodocs'],
+    render: () => (
+        <Frame width={744}>
+            <PageHeader
+                title='Physiotherapy follow-up after knee surgery and rehabilitation'
+                actions={[notificationsAction, primaryAction, ...secondaryActions]}
+            />
+        </Frame>
+    ),
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement)
+        const heading = await canvas.findByRole('heading', { level: 1 })
+
+        /* The heading itself is clamped; its natural width comes from the nowrap
+         * measurement copy. If measurement were broken (scrollWidth = 0), the title
+         * would reserve only the 120px minimum and every label would stay visible. */
+        await waitFor(async () => {
+            const overflowTrigger = canvas.queryByTestId('dynamic-toolbar-overflow-actions')
+            const shareButton = canvas.queryByText('Share')
+            /* With a properly measured long title at 744px, the planner must have
+             * demoted or collapsed at least one secondary action. */
+            expect(overflowTrigger != null || shareButton == null).toBe(true)
+        })
+
+        await expect(heading).toHaveAccessibleName(
+            'Physiotherapy follow-up after knee surgery and rehabilitation',
+        )
+    },
+}
+
+/** Focus moves to the route heading whenever focusKey changes (route navigation). */
+export const AcceptanceRouteFocus: Story = {
+    tags: ['!autodocs'],
+    render: function RouteFocusStory() {
+        const [route, setRoute] = useState('/inbox')
+
+        return (
+            <Frame width={744}>
+                <button data-testid='navigate' onClick={() => setRoute('/outbox')}>
+                    Navigate
+                </button>
+                <PageHeader
+                    title={route === '/inbox' ? 'Inbox' : 'Outbox'}
+                    titleDataTest='page-title'
+                    focusKey={route}
+                />
+            </Frame>
+        )
+    },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement)
+        const heading = await canvas.findByRole('heading', { level: 1 })
+
+        /* Initial render must not steal focus. */
+        await expect(heading).not.toHaveFocus()
+
+        await userEvent.click(canvas.getByTestId('navigate'))
+
+        await waitFor(async () => expect(canvas.getByRole('heading', { level: 1 })).toHaveFocus())
+        await expect(canvas.getByRole('heading', { level: 1 })).toHaveTextContent('Outbox')
+    },
+}
+
+/** Opening search moves focus into the search field; closing restores it. */
+export const AcceptanceSearchFocus: Story = {
+    tags: ['!autodocs'],
+    render: function SearchFocusStory() {
+        const [open, setOpen] = useState(false)
+        const [value, setValue] = useState('')
+
+        return (
+            <Frame width={744}>
+                <PageHeader
+                    title='Home'
+                    leading='back'
+                    onLeadingClick={noop}
+                    searchOpen={open}
+                    onSearchClose={() => setOpen(false)}
+                    search={
+                        <StyledSearchField
+                            dataTest='page-header-search'
+                            label='Search'
+                            value={value}
+                            onChange={(event) => setValue(event.target.value)}
+                            onClear={() => setValue('')}
+                        />
+                    }
+                    actions={[
+                        {
+                            id: 'open-search',
+                            label: 'Search',
+                            onClick: () => setOpen(true),
+                            keepVisible: true,
+                            dataTest: 'open-search-action',
+                        },
+                    ]}
+                />
+            </Frame>
+        )
+    },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement)
+        const openButton = await canvas.findByTestId('open-search-action')
+
+        await userEvent.click(openButton)
+
+        /* Focus transfers into the search field… */
+        await waitFor(async () => {
+            const input = canvasElement.querySelector<HTMLInputElement>('input')
+            expect(input).not.toBeNull()
+            expect(input).toHaveFocus()
+        })
+        /* …navigation stays through search mode… */
+        await expect(canvas.getByTestId('page-header-back')).toBeVisible()
+
+        await userEvent.click(canvas.getByTestId('page-header-search-close'))
+
+        /* …and closing restores focus. The invoker unmounted while search was open
+         * (React recreated the button), so focus falls back to the route heading —
+         * never lost to <body>. */
+        await waitFor(async () => expect(canvas.getByRole('heading', { level: 1 })).toHaveFocus())
+    },
+}
+
+/** Loading keeps the leading navigation and the (visually hidden) route heading. */
+export const AcceptanceLoadingKeepsNavigation: Story = {
+    tags: ['!autodocs'],
+    render: () => (
+        <Frame width={744}>
+            <PageHeader title='Documents' loading leading='back' onLeadingClick={noop} actions={[primaryAction]} />
+        </Frame>
+    ),
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement)
+
+        await expect(await canvas.findByTestId('page-header-back')).toBeVisible()
+        const heading = canvas.getByRole('heading', { level: 1 })
+        await expect(heading).toHaveTextContent('Documents')
+        await expect(canvas.getByTestId('page-header')).toHaveAttribute('aria-busy', 'true')
     },
 }

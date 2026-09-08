@@ -26,11 +26,40 @@ describe('PageHeader (ASMA-7622)', () => {
         expect(html).toContain('title="Inbox and outbox"')
     })
 
+    it('owns the heading and exposes the host selector contract via titleDataTest', () => {
+        const html = renderToStaticMarkup(<PageHeader title='Home' titleDataTest='page-title' />)
+
+        expect(html).toContain('data-test="page-title"')
+        expect(html).toContain('<h1')
+    })
+
+    it('keeps the heading programmatically focusable for route-change focus', () => {
+        const html = renderToStaticMarkup(<PageHeader title='Home' />)
+
+        expect(html).toContain('tabindex="-1"')
+    })
+
     it('clamps the title to a 2-line max at every width (AC: wrap then truncate)', () => {
         const html = renderToStaticMarkup(<PageHeader title='A very long page title' />)
 
         expect(html).toContain('line-clamp-2')
-        expect(html).not.toContain('whitespace-nowrap text-2xl')
+    })
+
+    it('measures the title as an unconstrained nowrap copy, not the clamped heading', () => {
+        /* Inline elements report scrollWidth 0, so the natural width must come from the
+         * measurement strip copy (whitespace-nowrap) — the visible h1 stays clamped. */
+        const html = renderToStaticMarkup(<PageHeader title='Measured title' />)
+
+        expect(html).toContain('whitespace-nowrap')
+        const stripCopyCount = html.split('Measured title').length - 1
+        expect(stripCopyCount).toBeGreaterThanOrEqual(2)
+    })
+
+    it('uses the same base height at every width', () => {
+        const html = renderToStaticMarkup(<PageHeader title='Home' />)
+
+        expect(html).toContain('min-h-[64px]')
+        expect(html).not.toContain('min-h-[72px]')
     })
 
     it('renders the status slot next to the title', () => {
@@ -82,19 +111,26 @@ describe('PageHeader (ASMA-7622)', () => {
         expect(html).toContain('data-testid="page-header-back"')
     })
 
-    it('loading replaces title and actions with skeleton bars', () => {
-        const html = renderToStaticMarkup(<PageHeader title='Home' loading actions={[bellAction]} />)
+    it('loading keeps the leading control and the route heading, replacing only title/actions', () => {
+        const html = renderToStaticMarkup(
+            <PageHeader title='Home' loading leading='back' onLeadingClick={noop} actions={[bellAction]} />,
+        )
 
         expect(html).toContain('animate-pulse')
-        expect(html).not.toContain('<h1')
+        expect(html).toContain('data-testid="page-header-back"')
+        /* Heading semantics survive as a visually hidden h1. */
+        expect(html).toContain('<h1')
+        expect(html).toContain('sr-only')
     })
 
-    it('search mode replaces the title row with the search slot and a close button', () => {
+    it('search mode keeps the leading control and heading semantics next to the search slot', () => {
         const html = renderToStaticMarkup(
             <PageHeader
                 title='Home'
                 searchOpen
                 onSearchClose={noop}
+                leading='back'
+                onLeadingClick={noop}
                 search={<input data-test='the-search' />}
                 actions={[bellAction]}
             />,
@@ -102,14 +138,17 @@ describe('PageHeader (ASMA-7622)', () => {
 
         expect(html).toContain('data-test="the-search"')
         expect(html).toContain('data-testid="page-header-search-close"')
-        expect(html).not.toContain('<h1')
+        expect(html).toContain('data-testid="page-header-back"')
+        expect(html).toContain('<h1')
+        expect(html).toContain('sr-only')
     })
 
-    it('sticky variant pins to the top on the page background token', () => {
+    it('sticky variant pins to the top on the page background token and renders the scroll sentinel', () => {
         const html = renderToStaticMarkup(<PageHeader title='Home' sticky />)
 
         expect(html).toContain('sticky')
         expect(html).toContain('bg-delta-50')
+        expect(html).toContain('data-stuck="false"')
     })
 
     it('leadingSlot renders a custom node instead of the built-in control and wins over leading', () => {
@@ -124,20 +163,5 @@ describe('PageHeader (ASMA-7622)', () => {
 
         expect(html).toContain('data-test="widget-back"')
         expect(html).not.toContain('data-testid="page-header-back"')
-    })
-
-    it('titleSlot replaces the built-in heading so the host keeps its own title contract', () => {
-        const html = renderToStaticMarkup(
-            <PageHeader title='Home' titleSlot={<h1 data-test='page-title'>Custom</h1>} />,
-        )
-
-        expect(html).toContain('data-test="page-title"')
-        expect(html).not.toContain('title="Home"')
-    })
-
-    it('focusTitleOnMount makes the heading programmatically focusable', () => {
-        const html = renderToStaticMarkup(<PageHeader title='Home' focusTitleOnMount />)
-
-        expect(html).toContain('tabindex="-1"')
     })
 })

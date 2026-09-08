@@ -34,11 +34,21 @@ export function ToolbarMeasurementStrip({
     register,
     overflowMenuLabel,
     selectionIndicator,
+    title,
+    titleClassName,
 }: {
     actions: DynamicToolbarAction[]
     register: WidthRegistry['register']
     overflowMenuLabel: string
     selectionIndicator?: SelectionIndicatorMeasurement
+    /**
+     * Title text measured as an unconstrained single line. Inline elements
+     * report `scrollWidth: 0`, so the natural title width must come from this
+     * nowrap copy instead of the visible (clamped) heading.
+     */
+    title?: string
+    /** Typography classes matching the visible heading, so the width is real. */
+    titleClassName?: string
 }): JSX.Element {
     return (
         <div
@@ -47,19 +57,37 @@ export function ToolbarMeasurementStrip({
             className='pointer-events-none invisible absolute left-0 top-0 h-0 overflow-hidden'
         >
             <div className='flex h-0 flex-nowrap items-center overflow-hidden'>
-                {actions.map((action) => (
-                    <Fragment key={action.id}>
-                        <span
-                            ref={register(actionKey(action.id, true))}
-                            className='inline-flex shrink-0 whitespace-nowrap'
-                        >
-                            <ToolbarActionButton action={action} showLabel />
-                        </span>
-                        <span ref={register(actionKey(action.id, false))} className='inline-flex shrink-0'>
-                            <ToolbarActionButton action={action} showLabel={false} />
-                        </span>
-                    </Fragment>
-                ))}
+                {title != null && (
+                    <span
+                        ref={register(KEY_TITLE)}
+                        className={`inline-flex shrink-0 whitespace-nowrap ${titleClassName ?? ''}`}
+                    >
+                        {title}
+                    </span>
+                )}
+                {actions.filter((action) => action.measureInStrip !== false).map((action) => {
+                    /* Measurement copies must not duplicate production test ids — hidden
+                     * clones would break findByTestId/e2e selectors targeting the real button. */
+                    const measureTest = (variant: string) =>
+                        `${action.dataTest ?? `dynamic-toolbar-action-${action.id}`}-measure-${variant}`
+
+                    return (
+                        <Fragment key={action.id}>
+                            <span
+                                ref={register(actionKey(action.id, true))}
+                                className='inline-flex shrink-0 whitespace-nowrap'
+                            >
+                                <ToolbarActionButton action={{ ...action, dataTest: measureTest('label') }} showLabel />
+                            </span>
+                            <span ref={register(actionKey(action.id, false))} className='inline-flex shrink-0'>
+                                <ToolbarActionButton
+                                    action={{ ...action, dataTest: measureTest('icon') }}
+                                    showLabel={false}
+                                />
+                            </span>
+                        </Fragment>
+                    )
+                })}
 
                 <span ref={register(KEY_MORE_BUTTON)} className='inline-flex shrink-0'>
                     <MoreTriggerButton overflowMenuLabel={overflowMenuLabel} />
