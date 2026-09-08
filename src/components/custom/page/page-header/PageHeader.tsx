@@ -321,7 +321,8 @@ export function PageHeader({
     const titleBlock = (
         <div className='flex min-w-0 flex-1 flex-col justify-center'>
             <div className='flex min-w-0 items-center gap-2'>
-                {heading(false)}
+                {/* An empty title renders no heading — an empty h1 is an a11y defect. */}
+                {title !== '' && heading(false)}
                 {status != null && <span className='shrink-0'>{status}</span>}
             </div>
             {/* Compact-on-scroll drops the context line so the stuck header takes minimal space. */}
