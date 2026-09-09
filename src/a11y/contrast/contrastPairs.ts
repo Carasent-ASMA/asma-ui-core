@@ -452,3 +452,54 @@ export const BUTTON_FINDINGS: Readonly<Record<string, string>> = {
     'contained/error/focused/boundary': 'F-15',
     'outlined/error/focused/boundary': 'F-15',
 }
+
+/**
+ * Regression floors for the quarantined pairs: the ratio each one measures on master, per theme.
+ *
+ * A quarantined pair is asserted against its floor rather than against the WCAG threshold, so the
+ * suite still detects *decay* on an already-failing pair while staying green if ASMA-8133 or a
+ * design fix legitimately *improves* the number. This is a characterization test — the floor is a
+ * record of the status quo, not a standard. The real target stays in docs/a11y-contrast.md against
+ * the finding id, and lifting a quarantine means deleting the pair's `finding` key so the live SC
+ * assertion takes over.
+ *
+ * `null` means the pair has no computed value at all — see F-15, where the `var()` chain is
+ * dangling so the browser drops the declaration outright. A floor is meaningless there, so those
+ * stay skipped.
+ *
+ * Values are produced by `contrastRatio`, which already truncates to two decimals, so the floor and
+ * the measurement are byte-identical and the comparison needs no epsilon. Regenerate after
+ * ASMA-8133 lands.
+ */
+export const REGRESSION_FLOORS: Readonly<Record<string, Readonly<Record<string, number | null>>>> = {
+    'input/placeholder': { default: 3.55, fretex: 5.57, greenish: 3.55 },
+    'input/error-value': { default: 3.88, fretex: 3.88, greenish: 3.88 },
+    'snackbar/info-message': { default: 6.28, fretex: 3.55, greenish: 11.52 },
+    'alert/filled-success-text': { default: 1.95, fretex: 1.95, greenish: 1.95 },
+    'alert/filled-info-text': { default: 3.18, fretex: 3.18, greenish: 3.18 },
+    'alert/filled-warning-text': { default: 1.61, fretex: 1.61, greenish: 1.61 },
+    'input/border-hover': { default: 2.33, fretex: 1.81, greenish: 2.2 },
+    'input/focus-ring': { default: 2.73, fretex: 2.24, greenish: 3.15 },
+    'switch/track-off': { default: 2.29, fretex: 5.57, greenish: 2.29 },
+    'switch/focus-ring': { default: 2.73, fretex: 2.24, greenish: 3.15 },
+    'switch/track-read-only': { default: 1.68, fretex: 1.98, greenish: 1.68 },
+    'chip/border-enabled': { default: 1.75, fretex: 2.07, greenish: 1.75 },
+    'chip/focus-ring': { default: 2.73, fretex: 2.24, greenish: 3.15 },
+    'link/focus-ring': { default: 2.73, fretex: 2.24, greenish: 3.15 },
+    'outlined/common/hover/text': { default: 3.55, fretex: 3.83, greenish: 4.21 },
+    'outlined/common/active/text': { default: 4.04, fretex: 4.23, greenish: 3.55 },
+    'outlined/common/focused/text': { default: 4.04, fretex: 4.23, greenish: 4.21 },
+    'text/common/hover/text': { default: 4.04, fretex: 4.23, greenish: 4.21 },
+    'text/common/active/text': { default: 3.55, fretex: 3.83, greenish: 3.55 },
+    'text/common/focused/text': { default: 4.04, fretex: 4.23, greenish: 4.21 },
+    'textGray/common/hover/text': { default: 4.04, fretex: 4.23, greenish: 4.21 },
+    'textGray/common/active/text': { default: 3.55, fretex: 3.83, greenish: 3.55 },
+    'textGray/common/focused/text': { default: 4.04, fretex: 4.23, greenish: 4.21 },
+    'contained/common/focused/boundary': { default: 2.73, fretex: 2.24, greenish: 3.15 },
+    'outlined/common/focused/boundary': { default: 2.73, fretex: 2.24, greenish: 3.15 },
+    'outlined/common/hover/boundary': { default: 2.33, fretex: 1.81, greenish: 2.2 },
+    'outlined/common/active/boundary': { default: 2.33, fretex: 1.81, greenish: 2.2 },
+    'outlined/error/focused/text': { default: 1.27, fretex: 1.27, greenish: 1.27 },
+    'contained/error/focused/boundary': { default: null, fretex: 2.24, greenish: null },
+    'outlined/error/focused/boundary': { default: null, fretex: 2.24, greenish: null },
+}

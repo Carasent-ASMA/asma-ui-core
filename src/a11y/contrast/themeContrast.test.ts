@@ -11,6 +11,7 @@ import {
     BUTTON_TYPES_WITHOUT_KNOWN_SURFACE,
     BUTTON_TYPES_WITH_BOUNDARY,
     COMPONENT_PAIRS,
+    REGRESSION_FLOORS,
     REQUIREMENT_RATIO,
     buttonTokenNames,
     type ContrastPair,
@@ -91,18 +92,51 @@ describe('theme colour contrast (WCAG 2.2 AA)', () => {
 
     describe.each(THEMES)('theme "%s"', (theme) => {
         /**
-         * Registers `assertion` as a live test, or — when the pair is a documented finding — as a
-         * skipped one prefixed with its id. The assertion body is written either way, so lifting a
-         * quarantine is a one-line deletion in the findings map rather than a rewrite.
+         * Registers a pair as either a live SC assertion or a quarantined one.
+         *
+         * Live: the ratio must meet the WCAG threshold.
+         * Quarantined: the ratio must hold its regression floor — the value it measures on master.
+         * That still catches decay on an already-failing pair while staying green if the number
+         * legitimately improves, which `it.skip` could not do. Skipped only where no ratio can be
+         * computed at all (F-15's dangling `var()`), because a floor is meaningless there.
+         *
+         * Lifting a quarantine stays a one-line change: delete the pair's `finding` key.
          */
-        const register = (finding: string | undefined, title: string, assertion: () => void): void => {
+        const register = (
+            finding: string | undefined,
+            pairId: string,
+            title: string,
+            measureRatio: () => number,
+            required: number,
+        ): void => {
             if (finding === undefined) {
-                it(title, assertion)
+                it(title, () => {
+                    expect(measureRatio()).toBeGreaterThanOrEqual(required)
+                })
 
                 return
             }
 
-            it.skip(`[${finding}] ${title}`, assertion)
+            const floor = REGRESSION_FLOORS[pairId]?.[theme]
+
+            if (floor === undefined) {
+                throw new Error(
+                    `Pair "${pairId}" is quarantined as ${finding} but has no regression floor for theme "${theme}". ` +
+                        'Add one to REGRESSION_FLOORS, or null if the pair has no computable ratio.',
+                )
+            }
+
+            if (floor === null) {
+                it.skip(`[${finding}] ${title} — no computable ratio, declaration is dropped`, () => {
+                    expect(measureRatio()).toBeGreaterThanOrEqual(required)
+                })
+
+                return
+            }
+
+            it(`[${finding}] ${title} — quarantined, holds ${floor}:1 (target ${required}:1)`, () => {
+                expect(measureRatio()).toBeGreaterThanOrEqual(floor)
+            })
         }
 
         describe('component pairs', () => {
@@ -110,9 +144,13 @@ describe('theme colour contrast (WCAG 2.2 AA)', () => {
                 const required = REQUIREMENT_RATIO[pair.requirement]
                 const criterion = pair.requirement === 'nonText' ? 'SC 1.4.11' : 'SC 1.4.3'
 
-                register(pair.finding, `${describePair(pair)} meets ${criterion} ${required}:1`, () => {
-                    expect(measure(theme, pair.foreground, pair.background)).toBeGreaterThanOrEqual(required)
-                })
+                register(
+                    pair.finding,
+                    pair.id,
+                    `${describePair(pair)} meets ${criterion} ${required}:1`,
+                    () => measure(theme, pair.foreground, pair.background),
+                    required,
+                )
             }
         })
 
@@ -134,12 +172,10 @@ describe('theme colour contrast (WCAG 2.2 AA)', () => {
 
                         register(
                             BUTTON_FINDINGS[`${combination}/text`],
+                            `${combination}/text`,
                             `${combination} label meets SC 1.4.3 4.5:1`,
-                            () => {
-                                expect(measure(theme, names.text, names.background)).toBeGreaterThanOrEqual(
-                                    REQUIREMENT_RATIO.text,
-                                )
-                            },
+                            () => measure(theme, names.text, names.background),
+                            REQUIREMENT_RATIO.text,
                         )
 
                         if (!BUTTON_TYPES_WITH_BOUNDARY.includes(type)) {
@@ -148,6 +184,7 @@ describe('theme colour contrast (WCAG 2.2 AA)', () => {
 
                         register(
                             BUTTON_FINDINGS[`${combination}/boundary`],
+                            `${combination}/boundary`,
                             `${combination} boundary meets SC 1.4.11 3:1`,
                             () => {
                                 // The visible edge is the border when it is not transparent,
@@ -158,10 +195,9 @@ describe('theme colour contrast (WCAG 2.2 AA)', () => {
                                         ? colorFor(theme, names.border, surfaceColor)
                                         : colorFor(theme, names.background, surfaceColor)
 
-                                expect(contrastRatio(boundary, surfaceColor)).toBeGreaterThanOrEqual(
-                                    REQUIREMENT_RATIO.nonText,
-                                )
+                                return contrastRatio(boundary, surfaceColor)
                             },
+                            REQUIREMENT_RATIO.nonText,
                         )
                     }
                 }

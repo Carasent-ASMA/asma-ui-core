@@ -45,18 +45,28 @@ agree.
    line numbers move.
 3. **Every quarantined pair must appear below.** `themeContrast.test.ts` asserts it: a skipped
    assertion with no write-up fails the suite.
-4. Quarantined pairs are `it.skip`, so they do not currently detect *regression* on an
-   already-failing pair. That is the accepted cost of not blocking the epic on design sign-off. Once
-   a finding is resolved, delete its `finding` key and the assertion becomes live.
+4. **A quarantined pair is still asserted — against a regression floor, not the WCAG threshold.**
+   The floor is the ratio the pair measures on master (`REGRESSION_FLOORS` in `contrastPairs.ts`).
+   The suite goes red if a quarantined pair gets *worse*, and stays green if it legitimately
+   *improves*. This is a characterization test: the floor records the status quo, it is not a
+   standard. The real target lives in this file, per finding. Lifting a quarantine means deleting
+   the pair's `finding` key, and the live SC assertion takes over.
+5. The only pairs left as `it.skip` are the ones with **no computable ratio at all** — F-15, where
+   the `var()` chain is dangling so the browser drops the declaration outright. A floor is
+   meaningless when there is no value to measure.
 
 ## Status
 
 | | |
 | --- | --- |
-| Pairs asserted and passing | 205 |
-| Pairs quarantined | 90 |
+| Assertions passing | 329 |
+| — of which quarantined, held to a regression floor | 90 |
+| Skipped (no computable ratio — F-15 only) | 4 |
 | Distinct findings | 15 |
 | Themes covered | 3 (`default`, `fretex`, `greenish`) |
+
+Regenerate the floors after any token change:
+`npx vitest --project=unit --run src/a11y`
 
 ---
 
@@ -213,6 +223,55 @@ border at all** — the failure is not a low ratio, it is a missing focus indica
 This is the finding that most justifies a token-level check: no rendered test can see it, because
 in the browser the broken declaration simply vanishes.
 
+#### Confirmed from rendered pixels
+
+ASMA-8133 decoded the VRT baseline PNGs and scanned inward from the top edge, which confirms the
+consequence empirically rather than by reasoning about the cascade:
+
+| variant | old baseline, scanning inward |
+| --- | --- |
+| Primary·Danger (contained) | `#ffffff ×5` `#e10700 ×1` `#ffffff ×2` `#e10700 ×10` |
+| Secondary·Danger (outlined) | `#ffffff ×6` `#f7dede ×12` |
+| Tertiary·Danger (text) | `#ffffff ×5` `#f7dede ×13` |
+
+`contained` shows only its ordinary 1px `#e10700` border, identical to the unfocused state; the
+other two show nothing at all. A **missing** focus indicator, not a weak one.
+
+The mechanism for `contained` is worth recording precisely: it applies the focus colour through the
+`outline` **shorthand**, and when a shorthand is invalid at computed-value time every longhand
+resets to its initial value — and `outline-style`'s initial is `none`. No outline is painted.
+
+#### Remedy in flight — `red-300` fails, `red-700` passes
+
+ASMA-8133's PR #172 originally proposed `var(--colors-red-300)` = `#f6b9b9`. That clears nothing:
+**1.67** against the white page, **2.96** against the `#e10700` contained fill, **1.31** against the
+`#f7dede` outlined/text fill — identical in all three themes. It would have fixed the dropped
+declaration while leaving the indicator failing SC 1.4.11.
+
+**#172 now uses `red-700` `#9d0f0f`, which clears 3:1 on every adjacency.** ASMA-8133 and this
+suite reached that shade independently, for the same reason: it is already the shade the sibling
+`*-error-active-border-color` uses, so it needs no new token.
+
+The adjacency differs by button type, per the `&:focus` block in `StyledButton.module.scss` and
+confirmed against the re-baselined pixels:
+
+- **outlined** and **text** — the ring sits at the button edge, between the white page and the
+  `#f7dede` fill. `red-700` measures **8.37** and **6.56**. Pass.
+- **contained** — `outline: 2px solid` with `outline-offset: -2px`, plus
+  `box-shadow: inset 0 0 0 2px white`. The new baseline scans
+  `#ffffff ×5` `#9d0f0f ×2` `#ffffff ×1` `#e10700 ×10`: the ring is sandwiched between the white
+  page outside and the white inset ring inside, and **never touches the fill**. So the pair to
+  measure is `red-700` against white, twice: **8.37 on both sides**. Pass. The white inset ring is
+  in turn **4.96** against the `#e10700` fill, so the composite two-tone indicator is discernible
+  end to end.
+
+> **Correction.** An earlier revision of this register concluded that no red shade could work for
+> `contained`, and that the ring would need to be near-black (≥14.89:1 against white, e.g.
+> `#4a0000`). That solve assumed the coloured ring is adjacent to the `#e10700` fill. The decoded
+> baseline shows it is not — the 2px white inset ring separates them. The arithmetic was right for
+> the premise; the premise was wrong. `red-700` is sufficient and no near-black is required. Raised
+> with ASMA-8133 and the coordinator so the incorrect conclusion is not propagated.
+
 ### F-16 — outlined error button, focused: white label on a pale pink tint
 
 `--colors-button-outlined-error-focused-text-color` (`#ffffff`) on
@@ -297,8 +356,17 @@ ticket.
    override nothing and the intended fretex values never apply — the `:root` defaults win instead.
    ASMA-8133 is already repairing this in PR #172.
 3. **`tw-configs/twConfigs.json` reads `--color-cardea--grey-0*` (singular) while
-   `rootVariables.css` defines `--colors-cardea--grey-0*` (plural)**, so the `custom-grey-*`
-   Tailwind colours resolve to nothing.
+   `rootVariables.css` defines `--colors-cardea--grey-0*` (plural)**, so all five `custom-grey-*`
+   Tailwind colours resolve to nothing. No component uses one today, which is why it went
+   unnoticed. Guarded going forward by the `tailwind colour bindings` test, which asserts every
+   token referenced by `twConfigs.json` resolves in every theme — it would catch a future token
+   rename — with these five named as known-broken. **Resolved: this is the same defect as
+   ASMA-8133's item 4, not a second mismatch — PR #172 corrects exactly these five occurrences to
+   the plural spelling.** The keys are kept rather than deleted because `twConfigs.json` is a
+   published `exports` entry, so an external consumer may use `bg-custom-grey-*`. Note there is
+   deliberately no `custom-grey-05` key even though `rootVariables.css` defines
+   `--colors-cardea--grey-05`; that palette entry simply has no Tailwind consumer, which is not a
+   defect. The known-broken list here can be emptied once #172 lands.
 
 ## Re-measuring after ASMA-8133 lands
 
