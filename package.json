@@ -13,7 +13,8 @@
         "dist/**/*",
         "dist/style.css",
         "tw-configs/**/*",
-        "src/styles/**/*"
+        "src/styles/**/*",
+        "!src/styles/fonts/**"
     ],
     "keywords": [],
     "author": "asma-team",
