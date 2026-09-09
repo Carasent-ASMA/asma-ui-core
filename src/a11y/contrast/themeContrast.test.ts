@@ -329,4 +329,19 @@ describe('findings register', () => {
 
         expect(undocumented).toEqual([])
     })
+
+    it('has no regression floor left behind by a resolved finding', () => {
+        // Stops the floors table rotting as quarantines are lifted: a floor for a pair that is no
+        // longer quarantined is dead weight that reads as if the pair were still failing.
+        const quarantinedPairIds = new Set<string>([
+            ...COMPONENT_PAIRS.flatMap((pair) => (pair.finding === undefined ? [] : [pair.id])),
+            ...Object.keys(BUTTON_FINDINGS),
+        ])
+
+        const orphaned = Object.keys(REGRESSION_FLOORS)
+            .filter((pairId) => !quarantinedPairIds.has(pairId))
+            .sort()
+
+        expect(orphaned).toEqual([])
+    })
 })
