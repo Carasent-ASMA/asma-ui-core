@@ -20,6 +20,28 @@ jobs:
             - name: Run ESLint
               run: pnpm lint
 
+    unit:
+        name: Unit tests (vitest 'unit' project)
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v5
+            - uses: actions/setup-node@v6
+              with:
+                  node-version: 24.14.0
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: latest
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+            # `pnpm test-storybook` only runs vite.config.ts `test.projects` -> 'storybook', so the
+            # node-environment 'unit' project had no CI gate at all: src/styles/tokens.test.ts (token
+            # layer completeness) and src/api-surface.test.ts (frozen public export surface) both
+            # passed locally and were inert in CI. This job runs them. No browser needed -- the
+            # project is `environment: 'node'`, so it skips the Playwright install entirely.
+            - name: Run unit tests
+              run: npx vitest --project=unit --run
+
     a11y:
         name: Storybook accessibility (axe, via addon-a11y)
         runs-on: ubuntu-latest

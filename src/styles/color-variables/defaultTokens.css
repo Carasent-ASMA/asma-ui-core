@@ -6,7 +6,14 @@
     --colors-alpha-600: var(--colors-blue-600);
     --colors-alpha-700: var(--colors-blue-700);
     --colors-beta-100: var(--colors-red-100);
-    --colors-beta-400: var(--colors-red-300);
+    /* Focus-indicator shade for the error buttons (WCAG 1.4.11 non-text contrast).
+       Chosen by measurement, not ramp position: red-300 clears 3:1 against nothing here
+       (1.31:1 on the outlined/text focused fill), whereas red-700 clears both adjacent
+       surfaces on the outlined and text variants (6.56:1 vs fill, 8.37:1 vs page). The
+       contained variant is unsatisfiable for any single border colour -- 3:1 vs the white
+       page needs L<=0.300 while 3:1 vs the beta-500 fill needs L>=0.585 -- so it takes the
+       best available worst case (1.69:1), which equals the shipped *-common convention. */
+    --colors-beta-400: var(--colors-red-700);
     --colors-beta-500: var(--colors-red-500);
     --colors-beta-600: var(--colors-red-600);
     --colors-beta-700: var(--colors-red-700);
