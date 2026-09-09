@@ -37,6 +37,7 @@ ARIA and Tailwind. That rewrite cut the dependency footprint from ~324 KB to ~57
 | Tailwind CSS | v3 or v4 — both are in use across ASMA apps; wiring differs slightly, see below |
 | Bundler | Anything ESM-native (Vite is what every ASMA app uses) |
 | Package | Public on npm as `asma-ui-core` — no registry setup needed |
+| Fonts | **Roboto**, loaded by your app — no font files are bundled, see [A note on fonts](#a-note-on-fonts) |
 
 The library ships prebuilt ESM in `dist/` with TypeScript declarations. Its own runtime dependencies
 (`@floating-ui/react`, `@tanstack/react-table`, `@dnd-kit/*`, `date-fns`, `notistack`,
@@ -77,6 +78,38 @@ utilities can win.
 @use 'tailwindcss/components';
 @use 'tailwindcss/utilities';
 ```
+
+#### A note on fonts
+
+**This library does not ship font files — your app must provide Roboto.** Components reference the
+family by name only (`font-family: Roboto`, plus the `font-sans` and `font-roboto` stacks in
+`tw-configs/twConfigs.json`). There are no `@font-face` rules in the published CSS and no font
+binaries in the package. If the host app doesn't load Roboto, text falls back to the browser default
+and the type scale will look wrong.
+
+Load it the way your app already loads fonts — Google Fonts:
+
+```html
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet"
+/>
+```
+
+or self-hosted with [`@fontsource/roboto`](https://www.npmjs.com/package/@fontsource/roboto):
+
+```ts
+import '@fontsource/roboto/300.css'
+import '@fontsource/roboto/400.css'
+import '@fontsource/roboto/500.css'
+import '@fontsource/roboto/600.css'
+import '@fontsource/roboto/700.css'
+```
+
+The library uses weights **300, 400, 500, 600 and 700** — 600 (SemiBold) by far the most — and no
+italics. Those five upright weights are all you need to load.
 
 ### 3. Extend your Tailwind config with the shared tokens
 
@@ -441,6 +474,7 @@ ASMA engineers: the full audit procedure, detection greps and per-recipe worked 
 | Chips overlap the input, field won't grow | `startAdornment` must be an **array**, not a single wrapped element. Remove `multiline`. |
 | Popover or calendar shows a black UA border | `dist/style.css` isn't imported. It carries the required `[popover]` reset. |
 | Nothing is styled at all | Same — the stylesheet import is missing, or lands after Tailwind. |
+| Type looks wrong everywhere / falls back to Arial | Roboto isn't loaded. The package doesn't bundle fonts — see [A note on fonts](#a-note-on-fonts). |
 | Text is 16px where it used to be 14px | Intended Figma parity. Don't force `text-sm`. |
 | Select/menu inside a `StyledDialog` can't be clicked | Fixed in later versions — modal `<dialog>` marks outside content inert, so the popover must portal into the dialog. Upgrade. |
 | Stray dark tooltip bubble on hover | `title={cond && 'text'}` yielded `false`. Fixed in later versions; upgrade. |
