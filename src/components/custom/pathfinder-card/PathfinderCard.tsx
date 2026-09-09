@@ -49,10 +49,7 @@ function useElementWidth<T extends HTMLElement>() {
 
     const subscribe = useCallback(
         (onStoreChange: () => void) => {
-            if (!node || typeof ResizeObserver === 'undefined')
-                return () => {
-                    console.log('Node is missing or ResizeObserver is undefined')
-                }
+            if (!node || typeof ResizeObserver === 'undefined') return () => {}
 
             let raf = 0
             const ro = new ResizeObserver(() => {
