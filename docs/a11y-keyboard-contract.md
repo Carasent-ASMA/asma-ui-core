@@ -4,8 +4,8 @@ ASMA-8139, wave 3b of the ASMA-8132 accessibility epic.
 
 Every interactive ui-core component has a suite that mounts it in **real Chromium** and drives it
 with **real key events**, asserting the keyboard contract its ARIA pattern promises: open/close,
-arrow navigation, Home/End, Escape dismissal, focus trap and restore, roving tabindex, and the
-name/role/value the control exposes.
+arrow navigation, Home/End, Escape dismissal, focus trap and restore, roving tabindex, the
+name/role/value the control exposes, and whether an overlay hides the control that opened it.
 
 | | |
 | --- | --- |
@@ -23,8 +23,9 @@ Sibling documents, same epic — read together, they describe what CI does and d
 ## Why this suite exists at all
 
 Storybook's axe job cannot see any of this. axe-core 4.7.2 enforces 99 rules — roughly the
-automatable third of WCAG — and **no rule is tagged for SC 2.4.11 (focus appearance)**; the tag
-`wcag2411` matches nothing. Keyboard operability, focus order, focus restoration and dismissal are
+automatable third of WCAG — and **no rule is tagged for SC 1.4.11 Non-text Contrast**, which is the
+AA criterion carrying the 3:1 requirement for focus indicators; the tag `wcag1411` matches nothing.
+Keyboard operability, focus order, focus restoration and dismissal are
 behavioural properties that only exist while something is being *driven*. A green axe run means "no
 automatically detectable violations of 99 rules". It is a regression gate, not a conformance claim.
 
@@ -112,7 +113,7 @@ same design sign-off as ASMA-8137's geometry items. **Coordinate with ASMA-8138 
 colour**: their F-07 measured `gama-400`, the library-wide focus colour, at 2.73 (default) / 2.24
 (fretex) / 3.15 (greenish) against its background — only one theme clears the 3:1 that SC 1.4.11
 requires, and only by 0.15. A new focus ring drawn in `gama-400` would ship a second, avoidable
-defect. axe cannot see either problem: it has no rule for 1.4.11 or 2.4.11.
+defect. axe cannot see either problem: it has no rule tagged `wcag1411`.
 
 ### C — Dialog does not restore focus to whatever opened it (2.4.3)
 
@@ -186,6 +187,30 @@ and passing, so the function is operable and this is not a total 2.1.1 block. Wh
 the panel itself — its eraser, its confirm button, its "now" affordance — so keyboard and pointer
 users get materially different capabilities.
 
+## SC 2.4.11 Focus Not Obscured (Minimum) — AA
+
+`StyledSelect.focus-obscured.interaction.test.tsx` covers a criterion nothing else in this epic
+checks. It is distinct from the 2.4.7 assertions: those ask whether a focus indicator is *painted*,
+this asks whether the focused control is *visible at all* once the component's own overlay is on
+screen. A control can have a perfect focus ring and still fail by being covered by the very popup it
+opened.
+
+The usual 2.4.11 failure — a focused control scrolled under an app's sticky header — is not
+something a component library can be responsible for. What *is* in scope, and what is asserted, is a
+library overlay covering its own trigger: the Select listbox over its combobox, the autocomplete
+popup over its input, the calendar over the button that opened it, the tooltip over the control it
+describes. This matters for ASMA-8080 in particular, which deliberately attached the Select popover
+flush to the field (`offset(0)`) — flush is one pixel from overlapping.
+
+Nothing else can see this. axe has no rule for it, and VRT cannot catch it because a baseline
+records the obscured state as correct. The check uses `elementFromPoint` (so it respects paint
+order, the top layer and `pointer-events`) over a 3×3 grid inset from the element's edges, and the
+file includes a self-check that deliberately covers a button and confirms the helper reports it —
+without that, a helper regression would leave every assertion in the file passing while measuring
+nothing.
+
+All five currently pass.
+
 ## Not covered
 
 - `StyledDrawer`, `StyledAccordion` and the minimizable-dialog stack have no suite yet.
@@ -193,5 +218,8 @@ users get materially different capabilities.
   interaction test as the precondition for adopting the checkbox `decorative` prop, which is what
   would clear the `nested-interactive` axe violation recorded in
   [`a11y-allowlist.md`](./a11y-allowlist.md). Tracked there; not written here.
-- SC 2.4.11 focus *appearance* (indicator size and contrast, as opposed to mere presence) is not
-  asserted. Presence is checked by the 2.4.7 assertions; contrast belongs with ASMA-8138's tooling.
+- Focus indicator **contrast and size**, as opposed to mere presence, is not asserted here. Presence
+  is what the 2.4.7 assertions check; the 3:1 contrast requirement is **SC 1.4.11 Non-text Contrast**
+  (AA) and belongs with ASMA-8138's tooling. Note that *Focus Appearance* — the criterion about
+  indicator area and thickness — is **SC 2.4.13, and it is AAA**, so it is out of scope for this
+  epic; it is not 2.4.11.

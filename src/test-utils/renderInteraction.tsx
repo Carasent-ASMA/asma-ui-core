@@ -154,3 +154,32 @@ export const tabbableWithin = (root: ParentNode): HTMLElement[] =>
             'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"]), [contenteditable="true"]',
         ),
     ).filter((node) => !node.hasAttribute('disabled') && node.getAttribute('aria-hidden') !== 'true')
+
+/**
+ * SC 2.4.11 Focus Not Obscured (Minimum), AA.
+ *
+ * Returns `true` when NO part of `element` is hit-testable — i.e. it is entirely covered by
+ * something painted on top of it, or has no box at all. The criterion is "not *entirely* hidden",
+ * so partial overlap is allowed and a single visible sample is enough to pass.
+ *
+ * Uses `elementFromPoint`, which respects paint order, the top layer and `pointer-events`, so it
+ * answers the question a sighted keyboard user actually has ("can I see where I am?") rather than
+ * the question a z-index comparison would answer. Samples a 3x3 grid inset from the edges, because
+ * corners land on borders and rounded corners return the element behind.
+ */
+export const isEntirelyObscured = (element: Element): boolean => {
+    const rect = element.getBoundingClientRect()
+    if (rect.width === 0 || rect.height === 0) return true
+
+    const fractions = [0.25, 0.5, 0.75]
+    for (const fx of fractions) {
+        for (const fy of fractions) {
+            const x = rect.left + rect.width * fx
+            const y = rect.top + rect.height * fy
+            if (x < 0 || y < 0 || x > window.innerWidth || y > window.innerHeight) continue
+            const hit = document.elementFromPoint(x, y)
+            if (hit && (hit === element || element.contains(hit))) return false
+        }
+    }
+    return true
+}
