@@ -6,13 +6,16 @@ import { describe, expect, it } from 'vitest'
 /**
  * Completeness guard for the design-token layer.
  *
+ * Lives at src/ root rather than next to the CSS it parses: package.json `files` ships
+ * src/styles/** as raw source, so a test placed there would be published to consumers.
+ *
  * The token layer is plain CSS custom properties spread over several files and re-exported to
  * consumers through tw-configs/twConfigs.json, so nothing in the normal build fails when a
  * reference goes stale: `var(--typo)` is invalid at computed-value time and the browser silently
  * drops the declaration. These assertions turn that silent failure into a test failure.
  */
 
-const repoRoot = resolve(dirname(new URL(import.meta.url).pathname), '..', '..')
+const repoRoot = resolve(dirname(new URL(import.meta.url).pathname), '..')
 const stylesGlob = 'src/styles/**/*.css'
 const twConfigPath = 'tw-configs/twConfigs.json'
 
