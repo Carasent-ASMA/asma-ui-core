@@ -23,11 +23,26 @@ Sibling documents, same epic — read together, they describe what CI does and d
 ## Why this suite exists at all
 
 Storybook's axe job cannot see any of this. axe-core 4.7.2 enforces 99 rules — roughly the
-automatable third of WCAG — and **no rule is tagged for SC 1.4.11 Non-text Contrast**, which is the
-AA criterion carrying the 3:1 requirement for focus indicators; the tag `wcag1411` matches nothing.
-Keyboard operability, focus order, focus restoration and dismissal are
+automatable third of WCAG. Keyboard operability, focus order, focus restoration and dismissal are
 behavioural properties that only exist while something is being *driven*. A green axe run means "no
 automatically detectable violations of 99 rules". It is a regression gate, not a conformance claim.
+
+### The four focus criteria, kept straight
+
+These are easy to conflate, and this epic did conflate them: "SC 2.4.11 focus appearance" — wrong on
+both the number and the level — reached three committed documents, this one included, before it was
+caught. None of the four is gated by any axe rule; the tags `wcag247`, `wcag1411`, `wcag2411` and
+`wcag2413` each match zero of the 99, verified against the installed axe-core rather than assumed.
+
+| SC | Level | Question | Owner |
+| --- | --- | --- | --- |
+| **2.4.7** Focus Visible | AA | Is there an indicator *at all*? | this suite (findings B, F) |
+| **1.4.11** Non-text Contrast | AA | Does the indicator reach 3:1? | ASMA-8138 |
+| **2.4.11** Focus Not Obscured (Min) | AA | Is the focused control *visible*, or covered? | this suite (see below) |
+| **2.4.13** Focus Appearance | **AAA** | Is the indicator big and thick enough? | **out of scope** — this epic is AA |
+
+The ordering matters for findings B and F: they are **2.4.7** failures first — there is no indicator —
+and only become 1.4.11 questions once a ring exists to measure.
 
 ## Three decisions worth knowing before you add a test
 
@@ -53,6 +68,13 @@ Two traps the harness now guards, both of which produced a *wrong answer* before
   branch on `useIsMobileView()` (≤768px) into a bottom-sheet `Drawer`, and `StyledDialog` goes
   fullScreen under `(max-width: 743px)`. At the default test-iframe width these suites silently
   exercised the *mobile* component and reported its behaviour as the desktop contract.
+- **`outline-none` is a *transparent* outline, not an absent one.** Tailwind compiles it to
+  `outline: 2px solid transparent`, so the obvious check — `outline-style !== 'none'` — reports a
+  focus ring that cannot be seen. Findings B and F are both this. `describeFocusIndicator` in the
+  harness therefore rejects outlines that are transparent or zero-width, and compares the focused
+  computed style against the element's own baseline so a background swap counts as an indicator just
+  as much as an outline does. Worth knowing beyond this suite: a transparent outline is invisible to
+  the naive hand-rolled check *and* to axe, which has no focus-visibility rule at all.
 - **Anchor overlay assertions on a stable inner node**, not the popper wrapper. Poppers that mount
   through a `Fade` churn their outer nodes while the transition settles, so a wrapper query can read
   "gone" for a frame and make an Escape assertion pass for the wrong reason. Finding K below was
@@ -109,11 +131,23 @@ open listbox or menu has no way to see where they are. The selected row's `bg-ga
 state, not focus, and does not move with the arrow keys; `hover:bg-delta-50` covers the mouse only.
 
 Fixing this is a visual change to a shared component and will move VRT baselines, so it needs the
-same design sign-off as ASMA-8137's geometry items. **Coordinate with ASMA-8138 before picking a
-colour**: their F-07 measured `gama-400`, the library-wide focus colour, at 2.73 (default) / 2.24
-(fretex) / 3.15 (greenish) against its background — only one theme clears the 3:1 that SC 1.4.11
-requires, and only by 0.15. A new focus ring drawn in `gama-400` would ship a second, avoidable
-defect. axe cannot see either problem: it has no rule tagged `wcag1411`.
+same design sign-off as ASMA-8137's geometry items. **Do not fix B or F with `gama-400` before
+ASMA-8138's F-07 is resolved** — the cross-link is recorded in
+[`a11y-contrast.md`](./a11y-contrast.md) too, so neither of us has to be in the room when someone
+picks this up.
+
+Their measurements: `gama-400`, the library-wide focus colour, is **2.73** (default) / **2.24**
+(fretex) / **3.15** (greenish) against its background. Only one theme clears the 3:1 that SC 1.4.11
+requires, and only by 0.15. **17 declarations** resolve to it — 15 `*-focused-border-color` plus
+`--colors-input-active-focus-outline-color` and `--colors-input-active-active-outline-color` — and
+none are touched by ASMA-8133's token work. So adding a `gama-400` ring here would join an existing
+17-declaration failure rather than create an isolated new one, and would trade "invisible focus
+ring" for "focus ring that fails contrast in two of three themes": strictly worse, because it is
+less obvious and, again, no gate can see it.
+
+The encouraging part, also from ASMA-8138: greenish already passes at 3.15 with `jade-400`
+(`#1ca1a1`), so a shade near that luminance clears all three themes. The fix is more tractable than
+the numbers first suggest.
 
 ### C — Dialog does not restore focus to whatever opened it (2.4.3)
 
@@ -218,8 +252,5 @@ All five currently pass.
   interaction test as the precondition for adopting the checkbox `decorative` prop, which is what
   would clear the `nested-interactive` axe violation recorded in
   [`a11y-allowlist.md`](./a11y-allowlist.md). Tracked there; not written here.
-- Focus indicator **contrast and size**, as opposed to mere presence, is not asserted here. Presence
-  is what the 2.4.7 assertions check; the 3:1 contrast requirement is **SC 1.4.11 Non-text Contrast**
-  (AA) and belongs with ASMA-8138's tooling. Note that *Focus Appearance* — the criterion about
-  indicator area and thickness — is **SC 2.4.13, and it is AAA**, so it is out of scope for this
-  epic; it is not 2.4.11.
+- Focus indicator **contrast** (1.4.11) and **size** (2.4.13, AAA) are not asserted here — see the
+  criteria table above for who owns what. This suite answers 2.4.7 and 2.4.11 only.
