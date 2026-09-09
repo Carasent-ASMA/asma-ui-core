@@ -2,6 +2,15 @@
 
 WCAG 2.2 AA, success criteria **1.4.3 Contrast (Minimum)** and **1.4.11 Non-text Contrast**.
 
+**Criterion scope, stated precisely because it is easy to get wrong.** Focus-indicator *contrast*
+is covered by **1.4.11 Non-text Contrast (AA)** — 3:1 against adjacent colours — and that is the
+criterion cited throughout this file. It is *not* 2.4.11: in WCAG 2.2, **2.4.11 is Focus Not
+Obscured (Minimum)** (AA), which is about a focused control being hidden behind sticky headers or
+overlays and says nothing about contrast. **Focus Appearance is 2.4.13, and it is AAA** — out of
+scope for this epic, which is scoped to AA. Nothing in this register asserts against 2.4.13.
+Focus Not Obscured (2.4.11) is a genuine AA criterion that nothing in this epic currently checks;
+it is a layout concern rather than a token one, so it does not belong here.
+
 The gate lives in `src/a11y/contrast/`. It resolves every design token out of the theme CSS and
 computes the contrast ratio of the pairs the components actually put on screen, for **every** theme
 — `default`, `fretex`, `greenish`.
@@ -214,8 +223,8 @@ surface. **SC 1.4.11, needs 3:1.** default `#66b3d6` **2.33** · fretex `#adc6bc
 
 A `var()` chain that never reaches a literal is *invalid at computed-value time*: the browser drops
 the whole declaration. So under `default` and `greenish` these three buttons render **no focus
-border at all** — the failure is not a low ratio, it is a missing focus indicator. **SC 1.4.11
-(needs 3:1) and SC 2.4.11 Focus Appearance.**
+border at all** — the failure is not a low ratio, it is a missing focus indicator.
+**SC 1.4.11 Non-text Contrast (AA), needs 3:1.**
 
 `fretex` escapes only because it independently overrides all three declarations to
 `var(--colors-gama-400)` — where it then lands at **2.24**, i.e. F-07 again.
