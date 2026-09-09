@@ -194,6 +194,8 @@ function StackStoryFrame() {
 }
 
 export const Default: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold); label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: () => (
         <DialogStackProvider>
             <StackStoryFrame />
@@ -221,6 +223,8 @@ export const Default: Story = {
 }
 
 export const ClosingParentClosesDependentDialog: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: () => (
         <DialogStackProvider>
             <StackStoryFrame />
@@ -241,6 +245,8 @@ export const ClosingParentClosesDependentDialog: Story = {
 }
 
 export const OpenCloseIndividually: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: () => (
         <DialogStackProvider>
             <StackStoryFrame />

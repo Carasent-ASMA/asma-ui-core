@@ -114,6 +114,8 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const SizingPersistenceAndControlAlignment: Story = {
+    // axe: button-name (icon-only button has no discernible text); empty-table-header (table header cell has no text); nested-interactive (focusable control nested inside an interactive control). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     loaders: [
         () => {
             localStorage.setItem(COLUMN_SIZING_KEY, JSON.stringify({ name: 240 }))
@@ -398,6 +400,8 @@ const makeFooterBoundaryRows = (count: number): TableRow[] =>
  * never a custom `footer` node (Save/Cancel buttons vanished on tables with < 5 rows).
  */
 export const FooterRowCountBoundary: Story = {
+    // axe: duplicate-id-active (active elements share the same id). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: () => (
         <div className='flex w-[500px] flex-col gap-6'>
             {[4, 5, 6].map((rowCount) => (

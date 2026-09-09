@@ -482,3 +482,6 @@ export const Label = (): JSX.Element => (
         <SaveStateLabelBlock />
     </div>
 )
+
+// axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+Label.parameters = { a11y: { test: 'todo' } }

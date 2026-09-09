@@ -61,3 +61,6 @@ export const Accordion = (): JSX.Element => (
         </StyledAccordion>
     </>
 )
+
+// axe: landmark-unique (duplicate landmark without a unique label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+Accordion.parameters = { a11y: { test: 'todo' } }

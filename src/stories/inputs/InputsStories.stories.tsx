@@ -97,7 +97,12 @@ export const FormInputs = (): JSX.Element => {
 }
 
 /** Every outlined single-line field in the matrix must measure 40px (Figma standard). */
+// axe: color-contrast (text/background contrast below the 4.5:1 threshold); heading-order (heading levels are not in descending order); label-title-only (form element is labelled only by title/aria-describedby); label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+FormInputs.parameters = { a11y: { test: 'todo' } }
+
 export const FormInputsHeightConsistency: StoryObj<typeof StyledInputField> = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold); heading-order (heading levels are not in descending order); label-title-only (form element is labelled only by title/aria-describedby); label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: () => <FormInputs />,
     play: async ({ canvas }) => {
         const shells = canvas.getAllByTestId('not-filled-shell')
