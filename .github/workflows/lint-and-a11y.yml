@@ -35,7 +35,7 @@ jobs:
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
             # `pnpm test-storybook` only runs vite.config.ts `test.projects` -> 'storybook', so the
-            # node-environment 'unit' project had no CI gate at all: src/styles/tokens.test.ts (token
+            # node-environment 'unit' project had no CI gate at all: src/tokens.test.ts (token
             # layer completeness) and src/api-surface.test.ts (frozen public export surface) both
             # passed locally and were inert in CI. This job runs them. No browser needed -- the
             # project is `environment: 'node'`, so it skips the Playwright install entirely.

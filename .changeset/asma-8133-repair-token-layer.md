@@ -33,7 +33,7 @@ Themed pages are otherwise visually unchanged. The Fretex overrides above are th
 behaviour change; `bg-custom-grey-*` now paints where it previously painted nothing.
 
 Also removes a leftover `console.log` from `PathfinderCard`'s `ResizeObserver` fallback, and adds
-`src/styles/tokens.test.ts`, which parses the token CSS and `tw-configs/twConfigs.json` and fails
+`src/tokens.test.ts`, which parses the token CSS and `tw-configs/twConfigs.json` and fails
 when a referenced custom property is declared nowhere, when the `--colors-input-*` set cannot
 resolve without a `data-theme` attribute, when a block declares the same property twice, when a
 theme block overrides a token the base layer never declares, or when a Tailwind key reaches past
