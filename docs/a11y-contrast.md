@@ -173,6 +173,26 @@ The single highest-reach finding in this file — `gama-400` is *the* focus colo
 
 Only `greenish` clears the bar, and only by 0.15. Worth pairing with ASMA-8139's focus-visible work.
 
+#### Blocks two ASMA-8139 findings — do not fix those with `gama-400`
+
+ASMA-8139 found that `StyledSelectItem` and `StyledMenuItem` paint **no** focus indicator while
+arrow-key navigation moves real DOM focus onto them (its findings B and F, in
+[`docs/a11y-keyboard-contract.md`](./a11y-keyboard-contract.md)). The obvious remedy is to reach
+for the library's standard focus ring — which is `gama-400`, i.e. this finding.
+
+**Fixing B or F with `gama-400` before F-07 is resolved would trade an invisible focus ring for one
+that fails SC 1.4.11 in two of three themes** — a strictly less obvious defect, and one no CI gate
+can catch: axe has no `wcag1411` rule, and VRT would be green because the baseline records the
+failing colour as correct. Recorded on both sides so the coupling does not depend on either author
+being in the room when B is picked up.
+
+Related trap from the same investigation, worth knowing for anyone extending this suite to walk
+rendered focus styles: **Tailwind's `outline-none` compiles to a *transparent* outline, not an
+absent one**, so a naive `outline-style !== 'none'` check reports those rows as focus-visible. This
+register is unaffected — it reads token values rather than computed styles — but it applies the
+same rule structurally: a `transparent` border is not treated as a boundary (see
+`BUTTON_TYPES_WITH_BOUNDARY` and the boundary selection in `themeContrast.test.ts`).
+
 **Scope, counted in the repo rather than estimated.** 15 `*-focused-border-color` declarations
 resolve to `--colors-gama-400` — 4 in `defaultTokens.css`, 4 in `jadeTokens.css` and 7 in
 `fretexTokens.css` (fretex has three extra because it routes its *error* focus borders through
