@@ -284,7 +284,13 @@ export function StyledSelectAutocomplete<
         strategy: 'fixed',
         whileElementsMounted: autoUpdate,
         middleware: [
-            offset(4),
+            // Figma Menus attaches flush to the field: in every cell of the Dynamic-select
+            // reference (node 34523-166798) the Menus frame's top edge equals the input box's
+            // bottom edge (Select 35046-160161: field h68 → Menus y68; Autocomplete 35046-161691:
+            // same; multiple 34634-153389 h92 → y92). The 4px gap was a MUI-removal artefact
+            // (ASMA-7573) — MUI's Popper/Autocomplete sat flush too. Keep the middleware at 0
+            // rather than dropping it, so a flip to `top-start` also lands flush (ASMA-8080).
+            offset(0),
             flip({ padding: 8 }),
             shift({ padding: 8 }),
             sizeMiddleware({
