@@ -11,6 +11,14 @@ scope for this epic, which is scoped to AA. Nothing in this register asserts aga
 Focus Not Obscured (2.4.11) is a genuine AA criterion that nothing in this epic currently checks;
 it is a layout concern rather than a token one, so it does not belong here.
 
+One further distinction this register relies on, because F-15 needs both halves:
+
+- **2.4.7 Focus Visible (AA)** — whether a focus indicator *exists at all*.
+- **1.4.11 Non-text Contrast (AA)** — whether the indicator that exists has *enough contrast*.
+
+A dropped declaration fails the first; a washed-out colour fails the second. Neither has an
+axe rule.
+
 The gate lives in `src/a11y/contrast/`. It resolves every design token out of the theme CSS and
 computes the contrast ratio of the pairs the components actually put on screen, for **every** theme
 — `default`, `fretex`, `greenish`.
@@ -165,6 +173,18 @@ The single highest-reach finding in this file — `gama-400` is *the* focus colo
 
 Only `greenish` clears the bar, and only by 0.15. Worth pairing with ASMA-8139's focus-visible work.
 
+**Scope, counted in the repo rather than estimated.** 15 `*-focused-border-color` declarations
+resolve to `--colors-gama-400` — 4 in `defaultTokens.css`, 4 in `jadeTokens.css` and 7 in
+`fretexTokens.css` (fretex has three extra because it routes its *error* focus borders through
+`gama-400` instead of `beta-400`). Two more reference it outside the button family:
+`--colors-input-active-focus-outline-color` and `--colors-input-active-active-outline-color`.
+
+None of those 17 are touched by ASMA-8133's PR #172, which fixes only the six `beta-400`
+declarations. They fail 1.4.11 under `default` (2.73) and `fretex` (2.24) and pass under `greenish`
+(3.15). **So after #172 lands the library still fails 1.4.11 on its primary focus indicator in two
+of three themes, and no CI gate can see it**: axe has no `wcag1411` rule, and VRT is green because
+the baselines record the failing colour as correct. This suite is the only thing that reports it.
+
 ### F-08 — input hover border is under 3:1
 
 `--colors-input-active-hover-outline-color` (`--colors-gama-300`) on
@@ -223,8 +243,13 @@ surface. **SC 1.4.11, needs 3:1.** default `#66b3d6` **2.33** · fretex `#adc6bc
 
 A `var()` chain that never reaches a literal is *invalid at computed-value time*: the browser drops
 the whole declaration. So under `default` and `greenish` these three buttons render **no focus
-border at all** — the failure is not a low ratio, it is a missing focus indicator.
-**SC 1.4.11 Non-text Contrast (AA), needs 3:1.**
+border at all** — the failure is not a low ratio, it is a missing focus indicator, so the criterion
+it breaks is **SC 2.4.7 Focus Visible (AA)** before contrast is even reachable. Where an indicator
+does render, **SC 1.4.11 Non-text Contrast (AA)** applies at 3:1.
+
+That split is the sharpest statement of why a token-level check was the only thing that could catch
+this: there was literally nothing in the DOM to measure. A contrast checker needs two colours, and
+the browser had discarded one of them.
 
 `fretex` escapes only because it independently overrides all three declarations to
 `var(--colors-gama-400)` — where it then lands at **2.24**, i.e. F-07 again.
@@ -280,6 +305,22 @@ confirmed against the re-baselined pixels:
 > baseline shows it is not — the 2px white inset ring separates them. The arithmetic was right for
 > the premise; the premise was wrong. `red-700` is sufficient and no near-black is required. Raised
 > with ASMA-8133 and the coordinator so the incorrect conclusion is not propagated.
+
+#### What #172 should be recorded as clearing — and what it should not
+
+| criterion | level | verdict for the three error variants after #172 |
+| --- | --- | --- |
+| 2.4.7 Focus Visible | AA | **Pass** — a ring now renders where two variants previously had none |
+| 1.4.11 Non-text Contrast | AA | **Pass** — 8.37 / 8.37 / 6.56 on the adjacencies that actually exist |
+| 2.4.13 Focus Appearance | **AAA** | **Not claimed, out of scope** |
+
+2.4.13 is explicitly *not* claimed, and it would not pass if it were. Beyond a ≥2px enclosing ring
+it requires ≥3:1 between the focused and unfocused states of the indicator area; the focused ring
+`red-700` `#9d0f0f` against the unfocused border `beta-500` `#e10700` measures **1.68**. Satisfying
+it would need a focus colour that also clears 3:1 against `beta-500`, which does land back in
+near-black territory — so the earlier `#4a0000` arithmetic is not wasted, it simply belongs under
+2.4.13/AAA rather than under the contained-adjacency question, which is settled. Raised by
+ASMA-8133; ratio re-measured here.
 
 ### F-16 — outlined error button, focused: white label on a pale pink tint
 
