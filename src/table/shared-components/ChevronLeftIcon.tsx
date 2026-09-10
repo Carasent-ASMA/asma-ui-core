@@ -1,10 +1,8 @@
-import React from 'react'
-import type { SVGProps } from 'react'
-
-export function ChevronLeftIcon(props: SVGProps<SVGSVGElement>): JSX.Element {
-    return (
-        <svg xmlns='http://www.w3.org/2000/svg' width='1rem' height='1rem' viewBox='0 0 24 24' {...props}>
-            <path fill='currentColor' d='M15.41 16.58L10.83 12l4.58-4.59L14 6l-6 6l6 6z'></path>
-        </svg>
-    )
-}
+// Duplicate of the core icon (ASMA-8134) — same artwork and viewBox. Re-exported to keep the
+// `src/table/shared-components/ChevronLeftIcon` import path stable.
+//
+// The core icon takes `IIcon` rather than `SVGProps`, which is fine here: the sole call site
+// (TablePagination) passes only `width`/`height`, and it passes both, so the copy's unused `1rem`
+// default is not observable. Core additionally renders `aria-hidden='true' focusable='false'` —
+// a deliberate accessible-tree change, documented in the PR; these chevrons are decorative.
+export { ChevronLeftIcon } from 'src/components/icons/chevron-left-icon'
