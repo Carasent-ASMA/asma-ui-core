@@ -27,7 +27,7 @@ import { compositeOver, contrastRatio, parseCssColor, type Rgba } from './wcagCo
  * tagged for non-text contrast. This suite closes both gaps by resolving the tokens straight out
  * of the theme CSS and computing the ratios, so every theme and both criteria are covered.
  *
- * Quarantined rows (`finding` set) are measured failures against master. They are `it.skip`, not
+ * Quarantined rows (`finding` set) are measured failures against master. They retain regression floors rather than being
  * fixed: a token value is a visual and potentially breaking change to a brand theme and belongs to
  * ASMA-8133 plus design sign-off. Each is written up in docs/a11y-contrast.md.
  */
@@ -243,38 +243,10 @@ describe('theme token integrity', () => {
             // declaration, so the styling the token file claims to apply never renders.
             const resolution = RESOLUTIONS.get(theme)
 
-            expect(resolution?.unresolvable.map((entry) => entry.property).sort()).toEqual(
-                EXPECTED_UNRESOLVABLE[theme] ?? [],
-            )
+            expect(resolution?.unresolvable).toEqual([])
         })
     })
 })
-
-/**
- * Dangling `var()` chains quarantined the same way a failing ratio is. Empty since ASMA-8133
- * defined `--colors-beta-400` (F-15 in docs/a11y-contrast.md, fixed in PR #172): every token in
- * every theme now resolves to a literal. A future dangling chain fails this test and must be
- * either fixed or quarantined here with a tracked finding.
- */
-const EXPECTED_UNRESOLVABLE: Readonly<Record<string, readonly string[]>> = {
-    default: [],
-    fretex: [],
-    greenish: [],
-}
-
-/**
- * Tailwind colours whose token is defined by no theme. `twConfigs.json` reads
- * `--color-cardea--grey-0*` (singular) while `rootVariables.css` defines `--colors-cardea--grey-0*`
- * (plural), so every `custom-grey-*` utility resolves to nothing. No component currently uses one,
- * which is why it has gone unnoticed. Observation 3 in docs/a11y-contrast.md; ASMA-8133's area.
- */
-const TAILWIND_COLOURS_WITH_UNDEFINED_TOKENS: readonly string[] = [
-    'custom-grey-01',
-    'custom-grey-02',
-    'custom-grey-03',
-    'custom-grey-04',
-    'custom-grey-06',
-]
 
 describe('tailwind colour bindings', () => {
     // Every Tailwind colour is an indirection onto a custom property. If a token is renamed and the
@@ -290,10 +262,6 @@ describe('tailwind colour bindings', () => {
         const broken: string[] = []
 
         for (const [colorName, declaration] of Object.entries(tailwindColors)) {
-            if (TAILWIND_COLOURS_WITH_UNDEFINED_TOKENS.includes(colorName)) {
-                continue
-            }
-
             for (const match of declaration.matchAll(/var\((?<token>--[^,)\s]+)/g)) {
                 const token = match.groups?.['token']
 
