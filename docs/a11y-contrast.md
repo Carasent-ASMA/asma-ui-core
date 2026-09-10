@@ -447,3 +447,21 @@ re-run the suite after it merges and update the tables here. ASMA-8133 has confi
 ```
 pnpm exec vitest --project=unit --run src/a11y
 ```
+
+
+## Post-merge verification (ASMA-8138 follow-up)
+
+After ASMA-8133 (#172) and the Fretex restoration (#176), all theme token chains resolve.
+The historical F-15 missing-token defect is resolved: default and greenish error focus
+boundaries now measure **8.37:1** against white. Their four skipped assertions now run
+with numeric floors. Fretex still measures **2.24:1**, so those boundary rows remain
+quarantined under **F-07**. All other regression floors are unchanged.
+
+The five repaired Tailwind grey bindings are now checked without exemptions. The earlier
+findings and measurements above describe the pre-#172 baseline; F-15 and observations 2–3
+are historical. Existing CI now runs the unit project via `lint-and-a11y.yml`.
+
+To inspect candidate floors, run `pnpm exec tsx src/a11y/contrast/printRegressionFloors.ts`.
+It prints measurements without changing files. Review each difference before updating the table:
+raising a floor preserves an improvement; lowering one permits a regression and must be
+justified by an intentional token change. Do not turn an unexpected unresolved value into a skip.

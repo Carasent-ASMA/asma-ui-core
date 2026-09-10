@@ -85,14 +85,15 @@ describe('resolveThemeTokens', () => {
 })
 
 describe('resolveTheme', () => {
-    it('reports a dangling var() chain instead of dropping it silently', () => {
-        const { unresolvable } = resolveTheme(DEFAULT_THEME)
+    it('resolves repaired error-button focus borders in every theme', () => {
+        for (const theme of discoverThemeNames()) {
+            const { resolved, unresolvable } = resolveTheme(theme)
 
-        // --colors-beta-400 is referenced by the error-button focus borders but defined nowhere.
-        // See F-15 in docs/a11y-contrast.md.
-        expect(unresolvable.map((entry) => entry.property)).toContain(
-            '--colors-button-contained-error-focused-border-color',
-        )
+            expect(unresolvable).toEqual([])
+            expect(resolved.get('--colors-button-contained-error-focused-border-color')).toBe(
+                theme === 'fretex' ? '#9cb2a9' : '#9d0f0f',
+            )
+        }
     })
 
     it('never lists a property as both resolved and unresolvable', () => {
