@@ -362,8 +362,8 @@ export function StyledSelectAutocomplete<
 
     const showClear = !disableClearable && !readOnly && !disabled && (isMultiple ? selectedArray.length > 0 : singleValue !== null)
 
-    // The dropdown indicator (chevron / plus) must itself open the popup. `onMouseDown` +
-    // preventDefault keeps focus on the input (no blur-then-refocus flicker) before we toggle.
+    // Activate on click so a pointer press can be cancelled and keyboard clicks work.
+    // Mouse-down only preserves input focus; it must not change the value or popup.
     const togglePopupFromIcon = (event: React.MouseEvent): void => {
         event.preventDefault()
         if (disabled || readOnly) return
@@ -389,18 +389,13 @@ export function StyledSelectAutocomplete<
         <span className='flex items-center gap-1'>
             {loading && <LoadingIcon width={20} height={20} className='animate-spin' />}
             {showClear && (
-                // Native <button>: was a <span role='button'> with no tabIndex/keydown — unreachable by
-                // keyboard. `onMouseDown` (not `onClick`) is deliberate — `preventDefault` stops the input
-                // from blurring before `clearValue` runs; buttons support `onMouseDown` the same way.
                 <button
                     type='button'
                     aria-label='Clear'
                     data-testid={`${dataTest}-clear`}
                     className='flex min-h-6 min-w-6 cursor-pointer items-center justify-center rounded-full border-0 bg-delta-50'
-                    onMouseDown={(event) => {
-                        event.preventDefault()
-                        clearValue(event)
-                    }}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={clearValue}
                 >
                     <CloseIcon width={20} height={20} className='text-delta-700' />
                 </button>
@@ -412,7 +407,8 @@ export function StyledSelectAutocomplete<
                     aria-expanded={open}
                     data-testid={`${dataTest}-popup-indicator`}
                     className='flex cursor-pointer items-center border-0 bg-transparent'
-                    onMouseDown={togglePopupFromIcon}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={togglePopupFromIcon}
                 >
                     {popupIcon ?? (isMultiple ? <PlusIconCircle width={24} height={24} className='text-delta-700' /> : (
                         <ChevronDownIcon

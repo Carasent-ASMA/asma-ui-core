@@ -182,7 +182,7 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
                             .join(' ') || undefined
                     }
                     aria-invalid={error}
-                    aria-label={fallbackName}
+                    aria-label={otherProps['aria-label'] ?? fallbackName}
                     id={textAreaId}
                     ref={textAreaRef}
                     className={`${styles['textarea']} ${styles[textareaType]} ${className} ${

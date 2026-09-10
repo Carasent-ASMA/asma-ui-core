@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { FloatingPortal } from '@floating-ui/react'
 import { cn } from 'src/helpers/cn'
 import { useTopmostOpenModalDialog } from 'src/hooks/useTopLayer.hook'
@@ -51,19 +51,35 @@ export const StyledSnackbar = ({
     // toast clears the dialog's top-layer entry instead of being painted behind it (see
     // useTopLayer.hook). `z-[1400]` below is what lifts it over the dialog's paper.
     const portalRoot = useTopmostOpenModalDialog()
+    const [hovered, setHovered] = useState(false)
+    const [focused, setFocused] = useState(false)
 
     useEffect(() => {
-        if (!open || autoHideDuration == null) return
+        if (!open || autoHideDuration == null || hovered || focused) return
         const timer = setTimeout(() => onClose?.(null, 'timeout'), autoHideDuration)
         return () => clearTimeout(timer)
-    }, [open, autoHideDuration, onClose])
+    }, [open, autoHideDuration, onClose, hovered, focused])
 
-    if (!open) return null
+    if (!open) {
+        // The portal unmounts without mouse-leave/blur when externally closed.
+        // Clear that interaction state so the next notification can time out.
+        if (hovered) setHovered(false)
+        if (focused) setFocused(false)
+        return null
+    }
 
     const position = POSITION_CLASS[`${anchorOrigin.vertical}-${anchorOrigin.horizontal}`]
     return (
         <FloatingPortal root={portalRoot}>
-            <div className={cn('fixed z-[1400] flex items-center gap-2', position, className)}>
+            <div
+                className={cn('fixed z-[1400] flex items-center gap-2', position, className)}
+                onMouseEnter={() => setHovered(true)}
+                onMouseLeave={() => setHovered(false)}
+                onFocusCapture={() => setFocused(true)}
+                onBlurCapture={(event) => {
+                    if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false)
+                }}
+            >
                 {children ?? (
                     <div className='flex items-center gap-2 rounded bg-delta-800 px-4 py-3 text-sm text-white shadow-lg'>
                         {message}
