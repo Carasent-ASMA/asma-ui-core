@@ -193,6 +193,9 @@ export const StyledInputField = ({
         | React.MouseEventHandler<HTMLDivElement>
         | undefined
 
+    const inputSlotOnClick = slotProps?.input?.['onClick'] as React.MouseEventHandler<HTMLDivElement> | undefined
+    const inputSlotClickProps = inputSlotOnClick ? { onClick: inputSlotOnClick } : {}
+
     // `autoComplete` and `name` may arrive either as a top-level prop or on the htmlInput slot, and the
     // slot is spread *before* the explicit keys below — so passing them bare would overwrite a slot
     // value with `undefined`. That is what silenced `StyledSelectAutocomplete`'s combobox `'off'` (it
@@ -411,6 +414,7 @@ export const StyledInputField = ({
                     )}
                     ref={mergedInputSlotRef}
                     onMouseDown={inputSlotOnMouseDown}
+                    {...inputSlotClickProps}
                     style={shellStyle}
                     data-testid={isAdornmentList ? `${dataTest}-adornment-list` : `${dataTest}-shell`}
                 >
