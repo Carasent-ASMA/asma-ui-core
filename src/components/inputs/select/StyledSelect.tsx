@@ -18,7 +18,6 @@ import {
     isValidElement,
     useEffect,
     useId,
-    useMemo,
     useRef,
     useState,
     type CSSProperties,
@@ -185,7 +184,11 @@ export const StyledSelect = ({
         if (!next) setActiveOptionIndex(null)
     }
 
-    const { refs, floatingStyles, context } = useFloating({
+    const {
+        refs: { domReference, reference, setFloating, setReference },
+        floatingStyles,
+        context,
+    } = useFloating({
         open,
         onOpenChange: handleOpenChange,
         placement: 'bottom-start',
@@ -212,15 +215,11 @@ export const StyledSelect = ({
     const dismiss = useDismiss(context)
     const role = useRole(context, { role: 'listbox' })
     const { getReferenceProps, getFloatingProps } = useInteractions([click, dismiss, role])
-    const triggerRef = refs.setReference
     // Portal INTO the trigger's modal <dialog> (if any) so the listbox isn't inert. Popover API
     // only when body-portalled — nested showPopover inside a dialog breaks on mobile Safari.
-    const portalRoot = useMemo(
-        () => (open ? getOpenModalDialogAncestor(refs.reference.current) : undefined),
-        [open, refs],
-    )
+    const [portalRoot, setPortalRoot] = useState<HTMLElement>()
     const usePopoverLayer = shouldUsePopoverTopLayer(portalRoot)
-    const listboxRef = useMergeRefs([useTopLayerRef(refs.setFloating, usePopoverLayer), listRef])
+    const listboxRef = useMergeRefs([useTopLayerRef(setFloating, usePopoverLayer), listRef])
 
     // Report state into the surrounding FormControl so the label floats.
     useEffect(() => ctx?.setFocused(open || focused), [open, focused, ctx])
@@ -251,7 +250,7 @@ export const StyledSelect = ({
         onChange?.({ target: { value: selected, name } }, child)
         if (close) {
             handleOpenChange(false)
-            requestAnimationFrame(() => (refs.domReference.current as HTMLElement | null)?.focus())
+            requestAnimationFrame(() => (domReference.current as HTMLElement | null)?.focus())
         }
     }
 
@@ -323,6 +322,7 @@ export const StyledSelect = ({
     }
 
     const openList = (direction: -1 | 1 = 1): void => {
+        setPortalRoot(getOpenModalDialogAncestor(reference.current))
         setActiveOptionIndex(getInitialActiveOptionIndex(direction))
         setOpen(true)
     }
@@ -383,18 +383,17 @@ export const StyledSelect = ({
             style={{ fontFamily: 'Roboto, Helvetica, Arial, sans-serif', ...resolveSx(sx), ...style }}
         >
             <button
-                ref={triggerRef}
+                ref={setReference}
                 type='button'
                 data-testid={dataTest}
                 // `getReferenceProps()` (from `useRole(context, { role: 'listbox' })`) sets its own
                 // role/aria-haspopup/aria-expanded on the reference — spread it FIRST so our explicit,
                 // single-source-of-truth attributes below (bound to local `open`/`listboxId`) win instead
                 // of being silently shadowed by floating-ui's copy (JSX: later props override earlier).
-                // getReferenceProps merely MERGES this handler into the returned props object (standard
-                // @floating-ui/react usage, called during render by design) — it doesn't read a ref's
-                // `.current` synchronously, so this isn't the unsafe pattern the rule targets.
-                // eslint-disable-next-line react-hooks/refs
-                {...getReferenceProps({ onKeyDown: handleTriggerKeyDown })}
+                {...getReferenceProps({
+                    onClick: () => setPortalRoot(getOpenModalDialogAncestor(reference.current)),
+                    onKeyDown: handleTriggerKeyDown,
+                })}
                 role='combobox'
                 aria-haspopup='listbox'
                 aria-expanded={open}

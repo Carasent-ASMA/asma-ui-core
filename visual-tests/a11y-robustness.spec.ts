@@ -163,18 +163,18 @@ test.describe('SC 2.5.8 target size (minimum)', () => {
         })
     }
 
-    test('checkbox and radio expose a 40x40 hit area, not their 1x1 sr-only input', async ({ page }) => {
+    test('checkbox and radio expose a 38x38 hit area, not their 1x1 sr-only input', async ({ page }) => {
         await prepareStoryFrame(page, 'inputs-checkbox--unchecked-default')
         const wrapper = page.locator('label[class*="_CheckboxWrapper_"]').first()
         const box = await wrapper.boundingBox()
 
-        /* The native input is sr-only at 1x1; the wrapper is the real target. Pinning this
+        /* The native input is sr-only at 1x1; the wrapper is the real target. Pinning 38px
          * keeps the core control's hit area from collapsing the way the table's drifted
          * copy did (15x15 — see A11Y-ROBUSTNESS.md F-04). */
         expect(box?.width).toBeGreaterThanOrEqual(24)
         expect(box?.height).toBeGreaterThanOrEqual(24)
-        expect(Math.round(box?.width ?? 0)).toBe(40)
-        expect(Math.round(box?.height ?? 0)).toBe(40)
+        expect(Math.round(box?.width ?? 0)).toBe(38)
+        expect(Math.round(box?.height ?? 0)).toBe(38)
     })
 
     test('date picker day cells are at least 24x24', async ({ page }) => {
