@@ -243,24 +243,10 @@ describe('theme token integrity', () => {
             // declaration, so the styling the token file claims to apply never renders.
             const resolution = RESOLUTIONS.get(theme)
 
-            expect(resolution?.unresolvable.map((entry) => entry.property).sort()).toEqual(
-                EXPECTED_UNRESOLVABLE[theme] ?? [],
-            )
+            expect(resolution?.unresolvable).toEqual([])
         })
     })
 })
-
-/**
- * Dangling `var()` chains quarantined the same way a failing ratio is. Empty since ASMA-8133
- * defined `--colors-beta-400` (F-15 in docs/a11y-contrast.md, fixed in PR #172): every token in
- * every theme now resolves to a literal. A future dangling chain fails this test and must be
- * either fixed or quarantined here with a tracked finding.
- */
-const EXPECTED_UNRESOLVABLE: Readonly<Record<string, readonly string[]>> = {
-    default: [],
-    fretex: [],
-    greenish: [],
-}
 
 /**
  * Tailwind colours whose token is defined by no theme. `twConfigs.json` reads
