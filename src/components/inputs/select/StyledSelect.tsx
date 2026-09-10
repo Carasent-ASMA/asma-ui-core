@@ -275,7 +275,9 @@ export const StyledSelect = ({
             active: index === activeOptionIndex,
             selected: isOptionSelected(itemValue),
             onClick: () => {
-                setActiveOptionIndex(index)
+                // Pointer selection is not keyboard navigation. In particular, a multiple Select
+                // remains open after a click, so don't leave its keyboard-active indicator behind.
+                setActiveOptionIndex(null)
                 selectValue(itemValue, child.props.children)
             },
         })
@@ -480,6 +482,9 @@ export const StyledSelect = ({
                 <FloatingPortal root={portalRoot}>
                     <ul
                         ref={listboxRef}
+                        // Floating UI's generated id must not replace `listboxId`: the trigger's
+                        // aria-controls points to this exact stable id.
+                        {...getFloatingProps()}
                         id={listboxId}
                         role='listbox'
                         // Mirror the trigger's own name fallback (`labelId` wins, else `name`) — the
@@ -494,7 +499,6 @@ export const StyledSelect = ({
                             ...floatingStyles,
                             fontFamily: 'Roboto, Helvetica, Arial, sans-serif',
                         }}
-                        {...getFloatingProps()}
                         className={cn(
                             // Figma Menus (node 34522-151497): the list is padded `8px 0` (was 4px)
                             // and separates its rows from the container — see the equivalent rule on

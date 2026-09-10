@@ -27,6 +27,23 @@ const SelectFixture = ({ allowClear = false }: { allowClear?: boolean }): JSX.El
     )
 }
 
+const MultipleSelectFixture = (): JSX.Element => {
+    const [value, setValue] = useState<unknown[]>(['b'])
+    return (
+        <StyledSelect
+            dataTest='multiple-status'
+            name='Multiple status'
+            multiple
+            value={value}
+            onChange={(event) => setValue(event.target.value as unknown[])}
+        >
+            <StyledSelectItem value='a'>Active</StyledSelectItem>
+            <StyledSelectItem value='b'>Paused</StyledSelectItem>
+            <StyledSelectItem value='c'>Closed</StyledSelectItem>
+        </StyledSelect>
+    )
+}
+
 const trigger = (container: HTMLElement): HTMLButtonElement =>
     container.querySelector<HTMLButtonElement>('[data-testid="status"]')!
 
@@ -72,48 +89,51 @@ describe('StyledSelect keyboard contract', () => {
         await expect(document.getElementById(button.getAttribute('aria-controls')!)).toBe(listbox())
     })
 
-    it('opens with ArrowDown and lands focus on the selected option (2.1.1)', async () => {
+    it('opens with ArrowDown and exposes the selected option as active (2.1.1)', async () => {
         const { container } = mount(<SelectFixture />)
-        trigger(container).focus()
+        const button = trigger(container)
+        button.focus()
 
         await userEvent.keyboard('{ArrowDown}')
 
         await waitFor(() => expect(options()).toHaveLength(3))
         // 'b' / Paused is selected, so keyboard open must start there, not at the top.
-        await waitFor(() => expect(document.activeElement).toBe(options()[1]))
+        await expect(document.activeElement).toBe(button)
+        await expect(button).toHaveAttribute('aria-activedescendant', 'status-listbox-option-1')
         await expect(options()[1]).toHaveAttribute('aria-selected', 'true')
     })
 
-    it('opens with ArrowUp and lands on the last option when nothing is selected (2.1.1)', async () => {
+    it('opens with ArrowUp and exposes the last option when nothing is selected (2.1.1)', async () => {
         const { container } = mount(
             <StyledSelect dataTest='empty' name='Empty'>
                 <StyledSelectItem value='a'>Active</StyledSelectItem>
                 <StyledSelectItem value='b'>Paused</StyledSelectItem>
             </StyledSelect>,
         )
-        container.querySelector<HTMLButtonElement>('[data-testid="empty"]')!.focus()
+        const button = container.querySelector<HTMLButtonElement>('[data-testid="empty"]')!
+        button.focus()
 
         await userEvent.keyboard('{ArrowUp}')
 
-        await waitFor(() => expect(document.activeElement).toBe(options()[1]))
+        await waitFor(() => expect(button).toHaveAttribute('aria-activedescendant', 'empty-listbox-option-1'))
     })
 
-    it('moves through options with the arrow keys and wraps (2.1.1)', async () => {
+    it('moves through options with the arrow keys and stops at either end (2.1.1)', async () => {
         const { container } = mount(<SelectFixture />)
-        trigger(container).focus()
+        const button = trigger(container)
+        button.focus()
         await userEvent.keyboard('{ArrowDown}')
-        await waitFor(() => expect(document.activeElement).toBe(options()[1]))
+        await waitFor(() => expect(button).toHaveAttribute('aria-activedescendant', 'status-listbox-option-1'))
 
         await userEvent.keyboard('{ArrowDown}')
-        await expect(document.activeElement).toBe(options()[2])
+        await expect(button).toHaveAttribute('aria-activedescendant', 'status-listbox-option-2')
 
-        // Wrap past the end.
+        // Stop at the end.
         await userEvent.keyboard('{ArrowDown}')
-        await expect(document.activeElement).toBe(options()[0])
+        await expect(button).toHaveAttribute('aria-activedescendant', 'status-listbox-option-2')
 
-        // And backwards past the start.
-        await userEvent.keyboard('{ArrowUp}')
-        await expect(document.activeElement).toBe(options()[2])
+        await userEvent.keyboard('{ArrowUp}{ArrowUp}{ArrowUp}')
+        await expect(button).toHaveAttribute('aria-activedescendant', 'status-listbox-option-0')
     })
 
     it('selects with Enter and returns focus to the trigger (2.1.1, 2.4.3)', async () => {
@@ -121,7 +141,7 @@ describe('StyledSelect keyboard contract', () => {
         const button = trigger(container)
         button.focus()
         await userEvent.keyboard('{ArrowDown}')
-        await waitFor(() => expect(document.activeElement).toBe(options()[1]))
+        await waitFor(() => expect(button).toHaveAttribute('aria-activedescendant', 'status-listbox-option-1'))
 
         await userEvent.keyboard('{ArrowDown}{Enter}')
 
@@ -130,17 +150,32 @@ describe('StyledSelect keyboard contract', () => {
         await expect(button).toHaveTextContent('Closed')
     })
 
-    it('selects with Space (2.1.1)', async () => {
+    it('selects with Space and keeps the listbox open (2.1.1)', async () => {
         const { container } = mount(<SelectFixture />)
         const button = trigger(container)
         button.focus()
         await userEvent.keyboard('{ArrowDown}')
-        await waitFor(() => expect(document.activeElement).toBe(options()[1]))
+        await waitFor(() => expect(button).toHaveAttribute('aria-activedescendant', 'status-listbox-option-1'))
 
         await userEvent.keyboard('{ArrowUp} ')
 
-        await waitFor(() => expect(listbox()).toBeNull())
+        await expect(listbox()).not.toBeNull()
+        await expect(document.activeElement).toBe(button)
+        await expect(button).toHaveAttribute('aria-expanded', 'true')
         await expect(button).toHaveTextContent('Active')
+    })
+
+    it('selects by pointer without leaving a keyboard-active option (2.1.1)', async () => {
+        const { container } = mount(<MultipleSelectFixture />)
+        const button = container.querySelector<HTMLButtonElement>('[data-testid="multiple-status"]')!
+
+        await userEvent.click(button)
+        await waitFor(() => expect(options()).toHaveLength(3))
+        await userEvent.click(options()[0]!)
+
+        await expect(options()[0]).toHaveAttribute('aria-selected', 'true')
+        await expect(listbox()).not.toBeNull()
+        await expect(button).not.toHaveAttribute('aria-activedescendant')
     })
 
     it('closes on Escape and restores focus to the trigger — no keyboard trap (2.1.2, 2.4.3)', async () => {

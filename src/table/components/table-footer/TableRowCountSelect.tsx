@@ -62,6 +62,7 @@ export function TableRowCountSelect<TData>({
                 aria-controls={open ? listboxId : undefined}
                 aria-expanded={open}
                 aria-activedescendant={activeIndex === null ? undefined : `${listboxId}-option-${activeIndex}`}
+                aria-label={`${pageSize} ${isNo ? 'rader' : 'rows'}`}
                 endIcon={
                     <ChevronDownIcon
                         className={`${open ? 'rotate-180' : 'rotate-0'} transition-transform duration-300`}

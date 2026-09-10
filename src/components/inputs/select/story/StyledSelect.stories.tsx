@@ -58,6 +58,32 @@ const Controlled = (args: StyledSelectProps) => {
     )
 }
 
+const ControlledMultiple = (args: StyledSelectProps) => {
+    const [value, setValue] = useState<unknown[]>(['1'])
+
+    return (
+        <StyledFormControl>
+            <StyledSelect
+                {...args}
+                dataTest='select-multiple'
+                name='Select people'
+                multiple
+                value={value}
+                onChange={(event, child) => {
+                    setValue(event.target.value as unknown[])
+                    args.onChange?.(event, child)
+                }}
+            >
+                {options.map((o) => (
+                    <StyledSelectItem key={o.id} value={o.id}>
+                        {o.title}
+                    </StyledSelectItem>
+                ))}
+            </StyledSelect>
+        </StyledFormControl>
+    )
+}
+
 /**
  * Trigger state gallery (field node 15561-37391): rows = State, columns = Value (Empty/Filled).
  * Hover forced via the root `group` + `pseudo-hover`. Focused/Open are React-driven and interactive —
@@ -168,7 +194,8 @@ export const KeyboardNavigation: Story = {
         await expect(trigger).toHaveAttribute('aria-activedescendant', 'select-listbox-option-1')
         await userEvent.keyboard(' ')
         await expect(canvas.getByRole('listbox')).toBeInTheDocument()
-        await expect(canvas.getByRole('option', { name: 'April Tucker' })).toHaveAttribute('aria-selected', 'true')
+        await expect(trigger).toHaveTextContent('April Tucker')
+
         await userEvent.keyboard('{End}')
         await expect(trigger).toHaveAttribute('aria-activedescendant', 'select-listbox-option-2')
         await userEvent.keyboard('{Home}')
@@ -320,17 +347,7 @@ export const SelectingSameValue: Story = {
 export const MultipleSelectBehavior: Story = {
     // axe: aria-input-field-name (ARIA input field has no accessible name); aria-valid-attr-value (ARIA attribute has an invalid value); button-name (icon-only button has no discernible text). ASMA-8136 allowlist - see docs/a11y-allowlist.md
     parameters: { a11y: { test: 'todo' } },
-    render: (args) => (
-        <StyledFormControl>
-            <StyledSelect {...args} multiple value={['1']}>
-                {options.map((o) => (
-                    <StyledSelectItem key={o.id} value={o.id}>
-                        {o.title}
-                    </StyledSelectItem>
-                ))}
-            </StyledSelect>
-        </StyledFormControl>
-    ),
+    render: (args) => <ControlledMultiple {...args} />,
     play: async ({ canvasElement, userEvent }) => {
         const canvas = within(canvasElement.ownerDocument.body)
 
@@ -344,7 +361,9 @@ export const MultipleSelectBehavior: Story = {
 
         await userEvent.click(option)
 
-        // Should remain open in multi mode
+        await expect(option).toHaveAttribute('aria-selected', 'true')
+        await expect(trigger).not.toHaveAttribute('aria-activedescendant')
+        // A multiple select remains open after pointer selection.
         await expect(canvas.getByRole('listbox')).toBeInTheDocument()
     },
 }

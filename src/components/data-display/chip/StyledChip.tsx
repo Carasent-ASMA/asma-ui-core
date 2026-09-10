@@ -1,4 +1,4 @@
-import { forwardRef, useRef, type CSSProperties, type KeyboardEvent, type MouseEvent, type ReactElement, type ReactNode } from 'react'
+import { forwardRef, type CSSProperties, type KeyboardEvent, type MouseEvent, type ReactElement, type ReactNode } from 'react'
 import { CloseIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
 import { consumerOverrides } from 'src/helpers/classOverride'
@@ -113,11 +113,7 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
         },
         ref,
     ) => {
-        // Delete-only chips use the chip itself as the Tab stop; the nested delete button is mouse-only
-        // in the tab sequence.
-        const deleteOnly = Boolean(onDelete && !clickable && !onClick)
-        const interactive = !readOnly && !disabled && (!!clickable || !!onClick || deleteOnly)
-        const deleteButtonRef = useRef<HTMLButtonElement>(null)
+        const interactive = !readOnly && !disabled && (!!clickable || !!onClick)
         const startSlot = avatar ?? icon
         const hasDelete = Boolean(onDelete && !readOnly)
         const hasStart = Boolean(startSlot)
@@ -139,11 +135,6 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
         // tab stop that does nothing on keyboard activation.
         const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>): void => {
             if (!interactive) return
-            if (deleteOnly && event.key === 'Backspace') {
-                event.preventDefault()
-                deleteButtonRef.current?.click()
-                return
-            }
             if (event.key === 'Enter' || event.key === ' ') {
                 event.preventDefault()
                 onClick?.(event as unknown as MouseEvent<HTMLElement>)
@@ -180,6 +171,11 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                     readOnly && 'pointer-events-none',
                     disabled && 'pointer-events-none opacity-[0.38]',
                     'data-[focus]:!border-focus-ring data-[focus]:bg-gama-25 data-[focus]:shadow-[inset_0_0_0_2px_var(--colors-focus-ring)]',
+                    // Figma's delete-tag focused state is a 3px focus border around the whole chip.
+                    // Keep the real 1px border in the focus color and paint the remaining 2px inset:
+                    // this hides the default border without changing an auto-width chip's dimensions.
+                    hasDelete &&
+                        'focus-within:!border-focus-ring focus-within:bg-gama-25 focus-within:shadow-[inset_0_0_0_2px_var(--colors-focus-ring)]',
                     interactive &&
                         cn(
                             'cursor-pointer outline-none',
@@ -208,18 +204,18 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                 </span>
                 {onDelete && !readOnly && (
                     <button
-                        ref={deleteButtonRef}
                         type='button'
                         data-testid={`${dataTest}-delete`}
                         // "Remove <label>" (not the bare label) so it reads distinctly from the chip
                         // itself; falls back to a generic "Remove" when `label` is a composite ReactNode
                         // (not a plain string) — always some name rather than none (axe `button-name`).
                         aria-label={typeof label === 'string' ? `Remove ${label}` : 'Remove'}
-                        tabIndex={deleteOnly ? -1 : undefined}
                         onClick={handleDelete}
                         disabled={disabled}
                         className={cn(
-                            'flex shrink-0 items-center justify-center rounded-full border border-solid border-delta-100 bg-delta-50 p-0 text-delta-700',
+                            // Its focus indication is intentionally painted by the parent via
+                            // `focus-within`, matching the Figma state without a second button ring.
+                            'flex shrink-0 items-center justify-center rounded-full border border-solid border-delta-100 bg-delta-50 p-0 text-delta-700 [outline:none]',
                             size === 'small' ? 'h-[18px] w-[18px]' : 'h-5 w-5',
                             classes?.deleteIcon,
                         )}

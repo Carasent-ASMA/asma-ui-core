@@ -195,7 +195,7 @@ export const KeyboardSelect: Story = {
         await userEvent.keyboard('{ArrowDown}')
         await userEvent.keyboard('{Enter}')
 
-        await expect(canvas.getByRole('button', { name: 'The Shawshank Redemption' })).toBeInTheDocument()
+        await expect(canvas.getByRole('button', { name: 'Remove The Shawshank Redemption' })).toBeInTheDocument()
     },
 }
 
@@ -294,7 +294,7 @@ export const RemovesChip: Story = {
         await userEvent.keyboard('{ArrowDown}')
         await userEvent.keyboard('{Enter}')
 
-        const chip = canvas.getByRole('button', { name: 'The Godfather' })
+        const chip = canvas.getByTestId('selected-chip-The Godfather')
         await expect(chip).toBeInTheDocument()
 
         const deleteIcon = canvas.getByTestId(
