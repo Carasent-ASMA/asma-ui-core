@@ -178,8 +178,6 @@
     --colors-button-textWhite-common-disabled-bg-color: transparent;
     --colors-button-textWhite-common-disabled-border-color: transparent;
 
-    --colors-btn-bg-mini-action: var(--colors-zinc-100);
-    --colors-btn-bg-mini-action-hover: var(--colors-gama-700);
     --colors-link-text-hover: var(--colors-red-700);
     --colors-link-text-standart: var(--colors-gray-500);
     --colors-link-text-active: var(--colors-red-700);
@@ -188,7 +186,6 @@
     --colors-app-directory-button-select-recipient-bg: var(--colors-slate-500);
     --colors-btn-task-status-bg: var(--colors-green-100);
     --colors-chat-ticket-message-bg: var(--colors-alpha-500);
-    --colors-topbar-text: #ffffff;
 
     --colors-menu-text-active: var(--colors-beta-700);
 }
