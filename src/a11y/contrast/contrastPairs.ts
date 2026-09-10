@@ -430,9 +430,8 @@ export const BUTTON_TYPES_WITHOUT_KNOWN_SURFACE: readonly ButtonType[] = ['textW
  * `boundary-outlined-hover` (F-13): outlined's hover/active border is gama-300, under 3:1 in all
  * three themes.
  * `outlined/error/focused/text` (F-16): white label on a beta-100 tint, 1.27:1 in every theme.
- * The error/focused boundary rows (F-15): the border points at `--colors-beta-400`, which no theme
- * defines, so `default` and `greenish` render no focus border at all; `fretex` overrides it to
- * gama-400 and lands at 2.24:1, which is F-07's root cause again.
+ * Error/focused boundaries now resolve after ASMA-8133. Default and greenish pass at 8.37:1;
+ * fretex still uses gama-400 at 2.24:1, so these rows remain under F-07.
  */
 export const BUTTON_FINDINGS: Readonly<Record<string, string>> = {
     'outlined/common/hover/text': 'F-12',
@@ -449,8 +448,8 @@ export const BUTTON_FINDINGS: Readonly<Record<string, string>> = {
     'outlined/common/hover/boundary': 'F-13',
     'outlined/common/active/boundary': 'F-13',
     'outlined/error/focused/text': 'F-16',
-    'contained/error/focused/boundary': 'F-15',
-    'outlined/error/focused/boundary': 'F-15',
+    'contained/error/focused/boundary': 'F-07',
+    'outlined/error/focused/boundary': 'F-07',
 }
 
 /**
@@ -468,8 +467,8 @@ export const BUTTON_FINDINGS: Readonly<Record<string, string>> = {
  * stay skipped.
  *
  * Values are produced by `contrastRatio`, which already truncates to two decimals, so the floor and
- * the measurement are byte-identical and the comparison needs no epsilon. Regenerate after
- * ASMA-8133 lands.
+ * the measurement are byte-identical and the comparison needs no epsilon. Use
+ * printRegressionFloors.ts to inspect current measurements; review changes before updating floors.
  */
 export const REGRESSION_FLOORS: Readonly<Record<string, Readonly<Record<string, number | null>>>> = {
     'input/placeholder': { default: 3.55, fretex: 5.57, greenish: 3.55 },
@@ -500,6 +499,6 @@ export const REGRESSION_FLOORS: Readonly<Record<string, Readonly<Record<string, 
     'outlined/common/hover/boundary': { default: 2.33, fretex: 1.81, greenish: 2.2 },
     'outlined/common/active/boundary': { default: 2.33, fretex: 1.81, greenish: 2.2 },
     'outlined/error/focused/text': { default: 1.27, fretex: 1.27, greenish: 1.27 },
-    'contained/error/focused/boundary': { default: null, fretex: 2.24, greenish: null },
-    'outlined/error/focused/boundary': { default: null, fretex: 2.24, greenish: null },
+    'contained/error/focused/boundary': { default: 8.37, fretex: 2.24, greenish: 8.37 },
+    'outlined/error/focused/boundary': { default: 8.37, fretex: 2.24, greenish: 8.37 },
 }

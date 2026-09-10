@@ -85,6 +85,17 @@ describe('resolveThemeTokens', () => {
 })
 
 describe('resolveTheme', () => {
+    it('resolves repaired error-button focus borders in every theme', () => {
+        for (const theme of discoverThemeNames()) {
+            const { resolved, unresolvable } = resolveTheme(theme)
+
+            expect(unresolvable).toEqual([])
+            expect(resolved.get('--colors-button-contained-error-focused-border-color')).toBe(
+                theme === 'fretex' ? '#9cb2a9' : '#9d0f0f',
+            )
+        }
+    })
+
     it('resolves the error-button focus borders repaired by ASMA-8133', () => {
         const { resolved, unresolvable } = resolveTheme(DEFAULT_THEME)
 
@@ -95,6 +106,7 @@ describe('resolveTheme', () => {
             )
         }
         expect(resolved.get('--colors-beta-400')).toMatch(/^#[\da-f]{6}$/i)
+
     })
 
     it('reports a dangling var() chain instead of dropping it silently', () => {
@@ -106,6 +118,7 @@ describe('resolveTheme', () => {
         ])
 
         expect(() => resolveDeclaration(declarations, 'var(--broken)')).toThrow(TokenResolutionError)
+
     })
 
     it('never lists a property as both resolved and unresolvable', () => {
