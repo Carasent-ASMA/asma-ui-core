@@ -32,6 +32,7 @@ export * from './components/inputs/switch'
 export * from './components/inputs/radio-button'
 export * from './components/inputs/label'
 export * from './components/inputs/dynamic-select'
+export * from './components/inputs/phone-field'
 
 // pickers
 export * from './datetime/components/date-picker'

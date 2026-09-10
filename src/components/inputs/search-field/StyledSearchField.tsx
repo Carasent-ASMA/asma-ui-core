@@ -21,6 +21,7 @@ export const StyledSearchField: FC<StyledSearchFieldProps> = ({
     label,
     onFocus,
     onBlur,
+    slotProps,
     ...props
 }) => {
     const [isFocused, setIsFocused] = useState<boolean>(false)
@@ -46,16 +47,23 @@ export const StyledSearchField: FC<StyledSearchFieldProps> = ({
                     setIsFocused(false)
                     onBlur?.(event)
                 }}
+                // Merged, not spread over. `slotProps` is destructured out of the rest props on
+                // purpose: `{...props}` below would otherwise replace this whole object, and a
+                // consumer passing only `slotProps.htmlInput` would silently lose the clear button,
+                // the search icon and the input padding along with it.
                 slotProps={{
+                    ...slotProps,
                     htmlInput: {
+                        // When the visible label is hidden, keep an accessible name on the control.
+                        'aria-label': !hasInteraction ? placeholderText : undefined,
+                        ...slotProps?.htmlInput,
                         style: {
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
                             ...(value ? { paddingRight: 40 } : {}),
+                            ...slotProps?.htmlInput?.style,
                         },
-                        // When the visible label is hidden, keep an accessible name on the control.
-                        'aria-label': !hasInteraction ? placeholderText : undefined,
                     },
                     input: {
                         endAdornment: value ? (
@@ -101,6 +109,7 @@ export const StyledSearchField: FC<StyledSearchFieldProps> = ({
                                 />
                             </span>
                         ) : undefined,
+                        ...slotProps?.input,
                     },
                 }}
                 {...props}
