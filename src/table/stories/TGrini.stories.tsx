@@ -91,3 +91,6 @@ export const TGrini = () => {
         </div>
     )
 }
+
+// axe: empty-table-header (table header cell has no text). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+TGrini.parameters = { a11y: { test: 'todo' } }

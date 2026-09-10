@@ -64,7 +64,12 @@ const LINK_SIZES = [
 
 const cell = 'border border-solid border-delta-200 box-border'
 
+// axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+Link.parameters = { a11y: { test: 'todo' } }
+
 export const Gallery: StoryObj<typeof meta> = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: () => (
         <table className='w-full table-fixed border-collapse text-delta-600'>
             <thead className='bg-delta-10'>

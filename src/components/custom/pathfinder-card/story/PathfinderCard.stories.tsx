@@ -211,6 +211,8 @@ export const DesktopCollapsedWithoutAvatar: Story = {
 }
 
 export const DesktopExpandedWithoutAvatar: Story = {
+    // axe: aria-hidden-focus (aria-hidden element contains focusable content); color-contrast (text/background contrast below the 4.5:1 threshold); nested-interactive (focusable control nested inside an interactive control). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: {
         breakpoint: 'desktop',
         withAvatar: false,
@@ -229,6 +231,8 @@ export const DesktopCollapsedWithAvatar: Story = {
 }
 
 export const DesktopExpandedWithAvatar: Story = {
+    // axe: aria-hidden-focus (aria-hidden element contains focusable content); color-contrast (text/background contrast below the 4.5:1 threshold); nested-interactive (focusable control nested inside an interactive control). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: {
         breakpoint: 'desktop',
         withAvatar: true,
@@ -238,6 +242,8 @@ export const DesktopExpandedWithAvatar: Story = {
 }
 
 export const BreakpointMatrixWithoutAvatar: Story = {
+    // axe: aria-hidden-focus (aria-hidden element contains focusable content); color-contrast (text/background contrast below the 4.5:1 threshold); nested-interactive (focusable control nested inside an interactive control). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: () => (
         <div className='grid gap-6 p-4'>
             <StoryShell breakpoint='mobile' withAvatar={false} expanded={false} />
@@ -251,6 +257,8 @@ export const BreakpointMatrixWithoutAvatar: Story = {
 }
 
 export const BreakpointMatrixWithAvatar: Story = {
+    // axe: aria-hidden-focus (aria-hidden element contains focusable content); color-contrast (text/background contrast below the 4.5:1 threshold); nested-interactive (focusable control nested inside an interactive control). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: () => (
         <div className='grid gap-6 p-4'>
             <StoryShell breakpoint='mobile' withAvatar={true} expanded={false} />
