@@ -9,8 +9,8 @@ export interface FocusedRow {
     onChangeFocused: (newExpanded: boolean, rowId?: string) => void
 
     isFocused: () => boolean
-    focusNextRow: () => void
-    focusPrevRow: () => void
+    focusNextRow: () => boolean
+    focusPrevRow: () => boolean
 }
 
 export interface FocusedRowsOptions {

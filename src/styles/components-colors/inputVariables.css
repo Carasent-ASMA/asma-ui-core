@@ -23,11 +23,11 @@
     --colors-input-active-focus-text-color: var(--colors-delta-800);
     --colors-input-active-disabled-text-color: var(--colors-delta-300);
     /* Figma Input field (node 15561-37391): enabled border delta-500 #7a899e; hover border/hover
-       gama-300 #60bdbd (2px); focus border/focus gama-400 #1ca1a1 (3px); disabled delta-300. */
+       gama-300 #60bdbd (2px); focus uses the theme-resolved focus ring (3px); disabled delta-300. */
     --colors-input-active-outline-color: var(--colors-delta-500);
     --colors-input-active-hover-outline-color: var(--colors-gama-300);
     --colors-input-active-active-outline-color: var(--colors-gama-400);
-    --colors-input-active-focus-outline-color: var(--colors-gama-400);
+    --colors-input-active-focus-outline-color: var(--colors-focus-ring);
     --colors-input-active-disabled-outline-color: var(--colors-delta-300);
     --input-active-cursor: text;
     --input-active-hover-cursor: text;

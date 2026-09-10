@@ -233,7 +233,10 @@ export function StyledSelectAutocomplete<
         if (next && (readOnly || disabled)) return
         if (controlledOpen === undefined) setUncontrolledOpen(next)
         if (next) onOpen?.()
-        else onClose?.()
+        else {
+            setActiveIndex(null)
+            onClose?.()
+        }
     }
 
     const [uncontrolledInput, setUncontrolledInput] = useState('')
@@ -264,6 +267,7 @@ export function StyledSelectAutocomplete<
 
     const isSelected = (option: T): boolean =>
         isMultiple ? selectedArray.some((v) => isEqual(option, v)) : singleValue !== null && isEqual(option, singleValue)
+    const isOptionDisabled = (option: T): boolean => getOptionDisabled?.(option) ?? isOptionObjectDisabled(option)
 
     const filtered = useMemo(() => {
         const base = [...options]
@@ -276,6 +280,18 @@ export function StyledSelectAutocomplete<
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [options, inputValue, filterOptions, value])
     const visibleOptions = useMemo(() => filtered.slice(0, 100), [filtered])
+    const enabledOptionIndexes = visibleOptions.flatMap((option, index) =>
+        !isOptionDisabled(option) ? [index] : [],
+    )
+    const selectedOptionIndex = visibleOptions.findIndex(isSelected)
+
+    useEffect(() => {
+        if (!open) return
+        const index = activeIndex ?? selectedOptionIndex
+        if (index < 0) return
+        const id = requestAnimationFrame(() => listRef.current[index]?.scrollIntoView({ block: 'nearest' }))
+        return () => cancelAnimationFrame(id)
+    }, [activeIndex, open, popperMaxHeight, selectedOptionIndex])
 
     const { refs, floatingStyles, context } = useFloating({
         open,
@@ -311,7 +327,21 @@ export function StyledSelectAutocomplete<
     const usePopoverLayer = shouldUsePopoverTopLayer(portalRoot)
     const floatingRef = useMergeRefs([useTopLayerRef(refs.setFloating, usePopoverLayer)])
 
-    const emitChange = (event: SyntheticEvent, option: T): void => {
+    const getInitialActiveIndex = (direction: -1 | 1): number | null => {
+        if (enabledOptionIndexes.includes(selectedOptionIndex)) return selectedOptionIndex
+        return enabledOptionIndexes[direction === 1 ? 0 : enabledOptionIndexes.length - 1] ?? null
+    }
+
+    const moveActiveOption = (direction: -1 | 1): void => {
+        if (enabledOptionIndexes.length === 0) return
+        setActiveIndex((index) => {
+            const position = enabledOptionIndexes.indexOf(index ?? selectedOptionIndex)
+            if (position === -1) return enabledOptionIndexes[direction === 1 ? 0 : enabledOptionIndexes.length - 1] ?? null
+            return enabledOptionIndexes[Math.min(Math.max(position + direction, 0), enabledOptionIndexes.length - 1)] ?? null
+        })
+    }
+
+    const emitChange = (event: SyntheticEvent, option: T, close = !isMultiple || !disableCloseOnSelect): void => {
         if (isMultiple) {
             const exists = selectedArray.some((v) => isEqual(option, v))
             const next = exists ? selectedArray.filter((v) => !isEqual(option, v)) : [...selectedArray, option]
@@ -322,12 +352,11 @@ export function StyledSelectAutocomplete<
                 { option },
             )
             setInputValue(event, '', 'reset')
-            // MUI parity: selecting closes the popup unless the caller opts out (default false).
-            if (!disableCloseOnSelect) setOpen(false)
+            if (close) setOpen(false)
         } else {
             onChange?.(event, option as never, 'selectOption', { option })
             setInputValue(event, getLabel(option), 'reset')
-            setOpen(false)
+            if (close) setOpen(false)
         }
     }
 
@@ -337,26 +366,33 @@ export function StyledSelectAutocomplete<
     }
 
     const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>): void => {
-        if (event.key === 'Enter' && open && activeIndex != null && visibleOptions[activeIndex] != null) {
+        if (event.key === 'Enter' && !open) {
+            event.preventDefault()
+            setOpen(true)
+        } else if (event.key === 'Enter' && activeIndex != null && visibleOptions[activeIndex] != null) {
             event.preventDefault()
             const option = visibleOptions[activeIndex]
-            if (!isOptionObjectDisabled(option)) emitChange(event, option)
+            if (!isOptionDisabled(option)) emitChange(event, option, true)
         } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
             event.preventDefault()
             if (!open) {
-                setActiveIndex(null)
+                setActiveIndex(getInitialActiveIndex(event.key === 'ArrowDown' ? 1 : -1))
                 setOpen(true)
                 return
             }
-            if (visibleOptions.length === 0) return
-            const direction = event.key === 'ArrowDown' ? 1 : -1
-            setActiveIndex((index) =>
-                index == null
-                    ? direction > 0
-                        ? 0
-                        : visibleOptions.length - 1
-                    : (index + direction + visibleOptions.length) % visibleOptions.length,
-            )
+            moveActiveOption(event.key === 'ArrowDown' ? 1 : -1)
+        } else if (event.key === 'Home' || event.key === 'End') {
+            event.preventDefault()
+            setActiveIndex(enabledOptionIndexes[event.key === 'Home' ? 0 : enabledOptionIndexes.length - 1] ?? null)
+        } else if (event.key === ' ' && activeIndex != null && visibleOptions[activeIndex] != null) {
+            event.preventDefault()
+            const option = visibleOptions[activeIndex]
+            if (!isOptionDisabled(option)) emitChange(event, option, false)
+        } else if (event.key === 'Escape') {
+            event.preventDefault()
+            setOpen(false)
+        } else if (event.key === 'Tab') {
+            setOpen(false)
         }
     }
 
@@ -391,6 +427,7 @@ export function StyledSelectAutocomplete<
             {showClear && (
                 <button
                     type='button'
+                    tabIndex={-1}
                     aria-label='Clear'
                     data-testid={`${dataTest}-clear`}
                     className='flex min-h-6 min-w-6 cursor-pointer items-center justify-center rounded-full border-0 bg-delta-50'
@@ -403,6 +440,7 @@ export function StyledSelectAutocomplete<
             {readOnly ? null : (
                 <button
                     type='button'
+                    tabIndex={-1}
                     aria-label='Toggle options'
                     aria-expanded={open}
                     data-testid={`${dataTest}-popup-indicator`}
@@ -460,8 +498,8 @@ export function StyledSelectAutocomplete<
     // hover, and selected backgrounds from that — not only from `defaultRenderOption`.
     const optionRowClassName = cn(
         // Figma Menus item: Body Base 16/lh24, text delta-800.
-        'box-border flex min-h-10 cursor-pointer items-center gap-x-3 px-3 py-1.5 text-base text-delta-800',
-        'aria-selected:bg-gama-50 data-[active]:bg-gama-50 data-[active]:text-delta-800',
+        'relative box-border flex min-h-10 cursor-pointer items-center gap-x-3 px-3 py-1.5 text-base text-delta-800',
+        'aria-selected:bg-gama-50 hover:bg-delta-50',
         // Disabled options never take the gama highlight (hover or keyboard) and read as muted.
         'aria-disabled:cursor-default aria-disabled:!bg-transparent aria-disabled:text-delta-300',
     )
@@ -470,6 +508,12 @@ export function StyledSelectAutocomplete<
         const { key, ...optionProps } = props
         return (
             <li key={key} {...optionProps}>
+                {props['data-active'] !== undefined && (
+                    <span
+                        aria-hidden='true'
+                        className='pointer-events-none absolute inset-y-0 left-0 border-l border-solid border-focus-ring'
+                    />
+                )}
                 {isMultiple ? (
                     // Pure state indicator: this <li> owns selection and carries the real accessible
                     // state via `aria-selected` (optionProps above). `decorative` renders no <input> at
@@ -496,7 +540,7 @@ export function StyledSelectAutocomplete<
     }
 
     const renderRow = (option: T, index: number): ReactNode => {
-        const optionDisabled = getOptionDisabled?.(option) ?? isOptionObjectDisabled(option)
+        const optionDisabled = isOptionDisabled(option)
         const props: OptionLiProps = {
             ...getItemProps({
                 // MUI parity: keep the field focused on option click (otherwise the outline drops
@@ -505,8 +549,8 @@ export function StyledSelectAutocomplete<
                 onClick: (event) => {
                     if (!optionDisabled) emitChange(event, option)
                 },
-                // Don't highlight a disabled option on hover.
-                onMouseMove: () => setActiveIndex(optionDisabled ? null : index),
+                // Hover is a grey mouse state; the left focus border is reserved for keyboard navigation.
+                onMouseMove: () => setActiveIndex(null),
             }),
             key: getOptionKey ? String(getOptionKey(option)) : `${getLabel(option)}-${index}`,
             ref: (node: HTMLLIElement | null) => {

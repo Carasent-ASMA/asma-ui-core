@@ -1,4 +1,4 @@
-import { forwardRef, type CSSProperties, type KeyboardEvent, type MouseEvent, type ReactElement, type ReactNode } from 'react'
+import { forwardRef, useRef, type CSSProperties, type KeyboardEvent, type MouseEvent, type ReactElement, type ReactNode } from 'react'
 import { CloseIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
 import { consumerOverrides } from 'src/helpers/classOverride'
@@ -113,11 +113,11 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
         },
         ref,
     ) => {
-        // Only a genuinely clickable chip is a button. A delete-only chip is NOT interactive itself —
-        // its delete `<button>` is the sole control (MUI parity). Making the whole chip `role="button"`
-        // when it merely has `onDelete` created two same-named buttons (chip + delete), an invalid
-        // nested-interactive a11y pattern that also broke role/name queries.
-        const interactive = !readOnly && !disabled && (!!clickable || !!onClick)
+        // Delete-only chips use the chip itself as the Tab stop; the nested delete button is mouse-only
+        // in the tab sequence.
+        const deleteOnly = Boolean(onDelete && !clickable && !onClick)
+        const interactive = !readOnly && !disabled && (!!clickable || !!onClick || deleteOnly)
+        const deleteButtonRef = useRef<HTMLButtonElement>(null)
         const startSlot = avatar ?? icon
         const hasDelete = Boolean(onDelete && !readOnly)
         const hasStart = Boolean(startSlot)
@@ -139,6 +139,11 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
         // tab stop that does nothing on keyboard activation.
         const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>): void => {
             if (!interactive) return
+            if (deleteOnly && event.key === 'Backspace') {
+                event.preventDefault()
+                deleteButtonRef.current?.click()
+                return
+            }
             if (event.key === 'Enter' || event.key === ' ') {
                 event.preventDefault()
                 onClick?.(event as unknown as MouseEvent<HTMLElement>)
@@ -161,7 +166,7 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                 role={roleOverride ?? (interactive ? 'button' : undefined)}
                 aria-checked={roleOverride ? ariaChecked : undefined}
                 aria-readonly={roleOverride ? ariaReadonly : undefined}
-                tabIndex={interactive ? tabIndex ?? 0 : tabIndex}
+                tabIndex={readOnly ? undefined : interactive ? tabIndex ?? 0 : tabIndex}
                 onClick={disabled || readOnly ? undefined : onClick}
                 onKeyDown={disabled || readOnly ? undefined : handleKeyDown}
                 onMouseDown={disabled || readOnly ? undefined : onMouseDown}
@@ -174,12 +179,12 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                     size === 'small' ? 'h-6' : 'h-8',
                     readOnly && 'pointer-events-none',
                     disabled && 'pointer-events-none opacity-[0.38]',
+                    'data-[focus]:!border-focus-ring data-[focus]:bg-gama-25 data-[focus]:shadow-[inset_0_0_0_2px_var(--colors-focus-ring)]',
                     interactive &&
                         cn(
                             'cursor-pointer outline-none',
                             'data-[hovered]:border-gama-200 data-[hovered]:bg-gama-25 hover:border-gama-200 hover:bg-gama-25',
-                            'focus:!border-gama-400 focus:bg-gama-25 focus:shadow-[0_0_0_1px_var(--colors-gama-400)]',
-                            'data-[focus]:!border-gama-400 data-[focus]:bg-gama-25 data-[focus]:shadow-[0_0_0_1px_var(--colors-gama-400)]',
+                            'focus-visible:!border-focus-ring focus-visible:bg-gama-25 focus-visible:shadow-[inset_0_0_0_2px_var(--colors-focus-ring)]',
                             'active:!border-gama-400 active:bg-gama-25 active:shadow-[0_0_0_2px_var(--colors-gama-400)]',
                         ),
                     classes?.root,
@@ -203,12 +208,14 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                 </span>
                 {onDelete && !readOnly && (
                     <button
+                        ref={deleteButtonRef}
                         type='button'
                         data-testid={`${dataTest}-delete`}
                         // "Remove <label>" (not the bare label) so it reads distinctly from the chip
                         // itself; falls back to a generic "Remove" when `label` is a composite ReactNode
                         // (not a plain string) — always some name rather than none (axe `button-name`).
                         aria-label={typeof label === 'string' ? `Remove ${label}` : 'Remove'}
+                        tabIndex={deleteOnly ? -1 : undefined}
                         onClick={handleDelete}
                         disabled={disabled}
                         className={cn(

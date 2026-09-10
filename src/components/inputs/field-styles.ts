@@ -68,7 +68,7 @@ export const outlineClass = ({ focused, error, disabled, readOnly, borderless }:
                 : error
                   ? 'border-error-500'
                   : focused
-                    ? 'border-[3px] border-gama-400' // Figma border/focus #1ca1a1 (node 15561-37298)
+                    ? 'border-[3px] border-focus-ring'
                     : 'border-delta-500 group-hover:border-2 group-hover:border-gama-300', // Figma border/hover #60bdbd
     )
 
@@ -88,10 +88,10 @@ export const notchedOutlineClass = ({
             ? 'border-delta-300'
             : readOnly
               ? 'border-delta-200'
-              : error
-                ? 'border-error-500'
-                : focused
-                  ? 'border-[3px] border-gama-400' // Figma border/focus #1ca1a1 (node 15561-37298)
+            : error
+              ? 'border-error-500'
+              : focused
+                ? 'border-[3px] border-focus-ring'
                   : 'border-delta-500 group-hover:border-2 group-hover:border-gama-300', // Figma border/hover #60bdbd
     )
 

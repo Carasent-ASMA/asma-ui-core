@@ -153,29 +153,36 @@ export const StyledSelect = ({
 
     const [open, setOpen] = useState(false)
     const [focused, setFocused] = useState(false)
+    const [activeOptionIndex, setActiveOptionIndex] = useState<number | null>(null)
     const [uncontrolled, setUncontrolled] = useState(defaultValue)
     const isControlled = value !== undefined
     const currentValue = isControlled ? value : uncontrolled
     const hasValue = Array.isArray(currentValue)
         ? currentValue.length > 0
         : currentValue !== undefined && currentValue !== '' && currentValue !== null
+    const childArray = Children.toArray(children)
+    const isOptionSelected = (optionValue: unknown): boolean =>
+        multiple ? Array.isArray(currentValue) && currentValue.includes(optionValue) : optionValue === currentValue
+    const enabledOptionIndexes = childArray.flatMap((child, index) =>
+        isValidElement<StyledSelectItemProps>(child) && !child.props.disabled ? [index] : [],
+    )
+    const selectedOptionIndex = childArray.findIndex(
+        (child) => isValidElement<StyledSelectItemProps>(child) && isOptionSelected(child.props.value),
+    )
+    const getInitialActiveOptionIndex = (direction: -1 | 1 = 1): number | null => {
+        if (enabledOptionIndexes.includes(selectedOptionIndex)) return selectedOptionIndex
+        return enabledOptionIndexes[direction === 1 ? 0 : enabledOptionIndexes.length - 1] ?? null
+    }
+    const activeOptionId =
+        activeOptionIndex === null ? undefined : `${listboxId}-option-${activeOptionIndex}`
 
     const listRef = useRef<HTMLUListElement>(null)
-    // Own handle on the trigger element: the merged floating-ui ref below can't be read back, and the
-    // dismiss handler needs to hand focus to it.
-    const triggerElRef = useRef<HTMLButtonElement | null>(null)
 
-    // Every close except a selection unmounts the listbox while the open-effect below still holds DOM
-    // focus inside it, so focus would fall to <body> and the next Tab would restart from the top of
-    // the document (WCAG 2.4.3 / 2.4.7; the ARIA combobox pattern requires Escape to return focus to
-    // the trigger). `selectValue` already restores focus after a pick — this covers Escape, outside
-    // press and re-clicking the trigger. Focus the user has already moved elsewhere is left alone.
+    // The trigger owns DOM focus throughout the open state; active options are exposed through
+    // aria-activedescendant. Closing never needs to recover focus from a list item.
     const handleOpenChange = (next: boolean): void => {
         setOpen(next)
-        if (next) return
-        const active = document.activeElement
-        if (active && active !== document.body && !listRef.current?.contains(active)) return
-        triggerElRef.current?.focus()
+        if (!next) setActiveOptionIndex(null)
     }
 
     const { refs, floatingStyles, context } = useFloating({
@@ -205,7 +212,7 @@ export const StyledSelect = ({
     const dismiss = useDismiss(context)
     const role = useRole(context, { role: 'listbox' })
     const { getReferenceProps, getFloatingProps } = useInteractions([click, dismiss, role])
-    const triggerRef = useMergeRefs([refs.setReference, triggerElRef])
+    const triggerRef = refs.setReference
     // Portal INTO the trigger's modal <dialog> (if any) so the listbox isn't inert. Popover API
     // only when body-portalled — nested showPopover inside a dialog breaks on mobile Safari.
     const portalRoot = useMemo(
@@ -222,20 +229,19 @@ export const StyledSelect = ({
         [hasValue, placeholder, displayEmpty, ctx],
     )
 
-    // Scroll (and focus) the selected option into view when the listbox opens — long year/month
-    // menus otherwise open at the top while the current value sits off-screen.
+    // Show the selected option on open, then follow keyboard navigation, without moving DOM focus.
     useEffect(() => {
         if (!open) return
         const id = requestAnimationFrame(() => {
-            const selected = listRef.current?.querySelector<HTMLElement>('[role="option"][aria-selected="true"]')
-            if (!selected) return
-            selected.scrollIntoView({ block: 'nearest' })
-            selected.focus()
+            const option = activeOptionId
+                ? document.getElementById(activeOptionId)
+                : listRef.current?.querySelector<HTMLElement>('[role="option"][aria-selected="true"]')
+            if (option && listRef.current?.contains(option)) option.scrollIntoView({ block: 'nearest' })
         })
         return () => cancelAnimationFrame(id)
-    }, [open])
+    }, [activeOptionId, open])
 
-    const selectValue = (next: unknown, child: ReactNode): void => {
+    const selectValue = (next: unknown, child: ReactNode, close = !multiple): void => {
         const selected = multiple
             ? Array.isArray(currentValue) && currentValue.includes(next)
                 ? currentValue.filter((item) => item !== next)
@@ -243,8 +249,8 @@ export const StyledSelect = ({
             : next
         if (!isControlled) setUncontrolled(selected)
         onChange?.({ target: { value: selected, name } }, child)
-        if (!multiple) {
-            setOpen(false)
+        if (close) {
+            handleOpenChange(false)
             requestAnimationFrame(() => (refs.domReference.current as HTMLElement | null)?.focus())
         }
     }
@@ -257,30 +263,33 @@ export const StyledSelect = ({
         const cleared = multiple ? [] : ''
         if (!isControlled) setUncontrolled(cleared)
         onChange?.({ target: { value: cleared, name } }, null)
-        setOpen(false)
+        handleOpenChange(false)
         setFocused(false)
     }
 
-    const options = Children.map(children, (child) => {
+    const options = Children.map(children, (child, index) => {
         if (!isValidElement<StyledSelectItemProps>(child)) return child
         const itemValue = child.props.value
         return cloneElement(child, {
-            selected: multiple
-                ? Array.isArray(currentValue) && currentValue.includes(itemValue)
-                : itemValue === currentValue,
-            onClick: () => selectValue(itemValue, child.props.children),
+            id: `${listboxId}-option-${index}`,
+            active: index === activeOptionIndex,
+            selected: isOptionSelected(itemValue),
+            onClick: () => {
+                setActiveOptionIndex(index)
+                selectValue(itemValue, child.props.children)
+            },
         })
     })
 
     // The selected option's label drives the trigger display (unless renderValue overrides).
-    const selectedChild = Children.toArray(children).find(
+    const selectedChild = childArray.find(
         (child): child is ReactElement<StyledSelectItemProps> =>
             isValidElement<StyledSelectItemProps>(child) && child.props.value === currentValue,
     )
     const shownValue = renderValue
         ? renderValue(currentValue)
         : multiple && Array.isArray(currentValue)
-          ? Children.toArray(children)
+          ? childArray
                 .filter(
                     (child): child is ReactElement<StyledSelectItemProps> =>
                         isValidElement<StyledSelectItemProps>(child) && currentValue.includes(child.props.value),
@@ -295,6 +304,27 @@ export const StyledSelect = ({
                 .join(', ')
           : selectedChild?.props.children
 
+    const moveActiveOption = (direction: -1 | 1): void => {
+        if (enabledOptionIndexes.length === 0) return
+        setActiveOptionIndex((previousIndex) => {
+            const position = enabledOptionIndexes.indexOf(previousIndex ?? selectedOptionIndex ?? -1)
+            if (position === -1) return enabledOptionIndexes[direction === 1 ? 0 : enabledOptionIndexes.length - 1] ?? null
+            const nextPosition = Math.min(Math.max(position + direction, 0), enabledOptionIndexes.length - 1)
+            return enabledOptionIndexes[nextPosition] ?? null
+        })
+    }
+
+    const selectActiveOption = (closeAfterSelect: boolean): void => {
+        const activeOption = activeOptionIndex === null ? undefined : childArray[activeOptionIndex]
+        if (!isValidElement<StyledSelectItemProps>(activeOption) || activeOption.props.disabled) return
+        selectValue(activeOption.props.value, activeOption.props.children, closeAfterSelect)
+    }
+
+    const openList = (direction: -1 | 1 = 1): void => {
+        setActiveOptionIndex(getInitialActiveOptionIndex(direction))
+        setOpen(true)
+    }
+
     const handleTriggerKeyDown = (event: KeyboardEvent<HTMLButtonElement>): void => {
         if (
             (event.key === 'Backspace' || event.key === 'Delete') &&
@@ -307,32 +337,32 @@ export const StyledSelect = ({
             handleClear()
             return
         }
-        if ((event.key !== 'ArrowDown' && event.key !== 'ArrowUp') || isDisabled || readOnly) return
-        event.preventDefault()
-        setOpen(true)
-        // Focus falls to the selected option via the open-effect above; if none selected, land on
-        // first (ArrowDown) / last (ArrowUp) so keyboard open still has a focus target.
-        requestAnimationFrame(() => {
-            if (listRef.current?.querySelector('[role="option"][aria-selected="true"]')) return
-            const items = listRef.current?.querySelectorAll<HTMLElement>('[role="option"]:not([aria-disabled="true"])')
-            if (!items?.length) return
-            items[event.key === 'ArrowUp' ? items.length - 1 : 0]?.focus()
-        })
-    }
+        if (isDisabled || readOnly) return
 
-    const handleKeyDown = (event: KeyboardEvent<HTMLUListElement>): void => {
-        const items = listRef.current
-            ? Array.from(listRef.current.querySelectorAll<HTMLElement>('[role="option"]:not([aria-disabled="true"])'))
-            : []
-        if (items.length === 0) return
-        const activeIndex = items.findIndex((n) => n === document.activeElement)
+        if (!open && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
+            event.preventDefault()
+            openList(event.key === 'ArrowDown' ? 1 : -1)
+            return
+        }
+        if (!open) return
+
         if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
             event.preventDefault()
-            const delta = event.key === 'ArrowDown' ? 1 : -1
-            items[(activeIndex + delta + items.length) % items.length]?.focus()
-        } else if (event.key === 'Enter' || event.key === ' ') {
+            moveActiveOption(event.key === 'ArrowDown' ? 1 : -1)
+        } else if (event.key === 'Home' || event.key === 'End') {
             event.preventDefault()
-            ;(document.activeElement as HTMLElement | null)?.click()
+            setActiveOptionIndex(enabledOptionIndexes[event.key === 'Home' ? 0 : enabledOptionIndexes.length - 1] ?? null)
+        } else if (event.key === ' ') {
+            event.preventDefault()
+            selectActiveOption(false)
+        } else if (event.key === 'Enter') {
+            event.preventDefault()
+            selectActiveOption(true)
+        } else if (event.key === 'Escape') {
+            event.preventDefault()
+            handleOpenChange(false)
+        } else if (event.key === 'Tab') {
+            handleOpenChange(false)
         }
     }
 
@@ -367,6 +397,7 @@ export const StyledSelect = ({
                 aria-haspopup='listbox'
                 aria-expanded={open}
                 aria-controls={listboxId}
+                aria-activedescendant={open ? activeOptionId : undefined}
                 // `labelId` (external label) wins when present — same MUI `Select` intent as
                 // `aria-labelledby` taking precedence over `aria-label` per spec. Otherwise fall back
                 // to `name` (unconditionally, same as the listbox's own `aria-label={name}` below) so
@@ -464,7 +495,6 @@ export const StyledSelect = ({
                             fontFamily: 'Roboto, Helvetica, Arial, sans-serif',
                         }}
                         {...getFloatingProps()}
-                        onKeyDown={handleKeyDown}
                         className={cn(
                             // Figma Menus (node 34522-151497): the list is padded `8px 0` (was 4px)
                             // and separates its rows from the container — see the equivalent rule on

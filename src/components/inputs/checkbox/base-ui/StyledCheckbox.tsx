@@ -70,7 +70,7 @@ export const CheckIcon = (props: SVGProps<SVGSVGElement>): JSX.Element => (
  */
 export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
     dataTest,
-    size = 'medium',
+    size = 'small',
     disabled,
     readOnly,
     error,
@@ -82,6 +82,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
     checkboxClassName,
     onChange,
     onClick,
+    onKeyDown,
     decorative,
     ...props
 }): JSX.Element => {
@@ -132,6 +133,14 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         if (readOnly) return
         onChange?.(event, event.target.checked)
+    }
+
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        onKeyDown?.(event)
+        if (event.defaultPrevented || event.key !== 'Enter' || readOnly) return
+
+        event.preventDefault()
+        event.currentTarget.click()
     }
 
     // Drive the SCSS module's state selectors (base-ui used to set these data-* attributes).
@@ -189,6 +198,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
                 disabled={disabled}
                 readOnly={readOnly}
                 onChange={handleChange}
+                onKeyDown={handleKeyDown}
                 {...props}
             />
             {visual}
