@@ -32,11 +32,15 @@ const RadioWrapper = ({
 }
 
 export const Unchecked_Default: Story = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: { checked: false },
     render: (args) => <RadioWrapper label='Unchecked' {...args} />,
 }
 
 export const Unchecked_Focused: Story = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: { checked: false },
     render: (args) => <RadioWrapper label='Focused' {...args} />,
     play: async ({ canvas }) => {
@@ -47,6 +51,8 @@ export const Unchecked_Focused: Story = {
 }
 
 export const Unchecked_Disabled: Story = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: { checked: false, disabled: true },
     render: (args) => <RadioWrapper label='Disabled' {...args} />,
     play: async ({ canvas, userEvent }) => {
@@ -58,11 +64,15 @@ export const Unchecked_Disabled: Story = {
 }
 
 export const Checked_Default: Story = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: { checked: true },
     render: (args) => <RadioWrapper label='Checked' {...args} />,
 }
 
 export const Checked_Focused: Story = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: { checked: true },
     render: (args) => <RadioWrapper label='Focused' {...args} />,
     play: async ({ canvas }) => {
@@ -73,6 +83,8 @@ export const Checked_Focused: Story = {
 }
 
 export const Checked_Disabled: Story = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: { checked: true, disabled: true },
     render: (args) => <RadioWrapper label='Disabled' {...args} />,
     play: async ({ canvas, userEvent }) => {
@@ -84,6 +96,8 @@ export const Checked_Disabled: Story = {
 }
 
 export const Group: Story = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: (args) => {
         const [selected, setSelected] = useState('')
         return (

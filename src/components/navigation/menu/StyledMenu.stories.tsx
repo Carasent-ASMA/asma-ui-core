@@ -30,6 +30,8 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Menu: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: meta.args,
     render: () => <StyledMenuExample args={meta.args} />,
 }

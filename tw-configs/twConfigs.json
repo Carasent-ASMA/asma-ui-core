@@ -37,7 +37,7 @@
         "delta-700": "var(--colors-delta-700)",
         "delta-800": "var(--colors-delta-800)",
         "delta-900": "var(--colors-delta-900)",
-        "delta-9000": "var(--colors-gray-9000)",
+        "delta-9000": "var(--colors-delta-9000)",
         "sigma-700": "var(--colors-sigma-700)",
         "theta-100": "var(--colors-theta-100)",
         "theta-200": "var(--colors-theta-200)",
@@ -83,11 +83,11 @@
         "btn-bg-mini-action-hover": "var(--colors-btn-bg-mini-action-hover)",
         "chat-ticket-message-bg": "var(--colors-chat-ticket-message-bg)",
         "colors-topbar-text": "var(--colors-topbar-text)",
-        "custom-grey-01": "hsl(var(--color-cardea--grey-01) / <alpha-value>)",
-        "custom-grey-02": "hsl(var(--color-cardea--grey-02) / <alpha-value>)",
-        "custom-grey-03": "hsl(var(--color-cardea--grey-03) / <alpha-value>)",
-        "custom-grey-04": "hsl(var(--color-cardea--grey-04) / <alpha-value>)",
-        "custom-grey-06": "hsl(var(--color-cardea--grey-06) / <alpha-value>)"
+        "custom-grey-01": "hsl(var(--colors-cardea--grey-01) / <alpha-value>)",
+        "custom-grey-02": "hsl(var(--colors-cardea--grey-02) / <alpha-value>)",
+        "custom-grey-03": "hsl(var(--colors-cardea--grey-03) / <alpha-value>)",
+        "custom-grey-04": "hsl(var(--colors-cardea--grey-04) / <alpha-value>)",
+        "custom-grey-06": "hsl(var(--colors-cardea--grey-06) / <alpha-value>)"
     },
     "boxShadow": {
         "ash": "-1px 8px 18px -20px black",
