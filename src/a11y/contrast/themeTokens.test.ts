@@ -97,6 +97,17 @@ describe('resolveTheme', () => {
         expect(resolved.get('--colors-beta-400')).toMatch(/^#[\da-f]{6}$/i)
     })
 
+    it('reports a dangling var() chain instead of dropping it silently', () => {
+        // Synthetic fixture: the live tokens are fully resolvable since ASMA-8133 (PR #172), and
+        // should stay that way — so the detector is exercised against a deliberately broken map
+        // instead of depending on a defect existing in the repo.
+        const declarations: ReadonlyMap<string, string> = new Map([
+            ['--broken', 'var(--never-defined)'],
+        ])
+
+        expect(() => resolveDeclaration(declarations, 'var(--broken)')).toThrow(TokenResolutionError)
+    })
+
     it('never lists a property as both resolved and unresolvable', () => {
         for (const theme of discoverThemeNames()) {
             const { resolved, unresolvable } = resolveTheme(theme)
