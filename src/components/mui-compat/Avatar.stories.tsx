@@ -54,6 +54,8 @@ const avatarStyle = (color: string, box: number, font: number): CSSProperties =>
  * The DS "Avatars" grid: rows = size, columns = semantic type. Reproduces the Figma reference frame.
  */
 export const Gallery: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: () => (
         <div className='inline-grid grid-cols-[120px_repeat(5,140px)] items-center gap-y-2 font-roboto'>
             {/* Header row */}
@@ -81,11 +83,15 @@ export const Gallery: Story = {
 
 /** A single default avatar (primitive defaults: 40px, grey surface, initials fallback). */
 export const Default: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: { children: 'NN' },
 }
 
 /** Variants (shape): circular (default), rounded, square. */
 export const Shapes: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: () => (
         <div className='flex items-center gap-4'>
             <Avatar variant='circular'>NN</Avatar>

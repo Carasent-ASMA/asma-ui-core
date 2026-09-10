@@ -6,6 +6,17 @@
     --colors-alpha-600: var(--colors-blue-600);
     --colors-alpha-700: var(--colors-blue-700);
     --colors-beta-100: var(--colors-red-100);
+    /* Focus-indicator shade for the three error-button *-focused-border-color rules.
+       Chosen by measurement on the rendered baseline, not by ramp position:
+         2.4.7  Focus Visible   (AA)  PASS - a ring renders where contained/outlined/text
+                                             previously painted none.
+         1.4.11 Non-text Contrast(AA) PASS - contained 8.37:1 against white on both sides
+                                             (a 1px white inset separates it from the fill,
+                                             itself 4.96:1); outlined and text 8.37:1 vs
+                                             page and 6.56:1 vs fill.
+         2.4.13 Focus Appearance(AAA) not claimed, outside this library's AA scope.
+       See docs/a11y-contrast.md (F-15) for the derivation and per-theme numbers. */
+    --colors-beta-400: var(--colors-red-700);
     --colors-beta-500: var(--colors-red-500);
     --colors-beta-600: var(--colors-red-600);
     --colors-beta-700: var(--colors-red-700);

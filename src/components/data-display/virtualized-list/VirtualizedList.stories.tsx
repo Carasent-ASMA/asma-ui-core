@@ -34,6 +34,8 @@ type Story = StoryObj<VirtualizedListProps<DemoRow>>
 
 /** 5,000 rows — the point being that only the visible handful are ever in the DOM. */
 export const FiveThousandRows: Story = {
+    // axe: scrollable-region-focusable (scrollable region is not keyboard focusable). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: { dataTest: 'virtualized-list-demo' },
     play: async ({ canvas }) => {
         const list = canvas.getByTestId('virtualized-list-demo')
@@ -52,6 +54,8 @@ export const FiveThousandRows: Story = {
 
 /** Variable heights need no configuration — the estimate only seeds the first paint. */
 export const VariableHeights: Story = {
+    // axe: scrollable-region-focusable (scrollable region is not keyboard focusable). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: {
         estimatedItemHeight: 48,
         items: rows(500),

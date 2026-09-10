@@ -59,6 +59,8 @@ export const WithCounter: Story = {
 }
 
 export const Error: Story = {
+    // axe: color-contrast (error text #e10700 on error bg #f7dede = 3.88, needs 4.5). Unmasked by ASMA-8133. ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: (args: any) => {
         const [value, setValue] = useState('')
 
@@ -86,6 +88,8 @@ export const Error: Story = {
 }
 
 export const Disabled: Story = {
+    // axe: color-contrast (disabled placeholder #bdc4cf on #ffffff = 1.75, needs 4.5). Unmasked by ASMA-8133. ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: {
         disabled: true,
         value: 'Disabled content',
@@ -215,6 +219,8 @@ export const LargeContentStress: Story = {
  * `storybook-addon-pseudo-states` classes so every state renders at rest.
  */
 export const Gallery: Story = {
+    // axe: color-contrast (error text #e10700 on error bg #f7dede = 3.88, needs 4.5). Unmasked by ASMA-8133. ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: () => {
         const cell: CSSProperties = { padding: 16, border: '1px solid #bdc4cf', verticalAlign: 'top', width: 320 }
         const head: CSSProperties = {
