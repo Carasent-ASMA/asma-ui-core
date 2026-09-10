@@ -155,6 +155,10 @@ export const Interactive: Story = {
         await userEvent.click(b as Element)
         await expect(b).toBeChecked()
         await expect(a).not.toBeChecked()
+        a?.focus()
+        await userEvent.keyboard('{Enter}')
+        await expect(a).toBeChecked()
+        await expect(b).not.toBeChecked()
     },
 }
 

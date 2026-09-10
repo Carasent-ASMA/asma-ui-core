@@ -221,12 +221,18 @@ export const DynamicSelectAutocomplete = forwardRef(
                                     onClick={!disabled ? props.onClick : undefined}
                                     className={cn(
                                         // Figma Menus item: Body Base 16/lh24.
-                                        'flex min-h-10 cursor-pointer items-center gap-x-1 bg-white px-2 text-base aria-selected:bg-gama-50 hover:bg-gama-50',
+                                        'relative flex min-h-10 cursor-pointer items-center gap-x-1 bg-white px-2 text-base aria-selected:bg-gama-50 hover:bg-delta-50',
                                         disabled &&
                                             'cursor-not-allowed bg-delta-50 aria-selected:!bg-delta-50 hover:!bg-delta-50 [&_*]:cursor-not-allowed',
                                     )}
                                     aria-disabled={disabled}
                                 >
+                                    {props['data-active'] !== undefined && (
+                                        <span
+                                            aria-hidden='true'
+                                            className='pointer-events-none absolute inset-y-0 left-0 border-l border-solid border-focus-ring'
+                                        />
+                                    )}
                                     <StyledTooltip arrow title={tooltipTitle}>
                                         <>
                                             <StyledCheckbox
@@ -271,13 +277,19 @@ export const DynamicSelectAutocomplete = forwardRef(
                                 key={props.id}
                                 className={cn(
                                     // Figma Menus item: Body Base 16/lh24.
-                                    'flex min-h-10 cursor-pointer items-center gap-x-1 px-2 text-base aria-selected:bg-gama-50 hover:bg-gama-50',
+                                    'relative flex min-h-10 cursor-pointer items-center gap-x-1 px-2 text-base aria-selected:bg-gama-50 hover:bg-delta-50',
                                     disabled &&
                                         'cursor-not-allowed bg-delta-50 aria-selected:!bg-delta-50 hover:!bg-delta-50 [&_*]:cursor-not-allowed',
                                 )}
                                 onClick={!disabled ? props.onClick : undefined}
                                 aria-disabled={disabled}
                             >
+                                {props['data-active'] !== undefined && (
+                                    <span
+                                        aria-hidden='true'
+                                        className='pointer-events-none absolute inset-y-0 left-0 border-l border-solid border-focus-ring'
+                                    />
+                                )}
                                 <StyledTooltip arrow title={tooltipTitle}>
                                     <>
                                         <span className='w-5 min-w-5'>
@@ -317,7 +329,10 @@ export const DynamicSelectAutocomplete = forwardRef(
                             readOnly={readOnly}
                             onFocus={onFocus}
                             onBlur={onBlur}
-                            onKeyDown={typingDisabled ? (e) => e.preventDefault() : undefined}
+                            onKeyDown={(event) => {
+                                params.onKeyDown(event)
+                                if (typingDisabled && !event.defaultPrevented && event.key.length === 1) event.preventDefault()
+                            }}
                             // Always off: this input owns its own option list, so the browser's
                             // form-history dropdown would cover it — same as `StyledSelectAutocomplete`
                             // and MUI's `useAutocomplete`. (The previous `typingDisabled ? 'off' : 'on'`

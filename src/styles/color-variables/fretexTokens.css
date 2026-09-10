@@ -6,6 +6,7 @@
     --colors-alpha-600: var(--colors-slate-600);
     --colors-alpha-700: var(--colors-slate-700);
     --colors-beta-100: var(--colors-red-100);
+    --colors-beta-400: var(--colors-green-400);
     --colors-beta-500: var(--colors-red-500);
     --colors-beta-600: var(--colors-red-600);
     --colors-beta-700: var(--colors-red-700);
@@ -16,6 +17,7 @@
     --colors-gama-300: var(--colors-green-300);
     --colors-gama-400: var(--colors-green-400);
     --colors-gama-500: var(--colors-green-500);
+    --colors-focus-ring: var(--colors-gama-500);
     --colors-gama-600: var(--colors-green-600);
     --colors-gama-700: var(--colors-green-700);
     --colors-gama-800: var(--colors-green-700);
@@ -71,7 +73,7 @@
     --colors-button-contained-error-border-color: var(--colors-beta-500);
     --colors-button-contained-error-focused-text-color: #ffffff;
     --colors-button-contained-error-focused-bg-color: var(--colors-beta-500);
-    --colors-button-contained-error-focused-border-color: var(--colors-gama-400);
+    --colors-button-contained-error-focused-border-color: var(--colors-beta-400);
     --colors-button-contained-error-active-text-color: #ffffff;
     --colors-button-contained-error-active-bg-color: var(--colors-beta-700);
     --colors-button-contained-error-active-border-color: var(--colors-beta-700);
@@ -101,9 +103,9 @@
     --colors-button-outlined-error-text-color: var(--colors-beta-500);
     --colors-button-outlined-error-bg-color: transparent;
     --colors-button-outlined-error-border-color: var(--colors-beta-500);
-    --colors-button-outlined-error-focused-text-color: #ffffff;
+    --colors-button-outlined-error-focused-text-color: var(--colors-beta-500);
     --colors-button-outlined-error-focused-bg-color: var(--colors-beta-100);
-    --colors-button-outlined-error-focused-border-color: var(--colors-gama-400);
+    --colors-button-outlined-error-focused-border-color: var(--colors-beta-400);
     --colors-button-outlined-error-active-text-color: var(--colors-beta-700);
     --colors-button-outlined-error-active-bg-color: var(--colors-beta-100);
     --colors-button-outlined-error-active-border-color: var(--colors-beta-700);
@@ -119,7 +121,6 @@
     --colors-button-text-common-border-color: transparent;
     --colors-button-text-common-focused-text-color: var(--colors-gama-500);
     --colors-button-text-common-focused-bg-color: var(--colors-gama-50);
-    --colors-button-text-common-focused-border-color: var(--colors-gama-400);
     --colors-button-text-common-active-text-color: var(--colors-gama-500);
     --colors-button-text-common-active-bg-color: var(--colors-gama-100);
     --colors-button-text-common-active-border-color: var(--colors-gama-100);
@@ -135,7 +136,7 @@
     --colors-button-text-error-border-color: transparent;
     --colors-button-text-error-focused-text-color: var(--colors-beta-600);
     --colors-button-text-error-focused-bg-color: var(--colors-beta-100);
-    --colors-button-text-error-focused-border-color: var(--colors-gama-400);
+    --colors-button-text-error-focused-border-color: var(--colors-beta-400);
     --colors-button-text-error-active-text-color: var(--colors-beta-600);
     --colors-button-text-error-active-bg-color: var(--colors-beta-100);
     --colors-button-text-error-active-border-color: var(--colors-beta-100);
@@ -151,7 +152,6 @@
     --colors-button-textGray-common-border-color: transparent;
     --colors-button-textGray-common-focused-text-color: var(--colors-gama-500);
     --colors-button-textGray-common-focused-bg-color: var(--colors-gama-50);
-    --colors-button-textGray-common-focused-border-color: var(--colors-gama-400);
     --colors-button-textGray-common-active-text-color: var(--colors-gama-500);
     --colors-button-textGray-common-active-bg-color: var(--colors-gama-100);
     --colors-button-textGray-common-active-border-color: var(--colors-gama-100);
@@ -167,7 +167,6 @@
     --colors-button-textWhite-common-border-color: transparent;
     --colors-button-textWhite-common-focused-text-color: white;
     --colors-button-textWhite-common-focused-bg-color: transparent;
-    --colors-button-textWhite-common-focused-border-color: transparent;
     --colors-button-textWhite-common-active-text-color: white;
     --colors-button-textWhite-common-active-bg-color: transparent;
     --colors-button-textWhite-common-active-border-color: transparent;

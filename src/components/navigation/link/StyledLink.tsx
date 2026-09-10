@@ -75,6 +75,7 @@ export const StyledLink: React.FC<StyledLinkProps> = ({
             data-testid={dataTest}
             ref={reflink}
             href={href}
+            tabIndex={0}
             className={clsx(style['styled-link'], textSize, className)}
         >
             {content}

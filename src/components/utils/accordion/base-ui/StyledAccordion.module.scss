@@ -8,8 +8,8 @@
         box-shadow: inset 0 0 0 1px var(--colors-delta-300);
 
         &:has(.Trigger:focus-visible) {
-            border-color: var(--colors-gama-400);
-            box-shadow: inset 0 0 0 2px var(--colors-gama-400);
+            border-color: var(--colors-focus-ring);
+            box-shadow: inset 0 0 0 3px var(--colors-focus-ring);
         }
     }
 
@@ -19,7 +19,7 @@
 
         &:has(.Trigger:focus-visible) {
             box-shadow: none;
-            outline: 2px solid var(--colors-gama-400);
+            outline: 3px solid var(--colors-focus-ring);
             outline-offset: 2px;
         }
     }

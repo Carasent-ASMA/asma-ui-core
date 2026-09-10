@@ -56,6 +56,9 @@ export const Interactive: Story = {
         await expect(box).toBeChecked()
         await userEvent.click(box)
         await expect(box).not.toBeChecked()
+        box.focus()
+        await userEvent.keyboard('{Enter}')
+        await expect(box).toBeChecked()
     },
 }
 
@@ -130,7 +133,7 @@ const CheckboxStateTable = ({ title, checkboxProps }: CheckboxTableProps) => {
                                 >
                                     <StyledCheckbox
                                         dataTest={`${title}-${rowName}-${columnName}`}
-                                        size='medium'
+                                        size='small'
                                         {...checkboxProps}
                                         {...COLUMN_CHECKBOX_PROPS[columnName]}
                                     />

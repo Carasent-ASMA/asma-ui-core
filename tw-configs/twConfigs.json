@@ -22,6 +22,7 @@
         "gama-300": "var(--colors-gama-300)",
         "gama-400": "var(--colors-gama-400)",
         "gama-500": "var(--colors-gama-500)",
+        "focus-ring": "var(--colors-focus-ring)",
         "gama-600": "var(--colors-gama-600)",
         "gama-700": "var(--colors-gama-700)",
         "gama-800": "var(--colors-gama-800)",

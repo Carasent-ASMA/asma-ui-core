@@ -79,28 +79,28 @@ describe('StyledSelectAutocomplete keyboard contract', () => {
 
         // The virtual-cursor pattern: focus must stay put, the ACTIVE option moves.
         await expect(document.activeElement).toBe(input())
-        await expect(activeOption()).toBe(optionRows()[0])
+        await expect(activeOption()).toBe(optionRows()[1])
     })
 
-    it('moves the active descendant down and up, wrapping at both ends (2.1.1)', async () => {
+    it('moves the active descendant down and up, stopping at either end (2.1.1)', async () => {
         mount(<AutocompleteFixture />)
         input().focus()
         await userEvent.keyboard('{ArrowDown}')
         await waitFor(() => expect(listbox()).not.toBeNull())
 
         await userEvent.keyboard('{ArrowDown}')
-        await expect(activeOption()).toBe(optionRows()[0])
-
-        await userEvent.keyboard('{ArrowDown}')
         await expect(activeOption()).toBe(optionRows()[1])
 
-        // Wrap forward off the end.
-        await userEvent.keyboard('{ArrowDown}{ArrowDown}{ArrowDown}')
-        await expect(activeOption()).toBe(optionRows()[0])
+        await userEvent.keyboard('{ArrowDown}')
+        await expect(activeOption()).toBe(optionRows()[2])
 
-        // Wrap backwards off the start.
-        await userEvent.keyboard('{ArrowUp}')
+        // Stop at the end.
+        await userEvent.keyboard('{ArrowDown}{ArrowDown}{ArrowDown}')
         await expect(activeOption()).toBe(optionRows()[OPTIONS.length - 1])
+
+        // Stop at the start.
+        await userEvent.keyboard('{ArrowUp}{ArrowUp}{ArrowUp}{ArrowUp}')
+        await expect(activeOption()).toBe(optionRows()[0])
     })
 
     it('resolves aria-activedescendant to a real option element (4.1.2)', async () => {
@@ -126,7 +126,7 @@ describe('StyledSelectAutocomplete keyboard contract', () => {
 
         await userEvent.keyboard('{ArrowDown}{ArrowDown}{Enter}')
 
-        await expect(onChange).toHaveBeenCalledWith('Bravo')
+        await expect(onChange).toHaveBeenCalledWith('Charlie')
         await waitFor(() => expect(listbox()).toBeNull())
     })
 

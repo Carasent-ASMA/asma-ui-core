@@ -193,10 +193,28 @@ export const KeyboardSelect: Story = {
         await expect(input).toHaveFocus()
 
         await userEvent.keyboard('{ArrowDown}')
-        await userEvent.keyboard('{ArrowDown}')
         await userEvent.keyboard('{Enter}')
 
-        await expect(canvas.getByRole('button', { name: /The Shawshank Redemption/i })).toBeInTheDocument()
+        await expect(canvas.getByRole('button', { name: 'Remove The Shawshank Redemption' })).toBeInTheDocument()
+    },
+}
+
+export const KeyboardToggleAndClose: Story = {
+    args: { disableCloseOnSelect: true },
+    render: (args) => <ControlledAutocomplete {...args} />,
+    play: async ({ canvasElement, userEvent }) => {
+        const { canvas, input } = getAutocomplete(canvasElement)
+
+        input.focus()
+        await userEvent.keyboard('{ArrowDown}')
+        await expect(input).toHaveFocus()
+        await expect(input).toHaveAttribute('aria-activedescendant', 'autocomplete-option-0')
+
+        await userEvent.keyboard(' ')
+        await expect(canvas.getByRole('listbox')).toBeInTheDocument()
+
+        await userEvent.keyboard('{Enter}')
+        await expect(canvas.queryByRole('listbox')).not.toBeInTheDocument()
     },
 }
 
@@ -276,7 +294,7 @@ export const RemovesChip: Story = {
         await userEvent.keyboard('{ArrowDown}')
         await userEvent.keyboard('{Enter}')
 
-        const chip = canvas.getByRole('button', { name: /The Godfather/i })
+        const chip = canvas.getByTestId('selected-chip-The Godfather')
         await expect(chip).toBeInTheDocument()
 
         const deleteIcon = canvas.getByTestId(
@@ -302,6 +320,12 @@ export const AriaExpandedLifecycle: Story = {
         await userEvent.keyboard('{Escape}')
 
         await expect(input).toHaveAttribute('aria-expanded', 'false')
+        await expect(input).not.toHaveAttribute('aria-activedescendant')
+
+        await userEvent.keyboard('{Enter}')
+        await expect(input).toHaveAttribute('aria-expanded', 'true')
+        await expect(input).not.toHaveAttribute('aria-activedescendant')
+        await userEvent.keyboard('{Escape}')
     },
 }
 
@@ -314,7 +338,10 @@ export const ActiveDescendant: Story = {
         await expect(input).toHaveFocus()
 
         await userEvent.keyboard('{ArrowDown}')
-        await userEvent.keyboard('{ArrowDown}')
+        await expect(input).toHaveAttribute('aria-activedescendant', 'autocomplete-option-0')
+        await userEvent.keyboard('{End}')
+        await expect(input).toHaveAttribute('aria-activedescendant', 'autocomplete-option-99')
+        await userEvent.keyboard('{Home}')
 
         const activeId = input.getAttribute('aria-activedescendant')
         await expect(activeId).toBeTruthy()

@@ -33,9 +33,15 @@ $checkbox-sizes: (
     cursor: pointer;
     background: transparent;
     border: none;
+    --cb-frame-size: 30px;
+    --cb-focus-gap-size: 24px;
+    --cb-frame-color: var(--colors-focus-ring);
+    --cb-frame-radius: 4px;
 
     &.size-small {
         @include checkbox-dimensions(small);
+        --cb-frame-size: 25px;
+        --cb-focus-gap-size: 19px;
     }
 
     &.size-medium {
@@ -82,23 +88,70 @@ $checkbox-sizes: (
     }
 
     &:focus-visible,
-    &[data-focus-visible] {
+    &[data-focus-visible],
+    input:focus-visible {
         outline: none;
+    }
+
+    &.Error,
+    &:has(input:focus-visible),
+    &:has(input[data-focus-visible]) {
+        &::before,
+        &::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        &::before {
+            width: var(--cb-frame-size);
+            height: var(--cb-frame-size);
+            z-index: 0;
+            border-radius: var(--cb-frame-radius);
+            background: var(--cb-frame-color);
+        }
+
+        &::after {
+            width: var(--cb-focus-gap-size);
+            height: var(--cb-focus-gap-size);
+            z-index: 1;
+            border-radius: 1px;
+            background: white;
+        }
+
+        .Checkbox {
+            z-index: 2;
+        }
     }
 }
 
-// Figma Error state (nodes 41325-207511/207527): box border = border/field-error #e10700 (error-500).
-// Unchecked keeps a transparent fill with a red border; checked/indeterminate keep the gama-500 fill
-// and gain a 2px red border.
+// Figma Error state (nodes 41325-207511/207527): 2px error frame outside the normal checkbox.
 .CheckboxWrapper.Error {
-    &[data-unchecked] .Checkbox {
-        border-color: var(--colors-error-500);
-    }
+    --cb-frame-size: 28px;
+    --cb-frame-color: var(--colors-error-500);
+    --cb-frame-radius: 3px;
+}
 
-    &:is([data-checked], [data-indeterminate]) .Checkbox,
-    &.Indeterminate .Checkbox {
-        border: 2px solid var(--colors-error-500);
-        --cb-border-w: 2px;
+.CheckboxWrapper.Error.size-small {
+    --cb-frame-size: 23px;
+}
+
+@media (forced-colors: active) {
+    .CheckboxWrapper.Error,
+    .CheckboxWrapper:has(input:focus-visible),
+    .CheckboxWrapper:has(input[data-focus-visible]) {
+        forced-color-adjust: none;
+
+        &::before {
+            background: CanvasText;
+        }
+
+        &::after {
+            background: Canvas;
+        }
     }
 }
 
@@ -161,7 +214,7 @@ $checkbox-sizes: (
 }
 
 .CheckboxHover {
-    &::after {
+    .CheckboxRippleContainer::after {
         content: '';
         @extend %ripple-base;
         width: 40px; // matches Figma 40px touch/hover target
@@ -175,20 +228,14 @@ $checkbox-sizes: (
         transform: translate(-50%, -50%) scale(0.7);
     }
 
-    &:hover::after,
-    &[data-hovered]::after,
-    &:has(input[data-hovered])::after {
+    &:hover .CheckboxRippleContainer::after,
+    &[data-hovered] .CheckboxRippleContainer::after,
+    &:has(input[data-hovered]) .CheckboxRippleContainer::after {
         opacity: 0.07;
         transform: translate(-50%, -50%) scale(1);
     }
 
-    &:has(input:focus-visible)::after,
-    &:has(input[data-focus-visible])::after {
-        opacity: 0.12;
-        transform: translate(-50%, -50%) scale(1);
-    }
-
-    &.size-small::after {
+    &.size-small .CheckboxRippleContainer::after {
         width: 38px;
         height: 38px;
     }

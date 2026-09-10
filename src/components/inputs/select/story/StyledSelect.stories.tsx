@@ -58,6 +58,32 @@ const Controlled = (args: StyledSelectProps) => {
     )
 }
 
+const ControlledMultiple = (args: StyledSelectProps) => {
+    const [value, setValue] = useState<unknown[]>(['1'])
+
+    return (
+        <StyledFormControl>
+            <StyledSelect
+                {...args}
+                dataTest='select-multiple'
+                name='Select people'
+                multiple
+                value={value}
+                onChange={(event, child) => {
+                    setValue(event.target.value as unknown[])
+                    args.onChange?.(event, child)
+                }}
+            >
+                {options.map((o) => (
+                    <StyledSelectItem key={o.id} value={o.id}>
+                        {o.title}
+                    </StyledSelectItem>
+                ))}
+            </StyledSelect>
+        </StyledFormControl>
+    )
+}
+
 /**
  * Trigger state gallery (field node 15561-37391): rows = State, columns = Value (Empty/Filled).
  * Hover forced via the root `group` + `pseudo-hover`. Focused/Open are React-driven and interactive —
@@ -161,16 +187,24 @@ export const KeyboardNavigation: Story = {
 
         const listbox = await canvas.findByRole('listbox')
         await expect(listbox).toBeInTheDocument()
-
-        // Opening moves focus to the first option via `requestAnimationFrame` (StyledSelect's
-        // `handleTriggerKeyDown`) — a real async step `findByRole` above doesn't wait for (it only
-        // waits for the listbox to exist in the DOM). Without this wait, a further `{ArrowDown}` sent
-        // before the RAF fires still lands on the trigger (re-opening a no-op, and losing a navigation
-        // step) instead of the listbox — flaky depending on RAF timing under test load.
-        await waitFor(() => expect(canvasElement.ownerDocument.activeElement).toHaveAttribute('role', 'option'))
+        await expect(trigger).toHaveFocus()
+        await expect(trigger).toHaveAttribute('aria-activedescendant', 'select-listbox-option-0')
 
         await userEvent.keyboard('{ArrowDown}')
+        await expect(trigger).toHaveAttribute('aria-activedescendant', 'select-listbox-option-1')
+        await userEvent.keyboard(' ')
+        await expect(canvas.getByRole('listbox')).toBeInTheDocument()
+        await expect(trigger).toHaveTextContent('April Tucker')
+
+        await userEvent.keyboard('{End}')
+        await expect(trigger).toHaveAttribute('aria-activedescendant', 'select-listbox-option-2')
+        await userEvent.keyboard('{Home}')
+        await expect(trigger).toHaveAttribute('aria-activedescendant', 'select-listbox-option-0')
+        await userEvent.keyboard('{ArrowUp}')
+        await expect(trigger).toHaveAttribute('aria-activedescendant', 'select-listbox-option-0')
         await userEvent.keyboard('{ArrowDown}')
+        await userEvent.keyboard('{ArrowDown}')
+        await expect(trigger).toHaveAttribute('aria-activedescendant', 'select-listbox-option-2')
 
         await userEvent.keyboard('{Enter}')
 
@@ -254,17 +288,10 @@ export const FocusReturnAfterSelect: Story = {
         await expect(trigger).toHaveFocus()
 
         await userEvent.keyboard('{ArrowDown}')
-
-        // Same RAF-timing wait as KeyboardNavigation — see its comment.
-        await waitFor(() => expect(canvasElement.ownerDocument.activeElement).toHaveAttribute('role', 'option'))
-
         await userEvent.keyboard('{ArrowDown}')
         await userEvent.keyboard('{Enter}')
 
-        // Selecting closes the listbox and returns focus to the trigger via `requestAnimationFrame`
-        // (StyledSelect's `selectValue`) — same RAF-timing concern as the wait above, so the
-        // assertion needs to wait for it rather than check immediately.
-        await waitFor(() => expect(trigger).toHaveFocus())
+        await expect(trigger).toHaveFocus()
     },
 }
 
@@ -278,17 +305,19 @@ export const EscapeCloses: Story = {
         await userEvent.click(trigger)
 
         await canvas.findByRole('listbox')
+        await userEvent.keyboard('{ArrowDown}')
+        await expect(trigger).toHaveAttribute('aria-activedescendant')
 
         await userEvent.keyboard('{Escape}')
 
         await expect(canvas.queryByRole('listbox')).not.toBeInTheDocument()
         await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+        await expect(trigger).toHaveFocus()
 
-        // Escape must hand focus back to the trigger: the open-effect parks focus on the selected
-        // option, so without StyledSelect's dismiss handler focus falls to <body> and the next Tab
-        // restarts from the top of the document. waitFor keeps the assertion independent of whether
-        // the restore lands synchronously with the dismiss or a render later.
-        await waitFor(() => expect(trigger).toHaveFocus())
+        await userEvent.keyboard('{Enter}')
+        await canvas.findByRole('listbox')
+        await expect(trigger).not.toHaveAttribute('aria-activedescendant')
+        await userEvent.keyboard('{Escape}')
     },
 }
 
@@ -318,17 +347,7 @@ export const SelectingSameValue: Story = {
 export const MultipleSelectBehavior: Story = {
     // axe: aria-input-field-name (ARIA input field has no accessible name); aria-valid-attr-value (ARIA attribute has an invalid value); button-name (icon-only button has no discernible text). ASMA-8136 allowlist - see docs/a11y-allowlist.md
     parameters: { a11y: { test: 'todo' } },
-    render: (args) => (
-        <StyledFormControl>
-            <StyledSelect {...args} multiple value={['1']}>
-                {options.map((o) => (
-                    <StyledSelectItem key={o.id} value={o.id}>
-                        {o.title}
-                    </StyledSelectItem>
-                ))}
-            </StyledSelect>
-        </StyledFormControl>
-    ),
+    render: (args) => <ControlledMultiple {...args} />,
     play: async ({ canvasElement, userEvent }) => {
         const canvas = within(canvasElement.ownerDocument.body)
 
@@ -342,8 +361,32 @@ export const MultipleSelectBehavior: Story = {
 
         await userEvent.click(option)
 
-        // Should remain open in multi mode
+        await expect(option).toHaveAttribute('aria-selected', 'true')
+        await expect(trigger).not.toHaveAttribute('aria-activedescendant')
+        // A multiple select remains open after pointer selection.
         await expect(canvas.getByRole('listbox')).toBeInTheDocument()
+    },
+}
+
+export const TabClosesAndMovesForward: Story = {
+    render: (args) => (
+        <>
+            <Controlled {...args} />
+            <button type='button'>Next control</button>
+        </>
+    ),
+    play: async ({ canvasElement, userEvent }) => {
+        const canvas = within(canvasElement.ownerDocument.body)
+        const trigger = canvas.getByRole('combobox')
+        const nextControl = canvas.getByRole('button', { name: 'Next control' })
+
+        trigger.focus()
+        await userEvent.keyboard('{ArrowDown}')
+        await canvas.findByRole('listbox')
+        await userEvent.keyboard('{Tab}')
+
+        await expect(canvas.queryByRole('listbox')).not.toBeInTheDocument()
+        await expect(nextControl).toHaveFocus()
     },
 }
 
@@ -366,6 +409,29 @@ export const EmptyOptions: Story = {
         await expect(listbox).toBeInTheDocument()
 
         await expect(canvas.queryByRole('option')).not.toBeInTheDocument()
+    },
+}
+
+export const ScrollsSelectedOptionIntoView: Story = {
+    render: (args) => (
+        <StyledSelect {...args} dataTest='long-select' name='Long select' value='25'>
+            {Array.from({ length: 30 }, (_, index) => (
+                <StyledSelectItem key={index} value={String(index)}>
+                    Option {index}
+                </StyledSelectItem>
+            ))}
+        </StyledSelect>
+    ),
+    play: async ({ canvasElement, userEvent }) => {
+        const canvas = within(canvasElement.ownerDocument.body)
+        const trigger = canvas.getByRole('combobox')
+
+        await userEvent.click(trigger)
+
+        const listbox = await canvas.findByRole('listbox')
+        await waitFor(() => expect(listbox.scrollTop).toBeGreaterThan(0))
+        await expect(trigger).toHaveFocus()
+        await expect(trigger).not.toHaveAttribute('aria-activedescendant')
     },
 }
 

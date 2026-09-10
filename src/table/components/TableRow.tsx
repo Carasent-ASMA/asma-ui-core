@@ -9,16 +9,34 @@ import { useRootContext } from 'src/table/context/RootContext'
 import type { ColumnWindow } from 'src/table/hooks/useColumnVirtualizer'
 import { compact } from 'src/helpers/arrays'
 
+const focusNextOutsideTable = (currentRow: HTMLTableRowElement): void => {
+    const table = currentRow.closest('table')
+    if (!table) return
+
+    const next = Array.from(
+        document.querySelectorAll<HTMLElement>(
+            'a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])',
+        ),
+    ).find(
+        (element) =>
+            !table.contains(element) && Boolean(table.compareDocumentPosition(element) & Node.DOCUMENT_POSITION_FOLLOWING),
+    )
+
+    next?.focus()
+}
+
 export function TableRow<TData extends { id: string | number }, TCustomData = Record<string, unknown>>({
     styledTableProps,
     row,
     index,
+    hasFocusedRow,
     columnWindow: { paddingLeft, paddingRight, indexes },
 }: {
     styledTableProps: StyledTableProps<TData, TCustomData>
     row: Row<TData>
     columnWindow: ColumnWindow
     index: number
+    hasFocusedRow: boolean
 }): JSX.Element {
     const {
         loading,
@@ -207,7 +225,7 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
                                 ? getRowClassName?.(row)
                                 : style['fixed-right-cell-default-background']),
                         isExpandedRow && style['expanded_row'],
-                        (Boolean(singleSelection) || row.isFocused()) && style['single-selection'],
+                        Boolean(singleSelection) && style['single-selection'],
                     )}
                     style={{
                         left: isFixedLeft ? cell.left : undefined,
@@ -268,7 +286,7 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
         <Fragment key={row.id}>
             <tr
                 aria-selected={row.getIsSelected() || row.isFocused() ? 'true' : 'false'}
-                tabIndex={row.isFocused() ? 0 : -1}
+                tabIndex={row.isFocused() || (index === 0 && !hasFocusedRow) ? 0 : -1}
                 data-index={index}
                 data-test={row.id}
                 id={row.id}
@@ -278,6 +296,9 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
                     ...(enableDnd && dndStyle),
                 }}
                 ref={setRowRef}
+                onFocus={(event) => {
+                    if (event.target === event.currentTarget && !row.isFocused()) row.onChangeFocused(true)
+                }}
                 onMouseUp={onMouseUp}
                 onMouseDown={(e) => {
                     if (e.detail > 1 && !hasRowClickHandler && textExpandArrow) {
@@ -286,14 +307,24 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
                 }}
                 onKeyDown={(e) => {
                     switch (e.key) {
-                        case 'Tab':
-                        case 'ArrowDown':
-                            row.focusNextRow()
+                        case 'Tab': {
                             e.preventDefault()
+                            if (e.shiftKey) {
+                                if (row.focusPrevRow()) break
+                                const header = e.currentTarget.closest('table')?.querySelector<HTMLTableRowElement>(
+                                    'thead tr[tabindex="0"]',
+                                )
+                                header?.focus()
+                            } else if (!row.focusNextRow()) {
+                                focusNextOutsideTable(e.currentTarget)
+                            }
+                            break
+                        }
+                        case 'ArrowDown':
+                            if (row.focusNextRow()) e.preventDefault()
                             break
                         case 'ArrowUp':
-                            row.focusPrevRow()
-                            e.preventDefault()
+                            if (row.focusPrevRow()) e.preventDefault()
                             break
                         case 'Enter':
                             onMouseUpAction(e)

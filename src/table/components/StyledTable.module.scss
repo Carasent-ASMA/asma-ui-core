@@ -177,29 +177,13 @@
             }
         }
 
-        &:focus {
-            background-color: var(--colors-gama-25);
-
-            .action-cell {
-                background-color: var(--colors-gama-25);
-            }
-
-            @media (min-width: 743px) {
-                .fixed-cell {
-                    background-color: var(--colors-gama-25);
-                }
-
-                .fixed-right-cell {
-                    background-color: var(--colors-gama-25);
-                }
-            }
-        }
-
         &:focus-visible {
             outline: none;
         }
 
         .t-cell {
+            --table-cell-shadow: 0 0 transparent;
+
             overflow: hidden;
             vertical-align: top;
             // Figma Body Base 16/lh24 — table content (FIGMA-PARITY.md typography table)
@@ -268,9 +252,11 @@
             z-index: 1;
 
             box-shadow: var(--action-cell-shadow);
+            --table-cell-shadow: var(--action-cell-shadow);
 
             &.action-cell--no-shadow {
                 box-shadow: none;
+                --table-cell-shadow: 0 0 transparent;
             }
 
             &.shadowed {
@@ -298,6 +284,7 @@
                 z-index: 1;
 
                 box-shadow: var(--fixed-cell-shadow);
+                --table-cell-shadow: var(--fixed-cell-shadow);
                 &.shadowed {
                     &.single-selection {
                         box-shadow:
@@ -316,6 +303,7 @@
                 z-index: 1;
 
                 box-shadow: var(--action-cell-shadow);
+                --table-cell-shadow: var(--action-cell-shadow);
                 &.single-selection {
                     box-shadow:
                         inset 0 2px 0 0 var(--colors-gama-400),
@@ -327,6 +315,7 @@
         .shadowed-right {
             @media (min-width: 743px) {
                 box-shadow: var(--action-cell-shadow);
+                --table-cell-shadow: var(--action-cell-shadow);
             }
         }
     }
@@ -436,9 +425,11 @@
                 z-index: 1;
                 background-color: var(--colors-gray-10);
                 box-shadow: var(--action-cell-shadow);
+                --table-cell-shadow: var(--action-cell-shadow);
 
                 &.t-cell__actions--no-shadow {
                     box-shadow: none;
+                    --table-cell-shadow: 0 0 transparent;
                 }
             }
 
@@ -450,6 +441,7 @@
                     z-index: 160;
 
                     box-shadow: var(--fixed-cell-shadow);
+                    --table-cell-shadow: var(--fixed-cell-shadow);
                 }
 
                 &.t-cell__fixed-right {
@@ -458,6 +450,7 @@
                     z-index: 160;
 
                     box-shadow: var(--action-cell-shadow);
+                    --table-cell-shadow: var(--action-cell-shadow);
                 }
             }
         }
@@ -483,6 +476,39 @@
                 white-space: nowrap;
             }
         }
+    }
+
+    // Figma table focus state: a 3px frame surrounds the whole header or row without changing
+    // its layout. `:has()` lets the focusable sortable cell activate the header-wide frame.
+    .table-header:has(:focus-visible),
+    .t-row:focus-visible {
+        .t-cell {
+            box-shadow:
+                inset 0 3px 0 0 var(--colors-focus-ring),
+                inset 0 -3px 0 0 var(--colors-focus-ring),
+                var(--table-cell-shadow, 0 0 transparent);
+
+            &:first-child {
+                box-shadow:
+                    inset 3px 0 0 0 var(--colors-focus-ring),
+                    inset 0 3px 0 0 var(--colors-focus-ring),
+                    inset 0 -3px 0 0 var(--colors-focus-ring),
+                    var(--table-cell-shadow, 0 0 transparent);
+            }
+
+            &:last-child {
+                box-shadow:
+                    inset -3px 0 0 0 var(--colors-focus-ring),
+                    inset 0 3px 0 0 var(--colors-focus-ring),
+                    inset 0 -3px 0 0 var(--colors-focus-ring),
+                    var(--table-cell-shadow, 0 0 transparent);
+            }
+        }
+    }
+
+    .table-header tr:focus-visible,
+    .table-header .sortable-column:focus-visible {
+        outline: none;
     }
 
     .table-footer--sticky {

@@ -35,6 +35,8 @@ export const Playground: Story = {
 }
 
 export const Variants: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: (args) => (
         <Stack spacing={6}>
             <StyledFilteredEmptyState

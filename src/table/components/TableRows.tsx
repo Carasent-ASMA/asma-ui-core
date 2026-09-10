@@ -18,6 +18,7 @@ export function TableRows<
     columnWindow: ColumnWindow
 }): JSX.Element {
     const rows = styledTableProps.hideFooter ? table.getExpandedRowModel().rows : table.getRowModel().rows
+    const hasFocusedRow = rows.some((row) => row.isFocused())
 
     return (
         <>
@@ -28,6 +29,7 @@ export function TableRows<
                         styledTableProps={styledTableProps}
                         row={row}
                         index={index}
+                        hasFocusedRow={hasFocusedRow}
                         columnWindow={columnWindow}
                     />
                 )
