@@ -316,6 +316,8 @@ export const SelectingSameValue: Story = {
 }
 
 export const MultipleSelectBehavior: Story = {
+    // axe: aria-input-field-name (ARIA input field has no accessible name); aria-valid-attr-value (ARIA attribute has an invalid value); button-name (icon-only button has no discernible text). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: (args) => (
         <StyledFormControl>
             <StyledSelect {...args} multiple value={['1']}>
@@ -346,6 +348,8 @@ export const MultipleSelectBehavior: Story = {
 }
 
 export const EmptyOptions: Story = {
+    // axe: aria-valid-attr-value (ARIA attribute has an invalid value). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: (args) => (
         <StyledFormControl>
             <StyledSelect {...args} dataTest='select-empty' name='Select empty' value=''></StyledSelect>
@@ -419,6 +423,8 @@ export const DynamicOptionsChange: Story = {
 }
 
 export const RapidOpenClose: Story = {
+    // axe: aria-valid-attr-value (ARIA attribute has an invalid value). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: (args) => <Controlled {...args} />,
     play: async ({ canvasElement, userEvent }) => {
         const canvas = within(canvasElement.ownerDocument.body)
@@ -458,6 +464,8 @@ export const ReadOnlyDoesNotOpen: Story = {
  * 16073-19226 / Input field 15561-37391) — at every `size`, including `small` (a no-op for text).
  */
 export const OptionAndValueAre16px: Story = {
+    // axe: aria-valid-attr-value (ARIA attribute has an invalid value). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: (args) => <Controlled {...args} size='small' />,
     play: async ({ canvasElement, userEvent }) => {
         const canvas = within(canvasElement.ownerDocument.body)

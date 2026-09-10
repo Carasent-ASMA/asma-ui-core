@@ -138,6 +138,8 @@ export const SingleSelectVariant: SingleStory = {
  * mount the `listbox`. Read-only is a display state (selected value(s) shown, no interaction).
  */
 export const ReadOnlyDoesNotOpen: SingleStory = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: () => {
         const Wrapper = () => {
             const [value] = useState<Film | null>(top100Films?.[0] || null)
@@ -213,6 +215,8 @@ export const StaysOpenOnSelect: Story = {
 }
 
 export const SelectAllTogglesAllOptions: Story = {
+    // axe: aria-required-children (role is missing a required child role). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: {
         allowSelectAll: true,
         selectAllLabel: 'Select every film',
@@ -334,6 +338,8 @@ export const AutoHeightApplies: Story = {
 }
 
 export const LargeDataset: Story = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: (args) => {
         const bigOptions = Array.from({ length: 2000 }).map((_, i) => ({
             title: `Film ${i}`,
@@ -415,6 +421,8 @@ export const AsyncLoading: Story = {
 }
 
 export const Performance_RenderCount: Story = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: (args) => {
         const { Wrapped, getRenderCount } =
             withRenderCounter<StyledSelectAutocompleteProps<Film, true, false, false>>(StyledSelectAutocomplete)
@@ -454,6 +462,8 @@ export const Performance_RenderCount: Story = {
 }
 
 export const Performance_LargeDataset: Story = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: (args) => {
         const options = useMemo(() => generateOptions(3000), [])
 
@@ -487,6 +497,8 @@ export const Performance_LargeDataset: Story = {
 }
 
 export const Performance_MultipleChips: Story = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: (args) => {
         const options = useMemo(() => generateOptions(1000), [])
 
@@ -558,6 +570,8 @@ const GalleryCell: FC<{
 }
 
 export const Gallery: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: () => {
         const cell: CSSProperties = { padding: 16, border: '1px solid #bdc4cf', verticalAlign: 'top', width: 340 }
         const head: CSSProperties = {

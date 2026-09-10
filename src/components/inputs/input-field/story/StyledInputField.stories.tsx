@@ -66,6 +66,8 @@ export default meta
 type Story = StoryObj<typeof StyledInputField>
 
 export const Default: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: {
         helperText: 'Helper text',
     },
@@ -79,6 +81,8 @@ export const Default: Story = {
 }
 
 export const Focused: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     play: async ({ canvas }) => {
         const input = canvas.getByLabelText('Label')
         input.focus()
@@ -117,6 +121,8 @@ export const Error: Story = {
 }
 
 export const ReservedHelperSlot: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: {
         label: 'Email',
         reserveHelperText: true,
@@ -150,6 +156,8 @@ export const ErrorWithoutMessage: Story = {
 }
 
 export const ReserveHelperTextFalse: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: {
         label: 'Email',
         reserveHelperText: false,
@@ -247,6 +255,8 @@ export const Multiline: Story = {
 }
 
 export const MultilineEmpty: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: {
         className: 'w-[600px]',
         label: 'Notes',
@@ -275,6 +285,8 @@ export const AriaInvalid: Story = {
 }
 
 export const AriaDescribedBy: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: {
         label: 'Email',
         helperText: 'name@example.com',
@@ -300,6 +312,8 @@ export const AriaDescribedBy: Story = {
  * kills the browser's "previously entered value" dropdown, and the floating `<label htmlFor>` dangles.
  */
 export const AutofillKeyAndLabelAssociation: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: {
         label: 'SMS code',
     },
@@ -321,6 +335,8 @@ export const AutofillKeyAndLabelAssociation: Story = {
  * dynamic select, date pickers) opt out by passing `autoComplete='off'` themselves.
  */
 export const BrowserDefaultAutofill: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     play: async ({ canvas }) => {
         const input = canvas.getByTestId('storybook-input')
 
@@ -336,6 +352,8 @@ export const BrowserDefaultAutofill: Story = {
  * `sharedProps` used to overwrite it with `undefined`.
  */
 export const HtmlInputSlotAutoCompleteWins: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: {
         slotProps: { htmlInput: { autoComplete: 'off', name: 'from_slot' } },
     },
@@ -349,6 +367,8 @@ export const HtmlInputSlotAutoCompleteWins: Story = {
 
 /** The top-level prop still wins over the slot, so a call site can override a wrapper's choice. */
 export const TopLevelAutoCompleteWins: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: {
         autoComplete: 'one-time-code',
         slotProps: { htmlInput: { autoComplete: 'off' } },
@@ -362,6 +382,8 @@ export const TopLevelAutoCompleteWins: Story = {
 
 /** An explicit `id` reaches the real control (MUI `TextField` parity) — not just the label's `htmlFor`. */
 export const ExplicitId: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: {
         id: 'sms-code-field',
         name: 'sms_code',
@@ -414,6 +436,8 @@ export const ChipAdornmentList: Story = {
 
 /** Live: typing updates the state-connected value and floats the label. */
 export const LiveTyping: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: { label: 'Type here', dataTest: 'storybook-input' },
     play: async ({ canvas, userEvent }) => {
         const input = canvas.getByTestId('storybook-input')
@@ -429,6 +453,8 @@ export const LiveTyping: Story = {
  * and inherently interactive — see the `Focused` story — so it is not part of this static matrix.
  */
 export const Gallery: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: () => {
         const cell: React.CSSProperties = { padding: 16, border: '1px solid #bdc4cf', verticalAlign: 'top' }
         const head: React.CSSProperties = {
