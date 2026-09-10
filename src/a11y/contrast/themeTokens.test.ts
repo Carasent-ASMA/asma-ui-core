@@ -75,7 +75,7 @@ describe('resolveThemeTokens', () => {
         expect(resolveThemeTokens('greenish').get('--colors-active-component')).toBe(fromRoot)
     })
 
-    it('applies the input variables, which are selected by [data-theme] and never by :root', () => {
+    it('applies the input variables under the selected theme', () => {
         expect(resolveThemeTokens('fretex').get('--colors-input-active-bg-color')).toBe('#ffffff')
     })
 
@@ -94,6 +94,19 @@ describe('resolveTheme', () => {
                 theme === 'fretex' ? '#9cb2a9' : '#9d0f0f',
             )
         }
+    })
+
+    it('resolves the error-button focus borders repaired by ASMA-8133', () => {
+        const { resolved, unresolvable } = resolveTheme(DEFAULT_THEME)
+
+        expect(unresolvable).toEqual([])
+        for (const variant of ['contained', 'outlined', 'text']) {
+            expect(resolved.get(`--colors-button-${variant}-error-focused-border-color`)).toBe(
+                resolved.get('--colors-beta-400'),
+            )
+        }
+        expect(resolved.get('--colors-beta-400')).toMatch(/^#[\da-f]{6}$/i)
+
     })
 
     it('reports a dangling var() chain instead of dropping it silently', () => {

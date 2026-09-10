@@ -8,8 +8,8 @@
  *  1. The stylesheets. Several assertions in this suite are about WCAG 2.4.7 (focus visible), which
  *     is a question about computed style. Without ui-core's CSS every element reports the UA
  *     default and a focus-indicator assertion would be meaningless — or worse, accidentally green.
- *  2. `data-theme`, which preview.ts sets via `withThemeByDataAttribute`. The token layer keys off
- *     it, so a bare mount would resolve every `var(--colors-*)` to the empty string.
+ *  2. `data-theme`, which preview.ts sets via `withThemeByDataAttribute`. Set it explicitly so
+ *     the suite exercises the default theme even where token families also have :root fallbacks.
  */
 import 'tailwindcss/tailwind.css'
 /* Read-only import of ASMA-8136's file — this suite reads `.storybook/`, it never edits it. The
