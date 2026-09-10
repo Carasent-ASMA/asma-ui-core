@@ -1,13 +1,6 @@
-import React from 'react'
-import type { SVGProps } from 'react'
-
-export function DotsVerticalIcon(props: SVGProps<SVGSVGElement>): JSX.Element {
-    return (
-        <svg xmlns='http://www.w3.org/2000/svg' width='1rem' height='1rem' viewBox='0 0 24 24' {...props}>
-            <path
-                fill='currentColor'
-                d='M12 16a2 2 0 0 1 2 2a2 2 0 0 1-2 2a2 2 0 0 1-2-2a2 2 0 0 1 2-2m0-6a2 2 0 0 1 2 2a2 2 0 0 1-2 2a2 2 0 0 1-2-2a2 2 0 0 1 2-2m0-6a2 2 0 0 1 2 2a2 2 0 0 1-2 2a2 2 0 0 1-2-2a2 2 0 0 1 2-2'
-            ></path>
-        </svg>
-    )
-}
+// Duplicate of the core icon (ASMA-8134) — same artwork and viewBox. Re-exported to keep the
+// `src/table/shared-components/DotsVerticalIcon` import path stable.
+//
+// The sole call site (RowActionMenu) passes `className` plus both `width` and `height`, all of
+// which `IIcon` expresses, so the copy's unused `1rem` default is not observable.
+export { DotsVerticalIcon } from 'src/components/icons/dots-vertical-icon'

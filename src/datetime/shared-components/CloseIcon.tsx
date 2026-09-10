@@ -1,13 +1,6 @@
-import React from 'react'
-import type { SVGProps } from 'react'
-
-export function CloseIcon(props: SVGProps<SVGSVGElement>): JSX.Element {
-    return (
-        <svg xmlns='http://www.w3.org/2000/svg' width='1em' height='1em' viewBox='0 0 24 24' {...props}>
-            <path
-                fill='currentColor'
-                d='M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12z'
-            ></path>
-        </svg>
-    )
-}
+// Duplicate of the core icon (ASMA-8134) — same artwork and viewBox. Re-exported to keep the
+// `src/datetime/shared-components/CloseIcon` import path stable.
+//
+// The sole call site (StyledCalendarPickerCaption) passes both `width` and `height`, so the copy's
+// unused `1em` default is not observable.
+export { CloseIcon } from 'src/components/icons/close-icon'

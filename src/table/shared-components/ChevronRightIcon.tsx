@@ -1,10 +1,8 @@
-import React from 'react'
-import type { SVGProps } from 'react'
-
-export function ChevronRightIcon(props: SVGProps<SVGSVGElement>): JSX.Element {
-    return (
-        <svg xmlns='http://www.w3.org/2000/svg' width='1rem' height='1rem' viewBox='0 0 24 24' {...props}>
-            <path fill='currentColor' d='M8.59 16.58L13.17 12L8.59 7.41L10 6l6 6l-6 6z'></path>
-        </svg>
-    )
-}
+// Duplicate of the core icon (ASMA-8134) — same artwork and viewBox. Re-exported to keep the
+// `src/table/shared-components/ChevronRightIcon` import path stable.
+//
+// Both call sites (TablePagination, the SubmenuExample story) pass explicit `width`/`height`, so
+// the copy's unused `1rem` default is not observable, and `color` is expressible on `IIcon`. Core
+// routes `color` through inline `style` where the copy passed it as an SVG presentation attribute
+// — computed colour is identical. See the PR for the full attribute-level diff.
+export { ChevronRightIcon } from 'src/components/icons/chevron-right-icon'
