@@ -251,24 +251,15 @@ describe('theme token integrity', () => {
 })
 
 /**
- * Dangling `var()` chains that exist on master, quarantined the same way a failing ratio is.
- * `--colors-beta-400` is referenced by three error-button focus borders but defined by no theme,
- * so in `default` and `greenish` those buttons render no focus border at all. `fretex` escapes
- * only because it overrides those three declarations to point at `--colors-gama-400` instead.
- * Tracked as F-15 in docs/a11y-contrast.md.
+ * Dangling `var()` chains quarantined the same way a failing ratio is. Empty since ASMA-8133
+ * defined `--colors-beta-400` (F-15 in docs/a11y-contrast.md, fixed in PR #172): every token in
+ * every theme now resolves to a literal. A future dangling chain fails this test and must be
+ * either fixed or quarantined here with a tracked finding.
  */
 const EXPECTED_UNRESOLVABLE: Readonly<Record<string, readonly string[]>> = {
-    default: [
-        '--colors-button-contained-error-focused-border-color',
-        '--colors-button-outlined-error-focused-border-color',
-        '--colors-button-text-error-focused-border-color',
-    ],
+    default: [],
     fretex: [],
-    greenish: [
-        '--colors-button-contained-error-focused-border-color',
-        '--colors-button-outlined-error-focused-border-color',
-        '--colors-button-text-error-focused-border-color',
-    ],
+    greenish: [],
 }
 
 /**
