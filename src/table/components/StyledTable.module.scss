@@ -1,6 +1,7 @@
 .asma-ui-table-styled-table {
-    --action-cell-shadow: none;
-    --fixed-cell-shadow: none;
+    // A transparent shadow remains valid when composed with the focused row's shadow layers.
+    --action-cell-shadow: 0 0 transparent;
+    --fixed-cell-shadow: 0 0 transparent;
 
     &[data-x-overflow='true'] {
         --action-cell-shadow: -15px 0px 15px rgba(0, 0, 0, 0.1);
@@ -486,14 +487,14 @@
             box-shadow:
                 inset 0 3px 0 0 var(--colors-focus-ring),
                 inset 0 -3px 0 0 var(--colors-focus-ring),
-                var(--table-cell-shadow, 0 0 transparent);
+                var(--table-cell-shadow, 0 0 transparent) !important;
 
             &:first-child {
                 box-shadow:
                     inset 3px 0 0 0 var(--colors-focus-ring),
                     inset 0 3px 0 0 var(--colors-focus-ring),
                     inset 0 -3px 0 0 var(--colors-focus-ring),
-                    var(--table-cell-shadow, 0 0 transparent);
+                    var(--table-cell-shadow, 0 0 transparent) !important;
             }
 
             &:last-child {
@@ -501,7 +502,7 @@
                     inset -3px 0 0 0 var(--colors-focus-ring),
                     inset 0 3px 0 0 var(--colors-focus-ring),
                     inset 0 -3px 0 0 var(--colors-focus-ring),
-                    var(--table-cell-shadow, 0 0 transparent);
+                    var(--table-cell-shadow, 0 0 transparent) !important;
             }
         }
     }

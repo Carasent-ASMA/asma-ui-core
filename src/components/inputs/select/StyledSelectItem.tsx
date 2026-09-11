@@ -51,7 +51,7 @@ export const StyledSelectItem = ({
             <span
                 aria-hidden='true'
                 data-select-active-indicator
-                className='pointer-events-none absolute inset-y-0 left-0 border-l border-solid border-focus-ring'
+                className='pointer-events-none absolute inset-y-0 left-0 border-l-[4px] border-solid border-focus-ring'
             />
         )}
         <span className='flex w-6 justify-center'>
