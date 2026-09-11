@@ -118,6 +118,40 @@ describe('StyledDialogFooter (ASMA-7099)', () => {
         expect(html).not.toContain('>Use as standard<')
     })
 
+    it('shows a spinner and disables the button while loading, keeping the label', () => {
+        /* The footers this replaces swapped the label FOR a spinner, which changed the
+         * button width mid-submit and forced hard-coded `w-[98px]` workarounds. */
+        const html = renderToStaticMarkup(
+            <StyledDialogFooter primaryAction={{ label: 'Save filter', loading: true }} />,
+        )
+
+        expect(html).toContain('Save filter')
+        expect(html).toContain('disabled')
+        expect(html).toContain('aria-busy="true"')
+    })
+
+    it('renders an endIcon on a right-cluster button', () => {
+        const html = renderToStaticMarkup(
+            <StyledDialogFooter primaryAction={{ label: 'Save', endIcon: <span>END</span> }} />,
+        )
+
+        expect(html).toContain('END')
+    })
+
+    it('anchors a tooltip on a wrapper only when one is supplied', () => {
+        /* StyledTooltip renders its content lazily on hover, so the title is absent from
+         * static markup — what SSR can prove is that the anchor wrapper exists at all, and
+         * that a falsy tooltip adds no stray wrapper. The visible text is asserted by the
+         * Storybook interaction test, which can actually hover. */
+        const withTooltip = renderToStaticMarkup(
+            <StyledDialogFooter primaryAction={{ label: 'Save', disabled: true, tooltip: 'Locked for editing' }} />,
+        )
+        const without = renderToStaticMarkup(<StyledDialogFooter primaryAction={{ label: 'Save' }} />)
+
+        expect(withTooltip).toContain('<span class="inline-flex">')
+        expect(without).not.toContain('<span class="inline-flex">')
+    })
+
     it('omits hidden left actions entirely', () => {
         const html = renderToStaticMarkup(
             <StyledDialogFooter leftActions={[{ ...deleteAction, hidden: true }]} />,

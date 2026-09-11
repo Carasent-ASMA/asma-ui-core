@@ -1,6 +1,7 @@
 import { useMemo, useState, type ReactNode } from 'react'
 
-import { DotsVerticalIcon } from 'src/components/icons'
+import { DotsVerticalIcon, LoadingIcon } from 'src/components/icons'
+import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip'
 import { StyledButton, type StyledButtonType } from 'src/components/inputs/button'
 import { StyledMenu } from 'src/components/navigation/menu/StyledMenu'
 import { StyledMenuItem } from 'src/components/navigation/menu/StyledMenuItem'
@@ -40,6 +41,21 @@ export interface StyledDialogFooterButton {
     /** Renders in the destructive palette (Figma `Danger = on`). */
     tone?: 'default' | 'danger'
     icon?: ReactNode
+    /** Trailing icon. `loading` supplies its own and wins. */
+    endIcon?: ReactNode
+    /**
+     * Shows a spinner after the label and disables the button. Consumers previously swapped
+     * the label *for* a spinner, which changes the button's width mid-submit — hence the
+     * hard-coded `w-[98px]` workarounds in the footers this replaces. Keeping the label
+     * makes the width stable on its own.
+     */
+    loading?: boolean
+    /**
+     * Wraps the button in a `StyledTooltip`. Falsy renders no tooltip, so the common
+     * `tooltip={disabled && 'Locked for editing'}` reads naturally. A disabled button does
+     * not emit pointer events, so the tooltip is anchored on a wrapper around it.
+     */
+    tooltip?: ReactNode
     dataTest?: string
     ariaLabel?: string
 }
@@ -149,21 +165,42 @@ export function StyledDialogFooter({
         [visibleLeftActions, leftAvailableWidth, widths],
     )
 
-    const renderButton = (button: StyledDialogFooterButton, fallbackVariant: StyledButtonType, key: string): JSX.Element => (
-        <StyledButton
-            dataTest={button.dataTest ?? `${dataTest}-${key}`}
-            variant={button.variant ?? fallbackVariant}
-            error={button.tone === 'danger'}
-            size='medium'
-            type={button.type ?? 'button'}
-            disabled={button.disabled}
-            startIcon={button.icon}
-            onClick={button.onClick}
-            aria-label={button.ariaLabel}
-        >
-            {button.label}
-        </StyledButton>
-    )
+    const renderButton = (
+        button: StyledDialogFooterButton,
+        fallbackVariant: StyledButtonType,
+        key: string,
+    ): JSX.Element => {
+        const element = (
+            <StyledButton
+                dataTest={button.dataTest ?? `${dataTest}-${key}`}
+                variant={button.variant ?? fallbackVariant}
+                error={button.tone === 'danger'}
+                size='medium'
+                type={button.type ?? 'button'}
+                disabled={Boolean(button.disabled) || Boolean(button.loading)}
+                startIcon={button.icon}
+                endIcon={button.loading ? <LoadingIcon width={20} height={20} /> : button.endIcon}
+                onClick={button.onClick}
+                aria-label={button.ariaLabel}
+                aria-busy={button.loading}
+            >
+                {button.label}
+            </StyledButton>
+        )
+
+        if (!button.tooltip) {
+            return element
+        }
+
+        /* A disabled button emits no pointer events, so the tooltip listens on a wrapper —
+         * otherwise the "why is this disabled?" tooltip never shows, which is the only
+         * reason these footers use one. */
+        return (
+            <StyledTooltip arrow title={button.tooltip}>
+                <span className='inline-flex'>{element}</span>
+            </StyledTooltip>
+        )
+    }
 
     return (
         <div

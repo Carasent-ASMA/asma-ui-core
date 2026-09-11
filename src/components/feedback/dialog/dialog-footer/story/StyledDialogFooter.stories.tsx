@@ -255,3 +255,45 @@ export const SingleLeftActionStaysInline: Story = {
         await expect(canvas.queryByRole('button', { name: 'More' })).not.toBeInTheDocument()
     },
 }
+
+/** A disabled primary explains itself on hover — the reason these footers use a tooltip. */
+export const DisabledPrimaryExplainsItself: Story = {
+    render: () => (
+        <Paper width={600}>
+            <StyledDialogFooter
+                secondaryAction={{ label: 'Cancel', onClick: noop }}
+                primaryAction={{ label: 'Save changes', disabled: true, tooltip: 'Locked for editing' }}
+            />
+        </Paper>
+    ),
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement)
+        const save = canvas.getByRole('button', { name: 'Save changes' })
+
+        await expect(save).toBeDisabled()
+        /* Hovering the disabled button itself would emit no pointer events — the wrapper is
+         * what makes the explanation reachable at all. */
+        await userEvent.hover(save.parentElement as HTMLElement)
+        await waitFor(async () => expect(within(document.body).getByText('Locked for editing')).toBeVisible())
+    },
+}
+
+/** Loading keeps the label (and therefore the button width) and marks the control busy. */
+export const PrimaryLoading: Story = {
+    render: () => (
+        <Paper width={600}>
+            <StyledDialogFooter
+                secondaryAction={{ label: 'Cancel', onClick: noop, disabled: true }}
+                primaryAction={{ label: 'Save filter', loading: true }}
+            />
+        </Paper>
+    ),
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement)
+        const save = canvas.getByRole('button', { name: /Save filter/ })
+
+        await expect(save).toBeDisabled()
+        await expect(save).toHaveAttribute('aria-busy', 'true')
+        await expect(save).toHaveTextContent('Save filter')
+    },
+}
