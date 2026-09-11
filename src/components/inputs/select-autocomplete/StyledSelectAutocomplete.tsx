@@ -89,7 +89,7 @@ type AutocompleteValue<T, Multiple, DisableClearable, FreeSolo> = Multiple exten
  * so the field **State** (Enabled/Hovered/Focused/Error/Read-only) ← focus/open + `error`/`readOnly`/
  * `disabled`. **Filled** ← selected value(s): single fills the input text, multiple renders **Tag
  * chips** (`StyledChip`: h32, radius25, label 16/delta-700 — node 20475-29954). The dropdown is the
- * **Menus** surface (node 16073-19226): rounded-lg, border delta-300, Menus shadow. Popup indicator =
+ * **Menus** surface (node 16073-19226): radius 4 (Figma `menus` token), border delta-300, Menus shadow. Popup indicator =
  * `+` (`PlusIconCircle`, multiple) or chevron (single); clear = `CloseIcon`. Non-annotated props are
  */
 export interface StyledSelectAutocompleteProps<
@@ -586,11 +586,11 @@ export function StyledSelectAutocomplete<
                         }}
                         {...getFloatingProps()}
                         className={cn(
-                            // Figma Autocomplete dropdown = the Menus surface (node 16073-19226): rounded-lg,
+                            // Figma Autocomplete dropdown = the Menus surface (node 16073-19226): radius 4,
                             // border/outline delta-300 (#bdc4cf), Menus shadow. Matches StyledSelect/StyledMenu.
                             // Figma Menus (node 34522-151497) pads the list `8px 0` — the rows run
                             // edge to edge horizontally, with 8px of breathing room top and bottom.
-                            'z-[1300] m-0 list-none overflow-auto rounded-lg border border-solid border-delta-300 bg-white px-0 py-2 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
+                            'z-[1300] m-0 list-none overflow-auto rounded border border-solid border-delta-300 bg-white px-0 py-2 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
                             // Figma Menus (node 34522-151497) separates the rows and leaves the last
                             // one clean. Owned by the LISTBOX, not the row, for two reasons: a custom
                             // `renderOption` that replaces `props.className` (a real pattern in
