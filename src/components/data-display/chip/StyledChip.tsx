@@ -1,10 +1,18 @@
-import { forwardRef, type CSSProperties, type KeyboardEvent, type MouseEvent, type ReactElement, type ReactNode } from 'react'
+import {
+    forwardRef,
+    type CSSProperties,
+    type KeyboardEvent,
+    type MouseEvent,
+    type ReactElement,
+    type ReactNode,
+} from 'react'
 import { CloseIcon } from 'src/components/icons'
-import { cn } from 'src/helpers/cn'
 import { consumerOverrides } from 'src/helpers/classOverride'
+import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
 
 import { getChipPadding } from './chipPadding'
+import styles from './StyledChip.module.scss'
 
 interface ChipClasses {
     root?: string
@@ -170,19 +178,13 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                     size === 'small' ? 'h-6' : 'h-8',
                     readOnly && 'pointer-events-none',
                     disabled && 'pointer-events-none opacity-[0.38]',
-                    'data-[focus]:!border-focus-ring data-[focus]:bg-gama-25 data-[focus]:shadow-[inset_0_0_0_2px_var(--colors-focus-ring)]',
-                    // Figma's delete-tag focused state is a 3px focus border around the whole chip.
-                    // Keep the real 1px border in the focus color and paint the remaining 2px inset:
-                    // this hides the default border without changing an auto-width chip's dimensions.
-                    hasDelete &&
-                        'focus-within:!border-focus-ring focus-within:bg-gama-25 focus-within:shadow-[inset_0_0_0_2px_var(--colors-focus-ring)]',
                     interactive &&
                         cn(
                             'cursor-pointer outline-none',
                             'data-[hovered]:border-gama-200 data-[hovered]:bg-gama-25 hover:border-gama-200 hover:bg-gama-25',
-                            'focus-visible:!border-focus-ring focus-visible:bg-gama-25 focus-visible:shadow-[inset_0_0_0_2px_var(--colors-focus-ring)]',
                             'active:!border-gama-400 active:bg-gama-25 active:shadow-[0_0_0_2px_var(--colors-gama-400)]',
                         ),
+                    styles['focus-ring'],
                     classes?.root,
                     className,
                 )}
