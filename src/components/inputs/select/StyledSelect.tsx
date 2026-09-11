@@ -447,7 +447,7 @@ export const StyledSelect = ({
                         <span
                             aria-hidden='true'
                             data-testid='select-clear-button'
-                            className='flex items-center justify-center rounded-full p-[2px] hover:bg-gama-100'
+                            className='invisible flex items-center justify-center rounded-full p-[2px] group-focus-within:visible hover:bg-gama-100'
                             onClick={(event) => {
                                 event.stopPropagation()
                                 handleClear()
