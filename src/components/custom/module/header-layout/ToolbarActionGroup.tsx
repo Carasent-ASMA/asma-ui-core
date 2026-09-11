@@ -128,7 +128,13 @@ export function ToolbarActionGroup({
 
             {showMoreMenu && (
                 <>
-                    <MoreTriggerButton overflowMenuLabel={overflowMenuLabel} onOpen={setAnchorEl} />
+                    {/* The trigger toggles: pressing it again closes the menu it opened. `StyledPopover`
+                        excludes the anchor from its outside-press handler on purpose, so the press
+                        reaches this button with the anchor still set — dismissal is ours to do. */}
+                    <MoreTriggerButton
+                        overflowMenuLabel={overflowMenuLabel}
+                        onOpen={(anchor) => setAnchorEl((current) => (current ? null : anchor))}
+                    />
 
                     <StyledMenu
                         anchorEl={anchorEl}
