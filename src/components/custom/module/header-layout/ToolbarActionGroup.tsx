@@ -32,6 +32,11 @@ export function ToolbarActionButton({
             variant={action.variant ?? (selectionTone ? 'text' : 'outlined')}
             error={action.tone === 'danger'}
             size={action.size ?? 'large'}
+            /* An action button runs its own onClick — it must never be the submit button of a
+             * surrounding <form>. StyledButton sets no default, so a bare <button> would be
+             * `type="submit"`, which fires the form instead (StyledDialogFooter footers commonly
+             * sit inside one). */
+            type='button'
             disabled={action.disabled}
             startIcon={action.icon}
             onClick={action.onClick}
@@ -56,6 +61,8 @@ export function MoreTriggerButton({
             dataTest='dynamic-toolbar-overflow-actions'
             variant='text'
             size='large'
+            /* Opens a menu; never submits a surrounding <form>. */
+            type='button'
             endIcon={<DotsVerticalIcon width={20} height={20} />}
             onClick={(event) => onOpen?.(event.currentTarget)}
             aria-label={overflowMenuLabel}
