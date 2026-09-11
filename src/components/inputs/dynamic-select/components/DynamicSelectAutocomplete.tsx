@@ -230,7 +230,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                                     {props['data-active'] !== undefined && (
                                         <span
                                             aria-hidden='true'
-                                            className='pointer-events-none absolute inset-y-0 left-0 border-l border-solid border-focus-ring'
+                                            className='pointer-events-none absolute inset-y-0 left-0 border-l-[4px] border-solid border-focus-ring'
                                         />
                                     )}
                                     <StyledTooltip arrow title={tooltipTitle}>
@@ -287,7 +287,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                                 {props['data-active'] !== undefined && (
                                     <span
                                         aria-hidden='true'
-                                        className='pointer-events-none absolute inset-y-0 left-0 border-l border-solid border-focus-ring'
+                                        className='pointer-events-none absolute inset-y-0 left-0 border-l-[4px] border-solid border-focus-ring'
                                     />
                                 )}
                                 <StyledTooltip arrow title={tooltipTitle}>
