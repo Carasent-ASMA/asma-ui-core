@@ -68,8 +68,10 @@ export const PointerCancellation: Story = {
         await userEvent.click(await body.findByRole('option', { name: 'Ada' }))
         await expect(pointerActions.select).toHaveBeenCalledTimes(1)
 
-        const clear = canvas.getByRole('button', { name: 'Clear' })
         const input = canvas.getByRole('combobox', { name: 'Search people' })
+        input.focus()
+        await expect(input).toHaveFocus()
+        const clear = canvas.getByRole('button', { name: 'Clear' })
         await userEvent.pointer({ target: clear, keys: '[MouseLeft>]' })
         await expect(input).toHaveValue('Ada')
         await userEvent.pointer({ target: canvasElement, keys: '[/MouseLeft]' })
