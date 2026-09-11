@@ -98,7 +98,7 @@ export const notchedOutlineClass = ({
 export const notchedLegendClass = (shrink: boolean): string =>
     cn(
         // The legend's opaque box masks the inset focus shadow in exactly the same gap as its native border.
-        'block h-[11px] overflow-hidden bg-white p-0 text-transparent text-xs leading-[23px] transition-[max-width] duration-150',
+        'block h-[11px] overflow-hidden bg-white p-0 text-xs leading-[23px] text-transparent transition-[max-width] duration-150',
         shrink ? 'max-w-full' : 'max-w-[0.01px]',
     )
 
