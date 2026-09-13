@@ -193,6 +193,7 @@ Every component is exported from the package root. Browse them interactively wit
 | --- | --- |
 | **Buttons & actions** | `StyledButton`, `StyledLink`, `CopyButton`, `CopyWrapper` |
 | **Text inputs** | `StyledInputField`, `StyledTextarea`, `StyledSearchField`, `StyledLabel` |
+| **Phone** | `StyledPhoneField` (country selector + national number), `StyledCountryFlag` |
 | **Selects** | `StyledSelect` + `StyledSelectItem` (single), `StyledSelectAutocomplete` (combobox), `StyledDynamicSelect` (chip multi-select), `Listbox` (headless) |
 | **Toggles** | `StyledCheckbox`, `StyledRadio` / `StyledRadioGroup`, `StyledSwitch`, `StyledSlider` |
 | **Form scaffolding** | `StyledFormControl`, `StyledFormControlLabel`, `StyledFormGroup`, `StyledFormLabel`, `StyledFormHelperText`, `StyledInputLabel` |
@@ -205,6 +206,37 @@ Every component is exported from the package root. Browse them interactively wit
 | **Layout / widgets** | `StyledWidget`, `StyledWidgetHeader`, `StyledWidgetTitle`, `StyledModuleTitle`, `DynamicToolbar` |
 | **Primitives** | `Paper`, `Stack`, `Container`, `Avatar`, `Skeleton`, `Fade`, `Popper`, `ClickAwayListener` |
 | **Hooks & utils** | `usePopupState` (+ `bindTrigger` / `bindPopover` / `bindPopper`), `useSnackbar`, `cn`, `omit`, `prepareForSlot` |
+
+### Phone field
+
+`StyledPhoneField` is a country selector paired with the national part of the number. It is
+presentational on purpose and owns **no** phone data: the country list, the formatter and the
+`tel:` href are injected by the consumer, which is normally `asma-core-helpers/phone`.
+
+```tsx
+import { StyledPhoneField, StyledCountryFlag } from 'asma-ui-core'
+import { listPhoneCountries, formatNationalAsYouType } from 'asma-core-helpers/phone'
+
+<StyledPhoneField
+    label='Phone'
+    countries={listPhoneCountries(locale)}
+    country={country}
+    onCountryChange={setCountry}
+    value={nationalNumber}
+    onChange={setNationalNumber}
+    formatNationalNumber={formatNationalAsYouType}
+    renderFlag={renderCountryFlag}
+    selectCountryLabel='Select country code'
+    searchPlaceholder='Search country or code'
+/>
+```
+
+The split is deliberate. Declaring the country structurally instead of importing the union keeps
+roughly 20 KB gz of country metadata out of the shared bundle, so an app that never renders a phone
+field does not pay for one. `onChange` reports digits only — the country travels separately.
+
+The picker has two shapes: below 744 px it is a full-screen sheet with its own search box, above it
+the trigger itself is the combobox. Both are keyboard-operable and share one listbox.
 
 ### Icons
 
