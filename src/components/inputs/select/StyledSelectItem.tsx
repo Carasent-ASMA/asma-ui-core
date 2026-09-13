@@ -3,7 +3,6 @@ import { CheckIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
 
 export interface StyledSelectItemProps {
-    id?: string
     value?: unknown
     /** Needed when a parent listbox points `aria-activedescendant` at this row. */
     id?: string
@@ -22,7 +21,6 @@ export interface StyledSelectItemProps {
 export const StyledSelectItem = ({
     id,
     children,
-    id,
     selected,
     active,
     disabled,
