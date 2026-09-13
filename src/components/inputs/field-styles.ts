@@ -68,7 +68,7 @@ export const outlineClass = ({ focused, error, disabled, readOnly, borderless }:
                 : error
                   ? 'border-error-500'
                   : focused
-                    ? 'border-[3px] border-gama-400' // Figma border/focus #1ca1a1 (node 15561-37298)
+                    ? 'border-focus-ring shadow-[inset_0_0_0_2px_var(--colors-focus-ring)]'
                     : 'border-delta-500 group-hover:border-2 group-hover:border-gama-300', // Figma border/hover #60bdbd
     )
 
@@ -88,16 +88,17 @@ export const notchedOutlineClass = ({
             ? 'border-delta-300'
             : readOnly
               ? 'border-delta-200'
-              : error
-                ? 'border-error-500'
-                : focused
-                  ? 'border-[3px] border-gama-400' // Figma border/focus #1ca1a1 (node 15561-37298)
-                  : 'border-delta-500 group-hover:border-2 group-hover:border-gama-300', // Figma border/hover #60bdbd
+            : error
+              ? 'border-error-500'
+              : focused
+                ? 'border-focus-ring shadow-[inset_0_0_0_2px_var(--colors-focus-ring)]'
+                : 'border-delta-500 group-hover:border-2 group-hover:border-gama-300', // Figma border/hover #60bdbd
     )
 
 export const notchedLegendClass = (shrink: boolean): string =>
     cn(
-        'invisible block h-[11px] overflow-hidden p-0 text-xs leading-[23px] transition-[max-width] duration-150',
+        // The legend's opaque box masks the inset focus shadow in exactly the same gap as its native border.
+        'block h-[11px] overflow-hidden bg-white p-0 text-xs leading-[23px] text-transparent transition-[max-width] duration-150',
         shrink ? 'max-w-full' : 'max-w-[0.01px]',
     )
 

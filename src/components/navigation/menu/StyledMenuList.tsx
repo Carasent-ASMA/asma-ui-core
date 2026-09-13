@@ -4,6 +4,8 @@ import { consumerOverrides } from 'src/helpers/classOverride'
 
 export interface StyledMenuListProps {
     children?: ReactNode
+    id?: string
+    role?: 'menu' | 'listbox'
     className?: string
     /** Focus the first enabled item on mount (MUI Menu autoFocus behaviour). */
     autoFocus?: boolean
@@ -22,6 +24,8 @@ const focusableItems = (list: HTMLUListElement | null): HTMLElement[] =>
  */
 export const StyledMenuList = ({
     children,
+    id,
+    role = 'menu',
     className,
     autoFocus,
     disablePadding,
@@ -57,20 +61,25 @@ export const StyledMenuList = ({
         items[nextIndex]?.focus()
     }
 
-    return (
-        <ul
-            ref={listRef}
-            role='menu'
-            className={cn(
-                'm-0 list-none outline-none',
-                !hasCustomPadding && 'px-0',
-                !hasCustomPadding && (disablePadding ? 'py-0' : 'py-2'),
-                className,
-            )}
-            style={{ fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}
-            onClick={onClick}
-            onKeyDown={handleKeyDown}
-        >
+    const listProps = {
+        id,
+        className: cn(
+            'm-0 list-none outline-none',
+            !hasCustomPadding && 'px-0',
+            !hasCustomPadding && (disablePadding ? 'py-0' : 'py-2'),
+            className,
+        ),
+        style: { fontFamily: 'Roboto, Helvetica, Arial, sans-serif' },
+        onClick,
+        onKeyDown: handleKeyDown,
+    }
+
+    return role === 'listbox' ? (
+        <ul ref={listRef} {...listProps} role='listbox'>
+            {children}
+        </ul>
+    ) : (
+        <ul ref={listRef} {...listProps} role='menu'>
             {children}
         </ul>
     )

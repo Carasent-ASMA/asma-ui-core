@@ -219,7 +219,7 @@ export function HeaderActionMenu<TData>({
                         className='h-10'
                         onClick={() => {
                             headerData.table.resetColumnOrder()
-                            message.info(t.column_order_reset)
+                            message.info(t.column_order_reset, { closeButton: true })
                         }}
                     >
                         {t.reset_order}

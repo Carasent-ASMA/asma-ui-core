@@ -32,10 +32,17 @@ export function ToolbarActionButton({
             variant={action.variant ?? (selectionTone ? 'text' : 'outlined')}
             error={action.tone === 'danger'}
             size={action.size ?? 'large'}
+            /* An action button runs its own onClick — it must never be the submit button of a
+             * surrounding <form>. StyledButton sets no default, so a bare <button> would be
+             * `type="submit"`, which fires the form instead (StyledDialogFooter footers commonly
+             * sit inside one). */
+            type='button'
             disabled={action.disabled}
             startIcon={action.icon}
             onClick={action.onClick}
-            aria-label={showLabel ? undefined : accessibleLabel}
+            /* An explicit ariaLabel always wins (e.g. a badge count appended to the name);
+             * otherwise the visible label is the accessible name and needs no duplication. */
+            aria-label={showLabel && action.ariaLabel == null ? undefined : accessibleLabel}
         >
             {showLabel ? action.label : undefined}
         </StyledButton>
@@ -54,6 +61,8 @@ export function MoreTriggerButton({
             dataTest='dynamic-toolbar-overflow-actions'
             variant='text'
             size='large'
+            /* Opens a menu; never submits a surrounding <form>. */
+            type='button'
             endIcon={<DotsVerticalIcon width={20} height={20} />}
             onClick={(event) => onOpen?.(event.currentTarget)}
             aria-label={overflowMenuLabel}
@@ -70,11 +79,18 @@ export function ToolbarActionGroup({
     overflowMenuLabel,
     className,
     selectionTone = false,
+    registerActionWidth,
 }: {
     plan: PlannedToolbarActions
     overflowMenuLabel: string
     className?: string
     selectionTone?: boolean
+    /**
+     * Width-registry hookup for `measureInStrip: false` actions: their single visible
+     * mount is measured here, so the planner budgets the real rendered width and the
+     * `estimatedWidthPx` only bridges the gap until the first measurement.
+     */
+    registerActionWidth?: (actionId: string, showLabel: boolean) => (element: HTMLElement | null) => void
 }): JSX.Element | null {
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
     const { inlineActions, overflowActions, showMoreMenu } = plan
@@ -85,18 +101,40 @@ export function ToolbarActionGroup({
 
     return (
         <div className={cn('flex shrink-0 flex-nowrap items-center gap-2', className)}>
-            {inlineActions.map(({ action, showLabel }) => (
-                <ToolbarActionButton
-                    key={action.id}
-                    action={action}
-                    showLabel={showLabel}
-                    selectionTone={selectionTone}
-                />
-            ))}
+            {inlineActions.map(({ action, showLabel }) => {
+                const button = (
+                    <ToolbarActionButton
+                        key={action.id}
+                        action={action}
+                        showLabel={showLabel}
+                        selectionTone={selectionTone}
+                    />
+                )
+
+                if (registerActionWidth == null || action.measureInStrip !== false) {
+                    return button
+                }
+
+                return (
+                    <span
+                        key={action.id}
+                        ref={registerActionWidth(action.id, showLabel)}
+                        className='inline-flex shrink-0'
+                    >
+                        {button}
+                    </span>
+                )
+            })}
 
             {showMoreMenu && (
                 <>
-                    <MoreTriggerButton overflowMenuLabel={overflowMenuLabel} onOpen={setAnchorEl} />
+                    {/* The trigger toggles: pressing it again closes the menu it opened. `StyledPopover`
+                        excludes the anchor from its outside-press handler on purpose, so the press
+                        reaches this button with the anchor still set — dismissal is ours to do. */}
+                    <MoreTriggerButton
+                        overflowMenuLabel={overflowMenuLabel}
+                        onOpen={(anchor) => setAnchorEl((current) => (current ? null : anchor))}
+                    />
 
                     <StyledMenu
                         anchorEl={anchorEl}

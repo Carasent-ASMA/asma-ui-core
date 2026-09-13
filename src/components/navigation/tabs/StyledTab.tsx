@@ -79,9 +79,9 @@ export const StyledTab: FC<StyledTabProps> = ({ value, label, disabled, classNam
                 // Disabled = text-icon/disabled #bdc4cf (delta-300); active = gama-500; inactive = delta-600.
                 disabled ? 'text-delta-300' : selected ? 'text-gama-500' : 'text-delta-600',
                 !disabled && 'cursor-pointer',
-                // Figma Focused = 2px gama-400 border on ALL sides. Inset box-shadow ring hugs the box
+                // Figma Focused = 3px focus-ring border on ALL sides. Inset box-shadow ring hugs the box
                 // (follows the rounded top) with no layout shift.
-                'focus-visible:shadow-[inset_0_0_0_2px_var(--colors-gama-400)]',
+                'focus-visible:shadow-[inset_0_0_0_3px_var(--colors-focus-ring)]',
                 // Figma Hover (not selected) = 2px delta-300 bottom underline (thicker than the resting line).
                 !disabled && !selected && 'hover:shadow-[inset_0_-2px_0_0_var(--colors-delta-300)]',
                 className,

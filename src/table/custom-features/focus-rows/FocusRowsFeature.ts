@@ -97,8 +97,9 @@ export const FocusedRowsFeature: TableFeature = {
             const nextRow = allRows[currentIndex + 1]
             if (nextRow) {
                 nextRow.onChangeFocused(true, nextRow.id)
-                document.getElementById(nextRow.id)?.focus({ preventScroll: true })
+                return true
             }
+            return false
         }
 
         row.focusPrevRow = () => {
@@ -107,8 +108,9 @@ export const FocusedRowsFeature: TableFeature = {
             const prevRow = allRows[currentIndex - 1]
             if (prevRow) {
                 prevRow.onChangeFocused(true, prevRow.id)
-                document.getElementById(prevRow.id)?.focus({ preventScroll: true })
+                return true
             }
+            return false
         }
     },
 }

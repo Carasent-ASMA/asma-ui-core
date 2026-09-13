@@ -1,7 +1,7 @@
 import type { Table } from '@tanstack/react-table'
-import { useToggleMenuVisibility } from 'src/table/hooks/useToggleMenuVisibility.hook'
+import { useKeyboardSelectMenu } from 'src/table/hooks/useToggleMenuVisibility.hook'
 import styleTable from '../StyledTable.module.scss'
-import { useMemo, useRef, useCallback } from 'react'
+import { useMemo, useRef, useCallback, useId } from 'react'
 import { StyledPopover as Popover, type PopoverOrigin } from 'src/components/utils/popover'
 import { StyledMenuList as MenuList } from 'src/components/navigation/menu'
 import { ChevronDownIcon } from 'src/table/shared-components/ChevronDownIcon'
@@ -9,7 +9,7 @@ import { ChevronRightIcon } from 'src/table/shared-components/ChevronRightIcon'
 import { ChevronLeftIcon } from 'src/table/shared-components/ChevronLeftIcon'
 import { StyledButton } from 'src/table/shared-components/button'
 import { StyledTooltip } from 'src/table/shared-components/tooltip'
-import { StyledMenuItem } from 'src/table/shared-components/menu-item'
+import { StyledSelectItem } from 'src/components/inputs/select'
 
 export function TablePagination<TData>({
     table,
@@ -18,9 +18,9 @@ export function TablePagination<TData>({
     locale: 'en' | 'no'
     table: Table<TData>
 }): JSX.Element {
-    const { anchorEl, open, handleClose, handleOpen } = useToggleMenuVisibility()
     const tablePaginationRef = useRef<HTMLDivElement | null>(null)
     const isNo = locale === 'no'
+    const listboxId = useId()
 
     const popoverOrigin = useMemo<{ anchorOrigin: PopoverOrigin; transformOrigin: PopoverOrigin }>(
         () => ({
@@ -50,11 +50,15 @@ export function TablePagination<TData>({
     const handlePageChange = useCallback(
         (page: number) => {
             table.setPageIndex(page - 1)
-            handleClose()
             scrollToTop()
         },
-        [table, handleClose, scrollToTop],
+        [table, scrollToTop],
     )
+    const { anchorEl, open, handleClose, handleOpen, triggerRef, activeIndex, handleKeyDown } = useKeyboardSelectMenu({
+        optionCount: pages.length,
+        selectedIndex: currentPage - 1,
+        onSelect: (index) => handlePageChange(pages[index]!),
+    })
 
     return (
         <>
@@ -64,7 +68,14 @@ export function TablePagination<TData>({
                         dataTest={'current-page-button'}
                         variant={'outlined'}
                         size={'large'}
+                        refLink={triggerRef}
                         onClick={handleOpen}
+                        onKeyDown={handleKeyDown}
+                        role='combobox'
+                        aria-haspopup='listbox'
+                        aria-controls={open ? listboxId : undefined}
+                        aria-expanded={open}
+                        aria-activedescendant={activeIndex === null ? undefined : `${listboxId}-option-${activeIndex}`}
                         endIcon={
                             <ChevronDownIcon
                                 className={`${open ? 'rotate-180' : 'rotate-0'} transition-transform duration-300`}
@@ -94,22 +105,25 @@ export function TablePagination<TData>({
                 anchorOrigin={popoverOrigin.anchorOrigin}
                 transformOrigin={popoverOrigin.transformOrigin}
             >
-                <MenuList>
-                    {pages.map((page) => (
-                        <StyledMenuItem
+                <MenuList id={listboxId} role='listbox'>
+                    {pages.map((page, index) => (
+                        <StyledSelectItem
                             key={page}
+                            id={`${listboxId}-option-${index}`}
+                            active={index === activeIndex}
                             onClick={(e) => {
                                 e.stopPropagation()
                                 e.preventDefault()
 
                                 handlePageChange(page)
+                                handleClose()
                             }}
                             selected={page === currentPage}
                         >
                             <span className={'text-base font-normal text-delta-700'}>
                                 {isNo ? 'Side' : 'Page'} {page}
                             </span>
-                        </StyledMenuItem>
+                        </StyledSelectItem>
                     ))}
                 </MenuList>
             </Popover>

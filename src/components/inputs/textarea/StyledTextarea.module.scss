@@ -29,7 +29,7 @@
             cursor: var(--input-#{$type}-active-cursor) #{!important};
         }
 
-        &:focus {
+        &:focus-visible {
             color: var(--colors-input-#{$type}-focus-text-color) #{!important};
             background-color: var(--colors-input-#{$type}-focus-bg-color) #{!important};
             outline-color: var(--colors-input-#{$type}-focus-outline-color) #{!important};

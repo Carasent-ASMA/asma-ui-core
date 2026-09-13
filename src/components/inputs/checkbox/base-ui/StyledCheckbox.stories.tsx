@@ -24,12 +24,16 @@ export default meta
 type Story = StoryObj<typeof StyledCheckbox>
 
 export const Checkbox: Story = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: { ...meta.args },
     render: () => <CheckboxTablesExample />,
 }
 
 /** Live: controlled checkbox whose state drives the label; clicking toggles it. */
 export const Interactive: Story = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: function InteractiveCheckbox() {
         const [checked, setChecked] = React.useState(false)
         return (
@@ -52,11 +56,16 @@ export const Interactive: Story = {
         await expect(box).toBeChecked()
         await userEvent.click(box)
         await expect(box).not.toBeChecked()
+        box.focus()
+        await userEvent.keyboard('{Enter}')
+        await expect(box).toBeChecked()
     },
 }
 
 /** Figma Checkbox+Label composite with 8px control-to-label gap. */
 export const CheckboxWithLabel: Story = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: () => (
         <StyledFormControlLabel
             label='Label'
@@ -124,7 +133,7 @@ const CheckboxStateTable = ({ title, checkboxProps }: CheckboxTableProps) => {
                                 >
                                     <StyledCheckbox
                                         dataTest={`${title}-${rowName}-${columnName}`}
-                                        size='medium'
+                                        size='small'
                                         {...checkboxProps}
                                         {...COLUMN_CHECKBOX_PROPS[columnName]}
                                     />

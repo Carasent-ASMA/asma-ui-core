@@ -1,10 +1,3 @@
-import React from 'react'
-import type { SVGProps } from 'react'
-
-export function ChevronLeftIcon(props: SVGProps<SVGSVGElement>): JSX.Element {
-    return (
-        <svg xmlns='http://www.w3.org/2000/svg' width='20px' height='20px' viewBox='0 0 24 24' {...props}>
-            <path fill='currentColor' d='M15.41 16.58L10.83 12l4.58-4.59L14 6l-6 6l6 6z'></path>
-        </svg>
-    )
-}
+// Duplicate of the core icon (ASMA-8134) — same artwork, viewBox and 20px default size.
+// Re-exported to keep the `src/datetime/shared-components/ChevronLeftIcon` import path stable.
+export { ChevronLeftIcon } from 'src/components/icons/chevron-left-icon'

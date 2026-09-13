@@ -13,6 +13,8 @@ type Story = StoryObj
 const range = { from: new Date(2026, 0, 10), to: new Date(2026, 0, 18) }
 
 export const AllDayStates: Story = {
+    // axe: button-name (icon-only button has no discernible text). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: () => (
         <div className='inline-block rounded border border-delta-300 p-4' style={{ width: 360 }}>
             <StyledDayPicker

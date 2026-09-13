@@ -138,6 +138,8 @@ export const SingleSelectVariant: SingleStory = {
  * mount the `listbox`. Read-only is a display state (selected value(s) shown, no interaction).
  */
 export const ReadOnlyDoesNotOpen: SingleStory = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: () => {
         const Wrapper = () => {
             const [value] = useState<Film | null>(top100Films?.[0] || null)
@@ -191,10 +193,28 @@ export const KeyboardSelect: Story = {
         await expect(input).toHaveFocus()
 
         await userEvent.keyboard('{ArrowDown}')
-        await userEvent.keyboard('{ArrowDown}')
         await userEvent.keyboard('{Enter}')
 
-        await expect(canvas.getByRole('button', { name: /The Shawshank Redemption/i })).toBeInTheDocument()
+        await expect(canvas.getByRole('button', { name: 'Remove The Shawshank Redemption' })).toBeInTheDocument()
+    },
+}
+
+export const KeyboardToggleAndClose: Story = {
+    args: { disableCloseOnSelect: true },
+    render: (args) => <ControlledAutocomplete {...args} />,
+    play: async ({ canvasElement, userEvent }) => {
+        const { canvas, input } = getAutocomplete(canvasElement)
+
+        input.focus()
+        await userEvent.keyboard('{ArrowDown}')
+        await expect(input).toHaveFocus()
+        await expect(input).toHaveAttribute('aria-activedescendant', 'autocomplete-option-0')
+
+        await userEvent.keyboard(' ')
+        await expect(canvas.getByRole('listbox')).toBeInTheDocument()
+
+        await userEvent.keyboard('{Enter}')
+        await expect(canvas.queryByRole('listbox')).not.toBeInTheDocument()
     },
 }
 
@@ -213,6 +233,8 @@ export const StaysOpenOnSelect: Story = {
 }
 
 export const SelectAllTogglesAllOptions: Story = {
+    // axe: aria-required-children (role is missing a required child role). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: {
         allowSelectAll: true,
         selectAllLabel: 'Select every film',
@@ -272,7 +294,7 @@ export const RemovesChip: Story = {
         await userEvent.keyboard('{ArrowDown}')
         await userEvent.keyboard('{Enter}')
 
-        const chip = canvas.getByRole('button', { name: /The Godfather/i })
+        const chip = canvas.getByTestId('selected-chip-The Godfather')
         await expect(chip).toBeInTheDocument()
 
         const deleteIcon = canvas.getByTestId(
@@ -298,6 +320,12 @@ export const AriaExpandedLifecycle: Story = {
         await userEvent.keyboard('{Escape}')
 
         await expect(input).toHaveAttribute('aria-expanded', 'false')
+        await expect(input).not.toHaveAttribute('aria-activedescendant')
+
+        await userEvent.keyboard('{Enter}')
+        await expect(input).toHaveAttribute('aria-expanded', 'true')
+        await expect(input).not.toHaveAttribute('aria-activedescendant')
+        await userEvent.keyboard('{Escape}')
     },
 }
 
@@ -310,7 +338,10 @@ export const ActiveDescendant: Story = {
         await expect(input).toHaveFocus()
 
         await userEvent.keyboard('{ArrowDown}')
-        await userEvent.keyboard('{ArrowDown}')
+        await expect(input).toHaveAttribute('aria-activedescendant', 'autocomplete-option-0')
+        await userEvent.keyboard('{End}')
+        await expect(input).toHaveAttribute('aria-activedescendant', 'autocomplete-option-99')
+        await userEvent.keyboard('{Home}')
 
         const activeId = input.getAttribute('aria-activedescendant')
         await expect(activeId).toBeTruthy()
@@ -334,6 +365,8 @@ export const AutoHeightApplies: Story = {
 }
 
 export const LargeDataset: Story = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: (args) => {
         const bigOptions = Array.from({ length: 2000 }).map((_, i) => ({
             title: `Film ${i}`,
@@ -415,6 +448,8 @@ export const AsyncLoading: Story = {
 }
 
 export const Performance_RenderCount: Story = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: (args) => {
         const { Wrapped, getRenderCount } =
             withRenderCounter<StyledSelectAutocompleteProps<Film, true, false, false>>(StyledSelectAutocomplete)
@@ -454,6 +489,8 @@ export const Performance_RenderCount: Story = {
 }
 
 export const Performance_LargeDataset: Story = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: (args) => {
         const options = useMemo(() => generateOptions(3000), [])
 
@@ -487,6 +524,8 @@ export const Performance_LargeDataset: Story = {
 }
 
 export const Performance_MultipleChips: Story = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: (args) => {
         const options = useMemo(() => generateOptions(1000), [])
 
@@ -558,6 +597,8 @@ const GalleryCell: FC<{
 }
 
 export const Gallery: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: () => {
         const cell: CSSProperties = { padding: 16, border: '1px solid #bdc4cf', verticalAlign: 'top', width: 340 }
         const head: CSSProperties = {

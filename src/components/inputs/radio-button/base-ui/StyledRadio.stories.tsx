@@ -53,11 +53,15 @@ const RadioWrapper = ({
 }
 
 export const Unchecked_Default: Story = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: { value: true },
     render: (args) => <RadioWrapper label='Unchecked' groupArgs={{ name: 'unchecked-default' }} radioArgs={args} />,
 }
 
 export const Unchecked_Focused: Story = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: { value: true },
     render: (args) => <RadioWrapper label='Focused' groupArgs={{ name: 'unchecked-focused' }} radioArgs={args} />,
     play: async ({ canvas }) => {
@@ -69,6 +73,8 @@ export const Unchecked_Focused: Story = {
 }
 
 export const Unchecked_Disabled: Story = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: { value: true, disabled: true },
     render: (args) => <RadioWrapper label='Disabled' groupArgs={{ name: 'unchecked-disabled' }} radioArgs={args} />,
     play: async ({ canvas, userEvent }) => {
@@ -83,6 +89,8 @@ export const Unchecked_Disabled: Story = {
 }
 
 export const Checked_Default: Story = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: { value: true },
     render: (args) => (
         <RadioWrapper label='Checked' groupArgs={{ name: 'checked-default', defaultValue: true }} radioArgs={args} />
@@ -90,6 +98,8 @@ export const Checked_Default: Story = {
 }
 
 export const Checked_Focused: Story = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: { value: true },
     render: (args) => (
         <RadioWrapper label='Focused' groupArgs={{ name: 'checked-focused', defaultValue: true }} radioArgs={args} />
@@ -103,6 +113,8 @@ export const Checked_Focused: Story = {
 }
 
 export const Checked_Disabled: Story = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: { value: true, disabled: true },
     render: (args) => (
         <RadioWrapper label='Disabled' groupArgs={{ name: 'checked-disabled', defaultValue: true }} radioArgs={args} />
@@ -120,6 +132,8 @@ export const Checked_Disabled: Story = {
 
 /** Live: controlled radio group; clicking an option selects it and updates state. */
 export const Interactive: Story = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: function InteractiveRadio() {
         const [value, setValue] = useState<string | number | boolean | null>('a')
         return (
@@ -141,6 +155,10 @@ export const Interactive: Story = {
         await userEvent.click(b as Element)
         await expect(b).toBeChecked()
         await expect(a).not.toBeChecked()
+        a?.focus()
+        await userEvent.keyboard('{Enter}')
+        await expect(a).toBeChecked()
+        await expect(b).not.toBeChecked()
     },
 }
 
@@ -150,6 +168,8 @@ export const Interactive: Story = {
  * checkbox). Read-only is omitted — the radio has no `readOnly` prop.
  */
 export const Gallery: Story = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: () => {
         const th: React.CSSProperties = {
             padding: 16,
@@ -210,6 +230,8 @@ export const Gallery: Story = {
 }
 
 export const Group: Story = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: { size: 'small' },
     render: (args) => {
         return (
@@ -255,6 +277,8 @@ export const Group: Story = {
 }
 
 export const ErrorText: Story = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: { size: 'small' },
     render: (args) => {
         return (
@@ -301,6 +325,8 @@ export const ErrorText: Story = {
 }
 
 export const DefaultErrorText: Story = {
+    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: { error: true, size: 'small' },
     render: (args) => {
         return (

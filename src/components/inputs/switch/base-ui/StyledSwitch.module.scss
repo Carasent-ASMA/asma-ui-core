@@ -80,13 +80,13 @@
 
     &:focus-visible {
         outline: none;
-        // Figma Focused (node 9197-93213): 2px gama-400 ring with a 2px white gap from the track.
+        // Figma Focused (node 9197-93213): 3px focus ring with a 2px white gap from the track.
         &::before {
             content: '';
             inset: 0;
             position: absolute;
             border-radius: inherit;
-            outline: 2px solid var(--colors-gama-400);
+            outline: 3px solid var(--colors-focus-ring);
             outline-offset: 2px;
         }
     }

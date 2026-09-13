@@ -77,7 +77,7 @@ export const TimePickerInput: React.FC<
                 slotProps={{
                     input: {
                         ref: inputRootRef,
-                        onMouseDown: (e: ReactMouseEvent<HTMLElement>) => {
+                        onClick: (e: ReactMouseEvent<HTMLElement>) => {
                             if (!disabled && !readOnly) popupState.open(e)
                         },
                         endAdornment: (

@@ -31,6 +31,13 @@ export interface DynamicToolbarAction {
     ariaLabel?: string
     /** Custom inline renderer for richer actions such as popover triggers. */
     render?: (options: DynamicToolbarActionRenderOptions) => ReactElement
+    /**
+     * Skip the measurement strip for this action and plan with `estimatedWidthPx`
+     * instead. For stateful renderers (widgets, stores, always-mounted dialogs)
+     * that must mount exactly once. Combine with `keepVisible` so the single
+     * mount stays in the visible row.
+     */
+    measureInStrip?: boolean
 }
 
 export interface PlannedToolbarAction {

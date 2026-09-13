@@ -75,7 +75,19 @@ export function TableHeader<
                 }, [])
 
                 return (
-                    <tr key={headerGroup.id}>
+                    <tr
+                        key={headerGroup.id}
+                        tabIndex={0}
+                        onKeyDown={(event) => {
+                            if (event.key !== 'Tab' || event.shiftKey) return
+                            const firstRow = event.currentTarget.closest('table')?.querySelector<HTMLTableRowElement>(
+                                'tbody tr[data-index="0"]',
+                            )
+                            if (!firstRow) return
+                            event.preventDefault()
+                            firstRow.focus()
+                        }}
+                    >
                         {leftHeaders.map(({ header, left }) => (
                             <TableHeaderCell
                                 key={header.id}

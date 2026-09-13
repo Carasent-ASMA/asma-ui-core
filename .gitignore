@@ -48,3 +48,6 @@ visual-tests/.baseline-static
 .lint-output.txt
 .storybook-exit.txt
 .storybook-output.txt
+
+# vitest browser-mode failure attachments (ASMA-8139 `interaction` project)
+.vitest-attachments

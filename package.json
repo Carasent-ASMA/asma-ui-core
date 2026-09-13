@@ -13,7 +13,8 @@
         "dist/**/*",
         "dist/style.css",
         "tw-configs/**/*",
-        "src/styles/**/*"
+        "src/styles/**/*",
+        "!src/styles/fonts/**"
     ],
     "keywords": [],
     "author": "asma-team",
@@ -65,6 +66,7 @@
         "vrt:accept": "bash scripts/vrt.sh accept",
         "vrt:report": "playwright show-report",
         "test-storybook": "npx vitest --project=storybook",
+        "test:interaction": "vitest --project=interaction --run",
         "changeset:pre-beta": "changeset pre enter beta",
         "changeset:pre-exit": "changeset pre exit",
         "changeset:version": "changeset version",

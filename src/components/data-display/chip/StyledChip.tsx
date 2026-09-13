@@ -1,10 +1,18 @@
-import { forwardRef, type CSSProperties, type KeyboardEvent, type MouseEvent, type ReactElement, type ReactNode } from 'react'
+import {
+    forwardRef,
+    type CSSProperties,
+    type KeyboardEvent,
+    type MouseEvent,
+    type ReactElement,
+    type ReactNode,
+} from 'react'
 import { CloseIcon } from 'src/components/icons'
-import { cn } from 'src/helpers/cn'
 import { consumerOverrides } from 'src/helpers/classOverride'
+import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
 
 import { getChipPadding } from './chipPadding'
+import styles from './StyledChip.module.scss'
 
 interface ChipClasses {
     root?: string
@@ -113,10 +121,6 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
         },
         ref,
     ) => {
-        // Only a genuinely clickable chip is a button. A delete-only chip is NOT interactive itself —
-        // its delete `<button>` is the sole control (MUI parity). Making the whole chip `role="button"`
-        // when it merely has `onDelete` created two same-named buttons (chip + delete), an invalid
-        // nested-interactive a11y pattern that also broke role/name queries.
         const interactive = !readOnly && !disabled && (!!clickable || !!onClick)
         const startSlot = avatar ?? icon
         const hasDelete = Boolean(onDelete && !readOnly)
@@ -161,7 +165,7 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                 role={roleOverride ?? (interactive ? 'button' : undefined)}
                 aria-checked={roleOverride ? ariaChecked : undefined}
                 aria-readonly={roleOverride ? ariaReadonly : undefined}
-                tabIndex={interactive ? tabIndex ?? 0 : tabIndex}
+                tabIndex={readOnly ? undefined : interactive ? tabIndex ?? 0 : tabIndex}
                 onClick={disabled || readOnly ? undefined : onClick}
                 onKeyDown={disabled || readOnly ? undefined : handleKeyDown}
                 onMouseDown={disabled || readOnly ? undefined : onMouseDown}
@@ -178,10 +182,9 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                         cn(
                             'cursor-pointer outline-none',
                             'data-[hovered]:border-gama-200 data-[hovered]:bg-gama-25 hover:border-gama-200 hover:bg-gama-25',
-                            'focus:!border-gama-400 focus:bg-gama-25 focus:shadow-[0_0_0_1px_var(--colors-gama-400)]',
-                            'data-[focus]:!border-gama-400 data-[focus]:bg-gama-25 data-[focus]:shadow-[0_0_0_1px_var(--colors-gama-400)]',
                             'active:!border-gama-400 active:bg-gama-25 active:shadow-[0_0_0_2px_var(--colors-gama-400)]',
                         ),
+                    styles['focus-ring'],
                     classes?.root,
                     className,
                 )}
@@ -212,7 +215,9 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                         onClick={handleDelete}
                         disabled={disabled}
                         className={cn(
-                            'flex shrink-0 items-center justify-center rounded-full border border-solid border-delta-100 bg-delta-50 p-0 text-delta-700',
+                            // Its focus indication is intentionally painted by the parent via
+                            // `focus-within`, matching the Figma state without a second button ring.
+                            'flex shrink-0 items-center justify-center rounded-full border border-solid border-delta-100 bg-delta-50 p-0 text-delta-700 [outline:none]',
                             size === 'small' ? 'h-[18px] w-[18px]' : 'h-5 w-5',
                             classes?.deleteIcon,
                         )}

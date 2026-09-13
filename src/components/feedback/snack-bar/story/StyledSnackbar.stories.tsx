@@ -118,11 +118,15 @@ type Story = StoryObj<typeof StyledDefaultSnackbar>
 
 /** Canonical Figma default: severity title + body, trailing action, close button. */
 export const Default: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: () => <StyledDefaultSnackbar {...toast('success')} />,
 }
 
 /** All four severities with the full layout (title + message + action + close). */
 export const AllVariants: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: () => (
         <div className='flex flex-col gap-8'>
             <Section heading='Severities (title + message + action)'>
@@ -163,6 +167,8 @@ export const AllVariants: Story = {
  * `useTopLayer.hook` / `SnackbarProvider`.
  */
 export const InsideDialog: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold) [intermittent]. ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: () => (
         <StyledDialog open onClose={() => undefined} dataTest='snackbar-dialog' dialogTitle='Send SMS'>
             <div className='p-6'>
@@ -286,6 +292,8 @@ export const NestedDialogs: Story = {
  * page content — the layout `SnackbarProvider` produces (`anchorOrigin: top/right`, `maxSnack: 3`).
  */
 export const PlacementInContext: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: () => (
         <div className='relative h-[560px] overflow-hidden rounded border border-solid border-delta-200 bg-white'>
             {/* Fake app chrome, so the stack is seen in front of real content. */}

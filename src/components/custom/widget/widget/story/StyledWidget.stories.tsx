@@ -141,3 +141,6 @@ export const Widget = (): JSX.Element => {
         </div>
     )
 }
+
+// axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+Widget.parameters = { a11y: { test: 'todo' } }

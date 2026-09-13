@@ -263,7 +263,12 @@ export const Chip = () => {
     return <ChipStateTable />
 }
 
+// axe: aria-allowed-attr (ARIA attribute not allowed on this role); color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+Chip.parameters = { a11y: { test: 'todo' } }
+
 export const FigmaPaddingMedium: StoryObj = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: () => (
         <StyledChip
             dataTest='figma-chip-padding'

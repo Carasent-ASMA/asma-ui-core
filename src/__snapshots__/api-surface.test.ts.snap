@@ -150,6 +150,7 @@ exports[`asma-ui-core public API surface > keeps every runtime export of the pac
   "OutlineCheckboxIconChecked",
   "OutlineCheckboxIconIndeterminate",
   "OutlineNotificationsIcon",
+  "PageHeader",
   "Paper",
   "PathfinderCard",
   "PdfIcon",
@@ -208,6 +209,7 @@ exports[`asma-ui-core public API surface > keeps every runtime export of the pac
   "StyledDialog",
   "StyledDialogActions",
   "StyledDialogContent",
+  "StyledDialogFooter",
   "StyledDialogTitle",
   "StyledDrawer",
   "StyledDynamicSelect",
@@ -298,6 +300,7 @@ exports[`asma-ui-core public API surface > keeps every runtime export of the pac
   "useDatePickerValidation",
   "useDynamicToolbarLayout",
   "usePopupState",
+  "useRouteHeadingFocus",
   "useSnackbar",
 ]
 `;

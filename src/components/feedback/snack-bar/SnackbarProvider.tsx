@@ -59,7 +59,7 @@ export const SnackbarProvider = (props: SnackbarProviderProps): JSX.Element => {
                 info: StyledInfoSnackbar,
                 default: StyledDefaultSnackbar,
             }}
-            autoHideDuration={6000}
+            autoHideDuration={props.autoHideDuration === undefined ? 6000 : props.autoHideDuration}
             anchorOrigin={{
                 vertical: 'top',
                 horizontal: 'right',

@@ -89,7 +89,7 @@ type AutocompleteValue<T, Multiple, DisableClearable, FreeSolo> = Multiple exten
  * so the field **State** (Enabled/Hovered/Focused/Error/Read-only) ← focus/open + `error`/`readOnly`/
  * `disabled`. **Filled** ← selected value(s): single fills the input text, multiple renders **Tag
  * chips** (`StyledChip`: h32, radius25, label 16/delta-700 — node 20475-29954). The dropdown is the
- * **Menus** surface (node 16073-19226): rounded-lg, border delta-300, Menus shadow. Popup indicator =
+ * **Menus** surface (node 16073-19226): radius 4 (Figma `menus` token), border delta-300, Menus shadow. Popup indicator =
  * `+` (`PlusIconCircle`, multiple) or chevron (single); clear = `CloseIcon`. Non-annotated props are
  */
 export interface StyledSelectAutocompleteProps<
@@ -233,7 +233,10 @@ export function StyledSelectAutocomplete<
         if (next && (readOnly || disabled)) return
         if (controlledOpen === undefined) setUncontrolledOpen(next)
         if (next) onOpen?.()
-        else onClose?.()
+        else {
+            setActiveIndex(null)
+            onClose?.()
+        }
     }
 
     const [uncontrolledInput, setUncontrolledInput] = useState('')
@@ -264,6 +267,7 @@ export function StyledSelectAutocomplete<
 
     const isSelected = (option: T): boolean =>
         isMultiple ? selectedArray.some((v) => isEqual(option, v)) : singleValue !== null && isEqual(option, singleValue)
+    const isOptionDisabled = (option: T): boolean => getOptionDisabled?.(option) ?? isOptionObjectDisabled(option)
 
     const filtered = useMemo(() => {
         const base = [...options]
@@ -276,6 +280,18 @@ export function StyledSelectAutocomplete<
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [options, inputValue, filterOptions, value])
     const visibleOptions = useMemo(() => filtered.slice(0, 100), [filtered])
+    const enabledOptionIndexes = visibleOptions.flatMap((option, index) =>
+        !isOptionDisabled(option) ? [index] : [],
+    )
+    const selectedOptionIndex = visibleOptions.findIndex(isSelected)
+
+    useEffect(() => {
+        if (!open) return
+        const index = activeIndex ?? selectedOptionIndex
+        if (index < 0) return
+        const id = requestAnimationFrame(() => listRef.current[index]?.scrollIntoView({ block: 'nearest' }))
+        return () => cancelAnimationFrame(id)
+    }, [activeIndex, open, popperMaxHeight, selectedOptionIndex])
 
     const { refs, floatingStyles, context } = useFloating({
         open,
@@ -284,7 +300,13 @@ export function StyledSelectAutocomplete<
         strategy: 'fixed',
         whileElementsMounted: autoUpdate,
         middleware: [
-            offset(4),
+            // Figma Menus attaches flush to the field: in every cell of the Dynamic-select
+            // reference (node 34523-166798) the Menus frame's top edge equals the input box's
+            // bottom edge (Select 35046-160161: field h68 → Menus y68; Autocomplete 35046-161691:
+            // same; multiple 34634-153389 h92 → y92). The 4px gap was a MUI-removal artefact
+            // (ASMA-7573) — MUI's Popper/Autocomplete sat flush too. Keep the middleware at 0
+            // rather than dropping it, so a flip to `top-start` also lands flush (ASMA-8080).
+            offset(0),
             flip({ padding: 8 }),
             shift({ padding: 8 }),
             sizeMiddleware({
@@ -305,7 +327,21 @@ export function StyledSelectAutocomplete<
     const usePopoverLayer = shouldUsePopoverTopLayer(portalRoot)
     const floatingRef = useMergeRefs([useTopLayerRef(refs.setFloating, usePopoverLayer)])
 
-    const emitChange = (event: SyntheticEvent, option: T): void => {
+    const getInitialActiveIndex = (direction: -1 | 1): number | null => {
+        if (enabledOptionIndexes.includes(selectedOptionIndex)) return selectedOptionIndex
+        return enabledOptionIndexes[direction === 1 ? 0 : enabledOptionIndexes.length - 1] ?? null
+    }
+
+    const moveActiveOption = (direction: -1 | 1): void => {
+        if (enabledOptionIndexes.length === 0) return
+        setActiveIndex((index) => {
+            const position = enabledOptionIndexes.indexOf(index ?? selectedOptionIndex)
+            if (position === -1) return enabledOptionIndexes[direction === 1 ? 0 : enabledOptionIndexes.length - 1] ?? null
+            return enabledOptionIndexes[Math.min(Math.max(position + direction, 0), enabledOptionIndexes.length - 1)] ?? null
+        })
+    }
+
+    const emitChange = (event: SyntheticEvent, option: T, close = !isMultiple || !disableCloseOnSelect): void => {
         if (isMultiple) {
             const exists = selectedArray.some((v) => isEqual(option, v))
             const next = exists ? selectedArray.filter((v) => !isEqual(option, v)) : [...selectedArray, option]
@@ -316,12 +352,11 @@ export function StyledSelectAutocomplete<
                 { option },
             )
             setInputValue(event, '', 'reset')
-            // MUI parity: selecting closes the popup unless the caller opts out (default false).
-            if (!disableCloseOnSelect) setOpen(false)
+            if (close) setOpen(false)
         } else {
             onChange?.(event, option as never, 'selectOption', { option })
             setInputValue(event, getLabel(option), 'reset')
-            setOpen(false)
+            if (close) setOpen(false)
         }
     }
 
@@ -331,33 +366,40 @@ export function StyledSelectAutocomplete<
     }
 
     const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>): void => {
-        if (event.key === 'Enter' && open && activeIndex != null && visibleOptions[activeIndex] != null) {
+        if (event.key === 'Enter' && !open) {
+            event.preventDefault()
+            setOpen(true)
+        } else if (event.key === 'Enter' && activeIndex != null && visibleOptions[activeIndex] != null) {
             event.preventDefault()
             const option = visibleOptions[activeIndex]
-            if (!isOptionObjectDisabled(option)) emitChange(event, option)
+            if (!isOptionDisabled(option)) emitChange(event, option, true)
         } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
             event.preventDefault()
             if (!open) {
-                setActiveIndex(null)
+                setActiveIndex(getInitialActiveIndex(event.key === 'ArrowDown' ? 1 : -1))
                 setOpen(true)
                 return
             }
-            if (visibleOptions.length === 0) return
-            const direction = event.key === 'ArrowDown' ? 1 : -1
-            setActiveIndex((index) =>
-                index == null
-                    ? direction > 0
-                        ? 0
-                        : visibleOptions.length - 1
-                    : (index + direction + visibleOptions.length) % visibleOptions.length,
-            )
+            moveActiveOption(event.key === 'ArrowDown' ? 1 : -1)
+        } else if (event.key === 'Home' || event.key === 'End') {
+            event.preventDefault()
+            setActiveIndex(enabledOptionIndexes[event.key === 'Home' ? 0 : enabledOptionIndexes.length - 1] ?? null)
+        } else if (event.key === ' ' && activeIndex != null && visibleOptions[activeIndex] != null) {
+            event.preventDefault()
+            const option = visibleOptions[activeIndex]
+            if (!isOptionDisabled(option)) emitChange(event, option, false)
+        } else if (event.key === 'Escape') {
+            event.preventDefault()
+            setOpen(false)
+        } else if (event.key === 'Tab') {
+            setOpen(false)
         }
     }
 
     const showClear = !disableClearable && !readOnly && !disabled && (isMultiple ? selectedArray.length > 0 : singleValue !== null)
 
-    // The dropdown indicator (chevron / plus) must itself open the popup. `onMouseDown` +
-    // preventDefault keeps focus on the input (no blur-then-refocus flicker) before we toggle.
+    // Activate on click so a pointer press can be cancelled and keyboard clicks work.
+    // Mouse-down only preserves input focus; it must not change the value or popup.
     const togglePopupFromIcon = (event: React.MouseEvent): void => {
         event.preventDefault()
         if (disabled || readOnly) return
@@ -383,18 +425,14 @@ export function StyledSelectAutocomplete<
         <span className='flex items-center gap-1'>
             {loading && <LoadingIcon width={20} height={20} className='animate-spin' />}
             {showClear && (
-                // Native <button>: was a <span role='button'> with no tabIndex/keydown — unreachable by
-                // keyboard. `onMouseDown` (not `onClick`) is deliberate — `preventDefault` stops the input
-                // from blurring before `clearValue` runs; buttons support `onMouseDown` the same way.
                 <button
                     type='button'
+                    tabIndex={-1}
                     aria-label='Clear'
                     data-testid={`${dataTest}-clear`}
-                    className='flex min-h-6 min-w-6 cursor-pointer items-center justify-center rounded-full border-0 bg-delta-50'
-                    onMouseDown={(event) => {
-                        event.preventDefault()
-                        clearValue(event)
-                    }}
+                    className='invisible flex min-h-6 min-w-6 cursor-pointer items-center justify-center rounded-full border-0 bg-delta-50 group-focus-within:visible'
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={clearValue}
                 >
                     <CloseIcon width={20} height={20} className='text-delta-700' />
                 </button>
@@ -402,11 +440,13 @@ export function StyledSelectAutocomplete<
             {readOnly ? null : (
                 <button
                     type='button'
+                    tabIndex={-1}
                     aria-label='Toggle options'
                     aria-expanded={open}
                     data-testid={`${dataTest}-popup-indicator`}
                     className='flex cursor-pointer items-center border-0 bg-transparent'
-                    onMouseDown={togglePopupFromIcon}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={togglePopupFromIcon}
                 >
                     {popupIcon ?? (isMultiple ? <PlusIconCircle width={24} height={24} className='text-delta-700' /> : (
                         <ChevronDownIcon
@@ -458,8 +498,8 @@ export function StyledSelectAutocomplete<
     // hover, and selected backgrounds from that — not only from `defaultRenderOption`.
     const optionRowClassName = cn(
         // Figma Menus item: Body Base 16/lh24, text delta-800.
-        'box-border flex min-h-10 cursor-pointer items-center gap-x-3 px-3 py-1.5 text-base text-delta-800',
-        'aria-selected:bg-gama-50 data-[active]:bg-gama-50 data-[active]:text-delta-800',
+        'relative box-border flex min-h-10 cursor-pointer items-center gap-x-3 px-3 py-1.5 text-base text-delta-800',
+        'aria-selected:bg-gama-50 hover:bg-delta-50',
         // Disabled options never take the gama highlight (hover or keyboard) and read as muted.
         'aria-disabled:cursor-default aria-disabled:!bg-transparent aria-disabled:text-delta-300',
     )
@@ -468,6 +508,12 @@ export function StyledSelectAutocomplete<
         const { key, ...optionProps } = props
         return (
             <li key={key} {...optionProps}>
+                {props['data-active'] !== undefined && (
+                    <span
+                        aria-hidden='true'
+                        className='pointer-events-none absolute inset-y-0 left-0 border-l-[4px] border-solid border-focus-ring'
+                    />
+                )}
                 {isMultiple ? (
                     // Pure state indicator: this <li> owns selection and carries the real accessible
                     // state via `aria-selected` (optionProps above). `decorative` renders no <input> at
@@ -494,7 +540,7 @@ export function StyledSelectAutocomplete<
     }
 
     const renderRow = (option: T, index: number): ReactNode => {
-        const optionDisabled = getOptionDisabled?.(option) ?? isOptionObjectDisabled(option)
+        const optionDisabled = isOptionDisabled(option)
         const props: OptionLiProps = {
             ...getItemProps({
                 // MUI parity: keep the field focused on option click (otherwise the outline drops
@@ -503,8 +549,8 @@ export function StyledSelectAutocomplete<
                 onClick: (event) => {
                     if (!optionDisabled) emitChange(event, option)
                 },
-                // Don't highlight a disabled option on hover.
-                onMouseMove: () => setActiveIndex(optionDisabled ? null : index),
+                // Hover is a grey mouse state; the left focus border is reserved for keyboard navigation.
+                onMouseMove: () => setActiveIndex(null),
             }),
             key: getOptionKey ? String(getOptionKey(option)) : `${getLabel(option)}-${index}`,
             ref: (node: HTMLLIElement | null) => {
@@ -540,11 +586,11 @@ export function StyledSelectAutocomplete<
                         }}
                         {...getFloatingProps()}
                         className={cn(
-                            // Figma Autocomplete dropdown = the Menus surface (node 16073-19226): rounded-lg,
+                            // Figma Autocomplete dropdown = the Menus surface (node 16073-19226): radius 4,
                             // border/outline delta-300 (#bdc4cf), Menus shadow. Matches StyledSelect/StyledMenu.
                             // Figma Menus (node 34522-151497) pads the list `8px 0` — the rows run
                             // edge to edge horizontally, with 8px of breathing room top and bottom.
-                            'z-[1300] m-0 list-none overflow-auto rounded-lg border border-solid border-delta-300 bg-white px-0 py-2 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
+                            'z-[1300] m-0 list-none overflow-auto rounded border border-solid border-delta-300 bg-white px-0 py-2 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
                             // Figma Menus (node 34522-151497) separates the rows and leaves the last
                             // one clean. Owned by the LISTBOX, not the row, for two reasons: a custom
                             // `renderOption` that replaces `props.className` (a real pattern in

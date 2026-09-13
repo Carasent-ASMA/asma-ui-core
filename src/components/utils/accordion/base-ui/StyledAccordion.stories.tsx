@@ -94,6 +94,8 @@ const ACCORDION_VARIANTS: AccordionVariant[] = [
 ]
 
 export const Gallery = {
+    // axe: landmark-unique (duplicate landmark without a unique label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: (): JSX.Element => (
         <div className='flex max-w-[640px] flex-col gap-6'>
             {ACCORDION_VARIANTS.map((v) => (

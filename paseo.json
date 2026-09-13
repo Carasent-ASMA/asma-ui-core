@@ -1,0 +1,16 @@
+{
+    "worktree": {
+        "setup": "pnpm install"
+    },
+    "scripts": {
+        "ts-check": { "command": "pnpm ts:check" },
+        "lint": { "command": "pnpm lint" },
+        "test": { "command": "pnpm test-storybook -- --run" },
+        "build": { "command": "pnpm build" },
+        "storybook": {
+            "type": "service",
+            "command": "pnpm exec storybook dev -p $PASEO_PORT --no-open",
+            "port": 6006
+        }
+    }
+}

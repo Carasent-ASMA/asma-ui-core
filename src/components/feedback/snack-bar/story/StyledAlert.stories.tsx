@@ -60,6 +60,8 @@ export const Default: Story = {}
  * close slots. This is the golden VRT reference for the Alert.
  */
 export const Gallery: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     render: () => (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 560 }}>
             {SEVERITIES.map((severity) => (

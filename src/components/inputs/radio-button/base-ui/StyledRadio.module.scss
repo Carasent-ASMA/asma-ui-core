@@ -48,19 +48,12 @@
         cursor: default;
         pointer-events: none;
     }
-    &:focus-visible {
+    &:focus-visible,
+    &[data-focus-visible],
+    input:focus-visible {
         outline: none;
     }
-}
 
-.RadioWrapper:has(input:focus-visible) .Radio::before,
-.RadioWrapper:has(input[data-focus-visible]) .Radio::before {
-    content: '';
-    position: absolute;
-    inset: -11.5px;
-    border-radius: 50%;
-    background-color: var(--colors-gama-500);
-    opacity: 0.12;
 }
 
 %ripple-base {
@@ -100,7 +93,7 @@
 }
 
 .RadioHover {
-    &::after {
+    .RadioRippleContainer::after {
         content: '';
         background: var(--colors-gama-300);
         border-radius: 50%;
@@ -112,16 +105,16 @@
         position: absolute;
         @include radio-wrapper-size(medium);
     }
-    &.size-small::after {
+    &.size-small .RadioRippleContainer::after {
         @include radio-wrapper-size(small);
     }
-    &:hover::after {
+    &:hover .RadioRippleContainer::after {
         opacity: 0.07;
         transform: translate(-50%, -50%) scale(1);
     }
 }
 
-[data-disabled].RadioHover:hover::after {
+[data-disabled].RadioHover:hover .RadioRippleContainer::after {
     opacity: 0;
 }
 
@@ -172,10 +165,26 @@
     }
 }
 
-.Error {
-    --colors-gama-500: var(--colors-error-500);
-    --colors-gama-400: var(--colors-error-400);
-    --colors-gama-300: var(--colors-error-300);
+.RadioWrapper:not(.Error):has(input:focus-visible) .Radio,
+.RadioWrapper:not(.Error):has(input[data-focus-visible]) .Radio {
+    box-shadow: 0 0 0 2px white, 0 0 0 5px var(--colors-focus-ring);
+}
+
+.RadioWrapper.Error .Radio {
+    box-shadow: 0 0 0 2px white, 0 0 0 4px var(--colors-error-500);
+}
+
+@media (forced-colors: active) {
+    .RadioWrapper:not(.Error):has(input:focus-visible) .Radio,
+    .RadioWrapper:not(.Error):has(input[data-focus-visible]) .Radio {
+        forced-color-adjust: none;
+        box-shadow: 0 0 0 2px Canvas, 0 0 0 5px CanvasText;
+    }
+
+    .RadioWrapper.Error .Radio {
+        forced-color-adjust: none;
+        box-shadow: 0 0 0 2px Canvas, 0 0 0 4px CanvasText;
+    }
 }
 
 // Figma Read-only (nodes 35046-162573/162576): muted, non-gama. Unchecked ring delta-300;

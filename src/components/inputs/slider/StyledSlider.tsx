@@ -147,7 +147,7 @@ export const StyledSlider = ({
         return isVertical ? { bottom: `${pct}%` } : { left: `${pct}%` }
     }
 
-    const handleTrackPointerDown = (event: ReactPointerEvent<HTMLDivElement>): void => {
+    const handleTrackPointerUp = (event: ReactPointerEvent<HTMLDivElement>): void => {
         if (disabled) return
         const rect = event.currentTarget.getBoundingClientRect()
         const ratio = isVertical
@@ -229,7 +229,7 @@ export const StyledSlider = ({
                 {/* Inset the visual track by half a thumb so marks align with the thumb-centre travel.
                     Setting both edges (no width/height) auto-sizes the track to length − 2·halfThumb. */}
                 <div
-                    onPointerDown={handleTrackPointerDown}
+                    onPointerUp={handleTrackPointerUp}
                     className={cn(
                         'absolute',
                         isVertical ? 'left-1/2 w-1 -translate-x-1/2' : 'top-[calc(50%+6px)] h-1 -translate-y-1/2',
