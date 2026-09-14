@@ -278,7 +278,11 @@ export const StyledSlider = ({
             )}
         >
             <div
-                className={cn('relative', isVertical ? 'h-full w-8' : 'h-4 w-full')}
+                className={cn(
+                    'relative',
+                    isVertical ? 'h-full w-8' : 'h-4 w-full',
+                    disabled ? 'cursor-default' : 'cursor-pointer',
+                )}
                 style={{ touchAction: 'none' }}
                 onPointerDown={handlePointerDown}
                 onPointerMove={handlePointerMove}
