@@ -1,4 +1,12 @@
-import { useId, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode, type SyntheticEvent } from 'react'
+import {
+    useId,
+    useState,
+    type CSSProperties,
+    type PointerEvent as ReactPointerEvent,
+    type ReactNode,
+    type SyntheticEvent,
+    useRef,
+} from 'react'
 import { cn } from 'src/helpers/cn'
 import { HelperRow } from 'src/helpers/HelperRow'
 import { useHelperSlot } from 'src/helpers/useHelperSlot'
@@ -109,13 +117,22 @@ export const StyledSlider = ({
     // exactly half the thumb so 0%/100% land on the thumb-centre travel (else the thumb drifts left of
     // the marks, worst at max). Thumb is 16px (medium) / 12px (small) — see StyledSlider.module.scss.
     const halfThumb = size === 'small' ? 6 : 8
+    const activeThumbRef = useRef<number | null>(null)
+    const activePointerIdRef = useRef<number | null>(null)
+    const [dragValue, setDragValue] = useState<SliderValue | null>(null)
     const [uncontrolledValue, setUncontrolledValue] = useState<SliderValue>(defaultValue ?? min)
-    const current = value ?? uncontrolledValue
+    const resolvedValue = value ?? uncontrolledValue
+    const current = dragValue ?? resolvedValue
     const pair = asPair(current)
     const isRange = pair !== null
 
-    const message = error ? (errorText ?? helperText) : helperText
-    const { show: showHelperSlot, role: helperAlertRole } = useHelperSlot('StyledSlider', error, message, reserveHelperText)
+    const message = error ? errorText ?? helperText : helperText
+    const { show: showHelperSlot, role: helperAlertRole } = useHelperSlot(
+        'StyledSlider',
+        error,
+        message,
+        reserveHelperText,
+    )
 
     // Match MUI's mark resolution (pre-rewrite parity):
     // - `marks === true` auto-generates a dot at every step: min + step·i for i in 0…floor((max-min)/step).
@@ -126,8 +143,8 @@ export const StyledSlider = ({
         marks === true && Number.isFinite(step) && step > 0 && max > min
             ? Array.from({ length: Math.floor((max - min) / step) + 1 }, (_, i) => ({ value: min + step * i }))
             : Array.isArray(marks)
-              ? marks
-              : []
+            ? marks
+            : []
     const markList: SliderMark[] = generatedMarks.filter((mark) => mark.value >= min && mark.value <= max)
 
     const lo = isRange ? Math.min(pair[0], pair[1]) : min
@@ -147,20 +164,66 @@ export const StyledSlider = ({
         return isVertical ? { bottom: `${pct}%` } : { left: `${pct}%` }
     }
 
-    const handleTrackPointerUp = (event: ReactPointerEvent<HTMLDivElement>): void => {
-        if (disabled) return
+    const computeValueFromPointer = (event: ReactPointerEvent<HTMLDivElement>): number => {
         const rect = event.currentTarget.getBoundingClientRect()
         const ratio = isVertical
-            ? 1 - (event.clientY - rect.top) / rect.height
-            : (event.clientX - rect.left) / rect.width
+            ? 1 - (event.clientY - (rect.top + halfThumb)) / (rect.height - halfThumb * 2)
+            : (event.clientX - (rect.left + halfThumb)) / (rect.width - halfThumb * 2)
         const stepped = min + Math.round(Math.min(1, Math.max(0, ratio)) * ((max - min) / step)) * step
-        const nextValue = Math.min(max, Math.max(min, stepped))
-        const thumbIndex = isRange
-            ? Math.abs((pair?.[1] ?? min) - nextValue) < Math.abs((pair?.[0] ?? min) - nextValue)
-                ? 1
-                : 0
-            : 0
-        emit(onChange, event, nextValue, thumbIndex)
+        return Math.min(max, Math.max(min, stepped))
+    }
+
+    const pickThumbIndex = (nextValue: number): number =>
+        isRange ? (Math.abs((pair?.[1] ?? min) - nextValue) < Math.abs((pair?.[0] ?? min) - nextValue) ? 1 : 0) : 0
+
+    const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>): void => {
+        if (disabled) return
+        const rawValue = computeValueFromPointer(event)
+        const thumbIndex = pickThumbIndex(rawValue)
+        activeThumbRef.current = thumbIndex
+        activePointerIdRef.current = event.pointerId
+        event.currentTarget.setPointerCapture(event.pointerId)
+        const nextValue = computeNextValue(rawValue, thumbIndex)
+        setDragValue(nextValue)
+        onChange?.(event, nextValue, thumbIndex)
+    }
+
+    const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>): void => {
+        if (disabled || activeThumbRef.current === null || event.pointerId !== activePointerIdRef.current) return
+        const thumbIndex = activeThumbRef.current
+        const nextValue = computeNextValue(computeValueFromPointer(event), thumbIndex)
+        setDragValue(nextValue)
+        onChange?.(event, nextValue, thumbIndex)
+    }
+
+    const handlePointerUp = (event: ReactPointerEvent<HTMLDivElement>): void => {
+        if (disabled || activeThumbRef.current === null || event.pointerId !== activePointerIdRef.current) return
+        const thumbIndex = activeThumbRef.current
+        const nextValue = computeNextValue(computeValueFromPointer(event), thumbIndex)
+        if (value === undefined) setUncontrolledValue(nextValue)
+        onChangeCommitted?.(event, nextValue)
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+            event.currentTarget.releasePointerCapture(event.pointerId)
+        }
+        setDragValue(null)
+        activeThumbRef.current = null
+        activePointerIdRef.current = null
+    }
+
+    const handlePointerCancel = (event: ReactPointerEvent<HTMLDivElement>): void => {
+        if (activeThumbRef.current === null || event.pointerId !== activePointerIdRef.current) return
+        setDragValue(null)
+        activeThumbRef.current = null
+        activePointerIdRef.current = null
+    }
+
+    const computeNextValue = (rawValue: number, thumbIndex: number): SliderValue => {
+        if (!isRange) return rawValue
+        const next: [number, number] = [pair?.[0] ?? 0, pair?.[1] ?? 0]
+        next[thumbIndex] = rawValue
+        if (thumbIndex === 0 && next[0] > next[1]) next[0] = next[1]
+        if (thumbIndex === 1 && next[1] < next[0]) next[1] = next[0]
+        return next
     }
 
     const emit = (
@@ -169,20 +232,10 @@ export const StyledSlider = ({
         rawValue: number,
         thumbIndex: number,
     ): void => {
-        let nextValue: SliderValue = rawValue
-        if (!isRange) {
-            nextValue = rawValue
-        } else {
-            const next: [number, number] = [pair?.[0] ?? 0, pair?.[1] ?? 0]
-            next[thumbIndex] = rawValue
-            // Keep thumbs from crossing (MUI clamps the moving thumb to its neighbour).
-            if (thumbIndex === 0 && next[0] > next[1]) next[0] = next[1]
-            if (thumbIndex === 1 && next[1] < next[0]) next[1] = next[0]
-            nextValue = next
-        }
+        const nextValue = computeNextValue(rawValue, thumbIndex)
         if (value === undefined) setUncontrolledValue(nextValue)
         if (!handler) return
-        ;(handler)(event, nextValue, thumbIndex)
+        handler(event, nextValue, thumbIndex)
     }
 
     const renderInput = (thumbIndex: number, thumbValue: number): JSX.Element => (
@@ -211,7 +264,6 @@ export const StyledSlider = ({
                 slotProps?.thumb?.className,
             )}
             onChange={(e) => emit(onChange, e, Number(e.currentTarget.value), thumbIndex)}
-            onPointerUp={(e) => emit(onChangeCommitted, e, Number(e.currentTarget.value), thumbIndex)}
             onKeyUp={(e) => emit(onChangeCommitted, e, Number(e.currentTarget.value), thumbIndex)}
         />
     )
@@ -225,11 +277,21 @@ export const StyledSlider = ({
                 className,
             )}
         >
-            <div className={cn('relative', isVertical ? 'h-full w-8' : 'h-4 w-full')}>
+            <div
+                className={cn(
+                    'relative',
+                    isVertical ? 'h-full w-8' : 'h-4 w-full',
+                    disabled ? 'cursor-default' : 'cursor-pointer',
+                )}
+                style={{ touchAction: 'none' }}
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                onPointerCancel={handlePointerCancel}
+            >
                 {/* Inset the visual track by half a thumb so marks align with the thumb-centre travel.
                     Setting both edges (no width/height) auto-sizes the track to length − 2·halfThumb. */}
                 <div
-                    onPointerUp={handleTrackPointerUp}
                     className={cn(
                         'absolute',
                         isVertical ? 'left-1/2 w-1 -translate-x-1/2' : 'top-[calc(50%+6px)] h-1 -translate-y-1/2',
@@ -237,7 +299,13 @@ export const StyledSlider = ({
                     style={isVertical ? { top: halfThumb, bottom: halfThumb } : { left: halfThumb, right: halfThumb }}
                 >
                     {/* Rail — Figma unfilled track = delta-100 (#e7eaee), 4px. */}
-                    <div className={cn('absolute inset-0 rounded-full bg-delta-100', classes?.rail, slotProps?.rail?.className)} />
+                    <div
+                        className={cn(
+                            'absolute inset-0 rounded-full bg-delta-100',
+                            classes?.rail,
+                            slotProps?.rail?.className,
+                        )}
+                    />
                     {/* Filled track */}
                     <div
                         className={cn(
@@ -259,7 +327,9 @@ export const StyledSlider = ({
                                     isVertical ? 'left-1/2 translate-y-1/2' : 'top-1/2 -translate-y-1/2',
                                     active
                                         ? cn(
-                                              disabled ? 'border-delta-200 bg-delta-200' : 'border-gama-500 bg-gama-500',
+                                              disabled
+                                                  ? 'border-delta-200 bg-delta-200'
+                                                  : 'border-gama-500 bg-gama-500',
                                               classes?.markActive,
                                           )
                                         : cn('border-delta-300 bg-white', classes?.mark),
@@ -279,9 +349,7 @@ export const StyledSlider = ({
                     // Inset the label track by half the thumb so labels share the mark coordinate
                     // system (marks live inside the half-thumb-inset track); else labels drift from
                     // their dots — worst at the extremes.
-                    className={cn(
-                        isVertical ? 'pointer-events-none absolute inset-x-0' : 'relative mt-[14px] h-6',
-                    )}
+                    className={cn(isVertical ? 'pointer-events-none absolute inset-x-0' : 'relative mt-[14px] h-6')}
                     style={
                         isVertical
                             ? { top: halfThumb, bottom: halfThumb }
