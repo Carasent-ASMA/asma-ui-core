@@ -44,7 +44,7 @@
 @mixin thumb {
     appearance: none;
     -webkit-appearance: none;
-    pointer-events: auto;
+    pointer-events: none;
     width: 16px;
     height: 16px;
     border-radius: 50%;
