@@ -79,7 +79,8 @@ export const PointerCancellation: Story = {
         await expect(pointerActions.autocomplete).not.toHaveBeenCalled()
         clear.focus()
         await userEvent.keyboard('{Enter}')
-        await expect(input).toHaveValue('')
+        // waitFor: Enter-activation clears through controlled state; the rerender can lag the event
+        await waitFor(() => expect(input).toHaveValue(''))
         await expect(pointerActions.autocomplete).toHaveBeenCalledTimes(1)
         const toggle = canvas.getByRole('button', { name: 'Toggle options' })
         await userEvent.keyboard('{Escape}')
