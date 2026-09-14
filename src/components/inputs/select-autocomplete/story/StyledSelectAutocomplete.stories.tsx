@@ -21,6 +21,25 @@ declare global {
     }
 }
 
+/**
+ * `renderInput` that gives the field an accessible name. `params.slotProps.htmlInput` carries the
+ * combobox wiring (role, aria-expanded, aria-activedescendant, the reference ref), so the name has
+ * to be merged into that slot rather than replace it — and it has to be a name, not a visible
+ * `label`/`placeholder`, to keep these stories' pixels unchanged (axe `label`, ASMA-8143).
+ */
+const namedInput =
+    (accessibleName: string) =>
+    (params: AutocompleteRenderInputParams): JSX.Element => (
+        <StyledInputField
+            {...params}
+            dataTest='input'
+            slotProps={{
+                ...params.slotProps,
+                htmlInput: { ...params.slotProps.htmlInput, 'aria-label': accessibleName },
+            }}
+        />
+    )
+
 const meta = {
     title: 'Inputs/Styled Select Autocomplete',
     component: StyledSelectAutocomplete,
@@ -138,8 +157,6 @@ export const SingleSelectVariant: SingleStory = {
  * mount the `listbox`. Read-only is a display state (selected value(s) shown, no interaction).
  */
 export const ReadOnlyDoesNotOpen: SingleStory = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     render: () => {
         const Wrapper = () => {
             const [value] = useState<Film | null>(top100Films?.[0] || null)
@@ -151,7 +168,7 @@ export const ReadOnlyDoesNotOpen: SingleStory = {
                     size='small'
                     value={value}
                     getOptionLabel={(option) => option.title}
-                    renderInput={(params) => <StyledInputField {...params} dataTest='input' />}
+                    renderInput={namedInput('Read-only films')}
                 />
             )
         }
@@ -365,8 +382,6 @@ export const AutoHeightApplies: Story = {
 }
 
 export const LargeDataset: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     render: (args) => {
         const bigOptions = Array.from({ length: 2000 }).map((_, i) => ({
             title: `Film ${i}`,
@@ -378,7 +393,7 @@ export const LargeDataset: Story = {
                 {...args}
                 options={bigOptions}
                 getOptionLabel={(opt) => (opt as { title: string }).title}
-                renderInput={(params) => <StyledInputField {...params} dataTest='input' />}
+                renderInput={namedInput('Films')}
             />
         )
     },
@@ -448,8 +463,6 @@ export const AsyncLoading: Story = {
 }
 
 export const Performance_RenderCount: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     render: (args) => {
         const { Wrapped, getRenderCount } =
             withRenderCounter<StyledSelectAutocompleteProps<Film, true, false, false>>(StyledSelectAutocomplete)
@@ -465,9 +478,7 @@ export const Performance_RenderCount: Story = {
                     value={value}
                     onChange={(_event: SyntheticEvent, nextValue: Film[]) => setValue(nextValue)}
                     getOptionLabel={(option: Film) => option.title}
-                    renderInput={(params: AutocompleteRenderInputParams) => (
-                        <StyledInputField {...params} dataTest='input' />
-                    )}
+                    renderInput={namedInput('Films')}
                 />
             )
         }
@@ -489,8 +500,6 @@ export const Performance_RenderCount: Story = {
 }
 
 export const Performance_LargeDataset: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     render: (args) => {
         const options = useMemo(() => generateOptions(3000), [])
 
@@ -499,7 +508,7 @@ export const Performance_LargeDataset: Story = {
                 {...args}
                 options={options}
                 getOptionLabel={(opt) => opt.title}
-                renderInput={(params) => <StyledInputField {...params} dataTest='input' />}
+                renderInput={namedInput('Films')}
             />
         )
     },
@@ -524,8 +533,6 @@ export const Performance_LargeDataset: Story = {
 }
 
 export const Performance_MultipleChips: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     render: (args) => {
         const options = useMemo(() => generateOptions(1000), [])
 
@@ -540,7 +547,7 @@ export const Performance_MultipleChips: Story = {
                     value={value}
                     onChange={(_, v) => setValue(v)}
                     getOptionLabel={(o) => o.title}
-                    renderInput={(params) => <StyledInputField {...params} dataTest='input' />}
+                    renderInput={namedInput('Films')}
                 />
             )
         }

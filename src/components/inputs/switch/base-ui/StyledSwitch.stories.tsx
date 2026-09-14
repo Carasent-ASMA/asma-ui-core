@@ -34,8 +34,6 @@ const SwitchWrapper = ({ label, args }: { label: string; args: PropsWithoutRef<S
 }
 
 export const Unchecked_Default: Story = {
-    // axe: button-name (icon-only button has no discernible text). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     args: {},
     render: (args) => <SwitchWrapper label='Default' args={args} />,
 }
@@ -43,16 +41,12 @@ export const Unchecked_Default: Story = {
 export const Unchecked_Hovered: Story = {
     args: {},
     parameters: {
-        // axe: button-name (icon-only button has no discernible text). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-        a11y: { test: 'todo' },
         pseudo: { hover: true },
     },
     render: (args) => <SwitchWrapper label='Hovered' args={args} />,
 }
 
 export const Unchecked_Focused: Story = {
-    // axe: button-name (icon-only button has no discernible text). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     args: {},
     render: (args) => <SwitchWrapper label='Focused' args={args} />,
     play: async ({ canvas }) => {
@@ -64,7 +58,7 @@ export const Unchecked_Focused: Story = {
 }
 
 export const Unchecked_Disabled: Story = {
-    // axe: button-name (icon-only button has no discernible text); color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
     parameters: { a11y: { test: 'todo' } },
     args: { disabled: true },
     render: (args) => <SwitchWrapper label='Disabled' args={args} />,
@@ -80,8 +74,6 @@ export const Unchecked_Disabled: Story = {
 }
 
 export const Checked_Default: Story = {
-    // axe: button-name (icon-only button has no discernible text). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     args: { defaultChecked: true },
     render: (args) => <SwitchWrapper label='Default' args={args} />,
 }
@@ -89,16 +81,12 @@ export const Checked_Default: Story = {
 export const Checked_Hovered: Story = {
     args: { defaultChecked: true },
     parameters: {
-        // axe: button-name (icon-only button has no discernible text). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-        a11y: { test: 'todo' },
         pseudo: { hover: true },
     },
     render: (args) => <SwitchWrapper label='Hovered' args={args} />,
 }
 
 export const Checked_Focused: Story = {
-    // axe: button-name (icon-only button has no discernible text). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     args: { defaultChecked: true },
     render: (args) => <SwitchWrapper label='Focused' args={args} />,
     play: async ({ canvas }) => {
@@ -110,7 +98,7 @@ export const Checked_Focused: Story = {
 }
 
 export const Checked_Disabled: Story = {
-    // axe: button-name (icon-only button has no discernible text); color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
     parameters: { a11y: { test: 'todo' } },
     args: { defaultChecked: true, disabled: true },
     render: (args) => <SwitchWrapper label='Disabled' args={args} />,
@@ -127,8 +115,6 @@ export const Checked_Disabled: Story = {
 
 /** Live: controlled switch whose state drives the label; clicking toggles it. */
 export const Interactive: Story = {
-    // axe: button-name (icon-only button has no discernible text). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     render: function InteractiveSwitch(args) {
         const [checked, setChecked] = React.useState(false)
         return (
@@ -161,8 +147,6 @@ export const Interactive: Story = {
  * `pseudo-focus-visible` element classes.
  */
 export const Gallery: Story = {
-    // axe: button-name (icon-only button has no discernible text). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     render: () => {
         const th: React.CSSProperties = {
             padding: 16,
@@ -208,6 +192,7 @@ export const Gallery: Story = {
                                 <td key={c.key} style={td}>
                                     <StyledSwitch
                                         dataTest={`gallery-${s.label}-${c.key}`}
+                                        aria-label={`${s.label} ${c.label}`}
                                         defaultChecked={c.checked}
                                         {...s.props}
                                     />
@@ -223,8 +208,6 @@ export const Gallery: Story = {
 
 /** Figma composite Switch with left label + error ring. */
 export const CompositeLeftLabelError: Story = {
-    // axe: button-name (icon-only button has no discernible text). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     render: () => (
         <StyledFormControlLabel
             label='Groups view'

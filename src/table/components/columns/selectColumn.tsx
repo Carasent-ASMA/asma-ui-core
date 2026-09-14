@@ -53,11 +53,15 @@ export function selectColumn<TData>(isFixed: boolean, rowHeight?: number, locale
                     onMouseUp={stopMouseEvent}
                     onKeyDown={(event) => handleToggleKeyDown(event, () => table.toggleAllRowsSelected())}
                 >
+                    {/* `decorative`: the wrapping div is the real control (it owns role, focus,
+                        click and keyboard). A nested real <input type="checkbox"> is an axe
+                        `nested-interactive` violation that `aria-hidden` + `tabIndex={-1}` do
+                        not satisfy — only removing the input does (ASMA-8143). Same classes and
+                        `data-*` state attributes, so the rendered box is unchanged. */}
                     <StyledCheckbox
                         size='small'
                         dataTest='cell-select-all'
-                        aria-hidden
-                        tabIndex={-1}
+                        decorative
                         checked={table.getIsAllRowsSelected()}
                         indeterminate={table.getIsSomeRowsSelected()}
                         className='pointer-events-none'
@@ -92,11 +96,11 @@ export function selectColumn<TData>(isFixed: boolean, rowHeight?: number, locale
                 >
                     <StyledTooltip arrow placement='top-start' title={cell.row.getRowSelectionTooltip()}>
                         <span className={disabled ? style['cursor-not-allowed'] : undefined}>
+                            {/* `decorative` — see the header checkbox above. */}
                             <StyledCheckbox
                                 size='small'
                                 dataTest='cell-select'
-                                aria-hidden
-                                tabIndex={-1}
+                                decorative
                                 checked={cell.row.getIsSelected()}
                                 // DO NOT REMOVE needed for layout consistency
                                 hideWrapper

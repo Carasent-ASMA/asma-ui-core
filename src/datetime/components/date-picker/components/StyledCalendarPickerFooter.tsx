@@ -48,8 +48,11 @@ export const StyledCalendarPickerFooter: React.FC<{
                 {isNb ? 'Nullstill' : 'Clear'}
             </StyledButton>
             <div style={{ display: 'flex', gap: 8 }}>
+                {/* Icon-only: needs an explicit name, the chevron contributes none
+                    (axe `button-name`, ASMA-8143). */}
                 <StyledButton
                     dataTest=''
+                    aria-label={isNb ? 'Forrige maned' : 'Previous month'}
                     variant='outlined'
                     size='small'
                     disabled={!previousMonth}
@@ -73,8 +76,10 @@ export const StyledCalendarPickerFooter: React.FC<{
                 >
                     {isNb ? 'I dag' : 'Today'}
                 </StyledButton>
+                {/* Icon-only — see the previous-month button above. */}
                 <StyledButton
                     dataTest=''
+                    aria-label={isNb ? 'Neste maned' : 'Next month'}
                     variant='outlined'
                     size='small'
                     disabled={!nextMonth}

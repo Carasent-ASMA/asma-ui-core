@@ -30,15 +30,11 @@ const CheckboxWrapper = ({
 }
 
 export const Unchecked_Default: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     args: { checked: false },
     render: (args) => <CheckboxWrapper label='Unchecked' {...args} />,
 }
 
 export const Unchecked_Hover: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     render: (args) => <CheckboxWrapper label='Hover' {...args} />,
     play: async ({ canvas, userEvent }) => {
         const checkbox = canvas.getByRole('checkbox', { name: 'Hover' })
@@ -47,8 +43,6 @@ export const Unchecked_Hover: Story = {
 }
 
 export const Unchecked_Focused: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     render: (args) => <CheckboxWrapper label='Focused' {...args} />,
     play: async ({ canvas }) => {
         const checkbox = canvas.getByRole('checkbox', { name: 'Focused' })
@@ -58,22 +52,16 @@ export const Unchecked_Focused: Story = {
 }
 
 export const Unchecked_Disabled: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     args: { disabled: true },
     render: (args) => <CheckboxWrapper label='Disabled' {...args} />,
 }
 
 export const Checked_Default: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     args: { checked: true },
     render: (args) => <CheckboxWrapper label='Checked' {...args} />,
 }
 
 export const Checked_Hover: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     args: { checked: true },
     render: (args) => <CheckboxWrapper label='Hover' {...args} />,
     play: async ({ canvas, userEvent }) => {
@@ -83,8 +71,6 @@ export const Checked_Hover: Story = {
 }
 
 export const Checked_Focused: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     args: { checked: true },
     render: (args) => <CheckboxWrapper label='Focused' {...args} />,
     play: async ({ canvas }) => {
@@ -95,22 +81,16 @@ export const Checked_Focused: Story = {
 }
 
 export const Checked_Disabled: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     args: { checked: true, disabled: true },
     render: (args) => <CheckboxWrapper label='Disabled' {...args} />,
 }
 
 export const Indeterminate_Default: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     args: { checked: true, indeterminate: true },
     render: (args) => <CheckboxWrapper label='Indeterminate' {...args} />,
 }
 
 export const Indeterminate_Hover: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     args: { checked: true, indeterminate: true },
     render: (args) => <CheckboxWrapper label='Hover' {...args} />,
     play: async ({ canvas, userEvent }) => {
@@ -120,8 +100,6 @@ export const Indeterminate_Hover: Story = {
 }
 
 export const Indeterminate_Focused: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     args: { checked: true, indeterminate: true },
     render: (args) => <CheckboxWrapper label='Focused' {...args} />,
     play: async ({ canvas }) => {
@@ -132,8 +110,6 @@ export const Indeterminate_Focused: Story = {
 }
 
 export const Indeterminate_Disabled: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     args: { checked: true, disabled: true, indeterminate: true },
     render: (args) => <CheckboxWrapper label='Disabled' {...args} />,
 }

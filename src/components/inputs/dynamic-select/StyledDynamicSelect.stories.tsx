@@ -204,6 +204,7 @@ function SelectFrame(props: {
                         <StyledFormLabel title='Helper text' />
                         <StyledInputField
                             dataTest='helper-text-input'
+                            slotProps={{ htmlInput: { 'aria-label': 'Helper text' } }}
                             value={helperText}
                             onChange={(e) => setHelperText(e.target.value)}
                             size='small'
@@ -214,6 +215,7 @@ function SelectFrame(props: {
                         <StyledFormLabel title='No options text' />
                         <StyledInputField
                             dataTest='no-options-text-input'
+                            slotProps={{ htmlInput: { 'aria-label': 'No options text' } }}
                             value={noOptionsText}
                             onChange={(e) => setNoOptionsText(e.target.value)}
                             size='small'
@@ -446,6 +448,7 @@ function PlaygroundFrame() {
                         <StyledFormLabel title='Helper text' />
                         <StyledInputField
                             dataTest='helper-text-input'
+                            slotProps={{ htmlInput: { 'aria-label': 'Helper text' } }}
                             value={helperText ?? ''}
                             onChange={(e) => setHelperText(e.target.value)}
                             size='small'
@@ -469,6 +472,7 @@ function PlaygroundFrame() {
                         <StyledFormLabel title='No options text' />
                         <StyledInputField
                             dataTest='no-options-text-input'
+                            slotProps={{ htmlInput: { 'aria-label': 'No options text' } }}
                             value={noOptionsText}
                             onChange={(e) => setNoOptionsText(e.target.value)}
                             size='small'
@@ -479,6 +483,7 @@ function PlaygroundFrame() {
                         <StyledFormLabel title='Max tags' />
                         <StyledInputField
                             dataTest='max-tags-input'
+                            slotProps={{ htmlInput: { 'aria-label': 'Max tags' } }}
                             type='number'
                             value={maxTags ?? ''}
                             onChange={(e) => setMaxTags(e.target.value === '' ? undefined : Number(e.target.value))}
@@ -528,7 +533,7 @@ const getAutocomplete = (canvasElement: HTMLElement) => {
 }
 
 export const SingleSelectChipGroup: Story = {
-    // axe: aria-allowed-attr (ARIA attribute not allowed on this role); button-name (icon-only button has no discernible text); color-contrast (text/background contrast below the 4.5:1 threshold); label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
     parameters: { a11y: { test: 'todo' } },
     render: () => <SelectFrame title='Status' options={createOptions(5)} />,
     play: async ({ canvas }) => {
@@ -544,7 +549,7 @@ export const SingleSelectChipGroup: Story = {
 }
 
 export const MultipleSelectChipGroup: Story = {
-    // axe: button-name (icon-only button has no discernible text); color-contrast (text/background contrast below the 4.5:1 threshold); label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
     parameters: { a11y: { test: 'todo' } },
     render: () => <SelectFrame title='Assignees' multiple options={createOptions(5)} />,
     play: async ({ canvas }) => {
@@ -561,8 +566,6 @@ export const MultipleSelectChipGroup: Story = {
 }
 
 export const SingleSelectAutocomplete: Story = {
-    // axe: button-name (icon-only button has no discernible text); label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     render: () => <SelectFrame title='Status' options={createOptions(12)} />,
     play: async ({ canvasElement }) => {
         const { canvas, input } = getAutocomplete(canvasElement)
@@ -578,8 +581,6 @@ export const SingleSelectAutocomplete: Story = {
 }
 
 export const MultipleSelectAutocomplete: Story = {
-    // axe: button-name (icon-only button has no discernible text); label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     render: () => <SelectFrame title='Assignees' multiple options={createOptions(12)} maxTags={3} />,
     play: async ({ canvasElement }) => {
         const { canvas, input } = getAutocomplete(canvasElement)
@@ -602,8 +603,6 @@ export const MultipleSelectAutocomplete: Story = {
 }
 
 export const LargeMultipleSelectAutocomplete: Story = {
-    // axe: button-name (icon-only button has no discernible text); label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     render: () => <SelectFrame title='Assignees' multiple options={createManyOptions(60)} maxTags={5} />,
     play: async ({ canvasElement }) => {
         const { canvas, input } = getAutocomplete(canvasElement)
@@ -665,8 +664,6 @@ export const MultiplePrimitiveOptions: Story = {
  * dropdown. This is the reported regression — read-only should be display-only, never openable.
  */
 export const ReadOnlyAutocompleteDoesNotOpen: Story = {
-    // axe: button-name (icon-only button has no discernible text); label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     render: () => <SelectFrame title='Status' options={createOptions(12)} readOnly />,
     play: async ({ canvasElement }) => {
         const { canvas, input } = getAutocomplete(canvasElement)
@@ -681,7 +678,7 @@ export const ReadOnlyAutocompleteDoesNotOpen: Story = {
 }
 
 export const LongLabelsAndDisabledOptions: Story = {
-    // axe: aria-allowed-attr (ARIA attribute not allowed on this role); button-name (icon-only button has no discernible text); color-contrast (text/background contrast below the 4.5:1 threshold); label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
     parameters: { a11y: { test: 'todo' } },
     render: () => <SelectFrame title='Plans' options={longLabelOptions} />,
 }
@@ -728,7 +725,7 @@ export const FocusDemo: Story = {
 }
 
 export const Playground: Story = {
-    // axe: button-name (icon-only button has no discernible text); color-contrast (text/background contrast below the 4.5:1 threshold); label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
     parameters: { a11y: { test: 'todo' } },
     render: () => <PlaygroundFrame />,
 }

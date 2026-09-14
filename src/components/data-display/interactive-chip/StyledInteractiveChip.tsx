@@ -83,7 +83,13 @@ export const StyledInteractiveChip = forwardRef<HTMLDivElement, StyledInteractiv
                 aria-label={accessibleName}
                 role={type}
                 aria-checked={Boolean(checked)}
-                aria-readonly={props.readOnly}
+                // `aria-readonly` is only allowed on roles that support it. `checkbox` does;
+                // `radio` does NOT (ARIA 1.2 — it is supported on `radiogroup`, not on the
+                // individual radio), so emitting it here was an axe `aria-allowed-attr` violation
+                // on every radio chip, including the `aria-readonly="false"` no-op case
+                // (ASMA-8143). A read-only radio chip is already `pointer-events-none`, so drop the
+                // attribute rather than ship a disallowed one.
+                aria-readonly={isCheckbox ? props.readOnly : undefined}
                 avatar={control}
                 clickable
                 tabIndex={0}

@@ -14,13 +14,21 @@ const meta = {
 
 export default meta
 
+// The four bare fields below are deliberate "no visible label" samples; name them so the matrix
+// does not ship unlabelled controls (axe `label`, ASMA-8143). The name goes on `htmlInput`
+// because that is the slot the real <input> gets, and it renders nothing visible.
 export const FormInputs = (): JSX.Element => {
     return (
         <div>
             <h2>Not filled</h2>
             <StyledFormLabel title='Enabled' size='xl' />
             <div className={'flex max-w-lg flex-col gap-5'}>
-                <StyledInputField autoComplete='off' size='small' dataTest='not-filled' />
+                <StyledInputField
+                    autoComplete='off'
+                    size='small'
+                    dataTest='not-filled'
+                    slotProps={{ htmlInput: { 'aria-label': 'Not filled - enabled, no label' } }}
+                />
                 <StyledInputField
                     autoComplete='off'
                     size='small'
@@ -41,7 +49,13 @@ export const FormInputs = (): JSX.Element => {
                     placeholder='Not filled - label and placeholder'
                 />
                 <h5>Error</h5>
-                <StyledInputField autoComplete='off' size='small' dataTest='not-filled' error />
+                <StyledInputField
+                    autoComplete='off'
+                    size='small'
+                    dataTest='not-filled'
+                    error
+                    slotProps={{ htmlInput: { 'aria-label': 'Not filled - error, no label' } }}
+                />
                 <StyledInputField
                     autoComplete='off'
                     size='small'
@@ -58,7 +72,13 @@ export const FormInputs = (): JSX.Element => {
                     placeholder='Not filled'
                 />
                 <h5>Disabled</h5>
-                <StyledInputField autoComplete='off' size='small' dataTest='not-filled' disabled />
+                <StyledInputField
+                    autoComplete='off'
+                    size='small'
+                    dataTest='not-filled'
+                    disabled
+                    slotProps={{ htmlInput: { 'aria-label': 'Not filled - disabled, no label' } }}
+                />
                 <StyledInputField
                     autoComplete='off'
                     size='small'
@@ -75,7 +95,13 @@ export const FormInputs = (): JSX.Element => {
                     placeholder='Not filled'
                 />
                 <h5>Readonly</h5>
-                <StyledInputField autoComplete='off' size='small' dataTest='not-filled' readOnly />
+                <StyledInputField
+                    autoComplete='off'
+                    size='small'
+                    dataTest='not-filled'
+                    readOnly
+                    slotProps={{ htmlInput: { 'aria-label': 'Not filled - read-only, no label' } }}
+                />
                 <StyledInputField
                     autoComplete='off'
                     size='small'
@@ -97,11 +123,11 @@ export const FormInputs = (): JSX.Element => {
 }
 
 /** Every outlined single-line field in the matrix must measure 40px (Figma standard). */
-// axe: color-contrast (text/background contrast below the 4.5:1 threshold); heading-order (heading levels are not in descending order); label-title-only (form element is labelled only by title/aria-describedby); label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+// axe: color-contrast (text/background contrast below the 4.5:1 threshold); heading-order (heading levels are not in descending order); label-title-only (form element is labelled only by title/aria-describedby). ASMA-8136 allowlist - see docs/a11y-allowlist.md
 FormInputs.parameters = { a11y: { test: 'todo' } }
 
 export const FormInputsHeightConsistency: StoryObj<typeof StyledInputField> = {
-    // axe: color-contrast (text/background contrast below the 4.5:1 threshold); heading-order (heading levels are not in descending order); label-title-only (form element is labelled only by title/aria-describedby); label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold); heading-order (heading levels are not in descending order); label-title-only (form element is labelled only by title/aria-describedby). ASMA-8136 allowlist - see docs/a11y-allowlist.md
     parameters: { a11y: { test: 'todo' } },
     render: () => <FormInputs />,
     play: async ({ canvas }) => {

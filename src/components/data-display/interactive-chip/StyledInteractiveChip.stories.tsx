@@ -210,8 +210,6 @@ export const Checkbox_Multiple: Story = {
 }
 
 export const Radio_Default: Story = {
-    // axe: aria-allowed-attr (ARIA attribute not allowed on this role). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     args: {
         label: 'Default radio',
         type: 'radio',
@@ -230,8 +228,6 @@ export const Radio_Default: Story = {
 }
 
 export const Radio_Focused: Story = {
-    // axe: aria-allowed-attr (ARIA attribute not allowed on this role). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     args: {
         label: 'Focused radio',
         type: 'radio',
@@ -250,8 +246,6 @@ export const Radio_Focused: Story = {
 }
 
 export const Radio_Readonly: Story = {
-    // axe: aria-allowed-attr (ARIA attribute not allowed on this role). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     args: {
         label: 'Radio readonly',
         type: 'radio',
@@ -264,7 +258,9 @@ export const Radio_Readonly: Story = {
         const canvas = within(canvasElement)
         const chip = canvas.getByRole('radio', { name: 'Radio readonly' })
         expect(chip).toBeChecked()
-        expect(chip).toHaveAttribute('aria-readonly', 'true')
+        // `aria-readonly` is not an allowed attribute on `role="radio"` (ASMA-8143), so the
+        // read-only radio chip expresses inertness through `pointer-events-none` only.
+        expect(chip).not.toHaveAttribute('aria-readonly')
     },
 }
 
@@ -282,8 +278,6 @@ export const Radio_Multiple: Story = {
 }
 
 export const Radio_WithReactNodeLabel: Story = {
-    // axe: aria-allowed-attr (ARIA attribute not allowed on this role). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     args: {
         label: (
             <span className='flex items-center gap-2'>

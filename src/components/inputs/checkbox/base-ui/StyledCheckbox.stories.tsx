@@ -24,16 +24,12 @@ export default meta
 type Story = StoryObj<typeof StyledCheckbox>
 
 export const Checkbox: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     args: { ...meta.args },
     render: () => <CheckboxTablesExample />,
 }
 
 /** Live: controlled checkbox whose state drives the label; clicking toggles it. */
 export const Interactive: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     render: function InteractiveCheckbox() {
         const [checked, setChecked] = React.useState(false)
         return (
@@ -64,8 +60,6 @@ export const Interactive: Story = {
 
 /** Figma Checkbox+Label composite with 8px control-to-label gap. */
 export const CheckboxWithLabel: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     render: () => (
         <StyledFormControlLabel
             label='Label'
@@ -131,9 +125,13 @@ const CheckboxStateTable = ({ title, checkboxProps }: CheckboxTableProps) => {
                                     className='flex items-center justify-center'
                                     data-theme={ROW_THEME_BY_NAME[rowName]}
                                 >
+                                    {/* The adjacent "Label" span is a visual sample, not an
+                                        associated label, so each matrix cell names its own
+                                        checkbox (axe `label`, ASMA-8143). */}
                                     <StyledCheckbox
                                         dataTest={`${title}-${rowName}-${columnName}`}
                                         size='small'
+                                        aria-label={`${title} ${rowName} ${columnName}`}
                                         {...checkboxProps}
                                         {...COLUMN_CHECKBOX_PROPS[columnName]}
                                     />
