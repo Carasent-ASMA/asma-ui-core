@@ -272,7 +272,18 @@ export function PathfinderCard({
                 {expanded ? <ChevronUpIcon className='size-6' /> : <ChevronDownIcon className='size-6' />}
             </div>
 
-            <div aria-hidden className={styles['measureLayer']}>
+            {/* Off-screen measurement copy of the same slots. It is `aria-hidden`, but the lead
+                and action slots it duplicates can contain real buttons — so without `inert` those
+                duplicates stayed focusable, which is both an axe `aria-hidden-focus` violation and
+                a real bug: Tab landed on an invisible second copy of the card's action. `inert`
+                (recognised by axe 4.7) removes them from the tab order without touching layout —
+                the layer is already `opacity-0 pointer-events-none`. ASMA-8143.
+                Spread-and-cast because React 18's JSX types predate the attribute. The value is the
+                string `'true'`, not `''` or `true`, because this package's peer range spans both
+                majors and they disagree: React 18 warns on a boolean for an attribute it does not
+                know, React 19 warns on an empty string for one it does. A non-empty string is the
+                one value neither complains about, and any value at all activates `inert`. */}
+            <div aria-hidden {...({ inert: 'true' } as Record<string, string>)} className={styles['measureLayer']}>
                 <div className={styles['measureRow']}>
                     {leadSlot ? (
                         <div className='shrink-0'>

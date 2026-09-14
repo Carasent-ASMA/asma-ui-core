@@ -32,9 +32,12 @@ export const TimePickerPanel: React.FC<TimePickerPanelProps> = ({
                 justifyContent: 'space-between',
             }}
         >
+            {/* Icon-only buttons: the glyph contributes no text, so both need an explicit
+                accessible name (axe `button-name`, ASMA-8143). */}
             <StyledButton
                 dataTest='time-picker-erase-button'
                 data-testid='time-picker-erase-button'
+                aria-label='Clear time'
                 variant='text'
                 onClick={handleClear}
                 size='small'
@@ -46,6 +49,7 @@ export const TimePickerPanel: React.FC<TimePickerPanelProps> = ({
             <StyledButton
                 dataTest='time-picker-confirm-button'
                 data-testid='time-picker-confirm-button'
+                aria-label='Confirm time'
                 variant='contained'
                 size='small'
                 onClick={onConfirm}

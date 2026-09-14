@@ -135,44 +135,61 @@ apply in the vitest browser-mode a11y run.
 
 ## Baseline
 
-| Metric | Count |
-| --- | --- |
-| Stories in the suite | 327 |
-| Stories failing axe when enforcement landed | **123** |
-| Story files affected | 33 |
-| Distinct (story, rule) violations | 159 |
-| Distinct axe rules violated | 15 |
+| Metric | At ASMA-8136 | After ASMA-8143 |
+| --- | --- | --- |
+| Stories in the suite | 327 | 355 |
+| Allowlisted stories (`test: 'todo'`) | **123** (124 immediately before ASMA-8143) | **67** |
+| Story files affected | 33 | 27 |
+| Distinct (story, rule) violations | 159 | 77 |
+| Distinct axe rules violated | 15 | 12 |
+
+ASMA-8143 removed 57 entries and cleared 6 story files outright. It was scoped to the cheap
+markup rules only - `label`, `button-name`, `aria-allowed-attr`, `nested-interactive` and
+`aria-hidden-focus`. `color-contrast` was deliberately left untouched: it needs design decisions,
+not markup, so all 54 of its entries survive with their rationale intact.
+
+One bookkeeping note on the `color-contrast` row below: the ASMA-8136 column records 53, the
+original baseline figure, while the current count is 54. The extra entry predates ASMA-8143 (see
+the recorded `StyledTextarea` exception above and the entries added with it) - ASMA-8143 removed
+none and added none, which the "removed" column of its own measurement confirms at zero.
 
 ### Violations by rule
 
-| Rule | Impact | Stories | What axe reports |
-| --- | --- | --- | --- |
-| `color-contrast` | serious | 53 | Elements must meet minimum colour contrast ratio thresholds |
-| `label` | critical | 49 | Form elements must have labels |
-| `button-name` | critical | 23 | Buttons must have discernible text |
-| `aria-allowed-attr` | serious | 7 | ARIA attributes must be allowed for an element’s role |
-| `nested-interactive` | serious | 5 | Interactive controls must not be nested |
-| `aria-hidden-focus` | serious | 4 | aria-hidden elements must not contain focusable elements |
-| `aria-valid-attr-value` | serious | 4 | ARIA attributes must have valid values |
-| `empty-table-header` | minor | 3 | Table header text should not be empty |
-| `heading-order` | moderate | 2 | Heading levels should only increase by one |
-| `label-title-only` | serious | 2 | Form elements should have a visible label, not only title/aria-describedby |
-| `scrollable-region-focusable` | serious | 2 | Scrollable region must have keyboard access |
-| `landmark-unique` | moderate | 2 | Landmarks must have a unique role or role/label/title combination |
-| `duplicate-id-active` | serious | 1 | IDs of active elements must be unique |
-| `aria-input-field-name` | serious | 1 | ARIA input fields must have an accessible name |
-| `aria-required-children` | critical | 1 | Certain ARIA roles must contain particular children |
+"Now" is the count still allowlisted after ASMA-8143. Rules the ticket was not scoped to are
+unchanged by construction.
+
+| Rule | Impact | At ASMA-8136 | Now | What axe reports |
+| --- | --- | --- | --- | --- |
+| `color-contrast` | serious | 53 | 54 | Elements must meet minimum colour contrast ratio thresholds |
+| `label` | critical | 49 | **0** | Form elements must have labels |
+| `button-name` | critical | 23 | 1 | Buttons must have discernible text |
+| `aria-allowed-attr` | serious | 7 | **0** | ARIA attributes must be allowed for an element’s role |
+| `nested-interactive` | serious | 5 | 4 | Interactive controls must not be nested |
+| `aria-hidden-focus` | serious | 4 | **0** | aria-hidden elements must not contain focusable elements |
+| `aria-valid-attr-value` | serious | 4 | 4 | ARIA attributes must have valid values |
+| `empty-table-header` | minor | 3 | 3 | Table header text should not be empty |
+| `heading-order` | moderate | 2 | 2 | Heading levels should only increase by one |
+| `label-title-only` | serious | 2 | 2 | Form elements should have a visible label, not only title/aria-describedby |
+| `scrollable-region-focusable` | serious | 2 | 2 | Scrollable region must have keyboard access |
+| `landmark-unique` | moderate | 2 | 2 | Landmarks must have a unique role or role/label/title combination |
+| `duplicate-id-active` | serious | 1 | 1 | IDs of active elements must be unique |
+| `aria-input-field-name` | serious | 1 | 1 | ARIA input fields must have an accessible name |
+| `aria-required-children` | critical | 1 | 1 | Certain ARIA roles must contain particular children |
 
 ## Allowlisted stories
+
+Regenerated from the source tree after the ASMA-8143 burn-down (67 entries across 27 files; the
+ASMA-8136 baseline was 124 across 33). Every row below is a story that still carries
+`parameters.a11y.test = 'todo'`.
 
 ### `src/components/custom/pathfinder-card/story/PathfinderCard.stories.tsx`
 
 | Story | Rule id(s) | Violation |
 | --- | --- | --- |
-| `BreakpointMatrixWithAvatar` (Breakpoint Matrix With Avatar) | `aria-hidden-focus` , `color-contrast` , `nested-interactive` | aria-hidden elements must not contain focusable elements; Elements must meet minimum colour contrast ratio thresholds; Interactive controls must not be nested |
-| `BreakpointMatrixWithoutAvatar` (Breakpoint Matrix Without Avatar) | `aria-hidden-focus` , `color-contrast` , `nested-interactive` | aria-hidden elements must not contain focusable elements; Elements must meet minimum colour contrast ratio thresholds; Interactive controls must not be nested |
-| `DesktopExpandedWithAvatar` (Desktop Expanded With Avatar) | `aria-hidden-focus` , `color-contrast` , `nested-interactive` | aria-hidden elements must not contain focusable elements; Elements must meet minimum colour contrast ratio thresholds; Interactive controls must not be nested |
-| `DesktopExpandedWithoutAvatar` (Desktop Expanded Without Avatar) | `aria-hidden-focus` , `color-contrast` , `nested-interactive` | aria-hidden elements must not contain focusable elements; Elements must meet minimum colour contrast ratio thresholds; Interactive controls must not be nested |
+| `BreakpointMatrixWithAvatar` (Breakpoint Matrix With Avatar) | `color-contrast` , `nested-interactive` | Elements must meet minimum colour contrast ratio thresholds; Interactive controls must not be nested |
+| `BreakpointMatrixWithoutAvatar` (Breakpoint Matrix Without Avatar) | `color-contrast` , `nested-interactive` | Elements must meet minimum colour contrast ratio thresholds; Interactive controls must not be nested |
+| `DesktopExpandedWithAvatar` (Desktop Expanded With Avatar) | `color-contrast` , `nested-interactive` | Elements must meet minimum colour contrast ratio thresholds; Interactive controls must not be nested |
+| `DesktopExpandedWithoutAvatar` (Desktop Expanded Without Avatar) | `color-contrast` , `nested-interactive` | Elements must meet minimum colour contrast ratio thresholds; Interactive controls must not be nested |
 
 ### `src/components/custom/widget/widget/story/StyledWidget.stories.tsx`
 
@@ -190,17 +207,8 @@ apply in the vitest browser-mode a11y run.
 
 | Story | Rule id(s) | Violation |
 | --- | --- | --- |
-| `Chip` (Chip) | `aria-allowed-attr` , `color-contrast` | ARIA attributes must be allowed for an element’s role; Elements must meet minimum colour contrast ratio thresholds |
+| `Chip` (Chip) | `color-contrast` | Elements must meet minimum colour contrast ratio thresholds |
 | `FigmaPaddingMedium` (Figma Padding Medium) | `color-contrast` | Elements must meet minimum colour contrast ratio thresholds |
-
-### `src/components/data-display/interactive-chip/StyledInteractiveChip.stories.tsx`
-
-| Story | Rule id(s) | Violation |
-| --- | --- | --- |
-| `Radio_Default` (Radio Default) | `aria-allowed-attr` | ARIA attributes must be allowed for an element’s role |
-| `Radio_Focused` (Radio Focused) | `aria-allowed-attr` | ARIA attributes must be allowed for an element’s role |
-| `Radio_Readonly` (Radio Readonly) | `aria-allowed-attr` | ARIA attributes must be allowed for an element’s role |
-| `Radio_WithReactNodeLabel` (Radio With React Node Label) | `aria-allowed-attr` | ARIA attributes must be allowed for an element’s role |
 
 ### `src/components/data-display/virtualized-list/VirtualizedList.stories.tsx`
 
@@ -214,13 +222,14 @@ apply in the vitest browser-mode a11y run.
 | Story | Rule id(s) | Violation |
 | --- | --- | --- |
 | `Playground` (Playground) | `color-contrast` | Elements must meet minimum colour contrast ratio thresholds |
+| `Variants` (Variants) | `color-contrast` | Elements must meet minimum colour contrast ratio thresholds |
 
 ### `src/components/feedback/minimizable-dialog/stories/MinimizableDialogStack.stories.tsx`
 
 | Story | Rule id(s) | Violation |
 | --- | --- | --- |
 | `ClosingParentClosesDependentDialog` (Closing Parent Closes Dependent Dialog) | `color-contrast` | Elements must meet minimum colour contrast ratio thresholds |
-| `Default` (Default) | `color-contrast` , `label` | Elements must meet minimum colour contrast ratio thresholds; Form elements must have labels |
+| `Default` (Default) | `color-contrast` | Elements must meet minimum colour contrast ratio thresholds |
 | `OpenCloseIndividually` (Open Close Individually) | `color-contrast` | Elements must meet minimum colour contrast ratio thresholds |
 
 ### `src/components/feedback/snack-bar/story/StyledAlert.stories.tsx`
@@ -238,43 +247,14 @@ apply in the vitest browser-mode a11y run.
 | `InsideDialog` (Inside Dialog) | `color-contrast` | Elements must meet minimum colour contrast ratio thresholds **(intermittent - fails only on some runs)** |
 | `PlacementInContext` (Placement In Context) | `color-contrast` | Elements must meet minimum colour contrast ratio thresholds |
 
-### `src/components/inputs/checkbox/StyledCheckbox.stories.tsx`
-
-| Story | Rule id(s) | Violation |
-| --- | --- | --- |
-| `Checked_Default` (Checked Default) | `label` | Form elements must have labels |
-| `Checked_Disabled` (Checked Disabled) | `label` | Form elements must have labels |
-| `Checked_Focused` (Checked Focused) | `label` | Form elements must have labels |
-| `Checked_Hover` (Checked Hover) | `label` | Form elements must have labels |
-| `Indeterminate_Default` (Indeterminate Default) | `label` | Form elements must have labels |
-| `Indeterminate_Disabled` (Indeterminate Disabled) | `label` | Form elements must have labels |
-| `Indeterminate_Focused` (Indeterminate Focused) | `label` | Form elements must have labels |
-| `Indeterminate_Hover` (Indeterminate Hover) | `label` | Form elements must have labels |
-| `Unchecked_Default` (Unchecked Default) | `label` | Form elements must have labels |
-| `Unchecked_Disabled` (Unchecked Disabled) | `label` | Form elements must have labels |
-| `Unchecked_Focused` (Unchecked Focused) | `label` | Form elements must have labels |
-| `Unchecked_Hover` (Unchecked Hover) | `label` | Form elements must have labels |
-
-### `src/components/inputs/checkbox/base-ui/StyledCheckbox.stories.tsx`
-
-| Story | Rule id(s) | Violation |
-| --- | --- | --- |
-| `Checkbox` (Checkbox) | `label` | Form elements must have labels |
-| `CheckboxWithLabel` (Checkbox With Label) | `label` | Form elements must have labels |
-| `Interactive` (Interactive) | `label` | Form elements must have labels |
-
 ### `src/components/inputs/dynamic-select/StyledDynamicSelect.stories.tsx`
 
 | Story | Rule id(s) | Violation |
 | --- | --- | --- |
-| `LargeMultipleSelectAutocomplete` (Large Multiple Select Autocomplete) | `button-name` , `label` | Buttons must have discernible text; Form elements must have labels |
-| `LongLabelsAndDisabledOptions` (Long Labels And Disabled Options) | `aria-allowed-attr` , `button-name` , `color-contrast` , `label` | ARIA attributes must be allowed for an element’s role; Buttons must have discernible text; Elements must meet minimum colour contrast ratio thresholds; Form elements must have labels |
-| `MultipleSelectAutocomplete` (Multiple Select Autocomplete) | `button-name` , `label` | Buttons must have discernible text; Form elements must have labels |
-| `MultipleSelectChipGroup` (Multiple Select Chip Group) | `button-name` , `color-contrast` , `label` | Buttons must have discernible text; Elements must meet minimum colour contrast ratio thresholds; Form elements must have labels |
-| `Playground` (Playground) | `button-name` , `color-contrast` , `label` | Buttons must have discernible text; Elements must meet minimum colour contrast ratio thresholds; Form elements must have labels |
-| `ReadOnlyAutocompleteDoesNotOpen` (Read Only Autocomplete Does Not Open) | `button-name` , `label` | Buttons must have discernible text; Form elements must have labels |
-| `SingleSelectAutocomplete` (Single Select Autocomplete) | `button-name` , `label` | Buttons must have discernible text; Form elements must have labels |
-| `SingleSelectChipGroup` (Single Select Chip Group) | `aria-allowed-attr` , `button-name` , `color-contrast` , `label` | ARIA attributes must be allowed for an element’s role; Buttons must have discernible text; Elements must meet minimum colour contrast ratio thresholds; Form elements must have labels |
+| `LongLabelsAndDisabledOptions` (Long Labels And Disabled Options) | `color-contrast` | Elements must meet minimum colour contrast ratio thresholds |
+| `MultipleSelectChipGroup` (Multiple Select Chip Group) | `color-contrast` | Elements must meet minimum colour contrast ratio thresholds |
+| `Playground` (Playground) | `color-contrast` | Elements must meet minimum colour contrast ratio thresholds |
+| `SingleSelectChipGroup` (Single Select Chip Group) | `color-contrast` | Elements must meet minimum colour contrast ratio thresholds |
 
 ### `src/components/inputs/input-field/story/StyledInputField.stories.tsx`
 
@@ -300,44 +280,11 @@ apply in the vitest browser-mode a11y run.
 | --- | --- | --- |
 | `Label` (Label) | `color-contrast` | Elements must meet minimum colour contrast ratio thresholds |
 
-### `src/components/inputs/radio-button/StyledRadio.stories.tsx`
-
-| Story | Rule id(s) | Violation |
-| --- | --- | --- |
-| `Checked_Default` (Checked Default) | `label` | Form elements must have labels |
-| `Checked_Disabled` (Checked Disabled) | `label` | Form elements must have labels |
-| `Checked_Focused` (Checked Focused) | `label` | Form elements must have labels |
-| `Group` (Group) | `label` | Form elements must have labels |
-| `Unchecked_Default` (Unchecked Default) | `label` | Form elements must have labels |
-| `Unchecked_Disabled` (Unchecked Disabled) | `label` | Form elements must have labels |
-| `Unchecked_Focused` (Unchecked Focused) | `label` | Form elements must have labels |
-
-### `src/components/inputs/radio-button/base-ui/StyledRadio.stories.tsx`
-
-| Story | Rule id(s) | Violation |
-| --- | --- | --- |
-| `Checked_Default` (Checked Default) | `label` | Form elements must have labels |
-| `Checked_Disabled` (Checked Disabled) | `label` | Form elements must have labels |
-| `Checked_Focused` (Checked Focused) | `label` | Form elements must have labels |
-| `DefaultErrorText` (Default Error Text) | `label` | Form elements must have labels |
-| `ErrorText` (Error Text) | `label` | Form elements must have labels |
-| `Gallery` (Gallery) | `label` | Form elements must have labels |
-| `Group` (Group) | `label` | Form elements must have labels |
-| `Interactive` (Interactive) | `label` | Form elements must have labels |
-| `Unchecked_Default` (Unchecked Default) | `label` | Form elements must have labels |
-| `Unchecked_Disabled` (Unchecked Disabled) | `label` | Form elements must have labels |
-| `Unchecked_Focused` (Unchecked Focused) | `label` | Form elements must have labels |
-
 ### `src/components/inputs/select-autocomplete/story/StyledSelectAutocomplete.stories.tsx`
 
 | Story | Rule id(s) | Violation |
 | --- | --- | --- |
 | `Gallery` (Gallery) | `color-contrast` | Elements must meet minimum colour contrast ratio thresholds |
-| `LargeDataset` (Large Dataset) | `label` | Form elements must have labels |
-| `Performance_LargeDataset` (Performance Large Dataset) | `label` | Form elements must have labels |
-| `Performance_MultipleChips` (Performance Multiple Chips) | `label` | Form elements must have labels |
-| `Performance_RenderCount` (Performance Render Count) | `label` | Form elements must have labels |
-| `ReadOnlyDoesNotOpen` (Read Only Does Not Open) | `label` | Form elements must have labels |
 | `SelectAllTogglesAllOptions` (Select All Toggles All Options) | `aria-required-children` | Certain ARIA roles must contain particular children |
 
 ### `src/components/inputs/select/story/StyledSelect.stories.tsx`
@@ -353,28 +300,16 @@ apply in the vitest browser-mode a11y run.
 
 | Story | Rule id(s) | Violation |
 | --- | --- | --- |
-| `Checked_Default` (Checked Default) | `button-name` | Buttons must have discernible text |
-| `Checked_Disabled` (Checked Disabled) | `button-name` , `color-contrast` | Buttons must have discernible text; Elements must meet minimum colour contrast ratio thresholds |
-| `Checked_Focused` (Checked Focused) | `button-name` | Buttons must have discernible text |
-| `Checked_Hovered` (Checked Hovered) | `button-name` | Buttons must have discernible text |
-| `CompositeLeftLabelError` (Composite Left Label Error) | `button-name` | Buttons must have discernible text |
-| `Gallery` (Gallery) | `button-name` | Buttons must have discernible text |
-| `Interactive` (Interactive) | `button-name` | Buttons must have discernible text |
-| `Unchecked_Default` (Unchecked Default) | `button-name` | Buttons must have discernible text |
-| `Unchecked_Disabled` (Unchecked Disabled) | `button-name` , `color-contrast` | Buttons must have discernible text; Elements must meet minimum colour contrast ratio thresholds |
-| `Unchecked_Focused` (Unchecked Focused) | `button-name` | Buttons must have discernible text |
-| `Unchecked_Hovered` (Unchecked Hovered) | `button-name` | Buttons must have discernible text |
+| `Checked_Disabled` (Checked Disabled) | `color-contrast` | Elements must meet minimum colour contrast ratio thresholds |
+| `Unchecked_Disabled` (Unchecked Disabled) | `color-contrast` | Elements must meet minimum colour contrast ratio thresholds |
 
 ### `src/components/inputs/textarea/StyledTextarea.stories.tsx`
 
-Added by recorded exception - see "Recorded exception" above. Pre-existing violations unmasked by the
-ASMA-8133 token repair, not new defects.
-
 | Story | Rule id(s) | Violation |
 | --- | --- | --- |
-| `Disabled` (Disabled) | `color-contrast` | Disabled placeholder `#bdc4cf` on `#ffffff` = 1.75, needs 4.5 |
-| `Error` (Error) | `color-contrast` | Error text `#e10700` on error background `#f7dede` = 3.88, needs 4.5 |
-| `Gallery` (Gallery) | `color-contrast` | Error text `#e10700` on error background `#f7dede` = 3.88, needs 4.5 |
+| `Disabled` (Disabled) | `color-contrast` | Elements must meet minimum colour contrast ratio thresholds **(unmasked by ASMA-8133 - see the recorded exception above)** |
+| `Error` (Error) | `color-contrast` | Elements must meet minimum colour contrast ratio thresholds **(unmasked by ASMA-8133 - see the recorded exception above)** |
+| `Gallery` (Gallery) | `color-contrast` | Elements must meet minimum colour contrast ratio thresholds **(unmasked by ASMA-8133 - see the recorded exception above)** |
 
 ### `src/components/mui-compat/Avatar.stories.tsx`
 
@@ -409,12 +344,6 @@ ASMA-8133 token repair, not new defects.
 | --- | --- | --- |
 | `Gallery` (Gallery) | `landmark-unique` | Landmarks must have a unique role or role/label/title combination |
 
-### `src/datetime/stories/DatePickerCalendarStates.stories.tsx`
-
-| Story | Rule id(s) | Violation |
-| --- | --- | --- |
-| `AllDayStates` (All Day States) | `button-name` | Buttons must have discernible text |
-
 ### `src/datetime/stories/StyledDatePicker.stories.tsx`
 
 | Story | Rule id(s) | Violation |
@@ -426,7 +355,6 @@ ASMA-8133 token repair, not new defects.
 
 | Story | Rule id(s) | Violation |
 | --- | --- | --- |
-| `ColorThemes` (Color Themes) | `button-name` | Buttons must have discernible text |
 | `Gallery` (Gallery) | `color-contrast` | Elements must meet minimum colour contrast ratio thresholds |
 | `TimePicker` (Time Picker) | `color-contrast` | Elements must meet minimum colour contrast ratio thresholds |
 
@@ -434,15 +362,15 @@ ASMA-8133 token repair, not new defects.
 
 | Story | Rule id(s) | Violation |
 | --- | --- | --- |
-| `FormInputs` (Form Inputs) | `color-contrast` , `heading-order` , `label-title-only` , `label` | Elements must meet minimum colour contrast ratio thresholds; Heading levels should only increase by one; Form elements should have a visible label, not only title/aria-describedby; Form elements must have labels |
-| `FormInputsHeightConsistency` (Form Inputs Height Consistency) | `color-contrast` , `heading-order` , `label-title-only` , `label` | Elements must meet minimum colour contrast ratio thresholds; Heading levels should only increase by one; Form elements should have a visible label, not only title/aria-describedby; Form elements must have labels |
+| `FormInputs` (Form Inputs) | `color-contrast` , `heading-order` , `label-title-only` | Elements must meet minimum colour contrast ratio thresholds; Heading levels should only increase by one; Form elements should have a visible label, not only title/aria-describedby |
+| `FormInputsHeightConsistency` (Form Inputs Height Consistency) | `color-contrast` , `heading-order` , `label-title-only` | Elements must meet minimum colour contrast ratio thresholds; Heading levels should only increase by one; Form elements should have a visible label, not only title/aria-describedby |
 
 ### `src/table/stories/StyledTable.stories.tsx`
 
 | Story | Rule id(s) | Violation |
 | --- | --- | --- |
 | `FooterRowCountBoundary` (Footer Row Count Boundary) | `duplicate-id-active` | IDs of active elements must be unique |
-| `SizingPersistenceAndControlAlignment` (Sizing Persistence And Control Alignment) | `button-name` , `empty-table-header` , `nested-interactive` | Buttons must have discernible text; Table header text should not be empty; Interactive controls must not be nested |
+| `SizingPersistenceAndControlAlignment` (Sizing Persistence And Control Alignment) | `empty-table-header` | Table header text should not be empty |
 
 ### `src/table/stories/TGrini.stories.tsx`
 
@@ -455,11 +383,14 @@ ASMA-8133 token repair, not new defects.
 | Story | Rule id(s) | Violation |
 | --- | --- | --- |
 | `TableV2` (Table V 2) | `empty-table-header` | Table header text should not be empty |
-
 ## Burn-down notes
 
 Concrete follow-up work identified while baselining. These are **not** fixed by ASMA-8136, which only
 adds enforcement; each needs its own ticket so it can carry interaction/visual evidence.
+
+Sections for rules ASMA-8143 closed are kept and marked **DONE**, with what the fix turned out to be -
+the original prediction is worth keeping next to the outcome. Everything still marked as follow-up is
+untouched and open.
 
 ### `color-contrast` (53 stories across 20 files - the largest cluster)
 
@@ -478,7 +409,15 @@ ASMA-8133 (token-layer work in the same epic) that `--colors-delta-300` (`#bdc4c
 general point still holds: after any token change, re-run the suite rather than trusting recorded
 ratios.
 
-### `button-name` (23 stories across 6 files)
+**Untouched by ASMA-8143, by instruction** - these need design decisions, not markup. One measurement
+worth recording though, since it makes the point above concrete: flipping every remaining entry to
+`test: 'error'` to audit the residue showed `base-ui/StyledSwitch > Unchecked_Disabled` and
+`> Checked_Disabled` now passing `color-contrast`. Their entries are almost certainly stale, cleared by
+the ASMA-8138 token repairs rather than by anything here. They were **left in place** - removing a
+`color-contrast` entry was out of scope - but whoever picks up the contrast cluster should re-measure
+before assuming any of these 54 rows is still real.
+
+### `button-name` (23 stories across 6 files) - **DONE in ASMA-8143** (23 -> 1)
 
 Icon-only buttons with no accessible name. The missing name is **per call site**: `StyledButton` cannot
 invent a label for an icon-only instance, so each site needs its own `aria-label`.
@@ -496,6 +435,33 @@ The remaining four are distinct call sites (confirmed with ASMA-8134, who owns t
 - `src/components/inputs/select/story/StyledSelect.stories.tsx` - one story (`RapidOpenClose`).
 
 There is no single shared fix across them.
+
+**Outcome.** The per-call-site prediction held: every fix was an `aria-label` at the call site, plus one
+structural fix in `StyledFormControlLabel` (a `<label>` does not name a `<button role="switch">` at all,
+so the label text now carries an `id` and the control gets `aria-labelledby`). The `StyledSwitch` and
+`StyledDynamicSelect` clusters both collapsed as predicted.
+
+One entry survives: `StyledSelect > MultipleSelectBehavior`. Its `button-name` violation is fixable, but
+the same story is also allowlisted for `aria-valid-attr-value` and `aria-input-field-name`, which were
+out of ASMA-8143's scope - so the entry cannot be removed yet and was left whole rather than partially
+rewritten. Clearing the two ARIA rules (see below) clears this row with them.
+
+### `aria-allowed-attr` (7 stories) - **DONE in ASMA-8143** (7 -> 0)
+
+All seven came from one line in `StyledInteractiveChip`, which emitted `aria-readonly` for every chip
+type. `aria-readonly` is supported on `role="checkbox"` but **not** on `role="radio"` (ARIA 1.2 puts it
+on `radiogroup`, not on the individual radio), so every radio chip shipped a disallowed attribute -
+including the `aria-readonly="false"` no-op case, which axe still flags. The fix emits the attribute only
+for the checkbox type. A read-only radio chip is already `pointer-events-none`, so nothing was lost;
+`Radio_Readonly`'s play function now asserts the attribute is absent.
+
+### `aria-hidden-focus` (4 stories) - **DONE in ASMA-8143** (4 -> 0)
+
+All four were `PathfinderCard`'s off-screen measurement layer. It duplicates the lead and action slots to
+measure them, and those slots can contain real buttons - so the duplicates stayed in the tab order. This
+was not only an axe violation but a real bug: Tab landed on an invisible second copy of the card's own
+action. Adding `inert` to the measure layer removes them from the tab order without touching layout (the
+layer is already `opacity-0 pointer-events-none`), and axe 4.7 recognises it.
 
 ### `nested-interactive` (5 stories: 4 in `PathfinderCard`, 1 in `StyledTable`)
 
@@ -520,6 +486,18 @@ tests** - it removes a real input from every row, so it needs test coverage prov
 selection and keyboard handling do not depend on it. Deliberately out of scope for the ASMA-8134 dedupe
 PR, which is constrained to no behaviour changes.
 
+**Partly done in ASMA-8143 (5 -> 4).** The table story is fixed: `decorative` was ported to
+`src/table/shared-components/StyledCheckbox` (the table has its own copy of the component) and adopted in
+both the select-all header cell and the per-row select cell. Same classes and same `data-*` state
+attributes, so the rendered box is unchanged; the wrapping `div` was already the real control, so
+selection and keyboard handling are untouched - `aria-hidden` + `tabIndex={-1}` simply never satisfied
+the rule, as axe says above.
+
+The four `PathfinderCard` stories are **still open**. Their `aria-hidden-focus` half is fixed (see
+above), but `nested-interactive` there is the card itself being a click target that contains real
+buttons - a structural change to the component's interaction model, not a markup tweak, so it was out of
+ASMA-8143's "cheap markup" scope and needs its own ticket with interaction tests.
+
 ### `empty-table-header` (3 stories: `StyledTable`, `TGrini`, `TableV2`)
 
 The select-all column renders an empty header cell:
@@ -531,18 +509,33 @@ The select-all column renders an empty header cell:
 A visually-hidden label on that one `<th>` should clear all three files at once. Note it is a fixed 38px
 cell, so the fix needs a visual check that added content does not affect layout.
 
+**Still open.** Out of ASMA-8143's scope (cheap markup rules only), so the entries stand. The approach
+above still looks right - `actionColumn.tsx` already does exactly this with `ActionsEmptyHeader` - and it
+would also want the `expand`, `dnd-handle` and `show-full-text` utility columns, which render
+`header: () => null`. It needs the VRT check the note calls for, which is why it was not folded in here.
+
 ### `duplicate-id-active` (1 story, `StyledTable > Footer Row Count Boundary`)
 
 The story renders several tables in one canvas and the row DOM `id` comes straight from the row key, so
 ids collide across table instances (`id="1"` .. `id="5"` appear more than once). Fixable by namespacing
 the row id per table instance. The stories assert on `data-test`, not `id`, so this looks selector-safe.
 
-### `label` (49 stories across 8 files)
+### `label` (49 stories across 8 files) - **DONE in ASMA-8143** (49 -> 0)
 
 Form controls with no associated label, concentrated in a few input families - `StyledCheckbox` (12),
 `base-ui/StyledRadio` (11), `StyledDynamicSelect` (8), `StyledRadio` (7) and `StyledSelectAutocomplete`
 (5). This is the second-largest cluster but the most concentrated one: five components account for 43 of
 the 49 stories, so it is worth auditing as one pass over the input components rather than story by story.
+
+**Outcome.** The "one pass over the input components" framing was right, and the root cause was a single
+pattern repeated everywhere: `StyledCheckbox` and `StyledRadio` each render their own `<label>` around
+the real `<input>`, so wrapping them in an *outer* `<label>` (which is what `StyledFormControlLabel` and
+most of the stories did) produces nested labels - and axe resolves an input's implicit label with
+`closest('label')`, which finds the *inner*, textless one. Fixing `StyledFormControlLabel` to name the
+control with `aria-labelledby` from the same visible text cleared the component-level cases; the
+remaining ones were state-matrix stories where the visible text is a *sample*, not a label, and those
+took an explicit name per cell. Note `StyledInputField` needs the name on `slotProps.htmlInput` - a
+top-level `aria-label` does not reach the inner `<input>`.
 
 ### Intermittent entry
 
@@ -559,3 +552,19 @@ pnpm test-storybook -- --run
 
 To see what a listed story actually violates, delete its override block and re-run - axe prints the
 offending node, the rule id and the remediation for each violation.
+
+To audit the whole allowlist at once - which is how the "Now" column and the regenerated tables above
+were produced - flip every entry temporarily and read the rule ids back out of the failures:
+
+```bash
+grep -rl "test: 'todo'" src/ > /tmp/todo-files.txt
+while read -r f; do sed -i '' "s/test: 'todo'/test: 'error'/g" "$f"; done < /tmp/todo-files.txt
+npx vitest --project=storybook --run 2>&1 | grep -oE 'rules/axe/4\.7/[a-z-]+' | sort | uniq -c
+# then put them back
+while read -r f; do sed -i '' "s/test: 'error'/test: 'todo'/g" "$f"; done < /tmp/todo-files.txt
+```
+
+Check `git status` afterwards: the set of modified files must be exactly what it was before the flip.
+Note `src/components/inputs/phone-field/story/StyledPhoneField.stories.tsx` carries a deliberate
+`test: 'error'` of its own, so the restore step will not round-trip it - it is not in the grep list to
+begin with, which is why the check above is on `git status` rather than on a second grep.

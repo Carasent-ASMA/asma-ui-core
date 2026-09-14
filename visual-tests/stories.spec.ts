@@ -59,6 +59,10 @@ const SKIP = new Map<string, string>([
         'data-display-styledtable--sizing-persistence-and-control-alignment',
         'ResizeObserver row-height recalculation races the screenshot after the row-expand interaction',
     ],
+    [
+        'accessibility-developer-checklist--pointer-cancellation',
+        'long interactive play (5 pointer-cancellation sequences) races the screenshot; end state is focus/hover-dependent since the autocomplete clear button became focus-conditional (#188)',
+    ],
     ...DYNAMIC_TOOLBAR_STORIES.map(
         (id) => [id, 'ResizeObserver/measurement layout oscillates by ~0.2–3k px between identical captures'] as const,
     ),

@@ -44,8 +44,11 @@ const RadioWrapper = ({
             }}
         >
             {/* <StyledFormControlLabel label={label} control={<StyledRadio {...radioArgs} />} /> */}
+            {/* `StyledRadio` renders its own <label> around the real <input>, so this wrapper
+                <label> nests and axe resolves the input's implicit label to the inner, textless
+                one. Name the input directly instead (axe `label`, ASMA-8143). */}
             <label className='flex items-center'>
-                <StyledRadio {...radioArgs} />
+                <StyledRadio {...radioArgs} aria-label={label} />
                 {label}
             </label>
         </StyledRadioGroup>
@@ -53,15 +56,11 @@ const RadioWrapper = ({
 }
 
 export const Unchecked_Default: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     args: { value: true },
     render: (args) => <RadioWrapper label='Unchecked' groupArgs={{ name: 'unchecked-default' }} radioArgs={args} />,
 }
 
 export const Unchecked_Focused: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     args: { value: true },
     render: (args) => <RadioWrapper label='Focused' groupArgs={{ name: 'unchecked-focused' }} radioArgs={args} />,
     play: async ({ canvas }) => {
@@ -73,8 +72,6 @@ export const Unchecked_Focused: Story = {
 }
 
 export const Unchecked_Disabled: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     args: { value: true, disabled: true },
     render: (args) => <RadioWrapper label='Disabled' groupArgs={{ name: 'unchecked-disabled' }} radioArgs={args} />,
     play: async ({ canvas, userEvent }) => {
@@ -89,8 +86,6 @@ export const Unchecked_Disabled: Story = {
 }
 
 export const Checked_Default: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     args: { value: true },
     render: (args) => (
         <RadioWrapper label='Checked' groupArgs={{ name: 'checked-default', defaultValue: true }} radioArgs={args} />
@@ -98,8 +93,6 @@ export const Checked_Default: Story = {
 }
 
 export const Checked_Focused: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     args: { value: true },
     render: (args) => (
         <RadioWrapper label='Focused' groupArgs={{ name: 'checked-focused', defaultValue: true }} radioArgs={args} />
@@ -113,8 +106,6 @@ export const Checked_Focused: Story = {
 }
 
 export const Checked_Disabled: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     args: { value: true, disabled: true },
     render: (args) => (
         <RadioWrapper label='Disabled' groupArgs={{ name: 'checked-disabled', defaultValue: true }} radioArgs={args} />
@@ -132,18 +123,16 @@ export const Checked_Disabled: Story = {
 
 /** Live: controlled radio group; clicking an option selects it and updates state. */
 export const Interactive: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     render: function InteractiveRadio() {
         const [value, setValue] = useState<string | number | boolean | null>('a')
         return (
             <StyledRadioGroup name='radio-interactive' value={value} onValueChange={(v) => setValue(v)}>
                 <label className='flex items-center'>
-                    <StyledRadio dataTest='radio-a' value='a' />
+                    <StyledRadio dataTest='radio-a' value='a' aria-label='Option A' />
                     Option A
                 </label>
                 <label className='flex items-center'>
-                    <StyledRadio dataTest='radio-b' value='b' />
+                    <StyledRadio dataTest='radio-b' value='b' aria-label='Option B' />
                     Option B
                 </label>
             </StyledRadioGroup>
@@ -168,8 +157,6 @@ export const Interactive: Story = {
  * checkbox). Read-only is omitted — the radio has no `readOnly` prop.
  */
 export const Gallery: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     render: () => {
         const th: React.CSSProperties = {
             padding: 16,
@@ -215,6 +202,7 @@ export const Gallery: Story = {
                                 <td key={c.key} style={td}>
                                     <StyledRadio
                                         dataTest={`gallery-${s.label}-${c.key}`}
+                                        aria-label={`${s.label} ${c.label}`}
                                         checked={c.checked}
                                         onChange={() => undefined}
                                         {...s.props}
@@ -230,8 +218,6 @@ export const Gallery: Story = {
 }
 
 export const Group: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     args: { size: 'small' },
     render: (args) => {
         return (
@@ -247,27 +233,27 @@ export const Group: Story = {
                     helperText='Custom helper text for radio group'
                 >
                     <label className='flex items-center'>
-                        <StyledRadio {...args} value='Nursing assistant' />
+                        <StyledRadio {...args} value='Nursing assistant' aria-label='Nursing assistant' />
                         Nursing assistant
                     </label>
 
                     <label className='flex items-center'>
-                        <StyledRadio {...args} value='Medical assistant' />
+                        <StyledRadio {...args} value='Medical assistant' aria-label='Medical assistant' />
                         Medical assistant
                     </label>
 
                     <label className='flex items-center'>
-                        <StyledRadio {...args} value='Tech assistant' />
+                        <StyledRadio {...args} value='Tech assistant' aria-label='Tech assistant' />
                         Tech assistant
                     </label>
 
                     <label className='flex items-center'>
-                        <StyledRadio {...args} value='Tax assistant' />
+                        <StyledRadio {...args} value='Tax assistant' aria-label='Tax assistant' />
                         Tax assistant
                     </label>
 
                     <label className='flex items-center'>
-                        <StyledRadio {...args} value='Diet assistant' />
+                        <StyledRadio {...args} value='Diet assistant' aria-label='Diet assistant' />
                         Diet assistant
                     </label>
                 </StyledRadioGroup>
@@ -277,8 +263,6 @@ export const Group: Story = {
 }
 
 export const ErrorText: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     args: { size: 'small' },
     render: (args) => {
         return (
@@ -295,27 +279,27 @@ export const ErrorText: Story = {
                     errorText='Custom error text here'
                 >
                     <label className='flex items-center'>
-                        <StyledRadio {...args} value='Nursing assistant' />
+                        <StyledRadio {...args} value='Nursing assistant' aria-label='Nursing assistant' />
                         Nursing assistant
                     </label>
 
                     <label className='flex items-center'>
-                        <StyledRadio {...args} value='Medical assistant' />
+                        <StyledRadio {...args} value='Medical assistant' aria-label='Medical assistant' />
                         Medical assistant
                     </label>
 
                     <label className='flex items-center'>
-                        <StyledRadio {...args} value='Tech assistant' />
+                        <StyledRadio {...args} value='Tech assistant' aria-label='Tech assistant' />
                         Tech assistant
                     </label>
 
                     <label className='flex items-center'>
-                        <StyledRadio {...args} value='Tax assistant' />
+                        <StyledRadio {...args} value='Tax assistant' aria-label='Tax assistant' />
                         Tax assistant
                     </label>
 
                     <label className='flex items-center'>
-                        <StyledRadio {...args} value='Diet assistant' />
+                        <StyledRadio {...args} value='Diet assistant' aria-label='Diet assistant' />
                         Diet assistant
                     </label>
                 </StyledRadioGroup>
@@ -325,8 +309,6 @@ export const ErrorText: Story = {
 }
 
 export const DefaultErrorText: Story = {
-    // axe: label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     args: { error: true, size: 'small' },
     render: (args) => {
         return (
@@ -338,17 +320,17 @@ export const DefaultErrorText: Story = {
 
                 <StyledRadioGroup aria-labelledby='group-example-label' name='radio-group' error>
                     <label className='flex items-center'>
-                        <StyledRadio {...args} value='Nursing assistant' />
+                        <StyledRadio {...args} value='Nursing assistant' aria-label='Nursing assistant' />
                         Nursing assistant
                     </label>
 
                     <label className='flex items-center'>
-                        <StyledRadio {...args} value='Medical assistant' />
+                        <StyledRadio {...args} value='Medical assistant' aria-label='Medical assistant' />
                         Medical assistant
                     </label>
 
                     <label className='flex items-center'>
-                        <StyledRadio {...args} value='Tech assistant' />
+                        <StyledRadio {...args} value='Tech assistant' aria-label='Tech assistant' />
                         Tech assistant
                     </label>
                 </StyledRadioGroup>

@@ -114,7 +114,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const SizingPersistenceAndControlAlignment: Story = {
-    // axe: button-name (icon-only button has no discernible text); empty-table-header (table header cell has no text); nested-interactive (focusable control nested inside an interactive control). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    // axe: empty-table-header (table header cell has no text). ASMA-8136 allowlist - see docs/a11y-allowlist.md
     parameters: { a11y: { test: 'todo' } },
     loaders: [
         () => {

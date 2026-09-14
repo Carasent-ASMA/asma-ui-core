@@ -235,9 +235,6 @@ const MobileExample = () => {
  * dismissal) instead of the anchored popper — same split as the date picker. This story pins the
  * Storybook viewport to a phone; on a desktop-sized canvas the same component renders the popper.
  */
-// axe: button-name (icon-only button has no discernible text). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-ColorThemes.parameters = { a11y: { test: 'todo' } }
-
 export const Mobile: StoryObj<typeof StyledTimePicker> = {
     globals: { viewport: { value: 'mobile1', isRotated: false } },
     render: () => <MobileExample />,

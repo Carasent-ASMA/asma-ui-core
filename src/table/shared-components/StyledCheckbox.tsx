@@ -11,6 +11,15 @@ type StyledCheckboxProps = {
     hideWrapper?: boolean
     className?: string
     onChange?: (event: ChangeEvent<HTMLInputElement>, checked: boolean) => void
+    /**
+     * Renders the identical visual box (same classes, same `data-*` state attributes — no visual
+     * change) with NO real `<input>` at all, for use as a pure state indicator inside a widget that
+     * already owns selection itself. A real `<input type="checkbox">` nested inside such a widget is
+     * an axe `nested-interactive` violation, and axe is explicit that `aria-hidden`/`tabIndex={-1}`
+     * do NOT satisfy the check — only removing the input does. Mirrors the `decorative` prop on the
+     * main `src/components/inputs/checkbox/base-ui/StyledCheckbox`.
+     */
+    decorative?: boolean
 } & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'size' | 'checked' | 'type'>
 
 export const IndeterminateIcon = (props: SVGProps<SVGSVGElement>): JSX.Element => (
@@ -52,6 +61,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
     hideWrapper,
     className,
     onChange,
+    decorative,
     ...props
 }): JSX.Element => {
     const isHideWrapper = !!hideWrapper
@@ -104,6 +114,25 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
         'data-disabled': disabled ? '' : undefined,
     }
 
+    const visual = (
+        <>
+            {!isHideWrapper && isRippleEnabled && <span ref={rippleRef} className={styles['CheckboxRippleContainer']} />}
+            <span className={checkboxClasses}>
+                <span className={styles['Indicator']}>
+                    <CheckboxIcon strokeWidth={size === 'small' ? 3 : 2} />
+                </span>
+            </span>
+        </>
+    )
+
+    if (decorative) {
+        return (
+            <span aria-hidden='true' className={wrapperClasses} data-test={dataTest} {...stateAttrs}>
+                {visual}
+            </span>
+        )
+    }
+
     return (
         <label className={wrapperClasses} data-test={dataTest} onPointerDown={handlePointerDown} {...stateAttrs}>
             <input
@@ -116,12 +145,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
                 onChange={handleChange}
                 {...props}
             />
-            {!isHideWrapper && isRippleEnabled && <span ref={rippleRef} className={styles['CheckboxRippleContainer']} />}
-            <span className={checkboxClasses}>
-                <span className={styles['Indicator']}>
-                    <CheckboxIcon strokeWidth={size === 'small' ? 3 : 2} />
-                </span>
-            </span>
+            {visual}
         </label>
     )
 }

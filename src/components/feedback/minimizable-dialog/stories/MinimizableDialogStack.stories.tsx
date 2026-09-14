@@ -75,7 +75,12 @@ function LongBody({ testId }: { testId: string }) {
                 industry's standard dummy text ever since the 1500s.
             </div>
             <StyledSelectExample />
-            <StyledInputField dataTest={`${testId}-input`} />
+            {/* Demo field with no visible label — name it so the dialog body doesn't ship an
+                unlabelled control (axe `label`, ASMA-8143). */}
+            <StyledInputField
+                dataTest={`${testId}-input`}
+                slotProps={{ htmlInput: { 'aria-label': 'Sample field' } }}
+            />
             <div>
                 Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the
                 industry's standard dummy text ever since the 1500s.
@@ -194,7 +199,7 @@ function StackStoryFrame() {
 }
 
 export const Default: Story = {
-    // axe: color-contrast (text/background contrast below the 4.5:1 threshold); label (form element has no associated label). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
     parameters: { a11y: { test: 'todo' } },
     render: () => (
         <DialogStackProvider>

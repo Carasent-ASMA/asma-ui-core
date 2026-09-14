@@ -26,6 +26,9 @@ function ShowFullTextCell<TData>({ info, rowHeight }: { info: CellContext<TData,
         <div className='flex w-full items-center justify-center' style={{ height: rowHeight ?? 'auto' }}>
             <StyledButton
                 dataTest='expand-text-button'
+                // Icon-only: without this the button has no accessible name at all
+                // (axe `button-name`, ASMA-8143).
+                aria-label={isExpanded ? 'Collapse text' : 'Show full text'}
                 size='small'
                 variant='textGray'
                 onClick={(event) => {
