@@ -52,6 +52,8 @@ export default defineConfig(
             ...eslintPluginBetterTailwindcss.configs['recommended-warn'].rules,
             ...eslintPluginBetterTailwindcss.configs['recommended-error'].rules,
 
+            'better-tailwindcss/no-unregistered-classes': ['error', { ignore: ['border-l-solid'] }],
+
             // NOTE: enable this when we have none of the other tailwind related errors
             'better-tailwindcss/enforce-consistent-line-wrapping': ['off', { printWidth: 100 }],
 

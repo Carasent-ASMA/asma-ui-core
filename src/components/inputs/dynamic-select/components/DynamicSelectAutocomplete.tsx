@@ -76,7 +76,11 @@ export const DynamicSelectAutocomplete = forwardRef(
                 return ''
             }
 
-            if (typeof optionValue === 'string' || typeof optionValue === 'number' || typeof optionValue === 'boolean') {
+            if (
+                typeof optionValue === 'string' ||
+                typeof optionValue === 'number' ||
+                typeof optionValue === 'boolean'
+            ) {
                 return String(optionValue)
             }
 
@@ -230,7 +234,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                                     {props['data-active'] !== undefined && (
                                         <span
                                             aria-hidden='true'
-                                            className='pointer-events-none absolute inset-y-0 left-0 border-l-[4px] border-solid border-focus-ring'
+                                            className='border-l-solid pointer-events-none absolute inset-y-0 left-0 border-l-[3px] border-focus-ring'
                                         />
                                     )}
                                     <StyledTooltip arrow title={tooltipTitle}>
@@ -287,7 +291,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                                 {props['data-active'] !== undefined && (
                                     <span
                                         aria-hidden='true'
-                                        className='pointer-events-none absolute inset-y-0 left-0 border-l-[4px] border-solid border-focus-ring'
+                                        className='border-l-solid pointer-events-none absolute inset-y-0 left-0 border-l-[3px] border-focus-ring'
                                     />
                                 )}
                                 <StyledTooltip arrow title={tooltipTitle}>
@@ -331,7 +335,8 @@ export const DynamicSelectAutocomplete = forwardRef(
                             onBlur={onBlur}
                             onKeyDown={(event) => {
                                 params.onKeyDown(event)
-                                if (typingDisabled && !event.defaultPrevented && event.key.length === 1) event.preventDefault()
+                                if (typingDisabled && !event.defaultPrevented && event.key.length === 1)
+                                    event.preventDefault()
                             }}
                             // Always off: this input owns its own option list, so the browser's
                             // form-history dropdown would cover it — same as `StyledSelectAutocomplete`
