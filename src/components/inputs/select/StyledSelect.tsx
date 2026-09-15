@@ -206,7 +206,11 @@ export const StyledSelect = ({
             shift({ padding: 8 }),
             sizeMiddleware({
                 apply({ rects, elements }) {
-                    elements.floating.style.minWidth = `${rects.reference.width + 20}px`
+                    // The list starts at the field's width. The `+ 20` this replaces made every
+                    // dropdown 20px wider than the field that opened it, which `shift` then slid
+                    // sideways to keep on screen — very visible on a full-width field in a dialog
+                    // or on mobile. StyledSelectAutocomplete already matches its input exactly.
+                    elements.floating.style.minWidth = `${rects.reference.width}px`
                 },
             }),
         ],
@@ -462,7 +466,7 @@ export const StyledSelect = ({
                         className={cn(
                             'shrink-0 transition-transform',
                             isButtonFocus ? 'text-gama-500' : chevronRestingClass,
-                            open && 'rotate-180',
+                            open && 'flip-180',
                         )}
                     />
                 </span>

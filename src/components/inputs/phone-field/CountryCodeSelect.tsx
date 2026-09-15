@@ -182,7 +182,7 @@ export const CountryCodeSelect = ({
                             onClick={close}
                             className='ml-auto flex shrink-0 cursor-pointer border-0 bg-transparent p-0'
                         >
-                            <ChevronDownIcon width={20} height={20} className='rotate-180' />
+                            <ChevronDownIcon width={20} height={20} className='flip-180' />
                         </button>
                     </span>
                 ) : (
@@ -205,7 +205,7 @@ export const CountryCodeSelect = ({
                         <ChevronDownIcon
                             width={20}
                             height={20}
-                            className={cn('ml-auto shrink-0 transition-transform', open && 'rotate-180')}
+                            className={cn('ml-auto shrink-0 transition-transform', open && 'flip-180')}
                         />
                     </button>
                 )}

@@ -269,3 +269,43 @@ describe('StyledSelect keyboard contract', () => {
         ).not.toBeNull()
     })
 })
+
+/** Popper geometry & the chevron flip — ASMA-8179. */
+describe('StyledSelect popper geometry', () => {
+    afterEach(cleanup)
+
+    it('opens a list that starts at the width of the field, not 20px wider', async () => {
+        const { container } = mount(<SelectFixture />)
+        const button = trigger(container)
+
+        await userEvent.click(button)
+        await waitFor(() => expect(options()).toHaveLength(3))
+
+        const field = button.getBoundingClientRect()
+        const list = listbox()!
+
+        // Asserts the size middleware's own output, not the rendered box: this browser loads no
+        // preflight, so the portalled list is content-box here and adds its 1px borders on top of
+        // the width, which it does not do in a consuming app. The hardcoded `+ 20` this replaces
+        // made every dropdown wider than the field that opened it, which `shift({ padding: 8 })`
+        // then slid sideways to keep on screen — obvious on a full-width field or on mobile.
+        await expect(Math.abs(Number.parseFloat(list.style.minWidth) - field.width)).toBeLessThanOrEqual(1)
+    })
+
+    it('flips the open chevron with a class no consumer build also defines', async () => {
+        const { container } = mount(<SelectFixture />)
+        const button = trigger(container)
+
+        await userEvent.click(button)
+        await waitFor(() => expect(options()).toHaveLength(3))
+
+        const chevron = button.querySelector('svg:last-of-type')!
+
+        // Deliberately a class-name assertion rather than a computed-style one: `rotate-180` renders
+        // correctly in this package, and only breaks in a consuming app, where Tailwind 4 emits that
+        // same name as the individual `rotate` property and the two rotations cancel out (ASMA-7890).
+        // A style assertion here would pass either way; the name staying ours is the actual contract.
+        await expect(chevron.getAttribute('class')).toContain('flip-180')
+        await expect(chevron.getAttribute('class')).not.toContain('rotate-180')
+    })
+})

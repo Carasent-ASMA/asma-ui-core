@@ -78,7 +78,7 @@ export function TablePagination<TData>({
                         aria-activedescendant={activeIndex === null ? undefined : `${listboxId}-option-${activeIndex}`}
                         endIcon={
                             <ChevronDownIcon
-                                className={`${open ? 'rotate-180' : 'rotate-0'} transition-transform duration-300`}
+                                className={`${open ? 'flip-180' : 'rotate-0'} transition-transform duration-300`}
                                 height={24}
                                 width={24}
                             />
