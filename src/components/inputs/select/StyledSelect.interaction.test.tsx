@@ -269,3 +269,33 @@ describe('StyledSelect keyboard contract', () => {
         ).not.toBeNull()
     })
 })
+
+describe('StyledSelect popper geometry', () => {
+    afterEach(cleanup)
+
+    it('opens a list that starts at the width of the field, not 20px wider', async () => {
+        const { container } = mount(<SelectFixture />)
+        const button = trigger(container)
+
+        await userEvent.click(button)
+        await waitFor(() => expect(options()).toHaveLength(3))
+
+        const field = button.getBoundingClientRect()
+        const list = listbox()!
+
+        await expect(Math.abs(Number.parseFloat(list.style.minWidth) - field.width)).toBeLessThanOrEqual(1)
+    })
+
+    it('flips the open chevron with a class no consumer build also defines', async () => {
+        const { container } = mount(<SelectFixture />)
+        const button = trigger(container)
+
+        await userEvent.click(button)
+        await waitFor(() => expect(options()).toHaveLength(3))
+
+        const chevron = button.querySelector('svg:last-of-type')!
+
+        await expect(chevron.getAttribute('class')).toContain('flip-180')
+        await expect(chevron.getAttribute('class')).not.toContain('rotate-180')
+    })
+})

@@ -9,6 +9,7 @@ const boxShadow = twConfigs.boxShadow,
 export default {
     mode: 'jit',
     important: true,
+    blocklist: ['rotate-180'],
     content: ['src/**/*.{js,jsx,ts,tsx}'],
     theme: {
         fontFamily,

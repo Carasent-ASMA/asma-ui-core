@@ -206,7 +206,7 @@ export const StyledSelect = ({
             shift({ padding: 8 }),
             sizeMiddleware({
                 apply({ rects, elements }) {
-                    elements.floating.style.minWidth = `${rects.reference.width + 20}px`
+                    elements.floating.style.minWidth = `${rects.reference.width}px`
                 },
             }),
         ],
@@ -462,7 +462,7 @@ export const StyledSelect = ({
                         className={cn(
                             'shrink-0 transition-transform',
                             isButtonFocus ? 'text-gama-500' : chevronRestingClass,
-                            open && 'rotate-180',
+                            open && 'flip-180',
                         )}
                     />
                 </span>

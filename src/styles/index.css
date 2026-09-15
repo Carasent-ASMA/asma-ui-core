@@ -48,6 +48,10 @@
 }
 
 @layer utilities {
+    .flip-180 {
+        transform: rotate(180deg);
+    }
+
     .border-solid {
         border-style: solid;
     }
