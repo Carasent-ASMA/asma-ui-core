@@ -48,15 +48,6 @@
 }
 
 @layer utilities {
-    /*
-     * Never write `rotate-180` on a component. This package is a Tailwind 3 build and emits it as
-     * `transform: … rotate(var(--tw-rotate)) …`, while a consuming app on Tailwind 4 emits the same
-     * class name as the individual `rotate` property. Both rules match, both apply, and 180° + 180°
-     * lands back at 360° — which is why every chevron looked unflipped in the product while
-     * flipping correctly in this package's own Storybook (ASMA-7890). This name only exists here,
-     * so it can only be applied once. `transform` rather than `rotate` keeps `transition-transform`
-     * animating it under Tailwind 3.
-     */
     .flip-180 {
         transform: rotate(180deg);
     }
