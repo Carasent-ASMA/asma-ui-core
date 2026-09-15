@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { useState } from 'react'
 
 import { StyledBadge } from './StyledBadge'
 
@@ -10,7 +11,7 @@ const meta: Meta = {
         docs: {
             description: {
                 component:
-                    'Figma: [Badge](https://www.figma.com/design/wXrXt5uKNNzV2DnQCgyYZH/Design-System?node-id=15181-43817) — h=20, pill radius 20px.',
+                    'Figma: [Badge](https://www.figma.com/design/wXrXt5uKNNzV2DnQCgyYZH/Design-System?node-id=15181-43817). Use a count when the quantity changes the action; use a dot when only unseen activity matters. The host control owns the accessible name.',
             },
         },
     },
@@ -43,7 +44,7 @@ export const Default: Story = {
                             {index === 0 ? (
                                 <StyledBadge dataTest={`badge-table-${index}`} badgeContent={3} />
                             ) : (
-                                <div className='inline-block h-2 w-2 rounded-full bg-gama-400' />
+                                <StyledBadge dataTest={`badge-table-${index}`} variant='dot' />
                             )}
                         </td>
                     </tr>
@@ -154,4 +155,29 @@ export const BadgeOverflowRule: Story = {
             </div>
         </div>
     ),
+}
+
+const LiveCountExample = () => {
+    const [count, setCount] = useState(98)
+
+    return (
+        <StyledBadge
+            dataTest='live-notification-count'
+            badgeContent={count}
+            statusMessage={`${count} unread notifications`}
+        >
+            <button
+                type='button'
+                aria-label={`Notifications, ${count} unread`}
+                className='rounded border border-solid border-delta-400 px-4 py-2'
+                onClick={() => setCount((currentCount) => currentCount + 1)}
+            >
+                Add notification
+            </button>
+        </StyledBadge>
+    )
+}
+
+export const LiveCount: Story = {
+    render: () => <LiveCountExample />,
 }

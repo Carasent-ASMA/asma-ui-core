@@ -85,6 +85,14 @@
     --colors-lime-500: #beda2f;
     --colors-lime-700: #8ba01d;
 
+    /* Figma Badge semantic tokens are shared by all three ASMA themes. */
+    --colors-badge-background: #d9f256;
+    --colors-badge-label: #404d00;
+    --colors-badge-border-count: #a2c200;
+    --colors-badge-border-dot: #778f00;
+    --border-badge-count: 1px;
+    --border-badge-dot: 2px;
+
     --colors-success-50: #e9fbf0;
     --colors-success-100: #d3f8e1;
     --colors-success-300: #a1ebbd;

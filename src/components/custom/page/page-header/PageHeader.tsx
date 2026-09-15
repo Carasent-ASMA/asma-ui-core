@@ -1,6 +1,7 @@
 import { useMergeRefs } from '@floating-ui/react'
 import { useMemo, useRef, type ReactNode, type Ref } from 'react'
 import { ArrowLeftIcon, HamburgerIcon } from 'src/components/icons'
+import { StyledBadge } from 'src/components/data-display/badge'
 import { StyledButton } from 'src/components/inputs/button'
 import { cn } from 'src/helpers/cn'
 import { useElementWidthPx } from 'src/hooks/useElementWidthPx'
@@ -98,16 +99,14 @@ export const toToolbarAction = (action: PageHeaderAction): DynamicToolbarAction 
         label: labelWithCount,
         ariaLabel: labelWithCount,
         render: ({ showLabel }) => (
-            <span className='relative inline-flex'>
+            <StyledBadge
+                dataTest={`${rest.dataTest ?? `page-header-action-${rest.id}`}-badge`}
+                badgeContent={badgeCount}
+                statusMessage={labelWithCount}
+                slotProps={{ badge: { style: { right: -8, top: -4, transform: 'none' } } }}
+            >
                 <ToolbarActionButton action={{ ...rest, ariaLabel: labelWithCount }} showLabel={showLabel} />
-                <span
-                    aria-hidden
-                    className='absolute -right-2 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full border border-solid border-lime-500 bg-lime-300 px-1.5 text-sm font-semibold leading-5 text-gama-800'
-                    data-testid={`${rest.dataTest ?? `page-header-action-${rest.id}`}-badge`}
-                >
-                    {badgeCount}
-                </span>
-            </span>
+            </StyledBadge>
         ),
     }
 }

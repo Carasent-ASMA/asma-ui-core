@@ -1,4 +1,4 @@
-import type { CSSProperties, ElementType, HTMLAttributes, ReactNode } from 'react'
+import { useEffect, useRef, type CSSProperties, type ElementType, type HTMLAttributes, type ReactNode } from 'react'
 import clsx from 'clsx'
 import { resolveSx } from 'src/helpers/sx'
 
@@ -6,19 +6,23 @@ type StyledBadgeSize = 'medium' | 'small'
 
 /**
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#15181-43817
- * Figma "Badge". Number badge = solid gama-500 pill, white Helper-Semibold 14px (h20/px6/r20);
- * `dot` variant = 8px dot (Unread/Filters). `color` selects the badge palette (primary→teal number
- * badge, error→soft error-100/error-600); other colors are app extensions with no Figma type.
+ * Figma "Badge". Notification count = 20px lime pill with a 1px border and Helper-Semibold 14/20;
+ * `dot` = 12px lime circle with a stronger 2px border. Other colors and `small` are legacy app
+ * extensions with no matching Figma notification variant.
  */
 interface BadgeProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'color'> {
     /** @figmaProp Badge content (the number/label) */
     badgeContent?: ReactNode
-    /** @figmaProp Type/colour = primary→number badge (gama-500) | error→error-100/600 | others = app */
+    /** @figmaProp Type/colour = primary→notification badge | others = legacy app extensions */
     color?: string
+    /** @deprecated Notification badges always cap at 99. */
     max?: number
+    /** @deprecated A zero notification count is always omitted. */
     showZero?: boolean
-    /** @figmaProp Type = dot→"Unread/Filters" (8px) | standard→number badge */
+    /** @figmaProp Size = dot→"Dot" (12px) | standard→"Default" count badge */
     variant?: 'standard' | 'dot'
+    /** Polite live-update text. Keep this contextual and include the real, uncapped count. */
+    statusMessage?: string
     invisible?: boolean
     anchorOrigin?: { vertical: 'top' | 'bottom'; horizontal: 'left' | 'right' }
     overlap?: 'rectangular' | 'circular'
@@ -34,11 +38,12 @@ type StyledBadgeProps = BadgeProps & {
     size?: StyledBadgeSize
 }
 
-// Badge colours. Figma "Badge" (node 15181-43817): the number badge is a solid gama-500 pill with
-// white text (Filters number); Error is a soft error-100 pill with error-600 text. default/secondary/
-// info/success/warning have no Figma badge type — kept as app extensions.
+// Figma notification styling is the primary default. Other palettes are legacy app extensions.
 const COLOR_STYLE: Record<string, CSSProperties> = {
-    primary: { backgroundColor: 'var(--colors-gama-500)', color: '#fff' },
+    primary: {
+        backgroundColor: 'var(--colors-badge-background)',
+        color: 'var(--colors-badge-label)',
+    },
     default: { backgroundColor: 'var(--colors-delta-200)', color: 'var(--colors-delta-800)' },
     secondary: { backgroundColor: 'var(--colors-delta-600)', color: '#fff' },
     error: { backgroundColor: 'var(--colors-error-100)', color: 'var(--colors-error-600)' },
@@ -68,9 +73,10 @@ export const StyledBadge = ({
     dataTest,
     size = 'medium',
     badgeContent,
-    max = 99,
-    showZero = false,
+    max: _max,
+    showZero: _showZero,
     variant = 'standard',
+    statusMessage,
     invisible,
     anchorOrigin,
     children,
@@ -82,8 +88,20 @@ export const StyledBadge = ({
     slots: _slots,
     slotProps,
     component: _component,
+    tabIndex: _tabIndex,
     ...props
 }: StyledBadgeProps): JSX.Element => {
+    const statusRef = useRef<HTMLSpanElement>(null)
+    const count = typeof badgeContent === 'number' ? badgeContent : undefined
+    const previousCountRef = useRef(count)
+
+    useEffect(() => {
+        if (count === previousCountRef.current) return
+
+        previousCountRef.current = count
+        if (statusRef.current) statusRef.current.textContent = statusMessage ?? ''
+    }, [count, statusMessage])
+
     const sxObject = (sx && typeof sx === 'object' && !Array.isArray(sx) ? sx : {}) as Record<string, unknown>
     const badgeSlotStyle: CSSProperties = resolveSx(sxObject[SX_BADGE_SLOT])
     const rootStyle: CSSProperties = resolveSx(
@@ -92,37 +110,50 @@ export const StyledBadge = ({
 
     const isDot = variant === 'dot'
     const isZeroHidden =
-        !isDot && (badgeContent === 0 || badgeContent === undefined || badgeContent === null) && !showZero
+        !isDot && (badgeContent === 0 || badgeContent === undefined || badgeContent === null)
     const hidden = !!invisible || isZeroHidden
 
     const displayContent: ReactNode = isDot
         ? null
-        : typeof badgeContent === 'number' && badgeContent > max
-          ? `${max}+`
+        : typeof badgeContent === 'number' && badgeContent > 99
+          ? '99+'
           : badgeContent
+    const isSingleDigitCount = typeof badgeContent === 'number' && badgeContent > 0 && badgeContent < 10
 
     const vertical = anchorOrigin?.vertical ?? 'top'
     const horizontal = anchorOrigin?.horizontal ?? 'right'
+    const primaryBorderStyle: CSSProperties =
+        color === 'primary'
+            ? {
+                  borderColor: isDot
+                      ? 'var(--colors-badge-border-dot)'
+                      : 'var(--colors-badge-border-count)',
+                  borderStyle: 'solid',
+                  borderWidth: isDot ? 'var(--border-badge-dot)' : 'var(--border-badge-count)',
+              }
+            : {}
 
     return (
         <span className='relative inline-flex shrink-0 align-middle' data-testid={dataTest} style={rootStyle} {...props}>
             {children}
             {!hidden && (
                 <span
+                    aria-hidden='true'
                     className={clsx(
-                        // Figma badge: Helper Semibold 14/20, pill radius; dots are 8px.
-                        'absolute z-[1] box-border flex flex-row flex-wrap content-center items-center justify-center whitespace-nowrap font-roboto font-semibold leading-none',
+                        'absolute z-[1] box-border flex items-center justify-center whitespace-nowrap font-roboto font-semibold',
                         ANCHOR_CLASS[`${vertical}-${horizontal}`],
                         isDot
-                            ? 'h-[8px] w-[8px] min-w-[8px] rounded-full p-0'
+                            ? 'h-[12px] w-[12px] min-w-[12px] rounded-full p-0'
                             : size === 'small'
                               ? 'h-[16px] w-max min-w-[16px] rounded-[20px] px-[4px] text-[0.75rem]'
-                              : 'h-[20px] min-w-[20px] rounded-[20px] px-[6px] text-sm',
+                              : 'h-[20px] min-w-[20px] rounded-[20px] px-[6px] text-sm leading-5',
+                        !isDot && size === 'medium' && isSingleDigitCount && 'w-[20px]',
                         className,
                         slotProps?.badge?.className,
                     )}
                     style={{
                         ...(COLOR_STYLE[color] ?? COLOR_STYLE['default']),
+                        ...primaryBorderStyle,
                         ...badgeSlotStyle,
                         ...slotProps?.badge?.style,
                     }}
@@ -130,6 +161,7 @@ export const StyledBadge = ({
                     {displayContent}
                 </span>
             )}
+            <span ref={statusRef} aria-atomic='true' aria-live='polite' className='sr-only' role='status' />
         </span>
     )
 }

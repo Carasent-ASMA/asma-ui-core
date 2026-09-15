@@ -109,6 +109,16 @@ describe('PageHeader (ASMA-7622)', () => {
         expect(html).toContain('aria-label="Notifications (56)"')
     })
 
+    it('caps only the visible action badge while preserving the real count in the button name', () => {
+        const html = renderToStaticMarkup(
+            <PageHeader title='Home' actions={[{ ...bellAction, badgeCount: 120 }]} />,
+        )
+
+        expect(html).toContain('>99+<')
+        expect(html).not.toContain('>120<')
+        expect(html).toContain('aria-label="Notifications (120)"')
+    })
+
     it('never lets an icon-less action collapse its label into a blank button', () => {
         /* The planner treats undefined canHideLabel as collapsible; the adapter must only
          * allow collapse when an icon remains to represent the action. */
