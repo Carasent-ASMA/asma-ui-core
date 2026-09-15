@@ -168,6 +168,7 @@ exports[`asma-ui-core public API surface > keeps every runtime export of the pac
   "PlusIconCircle",
   "Popper",
   "PopupState",
+  "ProhibitionIcon",
   "QnrIcon",
   "RefreshIcon",
   "RemoveIcon",
