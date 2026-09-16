@@ -82,8 +82,8 @@ export const StyledTab: FC<StyledTabProps> = ({ value, label, disabled, classNam
                 // Figma Focused = 3px focus-ring border on ALL sides. Inset box-shadow ring hugs the box
                 // (follows the rounded top) with no layout shift.
                 'focus-visible:shadow-[inset_0_0_0_3px_var(--colors-focus-ring)]',
-                // Figma Hover (not selected) = 2px delta-300 bottom underline (thicker than the resting line).
-                !disabled && !selected && 'hover:shadow-[inset_0_-2px_0_0_var(--colors-delta-300)]',
+                // Figma Hover (not selected) = 3px delta-300 bottom underline.
+                !disabled && !selected && 'hover:shadow-[inset_0_-3px_0_0_var(--colors-delta-300)]',
                 className,
             )}
             style={{ fontFamily: 'Roboto, Helvetica, Arial, sans-serif', ...resolveSx(sx) }}
