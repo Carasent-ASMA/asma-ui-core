@@ -120,4 +120,24 @@ describe('StyledTabs keyboard contract', () => {
         const indicator = describeFocusIndicator(before, focusStyleOf(tabs[0]!))
         await expect(indicator, 'focused tab paints no perceivable focus indicator').not.toBeNull()
     })
+
+    it.each(['default', 'small'] as const)('renders 3px active and hover indicators without changing the %s tab geometry', async size => {
+        const { container } = mount(
+            <StyledTabs value='one' size={size}>
+                <StyledTab value='one' label='One' />
+                <StyledTab value='two' label='Two' />
+            </StyledTabs>,
+        )
+        const tablist = container.querySelector<HTMLElement>('[role="tablist"]')!
+        const tabs = tabsOf(container)
+        const activeIndicator = tablist.lastElementChild as HTMLElement
+
+        await expect(getComputedStyle(activeIndicator).height).toBe('3px')
+        await expect(activeIndicator.getBoundingClientRect().bottom).toBe(tablist.getBoundingClientRect().bottom)
+
+        const tabHeight = tabs[1]!.getBoundingClientRect().height
+        await userEvent.hover(tabs[1]!)
+        await expect(getComputedStyle(tabs[1]!).boxShadow).toContain('0px -3px 0px 0px')
+        await expect(tabs[1]!.getBoundingClientRect().height).toBe(tabHeight)
+    })
 })

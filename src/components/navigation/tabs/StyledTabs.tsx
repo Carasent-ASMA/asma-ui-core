@@ -23,7 +23,7 @@ import { TabsContext, type TabValue } from './TabsContext'
 /**
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#15981-35855
  * The tablist. `value` marks which child `StyledTab` is Figma **Active**; `size` maps to Figma
- * **Size** (`default`→Medium 48px, `small`→40px). The animated 2px underline is `gama-500`.
+ * **Size** (`default`→Medium 48px, `small`→40px). The animated 3px underline is `gama-500`.
  */
 export interface StyledTabsProps {
     /** @figmaProp Active — selects the matching child tab */
@@ -182,7 +182,7 @@ export const StyledTabs: FC<StyledTabsProps> = ({
                     <span
                         aria-hidden
                         className={cn(
-                            'absolute bottom-0 h-0.5 transition-all duration-300',
+                            'absolute bottom-0 h-[3px] transition-all duration-300',
                             indicator.disabled ? 'bg-delta-300' : 'bg-gama-500',
                         )}
                         style={{ left: indicator.left, width: indicator.width }}

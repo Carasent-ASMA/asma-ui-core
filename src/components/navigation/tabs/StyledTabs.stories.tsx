@@ -16,7 +16,7 @@ const meta = {
         docs: {
             description: {
                 component:
-                    'Figma: [Tabs](https://www.figma.com/design/wXrXt5uKNNzV2DnQCgyYZH/Design-System?node-id=15981-35855) — tab min-height 48px, indicator 2px.',
+                    'Figma: [Tabs](https://www.figma.com/design/wXrXt5uKNNzV2DnQCgyYZH/Design-System?node-id=15981-35855) — tab min-height 48px, active and hover indicators 3px.',
             },
         },
     },
