@@ -1,6 +1,6 @@
 import type { SVGProps } from 'react'
 
-/** Material Symbols `print` glyph, exactly as used by the Ad Voca Figma (document viewer actions). */
+/** Material Symbols `print` glyph, exactly as used by the Ad Voca Figma (document viewer actions, Figma file 9Q7C7JYPgnUSsrX1L8v40t). */
 export function PrintIcon(props: SVGProps<SVGSVGElement>): JSX.Element {
     return (
         <svg
