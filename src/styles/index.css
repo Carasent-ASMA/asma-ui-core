@@ -101,6 +101,88 @@
                                   supported by Chrome, Edge, Opera and Firefox */
     }
 
+    /*
+     * ASMA-8210 (TB-02) — touch-readiness primitives for the Ad Voca mobile TabBar/Menu work.
+     *
+     * Four opt-in utilities. Every one of them is inert until a finger or a mouse button is on the
+     * control, or until the viewport is mobile, so no resting style changes anywhere: the frozen
+     * barrel (`api-surface.test.ts`) and the VRT baselines — captured at 1280x720 with a fine
+     * pointer — are untouched by design, not by luck. They reach consumers through `dist/style.css`,
+     * the same route as `.noselect` and `.absolute-center`, so no new export is needed to use them.
+     *
+     * Pick per control:
+     *   .asma-touch-ready   control that already has a designed `:active` (Button, Chip, Switch).
+     *   .asma-pressable     control with no pressed state at all (Tab, MenuItem, Link).
+     *   .asma-hit-area      isolated control that must reach 44px without growing.
+     *   .asma-touch-target  row in a stack, where growing on a phone is the honest fix.
+     *
+     * Sizes come from `--asma-touch-target-size` (44px, Apple HIG / WCAG 2.5.5 AAA; WCAG 2.5.8 AA
+     * asks only 24px, so this is the stricter of the two) and `--asma-pressed-opacity`. Both are
+     * plain custom properties: a component or a consumer retunes them without a new class.
+     */
+
+    /*
+     * Kills the grey iOS/Android tap flash and the 300ms double-tap-zoom delay that `touch-action:
+     * auto` implies. Both behaviours exist only for touch input, so a mouse or trackpad renders and
+     * behaves exactly as it did before.
+     */
+    .asma-touch-ready,
+    .asma-pressable {
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+    }
+
+    /*
+     * The replacement for the tap flash removed above — without it, touch would end up with *less*
+     * feedback than before. Opacity is background-agnostic (filled, outlined and bare controls all
+     * read the same) and layout-neutral, so it never reflows and never reaches a VRT baseline.
+     * Disabled controls stay inert, matching their `onClick` being detached.
+     */
+    .asma-pressable:active:not(:disabled):not([aria-disabled='true']) {
+        opacity: var(--asma-pressed-opacity, 0.7);
+    }
+
+    /*
+     * A 44px pointer target on a control that must keep its drawn size: a transparent, centred
+     * overlay that belongs to the control, so a press anywhere inside it activates the control
+     * itself. `width/height: 100%` keeps it at least as large as the control it sits on.
+     *
+     * Three caveats, all of them reasons to reach for `.asma-touch-target` instead:
+     *   - it needs a non-static position, supplied here and overridable by any Tailwind `position`
+     *     utility (those are `!important`, this is not);
+     *   - an ancestor `overflow: hidden` clips it, and a scroll container counts it as overflow;
+     *   - it covers nested interactive children, and neighbours closer together than 44px would
+     *     overlap and steal each other's presses.
+     */
+    .asma-hit-area {
+        position: relative;
+    }
+
+    .asma-hit-area::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 100%;
+        height: 100%;
+        min-width: var(--asma-touch-target-size, 44px);
+        min-height: var(--asma-touch-target-size, 44px);
+        transform: translate(-50%, -50%);
+    }
+
+    /*
+     * 44px for rows in a stack, where overlapping hit areas would fight and growing is what the
+     * design actually wants. Gated to the mobile breakpoint (`_breakpoints.scss` `$mobile-max`) so
+     * tablet and desktop — including every VRT baseline — stay byte-identical. `!important` is
+     * required to outrank Tailwind's own `min-h-*`, which `important: true` emits with `!`.
+     */
+    @media (max-width: 743px) {
+        .asma-touch-target {
+            min-width: var(--asma-touch-target-size, 44px) !important;
+            min-height: var(--asma-touch-target-size, 44px) !important;
+        }
+    }
+
     .overflow-wrap-anywhere {
         word-break: break-word !important; /* Chrome, Safari */
         overflow-wrap: anywhere !important; /* Firefox */

@@ -75,6 +75,10 @@ export const StyledTab: FC<StyledTabProps> = ({ value, label, disabled, classNam
                         : 'font-medium hover:font-semibold focus-visible:font-semibold'),
                 !hasTextTransform && 'normal-case',
                 ctx?.size === 'small' && 'min-h-10 px-3 py-2',
+                // ASMA-8210: tabs had hover and focus treatments but no pressed state. The default
+                // tab is already 48px; `asma-touch-target` is a no-op there and lifts the small
+                // variant from 40px to 44px on a phone only.
+                'asma-pressable asma-touch-target',
                 // Label colour — single source so precedence is exact: disabled → selected → inactive.
                 // Disabled = text-icon/disabled #bdc4cf (delta-300); active = gama-500; inactive = delta-600.
                 disabled ? 'text-delta-300' : selected ? 'text-gama-500' : 'text-delta-600',

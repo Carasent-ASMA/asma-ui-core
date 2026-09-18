@@ -106,6 +106,10 @@ export const StyledButton = ({
         <button
             {...otherProps}
             className={clsx(
+                // ASMA-8210: touch readiness only. The button already owns a designed `:active`
+                // (see StyledButton.module.scss), so it must not also take `.asma-pressable`'s
+                // fallback opacity — that would dim the designed pressed colours on top of them.
+                'asma-touch-ready',
                 style['asma-ui-core-button'],
                 BtnStyles[variant],
                 BtnStyles[color],

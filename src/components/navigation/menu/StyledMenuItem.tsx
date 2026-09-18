@@ -73,6 +73,11 @@ export const StyledMenuItem = ({
                 // (delta-700); hover delta-50; selected gama-50.
                 'box-border flex items-center px-4 text-base outline-none',
                 dense ? 'min-h-8 py-1' : 'min-h-10 py-2',
+                // ASMA-8210: the item had no pressed state at all, and at 40px (32px dense) it was
+                // under the 44px touch target. Menu rows sit flush against each other, so an
+                // overlaid hit area would steal the neighbour's presses — grow instead, and only
+                // on a phone, which leaves tablet and desktop byte-identical.
+                'asma-pressable asma-touch-target',
                 // Figma Disabled menu item = muted text-icon/disabled (delta-300); enabled = text-icon/body (delta-700).
                 // The `aria-disabled:` variant (specificity 0,2,0) keeps the grey winning over any
                 // text-* colour a consumer passes via `className` (all utilities are `!important`,
