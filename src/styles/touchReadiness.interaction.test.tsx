@@ -1,11 +1,11 @@
 import { afterEach, describe, it } from 'vitest'
-import { page } from '@vitest/browser/context'
 import { expect } from 'storybook/test'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { StyledMenuItem } from 'src/components/navigation/menu/StyledMenuItem'
 import { StyledTab } from 'src/components/navigation/tabs/StyledTab'
 import { StyledTabs } from 'src/components/navigation/tabs/StyledTabs'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
+import { page } from 'src/test-utils/interaction-api'
 
 /**
  * ASMA-8210 (TB-02) — the touch-readiness primitives in `src/styles/index.css`.
