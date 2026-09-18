@@ -75,10 +75,17 @@ export const StyledTab: FC<StyledTabProps> = ({ value, label, disabled, classNam
                         : 'font-medium hover:font-semibold focus-visible:font-semibold'),
                 !hasTextTransform && 'normal-case',
                 ctx?.size === 'small' && 'min-h-10 px-3 py-2',
-                // ASMA-8210: tabs had hover and focus treatments but no pressed state. The default
-                // tab is already 48px; `asma-touch-target` is a no-op there and lifts the small
-                // variant from 40px to 44px on a phone only.
-                'asma-pressable asma-touch-target',
+                // ASMA-8210: tabs had hover and focus treatments but no pressed state — pressable
+                // adds that with zero dimension impact. Deliberately NO `asma-touch-target`: that
+                // class is a later-source min-height OVERRIDE, not a floor (see index.css), and
+                // BOTH tab variants already rest at an effective 48px×90px minimum — the small
+                // variant's `min-h-10` loses to the base `min-h-12` because Tailwind emits
+                // `.min-h-12` later and `cn` (plain clsx) keeps both classes. Applying the
+                // override to either variant would SHRINK 48px to 44px on phones (review B1).
+                // The min-h-10/min-h-12 stacking quirk itself is pre-existing (small tabs render
+                // 48px, not the Figma 40px) and is left for the ASMA-8220 sweep — resolving it
+                // moves VRT baselines.
+                'asma-pressable',
                 // Label colour — single source so precedence is exact: disabled → selected → inactive.
                 // Disabled = text-icon/disabled #bdc4cf (delta-300); active = gama-500; inactive = delta-600.
                 disabled ? 'text-delta-300' : selected ? 'text-gama-500' : 'text-delta-600',

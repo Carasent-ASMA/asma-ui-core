@@ -129,14 +129,23 @@
 }
 
 /*
- * 44px for rows in a stack, where overlapping hit areas would fight and growing is what the
+ * 44px tall rows in a stack, where overlapping hit areas would fight and growing is what the
  * design actually wants. Gated to the mobile breakpoint (`_breakpoints.scss` `$mobile-max`) so
  * tablet and desktop — including every VRT baseline — stay byte-identical. `!important` is
  * required to outrank Tailwind's own `min-h-*`, which `important: true` emits with `!`.
+ *
+ * This is a LATER-SOURCE OVERRIDE, not a CSS `max()` floor — it replaces whatever `min-height`
+ * the component declares, it cannot clamp against it. Two consequences (ASMA-8210 review B1):
+ *   - Only apply it where the EFFECTIVE min-height is below 44px — effective, not the class you
+ *     can see: stacked utilities resolve by emitted order, so verify with computed style. On a
+ *     component resting at `min-h-12` (48px) this rule would SHRINK the target — that is why
+ *     StyledTab takes only `asma-pressable` (both tab variants effectively rest at 48px; even
+ *     the small one, whose `min-h-10` loses to the base `min-h-12` by source order).
+ *   - It deliberately sets no `min-width`: a width override would replace designed minimums
+ *     like the tab's `min-w-[90px]` with 44px. Width floors stay per-component.
  */
 @media (max-width: 743px) {
     .asma-touch-target {
-        min-width: var(--asma-touch-target-size, 44px) !important;
         min-height: var(--asma-touch-target-size, 44px) !important;
     }
 }

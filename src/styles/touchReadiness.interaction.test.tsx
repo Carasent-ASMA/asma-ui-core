@@ -1,7 +1,10 @@
 import { afterEach, describe, it } from 'vitest'
+import { page } from '@vitest/browser/context'
 import { expect } from 'storybook/test'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { StyledMenuItem } from 'src/components/navigation/menu/StyledMenuItem'
+import { StyledTab } from 'src/components/navigation/tabs/StyledTab'
+import { StyledTabs } from 'src/components/navigation/tabs/StyledTabs'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 
 /**
@@ -99,6 +102,50 @@ describe('touch-readiness primitives', () => {
         await expect(window.matchMedia('(max-width: 743px)').matches).toBe(false)
         const { container } = mount(<StyledMenuItem>Item</StyledMenuItem>)
         await expect(getComputedStyle(container.querySelector('li')!).minHeight).toBe('40px')
+    })
+
+    it('on a phone viewport, grows sub-44px rows and never shrinks a designed minimum', async () => {
+        // 390x700 puts the tester iframe under the 743px gate — the cascade CI otherwise never
+        // sees (interaction and VRT both run at 1280x720). Guards ASMA-8210 review B1: the
+        // touch-target utility is a later-source override, not a floor, so a mis-scoped opt-in
+        // would silently SHRINK a tab's effective 48x90 minimum to 44px. Both tab variants rest
+        // at 48px — the small variant's `min-h-10` loses to the base `min-h-12` by emitted
+        // order (pre-existing quirk, `cn` is plain clsx) — so NEITHER may carry the override.
+        await page.viewport(390, 700)
+        try {
+            await expect(window.matchMedia('(max-width: 743px)').matches).toBe(true)
+            const { container } = mount(
+                <>
+                    <StyledTabs value={0}>
+                        <StyledTab label='Default' />
+                    </StyledTabs>
+                    <StyledTabs size='small' value={0}>
+                        <StyledTab label='Small' />
+                    </StyledTabs>
+                    <StyledMenuItem>Item</StyledMenuItem>
+                </>,
+            )
+            const tabs = Array.from(container.querySelectorAll('[role="tab"]'))
+            await expect(tabs.length).toBe(2)
+
+            // Tabs carry no touch-target class: the effective 48px/90px minimums survive on
+            // both variants, and neither shrinks.
+            for (const tab of tabs) {
+                const tabStyle = getComputedStyle(tab)
+                await expect(tabStyle.minHeight).toBe('48px')
+                await expect(tabStyle.minWidth).toBe('90px')
+                await expect(tab.classList.contains('asma-touch-target')).toBe(false)
+            }
+
+            // Menu item: 40px → 44px, and it must not gain a min-width it never declared
+            // (Chromium resolves the initial `min-width: auto` to 0px on a block-level li).
+            const itemStyle = getComputedStyle(container.querySelector('li')!)
+            await expect(itemStyle.minHeight).toBe('44px')
+            await expect(itemStyle.minWidth).toBe('0px')
+        } finally {
+            // The desktop viewport every other test in this project assumes (vite.config.ts).
+            await page.viewport(1280, 720)
+        }
     })
 
     it('opts the button into touch readiness without dimming its designed pressed state', async () => {
