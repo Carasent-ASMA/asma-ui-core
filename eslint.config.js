@@ -52,7 +52,22 @@ export default defineConfig(
             ...eslintPluginBetterTailwindcss.configs['recommended-warn'].rules,
             ...eslintPluginBetterTailwindcss.configs['recommended-error'].rules,
 
-            'better-tailwindcss/no-unregistered-classes': ['error', { ignore: ['border-l-solid', 'flip-180'] }],
+            // ASMA-8210 adds the `asma-*` touch-readiness utilities to the `@layer utilities` block in
+            // src/styles/index.css; like the existing hand-written utilities below they are invisible
+            // to the Tailwind config this rule reads.
+            'better-tailwindcss/no-unregistered-classes': [
+                'error',
+                {
+                    ignore: [
+                        'border-l-solid',
+                        'flip-180',
+                        'asma-touch-ready',
+                        'asma-pressable',
+                        'asma-hit-area',
+                        'asma-touch-target',
+                    ],
+                },
+            ],
 
             // NOTE: enable this when we have none of the other tailwind related errors
             'better-tailwindcss/enforce-consistent-line-wrapping': ['off', { printWidth: 100 }],
