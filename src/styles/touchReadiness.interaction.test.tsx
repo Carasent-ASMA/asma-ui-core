@@ -45,14 +45,20 @@ describe('touch-readiness primitives', () => {
 
     it('gives .asma-hit-area a 44px pointer target without changing the drawn size', async () => {
         // Fixed positioning pins the probe away from the body edge so the hit tests below are
-        // arithmetic, not a guess about layout. Inline `position` beats the class, and a fixed box
-        // is still the containing block its ::after resolves against.
+        // arithmetic, not a guess about layout. A fixed box is still the containing block its
+        // ::after resolves against.
         const { container } = mount(
             <button className='asma-hit-area' style={{ position: 'fixed', left: 100, top: 100, width: 24, height: 24 }}>
                 probe
             </button>,
         )
         const probe = container.querySelector('button')!
+
+        // The class supplies `position: relative` WITHOUT `!important` — the rule lives outside
+        // `@layer utilities` precisely so Tailwind's `important: true` cannot importantify it
+        // (ASMA-8210 review). If this assertion fails, the rule regressed back into the layer and
+        // the inline `fixed` (and any Tailwind position utility) would silently lose again.
+        await expect(getComputedStyle(probe).position).toBe('fixed')
 
         // The visual box is untouched — this is hit-area padding, not a size change (ASMA-8210).
         const box = probe.getBoundingClientRect()
