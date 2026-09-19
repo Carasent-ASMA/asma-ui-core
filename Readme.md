@@ -238,6 +238,67 @@ field does not pay for one. `onChange` reports digits only — the country trave
 The picker has two shapes: below 744 px it is a full-screen sheet with its own search box, above it
 the trigger itself is the combobox. Both are keyboard-operable and share one listbox.
 
+### Popover
+
+`StyledPopoverV2` is the Design System popover (ASMA-8183): an anchored surface with an optional
+title, a close control and two optional footer rows. One implementation, two variants picked by
+**content** rather than by breakpoint.
+
+```tsx
+import { StyledButton, StyledPopoverV2 } from 'asma-ui-core'
+
+<StyledPopoverV2
+    dataTest='case-filter'
+    variant='action'
+    title='Filtrer søknader'
+    renderTrigger={({ ref, triggerProps }) => (
+        <StyledButton dataTest='case-filter-trigger' refLink={ref} type='button' {...triggerProps}>
+            {activeCount > 0 ? `Filter (${activeCount})` : 'Filter'}
+        </StyledButton>
+    )}
+    viewResultsAction={({ close }) => (
+        <StyledButton dataTest='case-filter-view' type='button' variant='text' onClick={close}>
+            {`Vis resultater (${matchCount})`}
+        </StyledButton>
+    )}
+    resetAction={
+        <StyledButton dataTest='case-filter-reset' type='button' variant='text' onClick={clearFilters}>
+            Nullstill
+        </StyledButton>
+    }
+>
+    <CaseFilterForm value={filters} onChange={setFilters} />
+</StyledPopoverV2>
+```
+
+The two footer rows come straight from Figma. The **Reset filter** row is `space-between`:
+`viewResultsAction` on the left (the live match count, which closes the surface — the filter has
+already applied) and `resetAction` on the right. The **Actions** row (`footerActions`) is a single
+right-aligned outlined button. Each of those slots, like `children`, may be a render-prop receiving
+`close()`. In Storybook, **`Gallery`** shows every Title x Reset filter x Actions combination side
+by side, and **`Playground`** lets you switch those properties on a real popover and operate it.
+
+`info` is read-only: a plain container the trigger points at with `aria-describedby`, not focus
+trapped, so `Tab` walks out of it and closes it. `action` is a `role="dialog"` with a focus trap,
+and covers both the Filter pattern (every change applies immediately — there is no apply step,
+`Nullstill` clears) and the Actions pattern (a list of buttons; `children` may be a render-prop
+receiving `close()` so activating one closes the surface).
+
+There is deliberately **no `role="menu"` and no arrow-key navigation**: menu semantics bring a
+keyboard contract that cannot coexist with the dialog model Filter uses, so everything inside is
+reached with `Tab`. There is no arrow or anchor pointer either — the surface is edge-aligned to its
+trigger at an 8px offset.
+
+The consumer owns the trigger element (spread `triggerProps`, wire `ref` — `refLink` on
+`StyledButton`), the filter state, and the `aria-live` region that announces the new result count.
+Below 744px the surface takes `100vw - 32px` and an `info` popover is pinned below its trigger;
+`action` should become a Bottom Sheet there, which is ASMA-8184 and not available yet.
+
+`StyledPopover` (no `V2`) is a different thing and stays: the MUI-`Popover`-parity positioning
+primitive that `StyledMenu`, `StyledFilterMenu`, the date-picker calendar and four table components
+still build on. New code should reach for `StyledPopoverV2`; those consumers migrate across
+gradually.
+
 ### Icons
 
 Around 180 icons ship on a dedicated subpath so you only pay for the ones you use — each is its own
