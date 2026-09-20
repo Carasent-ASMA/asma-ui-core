@@ -160,7 +160,6 @@ export const StyledSlider = ({
     const hi = isRange ? Math.max(pair[0], pair[1]) : (current as number)
     const isMarkActive = (markValue: number): boolean =>
         isRange ? markValue >= lo && markValue <= hi : markValue <= hi
-    const labelInset = showButtons ? 0 : halfThumb
     const isMinDisabled = isRange ? Math.min(pair[0], pair[1]) <= min : (current as number) <= min
     const isMaxDisabled = isRange ? Math.max(pair[0], pair[1]) >= max : (current as number) >= max
 
@@ -245,7 +244,6 @@ export const StyledSlider = ({
 
         const rawValue = Math.min(max, Math.max(min, currentVal + stepDelta))
 
-        // Reuse the existing emit function to handle state updates and callbacks
         emit(onChange, event, rawValue, thumbIndex)
         emit(onChangeCommitted, event, rawValue, thumbIndex)
     }
@@ -302,36 +300,26 @@ export const StyledSlider = ({
     )
 
     return (
-        <div className='flex flex-col gap-3 max-w-[600px]'>
-            <div className='flex justify-between items-center'>
-                {!isVertical && fromLabel && (
-                    <span className='text-delta-800 font-normal flex-1 text-left break-words'>{fromLabel}</span>
-                )}
+        <div className={cn('flex max-w-[600px] flex-col gap-3', isVertical && 'h-full')}>
+            {!isVertical && (fromLabel ?? toLabel) && (
+                <div className='grid w-full grid-cols-2 gap-4'>
+                    {!isVertical && fromLabel && (
+                        <span className='min-w-0 break-words text-left font-normal text-delta-800'>{fromLabel}</span>
+                    )}
 
-                {!isVertical && toLabel && (
-                    <span className='text-delta-800 font-normal flex-1 text-right break-words'>{toLabel}</span>
-                )}
-            </div>
+                    {!isVertical && toLabel && (
+                        <span className='min-w-0 break-words text-right font-normal text-delta-800'>{toLabel}</span>
+                    )}
+                </div>
+            )}
 
             <div
                 className={cn(
-                    'flex w-full',
-                    !isVertical && 'items-start gap-2',
+                    'flex',
+                    !isVertical && 'w-full items-start gap-3',
                     isVertical && 'h-full flex-col items-center',
                 )}
             >
-                {/* {!isVertical && (fromLabel ?? toLabel) && ( */}
-                {/*     <div */}
-                {/*         className='flex justify-between items-start w-full gap-4 mb-2 text-sm text-delta-700' */}
-                {/*         style={{ paddingLeft: labelInset, paddingRight: labelInset }} */}
-                {/*     > */}
-                {/*         {fromLabel && <span className='flex-1 text-left leading-tight break-words'>{fromLabel}</span>} */}
-                {/*         {toLabel && <span className='flex-1 text-right leading-tight break-words'>{toLabel}</span>} */}
-                {/*     </div> */}
-                {/* )} */}
-
-                {/* <div className='flex flex-col gap-4'> */}
-                {/* Minus Button */}
                 {!isVertical && showButtons && (
                     <StyledButton
                         dataTest='slider-from-button'
@@ -343,7 +331,6 @@ export const StyledSlider = ({
                         onClick={handleButtonClick('decrement')}
                     />
                 )}
-                {/* </div> */}
 
                 <div
                     className={cn(
@@ -476,7 +463,6 @@ export const StyledSlider = ({
                     )}
                 </div>
 
-                {/* <div className='flex flex-col'> */}
                 {!isVertical && showButtons && (
                     <StyledButton
                         dataTest='slider-to-button'
@@ -488,7 +474,6 @@ export const StyledSlider = ({
                         onClick={handleButtonClick('increment')}
                     />
                 )}
-                {/* </div> */}
             </div>
         </div>
     )

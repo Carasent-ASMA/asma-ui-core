@@ -111,7 +111,7 @@ export const Error: Story = {
 export const Vertical: Story = {
     args: { orientation: 'vertical' },
     render: (args) => (
-        <label className='flex flex-col gap-4 gap-4 font-semibold text-base text-delta-800 h-[600px]'>
+        <label className='flex flex-col gap-4 font-semibold text-base text-delta-800 h-[600px]'>
             Vertical Slider
             <StyledSlider {...args} />
         </label>
@@ -172,9 +172,8 @@ export const WithLabelsAndButtons: Story = {
  */
 export const LongLabels: Story = {
     args: {
-        className: 'max-w-[400px]', // Constrained to force wrapping
-        fromLabel: 'Very long text goes here and wraps nicely',
-        toLabel: 'Very long text goes here and wraps nicely',
+        fromLabel: 'Very long, super long, mega long text goes here and wraps nicely',
+        toLabel: 'Very long, super long, mega long text goes here and wraps nicely',
         showButtons: true,
     },
     render: (args) => (
