@@ -41,6 +41,9 @@ export const StyledSelectItem = ({
         className={cn(
             // Figma Menus item (node 16073-19226) label = Body Base 16/lh24 (`text-base`), not 14px,
             // in text/delta-800 — same as the DynamicSelect option row (don't inherit page black).
+            // ASMA-8220 (TB-14): no pressed state of its own → pressable. Also covers
+            // CountryCodeOptions, which renders this component.
+            'asma-pressable',
             'relative flex items-center gap-1 px-2 py-2.5 text-base outline-none',
             disabled ? 'cursor-not-allowed text-delta-300' : 'cursor-pointer text-delta-800 hover:bg-delta-50',
             selected && 'bg-gama-50',

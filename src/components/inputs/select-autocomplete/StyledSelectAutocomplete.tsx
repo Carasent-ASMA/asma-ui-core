@@ -521,6 +521,11 @@ export function StyledSelectAutocomplete<
     // Custom `renderOption` callers spread `{...props}` onto their `<li>` and expect flex, cursor,
     // hover, and selected backgrounds from that — not only from `defaultRenderOption`.
     const optionRowClassName = cn(
+        // ASMA-8220 (TB-14): hover/selected only, no `:active` → pressable. It rides the shared row
+        // class, so custom `renderOption` callers spreading `{...props}` inherit it too. No
+        // `asma-touch-target`: the rows already declare `min-h-10`, and the mobile override would
+        // also grow `aria-disabled` rows, which are not pressable at all.
+        'asma-pressable',
         // Figma Menus item: Body Base 16/lh24, text delta-800.
         'relative box-border flex min-h-10 cursor-pointer items-center gap-x-3 px-3 py-1.5 text-base text-delta-800',
         'aria-selected:bg-gama-50 hover:bg-delta-50',

@@ -105,7 +105,11 @@ export const StyledSwitch = forwardRef<HTMLButtonElement, StyledSwitchProps>(
                 aria-checked={checked}
                 aria-readonly={readOnly}
                 aria-required={required}
-                className={cn(styles['switch'], className)}
+                // ASMA-8220 (TB-14): the track is drawn 38x22 but Figma specs a 54x32 touch area, so
+                // `.asma-hit-area` reaches 44px without redrawing it (`.switch` is already
+                // `position: relative` and spends only `::before` on its focus ring). Touch-ready
+                // rather than pressable — `.switch:active` already dims the knob icon.
+                className={cn(styles['switch'], 'asma-touch-ready asma-hit-area', className)}
                 onClick={handleToggle}
                 disabled={disabled}
                 id={id}

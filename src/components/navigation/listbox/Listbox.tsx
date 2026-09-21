@@ -13,6 +13,7 @@ import {
     useRef,
     useState,
 } from 'react'
+import { cn } from 'src/helpers/cn'
 import { tabbableWithin } from 'src/helpers/focusable'
 
 /**
@@ -171,7 +172,9 @@ const ListboxButton = ({
         <button
             {...rest}
             type='button'
-            className={className}
+            // ASMA-8220 (TB-14): pressable — this primitive paints nothing itself, so it has no
+            // designed `:active` to preserve. Sizing stays the consumer's, hence no `asma-touch-target`.
+            className={cn('asma-pressable', className)}
             onClick={(event) => {
                 onClick?.(event)
                 if (!event.defaultPrevented) setOpen(!open)
@@ -245,7 +248,9 @@ function ListboxOption<T>({
             aria-disabled={disabled}
             data-index={optionIndex}
             tabIndex={-1}
-            className={className}
+            // ASMA-8220 (TB-14): see ListboxButton. `aria-disabled` renders as "true" only when
+            // disabled, so the pressed-opacity rule already skips disabled options.
+            className={cn('asma-pressable', className)}
             onMouseDown={(event) => {
                 // Clicking the row must not pull DOM focus off the trigger, which drives this row
                 // through `aria-activedescendant`. A focusable control inside the row is the
