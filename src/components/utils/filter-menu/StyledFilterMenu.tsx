@@ -90,9 +90,7 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
             <div className='relative h-fit w-fit'>
                 {anchorNode &&
                 React.isValidElement<{ onClick?: (e: React.MouseEvent<HTMLElement>) => void }>(customAnchor) ? (
-                    React.cloneElement(customAnchor, {
-                        onClick: onAnchorClick,
-                    })
+                    React.cloneElement(customAnchor, { onClick: onAnchorClick })
                 ) : (
                     <StyledButton
                         type='button'

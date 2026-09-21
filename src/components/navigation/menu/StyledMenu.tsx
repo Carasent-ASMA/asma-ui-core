@@ -1,12 +1,13 @@
 import type { CSSProperties, MouseEvent, ReactNode } from 'react'
 import { cn } from 'src/helpers/cn'
-import { StyledPopover, type PopoverOrigin, type StyledPopoverProps } from '../../utils/popover'
+import { StyledPopover, type PopoverCloseReason, type PopoverOrigin } from '../../utils/popover'
 import { StyledMenuList } from './StyledMenuList'
+export type MenuCloseReason = PopoverCloseReason | 'tabKeyDown'
 
 export interface MenuProps {
     open: boolean
     anchorEl?: Element | null
-    onClose?: StyledPopoverProps['onClose']
+    onClose?: (event: object, reason?: MenuCloseReason) => void
     anchorOrigin?: PopoverOrigin
     transformOrigin?: PopoverOrigin
     id?: string
@@ -54,6 +55,7 @@ export const StyledMenu = ({
         open={open}
         anchorEl={anchorEl}
         onClose={onClose}
+        tabIntoContent={false}
         anchorOrigin={anchorOrigin}
         transformOrigin={transformOrigin}
         id={id}
@@ -68,11 +70,28 @@ export const StyledMenu = ({
             },
         }}
     >
-        {/* eslint-disable-next-line jsx-a11y/no-autofocus -- false positive: this `autoFocus` is a custom
-            StyledMenuList prop (imperative `.focus()` in a useEffect, not the native HTML attribute the
-            rule targets) implementing the WAI-ARIA Menu pattern's recommended behaviour — focus the first
-            item when the menu opens. Not the page-load focus-steal the rule guards against. */}
-        <StyledMenuList autoFocus={autoFocus} className={classes?.list} onClick={onClick}>
+        <StyledMenuList
+            /* False positive: this `autoFocus` is a custom StyledMenuList prop (imperative `.focus()`
+               in a useEffect, not the native HTML attribute the rule targets) implementing the
+               WAI-ARIA Menu pattern — focus the first item when the menu opens. Not the page-load
+               focus-steal the rule guards against. */
+            // eslint-disable-next-line jsx-a11y/no-autofocus
+            autoFocus={autoFocus}
+            className={classes?.list}
+            onClick={onClick}
+            // WAI-ARIA Menu pattern, Tab: "When focus is on a menuitem ... move focus out of the
+            // menu and close all menus". The condition is load-bearing, not decoration — `StyledMenu`
+            // is also the surface for popovers whose content is arbitrary (a search field over a
+            // filter list, e.g. the editor's `SearchFilterMenu`). Tab between those controls is
+            // ordinary movement inside the panel and must not dismiss it.
+            // Deliberately no preventDefault: the browser still performs the focus move, and
+            // StyledPopover's close restores focus to the trigger first, so Tab continues from the
+            // trigger to the next control instead of from a node that is being unmounted.
+            onKeyDown={(event) => {
+                if (event.key === 'Tab' && (event.target as HTMLElement).getAttribute('role') === 'menuitem')
+                    onClose?.(event, 'tabKeyDown')
+            }}
+        >
             {children}
         </StyledMenuList>
     </StyledPopover>

@@ -18,13 +18,7 @@ export const FullScreenBtn: FC<{
                     aria-label={tooltipTitle}
                     variant='textGray'
                     size='small'
-                    onClick={(event) => {
-                        onClick()
-
-                        if (event.detail !== 0) {
-                            event.currentTarget.blur()
-                        }
-                    }}
+                    onClick={onClick}
                     endIcon={
                         fullScreen ? (
                             <ArrowShrinkIcon width={20} height={20} color='text-delta-700' />

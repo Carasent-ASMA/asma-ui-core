@@ -25,14 +25,17 @@ export interface UseCountryPickerOptions {
     selectedIso2: string
     query: string
     listId: string
-    onSelect: (iso2: string) => void
+    onSelect: (iso2: string, close?: boolean) => void
     onDismiss: () => void
 }
 
 export interface CountryPicker {
     visible: readonly PhoneCountryChoice[]
-    activeIndex: number
+    activeIndex: number | null
     optionId: (index: number) => string
+    openWithKeyboard: (direction: -1 | 1) => void
+    select: (iso2: string) => void
+    dismiss: () => void
     handleKeyDown: (event: KeyboardEvent<HTMLElement>) => void
 }
 
@@ -52,23 +55,49 @@ export function useCountryPicker({
     onSelect,
     onDismiss,
 }: UseCountryPickerOptions): CountryPicker {
-    const [activeIso2, setActiveIso2] = useState(selectedIso2)
+    const [activeIso2, setActiveIso2] = useState<string | null>(null)
 
     const visible = useMemo(
         () => countries.filter((country) => matchesCountryQuery(country, query)),
         [countries, query],
     )
 
-    const foundIndex = visible.findIndex((country) => country.iso2 === activeIso2)
-    // Filtering can hide the active row; the first remaining row takes over.
-    const activeIndex = foundIndex >= 0 ? foundIndex : 0
+    // `null` carries "no cursor" the way `StyledSelect`'s nullable `activeOptionIndex` does, so the
+    // indicator and `aria-activedescendant` agree without a second flag to keep in sync. Filtering
+    // can hide the active row; the first remaining row takes over.
+    const activeIndex =
+        activeIso2 === null || visible.length === 0
+            ? null
+            : Math.max(visible.findIndex((country) => country.iso2 === activeIso2), 0)
 
     const optionId = (index: number): string => `${listId}-option-${index}`
 
-    const move = (delta: number): void => {
+    const openWithKeyboard = (direction: -1 | 1): void => {
+        const fallback = direction === 1 ? visible[0] : visible[visible.length - 1]
+        const target = visible.find((country) => country.iso2 === selectedIso2) ?? fallback
+        if (target !== undefined) setActiveIso2(target.iso2)
+    }
+
+    const move = (direction: -1 | 1): void => {
         if (visible.length === 0) return
-        const next = visible[(activeIndex + delta + visible.length) % visible.length]
+        // With no cursor yet — a pointer open — the first arrow steps *off* the selected row rather
+        // than landing on it, which is what `StyledSelect.moveActiveOption` does with its null
+        // `activeOptionIndex`. With nothing selected, start just outside the list so ArrowDown lands
+        // on the first row and ArrowUp wraps to the last.
+        const selectedIndex = visible.findIndex((country) => country.iso2 === selectedIso2)
+        const from = activeIndex ?? (selectedIndex >= 0 ? selectedIndex : direction === 1 ? -1 : 0)
+        const next = visible[(from + direction + visible.length) % visible.length]
         if (next !== undefined) setActiveIso2(next.iso2)
+    }
+
+    const select = (iso2: string, close = true): void => {
+        if (close) setActiveIso2(null)
+        onSelect(iso2, close)
+    }
+
+    const dismiss = (): void => {
+        setActiveIso2(null)
+        onDismiss()
     }
 
     const handleKeyDown = (event: KeyboardEvent<HTMLElement>): void => {
@@ -93,20 +122,30 @@ export function useCountryPicker({
                 if (last !== undefined) setActiveIso2(last.iso2)
                 break
             }
+            case ' ': {
+                if (query !== '') break
+                event.preventDefault()
+                const activeOnSpace = activeIndex === null ? undefined : visible[activeIndex]
+                if (activeOnSpace !== undefined) select(activeOnSpace.iso2, false)
+                break
+            }
             case 'Enter': {
                 event.preventDefault()
-                const active = visible[activeIndex]
-                if (active !== undefined) onSelect(active.iso2)
+                const active = activeIndex === null ? undefined : visible[activeIndex]
+                if (active !== undefined) select(active.iso2)
                 break
             }
             case 'Escape':
                 event.preventDefault()
-                onDismiss()
+                dismiss()
+                break
+            case 'Tab':
+                dismiss()
                 break
             default:
                 break
         }
     }
 
-    return { visible, activeIndex, optionId, handleKeyDown }
+    return { visible, activeIndex, optionId, openWithKeyboard, select, dismiss, handleKeyDown }
 }

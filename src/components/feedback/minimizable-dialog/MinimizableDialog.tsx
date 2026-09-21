@@ -1,5 +1,6 @@
 import { StyledButton } from 'src/components/inputs/button'
-import React, { useRef, useState } from 'react'
+import React, { useLayoutEffect, useRef, useState } from 'react'
+import { firstTabbable } from 'src/helpers/focusable'
 import clsx from 'clsx'
 import { cn } from 'src/helpers/cn'
 import styles from './MinimizableDialog.module.scss'
@@ -53,7 +54,8 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     const [minimized, setMinimized] = useState(false)
     const [fullscreen, setFullscreen] = useState(false)
     const { open: extraActionsOpen, anchorEl, handleOpen, handleClose } = useToggleMenuVisibility()
-    const panelRef = useRef<HTMLDivElement>(null)
+    const panelRef = useRef<HTMLDivElement | null>(null)
+    const minimizedPanelRef = useRef<HTMLDivElement | null>(null)
 
     const fullScreen = fullScreenState ?? fullscreen
     const isFullScreenActive = fullScreen && !minimized
@@ -61,6 +63,16 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     // Only the fullscreen state shows a page-covering backdrop (below) and is actually modal — the
     // default corner-docked panel is a non-modal floating widget that must NOT trap focus.
     useFocusTrap(open && isFullScreenActive, panelRef, onClose)
+
+    // Both panels stay mounted — the `hidden` class is only `h-0 w-0`, so the hidden one's controls
+    // would still be tabbable. `inert` is what actually removes it from the tab order, and it is set
+    // here rather than as a prop because React 18 has no boolean `inert`: `inert={false}` renders
+    // `inert="false"`, which HTML still reads as inert.
+    useLayoutEffect(() => {
+        panelRef.current?.toggleAttribute('inert', minimized)
+        minimizedPanelRef.current?.toggleAttribute('inert', !minimized)
+    }, [minimized])
+
 
     if (!open) return null
 
@@ -88,15 +100,30 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
 
     const showButtons = showPrimaryButton || secondaryButtonText
 
-    const toggleMinimized = () => {
+    // Toggling makes the panel holding the just-pressed button inert, so focus has to be handed to
+    // the panel that became visible or it dies there (WCAG 2.4.3). Aim for the counterpart toggle;
+    // fall back to whatever is reachable, because that toggle is optional — hidden on mobile, in
+    // fullscreen, or by `showMinimizeIcon`/`showExpandIcon`.
+    const toggleMinimized = (): void => {
+        const revealed = minimized ? panelRef : minimizedPanelRef
         setMinimized(!minimized)
+        requestAnimationFrame(() => {
+            const panel = revealed.current
+            if (!panel) return
+            const counterpart = panel.querySelector<HTMLElement>('[data-testid="minimize-button"]')
+            ;(counterpart ?? firstTabbable(panel))?.focus({ preventScroll: true })
+        })
     }
 
     return (
         <>
             {isFullScreenActive && <div className='fixed inset-0 z-[51] bg-[rgb(98,110,126)] bg-opacity-70' />}
 
-            <div style={{ zIndex: 51 }} className={cn(styles['dialog'], !minimized && styles['hidden'])}>
+            <div
+                ref={minimizedPanelRef}
+                style={{ zIndex: 51 }}
+                className={cn(styles['dialog'], !minimized && styles['hidden'])}
+            >
                 <div className={clsx('flex items-center justify-between', !minimized && 'hidden')} data-testid={dataTest}>
                     <div className='truncate text-lg font-semibold text-delta-800'>{title}</div>
                     <div className='flex items-center gap-x-1'>
@@ -187,15 +214,11 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                                             aria-label={!onFullScreenText ? fullScreenTooltipTitle : undefined}
                                             variant='textGray'
                                             size='small'
-                                            onClick={(event) => {
+                                            onClick={() => {
                                                 if (fullScreenState !== undefined && handleFullScreenState) {
                                                     handleFullScreenState()
                                                 } else {
                                                     setFullscreen(!fullscreen)
-                                                }
-
-                                                if (event.detail !== 0) {
-                                                    event.currentTarget.blur()
                                                 }
                                             }}
                                             endIcon={

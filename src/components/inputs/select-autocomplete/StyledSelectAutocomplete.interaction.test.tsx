@@ -145,6 +145,20 @@ describe('StyledSelectAutocomplete keyboard contract', () => {
         await expect(activeOption()).toBe(filtered[0])
     })
 
+    it('clears an active descendant whenever typing changes its option position (4.1.2)', async () => {
+        mount(<AutocompleteFixture />)
+        input().focus()
+        await userEvent.keyboard('{ArrowDown}{ArrowDown}{ArrowDown}')
+        await expect(activeOption()).toHaveTextContent('Charlie')
+
+        // The third filtered row is now Delta. Retaining index 2 would silently move the virtual
+        // cursor from Charlie to Delta, so typing must clear it until the user arrows again.
+        await userEvent.fill(input(), 'l')
+        await waitFor(() => expect(optionRows()).toHaveLength(3))
+
+        await expect(input()).not.toHaveAttribute('aria-activedescendant')
+    })
+
     it('closes on Escape without stealing focus from the input (2.1.2, 1.4.13)', async () => {
         mount(<AutocompleteFixture />)
         input().focus()
@@ -160,7 +174,55 @@ describe('StyledSelectAutocomplete keyboard contract', () => {
         await expect(input()).not.toHaveAttribute('aria-activedescendant')
     })
 
-    it('exposes the clear and popup affordances as real, named buttons (2.1.1, 4.1.2)', async () => {
+    it('closes on Tab and lets focus move on to the next control (2.1.2)', async () => {
+        const { container } = mount(
+            <>
+                <AutocompleteFixture />
+                <button type='button' data-testid='after'>
+                    After
+                </button>
+            </>,
+        )
+        input().focus()
+        await userEvent.keyboard('{ArrowDown}')
+        await waitFor(() => expect(listbox()).not.toBeNull())
+
+        await userEvent.tab()
+
+        // Tab must close the popup WITHOUT preventDefault, or the combobox becomes a keyboard trap.
+        await waitFor(() => expect(listbox()).toBeNull())
+        await expect(document.activeElement).toBe(container.querySelector('[data-testid="after"]'))
+    })
+
+    it('preserves the multi-select selection when Escape closes the list (2.1.2)', async () => {
+        const onChange = fn()
+        mount(
+            <StyledSelectAutocomplete<string, true, false, false>
+                dataTest='ac'
+                multiple
+                disableCloseOnSelect
+                options={OPTIONS}
+                value={['Bravo']}
+                onChange={(_event, next) => {
+                    onChange(next)
+                }}
+                renderInput={(params) => <StyledInputField {...params} dataTest='ac-input' label='Team' />}
+            />,
+        )
+        input().focus()
+        await userEvent.keyboard('{ArrowDown}')
+        await waitFor(() => expect(listbox()).not.toBeNull())
+
+        await userEvent.keyboard('{Escape}')
+
+        // Escape dismisses the popup; it never reverts what was already picked.
+        await waitFor(() => expect(listbox()).toBeNull())
+        await expect(document.activeElement).toBe(input())
+        await expect(onChange).not.toHaveBeenCalled()
+        await expect(document.querySelectorAll('[data-testid^="selected-chip-"]').length).toBeGreaterThan(0)
+    })
+
+    it('keeps trailing affordances named but out of the combobox tab order (2.1.1, 4.1.2)', async () => {
         const onChange = fn()
         mount(<AutocompleteFixture onChange={onChange} />)
         input().focus()
@@ -171,47 +233,115 @@ describe('StyledSelectAutocomplete keyboard contract', () => {
         const popup = document.querySelector<HTMLButtonElement>('[data-testid="ac-popup-indicator"]')!
         await expect(clear.tagName).toBe('BUTTON')
         await expect(clear).toHaveAccessibleName('Clear')
+        await expect(clear).toHaveAttribute('tabindex', '-1')
         await expect(popup.tagName).toBe('BUTTON')
         await expect(popup).toHaveAccessibleName('Toggle options')
+        await expect(popup).toHaveAttribute('tabindex', '-1')
         await expect(popup).toHaveAttribute('aria-expanded', 'false')
+    })
+
+    it('keeps selected-tag delete buttons out of the combobox tab order (2.1.1)', async () => {
+        mount(
+            <>
+                <button type='button'>Before</button>
+                <StyledSelectAutocomplete<string, true, false, false>
+                    dataTest='ac'
+                    multiple
+                    options={OPTIONS}
+                    value={['Bravo', 'Charlie']}
+                    onChange={() => undefined}
+                    renderInput={(params) => <StyledInputField {...params} dataTest='ac-input' label='Team' />}
+                />
+                <button type='button'>After</button>
+            </>,
+        )
+
+        const deleteButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-testid$="-delete"]'))
+        await expect(deleteButtons).toHaveLength(2)
+        for (const button of deleteButtons) await expect(button).toHaveAttribute('tabindex', '-1')
+
+        await userEvent.tab()
+        await expect(document.activeElement).toHaveTextContent('Before')
+        await userEvent.tab()
+        await expect(document.activeElement).toBe(input())
     })
 
     /* FINDING ASMA-8139-G — WCAG 2.1.1 (keyboard). src/components/inputs/select-autocomplete/
      * StyledSelectAutocomplete.tsx, `endAdornment`. Both trailing buttons are real `<button>`s with
-     * accessible names, and they ARE in the tab order — but each is wired with `onMouseDown` only
-     * (`clearValue` on the clear button, `togglePopupFromIcon` on the popup indicator). A `<button>`
-     * activated with Enter or Space fires `click`, never `mousedown`, so a keyboard user can focus
-     * both controls and press them to no effect. The `onMouseDown` choice is deliberate and
-     * documented — `preventDefault` stops the input blurring before the handler runs — but it has no
-     * keyboard counterpart, which is the classic "looks focusable, does nothing" trap.
-     * Mitigation that exists: clearing is also reachable by selecting the text and deleting it, and
-     * the popup also opens with ArrowDown on the input. So this is a defect, not a total block.
-     * Not fixed here: wave-3 builders add tests, not component fixes. Escalated to the coordinator.
+     * accessible names, but are deliberately outside the tab order. Their keyboard equivalents are
+     * Backspace for clearing/removing tags and ArrowDown/Enter for opening the popup; mouse presses
+     * retain input focus so the combobox's visual focus indicator remains stable.
      * @see docs/a11y-keyboard-contract.md */
-    it.skip('activates the clear button from the keyboard (2.1.1)', async () => {
+    it('removes the last tag with Backspace on an empty input (2.1.1)', async () => {
         const onChange = fn()
-        mount(<AutocompleteFixture onChange={onChange} />)
+        mount(
+            <StyledSelectAutocomplete<string, true, false, false>
+                dataTest='ac'
+                multiple
+                options={OPTIONS}
+                value={['Bravo', 'Charlie']}
+                onChange={(_event, next) => {
+                    onChange(next)
+                }}
+                renderInput={(params) => <StyledInputField {...params} dataTest='ac-input' label='Team' />}
+            />,
+        )
         input().focus()
-        await userEvent.keyboard('{ArrowDown}{ArrowDown}{Enter}')
-        await waitFor(() => expect(onChange).toHaveBeenCalledWith('Bravo'))
+        await userEvent.keyboard('{Backspace}')
 
-        const clear = document.querySelector<HTMLButtonElement>('[data-testid="ac-clear"]')!
-        clear.focus()
-        await userEvent.keyboard('{Enter}')
-
-        await waitFor(() => expect(onChange).toHaveBeenLastCalledWith(null))
+        // One keystroke, one tag — never the whole selection.
+        await expect(onChange).toHaveBeenLastCalledWith(['Bravo'])
     })
 
-    /* FINDING ASMA-8139-H — WCAG 2.1.1 (keyboard). Same file, same cause as ASMA-8139-G: the popup
-     * indicator button only responds to `onMouseDown`, so Enter/Space on it does not open the
-     * listbox. @see docs/a11y-keyboard-contract.md */
-    it.skip('opens the listbox from the popup indicator button by keyboard (2.1.1)', async () => {
-        mount(<AutocompleteFixture />)
-        const popup = document.querySelector<HTMLButtonElement>('[data-testid="ac-popup-indicator"]')!
-        popup.focus()
+    it('clears the single value with Backspace on an empty input (2.1.1)', async () => {
+        const onChange = fn()
+        mount(
+            <StyledSelectAutocomplete<string, false, false, false>
+                dataTest='ac'
+                options={OPTIONS}
+                value='Bravo'
+                onChange={(_event, next) => {
+                    onChange(next)
+                }}
+                renderInput={(params) => <StyledInputField {...params} dataTest='ac-input' label='Team' />}
+            />,
+        )
+        const field = input()
+        field.focus()
+        await userEvent.clear(field)
+        await userEvent.keyboard('{Backspace}')
 
-        await userEvent.keyboard('{Enter}')
+        await expect(onChange).toHaveBeenLastCalledWith(null)
+    })
 
+    it('handles Select all through the trigger-owned virtual cursor (2.1.1, 4.1.2)', async () => {
+        const onChange = fn()
+        mount(
+            <StyledSelectAutocomplete<string, true, false, false>
+                dataTest='ac'
+                multiple
+                allowSelectAll
+                options={OPTIONS}
+                value={[]}
+                onChange={(_event, next) => {
+                    onChange(next)
+                }}
+                renderInput={(params) => <StyledInputField {...params} dataTest='ac-input' label='Team' />}
+            />,
+        )
+        input().focus()
+        await userEvent.keyboard('{ArrowDown}')
         await waitFor(() => expect(listbox()).not.toBeNull())
+        await userEvent.keyboard('{Home}')
+
+        const selectAll = document.getElementById('ac-select-all')!
+        await expect(document.activeElement).toBe(input())
+        await expect(input()).toHaveAttribute('aria-activedescendant', selectAll.id)
+        await expect(selectAll.querySelector('input')).toBeNull()
+        await expect(listbox()).toHaveAttribute('aria-multiselectable', 'true')
+
+        await userEvent.keyboard('{Enter}')
+        await expect(onChange).toHaveBeenLastCalledWith(OPTIONS)
     })
+
 })
