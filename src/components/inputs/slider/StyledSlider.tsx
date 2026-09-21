@@ -6,11 +6,14 @@ import {
     type ReactNode,
     type SyntheticEvent,
     useRef,
+    type MouseEvent,
 } from 'react'
 import { cn } from 'src/helpers/cn'
 import { HelperRow } from 'src/helpers/HelperRow'
 import { useHelperSlot } from 'src/helpers/useHelperSlot'
 import styles from './StyledSlider.module.scss'
+import { StyledButton } from '../button'
+import { PlusIcon, RemoveIcon } from 'src/components/icons'
 
 export interface SliderMark {
     value: number
@@ -61,6 +64,9 @@ export interface StyledSliderProps {
     errorText?: string
     helperText?: string
     reserveHelperText?: boolean
+    fromLabel?: ReactNode
+    toLabel?: ReactNode
+    showButtons?: boolean
     /** Accessible name for the thumb input(s) — there is no visible label to derive it from
      * (axe `label`). A function receives the thumb index (0, or 0/1 for a two-thumb range) so each
      * thumb of a range slider can get a distinct name. */
@@ -106,6 +112,9 @@ export const StyledSlider = ({
     errorText,
     helperText,
     reserveHelperText,
+    fromLabel,
+    toLabel,
+    showButtons,
     ariaLabel,
     ariaLabelledBy,
     onChange,
@@ -151,6 +160,8 @@ export const StyledSlider = ({
     const hi = isRange ? Math.max(pair[0], pair[1]) : (current as number)
     const isMarkActive = (markValue: number): boolean =>
         isRange ? markValue >= lo && markValue <= hi : markValue <= hi
+    const isMinDisabled = isRange ? Math.min(pair[0], pair[1]) <= min : (current as number) <= min
+    const isMaxDisabled = isRange ? Math.max(pair[0], pair[1]) >= max : (current as number) >= max
 
     // Filled portion of the rail (between the two thumbs, or 0→thumb for single value).
     const startPct = isRange ? clampPercent(lo, min, max) : 0
@@ -217,6 +228,26 @@ export const StyledSlider = ({
         activePointerIdRef.current = null
     }
 
+    const handleButtonClick = (direction: 'increment' | 'decrement') => (event: MouseEvent<HTMLButtonElement>) => {
+        if (disabled) return
+        const stepDelta = direction === 'increment' ? step || 1 : -(step || 1)
+
+        let thumbIndex = 0
+        let currentVal: number
+
+        if (isRange) {
+            thumbIndex = direction === 'increment' ? 1 : 0
+            currentVal = direction === 'increment' ? Math.max(pair[0], pair[1]) : Math.min(pair[0], pair[1])
+        } else {
+            currentVal = current as number
+        }
+
+        const rawValue = Math.min(max, Math.max(min, currentVal + stepDelta))
+
+        emit(onChange, event, rawValue, thumbIndex)
+        emit(onChangeCommitted, event, rawValue, thumbIndex)
+    }
+
     const computeNextValue = (rawValue: number, thumbIndex: number): SliderValue => {
         if (!isRange) return rawValue
         const next: [number, number] = [pair?.[0] ?? 0, pair?.[1] ?? 0]
@@ -269,125 +300,181 @@ export const StyledSlider = ({
     )
 
     return (
-        <div
-            className={cn(
-                'relative flex',
-                isVertical ? 'h-full w-8 flex-col items-center' : 'mt-px w-full flex-col',
-                classes?.root,
-                className,
+        <div className={cn('flex max-w-[600px] flex-col gap-3', isVertical && 'h-full')}>
+            {!isVertical && (fromLabel ?? toLabel) && (
+                <div className='grid w-full grid-cols-2 gap-4'>
+                    {!isVertical && fromLabel && (
+                        <span className='min-w-0 break-words text-left font-normal text-delta-800'>{fromLabel}</span>
+                    )}
+
+                    {!isVertical && toLabel && (
+                        <span className='min-w-0 break-words text-right font-normal text-delta-800'>{toLabel}</span>
+                    )}
+                </div>
             )}
-        >
+
             <div
                 className={cn(
-                    'relative',
-                    isVertical ? 'h-full w-8' : 'h-4 w-full',
-                    disabled ? 'cursor-default' : 'cursor-pointer',
+                    'flex',
+                    !isVertical && 'w-full items-start gap-3',
+                    isVertical && 'h-full flex-col items-center',
                 )}
-                style={{ touchAction: 'none' }}
-                onPointerDown={handlePointerDown}
-                onPointerMove={handlePointerMove}
-                onPointerUp={handlePointerUp}
-                onPointerCancel={handlePointerCancel}
             >
-                {/* Inset the visual track by half a thumb so marks align with the thumb-centre travel.
-                    Setting both edges (no width/height) auto-sizes the track to length − 2·halfThumb. */}
+                {!isVertical && showButtons && (
+                    <StyledButton
+                        dataTest='slider-from-button'
+                        aria-label='Decrease value'
+                        className='-mt-0.5 w-8'
+                        variant='outlined'
+                        disabled={disabled ?? isMinDisabled}
+                        startIcon={<RemoveIcon width={24} height={24} />}
+                        onClick={handleButtonClick('decrement')}
+                    />
+                )}
+
                 <div
                     className={cn(
-                        'absolute',
-                        isVertical ? 'left-1/2 w-1 -translate-x-1/2' : 'top-[calc(50%+6px)] h-1 -translate-y-1/2',
+                        'relative flex',
+                        isVertical ? 'h-full w-8 flex-col items-center' : 'mt-px w-full flex-col',
+                        classes?.root,
+                        className,
                     )}
-                    style={isVertical ? { top: halfThumb, bottom: halfThumb } : { left: halfThumb, right: halfThumb }}
                 >
-                    {/* Rail — Figma unfilled track = delta-100 (#e7eaee), 4px. */}
                     <div
                         className={cn(
-                            'absolute inset-0 rounded-full bg-delta-100',
-                            classes?.rail,
-                            slotProps?.rail?.className,
+                            'relative',
+                            isVertical ? 'h-full w-8' : 'h-4 w-full',
+                            disabled ? 'cursor-default' : 'cursor-pointer',
                         )}
-                    />
-                    {/* Filled track */}
-                    <div
-                        className={cn(
-                            'absolute rounded-full',
-                            isVertical ? 'left-0 w-full' : 'top-0 h-full',
-                            disabled ? 'bg-delta-200' : 'bg-gama-500',
-                            classes?.track,
-                        )}
-                        style={fillStyle}
-                    />
-                    {/* Marks */}
-                    {markList.map((mark) => {
-                        const active = isMarkActive(mark.value)
-                        return (
-                            <span
-                                key={mark.value}
+                        style={{ touchAction: 'none' }}
+                        onPointerDown={handlePointerDown}
+                        onPointerMove={handlePointerMove}
+                        onPointerUp={handlePointerUp}
+                        onPointerCancel={handlePointerCancel}
+                    >
+                        {/* Inset the visual track by half a thumb so marks align with the thumb-centre travel.
+                    Setting both edges (no width/height) auto-sizes the track to length − 2·halfThumb. */}
+                        <div
+                            className={cn(
+                                'absolute',
+                                isVertical
+                                    ? 'left-1/2 w-1 -translate-x-1/2'
+                                    : 'top-[calc(50%+6px)] h-1 -translate-y-1/2',
+                            )}
+                            style={
+                                isVertical
+                                    ? { top: halfThumb, bottom: halfThumb }
+                                    : { left: halfThumb, right: halfThumb }
+                            }
+                        >
+                            {/* Rail — Figma unfilled track = delta-100 (#e7eaee), 4px. */}
+                            <div
                                 className={cn(
-                                    'absolute z-10 box-border h-2 w-2 -translate-x-1/2 rounded-full border border-solid',
-                                    isVertical ? 'left-1/2 translate-y-1/2' : 'top-1/2 -translate-y-1/2',
-                                    active
-                                        ? cn(
-                                              disabled
-                                                  ? 'border-delta-200 bg-delta-200'
-                                                  : 'border-gama-500 bg-gama-500',
-                                              classes?.markActive,
-                                          )
-                                        : cn('border-delta-300 bg-white', classes?.mark),
+                                    'absolute inset-0 rounded-full bg-delta-100',
+                                    classes?.rail,
+                                    slotProps?.rail?.className,
                                 )}
-                                style={markPosStyle(mark.value)}
                             />
-                        )
-                    })}
-                </div>
-                {/* Native thumb input(s) span the full length; their built-in 8px inset matches the track. */}
-                {isRange ? [renderInput(0, pair[0]), renderInput(1, pair[1])] : renderInput(0, current as number)}
-            </div>
-
-            {/* Mark labels */}
-            {markList.some((m) => m.label != null) && (
-                <div
-                    // Inset the label track by half the thumb so labels share the mark coordinate
-                    // system (marks live inside the half-thumb-inset track); else labels drift from
-                    // their dots — worst at the extremes.
-                    className={cn(isVertical ? 'pointer-events-none absolute inset-x-0' : 'relative mt-[14px] h-6')}
-                    style={
-                        isVertical
-                            ? { top: halfThumb, bottom: halfThumb }
-                            : { marginLeft: halfThumb, marginRight: halfThumb }
-                    }
-                >
-                    {markList.map((mark) =>
-                        mark.label == null ? null : (
-                            <span
-                                key={mark.value}
+                            {/* Filled track */}
+                            <div
                                 className={cn(
-                                    // Figma scale numbers = Body Base SemiBold 16/24, text-icon/body
-                                    // (delta-700), uniform (no active/inactive color split).
-                                    // vertical: translate-y-1/2 centres the label on its tick (matches dots).
-                                    'absolute text-base font-semibold text-delta-700',
-                                    isVertical ? 'left-[37px] translate-y-1/2' : '-translate-x-1/2',
-                                    isMarkActive(mark.value) && classes?.markLabelActive,
-                                    classes?.markLabel,
-                                    slotProps?.markLabel?.className,
+                                    'absolute rounded-full',
+                                    isVertical ? 'left-0 w-full' : 'top-0 h-full',
+                                    disabled ? 'bg-delta-200' : 'bg-gama-500',
+                                    classes?.track,
                                 )}
-                                style={markPosStyle(mark.value)}
-                            >
-                                {mark.label}
-                            </span>
-                        ),
+                                style={fillStyle}
+                            />
+                            {/* Marks */}
+                            {markList.map((mark) => {
+                                const active = isMarkActive(mark.value)
+                                return (
+                                    <span
+                                        key={mark.value}
+                                        className={cn(
+                                            'absolute z-10 box-border h-2 w-2 -translate-x-1/2 rounded-full border border-solid',
+                                            isVertical ? 'left-1/2 translate-y-1/2' : 'top-1/2 -translate-y-1/2',
+                                            active
+                                                ? cn(
+                                                      disabled
+                                                          ? 'border-delta-200 bg-delta-200'
+                                                          : 'border-gama-500 bg-gama-500',
+                                                      classes?.markActive,
+                                                  )
+                                                : cn('border-delta-300 bg-white', classes?.mark),
+                                        )}
+                                        style={markPosStyle(mark.value)}
+                                    />
+                                )
+                            })}
+                        </div>
+                        {/* Native thumb input(s) span the full length; their built-in 8px inset matches the track. */}
+                        {isRange
+                            ? [renderInput(0, pair[0]), renderInput(1, pair[1])]
+                            : renderInput(0, current as number)}
+                    </div>
+
+                    {/* Mark labels */}
+                    {markList.some((m) => m.label != null) && (
+                        <div
+                            // Inset the label track by half the thumb so labels share the mark coordinate
+                            // system (marks live inside the half-thumb-inset track); else labels drift from
+                            // their dots — worst at the extremes.
+                            className={cn(
+                                isVertical ? 'pointer-events-none absolute inset-x-0' : 'relative mt-[14px] h-6',
+                            )}
+                            style={
+                                isVertical
+                                    ? { top: halfThumb, bottom: halfThumb }
+                                    : { marginLeft: halfThumb, marginRight: halfThumb }
+                            }
+                        >
+                            {markList.map((mark) =>
+                                mark.label == null ? null : (
+                                    <span
+                                        key={mark.value}
+                                        className={cn(
+                                            // Figma scale numbers = Body Base SemiBold 16/24, text-icon/body
+                                            // (delta-700), uniform (no active/inactive color split).
+                                            // vertical: translate-y-1/2 centres the label on its tick (matches dots).
+                                            'absolute text-base font-semibold text-delta-700',
+                                            isVertical ? 'left-[37px] translate-y-1/2' : '-translate-x-1/2',
+                                            isMarkActive(mark.value) && classes?.markLabelActive,
+                                            classes?.markLabel,
+                                            slotProps?.markLabel?.className,
+                                        )}
+                                        style={markPosStyle(mark.value)}
+                                    >
+                                        {mark.label}
+                                    </span>
+                                ),
+                            )}
+                        </div>
+                    )}
+
+                    {showHelperSlot && (
+                        <HelperRow
+                            id={helperId}
+                            role={helperAlertRole}
+                            error={error}
+                            message={message}
+                            className='m-0 items-center'
+                        />
                     )}
                 </div>
-            )}
 
-            {showHelperSlot && (
-                <HelperRow
-                    id={helperId}
-                    role={helperAlertRole}
-                    error={error}
-                    message={message}
-                    className='m-0 items-center'
-                />
-            )}
+                {!isVertical && showButtons && (
+                    <StyledButton
+                        dataTest='slider-to-button'
+                        aria-label='Increase value'
+                        className='-mt-0.5 w-8'
+                        variant='outlined'
+                        disabled={disabled ?? isMaxDisabled}
+                        startIcon={<PlusIcon width={24} height={24} />}
+                        onClick={handleButtonClick('increment')}
+                    />
+                )}
+            </div>
         </div>
     )
 }
