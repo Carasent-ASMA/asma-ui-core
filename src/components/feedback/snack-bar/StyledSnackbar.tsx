@@ -81,7 +81,11 @@ export const StyledSnackbar = ({
                 }}
             >
                 {children ?? (
-                    <div className='flex items-center gap-2 rounded bg-delta-800 px-4 py-3 text-sm text-white shadow-lg'>
+                    <div
+                        role='status'
+                        aria-atomic='true'
+                        className='flex items-center gap-2 rounded bg-delta-800 px-4 py-3 text-sm text-white shadow-lg'
+                    >
                         {message}
                         {action}
                     </div>

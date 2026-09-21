@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { StyledCalendarPicker } from './components/StyledCalendarPicker'
 import type { DatePickerProps } from './types'
 import { setPickerPosition } from './helpers'
@@ -34,6 +34,16 @@ export const StyledDatePicker = (props: DatePickerProps): JSX.Element => {
         setValidateOnCalendarClose(true)
         setAnchorEl(null)
     }
+
+    useEffect(() => {
+        if (!anchorEl) return
+        const handleKeyDown = (event: KeyboardEvent): void => {
+            if (document.activeElement !== anchorEl) return
+            if (event.key === 'Escape' || event.key === 'Tab') onClose()
+        }
+        document.addEventListener('keydown', handleKeyDown)
+        return () => document.removeEventListener('keydown', handleKeyDown)
+    }, [anchorEl])
 
     useBackNavigationClose({ open: !!anchorEl, onClose })
     const sharedProps: DatePickerProps = {

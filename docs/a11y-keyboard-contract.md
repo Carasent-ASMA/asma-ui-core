@@ -93,21 +93,35 @@ speculative.
 
 ## Findings
 
-11 defects, all reproduced against current `master`.
+The following findings were resolved by ASMA-8087 and are enforced by the `interaction` project.
 
-| ID | SC | Component | Defect |
+| ID | Component | Resolution |
+| --- | --- | --- |
+| A | `inputs/select/StyledSelect.tsx` | Stable listbox IDs; `aria-controls` only while the popup exists |
+| B | `inputs/select/StyledSelectItem.tsx` | Trigger-owned active descendant with a visible left indicator |
+| C | `feedback/dialog/StyledDialog.tsx` | Restores focus to the connected opener on every close path |
+| E | `utils/popover/StyledPopover.tsx` | Returns focus to the anchor on every close path — Escape, outside-press and item activation — whenever the closing panel still owned DOM focus |
+| F | `navigation/menu/StyledMenuItem.tsx` | Visible focus indicator on keyboard-focused menu items |
+| G | `inputs/select-autocomplete/StyledSelectAutocomplete.tsx` | Empty-input Backspace clears through the combobox trigger |
+| I | `feedback/snack-bar/StyledSnackbar.tsx` | Built-in message fallback is an atomic polite status region |
+| K | `datetime/.../StyledTimePicker.tsx` | Escape and Tab close the desktop popup without trapping focus |
+
+| ID | SC | Component | Status |
 | --- | --- | --- | --- |
-| A | 4.1.2 | `inputs/select/StyledSelect.tsx` | `aria-controls` on the trigger dangles |
-| B | 2.4.7 | `inputs/select/StyledSelectItem.tsx` | Focused option paints no focus indicator |
-| C | 2.4.3 | `feedback/dialog/StyledDialog.tsx` | Focus is not restored to the opener on close |
 | D | 4.1.2 | `feedback/dialog/StyledDialog.tsx` | Dialog is named by its test hook |
-| E | 2.4.3 | `utils/popover/StyledPopover.tsx` | Menu close drops focus to `<body>` |
-| F | 2.4.7 | `navigation/menu/StyledMenuItem.tsx` | Focused menu item paints no focus indicator |
-| G | 2.1.1 | `inputs/select-autocomplete/StyledSelectAutocomplete.tsx` | Clear button is mouse-only |
-| H | 2.1.1 | `inputs/select-autocomplete/StyledSelectAutocomplete.tsx` | Popup indicator is mouse-only |
-| I | 4.1.3 | `feedback/snack-bar/StyledSnackbar.tsx` | Bare `message` toast is not a live region |
-| J | 2.1.1 | `datetime/.../time-picker/TimePickerInput.tsx` | Time panel cannot be opened by keyboard |
-| K | 1.4.13, 2.1.2 | `datetime/.../time-picker/StyledTimePicker.tsx` | Escape does not close the time panel |
+| J | 2.1.1 | `datetime/.../time-picker/TimePickerInput.tsx` | Deferred: keyboard-open/panel operation |
+
+**L (found during the ASMA-8087 review, 2026-09-17) — WCAG 2.1.2 / 2.4.3, `navigation/menu/StyledMenu.tsx`.**
+Tab on an open menu left it on screen and dropped focus to whatever followed the portalled popover in
+the tab sequence. The WAI-ARIA Menu pattern makes Tab an exit from the composite widget — "move focus
+out of the menu or menubar, and close all menus and submenus" — because every `menuitem` is
+`tabindex=-1`, so Tab can never walk the items. `StyledMenu` now closes on Tab without
+`preventDefault`, so the browser still performs the move; `StyledPopover` restores the trigger first,
+and focus continues from there. Covered for Tab and Shift+Tab.
+
+H was retired as a false escalation: the popup indicator is intentionally out of the tab order; the focused combobox opens the list with Enter, ArrowDown or ArrowUp.
+
+The detailed passages below are retained investigation history. Their former “not fixed” notes are superseded by the resolved table above.
 
 ### A — `aria-controls` on the Select trigger points at nothing (4.1.2)
 
@@ -247,10 +261,11 @@ All five currently pass.
 
 ## Not covered
 
-- `StyledDrawer`, `StyledAccordion` and the minimizable-dialog stack have no suite yet.
 - The table row-selection keyboard model is a known gap. ASMA-8134 named a keyboard/selection
   interaction test as the precondition for adopting the checkbox `decorative` prop, which is what
   would clear the `nested-interactive` axe violation recorded in
   [`a11y-allowlist.md`](./a11y-allowlist.md). Tracked there; not written here.
+- Dialog accessible naming (finding D) and TimePicker keyboard-open/panel operation (finding J)
+  remain deferred to their owning follow-ups.
 - Focus indicator **contrast** (1.4.11) and **size** (2.4.13, AAA) are not asserted here — see the
   criteria table above for who owns what. This suite answers 2.4.7 and 2.4.11 only.

@@ -1,4 +1,5 @@
-import React, { useRef } from 'react'
+import React, { useLayoutEffect, useRef } from 'react'
+import { firstTabbable } from 'src/helpers/focusable'
 import clsx from 'clsx'
 import { CloseBtn } from '../components/CloseBtn'
 import { MinimizeBtn } from '../components/MinimizeBtn'
@@ -38,7 +39,8 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
 
     const t = useTranslations(locale)
 
-    const modalRef = useRef<HTMLDivElement>(null)
+    const modalRef = useRef<HTMLDivElement | null>(null)
+    const minimizedPanelRef = useRef<HTMLDivElement | null>(null)
 
     const { minimized, setMinimized, fullScreen, setFullScreen } = useControlledProps(props)
     const isFullScreenActive = fullScreen && !minimized
@@ -46,6 +48,30 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
     const handleClose = () => {
         setMinimized(false)
         onClose()
+    }
+
+    // Both panels stay mounted — the `hidden` class is only `h-0 w-0`, so the hidden one's controls
+    // would still be tabbable. `inert` is what actually removes it from the tab order, and it is set
+    // here rather than as a prop because React 18 has no boolean `inert`: `inert={false}` renders
+    // `inert="false"`, which HTML still reads as inert.
+    useLayoutEffect(() => {
+        modalRef.current?.toggleAttribute('inert', minimized)
+        minimizedPanelRef.current?.toggleAttribute('inert', !minimized)
+    }, [minimized])
+
+    // Toggling makes the panel holding the just-pressed button inert, so focus has to be handed to
+    // the panel that became visible or it dies there (WCAG 2.4.3). Aim for the counterpart toggle;
+    // fall back to whatever is reachable, because that toggle is optional — hidden on mobile, in
+    // fullscreen, or by `showMinimizeIcon`/`showExpandIcon`.
+    const toggleMinimized = (): void => {
+        const revealed = minimized ? modalRef : minimizedPanelRef
+        setMinimized(!minimized)
+        requestAnimationFrame(() => {
+            const panel = revealed.current
+            if (!panel) return
+            const counterpart = panel.querySelector<HTMLElement>('[data-testid="toggle-minimize-btn"]')
+            ;(counterpart ?? firstTabbable(panel))?.focus({ preventScroll: true })
+        })
     }
 
     // Only the fullscreen state shows a page-covering backdrop (below) and is actually modal — the
@@ -80,6 +106,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
         <>
             {/* Minimized  */}
             <div
+                ref={minimizedPanelRef}
                 style={{ zIndex: 51, ...style }}
                 className={cn(styles['minimized-dialog'], !minimized && styles['hidden'], classNameOverrides.minimized)}
             >
@@ -96,9 +123,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                         <MinimizeBtn
                             type='expand'
                             visibility={showExpandIcon}
-                            onClick={() => {
-                                setMinimized(!minimized)
-                            }}
+                            onClick={toggleMinimized}
                             tooltipTitle={t.expand}
                         />
 
@@ -154,9 +179,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                             <MinimizeBtn
                                 visibility={showMinimizeIcon && !isMobile && !fullScreen}
                                 type='minimize'
-                                onClick={() => {
-                                    setMinimized(!minimized)
-                                }}
+                                onClick={toggleMinimized}
                                 tooltipTitle={t.minimize}
                             />
                             <FullScreenBtn

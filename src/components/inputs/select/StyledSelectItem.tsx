@@ -33,7 +33,7 @@ export const StyledSelectItem = ({
     <li
         id={id}
         role='option'
-        aria-selected={selected ? true : undefined}
+        aria-selected={selected ? true : false}
         aria-disabled={disabled ? true : undefined}
         tabIndex={-1}
         onMouseDown={(event) => event.preventDefault()}

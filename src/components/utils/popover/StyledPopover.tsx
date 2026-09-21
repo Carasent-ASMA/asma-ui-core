@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react'
 import {
     autoUpdate,
     flip,
@@ -12,6 +12,7 @@ import {
     type Placement,
 } from '@floating-ui/react'
 import { cn } from 'src/helpers/cn'
+import { tabbableWithin } from 'src/helpers/focusable'
 import { resolveSx } from 'src/helpers/sx'
 import {
     getOpenModalDialogAncestor,
@@ -26,10 +27,17 @@ export interface PopoverOrigin {
     horizontal: 'left' | 'center' | 'right' | number
 }
 
-export type PopoverCloseReason = 'backdropClick' | 'escapeKeyDown'
+export type PopoverCloseReason = 'backdropClick' | 'escapeKeyDown' | 'tabKeyDown'
 
 export interface StyledPopoverProps {
     open: boolean
+    /**
+     * Splice the panel into the tab sequence right after the anchor: Tab on the anchor steps into the
+     * panel's first control, and Shift+Tab out of that control retraces to the anchor. On by
+     * default because a popover's controls must be reachable by keyboard. Opt out only when its
+     * trigger owns keyboard navigation (select, country picker, date/time picker).
+     */
+    tabIntoContent?: boolean
     anchorEl?: Element | null
     onClose?: (event: object, reason?: PopoverCloseReason) => void
     anchorOrigin?: PopoverOrigin
@@ -97,6 +105,7 @@ export const StyledPopover = ({
     onClick,
     children,
     keepMounted = false,
+    tabIntoContent = true,
 }: StyledPopoverProps): JSX.Element | null => {
     const placement = useMemo(
         () => toPlacement(anchorOrigin, transformOrigin),
@@ -104,6 +113,7 @@ export const StyledPopover = ({
     )
 
     const [hasOpened, setHasOpened] = useState(open)
+    const tabbingRef = useRef(false)
     if (open && !hasOpened) setHasOpened(true)
     const shouldMount = open || (keepMounted && hasOpened)
     const anchoredPortalRoot = getOpenModalDialogAncestor(anchorEl)
@@ -139,6 +149,90 @@ export const StyledPopover = ({
     const usePopoverLayer = shouldUsePopoverTopLayer(portalRoot)
     const floatingRef = useMergeRefs([useTopLayerRef(refs.setFloating, usePopoverLayer)])
 
+    useEffect(() => {
+        if (!open) return
+        const opener = anchorEl instanceof HTMLElement ? anchorEl : null
+        // Read the panel lazily: FloatingPortal mounts its children a render later, so the ref is
+        // still empty on this effect's first pass.
+        const panelHasFocus = (): boolean => refs.floating.current?.contains(document.activeElement) ?? false
+        let focusWasInside = panelHasFocus()
+        const trackFocus = (): void => {
+            focusWasInside = panelHasFocus()
+        }
+        document.addEventListener('focusin', trackFocus)
+
+        return () => {
+            document.removeEventListener('focusin', trackFocus)
+            const activeElement = document.activeElement
+            const focusIsLoose = !activeElement || activeElement === document.body || panelHasFocus()
+            if (focusWasInside && focusIsLoose && opener?.isConnected) opener.focus({ preventScroll: true })
+        }
+    }, [open, anchorEl, refs.floating])
+
+    useEffect(() => {
+        if (!open) return
+
+        const handleKeyDown = (event: KeyboardEvent): void => {
+            tabbingRef.current = event.key === 'Tab'
+            if (!tabIntoContent || !tabbingRef.current || event.shiftKey || event.defaultPrevented) return
+            // Tab on the anchor steps INTO the panel. It is portalled to <body>, so document order
+            // skips it and its controls are unreachable by keyboard without this (2.1.1).
+            const panel = refs.floating.current
+            if (!panel || !(anchorEl instanceof Element) || !anchorEl.contains(document.activeElement)) return
+            const [first] = tabbableWithin(panel)
+            // Nothing to land on — an empty or still-loading panel. Swallowing Tab there would trap
+            // the keyboard (2.1.2); the focus branch below closes on the way past instead.
+            if (!first) return
+            event.preventDefault()
+            first.focus({ preventScroll: true })
+            tabbingRef.current = false
+        }
+        const handleFocusIn = (event: FocusEvent): void => {
+            const target = event.target
+            const stayedInside =
+                target instanceof Node &&
+                ((refs.floating.current?.contains(target) ?? false) ||
+                    (anchorEl instanceof Element && anchorEl.contains(target)))
+            if (tabbingRef.current && !stayedInside) onClose?.(event, 'tabKeyDown')
+            tabbingRef.current = false
+        }
+
+        document.addEventListener('keydown', handleKeyDown, true)
+        document.addEventListener('focusin', handleFocusIn)
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown, true)
+            document.removeEventListener('focusin', handleFocusIn)
+        }
+    }, [open, anchorEl, onClose, refs.floating, tabIntoContent])
+
+    // Tab at either end of the panel leaves it, and where it lands has to be worked out here: the
+    // panel joins the browser top layer, where sequential navigation is scoped to the popover, so
+    // letting the keystroke run wraps to the start of the document instead of carrying on past the
+    // anchor. It is blocked, and the destination read off the anchor's own place in the document —
+    // the panel excluded, being the thing left behind.
+    const handlePanelKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>): void => {
+        if (event.key !== 'Tab' || event.defaultPrevented || !(anchorEl instanceof HTMLElement)) return
+        const panel = event.currentTarget
+        const focusable = tabbableWithin(panel)
+        const index = focusable.indexOf(document.activeElement as HTMLElement)
+        // Only the two ends leave; in between, Tab is ordinary movement between the panel's controls.
+        if (index === -1 || (event.shiftKey ? index !== 0 : index !== focusable.length - 1)) return
+        event.preventDefault()
+        const outside = tabbableWithin(document).filter((element) => !panel.contains(element))
+        const neighbour = outside[outside.indexOf(anchorEl) + (event.shiftKey ? -1 : 1)]
+        // Backwards out of a panel the user tabbed *into*, the anchor is itself the destination —
+        // that is the step being retraced. It is also the fallback when the anchor has no neighbour
+        // on that side at all, so leaving the panel never strands focus on <body> (2.4.3).
+        const destination = (tabIntoContent && event.shiftKey ? undefined : neighbour) ?? anchorEl
+        // Move first, close second: closing hands focus back to the anchor when the panel that is
+        // going away still owned it, which would undo this.
+        // The explicit handoff below also emits focusin. It is already closing through this path,
+        // so keep the document-level watcher from reporting the same Tab a second time.
+        tabbingRef.current = false
+        destination.focus({ preventScroll: true })
+        onClose?.(event, 'tabKeyDown')
+    }
+
     // keepMounted leaves the node in the DOM across open/close — re-assert popover show/hide each flip
     // (useTopLayerRef only runs on attach, which doesn't re-fire when we stay mounted).
     useEffect(() => {
@@ -169,7 +263,7 @@ export const StyledPopover = ({
                     ...slotProps?.paper?.style,
                     ...(!open ? { display: 'none' } : null),
                 }}
-                {...(open ? getFloatingProps({ onClick }) : {})}
+                {...(open ? getFloatingProps({ onClick, onKeyDown: handlePanelKeyDown }) : {})}
                 className={cn(
                     // Figma DS floating surface: radius 4 (`menus` token) + Float shadow (0 1 12 rgba(0,0,0,.15)).
                     'z-[1300] overflow-auto rounded bg-white shadow-[0px_1px_12px_0px_rgba(0,0,0,0.15)]',

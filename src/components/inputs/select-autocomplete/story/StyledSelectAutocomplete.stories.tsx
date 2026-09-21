@@ -250,8 +250,6 @@ export const StaysOpenOnSelect: Story = {
 }
 
 export const SelectAllTogglesAllOptions: Story = {
-    // axe: aria-required-children (role is missing a required child role). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
     args: {
         allowSelectAll: true,
         selectAllLabel: 'Select every film',
@@ -283,9 +281,13 @@ export const SelectAllTogglesAllOptions: Story = {
 
         await openAutocomplete(input, userEvent)
 
-        const selectAllCheckbox = await canvas.findByRole('checkbox', { name: 'Select every film' })
+        // Select all is an option row in the trigger-owned combobox, not an independently focusable
+        // checkbox (ASMA-8087 KBD-07) — its checkbox visual is decorative and renders no <input>.
+        const selectAll = await canvas.findByRole('option', { name: 'Select every film' })
+        await expect(selectAll).toHaveAttribute('aria-selected', 'false')
 
-        await userEvent.click(selectAllCheckbox)
+        await userEvent.click(selectAll)
+        await expect(selectAll).toHaveAttribute('aria-selected', 'true')
 
         // The chip itself is not a button (a delete-only chip is a plain container, StyledChip's
         // `interactive` rule); only its delete control is, named "Remove <title>". Exact names:
@@ -294,7 +296,7 @@ export const SelectAllTogglesAllOptions: Story = {
         await expect(canvas.getByRole('button', { name: 'Remove The Godfather' })).toBeInTheDocument()
         await expect(canvas.getByRole('button', { name: 'Remove The Godfather: Part II' })).toBeInTheDocument()
 
-        await userEvent.click(selectAllCheckbox)
+        await userEvent.click(selectAll)
 
         await expect(canvas.queryByRole('button', { name: 'Remove The Shawshank Redemption' })).not.toBeInTheDocument()
         await expect(canvas.queryByRole('button', { name: 'Remove The Godfather' })).not.toBeInTheDocument()

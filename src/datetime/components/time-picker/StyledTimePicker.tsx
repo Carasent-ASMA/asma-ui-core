@@ -1,6 +1,6 @@
 import { format, isBefore, isValid } from 'date-fns'
 import { usePopupState } from 'src/hooks/usePopupState'
-import { useState, type ChangeEvent } from 'react'
+import { useEffect, useState, type ChangeEvent } from 'react'
 import { ClickAwayListener } from 'src/components/mui-compat'
 import { TimePickerPopper } from './TimePickerPopper'
 import { getTimeFromValue } from './helpers/getTimeFromValue'
@@ -28,6 +28,21 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
     const isMobile = useIsMobileView()
     // Android back must close the bottom sheet, not leave the page (parity with StyledDatePicker).
     useBackNavigationClose({ open: isMobile && popupState.isOpen, onClose: popupState.close })
+
+    // Destructured up front so the effect closes over the three values it actually uses instead of the
+    // whole popup-state object — otherwise the handler reads `popupState.*` at call time and the deps
+    // array cannot describe it honestly.
+    const { isOpen: isPopupOpen, anchorEl: popupAnchorEl, close: closePopup } = popupState
+
+    useEffect(() => {
+        if (!isPopupOpen || isMobile) return
+        const handleKeyDown = (event: KeyboardEvent): void => {
+            if (!popupAnchorEl?.contains(document.activeElement)) return
+            if (event.key === 'Escape' || event.key === 'Tab') closePopup()
+        }
+        document.addEventListener('keydown', handleKeyDown)
+        return () => document.removeEventListener('keydown', handleKeyDown)
+    }, [isPopupOpen, popupAnchorEl, closePopup, isMobile])
     const externalValue = value ? format(value, 'HH:mm') : ''
     const [localValue, setLocalValue] = useState(externalValue)
     const [isDirty, setIsDirty] = useState(false)

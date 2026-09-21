@@ -1,5 +1,6 @@
 import type { Meta } from '@storybook/react-vite'
 import { useState } from 'react'
+import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { StyledWidgetTitle } from 'src/components/custom/widget/widget-title/StyledWidgetTitle'
 import { StyledAccordion } from './StyledAccordion'
 import { StyledAccordionDetails } from './StyledAccordionDetails'
@@ -35,6 +36,12 @@ export const Outlined = {
 
                     <StyledAccordionDetails>
                         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                        {/* A real control in the panel, to check by hand what the interaction suite
+                            asserts: collapsed, the panel is `inert`, so Tab goes straight from the
+                            header past this button; expanded, it is an ordinary tab stop. */}
+                        <StyledButton dataTest='accordion-panel-action' size='small' variant='contained'>
+                            Button inside the panel
+                        </StyledButton>
                     </StyledAccordionDetails>
                 </StyledAccordion>
             </div>
@@ -58,6 +65,9 @@ export const Text = {
 
                     <StyledAccordionDetails>
                         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                        <StyledButton dataTest='accordion-panel-action' size='small' variant='contained'>
+                            Button inside the panel
+                        </StyledButton>
                     </StyledAccordionDetails>
                 </StyledAccordion>
             </div>
