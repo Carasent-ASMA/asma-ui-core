@@ -581,3 +581,5 @@ npx changeset
 Choose `patch` for a fix, `minor` for a feature, `major` for a breaking change, and commit the
 generated markdown file with your PR. A PR may carry several changesets. On merge to master the
 pipeline bumps the version, writes the changelog and publishes to npm.
+
+Releases are cut by conventional-commit subjects on master (`feat:` minor, `fix:`/`chore:` patch); Jira-only subjects do not publish.
