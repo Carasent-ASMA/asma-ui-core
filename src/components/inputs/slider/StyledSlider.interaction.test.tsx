@@ -52,6 +52,8 @@ describe('StyledSlider keyboard contract', () => {
     it('is reachable by Tab (2.1.1)', async () => {
         const { container } = mount(<SliderFixture />)
 
+        // first focus goes on the minus button
+        await userEvent.tab()
         await userEvent.tab()
 
         await expect(document.activeElement).toBe(thumb(container))
