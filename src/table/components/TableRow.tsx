@@ -9,9 +9,9 @@ import { useRootContext } from 'src/table/context/RootContext'
 import type { ColumnWindow } from 'src/table/hooks/useColumnVirtualizer'
 import { compact } from 'src/helpers/arrays'
 
-const focusNextOutsideTable = (currentRow: HTMLTableRowElement): void => {
+const focusNextOutsideTable = (currentRow: HTMLTableRowElement): boolean => {
     const table = currentRow.closest('table')
-    if (!table) return
+    if (!table) return false
 
     const next = Array.from(
         document.querySelectorAll<HTMLElement>(
@@ -22,7 +22,9 @@ const focusNextOutsideTable = (currentRow: HTMLTableRowElement): void => {
             !table.contains(element) && Boolean(table.compareDocumentPosition(element) & Node.DOCUMENT_POSITION_FOLLOWING),
     )
 
-    next?.focus()
+    if (!next) return false
+    next.focus()
+    return document.activeElement === next
 }
 
 export function TableRow<TData extends { id: string | number }, TCustomData = Record<string, unknown>>({
@@ -308,15 +310,20 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
                 onKeyDown={(e) => {
                     switch (e.key) {
                         case 'Tab': {
-                            e.preventDefault()
                             if (e.shiftKey) {
-                                if (row.focusPrevRow()) break
+                                if (row.focusPrevRow()) {
+                                    e.preventDefault()
+                                    break
+                                }
                                 const header = e.currentTarget.closest('table')?.querySelector<HTMLTableRowElement>(
                                     'thead tr[tabindex="0"]',
                                 )
-                                header?.focus()
-                            } else if (!row.focusNextRow()) {
-                                focusNextOutsideTable(e.currentTarget)
+                                if (header) {
+                                    e.preventDefault()
+                                    header.focus()
+                                }
+                            } else if (row.focusNextRow() || focusNextOutsideTable(e.currentTarget)) {
+                                e.preventDefault()
                             }
                             break
                         }
