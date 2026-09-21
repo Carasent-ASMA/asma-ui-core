@@ -237,6 +237,7 @@ exports[`asma-ui-core public API surface > keeps every runtime export of the pac
   "StyledModuleTitle",
   "StyledPhoneField",
   "StyledPopover",
+  "StyledPopoverV2",
   "StyledRadio",
   "StyledRadioGroup",
   "StyledSearchField",
