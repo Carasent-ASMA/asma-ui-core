@@ -12,7 +12,7 @@ the surface). Deliberately no `role="menu"` and no arrow-key navigation, and no 
 The two footer rows follow the Figma frames exactly: the **Reset filter** row is `space-between`
 (`viewResultsAction` left, `resetAction` right) and the **Actions** row (`footerActions`) is a single
 right-aligned outlined button. `children` and all three footer slots may be render-props receiving
-`close()`. The `Gallery` story renders every Title x Reset filter x Actions combination side by side.
+`close()`. The `AllCases` story gives every case its own trigger to open and operate; `Gallery` renders the same anatomies side by side, statically.
 
 Separate from `StyledPopover`, which is untouched and stays the MUI-parity positioning primitive its
 eight internal consumers depend on; those migrate across gradually. Deliberate addition to the frozen

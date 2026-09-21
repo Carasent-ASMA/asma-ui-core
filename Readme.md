@@ -275,8 +275,8 @@ The two footer rows come straight from Figma. The **Reset filter** row is `space
 `viewResultsAction` on the left (the live match count, which closes the surface — the filter has
 already applied) and `resetAction` on the right. The **Actions** row (`footerActions`) is a single
 right-aligned outlined button. Each of those slots, like `children`, may be a render-prop receiving
-`close()`. In Storybook, **`Gallery`** shows every Title x Reset filter x Actions combination side
-by side, and **`Playground`** lets you switch those properties on a real popover and operate it.
+`close()`. In Storybook, **`AllCases`** gives every case its own trigger to open and operate, and
+**`Gallery`** shows the same anatomies side by side, statically, for visual comparison.
 
 `info` is read-only: a plain container the trigger points at with `aria-describedby`, not focus
 trapped, so `Tab` walks out of it and closes it. `action` is a `role="dialog"` with a focus trap,

@@ -7,7 +7,7 @@ import { FilterIcon } from 'src/components/icons/filter-icon/FilterIcon'
 import { InfoOutlineIcon } from 'src/components/icons/info-outline-icon/InfoOutlineIcon'
 import { StyledPopoverV2 } from './StyledPopoverV2'
 import { PopoverGallery } from './story/PopoverGallery'
-import { PopoverPlayground } from './story/PopoverPlayground'
+import { PopoverCases } from './story/PopoverCases'
 import {
     ChipGroup,
     countActive,
@@ -57,8 +57,8 @@ const meta = {
                     '(`footerActions`) is one right-aligned outlined button. Each of those slots, like',
                     '`children`, may be a render-prop receiving `close()`.',
                     '',
-                    '**Where to look first** — `Gallery` shows every anatomy side by side; `Playground` lets',
-                    'you switch the same properties on a real popover and operate it.',
+                    '**Where to look first** — `AllCases` gives every case its own trigger to open and operate;',
+                    '`Gallery` shows the same anatomies side by side, statically, for visual comparison.',
                     '',
                     '**The consumer owns**: the trigger element (spread `triggerProps`, wire `ref`), the',
                     'filter state, the `aria-live` region announcing the new result count, and a 300ms',
@@ -99,7 +99,7 @@ const openFrom = (triggerName: string | RegExp) =>
 /**
  * Every anatomy the Figma component can produce, side by side — the reference matrix of its three
  * boolean properties (Title, Reset filter, Actions) plus both widths and the scrolling case.
- * Static on purpose; use `Playground` to operate them.
+ * Static on purpose; use `AllCases` to open and operate them.
  */
 export const Gallery: Story = {
     parameters: { layout: 'fullscreen' },
@@ -107,13 +107,14 @@ export const Gallery: Story = {
 }
 
 /**
- * Switch the Figma properties on and off and operate a real popover in every combination —
- * keyboard, focus return, Escape, outside press, immediate-apply filtering and 60vh scrolling.
- * The event log shows what the component reported.
+ * One real popover per case, each with its own trigger — anatomy, both variants, the Filter and
+ * Actions patterns, a long title, the 240px floor and 60vh scrolling. Open them in turn to check
+ * keyboard, focus return, Escape and outside press; pressing another trigger dismisses the current
+ * surface, which is the "only one open at a time" rule doing its job.
  */
-export const Playground: Story = {
+export const AllCases: Story = {
     parameters: { layout: 'fullscreen' },
-    render: () => <PopoverPlayground />,
+    render: () => <PopoverCases />,
 }
 
 const InfoExample = ({ withTitle }: { withTitle: boolean }): JSX.Element => (
