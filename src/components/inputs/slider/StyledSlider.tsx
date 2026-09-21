@@ -114,7 +114,7 @@ export const StyledSlider = ({
     reserveHelperText,
     fromLabel,
     toLabel,
-    showButtons,
+    showButtons = true,
     ariaLabel,
     ariaLabelledBy,
     onChange,
