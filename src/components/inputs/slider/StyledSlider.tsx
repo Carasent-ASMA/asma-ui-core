@@ -451,16 +451,6 @@ export const StyledSlider = ({
                             )}
                         </div>
                     )}
-
-                    {showHelperSlot && (
-                        <HelperRow
-                            id={helperId}
-                            role={helperAlertRole}
-                            error={error}
-                            message={message}
-                            className='m-0 items-center'
-                        />
-                    )}
                 </div>
 
                 {!isVertical && showButtons && (
@@ -475,6 +465,16 @@ export const StyledSlider = ({
                     />
                 )}
             </div>
+
+            {showHelperSlot && (
+                <HelperRow
+                    id={helperId}
+                    role={helperAlertRole}
+                    error={error}
+                    message={message}
+                    className='m-0 items-center'
+                />
+            )}
         </div>
     )
 }
