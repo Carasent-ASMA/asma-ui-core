@@ -71,7 +71,7 @@ export const StyledMenuItem = ({
             className={cn(
                 // Figma Menus item (node 16073-19226): h40, py8, label Body Base 16px text-icon/body
                 // (delta-700); hover delta-50; selected gama-50.
-                'box-border flex items-center px-4 text-base outline-none',
+                'box-border flex items-center px-4 text-base outline-none focus-visible:shadow-[inset_3px_0_var(--colors-focus-ring)]',
                 dense ? 'min-h-8 py-1' : 'min-h-10 py-2',
                 // ASMA-8210: the item had no pressed state at all, and at 40px (32px dense) both
                 // variants sit under the 44px touch height — safe for the touch-target override,

@@ -13,9 +13,8 @@ import { forwardRef } from 'react'
  * **Multiple**) to a representation, which this component's thresholds reproduce exactly:
  * - **≤5 → Chips select** (`DynamicInteractiveChipGroup`): `StyledInteractiveChip` radio (single)
  *   or checkbox (multiple) chips; long labels stack vertically; "Clear selection" link + helper row.
- * - **>5 & ≤10 → Select (dropdown)**: outlined `StyledInputField` trigger + `Menus` list, typing
- *   disabled (caret hidden, keyboard blocked).
- * - **>10 → Autocomplete**: same trigger + scrollable `Menus` list with type-ahead search.
+ * - **>5 → Autocomplete**: outlined `StyledInputField` trigger + scrollable `Menus` list with
+ *   type-ahead search.
  * Each representation is composed from components already aligned to their own Figma nodes (Chip
  * `13248-31089`, Input field `15561-37391`, Menus `16073-19226`, Autocomplete `20474-27966`), so
  * parity here is the mode routing + the shared title/clear/helper chrome, not a bespoke visual.
@@ -29,7 +28,7 @@ import { forwardRef } from 'react'
  *   Long labels automatically switch to a vertical stacked layout.
  *   When `!required` and a value is selected, a "Clear selection" button is shown.
  * - `0 or 6+ options` → renders as a searchable autocomplete (`DynamicSelectAutocomplete`).
- *   Typing is disabled when there are ≤10 options (caret hidden, keyboard blocked).
+ *   All autocomplete option counts remain filterable and keyboard-operable.
  *
  * **Option types:**
  * Options can be primitives (`string | number | boolean`) or objects. When using objects,

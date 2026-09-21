@@ -247,6 +247,7 @@ export function StyledSelectAutocomplete<
     }
 
     const [activeIndex, setActiveIndex] = useState<number | null>(null)
+    const listboxId = `${dataTest}-listbox`
     const listRef = useRef<(HTMLElement | null)[]>([])
     const inputRef = useRef<HTMLInputElement>(null)
     // Popup box sizing driven off the reference (input) rect via the `size` middleware. Kept in state
@@ -283,6 +284,8 @@ export function StyledSelectAutocomplete<
     const enabledOptionIndexes = visibleOptions.flatMap((option, index) =>
         !isOptionDisabled(option) ? [index] : [],
     )
+    const enabledActiveIndexes =
+        allowSelectAll && isMultiple ? [-1, ...enabledOptionIndexes] : enabledOptionIndexes
     const selectedOptionIndex = visibleOptions.findIndex(isSelected)
 
     useEffect(() => {
@@ -328,16 +331,16 @@ export function StyledSelectAutocomplete<
     const floatingRef = useMergeRefs([useTopLayerRef(refs.setFloating, usePopoverLayer)])
 
     const getInitialActiveIndex = (direction: -1 | 1): number | null => {
-        if (enabledOptionIndexes.includes(selectedOptionIndex)) return selectedOptionIndex
-        return enabledOptionIndexes[direction === 1 ? 0 : enabledOptionIndexes.length - 1] ?? null
+        if (enabledActiveIndexes.includes(selectedOptionIndex)) return selectedOptionIndex
+        return enabledActiveIndexes[direction === 1 ? 0 : enabledActiveIndexes.length - 1] ?? null
     }
 
     const moveActiveOption = (direction: -1 | 1): void => {
-        if (enabledOptionIndexes.length === 0) return
+        if (enabledActiveIndexes.length === 0) return
         setActiveIndex((index) => {
-            const position = enabledOptionIndexes.indexOf(index ?? selectedOptionIndex)
-            if (position === -1) return enabledOptionIndexes[direction === 1 ? 0 : enabledOptionIndexes.length - 1] ?? null
-            return enabledOptionIndexes[Math.min(Math.max(position + direction, 0), enabledOptionIndexes.length - 1)] ?? null
+            const position = enabledActiveIndexes.indexOf(index ?? selectedOptionIndex)
+            if (position === -1) return enabledActiveIndexes[direction === 1 ? 0 : enabledActiveIndexes.length - 1] ?? null
+            return enabledActiveIndexes[Math.min(Math.max(position + direction, 0), enabledActiveIndexes.length - 1)] ?? null
         })
     }
 
@@ -365,10 +368,22 @@ export function StyledSelectAutocomplete<
         setInputValue(event, '', 'clear')
     }
 
+    const toggleSelectAll = (event: SyntheticEvent): void => {
+        const allSelected = options.length > 0 && selectedArray.length === options.length
+        onChange?.(event, (allSelected ? [] : options) as never, allSelected ? 'clear' : 'selectOption', undefined)
+    }
+
     const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>): void => {
-        if (event.key === 'Enter' && !open) {
+        if (event.key === 'Backspace' && inputValue === '' && showClear) {
+            const lastSelected = selectedArray[selectedArray.length - 1]
+            if (!isMultiple) clearValue(event)
+            else if (lastSelected !== undefined) emitChange(event, lastSelected, false)
+        } else if (event.key === 'Enter' && !open) {
             event.preventDefault()
             setOpen(true)
+        } else if (event.key === 'Enter' && activeIndex === -1) {
+            event.preventDefault()
+            toggleSelectAll(event)
         } else if (event.key === 'Enter' && activeIndex != null && visibleOptions[activeIndex] != null) {
             event.preventDefault()
             const option = visibleOptions[activeIndex]
@@ -383,7 +398,10 @@ export function StyledSelectAutocomplete<
             moveActiveOption(event.key === 'ArrowDown' ? 1 : -1)
         } else if (event.key === 'Home' || event.key === 'End') {
             event.preventDefault()
-            setActiveIndex(enabledOptionIndexes[event.key === 'Home' ? 0 : enabledOptionIndexes.length - 1] ?? null)
+            setActiveIndex(enabledActiveIndexes[event.key === 'Home' ? 0 : enabledActiveIndexes.length - 1] ?? null)
+        } else if (event.key === ' ' && activeIndex === -1) {
+            event.preventDefault()
+            toggleSelectAll(event)
         } else if (event.key === ' ' && activeIndex != null && visibleOptions[activeIndex] != null) {
             event.preventDefault()
             const option = visibleOptions[activeIndex]
@@ -397,6 +415,10 @@ export function StyledSelectAutocomplete<
     }
 
     const showClear = !disableClearable && !readOnly && !disabled && (isMultiple ? selectedArray.length > 0 : singleValue !== null)
+    let activeOptionId: string | undefined
+    if (open && activeIndex != null && (activeIndex === -1 || visibleOptions[activeIndex] !== undefined)) {
+        activeOptionId = activeIndex === -1 ? `${dataTest}-select-all` : `${dataTest}-option-${activeIndex}`
+    }
 
     // Activate on click so a pointer press can be cancelled and keyboard clicks work.
     // Mouse-down only preserves input focus; it must not change the value or popup.
@@ -416,6 +438,7 @@ export function StyledSelectAutocomplete<
                         dataTest={`selected-chip-${getLabel(option)}`}
                         label={getLabel(option)}
                         readOnly={readOnly}
+                        deleteButtonTabIndex={-1}
                         onDelete={readOnly ? undefined : (event) => emitChange(event, option)}
                     />
                 )))
@@ -472,6 +495,7 @@ export function StyledSelectAutocomplete<
         helperText,
         value: inputValue,
         onChange: (event) => {
+            setActiveIndex(null)
             setInputValue(event, event.target.value, 'input')
             if (!open) setOpen(true)
         },
@@ -484,8 +508,8 @@ export function StyledSelectAutocomplete<
                 role: 'combobox',
                 'aria-autocomplete': 'list',
                 'aria-expanded': open,
-                'aria-activedescendant':
-                    open && activeIndex != null ? `${dataTest}-option-${activeIndex}` : undefined,
+                'aria-controls': open ? listboxId : undefined,
+                'aria-activedescendant': activeOptionId,
                 autoComplete: 'off',
                 readOnly,
             },
@@ -590,6 +614,9 @@ export function StyledSelectAutocomplete<
                             ...slotProps?.popper?.style,
                         }}
                         {...getFloatingProps()}
+                        id={listboxId}
+                        role='listbox'
+                        aria-multiselectable={isMultiple ? true : undefined}
                         className={cn(
                             // Figma Autocomplete dropdown = the Menus surface (node 16073-19226): radius 4,
                             // border/outline delta-300 (#bdc4cf), Menus shadow. Matches StyledSelect/StyledMenu.
@@ -612,41 +639,37 @@ export function StyledSelectAutocomplete<
                         )}
                     >
                             {allowSelectAll && isMultiple && (
-                                // Not one of the selectable options (never part of `visibleOptions`/
-                                // arrow-key nav) — it's a toggle-all action, so it must NOT claim
-                                // `role='option'` (that false premise was the actual cause of its
-                                // `nested-interactive` violation: `option` disallows interactive
-                                // descendants; a real, independently-focusable checkbox is perfectly
-                                // valid once it isn't wrapped in a role that says it can't be). But a
-                                // bare, roleless <li> isn't valid inside `role='listbox'` either (axe
-                                // `aria-required-children`/`listitem`) — `role='group'` is the ARIA-listbox-
-                                // valid child role that, unlike `option`, permits real interactive content.
-                                // A plain `<div>` hosts it (not `<li>` — ARIA-in-HTML doesn't allow
-                                // `role='group'` on `<li>`; `<div>` accepts any role, and `flex` layout
-                                // doesn't care about tag name, so this is visually identical).
-                                <div
-                                    role='group'
-                                    className='flex min-h-12 items-center gap-x-1 border-0 border-b border-solid border-delta-200 px-4 text-sm text-delta-700'
+                                // The input keeps DOM focus and drives this row through
+                                // `aria-activedescendant`, so the row is `tabIndex={-1}` and carries no key
+                                // handler of its own — Space/Enter are handled on the combobox. Pointer
+                                // selection still needs the click. Same call `StyledSelectItem` makes.
+                                // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+                                <li
+                                    id={`${dataTest}-select-all`}
+                                    role='option'
+                                    aria-selected={options.length > 0 && selectedArray.length === options.length}
+                                    data-active={activeIndex === -1 ? '' : undefined}
+                                    tabIndex={-1}
+                                    onMouseDown={(event) => event.preventDefault()}
+                                    onClick={toggleSelectAll}
+                                    onMouseMove={() => setActiveIndex(null)}
+                                    className='relative flex min-h-12 cursor-pointer items-center gap-x-1 border-0 border-b border-solid border-delta-200 px-4 text-sm text-delta-700 aria-selected:bg-gama-50 hover:bg-delta-50'
                                 >
+                                    {activeIndex === -1 && (
+                                        <span
+                                            aria-hidden='true'
+                                            className='border-l-solid pointer-events-none absolute inset-y-0 left-0 border-l-[3px] border-focus-ring'
+                                        />
+                                    )}
                                     <StyledCheckbox
                                         dataTest={`${dataTest}-select-all`}
-                                        aria-label={selectAllLabel}
                                         checked={options.length > 0 && selectedArray.length === options.length}
                                         size='small'
                                         hideWrapper
-                                        onChange={(event) => {
-                                            event.stopPropagation()
-                                            const allSelected = options.length > 0 && selectedArray.length === options.length
-                                            onChange?.(
-                                                event,
-                                                (allSelected ? [] : options) as never,
-                                                allSelected ? 'clear' : 'selectOption',
-                                                undefined,
-                                            )
-                                        }}
+                                        decorative
                                     />
                                     <span className='flex-1 truncate py-2'>{selectAllLabel}</span>
-                                </div>
+                                </li>
                             )}
                             {loading ? (
                                 // Placeholder text, not a selectable option — `role='presentation'`

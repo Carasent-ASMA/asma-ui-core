@@ -397,7 +397,7 @@ export const StyledSelect = ({
                 role='combobox'
                 aria-haspopup='listbox'
                 aria-expanded={open}
-                aria-controls={listboxId}
+                aria-controls={open ? listboxId : undefined}
                 aria-activedescendant={open ? activeOptionId : undefined}
                 // `labelId` (external label) wins when present — same MUI `Select` intent as
                 // `aria-labelledby` taking precedence over `aria-label` per spec. Otherwise fall back
@@ -490,6 +490,7 @@ export const StyledSelect = ({
                         {...getFloatingProps()}
                         id={listboxId}
                         role='listbox'
+                        aria-multiselectable={multiple ? true : undefined}
                         // Mirror the trigger's own name fallback (`labelId` wins, else `name`) — the
                         // popup is a separate element from the trigger and needs its own accessible name
                         // (axe `aria-input-field-name`); relying on `name` alone left it nameless for any

@@ -138,14 +138,13 @@ describe('StyledSnackbar status-message contract', () => {
      * Not fixed here: wave-3 builders add tests, not component fixes. The fix is a one-line
      * `role="status"` on the fallback pill and should be cheap, but choosing assertive vs polite is
      * a product decision. Escalated to the coordinator. @see docs/a11y-keyboard-contract.md */
-    it.skip('announces a bare message string via a live region (4.1.3)', async () => {
+    it('announces a bare message string via a live region (4.1.3)', async () => {
         mount(<StyledSnackbar open autoHideDuration={null} message='Thread archived' />)
 
         await waitFor(() => expect(document.body.textContent).toContain('Thread archived'))
-        const text = Array.from(document.querySelectorAll('div')).find(
-            (node) => node.textContent === 'Thread archived',
-        )!
+        const text = document.querySelector('[role="status"]')!
 
         await expect(liveRegionFor(text)).not.toBeNull()
+        await expect(text).toHaveAttribute('aria-atomic', 'true')
     })
 })

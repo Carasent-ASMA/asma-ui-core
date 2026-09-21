@@ -5,6 +5,7 @@ import {
     FloatingArrow,
     FloatingPortal,
     offset,
+    safePolygon,
     shift,
     useDismiss,
     useFloating,
@@ -15,8 +16,9 @@ import {
     useRole,
     type Placement,
 } from '@floating-ui/react'
-import { cloneElement, useRef, useState, type CSSProperties, type ReactElement, type ReactNode } from 'react'
+import { cloneElement, Fragment, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactElement, type ReactNode } from 'react'
 import { cn } from 'src/helpers/cn'
+import { firstTabbable } from 'src/helpers/focusable'
 import { resolveSx } from 'src/helpers/sx'
 import {
     getOpenModalDialogAncestor,
@@ -27,6 +29,13 @@ import {
 } from 'src/hooks/useTopLayer.hook'
 
 const TOOLTIP_BG = '#363E4A'
+
+/** What a `display: contents` host renders — it generates no box of its own to measure. */
+const contentsRect = (host: Element): DOMRect => {
+    const range = document.createRange()
+    range.selectNodeContents(host)
+    return range.getBoundingClientRect()
+}
 
 interface TooltipSlotProps {
     tooltip?: { sx?: unknown; className?: string; style?: CSSProperties }
@@ -128,21 +137,58 @@ const TooltipWithFloating = ({
         enabled: !isControlled && !disableHoverListener,
         delay: { open: enterDelay, close: leaveDelay },
         move: false,
+        handleClose: safePolygon(),
     })
     const focus = useFocus(context, { enabled: !isControlled && !disableFocusListener })
     const dismiss = useDismiss(context)
     const role = useRole(context, { role: 'tooltip' })
     const { getReferenceProps, getFloatingProps } = useInteractions([hover, focus, dismiss, role])
-    const portalRoot = open ? getOpenModalDialogAncestor(refs.reference.current) : undefined
+    const portalRoot = open ? getOpenModalDialogAncestor(refs.domReference.current) : undefined
     const usePopoverLayer = shouldUsePopoverTopLayer(portalRoot)
     const floatingRef = useTopLayerRef(refs.setFloating, usePopoverLayer)
 
+    // `useRole` already mints the floating element's id and puts it on the floating node — reuse it
+    // instead of a second `useId`, so nothing overrides a Floating UI internal.
+    const { floatingId } = context
+
+    // APG puts `aria-describedby` on the *trigger*, but by house rule the child handed in is a
+    // wrapper span, not the control a screen reader lands on — so the id goes on the focusable
+    // control inside it. Last resort is the reference itself: a decorative or disabled subtree has
+    // nothing focusable, and an unassociated description is worse than one on the wrapper.
+    useEffect(() => {
+        const reference = refs.domReference.current
+        if (!open || !floatingId || !(reference instanceof HTMLElement)) return
+        const described = firstTabbable(reference) ?? reference
+        const previous = described.getAttribute('aria-describedby')
+        described.setAttribute('aria-describedby', previous ? `${previous} ${floatingId}` : floatingId)
+        return () => {
+            if (previous === null) described.removeAttribute('aria-describedby')
+            else described.setAttribute('aria-describedby', previous)
+        }
+    }, [open, refs.domReference, floatingId])
+
+    // A Fragment has no DOM node to act as the reference, so it gets a `display: contents` host:
+    // that host carries the ref and the handlers while its children keep their exact place in the
+    // parent's layout (a plain <span> would adopt them and break a flex row). Generating no box of
+    // its own, it also needs a virtual reference, or positioning lands at the page origin.
+    const isFragment = children.type === Fragment
+    const child = isFragment ? <span style={{ display: 'contents' }}>{children}</span> : children
+    useLayoutEffect(() => {
+        const host = refs.domReference.current
+        if (!isFragment || !host) return
+        refs.setPositionReference({ contextElement: host, getBoundingClientRect: () => contentsRect(host) })
+    }, [isFragment, refs])
+
     // Merge our reference ref with any ref the child already carries (React 18 element.ref).
-    const childRef = useMergeRefs([refs.setReference, (children as { ref?: React.Ref<unknown> }).ref])
-    const reference = cloneElement(
-        children,
-        getReferenceProps({ ref: childRef, ...(children.props as Record<string, unknown>) }),
-    )
+    const childRef = useMergeRefs([refs.setReference, (child as { ref?: React.Ref<unknown> }).ref])
+    // Drop Floating UI's generated `aria-describedby`: it would land on the wrapper that the effect
+    // above deliberately looks past. `cloneElement` merges over the child's own props, so a value
+    // the caller set themselves survives untouched.
+    const { ['aria-describedby']: _generated, ...referenceProps } = getReferenceProps({
+        ref: childRef,
+        ...(child.props as Record<string, unknown>),
+    })
+    const reference = cloneElement(child, referenceProps)
 
     return (
         <>

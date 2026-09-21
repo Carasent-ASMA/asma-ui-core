@@ -77,6 +77,7 @@ export function TableRowCountSelect<TData>({
             <Popover
                 open={open}
                 anchorEl={anchorEl}
+                tabIntoContent={false}
                 slotProps={{
                     paper: {
                         className: 'border border-solid border-delta-200',

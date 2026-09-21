@@ -110,6 +110,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
 }) => {
     const isMobile = useMobileMediaQuery()
     const dialogRef = useRef<HTMLDialogElement>(null)
+    const openerRef = useRef<HTMLElement | null>(null)
     const escapeHandledRef = useRef(false)
     const prevOpenRef = useRef(open)
     const isFullScreen = fullScreen ?? isMobile
@@ -125,6 +126,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
         const node = dialogRef.current
         if (!node || !open) return
         if (!node.open) {
+            openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
             node.showModal()
             // showModal() focuses the first focusable element (the header close button) — move focus
             // back to the shell, which has tabIndex={-1} + outline-none, so no :focus ring paints.
@@ -137,7 +139,11 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
         // showModal() put this dialog in the browser top layer, above every z-index in the page.
         // Publish it so anchorless global overlays (the snackbar stack) can render INSIDE it instead
         // of behind it — see useTopLayer.hook. Unregisters before the node leaves the DOM.
-        return registerOpenModalDialog(node)
+        const unregister = registerOpenModalDialog(node)
+        return () => {
+            unregister()
+            if (openerRef.current?.isConnected) openerRef.current.focus({ preventScroll: true })
+        }
     }, [open])
 
     useEffect(() => {

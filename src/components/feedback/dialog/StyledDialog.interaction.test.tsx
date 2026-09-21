@@ -191,13 +191,19 @@ describe('StyledDialog keyboard & focus contract', () => {
      * elsewhere. Reproduces for Escape, the close button, and backdrop click alike.
      * Not fixed here: wave-3 builders add tests, not component fixes. Escalated to the coordinator.
      * @see docs/a11y-keyboard-contract.md */
-    it.skip('restores focus to the element that opened it (2.4.3)', async () => {
+    it.each([
+        ['Escape', async () => userEvent.keyboard('{Escape}')],
+        ['the header close button', async () =>
+            userEvent.click(dialogEl()!.querySelector<HTMLButtonElement>('[data-testid="close-button-confirm"]')!)],
+        ['the backdrop', () =>
+            Promise.resolve(dialogEl()!.firstElementChild!.dispatchEvent(new MouseEvent('click', { bubbles: true })))],
+    ])('restores focus to the element that opened it after %s (2.4.3)', async (_closePath, close) => {
         const { container } = mount(<DialogFixture />)
         const opener = container.querySelector<HTMLButtonElement>('[data-testid="opener"]')!
         await userEvent.click(opener)
         await waitFor(() => expect(dialogEl()).not.toBeNull())
 
-        await userEvent.keyboard('{Escape}')
+        await close()
         await waitFor(() => expect(dialogEl()).toBeNull())
 
         await expect(document.activeElement).toBe(opener)
