@@ -233,6 +233,10 @@ export const StyledPopover = ({
         onClose?.(event, 'tabKeyDown')
     }
 
+    // Floating UI only merges this callback into its returned event prop; it does not invoke it while rendering.
+    // eslint-disable-next-line react-hooks/refs
+    const floatingProps = open ? getFloatingProps({ onClick, onKeyDown: handlePanelKeyDown }) : {}
+
     // keepMounted leaves the node in the DOM across open/close — re-assert popover show/hide each flip
     // (useTopLayerRef only runs on attach, which doesn't re-fire when we stay mounted).
     useEffect(() => {
@@ -263,7 +267,7 @@ export const StyledPopover = ({
                     ...slotProps?.paper?.style,
                     ...(!open ? { display: 'none' } : null),
                 }}
-                {...(open ? getFloatingProps({ onClick, onKeyDown: handlePanelKeyDown }) : {})}
+                {...floatingProps}
                 className={cn(
                     // Figma DS floating surface: radius 4 (`menus` token) + Float shadow (0 1 12 rgba(0,0,0,.15)).
                     'z-[1300] overflow-auto rounded bg-white shadow-[0px_1px_12px_0px_rgba(0,0,0,0.15)]',
