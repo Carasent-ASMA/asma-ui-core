@@ -55,6 +55,9 @@ export const StyledTitleChevron: React.FC<StyledTitleChevronProps> = ({
             'font-semibold text-delta-800 transition-colors duration-300',
             SIZE_TEXT[size],
             'hover:text-gama-500 focus-visible:text-gama-500 active:text-gama-600',
+            // ASMA-8220 (TB-14): designed `active:` colour above → touch-ready. Already `min-h-11`
+            // (44px), so no `asma-touch-target` — that rule is an override, not a floor.
+            'asma-touch-ready',
             'outline-gama-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
             className,
         )}

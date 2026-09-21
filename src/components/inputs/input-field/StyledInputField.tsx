@@ -460,7 +460,12 @@ export const StyledInputField = ({
                             type='button'
                             aria-label='Clear'
                             data-testid={`${dataTest}-clear`}
-                            className='absolute right-4 z-40 flex items-center justify-center rounded-full border-0 bg-transparent p-[2px] duration-300 hover:bg-gama-100'
+                            // ASMA-8220 (TB-14): `hover:bg-gama-100` is the only feedback it has, so
+                            // pressable (the audit grouped it with the touch-ready controls, but it
+                            // declares no `:active` to preserve). No hit-area: a 44px overlay on this
+                            // ~22px button sits inside the field and would swallow taps meant to place
+                            // the caret in the text it clears.
+                            className='asma-pressable absolute right-4 z-40 flex items-center justify-center rounded-full border-0 bg-transparent p-[2px] duration-300 hover:bg-gama-100'
                             onClick={(event) => {
                                 event.stopPropagation()
                                 event.preventDefault()

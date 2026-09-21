@@ -1,5 +1,6 @@
 import { ClickAwayListener } from 'src/components/mui-compat'
 import { createContext, type ReactNode, useContext, useEffect, useMemo, useState } from 'react'
+import { cn } from 'src/helpers/cn'
 
 /**
  * @figmaNode none — **headless behaviour primitive**, no Design-System visuals. It renders bare
@@ -86,7 +87,9 @@ const ListboxButton = ({
 } & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'children'>): JSX.Element => {
     const { open, setOpen } = useListboxContext()
     return (
-        <button type='button' className={className} onClick={() => setOpen(!open)} {...rest}>
+        // ASMA-8220 (TB-14): pressable — this primitive paints nothing itself, so it has no
+        // designed `:active` to preserve. Sizing stays the consumer's, hence no `asma-touch-target`.
+        <button type='button' className={cn('asma-pressable', className)} onClick={() => setOpen(!open)} {...rest}>
             {renderChildren(children, { open })}
         </button>
     )
@@ -130,7 +133,9 @@ function ListboxOption<T>({
             aria-selected={selected}
             aria-disabled={disabled}
             tabIndex={disabled ? undefined : 0}
-            className={className}
+            // ASMA-8220 (TB-14): see ListboxButton. `aria-disabled` renders as "true" only when
+            // disabled, so the pressed-opacity rule already skips disabled options.
+            className={cn('asma-pressable', className)}
             onClick={choose}
             onKeyDown={(event) => {
                 if (event.key === 'Enter' || event.key === ' ') {

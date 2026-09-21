@@ -226,7 +226,9 @@ export function PathfinderCard({
     return (
         <div
             ref={ref}
-            className={cn(styles['root'], compact ? 'overflow-hidden' : 'overflow-visible', className)}
+            // ASMA-8220 (TB-14): the root is the whole tap target (`role='button'`, no nested
+            // interactive children) and has no pressed state → pressable.
+            className={cn(styles['root'], 'asma-pressable', compact ? 'overflow-hidden' : 'overflow-visible', className)}
             aria-expanded={expanded}
             role='button'
             tabIndex={0}

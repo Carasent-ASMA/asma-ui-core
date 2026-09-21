@@ -67,7 +67,9 @@ export const StyledAccordionSummary = ({
                     onClick?.(e)
                     toggle()
                 }}
-                className={clsx(styles['Trigger'], className)}
+                // ASMA-8220 (TB-14): the trigger has no `:active` rule → pressable. Already
+                // 48px/72px tall, so no `asma-touch-target` (it would shrink it to 44px).
+                className={clsx(styles['Trigger'], 'asma-pressable', className)}
                 style={styleVars}
                 data-panel-open={open ? '' : undefined}
             >
