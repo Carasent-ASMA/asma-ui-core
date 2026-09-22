@@ -38,7 +38,11 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
         if (!isPopupOpen || isMobile) return
         const handleKeyDown = (event: KeyboardEvent): void => {
             if (!popupAnchorEl?.contains(document.activeElement)) return
-            if (event.key === 'Escape' || event.key === 'Tab') closePopup()
+            if (event.key === 'Escape') {
+                event.preventDefault()
+                event.stopPropagation()
+                closePopup()
+            } else if (event.key === 'Tab') closePopup()
         }
         document.addEventListener('keydown', handleKeyDown)
         return () => document.removeEventListener('keydown', handleKeyDown)

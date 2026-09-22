@@ -406,8 +406,9 @@ export function StyledSelectAutocomplete<
             event.preventDefault()
             const option = visibleOptions[activeIndex]
             if (!isOptionDisabled(option)) emitChange(event, option, false)
-        } else if (event.key === 'Escape') {
+        } else if (event.key === 'Escape' && open) {
             event.preventDefault()
+            event.stopPropagation()
             setOpen(false)
         } else if (event.key === 'Tab') {
             setOpen(false)

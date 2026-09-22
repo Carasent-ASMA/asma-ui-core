@@ -137,6 +137,7 @@ export function useCountryPicker({
             }
             case 'Escape':
                 event.preventDefault()
+                event.stopPropagation()
                 dismiss()
                 break
             case 'Tab':
