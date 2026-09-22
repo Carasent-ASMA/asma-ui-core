@@ -39,7 +39,11 @@ export const StyledDatePicker = (props: DatePickerProps): JSX.Element => {
         if (!anchorEl) return
         const handleKeyDown = (event: KeyboardEvent): void => {
             if (document.activeElement !== anchorEl) return
-            if (event.key === 'Escape' || event.key === 'Tab') onClose()
+            if (event.key === 'Escape') {
+                event.preventDefault()
+                event.stopPropagation()
+                onClose()
+            } else if (event.key === 'Tab') onClose()
         }
         document.addEventListener('keydown', handleKeyDown)
         return () => document.removeEventListener('keydown', handleKeyDown)

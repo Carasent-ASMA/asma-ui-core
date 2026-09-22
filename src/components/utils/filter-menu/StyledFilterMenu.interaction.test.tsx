@@ -2,6 +2,9 @@ import { afterEach, describe, it } from 'vitest'
 import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { StyledCheckbox } from '../../inputs/checkbox'
+import { StyledDynamicSelect } from '../../inputs/dynamic-select'
+import { StyledSelect } from '../../inputs/select'
+import { StyledSelectItem } from '../../inputs/select/StyledSelectItem'
 import { StyledFormControlLabel } from '../../miscellaneous/StyledFormControlLabel'
 import { StyledFilterMenu } from './StyledFilterMenu'
 
@@ -21,6 +24,36 @@ const FilterFixture = (): JSX.Element => (
         />
         <button type='button'>After</button>
     </>
+)
+
+const FilterWithAutocompleteFixture = (): JSX.Element => (
+    <StyledFilterMenu
+        dataTest='filter'
+        filterIsActive={false}
+        popoverContent={
+            <StyledDynamicSelect
+                dataTest='category'
+                title='Category'
+                multiple
+                options={['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo', 'Foxtrot']}
+                value={[]}
+                onChange={() => undefined}
+            />
+        }
+    />
+)
+
+const FilterWithSelectFixture = (): JSX.Element => (
+    <StyledFilterMenu
+        dataTest='filter'
+        filterIsActive={false}
+        popoverContent={
+            <StyledSelect dataTest='status' name='Status'>
+                <StyledSelectItem value='active'>Active</StyledSelectItem>
+                <StyledSelectItem value='paused'>Paused</StyledSelectItem>
+            </StyledSelect>
+        }
+    />
 )
 
 describe('StyledFilterMenu keyboard contract', () => {
@@ -97,6 +130,38 @@ describe('StyledFilterMenu keyboard contract', () => {
         await expect(document.activeElement).toBe(
             Array.from(container.querySelectorAll<HTMLButtonElement>('button')).find((b) => b.textContent === 'After'),
         )
+    })
+
+    it('lets Escape dismiss an open nested autocomplete before the filter menu', async () => {
+        const { container } = mount(<FilterWithAutocompleteFixture />)
+        const trigger = container.querySelector<HTMLButtonElement>('[data-testid="filter"]')!
+        await userEvent.click(trigger)
+        await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'true'))
+
+        await userEvent.tab()
+        await userEvent.keyboard('{ArrowDown}')
+        await waitFor(() => expect(document.querySelector('[role="listbox"]')).not.toBeNull())
+
+        await userEvent.keyboard('{Escape}')
+
+        await waitFor(() => expect(document.querySelector('[role="listbox"]')).toBeNull())
+        await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+    })
+
+    it('lets Escape dismiss an open nested select before the filter menu', async () => {
+        const { container } = mount(<FilterWithSelectFixture />)
+        const trigger = container.querySelector<HTMLButtonElement>('[data-testid="filter"]')!
+        await userEvent.click(trigger)
+        await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'true'))
+
+        await userEvent.tab()
+        await userEvent.keyboard('{ArrowDown}')
+        await waitFor(() => expect(document.querySelector('[role="listbox"]')).not.toBeNull())
+
+        await userEvent.keyboard('{Escape}')
+
+        await waitFor(() => expect(document.querySelector('[role="listbox"]')).toBeNull())
+        await expect(trigger).toHaveAttribute('aria-expanded', 'true')
     })
 
     it('keeps Shift+Tab inside the panel until its first control (2.1.1)', async () => {
