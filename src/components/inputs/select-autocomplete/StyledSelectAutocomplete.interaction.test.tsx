@@ -344,4 +344,48 @@ describe('StyledSelectAutocomplete keyboard contract', () => {
         await expect(onChange).toHaveBeenLastCalledWith(OPTIONS)
     })
 
+    /* A custom `renderOption` replaces the default row renderer, so the pieces the keyboard contract
+     * needs have to reach it through `props`: `data-active` marks the row the virtual cursor points
+     * at, and the row `className` carries the `relative` the indicator is positioned against. Apps do
+     * customise these rows (the notification app's SMS-template and category pickers both do), and
+     * dropping either leaves the cursor invisible while arrowing (2.4.7). */
+    it('hands a custom renderOption the active marker and the row class it needs (2.4.7)', async () => {
+        const rowClasses: (string | undefined)[] = []
+        const { container } = mount(
+            <StyledSelectAutocomplete<string, false, false, false>
+                dataTest='ac'
+                options={OPTIONS}
+                value={null}
+                onChange={() => undefined}
+                renderInput={(params) => <StyledInputField {...params} dataTest='ac-input' label='Team' />}
+                renderOption={(props, option) => {
+                    const { key, className, ...liProps } = props
+                    rowClasses.push(className)
+                    return (
+                        <li key={key} {...liProps} className={className}>
+                            {props['data-active'] !== undefined && <span data-testid={`cursor-${option}`} />}
+                            {option}
+                        </li>
+                    )
+                }}
+            />,
+        )
+        const input = container.querySelector<HTMLInputElement>('input')!
+        input.focus()
+
+        await userEvent.keyboard('{ArrowDown}')
+        await waitFor(() => expect(document.querySelector('[role="listbox"]')).not.toBeNull())
+
+        // The row must stay positioned, or an absolutely-placed indicator escapes to the page.
+        await expect(rowClasses.every((className) => className?.includes('relative'))).toBe(true)
+        // Exactly one row is the cursor, and it is the one `aria-activedescendant` names.
+        const cursors = document.querySelectorAll('[data-testid^="cursor-"]')
+        await expect(cursors).toHaveLength(1)
+        const activeId = input.getAttribute('aria-activedescendant')!
+        await expect(document.getElementById(activeId)).toContainElement(cursors[0] as HTMLElement)
+
+        await userEvent.keyboard('{ArrowDown}')
+        await expect(document.querySelector('[data-testid="cursor-Bravo"]')).not.toBeNull()
+        await expect(document.querySelector('[data-testid="cursor-Alpha"]')).toBeNull()
+    })
 })

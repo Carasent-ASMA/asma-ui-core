@@ -178,11 +178,33 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
         onClose?.(event, 'escapeKeyDown')
     }
 
+    // Native ESC / cancel — never auto-close; the consumer owns `open`. Closing is requested from
+    // the window-level listener below, which nested layers are able to pre-empt; `cancel` fires even
+    // when one of them took the key, so it must not close anything by itself.
     const handleCancel = (event: React.SyntheticEvent<HTMLDialogElement>): void => {
-        // Native ESC / cancel — never auto-close; let the consumer flip `open`.
         event.preventDefault()
-        if (!disableEscapeKeyDown) requestEscapeClose(event)
     }
+
+    // Escape is heard on `window`, deliberately last in the event path. Every dismissible layer this
+    // dialog can contain — menus, popovers, selects, the filter menu — consumes Escape on a
+    // `document` listener (Floating UI's `useDismiss`) or by calling `preventDefault()`, both of
+    // which happen after React's own handlers: those run at the root container, i.e. *before*
+    // `document`, which is why a handler on the <dialog> used to close it together with the popup
+    // the user was actually dismissing. `window` is the only position that sees a press only when
+    // nobody below claimed it — and unlike the native `cancel` event it also works for a
+    // JS-dispatched Escape, which browsers never give a default action.
+    useEffect(() => {
+        if (!open || disableEscapeKeyDown) return
+        const closeOnEscape = (event: KeyboardEvent): void => {
+            if (event.key !== 'Escape' || event.defaultPrevented) return
+            // Stacked dialogs: only the innermost one the user is actually in responds.
+            const focused = document.activeElement
+            if (focused instanceof Element && focused.closest('dialog[open]') !== dialogRef.current) return
+            requestEscapeClose(event)
+        }
+        window.addEventListener('keydown', closeOnEscape)
+        return () => window.removeEventListener('keydown', closeOnEscape)
+    })
 
     if (!open) return null
 
@@ -193,11 +215,6 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
             data-testid={dataTest}
             aria-label={dataTest}
             onCancel={handleCancel}
-            onKeyDown={(event) => {
-                if (event.key !== 'Escape' || disableEscapeKeyDown) return
-                event.preventDefault()
-                requestEscapeClose(event)
-            }}
             className={cn(
                 style['StyledDialog'],
                 'fixed inset-0 m-0 h-full max-h-none w-full max-w-none items-center justify-center overflow-hidden border-0 bg-transparent p-0 outline-none open:flex',
