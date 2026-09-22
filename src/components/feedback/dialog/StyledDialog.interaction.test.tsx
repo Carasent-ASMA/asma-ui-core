@@ -4,6 +4,12 @@ import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { cleanup, mount, tabbableWithin } from 'src/test-utils/renderInteraction'
 import { StyledDialog } from './StyledDialog'
+import { StyledInputField } from 'src/components/inputs/input-field'
+import { StyledMenu } from 'src/components/navigation/menu/StyledMenu'
+import { StyledMenuItem } from 'src/components/navigation/menu/StyledMenuItem'
+import { StyledSelect } from 'src/components/inputs/select/StyledSelect'
+import { StyledSelectAutocomplete } from 'src/components/inputs/select-autocomplete/StyledSelectAutocomplete'
+import { StyledSelectItem } from 'src/components/inputs/select/StyledSelectItem'
 
 /**
  * Keyboard & focus contract — StyledDialog (ASMA-8139).
@@ -151,6 +157,159 @@ describe('StyledDialog keyboard & focus contract', () => {
         await userEvent.keyboard('{Escape}')
 
         await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
+    })
+
+    /* Escape belongs to the innermost open layer. Every dismissible thing a dialog can contain
+     * consumes Escape on a `document` listener (Floating UI's `useDismiss`) and stops it there, while
+     * a React handler on the <dialog> would run at the root container — earlier — and close the
+     * dialog out from under the popup the user was actually dismissing. Listening on `window` puts
+     * the dialog last in the path. @see https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/ */
+    describe('Escape closes only the innermost open layer (2.1.2)', () => {
+        // The dialog re-asserts focus shortly after `showModal()`, so settle before driving the
+        // keyboard or the first key lands on the dialog instead of the control under test.
+        const settled = async (): Promise<void> => {
+            await waitFor(() => expect(document.querySelector('dialog')).not.toBeNull())
+            await new Promise((resolve) => setTimeout(resolve, 300))
+        }
+        const dialogIsOpen = (): boolean => document.querySelector('dialog') !== null
+
+        it('keeps the dialog open when a StyledMenu inside it is dismissed', async () => {
+            const onClose = fn()
+            const Fixture = (): JSX.Element => {
+                const [anchorEl, setAnchorEl] = useState<Element | null>(null)
+                return (
+                    <StyledDialog open onClose={onClose} dataTest='dlg'>
+                        <StyledButton dataTest='menu-trigger' onClick={(event) => setAnchorEl(event.currentTarget)}>
+                            Actions
+                        </StyledButton>
+                        <StyledMenu open={Boolean(anchorEl)} anchorEl={anchorEl} onClose={() => setAnchorEl(null)}>
+                            <StyledMenuItem>Rename</StyledMenuItem>
+                        </StyledMenu>
+                    </StyledDialog>
+                )
+            }
+            mount(<Fixture />)
+            await settled()
+            document.querySelector<HTMLElement>('[data-testid="menu-trigger"]')!.focus()
+            await userEvent.keyboard('{Enter}')
+            await waitFor(() => expect(document.querySelector('[role="menu"]')).not.toBeNull())
+
+            await userEvent.keyboard('{Escape}')
+
+            await waitFor(() => expect(document.querySelector('[role="menu"]')).toBeNull())
+            await expect(dialogIsOpen()).toBe(true)
+            await expect(onClose).not.toHaveBeenCalled()
+        })
+
+        it('keeps the dialog open when a StyledSelect inside it is dismissed', async () => {
+            const onClose = fn()
+            const Fixture = (): JSX.Element => {
+                const [value, setValue] = useState<unknown>('a')
+                return (
+                    <StyledDialog open onClose={onClose} dataTest='dlg'>
+                        <StyledSelect dataTest='sel' value={value} onChange={(event) => setValue(event.target.value)}>
+                            <StyledSelectItem value='a'>Active</StyledSelectItem>
+                            <StyledSelectItem value='b'>Paused</StyledSelectItem>
+                        </StyledSelect>
+                    </StyledDialog>
+                )
+            }
+            mount(<Fixture />)
+            await settled()
+            document.querySelector<HTMLElement>('[data-testid="sel"]')!.focus()
+            await userEvent.keyboard('{ArrowDown}')
+            await waitFor(() => expect(document.querySelector('[role="listbox"]')).not.toBeNull())
+
+            await userEvent.keyboard('{Escape}')
+
+            await waitFor(() => expect(document.querySelector('[role="listbox"]')).toBeNull())
+            await expect(dialogIsOpen()).toBe(true)
+            await expect(onClose).not.toHaveBeenCalled()
+        })
+
+        it('keeps the dialog open when a StyledSelectAutocomplete inside it is dismissed', async () => {
+            const onClose = fn()
+            const Fixture = (): JSX.Element => (
+                <StyledDialog open onClose={onClose} dataTest='dlg'>
+                    <StyledSelectAutocomplete<string, false, false, false>
+                        dataTest='ac'
+                        options={['Alpha', 'Bravo']}
+                        value={null}
+                        onChange={() => undefined}
+                        renderInput={(params) => <StyledInputField {...params} dataTest='ac-input' label='Team' />}
+                    />
+                </StyledDialog>
+            )
+            mount(<Fixture />)
+            await settled()
+            document.querySelector<HTMLInputElement>('[data-testid="dlg"] input')!.focus()
+            await userEvent.keyboard('{ArrowDown}')
+            await waitFor(() => expect(document.querySelector('[role="listbox"]')).not.toBeNull())
+
+            await userEvent.keyboard('{Escape}')
+
+            await waitFor(() => expect(document.querySelector('[role="listbox"]')).toBeNull())
+            await expect(dialogIsOpen()).toBe(true)
+            await expect(onClose).not.toHaveBeenCalled()
+        })
+
+        it('closes only the inner dialog when a confirm is opened from inside one', async () => {
+            // Escape belongs to the topmost modal dialog, and the browser tracks that itself: it
+            // fires `cancel` on the last one promoted to the top layer — the confirm the user just
+            // opened — so the dialog behind it is not involved at all.
+            const onOuterClose = fn()
+            const onInnerClose = fn()
+            const Fixture = (): JSX.Element => {
+                const [confirmOpen, setConfirmOpen] = useState(false)
+                return (
+                    <StyledDialog open onClose={onOuterClose} dataTest='outer'>
+                        <StyledButton dataTest='open-confirm' onClick={() => setConfirmOpen(true)}>
+                            Delete
+                        </StyledButton>
+                        {confirmOpen && (
+                            <StyledDialog open onClose={onInnerClose} dataTest='inner'>
+                                <StyledButton dataTest='confirm-btn'>Confirm</StyledButton>
+                            </StyledDialog>
+                        )}
+                    </StyledDialog>
+                )
+            }
+            mount(<Fixture />)
+            await settled()
+            await userEvent.click(document.querySelector<HTMLElement>('[data-testid="open-confirm"]')!)
+            await waitFor(() => expect(document.querySelector('[data-testid="inner"]')).not.toBeNull())
+
+            await userEvent.keyboard('{Escape}')
+
+            await waitFor(() => expect(onInnerClose).toHaveBeenCalledTimes(1))
+            await expect(onOuterClose).not.toHaveBeenCalled()
+        })
+
+        it('still closes on the next Escape, once nothing inside is open', async () => {
+            const onClose = fn()
+            const Fixture = (): JSX.Element => {
+                const [value, setValue] = useState<unknown>('a')
+                return (
+                    <StyledDialog open onClose={onClose} dataTest='dlg'>
+                        <StyledSelect dataTest='sel' value={value} onChange={(event) => setValue(event.target.value)}>
+                            <StyledSelectItem value='a'>Active</StyledSelectItem>
+                        </StyledSelect>
+                    </StyledDialog>
+                )
+            }
+            mount(<Fixture />)
+            await settled()
+            document.querySelector<HTMLElement>('[data-testid="sel"]')!.focus()
+            await userEvent.keyboard('{ArrowDown}')
+            await waitFor(() => expect(document.querySelector('[role="listbox"]')).not.toBeNull())
+            await userEvent.keyboard('{Escape}')
+            await waitFor(() => expect(document.querySelector('[role="listbox"]')).toBeNull())
+
+            await userEvent.keyboard('{Escape}')
+
+            await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
+            await expect(onClose.mock.calls[0]?.[1]).toBe('escapeKeyDown')
+        })
     })
 
     it('honours disableEscapeKeyDown and stays open (2.1.2)', async () => {
