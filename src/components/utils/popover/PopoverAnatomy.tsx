@@ -53,24 +53,23 @@ export const PopoverAnatomy = ({
     onClose,
 }: PopoverAnatomyProps): JSX.Element => (
     <>
-        {/* No `items-start`: the columns must stretch to the row's height, or the body never gets a
-            bounded height and `overflow-y-auto` never engages — the content then overflows and the
-            footers paint on top of it. */}
-        <div className='flex min-h-0 flex-1'>
-            <div className='flex min-h-0 min-w-0 flex-1 flex-col'>
-                {title && (
-                    <div
-                        id={titleId}
-                        className='shrink-0 truncate pb-1 pl-4 pt-2 text-lg font-semibold leading-7 text-delta-800'
-                    >
-                        {title}
-                    </div>
-                )}
-                <div className='flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto py-2 pl-4'>{children}</div>
-            </div>
-            {/* Figma keeps the close control in its own 40px column, which also reserves the gutter
-                the scrollbar appears in. */}
-            <div className='flex shrink-0 flex-col items-end'>
+        {/* Figma draws the scrollbar flush with the surface's right edge (x 385-400 of a 400 frame),
+            not against the text column. So the scroll container spans the full width and the 40px
+            close gutter is its right padding — the bar then lands in that gutter, where the design
+            puts it. The close control floats over the corner instead of occupying a column, but
+            stays LAST in the DOM so `action` still opens on the first body control, not on it.
+            `min-h-0` is what lets the body shrink and actually scroll. */}
+        <div className='relative flex min-h-0 flex-1 flex-col'>
+            {title && (
+                <div
+                    id={titleId}
+                    className='shrink-0 truncate pb-1 pl-4 pr-10 pt-2 text-lg font-semibold leading-7 text-delta-800'
+                >
+                    {title}
+                </div>
+            )}
+            <div className='flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto py-2 pl-4 pr-10'>{children}</div>
+            <div className='absolute right-0 top-0'>
                 <StyledButton
                     dataTest={`${dataTest}-close`}
                     variant='textGray'
