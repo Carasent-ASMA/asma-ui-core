@@ -33,6 +33,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
         actionNode,
         locale = 'en',
         style,
+        initialFocusRef,
     } = props
 
     const isMobile = useMobileMediaQuery()
@@ -41,6 +42,9 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
 
     const modalRef = useRef<HTMLDivElement | null>(null)
     const minimizedPanelRef = useRef<HTMLDivElement | null>(null)
+    const closeButtonRef = useRef<HTMLButtonElement | null>(null)
+    const minimizedCloseButtonRef = useRef<HTMLButtonElement | null>(null)
+    const wasOpenRef = useRef(false)
 
     const { minimized, setMinimized, fullScreen, setFullScreen } = useControlledProps(props)
     const isFullScreenActive = fullScreen && !minimized
@@ -58,6 +62,18 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
         modalRef.current?.toggleAttribute('inert', minimized)
         minimizedPanelRef.current?.toggleAttribute('inert', !minimized)
     }, [minimized])
+
+    useLayoutEffect(() => {
+        const justOpened = open && !wasOpenRef.current
+        wasOpenRef.current = open
+
+        if (!justOpened) return
+
+        const panel = minimized ? minimizedPanelRef.current : modalRef.current
+        const closeButton = minimized ? minimizedCloseButtonRef.current : closeButtonRef.current
+        const initialFocusTarget = initialFocusRef?.current ?? closeButton ?? (panel ? firstTabbable(panel) : undefined)
+        initialFocusTarget?.focus({ preventScroll: true })
+    }, [initialFocusRef, minimized, open])
 
     // Toggling makes the panel holding the just-pressed button inert, so focus has to be handed to
     // the panel that became visible or it dies there (WCAG 2.4.3). Aim for the counterpart toggle;
@@ -127,7 +143,12 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                             tooltipTitle={t.expand}
                         />
 
-                        <CloseBtn showCloseIcon={showCloseIcon} onClick={handleClose} tooltipTitle={t.close} />
+                        <CloseBtn
+                            buttonRef={minimizedCloseButtonRef}
+                            showCloseIcon={showCloseIcon}
+                            onClick={handleClose}
+                            tooltipTitle={t.close}
+                        />
                     </div>
                 </div>
             </div>
@@ -190,7 +211,12 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                                 }}
                                 tooltipTitle={fullScreen ? t.exitFullscreen : t.fullscreen}
                             />
-                            <CloseBtn showCloseIcon={showCloseIcon} onClick={handleClose} tooltipTitle={t.close} />
+                            <CloseBtn
+                                buttonRef={closeButtonRef}
+                                showCloseIcon={showCloseIcon}
+                                onClick={handleClose}
+                                tooltipTitle={t.close}
+                            />
                         </div>
                     </div>
 
