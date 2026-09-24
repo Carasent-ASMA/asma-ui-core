@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { ReactNode, RefObject } from 'react'
 export type ILocale = 'en' | 'no'
 
 /**
@@ -33,6 +33,11 @@ export interface IMinimizableDialogV2Props {
     locale?: ILocale
     dataTest: string
     style?: React.CSSProperties
+    /**
+     * Overrides the Close button as the focus target when the dialog opens.
+     * Docked dialogs remain non-modal and do not trap subsequent keyboard navigation.
+     */
+    initialFocusRef?: RefObject<HTMLElement | null>
     //
     minimizedState?: boolean
     handleMinimizedState?: (minimized: boolean) => void

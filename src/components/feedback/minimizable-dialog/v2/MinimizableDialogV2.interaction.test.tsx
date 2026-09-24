@@ -1,5 +1,5 @@
 import { afterEach, describe, it } from 'vitest'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { MinimizableDialogV2 } from './MinimizableDialogV2'
@@ -134,15 +134,20 @@ describe('MinimizableDialogV2 keyboard contract', () => {
             </>,
         )
         const dialog = container.querySelector<HTMLElement>('[role="dialog"]')!
+        const minimizedPanel = container.querySelector('[data-testid="dialog-v2"]')!.parentElement!
+        const visibleCloseButton = (): HTMLButtonElement =>
+            Array.from(container.querySelectorAll<HTMLButtonElement>('[data-testid="close-button"]')).find(
+                (button) => !minimizedPanel.contains(button),
+            )!
 
-        await waitFor(() => expect(document.activeElement).toBe(dialog))
+        await waitFor(() => expect(document.activeElement).toBe(visibleCloseButton()))
         await userEvent.tab()
         await expect(dialog.contains(document.activeElement)).toBe(true)
         await userEvent.tab({ shift: true })
         await expect(dialog.contains(document.activeElement)).toBe(true)
     })
 
-    it('keeps focus on the opener while docked and on Exit fullscreen after a pointer transition (2.4.3)', async () => {
+    it('moves focus to Close when opened and keeps Exit fullscreen focused after a pointer transition (2.4.3)', async () => {
         const Fixture = (): JSX.Element => {
             const [open, setOpen] = useState(false)
             return (
@@ -156,16 +161,53 @@ describe('MinimizableDialogV2 keyboard contract', () => {
         }
         const { container } = mount(<Fixture />)
         const opener = container.querySelector<HTMLButtonElement>('button')!
+        const visibleCloseButton = (): HTMLButtonElement => {
+            const minimizedPanel = container.querySelector('[data-testid="dialog-v2"]')!.parentElement!
+            const closeButtons = Array.from(container.querySelectorAll<HTMLButtonElement>('[data-testid="close-button"]'))
+
+            return closeButtons.find((button) => !minimizedPanel.contains(button))!
+        }
         await userEvent.click(opener)
-        await expect(document.activeElement).toBe(opener)
+        await expect(document.activeElement).toBe(visibleCloseButton())
 
         await userEvent.tab()
-        await expect(document.activeElement).toBe(container.querySelectorAll('[data-testid="toggle-minimize-btn"]')[1])
+        await expect(document.activeElement).toBe(
+            Array.from(container.querySelectorAll<HTMLButtonElement>('button')).find(
+                (button) => button.textContent === 'Content action',
+            ),
+        )
 
         const fullscreenButton = container.querySelector<HTMLButtonElement>('[data-testid="fullscreen-button"]')!
         await userEvent.click(fullscreenButton)
         await waitFor(() => expect(fullscreenButton).toHaveAccessibleName('Exit fullscreen'))
         await expect(document.activeElement).toBe(fullscreenButton)
+    })
+
+    it('moves focus to an explicitly supplied target when opening docked (2.4.3)', async () => {
+        const Fixture = (): JSX.Element => {
+            const [open, setOpen] = useState(false)
+            const titleInputRef = useRef<HTMLInputElement>(null)
+
+            return (
+                <>
+                    <button type='button' onClick={() => setOpen(true)}>Open editor</button>
+                    <MinimizableDialogV2
+                        dataTest='dialog-v2'
+                        open={open}
+                        title='Editor'
+                        initialFocusRef={titleInputRef}
+                        onClose={() => setOpen(false)}
+                    >
+                        <input ref={titleInputRef} aria-label='Editor title' />
+                    </MinimizableDialogV2>
+                </>
+            )
+        }
+
+        const { container } = mount(<Fixture />)
+        await userEvent.click(container.querySelector<HTMLButtonElement>('button')!)
+
+        await expect(document.activeElement).toBe(container.querySelector('[aria-label="Editor title"]'))
     })
 
     it('keeps keyboard focus on Exit fullscreen after entering fullscreen (2.4.3)', async () => {
