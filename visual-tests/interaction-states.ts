@@ -93,6 +93,17 @@ export const INTERACTION_CAPTURES: InteractionCapture[] = [
         },
     },
     {
+        // ASMA-8184: the same StyledPopoverV2 becomes a Bottom Sheet below 744px — resize first,
+        // then open, so the capture shows the sheet rather than the anchored popover.
+        storyId: 'utils-styled-bottom-sheet--popover-on-mobile',
+        screenshot: 'utils-styled-bottom-sheet--popover-on-mobile--open.png',
+        act: async (page) => {
+            await page.setViewportSize({ width: 375, height: 812 })
+            await page.getByRole('button', { name: 'Filter' }).click()
+            await page.getByRole('dialog', { name: 'Filtrer søknader' }).waitFor({ state: 'visible' })
+        },
+    },
+    {
         storyId: 'navigation-styled-menu--menu',
         screenshot: 'navigation-styled-menu--menu--open.png',
         act: async (page) => {

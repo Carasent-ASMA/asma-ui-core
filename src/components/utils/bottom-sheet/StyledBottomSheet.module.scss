@@ -1,0 +1,5 @@
+// ponytail: ::backdrop is a pseudo-element Tailwind 3.3 has no variant for — GUD-003 exception, same as
+// StyledDialog. The visible scrim is a real element so it can take the tap that dismisses the sheet.
+.StyledBottomSheet::backdrop {
+    background-color: transparent;
+}
