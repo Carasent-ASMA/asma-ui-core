@@ -291,8 +291,38 @@ trigger at an 8px offset.
 
 The consumer owns the trigger element (spread `triggerProps`, wire `ref` — `refLink` on
 `StyledButton`), the filter state, and the `aria-live` region that announces the new result count.
-Below 744px the surface takes `100vw - 32px` and an `info` popover is pinned below its trigger;
-`action` should become a Bottom Sheet there, which is ASMA-8184 and not available yet.
+Below 744px an `info` popover takes `100vw - 32px` and is pinned below its trigger, while an
+`action` popover renders as a **Bottom Sheet** with the same props (see below).
+
+### Bottom sheet
+
+`StyledBottomSheet` (ASMA-8184) is the mobile (0–743px) form of the Action popover. You rarely use
+it directly — `StyledPopoverV2 variant='action'` switches to it below 744px — but it is exported for
+screens that only ever show a sheet.
+
+```tsx
+<StyledBottomSheet
+    dataTest='row-actions'
+    open={open}
+    onClose={() => setOpen(false)}
+    title='Handlinger — søknad 4417'
+>
+    {({ close }) => <RowActionButtons onDone={close} />}
+</StyledBottomSheet>
+```
+
+A modal sheet on a native `<dialog>`: dimmed scrim, page scroll locked and made `inert`, top corners
+28px, width up to 640px, height fitting the content up to 90vh with an internally scrolling body (a
+full-screen dialog at `max-height: 480px`). Five equivalent dismiss routes — close button, *Vis
+resultater*, scrim, `Esc`, dragging down past 30% — and none of them commits anything. Focus goes to
+the sheet on open so the title is read first, and back to the trigger on close; the grabber is
+decorative.
+
+Pass **`resultCount`** (to the sheet or the popover) for the standard *Vis resultater (N)* control:
+debounced ~500ms, `Ingen treff` at zero and still enabled, capped at `9999+`, and announced from a
+live region inside the sheet — the list behind is inert, so its own live region cannot. The label
+comes from the exported `formatResultsLabel`. Title the sheet after the object, not the action: a
+sheet detaches from its trigger, so `Handlinger` alone does not say which row was opened.
 
 `StyledPopover` (no `V2`) is a different thing and stays: the MUI-`Popover`-parity positioning
 primitive that `StyledMenu`, `StyledFilterMenu`, the date-picker calendar and four table components
