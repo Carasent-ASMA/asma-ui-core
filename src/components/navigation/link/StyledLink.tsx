@@ -76,7 +76,9 @@ export const StyledLink: React.FC<StyledLinkProps> = ({
             ref={reflink}
             href={href}
             tabIndex={0}
-            className={clsx(style['styled-link'], textSize, className)}
+            // ASMA-8220 (TB-14): `.styled-link:active` already recolours to gama-500, so touch-ready
+            // (tap-flash + double-tap-zoom removal) rather than pressable.
+            className={clsx(style['styled-link'], 'asma-touch-ready', textSize, className)}
         >
             {content}
             {contentNode}

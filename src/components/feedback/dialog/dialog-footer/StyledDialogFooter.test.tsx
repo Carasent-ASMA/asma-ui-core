@@ -198,6 +198,20 @@ describe('StyledDialogFooter (ASMA-7099)', () => {
         expect(renderToStaticMarkup(<StyledDialogFooter rounded={false} />)).not.toContain('rounded-b-lg')
     })
 
+    it('spans the full width of its parent, whatever the parent aligns its cross axis to', () => {
+        /* Regression: without an explicit width the footer is sized by the parent's align-items,
+         * so a `flex flex-col items-center` parent shrank it to its buttons and left the separator
+         * floating mid-dialog (crm "Edit person details"). */
+        const html = renderToStaticMarkup(
+            <StyledDialogFooter
+                secondaryAction={{ label: 'Cancel', onClick: noop }}
+                primaryAction={{ label: 'Save changes', onClick: noop }}
+            />,
+        )
+
+        expect(html).toContain('self-stretch')
+    })
+
     it('keeps the separator border and surface from the Figma spec', () => {
         const html = renderToStaticMarkup(<StyledDialogFooter />)
 

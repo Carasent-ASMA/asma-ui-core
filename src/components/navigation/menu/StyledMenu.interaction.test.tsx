@@ -20,6 +20,9 @@ const MenuFixture = ({ onPick = () => undefined }: { onPick?: (value: string) =>
     }
     return (
         <div>
+            <button type='button' data-testid='before'>
+                Before
+            </button>
             <StyledButton dataTest='menu-trigger' onClick={(event) => setAnchorEl(event.currentTarget)}>
                 Actions
             </StyledButton>
@@ -37,6 +40,15 @@ const MenuFixture = ({ onPick = () => undefined }: { onPick?: (value: string) =>
                     Delete
                 </StyledMenuItem>
             </StyledMenu>
+            {/* Parked out of the anchored popover's way so it is a real, hittable target. */}
+            <button
+                type='button'
+                data-testid='outside-close'
+                style={{ position: 'fixed', right: 0, bottom: 0 }}
+                onClick={() => setAnchorEl(null)}
+            >
+                Close from outside
+            </button>
         </div>
     )
 }
@@ -156,10 +168,9 @@ describe('StyledMenu keyboard contract', () => {
      * Escape, outside-press and item activation alike, and therefore every StyledMenu consumer.
      * StyledSelect solves exactly this in its own `handleOpenChange`, so the codebase already treats
      * the behaviour as required — StyledPopover simply has no equivalent.
-     * Not fixed here: wave-3 builders add tests, not component fixes; StyledPopover is shared by the
-     * menu, the date-picker calendar and the filter menu, so a focus-restore change needs routing.
-     * Escalated to the coordinator. @see docs/a11y-keyboard-contract.md */
-    it.skip('returns focus to the trigger when the menu closes (2.4.3)', async () => {
+     * RESOLVED by ASMA-8087 KBD-02: StyledPopover hands focus back to the anchor when the closing
+     * panel still owned it. @see docs/a11y-keyboard-contract.md */
+    it('returns focus to the trigger when the menu closes (2.4.3)', async () => {
         const { container } = mount(<MenuFixture />)
         const button = await openMenu(container)
         await waitFor(() => expect(document.activeElement).toBe(items()[0]))
@@ -170,13 +181,105 @@ describe('StyledMenu keyboard contract', () => {
         await expect(document.activeElement).toBe(button)
     })
 
+    /* The same finding-E defect, on the path a keyboard user actually takes: activating an item closes
+     * the menu from the consumer's `onClose`, not from a dismiss reason, so an `onOpenChange`-only
+     * restore would leave focus on `<body>`. @see docs/a11y-keyboard-contract.md */
+    it('returns focus to the trigger when an item is activated (2.4.3)', async () => {
+        const onPick = fn()
+        const { container } = mount(<MenuFixture onPick={onPick} />)
+        const button = await openMenu(container)
+        await waitFor(() => expect(document.activeElement).toBe(items()[0]))
+
+        await userEvent.keyboard('{Enter}')
+        await waitFor(() => expect(menu()).toBeNull())
+
+        await expect(onPick).toHaveBeenCalledWith('rename')
+        await expect(document.activeElement).toBe(button)
+    })
+
+    /* WAI-ARIA Menu pattern, Tab: "When focus is on a menuitem in a menu or menubar, move focus out of
+     * the menu or menubar, and close all menus and submenus." A menu is a composite widget — Tab is an
+     * exit, never a way to walk its items (which are all tabindex=-1). Leaving it open dumped focus
+     * somewhere arbitrary with the menu still on screen (2.1.2, 2.4.3).
+     * @see https://www.w3.org/WAI/ARIA/apg/patterns/menubar/ */
+    // Tab order of the fixture: before → menu-trigger → outside-close.
+    it.each([
+        ['Tab', 'outside-close', () => userEvent.tab()],
+        ['Shift+Tab', 'before', () => userEvent.tab({ shift: true })],
+    ])('closes on %s and moves focus out of the menu (2.1.2)', async (_key, landing, move) => {
+        const { container } = mount(<MenuFixture />)
+        await openMenu(container)
+        await waitFor(() => expect(document.activeElement).toBe(items()[0]))
+
+        await move()
+
+        await waitFor(() => expect(menu()).toBeNull())
+        await expect(document.activeElement).toBe(container.querySelector(`[data-testid="${landing}"]`))
+    })
+
+    /* The other half of the KBD-02 contract (RISK-002): the restore is conditional on the closing panel
+     * still owning focus, so a close that deliberately put focus somewhere else must be left alone —
+     * otherwise every StyledPopover consumer (filter menu, country picker, calendar) yanks focus back
+     * to its anchor. @see docs/a11y-keyboard-contract.md */
+    it('leaves focus where the user moved it when the menu closes (2.4.3)', async () => {
+        const { container } = mount(<MenuFixture />)
+        await openMenu(container)
+        await waitFor(() => expect(document.activeElement).toBe(items()[0]))
+
+        // Keyboard activation, deliberately: a pointer click would re-focus its own target after the
+        // close, hiding an unconditional restore. Here nothing focuses anything afterwards, so the
+        // assertion only holds while the restore stays conditional.
+        const outside = container.querySelector<HTMLButtonElement>('[data-testid="outside-close"]')!
+        outside.focus()
+        await userEvent.keyboard('{Enter}')
+        await waitFor(() => expect(menu()).toBeNull())
+
+        await expect(document.activeElement).toBe(outside)
+    })
+
+    /* The other half of that rule: "when focus is on a **menuitem**". `StyledMenu` is also the surface
+     * for popovers whose content is arbitrary — the editor's `SearchFilterMenu` and
+     * `SearchTemplatesMenu` render an autofocused search field over a filter list and no menu items
+     * at all. There, Tab is ordinary movement between controls and dismissing the panel would put the
+     * list out of keyboard reach entirely (2.1.1).
+     * @see https://www.w3.org/WAI/ARIA/apg/patterns/menubar/ */
+    it('keeps the menu open when Tab moves between controls inside its content (2.1.1)', async () => {
+        const ContentMenuFixture = (): JSX.Element => {
+            const [anchorEl, setAnchorEl] = useState<Element | null>(null)
+            return (
+                <div>
+                    <StyledButton dataTest='menu-trigger' onClick={(event) => setAnchorEl(event.currentTarget)}>
+                        Filter
+                    </StyledButton>
+                    <StyledMenu open={Boolean(anchorEl)} anchorEl={anchorEl} onClose={() => setAnchorEl(null)}>
+                        <div className='flex flex-col gap-2 p-4'>
+                            <input data-testid='search' placeholder='search' />
+                            <button type='button' data-testid='result'>
+                                Result
+                            </button>
+                        </div>
+                    </StyledMenu>
+                </div>
+            )
+        }
+        const { container } = mount(<ContentMenuFixture />)
+        await userEvent.click(container.querySelector('[data-testid="menu-trigger"]')!)
+        await waitFor(() => expect(document.querySelector('[role="menu"]')).not.toBeNull())
+        document.querySelector<HTMLInputElement>('[data-testid="search"]')!.focus()
+
+        await userEvent.tab()
+
+        await expect(document.querySelector('[role="menu"]')).not.toBeNull()
+        await expect(document.activeElement).toBe(document.querySelector('[data-testid="result"]'))
+    })
+
     /* FINDING ASMA-8139-F — WCAG 2.4.7 (focus visible). src/components/navigation/menu/StyledMenuItem.tsx.
      * Same defect as ASMA-8139-B on StyledSelectItem: the row is `outline-none` with no focus rule,
      * while StyledMenuList's arrow-key handler moves real DOM focus onto it. The `hover:bg-delta-50`
      * rule covers the mouse only, so a keyboard user cannot see which item is focused.
-     * Not fixed here — a visual change to a shared component, design-gated per ASMA-8137.
-     * Escalated to the coordinator. @see docs/a11y-keyboard-contract.md */
-    it.skip('paints a visible focus indicator on the focused menu item (2.4.7)', async () => {
+     * RESOLVED by ASMA-8087 KBD-07 as the requested WCAG 2.4.7 exception: a `:focus-visible` left
+     * indicator drawn from the shared focus-ring token. @see docs/a11y-keyboard-contract.md */
+    it('paints a visible focus indicator on the focused menu item (2.4.7)', async () => {
         const { container } = mount(<MenuFixture />)
         await openMenu(container)
         await waitFor(() => expect(document.activeElement).toBe(items()[0]))

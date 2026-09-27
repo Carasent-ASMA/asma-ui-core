@@ -207,7 +207,14 @@ export function StyledDialogFooter({
             ref={containerRef}
             data-testid={dataTest}
             className={cn(
-                'flex items-center justify-end border-0 border-t border-solid border-delta-200 bg-white',
+                /* `self-stretch` is load-bearing: a footer is a full-width bar, but with no explicit
+                 * cross-axis sizing it inherits the parent's align-items. A parent that centres or
+                 * packs its cross axis (e.g. `flex flex-col items-center`) shrinks the footer to its
+                 * buttons, leaving the separator floating mid-dialog instead of spanning it.
+                 * `self-stretch` overrides that for this item only. Deliberately not `w-full`: with
+                 * the footer's own `p-4`, a 100% width overflows the parent wherever box-sizing is
+                 * content-box — which also perturbs the width the action planner measures. */
+                'flex items-center justify-end self-stretch border-0 border-t border-solid border-delta-200 bg-white',
                 compact ? 'gap-2 p-2' : 'gap-4 p-4',
                 rounded && 'rounded-b-lg',
                 /* DS effect style "Fixed bottom". */

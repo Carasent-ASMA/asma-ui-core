@@ -13,4 +13,6 @@
  * `toHaveAttribute`, …) that the accessibility assertions are written against.
  */
 export { expect, fn, waitFor, within } from 'storybook/test'
-export { userEvent } from 'vitest/browser'
+// `page` gives environment control (viewport resizing for breakpoint-gated CSS); it rides the
+// same virtualized module as `userEvent`, so it needs no extra dependency (ASMA-8210).
+export { page, userEvent } from 'vitest/browser'

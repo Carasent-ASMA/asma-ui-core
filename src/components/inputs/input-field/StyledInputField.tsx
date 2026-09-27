@@ -453,14 +453,24 @@ export const StyledInputField = ({
                     )}
 
                     {showClear ? (
-                        // Native <button>: keyboard-operable (Tab/Enter/Space) and has a role for free —
-                        // a `<div role='button'>` here had no tabIndex/keydown handler and was unreachable
-                        // by keyboard. `aria-label` is required since the only content is an icon.
+                        // Native <button> for the role and the pointer affordance, but deliberately OUT
+                        // of the tab order (`tabIndex={-1}`): it appears only while there is a value, so
+                        // tabbing onto it and activating it unmounts the very control that had focus and
+                        // drops focus to <body> (WCAG 2.4.3). No 2.1.1 cost — the field is editable text,
+                        // so a keyboard user clears it the native way (Ctrl/Cmd+A, Delete). Same call the
+                        // autocomplete's trailing affordances already make.
+                        // `aria-label` is required since the only content is an icon.
                         <button
                             type='button'
+                            tabIndex={-1}
                             aria-label='Clear'
                             data-testid={`${dataTest}-clear`}
-                            className='absolute right-4 z-40 flex items-center justify-center rounded-full border-0 bg-transparent p-[2px] duration-300 hover:bg-gama-100'
+                            // ASMA-8220 (TB-14): `hover:bg-gama-100` is the only feedback it has, so
+                            // pressable (the audit grouped it with the touch-ready controls, but it
+                            // declares no `:active` to preserve). No hit-area: a 44px overlay on this
+                            // ~22px button sits inside the field and would swallow taps meant to place
+                            // the caret in the text it clears.
+                            className='asma-pressable absolute right-4 z-40 flex items-center justify-center rounded-full border-0 bg-transparent p-[2px] duration-300 hover:bg-gama-100'
                             onClick={(event) => {
                                 event.stopPropagation()
                                 event.preventDefault()

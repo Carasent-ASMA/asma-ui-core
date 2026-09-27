@@ -16,17 +16,22 @@ import { StyledDatePicker } from './StyledDatePicker'
 const DatePickerFixture = ({ onPick = () => undefined }: { onPick?: (date?: Date) => void }): JSX.Element => {
     const [date, setDate] = useState<Date>()
     return (
-        <StyledDatePicker
-            dataTest='kbd-date'
-            mode='single'
-            selected={date}
-            onSelect={setDate}
-            onInputChange={(next) => {
-                setDate(next)
-                onPick(next)
-            }}
-            label='Date'
-        />
+        <>
+            <StyledDatePicker
+                dataTest='kbd-date'
+                mode='single'
+                selected={date}
+                onSelect={setDate}
+                onInputChange={(next) => {
+                    setDate(next)
+                    onPick(next)
+                }}
+                label='Date'
+            />
+            <button type='button' data-testid='after'>
+                After
+            </button>
+        </>
     )
 }
 
@@ -128,6 +133,31 @@ describe('StyledDatePicker keyboard contract', () => {
         await userEvent.keyboard('{Escape}')
 
         await waitFor(() => expect(calendar()).toBeNull())
+        await expect(document.activeElement).toBe(calendarButton(container))
+    })
+
+    it('closes the calendar on Tab without blocking normal focus movement (2.1.2)', async () => {
+        const { container } = mount(<DatePickerFixture />)
+        calendarButton(container).focus()
+        await userEvent.keyboard('{Enter}')
+        await waitFor(() => expect(calendar()).not.toBeNull())
+
+        await userEvent.tab()
+
+        await waitFor(() => expect(calendar()).toBeNull())
+        await expect(document.activeElement).toBe(container.querySelector('[data-testid="after"]'))
+    })
+
+    it('closes the calendar on Shift+Tab without blocking reverse focus movement (2.1.2)', async () => {
+        const { container } = mount(<DatePickerFixture />)
+        calendarButton(container).focus()
+        await userEvent.keyboard('{Enter}')
+        await waitFor(() => expect(calendar()).not.toBeNull())
+
+        await userEvent.tab({ shift: true })
+
+        await waitFor(() => expect(calendar()).toBeNull())
+        await expect(document.activeElement).toBe(field(container))
     })
 
     it('takes a read-only picker out of the calendar path but keeps it announced (4.1.2)', async () => {

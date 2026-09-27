@@ -63,6 +63,8 @@ export interface StyledChipProps {
     classes?: ChipClasses
     sx?: unknown
     tabIndex?: number
+    /** Removes the delete affordance from sequential navigation when its owner has a keyboard equivalent. */
+    deleteButtonTabIndex?: number
     'aria-label'?: string
     /** Overrides the default `role="button"`/no-role logic — for `StyledInteractiveChip`'s
      * checkbox/radio chip, whose inner control is `decorative`/`aria-hidden` (a real, even hidden,
@@ -109,6 +111,7 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
             classes,
             sx,
             tabIndex,
+            deleteButtonTabIndex,
             'aria-label': ariaLabel,
             role: roleOverride,
             'aria-checked': ariaChecked,
@@ -165,7 +168,7 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                 role={roleOverride ?? (interactive ? 'button' : undefined)}
                 aria-checked={roleOverride ? ariaChecked : undefined}
                 aria-readonly={roleOverride ? ariaReadonly : undefined}
-                tabIndex={readOnly ? undefined : interactive ? tabIndex ?? 0 : tabIndex}
+                tabIndex={readOnly || disabled ? undefined : interactive ? tabIndex ?? 0 : tabIndex}
                 onClick={disabled || readOnly ? undefined : onClick}
                 onKeyDown={disabled || readOnly ? undefined : handleKeyDown}
                 onMouseDown={disabled || readOnly ? undefined : onMouseDown}
@@ -181,6 +184,10 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                     interactive &&
                         cn(
                             'cursor-pointer outline-none',
+                            // ASMA-8220 (TB-14): touch-ready, not pressable — the `active:` colours
+                            // below are the designed pressed state, so no opacity layer over them.
+                            // No `asma-touch-target`: the fixed h-6/h-8 heights are the Figma chip.
+                            'asma-touch-ready',
                             'data-[hovered]:border-gama-200 data-[hovered]:bg-gama-25 hover:border-gama-200 hover:bg-gama-25',
                             'active:!border-gama-400 active:bg-gama-25 active:shadow-[0_0_0_2px_var(--colors-gama-400)]',
                         ),
@@ -207,6 +214,7 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                 {onDelete && !readOnly && (
                     <button
                         type='button'
+                        tabIndex={deleteButtonTabIndex}
                         data-testid={`${dataTest}-delete`}
                         // "Remove <label>" (not the bare label) so it reads distinctly from the chip
                         // itself; falls back to a generic "Remove" when `label` is a composite ReactNode

@@ -285,7 +285,6 @@ ASMA-8136 baseline was 124 across 33). Every row below is a story that still car
 | Story | Rule id(s) | Violation |
 | --- | --- | --- |
 | `Gallery` (Gallery) | `color-contrast` | Elements must meet minimum colour contrast ratio thresholds |
-| `SelectAllTogglesAllOptions` (Select All Toggles All Options) | `aria-required-children` | Certain ARIA roles must contain particular children |
 
 ### `src/components/inputs/select/story/StyledSelect.stories.tsx`
 
