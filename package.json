@@ -26,6 +26,9 @@
             ],
             "icons/*": [
                 "dist/src/components/icons/*/index.d.ts"
+            ],
+            "forms": [
+                "dist/src/forms/index.d.ts"
             ]
         }
     },
@@ -44,6 +47,11 @@
         "./icons/*": {
             "types": "./dist/src/components/icons/*/index.d.ts",
             "default": "./dist/components/icons/*/index.js"
+        },
+        "./forms": {
+            "types": "./dist/src/forms/index.d.ts",
+            "import": "./dist/forms/index.js",
+            "default": "./dist/forms/index.js"
         },
         "./dist/style.css": "./dist/style.css",
         "./tw-configs/twConfigs.json": "./tw-configs/twConfigs.json",
@@ -102,6 +110,8 @@
         "@storybook/addon-themes": "^10.3.3",
         "@storybook/addon-vitest": "10.3.3",
         "@storybook/react-vite": "10.3.3",
+        "@testing-library/dom": "^10.4.1",
+        "@testing-library/react": "^16.3.2",
         "@tippyjs/react": "^4.2.6",
         "@types/node": "^24.12.4",
         "@types/react": "^18.3.23",
@@ -120,10 +130,12 @@
         "eslint-plugin-react-you-might-not-need-an-effect": "^0.7.0",
         "eslint-plugin-regexp": "^2.10.0",
         "eslint-plugin-storybook": "10.3.3",
+        "jsdom": "^30.0.1",
         "playwright": "^1.57.0",
         "react": "^18.3.1",
         "react-copy-to-clipboard": "^5.1.0",
         "react-dom": "^18.3.1",
+        "react-hook-form": "^7.89.0",
         "react-hot-toast": "^2.4.1",
         "sass": "^1.98.0",
         "storybook": "10.3.3",
@@ -142,7 +154,13 @@
     },
     "peerDependencies": {
         "react": "^18.0.0 || ^19.0.0",
-        "react-dom": "^18.0.0 || ^19.0.0"
+        "react-dom": "^18.0.0 || ^19.0.0",
+        "react-hook-form": "^7.85.0"
+    },
+    "peerDependenciesMeta": {
+        "react-hook-form": {
+            "optional": true
+        }
     },
     "repository": {
         "type": "git",

@@ -1,0 +1,11 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`asma-ui-core/forms public API surface > keeps every runtime export of the subpath stable 1`] = `
+[
+  "createAsmaForms",
+  "focusFormField",
+  "getDirtyValues",
+  "touchInvalidFields",
+  "useAsmaForm",
+]
+`;
