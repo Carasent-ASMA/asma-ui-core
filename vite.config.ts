@@ -99,6 +99,10 @@ export default defineConfig({
                 // and are deliberately left alone rather than fixed in a test-only PR.
                 'src/**/*.interaction.test.tsx',
                 'src/test-utils/**',
+                // ASMA-7729: the forms adapter ships under its own entry; its tests must not leak
+                // `.d.ts` files into the tarball (same tarball-reduction reason as ASMA-8139 above).
+                'src/forms/**/*.test.ts',
+                'src/forms/**/*.test.tsx',
             ],
         }),
     ],
@@ -111,7 +115,10 @@ export default defineConfig({
     build: {
         minify: 'esbuild',
         lib: {
-            entry: resolve('src', 'index.ts'),
+            entry: {
+                index: resolve('src', 'index.ts'),
+                'forms/index': resolve('src', 'forms', 'index.ts'),
+            },
             name: 'asma-ui-core',
             formats: ['es'],
             fileName: (format) => `asma-ui-core.${format}.js`,
