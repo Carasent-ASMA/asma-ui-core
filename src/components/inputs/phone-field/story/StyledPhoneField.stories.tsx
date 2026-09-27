@@ -155,7 +155,7 @@ export const CountryPickerOpen: Story = {
     render: (args) => <Controlled {...args} />,
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement)
-        await userEvent.click(canvas.getByRole('button', { expanded: false }))
+        await userEvent.click(canvas.getByRole('combobox', { expanded: false }))
 
         // The popover is portalled, so query the document rather than the canvas.
         const listbox = await waitFor(() => within(document.body).getByRole('listbox'))
@@ -175,7 +175,7 @@ export const SearchByNameOrCode: Story = {
     render: (args) => <Controlled {...args} />,
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement)
-        await userEvent.click(canvas.getByRole('button', { expanded: false }))
+        await userEvent.click(canvas.getByRole('combobox', { expanded: false }))
 
         const body = within(document.body)
         const search = await waitFor(() => body.getByRole('combobox'))
@@ -200,7 +200,7 @@ export const KeyboardSelection: Story = {
     render: (args) => <Controlled {...args} />,
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement)
-        const trigger = canvas.getByRole('button', { expanded: false })
+        const trigger = canvas.getByRole('combobox', { expanded: false })
         await userEvent.click(trigger)
 
         const body = within(document.body)
@@ -210,7 +210,7 @@ export const KeyboardSelection: Story = {
 
         // Arrowing one row down from Norway lands on Australia and closes the picker.
         await waitFor(async () => {
-            await expect(canvas.getByRole('button')).toHaveTextContent('+61')
+            await expect(canvas.getByRole('combobox', { expanded: false })).toHaveTextContent('+61')
         })
     },
 }
@@ -343,7 +343,7 @@ export const MobileSearchClears: Story = {
     render: (args) => <Controlled {...args} />,
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement)
-        await userEvent.click(canvas.getByRole('button', { expanded: false }))
+        await userEvent.click(canvas.getByRole('combobox', { expanded: false }))
 
         // Assert the branch FIRST, and assert it on the sheet itself: below 744 px the picker is
         // a dialog holding a search box, above it a popover anchored to the trigger. Without this

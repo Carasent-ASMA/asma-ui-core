@@ -2,7 +2,10 @@
     &.#{$type} {
         // Figma Input field text = Body Base 16/lh24, text delta-800, radius 4.
         // box-border so the JS auto-resize height (rows*lineHeight + paddings) is exact.
-        @apply box-border font-roboto text-base font-normal rounded w-[400px] outline p-3 resize-none duration-75 leading-6 border-none #{!important};
+        // Default width only — deliberately NOT !important so a consumer `className` (e.g. `w-full!`)
+        // can size the field to its container.
+        width: 400px;
+        @apply box-border font-roboto text-base font-normal rounded outline p-3 resize-none duration-75 leading-6 border-none #{!important};
         color: var(--colors-input-#{$type}-text-color) #{!important};
         background-color: var(--colors-input-#{$type}-bg-color) #{!important};
         outline-color: var(--colors-input-#{$type}-outline-color) #{!important};

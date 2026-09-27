@@ -74,6 +74,10 @@ export const StyledSearchField: FC<StyledSearchFieldProps> = ({
                                 aria-label='Clear'
                                 data-testid='styled-search-clear-icon'
                                 className={cn(
+                                    // ASMA-8220 (TB-14): no pressed state → pressable. No hit-area:
+                                    // a 44px overlay on this 24px button would extend back over the
+                                    // input text and steal taps meant to place the caret.
+                                    'asma-pressable',
                                     'cursor-pointer rounded-full border-0 bg-delta-50',
                                     'flex items-center justify-center',
                                     'transform-gpu transition-all duration-300 ease-in-out',

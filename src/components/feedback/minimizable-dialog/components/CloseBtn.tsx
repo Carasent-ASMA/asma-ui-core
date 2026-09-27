@@ -7,7 +7,8 @@ export const CloseBtn: React.FC<{
     showCloseIcon: boolean
     onClick: () => void
     tooltipTitle: string
-}> = ({ showCloseIcon, tooltipTitle, onClick }) => {
+    buttonRef?: React.Ref<HTMLButtonElement>
+}> = ({ showCloseIcon, tooltipTitle, onClick, buttonRef }) => {
     if (!showCloseIcon) return null
 
     return (
@@ -15,6 +16,7 @@ export const CloseBtn: React.FC<{
             <div>
                 <StyledButton
                     dataTest='close-button'
+                    refLink={buttonRef}
                     aria-label={tooltipTitle}
                     variant='textGray'
                     size='small'

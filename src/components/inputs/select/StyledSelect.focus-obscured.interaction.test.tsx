@@ -102,7 +102,9 @@ describe('Focus Not Obscured — overlays must not cover their own trigger (2.4.
     it('StyledTooltip: the bubble does not hide the control it describes', async () => {
         const { container } = mount(
             <StyledTooltip title='Archive this thread'>
-                <StyledButton dataTest='tip-target'>Archive</StyledButton>
+                <span>
+                    <StyledButton dataTest='tip-target'>Archive</StyledButton>
+                </span>
             </StyledTooltip>,
         )
         const target = container.querySelector<HTMLButtonElement>('[data-testid="tip-target"]')!

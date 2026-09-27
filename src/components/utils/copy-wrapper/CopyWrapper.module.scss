@@ -1,11 +1,12 @@
 .copy-wrapper {
-    &:hover {
+    &:hover,
+    &:focus-within {
         .hidden-copy {
-            @apply visible;
+            @apply opacity-100 pointer-events-auto;
         }
     }
 }
 
 .hidden-copy {
-    @apply invisible;
+    @apply opacity-0 pointer-events-none;
 }

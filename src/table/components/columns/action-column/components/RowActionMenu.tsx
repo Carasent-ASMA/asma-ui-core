@@ -64,12 +64,13 @@ export function RowActionMenu<TData>({
 
                 if (disabled) return
 
+                // `onMouseDown` preserves table selection, so a pointer click does not natively
+                // focus this button. The menu trigger—not its containing row—owns keyboard focus.
+                e.currentTarget.focus({ preventScroll: true })
                 if (open) {
                     handleClose()
-                    tableData.row.onChangeFocused(false)
                 } else {
                     handleOpen(e)
-                    tableData.row.onChangeFocused(true)
                 }
             }}
             onMouseDown={(e) => {
@@ -124,14 +125,8 @@ export function RowActionMenu<TData>({
                     <Popover
                         open={open}
                         anchorEl={anchorEl}
-                        onClose={() => {
-                            handleClose()
-                            tableData.row.onChangeFocused(false)
-                        }}
-                        onClick={() => {
-                            handleClose()
-                            tableData.row.onChangeFocused(false)
-                        }}
+                        onClose={handleClose}
+                        onClick={handleClose}
                         anchorOrigin={{
                             horizontal: 'right',
                             vertical: 'bottom',

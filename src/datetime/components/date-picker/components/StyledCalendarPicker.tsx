@@ -14,6 +14,7 @@ export const StyledCalendarPicker: React.FC<{
             open={open}
             anchorEl={anchorEl}
             onClose={onClose}
+            tabIntoContent={false}
             anchorOrigin={{
                 vertical: positionAbove ? 'top' : 50,
                 horizontal: 'left',

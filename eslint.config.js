@@ -56,10 +56,23 @@ export default defineConfig(
             // (src/styles/index.css) — real Tailwind only ships the unsided `border-solid`, so the
             // plugin can't find these in its own class list. Each gets added here the first time a
             // component actually uses it (precedent: `border-l-solid`); `border-r-solid`/
-            // `border-y-solid` stay unlisted until something needs them.
+            // `border-y-solid` stay unlisted until something needs them. ASMA-8210 adds the `asma-*`
+            // touch-readiness utilities to the same `@layer utilities` block, invisible to this rule
+            // for the same reason.
             'better-tailwindcss/no-unregistered-classes': [
                 'error',
-                { ignore: ['border-l-solid', 'border-b-solid', 'border-t-solid', 'flip-180'] },
+                {
+                    ignore: [
+                        'border-l-solid',
+                        'border-b-solid',
+                        'border-t-solid',
+                        'flip-180',
+                        'asma-touch-ready',
+                        'asma-pressable',
+                        'asma-hit-area',
+                        'asma-touch-target',
+                    ],
+                },
             ],
 
             // NOTE: enable this when we have none of the other tailwind related errors

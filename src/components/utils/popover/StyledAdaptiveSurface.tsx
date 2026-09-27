@@ -14,8 +14,9 @@ import {
 
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { cn } from 'src/helpers/cn'
+import { firstTabbable } from 'src/helpers/focusable'
 import { useDebouncedValue } from 'src/hooks/useDebouncedValue.hook'
-import { FOCUSABLE_SELECTOR, useFocusTrap } from 'src/hooks/useFocusTrap.hook'
+import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
 import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
 import { formatResultsLabel } from '../bottom-sheet/formatResultsLabel'
 import { StyledBottomSheet } from '../bottom-sheet/StyledBottomSheet'
@@ -242,7 +243,7 @@ export const StyledAdaptiveSurface = ({
     useEffect(() => {
         if (!panelNode) return
         const frame = requestAnimationFrame(() => {
-            const target = isDialog ? panelNode.querySelector<HTMLElement>(FOCUSABLE_SELECTOR) : panelNode
+            const target = isDialog ? firstTabbable(panelNode) : panelNode
             target?.focus({ preventScroll: true })
         })
         return () => {

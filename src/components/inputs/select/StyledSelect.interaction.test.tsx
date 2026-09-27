@@ -60,6 +60,7 @@ describe('StyledSelect keyboard contract', () => {
         await expect(button).toHaveAttribute('role', 'combobox')
         await expect(button).toHaveAttribute('aria-haspopup', 'listbox')
         await expect(button).toHaveAttribute('aria-expanded', 'false')
+        await expect(button).not.toHaveAttribute('aria-controls')
         await expect(button).toHaveAccessibleName('Status')
 
         button.focus()
@@ -67,6 +68,7 @@ describe('StyledSelect keyboard contract', () => {
 
         await waitFor(() => expect(button).toHaveAttribute('aria-expanded', 'true'))
         await expect(listbox()).toHaveAccessibleName('Status')
+        await expect(button).toHaveAttribute('aria-controls', listbox()!.id)
     })
 
     /* FINDING ASMA-8139-A — WCAG 4.1.2 (axe `aria-valid-attr-value`). src/components/inputs/select/
@@ -79,7 +81,7 @@ describe('StyledSelect keyboard contract', () => {
      * listbox just did not get the same treatment.
      * Not fixed here: wave-3 builders add tests, not component fixes. Escalated to the coordinator.
      * @see docs/a11y-keyboard-contract.md */
-    it.skip('resolves aria-controls to the listbox that actually exists (4.1.2)', async () => {
+    it('resolves aria-controls to the listbox that actually exists (4.1.2)', async () => {
         const { container } = mount(<SelectFixture />)
         const button = trigger(container)
         button.focus()
@@ -101,6 +103,7 @@ describe('StyledSelect keyboard contract', () => {
         await expect(document.activeElement).toBe(button)
         await expect(button).toHaveAttribute('aria-activedescendant', 'status-listbox-option-1')
         await expect(options()[1]).toHaveAttribute('aria-selected', 'true')
+        await expect(options()[0]).toHaveAttribute('aria-selected', 'false')
     })
 
     it('opens with ArrowUp and exposes the last option when nothing is selected (2.1.1)', async () => {
@@ -116,6 +119,21 @@ describe('StyledSelect keyboard contract', () => {
         await userEvent.keyboard('{ArrowUp}')
 
         await waitFor(() => expect(button).toHaveAttribute('aria-activedescendant', 'empty-listbox-option-1'))
+    })
+
+    it('opens with Enter, keeps focus on the trigger and marks no active option (2.1.1, 2.4.3)', async () => {
+        const { container } = mount(<SelectFixture />)
+        const button = trigger(container)
+        button.focus()
+
+        await userEvent.keyboard('{Enter}')
+
+        await waitFor(() => expect(listbox()).not.toBeNull())
+        await expect(document.activeElement).toBe(button)
+        // Opening is not navigating: the keyboard indicator is reserved for an actual arrow press,
+        // so neither the trigger nor any row advertises an active option yet.
+        await expect(button).not.toHaveAttribute('aria-activedescendant')
+        await expect(document.querySelector('[data-select-active-indicator]')).toBeNull()
     })
 
     it('moves through options with the arrow keys and stops at either end (2.1.1)', async () => {
@@ -150,19 +168,37 @@ describe('StyledSelect keyboard contract', () => {
         await expect(button).toHaveTextContent('Closed')
     })
 
-    it('selects with Space and keeps the listbox open (2.1.1)', async () => {
-        const { container } = mount(<SelectFixture />)
-        const button = trigger(container)
+    it('toggles a multi-select with Space and keeps the listbox open (2.1.1)', async () => {
+        const { container } = mount(<MultipleSelectFixture />)
+        const button = container.querySelector<HTMLButtonElement>('[data-testid="multiple-status"]')!
         button.focus()
         await userEvent.keyboard('{ArrowDown}')
-        await waitFor(() => expect(button).toHaveAttribute('aria-activedescendant', 'status-listbox-option-1'))
+        await waitFor(() => expect(button).toHaveAttribute('aria-activedescendant', 'multiple-status-listbox-option-1'))
 
         await userEvent.keyboard('{ArrowUp} ')
 
         await expect(listbox()).not.toBeNull()
         await expect(document.activeElement).toBe(button)
         await expect(button).toHaveAttribute('aria-expanded', 'true')
+        await expect(listbox()).toHaveAttribute('aria-multiselectable', 'true')
         await expect(button).toHaveTextContent('Active')
+    })
+
+    it('selects a single-select with Space and keeps the listbox open (2.1.1)', async () => {
+        const { container } = mount(<SelectFixture />)
+        const button = trigger(container)
+        button.focus()
+        await userEvent.keyboard('{ArrowDown}')
+        await waitFor(() => expect(listbox()).not.toBeNull())
+
+        await userEvent.keyboard(' ')
+
+        // Space means the same thing in both modes (epic AC §4): commit the active option and leave
+        // the list up. Only Enter closes — otherwise one keystroke would carry two meanings.
+        await expect(listbox()).not.toBeNull()
+        await expect(button).toHaveAttribute('aria-expanded', 'true')
+        await expect(document.activeElement).toBe(button)
+        await expect(button).toHaveTextContent('Paused')
     })
 
     it('selects by pointer without leaving a keyboard-active option (2.1.1)', async () => {
@@ -190,6 +226,45 @@ describe('StyledSelect keyboard contract', () => {
         await waitFor(() => expect(listbox()).toBeNull())
         await waitFor(() => expect(document.activeElement).toBe(button))
         await expect(button).toHaveAttribute('aria-expanded', 'false')
+    })
+
+    it('preserves the multi-select selection when Escape closes the list (2.1.2)', async () => {
+        const { container } = mount(<MultipleSelectFixture />)
+        const button = container.querySelector<HTMLButtonElement>('[data-testid="multiple-status"]')!
+        button.focus()
+        await userEvent.keyboard('{ArrowDown}')
+        await waitFor(() => expect(listbox()).not.toBeNull())
+        await userEvent.keyboard('{ArrowUp} ')
+        await expect(button).toHaveTextContent('Active')
+
+        await userEvent.keyboard('{Escape}')
+
+        // Escape dismisses the popup, it does not revert what was picked while it was open.
+        await waitFor(() => expect(listbox()).toBeNull())
+        await expect(document.activeElement).toBe(button)
+        await expect(button).toHaveTextContent('Active')
+        await expect(button).toHaveTextContent('Paused')
+    })
+
+    it('closes on Tab and lets focus move on to the next control (2.1.2)', async () => {
+        const { container } = mount(
+            <>
+                <SelectFixture />
+                <button type='button' data-testid='after'>
+                    After
+                </button>
+            </>,
+        )
+        const button = trigger(container)
+        button.focus()
+        await userEvent.keyboard('{ArrowDown}')
+        await waitFor(() => expect(listbox()).not.toBeNull())
+
+        await userEvent.tab()
+
+        // Tab must close the popup WITHOUT preventDefault, or the combobox becomes a keyboard trap.
+        await waitFor(() => expect(listbox()).toBeNull())
+        await expect(document.activeElement).toBe(container.querySelector('[data-testid="after"]'))
     })
 
     it('clears the value from the keyboard when allowClear is set (2.1.1)', async () => {
@@ -250,23 +325,20 @@ describe('StyledSelect keyboard contract', () => {
      * Not fixed here: adding a focus ring is a visual change to a shared component and would move VRT
      * baselines — exactly the design-gated class ASMA-8137 fenced off. Escalated to the coordinator.
      * @see docs/a11y-keyboard-contract.md */
-    it.skip('paints a visible focus indicator on the keyboard-focused option (2.4.7)', async () => {
+    it('indicates the keyboard-active option while focus remains on the trigger (2.4.7, 2.4.3)', async () => {
         const { container } = mount(<SelectFixture />)
-        trigger(container).focus()
+        const button = trigger(container)
+        button.focus()
         await userEvent.keyboard('{ArrowDown}')
         await waitFor(() => expect(options()).toHaveLength(3))
 
-        // Compare an unfocused, unselected option against the same option once focus lands on it,
-        // so the selected-state background cannot be mistaken for a focus indicator.
+        // Active-descendant navigation keeps DOM focus on the combobox. Its visual counterpart is
+        // the absolute left indicator on the active option, not a focus ring on that option.
         const target = options()[2]!
-        const before = focusStyleOf(target)
         await userEvent.keyboard('{ArrowDown}')
-        await expect(document.activeElement).toBe(target)
+        await expect(document.activeElement).toBe(button)
 
-        await expect(
-            describeFocusIndicator(before, focusStyleOf(target)),
-            'keyboard-focused option paints no perceivable focus indicator',
-        ).not.toBeNull()
+        await expect(target.querySelector('[data-select-active-indicator]')).not.toBeNull()
     })
 })
 
