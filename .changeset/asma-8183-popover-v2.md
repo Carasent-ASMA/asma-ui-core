@@ -2,7 +2,7 @@
 'asma-ui-core': minor
 ---
 
-Add `StyledPopoverV2` — the Design System Popover (ASMA-8183): an anchored surface with an optional
+Add `StyledAdaptiveSurface` — the Design System Popover (ASMA-8183): an anchored surface with an optional
 title, a required close control and two optional footer rows, in two content-driven variants. `info`
 is a read-only container referenced by `aria-describedby` that is not focus-trapped (`Tab` leaves and
 closes it); `action` is a `role="dialog"` with a focus trap, covering both the Filter pattern (changes

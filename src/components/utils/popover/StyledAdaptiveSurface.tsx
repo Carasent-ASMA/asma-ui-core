@@ -59,7 +59,7 @@ const MAX_HEIGHT_RATIO = 0.6
 const MOBILE_WIDTH = 'calc(100vw - 32px)'
 
 /** @figmaNode wXrXt5uKNNzV2DnQCgyYZH#44531-233781 (Design-System · "_Popover") */
-export interface StyledPopoverV2Props {
+export interface StyledAdaptiveSurfaceProps {
     /** @figmaProp none — test hook */
     dataTest: string
     /** @figmaProp none — behavioral: the consumer owns the trigger element, this wires its aria + click */
@@ -123,7 +123,7 @@ export interface StyledPopoverV2Props {
  * Separate from {@link StyledPopover}, which stays as the MUI-parity positioning primitive its eight
  * internal consumers still depend on; those migrate here gradually.
  */
-export const StyledPopoverV2 = ({
+export const StyledAdaptiveSurface = ({
     dataTest,
     renderTrigger,
     variant = 'info',
@@ -137,7 +137,7 @@ export const StyledPopoverV2 = ({
     ariaLabel,
     onOpenChange,
     className,
-}: StyledPopoverV2Props): JSX.Element => {
+}: StyledAdaptiveSurfaceProps): JSX.Element => {
     const panelId = useId()
     const titleId = `${panelId}-title`
 
@@ -331,6 +331,12 @@ export const StyledPopoverV2 = ({
         return (
             <>
                 {renderTrigger(trigger)}
+                {/* `onClose={close}` discards the sheet's own dismiss reason (closeButton/scrim/
+                    escape/drag/viewResults/action) — `close` is `() => void`. Deliberate, not an
+                    oversight: the desktop path has never exposed a dismiss reason either (floating-ui's
+                    outside-press vs Escape also collapse into the same `onOpenChange(false)`), so this
+                    keeps the two paths at parity rather than growing a reason union just for mobile.
+                    A direct `StyledBottomSheet` consumer still gets the full reason. */}
                 <StyledBottomSheet
                     id={panelId}
                     dataTest={dataTest}

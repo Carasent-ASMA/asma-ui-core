@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { FilterIcon } from 'src/components/icons/filter-icon/FilterIcon'
-import { StyledPopoverV2 } from '../popover/StyledPopoverV2'
+import { StyledAdaptiveSurface } from '../popover/StyledAdaptiveSurface'
 import { ChipGroup, KARTLEGGING, noop } from '../popover/story/popoverStoryFixtures'
 import { StyledBottomSheet } from './StyledBottomSheet'
 import { BottomSheetCases } from './story/BottomSheetCases'
@@ -20,7 +20,7 @@ const meta = {
                     '· Spec: [ASMA-8184](https://carasent.atlassian.net/browse/ASMA-8184)',
                     '',
                     'The mobile (0–743px) form of the **Action popover**: filters and row actions. A modal',
-                    'sheet — dimmed scrim, scroll lock, everything behind it `inert`. `StyledPopoverV2` with',
+                    'sheet — dimmed scrim, scroll lock, everything behind it `inert`. `StyledAdaptiveSurface` with',
                     "`variant='action'` renders it automatically below 744px, so most screens never use it",
                     'directly.',
                     '',
@@ -125,13 +125,13 @@ export const LongContent: Story = {
 }
 
 /**
- * The integration: one `StyledPopoverV2` — an anchored popover from 744px, this sheet below. Resize
+ * The integration: one `StyledAdaptiveSurface` — an anchored popover from 744px, this sheet below. Resize
  * the viewport across 744px to watch it switch; the props do not change.
  */
 export const PopoverOnMobile: Story = {
     render: () => (
         <Screen>
-            <StyledPopoverV2
+            <StyledAdaptiveSurface
                 dataTest='responsive-filter'
                 variant='action'
                 title='Filtrer søknader'
@@ -161,7 +161,7 @@ export const PopoverOnMobile: Story = {
                     isSelected={(option) => option === 'Art'}
                     onToggle={noop}
                 />
-            </StyledPopoverV2>
+            </StyledAdaptiveSurface>
         </Screen>
     ),
 }

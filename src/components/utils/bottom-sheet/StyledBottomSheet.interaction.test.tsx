@@ -4,11 +4,11 @@ import { page } from 'vitest/browser'
 import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount, tabbableWithin } from 'src/test-utils/renderInteraction'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
-import { StyledPopoverV2, type StyledPopoverV2Props } from '../popover/StyledPopoverV2'
+import { StyledAdaptiveSurface, type StyledAdaptiveSurfaceProps } from '../popover/StyledAdaptiveSurface'
 
 /**
  * Keyboard, focus and dismissal contract — StyledBottomSheet (ASMA-8184), exercised the way it ships:
- * as the mobile (0–743px) form of `StyledPopoverV2 variant='action'`.
+ * as the mobile (0–743px) form of `StyledAdaptiveSurface variant='action'`.
  * WCAG 2.1.2, 2.4.3, 2.5.7, 3.2.2, 4.1.2, 4.1.3, 1.3.4.
  */
 
@@ -17,12 +17,12 @@ const PHONE = { width: 375, height: 812 }
 const PHONE_LANDSCAPE = { width: 667, height: 375 }
 const DESKTOP = { width: 1280, height: 720 }
 
-type FixtureProps = Partial<StyledPopoverV2Props>
+type FixtureProps = Partial<StyledAdaptiveSurfaceProps>
 
 const FilterFixture = (props: FixtureProps): JSX.Element => {
     const [count, setCount] = useState(248)
     return (
-        <StyledPopoverV2
+        <StyledAdaptiveSurface
             dataTest='sheet'
             variant='action'
             title='Filtrer søknader'
@@ -48,7 +48,7 @@ const FilterFixture = (props: FixtureProps): JSX.Element => {
             <button type='button' data-testid='huge' onClick={() => setCount(123456)}>
                 Alle
             </button>
-        </StyledPopoverV2>
+        </StyledAdaptiveSurface>
     )
 }
 

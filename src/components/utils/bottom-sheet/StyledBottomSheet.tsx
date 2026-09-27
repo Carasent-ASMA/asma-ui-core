@@ -9,7 +9,7 @@ import { useDebouncedValue } from 'src/hooks/useDebouncedValue.hook'
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
 import { useShortViewportMediaQuery } from 'src/hooks/useMediaQuery.hook'
 import { registerOpenModalDialog } from 'src/hooks/useTopLayer.hook'
-import type { PopoverContentApi, PopoverSlot } from '../popover/StyledPopoverV2'
+import type { PopoverContentApi, PopoverSlot } from '../popover/StyledAdaptiveSurface'
 import { formatResultsLabel } from './formatResultsLabel'
 import style from './StyledBottomSheet.module.scss'
 import { useDragToDismiss } from './useDragToDismiss.hook'
@@ -73,7 +73,7 @@ export interface StyledBottomSheetProps {
  *
  * Interaction model is the popover's: `role="dialog"`, `Tab` only, no `role="menu"`, no arrow keys.
  * Focus moves to the sheet on open (so the title is announced first) and back to the trigger on
- * close. `StyledPopoverV2` with `variant='action'` renders this automatically below 744px.
+ * close. `StyledAdaptiveSurface` with `variant='action'` renders this automatically below 744px.
  */
 export const StyledBottomSheet = ({
     dataTest,
