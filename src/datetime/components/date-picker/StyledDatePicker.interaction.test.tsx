@@ -160,6 +160,27 @@ describe('StyledDatePicker keyboard contract', () => {
         await expect(document.activeElement).toBe(field(container))
     })
 
+    /**
+     * ASMA-8236. Figma node 38285-181679 specifies the trigger as 156 input + 4 gap + 40 button =
+     * 200px. Measured rather than asserted against the style attribute: the button's width comes
+     * from its padding + borders, so only a real layout box catches it growing past 40.
+     */
+    it('lays the trigger out to the Figma 200px spec (156 + 4 + 40)', async () => {
+        const { container } = mount(<DatePickerFixture />)
+        const button = calendarButton(container)
+        const inputSegment = button.parentElement!.firstElementChild as HTMLElement
+
+        const segment = inputSegment.getBoundingClientRect()
+        const calendar = button.getBoundingClientRect()
+
+        await expect({
+            segment: segment.width,
+            gap: calendar.left - segment.right,
+            button: calendar.width,
+            total: calendar.right - segment.left,
+        }).toEqual({ segment: 156, gap: 4, button: 40, total: 200 })
+    })
+
     it('takes a read-only picker out of the calendar path but keeps it announced (4.1.2)', async () => {
         const { container } = mount(
             <StyledDatePicker dataTest='ro-date' mode='single' readOnly label='Date' onSelect={() => undefined} />,

@@ -169,7 +169,8 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
         onInputChange?.(isValidDateFns(parsed) ? parsed : undefined)
     }
 
-    const width = readOnly ? 120 : 160
+    // Figma node 38285-181679: the editable trigger is 156 input + 4 gap + 40 button = 200 total.
+    const width = readOnly ? 120 : 156
     const height = readOnly ? 40 : 75
 
     return (

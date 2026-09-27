@@ -23,7 +23,10 @@ export const DatePickerButton: React.FC<DatePickerButtonProps> = ({ onClick, dis
             // with the disabled styling — not just a click guard — when the date picker is disabled.
             disabled={disabled}
             onClick={(event: React.MouseEvent<HTMLButtonElement>) => !disabled && onClick(event)}
-            className={cn(disabled && 'cursor-not-allowed')}
+            // Figma gives this button a flat 40x40. `large` only sets a height, so its 8px padding
+            // plus the 1px border grew it to 42 — `box-border` is required because the package
+            // disables Tailwind preflight, leaving box-sizing at content-box.
+            className={cn('box-border w-[40px] px-0', disabled && 'cursor-not-allowed')}
         />
     )
 }
