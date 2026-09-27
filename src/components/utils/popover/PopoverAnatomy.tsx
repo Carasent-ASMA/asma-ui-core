@@ -35,7 +35,7 @@ export interface PopoverAnatomyProps {
 
 /**
  * Everything inside the popover surface: the content row (title + body + close column) and the two
- * optional footer rows. Split out of `StyledPopoverV2` so the Gallery story can render every
+ * optional footer rows. Split out of `StyledAdaptiveSurface` so the Gallery story can render every
  * Title × Reset filter × Actions combination side by side — a real popover is portalled, anchored
  * and mutually exclusive, so the variants can never be seen together through the live component.
  *

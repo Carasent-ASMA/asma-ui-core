@@ -1,2 +1,2 @@
 export * from './StyledPopover'
-export * from './StyledPopoverV2'
+export * from './StyledAdaptiveSurface'
