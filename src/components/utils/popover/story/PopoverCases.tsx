@@ -3,7 +3,7 @@ import { useState, type ReactNode } from 'react'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { FilterIcon } from 'src/components/icons/filter-icon/FilterIcon'
 import { InfoOutlineIcon } from 'src/components/icons/info-outline-icon/InfoOutlineIcon'
-import { StyledPopoverV2, type PopoverTriggerProps } from '../StyledPopoverV2'
+import { PopoverSheet, type PopoverTriggerProps } from '../PopoverSheet'
 import {
     ChipGroup,
     countActive,
@@ -60,7 +60,7 @@ const FilterCase = (): JSX.Element => {
     const matchCount = matchCountFor(activeCount)
 
     return (
-        <StyledPopoverV2
+        <PopoverSheet
             dataTest='case-filter'
             variant='action'
             title='Small set of controls'
@@ -116,7 +116,7 @@ const FilterCase = (): JSX.Element => {
                     setFilter((previous) => ({ ...previous, egenrapportering: option }))
                 }}
             />
-        </StyledPopoverV2>
+        </PopoverSheet>
     )
 }
 
@@ -126,7 +126,7 @@ const ActionsCase = (): JSX.Element => {
 
     return (
         <div className='flex flex-col items-start gap-2'>
-            <StyledPopoverV2
+            <PopoverSheet
                 dataTest='case-actions'
                 variant='action'
                 ariaLabel='Handlinger for søknaden'
@@ -158,7 +158,7 @@ const ActionsCase = (): JSX.Element => {
                         </StyledButton>
                     ))
                 }
-            </StyledPopoverV2>
+            </PopoverSheet>
             <p className='m-0 text-sm leading-5 text-delta-600'>{lastAction ?? 'Ingen handling valgt'}</p>
         </div>
     )
@@ -181,7 +181,7 @@ const SimpleActionCase = ({
     withActions?: boolean
     children: ReactNode
 }): JSX.Element => (
-    <StyledPopoverV2
+    <PopoverSheet
         dataTest={id}
         variant='action'
         title={title}
@@ -214,7 +214,7 @@ const SimpleActionCase = ({
         }
     >
         {children}
-    </StyledPopoverV2>
+    </PopoverSheet>
 )
 
 const shortGroup = (
@@ -230,7 +230,7 @@ const shortGroup = (
 export const PopoverCases = (): JSX.Element => (
     <div className='grid grid-cols-1 gap-x-10 gap-y-12 p-6 md:grid-cols-2 xl:grid-cols-3'>
         <Case label='Info · with title' hint='Read-only. Focus lands on the container; Tab leaves and closes.'>
-            <StyledPopoverV2
+            <PopoverSheet
                 dataTest='case-info-title'
                 title='Løpenummer'
                 renderTrigger={({ ref, triggerProps }) => (
@@ -238,11 +238,11 @@ export const PopoverCases = (): JSX.Element => (
                 )}
             >
                 Løpenummeret tildeles automatisk når søknaden registreres, og kan ikke endres i ettertid.
-            </StyledPopoverV2>
+            </PopoverSheet>
         </Case>
 
         <Case label='Info · without title' hint='Short explanations need no heading; close is still required.'>
-            <StyledPopoverV2
+            <PopoverSheet
                 dataTest='case-info-plain'
                 renderTrigger={({ ref, triggerProps }) => (
                     <InfoTrigger id='case-info-plain' name='Om feltet' popoverRef={ref} triggerProps={triggerProps} />
@@ -250,11 +250,11 @@ export const PopoverCases = (): JSX.Element => (
             >
                 Show supplementary content or a small set of controls anchored to a trigger, without taking the user
                 out of their current task.
-            </StyledPopoverV2>
+            </PopoverSheet>
         </Case>
 
         <Case label='Info · long title' hint='A title is one line and ellipsises rather than wrapping.'>
-            <StyledPopoverV2
+            <PopoverSheet
                 dataTest='case-info-long-title'
                 title='Et svært langt løpenummer som ikke får plass på én linje i det hele tatt'
                 renderTrigger={({ ref, triggerProps }) => (
@@ -262,7 +262,7 @@ export const PopoverCases = (): JSX.Element => (
                 )}
             >
                 The title row is single-line with an ellipsis, so the surface never grows a second header line.
-            </StyledPopoverV2>
+            </PopoverSheet>
         </Case>
 
         <Case label='Action · title only' hint='role="dialog", named by its title. No footer rows.'>

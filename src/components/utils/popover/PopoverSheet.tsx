@@ -12,10 +12,14 @@ import {
     useMergeRefs,
 } from '@floating-ui/react'
 
+import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { cn } from 'src/helpers/cn'
 import { firstTabbable } from 'src/helpers/focusable'
+import { useDebouncedValue } from 'src/hooks/useDebouncedValue.hook'
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
 import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
+import { formatResultsLabel } from '../bottom-sheet/formatResultsLabel'
+import { StyledBottomSheet } from '../bottom-sheet/StyledBottomSheet'
 import { PopoverAnatomy, POPOVER_SURFACE_CLASSNAME } from './PopoverAnatomy'
 import {
     getOpenModalDialogAncestor,
@@ -55,7 +59,7 @@ const MAX_HEIGHT_RATIO = 0.6
 const MOBILE_WIDTH = 'calc(100vw - 32px)'
 
 /** @figmaNode wXrXt5uKNNzV2DnQCgyYZH#44531-233781 (Design-System · "_Popover") */
-export interface StyledPopoverV2Props {
+export interface PopoverSheetProps {
     /** @figmaProp none — test hook */
     dataTest: string
     /** @figmaProp none — behavioral: the consumer owns the trigger element, this wires its aria + click */
@@ -80,6 +84,13 @@ export interface StyledPopoverV2Props {
     resetAction?: PopoverSlot
     /** @figmaProp Actions = ReactNode→true | undefined→false — the 12px footer row, right-aligned */
     footerActions?: PopoverSlot
+    /**
+     * Result total for the standard "Vis resultater (N)" control, rendered when no `viewResultsAction`
+     * is given (see `formatResultsLabel`). On mobile the sheet also announces it from its own live
+     * region, because the list behind is inert. `null` = total unavailable.
+     * @figmaProp none — behavioral
+     */
+    resultCount?: number | null
     /** @figmaProp none — a11y: accessible name of the close control */
     closeLabel?: string
     /** @figmaProp none — a11y: required when `variant='action'` and no `title` is given, so the dialog has a name */
@@ -106,10 +117,13 @@ export interface StyledPopoverV2Props {
  * There is also **no arrow/anchor pointer**: the surface is edge-aligned at an 8px offset and
  * proximity carries the relationship.
  *
+ * Below 744px `action` renders as a {@link StyledBottomSheet} (ASMA-8184) — same props, same content;
+ * `info` stays anchored at every size, because for an explanation the link to its term is the point.
+ *
  * Separate from {@link StyledPopover}, which stays as the MUI-parity positioning primitive its eight
  * internal consumers still depend on; those migrate here gradually.
  */
-export const StyledPopoverV2 = ({
+export const PopoverSheet = ({
     dataTest,
     renderTrigger,
     variant = 'info',
@@ -118,11 +132,12 @@ export const StyledPopoverV2 = ({
     viewResultsAction,
     resetAction,
     footerActions,
+    resultCount,
     closeLabel = 'Lukk',
     ariaLabel,
     onOpenChange,
     className,
-}: StyledPopoverV2Props): JSX.Element => {
+}: PopoverSheetProps): JSX.Element => {
     const panelId = useId()
     const titleId = `${panelId}-title`
 
@@ -133,8 +148,9 @@ export const StyledPopoverV2 = ({
     const isMobile = useMobileMediaQuery()
     const isDialog = variant === 'action'
     // Spec: on mobile an Info popover always sits below its trigger — flipping above would cover the
-    // very term it explains. Action below 744px becomes a Bottom Sheet (ASMA-8184), not our problem yet.
+    // very term it explains. Action below 744px is a Bottom Sheet instead of an anchored surface.
     const keepBelowTrigger = isMobile && !isDialog
+    const isSheet = isMobile && isDialog
 
     const changeOpen = useCallback(
         (next: boolean) => {
@@ -166,7 +182,10 @@ export const StyledPopoverV2 = ({
     // The trigger owns opening, so a press on it must not also register as an outside-press — on touch
     // that races the popover shut in the same tap. Pressing a *different* popover's trigger is still
     // outside, which is what gives "only one popover open at a time" for free.
+    // Off in sheet mode: with no floating element every press inside the sheet would count as an
+    // outside press and close it. The sheet owns its own dismiss routes.
     const dismiss = useDismiss(context, {
+        enabled: !isSheet,
         escapeKey: true,
         outsidePress: (event) => {
             const trigger = triggerRef.current
@@ -297,7 +316,46 @@ export const StyledPopoverV2 = ({
 
     const resolveSlot = (slot: PopoverSlot): ReactNode => (typeof slot === 'function' ? slot({ close }) : slot)
 
+    const displayedCount = useDebouncedValue(resultCount, 500)
+    const viewResults: PopoverSlot | undefined =
+        viewResultsAction ??
+        (resultCount === undefined ? undefined : (
+            <StyledButton dataTest={`${dataTest}-view-results`} type='button' variant='text' onClick={close}>
+                {formatResultsLabel(displayedCount)}
+            </StyledButton>
+        ))
+
     const maxWidth = isMobile ? MOBILE_WIDTH : MAX_WIDTH_PX[variant]
+
+    if (isSheet) {
+        return (
+            <>
+                {renderTrigger(trigger)}
+                {/* `onClose={close}` discards the sheet's own dismiss reason (closeButton/scrim/
+                    escape/drag/viewResults/action) — `close` is `() => void`. Deliberate, not an
+                    oversight: the desktop path has never exposed a dismiss reason either (floating-ui's
+                    outside-press vs Escape also collapse into the same `onOpenChange(false)`), so this
+                    keeps the two paths at parity rather than growing a reason union just for mobile.
+                    A direct `StyledBottomSheet` consumer still gets the full reason. */}
+                <StyledBottomSheet
+                    id={panelId}
+                    dataTest={dataTest}
+                    open={isOpen}
+                    onClose={close}
+                    title={title}
+                    ariaLabel={ariaLabel}
+                    viewResultsAction={viewResultsAction}
+                    resetAction={resetAction}
+                    footerActions={footerActions}
+                    resultCount={resultCount}
+                    closeLabel={closeLabel}
+                    className={className}
+                >
+                    {children}
+                </StyledBottomSheet>
+            </>
+        )
+    }
 
     return (
         <>
@@ -332,7 +390,7 @@ export const StyledPopoverV2 = ({
                             dataTest={dataTest}
                             title={title}
                             titleId={titleId}
-                            viewResultsAction={resolveSlot(viewResultsAction)}
+                            viewResultsAction={resolveSlot(viewResults)}
                             resetAction={resolveSlot(resetAction)}
                             footerActions={resolveSlot(footerActions)}
                             closeLabel={closeLabel}
