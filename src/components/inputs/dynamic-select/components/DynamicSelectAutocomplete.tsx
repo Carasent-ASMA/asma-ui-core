@@ -41,8 +41,6 @@ export const DynamicSelectAutocomplete = forwardRef(
             onFocus,
             onBlur,
         } = props
-        const typingDisabled = options.length < 11
-
         const getOptionLabel = (option: TOption | string) => {
             if (typeof option === 'object') {
                 return option?.[labelKey as keyof TOption]?.toString() ?? ''
@@ -169,6 +167,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                                                   label: 'block whitespace-normal',
                                               }}
                                               disabled={Boolean(disabled) || Boolean(loading)}
+                                              deleteButtonTabIndex={-1}
                                               onDelete={() => {
                                                   if (!Array.isArray(value)) return
                                                   const newValues = value.filter(
@@ -184,6 +183,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                                               dataTest='remaining-count-tag-chip'
                                               label={`+${remainingCount}`}
                                               variant='outlined'
+                                              tabIndex={-1}
                                               onClick={handleOpen}
                                           />
                                       ) : null,
@@ -333,11 +333,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                             readOnly={readOnly}
                             onFocus={onFocus}
                             onBlur={onBlur}
-                            onKeyDown={(event) => {
-                                params.onKeyDown(event)
-                                if (typingDisabled && !event.defaultPrevented && event.key.length === 1)
-                                    event.preventDefault()
-                            }}
+                            onKeyDown={params.onKeyDown}
                             // Always off: this input owns its own option list, so the browser's
                             // form-history dropdown would cover it — same as `StyledSelectAutocomplete`
                             // and MUI's `useAutocomplete`. (The previous `typingDisabled ? 'off' : 'on'`
@@ -352,7 +348,6 @@ export const DynamicSelectAutocomplete = forwardRef(
                                         startAdornment ??
                                         (params.slotProps?.input as { startAdornment?: React.ReactNode } | undefined)
                                             ?.startAdornment,
-                                    style: typingDisabled ? { caretColor: 'transparent' } : {},
                                 },
                                 htmlInput: {
                                     ...(params.slotProps?.htmlInput ?? {}),
@@ -364,7 +359,6 @@ export const DynamicSelectAutocomplete = forwardRef(
                                     // visible title (axe `label`, the single largest violation source
                                     // in this component's stories).
                                     ...(titleId ? { 'aria-labelledby': titleId } : {}),
-                                    style: typingDisabled ? { caretColor: 'transparent' } : {},
                                 },
                             }}
                         />

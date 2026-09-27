@@ -21,6 +21,23 @@ type Story = StoryObj<typeof meta>
 
 const pointerActions = { save: fn(), archive: fn(), select: fn(), autocomplete: fn() }
 
+const PointerCancellationAutocomplete = (): JSX.Element => {
+    const [value, setValue] = useState<string | null>('Ada')
+
+    return (
+        <StyledSelectAutocomplete
+            dataTest='autocomplete'
+            options={['Ada', 'Grace']}
+            value={value}
+            onChange={(event, next) => {
+                pointerActions.autocomplete(event, next)
+                setValue(next)
+            }}
+            renderInput={(params) => <StyledInputField {...params} dataTest='search' label='Search people' />}
+        />
+    )
+}
+
 export const PointerCancellation: Story = {
     render: () => (
         <div>
@@ -29,13 +46,7 @@ export const PointerCancellation: Story = {
             <StyledSelect dataTest='person' name='Person' value='' onChange={pointerActions.select}>
                 <StyledSelectItem value='Ada'>Ada</StyledSelectItem>
             </StyledSelect>
-            <StyledSelectAutocomplete
-                dataTest='autocomplete'
-                options={['Ada', 'Grace']}
-                value='Ada'
-                onChange={pointerActions.autocomplete}
-                renderInput={(params) => <StyledInputField {...params} dataTest='search' label='Search people' />}
-            />
+            <PointerCancellationAutocomplete />
         </div>
     ),
     play: async ({ canvasElement }) => {

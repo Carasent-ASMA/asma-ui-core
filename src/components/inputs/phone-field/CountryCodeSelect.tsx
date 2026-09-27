@@ -52,6 +52,7 @@ export const CountryCodeSelect = ({
     className,
 }: CountryCodeSelectProps): JSX.Element => {
     const [open, setOpen] = useState(false)
+    const [focused, setFocused] = useState(false)
     const [query, setQuery] = useState('')
     // The popover needs the element as a value, and a ref cannot be read during render — so the
     // trigger is captured through a callback ref into state instead.
@@ -65,23 +66,22 @@ export const CountryCodeSelect = ({
     const selected = countries.find((country) => country.iso2 === value)
     const dialCode = selected === undefined ? '' : `+${selected.dialCode}`
 
-    const close = (): void => {
-        setOpen(false)
-        setQuery('')
-    }
-
-    const select = (iso2: string): void => {
-        onChange(iso2)
-        close()
-    }
-
     const picker = useCountryPicker({
         countries,
         selectedIso2: value,
         query,
         listId,
-        onSelect: select,
-        onDismiss: close,
+        onSelect: (iso2, closeAfterSelect = true) => {
+            onChange(iso2)
+            if (closeAfterSelect) {
+                setOpen(false)
+                setQuery('')
+            }
+        },
+        onDismiss: () => {
+            setOpen(false)
+            setQuery('')
+        },
     })
 
     useEffect(() => {
@@ -105,7 +105,7 @@ export const CountryCodeSelect = ({
             selectedIso2={value}
             activeIndex={picker.activeIndex}
             optionId={picker.optionId}
-            onSelect={select}
+            onSelect={picker.select}
             listId={listId}
             label={selectCountryLabel}
             renderFlag={renderFlag}
@@ -117,7 +117,7 @@ export const CountryCodeSelect = ({
         // and the sheet's search box is a `StyledSearchField` whose input defaults to a plain
         // textbox — the desktop trigger below spells the same role out for itself.
         role: 'combobox' as const,
-        'aria-activedescendant': picker.visible.length > 0 ? picker.optionId(picker.activeIndex) : undefined,
+        'aria-activedescendant': picker.activeIndex === null ? undefined : picker.optionId(picker.activeIndex),
         'aria-autocomplete': 'list' as const,
         'aria-controls': listId,
         'aria-expanded': true,
@@ -143,7 +143,7 @@ export const CountryCodeSelect = ({
                     neutral and reddens only the number input, because the country is always valid. */}
                 <span
                     aria-hidden='true'
-                    className={cn(notchedOutlineClass({ disabled, notched: false }), className)}
+                    className={cn(notchedOutlineClass({ focused: focused || openDesktopCombobox, disabled, notched: false }), className)}
                 />
 
                 {/* One layer above the outline for ALL content: the outline carries the consumer's
@@ -171,16 +171,20 @@ export const CountryCodeSelect = ({
                             aria-expanded
                             aria-activedescendant={comboboxAria['aria-activedescendant']}
                             aria-autocomplete='list'
+                            aria-haspopup='listbox'
+                            onFocus={() => setFocused(true)}
+                            onBlur={() => setFocused(false)}
                         />
                         {/* `StyledPopover` deliberately ignores presses inside its anchor, so the
                             toggle has to live here — otherwise the chevron could never close it. */}
                         <button
                             type='button'
                             data-testid={`${dataTest}-collapse`}
-                            aria-labelledby={labelledBy}
+                            tabIndex={-1}
+                            aria-hidden='true'
                             aria-expanded
-                            onClick={close}
-                            className='ml-auto flex shrink-0 cursor-pointer border-0 bg-transparent p-0'
+                            onClick={picker.dismiss}
+                            className='ml-auto flex shrink-0 cursor-pointer border-0 bg-transparent p-0 outline-none focus:shadow-none focus:outline-none focus:ring-0'
                         >
                             <ChevronDownIcon width={20} height={20} className='flip-180' />
                         </button>
@@ -193,10 +197,20 @@ export const CountryCodeSelect = ({
                         disabled={disabled}
                         aria-haspopup='listbox'
                         aria-expanded={open}
+                        aria-controls={open ? listId : undefined}
                         aria-labelledby={labelledBy}
+                        role='combobox'
                         onClick={() => setOpen(true)}
+                        onKeyDown={(event) => {
+                            if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return
+                            event.preventDefault()
+                            picker.openWithKeyboard(event.key === 'ArrowUp' ? -1 : 1)
+                            setOpen(true)
+                        }}
+                        onFocus={() => setFocused(true)}
+                        onBlur={() => setFocused(false)}
                         className={cn(
-                            'relative z-[1] flex w-full items-center gap-1.5 border-0 bg-transparent p-0 text-base',
+                            'relative z-[1] flex w-full items-center gap-1.5 border-0 bg-transparent p-0 text-base outline-none focus:shadow-none focus:outline-none focus:ring-0',
                             disabled ? 'cursor-not-allowed text-delta-300' : 'cursor-pointer text-delta-800',
                         )}
                     >
@@ -214,7 +228,7 @@ export const CountryCodeSelect = ({
             {isMobile ? (
                 <StyledDialog
                     open={open}
-                    onClose={close}
+                    onClose={picker.dismiss}
                     dataTest={`${dataTest}-dialog`}
                     dialogTitle={selectCountryLabel}
                     showCloseIcon
@@ -246,7 +260,8 @@ export const CountryCodeSelect = ({
                 <StyledPopover
                     open={open}
                     anchorEl={triggerEl}
-                    onClose={close}
+                    onClose={picker.dismiss}
+                    tabIntoContent={false}
                     slotProps={{ paper: { className: 'flex max-h-80 w-80 flex-col overflow-hidden' } }}
                 >
                     {options}

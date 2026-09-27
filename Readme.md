@@ -238,6 +238,113 @@ field does not pay for one. `onChange` reports digits only — the country trave
 The picker has two shapes: below 744 px it is a full-screen sheet with its own search box, above it
 the trigger itself is the combobox. Both are keyboard-operable and share one listbox.
 
+### Popover
+
+`PopoverSheet` is the Design System popover (ASMA-8183): an anchored surface with an optional
+title, a close control and two optional footer rows. One implementation, two variants picked by
+**content** rather than by breakpoint.
+
+```tsx
+import { StyledButton, PopoverSheet } from 'asma-ui-core'
+
+<PopoverSheet
+    dataTest='case-filter'
+    variant='action'
+    title='Filtrer søknader'
+    renderTrigger={({ ref, triggerProps }) => (
+        <StyledButton dataTest='case-filter-trigger' refLink={ref} type='button' {...triggerProps}>
+            {activeCount > 0 ? `Filter (${activeCount})` : 'Filter'}
+        </StyledButton>
+    )}
+    viewResultsAction={({ close }) => (
+        <StyledButton dataTest='case-filter-view' type='button' variant='text' onClick={close}>
+            {`Vis resultater (${matchCount})`}
+        </StyledButton>
+    )}
+    resetAction={
+        <StyledButton dataTest='case-filter-reset' type='button' variant='text' onClick={clearFilters}>
+            Nullstill
+        </StyledButton>
+    }
+>
+    <CaseFilterForm value={filters} onChange={setFilters} />
+</PopoverSheet>
+```
+
+The two footer rows come straight from Figma. The **Reset filter** row is `space-between`:
+`viewResultsAction` on the left (the live match count, which closes the surface — the filter has
+already applied) and `resetAction` on the right. The **Actions** row (`footerActions`) is a single
+right-aligned outlined button. Each of those slots, like `children`, may be a render-prop receiving
+`close()`. In Storybook, **`AllCases`** gives every case its own trigger to open and operate, and
+**`Gallery`** shows the same anatomies side by side, statically, for visual comparison.
+
+`info` is read-only: a plain container the trigger points at with `aria-describedby`, not focus
+trapped, so `Tab` walks out of it and closes it. `action` is a `role="dialog"` with a focus trap,
+and covers both the Filter pattern (every change applies immediately — there is no apply step,
+`Nullstill` clears) and the Actions pattern (a list of buttons; `children` may be a render-prop
+receiving `close()` so activating one closes the surface).
+
+There is deliberately **no `role="menu"` and no arrow-key navigation**: menu semantics bring a
+keyboard contract that cannot coexist with the dialog model Filter uses, so everything inside is
+reached with `Tab`. There is no arrow or anchor pointer either — the surface is edge-aligned to its
+trigger at an 8px offset.
+
+The consumer owns the trigger element (spread `triggerProps`, wire `ref` — `refLink` on
+`StyledButton`), the filter state, and the `aria-live` region that announces the new result count.
+Below 744px an `info` popover takes `100vw - 32px` and is pinned below its trigger, while an
+`action` popover renders as a **Bottom Sheet** with the same props (see below).
+
+### Bottom sheet
+
+`StyledBottomSheet` (ASMA-8184) is the mobile (0–743px) form of the Action popover. You rarely use
+it directly — `PopoverSheet variant='action'` switches to it below 744px — but it is exported for
+screens that only ever show a sheet.
+
+```tsx
+<StyledBottomSheet
+    dataTest='row-actions'
+    open={open}
+    onClose={() => setOpen(false)}
+    title='Handlinger — søknad 4417'
+>
+    {({ close }) => <RowActionButtons onDone={close} />}
+</StyledBottomSheet>
+```
+
+A modal sheet on a native `<dialog>`: dimmed scrim, page scroll locked and made `inert`, top corners
+28px, width up to 640px, height fitting the content up to 90vh with an internally scrolling body (a
+full-screen dialog at `max-height: 480px`). Five equivalent dismiss routes — close button, *Vis
+resultater*, scrim, `Esc`, dragging down past 30% — and none of them commits anything. Focus goes to
+the sheet on open so the title is read first, and back to the trigger on close; the grabber is
+decorative.
+
+Pass **`resultCount`** (to the sheet or the popover) for the standard *Vis resultater (N)* control:
+debounced ~500ms, `Ingen treff` at zero and still enabled, capped at `9999+`, and announced from a
+live region inside the sheet — the list behind is inert, so its own live region cannot. The label
+comes from the exported `formatResultsLabel`. Title the sheet after the object, not the action: a
+sheet detaches from its trigger, so `Handlinger` alone does not say which row was opened.
+
+`StyledPopover` is a different, older thing and stays permanently: the MUI-`Popover`-parity
+positioning primitive that `StyledMenu`, the date-picker calendar, `CountryCodeSelect` and four table
+components (`RowActionMenu`, `HeaderActionMenu`, `TableRowCountSelect`, `TablePagination`) build on.
+New code should reach for `PopoverSheet` — but it is **not** a drop-in replacement for
+`StyledPopover`, and most of those consumers should never move to it:
+
+- `StyledMenu`, `RowActionMenu` and (through it) `ToolbarActionGroup` render `role="menu"` with roving
+  tabindex and arrow-key navigation — semantics `PopoverSheet` deliberately excludes.
+- `TableRowCountSelect`, `TablePagination` and `CountryCodeSelect`'s desktop panel are `role="listbox"`
+  / combobox pickers, not Info or Action content.
+- The date-picker calendar is a day grid with its own mobile `Drawer` fallback already, which would
+  collide with `PopoverSheet`'s built-in <744px sheet swap.
+
+`StyledFilterMenu` is the one real migration candidate — its `popoverContent({isOpen, onClose})` +
+`anchorNode` render-props are exactly the shape `PopoverSheet`'s Filter pattern
+(`resetAction`/`viewResultsAction`/`resultCount`) was modeled on — but the render-prop shapes differ
+enough (`{isOpen, onClose}` vs `{close}`, `anchorNode` vs `renderTrigger`) that it needs its own
+rewrite, not an import swap; tracked as a follow-up, not done here. `HeaderActionMenu` (plain
+buttons/checkboxes, no menu role) is a plausible second candidate for the same reason, with its
+drag-and-drop reordering needing its own verification inside a focus trap.
+
 ### Icons
 
 Around 180 icons ship on a dedicated subpath so you only pay for the ones you use — each is its own
@@ -581,3 +688,5 @@ npx changeset
 Choose `patch` for a fix, `minor` for a feature, `major` for a breaking change, and commit the
 generated markdown file with your PR. A PR may carry several changesets. On merge to master the
 pipeline bumps the version, writes the changelog and publishes to npm.
+
+Releases are cut by conventional-commit subjects on master (`feat:` minor, `fix:`/`chore:` patch); Jira-only subjects do not publish.

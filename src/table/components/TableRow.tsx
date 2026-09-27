@@ -9,9 +9,9 @@ import { useRootContext } from 'src/table/context/RootContext'
 import type { ColumnWindow } from 'src/table/hooks/useColumnVirtualizer'
 import { compact } from 'src/helpers/arrays'
 
-const focusNextOutsideTable = (currentRow: HTMLTableRowElement): void => {
+const focusNextOutsideTable = (currentRow: HTMLTableRowElement): boolean => {
     const table = currentRow.closest('table')
-    if (!table) return
+    if (!table) return false
 
     const next = Array.from(
         document.querySelectorAll<HTMLElement>(
@@ -22,7 +22,9 @@ const focusNextOutsideTable = (currentRow: HTMLTableRowElement): void => {
             !table.contains(element) && Boolean(table.compareDocumentPosition(element) & Node.DOCUMENT_POSITION_FOLLOWING),
     )
 
-    next?.focus()
+    if (!next) return false
+    next.focus()
+    return document.activeElement === next
 }
 
 export function TableRow<TData extends { id: string | number }, TCustomData = Record<string, unknown>>({
@@ -136,6 +138,41 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
             return
         }
         onMouseUpAction(e)
+    }
+
+    const onKeyDownCapture = (e: React.KeyboardEvent<HTMLTableRowElement>): void => {
+        if (e.target !== e.currentTarget) return
+
+        switch (e.key) {
+            case 'Tab': {
+                if (e.shiftKey) {
+                    if (row.focusPrevRow()) {
+                        e.preventDefault()
+                        break
+                    }
+                    const header = e.currentTarget.closest('table')?.querySelector<HTMLTableRowElement>(
+                        'thead tr[tabindex="0"]',
+                    )
+                    if (header) {
+                        e.preventDefault()
+                        header.focus()
+                    }
+                } else if (row.focusNextRow() || focusNextOutsideTable(e.currentTarget)) {
+                    e.preventDefault()
+                }
+                break
+            }
+            case 'ArrowDown':
+                if (row.focusNextRow()) e.preventDefault()
+                break
+            case 'ArrowUp':
+                if (row.focusPrevRow()) e.preventDefault()
+                break
+            case 'Enter':
+                e.preventDefault()
+                onMouseUpAction(e)
+                break
+        }
     }
 
     const positionedCells = row.getVisibleCells().map((cell, idx, allCells) => ({
@@ -305,32 +342,7 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
                         e.preventDefault()
                     }
                 }}
-                onKeyDown={(e) => {
-                    switch (e.key) {
-                        case 'Tab': {
-                            e.preventDefault()
-                            if (e.shiftKey) {
-                                if (row.focusPrevRow()) break
-                                const header = e.currentTarget.closest('table')?.querySelector<HTMLTableRowElement>(
-                                    'thead tr[tabindex="0"]',
-                                )
-                                header?.focus()
-                            } else if (!row.focusNextRow()) {
-                                focusNextOutsideTable(e.currentTarget)
-                            }
-                            break
-                        }
-                        case 'ArrowDown':
-                            if (row.focusNextRow()) e.preventDefault()
-                            break
-                        case 'ArrowUp':
-                            if (row.focusPrevRow()) e.preventDefault()
-                            break
-                        case 'Enter':
-                            onMouseUpAction(e)
-                            break
-                    }
-                }}
+                onKeyDownCapture={onKeyDownCapture}
             >
                 {leftCells.map((cell, idx) => renderCell(cell, idx))}
 

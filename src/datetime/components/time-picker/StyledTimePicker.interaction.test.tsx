@@ -16,15 +16,23 @@ import { StyledTimePicker } from './StyledTimePicker'
 const TimePickerFixture = ({ onSelect = () => undefined }: { onSelect?: (date?: Date) => void }): JSX.Element => {
     const [value, setValue] = useState<Date>()
     return (
-        <StyledTimePicker
-            dataTest='start-time'
-            label='Start time'
-            value={value}
-            onSelect={(next) => {
-                setValue(next)
-                onSelect(next)
-            }}
-        />
+        <>
+            <button type='button' data-testid='before'>
+                Before
+            </button>
+            <StyledTimePicker
+                dataTest='start-time'
+                label='Start time'
+                value={value}
+                onSelect={(next) => {
+                    setValue(next)
+                    onSelect(next)
+                }}
+            />
+            <button type='button' data-testid='after'>
+                After
+            </button>
+        </>
     )
 }
 
@@ -57,6 +65,8 @@ describe('StyledTimePicker keyboard contract', () => {
     it('is reachable by Tab (2.1.1)', async () => {
         const { container } = mount(<TimePickerFixture />)
 
+        await userEvent.tab()
+        await expect(document.activeElement).toBe(container.querySelector('[data-testid="before"]'))
         await userEvent.tab()
 
         await expect(document.activeElement).toBe(field(container))
@@ -132,12 +142,36 @@ describe('StyledTimePicker keyboard contract', () => {
      * inconsistency as well as a defect.
      * Not fixed here: wave-3 builders add tests, not component fixes. Escalated to the coordinator.
      * @see docs/a11y-keyboard-contract.md */
-    it.skip('closes the time panel on Escape (1.4.13, 2.1.2)', async () => {
+    it('closes the time panel on Escape (1.4.13, 2.1.2)', async () => {
         const { container } = mount(<TimePickerFixture />)
         await openPanel(container)
 
         await userEvent.keyboard('{Escape}')
         await waitFor(() => expect(panel()).toBeNull())
+        await expect(document.activeElement).toBe(field(container))
+    })
+
+    it('closes the time panel on Tab without blocking focus movement (2.1.2)', async () => {
+        const { container } = mount(<TimePickerFixture />)
+        const input = field(container)
+        await openPanel(container)
+        input.focus()
+
+        await userEvent.tab()
+
+        await waitFor(() => expect(panel()).toBeNull())
+        await expect(document.activeElement).toBe(container.querySelector('[data-testid="after"]'))
+    })
+
+    it('closes the time panel on Shift+Tab without blocking reverse focus movement (2.1.2)', async () => {
+        const { container } = mount(<TimePickerFixture />)
+        await openPanel(container)
+        field(container).focus()
+
+        await userEvent.tab({ shift: true })
+
+        await waitFor(() => expect(panel()).toBeNull())
+        await expect(document.activeElement).toBe(container.querySelector('[data-testid="before"]'))
     })
 
     it('confirms the panel really is mouse-openable, so ASMA-8139-J/K are about the panel and not the fixture', async () => {

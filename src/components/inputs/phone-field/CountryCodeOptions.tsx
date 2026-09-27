@@ -8,7 +8,7 @@ export interface CountryCodeOptionsProps {
     /** Already filtered — the caller owns the query. */
     visible: readonly PhoneCountryChoice[]
     selectedIso2: string
-    activeIndex: number
+    activeIndex: number | null
     optionId: (index: number) => string
     onSelect: (iso2: string) => void
     listId: string
@@ -39,6 +39,7 @@ export const CountryCodeOptions = ({
     useEffect(() => {
         // Keep the active row in view: `aria-activedescendant` moves the virtual cursor but does
         // not scroll, so a keyboard user would otherwise arrow into an invisible row.
+        if (activeIndex === null) return
         listRef.current?.querySelector(`#${CSS.escape(optionId(activeIndex))}`)?.scrollIntoView({ block: 'nearest' })
     })
 
@@ -56,11 +57,9 @@ export const CountryCodeOptions = ({
                     key={country.iso2}
                     id={optionId(index)}
                     selected={country.iso2 === selectedIso2}
+                    active={index === activeIndex}
                     onClick={() => onSelect(country.iso2)}
-                    className={cn(
-                        'border-0 border-b border-solid border-delta-100',
-                        index === activeIndex && 'bg-delta-50',
-                    )}
+                    className='border-0 border-b border-solid border-delta-100'
                 >
                     {/* One wrapper: StyledSelectItem puts children inside a single flex-1 span,
                         so the name/code split has to happen in here. */}

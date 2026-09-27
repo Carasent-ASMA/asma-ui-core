@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 
 import { StyledFilterMenu } from './StyledFilterMenu'
 import { useEffect, useState } from 'react'
-import { StyledMenuList as MenuList, StyledMenuItem as MenuItem } from 'src/components/navigation/menu'
 import { StyledCheckbox } from '../../inputs/checkbox'
 import { StyledFormControlLabel } from '../../miscellaneous/StyledFormControlLabel'
 
@@ -83,18 +82,18 @@ const FilterMenuExample = () => {
                 dataTest='filter-menu-example'
                 popoverContent={
                     (/* { isOpen, onClose } */) => (
-                        <MenuList>
+                        <div className='flex flex-col gap-2 p-3'>
                             {mockData.map(({ key, label, checked }) => (
-                                <MenuItem key={key} className={`${checked ? 'bg-gama-50' : ''} h-12`}>
+                                <div key={key} className={checked ? 'bg-gama-50' : undefined}>
                                     <StyledFormControlLabel
                                         label={label}
                                         control={<StyledCheckbox dataTest='menu-item-checkbox' disableRipple />}
                                         checked={checked}
                                         onChange={() => handleCheckboxChange(key)}
                                     />
-                                </MenuItem>
+                                </div>
                             ))}
-                        </MenuList>
+                        </div>
                     )
                 }
             />
@@ -104,18 +103,18 @@ const FilterMenuExample = () => {
                 dataTest='filter-menu-example-2'
                 size='small'
                 popoverContent={
-                    <MenuList>
+                    <div className='flex flex-col gap-2 p-3'>
                         {mockData.map(({ key, label, checked }) => (
-                            <MenuItem key={key} className={`${checked ? 'bg-primary-50' : ''} h-12`}>
+                            <div key={key} className={checked ? 'bg-primary-50' : undefined}>
                                 <StyledFormControlLabel
                                     label={label}
                                     control={<StyledCheckbox dataTest='menu-item-checkbox' disableRipple />}
                                     checked={checked}
                                     onChange={() => handleCheckboxChange(key)}
                                 />
-                            </MenuItem>
+                            </div>
                         ))}
-                    </MenuList>
+                    </div>
                 }
             />
         </div>

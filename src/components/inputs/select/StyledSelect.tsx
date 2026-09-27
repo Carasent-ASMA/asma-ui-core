@@ -397,7 +397,7 @@ export const StyledSelect = ({
                 role='combobox'
                 aria-haspopup='listbox'
                 aria-expanded={open}
-                aria-controls={listboxId}
+                aria-controls={open ? listboxId : undefined}
                 aria-activedescendant={open ? activeOptionId : undefined}
                 // `labelId` (external label) wins when present — same MUI `Select` intent as
                 // `aria-labelledby` taking precedence over `aria-label` per spec. Otherwise fall back
@@ -427,6 +427,10 @@ export const StyledSelect = ({
                     // `standard` shares the outlined geometry (h40, px-3, radius) — only its border is
                     // deferred to focus, via `borderless` on the outline overlay below.
                     'h-10 rounded-lg border-0 px-3 text-base transition-colors',
+                    // ASMA-8220 (TB-14): the trigger repaints its background while pressed, so
+                    // touch-ready. No `asma-touch-target`: growing 40→44px on a phone would desync
+                    // the trigger from StyledInputField's h-10 in a mixed form.
+                    'asma-touch-ready',
                     isButtonFocus ? 'bg-gama-50' : 'bg-transparent',
                     triggerTextClass,
                     isStandard && 'min-w-0',
@@ -486,6 +490,7 @@ export const StyledSelect = ({
                         {...getFloatingProps()}
                         id={listboxId}
                         role='listbox'
+                        aria-multiselectable={multiple ? true : undefined}
                         // Mirror the trigger's own name fallback (`labelId` wins, else `name`) — the
                         // popup is a separate element from the trigger and needs its own accessible name
                         // (axe `aria-input-field-name`); relying on `name` alone left it nameless for any

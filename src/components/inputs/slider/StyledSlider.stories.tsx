@@ -71,7 +71,7 @@ type Story = StoryObj<typeof StyledSlider>
 export const Default: Story = {
     args: {},
     render: (args) => (
-        <label className='flex flex-col font-semibold text-base text-delta-800'>
+        <label className='flex flex-col gap-4 font-semibold text-base text-delta-800'>
             Default Slider
             <StyledSlider {...args} />
         </label>
@@ -81,7 +81,7 @@ export const Default: Story = {
 export const Disabled: Story = {
     args: { disabled: true },
     render: (args) => (
-        <label className='flex flex-col font-semibold text-base text-delta-800'>
+        <label className='flex flex-col gap-4 font-semibold text-base text-delta-800'>
             Disabled Slider
             <StyledSlider {...args} />
         </label>
@@ -91,7 +91,7 @@ export const Disabled: Story = {
 export const HelperText: Story = {
     args: { helperText: 'Custom helper text here' },
     render: (args) => (
-        <label className='flex flex-col font-semibold text-base text-delta-800'>
+        <label className='flex flex-col gap-4 font-semibold text-base text-delta-800'>
             Slider With Helper Text
             <StyledSlider {...args} />
         </label>
@@ -101,7 +101,7 @@ export const HelperText: Story = {
 export const Error: Story = {
     args: { error: true, errorText: 'Custom Error text here' },
     render: (args) => (
-        <label className='flex flex-col font-semibold text-base text-delta-800'>
+        <label className='flex flex-col gap-4 font-semibold text-base text-delta-800'>
             Slider With Error Text
             <StyledSlider {...args} />
         </label>
@@ -113,6 +113,110 @@ export const Vertical: Story = {
     render: (args) => (
         <label className='flex flex-col gap-4 font-semibold text-base text-delta-800 h-[600px]'>
             Vertical Slider
+            <StyledSlider {...args} />
+        </label>
+    ),
+}
+
+export const WithLabelsOnly: Story = {
+    args: {
+        fromLabel: 'Very poor',
+        toLabel: 'Excellent',
+    },
+    render: (args) => (
+        <label className='flex flex-col gap-4 font-semibold text-base text-delta-800'>
+            Slider with From/To Labels
+            <StyledSlider {...args} />
+        </label>
+    ),
+}
+
+/**
+ * Tests the +/- buttons without the From/To labels.
+ * Verifies the buttons sit flush with the edges of the component.
+ */
+export const WithButtonsOnly: Story = {
+    args: {
+        showButtons: true,
+    },
+    render: (args) => (
+        <label className='flex flex-col gap-4 font-semibold text-base text-delta-800'>
+            Slider with +/- Buttons
+            <StyledSlider {...args} />
+        </label>
+    ),
+}
+
+/**
+ * Tests both labels and buttons together.
+ * The labels should align with the outer edges of the buttons.
+ */
+export const WithLabelsAndButtons: Story = {
+    args: {
+        fromLabel: 'Very poor',
+        toLabel: 'Excellent',
+        showButtons: true,
+    },
+    render: (args) => (
+        <label className='flex flex-col gap-4 font-semibold text-base text-delta-800'>
+            Slider with Labels and Buttons
+            <StyledSlider {...args} />
+        </label>
+    ),
+}
+
+/**
+ * Tests long text wrapping for the From/To labels (matching the Figma red box example).
+ * The labels use `flex-1` and `break-words` so they wrap instead of overlapping or overflowing.
+ * We've constrained the max-width to force the wrap.
+ */
+export const LongLabels: Story = {
+    args: {
+        fromLabel: 'Very long, super long, mega long text goes here and wraps nicely',
+        toLabel: 'Very long, super long, mega long text goes here and wraps nicely',
+        showButtons: true,
+    },
+    render: (args) => (
+        <label className='flex flex-col gap-4 font-semibold text-base text-delta-800'>
+            Slider with Long Wrapping Labels
+            <StyledSlider {...args} />
+        </label>
+    ),
+}
+
+/**
+ * Tests the disabled state with the new layout elements.
+ * Buttons and labels should render correctly but be visually disabled.
+ */
+export const DisabledWithLabelsAndButtons: Story = {
+    args: {
+        disabled: true,
+        fromLabel: 'Poor',
+        toLabel: 'Excellent',
+        showButtons: true,
+    },
+    render: (args) => (
+        <label className='flex flex-col gap-4 font-semibold text-base text-delta-800'>
+            Disabled Slider with Labels and Buttons
+            <StyledSlider {...args} />
+        </label>
+    ),
+}
+
+/**
+ * Tests that the new layout elements don't break the vertical orientation.
+ * (Based on the component code, buttons and labels should be hidden for vertical sliders).
+ */
+export const VerticalWithLabelsAndButtons: Story = {
+    args: {
+        orientation: 'vertical',
+        fromLabel: 'Low',
+        toLabel: 'High',
+        showButtons: true,
+    },
+    render: (args) => (
+        <label className='flex flex-col gap-4 font-semibold text-base text-delta-800 h-[400px]'>
+            Vertical Slider with Labels and Buttons (Should ignore buttons/labels)
             <StyledSlider {...args} />
         </label>
     ),
@@ -207,5 +311,28 @@ export const ParamsMatrix: Story = {
                 </label>
             ))}
         </div>
+    ),
+}
+
+/**
+ * Tests the range (two-thumb) slider with labels and buttons.
+ * The increment button should move the upper thumb, and decrement the lower thumb.
+ */
+export const RangeWithLabelsAndButtons: Story = {
+    args: {
+        min: 0,
+        max: 10,
+        step: 1,
+        defaultValue: [2, 7],
+        fromLabel: 'Minimum',
+        toLabel: 'Maximum',
+        showButtons: true,
+        marks: labelledMarks(0, 10),
+    },
+    render: (args) => (
+        <label className='flex flex-col gap-4 font-semibold text-base text-delta-800'>
+            Range Slider with Labels and Buttons
+            <StyledSlider {...args} />
+        </label>
     ),
 }

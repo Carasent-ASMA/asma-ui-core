@@ -19,3 +19,6 @@ export function makeMediaQueryStore(mediaQuery: string) {
 }
 
 export const useMobileMediaQuery = makeMediaQueryStore('(max-width: 743px)')
+
+/** A phone in landscape: too short for a sheet capped at 90vh to leave a usable body. */
+export const useShortViewportMediaQuery = makeMediaQueryStore('(max-height: 480px)')

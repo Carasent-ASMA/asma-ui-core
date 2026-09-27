@@ -297,3 +297,36 @@ export const PrimaryLoading: Story = {
         await expect(save).toHaveTextContent('Save filter')
     },
 }
+
+/**
+ * Regression (crm "Edit person details"): the host form is
+ * `flex flex-col items-center justify-center`. In a flex COLUMN, `items-center` aligns the
+ * CROSS axis, so a footer with no explicit width shrinks to its buttons and the separator
+ * floats mid-dialog instead of spanning it. The footer must span regardless.
+ */
+export const SpansCentringParent: Story = {
+    render: () => (
+        <div
+            className='flex flex-col items-center justify-center rounded-lg border border-solid border-delta-200 bg-white'
+            style={{ width: 600, height: 220 }}
+        >
+            <div className='flex w-full flex-auto flex-col p-4 text-delta-700'>Dialogue body</div>
+            <StyledDialogFooter
+                secondaryAction={{ label: 'Cancel', onClick: noop }}
+                primaryAction={{ label: 'Save changes', onClick: noop }}
+            />
+        </div>
+    ),
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement)
+        const footer = canvas.getByTestId('styled-dialog-footer')
+        const parent = footer.parentElement as HTMLElement
+
+        /* clientWidth is the parent's content box; its getBoundingClientRect would add its own
+         * 1px borders, which the footer correctly does not span. */
+        await waitFor(async () => expect(footer.getBoundingClientRect().width).toBeCloseTo(parent.clientWidth, 0))
+        /* And the primary still sits at the right edge, not centred. */
+        const save = canvas.getByRole('button', { name: 'Save changes' })
+        expect(parent.getBoundingClientRect().right - save.getBoundingClientRect().right).toBeLessThan(24)
+    },
+}
