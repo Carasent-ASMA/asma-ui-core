@@ -52,7 +52,15 @@ export default defineConfig(
             ...eslintPluginBetterTailwindcss.configs['recommended-warn'].rules,
             ...eslintPluginBetterTailwindcss.configs['recommended-error'].rules,
 
-            'better-tailwindcss/no-unregistered-classes': ['error', { ignore: ['border-l-solid', 'flip-180'] }],
+            // `border-{l,b,t}-solid` are this package's own side-specific border-style utilities
+            // (src/styles/index.css) — real Tailwind only ships the unsided `border-solid`, so the
+            // plugin can't find these in its own class list. Each gets added here the first time a
+            // component actually uses it (precedent: `border-l-solid`); `border-r-solid`/
+            // `border-y-solid` stay unlisted until something needs them.
+            'better-tailwindcss/no-unregistered-classes': [
+                'error',
+                { ignore: ['border-l-solid', 'border-b-solid', 'border-t-solid', 'flip-180'] },
+            ],
 
             // NOTE: enable this when we have none of the other tailwind related errors
             'better-tailwindcss/enforce-consistent-line-wrapping': ['off', { printWidth: 100 }],

@@ -221,7 +221,7 @@ export const StyledBottomSheet = ({
             >
                 {/* `border-b-solid`, not `border-solid`: with preflight off the other three sides would default
                     to a 3px `medium` width and paint a solid border — a visible line under the corners. */}
-                <div className='shrink-0 border-b border-b-solid border-delta-200 pb-2'>
+                <div className='border-b-solid shrink-0 border-b border-delta-200 pb-2'>
                     {/* The top 48px is the drag zone (Figma "touch target area"). */}
                     <div {...dragHandleProps} className='relative flex h-12 touch-none items-center gap-2 px-2'>
                         <div className='min-w-0 flex-1' />
@@ -261,7 +261,7 @@ export const StyledBottomSheet = ({
                 {hasFooter && (
                     <div
                         className={cn(
-                            'flex shrink-0 items-start border-t border-t-solid border-delta-200 bg-white p-1',
+                            'border-t-solid flex shrink-0 items-start border-t border-delta-200 bg-white p-1',
                             viewResults ? 'justify-between' : 'justify-end',
                             !extraActions && 'pb-[max(0.25rem,env(safe-area-inset-bottom))]',
                         )}
