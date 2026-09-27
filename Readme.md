@@ -240,14 +240,14 @@ the trigger itself is the combobox. Both are keyboard-operable and share one lis
 
 ### Popover
 
-`StyledAdaptiveSurface` is the Design System popover (ASMA-8183): an anchored surface with an optional
+`PopoverSheet` is the Design System popover (ASMA-8183): an anchored surface with an optional
 title, a close control and two optional footer rows. One implementation, two variants picked by
 **content** rather than by breakpoint.
 
 ```tsx
-import { StyledButton, StyledAdaptiveSurface } from 'asma-ui-core'
+import { StyledButton, PopoverSheet } from 'asma-ui-core'
 
-<StyledAdaptiveSurface
+<PopoverSheet
     dataTest='case-filter'
     variant='action'
     title='Filtrer søknader'
@@ -268,7 +268,7 @@ import { StyledButton, StyledAdaptiveSurface } from 'asma-ui-core'
     }
 >
     <CaseFilterForm value={filters} onChange={setFilters} />
-</StyledAdaptiveSurface>
+</PopoverSheet>
 ```
 
 The two footer rows come straight from Figma. The **Reset filter** row is `space-between`:
@@ -297,7 +297,7 @@ Below 744px an `info` popover takes `100vw - 32px` and is pinned below its trigg
 ### Bottom sheet
 
 `StyledBottomSheet` (ASMA-8184) is the mobile (0–743px) form of the Action popover. You rarely use
-it directly — `StyledAdaptiveSurface variant='action'` switches to it below 744px — but it is exported for
+it directly — `PopoverSheet variant='action'` switches to it below 744px — but it is exported for
 screens that only ever show a sheet.
 
 ```tsx
@@ -327,18 +327,18 @@ sheet detaches from its trigger, so `Handlinger` alone does not say which row wa
 `StyledPopover` is a different, older thing and stays permanently: the MUI-`Popover`-parity
 positioning primitive that `StyledMenu`, the date-picker calendar, `CountryCodeSelect` and four table
 components (`RowActionMenu`, `HeaderActionMenu`, `TableRowCountSelect`, `TablePagination`) build on.
-New code should reach for `StyledAdaptiveSurface` — but it is **not** a drop-in replacement for
+New code should reach for `PopoverSheet` — but it is **not** a drop-in replacement for
 `StyledPopover`, and most of those consumers should never move to it:
 
 - `StyledMenu`, `RowActionMenu` and (through it) `ToolbarActionGroup` render `role="menu"` with roving
-  tabindex and arrow-key navigation — semantics `StyledAdaptiveSurface` deliberately excludes.
+  tabindex and arrow-key navigation — semantics `PopoverSheet` deliberately excludes.
 - `TableRowCountSelect`, `TablePagination` and `CountryCodeSelect`'s desktop panel are `role="listbox"`
   / combobox pickers, not Info or Action content.
 - The date-picker calendar is a day grid with its own mobile `Drawer` fallback already, which would
-  collide with `StyledAdaptiveSurface`'s built-in <744px sheet swap.
+  collide with `PopoverSheet`'s built-in <744px sheet swap.
 
 `StyledFilterMenu` is the one real migration candidate — its `popoverContent({isOpen, onClose})` +
-`anchorNode` render-props are exactly the shape `StyledAdaptiveSurface`'s Filter pattern
+`anchorNode` render-props are exactly the shape `PopoverSheet`'s Filter pattern
 (`resetAction`/`viewResultsAction`/`resultCount`) was modeled on — but the render-prop shapes differ
 enough (`{isOpen, onClose}` vs `{close}`, `anchorNode` vs `renderTrigger`) that it needs its own
 rewrite, not an import swap; tracked as a follow-up, not done here. `HeaderActionMenu` (plain

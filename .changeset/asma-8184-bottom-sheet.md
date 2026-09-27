@@ -3,7 +3,7 @@
 ---
 
 Add `StyledBottomSheet` — the Design System Bottom Sheet (ASMA-8184), the mobile (0–743px) form of the
-Action popover. `StyledAdaptiveSurface` with `variant='action'` now renders it automatically below 744px, so
+Action popover. `PopoverSheet` with `variant='action'` now renders it automatically below 744px, so
 the same props produce an anchored popover on tablet/desktop and a sheet on phones; `variant='info'`
 stays anchored at every size.
 

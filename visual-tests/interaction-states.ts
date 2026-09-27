@@ -93,7 +93,7 @@ export const INTERACTION_CAPTURES: InteractionCapture[] = [
         },
     },
     {
-        // ASMA-8184: the same StyledAdaptiveSurface becomes a Bottom Sheet below 744px — resize first,
+        // ASMA-8184: the same PopoverSheet becomes a Bottom Sheet below 744px — resize first,
         // then open, so the capture shows the sheet rather than the anchored popover.
         storyId: 'utils-styled-bottom-sheet--popover-on-mobile',
         screenshot: 'utils-styled-bottom-sheet--popover-on-mobile--open.png',

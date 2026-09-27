@@ -59,7 +59,7 @@ const MAX_HEIGHT_RATIO = 0.6
 const MOBILE_WIDTH = 'calc(100vw - 32px)'
 
 /** @figmaNode wXrXt5uKNNzV2DnQCgyYZH#44531-233781 (Design-System · "_Popover") */
-export interface StyledAdaptiveSurfaceProps {
+export interface PopoverSheetProps {
     /** @figmaProp none — test hook */
     dataTest: string
     /** @figmaProp none — behavioral: the consumer owns the trigger element, this wires its aria + click */
@@ -123,7 +123,7 @@ export interface StyledAdaptiveSurfaceProps {
  * Separate from {@link StyledPopover}, which stays as the MUI-parity positioning primitive its eight
  * internal consumers still depend on; those migrate here gradually.
  */
-export const StyledAdaptiveSurface = ({
+export const PopoverSheet = ({
     dataTest,
     renderTrigger,
     variant = 'info',
@@ -137,7 +137,7 @@ export const StyledAdaptiveSurface = ({
     ariaLabel,
     onOpenChange,
     className,
-}: StyledAdaptiveSurfaceProps): JSX.Element => {
+}: PopoverSheetProps): JSX.Element => {
     const panelId = useId()
     const titleId = `${panelId}-title`
 

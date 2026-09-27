@@ -2,20 +2,20 @@ import { afterEach, describe, it } from 'vitest'
 import { expect, userEvent } from 'src/test-utils/interaction-api'
 import { cleanup, isEntirelyObscured, mount, tabbableWithin } from 'src/test-utils/renderInteraction'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
-import { StyledAdaptiveSurface, type StyledAdaptiveSurfaceProps } from './StyledAdaptiveSurface'
+import { PopoverSheet, type PopoverSheetProps } from './PopoverSheet'
 
 /**
- * Keyboard & focus contract — StyledAdaptiveSurface (ASMA-8183).
+ * Keyboard & focus contract — PopoverSheet (ASMA-8183).
  * WCAG 2.1.1, 2.1.2, 2.4.3, 2.4.7, 2.4.11, 4.1.2.
  *
  * The ticket is explicit that this component has NO `role="menu"` and NO arrow-key navigation —
  * everything inside is reached with Tab. The arrow-key test below is the regression guard for that.
  */
 
-type FixtureProps = Partial<StyledAdaptiveSurfaceProps> & { label?: string; dataTest?: string }
+type FixtureProps = Partial<PopoverSheetProps> & { label?: string; dataTest?: string }
 
 const Fixture = ({ label = 'Open', dataTest = 'pop', ...props }: FixtureProps): JSX.Element => (
-    <StyledAdaptiveSurface
+    <PopoverSheet
         dataTest={dataTest}
         title='Popover title'
         renderTrigger={({ ref, triggerProps }) => (
@@ -26,7 +26,7 @@ const Fixture = ({ label = 'Open', dataTest = 'pop', ...props }: FixtureProps): 
         {...props}
     >
         {props.children ?? 'Supplementary content'}
-    </StyledAdaptiveSurface>
+    </PopoverSheet>
 )
 
 const ActionFixture = (props: FixtureProps): JSX.Element => (
@@ -50,7 +50,7 @@ const triggerOf = (container: HTMLElement): HTMLButtonElement =>
 const panelOf = (dataTest = 'pop'): HTMLElement | null =>
     document.body.querySelector<HTMLElement>(`[data-test="${dataTest}"]`)
 
-describe('StyledAdaptiveSurface — trigger semantics', () => {
+describe('PopoverSheet — trigger semantics', () => {
     afterEach(cleanup)
 
     it('keeps aria-expanded in sync on the trigger, both states (4.1.2)', async () => {
@@ -95,7 +95,7 @@ describe('StyledAdaptiveSurface — trigger semantics', () => {
     })
 })
 
-describe('StyledAdaptiveSurface — info variant', () => {
+describe('PopoverSheet — info variant', () => {
     afterEach(cleanup)
 
     it('is a plain container, not a dialog, and takes focus itself on open', async () => {
@@ -129,7 +129,7 @@ describe('StyledAdaptiveSurface — info variant', () => {
     })
 })
 
-describe('StyledAdaptiveSurface — action variant', () => {
+describe('PopoverSheet — action variant', () => {
     afterEach(cleanup)
 
     it('exposes role=dialog named by its title (4.1.2)', async () => {
@@ -214,7 +214,7 @@ describe('StyledAdaptiveSurface — action variant', () => {
     })
 })
 
-describe('StyledAdaptiveSurface — dismissal', () => {
+describe('PopoverSheet — dismissal', () => {
     afterEach(cleanup)
 
     it('closes from the close control and returns focus to the trigger', async () => {
@@ -279,7 +279,7 @@ describe('StyledAdaptiveSurface — dismissal', () => {
     })
 })
 
-describe('StyledAdaptiveSurface — focus visibility', () => {
+describe('PopoverSheet — focus visibility', () => {
     afterEach(cleanup)
 
     it('does not entirely obscure its own trigger while open (2.4.11)', async () => {

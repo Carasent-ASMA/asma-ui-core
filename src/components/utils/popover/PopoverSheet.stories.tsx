@@ -5,7 +5,7 @@ import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { FilterIcon } from 'src/components/icons/filter-icon/FilterIcon'
 import { InfoOutlineIcon } from 'src/components/icons/info-outline-icon/InfoOutlineIcon'
-import { StyledAdaptiveSurface } from './StyledAdaptiveSurface'
+import { PopoverSheet } from './PopoverSheet'
 import { PopoverGallery } from './story/PopoverGallery'
 import { PopoverCases } from './story/PopoverCases'
 import {
@@ -21,8 +21,8 @@ import {
 } from './story/popoverStoryFixtures'
 
 const meta = {
-    title: 'Utils/Styled Adaptive Surface',
-    component: StyledAdaptiveSurface,
+    title: 'Utils/Popover Sheet',
+    component: PopoverSheet,
     parameters: {
         layout: 'padded',
         docs: {
@@ -68,10 +68,10 @@ const meta = {
             },
         },
     },
-} satisfies Meta<typeof StyledAdaptiveSurface>
+} satisfies Meta<typeof PopoverSheet>
 
 export default meta
-type Story = StoryObj<typeof StyledAdaptiveSurface>
+type Story = StoryObj<typeof PopoverSheet>
 
 /**
  * Opens the surface so the story renders what it is actually about. This is what puts the open
@@ -118,7 +118,7 @@ export const AllCases: Story = {
 }
 
 const InfoExample = ({ withTitle }: { withTitle: boolean }): JSX.Element => (
-    <StyledAdaptiveSurface
+    <PopoverSheet
         dataTest='info-popover'
         title={withTitle ? 'Løpenummer' : undefined}
         renderTrigger={({ ref, triggerProps }) => (
@@ -136,7 +136,7 @@ const InfoExample = ({ withTitle }: { withTitle: boolean }): JSX.Element => (
     >
         Løpenummeret tildeles automatisk når søknaden registreres, og kan ikke endres i ettertid. Det er unikt per
         virksomhet og brukes som referanse i all korrespondanse.
-    </StyledAdaptiveSurface>
+    </PopoverSheet>
 )
 
 /** Read-only explanation anchored to an inline ⓘ — the most common use. */
@@ -158,7 +158,7 @@ const FilterExample = (): JSX.Element => {
 
     return (
         <div className='flex flex-col items-start gap-4'>
-            <StyledAdaptiveSurface
+            <PopoverSheet
                 dataTest='filter-popover'
                 variant='action'
                 title='Small set of controls'
@@ -214,7 +214,7 @@ const FilterExample = (): JSX.Element => {
                         setFilter((previous) => ({ ...previous, egenrapportering: option }))
                     }}
                 />
-            </StyledAdaptiveSurface>
+            </PopoverSheet>
             {/* The list behind the popover owns the announcement — applying a filter changes the
                 result set, and without this nothing confirms it to a screen reader user. */}
             <p aria-live='polite' className='m-0 text-base leading-6 text-delta-700'>
@@ -239,7 +239,7 @@ const ActionsExample = (): JSX.Element => {
 
     return (
         <div className='flex flex-col items-start gap-4'>
-            <StyledAdaptiveSurface
+            <PopoverSheet
                 dataTest='actions-popover'
                 variant='action'
                 ariaLabel='Handlinger for søknaden'
@@ -271,7 +271,7 @@ const ActionsExample = (): JSX.Element => {
                         </StyledButton>
                     ))
                 }
-            </StyledAdaptiveSurface>
+            </PopoverSheet>
             <p className='m-0 text-base leading-6 text-delta-700'>{lastAction ?? 'Ingen handling valgt'}</p>
         </div>
     )
@@ -288,7 +288,7 @@ export const ActionsList: Story = {
 }
 
 const ScrollingExample = (): JSX.Element => (
-    <StyledAdaptiveSurface
+    <PopoverSheet
         dataTest='scrolling-popover'
         variant='action'
         title='Content taller than 60vh'
@@ -329,7 +329,7 @@ const ScrollingExample = (): JSX.Element => (
                 onToggle={noop}
             />
         ))}
-    </StyledAdaptiveSurface>
+    </PopoverSheet>
 )
 
 /** The body scrolls past 60vh while the title, the close control and both footer rows stay put. */
@@ -342,7 +342,7 @@ export const LongContentScrolls: Story = {
 export const OnlyOneOpenAtATime: Story = {
     render: () => (
         <div className='flex w-[900px] justify-between'>
-            <StyledAdaptiveSurface
+            <PopoverSheet
                 dataTest='first-popover'
                 title='Første'
                 renderTrigger={({ ref, triggerProps }) => (
@@ -352,8 +352,8 @@ export const OnlyOneOpenAtATime: Story = {
                 )}
             >
                 Åpne den andre — denne lukkes.
-            </StyledAdaptiveSurface>
-            <StyledAdaptiveSurface
+            </PopoverSheet>
+            <PopoverSheet
                 dataTest='second-popover'
                 title='Andre'
                 renderTrigger={({ ref, triggerProps }) => (
@@ -363,7 +363,7 @@ export const OnlyOneOpenAtATime: Story = {
                 )}
             >
                 Bare én popover er åpen om gangen.
-            </StyledAdaptiveSurface>
+            </PopoverSheet>
         </div>
     ),
     play: async ({ canvasElement }) => {

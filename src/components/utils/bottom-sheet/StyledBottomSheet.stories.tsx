@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { FilterIcon } from 'src/components/icons/filter-icon/FilterIcon'
-import { StyledAdaptiveSurface } from '../popover/StyledAdaptiveSurface'
+import { PopoverSheet } from '../popover/PopoverSheet'
 import { ChipGroup, KARTLEGGING, noop } from '../popover/story/popoverStoryFixtures'
 import { StyledBottomSheet } from './StyledBottomSheet'
 import { BottomSheetCases } from './story/BottomSheetCases'
@@ -20,7 +20,7 @@ const meta = {
                     '· Spec: [ASMA-8184](https://carasent.atlassian.net/browse/ASMA-8184)',
                     '',
                     'The mobile (0–743px) form of the **Action popover**: filters and row actions. A modal',
-                    'sheet — dimmed scrim, scroll lock, everything behind it `inert`. `StyledAdaptiveSurface` with',
+                    'sheet — dimmed scrim, scroll lock, everything behind it `inert`. `PopoverSheet` with',
                     "`variant='action'` renders it automatically below 744px, so most screens never use it",
                     'directly.',
                     '',
@@ -125,13 +125,13 @@ export const LongContent: Story = {
 }
 
 /**
- * The integration: one `StyledAdaptiveSurface` — an anchored popover from 744px, this sheet below. Resize
+ * The integration: one `PopoverSheet` — an anchored popover from 744px, this sheet below. Resize
  * the viewport across 744px to watch it switch; the props do not change.
  */
 export const PopoverOnMobile: Story = {
     render: () => (
         <Screen>
-            <StyledAdaptiveSurface
+            <PopoverSheet
                 dataTest='responsive-filter'
                 variant='action'
                 title='Filtrer søknader'
@@ -161,7 +161,7 @@ export const PopoverOnMobile: Story = {
                     isSelected={(option) => option === 'Art'}
                     onToggle={noop}
                 />
-            </StyledAdaptiveSurface>
+            </PopoverSheet>
         </Screen>
     ),
 }
