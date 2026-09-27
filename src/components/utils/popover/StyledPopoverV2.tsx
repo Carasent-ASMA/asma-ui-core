@@ -13,7 +13,8 @@ import {
 } from '@floating-ui/react'
 
 import { cn } from 'src/helpers/cn'
-import { FOCUSABLE_SELECTOR, useFocusTrap } from 'src/hooks/useFocusTrap.hook'
+import { firstTabbable } from 'src/helpers/focusable'
+import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
 import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
 import { PopoverAnatomy, POPOVER_SURFACE_CLASSNAME } from './PopoverAnatomy'
 import {
@@ -223,7 +224,7 @@ export const StyledPopoverV2 = ({
     useEffect(() => {
         if (!panelNode) return
         const frame = requestAnimationFrame(() => {
-            const target = isDialog ? panelNode.querySelector<HTMLElement>(FOCUSABLE_SELECTOR) : panelNode
+            const target = isDialog ? firstTabbable(panelNode) : panelNode
             target?.focus({ preventScroll: true })
         })
         return () => {
