@@ -12,9 +12,19 @@ import { useWidthRegistry } from 'src/hooks/useWidthRegistry'
 import {
     planToolbarActions,
     type DynamicToolbarAction,
+    type PlannedToolbarActions,
 } from '../../../custom/module/header-layout/planToolbarActions'
 import { ToolbarActionButton } from '../../../custom/module/header-layout/ToolbarActionGroup'
 import { useToolbarTranslations, type ToolbarLocale } from '../../../custom/module/header-layout/useTranslations'
+
+/**
+ * Figma states the left cluster by action COUNT, not by available width: at the same 600px
+ * frame it draws both `State=Edit` (one action, inline and labelled) and `State=More` (the
+ * icon-only overflow trigger). So from two actions up the cluster is always the More menu,
+ * even on a wide dialog. A lone action stays inline and only its *label* answers to width —
+ * Figma `Mobile=on, State=Edit` is that same Delete rendered icon-only.
+ */
+const OVERFLOW_FROM_ACTION_COUNT = 2
 
 /**
  * Figma specifies only the two endpoints of the responsive band — the 600px desktop
@@ -62,10 +72,11 @@ export interface StyledDialogFooterButton {
 
 export interface StyledDialogFooterProps {
     /**
-     * Left cluster (Figma "Left"): destructive and utility actions. They keep their
-     * labels while they fit, collapse to icon-only next, and move into an icon-only
-     * "More" menu once even that overflows — so 1, 2, 3 and 3+ actions all resolve to
-     * the approved layout without the caller branching on width.
+     * Left cluster (Figma "Left"): destructive and utility actions.
+     *
+     * One action renders inline, keeping its label while it fits and collapsing to icon-only
+     * when it does not. Two or more always collapse into the icon-only "More" menu, matching
+     * the Figma `More` state — so the caller never branches on count or width itself.
      */
     leftActions?: DynamicToolbarAction[]
     /** Replaces the planned left cluster with arbitrary content — Figma's "Checkbox+Label" left variant, or footer info text. */
@@ -88,15 +99,15 @@ export interface StyledDialogFooterProps {
  *
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#26769-135283
  * @remarks Figma "Dialog footer" component set. The Figma `State` property
- * (Create/Edit/More/Reset filter) is **not** a prop — it is the emergent result of which
- * actions the caller passes and how much room the container leaves, which is the whole
- * point of ASMA-7099. `Mobile` is likewise derived from the **container** width, not the
- * viewport, so a footer inside a narrow popover compacts even on a desktop screen.
+ * (Create/Edit/More/Reset filter) is **not** a prop — it follows from the actions the caller
+ * passes: one left action is `Edit`, two or more is `More`. `Mobile` is derived from the
+ * **container** width, not the viewport, so a footer inside a narrow popover compacts even on
+ * a desktop screen.
  *
  * Layout: `Left` cluster (planned, adaptive) · `Right` cluster (Cancel + primary, always
  * visible and never overflowed — the primary action must stay reachable).
  *
- * @param leftActions - adaptive left cluster; label → icon-only → More menu
+ * @param leftActions - left cluster; one action inline, two or more behind the More menu
  * @param leadingSlot - arbitrary left content, replaces `leftActions`
  * @param secondaryAction - outlined Cancel
  * @param primaryAction - contained primary
@@ -153,17 +164,22 @@ export function StyledDialogFooter({
         containerWidth - paddingPx * 2 - rightClusterWidth - (hasRightCluster ? GAP_PX : 0),
     )
 
-    const plan = useMemo(
-        () =>
-            planToolbarActions({
-                actions: visibleLeftActions,
-                availableWidth: leftAvailableWidth,
-                collapseLabels: true,
-                resolveActionWidth: (action, showLabel) => widths[actionKey(action.id, showLabel)],
-                moreButtonWidthPx: widths[KEY_MORE_BUTTON],
-            }),
-        [visibleLeftActions, leftAvailableWidth, widths],
-    )
+    const plan = useMemo<PlannedToolbarActions>(() => {
+        /* Two or more actions are the Figma `More` state outright — no width measurement,
+         * so the menu does not appear and disappear as the dialog is resized. */
+        if (visibleLeftActions.length >= OVERFLOW_FROM_ACTION_COUNT) {
+            return { inlineActions: [], overflowActions: visibleLeftActions, showMoreMenu: true }
+        }
+
+        /* A lone action: width still decides label vs icon-only, and whether even the icon fits. */
+        return planToolbarActions({
+            actions: visibleLeftActions,
+            availableWidth: leftAvailableWidth,
+            collapseLabels: true,
+            resolveActionWidth: (action, showLabel) => widths[actionKey(action.id, showLabel)],
+            moreButtonWidthPx: widths[KEY_MORE_BUTTON],
+        })
+    }, [visibleLeftActions, leftAvailableWidth, widths])
 
     const renderButton = (
         button: StyledDialogFooterButton,
