@@ -89,9 +89,16 @@ export const PointerCancellation: Story = {
         await expect(input).toHaveValue('Ada')
         await expect(pointerActions.autocomplete).not.toHaveBeenCalled()
         clear.focus()
+        /* Wait for focus to settle before typing. `clear` sits inside the autocomplete, which
+         * refocuses its input on its own schedule after the cancelled press above; if that lands
+         * between `focus()` and the keypress, Enter goes to the INPUT (selecting the highlighted
+         * option) instead of activating Clear, and the value never changes at all. #193 only
+         * widened the assertion below, which cannot help when the key never reached the button. */
+        await waitFor(() => expect(clear).toHaveFocus())
         await userEvent.keyboard('{Enter}')
-        // waitFor: Enter-activation clears through controlled state; the rerender can lag the event
-        await waitFor(() => expect(input).toHaveValue(''))
+        /* Enter-activation clears through controlled state; the rerender can lag the event, and
+         * the default 1s can be tight on a loaded runner with the whole story suite in parallel. */
+        await waitFor(() => expect(input).toHaveValue(''), { timeout: 5000 })
         await expect(pointerActions.autocomplete).toHaveBeenCalledTimes(1)
         const toggle = canvas.getByRole('button', { name: 'Toggle options' })
         await userEvent.keyboard('{Escape}')
