@@ -8,8 +8,12 @@
  * 2. Prevent adjustments of font size after orientation changes in iOS.
  */
 
+:root {
+    --roboto-font: 'Roboto', sans-serif;
+}
+
 html {
-    @apply font-roboto;
+    font-family: var(--roboto-font);
     line-height: 1.15;
     /* 1 */
     -webkit-text-size-adjust: 100%;

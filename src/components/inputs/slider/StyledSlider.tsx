@@ -304,11 +304,11 @@ export const StyledSlider = ({
             {!isVertical && (fromLabel ?? toLabel) && (
                 <div className='grid w-full grid-cols-2 gap-4'>
                     {!isVertical && fromLabel && (
-                        <span className='min-w-0 break-words text-left font-normal text-delta-800'>{fromLabel}</span>
+                        <span className='min-w-0 wrap-break-word text-left font-normal text-delta-800'>{fromLabel}</span>
                     )}
 
                     {!isVertical && toLabel && (
-                        <span className='min-w-0 break-words text-right font-normal text-delta-800'>{toLabel}</span>
+                        <span className='min-w-0 wrap-break-word text-right font-normal text-delta-800'>{toLabel}</span>
                     )}
                 </div>
             )}

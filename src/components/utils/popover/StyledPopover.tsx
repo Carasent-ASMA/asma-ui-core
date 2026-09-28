@@ -270,7 +270,7 @@ export const StyledPopover = ({
                 {...floatingProps}
                 className={cn(
                     // Figma DS floating surface: radius 4 (`menus` token) + Float shadow (0 1 12 rgba(0,0,0,.15)).
-                    'z-[1300] overflow-auto rounded bg-white shadow-[0px_1px_12px_0px_rgba(0,0,0,0.15)]',
+                    'z-1300 overflow-auto rounded bg-white shadow-[0px_1px_12px_0px_rgba(0,0,0,0.15)]',
                     className ?? 'my-1',
                     slotProps?.paper?.className,
                 )}

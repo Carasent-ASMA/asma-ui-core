@@ -531,7 +531,7 @@ export function StyledSelectAutocomplete<
         'relative box-border flex min-h-10 cursor-pointer items-center gap-x-3 px-3 py-1.5 text-base text-delta-800',
         'aria-selected:bg-gama-50 hover:bg-delta-50',
         // Disabled options never take the gama highlight (hover or keyboard) and read as muted.
-        'aria-disabled:cursor-default aria-disabled:!bg-transparent aria-disabled:text-delta-300',
+        'aria-disabled:cursor-default aria-disabled:bg-transparent! aria-disabled:text-delta-300',
     )
 
     const defaultRenderOption = (props: OptionLiProps, option: T, state: AutocompleteRenderOptionState): ReactNode => {
@@ -562,9 +562,9 @@ export function StyledSelectAutocomplete<
                     </span>
                 )}
                 {/* Long labels wrap to a second line and only then ellipsise (ASMA-7847): one
-                    clipped line hid which organisation a row actually was. `break-words` mirrors
+                    clipped line hid which organisation a row actually was. `wrap-break-word` mirrors
                     Figma's `word-break: break-word`, so an unbroken name still wraps. */}
-                <span className='line-clamp-2 min-w-0 flex-1 break-words'>{getLabel(option)}</span>
+                <span className='line-clamp-2 min-w-0 flex-1 wrap-break-word'>{getLabel(option)}</span>
             </li>
         )
     }
@@ -623,7 +623,7 @@ export function StyledSelectAutocomplete<
                             // border/outline delta-300 (#bdc4cf), Menus shadow. Matches StyledSelect/StyledMenu.
                             // Figma Menus (node 34522-151497) pads the list `8px 0` — the rows run
                             // edge to edge horizontally, with 8px of breathing room top and bottom.
-                            'z-[1300] m-0 list-none overflow-auto rounded border border-solid border-delta-300 bg-white px-0 py-2 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
+                            'z-1300 m-0 list-none overflow-auto rounded border border-solid border-delta-300 bg-white px-0 py-2 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
                             // Figma Menus (node 34522-151497) separates the rows and leaves the last
                             // one clean. Owned by the LISTBOX, not the row, for two reasons: a custom
                             // `renderOption` that replaces `props.className` (a real pattern in

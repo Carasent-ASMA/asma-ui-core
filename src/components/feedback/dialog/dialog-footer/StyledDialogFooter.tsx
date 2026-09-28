@@ -218,7 +218,7 @@ export function StyledDialogFooter({
                 compact ? 'gap-2 p-2' : 'gap-4 p-4',
                 rounded && 'rounded-b-lg',
                 /* DS effect style "Fixed bottom". */
-                fixed && 'sticky bottom-0 z-[1] shadow-[0_0_16px_0_rgba(34,33,51,0.2)]',
+                fixed && 'sticky bottom-0 z-1 shadow-[0_0_16px_0_rgba(34,33,51,0.2)]',
                 className,
             )}
         >

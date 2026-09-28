@@ -82,7 +82,7 @@ export const StyledSearchField: FC<StyledSearchFieldProps> = ({
                                     'flex items-center justify-center',
                                     'transform-gpu transition-all duration-300 ease-in-out',
                                     value ? 'scale-100 opacity-100' : 'pointer-events-none scale-75 opacity-0',
-                                    props.readOnly && '-translate-x-[6.5px]',
+                                    props.readOnly && 'translate-x-[-6.5px]',
                                 )}
                                 style={{
                                     width: 24,

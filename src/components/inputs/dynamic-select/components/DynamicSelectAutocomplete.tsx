@@ -227,7 +227,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                                         // Figma Menus item: Body Base 16/lh24.
                                         'relative flex min-h-10 cursor-pointer items-center gap-x-1 bg-white px-2 text-base aria-selected:bg-gama-50 hover:bg-delta-50',
                                         disabled &&
-                                            'cursor-not-allowed bg-delta-50 aria-selected:!bg-delta-50 hover:!bg-delta-50 [&_*]:cursor-not-allowed',
+                                            'cursor-not-allowed bg-delta-50 aria-selected:bg-delta-50! hover:bg-delta-50! **:cursor-not-allowed',
                                     )}
                                     aria-disabled={disabled}
                                 >
@@ -257,7 +257,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                                             ) : (
                                                 // Two lines, then ellipsis (ASMA-7847). Unclamped,
                                                 // a long name grew the row without limit.
-                                                <span className='line-clamp-2 h-fit min-w-0 flex-1 break-words text-base text-delta-800'>
+                                                <span className='line-clamp-2 h-fit min-w-0 flex-1 wrap-break-word text-base text-delta-800'>
                                                     {getOptionLabel(option)}
                                                 </span>
                                             )}
@@ -283,7 +283,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                                     // Figma Menus item: Body Base 16/lh24.
                                     'relative flex min-h-10 cursor-pointer items-center gap-x-1 px-2 text-base aria-selected:bg-gama-50 hover:bg-delta-50',
                                     disabled &&
-                                        'cursor-not-allowed bg-delta-50 aria-selected:!bg-delta-50 hover:!bg-delta-50 [&_*]:cursor-not-allowed',
+                                        'cursor-not-allowed bg-delta-50 aria-selected:bg-delta-50! hover:bg-delta-50! **:cursor-not-allowed',
                                 )}
                                 onClick={!disabled ? props.onClick : undefined}
                                 aria-disabled={disabled}
@@ -310,7 +310,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                                         ) : (
                                             // Two lines, then ellipsis (ASMA-7847). Unclamped,
                                             // a long name grew the row without limit.
-                                            <span className='line-clamp-2 min-w-0 flex-1 break-words text-base text-delta-800'>
+                                            <span className='line-clamp-2 min-w-0 flex-1 wrap-break-word text-base text-delta-800'>
                                                 {getOptionLabel(option)}
                                             </span>
                                         )}

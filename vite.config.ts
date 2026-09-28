@@ -1,6 +1,7 @@
 import { readFileSync, readdirSync } from 'node:fs'
 import { relative, resolve } from 'node:path'
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 /// <reference types="vitest/config" />
 import { defineConfig } from 'vitest/config'
 import dts from 'vite-plugin-dts'
@@ -81,6 +82,7 @@ export default defineConfig({
         react({
             jsxRuntime: 'automatic',
         }),
+        tailwindcss(),
         dts({
             insertTypesEntry: true,
             //rollupTypes: true,

@@ -238,7 +238,7 @@ export function PageHeader({
             title={titleClamped ? title : undefined}
             className={cn(
                 /* 2-line clamp is visual only — the accessible name stays the full title. */
-                'm-0 line-clamp-2 min-w-0 break-words font-semibold text-delta-800 outline-none',
+                'm-0 line-clamp-2 min-w-0 wrap-break-word font-semibold text-delta-800 outline-none',
                 smallType ? 'text-xl leading-7' : 'text-2xl leading-8',
             )}
         >
