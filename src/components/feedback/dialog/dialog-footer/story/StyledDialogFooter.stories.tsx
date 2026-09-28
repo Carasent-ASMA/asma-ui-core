@@ -84,10 +84,8 @@ export const Gallery: Story = {
                     },
                 },
                 {
-                    /* Labels collapse before anything overflows, so at 600px three actions still
-                     * fit — the icon-less one keeps its label. The More state is the 360px cell
-                     * below and the Reflow story. */
-                    caption: '3+ actions — labels collapse to icons before anything overflows',
+                    /* Two or more left actions are the Figma `More` state regardless of room. */
+                    caption: '3+ actions — always the More menu, even at 600px',
                     width: 600,
                     props: {
                         leftActions: longExtraActions,
@@ -111,7 +109,8 @@ export const Gallery: Story = {
                     },
                 },
                 {
-                    caption: 'Mobile 360 — destructive collapses to icon-only',
+                    /* A short label still fits at 360px; the icon-only step is in Reflow. */
+                    caption: 'Mobile 360 — one action, short label still fits',
                     width: 360,
                     props: {
                         leftActions: [deleteAction],
@@ -160,7 +159,12 @@ export const Gallery: Story = {
     ),
 }
 
-/** Live: the footer plans against its container, so shrinking the container reflows it. */
+/**
+ * Live: width still governs ONE thing — a lone left action's label. It is labelled while it
+ * fits, then icon-only, then (only if even that will not fit) the More menu. A cluster of two
+ * or more never reaches this path; it is the More state by count. Padding also steps down
+ * below the 470px compact breakpoint.
+ */
 export const Reflow: Story = {
     render: () => (
         <div className='flex flex-col gap-6'>
@@ -169,7 +173,7 @@ export const Reflow: Story = {
                     <span className='text-sm text-delta-700'>{width}px container</span>
                     <Paper width={width}>
                         <StyledDialogFooter
-                            leftActions={extraActions}
+                            leftActions={[{ ...deleteAction, label: 'Delete this event series' }]}
                             secondaryAction={{ label: 'Cancel', onClick: noop }}
                             primaryAction={{ label: 'Save changes', onClick: noop }}
                         />
@@ -328,5 +332,37 @@ export const SpansCentringParent: Story = {
         /* And the primary still sits at the right edge, not centred. */
         const save = canvas.getByRole('button', { name: 'Save changes' })
         expect(parent.getBoundingClientRect().right - save.getBoundingClientRect().right).toBeLessThan(24)
+    },
+}
+
+/**
+ * The Figma `More` state is chosen by action COUNT, not by width. Two actions at a roomy
+ * 600px must still collapse into the menu — this is the story that can prove it, because
+ * SSR always measures 0px and so cannot tell the two rules apart.
+ */
+export const TwoActionsAlwaysUseMoreMenu: Story = {
+    render: () => (
+        <Paper width={600}>
+            <StyledDialogFooter
+                leftActions={[
+                    { id: 'copy', label: 'Make a copy', icon: <ContentCopyIcon width={20} height={20} />, onClick: noop },
+                    deleteAction,
+                ]}
+                secondaryAction={{ label: 'Avbryt', onClick: noop }}
+                primaryAction={{ label: 'Legg til ny timeregistrering', onClick: noop }}
+            />
+        </Paper>
+    ),
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement)
+
+        const more = await waitFor(() => canvas.getByRole('button', { name: 'More' }))
+        /* Neither action is its own button, even with 600px of room. */
+        await expect(canvas.queryByRole('button', { name: 'Make a copy' })).not.toBeInTheDocument()
+        await expect(canvas.queryByRole('button', { name: 'Delete' })).not.toBeInTheDocument()
+
+        await userEvent.click(more)
+        await waitFor(async () => expect(within(document.body).getByText('Make a copy')).toBeVisible())
+        await expect(within(document.body).getByText('Delete')).toBeVisible()
     },
 }
