@@ -285,15 +285,11 @@ export function StyledDialogFooter({
                                                 action.onClick()
                                             }}
                                         >
-                                            <div
-                                                className={cn(
-                                                    'flex items-center gap-2',
-                                                    action.tone === 'danger' ? 'text-beta-500' : 'text-delta-700',
-                                                )}
-                                            >
-                                                {action.icon}
-                                                <span>{action.label}</span>
-                                            </div>
+                                            {/* Figma "More" menu items are label-only: an action's icon
+                                             * belongs to its inline button, not to its overflow row. */}
+                                            <span className={action.tone === 'danger' ? 'text-beta-500' : 'text-delta-700'}>
+                                                {action.label}
+                                            </span>
                                         </StyledMenuItem>
                                     ))}
                                 </StyledMenu>
