@@ -298,7 +298,7 @@ export const StyledInputField = ({
         // width of the adornment + its 14px right inset + a small gap.
         const next = el ? Math.ceil(el.getBoundingClientRect().width) + 20 : undefined
         setEndAdornmentPad((prev) => (prev === next ? prev : next))
-    })
+    }, [isSingleLineShell, showClear, userEndAdornment])
     // With a label the resting (un-shrunk) label sits in the placeholder position, so the HTML
     // placeholder must stay hidden until the label floats up (`shrink`) — otherwise the two texts
     // overlap. With no label there is nothing to overlap, so the placeholder should show at rest like
