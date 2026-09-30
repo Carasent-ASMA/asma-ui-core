@@ -184,13 +184,13 @@ describe('StyledDialogFooter (ASMA-7099)', () => {
         expect(html).not.toContain('styled-dialog-footer-more')
     })
 
-    it('applies the DS "Fixed bottom" shadow only when fixed', () => {
+    it('sticks to the bottom only when fixed, with no drop shadow', () => {
         const fixedHtml = renderToStaticMarkup(<StyledDialogFooter fixed />)
         const staticHtml = renderToStaticMarkup(<StyledDialogFooter />)
 
-        expect(fixedHtml).toContain('shadow-[0_0_16px_0_rgba(34,33,51,0.2)]')
         expect(fixedHtml).toContain('sticky')
-        expect(staticHtml).not.toContain('shadow-[0_0_16px_0_rgba(34,33,51,0.2)]')
+        expect(fixedHtml).not.toContain('shadow-[')
+        expect(staticHtml).not.toContain('sticky')
     })
 
     it('rounds the bottom corners by default and squares them on request', () => {

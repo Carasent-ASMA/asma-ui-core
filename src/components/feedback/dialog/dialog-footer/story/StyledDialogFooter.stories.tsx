@@ -191,7 +191,7 @@ export const Fixed: Story = {
             style={{ width: 600, height: 260 }}
         >
             <div className='shrink-0 px-4 py-6 text-delta-700' style={{ height: 600 }}>
-                Scroll — the footer stays pinned with the DS “Fixed bottom” shadow.
+                Scroll — the footer stays pinned, separated by its top border only.
             </div>
             <StyledDialogFooter
                 fixed
@@ -233,6 +233,11 @@ export const OverflowMenuOpensUpward: Story = {
         await expect(item).toBeVisible()
         await expect(within(document.body).getByText('Use as standard')).toBeVisible()
         await expect(within(document.body).getByText('Delete')).toBeVisible()
+
+        /* ASMA-7099: overflow rows are label-only — an action's icon belongs to its inline
+         * button, not to its menu row, so the "Make copy" icon is not repeated here. */
+        const menuItem = item.closest('[role="menuitem"]')
+        await expect(menuItem?.querySelector('svg')).toBeNull()
 
         /* Opens upward: the menu sits above the trigger, not below it. */
         const menuRect = item.getBoundingClientRect()
