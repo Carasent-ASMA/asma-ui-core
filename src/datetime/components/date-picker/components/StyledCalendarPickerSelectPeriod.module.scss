@@ -1,5 +1,26 @@
 .styled-calendar-picker-select-period-menu {
     ul {
-        @apply overflow-auto scrollbar-thin max-h-[250px] #{!important};
+        overflow: auto !important;
+        &::-webkit-scrollbar-track {
+            background-color: var(--scrollbar-track) !important;
+            border-radius: var(--scrollbar-track-radius) !important;
+        }
+        &::-webkit-scrollbar-thumb {
+            background-color: var(--scrollbar-thumb) !important;
+            border-radius: var(--scrollbar-thumb-radius) !important;
+        }
+        &::-webkit-scrollbar-corner {
+            background-color: var(--scrollbar-corner) !important;
+            border-radius: var(--scrollbar-corner-radius) !important;
+        }
+        scrollbar-color: var(--scrollbar-thumb, initial) var(--scrollbar-track, initial) !important;
+        &::-webkit-scrollbar {
+            display: block !important;
+            width: 8px !important;
+            height: 8px !important;
+        }
+        scrollbar-width: thin !important;
+
+        max-height: 250px !important;
     }
 }
