@@ -1,4 +1,4 @@
-.dialog-base {
+@mixin dialog-base {
     position: fixed;
     bottom: 0;
     right: 0;
@@ -9,7 +9,7 @@
 }
 
 .minimized-dialog {
-    @extend .dialog-base;
+    @include dialog-base;
 
     width: 100dvw;
     overflow: clip;
@@ -28,7 +28,7 @@
 }
 
 .dialog {
-    @extend .dialog-base;
+    @include dialog-base;
 
     width: 100dvw;
     height: 100dvh;
