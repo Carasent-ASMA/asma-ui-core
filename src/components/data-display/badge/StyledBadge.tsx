@@ -56,7 +56,7 @@ const COLOR_STYLE: Record<string, CSSProperties> = {
 const ANCHOR_CLASS: Record<string, string> = {
     'top-right': 'top-0 right-0 translate-x-1/2 -translate-y-1/2 origin-[100%_0%]',
     'top-left': 'top-0 left-0 -translate-x-1/2 -translate-y-1/2 origin-[0%_0%]',
-    'bottom-right': 'bottom-0 right-0 translate-x-1/2 translate-y-1/2 origin-[100%_100%]',
+    'bottom-right': 'bottom-0 right-0 translate-x-1/2 translate-y-1/2 origin-bottom-right',
     'bottom-left': 'bottom-0 left-0 -translate-x-1/2 translate-y-1/2 origin-[0%_100%]',
 }
 
@@ -140,7 +140,7 @@ export const StyledBadge = ({
                 <span
                     aria-hidden='true'
                     className={clsx(
-                        'absolute z-[1] box-border flex items-center justify-center whitespace-nowrap font-roboto font-semibold',
+                        'absolute z-1 box-border flex items-center justify-center whitespace-nowrap font-roboto font-semibold',
                         ANCHOR_CLASS[`${vertical}-${horizontal}`],
                         isDot
                             ? 'h-[12px] w-[12px] min-w-[12px] rounded-full p-0'

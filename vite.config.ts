@@ -1,10 +1,11 @@
 import { readFileSync, readdirSync } from 'node:fs'
 import { relative, resolve } from 'node:path'
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 /// <reference types="vitest/config" />
 import { defineConfig } from 'vitest/config'
 import dts from 'vite-plugin-dts'
-import * as packageJson from './package.json'
+import packageJson from './package.json'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin'
@@ -74,13 +75,15 @@ const emitIconCompatibilityAssets = () => ({
     },
 })
 
-const currentDirectory = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url))
+const currentDirectory =
+    typeof import.meta.dirname !== 'undefined' ? import.meta.dirname : path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
     plugins: [
         react({
             jsxRuntime: 'automatic',
         }),
+        tailwindcss(),
         dts({
             insertTypesEntry: true,
             //rollupTypes: true,
@@ -200,6 +203,7 @@ export default defineConfig({
                         'react-dom/client',
                         ...Object.keys(packageJson.dependencies ?? {}),
                     ],
+                    exclude: ['@tailwindcss/oxide', '@tailwindcss/oxide-linux-x64-gnu'],
                 },
                 test: {
                     name: 'interaction',

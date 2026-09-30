@@ -158,7 +158,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                 // FullScreenBtn toggle in the header (a real <button> via StyledButton).
                 // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
                 <div
-                    className='fixed inset-0 z-[52] bg-[rgb(98,110,126)] bg-opacity-70'
+                    className='fixed inset-0 z-52 bg-[rgb(98,110,126)] bg-opacity-70'
                     onClick={() => {
                         setFullScreen(false)
                     }}
@@ -177,10 +177,10 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                     minimized && styles['hidden'],
                     !fullScreen && classNameOverrides.maximized,
                     fullScreen && classNameOverrides.fullscreen,
-                    isFullScreenActive && 'fixed z-[53] duration-0',
+                    isFullScreenActive && 'fixed z-53 duration-0',
                 )}
             >
-                <div className={cn('flex flex-col border-b-[1px] border-delta-200 px-4', isMobile ? 'py-3' : 'py-4')}>
+                <div className={cn('flex flex-col border-b border-delta-200 px-4', isMobile ? 'py-3' : 'py-4')}>
                     <div className='flex items-center justify-between'>
                         {!label ? (
                             <div
@@ -231,7 +231,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                         </div>
                     )}
                 </div>
-                <div className={cn(minimized && 'hidden', 'flex flex-grow flex-col overflow-y-auto')}>{children}</div>
+                <div className={cn(minimized && 'hidden', 'flex grow flex-col overflow-y-auto')}>{children}</div>
             </div>
         </>
     )

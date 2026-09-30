@@ -197,7 +197,7 @@ export const StyledBottomSheet = ({
                     onClose('scrim')
                 }}
                 className={cn(
-                    'absolute inset-0 bg-[#626e7eb2] transition-opacity duration-[250ms] ease-out motion-reduce:duration-150',
+                    'absolute inset-0 bg-[#626e7eb2] transition-opacity duration-250 ease-out motion-reduce:duration-150',
                     isShown ? 'opacity-100' : 'opacity-0',
                 )}
             />
@@ -213,7 +213,7 @@ export const StyledBottomSheet = ({
                     // Utilities ship `!important`, so while dragging the transform classes are dropped
                     // rather than out-ranked by the inline offset.
                     !isDragging && [
-                        'ease-out motion-safe:transition-transform motion-safe:duration-[250ms] motion-reduce:transition-opacity motion-reduce:duration-150',
+                        'ease-out motion-safe:transition-transform motion-safe:duration-250 motion-reduce:transition-opacity motion-reduce:duration-150',
                         isShown ? 'translate-y-0 opacity-100' : 'motion-safe:translate-y-full motion-reduce:opacity-0',
                     ],
                     className,

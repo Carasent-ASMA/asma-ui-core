@@ -154,7 +154,7 @@ export const CountryCodeSelect = ({
                     click anywhere on it opens the picker. Making only the code slot clickable left
                     the flag and the chevron dead, which is the obvious place to aim for. */}
                 {openDesktopCombobox ? (
-                    <span className='relative z-[1] flex w-full items-center gap-1.5'>
+                    <span className='relative z-1 flex w-full items-center gap-1.5'>
                         {renderFlag?.(value, 'eager')}
                         <input
                             ref={desktopInputRef}
@@ -210,7 +210,7 @@ export const CountryCodeSelect = ({
                         onFocus={() => setFocused(true)}
                         onBlur={() => setFocused(false)}
                         className={cn(
-                            'relative z-[1] flex w-full items-center gap-1.5 border-0 bg-transparent p-0 text-base outline-none focus:shadow-none focus:outline-none focus:ring-0',
+                            'relative z-1 flex w-full items-center gap-1.5 border-0 bg-transparent p-0 text-base outline-none focus:shadow-none focus:outline-none focus:ring-0',
                             disabled ? 'cursor-not-allowed text-delta-300' : 'cursor-pointer text-delta-800',
                         )}
                     >

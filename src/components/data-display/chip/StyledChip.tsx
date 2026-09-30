@@ -188,8 +188,8 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                             // below are the designed pressed state, so no opacity layer over them.
                             // No `asma-touch-target`: the fixed h-6/h-8 heights are the Figma chip.
                             'asma-touch-ready',
-                            'data-[hovered]:border-gama-200 data-[hovered]:bg-gama-25 hover:border-gama-200 hover:bg-gama-25',
-                            'active:!border-gama-400 active:bg-gama-25 active:shadow-[0_0_0_2px_var(--colors-gama-400)]',
+                            'data-hovered:border-gama-200 data-hovered:bg-gama-25 hover:border-gama-200 hover:bg-gama-25',
+                            'active:border-gama-400! active:bg-gama-25 active:shadow-[0_0_0_2px_var(--colors-gama-400)]',
                         ),
                     styles['focus-ring'],
                     classes?.root,

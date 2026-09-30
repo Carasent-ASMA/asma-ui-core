@@ -176,7 +176,7 @@ export const DynamicInteractiveChipGroup = forwardRef(
                                                     wrapDisabled
                                                         ? {
                                                               root: 'border-none outline-none bg-transparent w-full flex justify-start h-full min-h-[40px] shadow-none',
-                                                              label: 'block whitespace-normal break-words overflow-visible',
+                                                              label: 'block whitespace-normal wrap-break-word overflow-visible',
                                                           }
                                                         : {
                                                               root: 'min-h-[32px] h-full',

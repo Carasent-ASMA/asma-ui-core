@@ -14,7 +14,10 @@
         justify-content: center;
         // font-size / line-height are size-conditional (Figma: Medium 16/24, Small 14/20) — see size blocks below
         font-weight: 600;
-        transition: color 300ms ease-in-out, background-color 300ms ease-in-out, border-color 300ms ease-in-out,
+        transition:
+            color 300ms ease-in-out,
+            background-color 300ms ease-in-out,
+            border-color 300ms ease-in-out,
             box-shadow 300ms ease-in-out;
         color: var(--colors-button-#{$type}-#{$color}-text-color) #{!important};
         background-color: var(--colors-button-#{$type}-#{$color}-bg-color) #{!important};
@@ -59,21 +62,24 @@
     // Sizes — Figma node 13431-18852. Medium/Small are the canonical Figma sizes;
     // "large" has no distinct Figma size and mirrors Medium.
     &.medium {
-        @apply h-[40px] min-w-[40px];
+        height: 40px;
+        min-width: 40px;
         padding-left: 8px;
         padding-right: 8px;
         font-size: 16px;
         line-height: 24px;
     }
     &.small {
-        @apply h-[32px] min-w-[32px];
+        height: 32px;
+        min-width: 32px;
         padding-left: 6px;
         padding-right: 6px;
         font-size: 14px;
         line-height: 20px;
     }
     &.large {
-        @apply h-[40px] min-w-[40px];
+        height: 40px;
+        min-width: 40px;
         padding-left: 8px;
         padding-right: 8px;
         font-size: 16px;
