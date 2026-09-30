@@ -54,7 +54,7 @@ export interface PopoverContentApi {
 export type PopoverSlot = ReactNode | ((api: PopoverContentApi) => ReactNode)
 
 const MIN_WIDTH_PX = 240
-const MAX_WIDTH_PX = { info: 360, action: 472 } as const
+const MAX_WIDTH_PX = { info: 472, action: 472 } as const
 const MAX_HEIGHT_RATIO = 0.6
 const MOBILE_WIDTH = 'calc(100vw - 32px)'
 
