@@ -159,6 +159,10 @@
         border-style: solid;
     }
 
+    .outline-solid {
+        outline-style: solid;
+    }
+
     .border-r-solid {
         border-right-style: solid;
     }
