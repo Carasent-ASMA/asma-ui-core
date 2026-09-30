@@ -100,7 +100,13 @@ export const INTERACTION_CAPTURES: InteractionCapture[] = [
         act: async (page) => {
             await page.setViewportSize({ width: 375, height: 812 })
             await page.getByRole('button', { name: 'Filter' }).click()
-            await page.getByRole('dialog', { name: 'Filtrer søknader' }).waitFor({ state: 'visible' })
+            const sheet = page.getByRole('dialog', { name: 'Filtrer søknader' })
+            await sheet.waitFor({ state: 'visible' })
+            // `showModal()` makes the <dialog> visible at once, but the sheet and its scrim only move
+            // to their open state on the next animation frame (`isShown` in StyledBottomSheet). A
+            // slow runner could screenshot before that frame — a blank page with no sheet — which
+            // is how this capture flaked. Disabled animations cannot help: nothing has started yet.
+            await sheet.locator('[data-state="open"]').waitFor({ state: 'visible' })
         },
     },
     {
