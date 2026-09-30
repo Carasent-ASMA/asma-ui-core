@@ -85,7 +85,7 @@ export interface StyledDialogFooterProps {
     secondaryAction?: StyledDialogFooterButton
     /** Rightmost contained action — Save changes / Add new …. */
     primaryAction?: StyledDialogFooterButton
-    /** Pins the footer to the bottom of its scroll container with the DS `Fixed bottom` shadow. */
+    /** Pins the footer to the bottom of its scroll container, separated by its top border only. */
     fixed?: boolean
     /** Bottom corners rounded to sit flush inside a dialog paper. Pass `false` for a full-bleed page footer. */
     rounded?: boolean
@@ -111,7 +111,7 @@ export interface StyledDialogFooterProps {
  * @param leadingSlot - arbitrary left content, replaces `leftActions`
  * @param secondaryAction - outlined Cancel
  * @param primaryAction - contained primary
- * @param fixed - sticky bottom + `Fixed bottom` shadow
+ * @param fixed - sticky bottom, separated by the top border only
  * @param rounded - rounded bottom corners (default `true`)
  */
 export function StyledDialogFooter({
@@ -233,8 +233,9 @@ export function StyledDialogFooter({
                 'flex items-center justify-end self-stretch border-0 border-t border-solid border-delta-200 bg-white',
                 compact ? 'gap-2 p-2' : 'gap-4 p-4',
                 rounded && 'rounded-b-lg',
-                /* DS effect style "Fixed bottom". */
-                fixed && 'sticky bottom-0 z-[1] shadow-[0_0_16px_0_rgba(34,33,51,0.2)]',
+                /* Pinned to the bottom of the scroll container. The ASMA design system separates a
+                 * fixed footer with the top border alone — no drop shadow. */
+                fixed && 'sticky bottom-0 z-[1]',
                 className,
             )}
         >

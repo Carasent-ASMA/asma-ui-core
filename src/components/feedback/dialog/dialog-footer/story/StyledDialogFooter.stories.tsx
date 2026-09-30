@@ -191,7 +191,7 @@ export const Fixed: Story = {
             style={{ width: 600, height: 260 }}
         >
             <div className='shrink-0 px-4 py-6 text-delta-700' style={{ height: 600 }}>
-                Scroll — the footer stays pinned with the DS “Fixed bottom” shadow.
+                Scroll — the footer stays pinned, separated by its top border only.
             </div>
             <StyledDialogFooter
                 fixed
