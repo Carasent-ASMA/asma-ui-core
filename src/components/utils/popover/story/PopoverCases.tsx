@@ -1,6 +1,8 @@
 import { useState, type ReactNode } from 'react'
 
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
+import { StyledInputField } from 'src/components/inputs/input-field'
+import { StyledSelectAutocomplete } from 'src/components/inputs/select-autocomplete/StyledSelectAutocomplete'
 import { FilterIcon } from 'src/components/icons/filter-icon/FilterIcon'
 import { InfoOutlineIcon } from 'src/components/icons/info-outline-icon/InfoOutlineIcon'
 import { PopoverSheet, type PopoverTriggerProps } from '../PopoverSheet'
@@ -164,6 +166,82 @@ const ActionsCase = (): JSX.Element => {
     )
 }
 
+const ROLE_OPTIONS = [
+    'Administrator',
+    'Therapist',
+    'Case manager',
+    'External consultant with a long role name',
+    'Nursing staff',
+    'Without role',
+]
+
+/**
+ * Chip multi-select inside an action filter. The field is pinned to 416px (472 − body padding)
+ * so the surface opens at the max width and chips wrap instead of stretching the popover.
+ */
+const ChipSelectFilterCase = (): JSX.Element => {
+    const [roles, setRoles] = useState<string[]>([
+        'Administrator',
+        'Therapist',
+        'External consultant with a long role name',
+    ])
+
+    return (
+        <PopoverSheet
+            dataTest='case-chip-select-filter'
+            variant='action'
+            title='Filter'
+            renderTrigger={({ ref, triggerProps }) => (
+                <StyledButton
+                    dataTest='case-chip-select-filter-trigger'
+                    refLink={ref}
+                    type='button'
+                    variant='contained'
+                    startIcon={<FilterIcon />}
+                    {...triggerProps}
+                >
+                    {roles.length > 0 ? `Filter (${roles.length})` : 'Chip filter'}
+                </StyledButton>
+            )}
+            resetAction={
+                <StyledButton
+                    dataTest='case-chip-select-filter-reset'
+                    type='button'
+                    variant='text'
+                    disabled={roles.length === 0}
+                    onClick={() => {
+                        setRoles([])
+                    }}
+                >
+                    Nullstill
+                </StyledButton>
+            }
+        >
+            <div className='flex w-[416px] max-w-full flex-col'>
+                <p className='m-0 mb-1 text-sm font-semibold leading-5 text-delta-800'>Role</p>
+                <StyledSelectAutocomplete<string, true, false, false>
+                    dataTest='case-chip-select-filter-select'
+                    multiple
+                    options={ROLE_OPTIONS}
+                    value={roles}
+                    onChange={(_, value) => {
+                        setRoles(value)
+                    }}
+                    getOptionLabel={(option) => option}
+                    renderInput={(params) => (
+                        <StyledInputField
+                            {...params}
+                            dataTest='case-chip-select-filter-input'
+                            label=''
+                            placeholder='Type for search'
+                        />
+                    )}
+                />
+            </div>
+        </PopoverSheet>
+    )
+}
+
 const SimpleActionCase = ({
     id,
     label,
@@ -309,6 +387,13 @@ export const PopoverCases = (): JSX.Element => (
 
         <Case label='Filter — applies immediately' hint='Live: tick a chip and the count updates. No apply step.'>
             <FilterCase />
+        </Case>
+
+        <Case
+            label='Action · filter with chip select'
+            hint='Pinned field width; chips wrap instead of stretching the popover past 472px.'
+        >
+            <ChipSelectFilterCase />
         </Case>
 
         <Case label='Actions — closes on activation' hint='Live: a list of buttons reached with Tab, no arrow keys.'>

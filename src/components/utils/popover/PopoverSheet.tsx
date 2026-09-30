@@ -325,7 +325,10 @@ export const PopoverSheet = ({
             </StyledButton>
         ))
 
+    // Spec: content-driven width between min 240 and max 472. Only mobile pins
+    // an explicit width (`100vw - 32px`); on desktop the surface hugs its body.
     const maxWidth = isMobile ? MOBILE_WIDTH : MAX_WIDTH_PX[variant]
+    const width = isMobile ? MOBILE_WIDTH : undefined
 
     if (isSheet) {
         return (
@@ -377,7 +380,7 @@ export const PopoverSheet = ({
                             ...(usePopoverLayer ? TOP_LAYER_RESET_STYLE : {}),
                             ...floatingStyles,
                             minWidth: MIN_WIDTH_PX,
-                            width: isMobile ? MOBILE_WIDTH : undefined,
+                            width,
                             maxWidth,
                             maxHeight: maxHeightPx,
                         }}

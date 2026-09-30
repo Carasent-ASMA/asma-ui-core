@@ -313,7 +313,9 @@ export const NumberInputWidthIsCapped: Story = {
     ),
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement)
-        const root = canvas.getByRole('textbox').closest('.inline-flex') as HTMLElement
+        // Cap lives on the StyledInputField root (`max-w-[200px]`). The old `.inline-flex` lookup
+        // broke when fullWidth fields switched to `display: flex` (inline style, not a class).
+        const root = canvas.getByTestId('phone-number-shell').parentElement?.parentElement as HTMLElement
         const row = root.parentElement as HTMLElement
 
         // Assert the room exists FIRST — otherwise a narrow row would satisfy the cap for the

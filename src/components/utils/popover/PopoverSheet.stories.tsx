@@ -3,6 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
+import { StyledInputField } from 'src/components/inputs/input-field'
+import { StyledSelectAutocomplete } from 'src/components/inputs/select-autocomplete/StyledSelectAutocomplete'
 import { FilterIcon } from 'src/components/icons/filter-icon/FilterIcon'
 import { InfoOutlineIcon } from 'src/components/icons/info-outline-icon/InfoOutlineIcon'
 import { PopoverSheet } from './PopoverSheet'
@@ -232,6 +234,87 @@ const FilterExample = (): JSX.Element => {
 export const ActionFilter: Story = {
     render: () => <FilterExample />,
     play: openFrom('Filter'),
+}
+
+const CHIP_ROLE_OPTIONS = [
+    'Administrator',
+    'Therapist',
+    'Case manager',
+    'External consultant with a long role name',
+    'Nursing staff',
+    'Without role',
+]
+
+/**
+ * Chip multi-select filter: field pinned at 416px so the surface opens at max width and chips wrap
+ * instead of growing the popover. Baseline for the Role-filter regression.
+ */
+const ChipSelectFilterExample = (): JSX.Element => {
+    const [roles, setRoles] = useState<string[]>([
+        'Administrator',
+        'Therapist',
+        'External consultant with a long role name',
+    ])
+
+    return (
+        <PopoverSheet
+            dataTest='chip-select-filter-popover'
+            variant='action'
+            title='Filter'
+            renderTrigger={({ ref, triggerProps }) => (
+                <StyledButton
+                    dataTest='chip-select-filter-popover-trigger'
+                    refLink={ref}
+                    type='button'
+                    variant='contained'
+                    startIcon={<FilterIcon />}
+                    {...triggerProps}
+                >
+                    {roles.length > 0 ? `Filter (${roles.length})` : 'Chip filter'}
+                </StyledButton>
+            )}
+            resetAction={
+                <StyledButton
+                    dataTest='chip-select-filter-popover-reset'
+                    type='button'
+                    variant='text'
+                    disabled={roles.length === 0}
+                    onClick={() => {
+                        setRoles([])
+                    }}
+                >
+                    Nullstill
+                </StyledButton>
+            }
+        >
+            <div className='flex w-[416px] max-w-full flex-col'>
+                <p className='m-0 mb-1 text-sm font-semibold leading-5 text-delta-800'>Role</p>
+                <StyledSelectAutocomplete<string, true, false, false>
+                    dataTest='chip-select-filter-popover-select'
+                    multiple
+                    options={CHIP_ROLE_OPTIONS}
+                    value={roles}
+                    onChange={(_, value) => {
+                        setRoles(value)
+                    }}
+                    getOptionLabel={(option) => option}
+                    renderInput={(params) => (
+                        <StyledInputField
+                            {...params}
+                            dataTest='chip-select-filter-popover-input'
+                            label=''
+                            placeholder='Type for search'
+                        />
+                    )}
+                />
+            </div>
+        </PopoverSheet>
+    )
+}
+
+export const ActionChipSelectFilter: Story = {
+    render: () => <ChipSelectFilterExample />,
+    play: openFrom(/^Filter/),
 }
 
 const ActionsExample = (): JSX.Element => {
