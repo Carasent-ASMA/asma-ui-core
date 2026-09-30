@@ -654,7 +654,12 @@ export function StyledSelectAutocomplete<
                                     onMouseDown={(event) => event.preventDefault()}
                                     onClick={toggleSelectAll}
                                     onMouseMove={() => setActiveIndex(null)}
-                                    className='relative flex min-h-12 cursor-pointer items-center gap-x-1 border-0 border-b border-solid border-delta-200 px-4 text-sm text-delta-700 aria-selected:bg-gama-50 hover:bg-delta-50'
+                                    // Styled as the list's table header: a grey bar with its own
+                                    // checkbox column and an uppercase category label, aligned to the
+                                    // option rows below (same px-3/gap-x-3). It stays clickable to
+                                    // toggle select-all, so hover deepens the grey rather than turning
+                                    // the header green like a selected option.
+                                    className='relative flex min-h-10 cursor-pointer items-center gap-x-3 border-0 border-b border-solid border-delta-200 bg-delta-50 px-3 text-xs font-medium uppercase tracking-wide text-delta-600 hover:bg-delta-100'
                                 >
                                     {activeIndex === -1 && (
                                         <span
@@ -669,7 +674,7 @@ export function StyledSelectAutocomplete<
                                         hideWrapper
                                         decorative
                                     />
-                                    <span className='flex-1 truncate py-2'>{selectAllLabel}</span>
+                                    <span className='flex-1 truncate'>{selectAllLabel}</span>
                                 </li>
                             )}
                             {loading ? (
