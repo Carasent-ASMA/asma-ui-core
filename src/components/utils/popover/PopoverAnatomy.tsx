@@ -8,23 +8,20 @@ import { cn } from 'src/helpers/cn'
  * The Figma "_Popover" surface chrome (node `44531:233781`): white, 1px `border/outline` (delta-300),
  * radius 8 (`dialog` token) and the Dialogue-popup elevation — the same surface `StyledDialog` paints.
  *
- * The 1px edge is drawn as an **outline with a -1px offset** (inside the border box) instead of a
- * border: a border consumes layout width, and at the 472px Action max-width a date-picker pair
- * (200 + 16 + 200 = 416px, with 16px + 40px body padding) needs the full 472px of the frame — with a
- * border only 470px remain and the pair wraps. Figma's stroke takes no width from autolayout, and the
- * outline matches that. The negative offset also keeps the line inside the surface, where an
- * ancestor's `overflow` cannot clip it.
+ * The 1px edge is an **inset box-shadow ring**, the package's own idiom for non-layout lines
+ * (`StyledTab`/`StyledMenuItem` draw their DS focus rings the same way): a border consumes layout
+ * width, and at the 472px Action max-width a date-picker pair (200 + 16 + 200 = 416px, with 16px +
+ * 40px body padding) needs the full 472px of the frame — with a border only 470px remain and the
+ * pair wraps. Figma's stroke takes no width from autolayout, and the inset shadow matches that.
  *
  * `box-border` is load-bearing, not noise: this package builds Tailwind with `preflight: false`, so
- * without it `box-sizing` falls back to `content-box` and a 472px max-width renders 474. The
- * `outline-solid` utility is a package-local class for the same reason — with preflight off the
- * outline style defaults to none.
+ * without it `box-sizing` falls back to `content-box` and a 472px max-width renders 474.
  *
  * Positioning (`z-index`, the floating transform, the top-layer props) deliberately stays with the
  * caller, so the Gallery story can render the same surface statically in a grid.
  */
 export const POPOVER_SURFACE_CLASSNAME =
-    'box-border flex flex-col overflow-hidden rounded-lg bg-white text-delta-700 outline-1 outline-solid outline-delta-300 outline-offset-[-1px] shadow-[0px_4px_40px_0px_#22213366]'
+    'box-border flex flex-col overflow-hidden rounded-lg bg-white text-delta-700 outline-none shadow-[inset_0_0_0_1px_var(--colors-delta-300),0px_4px_40px_0px_#22213366]'
 
 export interface PopoverAnatomyProps {
     dataTest: string

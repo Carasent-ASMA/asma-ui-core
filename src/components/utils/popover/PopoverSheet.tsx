@@ -381,9 +381,9 @@ export const PopoverSheet = ({
                             maxWidth,
                             maxHeight: maxHeightPx,
                         }}
-                        // The surface's 1px edge is the shared chrome's outline (delta-300), which
-                        // also replaces the UA focus ring: focusing the container on open must not
-                        // paint a browser ring around the whole surface.
+                        // `outline-none` (in the shared chrome) pairs with the shell's tabIndex={-1}:
+                        // focusing the container on open must not paint a UA focus ring around the
+                        // whole surface — same pairing as StyledDialog.
                         className={cn('z-[1300]', POPOVER_SURFACE_CLASSNAME, className)}
                     >
                         <PopoverAnatomy
