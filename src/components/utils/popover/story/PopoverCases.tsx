@@ -217,7 +217,7 @@ const ChipSelectFilterCase = (): JSX.Element => {
                 </StyledButton>
             }
         >
-            <div className='flex max-w-full w-[416px] flex-col'>
+            <div className='flex w-[416px] max-w-full flex-col'>
                 <p className='m-0 mb-1 text-sm font-semibold leading-5 text-delta-800'>Role</p>
                 <StyledSelectAutocomplete<string, true, false, false>
                     dataTest='case-chip-select-filter-select'
