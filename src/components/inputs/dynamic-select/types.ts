@@ -39,6 +39,12 @@ interface DynamicSelectCommonProps<TOption extends DynamicSelectOption> {
     title?: string
     /** @figmaProp none — app size (chips/buttons). Defaults to `'medium'`. */
     size?: 'small' | 'medium'
+    /**
+     * Option-row density in the autocomplete dropdown. `'compact'` (default) matches the Figma Menus
+     * item at 40px; `'regular'` gives a roomier 48px row. Rows still grow taller when a label wraps.
+     * No effect on the chip-group variant (≤5 options).
+     */
+    rowSize?: 'compact' | 'regular'
     /** Placeholder text shown in the autocomplete input when no value is selected. */
     placeholder?: string
     /** @figmaProp State = true→"Disabled" */

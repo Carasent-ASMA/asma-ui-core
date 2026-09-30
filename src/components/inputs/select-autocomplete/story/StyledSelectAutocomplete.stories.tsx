@@ -63,6 +63,7 @@ const meta = {
         multiple: { control: 'boolean' },
         selectAllLabel: { control: 'text' },
         size: { control: 'radio', options: ['small', 'medium'] },
+        rowSize: { control: 'radio', options: ['compact', 'regular'] },
     },
 } satisfies Meta<typeof StyledSelectAutocomplete>
 
@@ -301,6 +302,46 @@ export const SelectAllTogglesAllOptions: Story = {
         await expect(canvas.queryByRole('button', { name: 'Remove The Shawshank Redemption' })).not.toBeInTheDocument()
         await expect(canvas.queryByRole('button', { name: 'Remove The Godfather' })).not.toBeInTheDocument()
         await expect(canvas.queryByRole('button', { name: 'Remove The Godfather: Part II' })).not.toBeInTheDocument()
+    },
+}
+
+/**
+ * `rowSize='regular'` gives the option rows a roomier 48px min-height (vs the default 40px `'compact'`
+ * that matches the Figma Menus item). The popper is left open so the taller rows are captured.
+ */
+export const RegularRowSize: Story = {
+    args: { rowSize: 'regular', disableCloseOnSelect: true },
+    render: (args) => {
+        const regularOptions = top100Films.slice(0, 4)
+
+        const Wrapper = () => {
+            const [value, setValue] = useState<Film[]>([])
+
+            return (
+                <StyledSelectAutocomplete
+                    {...args}
+                    multiple
+                    options={regularOptions}
+                    value={value}
+                    onChange={(_, nextValue) => setValue(nextValue)}
+                    getOptionLabel={(option) => option.title}
+                    renderInput={(params) => <StyledInputField {...params} dataTest='input' placeholder='Regular rows' />}
+                />
+            )
+        }
+
+        return <Wrapper />
+    },
+    play: async ({ canvasElement, userEvent }) => {
+        const { canvas, input } = getAutocomplete(canvasElement)
+
+        await openAutocomplete(input, userEvent)
+
+        const listbox = await canvas.findByRole('listbox')
+        await expect(listbox).toBeInTheDocument()
+
+        const option = await canvas.findByRole('option', { name: 'The Godfather' })
+        await expect(option).toBeInTheDocument()
     },
 }
 

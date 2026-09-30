@@ -134,6 +134,13 @@ export interface StyledSelectAutocompleteProps<
     helperText?: ReactNode
     /** @figmaProp none — FieldSize (both render the 40px field) */
     size?: 'small' | 'medium'
+    /**
+     * Option-row density in the popover. `'compact'` (default) matches the Figma Menus item at 40px
+     * (`min-h-10`); `'regular'` gives a roomier 48px row (`min-h-12`). Rows still grow taller when a
+     * label wraps to a second line — this only sets the minimum. Does not affect the 32px select-all
+     * header, the input field, or single-select rows' left check column.
+     */
+    rowSize?: 'compact' | 'regular'
     /** @figmaProp Clear (trigger clear button) */
     disableClearable?: boolean
     freeSolo?: boolean
@@ -201,6 +208,7 @@ export function StyledSelectAutocomplete<
     error,
     helperText,
     size = 'small',
+    rowSize = 'compact',
     disableClearable,
     disableCloseOnSelect,
     popupIcon,
@@ -524,11 +532,14 @@ export function StyledSelectAutocomplete<
     const optionRowClassName = cn(
         // ASMA-8220 (TB-14): hover/selected only, no `:active` → pressable. It rides the shared row
         // class, so custom `renderOption` callers spreading `{...props}` inherit it too. No
-        // `asma-touch-target`: the rows already declare `min-h-10`, and the mobile override would
+        // `asma-touch-target`: the rows already declare their min-height, and the mobile override would
         // also grow `aria-disabled` rows, which are not pressable at all.
         'asma-pressable',
         // Figma Menus item: Body Base 16/lh24, text delta-800.
-        'relative box-border flex min-h-10 cursor-pointer items-center gap-x-3 px-3 py-1.5 text-base text-delta-800',
+        'relative box-border flex cursor-pointer items-center gap-x-3 px-3 py-1.5 text-base text-delta-800',
+        // Row density: 'compact' = 40px (Figma Menus item); 'regular' = roomier 48px. min-height only,
+        // so a wrapped 2-line label still grows the row past this.
+        rowSize === 'regular' ? 'min-h-12' : 'min-h-10',
         'aria-selected:bg-gama-50 hover:bg-delta-50',
         // Disabled options never take the gama highlight (hover or keyboard) and read as muted.
         'aria-disabled:cursor-default aria-disabled:!bg-transparent aria-disabled:text-delta-300',
