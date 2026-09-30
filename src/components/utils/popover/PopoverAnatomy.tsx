@@ -53,12 +53,10 @@ export const PopoverAnatomy = ({
     onClose,
 }: PopoverAnatomyProps): JSX.Element => (
     <>
-        {/* Figma draws the scrollbar flush with the surface's right edge (x 385-400 of a 400 frame),
-            not against the text column. So the scroll container spans the full width and the 40px
-            close gutter is its right padding — the bar then lands in that gutter, where the design
-            puts it. The close control floats over the corner instead of occupying a column, but
-            stays LAST in the DOM so `action` still opens on the first body control, not on it.
-            `min-h-0` is what lets the body shrink and actually scroll. */}
+        {/* The body keeps the spec 16px padding on every side (`p-4`). The scroll container spans the
+            full width; the close control floats over the top-right corner instead of occupying a
+            column, and stays LAST in the DOM so `action` still opens on the first body control, not
+            on it. `min-h-0` is what lets the body shrink and actually scroll. */}
         <div className='relative flex min-h-0 flex-1 flex-col'>
             {title && (
                 <div
@@ -68,7 +66,7 @@ export const PopoverAnatomy = ({
                     {title}
                 </div>
             )}
-            <div className='flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto py-2 pl-4 pr-10'>{children}</div>
+            <div className='flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4'>{children}</div>
             <div className='absolute right-0 top-0'>
                 <StyledButton
                     dataTest={`${dataTest}-close`}

@@ -117,6 +117,11 @@ export interface PopoverSheetProps {
  * There is also **no arrow/anchor pointer**: the surface is edge-aligned at an 8px offset and
  * proximity carries the relationship.
  *
+ * Per the DS spec the Action surface renders at a **fixed 400px** width — sizing never follows
+ * content, so the surface cannot jump as filters are typed or selected; anything needing more width
+ * is a panel or a page, not a popover. The Info surface keeps content-driven sizing bounded to
+ * 240–360px.
+ *
  * Below 744px `action` renders as a {@link StyledBottomSheet} (ASMA-8184) — same props, same content;
  * `info` stays anchored at every size, because for an explanation the link to its term is the point.
  *
@@ -326,6 +331,12 @@ export const PopoverSheet = ({
         ))
 
     const maxWidth = isMobile ? MOBILE_WIDTH : MAX_WIDTH_PX[variant]
+    // Spec "Sizing and position": the Action surface is a fixed 400px — the widest it can be and
+    // still sit next to its trigger. Content must never drive its width: a combobox input
+    // (`flex-1`, `min-width: 60px`) would otherwise shrink an empty sheet and grow it as values are
+    // selected, making the surface jump while the user interacts with it. Info keeps content-driven
+    // sizing within 240–360px — its content is read-only and cannot change size while open.
+    const width = isMobile ? MOBILE_WIDTH : isDialog ? MAX_WIDTH_PX.action : undefined
 
     if (isSheet) {
         return (
@@ -377,7 +388,7 @@ export const PopoverSheet = ({
                             ...(usePopoverLayer ? TOP_LAYER_RESET_STYLE : {}),
                             ...floatingStyles,
                             minWidth: MIN_WIDTH_PX,
-                            width: isMobile ? MOBILE_WIDTH : undefined,
+                            width,
                             maxWidth,
                             maxHeight: maxHeightPx,
                         }}
