@@ -597,6 +597,12 @@ export function StyledSelectAutocomplete<
         return renderOption ? renderOption(props, option, state) : defaultRenderOption(props, option, state)
     }
 
+    // Group-header ("select all") state, shared by the row's `aria-selected` and its checkbox.
+    // Figma checkbox Type: all selected → Checked, some (but not all) → Indeterminate, none → blank.
+    const hasSelectAllHeader = Boolean(allowSelectAll && isMultiple)
+    const allSelected = options.length > 0 && selectedArray.length === options.length
+    const someSelected = selectedArray.length > 0 && !allSelected
+
     return (
         <div className={cn(style['styledSelectAutocompleteWrapper'], !fullWidth && 'w-auto', wrapperClassName, className)}>
             {renderInput(renderInputParams)}
@@ -624,6 +630,10 @@ export function StyledSelectAutocomplete<
                             // Figma Menus (node 34522-151497) pads the list `8px 0` — the rows run
                             // edge to edge horizontally, with 8px of breathing room top and bottom.
                             'z-[1300] m-0 list-none overflow-auto rounded border border-solid border-delta-300 bg-white px-0 py-2 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
+                            // With a group-select header the Figma popover has no vertical padding:
+                            // the grey header bar sits flush against the top edge and the last option
+                            // against the bottom, so drop both `py-2` paddings.
+                            hasSelectAllHeader && 'py-0',
                             // Figma Menus (node 34522-151497) separates the rows and leaves the last
                             // one clean. Owned by the LISTBOX, not the row, for two reasons: a custom
                             // `renderOption` that replaces `props.className` (a real pattern in
@@ -648,18 +658,19 @@ export function StyledSelectAutocomplete<
                                 <li
                                     id={`${dataTest}-select-all`}
                                     role='option'
-                                    aria-selected={options.length > 0 && selectedArray.length === options.length}
+                                    aria-selected={allSelected}
                                     data-active={activeIndex === -1 ? '' : undefined}
                                     tabIndex={-1}
                                     onMouseDown={(event) => event.preventDefault()}
                                     onClick={toggleSelectAll}
                                     onMouseMove={() => setActiveIndex(null)}
-                                    // Styled as the list's table header: a grey bar with its own
-                                    // checkbox column and an uppercase category label, aligned to the
-                                    // option rows below (same px-3/gap-x-3). It stays clickable to
-                                    // toggle select-all, so hover deepens the grey rather than turning
-                                    // the header green like a selected option.
-                                    className='relative flex min-h-10 cursor-pointer items-center gap-x-3 border-0 border-b border-solid border-delta-200 bg-delta-50 px-3 text-xs font-medium uppercase tracking-wide text-delta-600 hover:bg-delta-100'
+                                    // Styled as the list's table header (Figma Reports table-header row):
+                                    // a `--table-bg-header` (#F9FAFB = colors-gray-10) bar, fixed 32px
+                                    // tall with 8px/8px padding and a 16px cell gap, carrying its own
+                                    // checkbox column and an X-small Semibold uppercase category label.
+                                    // It stays clickable to toggle select-all, so hover deepens the grey
+                                    // rather than turning the header green like a selected option.
+                                    className='relative flex h-8 cursor-pointer items-center gap-x-4 border-0 border-b border-solid border-delta-200 bg-[var(--colors-gray-10)] px-2 text-[10px] font-semibold uppercase leading-3 tracking-[0.2px] text-delta-600 hover:bg-delta-50'
                                 >
                                     {activeIndex === -1 && (
                                         <span
@@ -669,7 +680,8 @@ export function StyledSelectAutocomplete<
                                     )}
                                     <StyledCheckbox
                                         dataTest={`${dataTest}-select-all`}
-                                        checked={options.length > 0 && selectedArray.length === options.length}
+                                        checked={allSelected}
+                                        indeterminate={someSelected}
                                         size='small'
                                         hideWrapper
                                         decorative
