@@ -47,7 +47,7 @@ const meta = {
                     'Deliberately **no arrow/anchor pointer** either: the surface is edge-aligned at an 8px',
                     'offset and proximity carries the relationship.',
                     '',
-                    '**Sizing** — min-width 240px, max-width 360px (info) / 400px (action), max-height 60vh',
+                    '**Sizing** — min-width 240px, max-width 360px (info) / 472px (action), max-height 60vh',
                     'with the body scrolling while the title and footers stay put. Below 744px the surface',
                     'takes `100vw - 32px` and an info popover is pinned below its trigger.',
                     '',
