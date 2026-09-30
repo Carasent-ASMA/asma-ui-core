@@ -57,7 +57,7 @@ const MIN_WIDTH_PX = 240
 const MAX_WIDTH_PX = { info: 472, action: 472 } as const
 const MAX_HEIGHT_RATIO = 0.6
 const MOBILE_WIDTH = 'calc(100vw - 32px)'
-const ACTION_DESKTOP_WIDTH = 'min(400px, calc(100vw - 16px))'
+const ACTION_DESKTOP_WIDTH = 'min(472px, calc(100vw - 16px))'
 
 /** @figmaNode wXrXt5uKNNzV2DnQCgyYZH#44531-233781 (Design-System · "_Popover") */
 export interface PopoverSheetProps {
