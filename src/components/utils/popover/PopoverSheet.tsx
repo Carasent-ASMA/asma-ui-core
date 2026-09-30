@@ -57,6 +57,7 @@ const MIN_WIDTH_PX = 240
 const MAX_WIDTH_PX = { info: 472, action: 472 } as const
 const MAX_HEIGHT_RATIO = 0.6
 const MOBILE_WIDTH = 'calc(100vw - 32px)'
+const ACTION_DESKTOP_WIDTH = 'min(400px, calc(100vw - 16px))'
 
 /** @figmaNode wXrXt5uKNNzV2DnQCgyYZH#44531-233781 (Design-System · "_Popover") */
 export interface PopoverSheetProps {
@@ -326,6 +327,7 @@ export const PopoverSheet = ({
         ))
 
     const maxWidth = isMobile ? MOBILE_WIDTH : MAX_WIDTH_PX[variant]
+    const width = isMobile ? MOBILE_WIDTH : isDialog ? ACTION_DESKTOP_WIDTH : undefined
 
     if (isSheet) {
         return (
@@ -377,7 +379,7 @@ export const PopoverSheet = ({
                             ...(usePopoverLayer ? TOP_LAYER_RESET_STYLE : {}),
                             ...floatingStyles,
                             minWidth: MIN_WIDTH_PX,
-                            width: isMobile ? MOBILE_WIDTH : undefined,
+                            width,
                             maxWidth,
                             maxHeight: maxHeightPx,
                         }}

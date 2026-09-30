@@ -382,9 +382,13 @@ export const StyledInputField = ({
         // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
         <div
             ref={rootRef}
-            className={cn('group relative inline-flex flex-col', className)}
+            className={cn('group relative min-w-0 flex-col', className)}
             onClick={onClick}
             style={{
+                // Keep the default shrink-to-fit field when `fullWidth` is omitted, but switch the
+                // full-width variant to block-level flex so it wraps inside popovers/dialog rows
+                // instead of preserving the old inline-flex min-content behaviour.
+                display: fullWidth ? 'flex' : 'inline-flex',
                 width: fullWidth ? '100%' : 235,
                 fontFamily: 'Roboto, Helvetica, Arial, sans-serif',
                 letterSpacing: '0.00938em',
