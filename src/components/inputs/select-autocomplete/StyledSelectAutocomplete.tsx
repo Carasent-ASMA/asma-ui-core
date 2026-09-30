@@ -552,7 +552,7 @@ export function StyledSelectAutocomplete<
                     <StyledCheckbox
                         dataTest={`${dataTest}-${getLabel(option)}-checkbox`}
                         checked={state.selected}
-                        size='small'
+                        size='medium'
                         hideWrapper
                         decorative
                     />
@@ -666,11 +666,13 @@ export function StyledSelectAutocomplete<
                                     onMouseMove={() => setActiveIndex(null)}
                                     // Styled as the list's table header (Figma Reports table-header row):
                                     // a `--table-bg-header` (#F9FAFB = colors-gray-10) bar, fixed 32px
-                                    // tall with 8px/8px padding and a 16px cell gap, carrying its own
-                                    // checkbox column and an X-small Semibold uppercase category label.
-                                    // It stays clickable to toggle select-all, so hover deepens the grey
-                                    // rather than turning the header green like a selected option.
-                                    className='relative flex h-8 cursor-pointer items-center gap-x-4 border-0 border-b border-solid border-delta-200 bg-[var(--colors-gray-10)] px-2 text-[10px] font-semibold uppercase leading-3 tracking-[0.2px] text-delta-600 hover:bg-delta-50'
+                                    // tall, carrying its own checkbox column and a Semibold uppercase
+                                    // category label. Its checkbox column and horizontal padding match
+                                    // the option rows below (px-3/gap-x-3, medium checkbox) so the
+                                    // checkboxes line up in a single column. It stays clickable to toggle
+                                    // select-all, so hover deepens the grey rather than turning the header
+                                    // green like a selected option.
+                                    className='relative flex h-8 cursor-pointer items-center gap-x-3 border-0 border-b border-solid border-delta-200 bg-[var(--colors-gray-10)] px-3 text-xs font-semibold uppercase tracking-[0.2px] text-delta-600 hover:bg-delta-50'
                                 >
                                     {activeIndex === -1 && (
                                         <span
@@ -682,7 +684,7 @@ export function StyledSelectAutocomplete<
                                         dataTest={`${dataTest}-select-all`}
                                         checked={allSelected}
                                         indeterminate={someSelected}
-                                        size='small'
+                                        size='medium'
                                         hideWrapper
                                         decorative
                                     />
