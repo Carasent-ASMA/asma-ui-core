@@ -128,6 +128,7 @@ import {
     GraphOutlineIcon,
     NotesIcon,
     SaveIcon,
+    SaveAsDraftIcon,
     RemoveIcon,
     EnvelopeIcon,
     FingerprintIcon,
@@ -1028,6 +1029,12 @@ export const useIconsList = ({
             component: <SaveIcon height={height} width={width} />,
             clipboardText: '<SaveIcon />',
             tags: ['save icon'],
+        },
+        {
+            name: 'SaveAsDraftIcon',
+            component: <SaveAsDraftIcon height={height} width={width} />,
+            clipboardText: '<SaveAsDraftIcon />',
+            tags: ['save as draft icon disk pencil edit'],
         },
         {
             name: 'EnvelopeIcon',
