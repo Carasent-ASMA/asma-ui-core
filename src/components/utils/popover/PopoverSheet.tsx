@@ -57,7 +57,6 @@ const MIN_WIDTH_PX = 240
 const MAX_WIDTH_PX = { info: 472, action: 472 } as const
 const MAX_HEIGHT_RATIO = 0.6
 const MOBILE_WIDTH = 'calc(100vw - 32px)'
-const ACTION_DESKTOP_WIDTH = 'min(472px, calc(100vw - 16px))'
 
 /** @figmaNode wXrXt5uKNNzV2DnQCgyYZH#44531-233781 (Design-System · "_Popover") */
 export interface PopoverSheetProps {
@@ -326,8 +325,10 @@ export const PopoverSheet = ({
             </StyledButton>
         ))
 
+    // Spec: content-driven width between min 240 and max 472. Only mobile pins
+    // an explicit width (`100vw - 32px`); on desktop the surface hugs its body.
     const maxWidth = isMobile ? MOBILE_WIDTH : MAX_WIDTH_PX[variant]
-    const width = isMobile ? MOBILE_WIDTH : isDialog ? ACTION_DESKTOP_WIDTH : undefined
+    const width = isMobile ? MOBILE_WIDTH : undefined
 
     if (isSheet) {
         return (
