@@ -34,7 +34,7 @@
 .drag-icon--enabled {
     color: var(--colors-delta-700);
     cursor: grab;
-    &:focus {
+    &:focus-visible {
         outline-color: var(--colors-gama-500);
     }
     &:active {
