@@ -63,13 +63,13 @@ export const PopoverAnatomy = ({
             {title && (
                 <div
                     id={titleId}
-                    className='shrink-0 truncate pb-1 pl-4 pr-10 pt-2 text-lg font-semibold leading-7 text-delta-800'
+                    className='text-delta-800 shrink-0 truncate pt-2 pr-10 pb-1 pl-4 text-lg leading-7 font-semibold'
                 >
                     {title}
                 </div>
             )}
-            <div className='flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto py-2 pl-4 pr-10'>{children}</div>
-            <div className='absolute right-0 top-0'>
+            <div className='flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto py-2 pr-10 pl-4'>{children}</div>
+            <div className='absolute top-0 right-0'>
                 <StyledButton
                     dataTest={`${dataTest}-close`}
                     variant='textGray'

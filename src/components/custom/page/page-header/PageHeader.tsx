@@ -114,8 +114,8 @@ export const toToolbarAction = (action: PageHeaderAction): DynamicToolbarAction 
 function LoadingSkeleton({ compact }: { compact: boolean }): JSX.Element {
     return (
         <div className='flex w-full min-w-0 items-center justify-between gap-2' aria-hidden>
-            <div className={cn('animate-pulse rounded bg-delta-100', compact ? 'h-6 w-3/5' : 'h-8 w-2/5 max-w-[500px]')} />
-            <div className='h-10 w-14 shrink-0 animate-pulse rounded bg-delta-100' />
+            <div className={cn('bg-delta-100 animate-pulse rounded', compact ? 'h-6 w-3/5' : 'h-8 w-2/5 max-w-[500px]')} />
+            <div className='bg-delta-100 h-10 w-14 shrink-0 animate-pulse rounded' />
         </div>
     )
 }
@@ -238,7 +238,7 @@ export function PageHeader({
             title={titleClamped ? title : undefined}
             className={cn(
                 /* 2-line clamp is visual only — the accessible name stays the full title. */
-                'm-0 line-clamp-2 min-w-0 wrap-break-word font-semibold text-delta-800 outline-none',
+                'text-delta-800 m-0 line-clamp-2 min-w-0 font-semibold wrap-break-word outline-none',
                 smallType ? 'text-xl leading-7' : 'text-2xl leading-8',
             )}
         >
@@ -260,7 +260,7 @@ export function PageHeader({
                     /* Same base height across breakpoints; content may expand it. */
                     'flex w-full items-center gap-2 px-4',
                     stuck ? 'min-h-[56px] py-2 shadow-sm' : 'min-h-[64px] py-3',
-                    sticky && 'sticky top-0 z-30 bg-delta-50',
+                    sticky && 'bg-delta-50 sticky top-0 z-30',
                     className,
                 )}
             >
@@ -292,7 +292,7 @@ export function PageHeader({
                     </div>
                     {/* Compact-on-scroll drops the context line so the stuck header takes minimal space. */}
                     {!headingHidden && subtitle != null && !stuck && (
-                        <div className='mt-0.5 min-w-0 text-sm text-delta-700'>{subtitle}</div>
+                        <div className='text-delta-700 mt-0.5 min-w-0 text-sm'>{subtitle}</div>
                     )}
                 </div>
 

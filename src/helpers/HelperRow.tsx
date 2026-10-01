@@ -24,7 +24,7 @@ export const HelperRow = forwardRef<HTMLDivElement, HelperRowProps>(
             id={id}
             role={role}
             className={cn(
-                'flex min-h-[24px] gap-1 pt-1 text-sm leading-5 tracking-[0.03333em]',
+                'flex min-h-[24px] gap-1 pt-1 text-sm/5 tracking-[0.03333em]',
                 error ? 'text-error-500' : 'text-delta-600',
                 className,
             )}

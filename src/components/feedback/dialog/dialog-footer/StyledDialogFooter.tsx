@@ -230,7 +230,7 @@ export function StyledDialogFooter({
                  * `self-stretch` overrides that for this item only. Deliberately not `w-full`: with
                  * the footer's own `p-4`, a 100% width overflows the parent wherever box-sizing is
                  * content-box — which also perturbs the width the action planner measures. */
-                'flex items-center justify-end self-stretch border-0 border-t border-solid border-delta-200 bg-white',
+                'border-delta-200 flex items-center justify-end self-stretch border-0 border-t border-solid bg-white',
                 compact ? 'gap-2 p-2' : 'gap-4 p-4',
                 rounded && 'rounded-b-lg',
                 /* Pinned to the bottom of the scroll container. The ASMA design system separates a

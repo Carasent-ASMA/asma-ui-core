@@ -44,7 +44,7 @@ export const ChipGroup = ({
     type: 'checkbox' | 'radio'
 }): JSX.Element => (
     <div className='flex flex-col gap-1'>
-        <p className='m-0 text-base font-semibold leading-6 text-delta-800'>{heading}</p>
+        <p className='text-delta-800 m-0 text-base leading-6 font-semibold'>{heading}</p>
         <div className='flex flex-wrap gap-2'>
             {options.map((option) => (
                 <StyledInteractiveChip

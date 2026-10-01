@@ -454,7 +454,7 @@ export function StyledSelectAutocomplete<
                     tabIndex={-1}
                     aria-label='Clear'
                     data-testid={`${dataTest}-clear`}
-                    className='invisible flex min-h-6 min-w-6 cursor-pointer items-center justify-center rounded-full border-0 bg-delta-50 group-focus-within:visible'
+                    className='bg-delta-50 invisible flex min-h-6 min-w-6 cursor-pointer items-center justify-center rounded-full border-0 group-focus-within:visible'
                     onMouseDown={(event) => event.preventDefault()}
                     onClick={clearValue}
                 >
@@ -528,10 +528,10 @@ export function StyledSelectAutocomplete<
         // also grow `aria-disabled` rows, which are not pressable at all.
         'asma-pressable',
         // Figma Menus item: Body Base 16/lh24, text delta-800.
-        'relative box-border flex min-h-10 cursor-pointer items-center gap-x-3 px-3 py-1.5 text-base text-delta-800',
+        'text-delta-800 relative box-border flex min-h-10 cursor-pointer items-center gap-x-3 px-3 py-1.5 text-base',
         'aria-selected:bg-gama-50 hover:bg-delta-50',
         // Disabled options never take the gama highlight (hover or keyboard) and read as muted.
-        'aria-disabled:cursor-default aria-disabled:bg-transparent! aria-disabled:text-delta-300',
+        'aria-disabled:text-delta-300 aria-disabled:cursor-default aria-disabled:bg-transparent!',
     )
 
     const defaultRenderOption = (props: OptionLiProps, option: T, state: AutocompleteRenderOptionState): ReactNode => {
@@ -541,7 +541,7 @@ export function StyledSelectAutocomplete<
                 {props['data-active'] !== undefined && (
                     <span
                         aria-hidden='true'
-                        className='border-l-solid pointer-events-none absolute inset-y-0 left-0 border-l-[3px] border-focus-ring'
+                        className='border-l-solid border-focus-ring pointer-events-none absolute inset-y-0 left-0 border-l-[3px]'
                     />
                 )}
                 {isMultiple ? (
@@ -623,7 +623,7 @@ export function StyledSelectAutocomplete<
                             // border/outline delta-300 (#bdc4cf), Menus shadow. Matches StyledSelect/StyledMenu.
                             // Figma Menus (node 34522-151497) pads the list `8px 0` — the rows run
                             // edge to edge horizontally, with 8px of breathing room top and bottom.
-                            'z-1300 m-0 list-none overflow-auto rounded border border-solid border-delta-300 bg-white px-0 py-2 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
+                            'border-delta-300 z-1300 m-0 list-none overflow-auto rounded border border-solid bg-white px-0 py-2 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
                             // Figma Menus (node 34522-151497) separates the rows and leaves the last
                             // one clean. Owned by the LISTBOX, not the row, for two reasons: a custom
                             // `renderOption` that replaces `props.className` (a real pattern in
@@ -634,7 +634,7 @@ export function StyledSelectAutocomplete<
                             // option. One structural rule cannot come apart like that: no stylesheet,
                             // no separators at all, which still reads correctly.
                             '[&>li:not(:last-child)]:border-0 [&>li:not(:last-child)]:border-b',
-                            '[&>li:not(:last-child)]:border-solid [&>li:not(:last-child)]:border-delta-200',
+                            '[&>li:not(:last-child)]:border-delta-200 [&>li:not(:last-child)]:border-solid',
                             classes?.listbox,
                             slotProps?.popper?.className,
                         )}
@@ -659,12 +659,12 @@ export function StyledSelectAutocomplete<
                                     // option rows below (same px-3/gap-x-3). It stays clickable to
                                     // toggle select-all, so hover deepens the grey rather than turning
                                     // the header green like a selected option.
-                                    className='relative flex min-h-10 cursor-pointer items-center gap-x-3 border-0 border-b border-solid border-delta-200 bg-delta-50 px-3 text-xs font-medium uppercase tracking-wide text-delta-600 hover:bg-delta-100'
+                                    className='border-delta-200 bg-delta-50 text-delta-600 relative flex min-h-10 cursor-pointer items-center gap-x-3 border-0 border-b border-solid px-3 text-xs font-medium tracking-wide uppercase hover:bg-delta-100'
                                 >
                                     {activeIndex === -1 && (
                                         <span
                                             aria-hidden='true'
-                                            className='border-l-solid pointer-events-none absolute inset-y-0 left-0 border-l-[3px] border-focus-ring'
+                                            className='border-l-solid border-focus-ring pointer-events-none absolute inset-y-0 left-0 border-l-[3px]'
                                         />
                                     )}
                                     <StyledCheckbox
@@ -681,11 +681,11 @@ export function StyledSelectAutocomplete<
                                 // Placeholder text, not a selectable option — `role='presentation'`
                                 // exempts it from `role='listbox'`'s required-children check (axe
                                 // `aria-required-children`), which a bare, roleless <li> doesn't satisfy.
-                                <li role='presentation' className='px-3 py-2 text-sm text-delta-600'>
+                                <li role='presentation' className='text-delta-600 px-3 py-2 text-sm'>
                                     {loadingText}
                                 </li>
                             ) : visibleOptions.length === 0 ? (
-                                <li role='presentation' className='px-3 py-2 text-sm text-delta-600'>
+                                <li role='presentation' className='text-delta-600 px-3 py-2 text-sm'>
                                     {noOptionsText}
                                 </li>
                             ) : (

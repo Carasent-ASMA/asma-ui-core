@@ -451,7 +451,7 @@ export const StyledSelect = ({
                         <span
                             aria-hidden='true'
                             data-testid='select-clear-button'
-                            className='invisible flex items-center justify-center rounded-full p-[2px] group-focus-within:visible hover:bg-gama-100'
+                            className='hover:bg-gama-100 invisible flex items-center justify-center rounded-full p-[2px] group-focus-within:visible'
                             onClick={(event) => {
                                 event.stopPropagation()
                                 handleClear()
@@ -507,9 +507,9 @@ export const StyledSelect = ({
                             // Figma Menus (node 34522-151497): the list is padded `8px 0` (was 4px)
                             // and separates its rows from the container — see the equivalent rule on
                             // StyledSelectAutocomplete's listbox for why it does not live on the row.
-                            'z-1300 m-0 max-h-72 list-none overflow-auto rounded border border-solid border-delta-300 bg-white px-0 py-2 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
+                            'border-delta-300 z-1300 m-0 max-h-72 list-none overflow-auto rounded border border-solid bg-white px-0 py-2 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
                             '[&>li:not(:last-child)]:border-0 [&>li:not(:last-child)]:border-b',
-                            '[&>li:not(:last-child)]:border-solid [&>li:not(:last-child)]:border-delta-200',
+                            '[&>li:not(:last-child)]:border-delta-200 [&>li:not(:last-child)]:border-solid',
                             MenuProps?.className,
                         )}
                     >

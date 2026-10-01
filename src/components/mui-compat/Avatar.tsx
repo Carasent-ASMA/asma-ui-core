@@ -46,7 +46,7 @@ export const Avatar = ({
     return (
         <div
             className={clsx(
-                'relative flex shrink-0 items-center justify-center overflow-hidden font-roboto',
+                'font-roboto relative flex shrink-0 items-center justify-center overflow-hidden',
                 VARIANT_CLASS[variant] ?? VARIANT_CLASS['circular'],
                 className,
             )}

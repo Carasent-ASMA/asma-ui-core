@@ -69,7 +69,7 @@ export function VirtualizedList<TItem>({
 
                     return (
                         <div
-                            className='absolute left-0 top-0 w-full'
+                            className='absolute top-0 left-0 w-full'
                             // `data-index` is not decoration: `measureElement` reads it to know which
                             // row it just measured.
                             data-index={virtualItem.index}

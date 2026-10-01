@@ -69,7 +69,7 @@ export const outlineClass = ({ focused, error, disabled, readOnly, borderless }:
                   ? 'border-error-500'
                   : focused
                     ? 'border-focus-ring shadow-[inset_0_0_0_2px_var(--colors-focus-ring)]'
-                    : 'border-delta-500 group-hover:border-2 group-hover:border-gama-300', // Figma border/hover #60bdbd
+                    : 'border-delta-500 group-hover:border-gama-300 group-hover:border-2', // Figma border/hover #60bdbd
     )
 
 /** MUI-compatible fieldset outline used by text fields with floating labels. */
@@ -83,7 +83,7 @@ export const notchedOutlineClass = ({
     cn(
         'pointer-events-none absolute z-0 m-0 box-border min-w-0 overflow-hidden rounded border border-solid transition-colors',
         // ponytail: notch only when a label needs the gap — no label = inset-0 so border is exactly 40px
-        notched ? 'inset-x-0 bottom-0 top-[-5px] px-2 py-0' : 'inset-0',
+        notched ? 'inset-x-0 top-[-5px] bottom-0 px-2 py-0' : 'inset-0',
         disabled
             ? 'border-delta-300'
             : readOnly
@@ -92,7 +92,7 @@ export const notchedOutlineClass = ({
               ? 'border-error-500'
               : focused
                 ? 'border-focus-ring shadow-[inset_0_0_0_2px_var(--colors-focus-ring)]'
-                : 'border-delta-500 group-hover:border-2 group-hover:border-gama-300', // Figma border/hover #60bdbd
+                : 'border-delta-500 group-hover:border-gama-300 group-hover:border-2', // Figma border/hover #60bdbd
     )
 
 export const notchedLegendClass = (shrink: boolean): string =>

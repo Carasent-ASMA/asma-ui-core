@@ -136,7 +136,7 @@ export const CountryCodeSelect = ({
                     // number input w=205). Fixed rather than hugging its text so the pair does not
                     // resize when the calling code changes width (+1 vs +994).
                     'group relative flex w-32 shrink-0 items-center gap-1.5 rounded px-3 text-base',
-                    disabled ? 'cursor-not-allowed text-delta-300' : 'text-delta-800',
+                    disabled ? 'text-delta-300 cursor-not-allowed' : 'text-delta-800',
                 )}
             >
                 {/* The country trigger never paints the error state — Figma keeps its border
@@ -184,7 +184,7 @@ export const CountryCodeSelect = ({
                             aria-hidden='true'
                             aria-expanded
                             onClick={picker.dismiss}
-                            className='ml-auto flex shrink-0 cursor-pointer border-0 bg-transparent p-0 outline-none focus:shadow-none focus:outline-none focus:ring-0'
+                            className='ml-auto flex shrink-0 cursor-pointer border-0 bg-transparent p-0 outline-none focus:shadow-none focus:ring-0 focus:outline-none'
                         >
                             <ChevronDownIcon width={20} height={20} className='flip-180' />
                         </button>
@@ -210,8 +210,8 @@ export const CountryCodeSelect = ({
                         onFocus={() => setFocused(true)}
                         onBlur={() => setFocused(false)}
                         className={cn(
-                            'relative z-1 flex w-full items-center gap-1.5 border-0 bg-transparent p-0 text-base outline-none focus:shadow-none focus:outline-none focus:ring-0',
-                            disabled ? 'cursor-not-allowed text-delta-300' : 'cursor-pointer text-delta-800',
+                            'relative z-1 flex w-full items-center gap-1.5 border-0 bg-transparent p-0 text-base outline-none focus:shadow-none focus:ring-0 focus:outline-none',
+                            disabled ? 'text-delta-300 cursor-not-allowed' : 'text-delta-800 cursor-pointer',
                         )}
                     >
                         {renderFlag?.(value, 'eager')}

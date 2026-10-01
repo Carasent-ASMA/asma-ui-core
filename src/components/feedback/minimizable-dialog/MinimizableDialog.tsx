@@ -117,7 +117,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
 
     return (
         <>
-            {isFullScreenActive && <div className='fixed inset-0 z-51 bg-[rgb(98,110,126)] bg-opacity-70' />}
+            {isFullScreenActive && <div className='bg-opacity-70 fixed inset-0 z-51 bg-[rgb(98,110,126)]' />}
 
             <div
                 ref={minimizedPanelRef}
@@ -125,7 +125,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                 className={cn(styles['dialog'], !minimized && styles['hidden'])}
             >
                 <div className={clsx('flex items-center justify-between', !minimized && 'hidden')} data-testid={dataTest}>
-                    <div className='truncate text-lg font-semibold text-delta-800'>{title}</div>
+                    <div className='text-delta-800 truncate text-lg font-semibold'>{title}</div>
                     <div className='flex items-center gap-x-1'>
                         {showExpandIcon && (
                             <StyledTooltip title={locale === 'en' ? 'Expand' : 'Utvid'}>
@@ -171,19 +171,19 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                 aria-modal={isFullScreenActive ? true : undefined}
                 aria-label={isFullScreenActive && typeof title === 'string' ? title : undefined}
                 className={cn(
-                    'fixed bottom-4 right-4 z-51 rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)] transition-all duration-300',
+                    'fixed right-4 bottom-4 z-51 rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)] transition-all duration-300',
                     className && !minimized && !fullScreen ? className : '',
                     minimized && 'h-0! w-0! opacity-0 duration-0',
                     isFullScreenActive && 'fixed duration-0',
                 )}
                 data-testid={dataTest}
             >
-                <div className='flex flex-col gap-y-2 border-b border-delta-200 p-4'>
+                <div className='border-delta-200 flex flex-col gap-y-2 border-b p-4'>
                     <div className='flex items-center justify-between'>
                         {!label ? (
-                            <div className='text-2xl font-semibold text-delta-800'>{title}</div>
+                            <div className='text-delta-800 text-2xl font-semibold'>{title}</div>
                         ) : (
-                            <div className='text-sm text-delta-700'>{label}</div>
+                            <div className='text-delta-700 text-sm'>{label}</div>
                         )}
 
                         <div className='flex items-center gap-x-1'>
@@ -254,7 +254,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                         </div>
                     </div>
 
-                    {label && <div className='truncate text-2xl font-semibold text-delta-800'>{title}</div>}
+                    {label && <div className='text-delta-800 truncate text-2xl font-semibold'>{title}</div>}
                 </div>
 
                 <div className={clsx('flex flex-col', fullScreen && !minimized && 'h-[87dvh]')}>
@@ -267,7 +267,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                     footerInfo ? (
                         <div
                             className={cn(
-                                'flex items-center justify-between border-0 border-t border-solid border-delta-200 bg-white p-4',
+                                'border-delta-200 flex items-center justify-between border-0 border-t border-solid bg-white p-4',
                                 footerClassName,
                             )}
                         >
@@ -327,7 +327,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                             {showButtons ? (
                                 <div
                                     className={cn(
-                                        'flex justify-end gap-x-2 border-t border-delta-200 p-4',
+                                        'border-delta-200 flex justify-end gap-x-2 border-t p-4',
                                         btnContainerClassName,
                                     )}
                                 >

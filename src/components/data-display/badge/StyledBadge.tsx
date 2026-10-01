@@ -140,7 +140,7 @@ export const StyledBadge = ({
                 <span
                     aria-hidden='true'
                     className={clsx(
-                        'absolute z-1 box-border flex items-center justify-center whitespace-nowrap font-roboto font-semibold',
+                        'font-roboto absolute z-1 box-border flex items-center justify-center font-semibold whitespace-nowrap',
                         ANCHOR_CLASS[`${vertical}-${horizontal}`],
                         isDot
                             ? 'h-[12px] w-[12px] min-w-[12px] rounded-full p-0'

@@ -43,7 +43,7 @@ export const StyledCountryFlag = ({
 }: StyledCountryFlagProps): JSX.Element => {
     const [failed, setFailed] = useState(false)
 
-    const box = cn('h-4 w-6 shrink-0 rounded-sm bg-delta-100', className)
+    const box = cn('bg-delta-100 h-4 w-6 shrink-0 rounded-sm', className)
 
     // Decorative: every row and the trigger already name the country in text, so announcing the
     // flag would only repeat it.

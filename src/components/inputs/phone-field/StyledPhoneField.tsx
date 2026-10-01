@@ -124,7 +124,7 @@ export const StyledPhoneField = ({
     return (
         <div className={cn('flex flex-col', className)} data-testid={`${dataTest}-root`}>
             {label != null && (
-                <label id={labelId} htmlFor={fieldId} className='pb-1 text-base font-semibold text-delta-800'>
+                <label id={labelId} htmlFor={fieldId} className='text-delta-800 pb-1 text-base font-semibold'>
                     {label}
                     {required === true && <span aria-hidden='true'>&nbsp;*</span>}
                 </label>
@@ -133,7 +133,7 @@ export const StyledPhoneField = ({
             {readOnly === true ? (
                 // Figma draws the read-only number as a link (gama-500, underlined), which is
                 // also what makes it dialable on a phone — so it is a real anchor, not styled text.
-                <span className='py-2 text-base text-delta-800'>
+                <span className='text-delta-800 py-2 text-base'>
                     {readOnlyHref === undefined ? (
                         <span data-testid={`${dataTest}-readonly`}>{readOnlyText ?? displayValue}</span>
                     ) : (

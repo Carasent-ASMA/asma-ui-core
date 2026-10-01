@@ -111,12 +111,12 @@ export const DynamicInteractiveChipGroup = forwardRef(
 
         return (
             <div data-testid={`${dataTest}-dynamic-radio-group`} className='relative flex flex-col gap-y-1'>
-                {title && <span className='text-base font-semibold text-delta-800'>{title}</span>}
+                {title && <span className='text-delta-800 text-base font-semibold'>{title}</span>}
                 {/* HACK for calculating overflow layout */}
                 <div
                     aria-hidden
                     ref={containerRef}
-                    className='pointer-events-none absolute left-0 top-0 flex flex-wrap gap-2 opacity-0'
+                    className='pointer-events-none absolute top-0 left-0 flex flex-wrap gap-2 opacity-0'
                     style={{ width: '100%' }}
                 >
                     {visibleOptions.map((o) => {
@@ -222,7 +222,7 @@ export const DynamicInteractiveChipGroup = forwardRef(
                     id={helperId}
                     role={helperAlertRole}
                     className={cn(
-                        'flex min-h-[24px] items-center gap-1 pt-1 text-sm/5 text-delta-600',
+                        'text-delta-600 flex min-h-[24px] items-center gap-1 pt-1 text-sm/5',
                         error && 'text-error-500',
                     )}
                 >

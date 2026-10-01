@@ -304,11 +304,11 @@ export const StyledSlider = ({
             {!isVertical && (fromLabel ?? toLabel) && (
                 <div className='grid w-full grid-cols-2 gap-4'>
                     {!isVertical && fromLabel && (
-                        <span className='min-w-0 wrap-break-word text-left font-normal text-delta-800'>{fromLabel}</span>
+                        <span className='text-delta-800 min-w-0 text-left font-normal wrap-break-word'>{fromLabel}</span>
                     )}
 
                     {!isVertical && toLabel && (
-                        <span className='min-w-0 wrap-break-word text-right font-normal text-delta-800'>{toLabel}</span>
+                        <span className='text-delta-800 min-w-0 text-right font-normal wrap-break-word'>{toLabel}</span>
                     )}
                 </div>
             )}
@@ -370,7 +370,7 @@ export const StyledSlider = ({
                             {/* Rail — Figma unfilled track = delta-100 (#e7eaee), 4px. */}
                             <div
                                 className={cn(
-                                    'absolute inset-0 rounded-full bg-delta-100',
+                                    'bg-delta-100 absolute inset-0 rounded-full',
                                     classes?.rail,
                                     slotProps?.rail?.className,
                                 )}
@@ -437,7 +437,7 @@ export const StyledSlider = ({
                                             // Figma scale numbers = Body Base SemiBold 16/24, text-icon/body
                                             // (delta-700), uniform (no active/inactive color split).
                                             // vertical: translate-y-1/2 centres the label on its tick (matches dots).
-                                            'absolute text-base font-semibold text-delta-700',
+                                            'text-delta-700 absolute text-base font-semibold',
                                             isVertical ? 'left-[37px] translate-y-1/2' : '-translate-x-1/2',
                                             isMarkActive(mark.value) && classes?.markLabelActive,
                                             classes?.markLabel,

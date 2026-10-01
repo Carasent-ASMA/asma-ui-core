@@ -148,9 +148,9 @@ export function TitleBlock({
     }
 
     return (
-        <div className='min-w-0 max-w-full'>
+        <div className='max-w-full min-w-0'>
             {title && <TitleText title={title} measureRef={titleMeasureRef} />}
-            {helperText && <div className='mt-1 text-sm text-delta-700'>{helperText}</div>}
+            {helperText && <div className='text-delta-700 mt-1 text-sm'>{helperText}</div>}
         </div>
     )
 }

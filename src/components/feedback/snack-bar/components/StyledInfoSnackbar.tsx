@@ -36,7 +36,7 @@ export const StyledInfoSnackbar = forwardRef<HTMLDivElement, StyledInfoSnackbarP
                 {isLoading ? (
                     <LoadingIcon width={24} height={24}/>
                 ) : null}
-                <div className={typeof message === 'string' || typeof message === 'number' ? 'pl-1 pr-2' : undefined}>
+                <div className={typeof message === 'string' || typeof message === 'number' ? 'pr-2 pl-1' : undefined}>
                     {message}
                 </div>
                 {closeButton ? (

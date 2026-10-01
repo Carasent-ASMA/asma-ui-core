@@ -78,7 +78,7 @@ export const StyledSearchField: FC<StyledSearchFieldProps> = ({
                                     // a 44px overlay on this 24px button would extend back over the
                                     // input text and steal taps meant to place the caret.
                                     'asma-pressable',
-                                    'cursor-pointer rounded-full border-0 bg-delta-50',
+                                    'bg-delta-50 cursor-pointer rounded-full border-0',
                                     'flex items-center justify-center',
                                     'transform-gpu transition-all duration-300 ease-in-out',
                                     value ? 'scale-100 opacity-100' : 'pointer-events-none scale-75 opacity-0',

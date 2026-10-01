@@ -85,8 +85,8 @@ export const StyledMenuItem = ({
                 // text-* colour a consumer passes via `className` (all utilities are `!important`,
                 // so plain classes resolve by stylesheet order, not by the `!` prefix).
                 disabled
-                    ? 'cursor-not-allowed text-delta-300 aria-disabled:text-delta-300'
-                    : 'cursor-pointer text-delta-700 hover:bg-delta-50',
+                    ? 'text-delta-300 cursor-not-allowed aria-disabled:text-delta-300'
+                    : 'text-delta-700 cursor-pointer hover:bg-delta-50',
                 selected && cn('bg-gama-50', classes?.selected),
                 classes?.root,
                 className,

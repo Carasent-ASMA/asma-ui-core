@@ -29,7 +29,7 @@ export const StyledAIDisclosure: FunctionComponent<{
             {tooltip && (
                 <StyledTooltip
                     arrow
-                    className='left-[-3px] top-[-14px] font-medium'
+                    className='top-[-14px] left-[-3px] font-medium'
                     offsetDistance={16}
                     disableFocusListener
                     disableHoverListener

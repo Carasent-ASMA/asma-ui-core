@@ -41,7 +41,7 @@ export const HelperText: React.FC<{
             </span>
 
             <span
-                className='flex-1 wrap-break-word pt-[2px] text-left leading-4'
+                className='flex-1 pt-[2px] text-left leading-4 wrap-break-word'
                 style={{
                     display: '-webkit-box',
                     WebkitLineClamp: 2,

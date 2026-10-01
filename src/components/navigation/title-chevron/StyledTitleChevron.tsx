@@ -52,7 +52,7 @@ export const StyledTitleChevron: React.FC<StyledTitleChevronProps> = ({
         onClick={onClick}
         className={cn(
             'group flex min-h-11 w-full cursor-pointer items-center rounded border-0 bg-transparent p-0 text-left',
-            'font-semibold text-delta-800 transition-colors duration-300',
+            'text-delta-800 font-semibold transition-colors duration-300',
             SIZE_TEXT[size],
             'hover:text-gama-500 focus-visible:text-gama-500 active:text-gama-600',
             // ASMA-8220 (TB-14): designed `active:` colour above → touch-ready. Already `min-h-11`
