@@ -191,7 +191,6 @@ const ChipSelectFilterCase = (): JSX.Element => {
             dataTest='case-chip-select-filter'
             variant='action'
             title='Filter'
-            width='max'
             renderTrigger={({ ref, triggerProps }) => (
                 <StyledButton
                     dataTest='case-chip-select-filter-trigger'
@@ -218,25 +217,27 @@ const ChipSelectFilterCase = (): JSX.Element => {
                 </StyledButton>
             }
         >
-            <p className='m-0 mb-1 text-sm font-semibold leading-5 text-delta-800'>Role</p>
-            <StyledSelectAutocomplete<string, true, false, false>
-                dataTest='case-chip-select-filter-select'
-                multiple
-                options={ROLE_OPTIONS}
-                value={roles}
-                onChange={(_, value) => {
-                    setRoles(value)
-                }}
-                getOptionLabel={(option) => option}
-                renderInput={(params) => (
-                    <StyledInputField
-                        {...params}
-                        dataTest='case-chip-select-filter-input'
-                        label=''
-                        placeholder='Type for search'
-                    />
-                )}
-            />
+            <div className='flex w-[416px] max-w-full flex-col'>
+                <p className='m-0 mb-1 text-sm font-semibold leading-5 text-delta-800'>Role</p>
+                <StyledSelectAutocomplete<string, true, false, false>
+                    dataTest='case-chip-select-filter-select'
+                    multiple
+                    options={ROLE_OPTIONS}
+                    value={roles}
+                    onChange={(_, value) => {
+                        setRoles(value)
+                    }}
+                    getOptionLabel={(option) => option}
+                    renderInput={(params) => (
+                        <StyledInputField
+                            {...params}
+                            dataTest='case-chip-select-filter-input'
+                            label=''
+                            placeholder='Type for search'
+                        />
+                    )}
+                />
+            </div>
         </PopoverSheet>
     )
 }

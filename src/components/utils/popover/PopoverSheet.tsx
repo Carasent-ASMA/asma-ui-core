@@ -110,14 +110,6 @@ export interface PopoverSheetProps {
     ariaLabel?: string
     /** @figmaProp none — behavioral */
     onOpenChange?: (isOpen: boolean) => void
-    /**
-     * Desktop width. Default `hug` sizes to the body (240–472). Pass `max` when the
-     * body has a chip-autocomplete: that field has no intrinsic width, so hugging
-     * lets tags grow or shift the sheet. `max` pins 472px so chips wrap inside.
-     * Radios and short chip-groups stay on `hug`. Mobile is always `100vw - 32px`.
-     * @figmaProp none — behavioral
-     */
-    width?: 'hug' | 'max'
     /** @figmaProp none — style escape hatch, applied to the surface */
     className?: string
 }
@@ -157,7 +149,6 @@ export const PopoverSheet = ({
     closeLabel = 'Lukk',
     ariaLabel,
     onOpenChange,
-    width: widthMode = 'hug',
     className,
 }: PopoverSheetProps): JSX.Element => {
     const panelId = useId()
@@ -347,11 +338,10 @@ export const PopoverSheet = ({
             </StyledButton>
         ))
 
-    // Spec: content-driven width between min 240 and max 472, unless the consumer
-    // pins `width="max"` (chip-autocomplete filters). Only mobile always pins
-    // an explicit width (`100vw - 32px`).
+    // Spec: content-driven width between min 240 and max 472. Only mobile pins
+    // an explicit width (`100vw - 32px`); on desktop the surface hugs its body.
     const maxWidth = isMobile ? MOBILE_WIDTH : MAX_WIDTH_PX[variant]
-    const width = isMobile ? MOBILE_WIDTH : widthMode === 'max' ? MAX_WIDTH_PX[variant] : undefined
+    const width = isMobile ? MOBILE_WIDTH : undefined
 
     if (isSheet) {
         return (
