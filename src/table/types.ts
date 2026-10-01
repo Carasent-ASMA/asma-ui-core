@@ -139,6 +139,13 @@ export type StyledTableProps<TData, TCustomData> = {
     focusable?: boolean
     stickyHeader?: boolean
     getRowClassName?: (row: Row<TData>) => string
+    /**
+     * The row the user is working with — e.g. the one whose preview is open beside the table — matched
+     * against `row.id`. Drawn in the Figma table-row **Focused** state (the 3px focus frame keyboard
+     * focus draws; with a ticked row, "Selected + focused"), and it stays drawn after focus moves on,
+     * which `:focus-visible` alone cannot do. Opt-in: tables that do not pass it are unchanged.
+     */
+    activeRowId?: string | null
     onRowClick?: (
         e: MouseEvent<HTMLTableRowElement, globalThis.MouseEvent> | React.KeyboardEvent<HTMLTableRowElement>,
         row: Row<TData>,
