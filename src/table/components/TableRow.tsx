@@ -43,6 +43,7 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
     const {
         loading,
         getRowClassName,
+        activeRowId,
         rowHeight,
         onRowClick,
         expandArrow,
@@ -326,6 +327,7 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
                 tabIndex={row.isFocused() || (index === 0 && !hasFocusedRow) ? 0 : -1}
                 data-index={index}
                 data-test={row.id}
+                data-active={activeRowId != null && row.id === activeRowId ? 'true' : undefined}
                 id={row.id}
                 className={clsx(style['t-row'], loading && style['is-loading'], getRowClassName?.(row))}
                 style={{
