@@ -58,6 +58,19 @@ const MAX_WIDTH_PX = { info: 472, action: 472 } as const
 const MAX_HEIGHT_RATIO = 0.6
 const MOBILE_WIDTH = 'calc(100vw - 32px)'
 
+/**
+ * Follow the trigger on scroll / ancestor resize, but ignore ResizeObserver on the
+ * floating node itself. Chip wrap and autocomplete tag growth change the sheet's
+ * height (sometimes a sub-pixel of width); default `autoUpdate` then re-runs
+ * `shift` and the surface jumps left-right even when the consumer pinned the
+ * width. `layoutShift` still tracks the trigger relocating.
+ */
+const followTriggerWhileMounted = (
+    reference: Parameters<typeof autoUpdate>[0],
+    floating: Parameters<typeof autoUpdate>[1],
+    update: () => void,
+): ReturnType<typeof autoUpdate> => autoUpdate(reference, floating, update, { elementResize: false })
+
 /** @figmaNode wXrXt5uKNNzV2DnQCgyYZH#44531-233781 (Design-System · "_Popover") */
 export interface PopoverSheetProps {
     /** @figmaProp none — test hook */
@@ -97,6 +110,14 @@ export interface PopoverSheetProps {
     ariaLabel?: string
     /** @figmaProp none — behavioral */
     onOpenChange?: (isOpen: boolean) => void
+    /**
+     * Desktop width. Default `hug` sizes to the body (240–472). Pass `max` when the
+     * body has a chip-autocomplete: that field has no intrinsic width, so hugging
+     * lets tags grow or shift the sheet. `max` pins 472px so chips wrap inside.
+     * Radios and short chip-groups stay on `hug`. Mobile is always `100vw - 32px`.
+     * @figmaProp none — behavioral
+     */
+    width?: 'hug' | 'max'
     /** @figmaProp none — style escape hatch, applied to the surface */
     className?: string
 }
@@ -136,6 +157,7 @@ export const PopoverSheet = ({
     closeLabel = 'Lukk',
     ariaLabel,
     onOpenChange,
+    width: widthMode = 'hug',
     className,
 }: PopoverSheetProps): JSX.Element => {
     const panelId = useId()
@@ -165,7 +187,7 @@ export const PopoverSheet = ({
         onOpenChange: changeOpen,
         placement: 'bottom-start',
         strategy: 'fixed',
-        whileElementsMounted: autoUpdate,
+        whileElementsMounted: followTriggerWhileMounted,
         middleware: [
             offset(8),
             ...(keepBelowTrigger ? [] : [flip({ padding: 8 })]),
@@ -325,10 +347,11 @@ export const PopoverSheet = ({
             </StyledButton>
         ))
 
-    // Spec: content-driven width between min 240 and max 472. Only mobile pins
-    // an explicit width (`100vw - 32px`); on desktop the surface hugs its body.
+    // Spec: content-driven width between min 240 and max 472, unless the consumer
+    // pins `width="max"` (chip-autocomplete filters). Only mobile always pins
+    // an explicit width (`100vw - 32px`).
     const maxWidth = isMobile ? MOBILE_WIDTH : MAX_WIDTH_PX[variant]
-    const width = isMobile ? MOBILE_WIDTH : undefined
+    const width = isMobile ? MOBILE_WIDTH : widthMode === 'max' ? MAX_WIDTH_PX[variant] : undefined
 
     if (isSheet) {
         return (

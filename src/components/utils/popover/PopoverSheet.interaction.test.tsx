@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { afterEach, describe, it } from 'vitest'
-import { expect, userEvent } from 'src/test-utils/interaction-api'
+import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, isEntirelyObscured, mount, tabbableWithin } from 'src/test-utils/renderInteraction'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { PopoverSheet, type PopoverSheetProps } from './PopoverSheet'
@@ -289,5 +290,93 @@ describe('PopoverSheet — focus visibility', () => {
 
         await expect(panelOf()).not.toBeNull()
         await expect(isEntirelyObscured(trigger)).toBe(false)
+    })
+})
+
+describe('PopoverSheet — position stability', () => {
+    afterEach(cleanup)
+
+    it('keeps its left edge when the body grows (chip wrap must not shift the sheet)', async () => {
+        const GrowFixture = (): JSX.Element => {
+            const [wide, setWide] = useState(false)
+            return (
+                <div style={{ display: 'flex', justifyContent: 'flex-end', width: 900 }}>
+                    <PopoverSheet
+                        dataTest='grow-pop'
+                        variant='action'
+                        title='Filter'
+                        renderTrigger={({ ref, triggerProps }) => (
+                            <StyledButton dataTest='grow-pop-trigger' refLink={ref} type='button' {...triggerProps}>
+                                Filter
+                            </StyledButton>
+                        )}
+                    >
+                        <button type='button' onClick={() => setWide(true)}>
+                            Grow
+                        </button>
+                        <div style={{ width: wide ? 400 : 240, height: 48 }}>canvas</div>
+                    </PopoverSheet>
+                </div>
+            )
+        }
+
+        const { container } = mount(<GrowFixture />)
+        await userEvent.click(triggerOf(container))
+        const panel = panelOf('grow-pop')
+        await expect(panel).not.toBeNull()
+
+        const left = panel!.getBoundingClientRect().left
+
+        await userEvent.click(panel!.querySelector('button')!)
+        await waitFor(() => expect(panel!.getBoundingClientRect().width).toBeGreaterThan(300))
+        await expect(panel!.getBoundingClientRect().left).toBe(left)
+    })
+})
+
+describe('PopoverSheet — width', () => {
+    afterEach(cleanup)
+
+    it('hugs a short body instead of stretching to 472px', async () => {
+        const { container } = mount(
+            <PopoverSheet
+                dataTest='hug-pop'
+                variant='action'
+                title='Filter'
+                renderTrigger={({ ref, triggerProps }) => (
+                    <StyledButton dataTest='hug-pop-trigger' refLink={ref} type='button' {...triggerProps}>
+                        Filter
+                    </StyledButton>
+                )}
+            >
+                Short
+            </PopoverSheet>,
+        )
+        await userEvent.click(triggerOf(container))
+        const panel = panelOf('hug-pop')
+        await expect(panel).not.toBeNull()
+        await expect(panel!.getBoundingClientRect().width).toBeLessThan(472)
+        await expect(panel!.getBoundingClientRect().width).toBeGreaterThanOrEqual(240)
+    })
+
+    it('pins to 472px when width is max, even with a short body', async () => {
+        const { container } = mount(
+            <PopoverSheet
+                dataTest='max-pop'
+                variant='action'
+                title='Filter'
+                width='max'
+                renderTrigger={({ ref, triggerProps }) => (
+                    <StyledButton dataTest='max-pop-trigger' refLink={ref} type='button' {...triggerProps}>
+                        Filter
+                    </StyledButton>
+                )}
+            >
+                Short
+            </PopoverSheet>,
+        )
+        await userEvent.click(triggerOf(container))
+        const panel = panelOf('max-pop')
+        await expect(panel).not.toBeNull()
+        await expect(Math.round(panel!.getBoundingClientRect().width)).toBe(472)
     })
 })

@@ -50,7 +50,9 @@ const meta = {
                     'offset and proximity carries the relationship.',
                     '',
                     '**Sizing** — min-width 240px, max-width 472px (info & action), max-height 60vh',
-                    'with the body scrolling while the title and footers stay put. Below 744px the surface',
+                    'with the body scrolling while the title and footers stay put. Desktop default is',
+                    '`width="hug"` (content-driven). Chip-autocomplete filters pass `width="max"` so the',
+                    'sheet stays 472px and tags wrap instead of growing it. Below 744px the surface',
                     'takes `100vw - 32px` and an info popover is pinned below its trigger.',
                     '',
                     '**Footer rows** come straight from Figma. The *Reset filter* row is `space-between`:',
@@ -246,7 +248,7 @@ const CHIP_ROLE_OPTIONS = [
 ]
 
 /**
- * Chip multi-select filter: field pinned at 416px so the surface opens at max width and chips wrap
+ * Chip multi-select filter: `width="max"` pins the surface at 472px so chips wrap
  * instead of growing the popover. Baseline for the Role-filter regression.
  */
 const ChipSelectFilterExample = (): JSX.Element => {
@@ -261,6 +263,7 @@ const ChipSelectFilterExample = (): JSX.Element => {
             dataTest='chip-select-filter-popover'
             variant='action'
             title='Filter'
+            width='max'
             renderTrigger={({ ref, triggerProps }) => (
                 <StyledButton
                     dataTest='chip-select-filter-popover-trigger'
@@ -287,27 +290,25 @@ const ChipSelectFilterExample = (): JSX.Element => {
                 </StyledButton>
             }
         >
-            <div className='flex w-[416px] max-w-full flex-col'>
-                <p className='m-0 mb-1 text-sm font-semibold leading-5 text-delta-800'>Role</p>
-                <StyledSelectAutocomplete<string, true, false, false>
-                    dataTest='chip-select-filter-popover-select'
-                    multiple
-                    options={CHIP_ROLE_OPTIONS}
-                    value={roles}
-                    onChange={(_, value) => {
-                        setRoles(value)
-                    }}
-                    getOptionLabel={(option) => option}
-                    renderInput={(params) => (
-                        <StyledInputField
-                            {...params}
-                            dataTest='chip-select-filter-popover-input'
-                            label=''
-                            placeholder='Type for search'
-                        />
-                    )}
-                />
-            </div>
+            <p className='m-0 mb-1 text-sm font-semibold leading-5 text-delta-800'>Role</p>
+            <StyledSelectAutocomplete<string, true, false, false>
+                dataTest='chip-select-filter-popover-select'
+                multiple
+                options={CHIP_ROLE_OPTIONS}
+                value={roles}
+                onChange={(_, value) => {
+                    setRoles(value)
+                }}
+                getOptionLabel={(option) => option}
+                renderInput={(params) => (
+                    <StyledInputField
+                        {...params}
+                        dataTest='chip-select-filter-popover-input'
+                        label=''
+                        placeholder='Type for search'
+                    />
+                )}
+            />
         </PopoverSheet>
     )
 }
