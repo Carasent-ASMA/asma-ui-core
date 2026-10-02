@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { afterEach, describe, it } from 'vitest'
 import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, isEntirelyObscured, mount, tabbableWithin } from 'src/test-utils/renderInteraction'
@@ -298,5 +299,45 @@ describe('PopoverSheet — focus visibility', () => {
 
         await expect(panelOf()).not.toBeNull()
         await expect(isEntirelyObscured(trigger)).toBe(false)
+    })
+})
+
+describe('PopoverSheet — position stability', () => {
+    afterEach(cleanup)
+
+    it('keeps its left edge when the body grows (chip wrap must not shift the sheet)', async () => {
+        const GrowFixture = (): JSX.Element => {
+            const [wide, setWide] = useState(false)
+            return (
+                <div style={{ display: 'flex', justifyContent: 'flex-end', width: 900 }}>
+                    <PopoverSheet
+                        dataTest='grow-pop'
+                        variant='action'
+                        title='Filter'
+                        renderTrigger={({ ref, triggerProps }) => (
+                            <StyledButton dataTest='grow-pop-trigger' refLink={ref} type='button' {...triggerProps}>
+                                Filter
+                            </StyledButton>
+                        )}
+                    >
+                        <button type='button' onClick={() => setWide(true)}>
+                            Grow
+                        </button>
+                        <div style={{ width: wide ? 400 : 240, height: 48 }}>canvas</div>
+                    </PopoverSheet>
+                </div>
+            )
+        }
+
+        const { container } = mount(<GrowFixture />)
+        await userEvent.click(triggerOf(container))
+        const panel = panelOf('grow-pop')
+        await expect(panel).not.toBeNull()
+
+        const left = panel!.getBoundingClientRect().left
+
+        await userEvent.click(panel!.querySelector('button')!)
+        await waitFor(() => expect(panel!.getBoundingClientRect().width).toBeGreaterThan(300))
+        await expect(panel!.getBoundingClientRect().left).toBe(left)
     })
 })
