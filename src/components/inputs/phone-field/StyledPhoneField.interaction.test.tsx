@@ -33,6 +33,15 @@ const PhoneFieldFixture = ({ initialCountry = 'NO' }: { initialCountry?: string 
 describe('StyledPhoneField country picker keyboard contract', () => {
     afterEach(cleanup)
 
+    it('associates the number input with its visible label', async () => {
+        const { container } = mount(<PhoneFieldFixture />)
+        const numberInput = container.querySelector<HTMLInputElement>('[data-testid="phone-number"]')!
+        const label = container.querySelector<HTMLLabelElement>('label')!
+
+        await expect(numberInput).toHaveAttribute('aria-labelledby', label.id)
+        await expect(numberInput).toHaveAccessibleName('Phone')
+    })
+
     it('opens from the trigger, retains focus on the combobox, and marks the arrow-active option', async () => {
         const { container } = mount(<PhoneFieldFixture />)
         const trigger = container.querySelector<HTMLButtonElement>('[data-testid="phone-country"]')!
