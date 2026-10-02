@@ -2,6 +2,7 @@ import { afterEach, describe, it } from 'vitest'
 import { expect } from 'src/test-utils/interaction-api'
 import { cleanup, mount, tabbableWithin } from 'src/test-utils/renderInteraction'
 import { StyledBadge } from './StyledBadge'
+import { StyledBadgeDot } from './StyledBadgeDot'
 
 const badgeRoot = (container: HTMLElement): HTMLElement =>
     container.querySelector<HTMLElement>('[data-testid="notifications-badge"]')!
@@ -112,6 +113,33 @@ describe('StyledBadge notification contract', () => {
         await expect(dotStyle.borderWidth).toBe('2px')
         await expect(dotStyle.borderColor).toBe('rgb(119, 143, 0)')
         await expect(dotStyle.backgroundColor).toBe('rgb(217, 242, 86)')
+    })
+
+    it('renders the standalone dot in flow with the same metrics as the anchored one', async () => {
+        const { container } = mount(
+            <div style={{ display: 'flex', gap: '8px' }}>
+                <span>Report</span>
+                <StyledBadgeDot dataTest='standalone-dot' />
+            </div>,
+        )
+        const dot = container.querySelector<HTMLElement>('[data-testid="standalone-dot"]')!
+        const style = getComputedStyle(dot)
+
+        await expect(style.width).toBe('12px')
+        await expect(style.height).toBe('12px')
+        await expect(style.borderWidth).toBe('2px')
+        await expect(style.borderColor).toBe('rgb(119, 143, 0)')
+        await expect(style.backgroundColor).toBe('rgb(217, 242, 86)')
+        await expect(style.position).toBe('static')
+        await expect(dot).toHaveAttribute('aria-hidden', 'true')
+    })
+
+    it('names the standalone dot for assistive technology when no host carries the state', async () => {
+        const { container } = mount(<StyledBadgeDot dataTest='standalone-dot' ariaLabel='Unread' />)
+        const dot = container.querySelector<HTMLElement>('[data-testid="standalone-dot"]')!
+
+        await expect(dot).toHaveAccessibleName('Unread')
+        await expect(dot).not.toHaveAttribute('aria-hidden')
     })
 
     it('keeps a silent polite status region mounted before announcing count changes', async () => {

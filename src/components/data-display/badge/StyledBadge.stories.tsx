@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
 
 import { StyledBadge } from './StyledBadge'
+import { StyledBadgeDot } from './StyledBadgeDot'
 
 const meta: Meta = {
     title: 'DataDisplay/Badge',
@@ -51,6 +52,39 @@ export const Default: Story = {
                 ))}
             </tbody>
         </table>
+    ),
+}
+
+export const StandaloneDot: Story = {
+    parameters: {
+        docs: {
+            description: {
+                story: 'The same dot as a flow element, for places with no host to anchor to. Give it an `ariaLabel` when nothing nearby already announces the state.',
+            },
+        },
+    },
+    render: () => (
+        <div className='flex flex-col gap-4 text-delta-700'>
+            <div className='flex items-center gap-2'>
+                <StyledBadgeDot dataTest='standalone-dot-row' />
+                <span className='text-sm'>Unread message</span>
+            </div>
+
+            <table className='table-fixed border-collapse text-sm'>
+                <colgroup>
+                    <col className='w-[140px]' />
+                    <col className='w-[60px]' />
+                </colgroup>
+                <tbody>
+                    <tr>
+                        <td className='border border-solid border-delta-200 p-4'>Report 2024</td>
+                        <td className='border border-solid border-delta-200 p-4 text-center'>
+                            <StyledBadgeDot dataTest='standalone-dot-cell' ariaLabel='Unread' />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     ),
 }
 
