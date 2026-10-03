@@ -1,5 +1,5 @@
 import { afterEach, describe, it } from 'vitest'
-import { expect, userEvent } from 'src/test-utils/interaction-api'
+import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { StyledFormControlLabel } from 'src/components/miscellaneous/StyledFormControlLabel'
 import { StyledRadio } from './StyledRadio'
@@ -38,5 +38,27 @@ describe('StyledRadioGroup keyboard contract', () => {
         await expect(document.activeElement).toBe(email)
         await userEvent.tab()
         await expect(document.activeElement).toBe(container.querySelector('button'))
+    })
+
+    it('keeps a read-only selection unchanged and explains why (disabled-states DIS-6)', async () => {
+        const { container } = mount(
+            <StyledRadioGroup
+                dataTest='delivery-method'
+                name='delivery-method'
+                defaultValue='email'
+                readOnly
+                readOnlyReason='Submitted questionnaires cannot be changed'
+            >
+                <StyledFormControlLabel label='Email' control={<StyledRadio dataTest='email' value='email' />} />
+                <StyledFormControlLabel label='Post' control={<StyledRadio dataTest='post' value='post' />} />
+            </StyledRadioGroup>,
+        )
+        const [email, post] = Array.from(container.querySelectorAll<HTMLInputElement>('input[type="radio"]'))
+
+        post!.click()
+
+        await expect(email).toBeChecked()
+        await expect(post).not.toBeChecked()
+        await waitFor(() => expect(email).toHaveAccessibleDescription('Submitted questionnaires cannot be changed'))
     })
 })

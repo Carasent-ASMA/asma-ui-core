@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { afterEach, describe, it } from 'vitest'
-import { expect, userEvent } from 'src/test-utils/interaction-api'
+import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { StyledFormControlLabel } from 'src/components/miscellaneous/StyledFormControlLabel'
 import { StyledCheckbox as TableStyledCheckbox } from 'src/table/shared-components/StyledCheckbox'
@@ -45,5 +45,28 @@ describe.each([
         await expect(document.activeElement).toBe(enabled)
         await userEvent.tab()
         await expect(document.activeElement).toBe(document.body)
+    })
+})
+
+describe('StyledCheckbox read-only reason', () => {
+    afterEach(cleanup)
+
+    it('stays unchanged when read-only and explains why (disabled-states DIS-6)', async () => {
+        const { container } = mount(
+            <StyledFormControlLabel
+                label='Receive updates'
+                control={
+                    <StyledCheckbox dataTest='locked' readOnly readOnlyReason='Locked for editing' />
+                }
+            />,
+        )
+        const input = container.querySelector<HTMLInputElement>('[data-testid="locked"] input')!
+
+        input.click()
+        await userEvent.hover(container.querySelector<HTMLElement>('[data-testid="locked"]')!)
+
+        await expect(input).not.toBeChecked()
+        await waitFor(() => expect(document.querySelector('[role="tooltip"]')).toHaveTextContent('Locked for editing'))
+        await waitFor(() => expect(input).toHaveAccessibleDescription('Locked for editing'))
     })
 })

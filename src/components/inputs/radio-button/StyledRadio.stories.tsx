@@ -49,10 +49,11 @@ export const Unchecked_Focused: Story = {
 export const Unchecked_Disabled: Story = {
     args: { checked: false, disabled: true },
     render: (args) => <RadioWrapper label='Disabled' {...args} />,
-    play: async ({ canvas, userEvent }) => {
+    play: async ({ canvas }) => {
         const radio = canvas.getByRole('radio', { name: 'Disabled' })
         await expect(radio).not.toBeChecked()
-        await expect(() => userEvent.click(radio)).rejects.toThrow(/pointer-events: none/)
+        // The disabled radio keeps pointer events (a reason can be hovered) but ignores the click.
+        radio.click()
         await expect(radio).not.toBeChecked()
     },
 }
@@ -75,10 +76,11 @@ export const Checked_Focused: Story = {
 export const Checked_Disabled: Story = {
     args: { checked: true, disabled: true },
     render: (args) => <RadioWrapper label='Disabled' {...args} />,
-    play: async ({ canvas, userEvent }) => {
+    play: async ({ canvas }) => {
         const radio = canvas.getByRole('radio', { name: 'Disabled' })
         await expect(radio).toBeChecked()
-        await expect(() => userEvent.click(radio)).rejects.toThrow(/pointer-events: none/)
+        // The disabled radio keeps pointer events (a reason can be hovered) but ignores the click.
+        radio.click()
         await expect(radio).toBeChecked()
     },
 }

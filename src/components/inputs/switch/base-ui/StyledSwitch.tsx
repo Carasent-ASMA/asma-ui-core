@@ -1,5 +1,6 @@
-import React, { forwardRef, useState, type ButtonHTMLAttributes } from 'react'
+import React, { forwardRef, useState, type ButtonHTMLAttributes, type ReactNode } from 'react'
 import styles from './StyledSwitch.module.scss'
+import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip'
 import { cn } from 'src/helpers/cn'
 import { getSvgIconStyle } from 'src/components/icons/iconStyle'
 import type { IIcon } from 'src/components/icons'
@@ -20,6 +21,9 @@ type StyledSwitchProps = {
     disabled?: boolean
     /** @figmaProp State = true→"Read-only" */
     readOnly?: boolean
+    /** @figmaProp none — behavioral. Why the setting can't be changed here, and where it can
+     * (disabled-states DIS-6). Shown on hover, focus and tap of a read-only switch. */
+    readOnlyReason?: ReactNode
     /** @figmaProp none — a11y */
     required?: boolean
     /** @figmaProp State = true→"Error" */
@@ -78,6 +82,7 @@ export const StyledSwitch = forwardRef<HTMLButtonElement, StyledSwitchProps>(
             dataTest,
             className,
             onClick,
+            readOnlyReason,
             ...rest
         },
         ref,
@@ -96,7 +101,7 @@ export const StyledSwitch = forwardRef<HTMLButtonElement, StyledSwitchProps>(
 
         const iconClass = styles['iconContent']
 
-        return (
+        const control = (
             <button
                 {...rest}
                 ref={ref}
@@ -131,6 +136,14 @@ export const StyledSwitch = forwardRef<HTMLButtonElement, StyledSwitchProps>(
                     </span>
                 </span>
             </button>
+        )
+
+        if (!readOnly || !readOnlyReason) return control
+
+        return (
+            <StyledTooltip title={readOnlyReason} openOnTap persistentDescription>
+                {control}
+            </StyledTooltip>
         )
     },
 )

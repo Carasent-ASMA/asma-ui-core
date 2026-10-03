@@ -43,9 +43,10 @@
 
     // Figma Disabled (nodes 9197-93212/93217): track uses explicit tokens (not an opacity fade) —
     // unchecked delta-300, checked gama-300.
+    // Pointer events stay on so a tooltip or helper reason can be reached; the control itself
+    // ignores activation while disabled (disabled-states DIS-5, §6).
     &[data-disabled] {
-        cursor: default;
-        pointer-events: none;
+        cursor: not-allowed;
     }
     &[data-disabled][data-unchecked] {
         background-color: var(--colors-delta-300);

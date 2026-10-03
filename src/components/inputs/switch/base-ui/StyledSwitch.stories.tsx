@@ -62,12 +62,13 @@ export const Unchecked_Disabled: Story = {
     parameters: { a11y: { test: 'todo' } },
     args: { disabled: true },
     render: (args) => <SwitchWrapper label='Disabled' args={args} />,
-    play: async ({ canvas, userEvent }) => {
+    play: async ({ canvas }) => {
         const switchEl = canvas.getByRole('switch', { name: 'Disabled' })
 
         await expect(switchEl).not.toBeChecked()
 
-        await expect(() => userEvent.click(switchEl)).rejects.toThrow(/pointer-events: none/)
+        // The disabled switch keeps pointer events (a reason can be hovered) but ignores the click.
+        switchEl.click()
 
         await expect(switchEl).not.toBeChecked()
     },
@@ -102,12 +103,13 @@ export const Checked_Disabled: Story = {
     parameters: { a11y: { test: 'todo' } },
     args: { defaultChecked: true, disabled: true },
     render: (args) => <SwitchWrapper label='Disabled' args={args} />,
-    play: async ({ canvas, userEvent }) => {
+    play: async ({ canvas }) => {
         const switchEl = canvas.getByRole('switch', { name: 'Disabled' })
 
         await expect(switchEl).toBeChecked()
 
-        await expect(() => userEvent.click(switchEl)).rejects.toThrow(/pointer-events: none/)
+        // The disabled switch keeps pointer events (a reason can be hovered) but ignores the click.
+        switchEl.click()
 
         await expect(switchEl).toBeChecked()
     },

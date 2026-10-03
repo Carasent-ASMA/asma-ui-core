@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, type ChangeEvent, type SVGProps } from 'react'
+import React, { useEffect, useRef, type ChangeEvent, type ReactNode, type SVGProps } from 'react'
 import styles from './StyledCheckbox.module.scss'
+import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip'
 import { cn } from 'src/helpers/cn'
 
 /**
@@ -36,6 +37,9 @@ type StyledCheckboxProps = {
      * would let a keyboard/AT user operate it).
      */
     decorative?: boolean
+    /** Why the value can't be changed here, and where it can (disabled-states DIS-6). Shown on hover,
+     * focus and tap of a read-only checkbox. */
+    readOnlyReason?: ReactNode
 } & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'size' | 'checked' | 'type'>
 // @figmaProp disabled → State="Disabled" · readOnly → State="Read-only" (from InputHTMLAttributes)
 
@@ -84,6 +88,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
     onClick,
     onKeyDown,
     decorative,
+    readOnlyReason,
     ...props
 }): JSX.Element => {
     const isHideWrapper = !!hideWrapper
@@ -176,7 +181,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
         )
     }
 
-    return (
+    const control = (
         // False positive: this is the native <label>-wraps-<input> pattern. The wrapped real
         // <input type='checkbox'> below is the actual interactive/keyboard-operable element (Tab
         // reaches it, Space toggles it); the browser natively delegates a label click to it. The
@@ -199,9 +204,19 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
                 readOnly={readOnly}
                 onChange={handleChange}
                 onKeyDown={handleKeyDown}
+                // `readonly` does not stop a native checkbox from toggling; cancelling the click does.
+                onClick={readOnly ? (event) => event.preventDefault() : undefined}
                 {...props}
             />
             {visual}
         </label>
+    )
+
+    if (!readOnly || !readOnlyReason) return control
+
+    return (
+        <StyledTooltip title={readOnlyReason} openOnTap persistentDescription>
+            {control}
+        </StyledTooltip>
     )
 }
