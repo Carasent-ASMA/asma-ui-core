@@ -1,8 +1,11 @@
-import React, { type ReactNode } from 'react'
+import React, { type MouseEvent, type ReactNode } from 'react'
 
 import style from './StyledButton.module.scss'
 
 import clsx from 'clsx'
+
+import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip'
+import { LoadingIcon } from 'src/components/icons'
 
 export type StyledButtonType = 'contained' | 'outlined' | 'text' | 'textGray'
 
@@ -17,6 +20,18 @@ interface commonProps {
     endIcon?: ReactNode
     /** @figmaProp none — test hook */
     dataTest: string
+    /**
+     * @figmaProp none — behavioral. Why the action is unavailable. Together with `disabled` the
+     * button stays focusable (`aria-disabled` instead of the native attribute), ignores activation
+     * and shows the reason on hover, focus and tap (disabled-states DIS-1…DIS-4). Without
+     * `disabled` it has no effect.
+     */
+    disabledReason?: ReactNode
+    /**
+     * @figmaProp none — behavioral. Busy: spinner after the label, `aria-busy`, focus and width kept,
+     * activation ignored (disabled-states DIS-8, submit-buttons SUB-4).
+     */
+    loading?: boolean
 }
 
 interface variantTextGrayProps {
@@ -95,6 +110,10 @@ export const StyledButton = ({
     dataTest,
     error,
     style: styleProp,
+    disabled,
+    disabledReason,
+    loading,
+    onClick,
     ...otherProps
 }: StyledButtonProps): JSX.Element => {
     const isLarge = size === 'large' || size === 'medium'
@@ -102,9 +121,27 @@ export const StyledButton = ({
     // setup className
     const color = error ? 'error' : 'common'
 
-    return (
+    const softDisabled = Boolean(disabled) && Boolean(disabledReason)
+    const blocked = softDisabled || Boolean(loading)
+    const iconSize = isLarge ? 20 : 16
+
+    // preventDefault also cancels the form submit of a `type="submit"` button, including the
+    // implicit submit a browser fires on Enter in a form field.
+    const handleClick = (event: MouseEvent<HTMLButtonElement>): void => {
+        if (blocked) {
+            event.preventDefault()
+            return
+        }
+        onClick?.(event)
+    }
+
+    const button = (
         <button
             {...otherProps}
+            disabled={Boolean(disabled) && !blocked}
+            aria-disabled={blocked || undefined}
+            aria-busy={loading || otherProps['aria-busy']}
+            onClick={handleClick}
             className={clsx(
                 // ASMA-8210: touch readiness only. The button already owns a designed `:active`
                 // (see StyledButton.module.scss), so it must not also take `.asma-pressable`'s
@@ -143,7 +180,15 @@ export const StyledButton = ({
                     {children}
                 </div>
             )}
-            {endIcon}
+            {loading ? <LoadingIcon width={iconSize} height={iconSize} /> : endIcon}
         </button>
+    )
+
+    if (!softDisabled) return button
+
+    return (
+        <StyledTooltip arrow title={disabledReason} openOnTap persistentDescription>
+            {button}
+        </StyledTooltip>
     )
 }
