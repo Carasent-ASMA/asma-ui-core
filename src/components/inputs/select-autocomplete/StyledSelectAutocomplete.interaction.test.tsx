@@ -82,6 +82,35 @@ describe('StyledSelectAutocomplete keyboard contract', () => {
         await expect(activeOption()).toBe(optionRows()[1])
     })
 
+    it('reaches a disabled option with a reason but refuses to select it (disabled-states DIS-3, A-6)', async () => {
+        const onChange = fn()
+        mount(
+            <StyledSelectAutocomplete<string, false, false, false>
+                dataTest='ac'
+                options={OPTIONS}
+                value={null}
+                onChange={onChange}
+                getOptionDisabled={(option) => option === 'Bravo' || option === 'Charlie'}
+                getOptionDisabledReason={(option) => (option === 'Bravo' ? 'Bravo is full this week' : undefined)}
+                renderInput={(params) => <StyledInputField {...params} dataTest='ac-input' label='Team' />}
+            />,
+        )
+        input().focus()
+        await userEvent.keyboard('{ArrowDown}')
+        await waitFor(() => expect(listbox()).not.toBeNull())
+
+        await userEvent.keyboard('{ArrowDown}')
+        await expect(activeOption()).toBe(optionRows()[1])
+        await expect(optionRows()[1]).toHaveAccessibleDescription('Bravo is full this week')
+
+        // 'Charlie' has no reason and stays skipped.
+        await userEvent.keyboard('{ArrowDown}')
+        await expect(activeOption()).toBe(optionRows()[3])
+
+        await userEvent.keyboard('{ArrowUp}{Enter}')
+        await expect(onChange).not.toHaveBeenCalled()
+    })
+
     it('moves the active descendant down and up, stopping at either end (2.1.1)', async () => {
         mount(<AutocompleteFixture />)
         input().focus()

@@ -106,6 +106,40 @@ describe('StyledSelect keyboard contract', () => {
         await expect(options()[0]).toHaveAttribute('aria-selected', 'false')
     })
 
+    it('reaches a disabled option with a reason but refuses to select it (disabled-states DIS-3, A-6)', async () => {
+        const ReasonFixture = (): JSX.Element => {
+            const [value, setValue] = useState<unknown>('a')
+            return (
+                <StyledSelect dataTest='status' name='Status' value={value} onChange={(event) => setValue(event.target.value)}>
+                    <StyledSelectItem value='a'>Active</StyledSelectItem>
+                    <StyledSelectItem value='b' disabled disabledReason='Only available on the Pro plan'>
+                        Archived
+                    </StyledSelectItem>
+                    <StyledSelectItem value='c' disabled>
+                        Closed
+                    </StyledSelectItem>
+                </StyledSelect>
+            )
+        }
+        const { container } = mount(<ReasonFixture />)
+        const button = trigger(container)
+        button.focus()
+
+        await userEvent.keyboard('{ArrowDown}')
+        await waitFor(() => expect(options()).toHaveLength(3))
+        await userEvent.keyboard('{ArrowDown}')
+
+        await expect(button).toHaveAttribute('aria-activedescendant', 'status-listbox-option-1')
+        await expect(options()[1]).toHaveAccessibleDescription('Only available on the Pro plan')
+
+        await userEvent.keyboard('{ArrowDown}')
+        // 'c' has no reason and stays skipped.
+        await expect(button).toHaveAttribute('aria-activedescendant', 'status-listbox-option-1')
+
+        await userEvent.keyboard('{Enter}')
+        await expect(options()[0]).toHaveAttribute('aria-selected', 'true')
+    })
+
     it('opens with ArrowUp and exposes the last option when nothing is selected (2.1.1)', async () => {
         const { container } = mount(
             <StyledSelect dataTest='empty' name='Empty'>

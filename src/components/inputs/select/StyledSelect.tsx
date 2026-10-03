@@ -162,8 +162,12 @@ export const StyledSelect = ({
     const childArray = Children.toArray(children)
     const isOptionSelected = (optionValue: unknown): boolean =>
         multiple ? Array.isArray(currentValue) && currentValue.includes(optionValue) : optionValue === currentValue
+    // A disabled option that carries its reason stays reachable so the reason can be read
+    // (disabled-states DIS-3); selecting it is still refused in selectActiveOption.
     const enabledOptionIndexes = childArray.flatMap((child, index) =>
-        isValidElement<StyledSelectItemProps>(child) && !child.props.disabled ? [index] : [],
+        isValidElement<StyledSelectItemProps>(child) && (!child.props.disabled || Boolean(child.props.disabledReason))
+            ? [index]
+            : [],
     )
     const selectedOptionIndex = childArray.findIndex(
         (child) => isValidElement<StyledSelectItemProps>(child) && isOptionSelected(child.props.value),
