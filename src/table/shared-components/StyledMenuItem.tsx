@@ -1,9 +1,13 @@
 import type { KeyboardEvent, MouseEvent, ReactNode } from 'react'
+import { StyledTooltip, type TooltipProps } from 'src/components/data-display/tooltip/StyledTooltip'
 import { cn } from 'src/table/helpers/cn'
 
 export interface StyledMenuItemProps {
     children?: ReactNode
     disabled?: boolean
+    /** Why a disabled item can't be used; keeps it reachable by arrow keys and shows the reason. */
+    disabledReason?: ReactNode
+    reasonPlacement?: TooltipProps['placement']
     selected?: boolean
     className?: string
     classes?: { root?: string }
@@ -19,6 +23,8 @@ export interface StyledMenuItemProps {
 export const StyledMenuItem = ({
     children,
     disabled,
+    disabledReason,
+    reasonPlacement = 'left',
     selected,
     className,
     classes,
@@ -34,10 +40,12 @@ export const StyledMenuItem = ({
         }
     }
 
-    return (
+    const reasoned = Boolean(disabled) && Boolean(disabledReason)
+    const item = (
         <li
             role='menuitem'
             aria-disabled={disabled ? true : undefined}
+            data-has-reason={reasoned || undefined}
             tabIndex={-1}
             onClick={disabled ? undefined : onClick}
             onKeyDown={handleKeyDown}
@@ -61,5 +69,11 @@ export const StyledMenuItem = ({
         >
             {children}
         </li>
+    )
+    if (!reasoned) return item
+    return (
+        <StyledTooltip title={disabledReason} arrow placement={reasonPlacement} openOnTap persistentDescription>
+            {item}
+        </StyledTooltip>
     )
 }
