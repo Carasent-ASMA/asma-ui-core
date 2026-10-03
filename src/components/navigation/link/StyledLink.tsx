@@ -1,5 +1,6 @@
 import React, { type AnchorHTMLAttributes, type ReactNode } from 'react'
 import clsx from 'clsx'
+import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip'
 import style from './StyledLink.module.scss'
 
 /**
@@ -12,6 +13,12 @@ import style from './StyledLink.module.scss'
 export type StyledLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
     /** @figmaProp State = true→"Disabled" (renders a non-interactive <span>, delta-300) */
     disabled?: boolean
+    /**
+     * @figmaProp none — behavioral. Why the link is unavailable. With `disabled` the link stays
+     * focusable (`aria-disabled`), does not navigate and shows the reason on hover, focus and tap
+     * (disabled-states DIS-1…DIS-3). Without it a disabled link stays a plain `<span>`.
+     */
+    disabledReason?: ReactNode
     /** @figmaProp Size = small→"Base" (14/20) | large→"Medium" (16/24); xs (12/20) = none (no DS size) */
     size?: 'small' | 'large' | 'xs'
     /** @figmaProp none — ref */
@@ -39,6 +46,7 @@ export type StyledLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
 export const StyledLink: React.FC<StyledLinkProps> = ({
     href,
     disabled,
+    disabledReason,
     size = 'large',
     dataTest,
     reflink,
@@ -58,6 +66,25 @@ export const StyledLink: React.FC<StyledLinkProps> = ({
         case 'xs':
             textSize = style['styled-link-xs']
             break
+    }
+
+    if (disabled && disabledReason) {
+        return (
+            <StyledTooltip title={disabledReason} openOnTap persistentDescription>
+                <a
+                    data-testid={dataTest}
+                    ref={reflink}
+                    role='link'
+                    aria-disabled='true'
+                    tabIndex={0}
+                    onClick={(event) => event.preventDefault()}
+                    className={clsx(style['styled-link'], style['styled-link-disabled'], textSize, className)}
+                >
+                    {content}
+                    {contentNode}
+                </a>
+            </StyledTooltip>
+        )
     }
 
     if (disabled) {

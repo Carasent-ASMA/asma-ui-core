@@ -1,0 +1,43 @@
+import { afterEach, describe, it } from 'vitest'
+import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
+import { cleanup, mount } from 'src/test-utils/renderInteraction'
+import { StyledLink } from './StyledLink'
+
+/**
+ * Disabled contract — StyledLink (ASMA-8305). disabled-states DIS-1…DIS-3; WCAG 2.1.1, 4.1.2.
+ */
+
+describe('StyledLink disabledReason', () => {
+    afterEach(cleanup)
+
+    it('keeps a plain disabled link a non-focusable span', async () => {
+        const { container } = mount(<StyledLink dataTest='report' href='#report' disabled contentNode='Open report' />)
+
+        await expect(container.querySelector('a')).toBeNull()
+        await expect(container.querySelector('span')).toHaveTextContent('Open report')
+    })
+
+    it('stays focusable, announces the reason and does not navigate', async () => {
+        const { container } = mount(
+            <StyledLink
+                dataTest='report'
+                href='#report'
+                disabled
+                disabledReason='The report is still being generated'
+                contentNode='Open report'
+            />,
+        )
+        const link = container.querySelector<HTMLAnchorElement>('[data-testid="report"]')!
+
+        await userEvent.tab()
+
+        await expect(document.activeElement).toBe(link)
+        await expect(link).toHaveAttribute('aria-disabled', 'true')
+        await expect(link).not.toHaveAttribute('href')
+        await waitFor(() => expect(link).toHaveAccessibleDescription('The report is still being generated'))
+
+        await userEvent.keyboard('{Enter}')
+        link.click()
+        await expect(window.location.hash).not.toBe('#report')
+    })
+})
