@@ -1,4 +1,5 @@
 import { useCallback, type FC, type ReactNode } from 'react'
+import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip'
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
 import { useTabsContext, type TabValue } from './TabsContext'
@@ -17,6 +18,11 @@ export interface StyledTabProps {
     label?: ReactNode
     /** @figmaProp State = true→"Disabled" */
     disabled?: boolean
+    /**
+     * @figmaProp none — behavioral. Why the tab is unavailable. With `disabled` the tab stays in
+     * arrow-key navigation and shows the reason on hover, focus and tap (disabled-states DIS-1…DIS-3).
+     */
+    disabledReason?: ReactNode
     className?: string
     sx?: unknown
     /** @internal Injected by `StyledTabs` so a value-less tab selects by position (MUI parity). */
@@ -28,7 +34,7 @@ export interface StyledTabProps {
  * `StyledTabs` context and reports its node so the parent can position the active indicator.
  * Public props (`value`/`label`/`disabled`/`className`) preserved (DEC-003). TASK-202.
  */
-export const StyledTab: FC<StyledTabProps> = ({ value, label, disabled, className, sx, index }) => {
+export const StyledTab: FC<StyledTabProps> = ({ value, label, disabled, disabledReason, className, sx, index }) => {
     const ctx = useTabsContext()
     const effectiveValue = value !== undefined ? value : index
     const selected = ctx ? ctx.value === effectiveValue : false
@@ -45,14 +51,16 @@ export const StyledTab: FC<StyledTabProps> = ({ value, label, disabled, classNam
         [ctx, effectiveValue],
     )
 
-    return (
+    const reasoned = Boolean(disabled) && Boolean(disabledReason)
+
+    const tab = (
         <button
             ref={ref}
             type='button'
             role='tab'
             aria-selected={selected}
             aria-disabled={disabled ? true : undefined}
-            disabled={disabled}
+            disabled={Boolean(disabled) && !reasoned}
             tabIndex={selected ? 0 : -1}
             data-tab-value={
                 typeof effectiveValue === 'string' || typeof effectiveValue === 'number'
@@ -89,7 +97,7 @@ export const StyledTab: FC<StyledTabProps> = ({ value, label, disabled, classNam
                 // Label colour — single source so precedence is exact: disabled → selected → inactive.
                 // Disabled = text-icon/disabled #bdc4cf (delta-300); active = gama-500; inactive = delta-600.
                 disabled ? 'text-delta-300' : selected ? 'text-gama-500' : 'text-delta-600',
-                !disabled && 'cursor-pointer',
+                disabled ? 'cursor-not-allowed' : 'cursor-pointer',
                 // Figma Focused = 3px focus-ring border on ALL sides. Inset box-shadow ring hugs the box
                 // (follows the rounded top) with no layout shift.
                 'focus-visible:shadow-[inset_0_0_0_3px_var(--colors-focus-ring)]',
@@ -101,5 +109,13 @@ export const StyledTab: FC<StyledTabProps> = ({ value, label, disabled, classNam
         >
             {label}
         </button>
+    )
+
+    if (!reasoned) return tab
+
+    return (
+        <StyledTooltip title={disabledReason} openOnTap persistentDescription>
+            {tab}
+        </StyledTooltip>
     )
 }
