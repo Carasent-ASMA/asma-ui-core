@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { afterEach, describe, it } from 'vitest'
-import { expect, userEvent } from 'src/test-utils/interaction-api'
+import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { StyledTextarea } from './StyledTextarea'
 
@@ -45,5 +45,23 @@ describe('StyledTextarea keyboard contract', () => {
 
         await userEvent.tab()
         await expect(document.activeElement).toBe(container.querySelector('button'))
+    })
+})
+
+describe('StyledTextarea read-only variants', () => {
+    afterEach(cleanup)
+
+    it.each(['view_only', 'not_editable'] as const)('%s is a focusable, labelled read-only textbox', async (variant) => {
+        const { container } = mount(
+            <StyledTextarea variant={variant} label='Notes' value='Signed off' readOnlyReason='Locked after signing' />,
+        )
+        const textbox = container.querySelector<HTMLElement>('[role="textbox"]')!
+
+        await expect(textbox).toHaveAccessibleName('Notes')
+        await expect(textbox).toHaveAttribute('aria-readonly', 'true')
+        await expect(textbox).toHaveAccessibleDescription(/Locked after signing/)
+        textbox.focus()
+        await expect(textbox).toHaveFocus()
+        await waitFor(() => expect(document.querySelector('[role="tooltip"]')).toHaveTextContent('Locked after signing'))
     })
 })

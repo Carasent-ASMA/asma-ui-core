@@ -1,4 +1,5 @@
 import React, { useEffect, useId, useRef, type ChangeEvent, type MutableRefObject, type ReactNode } from 'react'
+import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip'
 import { useHelperSlot } from 'src/helpers/useHelperSlot'
 import styles from './StyledTextarea.module.scss'
 
@@ -19,6 +20,8 @@ export interface TextareaCommonProps {
 
 export interface TextAreaNotEditableProps {
     variant?: 'not_editable' | 'view_only'
+    /** Why the text can't be edited; shown on hover, focus and tap. */
+    readOnlyReason?: ReactNode
     minRows?: never
     maxRows?: never
     disabled?: never
@@ -34,6 +37,7 @@ export interface TextAreaNotEditableProps {
 
 export interface TextAreaActiveProps {
     variant?: 'active'
+    readOnlyReason?: never
     minRows?: number
     maxRows?: number
     /** @figmaProp State = true→"Disabled" (delta-300 border/text) */
@@ -105,6 +109,7 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
     refLink,
     dataTest,
     counterLimit,
+    readOnlyReason,
     ...otherProps
 }) => {
     const textAreaInnerRef = useRef<HTMLTextAreaElement>(null)
@@ -115,6 +120,7 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
     const counterId = useId()
     const internalId = useId()
     const textAreaId = id ?? internalId
+    const labelId = `${textAreaId}-label`
     const helperMessage = error ? errorMessage : description
     const { show: showHelperSlot, role: helperAlertRole } = useHelperSlot('StyledTextarea', error, helperMessage, reserveHelperText)
 
@@ -157,7 +163,10 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
 
     return (
         <div className={`relative flex flex-col gap-1 ${containerClassName}`} data-testid={dataTest}>
-            <label htmlFor={textAreaId} className={`${styles['label']} ${styles[textType]} ${labelClassName}`}>
+            <label
+                id={labelId}
+                htmlFor={variant === 'active' ? textAreaId : undefined}
+                className={`${styles['label']} ${styles[textType]} ${labelClassName}`}>
                 {label}
             </label>
             {showHelperSlot && (
@@ -169,10 +178,16 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
                     {helperMessage}
                 </span>
             )}
-            {variant === 'view_only' ? (
-                <div className='pt-3 font-roboto text-base font-normal text-delta-700'>{value}</div>
-            ) : variant === 'not_editable' ? (
-                <div className='rounded bg-delta-50 p-3 font-roboto text-base font-normal text-delta-700'>{value}</div>
+            {variant !== 'active' ? (
+                <ReadOnlyText
+                    id={textAreaId}
+                    labelId={labelId}
+                    descriptionId={showHelperSlot ? descriptionId : undefined}
+                    boxed={variant === 'not_editable'}
+                    reason={readOnlyReason}
+                >
+                    {value}
+                </ReadOnlyText>
             ) : (
                 <textarea
                     {...otherProps}
@@ -206,5 +221,39 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
                 </>
             )}
         </div>
+    )
+}
+
+interface ReadOnlyTextProps {
+    id: string
+    labelId: string
+    descriptionId?: string
+    boxed: boolean
+    reason?: ReactNode
+    children: string
+}
+
+// A read-only field is still announced and focusable like a native `readonly` textarea, so its
+// value and any reason are reachable from the keyboard (disabled-states DIS-6).
+const ReadOnlyText = ({ id, labelId, descriptionId, boxed, reason, children }: ReadOnlyTextProps) => {
+    const text = (
+        <div
+            id={id}
+            role='textbox'
+            aria-readonly='true'
+            aria-multiline='true'
+            aria-labelledby={labelId}
+            aria-describedby={descriptionId}
+            tabIndex={0}
+            className={`${boxed ? 'rounded bg-delta-50 p-3' : 'pt-3'} cursor-default font-roboto text-base font-normal text-delta-700 outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-gama-400`}
+        >
+            {children}
+        </div>
+    )
+    if (!reason) return text
+    return (
+        <StyledTooltip title={reason} openOnTap persistentDescription>
+            {text}
+        </StyledTooltip>
     )
 }

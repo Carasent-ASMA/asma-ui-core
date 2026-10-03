@@ -11,10 +11,12 @@ import {
     type FocusEvent,
     type HTMLAttributes,
     type InputHTMLAttributes,
+    type ReactElement,
     type ReactNode,
     type Ref,
     type TextareaHTMLAttributes,
 } from 'react'
+import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip'
 import { CloseIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
 import { HelperRow } from 'src/helpers/HelperRow'
@@ -73,6 +75,8 @@ export interface StyledInputFieldProps {
     disabled?: boolean
     /** @figmaProp State = true→"Read only" */
     readOnly?: boolean
+    /** Why the value can't be changed; shown on hover, focus and tap of a read-only field. */
+    readOnlyReason?: ReactNode
     required?: boolean
     allowClear?: boolean
     onClear?: () => void
@@ -134,6 +138,7 @@ export const StyledInputField = ({
     expandHelperText = true,
     disabled,
     readOnly,
+    readOnlyReason,
     required,
     allowClear,
     onClear,
@@ -364,7 +369,7 @@ export const StyledInputField = ({
         // Read-only fill lives on the shell (below) so it covers the whole box incl. the multiline
         // padding; keep the field itself transparent to avoid a `bg-transparent`/`bg-delta-50` clash
         // (cn here is plain clsx, no tailwind-merge, so a competing bg is order-dependent/flaky).
-        readOnly && 'text-delta-800',
+        readOnly && 'cursor-default text-delta-800',
         inputSlotClass,
     )
     const singleLineDataProps =
@@ -397,125 +402,127 @@ export const StyledInputField = ({
             }}
         >
             <div className='relative overflow-visible'>
-                {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions -- not independently
-                    interactive: this shell wraps the REAL <input>/<textarea> below, which is already
-                    keyboard-operable on its own. `onMouseDown` is a passthrough (MUI-parity
-                    `slotProps.input.onMouseDown`) for mouse-specific shell behaviour, same as
-                    StyledFormControl's focus/blur bubbling — not a control needing its own tabIndex. */}
-                <div
-                    className={cn(
-                        'relative flex',
-                        isSingleLineShell && styles['InputShell'],
-                        multiline && 'box-border items-center px-[14px] py-[16.5px]',
-                        isAdornmentList &&
-                            cn(
-                                styles['AdornmentList'],
-                                userEndAdornment && styles['AdornmentList--endAdornment'],
-                            ),
-                        // Read-only surface: fill the whole box (matches the delta-200 border, radius 4).
-                        // On the shell (not the input) so it also covers the multiline field's padding.
-                        readOnly && 'rounded bg-delta-50',
-                    )}
-                    ref={mergedInputSlotRef}
-                    onMouseDown={inputSlotOnMouseDown}
-                    {...inputSlotClickProps}
-                    style={shellStyle}
-                    data-testid={isAdornmentList ? `${dataTest}-adornment-list` : `${dataTest}-shell`}
-                >
-                    {hasStartAdornment && (
-                        <span
-                            className={cn(
-                                'items-center text-delta-500',
-                                // `flex` must live only in the non-adornment branch: pairing it with
-                                // `contents` puts two `display` utilities on one element, and when a
-                                // consumer's Tailwind marks utilities `!important` (or orders `flex`
-                                // after `contents`), `flex` wins — the wrapper never dissolves and the
-                                // chip adornment list can't flex-wrap. See [[ui-core-adornment-contents-flex-conflict]].
-                                isAdornmentList ? 'contents' : 'absolute left-3 flex',
-                            )}
-                        >
-                            {startAdornment}
-                        </span>
-                    )}
-                    {multiline ? (
-                        <textarea
-                            {...(sharedProps as unknown as TextareaHTMLAttributes<HTMLTextAreaElement>)}
-                            ref={assignRef}
-                            data-testid={dataTest}
-                            rows={rows ?? minRows ?? 2}
-                            className={inputClasses}
-                        />
-                    ) : (
-                        <input
-                            {...(sharedProps)}
-                            {...singleLineDataProps}
-                            ref={assignRef}
-                            data-testid={dataTest}
-                            type={type}
-                            className={inputClasses}
-                        />
-                    )}
-
-                    {showClear ? (
-                        // Native <button> for the role and the pointer affordance, but deliberately OUT
-                        // of the tab order (`tabIndex={-1}`): it appears only while there is a value, so
-                        // tabbing onto it and activating it unmounts the very control that had focus and
-                        // drops focus to <body> (WCAG 2.4.3). No 2.1.1 cost — the field is editable text,
-                        // so a keyboard user clears it the native way (Ctrl/Cmd+A, Delete). Same call the
-                        // autocomplete's trailing affordances already make.
-                        // `aria-label` is required since the only content is an icon.
-                        <button
-                            type='button'
-                            tabIndex={-1}
-                            aria-label='Clear'
-                            data-testid={`${dataTest}-clear`}
-                            // ASMA-8220 (TB-14): `hover:bg-gama-100` is the only feedback it has, so
-                            // pressable (the audit grouped it with the touch-ready controls, but it
-                            // declares no `:active` to preserve). No hit-area: a 44px overlay on this
-                            // ~22px button sits inside the field and would swallow taps meant to place
-                            // the caret in the text it clears.
-                            className='asma-pressable absolute right-4 z-40 flex items-center justify-center rounded-full border-0 bg-transparent p-[2px] duration-300 hover:bg-gama-100'
-                            onClick={(event) => {
-                                event.stopPropagation()
-                                event.preventDefault()
-                                if (!isControlled) setHasValueUncontrolled(false)
-                                onClear?.()
-                            }}
-                        >
-                            <CloseIcon width={18} height={18} />
-                        </button>
-                    ) : (
-                        userEndAdornment && (
-                            // `inset-y-0 items-center` keeps the indicator vertically centred in the field
-                            // even after the chip adornment list grows to multiple rows (Figma icon-right).
+                <ReadOnlyReason reason={readOnly ? readOnlyReason : undefined}>
+                    {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions -- not independently
+                        interactive: this shell wraps the REAL <input>/<textarea> below, which is already
+                        keyboard-operable on its own. `onMouseDown` is a passthrough (MUI-parity
+                        `slotProps.input.onMouseDown`) for mouse-specific shell behaviour, same as
+                        StyledFormControl's focus/blur bubbling — not a control needing its own tabIndex. */}
+                    <div
+                        className={cn(
+                            'relative flex',
+                            isSingleLineShell && styles['InputShell'],
+                            multiline && 'box-border items-center px-[14px] py-[16.5px]',
+                            isAdornmentList &&
+                                cn(
+                                    styles['AdornmentList'],
+                                    userEndAdornment && styles['AdornmentList--endAdornment'],
+                                ),
+                            // Read-only surface: fill the whole box (matches the delta-200 border, radius 4).
+                            // On the shell (not the input) so it also covers the multiline field's padding.
+                            readOnly && 'rounded bg-delta-50',
+                        )}
+                        ref={mergedInputSlotRef}
+                        onMouseDown={inputSlotOnMouseDown}
+                        {...inputSlotClickProps}
+                        style={shellStyle}
+                        data-testid={isAdornmentList ? `${dataTest}-adornment-list` : `${dataTest}-shell`}
+                    >
+                        {hasStartAdornment && (
                             <span
-                                ref={endAdornmentRef}
-                                className='absolute inset-y-0 right-[14px] flex max-w-[calc(100%-28px)] items-center gap-1'
+                                className={cn(
+                                    'items-center text-delta-500',
+                                    // `flex` must live only in the non-adornment branch: pairing it with
+                                    // `contents` puts two `display` utilities on one element, and when a
+                                    // consumer's Tailwind marks utilities `!important` (or orders `flex`
+                                    // after `contents`), `flex` wins — the wrapper never dissolves and the
+                                    // chip adornment list can't flex-wrap. See [[ui-core-adornment-contents-flex-conflict]].
+                                    isAdornmentList ? 'contents' : 'absolute left-3 flex',
+                                )}
                             >
-                                {userEndAdornment}
+                                {startAdornment}
                             </span>
-                        )
-                    )}
+                        )}
+                        {multiline ? (
+                            <textarea
+                                {...(sharedProps as unknown as TextareaHTMLAttributes<HTMLTextAreaElement>)}
+                                ref={assignRef}
+                                data-testid={dataTest}
+                                rows={rows ?? minRows ?? 2}
+                                className={inputClasses}
+                            />
+                        ) : (
+                            <input
+                                {...(sharedProps)}
+                                {...singleLineDataProps}
+                                ref={assignRef}
+                                data-testid={dataTest}
+                                type={type}
+                                className={inputClasses}
+                            />
+                        )}
 
-                    {label ? (
-                        <fieldset
-                            aria-hidden
-                            className={notchedOutlineClass({ focused, error, disabled, readOnly, notched: true })}
-                        >
-                            <legend className={notchedLegendClass(shrink)}>
-                                <span className='inline-block px-[5px]'>
-                                    {label}
-                                    {required && ' *'}
+                        {showClear ? (
+                            // Native <button> for the role and the pointer affordance, but deliberately OUT
+                            // of the tab order (`tabIndex={-1}`): it appears only while there is a value, so
+                            // tabbing onto it and activating it unmounts the very control that had focus and
+                            // drops focus to <body> (WCAG 2.4.3). No 2.1.1 cost — the field is editable text,
+                            // so a keyboard user clears it the native way (Ctrl/Cmd+A, Delete). Same call the
+                            // autocomplete's trailing affordances already make.
+                            // `aria-label` is required since the only content is an icon.
+                            <button
+                                type='button'
+                                tabIndex={-1}
+                                aria-label='Clear'
+                                data-testid={`${dataTest}-clear`}
+                                // ASMA-8220 (TB-14): `hover:bg-gama-100` is the only feedback it has, so
+                                // pressable (the audit grouped it with the touch-ready controls, but it
+                                // declares no `:active` to preserve). No hit-area: a 44px overlay on this
+                                // ~22px button sits inside the field and would swallow taps meant to place
+                                // the caret in the text it clears.
+                                className='asma-pressable absolute right-4 z-40 flex items-center justify-center rounded-full border-0 bg-transparent p-[2px] duration-300 hover:bg-gama-100'
+                                onClick={(event) => {
+                                    event.stopPropagation()
+                                    event.preventDefault()
+                                    if (!isControlled) setHasValueUncontrolled(false)
+                                    onClear?.()
+                                }}
+                            >
+                                <CloseIcon width={18} height={18} />
+                            </button>
+                        ) : (
+                            userEndAdornment && (
+                                // `inset-y-0 items-center` keeps the indicator vertically centred in the field
+                                // even after the chip adornment list grows to multiple rows (Figma icon-right).
+                                <span
+                                    ref={endAdornmentRef}
+                                    className='absolute inset-y-0 right-[14px] flex max-w-[calc(100%-28px)] items-center gap-1'
+                                >
+                                    {userEndAdornment}
                                 </span>
-                            </legend>
-                        </fieldset>
-                    ) : (
-                        <div
-                            aria-hidden
-                            className={notchedOutlineClass({ focused, error, disabled, readOnly, notched: false })}
-                        />
-                    )}
-                </div>
+                            )
+                        )}
+
+                        {label ? (
+                            <fieldset
+                                aria-hidden
+                                className={notchedOutlineClass({ focused, error, disabled, readOnly, notched: true })}
+                            >
+                                <legend className={notchedLegendClass(shrink)}>
+                                    <span className='inline-block px-[5px]'>
+                                        {label}
+                                        {required && ' *'}
+                                    </span>
+                                </legend>
+                            </fieldset>
+                        ) : (
+                            <div
+                                aria-hidden
+                                className={notchedOutlineClass({ focused, error, disabled, readOnly, notched: false })}
+                            />
+                        )}
+                    </div>
+                </ReadOnlyReason>
 
                 {label && (
                     <label
@@ -549,5 +556,14 @@ export const StyledInputField = ({
                 />
             )}
         </div>
+    )
+}
+
+const ReadOnlyReason = ({ reason, children }: { reason: ReactNode; children: ReactElement }) => {
+    if (!reason) return children
+    return (
+        <StyledTooltip title={reason} openOnTap persistentDescription>
+            {children}
+        </StyledTooltip>
     )
 }

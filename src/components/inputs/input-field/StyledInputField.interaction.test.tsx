@@ -1,5 +1,5 @@
 import { afterEach, describe, it } from 'vitest'
-import { expect, userEvent } from 'src/test-utils/interaction-api'
+import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { StyledInputField } from './StyledInputField'
 
@@ -63,5 +63,26 @@ describe('StyledInputField keyboard contract', () => {
 
         await userEvent.tab()
         await expect(document.activeElement).toBe(container.querySelector('button'))
+    })
+})
+
+describe('StyledInputField read-only reason', () => {
+    afterEach(cleanup)
+
+    it('describes the reason on the input and shows it on focus', async () => {
+        const { container } = mount(
+            <StyledInputField dataTest='name' label='Name' value='Ada' readOnly readOnlyReason='Synced from HR' />,
+        )
+        const input = container.querySelector<HTMLInputElement>('input')!
+
+        await expect(input).toHaveAccessibleDescription('Synced from HR')
+        input.focus()
+        await waitFor(() => expect(document.querySelector('[role="tooltip"]')).toHaveTextContent('Synced from HR'))
+    })
+
+    it('renders no tooltip for an editable field', async () => {
+        const { container } = mount(<StyledInputField dataTest='name' label='Name' readOnlyReason='Synced from HR' />)
+
+        await expect(container.querySelector('input')).not.toHaveAccessibleDescription('Synced from HR')
     })
 })
