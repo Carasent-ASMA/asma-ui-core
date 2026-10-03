@@ -14,9 +14,22 @@ import {
     useInteractions,
     useMergeRefs,
     useRole,
+    type ElementProps,
     type Placement,
 } from '@floating-ui/react'
-import { cloneElement, Fragment, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactElement, type ReactNode } from 'react'
+import {
+    cloneElement,
+    Fragment,
+    useEffect,
+    useId,
+    useLayoutEffect,
+    useRef,
+    useState,
+    type CSSProperties,
+    type PointerEvent,
+    type ReactElement,
+    type ReactNode,
+} from 'react'
 import { cn } from 'src/helpers/cn'
 import { firstTabbable } from 'src/helpers/focusable'
 import { resolveSx } from 'src/helpers/sx'
@@ -64,6 +77,17 @@ export interface TooltipProps {
     disableHoverListener?: boolean
     disableFocusListener?: boolean
     disableTouchListener?: boolean
+    /**
+     * A tap on a touch screen toggles the tooltip; it stays until the next tap, a tap outside,
+     * scroll or Escape — never a timer (disabled-states DIS-2, §5). Hover stays mouse-only so the
+     * emulated mouse events after a tap cannot toggle it a second time.
+     */
+    openOnTap?: boolean
+    /**
+     * The text stays in the DOM and the trigger references it through `aria-describedby` while the
+     * tooltip is closed, so a screen reader announces it on focus (disabled-states DIS-2, 4.1.2).
+     */
+    persistentDescription?: boolean
     offsetDistance?: number
     className?: string
     slotProps?: TooltipSlotProps
@@ -101,6 +125,8 @@ const TooltipWithFloating = ({
     onClose,
     disableHoverListener,
     disableFocusListener,
+    openOnTap,
+    persistentDescription,
     offsetDistance,
     className,
     slotProps,
@@ -137,12 +163,21 @@ const TooltipWithFloating = ({
         enabled: !isControlled && !disableHoverListener,
         delay: { open: enterDelay, close: leaveDelay },
         move: false,
+        mouseOnly: Boolean(openOnTap),
         handleClose: safePolygon(),
     })
     const focus = useFocus(context, { enabled: !isControlled && !disableFocusListener })
-    const dismiss = useDismiss(context)
+    const dismiss = useDismiss(context, { ancestorScroll: Boolean(openOnTap) })
     const role = useRole(context, { role: 'tooltip' })
-    const { getReferenceProps, getFloatingProps } = useInteractions([hover, focus, dismiss, role])
+    const tap: ElementProps = {
+        reference: {
+            onPointerUp: (event: PointerEvent<Element>) => {
+                if (!openOnTap || event.pointerType !== 'touch') return
+                setOpen(!open)
+            },
+        },
+    }
+    const { getReferenceProps, getFloatingProps } = useInteractions([hover, focus, dismiss, role, tap])
     const portalRoot = open ? getOpenModalDialogAncestor(refs.domReference.current) : undefined
     const usePopoverLayer = shouldUsePopoverTopLayer(portalRoot)
     const floatingRef = useTopLayerRef(refs.setFloating, usePopoverLayer)
@@ -150,6 +185,9 @@ const TooltipWithFloating = ({
     // `useRole` already mints the floating element's id and puts it on the floating node — reuse it
     // instead of a second `useId`, so nothing overrides a Floating UI internal.
     const { floatingId } = context
+    const descriptionId = useId()
+    const describedById = persistentDescription ? descriptionId : floatingId
+    const describes = Boolean(persistentDescription) || open
 
     // APG puts `aria-describedby` on the *trigger*, but by house rule the child handed in is a
     // wrapper span, not the control a screen reader lands on — so the id goes on the focusable
@@ -157,15 +195,15 @@ const TooltipWithFloating = ({
     // nothing focusable, and an unassociated description is worse than one on the wrapper.
     useEffect(() => {
         const reference = refs.domReference.current
-        if (!open || !floatingId || !(reference instanceof HTMLElement)) return
+        if (!describes || !describedById || !(reference instanceof HTMLElement)) return
         const described = firstTabbable(reference) ?? reference
         const previous = described.getAttribute('aria-describedby')
-        described.setAttribute('aria-describedby', previous ? `${previous} ${floatingId}` : floatingId)
+        described.setAttribute('aria-describedby', previous ? `${previous} ${describedById}` : describedById)
         return () => {
             if (previous === null) described.removeAttribute('aria-describedby')
             else described.setAttribute('aria-describedby', previous)
         }
-    }, [open, refs.domReference, floatingId])
+    }, [describes, refs.domReference, describedById])
 
     // A Fragment has no DOM node to act as the reference, so it gets a `display: contents` host:
     // that host carries the ref and the handlers while its children keep their exact place in the
@@ -193,6 +231,11 @@ const TooltipWithFloating = ({
     return (
         <>
             {reference}
+            {persistentDescription && (
+                <span id={descriptionId} hidden>
+                    {title}
+                </span>
+            )}
             {open && (
                 <FloatingPortal root={portalRoot}>
                     <div
