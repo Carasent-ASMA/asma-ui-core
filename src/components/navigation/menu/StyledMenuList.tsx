@@ -15,8 +15,14 @@ export interface StyledMenuListProps {
     onKeyDown?: (event: KeyboardEvent<HTMLUListElement>) => void
 }
 
+// A disabled item that carries its reason stays reachable so the reason can be read
+// (disabled-states DIS-3); one without a reason is still skipped.
 const focusableItems = (list: HTMLUListElement | null): HTMLElement[] =>
-    list ? Array.from(list.querySelectorAll<HTMLElement>('[role="menuitem"]:not([aria-disabled="true"])')) : []
+    list
+        ? Array.from(
+              list.querySelectorAll<HTMLElement>('[role="menuitem"]:not([aria-disabled="true"]:not([data-has-reason]))'),
+          )
+        : []
 
 /**
  * Keyboard-navigable `role="menu"` list (replaces MUI `MenuList`). Arrow-key / Home / End roving
