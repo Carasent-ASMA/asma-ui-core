@@ -38,6 +38,7 @@ export function ToolbarActionButton({
              * sit inside one). */
             type='button'
             disabled={action.disabled}
+            disabledReason={action.disabledReason}
             startIcon={action.icon}
             onClick={action.onClick}
             /* An explicit ariaLabel always wins (e.g. a badge count appended to the name);
@@ -149,6 +150,7 @@ export function ToolbarActionGroup({
 
                                 <StyledMenuItem
                                     disabled={action.disabled}
+                                    disabledReason={action.disabledReason}
                                     onClick={() => {
                                         setAnchorEl(null)
                                         action.onClick()

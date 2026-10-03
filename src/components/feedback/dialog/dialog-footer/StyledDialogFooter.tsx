@@ -1,6 +1,6 @@
 import { useMemo, useState, type ReactNode } from 'react'
 
-import { DotsVerticalIcon, LoadingIcon } from 'src/components/icons'
+import { DotsVerticalIcon } from 'src/components/icons'
 import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip'
 import { StyledButton, type StyledButtonType } from 'src/components/inputs/button'
 import { StyledMenu } from 'src/components/navigation/menu/StyledMenu'
@@ -54,16 +54,17 @@ export interface StyledDialogFooterButton {
     /** Trailing icon. `loading` supplies its own and wins. */
     endIcon?: ReactNode
     /**
-     * Shows a spinner after the label and disables the button. Consumers previously swapped
-     * the label *for* a spinner, which changes the button's width mid-submit — hence the
-     * hard-coded `w-[98px]` workarounds in the footers this replaces. Keeping the label
-     * makes the width stable on its own.
+     * Shows a spinner after the label and marks the button busy: it keeps focus and ignores
+     * activation. Consumers previously swapped the label *for* a spinner, which changes the
+     * button's width mid-submit — hence the hard-coded `w-[98px]` workarounds in the footers
+     * this replaces. Keeping the label makes the width stable on its own.
      */
     loading?: boolean
     /**
-     * Wraps the button in a `StyledTooltip`. Falsy renders no tooltip, so the common
-     * `tooltip={disabled && 'Locked for editing'}` reads naturally. A disabled button does
-     * not emit pointer events, so the tooltip is anchored on a wrapper around it.
+     * Falsy renders no tooltip, so the common `tooltip={disabled && 'Locked for editing'}` reads
+     * naturally. With `disabled` it is the reason the action is unavailable (`disabledReason`):
+     * the button stays focusable and shows it on hover, focus and tap. Otherwise it is a plain
+     * hint anchored on a wrapper.
      */
     tooltip?: ReactNode
     dataTest?: string
@@ -186,6 +187,9 @@ export function StyledDialogFooter({
         fallbackVariant: StyledButtonType,
         key: string,
     ): JSX.Element => {
+        /* On a disabled button the tooltip is the reason it is unavailable: StyledButton keeps it
+         * focusable and shows the reason on hover, focus and tap (disabled-states DIS-1…DIS-4).
+         * Loading keeps focus on the button instead of disabling it (submit-buttons §6). */
         const element = (
             <StyledButton
                 dataTest={button.dataTest ?? `${dataTest}-${key}`}
@@ -193,24 +197,22 @@ export function StyledDialogFooter({
                 error={button.tone === 'danger'}
                 size='medium'
                 type={button.type ?? 'button'}
-                disabled={Boolean(button.disabled) || Boolean(button.loading)}
+                disabled={button.disabled}
+                disabledReason={button.disabled ? button.tooltip : undefined}
+                loading={button.loading}
                 startIcon={button.icon}
-                endIcon={button.loading ? <LoadingIcon width={20} height={20} /> : button.endIcon}
+                endIcon={button.endIcon}
                 onClick={button.onClick}
                 aria-label={button.ariaLabel}
-                aria-busy={button.loading}
             >
                 {button.label}
             </StyledButton>
         )
 
-        if (!button.tooltip) {
+        if (!button.tooltip || button.disabled) {
             return element
         }
 
-        /* A disabled button emits no pointer events, so the tooltip listens on a wrapper —
-         * otherwise the "why is this disabled?" tooltip never shows, which is the only
-         * reason these footers use one. */
         return (
             <StyledTooltip arrow title={button.tooltip}>
                 <span className='inline-flex'>{element}</span>
@@ -281,6 +283,7 @@ export function StyledDialogFooter({
                                         <StyledMenuItem
                                             key={action.id}
                                             disabled={action.disabled}
+                                            disabledReason={action.disabledReason}
                                             onClick={() => {
                                                 setAnchorEl(null)
                                                 action.onClick()
