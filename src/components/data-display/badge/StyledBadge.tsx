@@ -9,6 +9,9 @@ type StyledBadgeSize = 'medium' | 'small'
  * Figma "Badge". Notification count = 20px lime pill with a 1px border and Helper-Semibold 14/20;
  * `dot` = 12px lime circle with a stronger 2px border. Other colors and `small` are legacy app
  * extensions with no matching Figma notification variant.
+ *
+ * Pass children to decorate them — the badge anchors to their corner. Pass none and a `dot` becomes
+ * a flow element (Figma `Size=Dot`, node 44267-214524), for a table cell or a marker in a row.
  */
 interface BadgeProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'color'> {
     /** @figmaProp Badge content (the number/label) */
@@ -19,7 +22,10 @@ interface BadgeProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'color'> {
     max?: number
     /** @deprecated A zero notification count is always omitted. */
     showZero?: boolean
-    /** @figmaProp Size = dot→"Dot" (12px) | standard→"Default" count badge */
+    /**
+     * @figmaProp Size = dot→"Dot" (12px) | standard→"Default" count badge
+     * A `dot` with no children renders in normal flow rather than anchored to a corner.
+     */
     variant?: 'standard' | 'dot'
     /** Polite live-update text. Keep this contextual and include the real, uncapped count. */
     statusMessage?: string
@@ -109,6 +115,12 @@ export const StyledBadge = ({
     )
 
     const isDot = variant === 'dot'
+    /**
+     * Figma's "Size=Dot" is a 12px circle in its own right, so a dot with no host to decorate is a
+     * legitimate use, not a mistake. Anchoring it anyway would collapse the root to 0x0 and let the
+     * dot paint over whatever sits beside it, so the hostless form stays in normal flow instead.
+     */
+    const isStandaloneDot = isDot && children === undefined
     const isZeroHidden =
         !isDot && (badgeContent === 0 || badgeContent === undefined || badgeContent === null)
     const hidden = !!invisible || isZeroHidden
@@ -133,15 +145,30 @@ export const StyledBadge = ({
               }
             : {}
 
+    /**
+     * An anchored badge is decoration: the host it wraps already announces the state. A hostless dot
+     * has no such host, so when the caller names it we expose that name instead of leaving the state
+     * carried by colour alone (WCAG 2.2 AA 1.4.1). A bare `aria-label` on a span is not reliably
+     * surfaced, so it needs a role to land on.
+     */
+    const standaloneRole = isStandaloneDot && props['aria-label'] ? { role: 'img' } : {}
+
     return (
-        <span className='relative inline-flex shrink-0 align-middle' data-testid={dataTest} style={rootStyle} {...props}>
+        <span
+            className='relative inline-flex shrink-0 align-middle'
+            data-testid={dataTest}
+            style={rootStyle}
+            {...standaloneRole}
+            {...props}
+        >
             {children}
             {!hidden && (
                 <span
                     aria-hidden='true'
                     className={clsx(
-                        'absolute z-[1] box-border flex items-center justify-center whitespace-nowrap font-roboto font-semibold',
-                        ANCHOR_CLASS[`${vertical}-${horizontal}`],
+                        'box-border flex items-center justify-center whitespace-nowrap font-roboto font-semibold',
+                        !isStandaloneDot && 'absolute z-[1]',
+                        !isStandaloneDot && ANCHOR_CLASS[`${vertical}-${horizontal}`],
                         isDot
                             ? 'h-[12px] w-[12px] min-w-[12px] rounded-full p-0'
                             : size === 'small'

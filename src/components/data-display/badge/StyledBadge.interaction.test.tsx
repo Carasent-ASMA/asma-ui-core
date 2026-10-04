@@ -2,7 +2,6 @@ import { afterEach, describe, it } from 'vitest'
 import { expect } from 'src/test-utils/interaction-api'
 import { cleanup, mount, tabbableWithin } from 'src/test-utils/renderInteraction'
 import { StyledBadge } from './StyledBadge'
-import { StyledBadgeDot } from './StyledBadgeDot'
 
 const badgeRoot = (container: HTMLElement): HTMLElement =>
     container.querySelector<HTMLElement>('[data-testid="notifications-badge"]')!
@@ -115,31 +114,59 @@ describe('StyledBadge notification contract', () => {
         await expect(dotStyle.backgroundColor).toBe('rgb(217, 242, 86)')
     })
 
-    it('renders the standalone dot in flow with the same metrics as the anchored one', async () => {
+    it('keeps a hostless dot in normal flow so its neighbours lay out around it', async () => {
         const { container } = mount(
-            <div style={{ display: 'flex', gap: '8px' }}>
-                <span>Report</span>
-                <StyledBadgeDot dataTest='standalone-dot' />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span id='label'>Report</span>
+                <StyledBadge dataTest='standalone-dot' variant='dot' />
             </div>,
         )
-        const dot = container.querySelector<HTMLElement>('[data-testid="standalone-dot"]')!
+        const root = container.querySelector<HTMLElement>('[data-testid="standalone-dot"]')!
+        const dot = root.querySelector<HTMLElement>('span[aria-hidden="true"]')!
+        const label = container.querySelector<HTMLElement>('#label')!
         const style = getComputedStyle(dot)
 
+        // The same circle the anchored variant paints.
         await expect(style.width).toBe('12px')
         await expect(style.height).toBe('12px')
         await expect(style.borderWidth).toBe('2px')
         await expect(style.borderColor).toBe('rgb(119, 143, 0)')
         await expect(style.backgroundColor).toBe('rgb(217, 242, 86)')
+
+        // Anchoring a hostless dot collapses the root to 0x0 and paints the dot over its neighbour.
         await expect(style.position).toBe('static')
-        await expect(dot).toHaveAttribute('aria-hidden', 'true')
+        await expect(root.getBoundingClientRect().width).toBe(12)
+        await expect(root.getBoundingClientRect().height).toBe(12)
+        await expect(dot.getBoundingClientRect().left >= label.getBoundingClientRect().right).toBe(true)
     })
 
-    it('names the standalone dot for assistive technology when no host carries the state', async () => {
-        const { container } = mount(<StyledBadgeDot dataTest='standalone-dot' ariaLabel='Unread' />)
-        const dot = container.querySelector<HTMLElement>('[data-testid="standalone-dot"]')!
+    it('still anchors the dot to a corner when it has a host to decorate', async () => {
+        const { container } = mount(
+            <StyledBadge dataTest='anchored-dot' variant='dot'>
+                <span style={{ display: 'block', width: '40px', height: '40px' }} />
+            </StyledBadge>,
+        )
+        const root = container.querySelector<HTMLElement>('[data-testid="anchored-dot"]')!
+        const dot = root.querySelector<HTMLElement>('span[aria-hidden="true"]')!
 
-        await expect(dot).toHaveAccessibleName('Unread')
-        await expect(dot).not.toHaveAttribute('aria-hidden')
+        await expect(getComputedStyle(dot).position).toBe('absolute')
+        await expect(root.getBoundingClientRect().width).toBe(40)
+    })
+
+    it('names a hostless dot for assistive technology when nothing nearby carries the state', async () => {
+        const { container } = mount(<StyledBadge dataTest='standalone-dot' variant='dot' aria-label='Unread' />)
+        const root = container.querySelector<HTMLElement>('[data-testid="standalone-dot"]')!
+
+        await expect(root).toHaveAccessibleName('Unread')
+        await expect(root).toHaveAttribute('role', 'img')
+    })
+
+    it('leaves an unnamed hostless dot out of the accessibility tree', async () => {
+        const { container } = mount(<StyledBadge dataTest='standalone-dot' variant='dot' />)
+        const root = container.querySelector<HTMLElement>('[data-testid="standalone-dot"]')!
+
+        await expect(root).not.toHaveAttribute('role')
+        await expect(root.querySelector('span[aria-hidden="true"]')).toBeTruthy()
     })
 
     it('keeps a silent polite status region mounted before announcing count changes', async () => {
