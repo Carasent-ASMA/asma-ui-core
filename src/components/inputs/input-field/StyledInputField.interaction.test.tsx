@@ -80,6 +80,31 @@ describe('StyledInputField read-only reason', () => {
         await waitFor(() => expect(document.querySelector('[role="tooltip"]')).toHaveTextContent('Synced from HR'))
     })
 
+    it('is borderless and text-like, with a focus ring from the keyboard (DIS-6)', async () => {
+        const { container } = mount(
+            <>
+                <button type='button'>Before</button>
+                <StyledInputField dataTest='name' label='Name' value='Ada' readOnly readOnlyReason='Synced from HR' />
+            </>,
+        )
+        const shell = container.querySelector<HTMLElement>('[data-testid="name-shell"]')!
+        const outline = shell.querySelector<HTMLElement>('fieldset')!
+
+        await expect(getComputedStyle(outline).visibility).toBe('hidden')
+        await expect(getComputedStyle(shell).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+        await expect(getComputedStyle(container.querySelector('input')!).cursor).toBe('default')
+
+        container.querySelector<HTMLButtonElement>('button')!.focus()
+        await userEvent.tab()
+        await waitFor(() => expect(getComputedStyle(shell).outlineStyle).toBe('solid'))
+    })
+
+    it('keeps the bordered read-only look when no reason is given', async () => {
+        const { container } = mount(<StyledInputField dataTest='name' label='Name' value='Ada' readOnly />)
+
+        await expect(getComputedStyle(container.querySelector('fieldset')!).visibility).toBe('visible')
+    })
+
     it('renders no tooltip for an editable field', async () => {
         const { container } = mount(<StyledInputField dataTest='name' label='Name' readOnlyReason='Synced from HR' />)
 

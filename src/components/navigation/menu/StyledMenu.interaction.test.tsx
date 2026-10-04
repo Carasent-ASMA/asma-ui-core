@@ -116,7 +116,9 @@ describe('StyledMenu keyboard contract', () => {
                             data-testid='item-archive'
                             disabled
                             disabledReason='Locked for editing'
-                            onClick={() => onPick('archive')}
+                            onClick={() => {
+                                onPick('archive')
+                            }}
                         >
                             Archive
                         </StyledMenuItem>

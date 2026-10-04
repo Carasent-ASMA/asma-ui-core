@@ -1,4 +1,4 @@
-import React, { type MouseEvent, type ReactNode } from 'react'
+import React, { useState, type MouseEvent, type ReactNode } from 'react'
 
 import style from './StyledButton.module.scss'
 
@@ -27,6 +27,11 @@ interface commonProps {
      * `disabled` it has no effect.
      */
     disabledReason?: ReactNode
+    /**
+     * @figmaProp none — behavioral. Announced once, politely, when a button with a `disabledReason`
+     * becomes available, e.g. "Send is now available". App-supplied and localized.
+     */
+    availableAnnouncement?: string
     /**
      * @figmaProp none — behavioral. Busy: spinner after the label, `aria-busy`, focus and width kept,
      * activation ignored (disabled-states DIS-8, submit-buttons SUB-4).
@@ -112,6 +117,7 @@ export const StyledButton = ({
     style: styleProp,
     disabled,
     disabledReason,
+    availableAnnouncement,
     loading,
     onClick,
     ...otherProps
@@ -124,6 +130,13 @@ export const StyledButton = ({
     const softDisabled = Boolean(disabled) && Boolean(disabledReason)
     const blocked = softDisabled || Boolean(loading)
     const iconSize = isLarge ? 20 : 16
+
+    const [wasSoftDisabled, setWasSoftDisabled] = useState(softDisabled)
+    const [announcement, setAnnouncement] = useState('')
+    if (wasSoftDisabled !== softDisabled) {
+        setWasSoftDisabled(softDisabled)
+        setAnnouncement(softDisabled ? '' : (availableAnnouncement ?? ''))
+    }
 
     // preventDefault also cancels the form submit of a `type="submit"` button, including the
     // implicit submit a browser fires on Enter in a form field.
@@ -140,7 +153,7 @@ export const StyledButton = ({
             {...otherProps}
             disabled={Boolean(disabled) && !blocked}
             aria-disabled={blocked || undefined}
-            aria-busy={loading || otherProps['aria-busy']}
+            aria-busy={loading ? true : otherProps['aria-busy']}
             onClick={handleClick}
             className={clsx(
                 // ASMA-8210: touch readiness only. The button already owns a designed `:active`
@@ -184,11 +197,24 @@ export const StyledButton = ({
         </button>
     )
 
-    if (!softDisabled) return button
-
+    // The tooltip stays mounted while a reason is given, so toggling `disabled` never remounts the
+    // button and drops its focus; an enabled button keeps it closed.
     return (
-        <StyledTooltip arrow title={disabledReason} openOnTap persistentDescription>
-            {button}
-        </StyledTooltip>
+        <>
+            <StyledTooltip
+                arrow
+                title={disabledReason}
+                open={softDisabled ? undefined : false}
+                openOnTap={softDisabled}
+                persistentDescription={softDisabled}
+            >
+                {button}
+            </StyledTooltip>
+            {availableAnnouncement && (
+                <span role='status' className='sr-only'>
+                    {announcement}
+                </span>
+            )}
+        </>
     )
 }

@@ -71,13 +71,14 @@ export const StyledLink: React.FC<StyledLinkProps> = ({
     if (disabled && disabledReason) {
         return (
             <StyledTooltip title={disabledReason} openOnTap persistentDescription>
+                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid -- a disabled link keeps its link role
+                    and its place in the tab order (APG); with no `href` there is nothing to navigate to. */}
                 <a
                     data-testid={dataTest}
                     ref={reflink}
                     role='link'
                     aria-disabled='true'
                     tabIndex={0}
-                    onClick={(event) => event.preventDefault()}
                     className={clsx(style['styled-link'], style['styled-link-disabled'], textSize, className)}
                 >
                     {content}

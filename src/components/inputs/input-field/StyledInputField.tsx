@@ -181,6 +181,8 @@ export const StyledInputField = ({
     const isControlled = value !== undefined
     const hasValue = isControlled ? value !== '' && value != null : hasValueUncontrolled
     const disabledOrReadonly = Boolean(disabled) || Boolean(readOnly)
+    // A read-only field that explains itself is shown borderless and text-like (disabled-states DIS-6).
+    const plainReadOnly = Boolean(readOnly) && Boolean(readOnlyReason)
 
     const startAdornment = slotProps?.input?.startAdornment ?? InputProps?.startAdornment
     const hasStartAdornment = Children.count(startAdornment) > 0
@@ -420,7 +422,9 @@ export const StyledInputField = ({
                                 ),
                             // Read-only surface: fill the whole box (matches the delta-200 border, radius 4).
                             // On the shell (not the input) so it also covers the multiline field's padding.
-                            readOnly && 'rounded bg-delta-50',
+                            readOnly && !plainReadOnly && 'rounded bg-delta-50',
+                            plainReadOnly &&
+                                'rounded [&:has(:focus-visible)]:outline [&:has(:focus-visible)]:outline-2 [&:has(:focus-visible)]:outline-focus-ring',
                         )}
                         ref={mergedInputSlotRef}
                         onMouseDown={inputSlotOnMouseDown}
@@ -506,7 +510,10 @@ export const StyledInputField = ({
                         {label ? (
                             <fieldset
                                 aria-hidden
-                                className={notchedOutlineClass({ focused, error, disabled, readOnly, notched: true })}
+                                className={cn(
+                                    notchedOutlineClass({ focused, error, disabled, readOnly, notched: true }),
+                                    plainReadOnly && 'invisible',
+                                )}
                             >
                                 <legend className={notchedLegendClass(shrink)}>
                                     <span className='inline-block px-[5px]'>
@@ -518,7 +525,10 @@ export const StyledInputField = ({
                         ) : (
                             <div
                                 aria-hidden
-                                className={notchedOutlineClass({ focused, error, disabled, readOnly, notched: false })}
+                                className={cn(
+                                    notchedOutlineClass({ focused, error, disabled, readOnly, notched: false }),
+                                    plainReadOnly && 'invisible',
+                                )}
                             />
                         )}
                     </div>
