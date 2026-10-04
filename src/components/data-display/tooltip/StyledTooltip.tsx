@@ -217,14 +217,20 @@ const TooltipWithFloating = ({
         refs.setPositionReference({ contextElement: host, getBoundingClientRect: () => contentsRect(host) })
     }, [isFragment, refs])
 
-    // Merge our reference ref with any ref the child already carries (React 18 element.ref).
-    const childRef = useMergeRefs([refs.setReference, (child as { ref?: React.Ref<unknown> }).ref])
+    // Merge our reference ref with any ref the child already carries: `props.ref` in React 19,
+    // `element.ref` in React 18.
+    const childProps = child.props as Record<string, unknown> & { ref?: React.Ref<unknown> }
+    const childRef = useMergeRefs([
+        refs.setReference,
+        childProps.ref ?? (child as { ref?: React.Ref<unknown> }).ref,
+    ])
     // Drop Floating UI's generated `aria-describedby`: it would land on the wrapper that the effect
     // above deliberately looks past. `cloneElement` merges over the child's own props, so a value
-    // the caller set themselves survives untouched.
+    // the caller set themselves survives untouched. The merged ref goes last: in React 19 the
+    // child's own `ref` prop, even `undefined`, would otherwise replace it.
     const { ['aria-describedby']: _generated, ...referenceProps } = getReferenceProps({
+        ...childProps,
         ref: childRef,
-        ...(child.props as Record<string, unknown>),
     })
     const reference = cloneElement(child, referenceProps)
 
