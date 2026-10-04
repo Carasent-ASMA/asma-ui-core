@@ -76,11 +76,11 @@ const GallerySurface = ({
 )
 
 const GalleryLabel = ({ children }: { children: ReactNode }): JSX.Element => (
-    <p className='text-delta-800 m-0 text-base leading-6 font-semibold'>{children}</p>
+    <p className='text-delta-800 m-0 text-base/6 font-semibold'>{children}</p>
 )
 
 const GalleryCaption = ({ children }: { children: ReactNode }): JSX.Element => (
-    <p className='text-delta-600 m-0 text-sm leading-5'>{children}</p>
+    <p className='text-delta-600 m-0 text-sm/5'>{children}</p>
 )
 
 const FOOTER_ROWS: { label: string; caption: string; reset?: boolean; actions?: boolean }[] = [

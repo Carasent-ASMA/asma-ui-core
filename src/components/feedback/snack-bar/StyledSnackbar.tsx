@@ -84,7 +84,7 @@ export const StyledSnackbar = ({
                     <div
                         role='status'
                         aria-atomic='true'
-                        className='bg-delta-800 flex items-center gap-2 rounded px-4 py-3 text-sm text-white shadow-lg'
+                        className='bg-delta-800 flex items-center gap-2 rounded-sm px-4 py-3 text-sm text-white shadow-lg'
                     >
                         {message}
                         {action}

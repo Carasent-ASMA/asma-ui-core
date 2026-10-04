@@ -45,7 +45,7 @@ export const StyledInfoSnackbar = forwardRef<HTMLDivElement, StyledInfoSnackbarP
                         // ASMA-8220 (TB-14): `active:bg-gama-500` is the designed press → touch-ready.
                         // No hit-area: a 44px overlay on a 32px button would spill over the snackbar
                         // message and swallow taps meant for its action.
-                        className='asma-touch-ready grid size-8 cursor-pointer place-items-center rounded border-0 bg-transparent text-white transition-colors duration-300 ease-in-out hover:bg-gama-500 active:bg-gama-500'
+                        className='asma-touch-ready hover:bg-gama-500 active:bg-gama-500 grid size-8 cursor-pointer place-items-center rounded-sm border-0 bg-transparent text-white transition-colors duration-300 ease-in-out'
                         onClick={() => closeSnackbar(id)}
                         type='button'
                     >

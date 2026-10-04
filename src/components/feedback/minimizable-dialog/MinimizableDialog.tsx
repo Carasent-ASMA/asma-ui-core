@@ -73,7 +73,6 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
         minimizedPanelRef.current?.toggleAttribute('inert', !minimized)
     }, [minimized])
 
-
     if (!open) return null
 
     const fullScreenDialogStyle: React.CSSProperties | undefined = isFullScreenActive
@@ -93,8 +92,8 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
             ? 'Exit full screen'
             : 'Avslutt fullskjerm'
         : locale === 'en'
-          ? 'Full screen'
-          : 'Fullskjerm'
+        ? 'Full screen'
+        : 'Fullskjerm'
 
     const showPrimaryButton = primaryButtonText ?? primaryButtonLoading
 
@@ -117,14 +116,17 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
 
     return (
         <>
-            {isFullScreenActive && <div className='bg-opacity-70 fixed inset-0 z-51 bg-[rgb(98,110,126)]' />}
+            {isFullScreenActive && <div className='fixed inset-0 z-51 bg-[rgb(98,110,126)]/70' />}
 
             <div
                 ref={minimizedPanelRef}
                 style={{ zIndex: 51 }}
                 className={cn(styles['dialog'], !minimized && styles['hidden'])}
             >
-                <div className={clsx('flex items-center justify-between', !minimized && 'hidden')} data-testid={dataTest}>
+                <div
+                    className={clsx('flex items-center justify-between', !minimized && 'hidden')}
+                    data-testid={dataTest}
+                >
                     <div className='text-delta-800 truncate text-lg font-semibold'>{title}</div>
                     <div className='flex items-center gap-x-1'>
                         {showExpandIcon && (
@@ -173,7 +175,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                 className={cn(
                     'fixed right-4 bottom-4 z-51 rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)] transition-all duration-300',
                     className && !minimized && !fullScreen ? className : '',
-                    minimized && 'h-0! w-0! opacity-0 duration-0',
+                    minimized && 'size-0! opacity-0 duration-0',
                     isFullScreenActive && 'fixed duration-0',
                 )}
                 data-testid={dataTest}

@@ -217,7 +217,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
             onCancel={handleCancel}
             className={cn(
                 style['StyledDialog'],
-                'fixed inset-0 m-0 h-full max-h-none w-full max-w-none items-center justify-center overflow-hidden border-0 bg-transparent p-0 outline-none open:flex',
+                'fixed inset-0 m-0 size-full max-h-none max-w-none items-center justify-center overflow-hidden border-0 bg-transparent p-0 outline-none open:flex',
                 scroll === 'body' && 'overflow-y-auto',
                 className,
                 classes?.root,
@@ -277,13 +277,13 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                     <div className='box-border flex w-full max-w-full min-w-0 justify-between px-4 pt-4'>
                         <div className='flex min-w-0 flex-1 flex-col justify-start gap-0.5'>
                             {dialogLabel && (
-                                <div className='text-delta-600 flex h-8 items-center text-sm leading-5 font-normal'>
+                                <div className='text-delta-600 flex h-8 items-center text-sm/5 font-normal'>
                                     {dialogLabel}
                                 </div>
                             )}
                             {dialogTitle && (
                                 // Figma dialog title = Page title 24/32 SemiBold, text delta-800.
-                                <div className='text-delta-800 flex text-2xl leading-8 font-semibold'>
+                                <div className='text-delta-800 flex text-2xl/8 font-semibold'>
                                     {dialogTitle}
                                 </div>
                             )}

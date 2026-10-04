@@ -143,10 +143,10 @@ export const StyledBadge = ({
                         'font-roboto absolute z-1 box-border flex items-center justify-center font-semibold whitespace-nowrap',
                         ANCHOR_CLASS[`${vertical}-${horizontal}`],
                         isDot
-                            ? 'h-[12px] w-[12px] min-w-[12px] rounded-full p-0'
+                            ? 'size-[12px] min-w-[12px] rounded-full p-0'
                             : size === 'small'
                               ? 'h-[16px] w-max min-w-[16px] rounded-[20px] px-[4px] text-[0.75rem]'
-                              : 'h-[20px] min-w-[20px] rounded-[20px] px-[6px] text-sm leading-5',
+                              : 'h-[20px] min-w-[20px] rounded-[20px] px-[6px] text-sm/5',
                         !isDot && size === 'medium' && isSingleDigitCount && 'w-[20px]',
                         className,
                         slotProps?.badge?.className,

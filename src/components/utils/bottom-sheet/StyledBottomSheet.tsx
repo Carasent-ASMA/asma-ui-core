@@ -186,7 +186,7 @@ export const StyledBottomSheet = ({
             onCancel={handleCancel}
             className={cn(
                 style['StyledBottomSheet'],
-                'fixed inset-0 m-0 h-full max-h-none w-full max-w-none flex-col items-center justify-end overflow-hidden border-0 bg-transparent p-0 outline-none open:flex',
+                'fixed inset-0 m-0 size-full max-h-none max-w-none flex-col items-center justify-end overflow-hidden border-0 bg-transparent p-0 outline-none open:flex',
             )}
         >
             {/* Scrim: a convenience duplicate of the close button, not a control — hidden from AT. */}
@@ -241,11 +241,11 @@ export const StyledBottomSheet = ({
                             focusable='false'
                             width={24}
                             height={24}
-                            className='text-delta-800 pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'
+                            className='text-delta-800 pointer-events-none absolute top-1/2 left-1/2 -translate-1/2'
                         />
                     </div>
                     {title && (
-                        <div id={titleId} className='text-delta-800 truncate px-4 text-lg leading-7 font-semibold'>
+                        <div id={titleId} className='text-delta-800 truncate px-4 text-lg/7 font-semibold'>
                             {title}
                         </div>
                     )}

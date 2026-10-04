@@ -114,8 +114,8 @@ export const toToolbarAction = (action: PageHeaderAction): DynamicToolbarAction 
 function LoadingSkeleton({ compact }: { compact: boolean }): JSX.Element {
     return (
         <div className='flex w-full min-w-0 items-center justify-between gap-2' aria-hidden>
-            <div className={cn('bg-delta-100 animate-pulse rounded', compact ? 'h-6 w-3/5' : 'h-8 w-2/5 max-w-[500px]')} />
-            <div className='bg-delta-100 h-10 w-14 shrink-0 animate-pulse rounded' />
+            <div className={cn('bg-delta-100 animate-pulse rounded-sm', compact ? 'h-6 w-3/5' : 'h-8 w-2/5 max-w-[500px]')} />
+            <div className='bg-delta-100 h-10 w-14 shrink-0 animate-pulse rounded-sm' />
         </div>
     )
 }
@@ -239,7 +239,7 @@ export function PageHeader({
             className={cn(
                 /* 2-line clamp is visual only — the accessible name stays the full title. */
                 'text-delta-800 m-0 line-clamp-2 min-w-0 font-semibold wrap-break-word outline-none',
-                smallType ? 'text-xl leading-7' : 'text-2xl leading-8',
+                smallType ? 'text-xl/7' : 'text-2xl/8',
             )}
         >
             {title}
@@ -269,7 +269,7 @@ export function PageHeader({
                     register={register}
                     overflowMenuLabel={t.more}
                     title={title}
-                    titleClassName={cn('font-semibold', smallType ? 'text-xl leading-7' : 'text-2xl leading-8')}
+                    titleClassName={cn('font-semibold', smallType ? 'text-xl/7' : 'text-2xl/8')}
                 />
 
                 {/* Leading navigation stays through every state (never overflows/hides). */}

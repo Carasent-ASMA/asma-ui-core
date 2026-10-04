@@ -62,6 +62,7 @@ export default defineConfig(
             'better-tailwindcss/no-unknown-classes': [
                 'error',
                 {
+                    entryPoint: 'src/styles/index.css',
                     ignore: [
                         'border-l-solid',
                         'border-b-solid',

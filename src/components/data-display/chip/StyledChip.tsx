@@ -201,7 +201,7 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                     <span
                         className={cn(
                             'flex shrink-0 items-center justify-center',
-                            size === 'small' ? 'h-[18px] w-[18px]' : 'h-6 w-6',
+                            size === 'small' ? 'size-[18px]' : 'size-6',
                             avatar ? classes?.avatar : classes?.icon,
                         )}
                     >
@@ -225,8 +225,8 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                         className={cn(
                             // Its focus indication is intentionally painted by the parent (via
                             // `:has(button:focus-visible)`), matching the Figma state without a second button ring.
-                            'flex shrink-0 items-center justify-center rounded-full border border-solid border-delta-100 bg-delta-50 p-0 text-delta-700 [outline:none]',
-                            size === 'small' ? 'h-[18px] w-[18px]' : 'h-5 w-5',
+                            'border-delta-100 bg-delta-50 text-delta-700 flex shrink-0 items-center justify-center rounded-full border border-solid p-0 [outline:none]',
+                            size === 'small' ? 'size-[18px]' : 'size-5',
                             classes?.deleteIcon,
                         )}
                     >

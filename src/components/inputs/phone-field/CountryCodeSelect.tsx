@@ -135,7 +135,7 @@ export const CountryCodeSelect = ({
                     // Figma pins the trigger at 128 px (node 8523:109471 — trigger w=128, gap 10,
                     // number input w=205). Fixed rather than hugging its text so the pair does not
                     // resize when the calling code changes width (+1 vs +994).
-                    'group relative flex w-32 shrink-0 items-center gap-1.5 rounded px-3 text-base',
+                    'group relative flex w-32 shrink-0 items-center gap-1.5 rounded-sm px-3 text-base',
                     disabled ? 'text-delta-300 cursor-not-allowed' : 'text-delta-800',
                 )}
             >

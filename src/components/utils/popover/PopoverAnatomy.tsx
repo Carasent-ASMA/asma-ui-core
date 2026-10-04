@@ -68,7 +68,7 @@ export const PopoverAnatomy = ({
             {title && (
                 <div
                     id={titleId}
-                    className='text-delta-800 shrink-0 truncate pt-2 pr-10 pb-1 pl-4 text-lg leading-7 font-semibold'
+                    className='text-delta-800 shrink-0 truncate pt-2 pr-10 pb-1 pl-4 text-lg/7 font-semibold'
                 >
                     {title}
                 </div>

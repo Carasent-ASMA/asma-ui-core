@@ -536,7 +536,7 @@ export function StyledSelectAutocomplete<
         // also grow `aria-disabled` rows, which are not pressable at all.
         'asma-pressable',
         // Figma Menus item: Body Base 16/lh24, text delta-800.
-        'relative box-border flex cursor-pointer items-center gap-x-3 px-3 py-1.5 text-base text-delta-800',
+        'text-delta-800 relative box-border flex cursor-pointer items-center gap-x-3 px-3 py-1.5 text-base',
         // Row density: 'compact' = 40px (Figma Menus item); 'regular' = roomier 48px. min-height only,
         // so a wrapped 2-line label still grows the row past this.
         rowSize === 'regular' ? 'min-h-12' : 'min-h-10',
@@ -645,7 +645,7 @@ export function StyledSelectAutocomplete<
                             // border/outline delta-300 (#bdc4cf), Menus shadow. Matches StyledSelect/StyledMenu.
                             // Figma Menus (node 34522-151497) pads the list `8px 0` — the rows run
                             // edge to edge horizontally, with 8px of breathing room top and bottom.
-                            'z-[1300] m-0 list-none overflow-auto rounded border border-solid border-delta-300 bg-white px-0 py-2 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
+                            'border-delta-300 z-1300 m-0 list-none overflow-auto rounded-sm border border-solid bg-white px-0 py-2 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
                             // With a group-select header the Figma popover has no vertical padding:
                             // the grey header bar sits flush against the top edge and the last option
                             // against the bottom, so drop both `py-2` paddings.
@@ -688,7 +688,7 @@ export function StyledSelectAutocomplete<
                                     // checkboxes line up in a single column. It stays clickable to toggle
                                     // select-all, so hover deepens the grey rather than turning the header
                                     // green like a selected option.
-                                    className='relative flex h-8 cursor-pointer items-center gap-x-3 border-0 border-b border-solid border-delta-200 bg-[var(--colors-gray-10)] px-3 text-xs font-semibold uppercase tracking-[0.2px] text-delta-600 hover:bg-delta-50'
+                                    className='border-delta-200 text-delta-600 hover:bg-delta-50 relative flex h-8 cursor-pointer items-center gap-x-3 border-0 border-b border-solid bg-(--colors-gray-10) px-3 text-xs font-semibold tracking-[0.2px] uppercase'
                                 >
                                     {activeIndex === -1 && (
                                         <span

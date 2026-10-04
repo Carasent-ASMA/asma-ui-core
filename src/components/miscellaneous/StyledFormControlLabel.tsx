@@ -87,7 +87,7 @@ export const StyledFormControlLabel = ({
             {label != null && (
                 <span
                     id={shouldLabelControl ? labelTextId : undefined}
-                    className={cn('text-sm leading-5 tracking-[0.00938em]', isDisabled && 'text-delta-300')}
+                    className={cn('text-sm/5 tracking-[0.00938em]', isDisabled && 'text-delta-300')}
                 >
                     {label}
                 </span>

@@ -55,7 +55,7 @@ export const Avatar = ({
         >
             {src || srcSet ? (
                 <img
-                    className='h-full w-full object-cover text-transparent'
+                    className='size-full object-cover text-transparent'
                     src={src}
                     srcSet={srcSet}
                     alt={alt}

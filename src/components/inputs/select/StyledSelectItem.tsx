@@ -45,7 +45,7 @@ export const StyledSelectItem = ({
             // CountryCodeOptions, which renders this component.
             'asma-pressable',
             'relative flex items-center gap-1 px-2 py-2.5 text-base outline-none',
-            disabled ? 'text-delta-300 cursor-not-allowed' : 'text-delta-800 cursor-pointer hover:bg-delta-50',
+            disabled ? 'text-delta-300 cursor-not-allowed' : 'text-delta-800 hover:bg-delta-50 cursor-pointer',
             selected && 'bg-gama-50',
             className,
         )}

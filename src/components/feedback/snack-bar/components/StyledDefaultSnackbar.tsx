@@ -55,7 +55,7 @@ export const StyledDefaultSnackbar = forwardRef<HTMLDivElement, StyledDefaultSna
                     <button
                         type='button'
                         aria-label='close'
-                        className='flex items-center justify-center rounded border-0 bg-transparent p-[2px] hover:bg-black/10'
+                        className='flex items-center justify-center rounded-sm border-0 bg-transparent p-[2px] hover:bg-black/10'
                         onClick={() => closeSnackbar(id)}
                     >
                         <CloseIcon width={20} height={20} color='#49525F' />

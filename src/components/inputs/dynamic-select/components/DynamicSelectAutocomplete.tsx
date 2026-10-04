@@ -228,10 +228,10 @@ export const DynamicSelectAutocomplete = forwardRef(
                                     className={cn(
                                         // Figma Menus item: Body Base 16/lh24. Row density: 'compact'
                                         // = 40px (default), 'regular' = 48px.
-                                        'relative flex cursor-pointer items-center gap-x-1 bg-white px-2 text-base aria-selected:bg-gama-50 hover:bg-delta-50',
+                                        'aria-selected:bg-gama-50 hover:bg-delta-50 relative flex cursor-pointer items-center gap-x-1 bg-white px-2 text-base',
                                         rowSize === 'regular' ? 'min-h-12' : 'min-h-10',
                                         disabled &&
-                                            'bg-delta-50 cursor-not-allowed aria-selected:bg-delta-50! hover:bg-delta-50! **:cursor-not-allowed',
+                                            'bg-delta-50 aria-selected:bg-delta-50! hover:bg-delta-50! cursor-not-allowed **:cursor-not-allowed',
                                     )}
                                     aria-disabled={disabled}
                                 >
@@ -286,10 +286,10 @@ export const DynamicSelectAutocomplete = forwardRef(
                                 className={cn(
                                     // Figma Menus item: Body Base 16/lh24. Row density: 'compact' =
                                     // 40px (default), 'regular' = 48px.
-                                    'relative flex cursor-pointer items-center gap-x-1 px-2 text-base aria-selected:bg-gama-50 hover:bg-delta-50',
+                                    'aria-selected:bg-gama-50 hover:bg-delta-50 relative flex cursor-pointer items-center gap-x-1 px-2 text-base',
                                     rowSize === 'regular' ? 'min-h-12' : 'min-h-10',
                                     disabled &&
-                                        'bg-delta-50 cursor-not-allowed aria-selected:bg-delta-50! hover:bg-delta-50! **:cursor-not-allowed',
+                                        'bg-delta-50 aria-selected:bg-delta-50! hover:bg-delta-50! cursor-not-allowed **:cursor-not-allowed',
                                 )}
                                 onClick={!disabled ? props.onClick : undefined}
                                 aria-disabled={disabled}

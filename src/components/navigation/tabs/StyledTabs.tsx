@@ -169,7 +169,7 @@ export const StyledTabs: FC<StyledTabsProps> = ({
                     onKeyDown={handleKeyDown}
                     onScroll={measure}
                     className={cn(
-                        'relative flex [scrollbar-width:none] bg-[linear-gradient(to_top,var(--colors-delta-200)_1px,transparent_1px)] [&::-webkit-scrollbar]:hidden',
+                        'relative flex scrollbar-none bg-[linear-gradient(to_top,var(--colors-delta-200)_1px,transparent_1px)] [&::-webkit-scrollbar]:hidden',
                         isScrollable ? 'flex-1 overflow-x-auto' : 'w-full',
                         variant === 'fullWidth' && '*:flex-1',
                         centered && 'justify-center',

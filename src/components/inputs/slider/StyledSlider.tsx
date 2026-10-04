@@ -392,7 +392,7 @@ export const StyledSlider = ({
                                     <span
                                         key={mark.value}
                                         className={cn(
-                                            'absolute z-10 box-border h-2 w-2 -translate-x-1/2 rounded-full border border-solid',
+                                            'absolute z-10 box-border size-2 -translate-x-1/2 rounded-full border border-solid',
                                             isVertical ? 'left-1/2 translate-y-1/2' : 'top-1/2 -translate-y-1/2',
                                             active
                                                 ? cn(

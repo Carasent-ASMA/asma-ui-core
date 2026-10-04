@@ -158,7 +158,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                 // FullScreenBtn toggle in the header (a real <button> via StyledButton).
                 // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
                 <div
-                    className='bg-opacity-70 fixed inset-0 z-52 bg-[rgb(98,110,126)]'
+                    className='fixed inset-0 z-52 bg-[rgb(98,110,126)]/70'
                     onClick={() => {
                         setFullScreen(false)
                     }}

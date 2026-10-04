@@ -87,7 +87,7 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
 
     return (
         <>
-            <div className='relative h-fit w-fit'>
+            <div className='relative size-fit'>
                 {anchorNode &&
                 React.isValidElement<{ onClick?: (e: React.MouseEvent<HTMLElement>) => void }>(customAnchor) ? (
                     React.cloneElement(customAnchor, { onClick: onAnchorClick })
@@ -113,7 +113,7 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
                 {filterIsActive && (
                     <div
                         className={clsx(
-                            'bg-gama-400 absolute h-2 w-2 rounded-full',
+                            'bg-gama-400 absolute size-2 rounded-full',
                             size === 'large' ? 'top-2 right-2' : 'top-1 right-1',
                         )}
                     ></div>

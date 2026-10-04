@@ -235,7 +235,7 @@ export function StyledDialogFooter({
                 rounded && 'rounded-b-lg',
                 /* Pinned to the bottom of the scroll container. The ASMA design system separates a
                  * fixed footer with the top border alone — no drop shadow. */
-                fixed && 'sticky bottom-0 z-[1]',
+                fixed && 'sticky bottom-0 z-1',
                 className,
             )}
         >

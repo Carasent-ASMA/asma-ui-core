@@ -19,7 +19,7 @@ export const StyledEmptyPage: FC<{ emptyText: string; isEmpty?: boolean; classNa
             data-testid='empty-page-container'
             // Figma text-icon/placeholder #7a899e = delta-500 (semantic token → fretex/greenish-safe;
             // was raw `text-gray-600` = delta-600, wrong shade + broke theming).
-            className={`animate-opacity-in text-delta-500 flex h-full min-h-[106px] w-full items-center justify-center gap-2 text-sm duration-300 ${className}`}
+            className={`animate-opacity-in text-delta-500 flex size-full min-h-[106px] items-center justify-center gap-2 text-sm duration-300 ${className}`}
         >
             <EmptyPageIcon
                 data-testid='empty-page-icon'

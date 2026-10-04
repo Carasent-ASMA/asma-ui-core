@@ -26,8 +26,8 @@ import {
 
 const Case = ({ label, hint, children }: { label: string; hint: string; children: ReactNode }): JSX.Element => (
     <div className='flex flex-col items-start gap-2'>
-        <p className='text-delta-800 m-0 text-base leading-6 font-semibold'>{label}</p>
-        <p className='text-delta-600 m-0 text-sm leading-5'>{hint}</p>
+        <p className='text-delta-800 m-0 text-base/6 font-semibold'>{label}</p>
+        <p className='text-delta-600 m-0 text-sm/5'>{hint}</p>
         <div className='flex items-start pt-1'>{children}</div>
     </div>
 )
@@ -161,7 +161,7 @@ const ActionsCase = (): JSX.Element => {
                     ))
                 }
             </PopoverSheet>
-            <p className='text-delta-600 m-0 text-sm leading-5'>{lastAction ?? 'Ingen handling valgt'}</p>
+            <p className='text-delta-600 m-0 text-sm/5'>{lastAction ?? 'Ingen handling valgt'}</p>
         </div>
     )
 }
@@ -218,7 +218,7 @@ const ChipSelectFilterCase = (): JSX.Element => {
             }
         >
             <div className='flex w-[416px] max-w-full flex-col'>
-                <p className='m-0 mb-1 text-sm font-semibold leading-5 text-delta-800'>Role</p>
+                <p className='text-delta-800 m-0 mb-1 text-sm/5 font-semibold'>Role</p>
                 <StyledSelectAutocomplete<string, true, false, false>
                     dataTest='case-chip-select-filter-select'
                     multiple
