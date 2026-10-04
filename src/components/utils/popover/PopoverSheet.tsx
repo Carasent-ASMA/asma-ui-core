@@ -54,9 +54,22 @@ export interface PopoverContentApi {
 export type PopoverSlot = ReactNode | ((api: PopoverContentApi) => ReactNode)
 
 const MIN_WIDTH_PX = 240
-const MAX_WIDTH_PX = { info: 360, action: 400 } as const
+const MAX_WIDTH_PX = { info: 472, action: 472 } as const
 const MAX_HEIGHT_RATIO = 0.6
 const MOBILE_WIDTH = 'calc(100vw - 32px)'
+
+/**
+ * Follow the trigger on scroll / ancestor resize, but ignore ResizeObserver on the
+ * floating node itself. Chip wrap and autocomplete tag growth change the sheet's
+ * height (sometimes a sub-pixel of width); default `autoUpdate` then re-runs
+ * `shift` and the surface jumps left-right even when the consumer pinned the
+ * width. `layoutShift` still tracks the trigger relocating.
+ */
+const followTriggerWhileMounted = (
+    reference: Parameters<typeof autoUpdate>[0],
+    floating: Parameters<typeof autoUpdate>[1],
+    update: () => void,
+): ReturnType<typeof autoUpdate> => autoUpdate(reference, floating, update, { elementResize: false })
 
 /** @figmaNode wXrXt5uKNNzV2DnQCgyYZH#44531-233781 (Design-System · "_Popover") */
 export interface PopoverSheetProps {
@@ -165,7 +178,7 @@ export const PopoverSheet = ({
         onOpenChange: changeOpen,
         placement: 'bottom-start',
         strategy: 'fixed',
-        whileElementsMounted: autoUpdate,
+        whileElementsMounted: followTriggerWhileMounted,
         middleware: [
             offset(8),
             ...(keepBelowTrigger ? [] : [flip({ padding: 8 })]),
@@ -325,7 +338,10 @@ export const PopoverSheet = ({
             </StyledButton>
         ))
 
+    // Spec: content-driven width between min 240 and max 472. Only mobile pins
+    // an explicit width (`100vw - 32px`); on desktop the surface hugs its body.
     const maxWidth = isMobile ? MOBILE_WIDTH : MAX_WIDTH_PX[variant]
+    const width = isMobile ? MOBILE_WIDTH : undefined
 
     if (isSheet) {
         return (
@@ -377,7 +393,7 @@ export const PopoverSheet = ({
                             ...(usePopoverLayer ? TOP_LAYER_RESET_STYLE : {}),
                             ...floatingStyles,
                             minWidth: MIN_WIDTH_PX,
-                            width: isMobile ? MOBILE_WIDTH : undefined,
+                            width,
                             maxWidth,
                             maxHeight: maxHeightPx,
                         }}

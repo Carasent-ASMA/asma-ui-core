@@ -134,6 +134,13 @@ export interface StyledSelectAutocompleteProps<
     helperText?: ReactNode
     /** @figmaProp none — FieldSize (both render the 40px field) */
     size?: 'small' | 'medium'
+    /**
+     * Option-row density in the popover. `'compact'` (default) matches the Figma Menus item at 40px
+     * (`min-h-10`); `'regular'` gives a roomier 48px row (`min-h-12`). Rows still grow taller when a
+     * label wraps to a second line — this only sets the minimum. Does not affect the 32px select-all
+     * header, the input field, or single-select rows' left check column.
+     */
+    rowSize?: 'compact' | 'regular'
     /** @figmaProp Clear (trigger clear button) */
     disableClearable?: boolean
     freeSolo?: boolean
@@ -201,6 +208,7 @@ export function StyledSelectAutocomplete<
     error,
     helperText,
     size = 'small',
+    rowSize = 'compact',
     disableClearable,
     disableCloseOnSelect,
     popupIcon,
@@ -524,11 +532,14 @@ export function StyledSelectAutocomplete<
     const optionRowClassName = cn(
         // ASMA-8220 (TB-14): hover/selected only, no `:active` → pressable. It rides the shared row
         // class, so custom `renderOption` callers spreading `{...props}` inherit it too. No
-        // `asma-touch-target`: the rows already declare `min-h-10`, and the mobile override would
+        // `asma-touch-target`: the rows already declare their min-height, and the mobile override would
         // also grow `aria-disabled` rows, which are not pressable at all.
         'asma-pressable',
         // Figma Menus item: Body Base 16/lh24, text delta-800.
-        'text-delta-800 relative box-border flex min-h-10 cursor-pointer items-center gap-x-3 px-3 py-1.5 text-base',
+        'relative box-border flex cursor-pointer items-center gap-x-3 px-3 py-1.5 text-base text-delta-800',
+        // Row density: 'compact' = 40px (Figma Menus item); 'regular' = roomier 48px. min-height only,
+        // so a wrapped 2-line label still grows the row past this.
+        rowSize === 'regular' ? 'min-h-12' : 'min-h-10',
         'aria-selected:bg-gama-50 hover:bg-delta-50',
         // Disabled options never take the gama highlight (hover or keyboard) and read as muted.
         'aria-disabled:text-delta-300 aria-disabled:cursor-default aria-disabled:bg-transparent!',
@@ -552,7 +563,12 @@ export function StyledSelectAutocomplete<
                     <StyledCheckbox
                         dataTest={`${dataTest}-${getLabel(option)}-checkbox`}
                         checked={state.selected}
-                        size='small'
+                        size='medium'
+                        // Figma Reports table checkbox draws a 16px visible box (Bg) inside its 20px
+                        // component frame — 4px smaller than the design-system `medium` box. There is
+                        // no 16px size on StyledCheckbox, so pin this instance's box to 16px. The even
+                        // box keeps the checked/indeterminate glyph centred on integer pixels.
+                        checkboxClassName='!h-4 !w-4'
                         hideWrapper
                         decorative
                     />
@@ -597,6 +613,12 @@ export function StyledSelectAutocomplete<
         return renderOption ? renderOption(props, option, state) : defaultRenderOption(props, option, state)
     }
 
+    // Group-header ("select all") state, shared by the row's `aria-selected` and its checkbox.
+    // Figma checkbox Type: all selected → Checked, some (but not all) → Indeterminate, none → blank.
+    const hasSelectAllHeader = Boolean(allowSelectAll && isMultiple)
+    const allSelected = options.length > 0 && selectedArray.length === options.length
+    const someSelected = selectedArray.length > 0 && !allSelected
+
     return (
         <div className={cn(style['styledSelectAutocompleteWrapper'], !fullWidth && 'w-auto', wrapperClassName, className)}>
             {renderInput(renderInputParams)}
@@ -623,7 +645,11 @@ export function StyledSelectAutocomplete<
                             // border/outline delta-300 (#bdc4cf), Menus shadow. Matches StyledSelect/StyledMenu.
                             // Figma Menus (node 34522-151497) pads the list `8px 0` — the rows run
                             // edge to edge horizontally, with 8px of breathing room top and bottom.
-                            'border-delta-300 z-1300 m-0 list-none overflow-auto rounded border border-solid bg-white px-0 py-2 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
+                            'z-[1300] m-0 list-none overflow-auto rounded border border-solid border-delta-300 bg-white px-0 py-2 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
+                            // With a group-select header the Figma popover has no vertical padding:
+                            // the grey header bar sits flush against the top edge and the last option
+                            // against the bottom, so drop both `py-2` paddings.
+                            hasSelectAllHeader && 'py-0',
                             // Figma Menus (node 34522-151497) separates the rows and leaves the last
                             // one clean. Owned by the LISTBOX, not the row, for two reasons: a custom
                             // `renderOption` that replaces `props.className` (a real pattern in
@@ -648,18 +674,21 @@ export function StyledSelectAutocomplete<
                                 <li
                                     id={`${dataTest}-select-all`}
                                     role='option'
-                                    aria-selected={options.length > 0 && selectedArray.length === options.length}
+                                    aria-selected={allSelected}
                                     data-active={activeIndex === -1 ? '' : undefined}
                                     tabIndex={-1}
                                     onMouseDown={(event) => event.preventDefault()}
                                     onClick={toggleSelectAll}
                                     onMouseMove={() => setActiveIndex(null)}
-                                    // Styled as the list's table header: a grey bar with its own
-                                    // checkbox column and an uppercase category label, aligned to the
-                                    // option rows below (same px-3/gap-x-3). It stays clickable to
-                                    // toggle select-all, so hover deepens the grey rather than turning
-                                    // the header green like a selected option.
-                                    className='border-delta-200 bg-delta-50 text-delta-600 relative flex min-h-10 cursor-pointer items-center gap-x-3 border-0 border-b border-solid px-3 text-xs font-medium tracking-wide uppercase hover:bg-delta-100'
+                                    // Styled as the list's table header (Figma Reports table-header row):
+                                    // a `--table-bg-header` (#F9FAFB = colors-gray-10) bar, fixed 32px
+                                    // tall, carrying its own checkbox column and a Semibold uppercase
+                                    // category label. Its checkbox column and horizontal padding match
+                                    // the option rows below (px-3/gap-x-3, 16px checkbox box) so the
+                                    // checkboxes line up in a single column. It stays clickable to toggle
+                                    // select-all, so hover deepens the grey rather than turning the header
+                                    // green like a selected option.
+                                    className='relative flex h-8 cursor-pointer items-center gap-x-3 border-0 border-b border-solid border-delta-200 bg-[var(--colors-gray-10)] px-3 text-xs font-semibold uppercase tracking-[0.2px] text-delta-600 hover:bg-delta-50'
                                 >
                                     {activeIndex === -1 && (
                                         <span
@@ -669,8 +698,13 @@ export function StyledSelectAutocomplete<
                                     )}
                                     <StyledCheckbox
                                         dataTest={`${dataTest}-select-all`}
-                                        checked={options.length > 0 && selectedArray.length === options.length}
-                                        size='small'
+                                        checked={allSelected}
+                                        indeterminate={someSelected}
+                                        size='medium'
+                                        // 16px visible box to match the Figma Reports table checkbox
+                                        // (see the option-row checkbox above); keeps the indeterminate
+                                        // dash centred on integer pixels and aligned with the options.
+                                        checkboxClassName='!h-4 !w-4'
                                         hideWrapper
                                         decorative
                                     />

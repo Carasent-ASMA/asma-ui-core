@@ -186,7 +186,7 @@ export const StyledPhoneField = ({
                         reserveHelperText={reserveHelperText}
                         size={size}
                         slotProps={{
-                            htmlInput: { inputMode: 'tel', autoComplete: 'tel' },
+                            htmlInput: { inputMode: 'tel', autoComplete: 'tel', 'aria-labelledby': label == null ? undefined : labelId },
                             input: { className: fieldClassName },
                             formHelperText: { className: helperTextClassName },
                         }}

@@ -450,3 +450,58 @@ export const FooterRowCountBoundary: Story = {
         await expect(section('footer-boundary-none').querySelector('[class*="table-footer"]')).toBeNull()
     },
 }
+
+const activeRowData: TableRow[] = data.concat([
+    {
+        id: '3',
+        name: 'Third row',
+        role: 'User',
+        description: 'Description',
+        updatedDate: '14.07.2026 · 14:20',
+        updatedBy: 'User',
+        added: '01.09.2025 · 09:00',
+        offers: 'Offer',
+    },
+])
+
+/**
+ * `activeRowId` — the row the user is working with (e.g. previewed beside a picker) in the Figma
+ * table-row **Focused** state: the keyboard-focus frame, full width including the actions cell, kept
+ * after focus moves on. Top table: row 2 active (Focused). Bottom: row 2 active and ticked
+ * ("Selected + focused") next to row 3 ticked only ("Selected").
+ */
+export const ActiveRow: Story = {
+    // axe: empty-table-header (table header cell has no text). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
+    render: () => (
+        <div className='flex w-[720px] flex-col gap-6'>
+            <div data-test='active-row-focused'>
+                <StyledTable
+                    columns={consumerColumns.slice(0, 3)}
+                    data={activeRowData}
+                    activeRowId='2'
+                    enableRowSelection
+                    hideFooter
+                    initialState={{ columnVisibility: { select: true } }}
+                    uniqueKey='active-row-focused'
+                />
+            </div>
+            <div data-test='active-row-selected'>
+                <StyledTable
+                    columns={consumerColumns.slice(0, 3)}
+                    data={activeRowData}
+                    activeRowId='2'
+                    enableRowSelection
+                    hideFooter
+                    initialState={{ columnVisibility: { select: true }, rowSelection: { '2': true, '3': true } }}
+                    uniqueKey='active-row-selected'
+                />
+            </div>
+        </div>
+    ),
+    play: async ({ canvasElement }) => {
+        const activeRows = canvasElement.querySelectorAll('tr[data-active="true"]')
+        await expect(activeRows.length).toBe(2)
+        for (const row of activeRows) await expect(row.id).toBe('2')
+    },
+}

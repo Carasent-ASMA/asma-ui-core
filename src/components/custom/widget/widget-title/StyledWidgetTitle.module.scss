@@ -1,6 +1,10 @@
 // Figma "Section title" — Roboto SemiBold 18/28, text-icon/title-label (delta-800).
 // (Was lh 20.7 + raw gray-800; delta-800 is theme-safe under fretex/greenish.)
 .styled-widget-title {
+    // Rendered as an <h2> (semantic heading); zero the UA block margins so it stays
+    // visually identical to the former <div> (repo has Tailwind preflight:false and
+    // normalize.css resets only h1, so h2 would otherwise inherit browser margins).
+    margin: 0;
     font-size: 18px;
     font-style: normal;
     font-weight: 600;

@@ -483,8 +483,11 @@
 
     // Figma table focus state: a 3px frame surrounds the whole header or row without changing
     // its layout. `:has()` lets the focusable sortable cell activate the header-wide frame.
+    // `data-active` (the `activeRowId` prop) draws the same frame on the row the user is working
+    // with, so it persists after keyboard focus moves on and also shows after a mouse click.
     .table-header:has(:focus-visible),
-    .t-row:focus-visible {
+    .t-row:focus-visible,
+    .t-row[data-active='true'] {
         .t-cell {
             box-shadow:
                 inset 0 3px 0 0 var(--colors-focus-ring),

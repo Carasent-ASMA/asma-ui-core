@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { afterEach, describe, it } from 'vitest'
-import { expect, userEvent } from 'src/test-utils/interaction-api'
+import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, isEntirelyObscured, mount, tabbableWithin } from 'src/test-utils/renderInteraction'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { PopoverSheet, type PopoverSheetProps } from './PopoverSheet'
@@ -49,6 +50,15 @@ const triggerOf = (container: HTMLElement): HTMLButtonElement =>
 
 const panelOf = (dataTest = 'pop'): HTMLElement | null =>
     document.body.querySelector<HTMLElement>(`[data-test="${dataTest}"]`)
+
+/**
+ * The surface hands focus back to its trigger a frame after it closes (the dismiss fires on
+ * `pointerdown`, and focusing synchronously would be undone by the rest of that click), so the check
+ * waits for it rather than reading `activeElement` once — on a slow CI runner that frame may not
+ * have run by the next line.
+ */
+const expectFocusReturnedTo = (trigger: HTMLElement): Promise<void> =>
+    waitFor(() => expect(document.activeElement).toBe(trigger))
 
 describe('PopoverSheet — trigger semantics', () => {
     afterEach(cleanup)
@@ -125,7 +135,7 @@ describe('PopoverSheet — info variant', () => {
 
         await userEvent.keyboard('{Escape}')
         await expect(panelOf()).toBeNull()
-        await expect(document.activeElement).toBe(trigger)
+        await expectFocusReturnedTo(trigger)
     })
 })
 
@@ -192,7 +202,7 @@ describe('PopoverSheet — action variant', () => {
 
         await userEvent.click(document.body.querySelector<HTMLButtonElement>('[data-testid="view-results"]')!)
         await expect(panelOf()).toBeNull()
-        await expect(document.activeElement).toBe(trigger)
+        await expectFocusReturnedTo(trigger)
     })
 
     it('lets content close the surface via the render-prop, returning focus (Actions pattern)', async () => {
@@ -210,7 +220,7 @@ describe('PopoverSheet — action variant', () => {
 
         await userEvent.click(document.body.querySelector<HTMLButtonElement>('[data-test="pop"] button')!)
         await expect(panelOf()).toBeNull()
-        await expect(document.activeElement).toBe(trigger)
+        await expectFocusReturnedTo(trigger)
     })
 })
 
@@ -224,7 +234,7 @@ describe('PopoverSheet — dismissal', () => {
 
         await userEvent.click(document.body.querySelector<HTMLButtonElement>('[data-testid="pop-close"]')!)
         await expect(panelOf()).toBeNull()
-        await expect(document.activeElement).toBe(trigger)
+        await expectFocusReturnedTo(trigger)
     })
 
     it('closes on an outside press and returns focus to the trigger', async () => {
@@ -234,7 +244,7 @@ describe('PopoverSheet — dismissal', () => {
 
         await userEvent.click(document.body)
         await expect(panelOf()).toBeNull()
-        await expect(document.activeElement).toBe(trigger)
+        await expectFocusReturnedTo(trigger)
     })
 
     // Regression guard for `guards={false}`: the action variant is modal, so Floating UI marks the
@@ -289,5 +299,45 @@ describe('PopoverSheet — focus visibility', () => {
 
         await expect(panelOf()).not.toBeNull()
         await expect(isEntirelyObscured(trigger)).toBe(false)
+    })
+})
+
+describe('PopoverSheet — position stability', () => {
+    afterEach(cleanup)
+
+    it('keeps its left edge when the body grows (chip wrap must not shift the sheet)', async () => {
+        const GrowFixture = (): JSX.Element => {
+            const [wide, setWide] = useState(false)
+            return (
+                <div style={{ display: 'flex', justifyContent: 'flex-end', width: 900 }}>
+                    <PopoverSheet
+                        dataTest='grow-pop'
+                        variant='action'
+                        title='Filter'
+                        renderTrigger={({ ref, triggerProps }) => (
+                            <StyledButton dataTest='grow-pop-trigger' refLink={ref} type='button' {...triggerProps}>
+                                Filter
+                            </StyledButton>
+                        )}
+                    >
+                        <button type='button' onClick={() => setWide(true)}>
+                            Grow
+                        </button>
+                        <div style={{ width: wide ? 400 : 240, height: 48 }}>canvas</div>
+                    </PopoverSheet>
+                </div>
+            )
+        }
+
+        const { container } = mount(<GrowFixture />)
+        await userEvent.click(triggerOf(container))
+        const panel = panelOf('grow-pop')
+        await expect(panel).not.toBeNull()
+
+        const left = panel!.getBoundingClientRect().left
+
+        await userEvent.click(panel!.querySelector('button')!)
+        await waitFor(() => expect(panel!.getBoundingClientRect().width).toBeGreaterThan(300))
+        await expect(panel!.getBoundingClientRect().left).toBe(left)
     })
 })

@@ -49,6 +49,11 @@ $field-height: 40px;
 // never slide under the clear/add indicator.
 .AdornmentList {
     box-sizing: border-box;
+    // Chip rows prefer the sum of all chips on one line. Inside a content-sized
+    // popover that preferred width would grow the surface on every selection.
+    // `contain: inline-size` makes the list take its parent's width and wrap
+    // instead of contributing to the container's intrinsic size.
+    contain: inline-size;
     display: flex;
     flex-wrap: wrap;
     align-items: center;

@@ -88,13 +88,23 @@ export const PointerCancellation: Story = {
         await userEvent.pointer({ target: canvasElement, keys: '[/MouseLeft]' })
         await expect(input).toHaveValue('Ada')
         await expect(pointerActions.autocomplete).not.toHaveBeenCalled()
-        clear.focus()
-        /* Wait for focus to settle before typing. `clear` sits inside the autocomplete, which
-         * refocuses its input on its own schedule after the cancelled press above; if that lands
-         * between `focus()` and the keypress, Enter goes to the INPUT (selecting the highlighted
-         * option) instead of activating Clear, and the value never changes at all. #193 only
-         * widened the assertion below, which cannot help when the key never reached the button. */
-        await waitFor(() => expect(clear).toHaveFocus())
+        /* Focus Clear, retrying until it holds, before typing. Two things can make a single
+         * `clear.focus()` miss, both only under load (CI flake, 2026-09-30 / 10-01):
+         *  - Clear is `invisible` unless focus is inside the autocomplete (`group-focus-within`), and
+         *    a `visibility: hidden` element cannot take focus — so if the input has already lost
+         *    focus to the release press outside it, `focus()` is a silent no-op. Re-entering the
+         *    input first makes Clear visible again.
+         *  - The autocomplete refocuses its input on its own schedule after the cancelled press; if
+         *    that lands after our focus, Enter would go to the INPUT and select the highlighted
+         *    option instead of activating Clear.
+         * `waitFor` alone only waited, so a missed focus could never recover. */
+        await waitFor(() => {
+            if (document.activeElement !== clear) {
+                input.focus()
+                clear.focus()
+            }
+            expect(clear).toHaveFocus()
+        })
         await userEvent.keyboard('{Enter}')
         /* Enter-activation clears through controlled state; the rerender can lag the event, and
          * the default 1s can be tight on a loaded runner with the whole story suite in parallel. */

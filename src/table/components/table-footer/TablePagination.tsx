@@ -139,6 +139,7 @@ export function TablePagination<TData>({
                         }}
                         size={'large'}
                         disabled={!table.getCanPreviousPage()}
+                        aria-label={isNo ? 'Forrige side' : 'Previous page'}
                         startIcon={<ChevronLeftIcon height={24} width={24} />}
                     />
                 </div>
@@ -154,6 +155,7 @@ export function TablePagination<TData>({
                         }}
                         size={'large'}
                         disabled={!table.getCanNextPage()}
+                        aria-label={isNo ? 'Neste side' : 'Next page'}
                         startIcon={<ChevronRightIcon height={24} width={24} />}
                     />
                 </div>

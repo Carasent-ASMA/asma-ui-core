@@ -5,18 +5,23 @@ import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { cn } from 'src/helpers/cn'
 
 /**
- * The Figma "_Popover" surface chrome (node `44531:233781`): white, 1px `border/outline`, radius 8
- * (`dialog` token) and the Dialogue-popup elevation — the same surface `StyledDialog` paints.
+ * The Figma "_Popover" surface chrome (node `44531:233781`): white, 1px `border/outline` (delta-300),
+ * radius 8 (`dialog` token) and the Dialogue-popup elevation — the same surface `StyledDialog` paints.
  *
- * `border-solid` and `box-border` are load-bearing, not noise: this package builds Tailwind with
- * `preflight: false`, so without them `border` computes to `border-style: none` (no border paints at
- * all) and `box-sizing` falls back to `content-box` (a 400px max-width renders 402).
+ * The 1px edge is an **inset box-shadow ring**, the package's own idiom for non-layout lines
+ * (`StyledTab`/`StyledMenuItem` draw their DS focus rings the same way): a border consumes layout
+ * width, and at the 472px Action max-width a date-picker pair (200 + 16 + 200 = 416px, with 16px +
+ * 40px body padding) needs the full 472px of the frame — with a border only 470px remain and the
+ * pair wraps. Figma's stroke takes no width from autolayout, and the inset shadow matches that.
+ *
+ * `box-border` is load-bearing, not noise: this package builds Tailwind with `preflight: false`, so
+ * without it `box-sizing` falls back to `content-box` and a 472px max-width renders 474.
  *
  * Positioning (`z-index`, the floating transform, the top-layer props) deliberately stays with the
  * caller, so the Gallery story can render the same surface statically in a grid.
  */
 export const POPOVER_SURFACE_CLASSNAME =
-    'box-border flex flex-col overflow-hidden rounded-lg border border-solid border-delta-300 bg-white text-delta-700 outline-none shadow-[0px_4px_40px_0px_#22213366]'
+    'box-border flex flex-col overflow-hidden rounded-lg bg-white text-delta-700 outline-none shadow-[inset_0_0_0_1px_var(--colors-delta-300),0px_4px_40px_0px_#22213366]'
 
 export interface PopoverAnatomyProps {
     dataTest: string

@@ -187,6 +187,7 @@ exports[`asma-ui-core public API surface > keeps every runtime export of the pac
   "RuleOutlineIcon",
   "SELECT_COLUMN_ID",
   "SHOW_FULL_TEXT_ID",
+  "SaveAsDraftIcon",
   "SaveIcon",
   "SearchIcon",
   "SendIcon",

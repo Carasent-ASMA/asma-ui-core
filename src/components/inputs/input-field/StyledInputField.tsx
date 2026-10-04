@@ -298,7 +298,7 @@ export const StyledInputField = ({
         // width of the adornment + its 14px right inset + a small gap.
         const next = el ? Math.ceil(el.getBoundingClientRect().width) + 20 : undefined
         setEndAdornmentPad((prev) => (prev === next ? prev : next))
-    })
+    }, [isSingleLineShell, showClear, userEndAdornment])
     // With a label the resting (un-shrunk) label sits in the placeholder position, so the HTML
     // placeholder must stay hidden until the label floats up (`shrink`) — otherwise the two texts
     // overlap. With no label there is nothing to overlap, so the placeholder should show at rest like
@@ -382,9 +382,13 @@ export const StyledInputField = ({
         // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
         <div
             ref={rootRef}
-            className={cn('group relative inline-flex flex-col', className)}
+            className={cn('group relative min-w-0 flex-col', className)}
             onClick={onClick}
             style={{
+                // Keep the default shrink-to-fit field when `fullWidth` is omitted, but switch the
+                // full-width variant to block-level flex so it wraps inside popovers/dialog rows
+                // instead of preserving the old inline-flex min-content behaviour.
+                display: fullWidth ? 'flex' : 'inline-flex',
                 width: fullWidth ? '100%' : 235,
                 fontFamily: 'Roboto, Helvetica, Arial, sans-serif',
                 letterSpacing: '0.00938em',
