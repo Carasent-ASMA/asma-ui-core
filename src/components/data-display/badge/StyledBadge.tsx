@@ -53,12 +53,16 @@ const COLOR_STYLE: Record<string, CSSProperties> = {
 }
 
 // Rectangular anchor placement (MUI default). vertical-horizontal → position + translate + origin.
-const ANCHOR_CLASS: Record<string, string> = {
-    'top-right': 'top-0 right-0 translate-x-1/2 -translate-y-1/2 origin-[100%_0%]',
-    'top-left': 'top-0 left-0 -translate-x-1/2 -translate-y-1/2 origin-[0%_0%]',
-    'bottom-right': 'bottom-0 right-0 translate-x-1/2 translate-y-1/2 origin-bottom-right',
-    'bottom-left': 'bottom-0 left-0 -translate-x-1/2 translate-y-1/2 origin-[0%_100%]',
-}
+const ANCHOR_CLASS = {
+    top: {
+        right: 'top-0 right-0 translate-x-1/2 -translate-y-1/2 origin-[100%_0%]',
+        left: 'top-0 left-0 -translate-x-1/2 -translate-y-1/2 origin-[0%_0%]',
+    },
+    bottom: {
+        right: 'bottom-0 right-0 translate-x-1/2 translate-y-1/2 origin-bottom-right',
+        left: 'bottom-0 left-0 -translate-x-1/2 translate-y-1/2 origin-[0%_100%]',
+    },
+} as const
 
 const SX_BADGE_SLOT = '& .MuiBadge-badge'
 
@@ -109,15 +113,14 @@ export const StyledBadge = ({
     )
 
     const isDot = variant === 'dot'
-    const isZeroHidden =
-        !isDot && (badgeContent === 0 || badgeContent === undefined || badgeContent === null)
+    const isZeroHidden = !isDot && (badgeContent === 0 || badgeContent === undefined || badgeContent === null)
     const hidden = !!invisible || isZeroHidden
 
     const displayContent: ReactNode = isDot
         ? null
         : typeof badgeContent === 'number' && badgeContent > 99
-          ? '99+'
-          : badgeContent
+        ? '99+'
+        : badgeContent
     const isSingleDigitCount = typeof badgeContent === 'number' && badgeContent > 0 && badgeContent < 10
 
     const vertical = anchorOrigin?.vertical ?? 'top'
@@ -125,28 +128,31 @@ export const StyledBadge = ({
     const primaryBorderStyle: CSSProperties =
         color === 'primary'
             ? {
-                  borderColor: isDot
-                      ? 'var(--colors-badge-border-dot)'
-                      : 'var(--colors-badge-border-count)',
+                  borderColor: isDot ? 'var(--colors-badge-border-dot)' : 'var(--colors-badge-border-count)',
                   borderStyle: 'solid',
                   borderWidth: isDot ? 'var(--border-badge-dot)' : 'var(--border-badge-count)',
               }
             : {}
 
     return (
-        <span className='relative inline-flex shrink-0 align-middle' data-testid={dataTest} style={rootStyle} {...props}>
+        <span
+            className='relative inline-flex shrink-0 align-middle'
+            data-testid={dataTest}
+            style={rootStyle}
+            {...props}
+        >
             {children}
             {!hidden && (
                 <span
                     aria-hidden='true'
                     className={clsx(
                         'font-roboto absolute z-1 box-border flex items-center justify-center font-semibold whitespace-nowrap',
-                        ANCHOR_CLASS[`${vertical}-${horizontal}`],
+                        ANCHOR_CLASS[vertical][horizontal],
                         isDot
                             ? 'size-[12px] min-w-[12px] rounded-full p-0'
                             : size === 'small'
-                              ? 'h-[16px] w-max min-w-[16px] rounded-[20px] px-[4px] text-[0.75rem]'
-                              : 'h-[20px] min-w-[20px] rounded-[20px] px-[6px] text-sm/5',
+                            ? 'h-[16px] w-max min-w-[16px] rounded-[20px] px-[4px] text-[0.75rem]'
+                            : 'h-[20px] min-w-[20px] rounded-[20px] px-[6px] text-sm/5',
                         !isDot && size === 'medium' && isSingleDigitCount && 'w-[20px]',
                         className,
                         slotProps?.badge?.className,

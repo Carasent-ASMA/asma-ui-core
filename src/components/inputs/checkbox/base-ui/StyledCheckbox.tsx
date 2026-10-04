@@ -39,6 +39,11 @@ type StyledCheckboxProps = {
 } & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'size' | 'checked' | 'type'>
 // @figmaProp disabled → State="Disabled" · readOnly → State="Read-only" (from InputHTMLAttributes)
 
+const SIZE_CLASSES = {
+    small: styles['size-small'],
+    medium: styles['size-medium'],
+} as const
+
 export const IndeterminateIcon = (props: SVGProps<SVGSVGElement>): JSX.Element => (
     <svg aria-hidden='true' viewBox='0 0 24 24' width='100%' height='100%' fill='none' {...props}>
         <path d='M6 12H18' stroke='currentColor' strokeWidth={props.strokeWidth ?? 3} strokeLinecap='round' />
@@ -97,7 +102,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
 
     const wrapperClasses = cn(
         styles['CheckboxWrapper'],
-        !isHideWrapper && styles[`size-${size}`],
+        !isHideWrapper && SIZE_CLASSES[size],
         isHideWrapper && styles['HideWrapper'],
         indeterminate && styles['Indeterminate'],
         readOnly && styles['ReadOnly'],
@@ -107,7 +112,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
     )
     const checkboxClasses = cn(
         styles['Checkbox'],
-        styles[`size-${size}`],
+        SIZE_CLASSES[size],
         indeterminate && styles['Indeterminate'],
         checkboxClassName,
     )
@@ -159,7 +164,9 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
     // checkbox is a pure state indicator inside a widget that already owns selection itself.
     const visual = (
         <>
-            {!isHideWrapper && isRippleEnabled && <span ref={rippleRef} className={styles['CheckboxRippleContainer']} />}
+            {!isHideWrapper && isRippleEnabled && (
+                <span ref={rippleRef} className={styles['CheckboxRippleContainer']} />
+            )}
             <span className={checkboxClasses}>
                 <span className={styles['Indicator']}>
                     <CheckboxIcon strokeWidth={size === 'small' ? 3 : 2} />
