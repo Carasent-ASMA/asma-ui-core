@@ -91,7 +91,7 @@ const parseBlocks = (css: string): StyleBlock[] => {
 
 const readImportedStyleSheets = (): string[] => {
     const entryPointCss = stripComments(readFileSync(STYLES_ENTRY_POINT, 'utf8'))
-    const importPattern = /@import\s+['"](?<path>[^'"]+)['"]\s*;/g
+    const importPattern = /@import\s+['"](?<path>[^'"]+)['"][^;]*;/g
     const contents: string[] = []
 
     for (const match of entryPointCss.matchAll(importPattern)) {
