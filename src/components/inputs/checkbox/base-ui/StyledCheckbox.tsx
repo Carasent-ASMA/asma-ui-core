@@ -204,8 +204,10 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
                 readOnly={readOnly}
                 onChange={handleChange}
                 onKeyDown={handleKeyDown}
-                // `readonly` does not stop a native checkbox from toggling; cancelling the click does.
-                onClick={readOnly ? (event) => event.preventDefault() : undefined}
+                // `readonly` does not stop an uncontrolled native checkbox from toggling; cancelling the
+                // click does. A controlled one (`checked` set) is already restored by React, and
+                // cancelling its click would desync the DOM state instead.
+                onClick={readOnly && checked === undefined ? (event) => event.preventDefault() : undefined}
                 {...props}
             />
             {visual}
