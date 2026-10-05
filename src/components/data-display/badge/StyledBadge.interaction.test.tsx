@@ -153,6 +153,62 @@ describe('StyledBadge notification contract', () => {
         await expect(root.getBoundingClientRect().width).toBe(40)
     })
 
+    it('draws the unread and filter dots as Figma specifies: 8px, solid primary, no ring', async () => {
+        for (const purpose of ['unread', 'filter'] as const) {
+            const { container, unmount } = mount(
+                <>
+                    <StyledBadge dataTest={`${purpose}-dot`} variant='dot' purpose={purpose} />
+                    {/* Resolves `gama-500` through the active theme rather than pinning one theme's hex. */}
+                    <span id='probe' style={{ backgroundColor: 'var(--colors-gama-500)' }} />
+                </>,
+            )
+            const root = container.querySelector<HTMLElement>(`[data-testid="${purpose}-dot"]`)!
+            const dot = root.querySelector<HTMLElement>('span[aria-hidden="true"]')!
+            const probe = container.querySelector<HTMLElement>('#probe')!
+            const style = getComputedStyle(dot)
+
+            await expect(style.width).toBe('8px')
+            await expect(style.height).toBe('8px')
+            await expect(style.backgroundColor).toBe(getComputedStyle(probe).backgroundColor)
+            // The ring belongs to the notification dot; Parent=Unread/Filter are flat.
+            await expect(style.borderWidth).toBe('0px')
+            await expect(root.getBoundingClientRect().width).toBe(8)
+
+            unmount()
+        }
+    })
+
+    it('leaves the notification dot at 12px with its ring when another purpose is not asked for', async () => {
+        const { container } = mount(<StyledBadge dataTest='notification-dot' variant='dot' />)
+        const dot = container
+            .querySelector<HTMLElement>('[data-testid="notification-dot"]')!
+            .querySelector<HTMLElement>('span[aria-hidden="true"]')!
+        const style = getComputedStyle(dot)
+
+        await expect(style.width).toBe('12px')
+        await expect(style.borderWidth).toBe('2px')
+        await expect(style.borderColor).toBe('rgb(119, 143, 0)')
+    })
+
+    it('puts className on the root of a hostless dot so callers can place it', async () => {
+        const { container } = mount(
+            <div style={{ position: 'relative', width: '80px', height: '40px' }}>
+                <StyledBadge
+                    dataTest='filter-dot'
+                    variant='dot'
+                    purpose='filter'
+                    className='absolute top-1 right-1'
+                />
+            </div>,
+        )
+        const root = container.querySelector<HTMLElement>('[data-testid="filter-dot"]')!
+        const host = container.firstElementChild!
+
+        // On the inner span this would position the dot inside its own 8px box instead.
+        await expect(getComputedStyle(root).position).toBe('absolute')
+        await expect(Math.round(host.getBoundingClientRect().right - root.getBoundingClientRect().right)).toBe(4)
+    })
+
     it('names a hostless dot for assistive technology when nothing nearby carries the state', async () => {
         const { container } = mount(<StyledBadge dataTest='standalone-dot' variant='dot' aria-label='Unread' />)
         const root = container.querySelector<HTMLElement>('[data-testid="standalone-dot"]')!

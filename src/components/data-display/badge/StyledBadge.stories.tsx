@@ -87,6 +87,39 @@ export const StandaloneDot: Story = {
     ),
 }
 
+export const UnreadAndFilterDots: Story = {
+    parameters: {
+        docs: {
+            description: {
+                story: 'Figma `Parent=Unread` and `Parent=Filter`: an 8px solid `gama/500-primary` dot with no ring, smaller than the 12px notification dot above it. The two differ in meaning only, so pick the one that says why the dot is there.',
+            },
+        },
+    },
+    render: () => (
+        <div className='flex flex-col gap-4 text-delta-700'>
+            <div className='flex items-center gap-2'>
+                <StyledBadge dataTest='unread-dot' variant='dot' purpose='unread' aria-label='Unread' />
+                <span className='text-sm'>Unread message</span>
+            </div>
+
+            <div className='flex items-center gap-2'>
+                <StyledBadge dataTest='notification-dot' variant='dot' />
+                <span className='text-sm'>Notification dot, for size comparison</span>
+            </div>
+
+            <div className='relative inline-flex w-fit rounded border border-solid border-delta-200 px-3 py-2 text-sm'>
+                Filter
+                <StyledBadge
+                    dataTest='filter-dot'
+                    variant='dot'
+                    purpose='filter'
+                    className='absolute top-1 right-1'
+                />
+            </div>
+        </div>
+    ),
+}
+
 export const BadgeColorVariants: Story = {
     render: () => (
         <div className='inline-flex items-center gap-4 rounded border border-dashed border-[#8747E6] px-3 py-2'>
