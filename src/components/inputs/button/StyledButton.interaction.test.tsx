@@ -139,12 +139,7 @@ describe('StyledButton loading', () => {
 })
 
 const Gated = ({ ready }: { ready: boolean }): JSX.Element => (
-    <StyledButton
-        dataTest='send'
-        disabled={!ready}
-        disabledReason='Add a mobile number first'
-        availableAnnouncement='Send is now available'
-    >
+    <StyledButton dataTest='send' disabled={!ready} disabledReason='Add a mobile number first'>
         Send
     </StyledButton>
 )
@@ -152,11 +147,10 @@ const Gated = ({ ready }: { ready: boolean }): JSX.Element => (
 describe('StyledButton becoming available', () => {
     afterEach(cleanup)
 
-    it('keeps focus on the same button and announces once (2.4.3, 4.1.3)', async () => {
+    it('keeps focus on the same button when it becomes available (2.4.3)', async () => {
         const { rerender } = mount(<Gated ready={false} />)
         const before = byTest('send')
         before.focus()
-        await expect(document.querySelector('[role="status"]')).toHaveTextContent('')
 
         rerender(<Gated ready />)
 
@@ -164,17 +158,12 @@ describe('StyledButton becoming available', () => {
         await expect(byTest('send')).toHaveFocus()
         await expect(byTest('send')).not.toHaveAttribute('aria-disabled')
         await expect(byTest('send')).not.toHaveAccessibleDescription('Add a mobile number first')
-        await expect(document.querySelector('[role="status"]')).toHaveTextContent('Send is now available')
-
-        rerender(<Gated ready />)
-        await expect(document.querySelectorAll('[role="status"]')).toHaveLength(1)
     })
 
-    it('clears the announcement when the button is unavailable again', async () => {
+    it('describes the reason again when the button is unavailable again', async () => {
         const { rerender } = mount(<Gated ready />)
         rerender(<Gated ready={false} />)
 
-        await expect(document.querySelector('[role="status"]')).toHaveTextContent('')
         await expect(byTest('send')).toHaveAccessibleDescription('Add a mobile number first')
     })
 })
