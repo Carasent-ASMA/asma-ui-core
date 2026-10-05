@@ -137,7 +137,7 @@ export const StyledDrawer: FC<DrawerProps> = ({
                     }}
                     {...(usesPopoverTopLayer ? TOP_LAYER_PROPS : undefined)}
                     // Figma modal overlay bg/modal = #626e7eb2 (delta-600 @ ~70%), matching StyledDialog.
-                    className='fixed inset-0 z-[1200] bg-[#626e7eb2]'
+                    className='fixed inset-0 z-1200 bg-[#626e7eb2]'
                     style={usesPopoverTopLayer ? UA_POPOVER_BACKDROP_RESET : undefined}
                     onClick={(event) => onClose?.(event, 'backdropClick')}
                 />
@@ -152,7 +152,7 @@ export const StyledDrawer: FC<DrawerProps> = ({
                 aria-modal={isTemporary && open ? true : undefined}
                 aria-hidden={!open}
                 className={cn(
-                    'fixed z-[1200] overflow-auto bg-white transition-transform duration-300',
+                    'fixed z-1200 overflow-auto bg-white transition-transform duration-300',
                     // Dialogue-popup elevation (#22213366, 0 4 40), matching StyledDialog's modal surface.
                     open && 'shadow-[0px_4px_40px_0px_#22213366]',
                     EDGE_CLASS[anchor],

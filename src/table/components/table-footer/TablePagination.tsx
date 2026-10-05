@@ -121,7 +121,7 @@ export function TablePagination<TData>({
                             }}
                             selected={page === currentPage}
                         >
-                            <span className={'text-base font-normal text-delta-700'}>
+                            <span className={'text-delta-700 text-base font-normal'}>
                                 {isNo ? 'Side' : 'Page'} {page}
                             </span>
                         </StyledSelectItem>

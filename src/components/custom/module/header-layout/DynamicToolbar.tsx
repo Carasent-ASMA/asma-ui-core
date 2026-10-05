@@ -419,7 +419,7 @@ export function DynamicToolbar(props: DynamicToolbarProps): ReactElement {
                     />
                 </div>
             </div>
-            {helperText && <div className='text-sm text-delta-700'>{helperText}</div>}
+            {helperText && <div className='text-delta-700 text-sm'>{helperText}</div>}
         </div>,
         'inline',
     )

@@ -73,7 +73,6 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
         minimizedPanelRef.current?.toggleAttribute('inert', !minimized)
     }, [minimized])
 
-
     if (!open) return null
 
     const fullScreenDialogStyle: React.CSSProperties | undefined = isFullScreenActive
@@ -93,8 +92,8 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
             ? 'Exit full screen'
             : 'Avslutt fullskjerm'
         : locale === 'en'
-          ? 'Full screen'
-          : 'Fullskjerm'
+        ? 'Full screen'
+        : 'Fullskjerm'
 
     const showPrimaryButton = primaryButtonText ?? primaryButtonLoading
 
@@ -117,15 +116,18 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
 
     return (
         <>
-            {isFullScreenActive && <div className='fixed inset-0 z-[51] bg-[rgb(98,110,126)] bg-opacity-70' />}
+            {isFullScreenActive && <div className='fixed inset-0 z-51 bg-[rgb(98,110,126)]/70' />}
 
             <div
                 ref={minimizedPanelRef}
                 style={{ zIndex: 51 }}
                 className={cn(styles['dialog'], !minimized && styles['hidden'])}
             >
-                <div className={clsx('flex items-center justify-between', !minimized && 'hidden')} data-testid={dataTest}>
-                    <div className='truncate text-lg font-semibold text-delta-800'>{title}</div>
+                <div
+                    className={clsx('flex items-center justify-between', !minimized && 'hidden')}
+                    data-testid={dataTest}
+                >
+                    <div className='text-delta-800 truncate text-lg font-semibold'>{title}</div>
                     <div className='flex items-center gap-x-1'>
                         {showExpandIcon && (
                             <StyledTooltip title={locale === 'en' ? 'Expand' : 'Utvid'}>
@@ -171,19 +173,19 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                 aria-modal={isFullScreenActive ? true : undefined}
                 aria-label={isFullScreenActive && typeof title === 'string' ? title : undefined}
                 className={cn(
-                    'fixed bottom-4 right-4 z-[51] rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)] transition-all duration-300',
+                    'fixed right-4 bottom-4 z-51 rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)] transition-all duration-300',
                     className && !minimized && !fullScreen ? className : '',
-                    minimized && '!h-0 !w-0 opacity-0 duration-0',
+                    minimized && 'size-0! opacity-0 duration-0',
                     isFullScreenActive && 'fixed duration-0',
                 )}
                 data-testid={dataTest}
             >
-                <div className='flex flex-col gap-y-2 border-b-[1px] border-delta-200 p-4'>
+                <div className='border-delta-200 flex flex-col gap-y-2 border-b p-4'>
                     <div className='flex items-center justify-between'>
                         {!label ? (
-                            <div className='text-2xl font-semibold text-delta-800'>{title}</div>
+                            <div className='text-delta-800 text-2xl font-semibold'>{title}</div>
                         ) : (
-                            <div className='text-sm text-delta-700'>{label}</div>
+                            <div className='text-delta-700 text-sm'>{label}</div>
                         )}
 
                         <div className='flex items-center gap-x-1'>
@@ -254,11 +256,11 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                         </div>
                     </div>
 
-                    {label && <div className='truncate text-2xl font-semibold text-delta-800'>{title}</div>}
+                    {label && <div className='text-delta-800 truncate text-2xl font-semibold'>{title}</div>}
                 </div>
 
                 <div className={clsx('flex flex-col', fullScreen && !minimized && 'h-[87dvh]')}>
-                    <div className='flex-grow overflow-y-auto'>
+                    <div className='grow overflow-y-auto'>
                         {typeof children === 'function' ? children({ fullScreen }) : children}
                     </div>
 
@@ -267,7 +269,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                     footerInfo ? (
                         <div
                             className={cn(
-                                'flex items-center justify-between border-0 border-t-[1px] border-solid border-delta-200 bg-white p-4',
+                                'border-delta-200 flex items-center justify-between border-0 border-t border-solid bg-white p-4',
                                 footerClassName,
                             )}
                         >
@@ -327,7 +329,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                             {showButtons ? (
                                 <div
                                     className={cn(
-                                        'flex justify-end gap-x-2 border-t-[1px] border-delta-200 p-4',
+                                        'border-delta-200 flex justify-end gap-x-2 border-t p-4',
                                         btnContainerClassName,
                                     )}
                                 >

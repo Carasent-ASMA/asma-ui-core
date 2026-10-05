@@ -31,7 +31,7 @@ export const CopyWrapper: FC<
     }>
 > = ({ className, contentToCopy, locale, messageInfo, children }) => {
     return (
-        <div className={cn('flex items-center hover:text-gama-500', style['copy-wrapper'], className)}>
+        <div className={cn('hover:text-gama-500 flex items-center', style['copy-wrapper'], className)}>
             {children}
             <StyledTooltip title={locale === 'no' ? 'Kopier' : 'Copy'}>
                 {/* `hidden-copy` (invisible until `.copy-wrapper:hover`) must sit on the button's own

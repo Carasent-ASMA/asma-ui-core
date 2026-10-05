@@ -175,7 +175,7 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                 onMouseUp={disabled || readOnly ? undefined : onMouseUp}
                 className={cn(
                     // Figma _BASE_Tag (node 14312-26020): label Body Base 16px/lh24, text-icon/body #49525f (delta-700), border/outline #bdc4cf (delta-300), radius 25, gap 4.
-                    'box-border inline-flex items-center gap-1 rounded-[25px] border border-solid border-delta-300 bg-white text-base text-delta-700',
+                    'border-delta-300 text-delta-700 box-border inline-flex items-center gap-1 rounded-[25px] border border-solid bg-white text-base',
                     !consumerSetsWidth && 'w-fit',
                     !consumerSetsMaxWidth && 'max-w-full',
                     size === 'small' ? 'h-6' : 'h-8',
@@ -188,8 +188,8 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                             // below are the designed pressed state, so no opacity layer over them.
                             // No `asma-touch-target`: the fixed h-6/h-8 heights are the Figma chip.
                             'asma-touch-ready',
-                            'data-[hovered]:border-gama-200 data-[hovered]:bg-gama-25 hover:border-gama-200 hover:bg-gama-25',
-                            'active:!border-gama-400 active:bg-gama-25 active:shadow-[0_0_0_2px_var(--colors-gama-400)]',
+                            'data-hovered:border-gama-200 data-hovered:bg-gama-25 hover:border-gama-200 hover:bg-gama-25',
+                            'active:border-gama-400! active:bg-gama-25 active:shadow-[0_0_0_2px_var(--colors-gama-400)]',
                         ),
                     styles['focus-ring'],
                     classes?.root,
@@ -201,7 +201,7 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                     <span
                         className={cn(
                             'flex shrink-0 items-center justify-center',
-                            size === 'small' ? 'h-[18px] w-[18px]' : 'h-6 w-6',
+                            size === 'small' ? 'size-[18px]' : 'size-6',
                             avatar ? classes?.avatar : classes?.icon,
                         )}
                     >
@@ -225,8 +225,8 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                         className={cn(
                             // Its focus indication is intentionally painted by the parent (via
                             // `:has(button:focus-visible)`), matching the Figma state without a second button ring.
-                            'flex shrink-0 items-center justify-center rounded-full border border-solid border-delta-100 bg-delta-50 p-0 text-delta-700 [outline:none]',
-                            size === 'small' ? 'h-[18px] w-[18px]' : 'h-5 w-5',
+                            'border-delta-100 bg-delta-50 text-delta-700 flex shrink-0 items-center justify-center rounded-full border border-solid p-0 [outline:none]',
+                            size === 'small' ? 'size-[18px]' : 'size-5',
                             classes?.deleteIcon,
                         )}
                     >

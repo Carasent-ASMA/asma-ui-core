@@ -107,7 +107,7 @@ export function TableRowCountSelect<TData>({
                             }}
                             selected={pageSize === size}
                         >
-                            <span className={'whitespace-nowrap text-base font-normal text-delta-700'}>
+                            <span className={'text-delta-700 text-base font-normal whitespace-nowrap'}>
                                 {size} {isNo ? 'rader' : 'rows'}
                             </span>
                         </StyledSelectItem>

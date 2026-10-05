@@ -217,7 +217,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
             onCancel={handleCancel}
             className={cn(
                 style['StyledDialog'],
-                'fixed inset-0 m-0 h-full max-h-none w-full max-w-none items-center justify-center overflow-hidden border-0 bg-transparent p-0 outline-none open:flex',
+                'fixed inset-0 m-0 size-full max-h-none max-w-none items-center justify-center overflow-hidden border-0 bg-transparent p-0 outline-none open:flex',
                 scroll === 'body' && 'overflow-y-auto',
                 className,
                 classes?.root,
@@ -247,7 +247,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                 className={cn(
                     // Figma dialog: radius 8, Dialogue-popup shadow (#22213366, 0 4 40).
                     // `flex-col` is unconditional: `scroll` decides where overflow lives, not the paper's main axis.
-                    'relative z-[1] flex flex-col overflow-hidden rounded-lg border-0 bg-white p-0 text-delta-800 shadow-[0px_4px_40px_0px_#22213366]',
+                    'text-delta-800 relative z-1 flex flex-col overflow-hidden rounded-lg border-0 bg-white p-0 shadow-[0px_4px_40px_0px_#22213366]',
                     isFullScreen && 'rounded-none',
                     paper.className,
                     classes?.paper,
@@ -274,22 +274,22 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                 }}
             >
                 {(!!dialogLabel || !!dialogTitle || showCloseIcon) && (
-                    <div className='box-border flex w-full min-w-0 max-w-full justify-between px-4 pt-4'>
+                    <div className='box-border flex w-full max-w-full min-w-0 justify-between px-4 pt-4'>
                         <div className='flex min-w-0 flex-1 flex-col justify-start gap-0.5'>
                             {dialogLabel && (
-                                <div className='flex h-8 items-center text-sm font-normal leading-5 text-delta-600'>
+                                <div className='text-delta-600 flex h-8 items-center text-sm/5 font-normal'>
                                     {dialogLabel}
                                 </div>
                             )}
                             {dialogTitle && (
                                 // Figma dialog title = Page title 24/32 SemiBold, text delta-800.
-                                <div className='flex text-2xl font-semibold leading-8 text-delta-800'>
+                                <div className='text-delta-800 flex text-2xl/8 font-semibold'>
                                     {dialogTitle}
                                 </div>
                             )}
                         </div>
                         {showCloseIcon && (
-                            <div className='flex min-w-0 max-w-full shrink-0 justify-end gap-2'>
+                            <div className='flex max-w-full min-w-0 shrink-0 justify-end gap-2'>
                                 {dialogHeaderNode}
                                 <StyledButton
                                     dataTest={`close-button-${dataTest}`}

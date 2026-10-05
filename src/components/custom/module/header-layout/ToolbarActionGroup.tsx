@@ -145,7 +145,7 @@ export function ToolbarActionGroup({
                     >
                         {overflowActions.map((action, index) => (
                             <Fragment key={action.id}>
-                                {index > 0 && <hr className='m-0 border-0 border-t border-solid border-delta-200' />}
+                                {index > 0 && <hr className='border-delta-200 m-0 border-0 border-t border-solid' />}
 
                                 <StyledMenuItem
                                     disabled={action.disabled}

@@ -32,7 +32,7 @@ export const StyledFilterButton: React.FC<StyledButtonProps & StyledFilterMenuPr
 
     return (
         <>
-            <div className='relative h-fit w-fit'>
+            <div className='relative size-fit'>
                 <StyledButton
                     {...props}
                     type='button'
@@ -46,8 +46,8 @@ export const StyledFilterButton: React.FC<StyledButtonProps & StyledFilterMenuPr
                 {filterIsActive && (
                     <div
                         className={clsx(
-                            'absolute h-2 w-2 rounded-full bg-gama-400',
-                            size === 'large' ? 'right-2 top-2' : 'right-1 top-1',
+                            'bg-gama-400 absolute size-2 rounded-full',
+                            size === 'large' ? 'top-2 right-2' : 'top-1 right-1',
                         )}
                     ></div>
                 )}

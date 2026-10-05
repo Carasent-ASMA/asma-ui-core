@@ -17,7 +17,7 @@ export const StyledWidgetHeader: React.FC<{
     const hasTitle = title != null && title !== ''
 
     return (
-        <div className={cn(style['styled-widget-header'], containerClassname, !hasTitle && actions && '!block')}>
+        <div className={cn(style['styled-widget-header'], containerClassname, !hasTitle && actions && 'block!')}>
             {hasTitle && <StyledWidgetTitle>{title}</StyledWidgetTitle>}
             <div className={cn(actionsClassname, !hasTitle && 'w-full')}>{actions}</div>
         </div>

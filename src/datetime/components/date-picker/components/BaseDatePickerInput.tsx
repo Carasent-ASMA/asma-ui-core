@@ -175,7 +175,7 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
 
     return (
         <div className='cursor-default'>
-            {title && <div className='pb-1 font-roboto font-semibold text-delta-800'>{title}</div>}
+            {title && <div className='font-roboto text-delta-800 pb-1 font-semibold'>{title}</div>}
 
             <div className='flex gap-1' style={{ height }}>
                 <div style={{ width }}>

@@ -12,7 +12,7 @@ type PillProps = ComponentProps<typeof StyledInfoSnackbar>
  * (see `processMessageInfo`) — the Figma "Snackbar": brand `gama-700` fill, white text,
  * max text line 400px.
  */
-const PILL_CLASS = 'flex h-10 items-center gap-1 rounded-lg bg-gama-700 pl-2 pr-1 text-sm text-white !min-w-[100px] w-fit !max-w-[400px]'
+const PILL_CLASS = 'flex h-10 items-center gap-1 rounded-lg bg-gama-700 pl-2 pr-1 text-sm text-white min-w-[100px]! w-fit max-w-[400px]!'
 
 // ponytail: StyledInfoSnackbar consumes notistack's `CustomContentProps` (delivered at runtime by
 // the provider). For a static gallery we only need the presentational fields, so the notistack-internal
@@ -51,7 +51,7 @@ const meta: Meta<typeof StyledInfoSnackbar> = {
                     'Usage rules:',
                     '',
                     '- Triggered by **user actions**; gives brief confirmation or feedback, with an optional undo/retry action.',
-                    '- Max text line length: **400px** (`!max-w-[400px]` on the pill).',
+                    '- Max text line length: **400px** (`max-w-[400px]!` on the pill).',
                     '- Placed at the **bottom of the UI, centered**, in front of content (`anchorOrigin: bottom/center`).',
                     '- **Auto-dismisses after 6 seconds** when no warning or required action; can be closed manually via `closeButton` or the disposer returned by `message.*`.',
                     '- Color follows the brand theme token `gama-700`: **Blue** (default), **Green** (greenish), **Fretex** — see the Color themes story.',

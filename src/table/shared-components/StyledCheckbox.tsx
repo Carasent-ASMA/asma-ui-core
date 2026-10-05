@@ -22,6 +22,11 @@ type StyledCheckboxProps = {
     decorative?: boolean
 } & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'size' | 'checked' | 'type'>
 
+const SIZE_CLASSES = {
+    small: styles['size-small'],
+    medium: styles['size-medium'],
+} as const
+
 export const IndeterminateIcon = (props: SVGProps<SVGSVGElement>): JSX.Element => (
     <svg viewBox='0 0 24 24' width='100%' height='100%' fill='none' {...props}>
         <title>Indeterminate icon</title>
@@ -75,14 +80,14 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
 
     const wrapperClasses = cn(
         styles['CheckboxWrapper'],
-        !isHideWrapper && styles[`size-${size}`],
+        !isHideWrapper && SIZE_CLASSES[size],
         isHideWrapper && styles['HideWrapper'],
         indeterminate && styles['Indeterminate'],
         readOnly && styles['ReadOnly'],
         isRippleEnabled && styles['CheckboxHover'],
         className,
     )
-    const checkboxClasses = cn(styles['Checkbox'], styles[`size-${size}`], indeterminate && styles['Indeterminate'])
+    const checkboxClasses = cn(styles['Checkbox'], SIZE_CLASSES[size], indeterminate && styles['Indeterminate'])
     const CheckboxIcon = indeterminate ? IndeterminateIcon : CheckIcon
 
     const handlePointerDown = React.useCallback(
@@ -116,7 +121,9 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
 
     const visual = (
         <>
-            {!isHideWrapper && isRippleEnabled && <span ref={rippleRef} className={styles['CheckboxRippleContainer']} />}
+            {!isHideWrapper && isRippleEnabled && (
+                <span ref={rippleRef} className={styles['CheckboxRippleContainer']} />
+            )}
             <span className={checkboxClasses}>
                 <span className={styles['Indicator']}>
                     <CheckboxIcon strokeWidth={size === 'small' ? 3 : 2} />

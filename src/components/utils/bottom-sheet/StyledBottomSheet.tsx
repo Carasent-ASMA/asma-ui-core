@@ -186,7 +186,7 @@ export const StyledBottomSheet = ({
             onCancel={handleCancel}
             className={cn(
                 style['StyledBottomSheet'],
-                'fixed inset-0 m-0 h-full max-h-none w-full max-w-none flex-col items-center justify-end overflow-hidden border-0 bg-transparent p-0 outline-none open:flex',
+                'fixed inset-0 m-0 size-full max-h-none max-w-none flex-col items-center justify-end overflow-hidden border-0 bg-transparent p-0 outline-none open:flex',
             )}
         >
             {/* Scrim: a convenience duplicate of the close button, not a control — hidden from AT. */}
@@ -197,7 +197,7 @@ export const StyledBottomSheet = ({
                     onClose('scrim')
                 }}
                 className={cn(
-                    'absolute inset-0 bg-[#626e7eb2] transition-opacity duration-[250ms] ease-out motion-reduce:duration-150',
+                    'absolute inset-0 bg-[#626e7eb2] transition-opacity duration-250 ease-out motion-reduce:duration-150',
                     isShown ? 'opacity-100' : 'opacity-0',
                 )}
             />
@@ -208,12 +208,12 @@ export const StyledBottomSheet = ({
                 className={cn(
                     // `border-solid` + `box-border` are load-bearing: Tailwind runs with preflight off,
                     // so a bare `border` paints nothing and widths fall back to content-box.
-                    'relative box-border flex w-full max-w-[640px] flex-col border border-solid border-delta-300 bg-white text-delta-700 outline-none',
+                    'border-delta-300 text-delta-700 relative box-border flex w-full max-w-[640px] flex-col border border-solid bg-white outline-none',
                     isShortViewport ? 'h-full max-h-none rounded-none' : 'max-h-[90dvh] rounded-t-[28px]',
                     // Utilities ship `!important`, so while dragging the transform classes are dropped
                     // rather than out-ranked by the inline offset.
                     !isDragging && [
-                        'ease-out motion-safe:transition-transform motion-safe:duration-[250ms] motion-reduce:transition-opacity motion-reduce:duration-150',
+                        'ease-out motion-safe:transition-transform motion-safe:duration-250 motion-reduce:transition-opacity motion-reduce:duration-150',
                         isShown ? 'translate-y-0 opacity-100' : 'motion-safe:translate-y-full motion-reduce:opacity-0',
                     ],
                     className,
@@ -221,7 +221,7 @@ export const StyledBottomSheet = ({
             >
                 {/* `border-b-solid`, not `border-solid`: with preflight off the other three sides would default
                     to a 3px `medium` width and paint a solid border — a visible line under the corners. */}
-                <div className='border-b-solid shrink-0 border-b border-delta-200 pb-2'>
+                <div className='border-b-solid border-delta-200 shrink-0 border-b pb-2'>
                     {/* The top 48px is the drag zone (Figma "touch target area"). */}
                     <div {...dragHandleProps} className='relative flex h-12 touch-none items-center gap-2 px-2'>
                         <div className='min-w-0 flex-1' />
@@ -241,18 +241,18 @@ export const StyledBottomSheet = ({
                             focusable='false'
                             width={24}
                             height={24}
-                            className='pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-delta-800'
+                            className='text-delta-800 pointer-events-none absolute top-1/2 left-1/2 -translate-1/2'
                         />
                     </div>
                     {title && (
-                        <div id={titleId} className='truncate px-4 text-lg font-semibold leading-7 text-delta-800'>
+                        <div id={titleId} className='text-delta-800 truncate px-4 text-lg/7 font-semibold'>
                             {title}
                         </div>
                     )}
                 </div>
                 <div
                     className={cn(
-                        'flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain pl-4 pr-2 pt-2',
+                        'flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain pt-2 pr-2 pl-4',
                         hasFooter || extraActions ? 'pb-2' : 'pb-[max(0.5rem,env(safe-area-inset-bottom))]',
                     )}
                 >
@@ -261,7 +261,7 @@ export const StyledBottomSheet = ({
                 {hasFooter && (
                     <div
                         className={cn(
-                            'border-t-solid flex shrink-0 items-start border-t border-delta-200 bg-white p-1',
+                            'border-t-solid border-delta-200 flex shrink-0 items-start border-t bg-white p-1',
                             viewResults ? 'justify-between' : 'justify-end',
                             !extraActions && 'pb-[max(0.25rem,env(safe-area-inset-bottom))]',
                         )}

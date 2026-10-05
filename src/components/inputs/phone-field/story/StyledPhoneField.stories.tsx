@@ -34,8 +34,7 @@ const renderFlag = (iso2: string): JSX.Element => (
 )
 
 /** Stands in for `formatNationalAsYouType` so the story stays free of phone metadata. */
-const groupInPairs = (nationalNumber: string): string =>
-    (nationalNumber.match(/\d{1,2}/g) ?? []).join(' ')
+const groupInPairs = (nationalNumber: string): string => (nationalNumber.match(/\d{1,2}/g) ?? []).join(' ')
 
 const meta: Meta<typeof StyledPhoneField> = {
     title: 'Inputs/Phone Field',
@@ -243,7 +242,7 @@ export const OnTintedPanelWithFlag: Story = {
 
         await expect(flag).not.toBeNull()
         // Painted above the outline overlay, not behind it.
-        await expect(shell.querySelector('.z-\\[1\\]')).toContainElement(flag as HTMLElement)
+        await expect(shell.querySelector('.z-1')).toContainElement(flag as HTMLElement)
     },
 }
 
@@ -344,6 +343,8 @@ export const MobileSearchClears: Story = {
     globals: { viewport: { value: 'mobile1', isRotated: false } },
     render: (args) => <Controlled {...args} />,
     play: async ({ canvasElement }) => {
+        await expect(window.innerWidth).toBeLessThan(744)
+
         const canvas = within(canvasElement)
         await userEvent.click(canvas.getByRole('combobox', { expanded: false }))
 

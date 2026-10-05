@@ -11,7 +11,7 @@
  *  2. `data-theme`, which preview.ts sets via `withThemeByDataAttribute`. Set it explicitly so
  *     the suite exercises the default theme even where token families also have :root fallbacks.
  */
-import 'tailwindcss/tailwind.css'
+import 'tailwindcss/index.css'
 /* Read-only import of ASMA-8136's file — this suite reads `.storybook/`, it never edits it. The
  * normalize reset changes computed metrics (margins, box-sizing, button font), so leaving it out
  * would make these measurements disagree with Storybook and VRT for no good reason. */

@@ -49,7 +49,7 @@ export const StyledSnackbar = ({
 }: SnackbarProps): JSX.Element | null => {
     // Anchorless overlay: portal into the topmost open modal `<dialog>` when there is one, so the
     // toast clears the dialog's top-layer entry instead of being painted behind it (see
-    // useTopLayer.hook). `z-[1400]` below is what lifts it over the dialog's paper.
+    // useTopLayer.hook). `z-1400` below is what lifts it over the dialog's paper.
     const portalRoot = useTopmostOpenModalDialog()
     const [hovered, setHovered] = useState(false)
     const [focused, setFocused] = useState(false)
@@ -72,7 +72,7 @@ export const StyledSnackbar = ({
     return (
         <FloatingPortal root={portalRoot}>
             <div
-                className={cn('fixed z-[1400] flex items-center gap-2', position, className)}
+                className={cn('fixed z-1400 flex items-center gap-2', position, className)}
                 onMouseEnter={() => setHovered(true)}
                 onMouseLeave={() => setHovered(false)}
                 onFocusCapture={() => setFocused(true)}
@@ -84,7 +84,7 @@ export const StyledSnackbar = ({
                     <div
                         role='status'
                         aria-atomic='true'
-                        className='flex items-center gap-2 rounded bg-delta-800 px-4 py-3 text-sm text-white shadow-lg'
+                        className='bg-delta-800 flex items-center gap-2 rounded-sm px-4 py-3 text-sm text-white shadow-lg'
                     >
                         {message}
                         {action}

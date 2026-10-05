@@ -18,22 +18,38 @@ import { page } from 'src/test-utils/interaction-api'
 
 /** The `min-height` the mobile-gated `.asma-touch-target` rule declares, or null if it is missing. */
 const touchTargetMinHeightUnderMobileMedia = (): string | null => {
-    for (const sheet of Array.from(document.styleSheets)) {
-        let rules: CSSRule[]
-        try {
-            rules = Array.from(sheet.cssRules)
-        } catch {
-            continue // cross-origin sheet; ours are inline <style> tags, so nothing of interest here
-        }
-        for (const rule of rules) {
-            if (!(rule instanceof CSSMediaRule) || !rule.conditionText.includes('743px')) continue
-            for (const inner of Array.from(rule.cssRules)) {
-                if (inner instanceof CSSStyleRule && inner.selectorText.includes('.asma-touch-target')) {
-                    return inner.style.getPropertyValue('min-height')
+    const findInRules = (rules: CSSRuleList): string | null => {
+        for (const rule of Array.from(rules)) {
+            if (rule instanceof CSSMediaRule && rule.conditionText.includes('743px')) {
+                for (const inner of Array.from(rule.cssRules)) {
+                    if (inner instanceof CSSStyleRule && inner.selectorText.includes('.asma-touch-target')) {
+                        return inner.style.getPropertyValue('min-height')
+                    }
+                }
+            }
+
+            if ('cssRules' in rule) {
+                const result = findInRules(rule.cssRules as CSSRuleList)
+                if (result !== null) {
+                    return result
                 }
             }
         }
+
+        return null
     }
+
+    for (const sheet of Array.from(document.styleSheets)) {
+        try {
+            const result = findInRules(sheet.cssRules)
+            if (result !== null) {
+                return result
+            }
+        } catch {
+            // Ignore inaccessible stylesheets.
+        }
+    }
+
     return null
 }
 

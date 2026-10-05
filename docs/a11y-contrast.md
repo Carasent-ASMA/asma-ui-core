@@ -139,7 +139,7 @@ Note the same component's `filled` **error** variant passes at 6.81 and every `s
 
 `--colors-link-text-standart` on `--colors-theta-700`. Consumer:
 `src/components/feedback/snack-bar/processInfoSnackbar.ts` (`bg-theta-700` plus
-`!text-[color:var(--colors-link-text-standart)]`). **SC 1.4.3, needs 4.5:1.**
+`text-(--colors-link-text-standart)!`). **SC 1.4.3, needs 4.5:1.**
 
 | Theme | Resolved | Ratio |
 | --- | --- | --- |

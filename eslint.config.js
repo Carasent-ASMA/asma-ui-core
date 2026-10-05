@@ -59,9 +59,10 @@ export default defineConfig(
             // `border-y-solid` stay unlisted until something needs them. ASMA-8210 adds the `asma-*`
             // touch-readiness utilities to the same `@layer utilities` block, invisible to this rule
             // for the same reason.
-            'better-tailwindcss/no-unregistered-classes': [
+            'better-tailwindcss/no-unknown-classes': [
                 'error',
                 {
+                    entryPoint: 'src/styles/index.css',
                     ignore: [
                         'border-l-solid',
                         'border-b-solid',

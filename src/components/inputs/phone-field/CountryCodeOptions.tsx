@@ -59,7 +59,7 @@ export const CountryCodeOptions = ({
                     selected={country.iso2 === selectedIso2}
                     active={index === activeIndex}
                     onClick={() => onSelect(country.iso2)}
-                    className='border-0 border-b border-solid border-delta-100'
+                    className='border-delta-100 border-0 border-b border-solid'
                 >
                     {/* One wrapper: StyledSelectItem puts children inside a single flex-1 span,
                         so the name/code split has to happen in here. */}
@@ -68,7 +68,7 @@ export const CountryCodeOptions = ({
                             {renderFlag?.(country.iso2, 'eager')}
                             <span className='truncate'>{country.name}</span>
                         </span>
-                        <span className='shrink-0 font-medium text-delta-800'>{`+${country.dialCode}`}</span>
+                        <span className='text-delta-800 shrink-0 font-medium'>{`+${country.dialCode}`}</span>
                     </span>
                 </StyledSelectItem>
             ))}

@@ -7,7 +7,7 @@ const boxShadow = twConfigs.boxShadow,
     fontFamily = twConfigs.fontFamily
 
 export default {
-    mode: 'jit',
+    // mode: 'jit',
     important: true,
     blocklist: ['rotate-180'],
     content: ['src/**/*.{js,jsx,ts,tsx}'],
@@ -21,8 +21,8 @@ export default {
         },
     },
     darkMode: 'media',
-    corePlugins: {
-        preflight: false,
-    },
-    plugins: [require('tailwind-scrollbar')],
+    // corePlugins: {
+    //     preflight: false,
+    // },
+    // plugins: [require('tailwind-scrollbar')],
 } satisfies Config

@@ -39,7 +39,7 @@ export function SelectionIndicator({
             <StyledButton
                 dataTest='dynamic-toolbar-clear-selection'
                 variant='text'
-                className='!min-w-0 !px-1 !font-semibold'
+                className='min-w-0! px-1! font-semibold!'
                 startIcon={onClearSelection ? <CloseIcon width={20} height={20} /> : undefined}
                 onClick={onClearSelection}
                 aria-label={translations.clearSelection}
@@ -121,7 +121,7 @@ export function TitleText({ title, measureRef }: { title: ToolbarSlot; measureRe
      * while the rendered title is truncated. */
     if (typeof title === 'string') {
         return (
-            <StyledWidgetTitle ref={measureRef} className='!min-w-0 truncate'>
+            <StyledWidgetTitle ref={measureRef} className='min-w-0! truncate'>
                 {title}
             </StyledWidgetTitle>
         )
@@ -148,9 +148,9 @@ export function TitleBlock({
     }
 
     return (
-        <div className='min-w-0 max-w-full'>
+        <div className='max-w-full min-w-0'>
             {title && <TitleText title={title} measureRef={titleMeasureRef} />}
-            {helperText && <div className='mt-1 text-sm text-delta-700'>{helperText}</div>}
+            {helperText && <div className='text-delta-700 mt-1 text-sm'>{helperText}</div>}
         </div>
     )
 }

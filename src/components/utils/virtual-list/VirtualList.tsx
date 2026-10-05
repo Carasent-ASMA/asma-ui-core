@@ -83,7 +83,7 @@ export const VirtualList = <TItem,>({
                             key={virtualRow.key}
                             data-index={virtualRow.index}
                             ref={measureRows ? virtualizer.measureElement : undefined}
-                            className='absolute left-0 top-0 w-full'
+                            className='absolute top-0 left-0 w-full'
                             style={{
                                 transform: `translateY(${virtualRow.start}px)`,
                                 height: measureRows ? undefined : virtualRow.size,

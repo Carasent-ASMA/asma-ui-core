@@ -130,7 +130,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                     className={clsx('flex items-center justify-between', !minimized && 'hidden')}
                     data-testid={dataTest}
                 >
-                    <div className='max-w-[303px] truncate pr-1 text-lg font-semibold text-delta-800'>
+                    <div className='text-delta-800 max-w-[303px] truncate pr-1 text-lg font-semibold'>
                         <StyledTooltip title={title} placement='top'>
                             <div className='truncate'>{title}</div>
                         </StyledTooltip>
@@ -158,7 +158,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                 // FullScreenBtn toggle in the header (a real <button> via StyledButton).
                 // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
                 <div
-                    className='fixed inset-0 z-[52] bg-[rgb(98,110,126)] bg-opacity-70'
+                    className='fixed inset-0 z-52 bg-[rgb(98,110,126)]/70'
                     onClick={() => {
                         setFullScreen(false)
                     }}
@@ -177,22 +177,22 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                     minimized && styles['hidden'],
                     !fullScreen && classNameOverrides.maximized,
                     fullScreen && classNameOverrides.fullscreen,
-                    isFullScreenActive && 'fixed z-[53] duration-0',
+                    isFullScreenActive && 'fixed z-53 duration-0',
                 )}
             >
-                <div className={cn('flex flex-col border-b-[1px] border-delta-200 px-4', isMobile ? 'py-3' : 'py-4')}>
+                <div className={cn('border-delta-200 flex flex-col border-b px-4', isMobile ? 'py-3' : 'py-4')}>
                     <div className='flex items-center justify-between'>
                         {!label ? (
                             <div
                                 className={cn(
-                                    'font-semibold text-delta-800',
+                                    'text-delta-800 font-semibold',
                                     isMobile ? 'line-clamp-2 text-xl' : 'line-clamp-1 text-2xl',
                                 )}
                             >
                                 {title}
                             </div>
                         ) : (
-                            <div className='text-sm text-delta-700'>{label}</div>
+                            <div className='text-delta-700 text-sm'>{label}</div>
                         )}
 
                         <div className='flex items-center gap-x-1'>
@@ -223,7 +223,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                     {label && (
                         <div
                             className={cn(
-                                'font-semibold text-delta-800',
+                                'text-delta-800 font-semibold',
                                 isMobile ? 'line-clamp-2 text-xl' : 'line-clamp-1 text-2xl',
                             )}
                         >
@@ -231,7 +231,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                         </div>
                     )}
                 </div>
-                <div className={cn(minimized && 'hidden', 'flex flex-grow flex-col overflow-y-auto')}>{children}</div>
+                <div className={cn(minimized && 'hidden', 'flex grow flex-col overflow-y-auto')}>{children}</div>
             </div>
         </>
     )

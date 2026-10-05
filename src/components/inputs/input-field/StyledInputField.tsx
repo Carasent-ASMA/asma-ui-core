@@ -354,11 +354,11 @@ export const StyledInputField = ({
 
     const inputClasses = cn(
         styles['Input'],
-        'peer border-0 bg-transparent text-base tracking-[0.00938em] text-delta-800 outline-none placeholder:text-delta-500', // Figma field text delta/800 #363e4a
+        'peer text-delta-800 placeholder:text-delta-500 border-0 bg-transparent text-base tracking-[0.00938em] outline-none', // Figma field text delta/800 #363e4a
         isAdornmentList
-            ? 'box-border h-8 min-w-[60px] flex-1 py-0 pl-0 pr-0 leading-[23px]'
+            ? 'box-border h-8 min-w-[60px] flex-1 p-0 leading-[23px]'
             : multiline
-              ? 'w-full resize-none overflow-hidden p-0 pl-0 pr-0 leading-[23px]'
+              ? 'w-full resize-none overflow-hidden p-0 pr-0 pl-0 leading-[23px]'
               : cn('w-full', styles['Input--singleLine']),
         'disabled:text-delta-300',
         // Read-only fill lives on the shell (below) so it covers the whole box incl. the multiline
@@ -414,7 +414,7 @@ export const StyledInputField = ({
                             ),
                         // Read-only surface: fill the whole box (matches the delta-200 border, radius 4).
                         // On the shell (not the input) so it also covers the multiline field's padding.
-                        readOnly && 'rounded bg-delta-50',
+                        readOnly && 'bg-delta-50 rounded-sm',
                     )}
                     ref={mergedInputSlotRef}
                     onMouseDown={inputSlotOnMouseDown}
@@ -425,7 +425,7 @@ export const StyledInputField = ({
                     {hasStartAdornment && (
                         <span
                             className={cn(
-                                'items-center text-delta-500',
+                                'text-delta-500 items-center',
                                 // `flex` must live only in the non-adornment branch: pairing it with
                                 // `contents` puts two `display` utilities on one element, and when a
                                 // consumer's Tailwind marks utilities `!important` (or orders `flex`
@@ -474,7 +474,7 @@ export const StyledInputField = ({
                             // declares no `:active` to preserve). No hit-area: a 44px overlay on this
                             // ~22px button sits inside the field and would swallow taps meant to place
                             // the caret in the text it clears.
-                            className='asma-pressable absolute right-4 z-40 flex items-center justify-center rounded-full border-0 bg-transparent p-[2px] duration-300 hover:bg-gama-100'
+                            className='asma-pressable hover:bg-gama-100 absolute right-4 z-40 flex items-center justify-center rounded-full border-0 bg-transparent p-[2px] duration-300'
                             onClick={(event) => {
                                 event.stopPropagation()
                                 event.preventDefault()

@@ -63,7 +63,7 @@ export const StyledTab: FC<StyledTabProps> = ({ value, label, disabled, classNam
             className={cn(
                 // Figma Tab (node 15981-35855): Medium h48/px16/py12, Small h40/px12/py8, gap 8,
                 // label Medium 18px/lh28 (Section title) or Small 16px/lh24 (Body Base Semibold).
-                'inline-flex min-h-12 min-w-[90px] shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-t-lg border-0 bg-transparent px-4 py-3 tracking-normal outline-none transition-colors',
+                'inline-flex min-h-12 min-w-[90px] shrink-0 items-center justify-center gap-2 rounded-t-lg border-0 bg-transparent px-4 py-3 tracking-normal whitespace-nowrap transition-colors outline-none',
                 !hasTextSize && (ctx?.size === 'small' ? 'text-base' : 'text-lg'),
                 // Weight (Figma): Small tabs use "Body Base Semibold" in every state, so they are
                 // always SemiBold. Medium/default tabs use "Section title" — SemiBold when

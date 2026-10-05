@@ -400,7 +400,7 @@ export const PopoverSheet = ({
                         // `outline-none` (in the shared chrome) pairs with the shell's tabIndex={-1}:
                         // focusing the container on open must not paint a UA focus ring around the
                         // whole surface — same pairing as StyledDialog.
-                        className={cn('z-[1300]', POPOVER_SURFACE_CLASSNAME, className)}
+                        className={cn('z-1300', POPOVER_SURFACE_CLASSNAME, className)}
                     >
                         <PopoverAnatomy
                             dataTest={dataTest}

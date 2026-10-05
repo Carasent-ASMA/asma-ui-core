@@ -76,11 +76,11 @@ const GallerySurface = ({
 )
 
 const GalleryLabel = ({ children }: { children: ReactNode }): JSX.Element => (
-    <p className='m-0 text-base font-semibold leading-6 text-delta-800'>{children}</p>
+    <p className='text-delta-800 m-0 text-base/6 font-semibold'>{children}</p>
 )
 
 const GalleryCaption = ({ children }: { children: ReactNode }): JSX.Element => (
-    <p className='m-0 text-sm leading-5 text-delta-600'>{children}</p>
+    <p className='text-delta-600 m-0 text-sm/5'>{children}</p>
 )
 
 const FOOTER_ROWS: { label: string; caption: string; reset?: boolean; actions?: boolean }[] = [
@@ -91,7 +91,7 @@ const FOOTER_ROWS: { label: string; caption: string; reset?: boolean; actions?: 
 ]
 
 export const PopoverGallery = (): JSX.Element => (
-    <div className='flex flex-col gap-10 bg-delta-50 p-6'>
+    <div className='bg-delta-50 flex flex-col gap-10 p-6'>
         <section className='flex flex-col gap-4'>
             <GalleryLabel>Info popover — 360px, read-only, no footer rows</GalleryLabel>
             <div className='flex flex-wrap items-start gap-6'>

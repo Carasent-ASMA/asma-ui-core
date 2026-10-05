@@ -109,7 +109,7 @@ export const DynamicSelectAutocomplete = forwardRef(
         return (
             <div className='flex w-full flex-col gap-y-1'>
                 {title && (
-                    <span id={titleId} className='text-base font-semibold text-delta-800'>
+                    <span id={titleId} className='text-delta-800 text-base font-semibold'>
                         {title}
                     </span>
                 )}
@@ -228,17 +228,17 @@ export const DynamicSelectAutocomplete = forwardRef(
                                     className={cn(
                                         // Figma Menus item: Body Base 16/lh24. Row density: 'compact'
                                         // = 40px (default), 'regular' = 48px.
-                                        'relative flex cursor-pointer items-center gap-x-1 bg-white px-2 text-base aria-selected:bg-gama-50 hover:bg-delta-50',
+                                        'aria-selected:bg-gama-50 hover:bg-delta-50 relative flex cursor-pointer items-center gap-x-1 bg-white px-2 text-base',
                                         rowSize === 'regular' ? 'min-h-12' : 'min-h-10',
                                         disabled &&
-                                            'cursor-not-allowed bg-delta-50 aria-selected:!bg-delta-50 hover:!bg-delta-50 [&_*]:cursor-not-allowed',
+                                            'bg-delta-50 aria-selected:bg-delta-50! hover:bg-delta-50! cursor-not-allowed **:cursor-not-allowed',
                                     )}
                                     aria-disabled={disabled}
                                 >
                                     {props['data-active'] !== undefined && (
                                         <span
                                             aria-hidden='true'
-                                            className='border-l-solid pointer-events-none absolute inset-y-0 left-0 border-l-[3px] border-focus-ring'
+                                            className='border-l-solid border-focus-ring pointer-events-none absolute inset-y-0 left-0 border-l-[3px]'
                                         />
                                     )}
                                     <StyledTooltip arrow title={tooltipTitle}>
@@ -261,7 +261,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                                             ) : (
                                                 // Two lines, then ellipsis (ASMA-7847). Unclamped,
                                                 // a long name grew the row without limit.
-                                                <span className='line-clamp-2 h-fit min-w-0 flex-1 break-words text-base text-delta-800'>
+                                                <span className='text-delta-800 line-clamp-2 h-fit min-w-0 flex-1 text-base wrap-break-word'>
                                                     {getOptionLabel(option)}
                                                 </span>
                                             )}
@@ -286,10 +286,10 @@ export const DynamicSelectAutocomplete = forwardRef(
                                 className={cn(
                                     // Figma Menus item: Body Base 16/lh24. Row density: 'compact' =
                                     // 40px (default), 'regular' = 48px.
-                                    'relative flex cursor-pointer items-center gap-x-1 px-2 text-base aria-selected:bg-gama-50 hover:bg-delta-50',
+                                    'aria-selected:bg-gama-50 hover:bg-delta-50 relative flex cursor-pointer items-center gap-x-1 px-2 text-base',
                                     rowSize === 'regular' ? 'min-h-12' : 'min-h-10',
                                     disabled &&
-                                        'cursor-not-allowed bg-delta-50 aria-selected:!bg-delta-50 hover:!bg-delta-50 [&_*]:cursor-not-allowed',
+                                        'bg-delta-50 aria-selected:bg-delta-50! hover:bg-delta-50! cursor-not-allowed **:cursor-not-allowed',
                                 )}
                                 onClick={!disabled ? props.onClick : undefined}
                                 aria-disabled={disabled}
@@ -297,7 +297,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                                 {props['data-active'] !== undefined && (
                                     <span
                                         aria-hidden='true'
-                                        className='border-l-solid pointer-events-none absolute inset-y-0 left-0 border-l-[3px] border-focus-ring'
+                                        className='border-l-solid border-focus-ring pointer-events-none absolute inset-y-0 left-0 border-l-[3px]'
                                     />
                                 )}
                                 <StyledTooltip arrow title={tooltipTitle}>
@@ -305,7 +305,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                                         <span className='w-5 min-w-5'>
                                             {isSelected && (
                                                 <CheckIcon
-                                                    className='size-5 min-h-5 min-w-5 text-gama-500'
+                                                    className='text-gama-500 size-5 min-h-5 min-w-5'
                                                     height={20}
                                                     width={20}
                                                 />
@@ -316,7 +316,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                                         ) : (
                                             // Two lines, then ellipsis (ASMA-7847). Unclamped,
                                             // a long name grew the row without limit.
-                                            <span className='line-clamp-2 min-w-0 flex-1 break-words text-base text-delta-800'>
+                                            <span className='text-delta-800 line-clamp-2 min-w-0 flex-1 text-base wrap-break-word'>
                                                 {getOptionLabel(option)}
                                             </span>
                                         )}

@@ -142,7 +142,7 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
 
     if (isMobile)
         return (
-            <div className='relative h-auto w-auto'>
+            <div className='relative size-auto'>
                 <div className='m-0 flex h-fit items-center justify-center p-0'>{input}</div>
                 {/* Drawer owns backdrop/Escape dismissal — no ClickAwayListener (its portalled
                     content would register as a click-away and close the sheet on any tap inside). */}
@@ -152,7 +152,7 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
                     onClose={popupState.close}
                     anchorEl={popupState.anchorEl}
                 >
-                    <div className='mx-auto w-full max-w-[360px] px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2'>
+                    <div className='mx-auto w-full max-w-[360px] px-4 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))]'>
                         <TimePickerPanel
                             dataTest={props.dataTest}
                             value={value}
@@ -168,7 +168,7 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
 
     return (
         <ClickAwayListener mouseEvent='onMouseDown' onClickAway={popupState.close}>
-            <div className='relative h-auto w-auto'>
+            <div className='relative size-auto'>
                 <div className='m-0 flex h-fit items-center justify-center p-0'>{input}</div>
                 {popupState.isOpen && (
                     <TimePickerPopper

@@ -55,7 +55,7 @@ export const TimePickerInput: React.FC<
 
     return (
         <div style={{ height: readOnly ? '40px' : '75px' }}>
-            {title && <div className='pb-1 font-roboto font-semibold text-delta-800'>{title}</div>}
+            {title && <div className='font-roboto text-delta-800 pb-1 font-semibold'>{title}</div>}
             <StyledInputField
                 inputRef={inputRef}
                 autoComplete='off'

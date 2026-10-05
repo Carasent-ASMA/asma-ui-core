@@ -1,6 +1,13 @@
 .styled-date-picker-input-range-compact {
-    @apply flex gap-7 items-center flex-wrap w-fit cursor-pointer #{!important};
+    display: flex !important;
+    gap: calc(var(--spacing) * 7) !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    width: fit-content !important;
+    cursor: pointer !important;
+
     &.range-compact-disabled {
-        @apply pointer-events-none text-gama-300 #{!important};
+        pointer-events: none !important;
+        color: var(--colors-gama-300) !important;
     }
 }

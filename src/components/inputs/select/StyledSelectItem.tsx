@@ -45,7 +45,7 @@ export const StyledSelectItem = ({
             // CountryCodeOptions, which renders this component.
             'asma-pressable',
             'relative flex items-center gap-1 px-2 py-2.5 text-base outline-none',
-            disabled ? 'cursor-not-allowed text-delta-300' : 'cursor-pointer text-delta-800 hover:bg-delta-50',
+            disabled ? 'text-delta-300 cursor-not-allowed' : 'text-delta-800 hover:bg-delta-50 cursor-pointer',
             selected && 'bg-gama-50',
             className,
         )}
@@ -55,13 +55,13 @@ export const StyledSelectItem = ({
             <span
                 aria-hidden='true'
                 data-select-active-indicator
-                className='border-l-solid pointer-events-none absolute inset-y-0 left-0 border-l-[3px] border-focus-ring'
+                className='border-l-solid border-focus-ring pointer-events-none absolute inset-y-0 left-0 border-l-[3px]'
             />
         )}
         <span className='flex w-6 justify-center'>
             {selected && <CheckIcon width={22} height={22} className='text-gama-500' />}
         </span>
         {/* Two lines, then ellipsis (ASMA-7847) — see StyledSelectAutocomplete's option label. */}
-        <span className='line-clamp-2 min-w-0 flex-1 break-words'>{children}</span>
+        <span className='line-clamp-2 min-w-0 flex-1 wrap-break-word'>{children}</span>
     </li>
 )

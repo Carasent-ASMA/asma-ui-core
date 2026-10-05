@@ -21,9 +21,11 @@
         --table-hscroll-h: 12px;
     }
 
-    @apply w-full text-base;
     display: flex;
     flex-direction: column;
+    width: 100%;
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
 
     .table-wrapper {
         height: 100%;

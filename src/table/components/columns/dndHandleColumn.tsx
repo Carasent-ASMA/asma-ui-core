@@ -40,7 +40,7 @@ export const RowDragHandleCell: FC<
             <DotsHorizontalIcon
                 width={24}
                 height={24}
-                className={clsx(rest.disabled ? 'cursor-not-allowed text-delta-300' : 'cursor-grab text-delta-800')}
+                className={clsx(rest.disabled ? 'text-delta-300 cursor-not-allowed' : 'text-delta-800 cursor-grab')}
             />
         </div>
     )

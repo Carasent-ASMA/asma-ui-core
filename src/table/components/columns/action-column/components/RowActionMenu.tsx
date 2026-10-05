@@ -137,7 +137,7 @@ export function RowActionMenu<TData>({
                         }}
                     >
                         {showNoActions ? (
-                            <div className='flex items-center gap-2 p-3 text-base text-delta-700'>
+                            <div className='text-delta-700 flex items-center gap-2 p-3 text-base'>
                                 <CircleWarningOutlineIcon width={20} height={20} />
                                 <span>{noActionsLabel}</span>
                             </div>

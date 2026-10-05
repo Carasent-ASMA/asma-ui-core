@@ -167,7 +167,7 @@ export const WithLabelsAndButtons: Story = {
 
 /**
  * Tests long text wrapping for the From/To labels (matching the Figma red box example).
- * The labels use `flex-1` and `break-words` so they wrap instead of overlapping or overflowing.
+ * The labels use `flex-1` and `wrap-break-word` so they wrap instead of overlapping or overflowing.
  * We've constrained the max-width to force the wrap.
  */
 export const LongLabels: Story = {

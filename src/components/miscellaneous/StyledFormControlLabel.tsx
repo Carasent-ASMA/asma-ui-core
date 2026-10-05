@@ -76,7 +76,7 @@ export const StyledFormControlLabel = ({
     return (
         <label
             className={cn(
-                'm-0 inline-flex items-center gap-2 align-middle text-delta-800',
+                'text-delta-800 m-0 inline-flex items-center gap-2 align-middle',
                 isDisabled ? 'cursor-default' : 'cursor-pointer',
                 PLACEMENT_CLASS[labelPlacement],
                 className,
@@ -87,7 +87,7 @@ export const StyledFormControlLabel = ({
             {label != null && (
                 <span
                     id={shouldLabelControl ? labelTextId : undefined}
-                    className={cn('text-sm leading-5 tracking-[0.00938em]', isDisabled && 'text-delta-300')}
+                    className={cn('text-sm/5 tracking-[0.00938em]', isDisabled && 'text-delta-300')}
                 >
                     {label}
                 </span>

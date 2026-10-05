@@ -211,7 +211,7 @@ const TabsExample = () => (
 const TabLabelVariantsExample = () => (
     <div className='flex flex-row gap-4 overflow-x-auto flex-nowrap'>
         {TABS_LABEL_EXAMPLES.map(({ addon }, index) => (
-            <div key={index} className='flex-shrink-0'>
+            <div key={index} className='shrink-0'>
                 <StyledTabs value={1}>
                     <StyledTab label={buildTabLabel(addon, `tabs-example-${index}-first`)} className={TAB_BASE_CLASS} />
                     <StyledTab
