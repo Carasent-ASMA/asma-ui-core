@@ -15,6 +15,11 @@
         &.styled-time-picker-root_cell__cell-selected {
             @apply bg-gama-500 text-white hover:bg-gama-600;
         }
+        // Figma Time item State=Disabled (15086-19871): delta-400 text, no fill, not-allowed cursor.
+        // Last, so it also overrides the now/selected fills.
+        &:disabled {
+            @apply bg-white text-delta-400 hover:bg-white cursor-not-allowed;
+        }
     }
 }
 
