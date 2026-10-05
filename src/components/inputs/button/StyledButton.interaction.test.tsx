@@ -136,6 +136,23 @@ describe('StyledButton loading', () => {
         await expect(byTest('busy')).toHaveAttribute('aria-disabled', 'true')
         await expect(onClick).not.toHaveBeenCalled()
     })
+
+    it('keeps its size and its name while busy (SUB-4)', async () => {
+        const Toggle = ({ busy }: { busy: boolean }): JSX.Element => (
+            <StyledButton dataTest='size' loading={busy}>
+                Save filter
+            </StyledButton>
+        )
+        const { rerender } = mount(<Toggle busy={false} />)
+        const before = byTest('size').getBoundingClientRect()
+
+        rerender(<Toggle busy />)
+        const after = byTest('size').getBoundingClientRect()
+
+        await expect(after.width).toBe(before.width)
+        await expect(after.height).toBe(before.height)
+        await expect(byTest('size')).toHaveAccessibleName('Save filter')
+    })
 })
 
 const Gated = ({ ready }: { ready: boolean }): JSX.Element => (

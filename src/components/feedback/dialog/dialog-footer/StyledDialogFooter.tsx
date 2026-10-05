@@ -54,10 +54,11 @@ export interface StyledDialogFooterButton {
     /** Trailing icon. `loading` supplies its own and wins. */
     endIcon?: ReactNode
     /**
-     * Shows a spinner after the label and marks the button busy: it keeps focus and ignores
-     * activation. Consumers previously swapped the label *for* a spinner, which changes the
-     * button's width mid-submit — hence the hard-coded `w-[98px]` workarounds in the footers
-     * this replaces. Keeping the label makes the width stable on its own.
+     * Marks the button busy: a spinner sits centred over the label, which stays in the layout
+     * (invisible, still the accessible name), so the button keeps its width. It keeps focus and
+     * ignores activation. Consumers previously swapped the label *for* a spinner, which changed
+     * the button's width mid-submit — hence the hard-coded `w-[98px]` workarounds in the footers
+     * this replaces.
      */
     loading?: boolean
     /**

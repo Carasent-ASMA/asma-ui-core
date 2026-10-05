@@ -28,7 +28,7 @@ interface commonProps {
      */
     disabledReason?: ReactNode
     /**
-     * @figmaProp none — behavioral. Busy: spinner after the label, `aria-busy`, focus and width kept,
+     * @figmaProp none — behavioral. Busy: spinner centred over the label (the label stays invisible in the layout, so the width is kept), `aria-busy`, focus kept,
      * activation ignored (disabled-states DIS-8, submit-buttons SUB-4).
      */
     loading?: boolean
@@ -125,6 +125,11 @@ export const StyledButton = ({
     const blocked = softDisabled || Boolean(loading)
     const iconSize = isLarge ? 20 : 16
 
+    // Busy: the label and icons stay in the layout, invisible but still the accessible name, and the
+    // spinner sits centred over them, so the button keeps its width and height (submit-buttons SUB-4).
+    const hideWhenBusy = (node: ReactNode): ReactNode =>
+        loading && node ? <span style={{ display: 'inline-flex', opacity: 0 }}>{node}</span> : node
+
     // preventDefault also cancels the form submit of a `type="submit"` button, including the
     // implicit submit a browser fires on Enter in a form field.
     const handleClick = (event: MouseEvent<HTMLButtonElement>): void => {
@@ -158,14 +163,19 @@ export const StyledButton = ({
             // the text clips on BOTH sides ("Apply new versions" → "ply new versic") and the icon gets
             // squeezed. flex-shrink:0 keeps text buttons at content width; icon-only buttons (no
             // children) keep the default shrink + square min-width:40px, so toolbars aren't disturbed.
-            style={children ? { flexShrink: 0, ...styleProp } : styleProp}
+            style={{
+                ...(children ? { flexShrink: 0 } : {}),
+                ...(loading ? { position: 'relative' } : {}),
+                ...styleProp,
+            }}
             ref={refLink}
             data-testid={dataTest}
         >
-            {startIcon}
+            {hideWhenBusy(startIcon)}
             {children && (
                 <div
                     style={{
+                        opacity: loading ? 0 : undefined,
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
@@ -180,7 +190,15 @@ export const StyledButton = ({
                     {children}
                 </div>
             )}
-            {loading ? <LoadingIcon width={iconSize} height={iconSize} /> : endIcon}
+            {hideWhenBusy(endIcon)}
+            {loading && (
+                <span
+                    aria-hidden='true'
+                    style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >
+                    <LoadingIcon width={iconSize} height={iconSize} />
+                </span>
+            )}
         </button>
     )
 
