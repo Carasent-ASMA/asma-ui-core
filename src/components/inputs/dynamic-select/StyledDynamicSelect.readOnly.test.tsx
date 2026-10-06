@@ -129,16 +129,15 @@ describe('StyledDynamicSelect — read-only single select', () => {
         expect(readOnlyValue(html)).toBe('<b>After!</b>')
     })
 
-    it('uses Body Base 16/24 in text-icon/body, and 14/20 at size small', () => {
-        const medium = renderToStaticMarkup(
-            <StyledDynamicSelect dataTest='ro' options={FEW} value='After' onChange={noop} readOnly />,
+    it.each(['medium', 'small'] as const)('uses Body Base 16/24 in text-icon/body at size %s', (size) => {
+        // `size` scales chips and buttons; read-only draws neither, so the text never shrinks.
+        const html = renderToStaticMarkup(
+            <StyledDynamicSelect dataTest='ro' options={FEW} value='After' onChange={noop} size={size} readOnly />,
         )
-        expect(medium).toMatch(/data-testid="ro-read-only-value" class="[^"]*text-delta-700[^"]*text-base\/6/)
+        const valueClass = /data-testid="ro-read-only-value" class="([^"]*)"/.exec(html)?.[1] ?? ''
 
-        const small = renderToStaticMarkup(
-            <StyledDynamicSelect dataTest='ro' options={FEW} value='After' onChange={noop} size='small' readOnly />,
-        )
-        expect(small).toMatch(/data-testid="ro-read-only-value" class="[^"]*text-sm\/5/)
+        expect(valueClass.split(' ')).toEqual(expect.arrayContaining(['text-base/6', 'text-delta-700']))
+        expect(valueClass).not.toContain('text-sm')
     })
 })
 
