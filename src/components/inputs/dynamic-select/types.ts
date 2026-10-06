@@ -31,7 +31,11 @@ interface DynamicSelectCommonProps<TOption extends DynamicSelectOption> {
     dataTest: string
     /** @figmaProp option-count column — 1–5 → Chips select, 6–10 → Select (dropdown), 11+ → Autocomplete. */
     options: TOption[]
-    /** @figmaProp State = true→"Read-only" (non-interactive; selected value(s) shown as plain chips). */
+    /**
+     * @figmaProp State = true→"Read-only" (non-interactive). Single: the selected label as plain text
+     * (`-` when empty), no chip, input or helper row, at any option count. Multiple: the selected
+     * values as plain chips.
+     */
     readOnly?: boolean
     /** Prevents the built-in clear button from appearing even when a value is set. Applies to autocomplete only. */
     disableClearable?: boolean

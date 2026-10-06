@@ -75,6 +75,7 @@
         "vrt:report": "playwright show-report",
         "test-storybook": "npx vitest --project=storybook",
         "test:interaction": "vitest --project=interaction --run",
+        "test:flaky": "tsx scripts/detect-flaky.ts",
         "changeset:pre-beta": "changeset pre enter beta",
         "changeset:pre-exit": "changeset pre exit",
         "changeset:version": "changeset version",

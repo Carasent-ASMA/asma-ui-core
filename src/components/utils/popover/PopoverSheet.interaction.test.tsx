@@ -158,9 +158,31 @@ describe('PopoverSheet — action variant', () => {
         await expect(panelOf()).toHaveAccessibleName('Filtrer søknader')
     })
 
-    it('moves focus to the first control on open', async () => {
+    it('moves focus to the first control when opened from the keyboard', async () => {
+        const { container } = mount(<ActionFixture />)
+        triggerOf(container).focus()
+        await userEvent.keyboard('{Enter}')
+
+        await waitFor(() => expect(document.activeElement).toHaveTextContent('First'))
+    })
+
+    it('focuses no control when opened with a pointer — focus rests on the surface itself', async () => {
         const { container } = mount(<ActionFixture />)
         await userEvent.click(triggerOf(container))
+        const panel = panelOf()!
+
+        await waitFor(() => expect(document.activeElement).toBe(panel))
+        // Two frames later it has still not moved on to a control.
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+        await expect(document.activeElement).toBe(panel)
+    })
+
+    it('reaches the first control with one Tab after a pointer open', async () => {
+        const { container } = mount(<ActionFixture />)
+        await userEvent.click(triggerOf(container))
+        await waitFor(() => expect(document.activeElement).toBe(panelOf()))
+
+        await userEvent.keyboard('{Tab}')
 
         await expect(document.activeElement).toHaveTextContent('First')
     })
