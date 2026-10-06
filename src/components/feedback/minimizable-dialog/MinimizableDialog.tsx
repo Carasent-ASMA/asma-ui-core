@@ -258,7 +258,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                 </div>
 
                 <div className={clsx('flex flex-col', fullScreen && !minimized && 'h-[87dvh]')}>
-                    <div className='flex-grow overflow-y-auto'>
+                    <div className='flex-grow overflow-y-auto overscroll-contain'>
                         {typeof children === 'function' ? children({ fullScreen }) : children}
                     </div>
 
