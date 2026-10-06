@@ -5,16 +5,15 @@ name: 'Flaky tests'
 # focus), so a test can pass locally and on its PR and still fail one CI run in N on an unrelated
 # change — e.g. PageHeader "Sticky On Scroll" failing on the MinimizableDialog PR #242.
 #
-# - pull_request: only the story/interaction files affected by the PR, run 5x with retries off, in
-#   CI's normal order. Catches a flaky test at the moment it is introduced, before it lands on master
-#   and starts failing other people's PRs.
-# - schedule / workflow_dispatch: the whole of both suites, shuffled, to find flakes already on
-#   master and order dependencies (stories leaking state into the next one in the same iframe).
+# Deliberately NOT on pull_request: repeating real-browser suites on every PR costs too much CI time.
+# It runs nightly and on demand over the whole of both suites, shuffled, to find flakes on master and
+# order dependencies (stories leaking state into the next one in the same iframe). Before merging a
+# change you suspect of flaking, run it locally against only the affected files:
+#   pnpm test:flaky --changed origin/master
 #
 # A test that fails in SOME runs is "flaky"; in EVERY run, "broken". Both fail the job; the step
 # summary lists each with its failure count and last failure message.
 on:
-    pull_request:
     schedule:
         - cron: '0 2 * * 1-5'
     workflow_dispatch:
@@ -31,9 +30,6 @@ jobs:
         steps:
             - name: Checkout code
               uses: actions/checkout@v5
-              with:
-                  # --changed diffs against the PR base, which a shallow clone does not have.
-                  fetch-depth: 0
             # Same disk reclaim as the a11y and interaction jobs.
             - name: Free disk space
               run: |
@@ -49,13 +45,7 @@ jobs:
               run: pnpm install --frozen-lockfile
             - name: Install Playwright browsers
               run: pnpm exec playwright install --with-deps chromium
-            - name: Detect flaky tests (affected by this PR)
-              if: github.event_name == 'pull_request'
-              env:
-                  BASE_REF: ${{ github.base_ref }}
-              run: pnpm test:flaky --runs 5 --changed "origin/$BASE_REF"
             - name: Detect flaky tests (full suites)
-              if: github.event_name != 'pull_request'
               env:
                   RUNS: ${{ inputs.runs || '5' }}
               run: pnpm test:flaky --runs "$RUNS" --shuffle
