@@ -197,7 +197,7 @@ describe('StyledBadge notification contract', () => {
                     dataTest='filter-dot'
                     variant='dot'
                     purpose='filter'
-                    className='absolute top-1 right-1'
+                    className='absolute right-1 top-1'
                 />
             </div>,
         )
