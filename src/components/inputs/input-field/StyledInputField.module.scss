@@ -41,6 +41,18 @@ $field-height: 40px;
     }
 }
 
+// Multiline textarea: clipped while the content fits (no scrollbar flash while it auto-grows),
+// scrollable once StyledInputField marks it `data-scrollable` (content taller than the cap).
+// Deliberately not a Tailwind `overflow-hidden` utility: a consumer's `!important` utilities beat any
+// inline `overflow-y`, which silently clipped capped fields instead of scrolling them.
+.Input--multiline {
+    overflow: hidden;
+
+    &[data-scrollable='true'] {
+        overflow-y: auto;
+    }
+}
+
 // Chip/autocomplete adornment list = the Figma "filled" autocomplete field (node 20475-29954):
 // `py 16`, left inset 16 (Icon-left = two 8px spacings), chip gap 8, `flex-wrap` so chips wrap and the
 // field grows (min-height floors it at 40 when momentarily empty). Filled with a 32px chip row this is

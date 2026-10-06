@@ -117,8 +117,9 @@ export interface StyledInputFieldProps {
  * own focus/value state to drive the shared field styling ([[field-styles]]); supports multiline,
  * start/end adornments, an optional clear button, and error/helper text. Public props preserved
  *
- * ponytail: `variant` is accepted but always renders outlined, and multiline uses fixed `rows`
- * (no auto-grow to `maxRows`) — known ceilings; Chromatic in CI is the visual gate.
+ * ponytail: `variant` is accepted but always renders outlined — a known ceiling; Chromatic in CI is
+ * the visual gate. Multiline auto-grows between `minRows` and `maxRows` (a fixed `rows` pins the height)
+ * and scrolls once the content exceeds the cap; `readOnly` ignores the cap and shows the whole value.
  */
 export const StyledInputField = ({
     dataTest,
@@ -163,15 +164,14 @@ export const StyledInputField = ({
     const fieldId = id ?? generatedId
     const helperId = `${fieldId}-helper-text`
     const textareaRef = useRef<HTMLTextAreaElement | null>(null)
+    const lastMeasuredWidth = useRef(0)
     // Measures a custom end adornment (e.g. the autocomplete's clear + chevron) so the single-line
     // input can reserve exactly enough right padding — the fixed `data-end-adornment` 40px only fits
     // one icon, so wider adornments let long values scroll underneath them (ASMA select overflow).
     const endAdornmentRef = useRef<HTMLSpanElement | null>(null)
     const [endAdornmentPad, setEndAdornmentPad] = useState<number | undefined>(undefined)
     const [focused, setFocused] = useState(false)
-    const [hasValueUncontrolled, setHasValueUncontrolled] = useState(
-        defaultValue != null && defaultValue !== '',
-    )
+    const [hasValueUncontrolled, setHasValueUncontrolled] = useState(defaultValue != null && defaultValue !== '')
 
     const isControlled = value !== undefined
     const hasValue = isControlled ? value !== '' && value != null : hasValueUncontrolled
@@ -190,8 +190,7 @@ export const StyledInputField = ({
     const { className: inputSlotClass, style: inputSlotStyle, ref: inputSlotRef } = slotProps?.input ?? {}
     const mergedInputSlotRef = useMergeRefs([inputSlotRef])
     const inputSlotOnMouseDown = slotProps?.input?.['onMouseDown'] as
-        | React.MouseEventHandler<HTMLDivElement>
-        | undefined
+        React.MouseEventHandler<HTMLDivElement> | undefined
 
     const inputSlotOnClick = slotProps?.input?.['onClick'] as React.MouseEventHandler<HTMLDivElement> | undefined
     const inputSlotClickProps = inputSlotOnClick ? { onClick: inputSlotOnClick } : {}
@@ -207,9 +206,51 @@ export const StyledInputField = ({
 
     const shrink = focused || hasValue || hasStartAdornment
 
+    // Sizes the multiline textarea and decides whether it scrolls.
+    //  - editable + `rows`: height comes from the `rows` attribute (fixed cap).
+    //  - editable + `maxRows`/`minRows`: auto-grow between the two bounds.
+    //  - readOnly: ignores the cap and grows to the full value (MLF-2); `rows`/`minRows` stay as a floor.
+    // Overflow is `hidden` while the content fits (no scrollbar flash during growth) and `auto` once the
+    // content is taller than the box. Runs synchronously in a layout effect, so no intermediate frame is painted.
+    const syncTextareaLayout = useCallback((): void => {
+        const node = textareaRef.current
+        if (!multiline || !node) return
+
+        // 0 while not laid out (display:none ancestor). The observer below re-measures once it is shown.
+        lastMeasuredWidth.current = node.offsetWidth
+
+        // Measure scrollbar-free so the result never depends on the previous overflow state.
+        node.removeAttribute('data-scrollable')
+
+        if (rows != null && !readOnly) {
+            node.style.height = ''
+        } else {
+            node.style.height = 'auto'
+            // Not laid out (display:none ancestor, hidden tab): scrollHeight is 0 and we'd collapse to 0px.
+            if (node.scrollHeight === 0) {
+                node.style.height = ''
+                return
+            }
+            const computed = getComputedStyle(node)
+            const lineHeight = Number.parseFloat(computed.lineHeight) || 24
+            const verticalPadding = Number.parseFloat(computed.paddingTop) + Number.parseFloat(computed.paddingBottom)
+            const floorRows = rows ?? minRows
+            const minHeight = floorRows ? floorRows * lineHeight + verticalPadding : 0
+            const maxHeight = readOnly || !maxRows ? Number.POSITIVE_INFINITY : maxRows * lineHeight + verticalPadding
+            node.style.height = `${Math.min(maxHeight, Math.max(minHeight, node.scrollHeight))}px`
+        }
+
+        // 1px tolerance: scrollHeight is rounded, clientHeight can differ by a sub-pixel.
+        if (node.scrollHeight > node.clientHeight + 1) node.setAttribute('data-scrollable', 'true')
+    }, [maxRows, minRows, multiline, readOnly, rows])
+
     const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {
         if (readOnly) return
-        if (!isControlled) setHasValueUncontrolled(event.target.value !== '')
+        if (!isControlled) {
+            setHasValueUncontrolled(event.target.value !== '')
+            // Uncontrolled: nothing else re-runs the layout effect while typing.
+            syncTextareaLayout()
+        }
         onChange?.(event)
     }
     const handleFocus = (event: FocusEvent<HTMLInputElement>): void => {
@@ -224,17 +265,30 @@ export const StyledInputField = ({
     }
 
     useLayoutEffect(() => {
-        const node = textareaRef.current
-        if (!multiline || rows != null || !node) return
+        syncTextareaLayout()
+    }, [syncTextareaLayout, defaultValue, value])
 
-        node.style.height = 'auto'
-        const computed = getComputedStyle(node)
-        const lineHeight = Number.parseFloat(computed.lineHeight) || 24
-        const verticalPadding = Number.parseFloat(computed.paddingTop) + Number.parseFloat(computed.paddingBottom)
-        const minHeight = minRows ? minRows * lineHeight + verticalPadding : 0
-        const maxHeight = maxRows ? maxRows * lineHeight + verticalPadding : Number.POSITIVE_INFINITY
-        node.style.height = `${Math.min(maxHeight, Math.max(minHeight, node.scrollHeight))}px`
-    }, [defaultValue, maxRows, minRows, multiline, rows, value])
+    useLayoutEffect(() => {
+        const node = textareaRef.current
+        if (!multiline || !node || typeof ResizeObserver === 'undefined') return
+
+        let frame = 0
+        const observer = new ResizeObserver(() => {
+            // Our own height changes also fire this. Only a change in border-box width (reveal from
+            // display:none, container resize) can change line wrapping, so ignore everything else.
+            // offsetWidth is border-box, so the scrollbar appearing doesn't count.
+            if (node.offsetWidth === lastMeasuredWidth.current) return
+            // Deferred a frame: resizing the observed node inside its own callback triggers the browser's
+            // "ResizeObserver loop" error, which vitest/Storybook can report as unhandled.
+            cancelAnimationFrame(frame)
+            frame = requestAnimationFrame(syncTextareaLayout)
+        })
+        observer.observe(node)
+        return () => {
+            cancelAnimationFrame(frame)
+            observer.disconnect()
+        }
+    }, [multiline, syncTextareaLayout])
 
     // Capture the textarea node (for the auto-resize effect) via a stable ref callback, then let
     // `useMergeRefs` forward to the caller's ref. Merging (vs. hand-mutating `resolvedRef`) keeps the
@@ -273,10 +327,7 @@ export const StyledInputField = ({
         ...htmlInputStyleSansLayout
     } = htmlInputStyle ?? {}
 
-    const singleLinePaddingRight =
-        htmlPaddingRight ??
-        endAdornmentPad ??
-        (showClear || userEndAdornment ? 40 : 14)
+    const singleLinePaddingRight = htmlPaddingRight ?? endAdornmentPad ?? (showClear || userEndAdornment ? 40 : 14)
 
     const singleLineHtmlInputStyle: CSSProperties | undefined = isSingleLineShell
         ? {
@@ -305,7 +356,13 @@ export const StyledInputField = ({
     // a plain input. Gating purely on `shrink` wrongly hid the placeholder for label-less fields.
     const showPlaceholder = shrink || !label
 
-    const { show: showHelperSlot, role: helperAlertRole } = useHelperSlot('StyledInputField', error, helperText, reserveHelperText, readOnly)
+    const { show: showHelperSlot, role: helperAlertRole } = useHelperSlot(
+        'StyledInputField',
+        error,
+        helperText,
+        reserveHelperText,
+        readOnly,
+    )
 
     const {
         fieldRef: rootRef,
@@ -338,7 +395,11 @@ export const StyledInputField = ({
         // explicit `aria-label`/`aria-labelledby` on `htmlInput` (e.g. Autocomplete) still wins.
         'aria-label':
             htmlInputRest['aria-label'] ??
-            (htmlInputRest['aria-labelledby'] ? undefined : typeof label === 'string' && label !== '' ? label : undefined),
+            (htmlInputRest['aria-labelledby']
+                ? undefined
+                : typeof label === 'string' && label !== ''
+                  ? label
+                  : undefined),
         'aria-describedby': showHelperSlot ? helperId : htmlInputRest['aria-describedby'],
         onChange: handleChange,
         onFocus: handleFocus,
@@ -358,7 +419,7 @@ export const StyledInputField = ({
         isAdornmentList
             ? 'box-border h-8 min-w-[60px] flex-1 py-0 pl-0 pr-0 leading-[23px]'
             : multiline
-              ? 'w-full resize-none overflow-hidden p-0 pl-0 pr-0 leading-[23px]'
+              ? cn('w-full resize-none p-0 pl-0 pr-0 leading-[23px]', styles['Input--multiline'])
               : cn('w-full', styles['Input--singleLine']),
         'disabled:text-delta-300',
         // Read-only fill lives on the shell (below) so it covers the whole box incl. the multiline
@@ -408,10 +469,7 @@ export const StyledInputField = ({
                         isSingleLineShell && styles['InputShell'],
                         multiline && 'box-border items-center px-[14px] py-[16.5px]',
                         isAdornmentList &&
-                            cn(
-                                styles['AdornmentList'],
-                                userEndAdornment && styles['AdornmentList--endAdornment'],
-                            ),
+                            cn(styles['AdornmentList'], userEndAdornment && styles['AdornmentList--endAdornment']),
                         // Read-only surface: fill the whole box (matches the delta-200 border, radius 4).
                         // On the shell (not the input) so it also covers the multiline field's padding.
                         readOnly && 'rounded bg-delta-50',
@@ -447,7 +505,7 @@ export const StyledInputField = ({
                         />
                     ) : (
                         <input
-                            {...(sharedProps)}
+                            {...sharedProps}
                             {...singleLineDataProps}
                             ref={assignRef}
                             data-testid={dataTest}
