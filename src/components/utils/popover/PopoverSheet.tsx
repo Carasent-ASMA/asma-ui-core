@@ -249,12 +249,17 @@ export const PopoverSheet = ({
     // changes identity), tearing the trap down and rebuilding it on each keystroke.
     useFocusTrap(isOpen && isDialog && panelNode !== null, panelRef)
 
-    // `useFocusTrap` lands on the panel shell (as `StyledDialog` does). The spec wants an action
-    // surface to land on its first control instead, so move it on in the next frame — the hook's
-    // own focus call is an rAF scheduled by an earlier effect, so this one runs after it by
-    // queue order rather than by luck.
+    // How the trigger was activated — set by `handleTriggerClick` in the same batch as the open.
+    const [openedWithKeyboard, setOpenedWithKeyboard] = useState(false)
+
+    // `useFocusTrap` lands on the panel shell (as `StyledDialog` does). Opened from the keyboard, an
+    // action surface moves on to its first control in the next frame — the hook's own focus call is
+    // an rAF scheduled by an earlier effect, so this one runs after it by queue order rather than by
+    // luck. Opened with a pointer, it stays on the shell: no field is focused, and the shell's
+    // `outline-none` draws no ring, while the trap, Escape and focus return keep working.
     useEffect(() => {
         if (!panelNode) return
+        if (isDialog && !openedWithKeyboard) return
         const frame = requestAnimationFrame(() => {
             const target = isDialog ? firstTabbable(panelNode) : panelNode
             target?.focus({ preventScroll: true })
@@ -262,7 +267,7 @@ export const PopoverSheet = ({
         return () => {
             cancelAnimationFrame(frame)
         }
-    }, [panelNode, isDialog])
+    }, [panelNode, isDialog, openedWithKeyboard])
 
     // Info is deliberately NOT trapped: Tab walks out of the surface and closing follows the focus.
     // Tab-out is the one close route that does not pull focus back to the trigger — doing so would
@@ -312,6 +317,9 @@ export const PopoverSheet = ({
         /* Capture the element before setState: React nulls `e.currentTarget` once the handler
          * returns, so reading it lazily yields null and we lose the dialog portal root. */
         setPortalRoot(getOpenModalDialogAncestor(event.currentTarget))
+        // Enter/Space on a button dispatch a synthetic `click` with `detail === 0`; a real pointer
+        // click counts at least 1.
+        setOpenedWithKeyboard(event.detail === 0)
         changeOpen(true)
     }
 

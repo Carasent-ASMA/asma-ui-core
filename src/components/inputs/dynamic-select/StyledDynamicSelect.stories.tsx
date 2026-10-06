@@ -660,19 +660,26 @@ export const MultiplePrimitiveOptions: Story = {
 }
 
 /**
- * Read-only single select in the autocomplete path (>5 options): clicking the input must NOT open the
- * dropdown. This is the reported regression — read-only should be display-only, never openable.
+ * Read-only single select with an autocomplete-sized list (>5 options) must never be openable. Since
+ * read-only single selects render as plain text (no input at all), that holds by construction: there is
+ * no textbox to click and no listbox to open — just the title and `-` for the empty value. Name kept so
+ * the story id (and its VRT baseline) stay stable.
  */
 export const ReadOnlyAutocompleteDoesNotOpen: Story = {
     render: () => <SelectFrame title='Status' options={createOptions(12)} readOnly />,
     play: async ({ canvasElement }) => {
-        const { canvas, input } = getAutocomplete(canvasElement)
+        const canvas = within(canvasElement)
+        // Scoped to the select itself: the story frame has its own text inputs for the controls.
+        const select = canvasElement.querySelector<HTMLElement>('[data-testid$="-read-only"]')!
+        const inSelect = within(select)
 
-        await userEvent.click(input)
-        await expect(canvas.queryByRole('listbox')).not.toBeInTheDocument()
+        await expect(inSelect.queryByRole('combobox')).not.toBeInTheDocument()
+        await expect(inSelect.queryByRole('textbox')).not.toBeInTheDocument()
 
-        input.focus()
-        await userEvent.keyboard('{ArrowDown}')
+        const value = select.querySelector<HTMLElement>('[data-testid$="-read-only-value"]')!
+        await expect(value).toHaveTextContent('-')
+
+        await userEvent.click(value)
         await expect(canvas.queryByRole('listbox')).not.toBeInTheDocument()
     },
 }
