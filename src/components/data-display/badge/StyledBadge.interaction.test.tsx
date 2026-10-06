@@ -114,6 +114,117 @@ describe('StyledBadge notification contract', () => {
         await expect(dotStyle.backgroundColor).toBe('rgb(217, 242, 86)')
     })
 
+    it('keeps a hostless dot in normal flow so its neighbours lay out around it', async () => {
+        const { container } = mount(
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span id='label'>Report</span>
+                <StyledBadge dataTest='standalone-dot' variant='dot' />
+            </div>,
+        )
+        const root = container.querySelector<HTMLElement>('[data-testid="standalone-dot"]')!
+        const dot = root.querySelector<HTMLElement>('span[aria-hidden="true"]')!
+        const label = container.querySelector<HTMLElement>('#label')!
+        const style = getComputedStyle(dot)
+
+        // The same circle the anchored variant paints.
+        await expect(style.width).toBe('12px')
+        await expect(style.height).toBe('12px')
+        await expect(style.borderWidth).toBe('2px')
+        await expect(style.borderColor).toBe('rgb(119, 143, 0)')
+        await expect(style.backgroundColor).toBe('rgb(217, 242, 86)')
+
+        // Anchoring a hostless dot collapses the root to 0x0 and paints the dot over its neighbour.
+        await expect(style.position).toBe('static')
+        await expect(root.getBoundingClientRect().width).toBe(12)
+        await expect(root.getBoundingClientRect().height).toBe(12)
+        await expect(dot.getBoundingClientRect().left >= label.getBoundingClientRect().right).toBe(true)
+    })
+
+    it('still anchors the dot to a corner when it has a host to decorate', async () => {
+        const { container } = mount(
+            <StyledBadge dataTest='anchored-dot' variant='dot'>
+                <span style={{ display: 'block', width: '40px', height: '40px' }} />
+            </StyledBadge>,
+        )
+        const root = container.querySelector<HTMLElement>('[data-testid="anchored-dot"]')!
+        const dot = root.querySelector<HTMLElement>('span[aria-hidden="true"]')!
+
+        await expect(getComputedStyle(dot).position).toBe('absolute')
+        await expect(root.getBoundingClientRect().width).toBe(40)
+    })
+
+    it('draws the unread and filter dots as Figma specifies: 8px, solid primary, no ring', async () => {
+        for (const purpose of ['unread', 'filter'] as const) {
+            const { container, unmount } = mount(
+                <>
+                    <StyledBadge dataTest={`${purpose}-dot`} variant='dot' purpose={purpose} />
+                    {/* Resolves `gama-500` through the active theme rather than pinning one theme's hex. */}
+                    <span id='probe' style={{ backgroundColor: 'var(--colors-gama-500)' }} />
+                </>,
+            )
+            const root = container.querySelector<HTMLElement>(`[data-testid="${purpose}-dot"]`)!
+            const dot = root.querySelector<HTMLElement>('span[aria-hidden="true"]')!
+            const probe = container.querySelector<HTMLElement>('#probe')!
+            const style = getComputedStyle(dot)
+
+            await expect(style.width).toBe('8px')
+            await expect(style.height).toBe('8px')
+            await expect(style.backgroundColor).toBe(getComputedStyle(probe).backgroundColor)
+            // The ring belongs to the notification dot; Parent=Unread/Filter are flat.
+            await expect(style.borderWidth).toBe('0px')
+            await expect(root.getBoundingClientRect().width).toBe(8)
+
+            unmount()
+        }
+    })
+
+    it('leaves the notification dot at 12px with its ring when another purpose is not asked for', async () => {
+        const { container } = mount(<StyledBadge dataTest='notification-dot' variant='dot' />)
+        const dot = container
+            .querySelector<HTMLElement>('[data-testid="notification-dot"]')!
+            .querySelector<HTMLElement>('span[aria-hidden="true"]')!
+        const style = getComputedStyle(dot)
+
+        await expect(style.width).toBe('12px')
+        await expect(style.borderWidth).toBe('2px')
+        await expect(style.borderColor).toBe('rgb(119, 143, 0)')
+    })
+
+    it('puts className on the root of a hostless dot so callers can place it', async () => {
+        const { container } = mount(
+            <div style={{ position: 'relative', width: '80px', height: '40px' }}>
+                <StyledBadge
+                    dataTest='filter-dot'
+                    variant='dot'
+                    purpose='filter'
+                    className='absolute right-1 top-1'
+                />
+            </div>,
+        )
+        const root = container.querySelector<HTMLElement>('[data-testid="filter-dot"]')!
+        const host = container.firstElementChild!
+
+        // On the inner span this would position the dot inside its own 8px box instead.
+        await expect(getComputedStyle(root).position).toBe('absolute')
+        await expect(Math.round(host.getBoundingClientRect().right - root.getBoundingClientRect().right)).toBe(4)
+    })
+
+    it('names a hostless dot for assistive technology when nothing nearby carries the state', async () => {
+        const { container } = mount(<StyledBadge dataTest='standalone-dot' variant='dot' aria-label='Unread' />)
+        const root = container.querySelector<HTMLElement>('[data-testid="standalone-dot"]')!
+
+        await expect(root).toHaveAccessibleName('Unread')
+        await expect(root).toHaveAttribute('role', 'img')
+    })
+
+    it('leaves an unnamed hostless dot out of the accessibility tree', async () => {
+        const { container } = mount(<StyledBadge dataTest='standalone-dot' variant='dot' />)
+        const root = container.querySelector<HTMLElement>('[data-testid="standalone-dot"]')!
+
+        await expect(root).not.toHaveAttribute('role')
+        await expect(root.querySelector('span[aria-hidden="true"]')).toBeTruthy()
+    })
+
     it('keeps a silent polite status region mounted before announcing count changes', async () => {
         const { container, rerender } = mount(
             <StyledBadge dataTest='notifications-badge' badgeContent={2} statusMessage='2 unread notifications'>
