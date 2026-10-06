@@ -6,6 +6,7 @@ import clsx from 'clsx'
 
 import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip'
 import { LoadingIcon } from 'src/components/icons'
+import { useReportDialogBusy } from 'src/components/feedback/dialog/DialogBusyContext'
 
 export type StyledButtonType = 'contained' | 'outlined' | 'text' | 'textGray'
 
@@ -116,6 +117,9 @@ export const StyledButton = ({
     onClick,
     ...otherProps
 }: StyledButtonProps): JSX.Element => {
+    // A running action keeps the dialog around it open (no Esc / backdrop / X dismissal).
+    useReportDialogBusy(Boolean(loading))
+
     const isLarge = size === 'large' || size === 'medium'
 
     // setup className
@@ -194,7 +198,13 @@ export const StyledButton = ({
             {loading && (
                 <span
                     aria-hidden='true'
-                    style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    style={{
+                        position: 'absolute',
+                        inset: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
                 >
                     <LoadingIcon width={iconSize} height={iconSize} />
                 </span>

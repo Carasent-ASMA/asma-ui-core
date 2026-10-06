@@ -13,6 +13,7 @@ import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
 import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
 import { registerOpenModalDialog } from 'src/hooks/useTopLayer.hook'
+import { DialogBusyContext, useDialogBusyBoundary } from './DialogBusyContext'
 import style from './StyledDialog.module.scss'
 
 export type DialogCloseReason = 'escapeKeyDown' | 'backdropClick'
@@ -114,6 +115,8 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     const escapeHandledRef = useRef(false)
     const prevOpenRef = useRef(open)
     const isFullScreen = fullScreen ?? isMobile
+    // While a button inside runs an action, no dismissal goes through (see DialogBusyContext).
+    const { busy, contextValue } = useDialogBusyBoundary()
 
     useEffect(() => {
         if (prevOpenRef.current && !open) {
@@ -170,7 +173,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     } = (slotProps?.backdrop ?? {}) as HTMLAttributes<HTMLDivElement>
 
     const requestEscapeClose = (event: SyntheticEvent | Event): void => {
-        if (escapeHandledRef.current) return
+        if (busy || escapeHandledRef.current) return
         escapeHandledRef.current = true
         window.setTimeout(() => {
             escapeHandledRef.current = false
@@ -240,7 +243,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                 style={backdropStyle}
                 onClick={(event) => {
                     backdropOnClick?.(event)
-                    if (!event.defaultPrevented) onClose?.(event, 'backdropClick')
+                    if (!event.defaultPrevented && !busy) onClose?.(event, 'backdropClick')
                 }}
             />
             <div
@@ -298,7 +301,9 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                                     size='small'
                                     endIcon={<CloseIcon width={20} height={20} />}
                                     className='max-w-full shrink-0 whitespace-nowrap'
-                                    onClick={(event) => onClose?.(event, 'escapeKeyDown')}
+                                    onClick={(event) => {
+                                        if (!busy) onClose?.(event, 'escapeKeyDown')
+                                    }}
                                     style={{
                                         color: 'var(--colors-delta-800)',
                                         paddingRight: '6px',
@@ -312,7 +317,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                     </div>
                 )}
 
-                {children}
+                <DialogBusyContext.Provider value={contextValue}>{children}</DialogBusyContext.Provider>
             </div>
         </dialog>
     )
