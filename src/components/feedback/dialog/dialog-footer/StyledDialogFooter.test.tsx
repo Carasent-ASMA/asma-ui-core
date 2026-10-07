@@ -140,18 +140,16 @@ describe('StyledDialogFooter (ASMA-7099)', () => {
         expect(html).toContain('END')
     })
 
-    it('anchors a hint tooltip on a wrapper only when one is supplied', () => {
-        /* StyledTooltip renders its content lazily on hover, so the title is absent from
-         * static markup — what SSR can prove is that the anchor wrapper exists at all, and
-         * that a falsy tooltip adds no stray wrapper. The visible text is asserted by the
-         * Storybook interaction test, which can actually hover. */
+    it('keeps the hint anchor stable when a tooltip is absent', () => {
+        /* The anchor stays mounted so changing a hint or busy reason preserves focus.
+         * Tooltip content is still absent until interaction unless it is a disabled reason. */
         const withTooltip = renderToStaticMarkup(
             <StyledDialogFooter primaryAction={{ label: 'Save', tooltip: 'Saves a draft' }} />,
         )
         const without = renderToStaticMarkup(<StyledDialogFooter primaryAction={{ label: 'Save' }} />)
 
         expect(withTooltip).toContain('<span class="inline-flex">')
-        expect(without).not.toContain('<span class="inline-flex">')
+        expect(without).toContain('<span class="inline-flex">')
     })
 
     it('turns the tooltip of a disabled button into its reason (disabled-states DIS-1…DIS-3)', () => {
@@ -159,7 +157,7 @@ describe('StyledDialogFooter (ASMA-7099)', () => {
             <StyledDialogFooter primaryAction={{ label: 'Save', disabled: true, tooltip: 'Locked for editing' }} />,
         )
 
-        expect(html).not.toContain('<span class="inline-flex">')
+        expect(html).toContain('<span class="inline-flex">')
         expect(html).not.toContain('disabled=""')
         expect(html).toContain('aria-disabled="true"')
         expect(html).toContain('Locked for editing')

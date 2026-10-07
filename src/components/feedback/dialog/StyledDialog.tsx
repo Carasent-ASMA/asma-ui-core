@@ -58,6 +58,8 @@ export interface IStyledDialogProps {
     classes?: { paper?: string; root?: string }
     PaperProps?: DialogPaperProps
     slotProps?: { paper?: DialogPaperProps; backdrop?: Record<string, unknown>; transition?: { onExited?: () => void } }
+    /** App-localized explanation shown on close and Cancel while an action is running. */
+    busyReason?: ReactNode
     onCloseText?: ReactNode
     /** @figmaProp none — behavioral */
     showCloseIcon?: boolean
@@ -103,6 +105,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     classes,
     PaperProps,
     slotProps,
+    busyReason,
     onCloseText,
     showCloseIcon = true,
     dialogLabel,
@@ -116,7 +119,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     const prevOpenRef = useRef(open)
     const isFullScreen = fullScreen ?? isMobile
     // While a button inside runs an action, no dismissal goes through (see DialogBusyContext).
-    const { busy, contextValue } = useDialogBusyBoundary()
+    const { busy, contextValue } = useDialogBusyBoundary(busyReason)
 
     useEffect(() => {
         if (prevOpenRef.current && !open) {
@@ -218,6 +221,9 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
             data-testid={dataTest}
             aria-label={dataTest}
             onCancel={handleCancel}
+            onKeyDown={(event) => {
+                if (busy && event.key === 'Escape') event.preventDefault()
+            }}
             className={cn(
                 style['StyledDialog'],
                 'fixed inset-0 m-0 h-full max-h-none w-full max-w-none items-center justify-center overflow-hidden border-0 bg-transparent p-0 outline-none open:flex',
@@ -301,9 +307,9 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                                     size='small'
                                     endIcon={<CloseIcon width={20} height={20} />}
                                     className='max-w-full shrink-0 whitespace-nowrap'
-                                    onClick={(event) => {
-                                        if (!busy) onClose?.(event, 'escapeKeyDown')
-                                    }}
+                                    disabled={busy}
+                                    disabledReason={busyReason}
+                                    onClick={(event) => onClose?.(event, 'escapeKeyDown')}
                                     style={{
                                         color: 'var(--colors-delta-800)',
                                         paddingRight: '6px',
