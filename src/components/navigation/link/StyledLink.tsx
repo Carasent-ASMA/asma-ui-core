@@ -68,32 +68,7 @@ export const StyledLink: React.FC<StyledLinkProps> = ({
             break
     }
 
-    if (disabled && disabledReason) {
-        return (
-            <StyledTooltip title={disabledReason} openOnTap persistentDescription>
-                {/* A disabled link keeps its link role
-                    and its place in the tab order (APG); with no `href` there is nothing to navigate to. */}
-                <a
-                    {...otherProps}
-                    onClick={(event) => event.preventDefault()}
-                    onKeyDown={(event) => {
-                        if (event.key === 'Enter') event.preventDefault()
-                    }}
-                    data-testid={dataTest}
-                    ref={reflink}
-                    role='link'
-                    aria-disabled='true'
-                    tabIndex={0}
-                    className={clsx(style['styled-link'], style['styled-link-disabled'], textSize, className)}
-                >
-                    {content}
-                    {contentNode}
-                </a>
-            </StyledTooltip>
-        )
-    }
-
-    if (disabled) {
+    if (disabled && !disabledReason) {
         return (
             <span className={clsx(style['styled-link'], style['styled-link-disabled'], textSize, className)}>
                 {content}
@@ -103,18 +78,46 @@ export const StyledLink: React.FC<StyledLinkProps> = ({
     }
 
     return (
-        <a
-            {...otherProps}
-            data-testid={dataTest}
-            ref={reflink}
-            href={href}
-            tabIndex={0}
-            // ASMA-8220 (TB-14): `.styled-link:active` already recolours to gama-500, so touch-ready
-            // (tap-flash + double-tap-zoom removal) rather than pressable.
-            className={clsx(style['styled-link'], 'asma-touch-ready', textSize, className)}
+        <StyledTooltip
+            title={disabledReason}
+            open={disabled ? undefined : false}
+            openOnTap={Boolean(disabled)}
+            persistentDescription={Boolean(disabled)}
         >
-            {content}
-            {contentNode}
-        </a>
+            <a
+                {...otherProps}
+                data-testid={dataTest}
+                ref={reflink}
+                href={disabled ? undefined : href}
+                role={disabled ? 'link' : otherProps.role}
+                aria-disabled={disabled ? true : otherProps['aria-disabled']}
+                tabIndex={0}
+                onClick={(event) => {
+                    if (disabled) {
+                        event.preventDefault()
+                        return
+                    }
+                    otherProps.onClick?.(event)
+                }}
+                onKeyDown={(event) => {
+                    if (disabled && event.key === 'Enter') {
+                        event.preventDefault()
+                        return
+                    }
+                    otherProps.onKeyDown?.(event)
+                }}
+                // ASMA-8220 (TB-14): `.styled-link:active` already recolours to gama-500, so touch-ready
+                // (tap-flash + double-tap-zoom removal) rather than pressable.
+                className={clsx(
+                    style['styled-link'],
+                    disabled ? style['styled-link-disabled'] : 'asma-touch-ready',
+                    textSize,
+                    className,
+                )}
+            >
+                {content}
+                {contentNode}
+            </a>
+        </StyledTooltip>
     )
 }

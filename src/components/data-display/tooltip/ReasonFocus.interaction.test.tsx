@@ -12,6 +12,7 @@ import { StyledTextarea } from '../../inputs/textarea/StyledTextarea'
 import { StyledMenuItem } from '../../navigation/menu/StyledMenuItem'
 import { StyledTab } from '../../navigation/tabs/StyledTab'
 import { StyledButton } from '../../inputs/button/StyledButton'
+import { StyledLink } from '../../navigation/link/StyledLink'
 
 const reason = 'Locked after signing'
 const fixtures: [string, string, (active: boolean, reason?: string) => ReactElement][] = [
@@ -20,6 +21,13 @@ const fixtures: [string, string, (active: boolean, reason?: string) => ReactElem
         'button',
         (disabled, disabledReason) => (
             <StyledButton dataTest='button' disabled={disabled} disabledReason={disabledReason}>Action</StyledButton>
+        ),
+    ],
+    [
+        'link',
+        'a',
+        (disabled, disabledReason) => (
+            <StyledLink href='#report' contentNode='Open report' disabled={disabled} disabledReason={disabledReason} />
         ),
     ],
     [

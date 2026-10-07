@@ -71,4 +71,38 @@ describe('StyledLink disabledReason', () => {
         await expect(link).not.toHaveAttribute('href')
     })
 
+    it('restores navigation and app handlers on the same focused link after enabling it', async () => {
+        const onClick = vi.fn((event: React.MouseEvent<HTMLAnchorElement>) => event.preventDefault())
+        const onKeyDown = vi.fn()
+        const fixture = (disabled: boolean): JSX.Element => (
+            <StyledLink
+                dataTest='report'
+                href='#report'
+                disabled={disabled}
+                disabledReason='The report is still being generated'
+                contentNode='Open report'
+                onClick={onClick}
+                onKeyDown={onKeyDown}
+            />
+        )
+        const { container, rerender } = mount(fixture(true))
+        const link = container.querySelector('a')!
+        link.focus()
+        await userEvent.keyboard('{Enter}')
+        link.click()
+        await expect(onClick).not.toHaveBeenCalled()
+        await expect(onKeyDown).not.toHaveBeenCalled()
+
+        rerender(fixture(false))
+
+        await expect(container.querySelector('a')).toBe(link)
+        await expect(link).toHaveFocus()
+        await expect(link).toHaveAttribute('href', '#report')
+        await expect(link).not.toHaveAttribute('aria-disabled')
+        await expect(link).not.toHaveAccessibleDescription('The report is still being generated')
+        await userEvent.keyboard('{Enter}')
+        await expect(onKeyDown).toHaveBeenCalledTimes(1)
+        await expect(onClick).toHaveBeenCalledTimes(1)
+    })
+
 })
