@@ -274,10 +274,14 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
             </div>
         )
 
-        if (!reasoned) return chip
-
         return (
-            <StyledTooltip title={disabledReason} openOnTap persistentDescription>
+            <StyledTooltip
+                keepMounted
+                title={disabledReason}
+                open={reasoned ? undefined : false}
+                openOnTap={reasoned}
+                persistentDescription={reasoned}
+            >
                 {chip}
             </StyledTooltip>
         )

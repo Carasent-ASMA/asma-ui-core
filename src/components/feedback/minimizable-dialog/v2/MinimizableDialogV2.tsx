@@ -51,7 +51,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
     const isFullScreenActive = fullScreen && !minimized
 
     // While a button inside runs an action (e.g. Save), closing would hide the running request.
-    const { busy, contextValue } = useDialogBusyBoundary()
+    const { busy, busyReason, contextValue } = useDialogBusyBoundary()
 
     const handleClose = () => {
         if (busy) return
@@ -152,6 +152,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                             buttonRef={minimizedCloseButtonRef}
                             showCloseIcon={showCloseIcon}
                             onClick={handleClose}
+                            disabledReason={busy ? busyReason : undefined}
                             tooltipTitle={t.close}
                         />
                     </div>
@@ -220,6 +221,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                                 buttonRef={closeButtonRef}
                                 showCloseIcon={showCloseIcon}
                                 onClick={handleClose}
+                                disabledReason={busy ? busyReason : undefined}
                                 tooltipTitle={t.close}
                             />
                         </div>

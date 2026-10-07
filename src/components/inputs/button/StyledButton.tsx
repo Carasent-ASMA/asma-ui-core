@@ -218,10 +218,11 @@ export const StyledButton = ({
         </button>
     )
 
-    // The tooltip stays mounted while a reason is given, so toggling `disabled` never remounts the
-    // button and drops its focus; an enabled button keeps it closed.
+    // Keep the tooltip tree mounted even when the reason is removed, so the button retains focus.
+    // An enabled button keeps the tooltip closed.
     const tooltipped = (
         <StyledTooltip
+            keepMounted
             arrow
             title={disabledReason}
             open={softDisabled ? undefined : false}
@@ -232,15 +233,16 @@ export const StyledButton = ({
         </StyledTooltip>
     )
 
-    if (loading === undefined) return tooltipped
-
-    // The live region exists before `loading` turns on, otherwise screen readers miss the change.
+    // The live region exists before `loading` turns on, otherwise screen readers miss the change. The
+    // fragment is always returned, so adding the region never remounts the button.
     return (
         <>
             {tooltipped}
-            <span role='status' className='sr-only'>
-                {loading ? loadingAnnouncement ?? IN_PROGRESS[getUiCoreLocale()] : ''}
-            </span>
+            {loading !== undefined && (
+                <span role='status' className='sr-only'>
+                    {loading ? loadingAnnouncement ?? IN_PROGRESS[getUiCoreLocale()] : ''}
+                </span>
+            )}
         </>
     )
 }

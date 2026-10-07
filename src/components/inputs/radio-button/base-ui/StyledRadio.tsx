@@ -123,6 +123,9 @@ export const StyledRadio = forwardRef<HTMLInputElement, StyledRadioProps>(
                     {...rest}
                     ref={ref}
                     type='radio'
+                    aria-describedby={
+                        [rest['aria-describedby'], group?.reasonDescriptionId].filter(Boolean).join(' ') || undefined
+                    }
                     className='sr-only'
                     name={group?.name ?? rest.name}
                     value={value === undefined || value === null ? undefined : String(value)}

@@ -58,6 +58,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     const minimizedPanelRef = useRef<HTMLDivElement | null>(null)
 
     // A running primary action keeps the panel open (Esc / X would hide the running request).
+    const busyReason = locale === 'en' ? 'Wait until saved' : 'Vent til lagringen er ferdig'
     const closeWhenIdle = (): void => {
         if (!primaryButtonLoading) onClose()
     }
@@ -151,13 +152,18 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                             </StyledTooltip>
                         )}
                         {showCloseIcon && (
-                            <StyledTooltip title={locale === 'en' ? 'Close' : 'Lukk'}>
+                            <StyledTooltip
+                                title={locale === 'en' ? 'Close' : 'Lukk'}
+                                open={primaryButtonLoading ? false : undefined}
+                            >
                                 <div>
                                     <StyledButton
                                         dataTest='close-button'
                                         aria-label={!onCloseText ? (locale === 'en' ? 'Close' : 'Lukk') : undefined}
                                         variant='textGray'
                                         size='small'
+                                        disabled={primaryButtonLoading}
+                                        disabledReason={busyReason}
                                         onClick={closeWhenIdle}
                                         endIcon={<CloseIcon height={20} width={20} color='text-delta-700' />}
                                     >
@@ -243,13 +249,18 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                             )}
 
                             {showCloseIcon && (
-                                <StyledTooltip title={locale === 'en' ? 'Close' : 'Lukk'}>
+                                <StyledTooltip
+                                    title={locale === 'en' ? 'Close' : 'Lukk'}
+                                    open={primaryButtonLoading ? false : undefined}
+                                >
                                     <div>
                                         <StyledButton
                                             dataTest='close-button'
                                             aria-label={!onCloseText ? (locale === 'en' ? 'Close' : 'Lukk') : undefined}
                                             variant='textGray'
                                             size='small'
+                                            disabled={primaryButtonLoading}
+                                            disabledReason={busyReason}
                                             onClick={closeWhenIdle}
                                             endIcon={<CloseIcon height={20} width={20} color='text-delta-700' />}
                                         >

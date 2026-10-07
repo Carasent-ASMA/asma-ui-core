@@ -1,0 +1,116 @@
+import type { ReactElement } from 'react'
+import { afterEach, describe, it } from 'vitest'
+import { expect, userEvent } from 'src/test-utils/interaction-api'
+import { cleanup, mount } from 'src/test-utils/renderInteraction'
+import { StyledChip } from '../chip/StyledChip'
+import { StyledInputField } from '../../inputs/input-field/StyledInputField'
+import { StyledCheckbox } from '../../inputs/checkbox/base-ui/StyledCheckbox'
+import { StyledSwitch } from '../../inputs/switch/base-ui/StyledSwitch'
+import { StyledRadioGroup } from '../../inputs/radio-button/base-ui/StyledRadioGroup'
+import { StyledRadio } from '../../inputs/radio-button/base-ui/StyledRadio'
+import { StyledTextarea } from '../../inputs/textarea/StyledTextarea'
+import { StyledMenuItem } from '../../navigation/menu/StyledMenuItem'
+import { StyledTab } from '../../navigation/tabs/StyledTab'
+
+const reason = 'Locked after signing'
+const fixtures: [string, string, (active: boolean, reason?: string) => ReactElement][] = [
+    [
+        'input',
+        'input',
+        (readOnly, readOnlyReason) => (
+            <StyledInputField dataTest='field' label='Field' readOnly={readOnly} readOnlyReason={readOnlyReason} />
+        ),
+    ],
+    [
+        'checkbox',
+        'input',
+        (readOnly, readOnlyReason) => (
+            <StyledCheckbox dataTest='check' readOnly={readOnly} readOnlyReason={readOnlyReason} />
+        ),
+    ],
+    [
+        'switch',
+        'button',
+        (readOnly, readOnlyReason) => <StyledSwitch readOnly={readOnly} readOnlyReason={readOnlyReason} />,
+    ],
+    [
+        'radio',
+        'input',
+        (readOnly, readOnlyReason) => (
+            <StyledRadioGroup readOnly={readOnly} readOnlyReason={readOnlyReason} defaultValue='email'>
+                <StyledRadio value='email' />
+            </StyledRadioGroup>
+        ),
+    ],
+    [
+        'tab',
+        'button',
+        (disabled, disabledReason) => <StyledTab label='Tab' disabled={disabled} disabledReason={disabledReason} />,
+    ],
+    [
+        'menu item',
+        '[role="menuitem"]',
+        (disabled, disabledReason) => (
+            <StyledMenuItem disabled={disabled} disabledReason={disabledReason}>
+                Action
+            </StyledMenuItem>
+        ),
+    ],
+    [
+        'chip',
+        '[role="button"]',
+        (disabled, disabledReason) => (
+            <StyledChip
+                dataTest='chip'
+                label='Action'
+                onClick={() => undefined}
+                disabled={disabled}
+                disabledReason={disabledReason}
+            />
+        ),
+    ],
+    [
+        'read-only textarea',
+        '[role="textbox"]',
+        (_, readOnlyReason) => (
+            <StyledTextarea label='Notes' value='Saved notes' variant='view_only' readOnlyReason={readOnlyReason} />
+        ),
+    ],
+]
+
+describe('Controls keep their node when the reason changes', () => {
+    afterEach(cleanup)
+
+    for (const [name, selector, fixture] of fixtures) {
+        it(`preserves ${name} focus when a reason is added, activated and removed`, async () => {
+            const { container, rerender } = mount(fixture(false))
+            const control = container.querySelector<HTMLElement>(selector)!
+            control.focus()
+            rerender(fixture(false, reason))
+            await expect(document.activeElement).toBe(control)
+            rerender(fixture(true, reason))
+            await expect(container.querySelector(selector)).toBe(control)
+            await expect(document.activeElement).toBe(control)
+            rerender(fixture(false, reason))
+            await expect(document.activeElement).toBe(control)
+            rerender(fixture(false))
+            await expect(document.activeElement).toBe(control)
+            await expect(control).not.toHaveAccessibleDescription(reason)
+            await expect(document.querySelector('[role="tooltip"]')).toBeNull()
+        })
+    }
+
+    it('preserves an uncontrolled typed value when read-only changes', async () => {
+        const { container, rerender } = mount(<StyledInputField dataTest='field' label='Field' />)
+        const input = container.querySelector('input')!
+        input.focus()
+        await userEvent.keyboard('Unsaved text')
+        rerender(<StyledInputField dataTest='field' label='Field' readOnly readOnlyReason={reason} />)
+        await expect(input).toHaveValue('Unsaved text')
+        await expect(document.activeElement).toBe(input)
+        rerender(<StyledInputField dataTest='field' label='Field' />)
+        await expect(container.querySelector('input')).toBe(input)
+        await expect(input).toHaveValue('Unsaved text')
+        await expect(document.activeElement).toBe(input)
+    })
+})

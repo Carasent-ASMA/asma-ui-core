@@ -61,4 +61,41 @@ describe('StyledRadioGroup keyboard contract', () => {
         await expect(post).not.toBeChecked()
         await waitFor(() => expect(email).toHaveAccessibleDescription('Submitted questionnaires cannot be changed'))
     })
+
+    it('describes the checked radio when it is not first, and every other radio', async () => {
+        const reason = 'Submitted questionnaires cannot be changed'
+        const fixture = (readOnly: boolean): JSX.Element => (
+            <>
+                <span id='delivery-help' hidden>Delivery preference</span>
+                <StyledRadioGroup
+                    name='delivery-method'
+                    defaultValue='post'
+                    readOnly={readOnly}
+                    readOnlyReason={reason}
+                >
+                    <StyledFormControlLabel label='Email' control={<StyledRadio value='email' aria-describedby='delivery-help' />} />
+                    <StyledFormControlLabel label='Post' control={<StyledRadio value='post' aria-describedby='delivery-help' />} />
+                </StyledRadioGroup>
+            </>
+        )
+        const { container, rerender } = mount(fixture(true))
+        const [email, post] = Array.from(container.querySelectorAll<HTMLInputElement>('input[type="radio"]'))
+        await userEvent.tab()
+        await expect(post).toHaveFocus()
+        await expect(post).toBeChecked()
+        for (const radio of [email, post]) {
+            await expect(radio).toHaveAccessibleDescription(`Delivery preference ${reason}`)
+            await expect(radio!.getAttribute('aria-describedby')!.split(/\s+/)).toHaveLength(2)
+        }
+        await userEvent.keyboard('{ArrowLeft}')
+        await expect(email).toHaveFocus()
+        await expect(post).toBeChecked()
+        await expect(email).not.toBeChecked()
+        rerender(fixture(false))
+        await expect(email).toHaveFocus()
+        for (const radio of [email, post]) {
+            await expect(radio).toHaveAccessibleDescription('Delivery preference')
+        }
+    })
+
 })
