@@ -12,11 +12,13 @@ export const setUiCoreLocale = (locale: UiCoreLocale | undefined): void => {
 }
 
 const readStoredLanguage = (): string => {
+    let stored: string | null = null
     try {
-        return localStorage.getItem('lang') ?? document.documentElement.lang
+        stored = localStorage.getItem('lang')
     } catch {
-        return ''
+        // Storage can be unavailable even when the document is accessible.
     }
+    return stored ?? document.documentElement.lang
 }
 
 export const getUiCoreLocale = (): UiCoreLocale => {
