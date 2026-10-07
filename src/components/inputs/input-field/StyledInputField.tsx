@@ -219,6 +219,10 @@ export const StyledInputField = ({
         // 0 while not laid out (display:none ancestor). The observer below re-measures once it is shown.
         lastMeasuredWidth.current = node.offsetWidth
 
+        // Not laid out (display:none ancestor): keep the last good height and scroll state. Recording
+        // width 0 above means the observer re-measures when the field is shown again.
+        if (lastMeasuredWidth.current === 0) return
+
         // Measure scrollbar-free so the result never depends on the previous overflow state.
         node.removeAttribute('data-scrollable')
 
@@ -267,6 +271,13 @@ export const StyledInputField = ({
     useLayoutEffect(() => {
         syncTextareaLayout()
     }, [syncTextareaLayout, defaultValue, value])
+
+    useLayoutEffect(() => {
+        if (!multiline || !document.fonts) return
+        const onFontsLoaded = (): void => syncTextareaLayout()
+        document.fonts.addEventListener('loadingdone', onFontsLoaded)
+        return () => document.fonts.removeEventListener('loadingdone', onFontsLoaded)
+    }, [multiline, syncTextareaLayout])
 
     useLayoutEffect(() => {
         const node = textareaRef.current

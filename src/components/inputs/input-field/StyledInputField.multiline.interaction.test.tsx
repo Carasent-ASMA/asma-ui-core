@@ -233,3 +233,98 @@ describe('StyledInputField multiline: re-measures after layout changes', () => {
         })
     })
 })
+
+const nextFrames = (count: number): Promise<void> =>
+    new Promise((resolve) => {
+        const step = (left: number): void => {
+            if (left === 0) resolve()
+            else requestAnimationFrame(() => step(left - 1))
+        }
+        step(count)
+    })
+
+describe('StyledInputField multiline: keeps its last good layout while hidden', () => {
+    afterEach(cleanup)
+
+    const mountHideable = (props: FieldProps): { textarea: HTMLTextAreaElement; wrap: HTMLElement } => {
+        const { container } = mount(
+            <div data-testid='wrap'>
+                <Field {...props} />
+            </div>,
+        )
+        const wrap = container.querySelector<HTMLElement>('[data-testid="wrap"]')!
+        const textarea = container.querySelector<HTMLTextAreaElement>('textarea')!
+        if (textarea.scrollHeight === 0) throw new Error('needs real layout (browser mode), not jsdom')
+        return { textarea, wrap }
+    }
+
+    it.each([
+        [
+            'readOnly minRows (the MinimizableDialogV2 shape)',
+            { readOnly: true, minRows: 2, initial: lines(6) },
+            6,
+            false,
+        ],
+        ['capped and scrollable', { maxRows: 4, initial: lines(12) }, 4, true],
+    ])(
+        '%s: no wrong height on the first frame after it is shown again',
+        async (_name, props, expectedRows, scrollable) => {
+            const { textarea, wrap } = mountHideable(props)
+            const goodHeight = rowsPx(textarea, expectedRows)
+            await expect(textarea.clientHeight).toBe(goodHeight)
+
+            wrap.style.display = 'none'
+            // Let the ResizeObserver fire and its rAF re-measure run while hidden (3 frames is ample).
+            await nextFrames(3)
+
+            // The hidden field must not have been re-measured against scrollHeight 0.
+            await expect(textarea.style.height).toBe(`${goodHeight}px`)
+            await expect(textarea.hasAttribute('data-scrollable')).toBe(scrollable)
+
+            wrap.style.display = ''
+            // Read synchronously: this is the frame before any post-reveal re-measure can run.
+            await expect(textarea.clientHeight).toBe(goodHeight)
+            await expect(getComputedStyle(textarea).overflowY).toBe(scrollable ? 'auto' : 'hidden')
+        },
+    )
+
+    it('does not clear the layout when fonts finish loading while hidden', async () => {
+        const { textarea, wrap } = mountHideable({ readOnly: true, minRows: 2, initial: lines(6) })
+        const goodHeight = rowsPx(textarea, 6)
+
+        wrap.style.display = 'none'
+        await nextFrames(3)
+        document.fonts.dispatchEvent(new Event('loadingdone'))
+
+        await expect(textarea.style.height).toBe(`${goodHeight}px`)
+        wrap.style.display = ''
+        await expect(textarea.clientHeight).toBe(goodHeight)
+    })
+})
+
+it('re-measures a readOnly field when fonts finish loading and the text re-wraps', async () => {
+    const { container } = mount(
+        <div style={{ width: 280 }}>
+            <StyledInputField
+                dataTest='field'
+                label='Notes'
+                multiline
+                fullWidth
+                readOnly
+                maxRows={4}
+                defaultValue={'word '.repeat(40)}
+            />
+        </div>,
+    )
+    const textarea = container.querySelector<HTMLTextAreaElement>('textarea')!
+    const before = textarea.clientHeight
+
+    // Same box width, more wrapped lines: what a late font swap does.
+    textarea.style.setProperty('font-size', '28px', 'important')
+    await expect(textarea.scrollHeight).toBeGreaterThan(before + 1)
+
+    document.fonts.dispatchEvent(new Event('loadingdone'))
+
+    await expect(textarea.clientHeight).toBeGreaterThan(before)
+    await expect(textarea.scrollHeight).toBeLessThanOrEqual(textarea.clientHeight + 1)
+})
