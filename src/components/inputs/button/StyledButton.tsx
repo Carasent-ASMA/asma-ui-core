@@ -7,7 +7,7 @@ import clsx from 'clsx'
 import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip'
 import { LoadingIcon } from 'src/components/icons'
 import { useReportDialogBusy } from 'src/components/feedback/dialog/DialogBusyContext'
-import { getUiCoreLocale } from 'src/helpers/uiCoreLocale'
+import type { UiCoreLocale } from 'src/helpers/uiCoreLocale'
 
 const IN_PROGRESS = { en: 'In progress', no: 'Pågår' } as const
 
@@ -36,7 +36,9 @@ interface commonProps {
      * activation ignored (disabled-states DIS-8, submit-buttons SUB-4). The start is announced politely.
      */
     loading?: boolean
-    /** @figmaProp none — behavioral. Announced when `loading` starts; defaults to "In progress" in the ui-core locale. */
+    /** Language of the default busy announcement; defaults to English. */
+    locale?: UiCoreLocale
+    /** @figmaProp none — behavioral. Announced when `loading` starts; defaults to "In progress" in `locale`. */
     loadingAnnouncement?: string
 }
 
@@ -120,6 +122,7 @@ export const StyledButton = ({
     disabledReason,
     loading,
     loadingAnnouncement,
+    locale = 'en',
     onClick,
     ...otherProps
 }: StyledButtonProps): JSX.Element => {
@@ -240,7 +243,7 @@ export const StyledButton = ({
             {tooltipped}
             {loading !== undefined && (
                 <span role='status' className='sr-only'>
-                    {loading ? loadingAnnouncement ?? IN_PROGRESS[getUiCoreLocale()] : ''}
+                    {loading ? loadingAnnouncement ?? IN_PROGRESS[locale] : ''}
                 </span>
             )}
         </>

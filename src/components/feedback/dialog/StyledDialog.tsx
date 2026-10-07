@@ -15,6 +15,7 @@ import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
 import { registerOpenModalDialog } from 'src/hooks/useTopLayer.hook'
 import { DialogBusyContext, useDialogBusyBoundary } from './DialogBusyContext'
 import style from './StyledDialog.module.scss'
+import type { UiCoreLocale } from 'src/helpers/uiCoreLocale'
 
 export type DialogCloseReason = 'escapeKeyDown' | 'backdropClick'
 export type DialogMaxWidth = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
@@ -58,8 +59,10 @@ export interface IStyledDialogProps {
     classes?: { paper?: string; root?: string }
     PaperProps?: DialogPaperProps
     slotProps?: { paper?: DialogPaperProps; backdrop?: Record<string, unknown>; transition?: { onExited?: () => void } }
-    /** Why close and Cancel wait while an action runs; defaults to "Wait until saved" in the ui-core locale. */
+    /** Why close and Cancel wait while an action runs; defaults to "Wait until saved" in `locale`. */
     busyReason?: ReactNode
+    /** Language of the default busy reason; defaults to English. */
+    locale?: UiCoreLocale
     onCloseText?: ReactNode
     /** @figmaProp none — behavioral */
     showCloseIcon?: boolean
@@ -106,6 +109,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     PaperProps,
     slotProps,
     busyReason,
+    locale = 'en',
     onCloseText,
     showCloseIcon = true,
     dialogLabel,
@@ -119,7 +123,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     const prevOpenRef = useRef(open)
     const isFullScreen = fullScreen ?? isMobile
     // While a button inside runs an action, no dismissal goes through (see DialogBusyContext).
-    const { busy, busyReason: busyText, contextValue } = useDialogBusyBoundary(busyReason)
+    const { busy, busyReason: busyText, contextValue } = useDialogBusyBoundary(busyReason, locale)
 
     useEffect(() => {
         if (prevOpenRef.current && !open) {

@@ -1,9 +1,9 @@
 import { afterEach, describe, it, vi } from 'vitest'
 import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
-import { setUiCoreLocale } from 'src/helpers/uiCoreLocale'
 import { StyledButton } from '../../inputs/button/StyledButton'
 import { StyledDialog } from './StyledDialog'
+import { MinimizableDialogV2 } from '../minimizable-dialog/v2/MinimizableDialogV2'
 import { StyledDialogFooter } from './dialog-footer/StyledDialogFooter'
 
 const busyReason = 'Wait until saved'
@@ -75,7 +75,6 @@ describe('StyledDialog explains busy dismissal controls', () => {
     })
 
     it('explains busy dismissal with the ui-core default reason when none is supplied', async () => {
-        setUiCoreLocale('en')
         const onClose = vi.fn()
         const { container } = mount(
             <StyledDialog open dataTest='editor' onClose={onClose}>
@@ -92,6 +91,56 @@ describe('StyledDialog explains busy dismissal controls', () => {
             button.click()
         }
         await expect(onClose).not.toHaveBeenCalled()
-        setUiCoreLocale(undefined)
     })
+    it.each([
+        ['en', 'Wait until saved', 'In progress'],
+        ['no', 'Vent til lagringen er ferdig', 'Pågår'],
+    ] as const)('uses the dialog and footer locale %s for busy texts', async (locale, reason, announcement) => {
+        const { container } = mount(
+            <StyledDialog open dataTest='editor' locale={locale}>
+                <StyledDialogFooter
+                    locale={locale}
+                    secondaryAction={{ label: 'Cancel', dataTest: 'cancel' }}
+                    primaryAction={{ label: 'Save', loading: true }}
+                />
+            </StyledDialog>,
+        )
+        for (const selector of ['[data-testid="close-button-editor"]', '[data-testid="cancel"]']) {
+            await expect(container.querySelector(selector)).toHaveAccessibleDescription(reason)
+        }
+        await expect(container.querySelector('[role="status"]')).toHaveTextContent(announcement)
+    })
+
+    it('uses the footer locale for its fallback reason independently of the dialog locale', async () => {
+        const { container } = mount(
+            <StyledDialog open dataTest='editor' locale='en'>
+                <StyledDialogFooter
+                    locale='no'
+                    secondaryAction={{ label: 'Avbryt', dataTest: 'cancel' }}
+                    primaryAction={{ label: 'Lagre', loading: true }}
+                />
+            </StyledDialog>,
+        )
+        await expect(container.querySelector('[data-testid="cancel"]')).toHaveAccessibleDescription(
+            'Vent til lagringen er ferdig',
+        )
+        await expect(container.querySelector('[data-testid="close-button-editor"]')).toHaveAccessibleDescription(
+            'Wait until saved',
+        )
+    })
+
+    it.each([
+        ['en', 'Wait until saved'],
+        ['no', 'Vent til lagringen er ferdig'],
+    ] as const)('uses the minimizable dialog locale %s for its busy reason', async (locale, reason) => {
+        const { container } = mount(
+            <MinimizableDialogV2 open dataTest='editor' title='Editor' onClose={() => undefined} locale={locale}>
+                <StyledButton dataTest='save' loading>Save</StyledButton>
+            </MinimizableDialogV2>,
+        )
+        for (const close of container.querySelectorAll('[data-testid="close-button"]')) {
+            await expect(close).toHaveAccessibleDescription(reason)
+        }
+    })
+
 })

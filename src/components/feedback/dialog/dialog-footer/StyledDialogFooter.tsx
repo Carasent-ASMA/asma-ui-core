@@ -1,6 +1,6 @@
 import { useContext, useMemo, useState, type ReactNode } from 'react'
 
-import { DialogBusyContext } from '../DialogBusyContext'
+import { DialogBusyContext, WAIT_UNTIL_SAVED } from '../DialogBusyContext'
 
 import { DotsVerticalIcon } from 'src/components/icons'
 import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip'
@@ -196,9 +196,10 @@ export function StyledDialogFooter({
          * Loading keeps focus on the button instead of disabling it (submit-buttons §6). */
         const busySecondary = key === 'secondary' && dialogBusy?.busy
         const disabled = Boolean(button.disabled) || Boolean(busySecondary)
-        const disabledReason = busySecondary ? (dialogBusy.busyReason ?? button.tooltip) : button.tooltip
+        const disabledReason = busySecondary ? (dialogBusy.busyReason ?? WAIT_UNTIL_SAVED[locale]) : button.tooltip
         const element = (
             <StyledButton
+                locale={locale}
                 dataTest={button.dataTest ?? `${dataTest}-${key}`}
                 variant={button.variant ?? fallbackVariant}
                 error={button.tone === 'danger'}
@@ -262,6 +263,7 @@ export function StyledDialogFooter({
                                 {/* Figma "More": outlined, icon-only, 40x40 — never labelled in a footer. */}
                                 <span ref={register(KEY_MORE_BUTTON)} className='inline-flex shrink-0'>
                                     <StyledButton
+                                        locale={locale}
                                         dataTest={`${dataTest}-more`}
                                         variant='outlined'
                                         size='medium'

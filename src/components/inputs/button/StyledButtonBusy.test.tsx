@@ -4,18 +4,15 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { setUiCoreLocale } from 'src/helpers/uiCoreLocale'
 import { StyledButton } from './StyledButton'
 
 afterEach(() => {
     cleanup()
-    setUiCoreLocale(undefined)
     localStorage.removeItem('lang')
 })
 
 describe('StyledButton busy announcement', () => {
     it('keeps an empty status region until the action starts, then announces it', () => {
-        setUiCoreLocale('en')
         const { rerender } = render(
             <StyledButton dataTest='save' loading={false}>
                 Save
@@ -39,8 +36,8 @@ describe('StyledButton busy announcement', () => {
         expect(screen.getByRole('status').textContent).toBe('')
     })
 
-    it('follows the language the shell stored', () => {
-        localStorage.setItem('lang', 'EN')
+    it('uses its locale even when the shell stores another language', () => {
+        localStorage.setItem('lang', 'no')
         render(
             <StyledButton dataTest='save' loading>
                 Save
@@ -49,9 +46,9 @@ describe('StyledButton busy announcement', () => {
         expect(screen.getByRole('status').textContent).toBe('In progress')
     })
 
-    it('speaks Norwegian by default and takes an app text', () => {
+    it('speaks Norwegian when requested and takes an app text', () => {
         const { rerender } = render(
-            <StyledButton dataTest='save' loading>
+            <StyledButton dataTest='save' loading locale='no'>
                 Lagre
             </StyledButton>,
         )
