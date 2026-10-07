@@ -123,7 +123,6 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
 
         return (
             <StyledTooltip
-                keepMounted
                 title={readOnlyReason}
                 open={active ? undefined : false}
                 openOnTap={active}

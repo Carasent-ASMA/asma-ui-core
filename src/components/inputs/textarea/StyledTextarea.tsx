@@ -254,7 +254,6 @@ const ReadOnlyText = ({ id, labelId, descriptionId, boxed, reason, children }: R
     )
     return (
         <StyledTooltip
-            keepMounted
             title={reason}
             open={active ? undefined : false}
             openOnTap={active}

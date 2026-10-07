@@ -225,7 +225,6 @@ export const StyledButton = ({
     // An enabled button keeps the tooltip closed.
     const tooltipped = (
         <StyledTooltip
-            keepMounted
             arrow
             title={disabledReason}
             open={softDisabled ? undefined : false}

@@ -218,7 +218,6 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
 
     return (
         <StyledTooltip
-            keepMounted
             title={readOnlyReason}
             open={active ? undefined : false}
             openOnTap={active}

@@ -142,7 +142,6 @@ export const StyledSwitch = forwardRef<HTMLButtonElement, StyledSwitchProps>(
 
         return (
             <StyledTooltip
-                keepMounted
                 title={readOnlyReason}
                 open={active ? undefined : false}
                 openOnTap={active}

@@ -109,7 +109,6 @@ export const StyledMenuItem = ({
 
     return (
         <StyledTooltip
-            keepMounted
             title={disabledReason}
             open={reasoned ? undefined : false}
             placement='left'

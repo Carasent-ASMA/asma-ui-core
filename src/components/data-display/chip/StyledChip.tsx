@@ -276,7 +276,6 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
 
         return (
             <StyledTooltip
-                keepMounted
                 title={disabledReason}
                 open={reasoned ? undefined : false}
                 openOnTap={reasoned}

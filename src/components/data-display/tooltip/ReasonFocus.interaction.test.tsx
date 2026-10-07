@@ -11,9 +11,17 @@ import { StyledRadio } from '../../inputs/radio-button/base-ui/StyledRadio'
 import { StyledTextarea } from '../../inputs/textarea/StyledTextarea'
 import { StyledMenuItem } from '../../navigation/menu/StyledMenuItem'
 import { StyledTab } from '../../navigation/tabs/StyledTab'
+import { StyledButton } from '../../inputs/button/StyledButton'
 
 const reason = 'Locked after signing'
 const fixtures: [string, string, (active: boolean, reason?: string) => ReactElement][] = [
+    [
+        'button',
+        'button',
+        (disabled, disabledReason) => (
+            <StyledButton dataTest='button' disabled={disabled} disabledReason={disabledReason}>Action</StyledButton>
+        ),
+    ],
     [
         'input',
         'input',

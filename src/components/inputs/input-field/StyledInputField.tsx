@@ -572,7 +572,6 @@ export const StyledInputField = ({
 const ReadOnlyReason = ({ reason, active, children }: { reason: ReactNode; active: boolean; children: ReactElement }) => {
     return (
         <StyledTooltip
-            keepMounted
             title={reason}
             open={active ? undefined : false}
             openOnTap={active}

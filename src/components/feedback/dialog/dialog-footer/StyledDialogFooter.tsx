@@ -218,7 +218,7 @@ export function StyledDialogFooter({
         )
 
         return (
-            <StyledTooltip keepMounted arrow title={button.tooltip} open={disabled || !button.tooltip ? false : undefined}>
+            <StyledTooltip arrow title={button.tooltip} open={disabled || !button.tooltip ? false : undefined}>
                 <span className='inline-flex'>{element}</span>
             </StyledTooltip>
         )

@@ -113,7 +113,6 @@ export const StyledTab: FC<StyledTabProps> = ({ value, label, disabled, disabled
 
     return (
         <StyledTooltip
-            keepMounted
             title={disabledReason}
             open={reasoned ? undefined : false}
             openOnTap={reasoned}
