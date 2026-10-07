@@ -193,11 +193,12 @@ export const AutocompleteBoundary: Story = {
     render: () => (
         <div className='flex max-w-[640px] flex-col gap-12'>
             <div data-testid='ten-options'>
-                <label className='flex flex-col gap-4'>
-                    10 options - Slider
+                <div className='flex flex-col gap-4'>
+                    <span id='slider-10-options-caption'>10 options - Slider</span>
                     <StyledSlider<number>
                         dataTest='slider-10-options'
                         ariaLabel='10 options - Slider'
+                        ariaLabelledBy='slider-10-options-caption'
                         min={1}
                         max={10}
                         step={1}
@@ -205,7 +206,7 @@ export const AutocompleteBoundary: Story = {
                         defaultValue={5}
                         marks={labelledMarks(1, 10)}
                     />
-                </label>
+                </div>
             </div>
 
             <div data-testid='eleven-options'>
