@@ -200,7 +200,9 @@ export function StyledSlider<T>({
                     isOptionEqualToValue={isOptionEqualToValue}
                     value={autocompleteValue}
                     onChange={onAutocompleteChange}
-                    renderInput={(params) => <StyledInputField dataTest='slider-autocomplete-input' {...params} />}
+                    renderInput={(params) => (
+                        <StyledInputField dataTest='slider-autocomplete-input' {...params} name={name} />
+                    )}
                 />
             </>
         )
