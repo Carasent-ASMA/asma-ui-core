@@ -212,10 +212,11 @@ export const StyledButton = ({
         </button>
     )
 
-    // The tooltip stays mounted while a reason is given, so toggling `disabled` never remounts the
-    // button and drops its focus; an enabled button keeps it closed.
+    // Keep the tooltip tree mounted even when the reason is removed, so the button retains focus.
+    // An enabled button keeps the tooltip closed.
     return (
         <StyledTooltip
+            keepMounted
             arrow
             title={disabledReason}
             open={softDisabled ? undefined : false}

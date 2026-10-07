@@ -183,4 +183,24 @@ describe('StyledButton becoming available', () => {
 
         await expect(byTest('send')).toHaveAccessibleDescription('Add a mobile number first')
     })
+
+    it('keeps focus when availability also removes the reason', async () => {
+        const fixture = (disabled: boolean): JSX.Element => (
+            <StyledButton dataTest='send' disabled={disabled} disabledReason={disabled ? 'Add a mobile number first' : undefined}>
+                Send
+            </StyledButton>
+        )
+        const { rerender } = mount(fixture(true))
+        const button = byTest('send')
+        button.focus()
+        rerender(fixture(false))
+        await expect(byTest('send')).toBe(button)
+        await expect(button).toHaveFocus()
+        await expect(button).not.toHaveAccessibleDescription('Add a mobile number first')
+        await expect(document.querySelector('[role="tooltip"]')).toBeNull()
+        rerender(fixture(true))
+        await expect(button).toHaveFocus()
+        await expect(button).toHaveAccessibleDescription('Add a mobile number first')
+    })
+
 })
