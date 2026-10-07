@@ -10,6 +10,7 @@ export const TimePickerInput: React.FC<
     StyledTimePickerProps & {
         popupState: PopupState
         handleChange: (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => void
+        handleBlur?: () => void
         isValidTime: boolean
         isValidEndTime: boolean
         localValue: string
@@ -27,6 +28,7 @@ export const TimePickerInput: React.FC<
         locale = 'en',
         popupState,
         handleChange,
+        handleBlur,
         isValidTime,
         isValidEndTime,
         localValue,
@@ -74,6 +76,7 @@ export const TimePickerInput: React.FC<
                     />
                 }
                 onChange={handleChange}
+                onBlur={handleBlur}
                 slotProps={{
                     input: {
                         ref: inputRootRef,

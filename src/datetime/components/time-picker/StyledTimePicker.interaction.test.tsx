@@ -184,3 +184,95 @@ describe('StyledTimePicker keyboard contract', () => {
         await expect(panel()).not.toBeNull()
     })
 })
+
+/** `minTime` (ASMA-8358): earlier cells are disabled (Figma Time item State=Disabled), never an error. */
+describe('StyledTimePicker minTime', () => {
+    afterEach(cleanup)
+
+    const MinTimeFixture = ({
+        initial,
+        onSelect = () => undefined,
+    }: {
+        initial?: Date
+        onSelect?: (date?: Date) => void
+    }): JSX.Element => {
+        const [value, setValue] = useState<Date | undefined>(initial)
+        return (
+            <>
+                <StyledTimePicker
+                    dataTest='min-time'
+                    label='Start time'
+                    value={value}
+                    minTime={new Date(2026, 9, 5, 12, 32)}
+                    onSelect={(next) => {
+                        setValue(next)
+                        onSelect(next)
+                    }}
+                />
+                <button type='button' data-testid='after'>
+                    After
+                </button>
+            </>
+        )
+    }
+
+    const minField = (container: HTMLElement): HTMLInputElement =>
+        container.querySelector<HTMLInputElement>('input[data-testid="min-time"]')!
+    const openMinPanel = async (container: HTMLElement): Promise<void> => {
+        await userEvent.click(minField(container))
+        await waitFor(() => expect(panel()).not.toBeNull(), { timeout: 600 })
+    }
+
+    const columns = (): HTMLElement[] => {
+        const body = document.querySelector<HTMLElement>('[data-test="min-time-time-picker-body"]')!
+        return Array.from(body.children) as HTMLElement[]
+    }
+    const cell = (column: 0 | 1, label: string): HTMLButtonElement =>
+        Array.from(columns()[column]!.querySelectorAll('button')).find((b) => b.textContent === label)!
+
+    it('disables hour and minute cells before minTime', async () => {
+        const { container } = mount(<MinTimeFixture initial={new Date(2026, 9, 5, 12, 40)} />)
+        await openMinPanel(container)
+
+        await expect(cell(0, '11')).toBeDisabled()
+        await expect(cell(0, '12')).toBeEnabled()
+        await expect(cell(1, '30')).toBeDisabled()
+        await expect(cell(1, '35')).toBeEnabled()
+    })
+
+    it('enables every minute once a later hour is selected', async () => {
+        const { container } = mount(<MinTimeFixture initial={new Date(2026, 9, 5, 14, 0)} />)
+        await openMinPanel(container)
+
+        await expect(cell(1, '00')).toBeEnabled()
+    })
+
+    it('moves the minutes up when the minTime hour is picked with earlier minutes', async () => {
+        const onSelect = fn()
+        const { container } = mount(<MinTimeFixture initial={new Date(2026, 9, 5, 13, 10)} onSelect={onSelect} />)
+        await openMinPanel(container)
+
+        await userEvent.click(cell(0, '12'))
+
+        await waitFor(() => expect(minField(container)).toHaveValue('12:35'))
+        const picked = onSelect.mock.calls.at(-1)?.[0] as Date
+        await expect(picked.getMinutes()).toBe(35)
+    })
+
+    it('does not commit a typed earlier time and reverts it on blur, without an error', async () => {
+        const onSelect = fn()
+        const { container } = mount(<MinTimeFixture initial={new Date(2026, 9, 5, 13, 0)} onSelect={onSelect} />)
+        const input = minField(container)
+
+        await userEvent.clear(input)
+        await userEvent.keyboard('1000')
+        await waitFor(() => expect(input).toHaveValue('10:00'))
+        await expect(input).not.toHaveAttribute('aria-invalid', 'true')
+
+        input.blur()
+
+        await waitFor(() => expect(input).toHaveValue('13:00'))
+        await expect(onSelect).not.toHaveBeenCalled()
+        await expect(input).not.toHaveAttribute('aria-invalid', 'true')
+    })
+})

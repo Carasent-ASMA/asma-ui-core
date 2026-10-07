@@ -6,6 +6,7 @@ import { StyledButton } from 'src/datetime/shared-components/button'
 export interface TimePickerPanelProps {
     dataTest: string
     value?: Date
+    minTime?: Date
     onSelect: (date: Date | undefined) => void
     handleClear: () => void
     onConfirm: () => void
@@ -18,12 +19,13 @@ export interface TimePickerPanelProps {
 export const TimePickerPanel: React.FC<TimePickerPanelProps> = ({
     dataTest,
     value,
+    minTime,
     onSelect,
     handleClear,
     onConfirm,
 }) => (
     <>
-        <TimePickerBody dataTest={`${dataTest}-time-picker-body`} value={value} onSelect={onSelect} />
+        <TimePickerBody dataTest={`${dataTest}-time-picker-body`} value={value} minTime={minTime} onSelect={onSelect} />
         <div
             style={{
                 display: 'flex',

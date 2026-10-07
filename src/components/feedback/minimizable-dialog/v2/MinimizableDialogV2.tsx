@@ -238,7 +238,12 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                         </div>
                     )}
                 </div>
-                <div className={cn(minimized && 'hidden', 'flex flex-grow flex-col overflow-y-auto')}>
+                {/* `overscroll-contain` stops wheel scroll chaining to the page underneath, both from this body
+                    and from consumer scroll areas nested in it. Discrete mouse-wheel ticks (Windows) chain
+                    as soon as the scroller hits its edge; macOS trackpad gestures latch, which hid this. */}
+                <div
+                    className={cn(minimized && 'hidden', 'flex flex-grow flex-col overflow-y-auto overscroll-contain')}
+                >
                     <DialogBusyContext.Provider value={contextValue}>{children}</DialogBusyContext.Provider>
                 </div>
             </div>
