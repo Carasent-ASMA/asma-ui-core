@@ -50,6 +50,23 @@ $field-height: 40px;
 
     &[data-scrollable='true'] {
         overflow-y: auto;
+
+        // Persistent scrollbar (same approach as StyledDialog.module.scss): style only the WebKit
+        // pseudo-elements and do NOT set `scrollbar-width` / `scrollbar-color`, which would switch
+        // Chromium back to the overlay rail that stays hidden until interaction.
+        &::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.08);
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.45);
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            border-radius: 6px;
+        }
     }
 }
 

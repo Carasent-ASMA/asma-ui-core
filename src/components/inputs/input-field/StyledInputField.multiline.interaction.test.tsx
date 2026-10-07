@@ -328,3 +328,17 @@ it('re-measures a readOnly field when fonts finish loading and the text re-wraps
     await expect(textarea.clientHeight).toBeGreaterThan(before)
     await expect(textarea.scrollHeight).toBeLessThanOrEqual(textarea.clientHeight + 1)
 })
+
+it('styles a persistent scrollbar only while the content is scrollable', async () => {
+    const capped = mountField({ maxRows: 4, initial: lines(12) })
+    await expect(capped.hasAttribute('data-scrollable')).toBe(true)
+    // Not the rendered width: headless Chromium runs with --hide-scrollbars, so that is 0 here.
+    await expect(getComputedStyle(capped, '::-webkit-scrollbar').width).toBe('12px')
+    await expect(getComputedStyle(capped, '::-webkit-scrollbar-thumb').backgroundColor).toBe('rgba(0, 0, 0, 0.45)')
+
+    cleanup()
+
+    const fits = mountField({ maxRows: 4, initial: lines(3) })
+    await expect(fits.hasAttribute('data-scrollable')).toBe(false)
+    await expect(getComputedStyle(fits, '::-webkit-scrollbar').width).not.toBe('12px')
+})
