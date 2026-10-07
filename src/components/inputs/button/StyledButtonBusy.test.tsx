@@ -46,7 +46,7 @@ describe('StyledButton busy announcement', () => {
         expect(screen.getByRole('status').textContent).toBe('In progress')
     })
 
-    it('follows the shell language without a locale', () => {
+    it('defaults to English without a locale regardless of the shell language', () => {
         localStorage.setItem('lang', 'EN')
         const { rerender } = render(
             <StyledButton dataTest='save' loading>
@@ -61,7 +61,7 @@ describe('StyledButton busy announcement', () => {
                 Lagre
             </StyledButton>,
         )
-        expect(screen.getByRole('status').textContent).toBe('Pågår')
+        expect(screen.getByRole('status').textContent).toBe('In progress')
     })
 
     it('speaks Norwegian when requested and takes an app text', () => {
