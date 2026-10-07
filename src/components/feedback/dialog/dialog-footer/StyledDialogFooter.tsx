@@ -62,8 +62,8 @@ export interface StyledDialogFooterButton {
      */
     loading?: boolean
     /**
-     * Falsy renders no tooltip, so the common `tooltip={disabled && 'Locked for editing'}` reads
-     * naturally. With `disabled` it is the reason the action is unavailable (`disabledReason`):
+     * Pass a constant `tooltip` (e.g. 'Locked for editing') and toggle `disabled` separately.
+     * With `disabled` it is the reason the action is unavailable (`disabledReason`):
      * the button stays focusable and shows it on hover, focus and tap. Otherwise it is a plain
      * hint anchored on a wrapper.
      */
@@ -199,7 +199,7 @@ export function StyledDialogFooter({
                 size='medium'
                 type={button.type ?? 'button'}
                 disabled={button.disabled}
-                disabledReason={button.disabled ? button.tooltip : undefined}
+                disabledReason={button.tooltip}
                 loading={button.loading}
                 startIcon={button.icon}
                 endIcon={button.endIcon}
@@ -210,12 +210,8 @@ export function StyledDialogFooter({
             </StyledButton>
         )
 
-        if (!button.tooltip || button.disabled) {
-            return element
-        }
-
         return (
-            <StyledTooltip arrow title={button.tooltip}>
+            <StyledTooltip keepMounted arrow title={button.tooltip} open={button.disabled || !button.tooltip ? false : undefined}>
                 <span className='inline-flex'>{element}</span>
             </StyledTooltip>
         )
