@@ -209,8 +209,10 @@ const TooltipWithFloating = ({
         if (previous?.split(/\s+/).includes(describedById)) return
         described.setAttribute('aria-describedby', previous ? `${previous} ${describedById}` : describedById)
         return () => {
-            if (previous === null) described.removeAttribute('aria-describedby')
-            else described.setAttribute('aria-describedby', previous)
+            const remaining = described.getAttribute('aria-describedby')?.split(/\s+/)
+                .filter((id) => id && id !== describedById).join(' ')
+            if (remaining) described.setAttribute('aria-describedby', remaining)
+            else described.removeAttribute('aria-describedby')
         }
     }, [describes, refs.domReference, describedById])
 

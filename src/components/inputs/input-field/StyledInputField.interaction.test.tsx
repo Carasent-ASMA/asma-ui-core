@@ -53,6 +53,26 @@ describe('StyledInputField keyboard contract', () => {
         await expect(input).toHaveValue('person@example.test')
     })
 
+    it('describes its helper when a reasoned read-only field becomes editable', async () => {
+        const fixture = (readOnly: boolean): JSX.Element => (
+            <StyledInputField
+                dataTest='name'
+                label='Name'
+                helperText='Enter your full name'
+                readOnly={readOnly}
+                readOnlyReason='Synced from HR'
+            />
+        )
+        const { container, rerender } = mount(fixture(true))
+        const input = container.querySelector('input')!
+        await expect(input).toHaveAccessibleDescription('Synced from HR')
+
+        rerender(fixture(false))
+
+        await expect(container.querySelector('input')).toBe(input)
+        await expect(input).toHaveAccessibleDescription('Enter your full name')
+    })
+
     it('skips a disabled field in the Tab order (2.1.1)', async () => {
         const { container } = mount(
             <>
