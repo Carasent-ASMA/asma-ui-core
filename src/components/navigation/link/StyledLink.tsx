@@ -74,6 +74,8 @@ export const StyledLink: React.FC<StyledLinkProps> = ({
                 {/* eslint-disable-next-line jsx-a11y/anchor-is-valid -- a disabled link keeps its link role
                     and its place in the tab order (APG); with no `href` there is nothing to navigate to. */}
                 <a
+                    {...otherProps}
+                    onClick={(event) => event.preventDefault()}
                     data-testid={dataTest}
                     ref={reflink}
                     role='link'

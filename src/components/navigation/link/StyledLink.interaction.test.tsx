@@ -1,4 +1,4 @@
-import { afterEach, describe, it } from 'vitest'
+import { afterEach, describe, it, vi } from 'vitest'
 import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { StyledLink } from './StyledLink'
@@ -40,4 +40,35 @@ describe('StyledLink disabledReason', () => {
         link.click()
         await expect(window.location.hash).not.toBe('#report')
     })
+
+    it.each([
+        { 'aria-label': 'Open report' },
+        { 'aria-labelledby': 'report-label' },
+    ])('preserves the name of a disabled icon link with %j', async (nameProps) => {
+        const onClick = vi.fn()
+        const { container } = mount(
+            <>
+                <span id='report-label'>Open report</span>
+                <StyledLink
+                    {...nameProps}
+                    dataTest='report'
+                    href='#report'
+                    disabled
+                    disabledReason='The report is still being generated'
+                    contentNode={<span aria-hidden='true'>Icon</span>}
+                    onClick={onClick}
+                />
+            </>,
+        )
+        const link = container.querySelector('a')!
+        await userEvent.tab()
+        await expect(link).toHaveFocus()
+        await expect(link).toHaveAccessibleName('Open report')
+        await expect(link).toHaveAccessibleDescription('The report is still being generated')
+        link.click()
+        await userEvent.keyboard('{Enter}')
+        await expect(onClick).not.toHaveBeenCalled()
+        await expect(link).not.toHaveAttribute('href')
+    })
+
 })
