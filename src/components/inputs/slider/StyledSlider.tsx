@@ -201,7 +201,24 @@ export function StyledSlider<T>({
                     value={autocompleteValue}
                     onChange={onAutocompleteChange}
                     renderInput={(params) => (
-                        <StyledInputField dataTest='slider-autocomplete-input' {...params} name={name} />
+                        <StyledInputField
+                            dataTest='slider-autocomplete-input'
+                            {...params}
+                            name={name}
+                            slotProps={{
+                                ...params.slotProps,
+                                htmlInput: {
+                                    ...params.slotProps.htmlInput,
+                                    ...(ariaLabel
+                                        ? {
+                                              'aria-label':
+                                                  typeof ariaLabel === 'function' ? ariaLabel(0) : ariaLabel,
+                                          }
+                                        : {}),
+                                    ...(ariaLabelledBy ? { 'aria-labelledby': ariaLabelledBy } : {}),
+                                },
+                            }}
+                        />
                     )}
                 />
             </>
