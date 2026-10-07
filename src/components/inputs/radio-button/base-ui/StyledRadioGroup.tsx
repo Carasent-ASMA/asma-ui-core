@@ -51,6 +51,8 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
         ref,
     ) => {
         const helperId = useId()
+        const reasonId = useId()
+        const active = Boolean(readOnly && readOnlyReason)
         const generatedName = useId()
         const groupName = name ?? generatedName
 
@@ -65,9 +67,15 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
         }
 
         const contextValue = useMemo(
-            () => ({ name: groupName, value: selected, disabled, onSelect }),
+            () => ({
+                name: groupName,
+                value: selected,
+                disabled,
+                onSelect,
+                reasonDescriptionId: active ? reasonId : undefined,
+            }),
             // eslint-disable-next-line react-hooks/exhaustive-deps
-            [groupName, selected, disabled, readOnly],
+            [groupName, selected, disabled, readOnly, active, reasonId],
         )
 
         const message = error ? (errorText ?? helperText) : helperText
@@ -80,8 +88,6 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
         // stretched to the group's full width by the default `align-items: stretch` — the user asked
         // for fit-width radios that sit on one line rather than full-width rows on separate lines.
         const hasDirection = /\bflex-(?:row|col)\b/.test(rest.className ?? '')
-
-        const active = Boolean(readOnly && readOnlyReason)
 
         const group = (
             <div
@@ -122,6 +128,7 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
                 open={active ? undefined : false}
                 openOnTap={active}
                 persistentDescription={active}
+                persistentDescriptionId={reasonId}
             >
                 {group}
             </StyledTooltip>

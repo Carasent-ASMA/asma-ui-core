@@ -90,6 +90,8 @@ export interface TooltipProps {
      * tooltip is closed, so a screen reader announces it on focus (disabled-states DIS-2, 4.1.2).
      */
     persistentDescription?: boolean
+    /** Share the persistent description with every focusable item in a composite control. */
+    persistentDescriptionId?: string
     offsetDistance?: number
     className?: string
     slotProps?: TooltipSlotProps
@@ -129,6 +131,7 @@ const TooltipWithFloating = ({
     disableFocusListener,
     openOnTap,
     persistentDescription: requestedPersistentDescription,
+    persistentDescriptionId,
     offsetDistance,
     className,
     slotProps,
@@ -189,7 +192,8 @@ const TooltipWithFloating = ({
     // `useRole` already mints the floating element's id and puts it on the floating node — reuse it
     // instead of a second `useId`, so nothing overrides a Floating UI internal.
     const { floatingId } = context
-    const descriptionId = useId()
+    const generatedDescriptionId = useId()
+    const descriptionId = persistentDescriptionId ?? generatedDescriptionId
     const describedById = persistentDescription ? descriptionId : floatingId
     const describes = Boolean(persistentDescription) || open
 
@@ -202,6 +206,7 @@ const TooltipWithFloating = ({
         if (!describes || !describedById || !(reference instanceof HTMLElement)) return
         const described = firstTabbable(reference) ?? reference
         const previous = described.getAttribute('aria-describedby')
+        if (previous?.split(/\s+/).includes(describedById)) return
         described.setAttribute('aria-describedby', previous ? `${previous} ${describedById}` : describedById)
         return () => {
             if (previous === null) described.removeAttribute('aria-describedby')
