@@ -47,7 +47,7 @@ interface SliderSlotProps {
  * DS slider: rail `delta-100` (4px), filled track + thumb + active dots `gama-500`, inactive dots
  * white/`delta-300`, scale numbers Body Base SemiBold 16/24 `delta-700`. Disabled → `delta-200`.
  */
-export interface StyledSliderProps<T> {
+export interface StyledSliderProps<T = unknown> {
     dataTest: string
     min?: number
     max?: number
