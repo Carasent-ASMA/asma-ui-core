@@ -14,6 +14,8 @@ import { useHelperSlot } from 'src/helpers/useHelperSlot'
 import styles from './StyledSlider.module.scss'
 import { StyledButton } from '../button'
 import { PlusIcon, RemoveIcon } from 'src/components/icons'
+import { StyledSelectAutocomplete, type AutocompleteChangeReason } from '../select-autocomplete'
+import { StyledInputField } from '../input-field'
 
 export interface SliderMark {
     value: number
@@ -45,7 +47,7 @@ interface SliderSlotProps {
  * DS slider: rail `delta-100` (4px), filled track + thumb + active dots `gama-500`, inactive dots
  * white/`delta-300`, scale numbers Body Base SemiBold 16/24 `delta-700`. Disabled → `delta-200`.
  */
-export interface StyledSliderProps {
+export interface StyledSliderProps<T> {
     dataTest: string
     min?: number
     max?: number
@@ -74,6 +76,20 @@ export interface StyledSliderProps {
     ariaLabelledBy?: string
     onChange?: (event: SyntheticEvent, value: SliderValue, activeThumb: number) => void
     onChangeCommitted?: (event: SyntheticEvent, value: SliderValue) => void
+
+    // Autocomplete props
+    /** Autocomplete options */
+    options?: readonly T[]
+    autocompleteClassName?: string
+    autocompleteValue?: T | null
+    getOptionLabel?: (option: T) => string
+    isOptionEqualToValue?: (option: T, value: T) => boolean
+    onAutocompleteChange?: (
+        event: SyntheticEvent,
+        value: T | null,
+        reason: AutocompleteChangeReason,
+        details?: { option: T },
+    ) => void
 }
 
 const clampPercent = (value: number, min: number, max: number): number => {
@@ -84,6 +100,12 @@ const clampPercent = (value: number, min: number, max: number): number => {
 const asPair = (value: SliderValue | undefined): [number, number] | null =>
     Array.isArray(value) ? [value[0] ?? 0, value[1] ?? 0] : null
 
+const AUTOCOMPLETE_THRESHOLD = 10
+
+function shouldUseAutocomplete<T>(options?: readonly T[]): boolean {
+    return (options?.length ?? 0) > AUTOCOMPLETE_THRESHOLD
+}
+
 /**
  * Native range-input slider (replaces MUI `Slider`). Single value uses one `<input type="range">`;
  * a two-element `value` renders two stacked inputs (each thumb independently grabbable via
@@ -93,7 +115,7 @@ const asPair = (value: SliderValue | undefined): [number, number] | null =>
  * CI is the visual gate. Upgrade path: tune the 8px thumb inset if a diff shows misalignment.
  * TASK-204.
  */
-export const StyledSlider = ({
+export function StyledSlider<T>({
     dataTest,
     min = 0,
     max = 100,
@@ -119,7 +141,14 @@ export const StyledSlider = ({
     ariaLabelledBy,
     onChange,
     onChangeCommitted,
-}: StyledSliderProps): JSX.Element => {
+
+    options,
+    autocompleteClassName,
+    autocompleteValue,
+    getOptionLabel,
+    isOptionEqualToValue,
+    onAutocompleteChange,
+}: StyledSliderProps<T>): JSX.Element {
     const helperId = useId()
     const isVertical = orientation === 'vertical'
     // A native range thumb centers at T/2 … (length − T/2). The visual track + marks must be inset by
@@ -135,13 +164,33 @@ export const StyledSlider = ({
     const pair = asPair(current)
     const isRange = pair !== null
 
-    const message = error ? errorText ?? helperText : helperText
+    const message = error ? (errorText ?? helperText) : helperText
     const { show: showHelperSlot, role: helperAlertRole } = useHelperSlot(
         'StyledSlider',
         error,
         message,
         reserveHelperText,
     )
+
+    if (options?.length && shouldUseAutocomplete(options)) {
+        return (
+            <StyledSelectAutocomplete
+                dataTest={dataTest}
+                disableClearable
+                className={cn('min-w-[200px]', autocompleteClassName)}
+                size='small'
+                disabled={disabled}
+                error={error}
+                helperText={showHelperSlot ? message : ''}
+                options={options}
+                getOptionLabel={getOptionLabel}
+                isOptionEqualToValue={isOptionEqualToValue}
+                value={autocompleteValue}
+                onChange={onAutocompleteChange}
+                renderInput={(params) => <StyledInputField dataTest='slider-autocomplete-input' {...params} />}
+            />
+        )
+    }
 
     // Match MUI's mark resolution (pre-rewrite parity):
     // - `marks === true` auto-generates a dot at every step: min + step·i for i in 0…floor((max-min)/step).
@@ -152,8 +201,8 @@ export const StyledSlider = ({
         marks === true && Number.isFinite(step) && step > 0 && max > min
             ? Array.from({ length: Math.floor((max - min) / step) + 1 }, (_, i) => ({ value: min + step * i }))
             : Array.isArray(marks)
-            ? marks
-            : []
+              ? marks
+              : []
     const markList: SliderMark[] = generatedMarks.filter((mark) => mark.value >= min && mark.value <= max)
 
     const lo = isRange ? Math.min(pair[0], pair[1]) : min
@@ -258,7 +307,7 @@ export const StyledSlider = ({
     }
 
     const emit = (
-        handler: StyledSliderProps['onChange'] | StyledSliderProps['onChangeCommitted'],
+        handler: StyledSliderProps<T>['onChange'] | StyledSliderProps<T>['onChangeCommitted'],
         event: SyntheticEvent,
         rawValue: number,
         thumbIndex: number,
