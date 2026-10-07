@@ -193,29 +193,34 @@ export const AutocompleteBoundary: Story = {
     render: () => (
         <div className='flex max-w-[640px] flex-col gap-12'>
             <div data-testid='ten-options'>
-                <div className='mb-4 text-sm font-semibold text-delta-800'>10 options — Slider</div>
-                <StyledSlider<number>
-                    dataTest='slider-10-options'
-                    min={1}
-                    max={10}
-                    step={1}
-                    options={tenOptions.map((option) => option.id)}
-                    defaultValue={5}
-                    marks={labelledMarks(1, 10)}
-                />
+                <label className='flex flex-col gap-4'>
+                    10 options - Slider
+                    <StyledSlider<number>
+                        dataTest='slider-10-options'
+                        ariaLabel='10 options - Slider'
+                        min={1}
+                        max={10}
+                        step={1}
+                        options={tenOptions.map((option) => option.id)}
+                        defaultValue={5}
+                        marks={labelledMarks(1, 10)}
+                    />
+                </label>
             </div>
 
             <div data-testid='eleven-options'>
-                <div className='mb-4 text-sm font-semibold text-delta-800'>11 options — Autocomplete</div>
-                <StyledSlider<number>
-                    dataTest='slider-11-options'
-                    min={1}
-                    max={11}
-                    step={1}
-                    options={autocompleteOptions.map((option) => option.id)}
-                    autocompleteValue={6}
-                    getOptionLabel={(option) => String(option)}
-                />
+                <label className='flex flex-col gap-4'>
+                    11 options — Autocomplete
+                    <StyledSlider<number>
+                        dataTest='slider-11-options'
+                        min={1}
+                        max={11}
+                        step={1}
+                        options={autocompleteOptions.map((option) => option.id)}
+                        autocompleteValue={6}
+                        getOptionLabel={(option) => String(option)}
+                    />
+                </label>
             </div>
         </div>
     ),
@@ -237,9 +242,8 @@ export const AutocompleteStates: Story = {
 
         return (
             <div className='flex max-w-[600px] flex-col gap-10'>
-                <div>
-                    <div className='mb-4 text-sm font-semibold text-delta-800'>Helper text</div>
-
+                <label className='flex flex-col gap-4'>
+                    Helper text
                     <StyledSlider<number>
                         dataTest='autocomplete-helper'
                         options={options}
@@ -247,11 +251,10 @@ export const AutocompleteStates: Story = {
                         getOptionLabel={(option) => String(option)}
                         helperText='Choose the value that best matches your answer'
                     />
-                </div>
+                </label>
 
-                <div>
-                    <div className='mb-4 text-sm font-semibold text-delta-800'>Error</div>
-
+                <label className='flex flex-col gap-4'>
+                    Error
                     <StyledSlider<number>
                         dataTest='autocomplete-error'
                         options={options}
@@ -260,23 +263,18 @@ export const AutocompleteStates: Story = {
                         error
                         errorText='Please choose a valid value'
                     />
-                </div>
+                </label>
 
-                <div>
-                    {/* <div className='mb-4 text-sm font-semibold text-delta-800'>Disabled</div> */}
-
-                    <StyledFormControl>
-                        <StyledFormLabel title='Disabled' />
-
-                        <StyledSlider<number>
-                            dataTest='autocomplete-disabled'
-                            options={options}
-                            autocompleteValue={6}
-                            getOptionLabel={(option) => String(option)}
-                            disabled
-                        />
-                    </StyledFormControl>
-                </div>
+                <label className='flex flex-col gap-4'>
+                    Disabled
+                    <StyledSlider<number>
+                        dataTest='autocomplete-disabled'
+                        options={options}
+                        autocompleteValue={6}
+                        getOptionLabel={(option) => String(option)}
+                        disabled
+                    />
+                </label>
             </div>
         )
     },
@@ -287,6 +285,10 @@ export const AutocompleteStates: Story = {
         await expect(canvas.getByText('Choose the value that best matches your answer')).toBeInTheDocument()
 
         await expect(canvas.getByText('Please choose a valid value')).toBeInTheDocument()
+
+        await expect(canvas.getByRole('combobox', { name: 'Disabled' })).toBeInTheDocument()
+
+        await expect(canvas.getByRole('combobox', { name: 'Disabled' })).toBeDisabled()
     },
 }
 
