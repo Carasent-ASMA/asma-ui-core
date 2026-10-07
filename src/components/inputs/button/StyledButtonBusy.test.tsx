@@ -14,14 +14,14 @@ afterEach(() => {
 describe('StyledButton busy announcement', () => {
     it('keeps an empty status region until the action starts, then announces it', () => {
         const { rerender } = render(
-            <StyledButton dataTest='save' loading={false}>
+            <StyledButton dataTest='save' loading={false} locale='en'>
                 Save
             </StyledButton>,
         )
         expect(screen.getByRole('status').textContent).toBe('')
 
         rerender(
-            <StyledButton dataTest='save' loading>
+            <StyledButton dataTest='save' loading locale='en'>
                 Save
             </StyledButton>,
         )
@@ -39,11 +39,29 @@ describe('StyledButton busy announcement', () => {
     it('uses its locale even when the shell stores another language', () => {
         localStorage.setItem('lang', 'no')
         render(
+            <StyledButton dataTest='save' loading locale='en'>
+                Save
+            </StyledButton>,
+        )
+        expect(screen.getByRole('status').textContent).toBe('In progress')
+    })
+
+    it('follows the shell language without a locale', () => {
+        localStorage.setItem('lang', 'EN')
+        const { rerender } = render(
             <StyledButton dataTest='save' loading>
                 Save
             </StyledButton>,
         )
         expect(screen.getByRole('status').textContent).toBe('In progress')
+
+        localStorage.setItem('lang', 'no')
+        rerender(
+            <StyledButton dataTest='save' loading>
+                Lagre
+            </StyledButton>,
+        )
+        expect(screen.getByRole('status').textContent).toBe('Pågår')
     })
 
     it('speaks Norwegian when requested and takes an app text', () => {

@@ -1,6 +1,7 @@
 import { useContext, useMemo, useState, type ReactNode } from 'react'
 
 import { DialogBusyContext, WAIT_UNTIL_SAVED } from '../DialogBusyContext'
+import { getUiCoreLocale } from 'src/helpers/uiCoreLocale'
 
 import { DotsVerticalIcon } from 'src/components/icons'
 import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip'
@@ -125,12 +126,12 @@ export function StyledDialogFooter({
     primaryAction,
     fixed = false,
     rounded = true,
-    locale = 'en',
+    locale,
     className,
     dataTest = 'styled-dialog-footer',
 }: StyledDialogFooterProps): JSX.Element {
     const dialogBusy = useContext(DialogBusyContext)
-    const t = useToolbarTranslations(locale)
+    const t = useToolbarTranslations(locale ?? 'en')
     const { ref: containerRef, widthPx: containerWidth } = useElementWidthPx<HTMLDivElement>()
     const { register, widths } = useWidthRegistry()
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
@@ -196,7 +197,7 @@ export function StyledDialogFooter({
          * Loading keeps focus on the button instead of disabling it (submit-buttons §6). */
         const busySecondary = key === 'secondary' && dialogBusy?.busy
         const disabled = Boolean(button.disabled) || Boolean(busySecondary)
-        const disabledReason = busySecondary ? (dialogBusy.busyReason ?? WAIT_UNTIL_SAVED[locale]) : button.tooltip
+        const disabledReason = busySecondary ? (dialogBusy.busyReason ?? WAIT_UNTIL_SAVED[locale ?? getUiCoreLocale()]) : button.tooltip
         const element = (
             <StyledButton
                 locale={locale}
@@ -207,7 +208,7 @@ export function StyledDialogFooter({
                 type={button.type ?? 'button'}
                 disabled={disabled}
                 disabledReason={disabledReason}
-                loading={button.loading}
+                loading={Boolean(button.loading)}
                 startIcon={button.icon}
                 endIcon={button.endIcon}
                 onClick={button.onClick}

@@ -1,6 +1,7 @@
 import { afterEach, describe, it, vi } from 'vitest'
 import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
+import { setUiCoreLocale } from 'src/helpers/uiCoreLocale'
 import { StyledButton } from '../../inputs/button/StyledButton'
 import { StyledDialog } from './StyledDialog'
 import { MinimizableDialogV2 } from '../minimizable-dialog/v2/MinimizableDialogV2'
@@ -74,7 +75,8 @@ describe('StyledDialog explains busy dismissal controls', () => {
         await expect(cancel).not.toHaveAttribute('aria-disabled')
     })
 
-    it('explains busy dismissal with the ui-core default reason when none is supplied', async () => {
+    it('explains busy dismissal in the shell language when no reason or locale is supplied', async () => {
+        setUiCoreLocale('en')
         const onClose = vi.fn()
         const { container } = mount(
             <StyledDialog open dataTest='editor' onClose={onClose}>
@@ -91,7 +93,9 @@ describe('StyledDialog explains busy dismissal controls', () => {
             button.click()
         }
         await expect(onClose).not.toHaveBeenCalled()
+        setUiCoreLocale(undefined)
     })
+
     it.each([
         ['en', 'Wait until saved', 'In progress'],
         ['no', 'Vent til lagringen er ferdig', 'Pågår'],
@@ -108,7 +112,22 @@ describe('StyledDialog explains busy dismissal controls', () => {
         for (const selector of ['[data-testid="close-button-editor"]', '[data-testid="cancel"]']) {
             await expect(container.querySelector(selector)).toHaveAccessibleDescription(reason)
         }
-        await expect(container.querySelector('[role="status"]')).toHaveTextContent(announcement)
+        const statuses = Array.from(container.querySelectorAll('[role="status"]'), (status) => status.textContent)
+        await expect(statuses).toContain(announcement)
+    })
+
+    it('announces a footer action that starts loading after it rendered without a loading flag', async () => {
+        const fixture = (loading?: boolean): JSX.Element => (
+            <StyledDialog open dataTest='editor' locale='en'>
+                <StyledDialogFooter locale='en' primaryAction={{ label: 'Save', dataTest: 'save', loading }} />
+            </StyledDialog>
+        )
+        const { container, rerender } = mount(fixture())
+        const status = container.querySelector('[role="status"]')
+        await expect(status).toHaveTextContent('')
+        rerender(fixture(true))
+        await expect(container.querySelector('[role="status"]')).toBe(status)
+        await expect(status).toHaveTextContent('In progress')
     })
 
     it('uses the footer locale for its fallback reason independently of the dialog locale', async () => {
