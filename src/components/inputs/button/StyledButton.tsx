@@ -7,6 +7,9 @@ import clsx from 'clsx'
 import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip'
 import { LoadingIcon } from 'src/components/icons'
 import { useReportDialogBusy } from 'src/components/feedback/dialog/DialogBusyContext'
+import { getUiCoreLocale } from 'src/helpers/uiCoreLocale'
+
+const IN_PROGRESS = { en: 'In progress', no: 'Pågår' } as const
 
 export type StyledButtonType = 'contained' | 'outlined' | 'text' | 'textGray'
 
@@ -30,9 +33,11 @@ interface commonProps {
     disabledReason?: ReactNode
     /**
      * @figmaProp none — behavioral. Busy: spinner centred over the label (the label stays invisible in the layout, so the width is kept), `aria-busy`, focus kept,
-     * activation ignored (disabled-states DIS-8, submit-buttons SUB-4).
+     * activation ignored (disabled-states DIS-8, submit-buttons SUB-4). The start is announced politely.
      */
     loading?: boolean
+    /** @figmaProp none — behavioral. Announced when `loading` starts; defaults to "In progress" in the ui-core locale. */
+    loadingAnnouncement?: string
 }
 
 interface variantTextGrayProps {
@@ -114,6 +119,7 @@ export const StyledButton = ({
     disabled,
     disabledReason,
     loading,
+    loadingAnnouncement,
     onClick,
     ...otherProps
 }: StyledButtonProps): JSX.Element => {
@@ -214,7 +220,7 @@ export const StyledButton = ({
 
     // The tooltip stays mounted while a reason is given, so toggling `disabled` never remounts the
     // button and drops its focus; an enabled button keeps it closed.
-    return (
+    const tooltipped = (
         <StyledTooltip
             arrow
             title={disabledReason}
@@ -224,5 +230,17 @@ export const StyledButton = ({
         >
             {button}
         </StyledTooltip>
+    )
+
+    if (loading === undefined) return tooltipped
+
+    // The live region exists before `loading` turns on, otherwise screen readers miss the change.
+    return (
+        <>
+            {tooltipped}
+            <span role='status' className='sr-only'>
+                {loading ? loadingAnnouncement ?? IN_PROGRESS[getUiCoreLocale()] : ''}
+            </span>
+        </>
     )
 }
