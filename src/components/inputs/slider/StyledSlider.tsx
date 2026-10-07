@@ -202,7 +202,7 @@ export function StyledSlider<T>({
                     onChange={onAutocompleteChange}
                     renderInput={(params) => (
                         <StyledInputField
-                            dataTest='slider-autocomplete-input'
+                            dataTest={dataTest}
                             {...params}
                             name={name}
                             slotProps={{
