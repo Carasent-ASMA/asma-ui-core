@@ -101,6 +101,8 @@ export const StyledSwitch = forwardRef<HTMLButtonElement, StyledSwitchProps>(
 
         const iconClass = styles['iconContent']
 
+        const active = Boolean(readOnly && readOnlyReason)
+
         const control = (
             <button
                 {...rest}
@@ -138,10 +140,14 @@ export const StyledSwitch = forwardRef<HTMLButtonElement, StyledSwitchProps>(
             </button>
         )
 
-        if (!readOnly || !readOnlyReason) return control
-
         return (
-            <StyledTooltip title={readOnlyReason} openOnTap persistentDescription>
+            <StyledTooltip
+                keepMounted
+                title={readOnlyReason}
+                open={active ? undefined : false}
+                openOnTap={active}
+                persistentDescription={active}
+            >
                 {control}
             </StyledTooltip>
         )

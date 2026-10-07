@@ -236,6 +236,8 @@ interface ReadOnlyTextProps {
 // A read-only field is still announced and focusable like a native `readonly` textarea, so its
 // value and any reason are reachable from the keyboard (disabled-states DIS-6).
 const ReadOnlyText = ({ id, labelId, descriptionId, boxed, reason, children }: ReadOnlyTextProps) => {
+    const active = Boolean(reason)
+
     const text = (
         <div
             id={id}
@@ -250,9 +252,14 @@ const ReadOnlyText = ({ id, labelId, descriptionId, boxed, reason, children }: R
             {children}
         </div>
     )
-    if (!reason) return text
     return (
-        <StyledTooltip title={reason} openOnTap persistentDescription>
+        <StyledTooltip
+            keepMounted
+            title={reason}
+            open={active ? undefined : false}
+            openOnTap={active}
+            persistentDescription={active}
+        >
             {text}
         </StyledTooltip>
     )

@@ -181,6 +181,8 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
         )
     }
 
+    const active = Boolean(readOnly && readOnlyReason)
+
     const control = (
         // False positive: this is the native <label>-wraps-<input> pattern. The wrapped real
         // <input type='checkbox'> below is the actual interactive/keyboard-operable element (Tab
@@ -214,10 +216,14 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
         </label>
     )
 
-    if (!readOnly || !readOnlyReason) return control
-
     return (
-        <StyledTooltip title={readOnlyReason} openOnTap persistentDescription>
+        <StyledTooltip
+            keepMounted
+            title={readOnlyReason}
+            open={active ? undefined : false}
+            openOnTap={active}
+            persistentDescription={active}
+        >
             {control}
         </StyledTooltip>
     )

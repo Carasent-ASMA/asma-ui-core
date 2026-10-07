@@ -64,6 +64,8 @@ interface TooltipSlotProps {
  */
 export interface TooltipProps {
     title: ReactNode
+    /** Preserve the trigger node when a control gains or loses its reason. */
+    keepMounted?: boolean
     children: ReactElement
     /** @figmaProp Arrow placement (Top/Bottom/Left/Right × start/middle/end) */
     placement?: Placement
@@ -109,7 +111,7 @@ export const StyledTooltip = (props: TooltipProps): JSX.Element => {
     // Call sites use the `title={condition && 'text'}` idiom, which yields `false` when the condition
     // is off; without catching `false` here the machinery mounts and, with `arrow`, paints a stray
     // empty dark bubble + arrow on hover.
-    if (!props.title && props.title !== 0) return props.children
+    if (!props.keepMounted && !props.title && props.title !== 0) return props.children
     return <TooltipWithFloating {...props} />
 }
 
@@ -126,14 +128,16 @@ const TooltipWithFloating = ({
     disableHoverListener,
     disableFocusListener,
     openOnTap,
-    persistentDescription,
+    persistentDescription: requestedPersistentDescription,
     offsetDistance,
     className,
     slotProps,
 }: TooltipProps): JSX.Element => {
     const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
     const isControlled = controlledOpen !== undefined
-    const open = controlledOpen ?? uncontrolledOpen
+    const hasTitle = Boolean(title) || title === 0
+    const open = hasTitle && (controlledOpen ?? uncontrolledOpen)
+    const persistentDescription = hasTitle && requestedPersistentDescription
     const arrowRef = useRef<SVGSVGElement>(null)
 
     const setOpen = (next: boolean): void => {

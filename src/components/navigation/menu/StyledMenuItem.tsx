@@ -107,10 +107,15 @@ export const StyledMenuItem = ({
         </li>
     )
 
-    if (!reasoned) return item
-
     return (
-        <StyledTooltip title={disabledReason} placement='left' openOnTap persistentDescription>
+        <StyledTooltip
+            keepMounted
+            title={disabledReason}
+            open={reasoned ? undefined : false}
+            placement='left'
+            openOnTap={reasoned}
+            persistentDescription={reasoned}
+        >
             {item}
         </StyledTooltip>
     )

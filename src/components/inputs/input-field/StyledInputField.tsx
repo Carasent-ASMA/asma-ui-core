@@ -404,7 +404,7 @@ export const StyledInputField = ({
             }}
         >
             <div className='relative overflow-visible'>
-                <ReadOnlyReason reason={readOnly ? readOnlyReason : undefined}>
+                <ReadOnlyReason reason={readOnlyReason} active={Boolean(readOnly && readOnlyReason)}>
                     {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions -- not independently
                         interactive: this shell wraps the REAL <input>/<textarea> below, which is already
                         keyboard-operable on its own. `onMouseDown` is a passthrough (MUI-parity
@@ -569,10 +569,15 @@ export const StyledInputField = ({
     )
 }
 
-const ReadOnlyReason = ({ reason, children }: { reason: ReactNode; children: ReactElement }) => {
-    if (!reason) return children
+const ReadOnlyReason = ({ reason, active, children }: { reason: ReactNode; active: boolean; children: ReactElement }) => {
     return (
-        <StyledTooltip title={reason} openOnTap persistentDescription>
+        <StyledTooltip
+            keepMounted
+            title={reason}
+            open={active ? undefined : false}
+            openOnTap={active}
+            persistentDescription={active}
+        >
             {children}
         </StyledTooltip>
     )

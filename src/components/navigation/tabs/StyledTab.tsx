@@ -111,10 +111,14 @@ export const StyledTab: FC<StyledTabProps> = ({ value, label, disabled, disabled
         </button>
     )
 
-    if (!reasoned) return tab
-
     return (
-        <StyledTooltip title={disabledReason} openOnTap persistentDescription>
+        <StyledTooltip
+            keepMounted
+            title={disabledReason}
+            open={reasoned ? undefined : false}
+            openOnTap={reasoned}
+            persistentDescription={reasoned}
+        >
             {tab}
         </StyledTooltip>
     )
