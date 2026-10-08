@@ -30,6 +30,7 @@ reset outranks any consumer's layered `border-[color:…]` utility — cascade l
 specificity — so a hand-rolled badge silently renders Tailwind's default gray border
 instead of `--colors-badge-border-count`.
 
-Existing hostless badges will shift to the position their callers actually asked for,
-which for most is 10px down and to the right of where they sat. Call sites carrying
-hand-tuned offsets to compensate should drop them.
+A hostless count in normal flow moves 10px right and no longer overlaps its left
+neighbour. One whose root is pinned to a corner moves 10px toward the inside of that
+corner, for example 10px down and left for top/right. Drop offsets that made up for the
+old overhang.
