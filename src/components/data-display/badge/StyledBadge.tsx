@@ -13,9 +13,10 @@ type StyledBadgePurpose = 'notification' | 'unread' | 'filter'
  * `dot` = 12px lime circle with a stronger 2px border. Other colors and `small` are legacy app
  * extensions with no matching Figma notification variant.
  *
- * Pass children to decorate them — the badge anchors to their corner. Pass none and a `dot` becomes
- * a flow element (Figma `Size=Dot`, node 44267-214524), for a table cell or a marker in a row, and
- * `className` then applies to the badge's own root so the caller can place it.
+ * Pass children to decorate them — the badge anchors to their corner. Pass none and the badge,
+ * count or dot, becomes a flow element (for the dot, Figma `Size=Dot`, node 44267-214524), for a
+ * table cell or a marker in a row, and `className` then applies to the badge's own root so the
+ * caller can place it.
  *
  * `purpose` selects Figma's `Parent`: the default notification dot, or the 8px solid primary dot
  * that marks something unread or a filter as active.
@@ -31,7 +32,7 @@ interface BadgeProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'color'> {
     showZero?: boolean
     /**
      * @figmaProp Size = dot→"Dot" (12px) | standard→"Default" count badge
-     * A `dot` with no children renders in normal flow rather than anchored to a corner.
+     * With no children the badge renders in normal flow rather than anchored to a corner.
      */
     variant?: 'standard' | 'dot'
     /**
