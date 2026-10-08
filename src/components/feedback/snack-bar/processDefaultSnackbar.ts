@@ -1,4 +1,5 @@
-import { closeSnackbar, enqueueSnackbar, type SnackbarKey, type SnackbarMessage } from 'notistack'
+import type { SnackbarKey, SnackbarMessage } from 'notistack'
+import { closeSnackbar, enqueueSnackbar } from './snackbarHost'
 import type { StyledDefaultSnackbarProps } from './components/StyledDefaultSnackbar'
 
 export function processDefaultSnackbar(message: SnackbarMessage, options: Partial<StyledDefaultSnackbarProps> = {}): { onClose: () => void; snackbarKey: SnackbarKey; } {
