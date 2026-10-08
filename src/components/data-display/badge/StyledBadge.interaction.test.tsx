@@ -260,6 +260,27 @@ describe('StyledBadge notification contract', () => {
         await expect(root.querySelector('span[aria-hidden="true"]')).toBeTruthy()
     })
 
+    it('does not name a hidden hostless count for assistive technology', async () => {
+        const { container, rerender } = mount(
+            <StyledBadge dataTest='standalone-count' badgeContent={0} aria-label='Unread, 0' />,
+        )
+        const root = container.querySelector<HTMLElement>('[data-testid="standalone-count"]')!
+
+        await expect(root.querySelector('span[aria-hidden="true"]')).toBeNull()
+        await expect(root).not.toHaveAttribute('role')
+        await expect(root).not.toHaveAttribute('aria-label')
+        await expect(container.querySelector('[role="status"]')).toBeTruthy()
+
+        rerender(<StyledBadge dataTest='standalone-count' badgeContent={2} aria-label='Unread, 2' />)
+        await expect(root).toHaveAttribute('role', 'img')
+        await expect(root).toHaveAccessibleName('Unread, 2')
+
+        rerender(<StyledBadge dataTest='standalone-count' badgeContent={2} invisible aria-label='Unread, 2' />)
+        await expect(root.querySelector('span[aria-hidden="true"]')).toBeNull()
+        await expect(root).not.toHaveAttribute('role')
+        await expect(root).not.toHaveAttribute('aria-label')
+    })
+
     it('keeps a silent polite status region mounted before announcing count changes', async () => {
         const { container, rerender } = mount(
             <StyledBadge dataTest='notifications-badge' badgeContent={2} statusMessage='2 unread notifications'>
