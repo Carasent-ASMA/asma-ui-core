@@ -160,3 +160,48 @@ describe('StyledSlider Autocomplete mode', () => {
         await expect(container.querySelector('.my-autocomplete')).toBeTruthy()
     })
 })
+
+describe('StyledSlider autocomplete input props', () => {
+    afterEach(cleanup)
+
+    it('names the combobox from a string ariaLabel', async () => {
+        const { container } = mount(<AutocompleteFixture ariaLabel='Pain level' />)
+
+        await expect(within(container).getByRole('combobox', { name: 'Pain level' })).toBeTruthy()
+    })
+
+    it('names the combobox from a function ariaLabel', async () => {
+        const { container } = mount(<AutocompleteFixture ariaLabel={(thumbIndex) => `Pain level ${thumbIndex}`} />)
+
+        await expect(within(container).getByRole('combobox', { name: 'Pain level 0' })).toBeTruthy()
+    })
+
+    it('names the combobox from ariaLabelledBy', async () => {
+        const { container } = mount(
+            <div>
+                <span id='pain-scale-caption'>Pain scale</span>
+                <AutocompleteFixture ariaLabelledBy='pain-scale-caption' />
+            </div>,
+        )
+
+        await expect(within(container).getByRole('combobox', { name: 'Pain scale' })).toBeTruthy()
+    })
+
+    it('submits the selected option label under the field name', async () => {
+        const { container } = mount(
+            <form>
+                <AutocompleteFixture name='pain' initial={autocompleteOptions[5]} />
+            </form>,
+        )
+
+        const form = container.querySelector('form')!
+
+        await expect(new FormData(form).get('pain')).toBe('Option 6')
+    })
+
+    it('puts the caller dataTest id on the combobox input', async () => {
+        const { container } = mount(<AutocompleteFixture dataTest='pain-scale' />)
+
+        await expect(container.querySelector('[data-testid="pain-scale"]')).toHaveAttribute('role', 'combobox')
+    })
+})
