@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { StyledSlider } from './StyledSlider'
 import { afterEach, describe, it, vi } from 'vitest'
-import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
+import { expect, userEvent, waitFor, within } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 
 interface SliderOption {
@@ -54,6 +54,13 @@ describe('StyledSlider Autocomplete mode', () => {
 
         await expect(container.querySelector('input[type="range"]')).toBeNull()
         await expect(container.querySelector('[role="combobox"]')).toBeTruthy()
+    })
+
+    it('renders fromLabel and toLabel with more than 10 options', async () => {
+        const { container } = mount(<AutocompleteFixture fromLabel='No pain' toLabel='Worst pain' />)
+
+        await expect(within(container).getByText('No pain')).toBeTruthy()
+        await expect(within(container).getByText('Worst pain')).toBeTruthy()
     })
 
     it('uses the number of options rather than the numeric range to choose the mode', async () => {

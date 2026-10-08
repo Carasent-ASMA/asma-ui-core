@@ -174,39 +174,53 @@ export function StyledSlider<T>({
 
     if (options?.length && shouldUseAutocomplete(options)) {
         return (
-            <StyledSelectAutocomplete
-                dataTest={dataTest}
-                disableClearable
-                className={cn('min-w-[200px]', autocompleteClassName)}
-                size='small'
-                disabled={disabled}
-                error={error}
-                helperText={showHelperSlot ? message : ''}
-                options={options}
-                getOptionLabel={getOptionLabel}
-                isOptionEqualToValue={isOptionEqualToValue}
-                value={autocompleteValue}
-                onChange={onAutocompleteChange}
-                renderInput={(params) => (
-                    <StyledInputField
-                        dataTest={dataTest}
-                        {...params}
-                        name={name}
-                        slotProps={{
-                            ...params.slotProps,
-                            htmlInput: {
-                                ...params.slotProps.htmlInput,
-                                ...(ariaLabel
-                                    ? {
-                                          'aria-label': typeof ariaLabel === 'function' ? ariaLabel(0) : ariaLabel,
-                                      }
-                                    : {}),
-                                ...(ariaLabelledBy ? { 'aria-labelledby': ariaLabelledBy } : {}),
-                            },
-                        }}
-                    />
+            <>
+                {!isVertical && (fromLabel ?? toLabel) && (
+                    <div className='grid w-full grid-cols-2 gap-4'>
+                        {!isVertical && fromLabel && (
+                            <span className='min-w-0 break-words text-left font-normal text-delta-800'>{fromLabel}</span>
+                        )}
+
+                        {!isVertical && toLabel && (
+                            <span className='min-w-0 break-words text-right font-normal text-delta-800'>{toLabel}</span>
+                        )}
+                    </div>
                 )}
-            />
+
+                <StyledSelectAutocomplete
+                    dataTest={dataTest}
+                    disableClearable
+                    className={cn('min-w-[200px]', autocompleteClassName)}
+                    size='small'
+                    disabled={disabled}
+                    error={error}
+                    helperText={showHelperSlot ? message : ''}
+                    options={options}
+                    getOptionLabel={getOptionLabel}
+                    isOptionEqualToValue={isOptionEqualToValue}
+                    value={autocompleteValue}
+                    onChange={onAutocompleteChange}
+                    renderInput={(params) => (
+                        <StyledInputField
+                            dataTest={dataTest}
+                            {...params}
+                            name={name}
+                            slotProps={{
+                                ...params.slotProps,
+                                htmlInput: {
+                                    ...params.slotProps.htmlInput,
+                                    ...(ariaLabel
+                                        ? {
+                                              'aria-label': typeof ariaLabel === 'function' ? ariaLabel(0) : ariaLabel,
+                                          }
+                                        : {}),
+                                    ...(ariaLabelledBy ? { 'aria-labelledby': ariaLabelledBy } : {}),
+                                },
+                            }}
+                        />
+                    )}
+                />
+            </>
         )
     }
 
