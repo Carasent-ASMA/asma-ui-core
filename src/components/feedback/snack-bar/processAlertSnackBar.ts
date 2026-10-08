@@ -1,4 +1,4 @@
-import { enqueueSnackbar } from 'notistack'
+import { enqueueSnackbar } from './snackbarHost'
 
 export function processAlertSnackBar(message: string): void {
     enqueueSnackbar({
