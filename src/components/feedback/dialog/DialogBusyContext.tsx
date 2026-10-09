@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 
-import { getUiCoreLocale, type UiCoreLocale } from 'src/helpers/uiCoreLocale'
+import type { UiCoreLocale } from 'src/helpers/uiCoreLocale'
 
 export const WAIT_UNTIL_SAVED = { en: 'Wait until saved', no: 'Vent til lagringen er ferdig' } as const
 
@@ -21,7 +21,7 @@ export const DialogBusyContext = createContext<DialogBusyContextValue | null>(nu
  */
 export const useDialogBusyBoundary = (
     busyReason?: ReactNode,
-    locale?: UiCoreLocale,
+    locale: UiCoreLocale = 'en',
 ): { busy: boolean; busyReason: ReactNode; contextValue: DialogBusyContextValue } => {
     const [count, setCount] = useState(0)
 
@@ -32,7 +32,7 @@ export const useDialogBusyBoundary = (
 
     const busy = count > 0
     // Without an app text the dialog still says why it can't be closed (DIS-1).
-    const reason = busyReason ?? WAIT_UNTIL_SAVED[locale ?? getUiCoreLocale()]
+    const reason = busyReason ?? WAIT_UNTIL_SAVED[locale]
     // Share the app override; a footer chooses its own localized fallback.
     const contextValue = useMemo(() => ({ registerBusy, busy, busyReason }), [registerBusy, busy, busyReason])
 

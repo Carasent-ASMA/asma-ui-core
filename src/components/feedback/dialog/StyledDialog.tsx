@@ -61,7 +61,7 @@ export interface IStyledDialogProps {
     slotProps?: { paper?: DialogPaperProps; backdrop?: Record<string, unknown>; transition?: { onExited?: () => void } }
     /** Why close and Cancel wait while an action runs; defaults to "Wait until saved" in `locale`. */
     busyReason?: ReactNode
-    /** Language of the default busy reason; defaults to the shell language (see `getUiCoreLocale`). */
+    /** Language of the default busy reason; defaults to English. */
     locale?: UiCoreLocale
     onCloseText?: ReactNode
     /** @figmaProp none — behavioral */
@@ -109,7 +109,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     PaperProps,
     slotProps,
     busyReason,
-    locale,
+    locale = 'en',
     onCloseText,
     showCloseIcon = true,
     dialogLabel,

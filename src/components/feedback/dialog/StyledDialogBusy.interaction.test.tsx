@@ -10,7 +10,10 @@ import { StyledDialogFooter } from './dialog-footer/StyledDialogFooter'
 const busyReason = 'Wait until saved'
 
 describe('StyledDialog explains busy dismissal controls', () => {
-    afterEach(cleanup)
+    afterEach(() => {
+        cleanup()
+        setUiCoreLocale(undefined)
+    })
 
     it('soft-disables close and Cancel, blocks Escape, and restores them after saving', async () => {
         const onClose = vi.fn()
@@ -75,12 +78,16 @@ describe('StyledDialog explains busy dismissal controls', () => {
         await expect(cancel).not.toHaveAttribute('aria-disabled')
     })
 
-    it('explains busy dismissal in the shell language when no reason or locale is supplied', async () => {
-        setUiCoreLocale('en')
+    it('defaults busy texts to English in a Norwegian shell when no reason or locale is supplied', async () => {
+        setUiCoreLocale('no')
         const onClose = vi.fn()
         const { container } = mount(
             <StyledDialog open dataTest='editor' onClose={onClose}>
                 <StyledDialogFooter
+                    leftActions={[
+                        { id: 'edit', label: 'Edit', onClick: () => undefined },
+                        { id: 'delete', label: 'Delete', onClick: () => undefined },
+                    ]}
                     secondaryAction={{ label: 'Cancel', dataTest: 'cancel', onClick: onClose }}
                     primaryAction={{ label: 'Save', loading: true }}
                 />
@@ -93,13 +100,17 @@ describe('StyledDialog explains busy dismissal controls', () => {
             button.click()
         }
         await expect(onClose).not.toHaveBeenCalled()
-        setUiCoreLocale(undefined)
+        await expect(container.querySelector('[data-testid="styled-dialog-footer-more"]')).toHaveAccessibleName('More')
+        const statuses = Array.from(container.querySelectorAll('[role="status"]'), (status) => status.textContent)
+        await expect(statuses).toContain('In progress')
+        await expect(statuses).not.toContain('Pågår')
     })
 
     it.each([
         ['en', 'Wait until saved', 'In progress'],
         ['no', 'Vent til lagringen er ferdig', 'Pågår'],
     ] as const)('uses the dialog and footer locale %s for busy texts', async (locale, reason, announcement) => {
+        setUiCoreLocale(locale === 'en' ? 'no' : 'en')
         const { container } = mount(
             <StyledDialog open dataTest='editor' locale={locale}>
                 <StyledDialogFooter
