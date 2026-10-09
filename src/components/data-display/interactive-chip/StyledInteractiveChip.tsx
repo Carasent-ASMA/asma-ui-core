@@ -1,4 +1,4 @@
-import { forwardRef, type ComponentProps } from 'react'
+import { forwardRef, type ComponentProps, type ReactNode } from 'react'
 import { StyledChip } from '../chip'
 import { StyledCheckbox } from 'src/components/inputs/checkbox/base-ui/StyledCheckbox'
 import { StyledRadio } from 'src/components/inputs/radio-button/base-ui/StyledRadio'
@@ -25,6 +25,12 @@ export interface StyledInteractiveChipProps extends ComponentProps<typeof Styled
     size?: 'small' | 'medium'
     /** @figmaProp none — accessible name for the control */
     ariaLabel?: string
+    /**
+     * @figmaProp none — behavioral. Why the chip can't be selected. With `disabled` the chip stays
+     * focusable (`aria-disabled`), ignores activation and shows the reason on hover, focus and tap
+     * (disabled-states DIS-1…DIS-4). Without `disabled` it has no effect.
+     */
+    disabledReason?: ReactNode
 }
 
 // Figma Tag Chip Radio Selected (18869-29122) = 2px gama-400 border + gama-25 fill (same when

@@ -299,3 +299,22 @@ export const Radio_WithReactNodeLabel: Story = {
         expect(chip).toBeChecked()
     },
 }
+
+/** Disabled with a reason (disabled-states DIS-1…DIS-4): focusable, `aria-disabled`, reason on hover, focus and tap. */
+export const Checkbox_DisabledWithReason: Story = {
+    render: () => (
+        <StyledInteractiveChip
+            dataTest='interactive-chip'
+            label='SMS'
+            type='checkbox'
+            disabled
+            disabledReason='Add a mobile number first'
+            onClick={() => undefined}
+        />
+    ),
+    play: async ({ canvasElement }) => {
+        const chip = within(canvasElement).getByRole('checkbox', { name: 'SMS' })
+        await expect(chip).toHaveAttribute('aria-disabled', 'true')
+        await expect(chip).toHaveAccessibleDescription('Add a mobile number first')
+    },
+}
