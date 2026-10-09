@@ -7,7 +7,9 @@ import {
     type SyntheticEvent,
     useRef,
     type MouseEvent,
+    type KeyboardEvent,
 } from 'react'
+import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip'
 import { cn } from 'src/helpers/cn'
 import { HelperRow } from 'src/helpers/HelperRow'
 import { useHelperSlot } from 'src/helpers/useHelperSlot'
@@ -53,6 +55,16 @@ export interface StyledSliderProps {
     value?: SliderValue
     defaultValue?: SliderValue
     disabled?: boolean
+    /**
+     * @figmaProp none — behavioral. The value is shown but cannot change: the thumb stays focusable,
+     * exposes `aria-readonly` and ignores pointer and keys; the step buttons are hidden (disabled-states DIS-6).
+     */
+    readOnly?: boolean
+    /**
+     * @figmaProp none — behavioral. Why the value can't be changed here, and where it can. Shown on
+     * hover, focus and tap of a read-only slider. Without `readOnly` it has no effect.
+     */
+    readOnlyReason?: ReactNode
     size?: 'small' | 'medium'
     orientation?: 'horizontal' | 'vertical'
     marks?: boolean | SliderMark[]
@@ -75,6 +87,8 @@ export interface StyledSliderProps {
     onChange?: (event: SyntheticEvent, value: SliderValue, activeThumb: number) => void
     onChangeCommitted?: (event: SyntheticEvent, value: SliderValue) => void
 }
+
+const SLIDER_KEYS = new Set(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'])
 
 const clampPercent = (value: number, min: number, max: number): number => {
     if (max === min) return 0
@@ -101,6 +115,8 @@ export const StyledSlider = ({
     value,
     defaultValue,
     disabled,
+    readOnly,
+    readOnlyReason,
     size = 'medium',
     orientation = 'horizontal',
     marks,
@@ -121,6 +137,10 @@ export const StyledSlider = ({
     onChangeCommitted,
 }: StyledSliderProps): JSX.Element => {
     const helperId = useId()
+    const reasonId = useId()
+    // Read-only and disabled both refuse every change; only disabled leaves the Tab order.
+    const locked = Boolean(disabled) || Boolean(readOnly)
+    const reasoned = Boolean(readOnly) && Boolean(readOnlyReason)
     const isVertical = orientation === 'vertical'
     // A native range thumb centers at T/2 … (length − T/2). The visual track + marks must be inset by
     // exactly half the thumb so 0%/100% land on the thumb-centre travel (else the thumb drifts left of
@@ -188,7 +208,7 @@ export const StyledSlider = ({
         isRange ? (Math.abs((pair?.[1] ?? min) - nextValue) < Math.abs((pair?.[0] ?? min) - nextValue) ? 1 : 0) : 0
 
     const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>): void => {
-        if (disabled) return
+        if (locked) return
         const rawValue = computeValueFromPointer(event)
         const thumbIndex = pickThumbIndex(rawValue)
         activeThumbRef.current = thumbIndex
@@ -200,7 +220,7 @@ export const StyledSlider = ({
     }
 
     const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>): void => {
-        if (disabled || activeThumbRef.current === null || event.pointerId !== activePointerIdRef.current) return
+        if (locked || activeThumbRef.current === null || event.pointerId !== activePointerIdRef.current) return
         const thumbIndex = activeThumbRef.current
         const nextValue = computeNextValue(computeValueFromPointer(event), thumbIndex)
         setDragValue(nextValue)
@@ -208,7 +228,7 @@ export const StyledSlider = ({
     }
 
     const handlePointerUp = (event: ReactPointerEvent<HTMLDivElement>): void => {
-        if (disabled || activeThumbRef.current === null || event.pointerId !== activePointerIdRef.current) return
+        if (locked || activeThumbRef.current === null || event.pointerId !== activePointerIdRef.current) return
         const thumbIndex = activeThumbRef.current
         const nextValue = computeNextValue(computeValueFromPointer(event), thumbIndex)
         if (value === undefined) setUncontrolledValue(nextValue)
@@ -229,7 +249,7 @@ export const StyledSlider = ({
     }
 
     const handleButtonClick = (direction: 'increment' | 'decrement') => (event: MouseEvent<HTMLButtonElement>) => {
-        if (disabled) return
+        if (locked) return
         const stepDelta = direction === 'increment' ? step || 1 : -(step || 1)
 
         let thumbIndex = 0
@@ -269,6 +289,12 @@ export const StyledSlider = ({
         handler(event, nextValue, thumbIndex)
     }
 
+    // A read-only range input would still move its native thumb before React restores the value.
+    const blockReadOnlyKeys = (event: KeyboardEvent<HTMLInputElement>): void => {
+        if (readOnly && SLIDER_KEYS.has(event.key)) event.preventDefault()
+    }
+    const describedBy = [showHelperSlot && helperId, reasoned && reasonId].filter(Boolean).join(' ') || undefined
+
     const renderInput = (thumbIndex: number, thumbValue: number): JSX.Element => (
         <input
             key={thumbIndex}
@@ -284,18 +310,25 @@ export const StyledSlider = ({
             aria-label={typeof ariaLabel === 'function' ? ariaLabel(thumbIndex) : ariaLabel}
             aria-labelledby={ariaLabelledBy}
             aria-invalid={error ? true : undefined}
-            aria-describedby={showHelperSlot ? helperId : undefined}
+            aria-readonly={readOnly ? true : undefined}
+            aria-describedby={describedBy}
             className={cn(
                 styles['SliderInput'],
                 isVertical ? styles['Vertical'] : styles['Horizontal'],
                 !isVertical && 'z-0',
                 size === 'small' && styles['Small'],
                 disabled && styles['Disabled'],
+                readOnly && styles['ReadOnly'],
                 classes?.thumb,
                 slotProps?.thumb?.className,
             )}
-            onChange={(e) => emit(onChange, e, Number(e.currentTarget.value), thumbIndex)}
-            onKeyUp={(e) => emit(onChangeCommitted, e, Number(e.currentTarget.value), thumbIndex)}
+            onKeyDown={blockReadOnlyKeys}
+            onChange={(e) => {
+                if (!readOnly) emit(onChange, e, Number(e.currentTarget.value), thumbIndex)
+            }}
+            onKeyUp={(e) => {
+                if (!readOnly) emit(onChangeCommitted, e, Number(e.currentTarget.value), thumbIndex)
+            }}
         />
     )
 
@@ -320,7 +353,7 @@ export const StyledSlider = ({
                     isVertical && 'h-full flex-col items-center',
                 )}
             >
-                {!isVertical && showButtons && (
+                {!isVertical && showButtons && !readOnly && (
                     <StyledButton
                         dataTest='slider-from-button'
                         aria-label='Decrease value'
@@ -340,79 +373,87 @@ export const StyledSlider = ({
                         className,
                     )}
                 >
-                    <div
-                        className={cn(
-                            'relative',
-                            isVertical ? 'h-full w-8' : 'h-4 w-full',
-                            disabled ? 'cursor-default' : 'cursor-pointer',
-                        )}
-                        style={{ touchAction: 'none' }}
-                        onPointerDown={handlePointerDown}
-                        onPointerMove={handlePointerMove}
-                        onPointerUp={handlePointerUp}
-                        onPointerCancel={handlePointerCancel}
+                    <StyledTooltip
+                        title={readOnlyReason}
+                        open={reasoned ? undefined : false}
+                        openOnTap={reasoned}
+                        persistentDescription={reasoned}
+                        persistentDescriptionId={reasonId}
                     >
-                        {/* Inset the visual track by half a thumb so marks align with the thumb-centre travel.
-                    Setting both edges (no width/height) auto-sizes the track to length − 2·halfThumb. */}
                         <div
                             className={cn(
-                                'absolute',
-                                isVertical
-                                    ? 'left-1/2 w-1 -translate-x-1/2'
-                                    : 'top-[calc(50%+6px)] h-1 -translate-y-1/2',
+                                'relative',
+                                isVertical ? 'h-full w-8' : 'h-4 w-full',
+                                locked ? 'cursor-default' : 'cursor-pointer',
                             )}
-                            style={
-                                isVertical
-                                    ? { top: halfThumb, bottom: halfThumb }
-                                    : { left: halfThumb, right: halfThumb }
-                            }
+                            style={{ touchAction: 'none' }}
+                            onPointerDown={handlePointerDown}
+                            onPointerMove={handlePointerMove}
+                            onPointerUp={handlePointerUp}
+                            onPointerCancel={handlePointerCancel}
                         >
-                            {/* Rail — Figma unfilled track = delta-100 (#e7eaee), 4px. */}
+                            {/* Inset the visual track by half a thumb so marks align with the thumb-centre travel.
+                        Setting both edges (no width/height) auto-sizes the track to length − 2·halfThumb. */}
                             <div
                                 className={cn(
-                                    'absolute inset-0 rounded-full bg-delta-100',
-                                    classes?.rail,
-                                    slotProps?.rail?.className,
+                                    'absolute',
+                                    isVertical
+                                        ? 'left-1/2 w-1 -translate-x-1/2'
+                                        : 'top-[calc(50%+6px)] h-1 -translate-y-1/2',
                                 )}
-                            />
-                            {/* Filled track */}
-                            <div
-                                className={cn(
-                                    'absolute rounded-full',
-                                    isVertical ? 'left-0 w-full' : 'top-0 h-full',
-                                    disabled ? 'bg-delta-200' : 'bg-gama-500',
-                                    classes?.track,
-                                )}
-                                style={fillStyle}
-                            />
-                            {/* Marks */}
-                            {markList.map((mark) => {
-                                const active = isMarkActive(mark.value)
-                                return (
-                                    <span
-                                        key={mark.value}
-                                        className={cn(
-                                            'absolute z-10 box-border h-2 w-2 -translate-x-1/2 rounded-full border border-solid',
-                                            isVertical ? 'left-1/2 translate-y-1/2' : 'top-1/2 -translate-y-1/2',
-                                            active
-                                                ? cn(
-                                                      disabled
-                                                          ? 'border-delta-200 bg-delta-200'
-                                                          : 'border-gama-500 bg-gama-500',
-                                                      classes?.markActive,
-                                                  )
-                                                : cn('border-delta-300 bg-white', classes?.mark),
-                                        )}
-                                        style={markPosStyle(mark.value)}
-                                    />
-                                )
-                            })}
+                                style={
+                                    isVertical
+                                        ? { top: halfThumb, bottom: halfThumb }
+                                        : { left: halfThumb, right: halfThumb }
+                                }
+                            >
+                                {/* Rail — Figma unfilled track = delta-100 (#e7eaee), 4px. */}
+                                <div
+                                    className={cn(
+                                        'absolute inset-0 rounded-full bg-delta-100',
+                                        classes?.rail,
+                                        slotProps?.rail?.className,
+                                    )}
+                                />
+                                {/* Filled track */}
+                                <div
+                                    className={cn(
+                                        'absolute rounded-full',
+                                        isVertical ? 'left-0 w-full' : 'top-0 h-full',
+                                        disabled ? 'bg-delta-200' : 'bg-gama-500',
+                                        classes?.track,
+                                    )}
+                                    style={fillStyle}
+                                />
+                                {/* Marks */}
+                                {markList.map((mark) => {
+                                    const active = isMarkActive(mark.value)
+                                    return (
+                                        <span
+                                            key={mark.value}
+                                            className={cn(
+                                                'absolute z-10 box-border h-2 w-2 -translate-x-1/2 rounded-full border border-solid',
+                                                isVertical ? 'left-1/2 translate-y-1/2' : 'top-1/2 -translate-y-1/2',
+                                                active
+                                                    ? cn(
+                                                          disabled
+                                                              ? 'border-delta-200 bg-delta-200'
+                                                              : 'border-gama-500 bg-gama-500',
+                                                          classes?.markActive,
+                                                      )
+                                                    : cn('border-delta-300 bg-white', classes?.mark),
+                                            )}
+                                            style={markPosStyle(mark.value)}
+                                        />
+                                    )
+                                })}
+                            </div>
+                            {/* Native thumb input(s) span the full length; their built-in 8px inset matches the track. */}
+                            {isRange
+                                ? [renderInput(0, pair[0]), renderInput(1, pair[1])]
+                                : renderInput(0, current as number)}
                         </div>
-                        {/* Native thumb input(s) span the full length; their built-in 8px inset matches the track. */}
-                        {isRange
-                            ? [renderInput(0, pair[0]), renderInput(1, pair[1])]
-                            : renderInput(0, current as number)}
-                    </div>
+                    </StyledTooltip>
 
                     {/* Mark labels */}
                     {markList.some((m) => m.label != null) && (
@@ -453,7 +494,7 @@ export const StyledSlider = ({
                     )}
                 </div>
 
-                {!isVertical && showButtons && (
+                {!isVertical && showButtons && !readOnly && (
                     <StyledButton
                         dataTest='slider-to-button'
                         aria-label='Increase value'

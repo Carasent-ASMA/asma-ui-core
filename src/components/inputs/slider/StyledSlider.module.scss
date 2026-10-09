@@ -103,3 +103,14 @@
         cursor: default;
     }
 }
+
+// Read-only keeps the enabled colours (full contrast) but shows the default cursor (DIS-6).
+.ReadOnly {
+    cursor: default;
+    &::-webkit-slider-thumb {
+        cursor: default;
+    }
+    &::-moz-range-thumb {
+        cursor: default;
+    }
+}
