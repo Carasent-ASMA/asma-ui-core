@@ -102,6 +102,60 @@ describe('StyledButton disabledReason', () => {
         await waitFor(() => expect(tip()).toHaveTextContent('Locked for editing'))
     })
 
+    it('opens the reason on mouse hover after the enter delay (DIS-2, DIS-5)', async () => {
+        mount(
+            <StyledButton dataTest='reasoned' disabled disabledReason='Locked for editing'>
+                Edit
+            </StyledButton>,
+        )
+
+        await userEvent.hover(byTest('reasoned'))
+        await expect(tip()).toBeNull()
+
+        await waitFor(() => expect(tip()).toHaveTextContent('Locked for editing'), { timeout: 2000 })
+    })
+
+    it('closes a tapped reason on a tap outside (DIS-2, §5)', async () => {
+        mount(
+            <>
+                <StyledButton dataTest='reasoned' disabled disabledReason='Locked for editing'>
+                    Edit
+                </StyledButton>
+                <p data-testid='outside'>Elsewhere</p>
+            </>,
+        )
+
+        byTest('reasoned').dispatchEvent(new PointerEvent('pointerup', { pointerType: 'touch', bubbles: true }))
+        await waitFor(() => expect(tip()).not.toBeNull())
+
+        document
+            .querySelector('[data-testid="outside"]')!
+            .dispatchEvent(new PointerEvent('pointerdown', { pointerType: 'touch', bubbles: true }))
+
+        await waitFor(() => expect(tip()).toBeNull())
+    })
+
+    it('closes a tapped reason when an ancestor scrolls (DIS-2, §5)', async () => {
+        const { container } = mount(
+            <div data-testid='scroller' style={{ height: 80, overflow: 'auto' }}>
+                <div style={{ height: 400, paddingTop: 20 }}>
+                    <StyledButton dataTest='reasoned' disabled disabledReason='Locked for editing'>
+                        Edit
+                    </StyledButton>
+                </div>
+            </div>,
+        )
+        const scroller = container.querySelector<HTMLElement>('[data-testid="scroller"]')!
+
+        byTest('reasoned').dispatchEvent(new PointerEvent('pointerup', { pointerType: 'touch', bubbles: true }))
+        await waitFor(() => expect(tip()).not.toBeNull())
+
+        scroller.scrollTop = 40
+        scroller.dispatchEvent(new Event('scroll'))
+
+        await waitFor(() => expect(tip()).toBeNull())
+    })
+
     it('ignores the reason when the button is enabled', async () => {
         mount(
             <StyledButton dataTest='enabled' disabledReason='Locked for editing'>

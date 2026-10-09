@@ -13,6 +13,14 @@ import { StyledMenuItem } from '../../navigation/menu/StyledMenuItem'
 import { StyledTab } from '../../navigation/tabs/StyledTab'
 import { StyledButton } from '../../inputs/button/StyledButton'
 import { StyledLink } from '../../navigation/link/StyledLink'
+import { StyledInteractiveChip } from '../interactive-chip/StyledInteractiveChip'
+import { StyledSelect } from '../../inputs/select/StyledSelect'
+import { StyledSelectItem } from '../../inputs/select/StyledSelectItem'
+import { StyledSlider } from '../../inputs/slider/StyledSlider'
+import { StyledSelectAutocomplete } from '../../inputs/select-autocomplete/StyledSelectAutocomplete'
+import { StyledWidget } from '../../custom/widget/widget/StyledWidget'
+import { StyledDatePicker } from 'src/datetime/components/date-picker/StyledDatePicker'
+import { StyledTimePicker } from 'src/datetime/components/time-picker/StyledTimePicker'
 
 const reason = 'Locked after signing'
 const fixtures: [string, string, (active: boolean, reason?: string) => ReactElement][] = [
@@ -82,6 +90,114 @@ const fixtures: [string, string, (active: boolean, reason?: string) => ReactElem
                 onClick={() => undefined}
                 disabled={disabled}
                 disabledReason={disabledReason}
+            />
+        ),
+    ],
+    [
+        'disabled switch',
+        'button',
+        (disabled, disabledReason) => (
+            <StyledSwitch aria-label='Sign' disabled={disabled} disabledReason={disabledReason} />
+        ),
+    ],
+    [
+        'interactive chip',
+        '[role="checkbox"]',
+        (disabled, disabledReason) => (
+            <StyledInteractiveChip
+                dataTest='chip'
+                label='Email'
+                onClick={() => undefined}
+                disabled={disabled}
+                disabledReason={disabledReason}
+            />
+        ),
+    ],
+    [
+        'disabled select',
+        '[role="combobox"]',
+        (disabled, disabledReason) => (
+            <StyledSelect dataTest='status' name='Status' value='a' disabled={disabled} disabledReason={disabledReason}>
+                <StyledSelectItem value='a'>Active</StyledSelectItem>
+            </StyledSelect>
+        ),
+    ],
+    [
+        'read-only select',
+        '[role="combobox"]',
+        (readOnly, readOnlyReason) => (
+            <StyledSelect dataTest='status' name='Status' value='a' readOnly={readOnly} readOnlyReason={readOnlyReason}>
+                <StyledSelectItem value='a'>Active</StyledSelectItem>
+            </StyledSelect>
+        ),
+    ],
+    [
+        'read-only slider',
+        'input[type="range"]',
+        (readOnly, readOnlyReason) => (
+            <StyledSlider
+                dataTest='volume'
+                ariaLabel='Volume'
+                defaultValue={30}
+                showButtons={false}
+                readOnly={readOnly}
+                readOnlyReason={readOnlyReason}
+            />
+        ),
+    ],
+    [
+        'read-only autocomplete',
+        'input',
+        (readOnly, readOnlyReason) => (
+            <StyledSelectAutocomplete<string, false, false, false>
+                dataTest='team'
+                options={['Alpha', 'Bravo']}
+                value='Alpha'
+                readOnly={readOnly}
+                readOnlyReason={readOnlyReason}
+                renderInput={(params) => <StyledInputField {...params} dataTest='team-input' label='Team' />}
+            />
+        ),
+    ],
+    [
+        'widget view more',
+        '[data-testid="view-more"]',
+        (disabled, disabledReason) => (
+            <StyledWidget
+                title='Chats'
+                isLoading={false}
+                isEmpty={false}
+                emptyText='No chats'
+                viewMore={{ viewMoreText: 'View more', viewLessText: 'View less', disabled, disabledReason }}
+            />
+        ),
+    ],
+    [
+        'read-only date picker',
+        'input',
+        (readOnly, readOnlyReason) => (
+            <StyledDatePicker
+                mode='single'
+                dataTest='start'
+                label='Start'
+                selected={new Date(2026, 0, 5)}
+                readOnly={readOnly}
+                readOnlyReason={readOnlyReason}
+            />
+        ),
+    ],
+    [
+        // Toggling readOnly itself swaps the picker's popup wrapper, so only the reason changes here.
+        'read-only time picker',
+        'input',
+        (_, readOnlyReason) => (
+            <StyledTimePicker
+                dataTest='time'
+                label='Time'
+                value={new Date(2026, 0, 5, 9, 30)}
+                onSelect={() => undefined}
+                readOnly
+                readOnlyReason={readOnlyReason}
             />
         ),
     ],
