@@ -13,9 +13,10 @@ type StyledBadgePurpose = 'notification' | 'unread' | 'filter'
  * `dot` = 12px lime circle with a stronger 2px border. Other colors and `small` are legacy app
  * extensions with no matching Figma notification variant.
  *
- * Pass children to decorate them — the badge anchors to their corner. Pass none and a `dot` becomes
- * a flow element (Figma `Size=Dot`, node 44267-214524), for a table cell or a marker in a row, and
- * `className` then applies to the badge's own root so the caller can place it.
+ * Pass children to decorate them — the badge anchors to their corner. Pass none and the badge,
+ * count or dot, becomes a flow element (for the dot, Figma `Size=Dot`, node 44267-214524), for a
+ * table cell or a marker in a row, and `className` then applies to the badge's own root so the
+ * caller can place it.
  *
  * `purpose` selects Figma's `Parent`: the default notification dot, or the 8px solid primary dot
  * that marks something unread or a filter as active.
@@ -31,7 +32,7 @@ interface BadgeProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'color'> {
     showZero?: boolean
     /**
      * @figmaProp Size = dot→"Dot" (12px) | standard→"Default" count badge
-     * A `dot` with no children renders in normal flow rather than anchored to a corner.
+     * With no children the badge renders in normal flow rather than anchored to a corner.
      */
     variant?: 'standard' | 'dot'
     /**
@@ -109,6 +110,7 @@ export const StyledBadge = ({
     slotProps,
     component: _component,
     tabIndex: _tabIndex,
+    'aria-label': ariaLabel,
     ...props
 }: StyledBadgeProps): JSX.Element => {
     const statusRef = useRef<HTMLSpanElement>(null)
@@ -136,11 +138,12 @@ export const StyledBadge = ({
      */
     const isAccentDot = isDot && purpose !== 'notification'
     /**
-     * Figma's "Size=Dot" is a 12px circle in its own right, so a dot with no host to decorate is a
-     * legitimate use, not a mistake. Anchoring it anyway would collapse the root to 0x0 and let the
-     * dot paint over whatever sits beside it, so the hostless form stays in normal flow instead.
+     * A badge with no host to decorate is a legitimate use, not a mistake: Figma's "Size=Dot" is a
+     * 12px circle in its own right, and a count pill is just as often anchored to a container the
+     * caller positions itself. Anchoring either one anyway would collapse the root to 0x0 and let
+     * the badge paint over whatever sits beside it, so the hostless form stays in normal flow.
      */
-    const isStandaloneDot = isDot && children === undefined
+    const isStandalone = children === undefined
     const isZeroHidden =
         !isDot && (badgeContent === 0 || badgeContent === undefined || badgeContent === null)
     const hidden = !!invisible || isZeroHidden
@@ -166,21 +169,23 @@ export const StyledBadge = ({
             : {}
 
     /**
-     * An anchored badge is decoration: the host it wraps already announces the state. A hostless dot
-     * has no such host, so when the caller names it we expose that name instead of leaving the state
-     * carried by colour alone (WCAG 2.2 AA 1.4.1). A bare `aria-label` on a span is not reliably
-     * surfaced, so it needs a role to land on.
+     * An anchored badge is decoration: the host it wraps already announces the state. A hostless
+     * badge has no such host, so when the caller names it we expose that name instead of leaving the
+     * state carried by colour alone (WCAG 2.2 AA 1.4.1). A bare `aria-label` on a span is not
+     * reliably surfaced, so it needs a role to land on. A hidden badge renders no shape at all, so
+     * it keeps neither role nor name — a named image that cannot be seen misleads.
      */
-    const standaloneRole = isStandaloneDot && props['aria-label'] ? { role: 'img' } : {}
+    const standaloneRole = isStandalone && !hidden && ariaLabel ? { role: 'img', 'aria-label': ariaLabel } : {}
+    const anchoredLabel = !isStandalone && ariaLabel ? { 'aria-label': ariaLabel } : {}
 
     /**
      * `className` styles the badge itself, which for an anchored badge is the inner span. A hostless
-     * dot has no host, so there the badge *is* the outer element and the class belongs on the root —
-     * otherwise positioning a dot would place it inside its own 8px box. `relative` goes with it,
-     * since it exists only to anchor an absolutely positioned badge and would fight a caller's
-     * `absolute` for an unpredictable win on stylesheet order.
+     * badge has no host, so there the badge *is* the outer element and the class belongs on the root
+     * — otherwise positioning it would place it inside its own box. `relative` goes with it, since it
+     * exists only to anchor an absolutely positioned badge and would fight a caller's `absolute` for
+     * an unpredictable win on stylesheet order.
      */
-    const rootClassName = isStandaloneDot
+    const rootClassName = isStandalone
         ? clsx('inline-flex shrink-0 align-middle', className)
         : 'relative inline-flex shrink-0 align-middle'
 
@@ -189,6 +194,7 @@ export const StyledBadge = ({
             className={rootClassName}
             data-testid={dataTest}
             style={rootStyle}
+            {...anchoredLabel}
             {...standaloneRole}
             {...props}
         >
@@ -198,8 +204,8 @@ export const StyledBadge = ({
                     aria-hidden='true'
                     className={clsx(
                         'box-border flex items-center justify-center whitespace-nowrap font-roboto font-semibold',
-                        !isStandaloneDot && 'absolute z-[1]',
-                        !isStandaloneDot && ANCHOR_CLASS[`${vertical}-${horizontal}`],
+                        !isStandalone && 'absolute z-[1]',
+                        !isStandalone && ANCHOR_CLASS[`${vertical}-${horizontal}`],
                         isAccentDot
                             ? 'h-[8px] w-[8px] min-w-[8px] rounded-full p-0'
                             : isDot
@@ -208,7 +214,7 @@ export const StyledBadge = ({
                                 ? 'h-[16px] w-max min-w-[16px] rounded-[20px] px-[4px] text-[0.75rem]'
                                 : 'h-[20px] min-w-[20px] rounded-[20px] px-[6px] text-sm leading-5',
                         !isDot && size === 'medium' && isSingleDigitCount && 'w-[20px]',
-                        !isStandaloneDot && className,
+                        !isStandalone && className,
                         slotProps?.badge?.className,
                     )}
                     style={{
