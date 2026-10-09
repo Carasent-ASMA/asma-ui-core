@@ -48,6 +48,9 @@ export interface AutocompleteRenderOptionState {
 /** Props the combobox hands to `renderInput`; spread straight onto `StyledInputField`. */
 export interface AutocompleteRenderInputParams {
     disabled?: boolean
+    /** Set only with a `readOnlyReason`, so the field renders borderless with the reason tooltip. */
+    readOnly?: boolean
+    readOnlyReason?: ReactNode
     size?: 'small' | 'medium'
     fullWidth?: boolean
     error?: boolean
@@ -128,8 +131,20 @@ export interface StyledSelectAutocompleteProps<
     noOptionsText?: ReactNode
     /** @figmaProp State = true→"Disabled" */
     disabled?: boolean
+    /**
+     * @figmaProp none — behavioral. Why the field is unavailable. With `disabled` it replaces the helper
+     * text of `renderInput`, so the reason is visible without focus (disabled-states DIS-3, §6: a
+     * disabled field keeps native `disabled`). An error message still wins. Without `disabled` it has no effect.
+     */
+    disabledReason?: ReactNode
     /** @figmaProp State = true→"Read-only" (chips lose their delete button; no popup/clear icons) */
     readOnly?: boolean
+    /**
+     * @figmaProp none — behavioral. Why the value can't be changed here, and where it can. With
+     * `readOnly`, `renderInput` receives `readOnly` and `readOnlyReason`, so a `StyledInputField` renders
+     * borderless and text-like with the reason on hover, focus and tap (disabled-states DIS-6).
+     */
+    readOnlyReason?: ReactNode
     error?: boolean
     helperText?: ReactNode
     /** @figmaProp none — FieldSize (both render the 40px field) */
@@ -210,7 +225,9 @@ export function StyledSelectAutocomplete<
     loadingText = 'Loading…',
     noOptionsText = 'No options',
     disabled,
+    disabledReason,
     readOnly,
+    readOnlyReason,
     error,
     helperText,
     size = 'small',
@@ -505,12 +522,14 @@ export function StyledSelectAutocomplete<
         </span>
     )
 
+    const plainReadOnly = Boolean(readOnly) && Boolean(readOnlyReason)
     const renderInputParams: AutocompleteRenderInputParams = {
         disabled,
+        ...(plainReadOnly ? { readOnly: true, readOnlyReason } : {}),
         size,
         fullWidth: true,
         error,
-        helperText,
+        helperText: disabled && disabledReason && !error ? disabledReason : helperText,
         value: inputValue,
         onChange: (event) => {
             setActiveIndex(null)
