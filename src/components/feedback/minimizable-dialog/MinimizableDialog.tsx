@@ -15,7 +15,6 @@ import {
     CloseIcon,
     DotsVerticalIcon,
     KeyboardCapslockIcon,
-    LoadingIcon,
     MinimizeIcon,
 } from 'src/components/icons'
 
@@ -36,6 +35,8 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     className = '',
     primaryButtonText,
     primaryButtonLoading = false,
+    primaryButtonDisabled,
+    primaryButtonDisabledReason,
     secondaryButtonText,
     onPrimaryButtonClick,
     onSecondaryButtonClick,
@@ -104,6 +105,35 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     const showPrimaryButton = primaryButtonText ?? primaryButtonLoading
 
     const showButtons = showPrimaryButton || secondaryButtonText
+
+    // While the primary action runs, the secondary action waits with the same reason as Esc and X (DIS-8).
+    const footerButtons = (
+        <>
+            {secondaryButtonText && onSecondaryButtonClick && (
+                <StyledButton
+                    dataTest='cancel-button'
+                    variant='outlined'
+                    disabled={primaryButtonLoading}
+                    disabledReason={busyReason}
+                    onClick={onSecondaryButtonClick}
+                >
+                    {secondaryButtonText}
+                </StyledButton>
+            )}
+            {showPrimaryButton && onPrimaryButtonClick && (
+                <StyledButton
+                    dataTest='save-button'
+                    loading={primaryButtonLoading}
+                    locale={locale}
+                    disabled={primaryButtonDisabled}
+                    disabledReason={primaryButtonDisabledReason}
+                    onClick={onPrimaryButtonClick}
+                >
+                    {primaryButtonText}
+                </StyledButton>
+            )}
+        </>
+    )
 
     // Toggling makes the panel holding the just-pressed button inert, so focus has to be handed to
     // the panel that became visible or it dies there (WCAG 2.4.3). Aim for the counterpart toggle;
@@ -319,24 +349,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                             {footerInfo}
                             {showButtons ? (
                                 <div className={cn('flex justify-end gap-x-2', btnContainerClassName)}>
-                                    {secondaryButtonText && onSecondaryButtonClick && (
-                                        <StyledButton
-                                            dataTest='cancel-button'
-                                            variant='outlined'
-                                            onClick={onSecondaryButtonClick}
-                                        >
-                                            {secondaryButtonText}
-                                        </StyledButton>
-                                    )}
-                                    {showPrimaryButton && onPrimaryButtonClick && (
-                                        <StyledButton
-                                            dataTest='save-button'
-                                            startIcon={primaryButtonLoading && <LoadingIcon width={24} height={24} />}
-                                            onClick={onPrimaryButtonClick}
-                                        >
-                                            {primaryButtonText}
-                                        </StyledButton>
-                                    )}
+                                    {footerButtons}
                                 </div>
                             ) : null}
                         </div>
@@ -349,24 +362,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                                         btnContainerClassName,
                                     )}
                                 >
-                                    {secondaryButtonText && onSecondaryButtonClick && (
-                                        <StyledButton
-                                            dataTest='cancel-button'
-                                            variant='outlined'
-                                            onClick={onSecondaryButtonClick}
-                                        >
-                                            {secondaryButtonText}
-                                        </StyledButton>
-                                    )}
-                                    {showPrimaryButton && onPrimaryButtonClick && (
-                                        <StyledButton
-                                            dataTest='save-button'
-                                            startIcon={primaryButtonLoading && <LoadingIcon width={24} height={24} />}
-                                            onClick={onPrimaryButtonClick}
-                                        >
-                                            {primaryButtonText}
-                                        </StyledButton>
-                                    )}
+                                    {footerButtons}
                                 </div>
                             ) : null}
                         </>
