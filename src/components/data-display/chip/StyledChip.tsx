@@ -213,8 +213,9 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                     !consumerSetsMaxWidth && 'max-w-full',
                     size === 'small' ? 'h-6' : 'h-8',
                     readOnly && 'pointer-events-none',
-                    disabled && !reasoned && 'pointer-events-none opacity-[0.38]',
-                    reasoned && 'cursor-not-allowed opacity-[0.38]',
+                    // Pointer events stay on so the not-allowed cursor shows; activation is already
+                    // blocked because the handlers are removed while disabled (disabled-states §6).
+                    disabled && 'cursor-not-allowed opacity-[0.38]',
                     interactive &&
                         cn(
                             'cursor-pointer outline-none',
