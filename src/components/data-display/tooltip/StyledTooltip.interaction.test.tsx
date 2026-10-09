@@ -1,4 +1,4 @@
-import { afterEach, describe, it } from 'vitest'
+import { afterEach, describe, it, vi } from 'vitest'
 import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { cleanup, isEntirelyObscured, mount } from 'src/test-utils/renderInteraction'
@@ -323,5 +323,20 @@ describe('StyledTooltip keyboard contract', () => {
         await expect(container.querySelector('[data-testid="bare"]')).not.toBeNull()
         await expect(container.querySelector('[data-testid="bare"]')).not.toHaveAttribute('aria-describedby')
         await expect(tip()).toBeNull()
+    })
+
+    it('hands a function component child no ref when there is no title (4.1.2)', async () => {
+        const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+        try {
+            mount(
+                <StyledTooltip title=''>
+                    <StyledButton dataTest='bare'>Bare</StyledButton>
+                </StyledTooltip>,
+            )
+
+            await expect(consoleError).not.toHaveBeenCalled()
+        } finally {
+            consoleError.mockRestore()
+        }
     })
 })

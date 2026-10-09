@@ -121,7 +121,8 @@ const REFERENCE_EVENTS = [
 /**
  * Tooltip built on `@floating-ui/react` (replaces MUI `Tooltip`) — hover(+`enterDelay`)/focus open,
  * dismiss on blur/esc, `flip`/`shift` collision handling, optional arrow, portalled. Empty `title`
- * renders the child alone (MUI parity). Preserves the `#363E4A` design and the `title`/`placement`/
+ * renders the child alone (MUI parity); a Fragment child keeps its `display: contents` wrapper so
+ * it does not remount when a title appears. Preserves the `#363E4A` design and the `title`/`placement`/
  * `arrow`/`enterDelay`/`open`/`slotProps` surface (DEC-003). TASK-301.
  */
 export const StyledTooltip = ({ children, ...props }: TooltipProps): JSX.Element => {
@@ -151,14 +152,14 @@ export const StyledTooltip = ({ children, ...props }: TooltipProps): JSX.Element
         [childProps],
     )
 
+    const hasTitle = Boolean(props.title) || props.title === 0
+
     // The trigger always occupies the first slot. With an empty title no Floating UI interaction
     // or positioning hooks mount, even for the reason wrappers used in large option lists.
     return (
         <>
-            {cloneElement(child, { ...eventProps, ref: childRef })}
-            {(Boolean(props.title) || props.title === 0) && (
-                <TooltipWithFloating {...props} referenceRef={bridge} isFragment={isFragment} />
-            )}
+            {hasTitle ? cloneElement(child, { ...eventProps, ref: childRef }) : child}
+            {hasTitle && <TooltipWithFloating {...props} referenceRef={bridge} isFragment={isFragment} />}
         </>
     )
 }
