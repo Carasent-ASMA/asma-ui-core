@@ -1,7 +1,6 @@
 import { afterEach, describe, it, vi } from 'vitest'
 import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
-import { setUiCoreLocale } from 'src/helpers/uiCoreLocale'
 import { StyledButton } from '../../inputs/button/StyledButton'
 import { StyledDialog } from './StyledDialog'
 import { MinimizableDialogV2 } from '../minimizable-dialog/v2/MinimizableDialogV2'
@@ -12,7 +11,7 @@ const busyReason = 'Wait until saved'
 describe('StyledDialog explains busy dismissal controls', () => {
     afterEach(() => {
         cleanup()
-        setUiCoreLocale(undefined)
+        localStorage.removeItem('lang')
     })
 
     it('soft-disables close and Cancel, blocks Escape, and restores them after saving', async () => {
@@ -79,7 +78,7 @@ describe('StyledDialog explains busy dismissal controls', () => {
     })
 
     it('defaults busy texts to English in a Norwegian shell when no reason or locale is supplied', async () => {
-        setUiCoreLocale('no')
+        localStorage.setItem('lang', 'no')
         const onClose = vi.fn()
         const { container } = mount(
             <StyledDialog open dataTest='editor' onClose={onClose}>
@@ -110,7 +109,7 @@ describe('StyledDialog explains busy dismissal controls', () => {
         ['en', 'Wait until saved', 'In progress'],
         ['no', 'Vent til lagringen er ferdig', 'Pågår'],
     ] as const)('uses the dialog and footer locale %s for busy texts', async (locale, reason, announcement) => {
-        setUiCoreLocale(locale === 'en' ? 'no' : 'en')
+        localStorage.setItem('lang', locale === 'en' ? 'no' : 'en')
         const { container } = mount(
             <StyledDialog open dataTest='editor' locale={locale}>
                 <StyledDialogFooter
