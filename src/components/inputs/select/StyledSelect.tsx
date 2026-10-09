@@ -467,7 +467,9 @@ export const StyledSelect = ({
                         // No pointer-events-none: the reason must stay reachable by hover (disabled-states §6).
                         // useClick and handleTriggerKeyDown already refuse to open a read-only field.
                         readOnly && 'cursor-default',
-                        plainReadOnly && 'focus-visible:[box-shadow:inset_0_0_0_2px_var(--colors-focus-ring)]',
+                        // The outline overlay paints no focus state for disabled or read-only, so a focusable
+                        // reasoned trigger draws its own ring (DIS-3, DIS-6).
+                        reasoned && 'focus-visible:[box-shadow:inset_0_0_0_2px_var(--colors-focus-ring)]',
                     )}
                 >
                     <span className={cn('min-w-0 flex-1 truncate', !hasValue && 'text-delta-500')}>

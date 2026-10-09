@@ -460,3 +460,25 @@ describe('StyledSelect reasons (disabled-states DIS-5, DIS-6, §6)', () => {
         await expect(container.querySelector('[data-testid="select-clear-button"]')).toBeNull()
     })
 })
+
+describe('StyledSelect reasoned focus ring (disabled-states DIS-3, 2.4.7)', () => {
+    afterEach(cleanup)
+
+    it.each([
+        ['disabled', { disabled: true, disabledReason: 'Pick a team first' }],
+        ['read-only', { readOnly: true, readOnlyReason: 'Set by the organisation' }],
+    ])('shows a focus ring on a %s trigger with a reason', async (_, props) => {
+        const { container } = mount(
+            <StyledSelect dataTest='status' name='Status' value='a' {...props}>
+                <StyledSelectItem value='a'>Active</StyledSelectItem>
+            </StyledSelect>,
+        )
+        const button = trigger(container)
+        const before = focusStyleOf(button)
+
+        await userEvent.tab()
+
+        await expect(document.activeElement).toBe(button)
+        await expect(describeFocusIndicator(before, focusStyleOf(button))).not.toBeNull()
+    })
+})
