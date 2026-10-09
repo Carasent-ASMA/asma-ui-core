@@ -5,6 +5,7 @@ import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { StyledInputField } from 'src/components/inputs/input-field'
 import { StyledSelectAutocomplete } from 'src/components/inputs/select-autocomplete/StyledSelectAutocomplete'
+import { StyledDatePicker } from 'src/datetime/components/date-picker'
 import { FilterIcon } from 'src/components/icons/filter-icon/FilterIcon'
 import { InfoOutlineIcon } from 'src/components/icons/info-outline-icon/InfoOutlineIcon'
 import { PopoverSheet } from './PopoverSheet'
@@ -419,6 +420,204 @@ const ScrollingExample = (): JSX.Element => (
 export const LongContentScrolls: Story = {
     render: () => <ScrollingExample />,
     play: openFrom('Tall filter'),
+}
+
+/** A 17px classic scrollbar — the widest Windows draws; the 15px of Chromium and macOS "Always" is narrower. */
+const CLASSIC_SCROLLBAR_WIDTH = 17
+
+const ClassicScrollbarExample = (): JSX.Element => {
+    // Filled, as a used filter is: an empty field draws its `label` as a low-contrast placeholder.
+    const [from, setFrom] = useState<Date | undefined>(new Date(2026, 9, 1))
+    const [to, setTo] = useState<Date | undefined>(new Date(2026, 9, 31))
+
+    return (
+        <>
+            {/* Overlay scrollbars (macOS default, headless Chromium) take no layout width and hide the
+                edge case, so this one popover is forced onto a classic, width-taking bar — the one
+                Windows and macOS "Always show scroll bars" draw. Scoped to this story's surface. */}
+            <style>{`
+                [data-test='classic-scrollbar-popover'] ::-webkit-scrollbar { width: ${CLASSIC_SCROLLBAR_WIDTH}px; }
+                [data-test='classic-scrollbar-popover'] ::-webkit-scrollbar-thumb { background: #7a899e; }
+            `}</style>
+            <PopoverSheet
+                dataTest='classic-scrollbar-popover'
+                variant='action'
+                title='Filter'
+                renderTrigger={({ ref, triggerProps }) => (
+                    <StyledButton
+                        dataTest='classic-scrollbar-popover-trigger'
+                        refLink={ref}
+                        type='button'
+                        variant='contained'
+                        startIcon={<FilterIcon />}
+                        {...triggerProps}
+                    >
+                        Dated filter
+                    </StyledButton>
+                )}
+                resetAction={
+                    <StyledButton dataTest='classic-scrollbar-popover-reset' type='button' variant='text'>
+                        Nullstill
+                    </StyledButton>
+                }
+            >
+                {/* The consumers' From / To layout: two pickers that wrap when they do not fit. `label`, not
+                    `title`: the picker's `title` names its input only through a `title` attribute
+                    (axe `label-title-only`), a separate, pre-existing date-picker issue. Same 156px input. */}
+                <div className='flex w-full flex-wrap gap-4'>
+                    <StyledDatePicker
+                        dataTest='classic-scrollbar-from'
+                        mode='single'
+                        label='Fra'
+                        selected={from}
+                        onSelect={setFrom}
+                        onInputChange={setFrom}
+                        dateFormat='dd.MM.yyyy'
+                    />
+                    <StyledDatePicker
+                        dataTest='classic-scrollbar-to'
+                        mode='single'
+                        label='Til'
+                        selected={to}
+                        onSelect={setTo}
+                        onInputChange={setTo}
+                        dateFormat='dd.MM.yyyy'
+                    />
+                </div>
+                {Array.from({ length: 8 }, (_unused, index) => (
+                    <ChipGroup
+                        key={index}
+                        heading={`Gruppe ${index + 1}`}
+                        options={KARTLEGGING}
+                        type='checkbox'
+                        isSelected={() => false}
+                        onToggle={noop}
+                    />
+                ))}
+            </PopoverSheet>
+        </>
+    )
+}
+
+/**
+ * Edge case: a scrolling Filter body with a **classic** scrollbar must still give its content the full
+ * 416px, so a From / To date-picker pair (200 + 16 + 200) stays on one row. The bar takes its width out
+ * of the 40px right gutter, as Figma draws it, not out of the content — before this was fixed the
+ * second picker dropped under the first as soon as the body scrolled (Windows, macOS "Always show").
+ */
+export const ClassicScrollbarKeepsDatePickerPairOnOneRow: Story = {
+    render: () => <ClassicScrollbarExample />,
+    play: async (context) => {
+        await openFrom('Dated filter')(context)
+        const surface = document.querySelector<HTMLElement>("[data-test='classic-scrollbar-popover']")
+        const body = surface?.querySelector<HTMLElement>('.overflow-y-auto')
+        const from = document.querySelector<HTMLElement>("[data-testid='classic-scrollbar-from']")
+        const to = document.querySelector<HTMLElement>("[data-testid='classic-scrollbar-to']")
+        if (!body || !from || !to) throw new Error('popover body or date pickers not rendered')
+
+        // The case is real only with a scrolling body and a bar that takes layout width. Headless
+        // Chromium (the test runner) launches with `--hide-scrollbars`, so a bar never takes width on
+        // its own there — only the `scrollbar-gutter: stable` reservation does. That makes this check
+        // the guard for the gutter itself: drop it and this reads 0, not 17.
+        await waitFor(async () => {
+            await expect(body.scrollHeight).toBeGreaterThan(body.clientHeight)
+            await expect(body.offsetWidth - body.clientWidth).toBe(CLASSIC_SCROLLBAR_WIDTH)
+        })
+        // The bar sits inside Figma's 40px "Close + scroll" column: padding + bar = 40…
+        const style = getComputedStyle(body)
+        const paddingRight = parseFloat(style.paddingRight)
+        await expect(paddingRight + CLASSIC_SCROLLBAR_WIDTH).toBe(40)
+        // …so the content keeps exactly Figma's width at the 472px max-width…
+        const contentWidth = body.clientWidth - parseFloat(style.paddingLeft) - paddingRight
+        await expect(contentWidth).toBe(416)
+        // …and the pair stays side by side.
+        await expect(to.getBoundingClientRect().top).toBe(from.getBoundingClientRect().top)
+    },
+}
+
+const UntitledScrollingExample = (): JSX.Element => (
+    <>
+        <style>{`
+            [data-test='untitled-scrolling-popover'] ::-webkit-scrollbar { width: ${CLASSIC_SCROLLBAR_WIDTH}px; }
+            [data-test='untitled-scrolling-popover'] ::-webkit-scrollbar-thumb { background: #7a899e; }
+        `}</style>
+        <PopoverSheet
+            dataTest='untitled-scrolling-popover'
+            variant='action'
+            ariaLabel='Filter uten tittel'
+            renderTrigger={({ ref, triggerProps }) => (
+                <StyledButton
+                    dataTest='untitled-scrolling-popover-trigger'
+                    refLink={ref}
+                    type='button'
+                    variant='contained'
+                    startIcon={<FilterIcon />}
+                    {...triggerProps}
+                >
+                    Untitled tall filter
+                </StyledButton>
+            )}
+            resetAction={
+                <StyledButton dataTest='untitled-scrolling-popover-reset' type='button' variant='text'>
+                    Nullstill
+                </StyledButton>
+            }
+        >
+            {Array.from({ length: 8 }, (_unused, index) => (
+                <ChipGroup
+                    key={index}
+                    heading={`Gruppe ${index + 1}`}
+                    options={KARTLEGGING}
+                    type='checkbox'
+                    isSelected={() => false}
+                    onToggle={noop}
+                />
+            ))}
+        </PopoverSheet>
+    </>
+)
+
+/**
+ * Edge case: an untitled popover whose body scrolls. A native scrollbar runs the full height of its
+ * container, so starting the body at the top would put the bar under the Close button — its up arrow
+ * hidden, presses landing on Close. Figma draws the bar below the Close (`Windows scroll` at y 40 of
+ * the "Close + scroll" column), so a scrolling untitled body starts 40px down. An untitled body that
+ * does not scroll keeps its text beside the Close (`InfoWithoutTitle`).
+ */
+export const UntitledScrollingBodyStartsBelowClose: Story = {
+    render: () => <UntitledScrollingExample />,
+    play: async (context) => {
+        await openFrom('Untitled tall filter')(context)
+        const surface = document.querySelector<HTMLElement>("[data-test='untitled-scrolling-popover']")
+        const body = surface?.querySelector<HTMLElement>('.overflow-y-auto')
+        const close = document.querySelector<HTMLElement>("[data-testid='untitled-scrolling-popover-close']")
+        if (!surface || !body || !close) throw new Error('popover body or close not rendered')
+
+        // Overflow is detected by an observer, and the body moves down on the next render.
+        await waitFor(async () => {
+            await expect(body.scrollHeight).toBeGreaterThan(body.clientHeight)
+            await expect(body.getBoundingClientRect().top).toBeGreaterThanOrEqual(
+                close.getBoundingClientRect().bottom,
+            )
+        })
+    },
+}
+
+/** An untitled body that does not scroll keeps its text beside the Close, as Figma's untitled Info popover. */
+export const UntitledShortBodyStaysBesideClose: Story = {
+    render: () => <InfoExample withTitle={false} />,
+    play: async (context) => {
+        await openFrom('Om løpenummer')(context)
+        const surface = document.querySelector<HTMLElement>("[data-test='info-popover']")
+        const body = surface?.querySelector<HTMLElement>('.overflow-y-auto')
+        if (!surface || !body) throw new Error('popover body not rendered')
+
+        await expect(body.scrollHeight).toBeLessThanOrEqual(body.clientHeight)
+        await expect(body.getBoundingClientRect().top).toBe(surface.getBoundingClientRect().top)
+        // Padding + the reserved (here empty) bar gutter = Figma's 40px column, whatever the platform's bar.
+        const gutter = body.offsetWidth - body.clientWidth
+        await expect(parseFloat(getComputedStyle(body).paddingRight) + gutter).toBe(40)
+    },
 }
 
 /** Opening a second popover closes the first — the outside press that opens B dismisses A. */

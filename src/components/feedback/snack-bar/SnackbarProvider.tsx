@@ -1,8 +1,14 @@
 import { useLayoutEffect, useState } from 'react'
 import type { AlertColor } from './StyledAlert'
-import { SnackbarProvider as NotistackProvider, type SnackbarMessage, type SnackbarProviderProps } from 'notistack'
+import {
+    SnackbarProvider as NotistackProvider,
+    useSnackbar,
+    type SnackbarMessage,
+    type SnackbarProviderProps,
+} from 'notistack'
 
 import { useTopmostOpenModalDialog } from 'src/hooks/useTopLayer.hook'
+import { registerSnackbarHost } from './snackbarHost'
 import { StyledAlertSnackbar } from './StyledAlertSnackbar'
 import { StyledDefaultSnackbar } from './components/StyledDefaultSnackbar'
 import { StyledInfoSnackbar } from './components/StyledInfoSnackbar'
@@ -48,6 +54,18 @@ const useSnackbarPortalHost = (): HTMLElement => {
     return host
 }
 
+/**
+ * Publishes this provider as a target for the global snackbar helpers — see `snackbarHost`. Rendered
+ * before `children` so a host's registration lands before any provider nested inside it.
+ */
+const SnackbarHostRegistration = (): null => {
+    const { enqueueSnackbar, closeSnackbar } = useSnackbar()
+
+    useLayoutEffect(() => registerSnackbarHost({ enqueueSnackbar, closeSnackbar }), [enqueueSnackbar, closeSnackbar])
+
+    return null
+}
+
 export const SnackbarProvider = (props: SnackbarProviderProps): JSX.Element => {
     const domRoot = useSnackbarPortalHost()
 
@@ -69,6 +87,7 @@ export const SnackbarProvider = (props: SnackbarProviderProps): JSX.Element => {
             classes={{ root: 'min-w-fit flex justify-center' }}
             className='w-fit min-w-fit max-w-fit'
         >
+            <SnackbarHostRegistration />
             {props.children}
         </NotistackProvider>
     )
