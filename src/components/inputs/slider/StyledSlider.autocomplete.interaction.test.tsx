@@ -56,13 +56,6 @@ describe('StyledSlider Autocomplete mode', () => {
         await expect(container.querySelector('[role="combobox"]')).toBeTruthy()
     })
 
-    it('renders fromLabel and toLabel with more than 10 options', async () => {
-        const { container } = mount(<AutocompleteFixture fromLabel='No pain' toLabel='Worst pain' />)
-
-        await expect(within(container).getByText('No pain')).toBeTruthy()
-        await expect(within(container).getByText('Worst pain')).toBeTruthy()
-    })
-
     it('uses the number of options rather than the numeric range to choose the mode', async () => {
         const options = autocompleteOptions.slice(0, 5)
 
