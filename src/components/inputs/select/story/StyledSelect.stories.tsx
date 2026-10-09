@@ -569,3 +569,43 @@ export const OptionAndValueAre16px: Story = {
 //         // await expect(listbox.length).toBe(0)
 //     },
 // }
+
+/** Read-only and disabled with a reason (disabled-states DIS-1…DIS-6): both stay focusable and explain why. */
+export const WithReasons: Story = {
+    render: () => (
+        <div className='flex flex-col gap-6'>
+            <StyledSelect
+                dataTest='select-read-only-reason'
+                name='Case worker'
+                value='1'
+                readOnly
+                readOnlyReason='Assigned by the team lead'
+            >
+                {options.map((o) => (
+                    <StyledSelectItem key={o.id} value={o.id}>
+                        {o.title}
+                    </StyledSelectItem>
+                ))}
+            </StyledSelect>
+            <StyledSelect
+                dataTest='select-disabled-reason'
+                name='Reviewer'
+                placeholder='Choose a reviewer'
+                disabled
+                disabledReason='Choose a case worker first'
+            >
+                {options.map((o) => (
+                    <StyledSelectItem key={o.id} value={o.id}>
+                        {o.title}
+                    </StyledSelectItem>
+                ))}
+            </StyledSelect>
+        </div>
+    ),
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement)
+        await expect(canvas.getByRole('combobox', { name: 'Case worker' })).toHaveAttribute('aria-readonly', 'true')
+        await expect(canvas.getByRole('combobox', { name: 'Reviewer' })).toHaveAttribute('aria-disabled', 'true')
+        await expect(canvas.getByRole('combobox', { name: 'Reviewer' })).not.toBeDisabled()
+    },
+}

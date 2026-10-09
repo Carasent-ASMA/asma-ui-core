@@ -405,3 +405,58 @@ describe('StyledSelect popper geometry', () => {
         await expect(chevron.getAttribute('class')).not.toContain('rotate-180')
     })
 })
+
+describe('StyledSelect reasons (disabled-states DIS-5, DIS-6, §6)', () => {
+    afterEach(cleanup)
+
+    const reasonTip = (): HTMLElement | null => document.querySelector<HTMLElement>('[role="tooltip"]')
+
+    it('opens the read-only reason on mouse hover and still refuses to open the list', async () => {
+        const { container } = mount(
+            <StyledSelect dataTest='status' name='Status' value='a' readOnly readOnlyReason='Set by the organisation'>
+                <StyledSelectItem value='a'>Active</StyledSelectItem>
+                <StyledSelectItem value='b'>Paused</StyledSelectItem>
+            </StyledSelect>,
+        )
+        const button = trigger(container)
+
+        await userEvent.hover(button)
+        await waitFor(() => expect(reasonTip()).toHaveTextContent('Set by the organisation'), { timeout: 2000 })
+
+        await userEvent.click(button)
+        button.focus()
+        await userEvent.keyboard('{ArrowDown}')
+        await expect(listbox()).toBeNull()
+    })
+
+    it('opens the disabled reason on mouse hover', async () => {
+        const { container } = mount(
+            <StyledSelect dataTest='status' name='Status' value='a' disabled disabledReason='Pick a team first'>
+                <StyledSelectItem value='a'>Active</StyledSelectItem>
+            </StyledSelect>,
+        )
+
+        await userEvent.hover(trigger(container))
+        await waitFor(() => expect(reasonTip()).toHaveTextContent('Pick a team first'), { timeout: 2000 })
+    })
+
+    it('keeps a plain disabled trigger natively disabled', async () => {
+        const { container } = mount(
+            <StyledSelect dataTest='status' name='Status' value='a' disabled>
+                <StyledSelectItem value='a'>Active</StyledSelectItem>
+            </StyledSelect>,
+        )
+
+        await expect(trigger(container)).toBeDisabled()
+    })
+
+    it('hides the clear affordance while read-only', async () => {
+        const { container } = mount(
+            <StyledSelect dataTest='status' name='Status' value='a' readOnly allowClear>
+                <StyledSelectItem value='a'>Active</StyledSelectItem>
+            </StyledSelect>,
+        )
+
+        await expect(container.querySelector('[data-testid="select-clear-button"]')).toBeNull()
+    })
+})
