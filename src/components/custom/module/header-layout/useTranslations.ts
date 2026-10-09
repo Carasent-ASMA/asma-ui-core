@@ -10,6 +10,7 @@ const translations = {
         back: 'Back',
         menu: 'Menu',
         close: 'Close',
+        inProgress: 'In progress',
     },
     no: {
         more: 'Mer',
@@ -18,6 +19,7 @@ const translations = {
         back: 'Tilbake',
         menu: 'Meny',
         close: 'Lukk',
+        inProgress: 'Pågår',
     },
 }
 

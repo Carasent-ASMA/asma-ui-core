@@ -23,6 +23,8 @@ export interface StyledMenuItemProps {
      * arrow-key navigation and shows the reason on hover, focus and tap (disabled-states DIS-1…DIS-3).
      */
     disabledReason?: ReactNode
+    /** @figmaProp none — behavioral. The item's action is running; pair it with `disabled` and a reason. */
+    'aria-busy'?: boolean
     /** @figmaProp State = true→"Selected" */
     selected?: boolean
     /** Compact vertical padding (MUI `MenuItem` `dense` parity, DEC-003). */
@@ -46,6 +48,7 @@ export const StyledMenuItem = ({
     onMouseUp,
     disabled,
     disabledReason,
+    'aria-busy': ariaBusy,
     selected,
     dense,
     className,
@@ -70,6 +73,7 @@ export const StyledMenuItem = ({
         <li
             role='menuitem'
             aria-disabled={disabled ? true : undefined}
+            aria-busy={ariaBusy ? true : undefined}
             data-has-reason={reasoned ? '' : undefined}
             tabIndex={-1}
             data-test={dataTest}

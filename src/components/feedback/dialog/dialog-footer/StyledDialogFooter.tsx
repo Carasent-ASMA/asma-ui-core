@@ -16,7 +16,7 @@ import {
     type DynamicToolbarAction,
     type PlannedToolbarActions,
 } from '../../../custom/module/header-layout/planToolbarActions'
-import { ToolbarActionButton } from '../../../custom/module/header-layout/ToolbarActionGroup'
+import { overflowItemState, ToolbarActionButton } from '../../../custom/module/header-layout/ToolbarActionGroup'
 import { useToolbarTranslations, type ToolbarLocale } from '../../../custom/module/header-layout/useTranslations'
 
 /**
@@ -254,7 +254,7 @@ export function StyledDialogFooter({
                                 ref={register(actionKey(action.id, showLabel))}
                                 className='inline-flex shrink-0'
                             >
-                                <ToolbarActionButton action={action} showLabel={showLabel} />
+                                <ToolbarActionButton action={action} showLabel={showLabel} inProgressLabel={t.inProgress} />
                             </span>
                         ))}
 
@@ -287,8 +287,7 @@ export function StyledDialogFooter({
                                     {plan.overflowActions.map((action) => (
                                         <StyledMenuItem
                                             key={action.id}
-                                            disabled={action.disabled}
-                                            disabledReason={action.disabledReason}
+                                            {...overflowItemState(action, t.inProgress)}
                                             onClick={() => {
                                                 setAnchorEl(null)
                                                 action.onClick()

@@ -71,6 +71,7 @@ export function SelectionRow({
             <ToolbarActionGroup
                 plan={bulkActionsPlan}
                 overflowMenuLabel={translations.more}
+                inProgressLabel={translations.inProgress}
                 selectionTone
             />
         </div>
@@ -173,6 +174,7 @@ export function UtilityCluster({
     bulkActionsPlan,
     showPageActions,
     overflowMenuLabel,
+    inProgressLabel,
     searchMeasureRef,
     align = 'end',
 }: {
@@ -184,6 +186,7 @@ export function UtilityCluster({
     bulkActionsPlan?: PlannedToolbarActions
     showPageActions: boolean
     overflowMenuLabel: string
+    inProgressLabel?: string
     searchMeasureRef?: MeasureRef
     align?: 'start' | 'end'
 }): JSX.Element | null {
@@ -198,14 +201,22 @@ export function UtilityCluster({
 
     const beforeFilterBlock = hasBeforeFilterActions ? (
         <FadeSlot visible={hasBeforeFilterActions}>
-            <ToolbarActionGroup plan={beforeFilterActionsPlan} overflowMenuLabel={overflowMenuLabel} />
+            <ToolbarActionGroup
+                plan={beforeFilterActionsPlan}
+                overflowMenuLabel={overflowMenuLabel}
+                inProgressLabel={inProgressLabel}
+            />
         </FadeSlot>
     ) : null
 
     const afterSearchBlock = hasAfterSearchActions ? (
         <FadeSlot visible={hasAfterSearchActions}>
             <div className='flex flex-nowrap items-center gap-2'>
-                <ToolbarActionGroup plan={afterSearchActionsPlan} overflowMenuLabel={overflowMenuLabel} />
+                <ToolbarActionGroup
+                    plan={afterSearchActionsPlan}
+                    overflowMenuLabel={overflowMenuLabel}
+                    inProgressLabel={inProgressLabel}
+                />
             </div>
         </FadeSlot>
     ) : null
@@ -230,6 +241,7 @@ export function UtilityCluster({
                         <ToolbarActionGroup
                             plan={bulkActionsPlan}
                             overflowMenuLabel={overflowMenuLabel}
+                            inProgressLabel={inProgressLabel}
                             selectionTone
                         />
                     )}
