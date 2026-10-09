@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { StyledSlider, type SliderMark, type StyledSliderProps } from './StyledSlider'
+import { expect, fn, userEvent, within } from 'storybook/test'
+import { useState } from 'react'
 
 const meta = {
     title: 'Inputs/Styled Slider',
@@ -68,6 +70,18 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof StyledSlider>
 
+type AutocompleteOption = {
+    id: number
+    label: string
+}
+
+const autocompleteOptions: AutocompleteOption[] = Array.from({ length: 11 }, (_, index) => ({
+    id: index + 1,
+    label: `Option ${index + 1}`,
+}))
+
+const tenOptions = autocompleteOptions.slice(0, 10)
+
 export const Default: Story = {
     args: {},
     render: (args) => (
@@ -116,6 +130,165 @@ export const Vertical: Story = {
             <StyledSlider {...args} />
         </label>
     ),
+}
+
+export const Autocomplete: Story = {
+    render: (args) => {
+        const [value, setValue] = useState<AutocompleteOption | null>(autocompleteOptions[5]!)
+
+        return (
+            <label className='flex max-w-[600px] flex-col gap-4 font-semibold text-base text-delta-800'>
+                Slider with more than 10 options
+                <StyledSlider<AutocompleteOption>
+                    {...args}
+                    dataTest='autocomplete-slider'
+                    options={autocompleteOptions}
+                    autocompleteValue={value}
+                    getOptionLabel={(option) => option.label}
+                    isOptionEqualToValue={(option, other) => option.id === other.id}
+                    onAutocompleteChange={(event, next, reason, details) => {
+                        setValue(next)
+                        args.onAutocompleteChange?.(event, next, reason, details)
+                    }}
+                />
+            </label>
+        )
+    },
+
+    args: {
+        onAutocompleteChange: fn(),
+    },
+
+    play: async ({ canvasElement, args }) => {
+        const canvas = within(canvasElement)
+
+        const input = canvas.getByRole('combobox')
+
+        await expect(input).toHaveValue('Option 6')
+
+        await userEvent.click(input)
+
+        const option = await within(document.body).findByRole('option', {
+            name: 'Option 8',
+        })
+
+        await userEvent.click(option)
+
+        await expect(input).toHaveValue('Option 8')
+
+        await expect(args.onAutocompleteChange).toHaveBeenCalledWith(
+            expect.anything(),
+            autocompleteOptions[7],
+            'selectOption',
+            expect.objectContaining({
+                option: autocompleteOptions[7],
+            }),
+        )
+    },
+}
+
+export const AutocompleteBoundary: Story = {
+    render: () => (
+        <div className='flex max-w-[640px] flex-col gap-12'>
+            <div data-testid='ten-options'>
+                <div className='flex flex-col gap-4'>
+                    <span id='slider-10-options-caption'>10 options - Slider</span>
+                    <StyledSlider<number>
+                        dataTest='slider-10-options'
+                        ariaLabel='10 options - Slider'
+                        ariaLabelledBy='slider-10-options-caption'
+                        min={1}
+                        max={10}
+                        step={1}
+                        options={tenOptions.map((option) => option.id)}
+                        defaultValue={5}
+                        marks={labelledMarks(1, 10)}
+                    />
+                </div>
+            </div>
+
+            <div data-testid='eleven-options'>
+                <label className='flex flex-col gap-4'>
+                    11 options — Autocomplete
+                    <StyledSlider<number>
+                        dataTest='slider-11-options'
+                        min={1}
+                        max={11}
+                        step={1}
+                        options={autocompleteOptions.map((option) => option.id)}
+                        autocompleteValue={6}
+                        getOptionLabel={(option) => String(option)}
+                    />
+                </label>
+            </div>
+        </div>
+    ),
+
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement)
+
+        const ten = within(canvas.getByTestId('ten-options'))
+        const eleven = within(canvas.getByTestId('eleven-options'))
+
+        await expect(ten.getByRole('slider')).toBeInTheDocument()
+        await expect(eleven.getByRole('combobox')).toBeInTheDocument()
+    },
+}
+
+export const AutocompleteStates: Story = {
+    render: () => {
+        const options = autocompleteOptions.map((option) => option.id)
+
+        return (
+            <div className='flex max-w-[600px] flex-col gap-10'>
+                <label className='flex flex-col gap-4'>
+                    Helper text
+                    <StyledSlider<number>
+                        dataTest='autocomplete-helper'
+                        options={options}
+                        autocompleteValue={6}
+                        getOptionLabel={(option) => String(option)}
+                        helperText='Choose the value that best matches your answer'
+                    />
+                </label>
+
+                <label className='flex flex-col gap-4'>
+                    Error
+                    <StyledSlider<number>
+                        dataTest='autocomplete-error'
+                        options={options}
+                        autocompleteValue={6}
+                        getOptionLabel={(option) => String(option)}
+                        error
+                        errorText='Please choose a valid value'
+                    />
+                </label>
+
+                <label className='flex flex-col gap-4'>
+                    Disabled
+                    <StyledSlider<number>
+                        dataTest='autocomplete-disabled'
+                        options={options}
+                        autocompleteValue={6}
+                        getOptionLabel={(option) => String(option)}
+                        disabled
+                    />
+                </label>
+            </div>
+        )
+    },
+
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement.ownerDocument.body)
+
+        await expect(canvas.getByText('Choose the value that best matches your answer')).toBeInTheDocument()
+
+        await expect(canvas.getByText('Please choose a valid value')).toBeInTheDocument()
+
+        await expect(canvas.getByRole('combobox', { name: 'Disabled' })).toBeInTheDocument()
+
+        await expect(canvas.getByRole('combobox', { name: 'Disabled' })).toBeDisabled()
+    },
 }
 
 export const WithLabelsOnly: Story = {
