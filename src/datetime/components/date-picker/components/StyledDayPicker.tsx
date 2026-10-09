@@ -28,9 +28,11 @@ export const StyledDayPicker: React.FC<{
         disabledDays,
         onClear,
         title: _title, // consume it here if you remove calendar picker will have tooltip with this title
+        readOnlyReason: _readOnlyReason,
         ...dayPickerPropsRest
     } = datePickerProps
     void _title
+    void _readOnlyReason
 
     const { onClose } = popoverProps
 

@@ -12,6 +12,7 @@ import { useTranslations } from './useTranslations'
 import { useControlledProps } from './useControlledProps'
 import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
+import { DialogBusyContext, useDialogBusyBoundary } from 'src/components/feedback/dialog/DialogBusyContext'
 
 export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) => {
     const {
@@ -49,7 +50,11 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
     const { minimized, setMinimized, fullScreen, setFullScreen } = useControlledProps(props)
     const isFullScreenActive = fullScreen && !minimized
 
+    // While a button inside runs an action (e.g. Save), closing would hide the running request.
+    const { busy, busyReason, contextValue } = useDialogBusyBoundary(t.waitUntilSaved)
+
     const handleClose = () => {
+        if (busy) return
         setMinimized(false)
         onClose()
     }
@@ -147,6 +152,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                             buttonRef={minimizedCloseButtonRef}
                             showCloseIcon={showCloseIcon}
                             onClick={handleClose}
+                            disabledReason={busy ? busyReason : undefined}
                             tooltipTitle={t.close}
                         />
                     </div>
@@ -215,6 +221,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                                 buttonRef={closeButtonRef}
                                 showCloseIcon={showCloseIcon}
                                 onClick={handleClose}
+                                disabledReason={busy ? busyReason : undefined}
                                 tooltipTitle={t.close}
                             />
                         </div>
@@ -237,7 +244,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                 <div
                     className={cn(minimized && 'hidden', 'flex flex-grow flex-col overflow-y-auto overscroll-contain')}
                 >
-                    {children}
+                    <DialogBusyContext.Provider value={contextValue}>{children}</DialogBusyContext.Provider>
                 </div>
             </div>
         </>

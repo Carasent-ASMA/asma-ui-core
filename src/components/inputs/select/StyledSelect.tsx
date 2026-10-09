@@ -26,6 +26,7 @@ import {
     type ReactElement,
     type ReactNode,
 } from 'react'
+import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip'
 import { ChevronDownIcon, CloseIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
 import { HelperRow } from 'src/helpers/HelperRow'
@@ -77,8 +78,20 @@ export interface StyledSelectProps {
     allowClear?: boolean
     /** @figmaProp State = true→"Disabled" */
     disabled?: boolean
+    /**
+     * @figmaProp none — behavioral. Why the field is unavailable. With `disabled` the trigger stays
+     * focusable (`aria-disabled` instead of the native attribute), does not open and shows the reason
+     * on hover, focus and tap (disabled-states DIS-1…DIS-4). Without `disabled` it has no effect.
+     */
+    disabledReason?: ReactNode
     /** @figmaProp State = true→"Read-only" */
     readOnly?: boolean
+    /**
+     * @figmaProp none — behavioral. Why the value can't be changed here, and where it can. With
+     * `readOnly` the field is shown borderless and text-like, stays focusable and shows the reason on
+     * hover, focus and tap (disabled-states DIS-6). Without `readOnly` it has no effect.
+     */
+    readOnlyReason?: ReactNode
     name?: string
     /** @figmaProp Placeholder text (resting) */
     placeholder?: string
@@ -122,7 +135,9 @@ export const StyledSelect = ({
     expandHelperText = true,
     allowClear,
     disabled,
+    disabledReason,
     readOnly,
+    readOnlyReason,
     name,
     placeholder,
     displayEmpty,
@@ -144,6 +159,9 @@ export const StyledSelect = ({
     const isStandard = variant === 'standard'
     const isError = error ?? ctx?.error ?? false
     const isDisabled = disabled ?? ctx?.disabled ?? false
+    const softDisabled = isDisabled && Boolean(disabledReason)
+    const plainReadOnly = Boolean(readOnly) && Boolean(readOnlyReason)
+    const reasoned = softDisabled || plainReadOnly
     const message = isError ? (errorText ?? helperText) : helperText
     const { show: showHelperSlot, role: helperAlertRole } = useHelperSlot('StyledSelect', isError, message, reserveHelperText, readOnly)
     const helperId = useId()
@@ -162,8 +180,12 @@ export const StyledSelect = ({
     const childArray = Children.toArray(children)
     const isOptionSelected = (optionValue: unknown): boolean =>
         multiple ? Array.isArray(currentValue) && currentValue.includes(optionValue) : optionValue === currentValue
+    // A disabled option that carries its reason stays reachable so the reason can be read
+    // (disabled-states DIS-3); selecting it is still refused in selectActiveOption.
     const enabledOptionIndexes = childArray.flatMap((child, index) =>
-        isValidElement<StyledSelectItemProps>(child) && !child.props.disabled ? [index] : [],
+        isValidElement<StyledSelectItemProps>(child) && (!child.props.disabled || Boolean(child.props.disabledReason))
+            ? [index]
+            : [],
     )
     const selectedOptionIndex = childArray.findIndex(
         (child) => isValidElement<StyledSelectItemProps>(child) && isOptionSelected(child.props.value),
@@ -382,104 +404,121 @@ export const StyledSelect = ({
             className={cn('group relative inline-flex flex-col', fullWidth && 'w-full', className)}
             style={{ fontFamily: 'Roboto, Helvetica, Arial, sans-serif', ...resolveSx(sx), ...style }}
         >
-            <button
-                ref={setReference}
-                type='button'
-                data-testid={dataTest}
-                // `getReferenceProps()` (from `useRole(context, { role: 'listbox' })`) sets its own
-                // role/aria-haspopup/aria-expanded on the reference — spread it FIRST so our explicit,
-                // single-source-of-truth attributes below (bound to local `open`/`listboxId`) win instead
-                // of being silently shadowed by floating-ui's copy (JSX: later props override earlier).
-                {...getReferenceProps({
-                    onClick: () => setPortalRoot(getOpenModalDialogAncestor(reference.current)),
-                    onKeyDown: handleTriggerKeyDown,
-                })}
-                role='combobox'
-                aria-haspopup='listbox'
-                aria-expanded={open}
-                aria-controls={open ? listboxId : undefined}
-                aria-activedescendant={open ? activeOptionId : undefined}
-                // `labelId` (external label) wins when present — same MUI `Select` intent as
-                // `aria-labelledby` taking precedence over `aria-label` per spec. Otherwise fall back
-                // to `name` (unconditionally, same as the listbox's own `aria-label={name}` below) so
-                // the trigger has a real name instead of relying entirely on whatever placeholder/
-                // value text happens to be visible — which is either absent (nameless trigger, the
-                // axe `button-name` bug) or, when present, an ambiguous name on its own (a screen
-                // reader announcing just the selected value, e.g. "Paused", doesn't say what the field is).
-                aria-labelledby={labelId}
-                aria-label={!labelId ? name : undefined}
-                aria-invalid={isError ? true : undefined}
-                aria-describedby={showHelperSlot ? helperId : undefined}
-                aria-disabled={isDisabled ? true : undefined}
-                disabled={isDisabled}
-                onFocus={(event) => {
-                    setFocused(true)
-                    onFocus?.(event)
-                }}
-                onBlur={(event) => {
-                    setFocused(false)
-                    onBlur?.(event)
-                }}
-                style={{ minWidth: hasValue && !isStandard ? 105 : undefined }}
-                className={cn(
-                    'relative flex w-full items-center justify-between text-left outline-none',
-                    // Figma field text = Body Base 16/lh24 (`text-base`), h40 (matches StyledInputField/field-styles).
-                    // `standard` shares the outlined geometry (h40, px-3, radius) — only its border is
-                    // deferred to focus, via `borderless` on the outline overlay below.
-                    'h-10 rounded-lg border-0 px-3 text-base transition-colors',
-                    // ASMA-8220 (TB-14): the trigger repaints its background while pressed, so
-                    // touch-ready. No `asma-touch-target`: growing 40→44px on a phone would desync
-                    // the trigger from StyledInputField's h-10 in a mixed form.
-                    'asma-touch-ready',
-                    isButtonFocus ? 'bg-gama-50' : 'bg-transparent',
-                    triggerTextClass,
-                    isStandard && 'min-w-0',
-                    isDisabled && 'cursor-not-allowed',
-                    readOnly && 'pointer-events-none',
-                )}
+            <StyledTooltip
+                title={softDisabled ? disabledReason : readOnlyReason}
+                open={reasoned ? undefined : false}
+                openOnTap={reasoned}
+                persistentDescription={reasoned}
             >
-                <span className={cn('min-w-0 flex-1 truncate', !hasValue && 'text-delta-500')}>
-                    {hasValue || displayEmpty ? shownValue : placeholder}
-                </span>
-                <span className='flex items-center gap-1'>
-                    {allowClear && hasValue && !isDisabled && (
-                        // Mouse-only affordance, nested inside the trigger <button> — it can't be a
-                        // second, independently focusable control without invalid nested-interactive
-                        // semantics (a <button> may not contain interactive content). No `role='button'`
-                        // and `aria-hidden`: don't claim a Tab stop that isn't actually reachable. The
-                        // keyboard-equivalent path is Backspace/Delete on the trigger (handleTriggerKeyDown).
-                        <span
-                            aria-hidden='true'
-                            data-testid='select-clear-button'
-                            className='invisible flex items-center justify-center rounded-full p-[2px] group-focus-within:visible hover:bg-gama-100'
-                            onClick={(event) => {
-                                event.stopPropagation()
-                                handleClear()
-                            }}
-                        >
-                            <CloseIcon width={18} height={18} />
-                        </span>
+                <button
+                    ref={setReference}
+                    type='button'
+                    data-testid={dataTest}
+                    // `getReferenceProps()` (from `useRole(context, { role: 'listbox' })`) sets its own
+                    // role/aria-haspopup/aria-expanded on the reference — spread it FIRST so our explicit,
+                    // single-source-of-truth attributes below (bound to local `open`/`listboxId`) win instead
+                    // of being silently shadowed by floating-ui's copy (JSX: later props override earlier).
+                    {...getReferenceProps({
+                        onClick: () => setPortalRoot(getOpenModalDialogAncestor(reference.current)),
+                        onKeyDown: handleTriggerKeyDown,
+                    })}
+                    role='combobox'
+                    aria-haspopup='listbox'
+                    aria-expanded={open}
+                    aria-controls={open ? listboxId : undefined}
+                    aria-activedescendant={open ? activeOptionId : undefined}
+                    // `labelId` (external label) wins when present — same MUI `Select` intent as
+                    // `aria-labelledby` taking precedence over `aria-label` per spec. Otherwise fall back
+                    // to `name` (unconditionally, same as the listbox's own `aria-label={name}` below) so
+                    // the trigger has a real name instead of relying entirely on whatever placeholder/
+                    // value text happens to be visible — which is either absent (nameless trigger, the
+                    // axe `button-name` bug) or, when present, an ambiguous name on its own (a screen
+                    // reader announcing just the selected value, e.g. "Paused", doesn't say what the field is).
+                    aria-labelledby={labelId}
+                    aria-label={!labelId ? name : undefined}
+                    aria-invalid={isError ? true : undefined}
+                    aria-describedby={showHelperSlot ? helperId : undefined}
+                    aria-disabled={isDisabled ? true : undefined}
+                    aria-readonly={readOnly ? true : undefined}
+                    disabled={isDisabled && !softDisabled}
+                    onFocus={(event) => {
+                        setFocused(true)
+                        onFocus?.(event)
+                    }}
+                    onBlur={(event) => {
+                        setFocused(false)
+                        onBlur?.(event)
+                    }}
+                    style={{ minWidth: hasValue && !isStandard ? 105 : undefined }}
+                    className={cn(
+                        'relative flex w-full items-center justify-between text-left outline-none',
+                        // Figma field text = Body Base 16/lh24 (`text-base`), h40 (matches StyledInputField/field-styles).
+                        // `standard` shares the outlined geometry (h40, px-3, radius) — only its border is
+                        // deferred to focus, via `borderless` on the outline overlay below.
+                        'h-10 rounded-lg border-0 px-3 text-base transition-colors',
+                        // ASMA-8220 (TB-14): the trigger repaints its background while pressed, so
+                        // touch-ready. No `asma-touch-target`: growing 40→44px on a phone would desync
+                        // the trigger from StyledInputField's h-10 in a mixed form.
+                        'asma-touch-ready',
+                        isButtonFocus ? 'bg-gama-50' : 'bg-transparent',
+                        triggerTextClass,
+                        isStandard && 'min-w-0',
+                        isDisabled && 'cursor-not-allowed',
+                        // No pointer-events-none: the reason must stay reachable by hover (disabled-states §6).
+                        // useClick and handleTriggerKeyDown already refuse to open a read-only field.
+                        readOnly && 'cursor-default',
+                        // The outline overlay paints no focus state for disabled or read-only, so a focusable
+                        // reasoned trigger draws its own ring (DIS-3, DIS-6).
+                        reasoned && 'focus-visible:[box-shadow:inset_0_0_0_2px_var(--colors-focus-ring)]',
                     )}
-                    <ChevronDownIcon
-                        width={24}
-                        height={24}
+                >
+                    <span className={cn('min-w-0 flex-1 truncate', !hasValue && 'text-delta-500')}>
+                        {hasValue || displayEmpty ? shownValue : placeholder}
+                    </span>
+                    <span className='flex items-center gap-1'>
+                        {allowClear && hasValue && !isDisabled && !readOnly && (
+                            // Mouse-only affordance, nested inside the trigger <button> — it can't be a
+                            // second, independently focusable control without invalid nested-interactive
+                            // semantics (a <button> may not contain interactive content). No `role='button'`
+                            // and `aria-hidden`: don't claim a Tab stop that isn't actually reachable. The
+                            // keyboard-equivalent path is Backspace/Delete on the trigger (handleTriggerKeyDown).
+                            <span
+                                aria-hidden='true'
+                                data-testid='select-clear-button'
+                                className='invisible flex items-center justify-center rounded-full p-[2px] group-focus-within:visible hover:bg-gama-100'
+                                onClick={(event) => {
+                                    event.stopPropagation()
+                                    handleClear()
+                                }}
+                            >
+                                <CloseIcon width={18} height={18} />
+                            </span>
+                        )}
+                        <ChevronDownIcon
+                            width={24}
+                            height={24}
+                            className={cn(
+                                'shrink-0 transition-transform',
+                                plainReadOnly && 'invisible',
+                                isButtonFocus ? 'text-gama-500' : chevronRestingClass,
+                                open && 'flip-180',
+                            )}
+                        />
+                    </span>
+                    <div
                         className={cn(
-                            'shrink-0 transition-transform',
-                            isButtonFocus ? 'text-gama-500' : chevronRestingClass,
-                            open && 'flip-180',
+                            outlineClass({
+                                focused: open || focused,
+                                error: isError,
+                                disabled: isDisabled,
+                                readOnly,
+                                borderless: isStandard,
+                            }),
+                            plainReadOnly && 'invisible',
                         )}
                     />
-                </span>
-                <div
-                    className={outlineClass({
-                        focused: open || focused,
-                        error: isError,
-                        disabled: isDisabled,
-                        readOnly,
-                        borderless: isStandard,
-                    })}
-                />
-            </button>
+                </button>
+            </StyledTooltip>
 
             {open && (
                 <FloatingPortal root={portalRoot}>

@@ -706,3 +706,36 @@ export const Gallery: Story = {
         )
     },
 }
+
+/** Read-only and disabled with a reason (disabled-states DIS-3, DIS-6, §6). */
+export const WithReasons: StoryObj = {
+    render: () => (
+        <div className='flex w-[320px] flex-col gap-6'>
+            <StyledSelectAutocomplete<string, false, false, false>
+                dataTest='autocomplete-read-only-reason'
+                options={['Oslo', 'Bergen']}
+                value='Oslo'
+                readOnly
+                readOnlyReason='Taken from the national register'
+                renderInput={(params) => <StyledInputField {...params} dataTest='city' label='City' />}
+            />
+            <StyledSelectAutocomplete<string, false, false, false>
+                dataTest='autocomplete-disabled-reason'
+                options={['Oslo', 'Bergen']}
+                value={null}
+                disabled
+                disabledReason='Choose a country first'
+                renderInput={(params) => <StyledInputField {...params} dataTest='region' label='Region' />}
+            />
+        </div>
+    ),
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement)
+        await expect(canvas.getByRole('combobox', { name: 'City' })).toHaveAccessibleDescription(
+            'Taken from the national register',
+        )
+        await expect(canvas.getByRole('combobox', { name: 'Region' })).toHaveAccessibleDescription(
+            'Choose a country first',
+        )
+    },
+}

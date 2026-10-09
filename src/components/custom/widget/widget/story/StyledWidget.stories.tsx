@@ -144,3 +144,24 @@ export const Widget = (): JSX.Element => {
 
 // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
 Widget.parameters = { a11y: { test: 'todo' } }
+
+/** "View more" disabled with a reason (disabled-states DIS-1…DIS-4): focusable, reason on hover, focus and tap. */
+export const ViewMoreDisabledWithReason = (): JSX.Element => (
+    <div className='w-[400px] p-4'>
+        <StyledWidget
+            title='Last chats'
+            icon={<InboxOutboxOutlineIcon width={24} height={24} />}
+            viewMore={{
+                viewLessText: 'View less',
+                viewMoreText: 'View more',
+                disabled: true,
+                disabledReason: 'All chats are already shown',
+            }}
+            isEmpty={false}
+            isLoading={false}
+            emptyText='No data'
+        >
+            <div className='h-24 rounded-lg bg-gray-200'></div>
+        </StyledWidget>
+    </div>
+)

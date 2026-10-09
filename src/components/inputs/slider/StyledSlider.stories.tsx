@@ -336,3 +336,14 @@ export const RangeWithLabelsAndButtons: Story = {
         </label>
     ),
 }
+
+/** Read-only with a reason (disabled-states DIS-6): the value stays readable and focusable, nothing changes it. */
+export const ReadOnly: Story = {
+    args: { readOnly: true, readOnlyReason: 'Set by your case worker', defaultValue: 6, ariaLabel: 'Pain level' },
+    render: (args) => (
+        <label className='flex flex-col gap-4 font-semibold text-base text-delta-800'>
+            Read-only Slider
+            <StyledSlider {...args} />
+        </label>
+    ),
+}

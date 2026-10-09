@@ -1,6 +1,8 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useContext, useMemo, useState, type ReactNode } from 'react'
 
-import { DotsVerticalIcon, LoadingIcon } from 'src/components/icons'
+import { DialogBusyContext, WAIT_UNTIL_SAVED } from '../DialogBusyContext'
+
+import { DotsVerticalIcon } from 'src/components/icons'
 import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip'
 import { StyledButton, type StyledButtonType } from 'src/components/inputs/button'
 import { StyledMenu } from 'src/components/navigation/menu/StyledMenu'
@@ -14,7 +16,7 @@ import {
     type DynamicToolbarAction,
     type PlannedToolbarActions,
 } from '../../../custom/module/header-layout/planToolbarActions'
-import { ToolbarActionButton } from '../../../custom/module/header-layout/ToolbarActionGroup'
+import { overflowItemState, ToolbarActionButton } from '../../../custom/module/header-layout/ToolbarActionGroup'
 import { useToolbarTranslations, type ToolbarLocale } from '../../../custom/module/header-layout/useTranslations'
 
 /**
@@ -54,16 +56,18 @@ export interface StyledDialogFooterButton {
     /** Trailing icon. `loading` supplies its own and wins. */
     endIcon?: ReactNode
     /**
-     * Shows a spinner after the label and disables the button. Consumers previously swapped
-     * the label *for* a spinner, which changes the button's width mid-submit — hence the
-     * hard-coded `w-[98px]` workarounds in the footers this replaces. Keeping the label
-     * makes the width stable on its own.
+     * Marks the button busy: a spinner sits centred over the label, which stays in the layout
+     * (invisible, still the accessible name), so the button keeps its width. It keeps focus and
+     * ignores activation. Consumers previously swapped the label *for* a spinner, which changed
+     * the button's width mid-submit — hence the hard-coded `w-[98px]` workarounds in the footers
+     * this replaces.
      */
     loading?: boolean
     /**
-     * Wraps the button in a `StyledTooltip`. Falsy renders no tooltip, so the common
-     * `tooltip={disabled && 'Locked for editing'}` reads naturally. A disabled button does
-     * not emit pointer events, so the tooltip is anchored on a wrapper around it.
+     * Pass a constant `tooltip` (e.g. 'Locked for editing') and toggle `disabled` separately.
+     * With `disabled` it is the reason the action is unavailable (`disabledReason`):
+     * the button stays focusable and shows it on hover, focus and tap. Otherwise it is a plain
+     * hint anchored on a wrapper.
      */
     tooltip?: ReactNode
     dataTest?: string
@@ -125,6 +129,7 @@ export function StyledDialogFooter({
     className,
     dataTest = 'styled-dialog-footer',
 }: StyledDialogFooterProps): JSX.Element {
+    const dialogBusy = useContext(DialogBusyContext)
     const t = useToolbarTranslations(locale)
     const { ref: containerRef, widthPx: containerWidth } = useElementWidthPx<HTMLDivElement>()
     const { register, widths } = useWidthRegistry()
@@ -186,33 +191,34 @@ export function StyledDialogFooter({
         fallbackVariant: StyledButtonType,
         key: string,
     ): JSX.Element => {
+        /* On a disabled button the tooltip is the reason it is unavailable: StyledButton keeps it
+         * focusable and shows the reason on hover, focus and tap (disabled-states DIS-1…DIS-4).
+         * Loading keeps focus on the button instead of disabling it (submit-buttons §6). */
+        const busySecondary = key === 'secondary' && dialogBusy?.busy
+        const disabled = Boolean(button.disabled) || Boolean(busySecondary)
+        const disabledReason = busySecondary ? (dialogBusy.busyReason ?? WAIT_UNTIL_SAVED[locale]) : button.tooltip
         const element = (
             <StyledButton
+                locale={locale}
                 dataTest={button.dataTest ?? `${dataTest}-${key}`}
                 variant={button.variant ?? fallbackVariant}
                 error={button.tone === 'danger'}
                 size='medium'
                 type={button.type ?? 'button'}
-                disabled={Boolean(button.disabled) || Boolean(button.loading)}
+                disabled={disabled}
+                disabledReason={disabledReason}
+                loading={Boolean(button.loading)}
                 startIcon={button.icon}
-                endIcon={button.loading ? <LoadingIcon width={20} height={20} /> : button.endIcon}
+                endIcon={button.endIcon}
                 onClick={button.onClick}
                 aria-label={button.ariaLabel}
-                aria-busy={button.loading}
             >
                 {button.label}
             </StyledButton>
         )
 
-        if (!button.tooltip) {
-            return element
-        }
-
-        /* A disabled button emits no pointer events, so the tooltip listens on a wrapper —
-         * otherwise the "why is this disabled?" tooltip never shows, which is the only
-         * reason these footers use one. */
         return (
-            <StyledTooltip arrow title={button.tooltip}>
+            <StyledTooltip arrow title={button.tooltip} open={disabled || !button.tooltip ? false : undefined}>
                 <span className='inline-flex'>{element}</span>
             </StyledTooltip>
         )
@@ -248,7 +254,7 @@ export function StyledDialogFooter({
                                 ref={register(actionKey(action.id, showLabel))}
                                 className='inline-flex shrink-0'
                             >
-                                <ToolbarActionButton action={action} showLabel={showLabel} />
+                                <ToolbarActionButton action={action} showLabel={showLabel} inProgressLabel={t.inProgress} />
                             </span>
                         ))}
 
@@ -257,6 +263,7 @@ export function StyledDialogFooter({
                                 {/* Figma "More": outlined, icon-only, 40x40 — never labelled in a footer. */}
                                 <span ref={register(KEY_MORE_BUTTON)} className='inline-flex shrink-0'>
                                     <StyledButton
+                                        locale={locale}
                                         dataTest={`${dataTest}-more`}
                                         variant='outlined'
                                         size='medium'
@@ -280,7 +287,7 @@ export function StyledDialogFooter({
                                     {plan.overflowActions.map((action) => (
                                         <StyledMenuItem
                                             key={action.id}
-                                            disabled={action.disabled}
+                                            {...overflowItemState(action, t.inProgress)}
                                             onClick={() => {
                                                 setAnchorEl(null)
                                                 action.onClick()

@@ -10,6 +10,12 @@ export interface StyledTimePickerProps {
     placeholder?: string
     disabled?: boolean
     readOnly?: boolean
+    /**
+     * @figmaProp none — behavioral. Why the time can't be changed here, and where it can. With
+     * `readOnly` the field is shown borderless and text-like without the clock icon, stays focusable
+     * and shows the reason on hover, focus and tap (disabled-states DIS-6). Without `readOnly` it has no effect.
+     */
+    readOnlyReason?: ReactNode
     inputClassName?: string
     dataTest: string
     width?: number

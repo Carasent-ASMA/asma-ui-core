@@ -736,3 +736,42 @@ export const Playground: Story = {
     parameters: { a11y: { test: 'todo' } },
     render: () => <PlaygroundFrame />,
 }
+
+/** Read-only value and disabled field with a reason (disabled-states DIS-3, DIS-6, §6). */
+export const WithReasons: Story = {
+    render: () => {
+        const options = createOptions(8)
+        return (
+            <div className='flex max-w-xl flex-col gap-6 p-6'>
+                <StyledDynamicSelect<Option>
+                    dataTest='dynamic-read-only-reason'
+                    title='Status'
+                    options={options}
+                    valueKey='id'
+                    labelKey='name'
+                    value={options[0] ?? null}
+                    onChange={() => undefined}
+                    readOnly
+                    readOnlyReason='Set when the case was closed'
+                />
+                <StyledDynamicSelect<Option>
+                    dataTest='dynamic-disabled-reason'
+                    title='Reviewer'
+                    options={options}
+                    valueKey='id'
+                    labelKey='name'
+                    value={null}
+                    onChange={() => undefined}
+                    disabled
+                    disabledReason='Choose a status first'
+                />
+            </div>
+        )
+    },
+    play: async ({ canvas }) => {
+        await expect(canvas.getByRole('textbox', { name: 'Status' })).toHaveAccessibleDescription(
+            'Set when the case was closed',
+        )
+        await expect(canvas.getByText('Choose a status first')).toBeInTheDocument()
+    },
+}

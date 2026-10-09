@@ -48,6 +48,9 @@ export interface AutocompleteRenderOptionState {
 /** Props the combobox hands to `renderInput`; spread straight onto `StyledInputField`. */
 export interface AutocompleteRenderInputParams {
     disabled?: boolean
+    /** Set only with a `readOnlyReason`, so the field renders borderless with the reason tooltip. */
+    readOnly?: boolean
+    readOnlyReason?: ReactNode
     size?: 'small' | 'medium'
     fullWidth?: boolean
     error?: boolean
@@ -128,8 +131,20 @@ export interface StyledSelectAutocompleteProps<
     noOptionsText?: ReactNode
     /** @figmaProp State = true→"Disabled" */
     disabled?: boolean
+    /**
+     * @figmaProp none — behavioral. Why the field is unavailable. With `disabled` it replaces the helper
+     * text of `renderInput`, so the reason is visible without focus (disabled-states DIS-3, §6: a
+     * disabled field keeps native `disabled`). An error message still wins. Without `disabled` it has no effect.
+     */
+    disabledReason?: ReactNode
     /** @figmaProp State = true→"Read-only" (chips lose their delete button; no popup/clear icons) */
     readOnly?: boolean
+    /**
+     * @figmaProp none — behavioral. Why the value can't be changed here, and where it can. With
+     * `readOnly`, `renderInput` receives `readOnly` and `readOnlyReason`, so a `StyledInputField` renders
+     * borderless and text-like with the reason on hover, focus and tap (disabled-states DIS-6).
+     */
+    readOnlyReason?: ReactNode
     error?: boolean
     helperText?: ReactNode
     /** @figmaProp none — FieldSize (both render the 40px field) */
@@ -161,6 +176,12 @@ export interface StyledSelectAutocompleteProps<
     /** Accepted for MUI parity; single-select already omits selected options via filtering. */
     filterSelectedOptions?: boolean
     getOptionDisabled?: (option: T) => boolean
+    /**
+     * Why a disabled option is unavailable (hide-or-disable A-6). The default option row shows it
+     * under the label and links it as the option's description; such an option stays reachable by
+     * the arrow keys but cannot be selected (disabled-states DIS-2, DIS-3).
+     */
+    getOptionDisabledReason?: (option: T) => ReactNode
     classes?: { root?: string; paper?: string; listbox?: string }
     className?: string
     wrapperClassName?: string
@@ -204,7 +225,9 @@ export function StyledSelectAutocomplete<
     loadingText = 'Loading…',
     noOptionsText = 'No options',
     disabled,
+    disabledReason,
     readOnly,
+    readOnlyReason,
     error,
     helperText,
     size = 'small',
@@ -226,6 +249,7 @@ export function StyledSelectAutocomplete<
     className,
     wrapperClassName,
     getOptionDisabled,
+    getOptionDisabledReason,
     slotProps,
 }: StyledSelectAutocompleteProps<T, Multiple, DisableClearable, FreeSolo>): JSX.Element {
     const isMultiple = multiple === true
@@ -277,6 +301,8 @@ export function StyledSelectAutocomplete<
     const isSelected = (option: T): boolean =>
         isMultiple ? selectedArray.some((v) => isEqual(option, v)) : singleValue !== null && isEqual(option, singleValue)
     const isOptionDisabled = (option: T): boolean => getOptionDisabled?.(option) ?? isOptionObjectDisabled(option)
+    const optionDisabledReason = (option: T): ReactNode =>
+        isOptionDisabled(option) && !renderOption ? getOptionDisabledReason?.(option) : undefined
 
     const filtered = useMemo(() => {
         const base = [...options]
@@ -290,7 +316,7 @@ export function StyledSelectAutocomplete<
     }, [options, inputValue, filterOptions, value])
     const visibleOptions = useMemo(() => filtered.slice(0, 100), [filtered])
     const enabledOptionIndexes = visibleOptions.flatMap((option, index) =>
-        !isOptionDisabled(option) ? [index] : [],
+        !isOptionDisabled(option) || Boolean(optionDisabledReason(option)) ? [index] : [],
     )
     const enabledActiveIndexes =
         allowSelectAll && isMultiple ? [-1, ...enabledOptionIndexes] : enabledOptionIndexes
@@ -496,12 +522,14 @@ export function StyledSelectAutocomplete<
         </span>
     )
 
+    const plainReadOnly = Boolean(readOnly) && Boolean(readOnlyReason)
     const renderInputParams: AutocompleteRenderInputParams = {
         disabled,
+        ...(plainReadOnly ? { readOnly: true, readOnlyReason } : {}),
         size,
         fullWidth: true,
         error,
-        helperText,
+        helperText: disabled && disabledReason && !error ? disabledReason : helperText,
         value: inputValue,
         onChange: (event) => {
             setActiveIndex(null)
@@ -542,11 +570,12 @@ export function StyledSelectAutocomplete<
         rowSize === 'regular' ? 'min-h-12' : 'min-h-10',
         'aria-selected:bg-gama-50 hover:bg-delta-50',
         // Disabled options never take the gama highlight (hover or keyboard) and read as muted.
-        'aria-disabled:cursor-default aria-disabled:!bg-transparent aria-disabled:text-delta-300',
+        'aria-disabled:cursor-not-allowed aria-disabled:!bg-transparent aria-disabled:text-delta-300',
     )
 
     const defaultRenderOption = (props: OptionLiProps, option: T, state: AutocompleteRenderOptionState): ReactNode => {
         const { key, ...optionProps } = props
+        const reason = optionDisabledReason(option)
         return (
             <li key={key} {...optionProps}>
                 {props['data-active'] !== undefined && (
@@ -580,7 +609,16 @@ export function StyledSelectAutocomplete<
                 {/* Long labels wrap to a second line and only then ellipsise (ASMA-7847): one
                     clipped line hid which organisation a row actually was. `break-words` mirrors
                     Figma's `word-break: break-word`, so an unbroken name still wraps. */}
-                <span className='line-clamp-2 min-w-0 flex-1 break-words'>{getLabel(option)}</span>
+                {reason ? (
+                    <span className='flex min-w-0 flex-1 flex-col'>
+                        <span className='line-clamp-2 break-words'>{getLabel(option)}</span>
+                        <span id={`${props.id}-reason`} className='text-sm text-delta-600'>
+                            {reason}
+                        </span>
+                    </span>
+                ) : (
+                    <span className='line-clamp-2 min-w-0 flex-1 break-words'>{getLabel(option)}</span>
+                )}
             </li>
         )
     }
@@ -606,6 +644,7 @@ export function StyledSelectAutocomplete<
             id: `${dataTest}-option-${index}`,
             'aria-selected': isSelected(option),
             'aria-disabled': optionDisabled || undefined,
+            'aria-describedby': optionDisabledReason(option) ? `${dataTest}-option-${index}-reason` : undefined,
             'data-active': activeIndex === index ? '' : undefined,
             className: optionRowClassName,
         }

@@ -64,3 +64,24 @@ export const KeyboardEntry: StoryObj<typeof StyledDatePicker> = {
         await expect(input).toHaveValue('15/06/2024')
     },
 }
+
+/** Read-only with a reason (disabled-states DIS-6): borderless, focusable, reason on hover, focus and tap. */
+export const ReadOnlyWithReason: StoryObj<typeof StyledDatePicker> = {
+    render: () => (
+        <div className='flex flex-col gap-5'>
+            <StyledDatePicker
+                dataTest='read-only-date'
+                mode='single'
+                label='Start date'
+                selected={new Date(2026, 0, 5)}
+                readOnly
+                readOnlyReason='Set when the plan was approved'
+            />
+        </div>
+    ),
+    play: async ({ canvas }) => {
+        await expect(canvas.getByRole('textbox', { name: 'Start date' })).toHaveAccessibleDescription(
+            'Set when the plan was approved',
+        )
+    },
+}

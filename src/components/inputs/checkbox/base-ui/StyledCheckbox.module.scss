@@ -48,9 +48,10 @@ $checkbox-sizes: (
         @include checkbox-dimensions(medium);
     }
 
+    // Pointer events stay on so a tooltip or helper reason can be reached; the control itself
+    // ignores activation while disabled (disabled-states DIS-5, §6).
     &[data-disabled] {
-        cursor: default;
-        pointer-events: none;
+        cursor: not-allowed;
     }
 
     &:is([data-checked], [data-indeterminate]) .Checkbox {
@@ -155,8 +156,9 @@ $checkbox-sizes: (
     }
 }
 
+// Pointer events stay on so a read-only reason can be hovered (disabled-states DIS-6); the input
+// cancels its own click while read-only.
 .CheckboxWrapper.ReadOnly {
-    pointer-events: none;
     cursor: default;
 
     .Checkbox {

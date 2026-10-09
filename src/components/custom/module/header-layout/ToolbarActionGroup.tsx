@@ -1,10 +1,21 @@
-import { Fragment, useState } from 'react'
+import { Fragment, useState, type ReactNode } from 'react'
 import { StyledButton } from 'src/components/inputs/button'
 import { DotsVerticalIcon } from 'src/components/icons'
 import { StyledMenu } from 'src/components/navigation/menu/StyledMenu'
 import { StyledMenuItem } from 'src/components/navigation/menu/StyledMenuItem'
 import { cn } from 'src/helpers/cn'
 import type { DynamicToolbarAction, PlannedToolbarActions } from './planToolbarActions'
+
+const DEFAULT_IN_PROGRESS = 'In progress'
+
+/** More-menu item state: a running action is disabled with the busy reason (disabled-states DIS-8). */
+export function overflowItemState(
+    action: DynamicToolbarAction,
+    inProgressLabel = DEFAULT_IN_PROGRESS,
+): { disabled?: boolean; disabledReason?: ReactNode; 'aria-busy'?: boolean } {
+    if (!action.loading) return { disabled: action.disabled, disabledReason: action.disabledReason }
+    return { disabled: true, disabledReason: inProgressLabel, 'aria-busy': true }
+}
 
 /** True when the plan renders anything (inline buttons or the More menu). */
 export function hasPlannedActions(plan?: PlannedToolbarActions): boolean {
@@ -15,10 +26,13 @@ export function ToolbarActionButton({
     action,
     showLabel,
     selectionTone = false,
+    inProgressLabel,
 }: {
     action: DynamicToolbarAction
     showLabel: boolean
     selectionTone?: boolean
+    /** Busy announcement of a `loading` action, in the toolbar locale. */
+    inProgressLabel?: string
 }): JSX.Element {
     if (action.render) {
         return action.render({ showLabel })
@@ -38,6 +52,9 @@ export function ToolbarActionButton({
              * sit inside one). */
             type='button'
             disabled={action.disabled}
+            disabledReason={action.disabledReason}
+            loading={action.loading}
+            loadingAnnouncement={inProgressLabel}
             startIcon={action.icon}
             onClick={action.onClick}
             /* An explicit ariaLabel always wins (e.g. a badge count appended to the name);
@@ -80,9 +97,12 @@ export function ToolbarActionGroup({
     className,
     selectionTone = false,
     registerActionWidth,
+    inProgressLabel = DEFAULT_IN_PROGRESS,
 }: {
     plan: PlannedToolbarActions
     overflowMenuLabel: string
+    /** Reason and busy announcement of a `loading` action, in the toolbar locale. */
+    inProgressLabel?: string
     className?: string
     selectionTone?: boolean
     /**
@@ -108,6 +128,7 @@ export function ToolbarActionGroup({
                         action={action}
                         showLabel={showLabel}
                         selectionTone={selectionTone}
+                        inProgressLabel={inProgressLabel}
                     />
                 )
 
@@ -148,7 +169,7 @@ export function ToolbarActionGroup({
                                 {index > 0 && <hr className='m-0 border-0 border-t border-solid border-delta-200' />}
 
                                 <StyledMenuItem
-                                    disabled={action.disabled}
+                                    {...overflowItemState(action, inProgressLabel)}
                                     onClick={() => {
                                         setAnchorEl(null)
                                         action.onClick()

@@ -273,3 +273,17 @@ export const Mobile: StoryObj<typeof StyledTimePicker> = {
     globals: { viewport: { value: 'mobile1', isRotated: false } },
     render: () => <MobileExample />,
 }
+
+/** Read-only with a reason (disabled-states DIS-6): borderless without the clock icon, focusable, reason on hover, focus and tap. */
+export const ReadOnlyWithReason: StoryObj<typeof StyledTimePicker> = {
+    render: () => (
+        <StyledTimePicker
+            dataTest='read-only-time'
+            label='Start'
+            value={new Date(2026, 0, 5, 9, 30)}
+            onSelect={() => undefined}
+            readOnly
+            readOnlyReason='Booked by the reception'
+        />
+    ),
+}

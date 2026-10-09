@@ -1,4 +1,5 @@
-import React, { forwardRef, useId, useMemo, useState, type HTMLAttributes } from 'react'
+import React, { forwardRef, useId, useMemo, useState, type HTMLAttributes, type ReactNode } from 'react'
+import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip'
 import { cn } from 'src/helpers/cn'
 import { HelperRow } from 'src/helpers/HelperRow'
 import { useHelperSlot } from 'src/helpers/useHelperSlot'
@@ -12,6 +13,9 @@ export type StyledRadioGroupProps = {
     /** Non-interactive but not visually disabled (e.g. a submitted/read-only questionnaire): the
      * current selection is shown but can't change. */
     readOnly?: boolean
+    /** Why the selection can't be changed here, and where it can (disabled-states DIS-6). Shown on
+     * hover, focus and tap of the read-only group. */
+    readOnlyReason?: ReactNode
     dataTest?: string
     error?: boolean
     errorText?: string
@@ -34,6 +38,7 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
             onValueChange,
             disabled,
             readOnly,
+            readOnlyReason,
             dataTest,
             error,
             errorText,
@@ -46,6 +51,8 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
         ref,
     ) => {
         const helperId = useId()
+        const reasonId = useId()
+        const active = Boolean(readOnly && readOnlyReason)
         const generatedName = useId()
         const groupName = name ?? generatedName
 
@@ -60,9 +67,15 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
         }
 
         const contextValue = useMemo(
-            () => ({ name: groupName, value: selected, disabled, onSelect }),
+            () => ({
+                name: groupName,
+                value: selected,
+                disabled,
+                onSelect,
+                reasonDescriptionId: active ? reasonId : undefined,
+            }),
             // eslint-disable-next-line react-hooks/exhaustive-deps
-            [groupName, selected, disabled],
+            [groupName, selected, disabled, readOnly, active, reasonId],
         )
 
         const message = error ? (errorText ?? helperText) : helperText
@@ -76,7 +89,7 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
         // for fit-width radios that sit on one line rather than full-width rows on separate lines.
         const hasDirection = /\bflex-(?:row|col)\b/.test(rest.className ?? '')
 
-        return (
+        const group = (
             <div
                 {...rest}
                 ref={ref}
@@ -85,12 +98,12 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
                 aria-describedby={showHelperSlot ? helperId : undefined}
                 aria-invalid={error}
                 aria-readonly={readOnly ? true : undefined}
-                // readOnly: keep the normal (non-disabled) look but block interaction — selection can't
-                // change (onSelect early-returns) and clicks/focus are inert.
+                // readOnly: keep the normal (non-disabled) look; selection can't change (onSelect
+                // early-returns). Pointer events stay on so the reason can be hovered (DIS-6).
                 className={cn(
                     'flex items-start',
                     !hasDirection && 'flex-col',
-                    readOnly && 'pointer-events-none',
+                    readOnly && 'cursor-default [&_*]:cursor-default',
                     rest.className,
                 )}
             >
@@ -106,6 +119,18 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
                     />
                 )}
             </div>
+        )
+
+        return (
+            <StyledTooltip
+                title={readOnlyReason}
+                open={active ? undefined : false}
+                openOnTap={active}
+                persistentDescription={active}
+                persistentDescriptionId={reasonId}
+            >
+                {group}
+            </StyledTooltip>
         )
     },
 )

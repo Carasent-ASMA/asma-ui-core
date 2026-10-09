@@ -68,6 +68,30 @@ describe('StyledTabs keyboard contract', () => {
         await expect(document.activeElement).toBe(tabs[3])
     })
 
+    it('keeps a disabled tab with a reason reachable but unselectable (disabled-states DIS-3)', async () => {
+        const ReasonFixture = (): JSX.Element => {
+            const [value, setValue] = useState<string>('one')
+            return (
+                <StyledTabs value={value} onChange={(_event, next) => setValue(next as string)}>
+                    <StyledTab value='one' label='One' />
+                    <StyledTab value='two' label='Two' disabled disabledReason='Only administrators can open this' />
+                </StyledTabs>
+            )
+        }
+        const { container } = mount(<ReasonFixture />)
+        const tabs = tabsOf(container)
+        tabs[0]!.focus()
+
+        await userEvent.keyboard('{ArrowRight}')
+        await expect(document.activeElement).toBe(tabs[1])
+        await expect(tabs[1]).toHaveAttribute('aria-disabled', 'true')
+        await expect(tabs[1]).toHaveAccessibleDescription('Only administrators can open this')
+
+        await userEvent.keyboard('{Enter}')
+        await expect(tabs[0]).toHaveAttribute('aria-selected', 'true')
+        await expect(tabs[1]).toHaveAttribute('aria-selected', 'false')
+    })
+
     it('moves focus to the first/last enabled tab with Home/End (2.1.1)', async () => {
         const { container } = mount(<TabsFixture />)
         const tabs = tabsOf(container)

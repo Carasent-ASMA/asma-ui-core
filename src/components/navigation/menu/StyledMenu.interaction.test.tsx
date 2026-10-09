@@ -101,6 +101,43 @@ describe('StyledMenu keyboard contract', () => {
         await expect(document.activeElement).toBe(items()[3])
     })
 
+    it('keeps a disabled item with a reason reachable and announces the reason (disabled-states DIS-3)', async () => {
+        const onPick = fn()
+        const ReasonFixture = (): JSX.Element => {
+            const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+            return (
+                <div>
+                    <StyledButton dataTest='menu-trigger' onClick={(event) => setAnchorEl(event.currentTarget)}>
+                        Actions
+                    </StyledButton>
+                    <StyledMenu open={!!anchorEl} anchorEl={anchorEl} onClose={() => setAnchorEl(null)}>
+                        <StyledMenuItem data-testid='item-rename'>Rename</StyledMenuItem>
+                        <StyledMenuItem
+                            data-testid='item-archive'
+                            disabled
+                            disabledReason='Locked for editing'
+                            onClick={() => {
+                                onPick('archive')
+                            }}
+                        >
+                            Archive
+                        </StyledMenuItem>
+                    </StyledMenu>
+                </div>
+            )
+        }
+        const { container } = mount(<ReasonFixture />)
+        await openMenu(container)
+        await waitFor(() => expect(document.activeElement).toBe(items()[0]))
+
+        await userEvent.keyboard('{ArrowDown}')
+        await expect(document.activeElement).toBe(items()[1])
+        await expect(items()[1]).toHaveAccessibleDescription('Locked for editing')
+
+        await userEvent.keyboard('{Enter}')
+        await expect(onPick).not.toHaveBeenCalled()
+    })
+
     it('jumps to the first/last enabled item with Home/End (2.1.1)', async () => {
         const { container } = mount(<MenuFixture />)
         await openMenu(container)

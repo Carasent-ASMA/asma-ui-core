@@ -48,7 +48,14 @@
             background-color: var(--colors-button-#{$type}-#{$color}-focused-bg-color) #{!important};
         }
 
-        &:disabled {
+        &[aria-busy='true'] {
+            cursor: progress #{!important};
+        }
+
+        // `aria-disabled` keeps the button focusable (disabled-states DIS-3); the higher specificity
+        // also beats `:hover` / `:active`, so it has no hover or pressed look (DIS-4, DIS-5).
+        &:disabled,
+        &[aria-disabled='true']:not([aria-busy='true']) {
             cursor: not-allowed #{!important};
             color: var(--colors-button-#{$type}-#{$color}-disabled-text-color) #{!important};
             background-color: var(--colors-button-#{$type}-#{$color}-disabled-bg-color) #{!important};

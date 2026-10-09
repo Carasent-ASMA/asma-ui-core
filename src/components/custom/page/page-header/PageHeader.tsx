@@ -316,6 +316,7 @@ export function PageHeader({
                     <ToolbarActionGroup
                         plan={plan}
                         overflowMenuLabel={t.more}
+                        inProgressLabel={t.inProgress}
                         registerActionWidth={(actionId, showLabel) => register(actionKey(actionId, showLabel))}
                     />
                 )}

@@ -41,9 +41,10 @@ $checkbox-sizes: (
         @include checkbox-dimensions(medium);
     }
 
+    // Hoverable so the not-allowed cursor shows (disabled-states DIS-5); the native disabled input
+    // still blocks the toggle.
     &[data-disabled] {
-        cursor: default;
-        pointer-events: none;
+        cursor: not-allowed;
     }
 
     &:is([data-checked], [data-indeterminate]) .Checkbox {

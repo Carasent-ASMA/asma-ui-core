@@ -1,8 +1,15 @@
-import React, { type ReactNode } from 'react'
+import React, { type MouseEvent, type ReactNode } from 'react'
 
 import style from './StyledButton.module.scss'
 
 import clsx from 'clsx'
+
+import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip'
+import { LoadingIcon } from 'src/components/icons'
+import { useReportDialogBusy } from 'src/components/feedback/dialog/DialogBusyContext'
+import type { UiCoreLocale } from 'src/helpers/uiCoreLocale'
+
+const IN_PROGRESS = { en: 'In progress', no: 'Pågår' } as const
 
 export type StyledButtonType = 'contained' | 'outlined' | 'text' | 'textGray'
 
@@ -17,6 +24,23 @@ interface commonProps {
     endIcon?: ReactNode
     /** @figmaProp none — test hook */
     dataTest: string
+    /**
+     * @figmaProp none — behavioral. Why the action is unavailable. Together with `disabled` the
+     * button stays focusable (`aria-disabled` instead of the native attribute), ignores activation
+     * and shows the reason on hover, focus and tap (disabled-states DIS-1…DIS-4). Without
+     * `disabled` it has no effect.
+     */
+    disabledReason?: ReactNode
+    /**
+     * @figmaProp none — behavioral. Busy: spinner centred over the label (the label stays invisible in the layout, so the width is kept), `aria-busy`, focus kept,
+     * activation ignored (disabled-states DIS-8, submit-buttons SUB-4). The start is announced politely.
+     * Pass a boolean from the first render: the announcement region exists only while `loading` is defined.
+     */
+    loading?: boolean
+    /** Language of the default busy announcement; defaults to English. */
+    locale?: UiCoreLocale
+    /** @figmaProp none — behavioral. Announced when `loading` starts; defaults to "In progress" in `locale`. */
+    loadingAnnouncement?: string
 }
 
 interface variantTextGrayProps {
@@ -95,16 +119,48 @@ export const StyledButton = ({
     dataTest,
     error,
     style: styleProp,
+    disabled,
+    disabledReason,
+    loading,
+    loadingAnnouncement,
+    locale = 'en',
+    onClick,
     ...otherProps
 }: StyledButtonProps): JSX.Element => {
+    // A running action keeps the dialog around it open (no Esc / backdrop / X dismissal).
+    useReportDialogBusy(Boolean(loading))
+
     const isLarge = size === 'large' || size === 'medium'
 
     // setup className
     const color = error ? 'error' : 'common'
 
-    return (
+    const softDisabled = Boolean(disabled) && Boolean(disabledReason)
+    const blocked = softDisabled || Boolean(loading)
+    const iconSize = isLarge ? 20 : 16
+
+    // Busy: the label and icons stay in the layout, invisible but still the accessible name, and the
+    // spinner sits centred over them, so the button keeps its width and height (submit-buttons SUB-4).
+    const hideWhenBusy = (node: ReactNode): ReactNode =>
+        loading && node ? <span style={{ display: 'inline-flex', opacity: 0 }}>{node}</span> : node
+
+    // preventDefault also cancels the form submit of a `type="submit"` button, including the
+    // implicit submit a browser fires on Enter in a form field.
+    const handleClick = (event: MouseEvent<HTMLButtonElement>): void => {
+        if (blocked) {
+            event.preventDefault()
+            return
+        }
+        onClick?.(event)
+    }
+
+    const button = (
         <button
             {...otherProps}
+            disabled={Boolean(disabled) && !blocked}
+            aria-disabled={blocked || undefined}
+            aria-busy={loading ? true : otherProps['aria-busy']}
+            onClick={handleClick}
             className={clsx(
                 // ASMA-8210: touch readiness only. The button already owns a designed `:active`
                 // (see StyledButton.module.scss), so it must not also take `.asma-pressable`'s
@@ -121,14 +177,19 @@ export const StyledButton = ({
             // the text clips on BOTH sides ("Apply new versions" → "ply new versic") and the icon gets
             // squeezed. flex-shrink:0 keeps text buttons at content width; icon-only buttons (no
             // children) keep the default shrink + square min-width:40px, so toolbars aren't disturbed.
-            style={children ? { flexShrink: 0, ...styleProp } : styleProp}
+            style={{
+                ...(children ? { flexShrink: 0 } : {}),
+                ...(loading ? { position: 'relative' } : {}),
+                ...styleProp,
+            }}
             ref={refLink}
             data-testid={dataTest}
         >
-            {startIcon}
+            {hideWhenBusy(startIcon)}
             {children && (
                 <div
                     style={{
+                        opacity: loading ? 0 : undefined,
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
@@ -143,7 +204,48 @@ export const StyledButton = ({
                     {children}
                 </div>
             )}
-            {endIcon}
+            {hideWhenBusy(endIcon)}
+            {loading && (
+                <span
+                    aria-hidden='true'
+                    style={{
+                        position: 'absolute',
+                        inset: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
+                >
+                    <LoadingIcon width={iconSize} height={iconSize} />
+                </span>
+            )}
         </button>
+    )
+
+    // Keep the tooltip tree mounted even when the reason is removed, so the button retains focus.
+    // An enabled button keeps the tooltip closed.
+    const tooltipped = (
+        <StyledTooltip
+            arrow
+            title={disabledReason}
+            open={softDisabled ? undefined : false}
+            openOnTap={softDisabled}
+            persistentDescription={softDisabled}
+        >
+            {button}
+        </StyledTooltip>
+    )
+
+    // The live region exists before `loading` turns on, otherwise screen readers miss the change. The
+    // fragment is always returned, so adding the region never remounts the button.
+    return (
+        <>
+            {tooltipped}
+            {loading !== undefined && (
+                <span role='status' className='sr-only'>
+                    {loading ? loadingAnnouncement ?? IN_PROGRESS[locale] : ''}
+                </span>
+            )}
+        </>
     )
 }

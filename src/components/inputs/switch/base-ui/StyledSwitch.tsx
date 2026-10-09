@@ -1,5 +1,6 @@
-import React, { forwardRef, useState, type ButtonHTMLAttributes } from 'react'
+import React, { forwardRef, useState, type ButtonHTMLAttributes, type ReactNode } from 'react'
 import styles from './StyledSwitch.module.scss'
+import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip'
 import { cn } from 'src/helpers/cn'
 import { getSvgIconStyle } from 'src/components/icons/iconStyle'
 import type { IIcon } from 'src/components/icons'
@@ -18,8 +19,17 @@ type StyledSwitchProps = {
     onChange?: (event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => void
     /** @figmaProp State = true→"Disabled" */
     disabled?: boolean
+    /**
+     * @figmaProp none — behavioral. Why the switch is unavailable. Together with `disabled` the switch
+     * stays focusable (`aria-disabled` instead of the native attribute), ignores activation and shows
+     * the reason on hover, focus and tap (disabled-states DIS-1…DIS-4). Without `disabled` it has no effect.
+     */
+    disabledReason?: ReactNode
     /** @figmaProp State = true→"Read-only" */
     readOnly?: boolean
+    /** @figmaProp none — behavioral. Why the setting can't be changed here, and where it can
+     * (disabled-states DIS-6). Shown on hover, focus and tap of a read-only switch. */
+    readOnlyReason?: ReactNode
     /** @figmaProp none — a11y */
     required?: boolean
     /** @figmaProp State = true→"Error" */
@@ -78,6 +88,8 @@ export const StyledSwitch = forwardRef<HTMLButtonElement, StyledSwitchProps>(
             dataTest,
             className,
             onClick,
+            readOnlyReason,
+            disabledReason,
             ...rest
         },
         ref,
@@ -96,7 +108,10 @@ export const StyledSwitch = forwardRef<HTMLButtonElement, StyledSwitchProps>(
 
         const iconClass = styles['iconContent']
 
-        return (
+        const softDisabled = Boolean(disabled) && Boolean(disabledReason)
+        const active = softDisabled || Boolean(readOnly && readOnlyReason)
+
+        const control = (
             <button
                 {...rest}
                 ref={ref}
@@ -111,7 +126,8 @@ export const StyledSwitch = forwardRef<HTMLButtonElement, StyledSwitchProps>(
                 // rather than pressable — `.switch:active` already dims the knob icon.
                 className={cn(styles['switch'], 'asma-touch-ready asma-hit-area', className)}
                 onClick={handleToggle}
-                disabled={disabled}
+                disabled={Boolean(disabled) && !softDisabled}
+                aria-disabled={softDisabled || undefined}
                 id={id}
                 name={id}
                 data-testid={dataTest}
@@ -131,6 +147,17 @@ export const StyledSwitch = forwardRef<HTMLButtonElement, StyledSwitchProps>(
                     </span>
                 </span>
             </button>
+        )
+
+        return (
+            <StyledTooltip
+                title={softDisabled ? disabledReason : readOnlyReason}
+                open={active ? undefined : false}
+                openOnTap={active}
+                persistentDescription={active}
+            >
+                {control}
+            </StyledTooltip>
         )
     },
 )

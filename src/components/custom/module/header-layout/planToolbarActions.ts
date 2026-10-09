@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 
 export interface DynamicToolbarActionRenderOptions {
     showLabel: boolean
@@ -10,6 +10,17 @@ export interface DynamicToolbarAction {
     onClick: () => void
     icon?: ReactElement
     disabled?: boolean
+    /**
+     * Why the action is unavailable. With `disabled` the button or More-menu item stays focusable
+     * and shows the reason on hover, focus and tap (disabled-states DIS-1…DIS-3).
+     */
+    disabledReason?: ReactNode
+    /**
+     * Busy: the button shows a spinner, sets `aria-busy` and ignores activation (disabled-states DIS-8).
+     * In the More menu the item is disabled with the reason "In progress" in the toolbar locale. Pass a
+     * boolean from the first render so the busy announcement region exists before it turns on.
+     */
+    loading?: boolean
     hidden?: boolean
     variant?: 'contained' | 'outlined' | 'text' | 'textGray' | 'textWhite'
     /** Visual tone. `danger` renders the action in the destructive/red palette. */

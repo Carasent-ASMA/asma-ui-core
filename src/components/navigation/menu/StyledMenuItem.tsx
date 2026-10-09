@@ -1,4 +1,5 @@
 import type { KeyboardEvent, MouseEvent, ReactNode } from 'react'
+import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip'
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
 
@@ -17,6 +18,13 @@ export interface StyledMenuItemProps {
     onMouseUp?: (event: MouseEvent<HTMLLIElement>) => void
     /** @figmaProp State = true→"Disabled" */
     disabled?: boolean
+    /**
+     * @figmaProp none — behavioral. Why the item is unavailable. With `disabled` the item stays in
+     * arrow-key navigation and shows the reason on hover, focus and tap (disabled-states DIS-1…DIS-3).
+     */
+    disabledReason?: ReactNode
+    /** @figmaProp none — behavioral. The item's action is running; pair it with `disabled` and a reason. */
+    'aria-busy'?: boolean
     /** @figmaProp State = true→"Selected" */
     selected?: boolean
     /** Compact vertical padding (MUI `MenuItem` `dense` parity, DEC-003). */
@@ -39,6 +47,8 @@ export const StyledMenuItem = ({
     onMouseDown,
     onMouseUp,
     disabled,
+    disabledReason,
+    'aria-busy': ariaBusy,
     selected,
     dense,
     className,
@@ -57,10 +67,14 @@ export const StyledMenuItem = ({
         }
     }
 
-    return (
+    const reasoned = Boolean(disabled) && Boolean(disabledReason)
+
+    const item = (
         <li
             role='menuitem'
             aria-disabled={disabled ? true : undefined}
+            aria-busy={ariaBusy ? true : undefined}
+            data-has-reason={reasoned ? '' : undefined}
             tabIndex={-1}
             data-test={dataTest}
             data-testid={dataTestId}
@@ -95,5 +109,17 @@ export const StyledMenuItem = ({
         >
             {children}
         </li>
+    )
+
+    return (
+        <StyledTooltip
+            title={disabledReason}
+            open={reasoned ? undefined : false}
+            placement='left'
+            openOnTap={reasoned}
+            persistentDescription={reasoned}
+        >
+            {item}
+        </StyledTooltip>
     )
 }

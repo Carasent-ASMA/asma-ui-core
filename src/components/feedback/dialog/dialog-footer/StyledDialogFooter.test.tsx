@@ -118,15 +118,17 @@ describe('StyledDialogFooter (ASMA-7099)', () => {
         expect(html).not.toContain('>Use as standard<')
     })
 
-    it('shows a spinner and disables the button while loading, keeping the label', () => {
+    it('shows a spinner and marks the button busy while loading, keeping the label', () => {
         /* The footers this replaces swapped the label FOR a spinner, which changed the
-         * button width mid-submit and forced hard-coded `w-[98px]` workarounds. */
+         * button width mid-submit and forced hard-coded `w-[98px]` workarounds. A native
+         * `disabled` would drop focus to <body> mid-submit (submit-buttons §6). */
         const html = renderToStaticMarkup(
             <StyledDialogFooter primaryAction={{ label: 'Save filter', loading: true }} />,
         )
 
         expect(html).toContain('Save filter')
-        expect(html).toContain('disabled')
+        expect(html).not.toContain('disabled=""')
+        expect(html).toContain('aria-disabled="true"')
         expect(html).toContain('aria-busy="true"')
     })
 
@@ -138,18 +140,27 @@ describe('StyledDialogFooter (ASMA-7099)', () => {
         expect(html).toContain('END')
     })
 
-    it('anchors a tooltip on a wrapper only when one is supplied', () => {
-        /* StyledTooltip renders its content lazily on hover, so the title is absent from
-         * static markup — what SSR can prove is that the anchor wrapper exists at all, and
-         * that a falsy tooltip adds no stray wrapper. The visible text is asserted by the
-         * Storybook interaction test, which can actually hover. */
+    it('keeps the hint anchor stable when a tooltip is absent', () => {
+        /* The anchor stays mounted so changing a hint or busy reason preserves focus.
+         * Tooltip content is still absent until interaction unless it is a disabled reason. */
         const withTooltip = renderToStaticMarkup(
-            <StyledDialogFooter primaryAction={{ label: 'Save', disabled: true, tooltip: 'Locked for editing' }} />,
+            <StyledDialogFooter primaryAction={{ label: 'Save', tooltip: 'Saves a draft' }} />,
         )
         const without = renderToStaticMarkup(<StyledDialogFooter primaryAction={{ label: 'Save' }} />)
 
         expect(withTooltip).toContain('<span class="inline-flex">')
-        expect(without).not.toContain('<span class="inline-flex">')
+        expect(without).toContain('<span class="inline-flex">')
+    })
+
+    it('turns the tooltip of a disabled button into its reason (disabled-states DIS-1…DIS-3)', () => {
+        const html = renderToStaticMarkup(
+            <StyledDialogFooter primaryAction={{ label: 'Save', disabled: true, tooltip: 'Locked for editing' }} />,
+        )
+
+        expect(html).toContain('<span class="inline-flex">')
+        expect(html).not.toContain('disabled=""')
+        expect(html).toContain('aria-disabled="true"')
+        expect(html).toContain('Locked for editing')
     })
 
     it('omits hidden left actions entirely', () => {

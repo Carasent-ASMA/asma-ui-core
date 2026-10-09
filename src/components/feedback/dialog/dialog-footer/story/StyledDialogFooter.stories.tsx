@@ -265,7 +265,7 @@ export const SingleLeftActionStaysInline: Story = {
     },
 }
 
-/** A disabled primary explains itself on hover — the reason these footers use a tooltip. */
+/** A disabled primary explains itself on hover, focus and tap — the reason these footers use a tooltip. */
 export const DisabledPrimaryExplainsItself: Story = {
     render: () => (
         <Paper width={600}>
@@ -279,11 +279,12 @@ export const DisabledPrimaryExplainsItself: Story = {
         const canvas = within(canvasElement)
         const save = canvas.getByRole('button', { name: 'Save changes' })
 
-        await expect(save).toBeDisabled()
-        /* Hovering the disabled button itself would emit no pointer events — the wrapper is
-         * what makes the explanation reachable at all. */
-        await userEvent.hover(save.parentElement as HTMLElement)
-        await waitFor(async () => expect(within(document.body).getByText('Locked for editing')).toBeVisible())
+        /* aria-disabled, not native: the button stays focusable and receives pointer events,
+         * so the reason is reachable by hover, keyboard and screen reader (disabled-states DIS-3). */
+        await expect(save).toHaveAttribute('aria-disabled', 'true')
+        await expect(save).toHaveAccessibleDescription('Locked for editing')
+        await userEvent.hover(save)
+        await waitFor(async () => expect(within(document.body).getByRole('tooltip')).toHaveTextContent('Locked for editing'))
     },
 }
 
@@ -301,7 +302,7 @@ export const PrimaryLoading: Story = {
         const canvas = within(canvasElement)
         const save = canvas.getByRole('button', { name: /Save filter/ })
 
-        await expect(save).toBeDisabled()
+        await expect(save).toHaveAttribute('aria-disabled', 'true')
         await expect(save).toHaveAttribute('aria-busy', 'true')
         await expect(save).toHaveTextContent('Save filter')
     },
