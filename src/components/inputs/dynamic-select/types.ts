@@ -47,6 +47,12 @@ interface DynamicSelectCommonProps<TOption extends DynamicSelectOption> {
     disableClearable?: boolean
     /** @figmaProp Title (Body Base SemiBold 16, text-icon/title-label delta-800) above the control. */
     title?: string
+    /**
+     * Accessible name for the read-only single value when it is a focusable reasoned field (DIS-6)
+     * and no `title` is rendered. Without it (or a `title`) the value stays plain text, so a
+     * nameless `role="textbox"` never reaches assistive tech.
+     */
+    ariaLabel?: string
     /** @figmaProp none — app size (chips/buttons). Defaults to `'medium'`. */
     size?: 'small' | 'medium'
     /**

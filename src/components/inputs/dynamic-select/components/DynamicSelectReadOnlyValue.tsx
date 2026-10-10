@@ -5,7 +5,7 @@ import type { DynamicSelectOption, StyledDynamicSelectProps } from '../types'
 
 type DynamicSelectReadOnlyValueProps<TOption extends DynamicSelectOption> = Pick<
     StyledDynamicSelectProps<TOption>,
-    'dataTest' | 'options' | 'title' | 'valueKey' | 'labelKey' | 'renderLabel' | 'readOnlyReason'
+    'dataTest' | 'options' | 'title' | 'ariaLabel' | 'valueKey' | 'labelKey' | 'renderLabel' | 'readOnlyReason'
 > & {
     value: TOption | null
 }
@@ -24,6 +24,7 @@ export const DynamicSelectReadOnlyValue = <TOption extends DynamicSelectOption>(
     options,
     value,
     title,
+    ariaLabel,
     valueKey = 'value' as DynamicSelectReadOnlyValueProps<TOption>['valueKey'],
     labelKey = 'label' as DynamicSelectReadOnlyValueProps<TOption>['labelKey'],
     renderLabel,
@@ -31,6 +32,11 @@ export const DynamicSelectReadOnlyValue = <TOption extends DynamicSelectOption>(
 }: DynamicSelectReadOnlyValueProps<TOption>): JSX.Element => {
     const titleId = useId()
     const reasoned = Boolean(readOnlyReason)
+    /* The reason makes the value a focusable read-only field (DIS-6), but only when something can
+     * name it: a `role="textbox"` without an accessible name is an axe violation
+     * (`aria-input-field-name`) and worse than the plain text it replaced. The visible `title`
+     * names it; `ariaLabel` names it when no title is rendered. */
+    const field = reasoned && (Boolean(title) || Boolean(ariaLabel))
     const getOptionValue = (option: TOption | null) => {
         if (typeof option === 'object') return option?.[valueKey as keyof TOption]
         return option
@@ -65,13 +71,14 @@ export const DynamicSelectReadOnlyValue = <TOption extends DynamicSelectOption>(
             >
                 <div
                     data-testid={`${dataTest}-read-only-value`}
-                    role={reasoned ? 'textbox' : undefined}
-                    aria-readonly={reasoned ? true : undefined}
-                    aria-labelledby={reasoned && title ? titleId : undefined}
-                    tabIndex={reasoned ? 0 : undefined}
+                    role={field ? 'textbox' : undefined}
+                    aria-readonly={field ? true : undefined}
+                    aria-labelledby={field && title ? titleId : undefined}
+                    aria-label={field && !title ? ariaLabel : undefined}
+                    tabIndex={field ? 0 : undefined}
                     className={cn(
                         'text-base/6 text-delta-700',
-                        reasoned &&
+                        field &&
                             'w-fit cursor-default rounded outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-focus-ring',
                     )}
                 >

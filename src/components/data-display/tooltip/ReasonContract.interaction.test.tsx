@@ -343,3 +343,43 @@ describe('Disabled fields show their reason in the helper row (DIS-3, §6)', () 
         await expect(input).not.toHaveAccessibleDescription(reason)
     })
 })
+
+describe('Dynamic select read-only value keeps an accessible name (disabled-states DIS-6, WCAG 4.1.2)', () => {
+    afterEach(cleanup)
+
+    it('names the focusable value from ariaLabel when there is no title', async () => {
+        const { container } = mount(
+            <StyledDynamicSelect
+                dataTest='team'
+                options={['Alpha', 'Bravo']}
+                value='Alpha'
+                onChange={vi.fn()}
+                readOnly
+                readOnlyReason={reason}
+                ariaLabel='Team'
+            />,
+        )
+        const value = container.querySelector<HTMLElement>('[data-testid="team-read-only-value"]')!
+
+        await expect(value).toHaveAttribute('role', 'textbox')
+        await expect(value).toHaveAccessibleName('Team')
+        await expect(value).toHaveAccessibleDescription(reason)
+    })
+
+    it('stays plain text when neither a title nor a label can name it', async () => {
+        const { container } = mount(
+            <StyledDynamicSelect
+                dataTest='team'
+                options={['Alpha', 'Bravo']}
+                value='Alpha'
+                onChange={vi.fn()}
+                readOnly
+                readOnlyReason={reason}
+            />,
+        )
+        const value = container.querySelector<HTMLElement>('[data-testid="team-read-only-value"]')!
+
+        await expect(value).not.toHaveAttribute('role')
+        await expect(value).not.toHaveAttribute('tabindex')
+    })
+})
