@@ -1,6 +1,6 @@
 import { useContext, useMemo, useState, type ReactNode } from 'react'
 
-import { DialogBusyContext, WAIT_UNTIL_SAVED } from '../DialogBusyContext'
+import { DialogBusyContext, useReportDialogBusy, WAIT_UNTIL_SAVED } from '../DialogBusyContext'
 
 import { DotsVerticalIcon } from 'src/components/icons'
 import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip'
@@ -185,6 +185,11 @@ export function StyledDialogFooter({
             moreButtonWidthPx: widths[KEY_MORE_BUTTON],
         })
     }, [visibleLeftActions, leftAvailableWidth, widths])
+
+    /* A running action in the More menu holds the dialog too: its menu item is not a StyledButton,
+     * so StyledButton's own reporting never sees it. Inline actions already report through their
+     * StyledButton. `leadingSlot` replaces the left cluster, so its actions cannot be running. */
+    useReportDialogBusy(leadingSlot == null && plan.overflowActions.some((action) => Boolean(action.loading)))
 
     const renderButton = (
         button: StyledDialogFooterButton,
