@@ -33,6 +33,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
         dataTest,
         actionNode,
         locale = 'en',
+        busyReason: busyReasonProp,
         style,
         initialFocusRef,
     } = props
@@ -51,7 +52,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
     const isFullScreenActive = fullScreen && !minimized
 
     // While a button inside runs an action (e.g. Save), closing would hide the running request.
-    const { busy, busyReason, contextValue } = useDialogBusyBoundary(t.waitUntilSaved)
+    const { busy, busyReason, contextValue } = useDialogBusyBoundary(busyReasonProp ?? t.waitUntilSaved)
 
     const handleClose = () => {
         if (busy) return

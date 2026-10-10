@@ -172,4 +172,20 @@ describe('StyledDialog explains busy dismissal controls', () => {
         }
     })
 
+    it('uses the app busy reason of a minimizable dialog for its close button and footer Cancel', async () => {
+        const reason = 'Wait until the info line is deleted'
+        const { container } = mount(
+            <MinimizableDialogV2 open dataTest='editor' title='Editor' onClose={() => undefined} busyReason={reason}>
+                <StyledDialogFooter
+                    secondaryAction={{ label: 'Cancel', dataTest: 'cancel' }}
+                    primaryAction={{ label: 'Delete', loading: true }}
+                />
+            </MinimizableDialogV2>,
+        )
+        for (const close of container.querySelectorAll('[data-testid="close-button"]')) {
+            await expect(close).toHaveAccessibleDescription(reason)
+        }
+        await expect(container.querySelector('[data-testid="cancel"]')).toHaveAccessibleDescription(reason)
+    })
+
 })
