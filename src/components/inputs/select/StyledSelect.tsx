@@ -442,7 +442,9 @@ export const StyledSelect = ({
                     aria-readonly={readOnly ? true : undefined}
                     disabled={isDisabled && !softDisabled}
                     onFocus={(event) => {
-                        setFocused(true)
+                        // A read-only field shows no focus state, exactly like StyledInputField: a
+                        // mouse click must not float the label or light up the border.
+                        if (!readOnly) setFocused(true)
                         onFocus?.(event)
                     }}
                     onBlur={(event) => {

@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { afterEach, describe, it } from 'vitest'
 import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, describeFocusIndicator, focusStyleOf, mount } from 'src/test-utils/renderInteraction'
+import { StyledFormControl } from '../../miscellaneous/StyledFormControl'
+import { StyledInputLabel } from '../../miscellaneous/StyledInputLabel'
 import { StyledSelect } from './StyledSelect'
 import { StyledSelectItem } from './StyledSelectItem'
 
@@ -458,6 +460,31 @@ describe('StyledSelect reasons (disabled-states DIS-5, DIS-6, §6)', () => {
         )
 
         await expect(container.querySelector('[data-testid="select-clear-button"]')).toBeNull()
+    })
+
+    it('does not mark a read-only trigger focused on a mouse click, so the label stays put', async () => {
+        const { container } = mount(
+            <StyledFormControl>
+                <StyledInputLabel>Status</StyledInputLabel>
+                <StyledSelect
+                    dataTest='status'
+                    name='Status'
+                    value=''
+                    readOnly
+                    readOnlyReason='Set by the organisation'
+                >
+                    <StyledSelectItem value='a'>Active</StyledSelectItem>
+                </StyledSelect>
+            </StyledFormControl>,
+        )
+        const button = trigger(container)
+        const label = container.querySelector('label')!
+        await expect(label.style.top).toBe('50%')
+
+        await userEvent.click(button)
+
+        await expect(document.activeElement).toBe(button)
+        await expect(label.style.top).toBe('50%')
     })
 })
 
