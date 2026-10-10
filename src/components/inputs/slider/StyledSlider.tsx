@@ -5,6 +5,7 @@ import {
     type PointerEvent as ReactPointerEvent,
     type ReactNode,
     type SyntheticEvent,
+    useEffect,
     useRef,
     type MouseEvent,
     type KeyboardEvent,
@@ -148,7 +149,23 @@ export const StyledSlider = ({
     const halfThumb = size === 'small' ? 6 : 8
     const activeThumbRef = useRef<number | null>(null)
     const activePointerIdRef = useRef<number | null>(null)
+    const dragElementRef = useRef<HTMLDivElement | null>(null)
     const [dragValue, setDragValue] = useState<SliderValue | null>(null)
+
+    // A lock that lands mid-gesture (read-only or disabled) cancels the drag. The pointer release
+    // would return early, leaving the thumb showing the dragged value and the pointer refs armed,
+    // so a later move without pressing again would emit a change the user never released.
+    useEffect(() => {
+        if (!locked || activeThumbRef.current === null) return
+        const element = dragElementRef.current
+        const pointerId = activePointerIdRef.current
+        setDragValue(null)
+        activeThumbRef.current = null
+        activePointerIdRef.current = null
+        if (element && pointerId !== null && element.hasPointerCapture(pointerId)) {
+            element.releasePointerCapture(pointerId)
+        }
+    }, [locked])
     const [uncontrolledValue, setUncontrolledValue] = useState<SliderValue>(defaultValue ?? min)
     const resolvedValue = value ?? uncontrolledValue
     const current = dragValue ?? resolvedValue
@@ -381,6 +398,7 @@ export const StyledSlider = ({
                         persistentDescriptionId={reasonId}
                     >
                         <div
+                            ref={dragElementRef}
                             className={cn(
                                 'relative',
                                 isVertical ? 'h-full w-8' : 'h-4 w-full',
