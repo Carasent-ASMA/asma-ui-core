@@ -1,4 +1,5 @@
 import { afterEach, describe, it, vi } from 'vitest'
+import { useState } from 'react'
 import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { StyledButton } from '../../inputs/button/StyledButton'
@@ -51,6 +52,46 @@ describe('StyledDialog explains busy dismissal controls', () => {
             button.click()
         }
         await expect(onClose).toHaveBeenCalledTimes(2)
+    })
+
+    it('lets a nested dialog close with Escape while the outer dialog is busy', async () => {
+        const onOuterClose = vi.fn()
+        const onInnerClose = vi.fn()
+        const Nested = (): JSX.Element => {
+            const [innerOpen, setInnerOpen] = useState(true)
+            return (
+                <StyledDialog open dataTest='outer' busyReason={busyReason} onClose={onOuterClose}>
+                    <StyledButton dataTest='save' loading>
+                        Save
+                    </StyledButton>
+                    <StyledDialog
+                        open={innerOpen}
+                        dataTest='inner'
+                        onClose={() => {
+                            onInnerClose()
+                            setInnerOpen(false)
+                        }}
+                    >
+                        <p>Inner</p>
+                    </StyledDialog>
+                </StyledDialog>
+            )
+        }
+        const { container } = mount(<Nested />)
+        await new Promise(requestAnimationFrame)
+        const inner = container.querySelector<HTMLDialogElement>('[data-testid="inner"]')!
+        // Prove the outer layer is busy before the key press: its close control is soft-disabled.
+        const outerClose = container.querySelector<HTMLButtonElement>('[data-testid="close-button-outer"]')!
+        await waitFor(() => expect(outerClose).toHaveAccessibleDescription(busyReason))
+
+        // Focus sits in the inner layer; its Escape bubbles up through the busy outer dialog.
+        inner.focus()
+        await userEvent.keyboard('{Escape}')
+
+        await waitFor(() => expect(container.querySelector('[data-testid="inner"]')).toBeNull())
+        await expect(onInnerClose).toHaveBeenCalledTimes(1)
+        await expect(onOuterClose).not.toHaveBeenCalled()
+        await expect(container.querySelector('[data-testid="outer"]')).toHaveAttribute('open')
     })
 
     it('keeps the dialog busy while a loading action sits in the More menu', async () => {

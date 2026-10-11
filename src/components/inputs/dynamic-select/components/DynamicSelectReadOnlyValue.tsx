@@ -35,7 +35,9 @@ export const DynamicSelectReadOnlyValue = <TOption extends DynamicSelectOption>(
     /* The reason makes the value a focusable read-only field (DIS-6), but only when something can
      * name it: a `role="textbox"` without an accessible name is an axe violation
      * (`aria-input-field-name`) and worse than the plain text it replaced. The visible `title`
-     * names it; `ariaLabel` names it when no title is rendered. */
+     * names it; `ariaLabel` names it when no title is rendered. With neither, the value stays
+     * plain text and the reason is rendered as visible text below it — a hover/focus/tap tooltip
+     * on a node the keyboard cannot reach would never be announced (DIS-2). */
     const field = reasoned && (Boolean(title) || Boolean(ariaLabel))
     const getOptionValue = (option: TOption | null) => {
         if (typeof option === 'object') return option?.[valueKey as keyof TOption]
@@ -61,8 +63,9 @@ export const DynamicSelectReadOnlyValue = <TOption extends DynamicSelectOption>(
                     {title}
                 </span>
             )}
-            {/* With a reason the value is a focusable read-only field, so the reason reaches the
-                keyboard and screen readers too (disabled-states DIS-6). */}
+            {/* The reason reaches hover, focus and tap through the tooltip; a named field is also
+                described by it for screen readers. Without a name the value stays plain text, so the
+                reason is rendered as visible text beside it instead (disabled-states DIS-2, DIS-6). */}
             <StyledTooltip
                 title={readOnlyReason}
                 open={reasoned ? undefined : false}
@@ -85,6 +88,7 @@ export const DynamicSelectReadOnlyValue = <TOption extends DynamicSelectOption>(
                     {selected === null ? '-' : renderLabel ? renderLabel(selected) : getOptionLabel(selected)}
                 </div>
             </StyledTooltip>
+            {reasoned && !field && <span className='text-sm text-delta-600'>{readOnlyReason}</span>}
         </div>
     )
 }

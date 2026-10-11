@@ -132,6 +132,9 @@ describe('StyledSelect keyboard contract', () => {
         await userEvent.keyboard('{ArrowDown}')
 
         await expect(button).toHaveAttribute('aria-activedescendant', 'status-listbox-option-1')
+        // The reason is the option's description, not part of its name — otherwise a screen reader
+        // reads it twice (WAI-ARIA listbox pattern, 4.1.2).
+        await expect(options()[1]).toHaveAccessibleName('Archived')
         await expect(options()[1]).toHaveAccessibleDescription('Only available on the Pro plan')
 
         await userEvent.keyboard('{ArrowDown}')

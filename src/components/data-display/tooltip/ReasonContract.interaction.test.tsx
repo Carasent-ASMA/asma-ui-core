@@ -381,5 +381,12 @@ describe('Dynamic select read-only value keeps an accessible name (disabled-stat
 
         await expect(value).not.toHaveAttribute('role')
         await expect(value).not.toHaveAttribute('tabindex')
+        // Nothing can name the value, so it cannot become a focusable field: the reason is rendered
+        // as visible text beside it instead of living only in a tooltip the keyboard cannot open.
+        const visibleReason = Array.from(container.querySelectorAll('span')).find(
+            (span) => !span.hidden && span.textContent === reason,
+        )
+        await expect(visibleReason).toBeDefined()
+        await expect(visibleReason).toBeVisible()
     })
 })

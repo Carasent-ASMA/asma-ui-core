@@ -1,6 +1,12 @@
 import { afterEach, describe, it, vi } from 'vitest'
 import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
+import { StyledInputField } from 'src/components/inputs/input-field/StyledInputField'
+import { StyledSelect } from 'src/components/inputs/select/StyledSelect'
+import { StyledSelectItem } from 'src/components/inputs/select/StyledSelectItem'
+import { StyledAccordion } from 'src/components/utils/accordion/base-ui/StyledAccordion'
+import { StyledAccordionDetails } from 'src/components/utils/accordion/base-ui/StyledAccordionDetails'
+import { StyledAccordionSummary } from 'src/components/utils/accordion/base-ui/StyledAccordionSummary'
 import { cleanup, isEntirelyObscured, mount } from 'src/test-utils/renderInteraction'
 import { StyledTooltip } from './StyledTooltip'
 
@@ -154,6 +160,26 @@ describe('StyledTooltip keyboard contract', () => {
         await expect(wrapper).toHaveAttribute('aria-describedby', tip()!.id)
     })
 
+    it('describes a control inside a collapsed accordion panel (disabled-states DIS-2, 4.1.2)', async () => {
+        const { container } = mount(
+            <StyledAccordion>
+                <StyledAccordionSummary>Details</StyledAccordionSummary>
+                <StyledAccordionDetails>
+                    <StyledInputField dataTest='panel-field' label='Field' readOnly readOnlyReason='Locked after signing' />
+                </StyledAccordionDetails>
+            </StyledAccordion>,
+        )
+        const input = container.querySelector<HTMLInputElement>('[data-testid="panel-field"]')!
+
+        // The collapsed panel is `inert`, which `isTabbable` rejects — the id then landed on the
+        // wrapper and opening the panel could not move it. It must sit on the control already.
+        await waitFor(() => expect(input).toHaveAccessibleDescription('Locked after signing'))
+
+        await userEvent.click(container.querySelector('button')!)
+        input.focus()
+        await expect(input).toHaveAccessibleDescription('Locked after signing')
+    })
+
     it('leaves no aria-describedby residue once the tooltip closes (4.1.2)', async () => {
         const { container } = mount(<TooltipFixture />)
         const trigger = container.querySelector<HTMLButtonElement>('[data-testid="tip-target"]')!
@@ -257,6 +283,32 @@ describe('StyledTooltip keyboard contract', () => {
         await userEvent.keyboard('{Escape}')
         await waitFor(() => expect(tip()).toBeNull())
         await expect(trigger).toHaveAttribute('aria-describedby', 'hint')
+    })
+
+    it('keeps its reason when the trigger adds helper text (4.1.2)', async () => {
+        // React owns the trigger's `aria-describedby`: a helper row appearing rewrites the attribute.
+        // The reason id must be re-appended rather than dropped while the control stays disabled.
+        const fixture = (helperText?: string): JSX.Element => (
+            <StyledSelect
+                dataTest='status'
+                name='Status'
+                value='a'
+                disabled
+                disabledReason='Only administrators'
+                helperText={helperText}
+                onChange={() => undefined}
+            >
+                <StyledSelectItem value='a'>Active</StyledSelectItem>
+            </StyledSelect>
+        )
+        const { container, rerender } = mount(fixture())
+        const trigger = container.querySelector<HTMLElement>('[data-testid="status"]')!
+
+        await waitFor(() => expect(trigger).toHaveAccessibleDescription('Only administrators'))
+
+        rerender(fixture('Choose a status'))
+
+        await expect(trigger).toHaveAccessibleDescription('Choose a status Only administrators')
     })
 
     it('toggles on tap with openOnTap and needs no timer (disabled-states DIS-2)', async () => {

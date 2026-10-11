@@ -34,7 +34,7 @@ import {
     type ReactNode,
 } from 'react'
 import { cn } from 'src/helpers/cn'
-import { firstTabbable } from 'src/helpers/focusable'
+import { firstFocusable } from 'src/helpers/focusable'
 import { resolveSx } from 'src/helpers/sx'
 import {
     getOpenModalDialogAncestor,
@@ -262,12 +262,14 @@ const TooltipWithFloating = ({
 
     // APG puts `aria-describedby` on the *trigger*, but by house rule the child handed in is a
     // wrapper span, not the control a screen reader lands on — so the id goes on the focusable
-    // control inside it. Last resort is the reference itself: a decorative or disabled subtree has
-    // nothing focusable, and an unassociated description is worse than one on the wrapper.
+    // control inside it. `firstFocusable`, not `firstTabbable`: a reasoned control inside a collapsed
+    // accordion panel (`inert`) or a hidden parent is still the target, and the panel opening does
+    // not re-render this component. Last resort is the reference itself: a decorative or disabled
+    // subtree has nothing focusable, and an unassociated description is worse than one on the wrapper.
     useEffect(() => {
         const reference = refs.domReference.current
         if (!describes || !describedById || !(reference instanceof HTMLElement)) return
-        const described = firstTabbable(reference) ?? reference
+        const described = firstFocusable(reference) ?? reference
         const previous = described.getAttribute('aria-describedby')
         if (previous?.split(/\s+/).includes(describedById)) return
         described.setAttribute('aria-describedby', previous ? `${previous} ${describedById}` : describedById)
@@ -278,6 +280,19 @@ const TooltipWithFloating = ({
             else described.removeAttribute('aria-describedby')
         }
     }, [describes, refs.domReference, describedById])
+
+    // React owns the trigger's own `aria-describedby` too: adding or removing helper/error text
+    // rewrites the attribute, which drops the reason id and never re-runs the effect above. Re-append
+    // it after any render where it went missing, keeping whatever ids the caller put there. Declared
+    // after the effect above so it never pre-empts the cleanup registration on the first commit.
+    useEffect(() => {
+        const reference = refs.domReference.current
+        if (!describes || !describedById || !(reference instanceof HTMLElement)) return
+        const described = firstFocusable(reference) ?? reference
+        const previous = described.getAttribute('aria-describedby')
+        if (previous?.split(/\s+/).includes(describedById)) return
+        described.setAttribute('aria-describedby', previous ? `${previous} ${describedById}` : describedById)
+    })
 
     // A Fragment has no DOM node to act as the reference, so it gets a `display: contents` host:
     // that host carries the ref and the handlers while its children keep their exact place in the
