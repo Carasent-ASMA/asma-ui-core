@@ -54,7 +54,16 @@ $field-height: 40px;
         // Persistent scrollbar (same approach as StyledDialog.module.scss): style only the WebKit
         // pseudo-elements and do NOT set `scrollbar-width` / `scrollbar-color`, which would switch
         // Chromium back to the overlay rail that stays hidden until interaction.
+        //
+        // The shadow is added when either:
+        //   - the browser doesn't support ::-webkit-scrollbar (e.g. Firefox), or
+        //   - the browser is iOS Safari (detected via -webkit-touch-callout).
+        // This avoids applying the shadow on Android, which supports ::-webkit-scrollbar.
         @supports not selector(::-webkit-scrollbar) {
+            box-shadow: inset 0 -12px 10px -10px rgba(0, 0, 0, 0.45);
+        }
+
+        @supports (-webkit-touch-callout: none) {
             box-shadow: inset 0 -12px 10px -10px rgba(0, 0, 0, 0.45);
         }
 
