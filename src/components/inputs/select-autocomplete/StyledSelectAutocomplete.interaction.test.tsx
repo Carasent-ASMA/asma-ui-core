@@ -101,6 +101,9 @@ describe('StyledSelectAutocomplete keyboard contract', () => {
 
         await userEvent.keyboard('{ArrowDown}')
         await expect(activeOption()).toBe(optionRows()[1])
+        // The reason is the option's description, not part of its name — otherwise a screen reader
+        // reads it twice (WAI-ARIA listbox pattern, 4.1.2).
+        await expect(optionRows()[1]).toHaveAccessibleName('Bravo')
         await expect(optionRows()[1]).toHaveAccessibleDescription('Bravo is full this week')
 
         // 'Charlie' has no reason and stays skipped.

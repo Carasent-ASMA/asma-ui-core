@@ -612,7 +612,10 @@ export function StyledSelectAutocomplete<
                 {reason ? (
                     <span className='flex min-w-0 flex-1 flex-col'>
                         <span className='line-clamp-2 break-words'>{getLabel(option)}</span>
-                        <span id={`${props.id}-reason`} className='text-sm text-delta-600'>
+                        {/* Hidden from the option's name: its contents would otherwise be read twice —
+                            once inside the name, again through `aria-describedby` above. The
+                            description still resolves a hidden referenced node. */}
+                        <span id={`${props.id}-reason`} aria-hidden='true' className='text-sm text-delta-600'>
                             {reason}
                         </span>
                     </span>

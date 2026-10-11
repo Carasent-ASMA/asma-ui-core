@@ -76,7 +76,10 @@ export const StyledSelectItem = ({
             {reason ? (
                 <span className='flex min-w-0 flex-1 flex-col'>
                     <span className='line-clamp-2 break-words'>{children}</span>
-                    <span id={reasonId} className='text-sm text-delta-600'>
+                    {/* Hidden from the option's name: its contents would otherwise be read twice —
+                        once inside the name, again through `aria-describedby` below. The description
+                        still resolves a hidden referenced node. */}
+                    <span id={reasonId} aria-hidden='true' className='text-sm text-delta-600'>
                         {reason}
                     </span>
                 </span>
