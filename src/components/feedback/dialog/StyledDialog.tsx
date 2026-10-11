@@ -226,7 +226,11 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
             aria-label={dataTest}
             onCancel={handleCancel}
             onKeyDown={(event) => {
-                if (busy && event.key === 'Escape') event.preventDefault()
+                if (!busy || event.key !== 'Escape') return
+                // Block only an Escape aimed at this dialog's own layer. One bubbling out of a nested
+                // dialog must reach that dialog's window listener, which ignores a defaultPrevented
+                // event — the busy outer layer would otherwise keep the inner one from closing.
+                if ((event.target as Element).closest('dialog[open]') === dialogRef.current) event.preventDefault()
             }}
             className={cn(
                 style['StyledDialog'],
