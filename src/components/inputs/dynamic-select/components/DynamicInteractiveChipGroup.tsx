@@ -228,7 +228,7 @@ export const DynamicInteractiveChipGroup = forwardRef(
                         )}
                     </div>
                 </StyledTooltip>
-                {!required && hasValue && !readOnly && (
+                {!required && hasValue && !readOnly && !disabled && (
                     <StyledButton
                         dataTest='clear-selection-btn'
                         variant='text'
