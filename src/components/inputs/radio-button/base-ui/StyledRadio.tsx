@@ -51,6 +51,7 @@ export const StyledRadio = forwardRef<HTMLInputElement, StyledRadioProps>(
         const group = useRadioGroupContext()
         const isChecked = group ? group.value === value : !!checked
         const isDisabled = disabled ?? group?.disabled ?? false
+        const isReadOnly = readOnly ?? group?.readOnly ?? false
 
         const wrapperClasses = cn(
             styles['RadioWrapper'],
@@ -73,14 +74,14 @@ export const StyledRadio = forwardRef<HTMLInputElement, StyledRadioProps>(
         }, [])
 
         const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-            if (readOnly) return
+            if (isReadOnly) return
             if (group) group.onSelect(value ?? null)
             onChange?.(event, event.target.checked)
         }
 
         const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
             onKeyDown?.(event)
-            if (event.defaultPrevented || event.key !== 'Enter' || readOnly) return
+            if (event.defaultPrevented || event.key !== 'Enter' || isReadOnly) return
 
             event.preventDefault()
             event.currentTarget.click()

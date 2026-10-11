@@ -71,6 +71,7 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
                 name: groupName,
                 value: selected,
                 disabled,
+                readOnly,
                 onSelect,
                 reasonDescriptionId: active ? reasonId : undefined,
             }),

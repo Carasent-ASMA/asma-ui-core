@@ -6,6 +6,7 @@ export interface RadioGroupContextValue {
     name: string
     value?: RadioValue
     disabled?: boolean
+    readOnly?: boolean
     reasonDescriptionId?: string
     onSelect: (value: RadioValue) => void
 }

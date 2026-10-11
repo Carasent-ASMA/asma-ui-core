@@ -1,4 +1,4 @@
-import { afterEach, describe, it } from 'vitest'
+import { afterEach, describe, it, vi } from 'vitest'
 import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { StyledFormControlLabel } from 'src/components/miscellaneous/StyledFormControlLabel'
@@ -41,6 +41,7 @@ describe('StyledRadioGroup keyboard contract', () => {
     })
 
     it('keeps a read-only selection unchanged and explains why (disabled-states DIS-6)', async () => {
+        const onChange = vi.fn()
         const { container } = mount(
             <StyledRadioGroup
                 dataTest='delivery-method'
@@ -50,16 +51,25 @@ describe('StyledRadioGroup keyboard contract', () => {
                 readOnlyReason='Submitted questionnaires cannot be changed'
             >
                 <StyledFormControlLabel label='Email' control={<StyledRadio dataTest='email' value='email' />} />
-                <StyledFormControlLabel label='Post' control={<StyledRadio dataTest='post' value='post' />} />
+                <StyledFormControlLabel
+                    label='Post'
+                    control={<StyledRadio dataTest='post' value='post' onChange={onChange} />}
+                />
             </StyledRadioGroup>,
         )
         const [email, post] = Array.from(container.querySelectorAll<HTMLInputElement>('input[type="radio"]'))
 
         post!.click()
 
+        await expect(onChange).not.toHaveBeenCalled()
         await expect(email).toBeChecked()
         await expect(post).not.toBeChecked()
         await waitFor(() => expect(email).toHaveAccessibleDescription('Submitted questionnaires cannot be changed'))
+
+        email!.focus()
+        await userEvent.keyboard('{ArrowRight}')
+        await expect(onChange).not.toHaveBeenCalled()
+        await expect(email).toBeChecked()
     })
 
     it('describes the checked radio when it is not first, and every other radio', async () => {
