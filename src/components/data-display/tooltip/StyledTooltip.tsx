@@ -279,6 +279,19 @@ const TooltipWithFloating = ({
         }
     }, [describes, refs.domReference, describedById])
 
+    // React owns the trigger's own `aria-describedby` too: adding or removing helper/error text
+    // rewrites the attribute, which drops the reason id and never re-runs the effect above. Re-append
+    // it after any render where it went missing, keeping whatever ids the caller put there. Declared
+    // after the effect above so it never pre-empts the cleanup registration on the first commit.
+    useEffect(() => {
+        const reference = refs.domReference.current
+        if (!describes || !describedById || !(reference instanceof HTMLElement)) return
+        const described = firstTabbable(reference) ?? reference
+        const previous = described.getAttribute('aria-describedby')
+        if (previous?.split(/\s+/).includes(describedById)) return
+        described.setAttribute('aria-describedby', previous ? `${previous} ${describedById}` : describedById)
+    })
+
     // A Fragment has no DOM node to act as the reference, so it gets a `display: contents` host:
     // that host carries the ref and the handlers while its children keep their exact place in the
     // parent's layout (a plain <span> would adopt them and break a flex row). Generating no box of
