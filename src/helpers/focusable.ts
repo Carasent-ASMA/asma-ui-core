@@ -32,6 +32,9 @@ const isTabbable = (element: HTMLElement): boolean =>
     !element.closest('[inert]') &&
     (element.checkVisibility?.() ?? true)
 
+const isFocusable = (element: HTMLElement): boolean =>
+    element.tabIndex >= 0 && !element.matches(':disabled')
+
 /** Every element inside `root` a Tab press can reach, in DOM order. */
 export const tabbableWithin = (root: ParentNode): HTMLElement[] =>
     Array.from(root.querySelectorAll<HTMLElement>('*')).filter(isTabbable)
@@ -43,3 +46,13 @@ export const tabbableWithin = (root: ParentNode): HTMLElement[] =>
  */
 export const firstTabbable = (root: HTMLElement): HTMLElement | null =>
     isTabbable(root) ? root : (Array.from(root.querySelectorAll<HTMLElement>('*')).find(isTabbable) ?? null)
+
+/**
+ * The eventual Tab stop for `root`, ignoring a temporarily unreachable subtree. A reasoned control
+ * inside a collapsed accordion panel (`inert`) or a `display: none` parent is still the element a
+ * description belongs to once the panel opens, and neither state change re-renders the describer —
+ * so choosing by focusability alone leaves the description on the control itself (the tooltip's
+ * `firstTabbable` hunt would pick the wrapper and could never move it later).
+ */
+export const firstFocusable = (root: HTMLElement): HTMLElement | null =>
+    isFocusable(root) ? root : (Array.from(root.querySelectorAll<HTMLElement>('*')).find(isFocusable) ?? null)
