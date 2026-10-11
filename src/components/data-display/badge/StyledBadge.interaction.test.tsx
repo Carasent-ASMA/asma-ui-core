@@ -140,6 +140,41 @@ describe('StyledBadge notification contract', () => {
         await expect(dot.getBoundingClientRect().left >= label.getBoundingClientRect().right).toBe(true)
     })
 
+    it('keeps a hostless count badge in normal flow so its neighbours lay out around it', async () => {
+        const { container } = mount(
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span id='label'>Unread</span>
+                <StyledBadge dataTest='standalone-count' badgeContent={38} />
+            </div>,
+        )
+        const root = container.querySelector<HTMLElement>('[data-testid="standalone-count"]')!
+        const pill = root.querySelector<HTMLElement>('span[aria-hidden="true"]')!
+        const label = container.querySelector<HTMLElement>('#label')!
+        const style = getComputedStyle(pill)
+
+        // The same pill the anchored variant paints.
+        await expect(style.height).toBe('20px')
+        await expect(style.borderWidth).toBe('1px')
+        await expect(style.borderColor).toBe('rgb(162, 194, 0)')
+        await expect(style.backgroundColor).toBe('rgb(217, 242, 86)')
+
+        // A hostless count used to collapse the root to 0x0 and hang the pill off its corner,
+        // 10px up and to the left, overlapping whatever sat beside it.
+        await expect(style.position).toBe('static')
+        await expect(root.getBoundingClientRect().height).toBe(20)
+        await expect(root.getBoundingClientRect().width).toBe(pill.getBoundingClientRect().width)
+        await expect(pill.getBoundingClientRect().left >= label.getBoundingClientRect().right).toBe(true)
+        await expect(pill.getBoundingClientRect().top >= 0).toBe(true)
+    })
+
+    it('puts className on the root of a hostless count so callers can place it', async () => {
+        const { container } = mount(<StyledBadge dataTest='placed-count' badgeContent={7} className='absolute' />)
+        const root = container.querySelector<HTMLElement>('[data-testid="placed-count"]')!
+
+        // On the root, not the pill — otherwise placing a badge would position it inside its own box.
+        await expect(getComputedStyle(root).position).toBe('absolute')
+    })
+
     it('still anchors the dot to a corner when it has a host to decorate', async () => {
         const { container } = mount(
             <StyledBadge dataTest='anchored-dot' variant='dot'>
@@ -223,6 +258,27 @@ describe('StyledBadge notification contract', () => {
 
         await expect(root).not.toHaveAttribute('role')
         await expect(root.querySelector('span[aria-hidden="true"]')).toBeTruthy()
+    })
+
+    it('does not name a hidden hostless count for assistive technology', async () => {
+        const { container, rerender } = mount(
+            <StyledBadge dataTest='standalone-count' badgeContent={0} aria-label='Unread, 0' />,
+        )
+        const root = container.querySelector<HTMLElement>('[data-testid="standalone-count"]')!
+
+        await expect(root.querySelector('span[aria-hidden="true"]')).toBeNull()
+        await expect(root).not.toHaveAttribute('role')
+        await expect(root).not.toHaveAttribute('aria-label')
+        await expect(container.querySelector('[role="status"]')).toBeTruthy()
+
+        rerender(<StyledBadge dataTest='standalone-count' badgeContent={2} aria-label='Unread, 2' />)
+        await expect(root).toHaveAttribute('role', 'img')
+        await expect(root).toHaveAccessibleName('Unread, 2')
+
+        rerender(<StyledBadge dataTest='standalone-count' badgeContent={2} invisible aria-label='Unread, 2' />)
+        await expect(root.querySelector('span[aria-hidden="true"]')).toBeNull()
+        await expect(root).not.toHaveAttribute('role')
+        await expect(root).not.toHaveAttribute('aria-label')
     })
 
     it('keeps a silent polite status region mounted before announcing count changes', async () => {

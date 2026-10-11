@@ -1,4 +1,4 @@
-import { closeSnackbar, enqueueSnackbar } from 'notistack'
+import { closeSnackbar, enqueueSnackbar } from '../snackbarHost'
 import type { ReactNode } from 'react'
 
 import type { MessageProps } from './types'
