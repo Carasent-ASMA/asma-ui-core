@@ -109,8 +109,10 @@ describe('StyledButton disabledReason', () => {
             </StyledButton>,
         )
 
+        const hoveredAt = performance.now()
         await userEvent.hover(byTest('reasoned'))
-        await expect(tip()).toBeNull()
+        // Only meaningful while the 500 ms enter delay has not passed yet; a slow hover() call says nothing.
+        if (performance.now() - hoveredAt < 400) await expect(tip()).toBeNull()
 
         await waitFor(() => expect(tip()).toHaveTextContent('Locked for editing'), { timeout: 2000 })
     })
