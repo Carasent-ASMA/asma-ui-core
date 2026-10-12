@@ -288,7 +288,15 @@ export function StyledDialogFooter({
                                         >
                                             {/* Figma "More" menu items are label-only: an action's icon
                                              * belongs to its inline button, not to its overflow row. */}
-                                            <span className={action.tone === 'danger' ? 'text-beta-500' : 'text-delta-700'}>
+                                            {/* The label inherits the row's colour, so a disabled row
+                                             * keeps the menu's disabled grey. */}
+                                            <span
+                                                className={
+                                                    action.tone === 'danger' && !action.disabled
+                                                        ? 'text-beta-500'
+                                                        : undefined
+                                                }
+                                            >
                                                 {action.label}
                                             </span>
                                         </StyledMenuItem>

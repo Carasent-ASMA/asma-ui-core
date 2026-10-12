@@ -152,10 +152,12 @@ export function ToolbarActionGroup({
                                     action.onClick()
                                 }}
                             >
+                                {/* No `text-delta-700` here: the label inherits the row's colour, so a
+                                    disabled row keeps the menu's disabled grey instead of overriding it. */}
                                 <div
                                     className={cn(
                                         'flex items-center gap-2',
-                                        action.tone === 'danger' ? 'text-beta-500' : 'text-delta-700',
+                                        action.tone === 'danger' && !action.disabled && 'text-beta-500',
                                     )}
                                 >
                                     {action.icon}

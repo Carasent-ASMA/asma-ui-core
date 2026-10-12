@@ -57,4 +57,30 @@ describe('the toolbar overflow menu', () => {
 
         await waitFor(() => expect(menu()).not.toBeNull())
     })
+
+    /* The row's grey must reach the label: the inner wrapper used to set `text-delta-700` (or the
+     * danger red), which overrode the row's disabled colour and left disabled rows looking enabled. */
+    it('keeps a disabled overflow row in the menu disabled colour', async () => {
+        const { container } = mount(
+            <ToolbarActionGroup
+                overflowMenuLabel='More'
+                plan={{
+                    inlineActions: [],
+                    showMoreMenu: true,
+                    overflowActions: [action('archive'), { ...action('delete'), disabled: true, tone: 'danger' }],
+                }}
+            />,
+        )
+        await userEvent.click(trigger(container))
+        await waitFor(() => expect(menu()).not.toBeNull())
+
+        const rows = Array.from(menu()!.querySelectorAll<HTMLElement>('[role="menuitem"]'))
+        const wrapper = (row: HTMLElement): HTMLElement => row.querySelector<HTMLElement>('div')!
+        const disabledRow = rows.find((row) => row.getAttribute('aria-disabled') === 'true')!
+        const enabledRow = rows.find((row) => row.getAttribute('aria-disabled') !== 'true')!
+
+        // delta-300 (text-icon/disabled) on the disabled danger row, delta-700 on the enabled one.
+        await expect(getComputedStyle(wrapper(disabledRow)).color).toBe('rgb(189, 196, 207)')
+        await expect(getComputedStyle(wrapper(enabledRow)).color).toBe('rgb(73, 82, 95)')
+    })
 })
