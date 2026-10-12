@@ -1,7 +1,34 @@
-import type { KeyboardEvent, MouseEvent, ReactNode } from 'react'
+import { Children, isValidElement, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react'
 import { cn } from 'src/helpers/cn'
 import { StyledTooltip } from 'src/components/data-display/tooltip'
+import { StyledCheckbox } from 'src/components/inputs/checkbox'
 import { resolveSx } from 'src/helpers/sx'
+
+// Same wording as the app catalogs (`already_added`). Norwegian is the product default (`<html lang="no">`);
+// the shell language switch writes `lang`, so English follows the page rather than a new prop.
+const ALREADY_ADDED = { en: 'Already added', no: 'Allerede lagt til' } as const
+
+const alreadyAddedLabel = (): string =>
+    (typeof document === 'undefined' ? '' : document.documentElement.lang).toLowerCase().startsWith('en')
+        ? ALREADY_ADDED.en
+        : ALREADY_ADDED.no
+
+// Only a checked checkbox that is also disabled is "already selected" and not pickable again.
+// A checked enabled checkbox is a normal multi-select (FilterDropdown) and must stay silent.
+const takenCheckbox = (node: ReactNode): boolean => {
+    let taken = false
+    Children.forEach(node, (child) => {
+        if (taken || !isValidElement(child)) return
+        if (child.type === StyledCheckbox) {
+            const props = child.props as { checked?: boolean; disabled?: boolean }
+            taken = props.checked === true && props.disabled === true
+            return
+        }
+        const nested = (child.props as { children?: ReactNode }).children
+        if (nested !== undefined && takenCheckbox(nested)) taken = true
+    })
+    return taken
+}
 
 /**
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#16073-21583
@@ -21,8 +48,9 @@ export interface StyledMenuItemProps {
     /** Compact vertical padding (MUI `MenuItem` `dense` parity, DEC-003). */
     dense?: boolean
     /**
-     * Hover/focus hint for the row — e.g. the reason an already-selected multiple-choice option
-     * cannot be picked again. The caller owns the wording: this package ships no translations.
+     * Hover/focus hint. Optional. When omitted, a checked and disabled checkbox (an option that is
+     * already selected and cannot be picked again) gets "Allerede lagt til", or "Already added" when
+     * `<html lang>` is English. Pass this to use another phrase, such as "Already in use".
      */
     tooltip?: ReactNode
     value?: unknown
@@ -104,10 +132,12 @@ export const StyledMenuItem = ({
         </li>
     )
 
+    const title = tooltip ?? (takenCheckbox(children) ? alreadyAddedLabel() : undefined)
+
     // StyledTooltip clones its child, so the `<li>` stays a direct `<ul>` child — no wrapper, no
     // broken list semantics. An absent title renders the row alone.
-    return tooltip ? (
-        <StyledTooltip title={tooltip} arrow placement='top'>
+    return title ? (
+        <StyledTooltip title={title} arrow placement='top'>
             {row}
         </StyledTooltip>
     ) : (

@@ -7,6 +7,7 @@ import { StyledMenu } from './StyledMenu'
 import { ToolbarActionGroup } from 'src/components/custom/module/header-layout/ToolbarActionGroup'
 import { StyledMenuList } from './StyledMenuList'
 import { StyledMenuItem } from './StyledMenuItem'
+import { StyledCheckbox } from 'src/components/inputs/checkbox'
 // The table ships its own menu item; separators must reach it too.
 import { StyledMenuItem as TableMenuItem } from 'src/table/shared-components/StyledMenuItem'
 
@@ -398,7 +399,7 @@ describe('StyledMenu Figma colors', () => {
         await expect(getComputedStyle(rows[1]!).backgroundColor).toBe(selectedResting)
     })
 
-    it('shows the caller-supplied already-in-use tooltip only on the taken row', async () => {
+    it('shows the caller-supplied tooltip only on the row that sets it', async () => {
         const { container } = mount(
             <StyledMenuList>
                 <StyledMenuItem>Free</StyledMenuItem>
@@ -412,6 +413,43 @@ describe('StyledMenu Figma colors', () => {
         await expect(document.body.textContent).not.toContain('Allerede i bruk')
         await userEvent.hover(rows[1]!)
         await waitFor(() => expect(document.body.textContent).toContain('Allerede i bruk'))
+    })
+
+    it('defaults the tooltip when a checkbox is already selected', async () => {
+        document.documentElement.lang = 'no'
+        const { container } = mount(
+            <StyledMenuList>
+                <StyledMenuItem selected>Selected label</StyledMenuItem>
+                <StyledMenuItem>
+                    <StyledCheckbox dataTest='still-pickable' checked />
+                    Pickable
+                </StyledMenuItem>
+                <StyledMenuItem>
+                    <StyledCheckbox dataTest='taken' checked disabled />
+                    Taken
+                </StyledMenuItem>
+            </StyledMenuList>,
+        )
+        const rows = container.querySelectorAll<HTMLElement>('li')
+        await userEvent.hover(rows[0]!)
+        await userEvent.hover(rows[1]!)
+        await expect(document.body.textContent).not.toContain('Allerede lagt til')
+        await userEvent.hover(rows[2]!)
+        await waitFor(() => expect(document.body.textContent).toContain('Allerede lagt til'))
+
+        document.documentElement.lang = 'en'
+        cleanup()
+        const english = mount(
+            <StyledMenuList>
+                <StyledMenuItem>
+                    <StyledCheckbox dataTest='taken-en' checked disabled />
+                    Taken
+                </StyledMenuItem>
+            </StyledMenuList>,
+        )
+        await userEvent.hover(english.container.querySelector('li')!)
+        await waitFor(() => expect(document.body.textContent).toContain('Already added'))
+        document.documentElement.lang = ''
     })
 })
 

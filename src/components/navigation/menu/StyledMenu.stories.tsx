@@ -39,7 +39,8 @@ export const Menu: Story = {
 /**
  * Menu item state gallery (Figma Menus node 16073-21583): Enabled / Hovered (forced) / Selected /
  * Disabled, with the separator between every row. Hover is CSS-driven, forced via `pseudo-hover`.
- * The second list shows the caller-supplied already-in-use tooltip on a taken option.
+ * The second list shows a caller-supplied tooltip. A checked disabled checkbox with no tooltip
+ * uses the default "Allerede lagt til" / "Already added".
  */
 export const Gallery: Story = {
     render: () => (
