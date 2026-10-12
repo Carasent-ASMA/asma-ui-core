@@ -1,21 +1,9 @@
-import {
-    useEffect,
-    useLayoutEffect,
-    useRef,
-    type FocusEvent,
-    type KeyboardEvent,
-    type MouseEvent,
-    type ReactNode,
-} from 'react'
+import { useEffect, useLayoutEffect, useRef, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react'
 import styles from './StyledMenu.module.scss'
 import { cn } from 'src/helpers/cn'
 import { consumerOverrides } from 'src/helpers/classOverride'
 
 export interface StyledMenuListProps {
-    /** @figmaProp Type = Scroll; auto caps lists with more than six shared rows. */
-    scroll?: boolean | 'auto'
-    /** @figmaProp Menus surface — opt in for an unanchored list (StyledMenu supplies its own). */
-    surface?: boolean
     children?: ReactNode
     id?: string
     role?: 'menu' | 'listbox'
@@ -29,56 +17,25 @@ export interface StyledMenuListProps {
 }
 
 const LIST_SELECTOR = '[role="menu"], [role="listbox"]'
-const ITEM_SELECTOR = '[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]'
-
-const isHiddenWithin = (element: HTMLElement, boundary: HTMLElement): boolean => {
-    for (let current: HTMLElement | null = element; current && current !== boundary; current = current.parentElement) {
-        const style = getComputedStyle(current)
-        if (
-            current.hidden ||
-            current.getAttribute('aria-hidden') === 'true' ||
-            style.display === 'none' ||
-            style.visibility === 'hidden'
-        )
-            return true
-    }
-    return false
-}
+const ITEM_SELECTOR = '[role="menuitem"]'
 
 // Inspect rendered structure, not React children: fragments and tooltip/component wrappers are
 // transparent, while custom content, explicit dividers and nested lists break a run of rows.
-const rowSequence = (parent: HTMLElement, boundary = parent): (HTMLElement | null)[] =>
+// `hidden` nodes are skipped rather than treated as content: several consumer menus park a
+// `<input hidden>` file picker between rows, which would otherwise strip the separator above it.
+// The recursion already evaluates every level on the way down, so no ancestor walk is needed.
+const rowSequence = (parent: HTMLElement): (HTMLElement | null)[] =>
     Array.from(parent.childNodes).flatMap((node): (HTMLElement | null)[] => {
         if (!(node instanceof HTMLElement)) return node.textContent?.trim() ? [null] : []
-        if (isHiddenWithin(node, boundary)) return []
+        if (node.hidden) return []
         if (node.matches(LIST_SELECTOR)) return [null]
-        if (node.hasAttribute('data-menu-row')) return [node]
-        if (node.querySelector('[data-menu-row]')) return rowSequence(node, boundary)
+        if (node.matches(ITEM_SELECTOR)) return [node]
+        if (node.querySelector(ITEM_SELECTOR)) return rowSequence(node)
         return [null]
     })
 
 const focusableItems = (list: HTMLUListElement | null): HTMLElement[] =>
-    list
-        ? Array.from(list.querySelectorAll<HTMLElement>(ITEM_SELECTOR)).filter(
-              (item) =>
-                  item.closest(LIST_SELECTOR) === list &&
-                  item.getAttribute('aria-disabled') !== 'true' &&
-                  !isHiddenWithin(item, list),
-          )
-        : []
-
-const setSurfaceTabStop = (list: HTMLUListElement, requested?: HTMLElement): void => {
-    const enabled = focusableItems(list)
-    const tabStop =
-        (requested && enabled.includes(requested) ? requested : undefined) ??
-        enabled.find((item) => item.tabIndex === 0) ??
-        enabled[0]
-    Array.from(list.querySelectorAll<HTMLElement>(ITEM_SELECTOR))
-        .filter((item) => item.closest(LIST_SELECTOR) === list)
-        .forEach((item) => {
-            item.tabIndex = item === tabStop ? 0 : -1
-        })
-}
+    list ? Array.from(list.querySelectorAll<HTMLElement>('[role="menuitem"]:not([aria-disabled="true"])')) : []
 
 /**
  * Keyboard-navigable `role="menu"` list (replaces MUI `MenuList`). Arrow-key / Home / End roving
@@ -86,8 +43,6 @@ const setSurfaceTabStop = (list: HTMLUListElement, requested?: HTMLElement): voi
  */
 export const StyledMenuList = ({
     children,
-    scroll = 'auto',
-    surface,
     id,
     role = 'menu',
     className,
@@ -110,37 +65,26 @@ export const StyledMenuList = ({
         if (!list) return
         const syncRows = (): void => {
             const sequence = rowSequence(list)
-            Array.from(list.querySelectorAll<HTMLElement>('[data-menu-row]'))
+            Array.from(list.querySelectorAll<HTMLElement>(ITEM_SELECTOR))
                 .filter((row) => row.closest(LIST_SELECTOR) === list)
                 .forEach((row) => row.removeAttribute('data-menu-separator'))
-            list.toggleAttribute(
-                'data-menu-scroll',
-                scroll === true || (scroll === 'auto' && sequence.filter(Boolean).length > 6),
-            )
+            // Every row except the last visible one in its run gets the line.
             sequence.forEach((row, index) => row?.toggleAttribute('data-menu-separator', !!sequence[index + 1]))
-            if (surface) setSurfaceTabStop(list)
         }
         syncRows()
         const observer = new MutationObserver(syncRows)
-        observer.observe(list, {
-            childList: true,
-            subtree: true,
-            attributes: true,
-            attributeFilter: ['hidden', 'aria-hidden', 'aria-disabled', 'class', 'style'],
-        })
+        observer.observe(list, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden'] })
         return () => observer.disconnect()
-    }, [scroll, surface])
+    }, [])
 
     useEffect(() => {
         if (autoFocus) focusableItems(listRef.current)[0]?.focus()
     }, [autoFocus])
 
     const handleKeyDown = (event: KeyboardEvent<HTMLUListElement>): void => {
-        if ((event.target as HTMLElement).closest(LIST_SELECTOR) !== listRef.current) return
         onKeyDown?.(event)
-        if (event.defaultPrevented) return
         const keys = ['ArrowDown', 'ArrowUp', 'Home', 'End']
-        if (!keys.includes(event.key) || !(event.target as HTMLElement).matches(ITEM_SELECTOR)) return
+        if (!keys.includes(event.key)) return
         event.preventDefault()
         const items = focusableItems(listRef.current)
         if (items.length === 0) return
@@ -155,13 +99,8 @@ export const StyledMenuList = ({
 
     const listProps = {
         id,
-        onFocus: (event: FocusEvent<HTMLUListElement>): void => {
-            const target = event.target as HTMLElement
-            if (surface && target.matches(ITEM_SELECTOR)) setSurfaceTabStop(event.currentTarget, target)
-        },
         className: cn(
             styles['list'],
-            surface && styles['surface'],
             'm-0 list-none outline-none',
             !hasCustomPadding && 'px-0',
             !hasCustomPadding && (disablePadding ? 'py-0' : 'py-2'),

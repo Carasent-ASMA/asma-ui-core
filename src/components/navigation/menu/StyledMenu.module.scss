@@ -1,79 +1,23 @@
-.surface {
-    box-sizing: border-box;
-    overflow: hidden;
-    border: 1px solid var(--colors-delta-300);
-    border-radius: 4px;
-    background: white;
-    box-shadow: 0 1px 12px rgba(0, 0, 0, 0.15);
-}
+// Scoped to the list, but matched on the attribute rather than on a row class: the navigation
+// item and the table's own row-action item (src/table/shared-components/StyledMenuItem.tsx) are
+// separate components with separate class lists, and both need the line. StyledMenuList marks the
+// rows that get one.
+.list {
+    :global([data-menu-separator]) {
+        position: relative;
+    }
 
-.item {
-    position: relative;
-
-    &[data-menu-separator]::after {
+    // Figma border/separator #d3d8df. Pinned to gray-200 because fretex remaps delta-200 to zinc-200.
+    :global([data-menu-separator])::after {
         content: '';
         position: absolute;
-        right: 0;
-        bottom: 0;
-        left: 0;
+        inset: auto 0 0 0;
         height: 1px;
-        background: var(--colors-delta-200);
+        background: var(--colors-gray-200);
         pointer-events: none;
     }
-}
 
-.item:is(:focus-visible, [data-active])[data-menu-separator]::after {
-    left: 3px; // Leave the focus bar uninterrupted over the entire row height.
-}
-
-.item[data-active] {
-    box-shadow: inset 3px 0 var(--colors-focus-ring);
-}
-
-.icon {
-    display: inline-flex;
-    flex: 0 0 20px;
-    width: 20px;
-    height: 20px;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-}
-
-.dragHandle {
-    @extend .icon;
-    margin-right: 8px;
-}
-
-.checkbox {
-    flex-shrink: 0;
-    pointer-events: none;
-}
-
-.list[data-menu-scroll] {
-    box-sizing: border-box;
-    max-height: 246px; // 248px outer surface minus its two 1px borders.
-    overflow-y: scroll;
-    scrollbar-gutter: stable;
-    scrollbar-color: var(--colors-delta-400) var(--colors-delta-50);
-    scrollbar-width: auto;
-
-    &::-webkit-scrollbar {
-        display: block;
-        width: 16px;
+    :global([data-menu-separator]:focus-visible)::after {
+        left: 3px; // Leave the focus bar uninterrupted over the entire row height.
     }
-
-    &::-webkit-scrollbar-track {
-        background: var(--colors-delta-50);
-    }
-
-    &::-webkit-scrollbar-thumb {
-        border: 4px solid var(--colors-delta-50);
-        border-radius: 8px;
-        background: var(--colors-delta-400);
-    }
-}
-
-.list.surface[data-menu-scroll] {
-    max-height: 248px;
 }

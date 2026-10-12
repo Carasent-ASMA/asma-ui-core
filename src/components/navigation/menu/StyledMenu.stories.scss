@@ -1,9 +1,0 @@
-// VRT blocks Google Fonts. Load the existing local font for this reference fixture only;
-// applications continue to own font loading (ui-core does not ship font files).
-@font-face {
-    font-family: 'Roboto';
-    src: url('../../../styles/fonts/roboto/Roboto-Regular.ttf') format('truetype');
-    font-weight: 400;
-    font-style: normal;
-    font-display: block;
-}

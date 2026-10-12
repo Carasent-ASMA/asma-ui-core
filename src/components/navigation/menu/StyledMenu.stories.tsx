@@ -1,13 +1,11 @@
-import './StyledMenu.stories.scss'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { StyledMenu, type MenuProps } from './StyledMenu'
 import { useState, type FC } from 'react'
-import { StyledTooltip } from 'src/components/data-display/tooltip'
 import { StyledMenuList } from './StyledMenuList'
 import { StyledButton } from 'src/components/inputs/button'
 import { StyledTypography } from 'src/components/data-display/typography'
-import { StyledMenuItem, type StyledMenuItemProps } from './StyledMenuItem'
-import { ErrorOutlineIcon, CloudIcon, ContentCopyIcon, ContentCutIcon, ContentPasteIcon } from 'src/components/icons'
+import { StyledMenuItem } from './StyledMenuItem'
+import { CloudIcon, ContentCopyIcon, ContentCutIcon, ContentPasteIcon } from 'src/components/icons'
 
 const meta = {
     title: 'Navigation/Styled Menu',
@@ -38,109 +36,28 @@ export const Menu: Story = {
     render: () => <StyledMenuExample args={meta.args} />,
 }
 
-/** Figma 16045:31269 Type × State, and 16045:31278 1–6/Scroll surfaces. */
+/**
+ * Menu item state gallery (Figma Menus node 16073-21583): Enabled / Hovered (forced) / Selected /
+ * Disabled, with the separator between every row. Hover is CSS-driven, forced via `pseudo-hover`.
+ * The second list shows the caller-supplied already-in-use tooltip on a taken option.
+ */
 export const Gallery: Story = {
-    render: () => {
-        const types: { label: string; variant: StyledMenuItemProps['variant'] }[] = [
-            { label: 'Only Label', variant: 'label' },
-            { label: 'Icon', variant: 'icon' },
-            { label: 'Check mark', variant: 'checkmark' },
-            { label: 'Checkbox', variant: 'checkbox' },
-        ]
-        const states = [
-            { label: 'Enabled' },
-            { label: 'Hovered', className: 'pseudo-hover' },
-            { label: 'Selected', selected: true },
-            { label: 'Hover selected', selected: true, className: 'pseudo-hover' },
-            { label: 'Active descendant', active: true },
-            { label: 'Disabled', disabled: true },
-        ]
-        return (
-            <div
-                data-theme='greenish'
-                className='flex flex-col gap-4 text-delta-700'
-                style={{ width: 1200, fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}
-            >
-                <table className='w-full border-collapse text-left text-sm'>
-                    <caption className='pb-2 text-left text-base font-semibold'>Menus — Type × State (jade)</caption>
-                    <thead>
-                        <tr>
-                            <th className='p-2'>Type</th>
-                            {states.map((state) => (
-                                <th key={state.label} className='p-2'>
-                                    {state.label}
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {types.map(({ label, variant }) => (
-                            <tr key={variant}>
-                                <th className='border border-solid border-delta-200 p-2'>{label}</th>
-                                {states.map(({ label: state, ...props }) => (
-                                    <td key={state} className='border border-solid border-delta-200 p-1'>
-                                        <StyledMenuList disablePadding>
-                                            <StyledMenuItem
-                                                {...props}
-                                                variant={variant}
-                                                icon={<ErrorOutlineIcon width={20} height={20} color='currentColor' />}
-                                            >
-                                                Option name
-                                            </StyledMenuItem>
-                                        </StyledMenuList>
-                                    </td>
-                                ))}
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-                <div className='flex items-start gap-4'>
-                    {[1, 2, 3, 4, 5, 6, 8].map((count) => (
-                        <div key={count} style={{ width: count === 8 ? 159 : 142 }}>
-                            <div className='mb-2 text-sm'>
-                                {count === 8 ? 'Scroll (248px)' : `${count} option${count === 1 ? '' : 's'}`}
-                            </div>
-                            <StyledMenuList surface>
-                                {Array.from({ length: count }, (_, i) => (
-                                    <StyledMenuItem key={i}>Option name</StyledMenuItem>
-                                ))}
-                            </StyledMenuList>
-                        </div>
-                    ))}
-                </div>
-                <div className='flex items-end gap-8'>
-                    <div style={{ width: 190 }}>
-                        <div className='mb-2 text-sm'>Reorder affordance</div>
-                        <StyledMenuList surface>
-                            <StyledMenuItem variant='checkbox' dragHandle>
-                                Option name
-                            </StyledMenuItem>
-                        </StyledMenuList>
-                    </div>
-                    <div style={{ width: 190 }}>
-                        <div className='mb-2 text-sm'>Already selected</div>
-                        <StyledMenuList surface>
-                            <StyledTooltip title='Already in use' arrow>
-                                <span role='presentation' className='block'>
-                                    <StyledMenuItem
-                                        variant='checkmark'
-                                        selected
-                                        unavailable
-                                        aria-describedby='menu-unavailable-reason'
-                                    >
-                                        Option name
-                                    </StyledMenuItem>
-                                </span>
-                            </StyledTooltip>
-                        </StyledMenuList>
-                    </div>
-                    <span id='menu-unavailable-reason' className='text-sm'>
-                        Already in use
-                    </span>
-                </div>
-            </div>
-        )
-    },
+    render: () => (
+        <div className='flex items-start gap-8' style={{ width: 520 }}>
+            <StyledMenuList className='w-60'>
+                <StyledMenuItem>Enabled</StyledMenuItem>
+                <StyledMenuItem className='pseudo-hover'>Hovered</StyledMenuItem>
+                <StyledMenuItem selected>Selected</StyledMenuItem>
+                <StyledMenuItem disabled>Disabled</StyledMenuItem>
+            </StyledMenuList>
+            <StyledMenuList className='w-60'>
+                <StyledMenuItem>Free option</StyledMenuItem>
+                <StyledMenuItem selected tooltip='Already in use'>
+                    Taken option
+                </StyledMenuItem>
+            </StyledMenuList>
+        </div>
+    ),
 }
 
 const StyledMenuExample: FC<{ args: Partial<MenuProps> }> = ({ args }) => {

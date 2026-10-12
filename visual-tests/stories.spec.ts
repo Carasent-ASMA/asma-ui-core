@@ -73,8 +73,7 @@ test.beforeEach(async ({ page }) => {
 })
 
 for (const story of stories) {
-    // The menu gallery has its own native-scrollbar capture in menu-gallery.spec.ts.
-    if (SKIP.has(story.id) || story.id === 'navigation-styled-menu--gallery') continue
+    if (SKIP.has(story.id)) continue
     test(story.id, async ({ page }) => {
         await prepareStoryFrame(page, story.id)
         await expect(page).toHaveScreenshot(`${story.id}.png`)

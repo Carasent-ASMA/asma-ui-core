@@ -1,12 +1,10 @@
 import type { CSSProperties, MouseEvent, ReactNode } from 'react'
 import { cn } from 'src/helpers/cn'
 import { StyledPopover, type PopoverCloseReason, type PopoverOrigin } from '../../utils/popover'
-import { StyledMenuList, type StyledMenuListProps } from './StyledMenuList'
+import { StyledMenuList } from './StyledMenuList'
 export type MenuCloseReason = PopoverCloseReason | 'tabKeyDown'
 
 export interface MenuProps {
-    /** @figmaProp Type = Scroll; auto scrolls more than six shared rows. */
-    scroll?: StyledMenuListProps['scroll']
     open: boolean
     anchorEl?: Element | null
     onClose?: (event: object, reason?: MenuCloseReason) => void
@@ -37,7 +35,6 @@ const MENU_PAPER_STYLE = {
  */
 export const StyledMenu = ({
     open,
-    scroll,
     anchorEl,
     onClose,
     anchorOrigin,
@@ -65,7 +62,7 @@ export const StyledMenu = ({
         keepMounted={keepMounted}
         slotProps={{
             paper: {
-                className: cn('rounded [&]:overflow-hidden', classes?.paper, slotProps?.paper?.className),
+                className: cn('rounded', classes?.paper, slotProps?.paper?.className),
                 sx: [MENU_PAPER_STYLE, slotProps?.paper?.sx],
                 style: slotProps?.paper?.style,
             },
@@ -78,7 +75,6 @@ export const StyledMenu = ({
                focus-steal the rule guards against. */
             // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus={autoFocus}
-            scroll={scroll}
             className={classes?.list}
             onClick={onClick}
             // WAI-ARIA Menu pattern, Tab: "When focus is on a menuitem ... move focus out of the
@@ -90,12 +86,7 @@ export const StyledMenu = ({
             // StyledPopover's close restores focus to the trigger first, so Tab continues from the
             // trigger to the next control instead of from a node that is being unmounted.
             onKeyDown={(event) => {
-                if (
-                    event.key === 'Tab' &&
-                    ['menuitem', 'menuitemradio', 'menuitemcheckbox'].includes(
-                        (event.target as HTMLElement).getAttribute('role') ?? '',
-                    )
-                )
+                if (event.key === 'Tab' && (event.target as HTMLElement).getAttribute('role') === 'menuitem')
                     onClose?.(event, 'tabKeyDown')
             }}
         >

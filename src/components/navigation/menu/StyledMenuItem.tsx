@@ -1,32 +1,13 @@
-import type { AriaAttributes, KeyboardEvent, MouseEvent, ReactNode } from 'react'
+import type { KeyboardEvent, MouseEvent, ReactNode } from 'react'
 import { cn } from 'src/helpers/cn'
-import { CheckIcon } from 'src/components/icons/check-icon'
-import { DragHorizontalIcon } from 'src/components/icons/drag-horizontal-icon'
-import { ProhibitionIcon } from 'src/components/icons/prohibition-icon'
-import { StyledCheckbox } from 'src/components/inputs/checkbox'
-import styles from './StyledMenu.module.scss'
+import { StyledTooltip } from 'src/components/data-display/tooltip'
 import { resolveSx } from 'src/helpers/sx'
 
 /**
- * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#16073-19226
- * Figma "Menus item" (h40, label 16px text-icon/body). Figma **State** (Enabled/Hover/Selected/
- * Disabled) ← native hover + `selected`/`disabled`; **Type** (Only Label/Icon/Checkbox/Check mark)
- * maps to `variant`; arbitrary `children` remain supported. Selected bg = `gama-25`, hover = `delta-50`.
+ * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#16073-21583
+ * Figma "Menus item" (h40, label 16px text-icon/body). Hover gray `#f0f2f4`, separator `#d3d8df`.
  */
-export interface StyledMenuItemProps extends AriaAttributes {
-    /** @figmaProp Type — omitted preserves arbitrary child composition. */
-    variant?: 'label' | 'icon' | 'checkmark' | 'checkbox'
-    /** @figmaProp Icon — decorative 20px leading slot for variant="icon". */
-    icon?: ReactNode
-    /** @figmaProp State = Activedescendant; use id with the owner's aria-activedescendant. */
-    active?: boolean
-    /** @figmaProp State = NA — inert body-colored row; consumer supplies tooltip/reason. */
-    unavailable?: boolean
-    /** @figmaProp Drag handle — visual only; consumer owns ordering and accessible DnD. */
-    dragHandle?: boolean
-    /** @figmaProp none — accessibility; defaults to radio for checkmark, checkbox for checkbox. */
-    role?: 'menuitem' | 'menuitemradio' | 'menuitemcheckbox'
-    id?: string
+export interface StyledMenuItemProps {
     /** @figmaProp content — Type (Only Label / Icon / Checkbox / Check mark) via composition */
     children?: ReactNode
     onClick?: (event: MouseEvent<HTMLLIElement>) => void
@@ -39,6 +20,11 @@ export interface StyledMenuItemProps extends AriaAttributes {
     selected?: boolean
     /** Compact vertical padding (MUI `MenuItem` `dense` parity, DEC-003). */
     dense?: boolean
+    /**
+     * Hover/focus hint for the row — e.g. the reason an already-selected multiple-choice option
+     * cannot be picked again. The caller owns the wording: this package ships no translations.
+     */
+    tooltip?: ReactNode
     value?: unknown
     className?: string
     classes?: { root?: string; selected?: string }
@@ -53,19 +39,13 @@ export interface StyledMenuItemProps extends AriaAttributes {
  */
 export const StyledMenuItem = ({
     children,
-    variant,
-    icon,
-    active,
-    unavailable,
-    dragHandle,
-    role = variant === 'checkbox' ? 'menuitemcheckbox' : variant === 'checkmark' ? 'menuitemradio' : 'menuitem',
-    id,
     onClick,
     onMouseDown,
     onMouseUp,
     disabled,
     selected,
     dense,
+    tooltip,
     className,
     classes,
     sx,
@@ -73,49 +53,30 @@ export const StyledMenuItem = ({
     'data-testid': dataTestId,
     // Accepted for parity (consumed by Select, not needed for menu rendering).
     value: _value,
-    ...ariaProps
 }: StyledMenuItemProps): JSX.Element => {
-    const inert = disabled === true || unavailable === true
     const handleKeyDown = (event: KeyboardEvent<HTMLLIElement>): void => {
-        if (inert || event.target !== event.currentTarget) return
+        if (disabled) return
         if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault()
             onClick?.(event as unknown as MouseEvent<HTMLLIElement>)
         }
     }
 
-    return (
-        // All allowed roles are interactive menuitem roles; eslint cannot infer the role union.
-        // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
+    const row = (
         <li
-            {...ariaProps}
-            id={id}
-            role={role}
-            aria-checked={role === 'menuitem' ? undefined : ariaProps['aria-checked'] ?? !!selected}
-            data-active={active ? true : undefined}
-            data-unavailable={unavailable ? true : undefined}
-            data-menu-row=''
-            aria-disabled={inert ? true : undefined}
+            role='menuitem'
+            aria-disabled={disabled ? true : undefined}
             tabIndex={-1}
             data-test={dataTest}
             data-testid={dataTestId}
-            onClick={inert ? undefined : onClick}
-            onMouseDown={inert ? undefined : onMouseDown}
-            onMouseUp={inert ? undefined : onMouseUp}
+            onClick={disabled ? undefined : onClick}
+            onMouseDown={disabled ? undefined : onMouseDown}
+            onMouseUp={disabled ? undefined : onMouseUp}
             onKeyDown={handleKeyDown}
             className={cn(
-                styles['item'],
-                // Figma Menus item (node 16073-19226): h40, py8, label Body Base 16px text-icon/body
-                // (delta-700); hover delta-50; selected gama-25, hover-selected gama-50.
-                'box-border flex items-center text-base leading-6 outline-none focus-visible:shadow-[inset_3px_0_var(--colors-focus-ring)]',
-                variant === 'checkbox'
-                    ? 'gap-0 pl-0 pr-2'
-                    : variant === 'icon' || variant === 'checkmark'
-                    ? 'px-2'
-                    : 'pl-4 pr-2',
-                variant === 'icon' && 'gap-2',
-                variant === 'checkmark' && 'gap-1',
-                dense ? 'min-h-8 py-1' : variant === 'checkbox' ? 'min-h-10 py-0' : 'min-h-10 py-2',
+                // Figma Menus item (node 16073-21583): h40, py8, label Body Base 16px.
+                'box-border flex items-center px-4 text-base outline-none focus-visible:shadow-[inset_3px_0_var(--colors-focus-ring)]',
+                dense ? 'min-h-8 py-1' : 'min-h-10 py-2',
                 // ASMA-8210: the item had no pressed state at all, and at 40px (32px dense) both
                 // variants sit under the 44px touch height — safe for the touch-target override,
                 // which only ever raises them (it sets min-height only; the item declares no
@@ -127,52 +88,29 @@ export const StyledMenuItem = ({
                 // The `aria-disabled:` variant (specificity 0,2,0) keeps the grey winning over any
                 // text-* colour a consumer passes via `className` (all utilities are `!important`,
                 // so plain classes resolve by stylesheet order, not by the `!` prefix).
+                // Figma bg/hover-default #f0f2f4 = delta-50 in every theme. A selected row keeps its
+                // fill on hover (the node's bg/hover-selected equals the resting selected colour),
+                // so the hover utility is simply absent there rather than out-ranked.
                 disabled
                     ? 'cursor-not-allowed text-delta-300 aria-disabled:text-delta-300'
-                    : unavailable
-                    ? 'cursor-not-allowed bg-delta-50 text-delta-700'
-                    : 'cursor-pointer text-delta-700 hover:bg-delta-50',
-                selected && !unavailable && cn('bg-gama-25', !disabled && 'hover:bg-gama-50', classes?.selected),
+                    : cn('cursor-pointer text-delta-700', !selected && 'hover:bg-delta-50'),
+                selected && cn('bg-gama-50', classes?.selected),
                 classes?.root,
                 className,
             )}
             style={{ fontFamily: 'Roboto, Helvetica, Arial, sans-serif', ...resolveSx(sx) }}
         >
-            {dragHandle && (
-                <span aria-hidden='true' className={styles['dragHandle']}>
-                    <DragHorizontalIcon width={20} height={20} />
-                </span>
-            )}
-            {(variant === 'icon' || variant === 'checkmark') && (
-                <span
-                    aria-hidden='true'
-                    className={cn(
-                        styles['icon'],
-                        !disabled && variant === 'checkmark' && (unavailable ? 'text-delta-500' : 'text-gama-500'),
-                    )}
-                >
-                    {unavailable ? (
-                        <ProhibitionIcon width={20} height={20} />
-                    ) : variant === 'icon' ? (
-                        icon
-                    ) : selected ? (
-                        <CheckIcon width={20} height={20} />
-                    ) : null}
-                </span>
-            )}
-            {variant === 'checkbox' && (
-                <StyledCheckbox
-                    decorative
-                    disableRipple
-                    size='medium'
-                    dataTest='menu-checkbox'
-                    checked={selected}
-                    disabled={inert}
-                    className={styles['checkbox']}
-                    checkboxClassName={inert ? (selected ? 'bg-delta-300' : 'border-delta-300') : undefined}
-                />
-            )}
             {children}
         </li>
+    )
+
+    // StyledTooltip clones its child, so the `<li>` stays a direct `<ul>` child — no wrapper, no
+    // broken list semantics. An absent title renders the row alone.
+    return tooltip ? (
+        <StyledTooltip title={tooltip} arrow placement='top'>
+            {row}
+        </StyledTooltip>
+    ) : (
+        row
     )
 }
