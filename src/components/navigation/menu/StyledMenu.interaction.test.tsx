@@ -4,6 +4,8 @@ import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { cleanup, describeFocusIndicator, focusStyleOf, mount } from 'src/test-utils/renderInteraction'
 import { StyledMenu } from './StyledMenu'
+import { ToolbarActionGroup } from 'src/components/custom/module/header-layout/ToolbarActionGroup'
+import { StyledMenuList } from './StyledMenuList'
 import { StyledMenuItem } from './StyledMenuItem'
 
 /**
@@ -11,7 +13,13 @@ import { StyledMenuItem } from './StyledMenuItem'
  * WAI-ARIA menu-button pattern; WCAG 2.1.1, 2.1.2, 2.4.3, 2.4.7, 4.1.2.
  */
 
-const MenuFixture = ({ onPick = () => undefined }: { onPick?: (value: string) => void }): JSX.Element => {
+const MenuFixture = ({
+    onPick = () => undefined,
+    variant,
+}: {
+    onPick?: (value: string) => void
+    variant?: 'checkmark' | 'checkbox'
+}): JSX.Element => {
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
     // A real menu dismisses on activation; without that the second open in a test would be a no-op.
     const pick = (value: string): void => {
@@ -27,7 +35,7 @@ const MenuFixture = ({ onPick = () => undefined }: { onPick?: (value: string) =>
                 Actions
             </StyledButton>
             <StyledMenu open={!!anchorEl} anchorEl={anchorEl} onClose={() => setAnchorEl(null)}>
-                <StyledMenuItem data-testid='item-rename' onClick={() => pick('rename')}>
+                <StyledMenuItem variant={variant} data-testid='item-rename' onClick={() => pick('rename')}>
                     Rename
                 </StyledMenuItem>
                 <StyledMenuItem data-testid='item-duplicate' onClick={() => pick('duplicate')}>
@@ -65,6 +73,21 @@ const openMenu = async (container: HTMLElement): Promise<HTMLButtonElement> => {
 
 describe('StyledMenu keyboard contract', () => {
     afterEach(cleanup)
+
+    it('matches the Figma menu surface and interior padding', async () => {
+        const { container } = mount(<MenuFixture />)
+        await openMenu(container)
+        const list = menu()!
+        const paper = list.parentElement!
+        const style = getComputedStyle(paper)
+        await expect(style.borderTopWidth).toBe('1px')
+        await expect(style.borderTopColor).toBe('rgb(189, 196, 207)')
+        await expect(style.borderRadius).toBe('4px')
+        await expect(style.boxShadow).toContain('rgba(0, 0, 0, 0.15) 0px 1px 12px 0px')
+        await expect(style.overflow).toBe('hidden')
+        await expect(getComputedStyle(list).paddingTop).toBe('8px')
+        await expect(getComputedStyle(list).paddingBottom).toBe('8px')
+    })
 
     it('exposes menu/menuitem roles and the disabled state (4.1.2)', async () => {
         const { container } = mount(<MenuFixture />)
@@ -221,6 +244,23 @@ describe('StyledMenu keyboard contract', () => {
      * still owning focus, so a close that deliberately put focus somewhere else must be left alone —
      * otherwise every StyledPopover consumer (filter menu, country picker, calendar) yanks focus back
      * to its anchor. @see docs/a11y-keyboard-contract.md */
+    it.each(['checkmark', 'checkbox'] as const)(
+        'preserves Escape, Tab and focus return for %s rows',
+        async (variant) => {
+            const { container } = mount(<MenuFixture variant={variant} />)
+            const button = await openMenu(container)
+            const first = document.querySelector<HTMLElement>('[data-testid="item-rename"]')!
+            await expect(document.activeElement).toBe(first)
+            await userEvent.keyboard('{Escape}')
+            await waitFor(() => expect(menu()).toBeNull())
+            await expect(document.activeElement).toBe(button)
+            await openMenu(container)
+            await userEvent.tab()
+            await waitFor(() => expect(menu()).toBeNull())
+            await expect(document.activeElement).toBe(container.querySelector('[data-testid="outside-close"]'))
+        },
+    )
+
     it('leaves focus where the user moved it when the menu closes (2.4.3)', async () => {
         const { container } = mount(<MenuFixture />)
         await openMenu(container)
@@ -293,5 +333,266 @@ describe('StyledMenu keyboard contract', () => {
             describeFocusIndicator(before, focusStyleOf(target)),
             'keyboard-focused menu item paints no perceivable focus indicator',
         ).not.toBeNull()
+    })
+})
+
+describe('StyledMenu row structure', () => {
+    afterEach(cleanup)
+
+    const separator = (row: Element): string => getComputedStyle(row, '::after').height
+
+    it('separates wrapped/fragment rows, stops at custom content, and updates after removal', async () => {
+        const rows = (last: boolean): JSX.Element => (
+            <StyledMenuList>
+                <>
+                    <StyledMenuItem>First</StyledMenuItem>
+                </>
+                <div role='presentation'>
+                    <StyledMenuItem>Wrapped</StyledMenuItem>
+                </div>
+                <li role='presentation'>
+                    <input aria-label='Search' />
+                </li>
+                <StyledMenuItem>After search</StyledMenuItem>
+                {last && (
+                    <div role='presentation'>
+                        <StyledMenuItem>Last</StyledMenuItem>
+                    </div>
+                )}
+            </StyledMenuList>
+        )
+        const { container, rerender } = mount(rows(true))
+        const getRows = (): Element[] => Array.from(container.querySelectorAll('[role="menuitem"]'))
+        await waitFor(() => expect(separator(getRows()[0]!)).toBe('1px'))
+        await expect(getComputedStyle(getRows()[0]!, '::after').backgroundColor).toBe('rgb(211, 216, 223)')
+        await expect(separator(getRows()[1]!)).not.toBe('1px')
+        await expect(separator(getRows()[2]!)).toBe('1px')
+        await expect(separator(getRows()[3]!)).not.toBe('1px')
+        await expect(getRows()[0]!.getBoundingClientRect().height).toBe(40)
+        const input = container.querySelector('input')!
+        input.focus()
+        await userEvent.keyboard('{End}')
+        await expect(document.activeElement).toBe(input)
+        rerender(rows(false))
+        await waitFor(() => expect(separator(getRows()[2]!)).not.toBe('1px'))
+    })
+
+    it('keeps explicit dividers and nested menu navigation independent', async () => {
+        const { container } = mount(
+            <StyledMenuList>
+                <StyledMenuItem>Outer first</StyledMenuItem>
+                <hr />
+                <StyledMenuList>
+                    <StyledMenuItem>Inner first</StyledMenuItem>
+                    <StyledMenuItem>Inner last</StyledMenuItem>
+                </StyledMenuList>
+                <StyledMenuItem>Outer last</StyledMenuItem>
+            </StyledMenuList>,
+        )
+        const rows = Array.from(container.querySelectorAll<HTMLElement>('[role="menuitem"]'))
+        await expect(separator(rows[0]!)).not.toBe('1px')
+        rows[1]!.focus()
+        await userEvent.keyboard('{End}')
+        await expect(document.activeElement).toBe(rows[2])
+        rows[0]!.focus()
+        await userEvent.keyboard('{ArrowDown}')
+        await expect(document.activeElement).toBe(rows[3])
+    })
+
+    it('ignores rows hidden by consumer styles', async () => {
+        const rows = (hideMiddle: boolean): JSX.Element => (
+            <StyledMenuList>
+                <StyledMenuItem>First</StyledMenuItem>
+                <div style={hideMiddle ? { display: 'none' } : undefined}>
+                    <StyledMenuItem>Middle</StyledMenuItem>
+                </div>
+                <StyledMenuItem>Last</StyledMenuItem>
+            </StyledMenuList>
+        )
+        const { container, rerender } = mount(rows(false))
+        const getRows = (): HTMLElement[] =>
+            Array.from(container.querySelectorAll<HTMLElement>('[role="menuitem"]'))
+        await waitFor(() => expect(separator(getRows()[1]!)).toBe('1px'))
+
+        rerender(rows(true))
+        await waitFor(() => expect(separator(getRows()[1]!)).not.toBe('1px'))
+        getRows()[0]!.focus()
+        await userEvent.keyboard('{ArrowDown}')
+        await expect(document.activeElement).toBe(getRows()[2])
+    })
+})
+
+describe('StyledMenu Figma presentations', () => {
+    afterEach(cleanup)
+
+    it('owns selectable semantics and decorative slots without nested controls', async () => {
+        const onPick = fn()
+        const { container } = mount(
+            <StyledMenuList>
+                <StyledMenuItem>Action</StyledMenuItem>
+                <StyledMenuItem variant='icon' icon={<svg width='20' height='20' />}>
+                    Icon
+                </StyledMenuItem>
+                <StyledMenuItem variant='checkmark' selected onClick={onPick}>
+                    Single
+                </StyledMenuItem>
+                <StyledMenuItem variant='checkbox' selected dragHandle onClick={onPick}>
+                    Multiple
+                </StyledMenuItem>
+            </StyledMenuList>,
+        )
+        const radio = container.querySelector<HTMLElement>('[role="menuitemradio"]')!
+        const checkbox = container.querySelector<HTMLElement>('[role="menuitemcheckbox"]')!
+        await expect(radio).not.toBeNull()
+        await expect(checkbox).toHaveAttribute('aria-checked', 'true')
+        await expect(checkbox.querySelector('input, button, [tabindex]')).toBeNull()
+        radio.focus()
+        await userEvent.keyboard('{Enter}{ArrowDown} ')
+        await expect(onPick).toHaveBeenCalledTimes(2)
+        await expect(document.activeElement).toBe(checkbox)
+        for (const row of container.querySelectorAll('li')) {
+            await expect(row.getBoundingClientRect().height).toBe(40)
+            await expect(getComputedStyle(row).fontSize).toBe('16px')
+            await expect(getComputedStyle(row).lineHeight).toBe('24px')
+        }
+        await expect(getComputedStyle(container.querySelector('li')!).paddingLeft).toBe('16px')
+        await expect(getComputedStyle(container.querySelector('li')!).paddingRight).toBe('8px')
+        const icon = container.querySelectorAll('li')[1]!
+        await expect(getComputedStyle(icon).paddingLeft).toBe('8px')
+        await expect(getComputedStyle(icon).columnGap).toBe('8px')
+        await expect(getComputedStyle(radio).columnGap).toBe('4px')
+        await expect(checkbox.querySelector('svg')!.getBoundingClientRect().width).toBe(20)
+    })
+
+    it('uses jade state tokens, keeps unavailable rows inert and exposes external active state', async () => {
+        const onPick = fn()
+        const { container } = mount(
+            <div data-theme='greenish'>
+                <StyledMenuList>
+                    <StyledMenuItem>Enabled</StyledMenuItem>
+                    <StyledMenuItem selected>Selected</StyledMenuItem>
+                    <StyledMenuItem disabled onClick={onPick}>
+                        Disabled
+                    </StyledMenuItem>
+                    <StyledMenuItem variant='checkmark' selected unavailable aria-describedby='reason' onClick={onPick}>
+                        Unavailable
+                    </StyledMenuItem>
+                    <StyledMenuItem active id='active-row'>
+                        Active
+                    </StyledMenuItem>
+                </StyledMenuList>
+                <span id='reason'>Already in use</span>
+            </div>,
+        )
+        const rows = container.querySelectorAll<HTMLElement>('li')
+        await expect(getComputedStyle(rows[0]!).color).toBe('rgb(73, 82, 95)')
+        await userEvent.hover(rows[0]!)
+        await expect(getComputedStyle(rows[0]!).backgroundColor).toBe('rgb(240, 242, 244)')
+        await expect(getComputedStyle(rows[1]!).backgroundColor).toBe('rgb(243, 250, 250)')
+        await userEvent.hover(rows[1]!)
+        await expect(getComputedStyle(rows[1]!).backgroundColor).toBe('rgb(232, 246, 246)')
+        await expect(getComputedStyle(rows[2]!).color).toBe('rgb(189, 196, 207)')
+        rows[2]!.click()
+        rows[3]!.click()
+        rows[3]!.focus()
+        await userEvent.keyboard('{Enter} ')
+        await expect(onPick).not.toHaveBeenCalled()
+        await expect(rows[3]).toHaveAttribute('aria-disabled', 'true')
+        await expect(rows[3]).toHaveAttribute('aria-describedby', 'reason')
+        await expect(getComputedStyle(rows[4]!).boxShadow).toContain('3px 0px')
+    })
+
+    it('keeps six rows full height, caps long menus at 248px and scrolls focused rows into view', async () => {
+        const fixture = (count: number): JSX.Element => (
+            // Custom imperative-focus option, disabled here to measure the initial scroll position.
+            // eslint-disable-next-line jsx-a11y/no-autofocus
+            <StyledMenu open autoFocus={false}>
+                {Array.from({ length: count }, (_, i) => (
+                    <StyledMenuItem key={i}>Option {i + 1}</StyledMenuItem>
+                ))}
+            </StyledMenu>
+        )
+        const { rerender } = mount(fixture(6))
+        await expect(menu()!.parentElement!.getBoundingClientRect().height).toBe(258)
+        rerender(fixture(10))
+        await waitFor(() => expect(menu()!.parentElement!.getBoundingClientRect().height).toBe(248))
+        await expect(getComputedStyle(menu()!).overflowY).toBe('scroll')
+        await expect(getComputedStyle(menu()!, '::-webkit-scrollbar').width).toBe('16px')
+        items()[0]!.focus()
+        await userEvent.keyboard('{End}')
+        await expect(document.activeElement).toBe(items()[9])
+        await expect(menu()!.scrollTop).toBeGreaterThan(0)
+        await expect(items()[9]!.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+            menu()!.getBoundingClientRect().bottom,
+        )
+    })
+})
+
+describe('StyledMenu shared surface consumers', () => {
+    afterEach(cleanup)
+
+    it('supports a standalone surface with the same scroll dimensions', async () => {
+        const { container } = mount(
+            <>
+                <button type='button'>Before</button>
+                <StyledMenuList surface scroll>
+                    {Array.from({ length: 8 }, (_, i) => (
+                        <StyledMenuItem key={i}>Option {i}</StyledMenuItem>
+                    ))}
+                </StyledMenuList>
+                <button type='button'>After</button>
+            </>,
+        )
+        const list = container.querySelector('ul')!
+        const before = container.querySelector('button')!
+        await expect(getComputedStyle(list).borderTopWidth).toBe('1px')
+        await expect(getComputedStyle(list).borderRadius).toBe('4px')
+        await expect(getComputedStyle(list).boxShadow).toContain('rgba(0, 0, 0, 0.15) 0px 1px 12px 0px')
+        await expect(list.getBoundingClientRect().height).toBe(248)
+        await userEvent.tab()
+        await userEvent.tab()
+        await expect(document.activeElement).toBe(list.querySelector('li'))
+        await userEvent.keyboard('{End}')
+        await expect(document.activeElement).toBe(list.querySelector('li:last-child'))
+        await userEvent.tab({ shift: true })
+        await expect(document.activeElement).toBe(before)
+    })
+
+    it('lets ToolbarActionGroup use shared row separators instead of hr nodes', async () => {
+        const { container } = mount(
+            <ToolbarActionGroup
+                overflowMenuLabel='More'
+                plan={{
+                    inlineActions: [],
+                    showMoreMenu: true,
+                    overflowActions: [
+                        { id: 'one', label: 'First', onClick: () => undefined },
+                        { id: 'two', label: 'Second', onClick: () => undefined },
+                    ],
+                }}
+            />,
+        )
+        await userEvent.click(container.querySelector('button')!)
+        await waitFor(() => expect(menu()).not.toBeNull())
+        await expect(menu()!.querySelector('hr')).toBeNull()
+        await expect(getComputedStyle(items()[0]!, '::after').height).toBe('1px')
+    })
+})
+
+describe('StyledMenu disabled indicator', () => {
+    afterEach(cleanup)
+    it('uses the menu disabled token on the decorative checkbox', async () => {
+        const { container } = mount(
+            <StyledMenuList>
+                <StyledMenuItem variant='checkbox' disabled>
+                    Disabled checkbox
+                </StyledMenuItem>
+            </StyledMenuList>,
+        )
+        const slot = container.querySelector('[data-testid="menu-checkbox"]')!
+        await expect(slot.getBoundingClientRect().width).toBe(40)
+        const box = slot.firstElementChild!
+        await expect(box.getBoundingClientRect().width).toBe(20)
+        await expect(getComputedStyle(box).borderTopColor).toBe('rgb(189, 196, 207)')
     })
 })

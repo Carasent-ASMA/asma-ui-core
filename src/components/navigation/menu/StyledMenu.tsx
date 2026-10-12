@@ -1,10 +1,12 @@
 import type { CSSProperties, MouseEvent, ReactNode } from 'react'
 import { cn } from 'src/helpers/cn'
 import { StyledPopover, type PopoverCloseReason, type PopoverOrigin } from '../../utils/popover'
-import { StyledMenuList } from './StyledMenuList'
+import { StyledMenuList, type StyledMenuListProps } from './StyledMenuList'
 export type MenuCloseReason = PopoverCloseReason | 'tabKeyDown'
 
 export interface MenuProps {
+    /** @figmaProp Type = Scroll; auto scrolls more than six shared rows. */
+    scroll?: StyledMenuListProps['scroll']
     open: boolean
     anchorEl?: Element | null
     onClose?: (event: object, reason?: MenuCloseReason) => void
@@ -23,11 +25,9 @@ export interface MenuProps {
     keepMounted?: boolean
 }
 
-// Menu paper look (border + soft shadow) applied as flat sx → inline so it overrides StyledPopover's
-// base class shadow without tailwind-merge (dropped in Phase 0).
+// Menu outline; Float elevation and white background come from StyledPopover.
 const MENU_PAPER_STYLE = {
     border: '1px solid var(--colors-delta-300)',
-    boxShadow: '0px 2px 4px 0px rgba(34, 33, 51, 0.15)',
 }
 
 /**
@@ -37,6 +37,7 @@ const MENU_PAPER_STYLE = {
  */
 export const StyledMenu = ({
     open,
+    scroll,
     anchorEl,
     onClose,
     anchorOrigin,
@@ -64,7 +65,7 @@ export const StyledMenu = ({
         keepMounted={keepMounted}
         slotProps={{
             paper: {
-                className: cn('rounded', classes?.paper, slotProps?.paper?.className),
+                className: cn('rounded [&]:overflow-hidden', classes?.paper, slotProps?.paper?.className),
                 sx: [MENU_PAPER_STYLE, slotProps?.paper?.sx],
                 style: slotProps?.paper?.style,
             },
@@ -77,6 +78,7 @@ export const StyledMenu = ({
                focus-steal the rule guards against. */
             // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus={autoFocus}
+            scroll={scroll}
             className={classes?.list}
             onClick={onClick}
             // WAI-ARIA Menu pattern, Tab: "When focus is on a menuitem ... move focus out of the
@@ -88,7 +90,12 @@ export const StyledMenu = ({
             // StyledPopover's close restores focus to the trigger first, so Tab continues from the
             // trigger to the next control instead of from a node that is being unmounted.
             onKeyDown={(event) => {
-                if (event.key === 'Tab' && (event.target as HTMLElement).getAttribute('role') === 'menuitem')
+                if (
+                    event.key === 'Tab' &&
+                    ['menuitem', 'menuitemradio', 'menuitemcheckbox'].includes(
+                        (event.target as HTMLElement).getAttribute('role') ?? '',
+                    )
+                )
                     onClose?.(event, 'tabKeyDown')
             }}
         >
