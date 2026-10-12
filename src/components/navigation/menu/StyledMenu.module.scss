@@ -74,6 +74,13 @@
     }
 }
 
+// The anchored menu's paper no longer clips its overflow (a consumer max-height on the paper has to
+// stay scrollable), so the scrolling list rounds its own corners to the paper's inner edge:
+// 4px surface radius minus the paper's 1px border. `surface` lists round themselves at 4px already.
+.list[data-menu-scroll]:not(.surface) {
+    border-radius: 3px;
+}
+
 .list.surface[data-menu-scroll] {
     max-height: 248px;
 }

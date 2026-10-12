@@ -65,7 +65,10 @@ export const StyledMenu = ({
         keepMounted={keepMounted}
         slotProps={{
             paper: {
-                className: cn('rounded [&]:overflow-hidden', classes?.paper, slotProps?.paper?.className),
+                // No `overflow-hidden` here: the paper must stay StyledPopover's `overflow-auto`, so a
+                // consumer's `maxHeight` on the paper still scrolls. The Scroll variant clips its own
+                // corners on the list instead (`.list[data-menu-scroll]`).
+                className: cn('rounded', classes?.paper, slotProps?.paper?.className),
                 sx: [MENU_PAPER_STYLE, slotProps?.paper?.sx],
                 style: slotProps?.paper?.style,
             },

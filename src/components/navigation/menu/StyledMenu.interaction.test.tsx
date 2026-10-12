@@ -84,7 +84,9 @@ describe('StyledMenu keyboard contract', () => {
         await expect(style.borderTopColor).toBe('rgb(189, 196, 207)')
         await expect(style.borderRadius).toBe('4px')
         await expect(style.boxShadow).toContain('rgba(0, 0, 0, 0.15) 0px 1px 12px 0px')
-        await expect(style.overflow).toBe('hidden')
+        // The paper keeps StyledPopover's scroll container: a consumer's max-height on the paper has
+        // to keep scrolling while the list fits, and the Scroll variant clips on the list itself.
+        await expect(style.overflow).toBe('auto')
         await expect(getComputedStyle(list).paddingTop).toBe('8px')
         await expect(getComputedStyle(list).paddingBottom).toBe('8px')
     })
@@ -517,6 +519,8 @@ describe('StyledMenu Figma presentations', () => {
         rerender(fixture(10))
         await waitFor(() => expect(menu()!.parentElement!.getBoundingClientRect().height).toBe(248))
         await expect(getComputedStyle(menu()!).overflowY).toBe('scroll')
+        // The list, not the paper, clips the scroll variant: 4px paper radius minus its 1px border.
+        await expect(getComputedStyle(menu()!).borderTopLeftRadius).toBe('3px')
         await expect(getComputedStyle(menu()!, '::-webkit-scrollbar').width).toBe('16px')
         items()[0]!.focus()
         await userEvent.keyboard('{End}')
