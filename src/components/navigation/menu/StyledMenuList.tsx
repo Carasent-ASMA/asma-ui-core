@@ -1,4 +1,5 @@
-import { useEffect, useRef, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useRef, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react'
+import styles from './StyledMenu.module.scss'
 import { cn } from 'src/helpers/cn'
 import { consumerOverrides } from 'src/helpers/classOverride'
 
@@ -14,6 +15,24 @@ export interface StyledMenuListProps {
     onClick?: (event: MouseEvent<HTMLUListElement>) => void
     onKeyDown?: (event: KeyboardEvent<HTMLUListElement>) => void
 }
+
+const LIST_SELECTOR = '[role="menu"], [role="listbox"]'
+const ITEM_SELECTOR = '[role="menuitem"]'
+
+// Inspect rendered structure, not React children: fragments and tooltip/component wrappers are
+// transparent, while custom content, explicit dividers and nested lists break a run of rows.
+// `hidden` nodes are skipped rather than treated as content: several consumer menus park a
+// `<input hidden>` file picker between rows, which would otherwise strip the separator above it.
+// The recursion already evaluates every level on the way down, so no ancestor walk is needed.
+const rowSequence = (parent: HTMLElement): (HTMLElement | null)[] =>
+    Array.from(parent.childNodes).flatMap((node): (HTMLElement | null)[] => {
+        if (!(node instanceof HTMLElement)) return node.textContent?.trim() ? [null] : []
+        if (node.hidden) return []
+        if (node.matches(LIST_SELECTOR)) return [null]
+        if (node.matches(ITEM_SELECTOR)) return [node]
+        if (node.querySelector(ITEM_SELECTOR)) return rowSequence(node)
+        return [null]
+    })
 
 const focusableItems = (list: HTMLUListElement | null): HTMLElement[] =>
     list ? Array.from(list.querySelectorAll<HTMLElement>('[role="menuitem"]:not([aria-disabled="true"])')) : []
@@ -41,6 +60,23 @@ export const StyledMenuList = ({
     // sets any padding so their className takes effect (e.g. ToolbarFilterPopover's `p-4`).
     const hasCustomPadding = consumerOverrides(className, 'padding')
 
+    useLayoutEffect(() => {
+        const list = listRef.current
+        if (!list) return
+        const syncRows = (): void => {
+            const sequence = rowSequence(list)
+            Array.from(list.querySelectorAll<HTMLElement>(ITEM_SELECTOR))
+                .filter((row) => row.closest(LIST_SELECTOR) === list)
+                .forEach((row) => row.removeAttribute('data-menu-separator'))
+            // Every row except the last visible one in its run gets the line.
+            sequence.forEach((row, index) => row?.toggleAttribute('data-menu-separator', !!sequence[index + 1]))
+        }
+        syncRows()
+        const observer = new MutationObserver(syncRows)
+        observer.observe(list, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden'] })
+        return () => observer.disconnect()
+    }, [])
+
     useEffect(() => {
         if (autoFocus) focusableItems(listRef.current)[0]?.focus()
     }, [autoFocus])
@@ -64,6 +100,7 @@ export const StyledMenuList = ({
     const listProps = {
         id,
         className: cn(
+            styles['list'],
             'm-0 list-none outline-none',
             !hasCustomPadding && 'px-0',
             !hasCustomPadding && (disablePadding ? 'py-0' : 'py-2'),

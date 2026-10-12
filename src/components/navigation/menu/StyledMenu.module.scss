@@ -1,0 +1,23 @@
+// Scoped to the list, but matched on the attribute rather than on a row class: the navigation
+// item and the table's own row-action item (src/table/shared-components/StyledMenuItem.tsx) are
+// separate components with separate class lists, and both need the line. StyledMenuList marks the
+// rows that get one.
+.list {
+    :global([data-menu-separator]) {
+        position: relative;
+    }
+
+    // Figma border/separator #d3d8df. Pinned to gray-200 because fretex remaps delta-200 to zinc-200.
+    :global([data-menu-separator])::after {
+        content: '';
+        position: absolute;
+        inset: auto 0 0 0;
+        height: 1px;
+        background: var(--colors-gray-200);
+        pointer-events: none;
+    }
+
+    :global([data-menu-separator]:focus-visible)::after {
+        left: 3px; // Leave the focus bar uninterrupted over the entire row height.
+    }
+}

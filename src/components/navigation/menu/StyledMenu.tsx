@@ -23,11 +23,9 @@ export interface MenuProps {
     keepMounted?: boolean
 }
 
-// Menu paper look (border + soft shadow) applied as flat sx → inline so it overrides StyledPopover's
-// base class shadow without tailwind-merge (dropped in Phase 0).
+// Menu outline; Float elevation and white background come from StyledPopover.
 const MENU_PAPER_STYLE = {
     border: '1px solid var(--colors-delta-300)',
-    boxShadow: '0px 2px 4px 0px rgba(34, 33, 51, 0.15)',
 }
 
 /**

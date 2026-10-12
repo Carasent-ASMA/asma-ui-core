@@ -37,17 +37,25 @@ export const Menu: Story = {
 }
 
 /**
- * Menu item state gallery (Figma Menus node 16073-19226): Enabled / Hovered (forced) / Selected /
- * Disabled, inside the standard menu surface. Hover is CSS-driven, forced via `pseudo-hover`.
+ * Menu item state gallery (Figma Menus node 16073-21583): Enabled / Hovered (forced) / Selected /
+ * Disabled, with the separator between every row. Hover is CSS-driven, forced via `pseudo-hover`.
+ * The second list shows a caller-supplied tooltip. A checked disabled checkbox with no tooltip
+ * uses the default "Allerede lagt til" / "Already added".
  */
 export const Gallery: Story = {
     render: () => (
-        <div style={{ width: 240 }}>
-            <StyledMenuList>
+        <div className='flex items-start gap-8' style={{ width: 520 }}>
+            <StyledMenuList className='w-60'>
                 <StyledMenuItem>Enabled</StyledMenuItem>
                 <StyledMenuItem className='pseudo-hover'>Hovered</StyledMenuItem>
                 <StyledMenuItem selected>Selected</StyledMenuItem>
                 <StyledMenuItem disabled>Disabled</StyledMenuItem>
+            </StyledMenuList>
+            <StyledMenuList className='w-60'>
+                <StyledMenuItem>Free option</StyledMenuItem>
+                <StyledMenuItem selected tooltip='Already in use'>
+                    Taken option
+                </StyledMenuItem>
             </StyledMenuList>
         </div>
     ),
