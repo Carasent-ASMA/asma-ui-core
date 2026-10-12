@@ -55,8 +55,14 @@
     max-height: 246px; // 248px outer surface minus its two 1px borders.
     overflow-y: scroll;
     scrollbar-gutter: stable;
-    scrollbar-color: var(--colors-delta-400) var(--colors-delta-50);
-    scrollbar-width: auto;
+
+    // Firefox only. Chromium also understands the standard properties, but setting them switches it
+    // off the `::-webkit-scrollbar` rules below onto its overlay rail, which stays invisible until
+    // interaction — so the design's always-visible bar is drawn through the pseudo-elements there.
+    @supports not selector(::-webkit-scrollbar) {
+        scrollbar-color: var(--colors-delta-400) var(--colors-delta-50);
+        scrollbar-width: auto;
+    }
 
     &::-webkit-scrollbar {
         display: block;

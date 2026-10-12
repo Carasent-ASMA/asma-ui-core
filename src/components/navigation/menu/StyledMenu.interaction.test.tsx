@@ -521,7 +521,8 @@ describe('StyledMenu Figma presentations', () => {
         await expect(getComputedStyle(menu()!).overflowY).toBe('scroll')
         // The list, not the paper, clips the scroll variant: 4px paper radius minus its 1px border.
         await expect(getComputedStyle(menu()!).borderTopLeftRadius).toBe('3px')
-        await expect(getComputedStyle(menu()!, '::-webkit-scrollbar').width).toBe('16px')
+        // The designed 16px bar is asserted where it is actually drawn —
+        // visual-tests/menu-gallery.spec.ts — because this suite runs with `--hide-scrollbars`.
         items()[0]!.focus()
         await userEvent.keyboard('{End}')
         await expect(document.activeElement).toBe(items()[9])
