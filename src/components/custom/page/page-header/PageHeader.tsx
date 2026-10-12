@@ -32,6 +32,7 @@ export interface PageHeaderAction extends DynamicToolbarAction {
     badgeCount?: number
 }
 
+/** @figmaNode 9Q7C7JYPgnUSsrX1L8v40t#1237-65648 (Ad-Voca-concept · "Page header") */
 export interface PageHeaderProps {
     /** Page/object title — the route heading. PageHeader owns the heading element. */
     title: string
@@ -69,6 +70,7 @@ export interface PageHeaderProps {
     /**
      * Force the Figma Device variant (true = Mobile). Omit to derive it from the header's own width.
      * Pass it when the header sits beside a side menu and the app's breakpoint is viewport-based.
+     * @figmaProp Device = true→"Mobile" | false→"Tablet/Desktop" (unset = measured width)
      */
     compact?: boolean
     className?: string
