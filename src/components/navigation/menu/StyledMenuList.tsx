@@ -31,6 +31,12 @@ export interface StyledMenuListProps {
 const LIST_SELECTOR = '[role="menu"], [role="listbox"]'
 const ITEM_SELECTOR = '[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]'
 
+// Single-line fields whose ArrowUp/ArrowDown have no native meaning, so the list may take them to
+// step into the rows. Spinners (number, date, time) and multiline fields keep their arrows.
+const SINGLE_LINE_INPUT_TYPES = ['text', 'search', 'email', 'tel', 'url', 'password']
+const isSingleLineTextInput = (element: Element): boolean =>
+    element instanceof HTMLInputElement && SINGLE_LINE_INPUT_TYPES.includes(element.type)
+
 const isHiddenWithin = (element: HTMLElement, boundary: HTMLElement): boolean => {
     for (let current: HTMLElement | null = element; current && current !== boundary; current = current.parentElement) {
         const style = getComputedStyle(current)
@@ -136,11 +142,26 @@ export const StyledMenuList = ({
     }, [autoFocus])
 
     const handleKeyDown = (event: KeyboardEvent<HTMLUListElement>): void => {
-        if ((event.target as HTMLElement).closest(LIST_SELECTOR) !== listRef.current) return
+        const target = event.target as HTMLElement
+        if (target.closest(LIST_SELECTOR) !== listRef.current) return
         onKeyDown?.(event)
         if (event.defaultPrevented) return
+        /* A control inside the list (a search field over the rows) keeps its own keys except that
+         * ArrowDown/ArrowUp step into the rows: they are `tabIndex=-1` and Tab closes the menu, so
+         * without this the rows cannot be reached from that field at all (WCAG 2.1.1). Home/End
+         * stay with the field's caret. */
+        if (isSingleLineTextInput(target)) {
+            const items = focusableItems(listRef.current)
+            const row =
+                event.key === 'ArrowDown' ? items[0] : event.key === 'ArrowUp' ? items[items.length - 1] : undefined
+            if (row) {
+                event.preventDefault()
+                row.focus()
+            }
+            return
+        }
         const keys = ['ArrowDown', 'ArrowUp', 'Home', 'End']
-        if (!keys.includes(event.key) || !(event.target as HTMLElement).matches(ITEM_SELECTOR)) return
+        if (!keys.includes(event.key) || !target.matches(ITEM_SELECTOR)) return
         event.preventDefault()
         const items = focusableItems(listRef.current)
         if (items.length === 0) return

@@ -379,6 +379,33 @@ describe('StyledMenu row structure', () => {
         await waitFor(() => expect(separator(getRows()[2]!)).not.toBe('1px'))
     })
 
+    /* Rows are `tabIndex=-1` and Tab leaves the menu, so a keyboard user on a field inside the list
+     * (a search field over the rows) can only reach them with the arrows (2.1.1). Home/End stay
+     * with the field's own caret — asserted above. */
+    it('steps from a single-line field into the rows with ArrowDown/ArrowUp (2.1.1)', async () => {
+        const { container } = mount(
+            <StyledMenuList>
+                <li role='presentation'>
+                    <input aria-label='Search' defaultValue='query' />
+                </li>
+                <StyledMenuItem>First</StyledMenuItem>
+                <StyledMenuItem disabled>Disabled</StyledMenuItem>
+                <StyledMenuItem>Last</StyledMenuItem>
+            </StyledMenuList>,
+        )
+        const field = container.querySelector('input')!
+        const rows = Array.from(container.querySelectorAll<HTMLElement>('[role="menuitem"]'))
+
+        field.focus()
+        await userEvent.keyboard('{ArrowDown}')
+        await expect(document.activeElement).toBe(rows[0])
+
+        field.focus()
+        await userEvent.keyboard('{ArrowUp}')
+        // Disabled rows are skipped, so the last enabled row is the destination.
+        await expect(document.activeElement).toBe(rows[2])
+    })
+
     it('keeps explicit dividers and nested menu navigation independent', async () => {
         const { container } = mount(
             <StyledMenuList>
