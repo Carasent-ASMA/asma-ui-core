@@ -66,6 +66,11 @@ export interface PageHeaderProps {
     /** Stick to the top of the scroll container; compacts once scrolled (data-stuck). */
     sticky?: boolean
     locale?: ToolbarLocale
+    /**
+     * Force the Figma Device variant (true = Mobile). Omit to derive it from the header's own width.
+     * Pass it when the header sits beside a side menu and the app's breakpoint is viewport-based.
+     */
+    compact?: boolean
     className?: string
     dataTest?: string
 }
@@ -77,6 +82,8 @@ const GAP_PX = 8
 const HORIZONTAL_PADDING_PX = 32
 /** Minimum room reserved for the title before actions may keep their labels. */
 const TITLE_MIN_RESERVE_PX = 120
+/** Figma tablet/desktop "Page title" frame: `px-2` on both sides; mobile has none. */
+const WIDE_TITLE_INSET_PX = 16
 
 /** Maps a PageHeaderAction to the toolbar engine's action shape. Exported for tests. */
 export const toToolbarAction = (action: PageHeaderAction): DynamicToolbarAction => {
@@ -139,6 +146,7 @@ export function PageHeader({
     loading = false,
     sticky = false,
     locale = 'en',
+    compact: compactProp,
     className,
     dataTest = 'page-header',
 }: PageHeaderProps): JSX.Element {
@@ -150,8 +158,8 @@ export function PageHeader({
     const sentinelRef = useRef<HTMLDivElement>(null)
     const searchAreaRef = useRef<HTMLDivElement>(null)
 
-    /* Container-width adaptive (not viewport); drives only the type ramp. */
-    const compact = containerWidth > 0 && containerWidth < COMPACT_BREAKPOINT_PX
+    /* Container-width adaptive unless the caller pins the Device variant; the action budget always uses the real width. */
+    const compact = compactProp ?? (containerWidth > 0 && containerWidth < COMPACT_BREAKPOINT_PX)
 
     const setHeadingRef = useMergeRefs([headingRef, titleRef])
 
@@ -186,7 +194,7 @@ export function PageHeader({
     const gapCount = 1 + (hasLeading ? 1 : 0) + (hasStatus ? 1 : 0)
     const actionsAvailableWidth = Math.max(
         0,
-        contentWidth - leadingWidth - statusWidth - titleReserve - GAP_PX * gapCount,
+        contentWidth - leadingWidth - statusWidth - titleReserve - GAP_PX * gapCount - (compact ? 0 : WIDE_TITLE_INSET_PX),
     )
 
     const plan = useMemo(
@@ -220,7 +228,7 @@ export function PageHeader({
                 size='large'
                 onClick={onLeadingClick}
                 aria-label={compact ? resolvedLeadingLabel : undefined}
-                startIcon={<ArrowLeftIcon width={compact ? 24 : 20} height={compact ? 24 : 20} />}
+                startIcon={<ArrowLeftIcon width={24} height={24} />}
             >
                 {compact ? undefined : resolvedLeadingLabel}
             </StyledButton>
@@ -257,9 +265,10 @@ export function PageHeader({
                 data-stuck={stuck ? 'true' : 'false'}
                 aria-busy={loading || undefined}
                 className={cn(
-                    /* Same base height across breakpoints; content may expand it. */
+                    /* Figma Page header: 72px (16px padding) on tablet/desktop, 64px (12px) on mobile. */
                     'flex w-full items-center gap-2 px-4',
-                    stuck ? 'min-h-[56px] py-2 shadow-sm' : 'min-h-[64px] py-3',
+                    stuck && 'min-h-[56px] py-2 shadow-sm',
+                    !stuck && (compact ? 'min-h-[64px] py-3' : 'min-h-[72px] py-4'),
                     sticky && 'sticky top-0 z-30 bg-delta-50',
                     className,
                 )}
@@ -280,7 +289,12 @@ export function PageHeader({
                 )}
 
                 {/* `sr-only` removes the hidden title from flex flow while keeping heading semantics. */}
-                <div className={cn(headingHidden ? 'sr-only' : 'flex min-w-0 flex-1 flex-col justify-center')}>
+                <div
+                    className={cn(
+                        headingHidden ? 'sr-only' : 'flex min-w-0 flex-1 flex-col justify-center',
+                        !headingHidden && !compact && 'px-2',
+                    )}
+                >
                     <div className='flex min-w-0 items-center gap-2'>
                         {/* An empty title renders no heading — an empty h1 is an a11y defect. */}
                         {heading}

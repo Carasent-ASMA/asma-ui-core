@@ -77,11 +77,24 @@ describe('PageHeader (ASMA-7622)', () => {
         expect(stripCopyCount).toBeGreaterThanOrEqual(2)
     })
 
-    it('uses the same base height at every width', () => {
-        const html = renderToStaticMarkup(<PageHeader title='Home' />)
+    it('uses the Figma tablet/desktop height, title inset and 24px back arrow before measurement', () => {
+        /* Figma Page header: 72px (p-16) and a px-2 title frame on tablet/desktop; mobile is 64px (py-12). */
+        const html = renderToStaticMarkup(<PageHeader title='Home' leading='back' />)
 
-        expect(html).toContain('min-h-[64px]')
+        expect(html).toContain('min-h-[72px] py-4')
+        expect(html).not.toContain('min-h-[64px]')
+        expect(html).toMatch(/flex min-w-0 flex-1 flex-col justify-center px-2/)
+        expect(html).toContain('width="24" height="24"')
+    })
+
+    it('renders the Figma mobile variant when the caller pins compact', () => {
+        const html = renderToStaticMarkup(<PageHeader title='Home' leading='back' compact />)
+
+        expect(html).toContain('min-h-[64px] py-3')
         expect(html).not.toContain('min-h-[72px]')
+        expect(html).not.toMatch(/flex-col justify-center px-2/)
+        expect(html).toContain('text-xl leading-7')
+        expect(html).toContain('width="24" height="24"')
     })
 
     it('renders the status slot next to the title', () => {
