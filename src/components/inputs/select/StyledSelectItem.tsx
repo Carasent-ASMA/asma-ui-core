@@ -44,7 +44,8 @@ export const StyledSelectItem = ({
             // ASMA-8220 (TB-14): no pressed state of its own → pressable. Also covers
             // CountryCodeOptions, which renders this component.
             'asma-pressable',
-            'relative flex items-center gap-1 px-2 py-2.5 text-base outline-none',
+            // h40 = py8 + Body Base lh24.
+            'relative box-border flex min-h-10 items-center gap-1 px-2 py-2 text-base outline-none',
             disabled ? 'cursor-not-allowed text-delta-300' : 'cursor-pointer text-delta-800 hover:bg-delta-50',
             selected && 'bg-gama-50',
             className,
