@@ -70,12 +70,37 @@ export const StyledMenuList = ({
                 .forEach((row) => row.removeAttribute('data-menu-separator'))
             // Every row except the last visible one in its run gets the line.
             sequence.forEach((row, index) => row?.toggleAttribute('data-menu-separator', !!sequence[index + 1]))
+            if (list.classList.contains(styles['anchoredList']!)) {
+                // Mixed content (e.g. a search header) must stay visible. Only cap a plain run.
+                const eighth = sequence.every(Boolean) ? sequence[7] : null
+                const bounds = eighth?.getBoundingClientRect()
+                const height =
+                    bounds && bounds.height > 0
+                        ? bounds.top - list.getBoundingClientRect().top + list.scrollTop + bounds.height / 2
+                        : null
+                list.style.maxHeight = height === null ? '' : `${height}px`
+                list.toggleAttribute('data-menu-scroll', height !== null)
+                // Make the scroll region keyboard-reachable even when autoFocus is disabled.
+                if (height !== null) list.tabIndex = 0
+                else list.removeAttribute('tabindex')
+            }
         }
         syncRows()
+        // The parent popover joins the top layer after child layout effects have run.
+        const frame = requestAnimationFrame(syncRows)
         const observer = new MutationObserver(syncRows)
-        observer.observe(list, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden'] })
-        return () => observer.disconnect()
-    }, [])
+        observer.observe(list, {
+            childList: true,
+            subtree: true,
+            characterData: true,
+            attributes: true,
+            attributeFilter: ['hidden'],
+        })
+        return () => {
+            cancelAnimationFrame(frame)
+            observer.disconnect()
+        }
+    })
 
     useEffect(() => {
         if (autoFocus) focusableItems(listRef.current)[0]?.focus()
@@ -95,6 +120,7 @@ export const StyledMenuList = ({
         else if (event.key === 'Home') nextIndex = 0
         else if (event.key === 'End') nextIndex = items.length - 1
         items[nextIndex]?.focus()
+        if (listRef.current?.hasAttribute('data-menu-scroll')) items[nextIndex]?.scrollIntoView({ block: 'nearest' })
     }
 
     const listProps = {

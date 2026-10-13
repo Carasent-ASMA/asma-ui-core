@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { afterEach, describe, it } from 'vitest'
 import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
@@ -474,5 +474,120 @@ describe('StyledMenu shared surface consumers', () => {
         await waitFor(() => expect(menu()).not.toBeNull())
         await expect(menu()!.querySelector('hr')).toBeNull()
         await expect(getComputedStyle(items()[0]!, '::after').height).toBe('1px')
+    })
+})
+
+describe('StyledMenu scrolling', () => {
+    afterEach(cleanup)
+
+    const ScrollMenu = ({ children }: { children: ReactNode }): JSX.Element => {
+        const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+        return (
+            <>
+                <StyledButton dataTest='menu-trigger' onClick={(event) => setAnchorEl(event.currentTarget)}>
+                    Actions
+                </StyledButton>
+                <StyledMenu open={!!anchorEl} anchorEl={anchorEl}>
+                    {children}
+                </StyledMenu>
+            </>
+        )
+    }
+
+    it.each([
+        { name: 'navigation', Item: StyledMenuItem },
+        { name: 'table', Item: TableMenuItem },
+    ])('caps 12 $name rows at 7.5 and scrolls keyboard focus', async ({ Item }) => {
+        const { container } = mount(
+            <ScrollMenu>
+                {Array.from({ length: 12 }, (_, index) => (
+                    <span key={index}>
+                        <Item>Action {index + 1}</Item>
+                    </span>
+                ))}
+            </ScrollMenu>,
+        )
+        await openMenu(container)
+        const list = menu()!
+        const rows = items()
+        await waitFor(() => expect(list.scrollHeight).toBeGreaterThan(list.clientHeight))
+        const eighth = rows[7]!.getBoundingClientRect()
+        await expect(
+            Math.abs(list.getBoundingClientRect().bottom - (eighth.top + eighth.height / 2)),
+        ).toBeLessThanOrEqual(1)
+        await expect(getComputedStyle(list).overflowY).toBe('auto')
+        await waitFor(() => expect(document.activeElement).toBe(rows[0]))
+        for (let index = 1; index < rows.length; index++) await userEvent.keyboard('{ArrowDown}')
+        await expect(document.activeElement).toBe(rows[11])
+        await expect(list.scrollTop).toBeGreaterThan(0)
+        await expect(rows[11]!.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+            list.getBoundingClientRect().bottom + 1,
+        )
+        await userEvent.keyboard('{Home}')
+        await expect(document.activeElement).toBe(rows[0])
+        await expect(rows[0]!.getBoundingClientRect().top).toBeGreaterThanOrEqual(list.getBoundingClientRect().top)
+        await userEvent.keyboard('{End}')
+        await expect(document.activeElement).toBe(rows[11])
+        await expect(rows[11]!.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+            list.getBoundingClientRect().bottom + 1,
+        )
+    })
+
+    it('measures multiline rows, ignores hidden rows, and removes the cap when only five remain', async () => {
+        const content = (count: number): JSX.Element => (
+            <ScrollMenu>
+                <span hidden>
+                    <TableMenuItem>Hidden action</TableMenuItem>
+                </span>
+                {Array.from({ length: count }, (_, index) => (
+                    <TableMenuItem key={index}>
+                        <span>
+                            Action {index + 1}
+                            {index === 7 && (
+                                <>
+                                    <br />
+                                    Second line
+                                </>
+                            )}
+                        </span>
+                    </TableMenuItem>
+                ))}
+            </ScrollMenu>
+        )
+        const { container, rerender } = mount(content(12))
+        await openMenu(container)
+        const list = menu()!
+        await waitFor(() => expect(list.scrollHeight).toBeGreaterThan(list.clientHeight))
+        const eighth = items()[8]!.getBoundingClientRect()
+        await expect(eighth.height).toBeGreaterThan(items()[1]!.getBoundingClientRect().height)
+        await expect(
+            Math.abs(list.getBoundingClientRect().bottom - (eighth.top + eighth.height / 2)),
+        ).toBeLessThanOrEqual(1)
+        rerender(content(5))
+        await waitFor(() => expect(getComputedStyle(list).maxHeight).toBe('none'))
+        await expect(list.scrollHeight).toBe(list.clientHeight)
+    })
+
+    it('leaves five rows, standalone lists, and menus with search headers uncapped', async () => {
+        const rows = Array.from({ length: 12 }, (_, index) => (
+            <StyledMenuItem key={index}>Action {index + 1}</StyledMenuItem>
+        ))
+        const { container, rerender } = mount(<ScrollMenu>{rows.slice(0, 5)}</ScrollMenu>)
+        await openMenu(container)
+        await expect(getComputedStyle(menu()!).maxHeight).toBe('none')
+        await expect(menu()!.scrollHeight).toBe(menu()!.clientHeight)
+        rerender(
+            <ScrollMenu>
+                <li role='presentation'>
+                    <input aria-label='Search' />
+                </li>
+                {rows}
+            </ScrollMenu>,
+        )
+        await waitFor(() => expect(items()).toHaveLength(12))
+        await expect(getComputedStyle(menu()!).maxHeight).toBe('none')
+        rerender(<StyledMenuList>{rows}</StyledMenuList>)
+        await expect(getComputedStyle(menu()!).maxHeight).toBe('none')
+        await expect(menu()!.scrollHeight).toBe(menu()!.clientHeight)
     })
 })
