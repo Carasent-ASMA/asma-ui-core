@@ -1,4 +1,4 @@
-import React, { type AnchorHTMLAttributes, type ReactNode } from 'react'
+import React, { type AnchorHTMLAttributes, type ButtonHTMLAttributes, type MouseEvent, type ReactNode } from 'react'
 import clsx from 'clsx'
 import style from './StyledLink.module.scss'
 
@@ -9,7 +9,8 @@ import style from './StyledLink.module.scss'
  * Disabled = delta-300; Focused/Pressed adds a 1px gama-400 rounded indicator (radius 4, px4/py2).
  * State is derived at runtime from `:hover`/`:focus`/`disabled`, not a prop.
  */
-export type StyledLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
+export type StyledLinkProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'onClick'> & {
+    onClick?: (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void
     /** @figmaProp State = true→"Disabled" (renders a non-interactive <span>, delta-300) */
     disabled?: boolean
     /** @figmaProp Size = small→"Base" (14/20) | large→"Medium" (16/24); xs (12/20) = none (no DS size) */
@@ -45,6 +46,7 @@ export const StyledLink: React.FC<StyledLinkProps> = ({
     className,
     content,
     contentNode,
+    onClick,
     ...otherProps
 }) => {
     let textSize = style['styled-link-large']
@@ -69,13 +71,41 @@ export const StyledLink: React.FC<StyledLinkProps> = ({
         )
     }
 
+    if (!href) {
+        if (!onClick && import.meta.env.DEV) {
+            console.warn('StyledLink requires either href or onClick.')
+        }
+
+        return (
+            <button
+                {...(otherProps as ButtonHTMLAttributes<HTMLButtonElement>)}
+                data-testid={dataTest}
+                // `reflink` is declared as an anchor ref because that is the component's primary
+                // element; without `href` the same slot has to reach the button, or a caller that
+                // holds a ref loses it silently.
+                ref={reflink as React.Ref<HTMLButtonElement> | undefined}
+                type='button'
+                onClick={onClick}
+                className={clsx(
+                    style['styled-link'],
+                    style['styled-link-button'],
+                    'asma-touch-ready',
+                    textSize,
+                    className,
+                )}
+            >
+                {content}
+                {contentNode}
+            </button>
+        )
+    }
+
     return (
         <a
             {...otherProps}
             data-testid={dataTest}
             ref={reflink}
             href={href}
-            tabIndex={0}
             // ASMA-8220 (TB-14): `.styled-link:active` already recolours to gama-500, so touch-ready
             // (tap-flash + double-tap-zoom removal) rather than pressable.
             className={clsx(style['styled-link'], 'asma-touch-ready', textSize, className)}

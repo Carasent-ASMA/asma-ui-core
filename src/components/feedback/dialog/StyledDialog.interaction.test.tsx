@@ -4,6 +4,7 @@ import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { cleanup, mount, tabbableWithin } from 'src/test-utils/renderInteraction'
 import { StyledDialog } from './StyledDialog'
+import { StyledDialogTitle } from './StyledDialogTitle'
 import { StyledInputField } from 'src/components/inputs/input-field'
 import { StyledMenu } from 'src/components/navigation/menu/StyledMenu'
 import { StyledMenuItem } from 'src/components/navigation/menu/StyledMenuItem'
@@ -368,19 +369,69 @@ describe('StyledDialog keyboard & focus contract', () => {
         await expect(document.activeElement).toBe(opener)
     })
 
-    /* FINDING ASMA-8139-D — WCAG 4.1.2 (name/role/value). src/components/feedback/dialog/StyledDialog.tsx.
-     * The dialog names itself `aria-label={dataTest}`, i.e. with the test hook. A screen reader
-     * announces "confirm dialog" / "sms-send-modal dialog" — an internal identifier, not the
-     * human-readable title the component already receives as `dialogTitle`. The heading text is
-     * present in the DOM but is not wired as the accessible name.
-     * Not fixed here: changing the accessible name affects every consumer's e2e selectors and
-     * announcements. Escalated to the coordinator.
-     * @see docs/a11y-keyboard-contract.md */
-    it.skip('takes its accessible name from the dialog title, not the test hook (4.1.2)', async () => {
+    it('takes its accessible name from the dialog title, not the test hook (4.1.2)', async () => {
         const { container } = mount(<DialogFixture />)
         await userEvent.click(container.querySelector('[data-testid="opener"]')!)
         await waitFor(() => expect(dialogEl()).not.toBeNull())
 
         await expect(dialogEl()).toHaveAccessibleName('Confirm')
+    })
+
+    /* Most consumers render the title as a child instead of passing `dialogTitle` (advoca's
+     * privacy-consent modal is the one this finding was raised against), so that path has to name
+     * the dialog too — otherwise the fix only moves it from a wrong name to no name at all. */
+    it('is named by a <StyledDialogTitle> child as well as by the prop (4.1.2)', async () => {
+        mount(
+            <StyledDialog dataTest='privacy-modal' open>
+                <StyledDialogTitle>Privacy policy</StyledDialogTitle>
+            </StyledDialog>,
+        )
+
+        const dialog = (): HTMLDialogElement | null => document.querySelector('dialog[data-testid="privacy-modal"]')
+        await waitFor(() => expect(dialog()).not.toBeNull())
+        await waitFor(() => expect(dialog()).toHaveAccessibleName('Privacy policy'))
+    })
+
+    it('uses a child title’s explicit id as the dialog label target (4.1.2)', async () => {
+        mount(
+            <StyledDialog dataTest='explicit-title-modal' open>
+                <StyledDialogTitle id='privacy-policy-title'>Privacy policy</StyledDialogTitle>
+            </StyledDialog>,
+        )
+
+        const dialog = (): HTMLDialogElement | null => document.querySelector('dialog[data-testid="explicit-title-modal"]')
+        await waitFor(() => expect(dialog()).toHaveAccessibleName('Privacy policy'))
+        await expect(dialog()).toHaveAttribute('aria-labelledby', 'privacy-policy-title')
+    })
+
+    it('falls back to ariaLabel only when no title is rendered (4.1.2)', async () => {
+        mount(<StyledDialog dataTest='bare-modal' open ariaLabel='Session expired' />)
+
+        const dialog = (): HTMLDialogElement | null => document.querySelector('dialog[data-testid="bare-modal"]')
+        await waitFor(() => expect(dialog()).not.toBeNull())
+        await expect(dialog()).toHaveAccessibleName('Session expired')
+    })
+
+    it.each([
+        ['dialogTitle', <StyledDialog dataTest='title-modal' open dialogTitle='Delete document' />, 'Delete document'],
+        [
+            'a child StyledDialogTitle with an automatic id',
+            <StyledDialog dataTest='child-title-modal' open><StyledDialogTitle>Delete document</StyledDialogTitle></StyledDialog>,
+            'Delete document',
+        ],
+        [
+            'a child StyledDialogTitle with an explicit id',
+            <StyledDialog dataTest='explicit-child-title-modal' open><StyledDialogTitle id='delete-title'>Delete document</StyledDialogTitle></StyledDialog>,
+            'Delete document',
+        ],
+        ['ariaLabel without a title', <StyledDialog dataTest='aria-label-modal' open ariaLabel='Delete document' />, 'Delete document'],
+        [
+            'a title and ariaLabel together',
+            <StyledDialog dataTest='title-wins-modal' open ariaLabel='Wrong name' dialogTitle='Delete document' />,
+            'Delete document',
+        ],
+    ])('announces the correct name with %s (4.1.2)', async (_configuration, dialogNode, expectedName) => {
+        mount(dialogNode)
+        await expect(document.querySelector('dialog')).toHaveAccessibleName(expectedName)
     })
 })

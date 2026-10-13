@@ -1,4 +1,4 @@
-import { useEffect, useRef, type CSSProperties, type ElementType, type HTMLAttributes, type ReactNode } from 'react'
+import { type CSSProperties, type ElementType, type HTMLAttributes, type ReactNode } from 'react'
 import clsx from 'clsx'
 import { resolveSx } from 'src/helpers/sx'
 
@@ -113,16 +113,7 @@ export const StyledBadge = ({
     'aria-label': ariaLabel,
     ...props
 }: StyledBadgeProps): JSX.Element => {
-    const statusRef = useRef<HTMLSpanElement>(null)
     const count = typeof badgeContent === 'number' ? badgeContent : undefined
-    const previousCountRef = useRef(count)
-
-    useEffect(() => {
-        if (count === previousCountRef.current) return
-
-        previousCountRef.current = count
-        if (statusRef.current) statusRef.current.textContent = statusMessage ?? ''
-    }, [count, statusMessage])
 
     const sxObject = (sx && typeof sx === 'object' && !Array.isArray(sx) ? sx : {}) as Record<string, unknown>
     const badgeSlotStyle: CSSProperties = resolveSx(sxObject[SX_BADGE_SLOT])
@@ -228,7 +219,11 @@ export const StyledBadge = ({
                     {displayContent}
                 </span>
             )}
-            <span ref={statusRef} aria-atomic='true' aria-live='polite' className='sr-only' role='status' />
+            {/* Keep contextual status text in the accessibility tree from first render; subsequent
+                changes are announced politely. A hidden badge must not contribute stale status. */}
+            <span aria-atomic='true' aria-live='polite' className='sr-only' role='status'>
+                {hidden || count === undefined ? '' : (statusMessage ?? '')}
+            </span>
         </span>
     )
 }

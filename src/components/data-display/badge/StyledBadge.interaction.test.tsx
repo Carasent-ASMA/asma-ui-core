@@ -281,7 +281,7 @@ describe('StyledBadge notification contract', () => {
         await expect(root).not.toHaveAttribute('aria-label')
     })
 
-    it('keeps a silent polite status region mounted before announcing count changes', async () => {
+    it('announces a count badge on first render and after count changes', async () => {
         const { container, rerender } = mount(
             <StyledBadge dataTest='notifications-badge' badgeContent={2} statusMessage='2 unread notifications'>
                 <span>Notifications</span>
@@ -289,7 +289,7 @@ describe('StyledBadge notification contract', () => {
         )
         const status = container.querySelector<HTMLElement>('[role="status"]')
 
-        await expect(status).toBeEmptyDOMElement()
+        await expect(status).toHaveTextContent('2 unread notifications')
         await expect(status).toHaveAttribute('aria-live', 'polite')
         await expect(status).toHaveAttribute('aria-atomic', 'true')
 

@@ -1,7 +1,10 @@
 import {
     useEffect,
     useLayoutEffect,
+    useId,
+    useMemo,
     useRef,
+    useState,
     type CSSProperties,
     type HTMLAttributes,
     type ReactNode,
@@ -14,6 +17,7 @@ import { resolveSx } from 'src/helpers/sx'
 import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
 import { registerOpenModalDialog } from 'src/hooks/useTopLayer.hook'
 import style from './StyledDialog.module.scss'
+import { StyledDialogTitleContext } from './dialogTitleContext'
 
 export type DialogCloseReason = 'escapeKeyDown' | 'backdropClick'
 export type DialogMaxWidth = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
@@ -64,6 +68,8 @@ export interface IStyledDialogProps {
     dialogLabel?: ReactNode
     /** @figmaProp header Title (Page title 24 SemiBold, delta-800) */
     dialogTitle?: ReactNode
+    /** Accessible name when the dialog has no visible title. */
+    ariaLabel?: string
     dialogHeaderNode?: ReactNode
 }
 
@@ -106,8 +112,15 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     showCloseIcon = true,
     dialogLabel,
     dialogTitle,
+    ariaLabel,
     dialogHeaderNode,
 }) => {
+    const titleId = useId()
+    // A title rendered as a child (`<StyledDialogTitle>`) reports its actual id through context,
+    // including an explicit id supplied by the consumer.
+    const [titleChildId, setTitleChildId] = useState<string>()
+    const titleContext = useMemo(() => ({ titleId, setTitleId: setTitleChildId }), [titleId])
+    const labelledBy = dialogTitle ? titleId : titleChildId
     const isMobile = useMobileMediaQuery()
     const dialogRef = useRef<HTMLDialogElement>(null)
     const openerRef = useRef<HTMLElement | null>(null)
@@ -213,7 +226,8 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
             ref={dialogRef}
             tabIndex={-1}
             data-testid={dataTest}
-            aria-label={dataTest}
+            aria-labelledby={labelledBy}
+            aria-label={labelledBy ? undefined : ariaLabel}
             onCancel={handleCancel}
             className={cn(
                 style['StyledDialog'],
@@ -283,7 +297,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                             )}
                             {dialogTitle && (
                                 // Figma dialog title = Page title 24/32 SemiBold, text delta-800.
-                                <div className='flex text-2xl font-semibold leading-8 text-delta-800'>
+                                <div id={titleId} className='flex text-2xl font-semibold leading-8 text-delta-800'>
                                     {dialogTitle}
                                 </div>
                             )}
@@ -312,7 +326,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                     </div>
                 )}
 
-                {children}
+                <StyledDialogTitleContext.Provider value={titleContext}>{children}</StyledDialogTitleContext.Provider>
             </div>
         </dialog>
     )

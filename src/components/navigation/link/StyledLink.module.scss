@@ -31,6 +31,14 @@
     color: var(--colors-delta-300);
 }
 
+// Only the hrefless variant, which renders a real `<button>`. Resets the two UA button defaults
+// that `<a>` does not have, so the button is pixel-identical to the anchor. Scoped rather than
+// folded into `.styled-link` so the `<a>` and disabled `<span>` variants keep their own cursor.
+.styled-link-button {
+    background: transparent;
+    cursor: pointer;
+}
+
 .styled-link-xs {
     font-size: 12px;
     line-height: 20px;

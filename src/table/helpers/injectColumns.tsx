@@ -52,13 +52,13 @@ export const injectColumns = <
     }
 
     if (textExpandArrow && !columns.find((col) => col.id === SHOW_FULL_TEXT_ID)) {
-        columns.unshift(generateShowFullTextColumn(isFixed, rowHeight))
+        columns.unshift(generateShowFullTextColumn(isFixed, rowHeight, locale))
     }
     if (expandArrow && !textExpandArrow && !columns.find((col) => col.id === EXPAND_COLUMN_ID)) {
-        columns.unshift(generateExpandColumn(isFixed, rowHeight))
+        columns.unshift(generateExpandColumn(isFixed, rowHeight, locale))
     }
     if (enableDnd && !columns.find((col) => col.id === DND_HANDLE_COLUMN_ID)) {
-        columns.unshift(generateDndHandleColumn(customDndColumnProps, rowHeight))
+        columns.unshift(generateDndHandleColumn(customDndColumnProps, rowHeight, locale))
     }
     if (enableRowSelection && !columns.find((col) => col.id === SELECT_COLUMN_ID)) {
         columns.unshift(selectColumn(isFixed, rowHeight, locale))
