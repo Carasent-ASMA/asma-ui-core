@@ -21,3 +21,9 @@
         left: 3px; // Leave the focus bar uninterrupted over the entire row height.
     }
 }
+
+// Only StyledMenu adds this class; standalone lists keep their existing sizing and overflow.
+.anchoredList[data-menu-scroll] {
+    box-sizing: border-box;
+    overflow-y: auto;
+}

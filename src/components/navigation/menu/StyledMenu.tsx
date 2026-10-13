@@ -2,6 +2,7 @@ import type { CSSProperties, MouseEvent, ReactNode } from 'react'
 import { cn } from 'src/helpers/cn'
 import { StyledPopover, type PopoverCloseReason, type PopoverOrigin } from '../../utils/popover'
 import { StyledMenuList } from './StyledMenuList'
+import styles from './StyledMenu.module.scss'
 export type MenuCloseReason = PopoverCloseReason | 'tabKeyDown'
 
 export interface MenuProps {
@@ -75,7 +76,7 @@ export const StyledMenu = ({
                focus-steal the rule guards against. */
             // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus={autoFocus}
-            className={classes?.list}
+            className={cn(styles['anchoredList'], classes?.list)}
             onClick={onClick}
             // WAI-ARIA Menu pattern, Tab: "When focus is on a menuitem ... move focus out of the
             // menu and close all menus". The condition is load-bearing, not decoration — `StyledMenu`

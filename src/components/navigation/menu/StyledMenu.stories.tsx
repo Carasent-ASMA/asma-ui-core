@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { userEvent, within } from 'storybook/test'
 import { StyledMenu, type MenuProps } from './StyledMenu'
 import { useState, type FC } from 'react'
 import { StyledMenuList } from './StyledMenuList'
@@ -139,4 +140,27 @@ const StyledMenuExample: FC<{ args: Partial<MenuProps> }> = ({ args }) => {
             </div>
         </>
     )
+}
+
+export const ScrollableMenu: Story = {
+    play: async ({ canvasElement }) => {
+        await userEvent.click(within(canvasElement).getByRole('button', { name: 'Show 12 actions' }))
+    },
+    render: function ScrollableMenuStory() {
+        const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+        return (
+            <>
+                <StyledButton dataTest='long-menu-trigger' onClick={(event) => setAnchorEl(event.currentTarget)}>
+                    Show 12 actions
+                </StyledButton>
+                <StyledMenu open={!!anchorEl} anchorEl={anchorEl} onClose={() => setAnchorEl(null)}>
+                    {Array.from({ length: 12 }, (_, index) => (
+                        <StyledMenuItem key={index} onClick={() => setAnchorEl(null)}>
+                            Action {index + 1}
+                        </StyledMenuItem>
+                    ))}
+                </StyledMenu>
+            </>
+        )
+    },
 }
