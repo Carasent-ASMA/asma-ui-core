@@ -100,7 +100,7 @@ describe('StyledInputField read-only reason', () => {
         await waitFor(() => expect(document.querySelector('[role="tooltip"]')).toHaveTextContent('Synced from HR'))
     })
 
-    it('is borderless and text-like, with a focus ring from the keyboard (DIS-6)', async () => {
+    it('keeps the read-only look with a reason, with a focus ring from the keyboard', async () => {
         const { container } = mount(
             <>
                 <button type='button'>Before</button>
@@ -110,8 +110,8 @@ describe('StyledInputField read-only reason', () => {
         const shell = container.querySelector<HTMLElement>('[data-testid="name-shell"]')!
         const outline = shell.querySelector<HTMLElement>('fieldset')!
 
-        await expect(getComputedStyle(outline).visibility).toBe('hidden')
-        await expect(getComputedStyle(shell).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+        await expect(getComputedStyle(outline).visibility).toBe('visible')
+        await expect(getComputedStyle(shell).backgroundColor).not.toBe('rgba(0, 0, 0, 0)')
         await expect(getComputedStyle(container.querySelector('input')!).cursor).toBe('default')
 
         container.querySelector<HTMLButtonElement>('button')!.focus()

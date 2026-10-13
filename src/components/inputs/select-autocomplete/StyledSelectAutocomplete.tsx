@@ -48,7 +48,7 @@ export interface AutocompleteRenderOptionState {
 /** Props the combobox hands to `renderInput`; spread straight onto `StyledInputField`. */
 export interface AutocompleteRenderInputParams {
     disabled?: boolean
-    /** Set only with a `readOnlyReason`, so the field renders borderless with the reason tooltip. */
+    /** Set only with a `readOnlyReason`, so the field shows the reason tooltip. */
     readOnly?: boolean
     readOnlyReason?: ReactNode
     size?: 'small' | 'medium'
@@ -141,8 +141,8 @@ export interface StyledSelectAutocompleteProps<
     readOnly?: boolean
     /**
      * @figmaProp none — behavioral. Why the value can't be changed here, and where it can. With
-     * `readOnly`, `renderInput` receives `readOnly` and `readOnlyReason`, so a `StyledInputField` renders
-     * borderless and text-like with the reason on hover, focus and tap (disabled-states DIS-6).
+     * `readOnly`, `renderInput` receives `readOnly` and `readOnlyReason`, so a `StyledInputField` keeps
+     * its read-only look and shows the reason on hover, focus and tap (disabled-states DIS-6).
      */
     readOnlyReason?: ReactNode
     error?: boolean

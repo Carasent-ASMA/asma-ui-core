@@ -7,7 +7,7 @@ type CommonDatePickerProps = {
     readOnly?: boolean
     /**
      * @figmaProp none — behavioral. Why the date can't be changed here, and where it can. With
-     * `readOnly` the field is shown borderless and text-like, stays focusable and shows the reason on
+     * `readOnly` the field keeps its read-only look, stays focusable and shows the reason on
      * hover, focus and tap (disabled-states DIS-6). Without `readOnly` it has no effect.
      */
     readOnlyReason?: React.ReactNode

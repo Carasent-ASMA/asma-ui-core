@@ -181,7 +181,7 @@ export const StyledInputField = ({
     const isControlled = value !== undefined
     const hasValue = isControlled ? value !== '' && value != null : hasValueUncontrolled
     const disabledOrReadonly = Boolean(disabled) || Boolean(readOnly)
-    // A read-only field that explains itself is shown borderless and text-like (disabled-states DIS-6).
+    // A read-only field that explains itself keeps the read-only look and adds a focus ring for its reason.
     const plainReadOnly = Boolean(readOnly) && Boolean(readOnlyReason)
 
     const startAdornment = slotProps?.input?.startAdornment ?? InputProps?.startAdornment
@@ -422,7 +422,7 @@ export const StyledInputField = ({
                                 ),
                             // Read-only surface: fill the whole box (matches the delta-200 border, radius 4).
                             // On the shell (not the input) so it also covers the multiline field's padding.
-                            readOnly && !plainReadOnly && 'rounded bg-delta-50',
+                            readOnly && 'rounded bg-delta-50',
                             plainReadOnly &&
                                 'rounded [&:has(:focus-visible)]:outline [&:has(:focus-visible)]:outline-2 [&:has(:focus-visible)]:outline-focus-ring',
                         )}
@@ -512,7 +512,6 @@ export const StyledInputField = ({
                                 aria-hidden
                                 className={cn(
                                     notchedOutlineClass({ focused, error, disabled, readOnly, notched: true }),
-                                    plainReadOnly && 'invisible',
                                 )}
                             >
                                 <legend className={notchedLegendClass(shrink)}>
@@ -527,7 +526,6 @@ export const StyledInputField = ({
                                 aria-hidden
                                 className={cn(
                                     notchedOutlineClass({ focused, error, disabled, readOnly, notched: false }),
-                                    plainReadOnly && 'invisible',
                                 )}
                             />
                         )}

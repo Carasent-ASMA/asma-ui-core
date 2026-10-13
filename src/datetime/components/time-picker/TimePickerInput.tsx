@@ -36,7 +36,6 @@ export const TimePickerInput: React.FC<
         readOnly,
         readOnlyReason,
     } = props
-    const plainReadOnly = Boolean(readOnly) && Boolean(readOnlyReason)
 
     const inputRef = useInputMask({
         mask: 'xx:xx',
@@ -85,7 +84,7 @@ export const TimePickerInput: React.FC<
                         onClick: (e: ReactMouseEvent<HTMLElement>) => {
                             if (!disabled && !readOnly) popupState.open(e)
                         },
-                        endAdornment: plainReadOnly ? undefined : (
+                        endAdornment: (
                             <ClockOutlineIcon
                                 width={24}
                                 height={24}
