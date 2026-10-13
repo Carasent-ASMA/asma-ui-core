@@ -1,6 +1,5 @@
-import React, { useEffect, useRef, type ChangeEvent, type ReactNode, type SVGProps } from 'react'
+import React, { useEffect, useRef, type ChangeEvent, type SVGProps } from 'react'
 import styles from './StyledCheckbox.module.scss'
-import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip'
 import { cn } from 'src/helpers/cn'
 
 /**
@@ -37,9 +36,6 @@ type StyledCheckboxProps = {
      * would let a keyboard/AT user operate it).
      */
     decorative?: boolean
-    /** Why the value can't be changed here, and where it can (disabled-states DIS-6). Shown on hover,
-     * focus and tap of a read-only checkbox. */
-    readOnlyReason?: ReactNode
 } & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'size' | 'checked' | 'type'>
 // @figmaProp disabled → State="Disabled" · readOnly → State="Read-only" (from InputHTMLAttributes)
 
@@ -88,7 +84,6 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
     onClick,
     onKeyDown,
     decorative,
-    readOnlyReason,
     ...props
 }): JSX.Element => {
     const isHideWrapper = !!hideWrapper
@@ -181,9 +176,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
         )
     }
 
-    const active = Boolean(readOnly && readOnlyReason)
-
-    const control = (
+    return (
         // False positive: this is the native <label>-wraps-<input> pattern. The wrapped real
         // <input type='checkbox'> below is the actual interactive/keyboard-operable element (Tab
         // reaches it, Space toggles it); the browser natively delegates a label click to it. The
@@ -206,24 +199,9 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
                 readOnly={readOnly}
                 onChange={handleChange}
                 onKeyDown={handleKeyDown}
-                // `readonly` does not stop an uncontrolled native checkbox from toggling; cancelling the
-                // click does. A controlled one (`checked` set) is already restored by React, and
-                // cancelling its click would desync the DOM state instead.
-                onClick={readOnly && checked === undefined ? (event) => event.preventDefault() : undefined}
                 {...props}
             />
             {visual}
         </label>
-    )
-
-    return (
-        <StyledTooltip
-            title={readOnlyReason}
-            open={active ? undefined : false}
-            openOnTap={active}
-            persistentDescription={active}
-        >
-            {control}
-        </StyledTooltip>
     )
 }

@@ -34,7 +34,6 @@ export const TimePickerInput: React.FC<
         localValue,
         title,
         readOnly,
-        readOnlyReason,
     } = props
 
     const inputRef = useInputMask({
@@ -113,7 +112,6 @@ export const TimePickerInput: React.FC<
                 }}
                 disabled={disabled}
                 readOnly={readOnly}
-                readOnlyReason={readOnlyReason}
                 className={inputClassName}
                 label={label}
             />

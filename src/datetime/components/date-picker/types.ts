@@ -5,12 +5,6 @@ export type CalendarProps = React.ComponentProps<typeof DayPicker>
 type CommonDatePickerProps = {
     dateFormat?: string
     readOnly?: boolean
-    /**
-     * @figmaProp none — behavioral. Why the date can't be changed here, and where it can. With
-     * `readOnly` the field keeps its read-only look, stays focusable and shows the reason on
-     * hover, focus and tap (disabled-states DIS-6). Without `readOnly` it has no effect.
-     */
-    readOnlyReason?: React.ReactNode
     className?: string
     inputClassName?: string
     disabledDays?: Matcher | Matcher[]

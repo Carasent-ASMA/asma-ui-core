@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { afterEach, describe, it, vi } from 'vitest'
+import { afterEach, describe, it } from 'vitest'
 import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { StyledSlider } from './StyledSlider'
@@ -156,62 +156,4 @@ describe('StyledSlider keyboard contract', () => {
         await expect(describedBy).toBeTruthy()
         await expect(container.querySelector(`#${CSS.escape(describedBy!)}`)).toHaveTextContent('Too loud')
     })
-})
-
-describe('StyledSlider locked mid-drag', () => {
-    afterEach(cleanup)
-
-    it.each(['readOnly', 'disabled'] as const)(
-        'cancels the drag and releases the capture when %s lands mid-gesture',
-        async (lock) => {
-            const onChange = vi.fn()
-            const onChangeCommitted = vi.fn()
-            const fixture = (locked: boolean): JSX.Element => (
-                <StyledSlider
-                    dataTest='volume'
-                    ariaLabel='Volume'
-                    value={80}
-                    {...{ [lock]: locked }}
-                    readOnlyReason={lock === 'readOnly' && locked ? 'Set by the organisation' : undefined}
-                    onChange={onChange}
-                    onChangeCommitted={onChangeCommitted}
-                />
-            )
-            const { container, rerender } = mount(fixture(false))
-            const input = thumb(container)
-            const track = input.parentElement!
-            /* Pointer capture needs an active pointer, which a synthetic event has not; the stubs
-             * mark the element as capturing so the release path is observable. */
-            track.setPointerCapture = vi.fn()
-            track.hasPointerCapture = vi.fn().mockReturnValue(true)
-            const releasePointerCapture = vi.fn()
-            track.releasePointerCapture = releasePointerCapture
-
-            const rect = track.getBoundingClientRect()
-            const xFor = (value: number): number => rect.left + 8 + (value / 100) * (rect.width - 16)
-            const pointerEvent = (type: string, value: number): PointerEvent =>
-                new PointerEvent(type, {
-                    bubbles: true,
-                    pointerId: 7,
-                    pointerType: 'mouse',
-                    clientX: xFor(value),
-                    clientY: rect.top + rect.height / 2,
-                })
-
-            track.dispatchEvent(pointerEvent('pointerdown', 50))
-            await waitFor(() => expect(input).toHaveValue('50'))
-            await expect(onChange).toHaveBeenCalledTimes(1)
-
-            rerender(fixture(true))
-
-            // The thumb returns to the committed value, not the half-dragged one.
-            await expect(input).toHaveValue('80')
-            await expect(releasePointerCapture).toHaveBeenCalledWith(7)
-
-            track.dispatchEvent(pointerEvent('pointerup', 100))
-            await expect(onChangeCommitted).not.toHaveBeenCalled()
-            await expect(input).toHaveValue('80')
-            await expect(onChange).toHaveBeenCalledTimes(1)
-        },
-    )
 })

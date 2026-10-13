@@ -37,22 +37,10 @@ interface DynamicSelectCommonProps<TOption extends DynamicSelectOption> {
      * values as plain chips.
      */
     readOnly?: boolean
-    /**
-     * @figmaProp none — behavioral. Why the value can't be changed here, and where it can. With
-     * `readOnly` the read-only value stays focusable and shows the reason on hover, focus and tap
-     * (disabled-states DIS-6). Without `readOnly` it has no effect.
-     */
-    readOnlyReason?: React.ReactNode
     /** Prevents the built-in clear button from appearing even when a value is set. Applies to autocomplete only. */
     disableClearable?: boolean
     /** @figmaProp Title (Body Base SemiBold 16, text-icon/title-label delta-800) above the control. */
     title?: string
-    /**
-     * Accessible name for the read-only single value when it is a focusable reasoned field (DIS-6)
-     * and no `title` is rendered. Without it (or a `title`) the value stays plain text, so a
-     * nameless `role="textbox"` never reaches assistive tech.
-     */
-    ariaLabel?: string
     /** @figmaProp none — app size (chips/buttons). Defaults to `'medium'`. */
     size?: 'small' | 'medium'
     /**
@@ -65,12 +53,6 @@ interface DynamicSelectCommonProps<TOption extends DynamicSelectOption> {
     placeholder?: string
     /** @figmaProp State = true→"Disabled" */
     disabled?: boolean
-    /**
-     * @figmaProp none — behavioral. Why the field is unavailable. With `disabled` it is shown in the
-     * helper row, so it is visible without focus (disabled-states DIS-3, §6). An error message still
-     * wins. Without `disabled` it has no effect.
-     */
-    disabledReason?: React.ReactNode
     /** @figmaProp Empty-state text in the dropdown when no options match the search. */
     noOptionsText?: string
     /** @figmaProp State = true→"Error" (error border/icon + red helper row). */

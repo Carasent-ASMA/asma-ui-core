@@ -20,8 +20,6 @@ export const DynamicInteractiveChipGroup = forwardRef(
             multiple,
             title,
             disabled,
-            disabledReason,
-            readOnlyReason,
             onChange,
             required,
             error,
@@ -36,12 +34,7 @@ export const DynamicInteractiveChipGroup = forwardRef(
             clearSelectionLabel,
         } = props
         const helperId = useId()
-        const titleId = useId()
-        // A disabled group keeps its chips natively disabled and shows the reason in the helper row
-        // (DIS §6); a read-only group becomes one focusable stop that carries the reason (DIS-6).
-        const helperMessage = disabled && disabledReason && !error ? disabledReason : helperText
-        const readOnlyReasoned = Boolean(readOnly) && Boolean(readOnlyReason)
-        warnMissingErrorMessage('DynamicInteractiveChipGroup', error, helperMessage)
+        warnMissingErrorMessage('DynamicInteractiveChipGroup', error, helperText)
         const helperAlertRole = useHelperAlertRole(error)
         const { containerRef, wrapDisabled } = useWrap({ dependencyList: [options, options.length] })
 
@@ -118,11 +111,7 @@ export const DynamicInteractiveChipGroup = forwardRef(
 
         return (
             <div data-testid={`${dataTest}-dynamic-radio-group`} className='relative flex flex-col gap-y-1'>
-                {title && (
-                    <span id={titleId} className='text-base font-semibold text-delta-800'>
-                        {title}
-                    </span>
-                )}
+                {title && <span className='text-base font-semibold text-delta-800'>{title}</span>}
                 {/* HACK for calculating overflow layout */}
                 <div
                     aria-hidden
@@ -144,90 +133,73 @@ export const DynamicInteractiveChipGroup = forwardRef(
                     })}
                 </div>
 
-                <StyledTooltip
-                    title={readOnlyReason}
-                    open={readOnlyReasoned ? undefined : false}
-                    openOnTap={readOnlyReasoned}
-                    persistentDescription={readOnlyReasoned}
-                >
-                    <div
-                        role={readOnlyReasoned ? 'group' : undefined}
-                        aria-labelledby={readOnlyReasoned && title ? titleId : undefined}
-                        tabIndex={readOnlyReasoned ? 0 : undefined}
-                        className={cn(
-                            'flex flex-wrap gap-2',
-                            wrapDisabled && 'flex-col gap-1',
-                            readOnlyReasoned &&
-                                'w-fit cursor-default rounded outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-focus-ring',
-                        )}
-                    >
-                        {loading ? (
-                            <div className='flex flex-wrap gap-2'>
-                                <Skeleton className='h-[32px] w-[60px]' />
-                                <Skeleton className='h-[32px] w-[60px]' />
-                                <Skeleton className='h-[32px] w-[60px]' />
-                            </div>
-                        ) : visibleOptions?.length ? (
-                            visibleOptions.map((o, index) => {
-                                const checked = !!(multiple
-                                    ? value?.find((v) => isOptionEqualToValue(v, o))
-                                    : isOptionEqualToValue(value, o))
+                <div className={cn('flex flex-wrap gap-2', wrapDisabled && 'flex-col gap-1')}>
+                    {loading ? (
+                        <div className='flex flex-wrap gap-2'>
+                            <Skeleton className='h-[32px] w-[60px]' />
+                            <Skeleton className='h-[32px] w-[60px]' />
+                            <Skeleton className='h-[32px] w-[60px]' />
+                        </div>
+                    ) : visibleOptions?.length ? (
+                        visibleOptions.map((o, index) => {
+                            const checked = !!(multiple
+                                ? value?.find((v) => isOptionEqualToValue(v, o))
+                                : isOptionEqualToValue(value, o))
 
-                                const tooltipTitle = getOptionTooltip ? getOptionTooltip(o) : null
+                            const tooltipTitle = getOptionTooltip ? getOptionTooltip(o) : null
 
-                                if (readOnly && !checked) return null
-                                const optionDisabled = typeof o === 'object' ? !!o?.disabled : false
+                            if (readOnly && !checked) return null
+                            const optionDisabled = typeof o === 'object' ? !!o?.disabled : false
 
-                                const inputRef =
-                                    !optionDisabled && !readOnly && index === firstActiveIndex ? ref : undefined
+                            const inputRef =
+                                !optionDisabled && !readOnly && index === firstActiveIndex ? ref : undefined
 
-                                return (
-                                    <StyledTooltip key={getOptionValueText(o)} title={tooltipTitle} arrow>
-                                        <span className={cn(optionDisabled && 'cursor-not-allowed')}>
-                                            {readOnly && !wrapDisabled ? (
-                                                <StyledChip
-                                                    ref={inputRef}
-                                                    disabled={Boolean(disabled) || optionDisabled}
-                                                    classes={{
-                                                        root: 'min-h-[32px] h-full',
-                                                    }}
-                                                    className='w-fit'
-                                                    dataTest={`ic-${getOptionValueText(o)}`}
-                                                    label={renderLabel ? renderLabel(o) : getOptionLabel(o)}
-                                                />
-                                            ) : (
-                                                <StyledInteractiveChip
-                                                    ref={inputRef}
-                                                    disabled={Boolean(disabled) || optionDisabled}
-                                                    classes={
-                                                        wrapDisabled
-                                                            ? {
-                                                                  root: 'border-none outline-none bg-transparent w-full flex justify-start h-full min-h-[40px] shadow-none',
-                                                                  label: 'block whitespace-normal break-words overflow-visible',
-                                                              }
-                                                            : {
-                                                                  root: 'min-h-[32px] h-full',
-                                                              }
-                                                    }
-                                                    className='w-fit'
-                                                    readOnly={readOnly}
-                                                    type={multiple ? 'checkbox' : 'radio'}
-                                                    dataTest={`ic-${getOptionValueText(o)}`}
-                                                    checked={checked}
-                                                    size={size}
-                                                    onClick={() => handleClick(o)}
-                                                    label={renderLabel ? renderLabel(o) : getOptionLabel(o)}
-                                                />
-                                            )}
-                                        </span>
-                                    </StyledTooltip>
-                                )
-                            })
-                        ) : (
-                            <span>-</span>
-                        )}
-                    </div>
-                </StyledTooltip>
+                            return (
+                                <StyledTooltip key={getOptionValueText(o)} title={tooltipTitle} arrow>
+                                    <span className={cn(optionDisabled && 'cursor-not-allowed')}>
+                                        {readOnly && !wrapDisabled ? (
+                                            <StyledChip
+                                                ref={inputRef}
+                                                disabled={Boolean(disabled) || optionDisabled}
+                                                classes={{
+                                                    root: 'min-h-[32px] h-full',
+                                                }}
+                                                className='w-fit'
+                                                dataTest={`ic-${getOptionValueText(o)}`}
+                                                label={renderLabel ? renderLabel(o) : getOptionLabel(o)}
+                                            />
+                                        ) : (
+                                            <StyledInteractiveChip
+                                                ref={inputRef}
+                                                disabled={Boolean(disabled) || optionDisabled}
+                                                classes={
+                                                    wrapDisabled
+                                                        ? {
+                                                              root: 'border-none outline-none bg-transparent w-full flex justify-start h-full min-h-[40px] shadow-none',
+                                                              label: 'block whitespace-normal break-words overflow-visible',
+                                                          }
+                                                        : {
+                                                              root: 'min-h-[32px] h-full',
+                                                          }
+                                                }
+                                                className='w-fit'
+                                                readOnly={readOnly}
+                                                type={multiple ? 'checkbox' : 'radio'}
+                                                dataTest={`ic-${getOptionValueText(o)}`}
+                                                checked={checked}
+                                                size={size}
+                                                onClick={() => handleClick(o)}
+                                                label={renderLabel ? renderLabel(o) : getOptionLabel(o)}
+                                            />
+                                        )}
+                                    </span>
+                                </StyledTooltip>
+                            )
+                        })
+                    ) : (
+                        <span>-</span>
+                    )}
+                </div>
                 {!required && hasValue && !readOnly && !disabled && (
                     <StyledButton
                         dataTest='clear-selection-btn'
@@ -255,7 +227,7 @@ export const DynamicInteractiveChipGroup = forwardRef(
                     )}
                 >
                     {error && <ErrorOutlineIcon width={20} height={20} className='min-w-5' />}
-                    <span className='line-clamp-1'>{helperMessage}</span>
+                    <span className='line-clamp-1'>{helperText}</span>
                 </div>
             </div>
         )

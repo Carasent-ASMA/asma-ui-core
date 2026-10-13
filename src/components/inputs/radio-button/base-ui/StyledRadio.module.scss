@@ -44,10 +44,9 @@
     &.size-small {
         @include radio-wrapper-size(small);
     }
-    // Pointer events stay on so a tooltip or helper reason can be reached; the control itself
-    // ignores activation while disabled (disabled-states DIS-5, §6).
     &[data-disabled] {
-        cursor: not-allowed;
+        cursor: default;
+        pointer-events: none;
     }
     &:focus-visible,
     &[data-focus-visible],

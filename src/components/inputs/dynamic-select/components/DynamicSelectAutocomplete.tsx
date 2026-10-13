@@ -28,7 +28,6 @@ export const DynamicSelectAutocomplete = forwardRef(
             noOptionsText,
             placeholder,
             disabled,
-            disabledReason,
             helperText,
             disableHelperText,
             error,
@@ -106,8 +105,6 @@ export const DynamicSelectAutocomplete = forwardRef(
         if (multiple && readOnly) return <DynamicInteractiveChipGroup<TOption> {...props} />
 
         const titleId = title ? `${dataTest}-title` : undefined
-        // A disabled field keeps native `disabled` and shows its reason in the helper row (DIS §6).
-        const reasonInHelper = Boolean(disabled) && Boolean(disabledReason) && !error
 
         return (
             <div className='flex w-full flex-col gap-y-1'>
@@ -334,7 +331,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                             {...params}
                             inputRef={ref}
                             error={error}
-                            helperText={reasonInHelper ? disabledReason : disableHelperText ? undefined : helperText}
+                            helperText={disableHelperText ? undefined : helperText}
                             reserveHelperText={disableHelperText ? false : error !== undefined}
                             variant='outlined'
                             label=''

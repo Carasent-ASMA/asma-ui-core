@@ -90,14 +90,7 @@ describe('StyledDynamicSelect — read-only single select', () => {
 
     it('has no clear-selection button on a disabled chip group either', () => {
         const html = renderToStaticMarkup(
-            <StyledDynamicSelect
-                dataTest='ro'
-                options={FEW}
-                value='After'
-                onChange={noop}
-                disabled
-                disabledReason='Wait until the options are loaded'
-            />,
+            <StyledDynamicSelect dataTest='ro' options={FEW} value='After' onChange={noop} disabled />,
         )
 
         expect(html).toContain('data-testid="ic-After"')

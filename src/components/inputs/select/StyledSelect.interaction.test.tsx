@@ -2,8 +2,6 @@ import { useState } from 'react'
 import { afterEach, describe, it } from 'vitest'
 import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, describeFocusIndicator, focusStyleOf, mount } from 'src/test-utils/renderInteraction'
-import { StyledFormControl } from '../../miscellaneous/StyledFormControl'
-import { StyledInputLabel } from '../../miscellaneous/StyledInputLabel'
 import { StyledSelect } from './StyledSelect'
 import { StyledSelectItem } from './StyledSelectItem'
 
@@ -106,43 +104,6 @@ describe('StyledSelect keyboard contract', () => {
         await expect(button).toHaveAttribute('aria-activedescendant', 'status-listbox-option-1')
         await expect(options()[1]).toHaveAttribute('aria-selected', 'true')
         await expect(options()[0]).toHaveAttribute('aria-selected', 'false')
-    })
-
-    it('reaches a disabled option with a reason but refuses to select it (disabled-states DIS-3, A-6)', async () => {
-        const ReasonFixture = (): JSX.Element => {
-            const [value, setValue] = useState<unknown>('a')
-            return (
-                <StyledSelect dataTest='status' name='Status' value={value} onChange={(event) => setValue(event.target.value)}>
-                    <StyledSelectItem value='a'>Active</StyledSelectItem>
-                    <StyledSelectItem value='b' disabled disabledReason='Only available on the Pro plan'>
-                        Archived
-                    </StyledSelectItem>
-                    <StyledSelectItem value='c' disabled>
-                        Closed
-                    </StyledSelectItem>
-                </StyledSelect>
-            )
-        }
-        const { container } = mount(<ReasonFixture />)
-        const button = trigger(container)
-        button.focus()
-
-        await userEvent.keyboard('{ArrowDown}')
-        await waitFor(() => expect(options()).toHaveLength(3))
-        await userEvent.keyboard('{ArrowDown}')
-
-        await expect(button).toHaveAttribute('aria-activedescendant', 'status-listbox-option-1')
-        // The reason is the option's description, not part of its name — otherwise a screen reader
-        // reads it twice (WAI-ARIA listbox pattern, 4.1.2).
-        await expect(options()[1]).toHaveAccessibleName('Archived')
-        await expect(options()[1]).toHaveAccessibleDescription('Only available on the Pro plan')
-
-        await userEvent.keyboard('{ArrowDown}')
-        // 'c' has no reason and stays skipped.
-        await expect(button).toHaveAttribute('aria-activedescendant', 'status-listbox-option-1')
-
-        await userEvent.keyboard('{Enter}')
-        await expect(options()[0]).toHaveAttribute('aria-selected', 'true')
     })
 
     it('opens with ArrowUp and exposes the last option when nothing is selected (2.1.1)', async () => {
@@ -408,107 +369,5 @@ describe('StyledSelect popper geometry', () => {
 
         await expect(chevron.getAttribute('class')).toContain('flip-180')
         await expect(chevron.getAttribute('class')).not.toContain('rotate-180')
-    })
-})
-
-describe('StyledSelect reasons (disabled-states DIS-5, DIS-6, §6)', () => {
-    afterEach(cleanup)
-
-    const reasonTip = (): HTMLElement | null => document.querySelector<HTMLElement>('[role="tooltip"]')
-
-    it('opens the read-only reason on mouse hover and still refuses to open the list', async () => {
-        const { container } = mount(
-            <StyledSelect dataTest='status' name='Status' value='a' readOnly readOnlyReason='Set by the organisation'>
-                <StyledSelectItem value='a'>Active</StyledSelectItem>
-                <StyledSelectItem value='b'>Paused</StyledSelectItem>
-            </StyledSelect>,
-        )
-        const button = trigger(container)
-
-        await userEvent.hover(button)
-        await waitFor(() => expect(reasonTip()).toHaveTextContent('Set by the organisation'), { timeout: 2000 })
-
-        await userEvent.click(button)
-        button.focus()
-        await userEvent.keyboard('{ArrowDown}')
-        await expect(listbox()).toBeNull()
-    })
-
-    it('opens the disabled reason on mouse hover', async () => {
-        const { container } = mount(
-            <StyledSelect dataTest='status' name='Status' value='a' disabled disabledReason='Pick a team first'>
-                <StyledSelectItem value='a'>Active</StyledSelectItem>
-            </StyledSelect>,
-        )
-
-        await userEvent.hover(trigger(container))
-        await waitFor(() => expect(reasonTip()).toHaveTextContent('Pick a team first'), { timeout: 2000 })
-    })
-
-    it('keeps a plain disabled trigger natively disabled', async () => {
-        const { container } = mount(
-            <StyledSelect dataTest='status' name='Status' value='a' disabled>
-                <StyledSelectItem value='a'>Active</StyledSelectItem>
-            </StyledSelect>,
-        )
-
-        await expect(trigger(container)).toBeDisabled()
-    })
-
-    it('hides the clear affordance while read-only', async () => {
-        const { container } = mount(
-            <StyledSelect dataTest='status' name='Status' value='a' readOnly allowClear>
-                <StyledSelectItem value='a'>Active</StyledSelectItem>
-            </StyledSelect>,
-        )
-
-        await expect(container.querySelector('[data-testid="select-clear-button"]')).toBeNull()
-    })
-
-    it('does not mark a read-only trigger focused on a mouse click, so the label stays put', async () => {
-        const { container } = mount(
-            <StyledFormControl>
-                <StyledInputLabel>Status</StyledInputLabel>
-                <StyledSelect
-                    dataTest='status'
-                    name='Status'
-                    value=''
-                    readOnly
-                    readOnlyReason='Set by the organisation'
-                >
-                    <StyledSelectItem value='a'>Active</StyledSelectItem>
-                </StyledSelect>
-            </StyledFormControl>,
-        )
-        const button = trigger(container)
-        const label = container.querySelector('label')!
-        await expect(label.style.top).toBe('50%')
-
-        await userEvent.click(button)
-
-        await expect(document.activeElement).toBe(button)
-        await expect(label.style.top).toBe('50%')
-    })
-})
-
-describe('StyledSelect reasoned focus ring (disabled-states DIS-3, 2.4.7)', () => {
-    afterEach(cleanup)
-
-    it.each([
-        ['disabled', { disabled: true, disabledReason: 'Pick a team first' }],
-        ['read-only', { readOnly: true, readOnlyReason: 'Set by the organisation' }],
-    ])('shows a focus ring on a %s trigger with a reason', async (_, props) => {
-        const { container } = mount(
-            <StyledSelect dataTest='status' name='Status' value='a' {...props}>
-                <StyledSelectItem value='a'>Active</StyledSelectItem>
-            </StyledSelect>,
-        )
-        const button = trigger(container)
-        const before = focusStyleOf(button)
-
-        await userEvent.tab()
-
-        await expect(document.activeElement).toBe(button)
-        await expect(describeFocusIndicator(before, focusStyleOf(button))).not.toBeNull()
     })
 })

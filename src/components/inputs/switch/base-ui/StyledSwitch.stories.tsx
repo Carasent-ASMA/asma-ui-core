@@ -62,13 +62,12 @@ export const Unchecked_Disabled: Story = {
     parameters: { a11y: { test: 'todo' } },
     args: { disabled: true },
     render: (args) => <SwitchWrapper label='Disabled' args={args} />,
-    play: async ({ canvas }) => {
+    play: async ({ canvas, userEvent }) => {
         const switchEl = canvas.getByRole('switch', { name: 'Disabled' })
 
         await expect(switchEl).not.toBeChecked()
 
-        // The disabled switch keeps pointer events (a reason can be hovered) but ignores the click.
-        switchEl.click()
+        await expect(() => userEvent.click(switchEl)).rejects.toThrow(/pointer-events: none/)
 
         await expect(switchEl).not.toBeChecked()
     },
@@ -103,13 +102,12 @@ export const Checked_Disabled: Story = {
     parameters: { a11y: { test: 'todo' } },
     args: { defaultChecked: true, disabled: true },
     render: (args) => <SwitchWrapper label='Disabled' args={args} />,
-    play: async ({ canvas }) => {
+    play: async ({ canvas, userEvent }) => {
         const switchEl = canvas.getByRole('switch', { name: 'Disabled' })
 
         await expect(switchEl).toBeChecked()
 
-        // The disabled switch keeps pointer events (a reason can be hovered) but ignores the click.
-        switchEl.click()
+        await expect(() => userEvent.click(switchEl)).rejects.toThrow(/pointer-events: none/)
 
         await expect(switchEl).toBeChecked()
     },
@@ -220,21 +218,5 @@ export const CompositeLeftLabelError: Story = {
     play: async ({ canvas }) => {
         const switchEl = canvas.getByRole('switch')
         await expect(switchEl).toHaveAttribute('data-error')
-    },
-}
-
-/** Disabled with a reason (disabled-states DIS-1…DIS-4): focusable, `aria-disabled`, reason on hover, focus and tap. */
-export const Unchecked_DisabledWithReason: Story = {
-    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
-    args: { disabled: true, disabledReason: 'Sign the document first' },
-    render: (args) => <SwitchWrapper label='Send copy' args={args} />,
-    play: async ({ canvas }) => {
-        const switchEl = canvas.getByRole('switch', { name: 'Send copy' })
-
-        await expect(switchEl).toHaveAttribute('aria-disabled', 'true')
-        await expect(switchEl).toHaveAccessibleDescription('Sign the document first')
-        switchEl.click()
-        await expect(switchEl).not.toBeChecked()
     },
 }
