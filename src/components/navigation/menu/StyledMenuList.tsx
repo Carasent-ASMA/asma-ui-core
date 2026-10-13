@@ -100,7 +100,7 @@ export const StyledMenuList = ({
             cancelAnimationFrame(frame)
             observer.disconnect()
         }
-    })
+    }, [])
 
     useEffect(() => {
         if (autoFocus) focusableItems(listRef.current)[0]?.focus()
