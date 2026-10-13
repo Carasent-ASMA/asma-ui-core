@@ -80,22 +80,13 @@ export const StyledMenuList = ({
                         : null
                 list.style.maxHeight = height === null ? '' : `${height}px`
                 list.toggleAttribute('data-menu-scroll', height !== null)
-                // Make the scroll region keyboard-reachable even when autoFocus is disabled.
-                if (height !== null) list.tabIndex = 0
-                else list.removeAttribute('tabindex')
             }
         }
         syncRows()
         // The parent popover joins the top layer after child layout effects have run.
         const frame = requestAnimationFrame(syncRows)
         const observer = new MutationObserver(syncRows)
-        observer.observe(list, {
-            childList: true,
-            subtree: true,
-            characterData: true,
-            attributes: true,
-            attributeFilter: ['hidden'],
-        })
+        observer.observe(list, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden'] })
         return () => {
             cancelAnimationFrame(frame)
             observer.disconnect()
