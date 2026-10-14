@@ -47,7 +47,7 @@ export const StyledMenuItem = ({
             aria-disabled={disabled ? true : undefined}
             data-has-reason={reasoned || undefined}
             tabIndex={-1}
-            onClick={disabled ? undefined : onClick}
+            onClick={disabled ? (event) => event.stopPropagation() : onClick}
             onKeyDown={handleKeyDown}
             onMouseDown={onMouseDown}
             onMouseUp={onMouseUp}

@@ -1,6 +1,6 @@
 import type { ColumnDef } from '@tanstack/react-table'
 import { afterEach, describe, it } from 'vitest'
-import { expect, waitFor } from 'src/test-utils/interaction-api'
+import { expect, fn, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { StyledTable } from 'src/table/components/StyledTableIndex'
 
@@ -62,6 +62,39 @@ describe('RowActionMenu disabled reason', () => {
         await expect(item).toHaveAttribute('aria-disabled', 'true')
         await expect(item).toHaveAttribute('data-has-reason', 'true')
         await expect(item).toHaveAccessibleDescription('Only the owner can delete')
+    })
+
+    it('keeps the menu and the reason open when a disabled action is tapped', async () => {
+        const onDelete = fn()
+        mount(
+            <StyledTable
+                locale='en'
+                columns={columns}
+                data={data}
+                actions={() => [
+                    { label: 'Edit', onClick: () => undefined },
+                    { label: 'Delete', disabled: true, tooltipTitle: 'Only the owner can delete', onClick: onDelete },
+                ]}
+            />,
+        )
+        document.querySelector<HTMLButtonElement>('[data-test="row-actions-button"]')!.click()
+        const item = await waitFor(() => {
+            const found = [...document.querySelectorAll<HTMLElement>('[role="menuitem"]')].find(
+                (node) => node.textContent === 'Delete',
+            )
+            if (!found) throw new Error('menu not open')
+            return found
+        })
+
+        item.dispatchEvent(new PointerEvent('pointerup', { pointerType: 'touch', bubbles: true }))
+        await waitFor(() => expect(document.querySelector('[role="tooltip"]')).toHaveTextContent('Only the owner can delete'))
+        item.click()
+
+        await new Promise((resolve) => setTimeout(resolve, 100))
+        await expect(document.querySelector('[role="menu"]')).not.toBeNull()
+        await expect(item.isConnected).toBe(true)
+        await expect(document.querySelector('[role="tooltip"]')).toHaveTextContent('Only the owner can delete')
+        await expect(onDelete).not.toHaveBeenCalled()
     })
 
     it('stays natively disabled when no reason is given', async () => {
