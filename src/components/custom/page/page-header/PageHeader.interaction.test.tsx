@@ -13,8 +13,8 @@ describe('PageHeader compact pins the Figma Device variant (ASMA-7622)', () => {
 
     it('keeps the tablet/desktop variant when compact={false} despite a sub-744px measured width', async () => {
         const { container } = mount(
-            /* 700, not 720: without preflight the header's own px-4 padding sits outside its
-             * `w-full` width (content-box), so it measures 32px wider than this wrapper. */
+            /* Keep the header's measured width below the 744px mobile breakpoint; `box-border`
+             * makes it measure exactly this wrapper's width. */
             <div style={{ width: 700 }}>
                 <PageHeader compact={false} title='Home' leading='back' />
             </div>,
