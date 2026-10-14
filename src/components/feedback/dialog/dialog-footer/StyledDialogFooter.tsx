@@ -189,7 +189,10 @@ export function StyledDialogFooter({
     /* A running action in the More menu holds the dialog too: its menu item is not a StyledButton,
      * so StyledButton's own reporting never sees it. Inline actions already report through their
      * StyledButton. `leadingSlot` replaces the left cluster, so its actions cannot be running. */
-    useReportDialogBusy(leadingSlot == null && plan.overflowActions.some((action) => Boolean(action.loading)))
+    useReportDialogBusy(
+        leadingSlot == null &&
+            plan.overflowActions.some((action) => Boolean(action.loading) && action.holdsDialog !== false),
+    )
 
     const renderButton = (
         button: StyledDialogFooterButton,

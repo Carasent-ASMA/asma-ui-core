@@ -21,6 +21,12 @@ export interface DynamicToolbarAction {
      * boolean from the first render so the busy announcement region exists before it turns on.
      */
     loading?: boolean
+    /**
+     * Whether a `loading` action keeps the dialog around it open (no Esc, backdrop, X or Cancel), inline
+     * and in the More menu; defaults to `true`, the rule for a running save (submit-buttons SUB-8). Pass
+     * `false` for an action that is not a save, such as a preview or a lookup.
+     */
+    holdsDialog?: boolean
     hidden?: boolean
     variant?: 'contained' | 'outlined' | 'text' | 'textGray' | 'textWhite'
     /** Visual tone. `danger` renders the action in the destructive/red palette. */

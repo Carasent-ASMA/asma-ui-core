@@ -54,6 +54,7 @@ export function ToolbarActionButton({
             disabled={action.disabled}
             disabledReason={action.disabledReason}
             loading={action.loading}
+            holdsDialog={action.holdsDialog}
             loadingAnnouncement={inProgressLabel}
             startIcon={action.icon}
             onClick={action.onClick}

@@ -149,6 +149,45 @@ describe('StyledDialog explains busy dismissal controls', () => {
         await expect(onClose).toHaveBeenCalledTimes(3)
     })
 
+    it('stays closable while a left action that does not hold the dialog is loading', async () => {
+        const preview = { id: 'preview', label: 'Preview', loading: true, holdsDialog: false, onClick: () => undefined }
+        const placements = {
+            inline: [preview],
+            more: [{ id: 'edit', label: 'Edit', onClick: () => undefined }, preview],
+        }
+        for (const [placement, leftActions] of Object.entries(placements)) {
+            const onClose = vi.fn()
+            const { container } = mount(
+                <StyledDialog open dataTest='editor' onClose={onClose}>
+                    <div style={{ width: 480 }}>
+                        <StyledDialogFooter
+                            leftActions={leftActions}
+                            secondaryAction={{ label: 'Cancel', dataTest: 'cancel', onClick: onClose }}
+                        />
+                    </div>
+                </StyledDialog>,
+            )
+            await new Promise(requestAnimationFrame)
+            const busyMarker =
+                placement === 'inline'
+                    ? '[data-testid="dynamic-toolbar-action-preview"][aria-busy="true"]'
+                    : '[data-testid="styled-dialog-footer-more"]'
+            await waitFor(() => expect(container.querySelector(busyMarker)).not.toBeNull())
+            const close = container.querySelector<HTMLButtonElement>('[data-testid="close-button-editor"]')!
+            const cancel = container.querySelector<HTMLButtonElement>('[data-testid="cancel"]')!
+
+            for (const button of [close, cancel]) {
+                await expect(button).not.toHaveAttribute('aria-disabled')
+                await expect(button).not.toHaveAccessibleDescription(busyReason)
+                button.click()
+            }
+            cancel.focus()
+            await userEvent.keyboard('{Escape}')
+            await expect(onClose).toHaveBeenCalledTimes(3)
+            cleanup()
+        }
+    })
+
     it('tracks concurrent loading buttons across reason changes and unmounts', async () => {
         const fixture = (extra: boolean, loading: boolean, reason: string): JSX.Element => (
             <StyledDialog open dataTest='editor' busyReason={reason}>
