@@ -14,7 +14,8 @@ interface DialogBusyContextValue {
 export const DialogBusyContext = createContext<DialogBusyContextValue | null>(null)
 
 /**
- * A dialog (or popover) is busy while one of its buttons runs an action (`StyledButton loading`).
+ * A dialog (or popover) is busy while one of its buttons runs an action (`StyledButton loading`, unless
+ * the button passes `holdsDialog={false}`).
  * Closing it then would hide a request that is still running, so every dismissal (Esc, backdrop click,
  * the X button) is ignored until the action ends (submit-buttons SUB-4/SUB-8: Cancel waits for the result).
  * Provide `contextValue` with `DialogBusyContext.Provider` around the dialog content.

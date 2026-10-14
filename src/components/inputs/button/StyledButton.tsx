@@ -37,6 +37,12 @@ interface commonProps {
      * Pass a boolean from the first render: the announcement region exists only while `loading` is defined.
      */
     loading?: boolean
+    /**
+     * @figmaProp none — behavioral. Whether a `loading` button keeps the dialog around it open (no Esc,
+     * backdrop, X or Cancel) until it ends; defaults to `true`, the rule for a running save (submit-buttons
+     * SUB-8). Pass `false` for an action that is not a save, such as a search or a lookup.
+     */
+    holdsDialog?: boolean
     /** Language of the default busy announcement; defaults to English. */
     locale?: UiCoreLocale
     /** @figmaProp none — behavioral. Announced when `loading` starts; defaults to "In progress" in `locale`. */
@@ -122,13 +128,14 @@ export const StyledButton = ({
     disabled,
     disabledReason,
     loading,
+    holdsDialog = true,
     loadingAnnouncement,
     locale = 'en',
     onClick,
     ...otherProps
 }: StyledButtonProps): JSX.Element => {
-    // A running action keeps the dialog around it open (no Esc / backdrop / X dismissal).
-    useReportDialogBusy(Boolean(loading))
+    // A running save keeps the dialog around it open (no Esc / backdrop / X dismissal).
+    useReportDialogBusy(Boolean(loading) && holdsDialog)
 
     const isLarge = size === 'large' || size === 'medium'
 
