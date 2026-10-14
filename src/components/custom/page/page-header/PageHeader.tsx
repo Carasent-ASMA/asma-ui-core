@@ -32,6 +32,7 @@ export interface PageHeaderAction extends DynamicToolbarAction {
     badgeCount?: number
 }
 
+/** @figmaNode 9Q7C7JYPgnUSsrX1L8v40t#1237-65648 (Ad-Voca-concept · "Page header") */
 export interface PageHeaderProps {
     /** Page/object title — the route heading. PageHeader owns the heading element. */
     title: string
@@ -69,6 +70,7 @@ export interface PageHeaderProps {
     /**
      * Force the Figma Device variant (true = Mobile). Omit to derive it from the header's own width.
      * Pass it when the header sits beside a side menu and the app's breakpoint is viewport-based.
+     * @figmaProp Device = true→"Mobile" | false→"Tablet/Desktop" (unset = measured width)
      */
     compact?: boolean
     className?: string
@@ -265,8 +267,10 @@ export function PageHeader({
                 data-stuck={stuck ? 'true' : 'false'}
                 aria-busy={loading || undefined}
                 className={cn(
-                    /* Figma Page header: 72px (16px padding) on tablet/desktop, 64px (12px) on mobile. */
-                    'flex w-full items-center gap-2 px-4',
+                    /* Figma Page header: 72px (16px padding) on tablet/desktop, 64px (12px) on mobile.
+                     * `box-border` is load-bearing: preflight is off, so without it min-height + padding
+                     * render content-box and the header is 16px taller than the Figma frame. */
+                    'box-border flex w-full items-center gap-2 px-4',
                     stuck && 'min-h-[56px] py-2 shadow-sm',
                     !stuck && (compact ? 'min-h-[64px] py-3' : 'min-h-[72px] py-4'),
                     sticky && 'sticky top-0 z-30 bg-delta-50',
