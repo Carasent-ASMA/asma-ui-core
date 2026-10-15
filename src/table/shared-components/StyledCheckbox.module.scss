@@ -25,6 +25,9 @@ $checkbox-sizes: (
     align-items: center;
     justify-content: center;
     position: relative;
+    // Own stacking context: the box/ripple `z-index: 1` (above the opaque hover halo) stays inside
+    // the checkbox instead of competing with the table's sticky cells, which sit at z-index 1 too.
+    isolation: isolate;
     box-sizing: border-box;
     cursor: pointer;
     background: transparent;

@@ -29,6 +29,9 @@ $checkbox-sizes: (
     align-items: center;
     justify-content: center;
     position: relative;
+    // Own stacking context: the focus/error frame (z-index 1) and box (2), lifted above the opaque
+    // hover halo, stay inside the checkbox instead of painting over a table's sticky cells.
+    isolation: isolate;
     box-sizing: border-box;
     cursor: pointer;
     background: transparent;
