@@ -50,7 +50,12 @@ export const CountryCodeOptions = ({
             role='listbox'
             aria-label={label}
             data-testid={`${dataTest}-listbox`}
-            className={cn('m-0 min-h-0 flex-1 list-none overflow-y-auto p-0', className)}
+            className={cn(
+                'm-0 min-h-0 flex-1 list-none overflow-y-auto p-0',
+                '[&>li:not(:last-child)]:border-0 [&>li:not(:last-child)]:border-b',
+                '[&>li:not(:last-child)]:border-solid [&>li:not(:last-child)]:border-delta-100',
+                className,
+            )}
         >
             {visible.map((country, index) => (
                 <StyledSelectItem
@@ -59,7 +64,6 @@ export const CountryCodeOptions = ({
                     selected={country.iso2 === selectedIso2}
                     active={index === activeIndex}
                     onClick={() => onSelect(country.iso2)}
-                    className='border-0 border-b border-solid border-delta-100 last:border-b-0'
                 >
                     {/* One wrapper: StyledSelectItem puts children inside a single flex-1 span,
                         so the name/code split has to happen in here. */}
