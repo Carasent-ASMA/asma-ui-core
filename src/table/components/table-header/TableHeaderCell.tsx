@@ -4,9 +4,10 @@ import clsx from 'clsx'
 import style from '../StyledTable.module.scss'
 import { DropUpIcon } from 'src/table/shared-components/DropUpIcon'
 import { DropDownIcon } from 'src/table/shared-components/DropDownIcon'
-import { ACTIONS_COLUMN_ID, INTERNAL_COLUMN_IDS, type StyledTableProps } from 'src/table/types'
+import { ACTIONS_COLUMN_ID, INTERNAL_COLUMN_IDS, SELECT_COLUMN_ID, type StyledTableProps } from 'src/table/types'
 import { getTableHeaderStyle } from 'src/table/helpers/getTableHeaderStyle'
 import { useRootContext } from 'src/table/context/RootContext'
+import { COMPACT_COLUMN_MAX_WIDTH } from 'src/table/helpers/columnSpacing'
 
 export function TableHeaderCell<
     TData extends {
@@ -67,6 +68,8 @@ export function TableHeaderCell<
             aria-sort={ariaSort}
             className={clsx(
                 style['t-cell'],
+                !INTERNAL_COLUMN_IDS.includes(header.column.id) && header.column.getSize() > COMPACT_COLUMN_MAX_WIDTH && style['data-cell'],
+                header.column.id === SELECT_COLUMN_ID && style['select-cell'],
                 hideHeader && style['hide-header'],
                 isActionsColumn && style['t-cell__actions'],
                 isActionsColumn && (!hasActionsContent || hasFixedRightColumns) && style['t-cell__actions--no-shadow'],

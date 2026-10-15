@@ -1,6 +1,6 @@
 import { flexRender, type Row } from '@tanstack/react-table'
 import { Fragment, useMemo, type CSSProperties, useEffect, useCallback, useLayoutEffect, useRef, useState } from 'react'
-import { ACTIONS_COLUMN_ID, type StyledTableProps } from '../types'
+import { ACTIONS_COLUMN_ID, INTERNAL_COLUMN_IDS, SELECT_COLUMN_ID, type StyledTableProps } from '../types'
 import style from './StyledTable.module.scss'
 import clsx from 'clsx'
 import { useSortable } from '@dnd-kit/sortable'
@@ -8,6 +8,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { useRootContext } from 'src/table/context/RootContext'
 import type { ColumnWindow } from 'src/table/hooks/useColumnVirtualizer'
 import { compact } from 'src/helpers/arrays'
+import { COMPACT_COLUMN_MAX_WIDTH } from 'src/table/helpers/columnSpacing'
 
 const focusNextOutsideTable = (currentRow: HTMLTableRowElement): boolean => {
     const table = currentRow.closest('table')
@@ -244,6 +245,8 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
                     key={cell.id}
                     className={clsx(
                         style['t-cell'],
+                        !INTERNAL_COLUMN_IDS.includes(cell.column.id) && cell.column.getSize() > COMPACT_COLUMN_MAX_WIDTH && style['data-cell'],
+                        cell.column.id === SELECT_COLUMN_ID && style['select-cell'],
                         hasRowClickHandler && 'cursor-pointer',
                         tdClassName,
                         isActionsCell && style['action-cell'],

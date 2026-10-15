@@ -14,4 +14,6 @@ the first, a 32px header with 1px lines, and the selection checkbox at the Figma
 checkbox has the single Figma size: a 16px box (radius 2) centred in a 40px target, with Figma's
 filled check, a 26px focus ring and a 24px error ring, so the 40px hover circle is exactly concentric
 with the box. `size` is still accepted; both values render this size. A hovered focused checkbox
-keeps its focus frame. No props changed.
+keeps its focus frame. Table content cells use the Figma spacing (20px between cells, 8px at the
+row edges, text 4px after the selection checkbox); selection/expand/drag/action columns and columns
+64px or narrower keep their compact 5px padding. No props changed.
