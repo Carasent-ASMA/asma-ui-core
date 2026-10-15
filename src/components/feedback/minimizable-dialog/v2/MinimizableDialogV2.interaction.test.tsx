@@ -307,6 +307,20 @@ describe('MinimizableDialogV2 native Back (ASMA-8471)', () => {
         await expect(onClose).not.toHaveBeenCalled()
     })
 
+    it('does not register once minimized, even while fullscreen', async () => {
+        const onClose = fn()
+        mount(
+            <MinimizableDialogV2 dataTest='dialog-v2' open fullScreenState minimizedState title='Editor' onClose={onClose}>
+                <p>Content</p>
+            </MinimizableDialogV2>,
+        )
+        await waitFor(() => expect(document.querySelectorAll('[data-testid="dialog-v2"]')).not.toHaveLength(0))
+        await expect(getOverlayBackStackSize()).toBe(0)
+
+        void requestCloseTopOverlayBack()
+        await expect(onClose).not.toHaveBeenCalled()
+    })
+
     it('waits while busy, same as its ✕ path', async () => {
         const onClose = fn()
         const BusyMarker = (): null => {

@@ -11,7 +11,11 @@ import { StyledMenuItem } from 'src/components/navigation/menu/StyledMenuItem'
 import { StyledSelect } from 'src/components/inputs/select/StyledSelect'
 import { StyledSelectAutocomplete } from 'src/components/inputs/select-autocomplete/StyledSelectAutocomplete'
 import { StyledSelectItem } from 'src/components/inputs/select/StyledSelectItem'
-import { getOverlayBackStackSize, requestCloseTopOverlayBack } from 'src/hooks/useBackCloses.hook'
+import {
+    getOverlayBackStackSize,
+    registerOverlayBackCloser,
+    requestCloseTopOverlayBack,
+} from 'src/hooks/useBackCloses.hook'
 
 /**
  * Keyboard & focus contract — StyledDialog (ASMA-8139).
@@ -619,45 +623,47 @@ describe('StyledDialog native Back (ASMA-8471)', () => {
         await waitFor(() => expect(dialogByTest('confirm')).not.toBeNull())
     })
 
-    it('latches a Promise-returning onClose: Back does nothing while it is pending (TEST-009)', async () => {
-        const onClose = fn()
-        let resolveSave: (() => void) | undefined
-        const Fixture = (): JSX.Element => {
-            const [open, setOpen] = useState(true)
-            return open ? (
-                <StyledDialog
-                    dataTest='async-confirm'
-                    dialogTitle='Save?'
-                    open
-                    onClose={() => {
-                        onClose()
-                        return new Promise<void>((resolve) => {
-                            resolveSave = () => {
-                                resolve()
-                                setOpen(false)
-                            }
-                        })
-                    }}
-                />
-            ) : (
-                <></>
+    it.each(['Back', 'Escape', 'the close button'] as const)(
+        'latches onClose started from %s: Back, a click and Escape are all no-ops until it settles, then it can invoke again (TEST-009)',
+        async (startTrigger) => {
+            const onClose = fn()
+            // Reassigned on every call — this dialog never actually closes in this test, which is the
+            // point: it isolates the LATCH from the dirty-dialog-then-closes flow TEST-007/008 already
+            // cover, so a second invocation after settling is directly observable as a second call.
+            let resolveCurrent: (() => void) | undefined
+            const Fixture = (): JSX.Element => (
+                <StyledDialog dataTest='async-confirm' dialogTitle='Save?' open onClose={() => {
+                    onClose()
+                    return new Promise<void>((resolve) => {
+                        resolveCurrent = resolve
+                    })
+                }} />
             )
-        }
-        mount(<Fixture />)
-        await waitFor(() => expect(dialogByTest('async-confirm')).not.toBeNull())
+            const { container } = mount(<Fixture />)
+            await waitFor(() => expect(dialogByTest('async-confirm')).not.toBeNull())
+            const closeButton = (): HTMLButtonElement =>
+                container.querySelector<HTMLButtonElement>('[data-testid="close-button-async-confirm"]')!
 
-        void requestCloseTopOverlayBack()
-        await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
+            if (startTrigger === 'Back') void requestCloseTopOverlayBack()
+            else if (startTrigger === 'Escape') await userEvent.keyboard('{Escape}')
+            else await userEvent.click(closeButton())
+            await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
 
-        // Latched while the save is in flight — a repeated Back is a no-op, not a second save.
-        void requestCloseTopOverlayBack()
-        void requestCloseTopOverlayBack()
-        await expect(onClose).toHaveBeenCalledTimes(1)
-        await expect(dialogByTest('async-confirm')).not.toBeNull()
+            // Latched while the first attempt is in flight — none of Back, a click or Escape (even one
+            // that DIDN'T start it) can invoke `onClose` again before it settles.
+            void requestCloseTopOverlayBack()
+            await userEvent.click(closeButton())
+            await userEvent.keyboard('{Escape}')
+            await expect(onClose).toHaveBeenCalledTimes(1)
+            await expect(dialogByTest('async-confirm')).not.toBeNull()
 
-        resolveSave?.()
-        await waitFor(() => expect(dialogByTest('async-confirm')).toBeNull())
-    })
+            // Settled: the latch clears and the next attempt calls through again.
+            resolveCurrent?.()
+            await Promise.resolve()
+            void requestCloseTopOverlayBack()
+            await waitFor(() => expect(onClose).toHaveBeenCalledTimes(2))
+        },
+    )
 
     it('a no-safe-choice dialog ignores Back and does not fall through to the dialog underneath (TEST-010)', async () => {
         const onOuterClose = fn()
@@ -747,5 +753,34 @@ describe('StyledDialog native Back (ASMA-8471)', () => {
         // firing a non-cancelable `close` while React's `open` is still `true` — the zombie case.
         dialog.close()
         await waitFor(() => expect(dialog.matches(':modal')).toBe(true))
+    })
+
+    it('native cancel invokes the registry TOP, not this dialog’s own close, when something else is stacked above it (CON-007)', async () => {
+        // A mutation that swapped `requestCloseTopOverlayBack()` in `handleCancel` for a call to THIS
+        // dialog's own close would make this assertion fail: `topSpy` (registered directly through the
+        // registry, standing in for a real overlay above this one) is the only thing that may be
+        // called, and this dialog's own `onClose` must stay untouched.
+        const onClose = fn()
+        mount(
+            <StyledDialog dataTest='has-something-above' dialogTitle='Base' open onClose={onClose}>
+                <p>content</p>
+            </StyledDialog>,
+        )
+        const dialog = await waitFor(() => {
+            const node = dialogByTest('has-something-above')
+            if (!node) throw new Error('dialog not mounted yet')
+            return node
+        })
+        await waitFor(() => expect(dialog.matches(':modal')).toBe(true))
+
+        const topSpy = fn()
+        const unregisterTop = registerOverlayBackCloser(topSpy)
+
+        dialog.dispatchEvent(new Event('cancel', { cancelable: true }))
+
+        await waitFor(() => expect(topSpy).toHaveBeenCalledTimes(1))
+        await expect(onClose).not.toHaveBeenCalled()
+
+        unregisterTop()
     })
 })

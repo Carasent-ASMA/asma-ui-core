@@ -258,6 +258,32 @@ describe('MinimizableDialog native Back (ASMA-8471)', () => {
         await expect(onClose).not.toHaveBeenCalled()
     })
 
+    it('does not register once minimized, even while fullscreen', async () => {
+        const onClose = fn()
+        // `minimized` has no external control on this (v1) component, so it has to be reached the
+        // same way a user would: click Minimize (only visible outside fullscreen) first, THEN switch
+        // to fullscreen via a re-render with `fullScreenState` — the internal `minimized` state
+        // survives the re-render since it's the same component instance.
+        const { container, rerender } = mount(
+            <MinimizableDialog dataTest='dialog' open title='Editor' onClose={onClose}>
+                <p>Content</p>
+            </MinimizableDialog>,
+        )
+        await userEvent.click(container.querySelectorAll<HTMLButtonElement>('[data-testid="minimize-button"]')[1]!)
+        await waitFor(() => expect(getOverlayBackStackSize()).toBe(0))
+
+        rerender(
+            <MinimizableDialog dataTest='dialog' open fullScreenState title='Editor' onClose={onClose}>
+                <p>Content</p>
+            </MinimizableDialog>,
+        )
+
+        await expect(getOverlayBackStackSize()).toBe(0)
+
+        void requestCloseTopOverlayBack()
+        await expect(onClose).not.toHaveBeenCalled()
+    })
+
     it('waits while the primary action runs, same as its ✕/Esc path', async () => {
         const onClose = fn()
         mount(

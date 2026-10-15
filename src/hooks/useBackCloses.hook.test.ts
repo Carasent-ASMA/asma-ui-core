@@ -172,4 +172,149 @@ describe('overlay-back registry', () => {
             expect(hasOverlayBackAdapter()).toBe(false)
         })
     })
+
+    /**
+     * The coordinator contract with the real `asma-core-helpers` adapter (PR #51, ASMA-8476):
+     * `window.__ASMA__SHELL__.overlayBack = { v: 1, enabled, register }`. `register(requestClose)`
+     * returns an unregister; ui-core calls it exactly once — when the stack goes empty → non-empty —
+     * with a closer that always delegates to whatever is CURRENTLY on top, and calls the returned
+     * unregister exactly once — when the stack drains back to empty.
+     */
+    describe('adapter integration (coordinator contract)', () => {
+        const globals = globalThis as { window?: unknown; document?: unknown }
+
+        afterEach(() => {
+            delete globals.window
+            delete globals.document
+        })
+
+        interface FakeOverlayBackAdapter {
+            v?: number
+            enabled?: boolean
+            register?: (requestClose: () => void | Promise<unknown>) => () => void
+        }
+
+        const installFakeShell = (
+            overlayBack: FakeOverlayBackAdapter | undefined,
+        ): {
+            registerSpy: ReturnType<typeof vi.fn>
+            unregisterSpy: ReturnType<typeof vi.fn>
+            history: { pushState: ReturnType<typeof vi.fn>; replaceState: ReturnType<typeof vi.fn>; back: ReturnType<typeof vi.fn>; go: ReturnType<typeof vi.fn> }
+        } => {
+            const unregisterSpy = vi.fn()
+            const registerSpy = vi.fn(() => unregisterSpy)
+            const history = { pushState: vi.fn(), replaceState: vi.fn(), back: vi.fn(), go: vi.fn() }
+            const real = {
+                history,
+                __ASMA__SHELL__:
+                    overlayBack === undefined
+                        ? undefined
+                        : {
+                              overlayBack: {
+                                  ...overlayBack,
+                                  register: 'register' in overlayBack ? overlayBack.register : registerSpy,
+                              },
+                          },
+            }
+            globals.window = real
+            globals.document = { defaultView: real }
+            return { registerSpy, unregisterSpy, history }
+        }
+
+        const expectNoHistoryCalls = (history: ReturnType<typeof installFakeShell>['history']): void => {
+            expect(history.pushState).not.toHaveBeenCalled()
+            expect(history.replaceState).not.toHaveBeenCalled()
+            expect(history.back).not.toHaveBeenCalled()
+            expect(history.go).not.toHaveBeenCalled()
+        }
+
+        it('registers exactly once when the stack becomes non-empty, and the closer delegates to the CURRENT top', () => {
+            const { registerSpy } = installFakeShell({ v: 1, enabled: false })
+            const closeA = vi.fn()
+            const closeB = vi.fn()
+
+            const unregisterA = registerOverlayBackCloser(closeA)
+            expect(registerSpy).toHaveBeenCalledTimes(1)
+            const adapterCloser = registerSpy.mock.calls[0]?.[0] as () => void
+
+            adapterCloser()
+            expect(closeA).toHaveBeenCalledTimes(1)
+            expect(closeB).not.toHaveBeenCalled()
+
+            // A second overlay stacks on top — no second `register()` call, the SAME closer now
+            // delegates to B, proving it reads the stack live rather than closing over A forever.
+            const unregisterB = registerOverlayBackCloser(closeB)
+            expect(registerSpy).toHaveBeenCalledTimes(1)
+
+            adapterCloser()
+            expect(closeB).toHaveBeenCalledTimes(1)
+            expect(closeA).toHaveBeenCalledTimes(1)
+
+            unregisterB()
+            unregisterA()
+        })
+
+        it('unregisters the adapter once the stack drains to empty', async () => {
+            const { registerSpy, unregisterSpy } = installFakeShell({ v: 1, enabled: false })
+            const unregister = registerOverlayBackCloser(vi.fn())
+            expect(registerSpy).toHaveBeenCalledTimes(1)
+
+            unregister()
+            expect(unregisterSpy).not.toHaveBeenCalled()
+
+            await Promise.resolve()
+            expect(unregisterSpy).toHaveBeenCalledTimes(1)
+        })
+
+        it('StrictMode cleanup/setup defers the release by a microtask, and re-registration cancels it (no transient drain)', async () => {
+            const { registerSpy, unregisterSpy } = installFakeShell({ v: 1, enabled: false })
+            const requestClose = vi.fn()
+
+            // Mount, cleanup, mount again — synchronously, exactly like React StrictMode's dev-only
+            // double effect invoke, before any microtask gets a turn.
+            const firstUnregister = registerOverlayBackCloser(requestClose)
+            firstUnregister()
+            const secondUnregister = registerOverlayBackCloser(requestClose)
+
+            expect(registerSpy).toHaveBeenCalledTimes(1)
+            expect(unregisterSpy).not.toHaveBeenCalled()
+
+            // Flush the deferred release — it must observe the stack is non-empty again and no-op.
+            await Promise.resolve()
+            await Promise.resolve()
+            expect(unregisterSpy).not.toHaveBeenCalled()
+            expect(registerSpy).toHaveBeenCalledTimes(1)
+
+            secondUnregister()
+            await Promise.resolve()
+            expect(unregisterSpy).toHaveBeenCalledTimes(1)
+        })
+
+        it('never calls register or history when overlayBack is absent (TEST-012)', () => {
+            const { registerSpy, history } = installFakeShell(undefined)
+            const unregister = registerOverlayBackCloser(vi.fn())
+            void requestCloseTopOverlayBack()
+            unregister()
+            expect(registerSpy).not.toHaveBeenCalled()
+            expectNoHistoryCalls(history)
+        })
+
+        it('never calls register or history on a version other than 1 (TEST-012)', () => {
+            const { registerSpy, history } = installFakeShell({ v: 2, enabled: false })
+            const unregister = registerOverlayBackCloser(vi.fn())
+            void requestCloseTopOverlayBack()
+            unregister()
+            expect(registerSpy).not.toHaveBeenCalled()
+            expectNoHistoryCalls(history)
+        })
+
+        it('never calls register or history when overlayBack.register is not a function (TEST-012)', () => {
+            const { registerSpy, history } = installFakeShell({ v: 1, enabled: false, register: undefined })
+            const unregister = registerOverlayBackCloser(vi.fn())
+            void requestCloseTopOverlayBack()
+            unregister()
+            expect(registerSpy).not.toHaveBeenCalled()
+            expectNoHistoryCalls(history)
+        })
+    })
 })
