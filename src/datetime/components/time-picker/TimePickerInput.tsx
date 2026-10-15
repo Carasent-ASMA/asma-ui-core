@@ -1,10 +1,11 @@
 import type { StyledTimePickerProps } from './types'
 import { type PopupState } from 'src/hooks/usePopupState'
 import { HelperText, defaultTimePickerHelperMessages } from './components/HelperText'
-import { useRef, type ChangeEvent, useEffect, type MouseEvent as ReactMouseEvent } from 'react'
+import { useRef, type ChangeEvent, useEffect, useId, type MouseEvent as ReactMouseEvent } from 'react'
 import { StyledInputField } from 'src/datetime/shared-components/StyledInputField'
 import { ClockOutlineIcon } from 'src/datetime/shared-components/ClockOutlineIcon'
 import { useInputMask } from 'src/helpers/inputMask'
+import { getTitleLabelling } from 'src/datetime/helpers/getTitleLabelling'
 
 export const TimePickerInput: React.FC<
     StyledTimePickerProps & {
@@ -34,6 +35,7 @@ export const TimePickerInput: React.FC<
         localValue,
         title,
         readOnly,
+        inputAriaProps,
     } = props
 
     const inputRef = useInputMask({
@@ -44,6 +46,7 @@ export const TimePickerInput: React.FC<
 
     const hasError = !isValidTime || !isValidEndTime || !!error
     const inputRootRef = useRef<HTMLDivElement | null>(null)
+    const titleId = useId()
 
 
     useEffect(() => {
@@ -55,7 +58,11 @@ export const TimePickerInput: React.FC<
 
     return (
         <div style={{ height: readOnly ? '40px' : '75px' }}>
-            {title && <div className='pb-1 font-roboto font-semibold text-delta-800'>{title}</div>}
+            {title && (
+                <div id={titleId} className='pb-1 font-roboto font-semibold text-delta-800'>
+                    {title}
+                </div>
+            )}
             <StyledInputField
                 inputRef={inputRef}
                 autoComplete='off'
@@ -78,6 +85,7 @@ export const TimePickerInput: React.FC<
                 onChange={handleChange}
                 onBlur={handleBlur}
                 slotProps={{
+                    htmlInput: getTitleLabelling({ title, titleId, label, inputAriaProps }),
                     input: {
                         ref: inputRootRef,
                         onClick: (e: ReactMouseEvent<HTMLElement>) => {

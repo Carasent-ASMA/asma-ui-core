@@ -190,4 +190,25 @@ describe('StyledDatePicker keyboard contract', () => {
         await expect(container.querySelector('input')).toHaveAttribute('readonly')
         await expect(container.querySelector('button[aria-label="Open calendar"]')).toBeNull()
     })
+
+    it('names the field by its title, or by inputAriaProps when given (1.3.1, 4.1.2)', async () => {
+        const { container } = mount(
+            <>
+                <StyledDatePicker dataTest='titled' mode='single' selected={undefined} onSelect={() => undefined} title='Start date*' />
+                <StyledDatePicker
+                    dataTest='named'
+                    mode='single'
+                    selected={undefined}
+                    onSelect={() => undefined}
+                    title='End date*'
+                    inputAriaProps={{ 'aria-label': 'End date', 'aria-required': true }}
+                />
+            </>,
+        )
+
+        await expect(container.querySelector('input[data-testid="titled"]')).toHaveAccessibleName('Start date*')
+        const named = container.querySelector('input[data-testid="named"]')
+        await expect(named).toHaveAccessibleName('End date')
+        await expect(named).toHaveAttribute('aria-required', 'true')
+    })
 })

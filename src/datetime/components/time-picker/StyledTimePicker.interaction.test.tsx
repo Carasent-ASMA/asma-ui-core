@@ -275,4 +275,22 @@ describe('StyledTimePicker minTime', () => {
         await expect(onSelect).not.toHaveBeenCalled()
         await expect(input).not.toHaveAttribute('aria-invalid', 'true')
     })
+
+    it('names the field by its title, or by inputAriaProps for a label rendered outside (1.3.1, 4.1.2)', async () => {
+        const { container } = mount(
+            <>
+                <StyledTimePicker dataTest='titled' title='Start time' onSelect={() => undefined} />
+                <StyledTimePicker
+                    dataTest='named'
+                    onSelect={() => undefined}
+                    inputAriaProps={{ 'aria-label': 'End time', 'aria-required': true }}
+                />
+            </>,
+        )
+
+        await expect(container.querySelector('input[data-testid="titled"]')).toHaveAccessibleName('Start time')
+        const named = container.querySelector('input[data-testid="named"]')
+        await expect(named).toHaveAccessibleName('End time')
+        await expect(named).toHaveAttribute('aria-required', 'true')
+    })
 })

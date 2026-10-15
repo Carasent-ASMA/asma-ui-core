@@ -1,8 +1,9 @@
 import { StyledInputField } from 'src/datetime/shared-components/StyledInputField'
 import { DatePickerButton } from './DatePickerButton'
+import { getTitleLabelling } from 'src/datetime/helpers/getTitleLabelling'
 import { useDatePickerMask } from '../hooks/useDatePickerMask'
 import { DATE_INPUT_FONT_FAMILY } from 'src/helpers/inputMask'
-import { useEffect, useState } from 'react'
+import { type AriaAttributes, useEffect, useId, useState } from 'react'
 import { getValue } from '../helpers'
 import { useDatePickerValidation, defaultDatePickerValidationMessages } from '../hooks/useDatePickerValidation'
 import { parse, isValid as isValidDateFns } from 'date-fns'
@@ -33,6 +34,7 @@ export interface IBaseDatePickerInput {
     hideDefaultHelperText?: boolean
     required?: boolean
     minDate?: Date
+    inputAriaProps?: AriaAttributes
 }
 
 export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
@@ -50,6 +52,7 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
         disabledDays,
         label,
         title,
+        inputAriaProps,
         readOnly,
         disallowPast,
         disallowFuture,
@@ -64,6 +67,7 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
     const { validationError, handleValidation, errHelperText, clearValidation } =
         useDatePickerValidation(defaultDatePickerValidationMessages)
     const { maskRef } = useDatePickerMask()
+    const titleId = useId()
     const [value, setValue] = useState(selected ? getValue(selected, dateFormat) : '')
 
     // Keep `value` in sync with `selected`/`dateFormat` without an effect — the React-recommended
@@ -175,7 +179,11 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
 
     return (
         <div className='cursor-default'>
-            {title && <div className='pb-1 font-roboto font-semibold text-delta-800'>{title}</div>}
+            {title && (
+                <div id={titleId} className='pb-1 font-roboto font-semibold text-delta-800'>
+                    {title}
+                </div>
+            )}
 
             <div className='flex gap-1' style={{ height }}>
                 <div style={{ width }}>
@@ -200,6 +208,7 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
                             slotProps={{
                                 formHelperText: { sx: { marginTop: '4px', marginLeft: 0, marginRight: 0 } },
                                 htmlInput: {
+                                    ...getTitleLabelling({ title, titleId, label, inputAriaProps }),
                                     // The editable field renders the space-scaffold mask ('  /  /    '),
                                     // so it MUST use a monospace font — see DATE_INPUT_FONT_FAMILY. With a
                                     // proportional font (Roboto) the day/year space slots collapse to
