@@ -1,10 +1,10 @@
 @use 'sass:map';
 
-// Figma Checkbox (15385-19713): box 20px in a 40px target. Small keeps its 15px box in an odd 39px
-// target so the box is inset by whole pixels (38px put it on a half pixel, off the hover circle).
+// Figma Checkbox (11360-32062) has one size: a 16x16 box (radius 2) centred in a 40px target, so
+// the 40px hover circle is concentric with it. Both `size` values render that one size.
 $checkbox-sizes: (
     medium: 40px,
-    small: 39px,
+    small: 40px,
 );
 
 @mixin checkbox-dimensions($size) {
@@ -16,13 +16,8 @@ $checkbox-sizes: (
 @mixin checkbox-size($size) {
     border-radius: 2px;
 
-    @if $size == 'medium' {
-        width: 20px;
-        height: 20px;
-    } @else if $size == 'small' {
-        width: 15px;
-        height: 15px;
-    }
+    width: 16px;
+    height: 16px;
 }
 
 .CheckboxWrapper {
@@ -166,10 +161,6 @@ $checkbox-sizes: (
         transform: translate(-50%, -50%) scale(1);
     }
 
-    &.size-small::after {
-        width: 39px;
-        height: 39px;
-    }
 }
 
 .Checkbox {
@@ -205,10 +196,10 @@ $checkbox-sizes: (
         position: absolute;
         top: 50%;
         left: 50%;
-        width: 62%;
-        height: 2.5px;
+        // Figma Checkbox-indeterminate "Dash": 10x2, square ends.
+        width: 10px;
+        height: 2px;
         transform: translate(-50%, -50%);
-        border-radius: 999px;
         background-color: var(--cb-indicator-color);
         z-index: 2;
         pointer-events: none;

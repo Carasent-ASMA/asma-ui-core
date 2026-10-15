@@ -163,19 +163,19 @@ test.describe('SC 2.5.8 target size (minimum)', () => {
         })
     }
 
-    test('checkbox and radio expose a 39x39 hit area, not their 1x1 sr-only input', async ({ page }) => {
+    test('checkbox and radio expose a 40x40 hit area, not their 1x1 sr-only input', async ({ page }) => {
         await prepareStoryFrame(page, 'inputs-checkbox--unchecked-default')
         const wrapper = page.locator('label[class*="_CheckboxWrapper_"]').first()
         const box = await wrapper.boundingBox()
 
-        /* The native input is sr-only at 1x1; the wrapper is the real target. Pinning 39px
+        /* The native input is sr-only at 1x1; the wrapper is the real target. Pinning 40px
          * keeps the core control's hit area from collapsing the way the table's drifted
-         * copy did (15x15 — see A11Y-ROBUSTNESS.md F-04). 39, not 38, since ASMA-8338: an odd
-         * target centres the 15px small box on whole pixels under the hover circle. */
+         * copy did (15x15 — see A11Y-ROBUSTNESS.md F-04). 40, not 38, since ASMA-8338: Figma
+         * has one checkbox size, a 16px box centred in a 40px target. */
         expect(box?.width).toBeGreaterThanOrEqual(24)
         expect(box?.height).toBeGreaterThanOrEqual(24)
-        expect(Math.round(box?.width ?? 0)).toBe(39)
-        expect(Math.round(box?.height ?? 0)).toBe(39)
+        expect(Math.round(box?.width ?? 0)).toBe(40)
+        expect(Math.round(box?.height ?? 0)).toBe(40)
     })
 
     test('date picker day cells are at least 24x24', async ({ page }) => {

@@ -1,12 +1,13 @@
 @use 'sass:map';
 
-// Figma Checkbox (node 15385-19713): box 20px inside a 40px touch/hover target.
-// Small keeps every concentric layer the same parity as its 15px box (target 39, focus frame 25,
-// gap 19) so each one is inset by whole pixels; a 38px target put the box on a half pixel and
-// the hover circle rendered visibly off-centre.
+// Figma Checkbox (component set 11360-32062) has ONE size: a 40px target holding a 20px icon frame
+// whose visible box is 16x16 (radius 2) at a 2px inset — so the box sits 12px from every edge of
+// the target and the 40px hover circle is exactly concentric with it. Every layer below is even
+// (40 / 26 focus frame / 24 error frame / 20 gap / 16 box) so each is inset by whole pixels.
+// `size` stays in the API for compatibility; both values render this one Figma size.
 $checkbox-sizes: (
     medium: 40px,
-    small: 39px,
+    small: 40px,
 );
 
 @mixin checkbox-dimensions($size) {
@@ -18,13 +19,9 @@ $checkbox-sizes: (
 @mixin checkbox-size($size) {
     border-radius: 2px;
 
-    @if $size == 'medium' {
-        width: 20px; // Figma checkbox box = 20px
-        height: 20px;
-    } @else if $size == 'small' {
-        width: 15px;
-        height: 15px;
-    }
+    // Figma Bg / check_box_outline_blank = 16x16 for every size.
+    width: 16px;
+    height: 16px;
 }
 
 .CheckboxWrapper {
@@ -36,15 +33,14 @@ $checkbox-sizes: (
     cursor: pointer;
     background: transparent;
     border: none;
-    --cb-frame-size: 30px;
-    --cb-focus-gap-size: 24px;
+    // Figma Focused (11460-105640): 3px ring, 26px outer, 2px white gap (20px) around the 16px box.
+    --cb-frame-size: 26px;
+    --cb-focus-gap-size: 20px;
     --cb-frame-color: var(--colors-focus-ring);
     --cb-frame-radius: 4px;
 
     &.size-small {
         @include checkbox-dimensions(small);
-        --cb-frame-size: 25px;
-        --cb-focus-gap-size: 19px;
     }
 
     &.size-medium {
@@ -132,15 +128,12 @@ $checkbox-sizes: (
     }
 }
 
-// Figma Error state (nodes 41325-207511/207527): 2px error frame outside the normal checkbox.
+// Figma Error state (nodes 41325-207511/207527): 2px ring, 24px outer (radius 3), 2px gap around
+// the 16px box.
 .CheckboxWrapper.Error {
-    --cb-frame-size: 28px;
+    --cb-frame-size: 24px;
     --cb-frame-color: var(--colors-error-500);
     --cb-frame-radius: 3px;
-}
-
-.CheckboxWrapper.Error.size-small {
-    --cb-frame-size: 23px;
 }
 
 @media (forced-colors: active) {
@@ -241,10 +234,6 @@ $checkbox-sizes: (
         transform: translate(-50%, -50%) scale(1);
     }
 
-    &.size-small .CheckboxRippleContainer::after {
-        width: 39px;
-        height: 39px;
-    }
 }
 
 .Checkbox {

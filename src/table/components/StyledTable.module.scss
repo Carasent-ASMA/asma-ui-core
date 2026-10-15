@@ -590,5 +590,7 @@
     width: 100%;
     height: 100%;
     margin: 0;
-    padding: 0 0 0 8px;
+    // Figma table Checkbox cell: 8px row edge + a 32px slot centring the 16px box → box at x16.
+    // The cell adds 5px padding + its 1px (transparent) left border, so 10px here.
+    padding: 0 0 0 10px;
 }

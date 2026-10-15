@@ -58,9 +58,8 @@ export function selectColumn<TData>(isFixed: boolean, rowHeight?: number, locale
                         `nested-interactive` violation that `aria-hidden` + `tabIndex={-1}` do
                         not satisfy — only removing the input does (ASMA-8143). Same classes and
                         `data-*` state attributes, so the rendered box is unchanged. */}
-                    {/* Figma table "Checkbox" cell (12718-66403): a 20px box, like the standard checkbox. */}
                     <StyledCheckbox
-                        size='medium'
+                        size='small'
                         dataTest='cell-select-all'
                         decorative
                         checked={table.getIsAllRowsSelected()}
@@ -99,7 +98,7 @@ export function selectColumn<TData>(isFixed: boolean, rowHeight?: number, locale
                         <span className={disabled ? style['cursor-not-allowed'] : undefined}>
                             {/* `decorative` — see the header checkbox above. */}
                             <StyledCheckbox
-                                size='medium'
+                                size='small'
                                 dataTest='cell-select'
                                 decorative
                                 checked={cell.row.getIsSelected()}

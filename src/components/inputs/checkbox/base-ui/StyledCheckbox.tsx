@@ -4,7 +4,7 @@ import { cn } from 'src/helpers/cn'
 
 /**
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#15385-19713
- * Figma "Checkbox" (box 20px, 40px touch). Figma **Type** (Unchecked/Indeterminate/Checked) ←
+ * Figma "Checkbox" (one size: 16px box in a 40px target). Figma **Type** (Unchecked/Indeterminate/Checked) ←
  * `checked`/`indeterminate`; Figma **State** (Enabled/Hovered/Focused/Disabled/Read-only) ← native
  * hover/focus + `disabled`/`readOnly`/`error`. Checked/indeterminate box = `gama-500` #168181,
  * unchecked border = `delta-500`; Error = box border `error-500` #e10700 (node 41325-207511/207527).
@@ -12,7 +12,7 @@ import { cn } from 'src/helpers/cn'
 type StyledCheckboxProps = {
     /** @figmaProp none — test hook */
     dataTest: string
-    /** @figmaProp none — app size (Figma box is 20px) */
+    /** @figmaProp none — kept for API compatibility; Figma has one size, so both render the 16px box in a 40px target */
     size?: 'small' | 'medium'
     /** @figmaProp Type = true→"Checked" | false→"Unchecked" */
     checked?: boolean
@@ -59,6 +59,14 @@ export const CheckIcon = (props: SVGProps<SVGSVGElement>): JSX.Element => (
         {...props}
     >
         <path d='M4 12l5 5L20 6' />
+    </svg>
+)
+
+// Figma Checkbox-checked (11360-32028) "Check" glyph, re-based from its 20px frame onto the 16px box:
+// a filled tick, not a stroke, so it renders identically at every size.
+const FigmaCheckGlyph = (): JSX.Element => (
+    <svg aria-hidden='true' viewBox='0 0 16 16' width='100%' height='100%' fill='currentColor'>
+        <path d='M6 12.4L2 8.4L3.4 7L6 9.6L12.6 3L14 4.4L6 12.4Z' />
     </svg>
 )
 
@@ -111,7 +119,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
         indeterminate && styles['Indeterminate'],
         checkboxClassName,
     )
-    const CheckboxIcon = indeterminate ? IndeterminateIcon : CheckIcon
+    const CheckboxIcon = indeterminate ? IndeterminateIcon : FigmaCheckGlyph
 
     const handlePointerDown = React.useCallback(
         (e: React.PointerEvent) => {
@@ -162,7 +170,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
             {!isHideWrapper && isRippleEnabled && <span ref={rippleRef} className={styles['CheckboxRippleContainer']} />}
             <span className={checkboxClasses}>
                 <span className={styles['Indicator']}>
-                    <CheckboxIcon strokeWidth={size === 'small' ? 3 : 2} />
+                    <CheckboxIcon />
                 </span>
             </span>
         </>
