@@ -133,7 +133,7 @@ export function RowActionMenu<TData>({
                                 <span>{noActionsLabel}</span>
                             </div>
                         ) : (
-                            <MenuList disablePadding>
+                            <MenuList>
                                 {allActions.map((action, index) => {
                                     if (isCustomAction(action)) {
                                         const CustomComponent = action.component(tableData.row, handleClose)
