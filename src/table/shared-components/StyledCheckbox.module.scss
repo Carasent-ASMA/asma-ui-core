@@ -168,6 +168,9 @@ $checkbox-sizes: (
     overflow: visible;
     padding: 0;
     box-sizing: border-box;
+    // Above the opaque hover halo (.CheckboxHover::after, z-index 0, painted last as the wrapper's
+    // pseudo-element), so the 16px box and its focus outline are never covered on hover.
+    z-index: 1;
 
     --cb-border-w: 2px;
     --cb-indicator-color: #fff;
