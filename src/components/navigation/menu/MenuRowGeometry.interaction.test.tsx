@@ -14,6 +14,7 @@ import { StyledInputField } from 'src/components/inputs/input-field'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { StyledTable } from 'src/table/components/StyledTableIndex'
 import { StyledMenu } from './StyledMenu'
+import { StyledPhoneField } from 'src/components/inputs/phone-field/StyledPhoneField'
 
 /**
  * Figma Menus item (wXrXt5uKNNzV2DnQCgyYZH 16741-35895): every single-line row is exactly 40px with
@@ -203,5 +204,54 @@ describe('Menu popovers pad their list 8px top and bottom', () => {
         )
         document.querySelector<HTMLButtonElement>('[data-test="row-actions-button"]')!.click()
         await expectListPadding()
+    })
+})
+
+const COUNTRIES = [
+    { iso2: 'NO', dialCode: '47', name: 'Norway' },
+    { iso2: 'SE', dialCode: '46', name: 'Sweden' },
+    { iso2: 'DK', dialCode: '45', name: 'Denmark' },
+    { iso2: 'FI', dialCode: '358', name: 'Finland' },
+] as const
+
+const PhoneFieldFixture = (): JSX.Element => {
+    const [country, setCountry] = useState('NO')
+    return (
+        <StyledPhoneField
+            dataTest='geometry-phone'
+            label='Phone'
+            countries={COUNTRIES}
+            country={country}
+            value=''
+            onCountryChange={setCountry}
+            onChange={() => undefined}
+            selectCountryLabel='Select country'
+            searchPlaceholder='Search country'
+        />
+    )
+}
+
+// Desktop country picker (the mobile dialog keeps its own 44px touch rows, see the header note).
+describe('Phone field country picker matches the Figma Menus surface', () => {
+    afterEach(cleanup)
+
+    it('has 40px rows and 8px above the first row and below the last', async () => {
+        const { container } = mount(<PhoneFieldFixture />)
+        await userEvent.click(container.querySelector<HTMLElement>('[data-testid="geometry-phone-country"]')!)
+        const list = await waitFor(() => {
+            const found = document.querySelector<HTMLElement>('[data-testid="geometry-phone-country-listbox"]')
+            if (!found) throw new Error('country list not open')
+            return found
+        })
+        const rows = Array.from(list.querySelectorAll<HTMLElement>('[role="option"]'))
+        await expectFigmaRows(rows)
+
+        const paper = list.parentElement!
+        const box = paper.getBoundingClientRect()
+        const style = getComputedStyle(paper)
+        const innerTop = box.top + parseFloat(style.borderTopWidth)
+        const innerBottom = box.bottom - parseFloat(style.borderBottomWidth)
+        await expect(rows[0]!.getBoundingClientRect().top - innerTop, 'space above the first row').toBe(8)
+        await expect(innerBottom - rows.at(-1)!.getBoundingClientRect().bottom, 'space below the last row').toBe(8)
     })
 })
