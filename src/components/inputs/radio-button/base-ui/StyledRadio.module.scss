@@ -82,7 +82,9 @@
     transform: translate(-50%, -50%) scale(0);
     opacity: 0.25;
     animation: ripple 400ms ease-out forwards;
-    z-index: 0;
+    // Above the opaque hover halo (.RadioRippleContainer::after, z-index 0, painted last inside
+    // this container), so the press ripple stays visible.
+    z-index: 1;
 }
 
 @keyframes ripple {
