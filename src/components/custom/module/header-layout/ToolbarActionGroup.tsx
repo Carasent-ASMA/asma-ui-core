@@ -1,4 +1,5 @@
 import { Fragment, useState, type ReactNode } from 'react'
+import { useReportDialogBusy } from 'src/components/feedback/dialog/DialogBusyContext'
 import { StyledButton } from 'src/components/inputs/button'
 import { DotsVerticalIcon } from 'src/components/icons'
 import { StyledMenu } from 'src/components/navigation/menu/StyledMenu'
@@ -115,6 +116,10 @@ export function ToolbarActionGroup({
 }): JSX.Element | null {
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
     const { inlineActions, overflowActions, showMoreMenu } = plan
+    /* A menu item is not a StyledButton, so a running action in the More menu reports itself here. */
+    useReportDialogBusy(
+        showMoreMenu && overflowActions.some((action) => Boolean(action.loading) && action.holdsDialog !== false),
+    )
 
     if (!inlineActions.length && !showMoreMenu) {
         return null

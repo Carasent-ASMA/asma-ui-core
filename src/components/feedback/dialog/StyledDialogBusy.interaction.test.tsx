@@ -6,6 +6,7 @@ import { StyledButton } from '../../inputs/button/StyledButton'
 import { StyledDialog } from './StyledDialog'
 import { MinimizableDialogV2 } from '../minimizable-dialog/v2/MinimizableDialogV2'
 import { StyledDialogFooter } from './dialog-footer/StyledDialogFooter'
+import { PageHeader } from '../../custom/page/page-header/PageHeader'
 
 const busyReason = 'Wait until saved'
 
@@ -184,6 +185,50 @@ describe('StyledDialog explains busy dismissal controls', () => {
             cancel.focus()
             await userEvent.keyboard('{Escape}')
             await expect(onClose).toHaveBeenCalledTimes(3)
+            cleanup()
+        }
+    })
+
+    it('holds the dialog while a loading header action sits in the More menu, unless it opts out', async () => {
+        for (const [holdsDialog, closes] of [
+            [undefined, 0],
+            [false, 3],
+        ] as const) {
+            const onClose = vi.fn()
+            const { container } = mount(
+                <StyledDialog open dataTest='editor' onClose={onClose}>
+                    <div style={{ width: 240 }}>
+                        <PageHeader
+                            title='Editor'
+                            actions={[
+                                { id: 'edit', label: 'Edit', onClick: () => undefined },
+                                {
+                                    id: 'save',
+                                    label: 'Save',
+                                    loading: true,
+                                    holdsDialog,
+                                    measureInStrip: false,
+                                    estimatedWidthPx: 120,
+                                    onClick: () => undefined,
+                                },
+                            ]}
+                        />
+                    </div>
+                    <StyledDialogFooter secondaryAction={{ label: 'Cancel', dataTest: 'cancel', onClick: onClose }} />
+                </StyledDialog>,
+            )
+            await waitFor(() =>
+                expect(container.querySelector('[data-testid="dynamic-toolbar-overflow-actions"]')).not.toBeNull(),
+            )
+            await new Promise(requestAnimationFrame)
+            await expect(container.querySelector('[data-testid="dynamic-toolbar-action-save"]')).toBeNull()
+            const close = container.querySelector<HTMLButtonElement>('[data-testid="close-button-editor"]')!
+            const cancel = container.querySelector<HTMLButtonElement>('[data-testid="cancel"]')!
+
+            for (const button of [close, cancel]) button.click()
+            cancel.focus()
+            await userEvent.keyboard('{Escape}')
+            await expect(onClose).toHaveBeenCalledTimes(closes)
             cleanup()
         }
     })
