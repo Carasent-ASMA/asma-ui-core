@@ -1,9 +1,13 @@
 @use 'sass:map';
 
-// Figma Checkbox (node 15385-19713): box 20px inside a 40px touch/hover target.
+// Figma Checkbox (component set 11360-32062) has ONE size: a 40px target holding a 20px icon frame
+// whose visible box is 16x16 (radius 2) at a 2px inset — so the box sits 12px from every edge of
+// the target and the 40px hover circle is exactly concentric with it. Every layer below is even
+// (40 / 26 focus frame / 24 error frame / 20 gap / 16 box) so each is inset by whole pixels.
+// `size` stays in the API for compatibility; both values render this one Figma size.
 $checkbox-sizes: (
     medium: 40px,
-    small: 38px,
+    small: 40px,
 );
 
 @mixin checkbox-dimensions($size) {
@@ -15,13 +19,9 @@ $checkbox-sizes: (
 @mixin checkbox-size($size) {
     border-radius: 2px;
 
-    @if $size == 'medium' {
-        width: 20px; // Figma checkbox box = 20px
-        height: 20px;
-    } @else if $size == 'small' {
-        width: 15px;
-        height: 15px;
-    }
+    // Figma Bg / check_box_outline_blank = 16x16 for every size.
+    width: 16px;
+    height: 16px;
 }
 
 .CheckboxWrapper {
@@ -29,19 +29,21 @@ $checkbox-sizes: (
     align-items: center;
     justify-content: center;
     position: relative;
+    // Own stacking context: the focus/error frame (z-index 1) and box (2), lifted above the opaque
+    // hover halo, stay inside the checkbox instead of painting over a table's sticky cells.
+    isolation: isolate;
     box-sizing: border-box;
     cursor: pointer;
     background: transparent;
     border: none;
-    --cb-frame-size: 30px;
-    --cb-focus-gap-size: 24px;
+    // Figma Focused (11460-105640): 3px ring, 26px outer, 2px white gap (20px) around the 16px box.
+    --cb-frame-size: 26px;
+    --cb-focus-gap-size: 20px;
     --cb-frame-color: var(--colors-focus-ring);
     --cb-frame-radius: 4px;
 
     &.size-small {
         @include checkbox-dimensions(small);
-        --cb-frame-size: 25px;
-        --cb-focus-gap-size: 19px;
     }
 
     &.size-medium {
@@ -109,7 +111,8 @@ $checkbox-sizes: (
         &::before {
             width: var(--cb-frame-size);
             height: var(--cb-frame-size);
-            z-index: 0;
+            // Above the opaque hover circle (z-index 0), so a hovered focused/error checkbox keeps its frame.
+            z-index: 1;
             border-radius: var(--cb-frame-radius);
             background: var(--cb-frame-color);
         }
@@ -128,15 +131,12 @@ $checkbox-sizes: (
     }
 }
 
-// Figma Error state (nodes 41325-207511/207527): 2px error frame outside the normal checkbox.
+// Figma Error state (nodes 41325-207511/207527): 2px ring, 24px outer (radius 3), 2px gap around
+// the 16px box.
 .CheckboxWrapper.Error {
-    --cb-frame-size: 28px;
+    --cb-frame-size: 24px;
     --cb-frame-color: var(--colors-error-500);
     --cb-frame-radius: 3px;
-}
-
-.CheckboxWrapper.Error.size-small {
-    --cb-frame-size: 23px;
 }
 
 @media (forced-colors: active) {
@@ -203,7 +203,9 @@ $checkbox-sizes: (
     transform: translate(-50%, -50%) scale(0);
     opacity: 0.25;
     animation: ripple 400ms ease-out forwards;
-    z-index: 0;
+    // Above the opaque hover halo (.CheckboxRippleContainer::after, z-index 0, painted last inside
+    // this container), so the press ripple stays visible.
+    z-index: 1;
 }
 
 @keyframes ripple {
@@ -217,9 +219,11 @@ $checkbox-sizes: (
     .CheckboxRippleContainer::after {
         content: '';
         @extend %ripple-base;
-        width: 40px; // matches Figma 40px touch/hover target
+        // Figma Hovered (node 15424-87984): a solid bg/hover-default (#f0f2f4 = delta-50) circle
+        // filling the 40px touch target, the same for every type and theme.
+        width: 40px;
         height: 40px;
-        background: var(--colors-gama-300);
+        background: var(--colors-delta-50);
         border-radius: 50%;
         top: 50%;
         left: 50%;
@@ -231,14 +235,10 @@ $checkbox-sizes: (
     &:hover .CheckboxRippleContainer::after,
     &[data-hovered] .CheckboxRippleContainer::after,
     &:has(input[data-hovered]) .CheckboxRippleContainer::after {
-        opacity: 0.07;
+        opacity: 1;
         transform: translate(-50%, -50%) scale(1);
     }
 
-    &.size-small .CheckboxRippleContainer::after {
-        width: 38px;
-        height: 38px;
-    }
 }
 
 .Checkbox {

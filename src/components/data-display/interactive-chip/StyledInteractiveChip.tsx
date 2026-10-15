@@ -10,7 +10,7 @@ import styles from './StyledInteractiveChip.module.scss'
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#13248-31089
  * Figma "Tag Chip" **Type=Checkbox** (node 18832-25686 / selected 18869-29068) and **Type=Radio**
  * (18832-25900 / selected 18869-29122). It is a `StyledChip` (h32, radius25, border delta-300, label
- * Body Base 16 delta-700; hover gama-200 + gama-25, focus gama-400 — all inherited) whose start slot
+ * Body Base 16 delta-700; hover fill delta-50, focus gama-400 — all inherited) whose start slot
  * is a native checkbox/radio. Figma **State** (Enabled/Hovered/Focused/Read-only/Disabled) ← native
  * + `readOnly`/`disabled`; **Selected** ← `checked`. A selected **radio** additionally gets the teal
  * chip border/fill (gama-400 / gama-50); a selected **checkbox** only checks its box (matching Figma).
@@ -35,12 +35,12 @@ export interface StyledInteractiveChipProps extends ComponentProps<typeof Styled
 
 // Figma Tag Chip Radio Selected (18869-29122) = 2px gama-400 border + gama-25 fill (same when
 // hovered). Tailwind runs in `important: true` mode, so the base `border-delta-300`/`bg-white`
-// utilities — and, on hover, `hover:border-gama-200` — are `!important` and beat any inline style.
+// utilities — and, on hover, `hover:bg-delta-50` — are `!important` and beat any inline style.
 // That's why the old inline `sx` treatment was silently dead (only its box-shadow survived). We win
 // deterministically with arbitrary-variant classes carrying (0,3,0) specificity via the chip's
-// always-present `data-testid`+`role=button`, outranking the base/hover/focus/active utilities.
+// always-present `data-testid`+`role` (radio), outranking the base/hover/focus/active utilities.
 const SELECTED_RADIO_CLASS =
-    '[&[data-testid][role=button]]:border-2 [&[data-testid][role=button]]:border-gama-400 [&[data-testid][role=button]]:bg-gama-25'
+    '[&[data-testid][role]]:border-2 [&[data-testid][role]]:border-gama-400 [&[data-testid][role]]:bg-gama-25'
 
 // Figma _BASE_Tag Checkbox/Radio (nodes 18832-25686 / 18832-25900): the chip is `padding-left: 0`
 // but the control is a 40px-wide box whose centring leaves ~10px between the chip border and the

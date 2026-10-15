@@ -152,28 +152,36 @@
         color: var(--colors-gama-500);
     }
 
+    // Figma _table row DS: 1px table/border-default #d3d8df (delta-200) between rows, drawn inside
+    // the 48px row. A background layer takes no layout space (a border made every row after the
+    // first 49px) and sits over the hover/Checked/Selected `background-color` without replacing it.
     .t-row + .t-row .t-cell {
-        border-top: 0.5px solid var(--colors-delta-200);
+        background-image: linear-gradient(var(--colors-delta-200), var(--colors-delta-200));
+        background-repeat: no-repeat;
+        background-size: 100% 1px;
+        background-position: top;
     }
 
     .t-row {
         margin-top: 1px;
         display: table-row;
 
+        // Figma _table row DS Hovered (36956-168921): table/bg-row-hover #f0f2f4 = delta-50.
+        // Checked/Selected cells keep their own fill on hover (their rules come later).
         &:hover {
-            background-color: var(--colors-gray-50);
+            background-color: var(--colors-delta-50);
 
             .action-cell {
-                background-color: var(--colors-gray-50);
+                background-color: var(--colors-delta-50);
             }
 
             @media (min-width: 743px) {
                 .fixed-cell {
-                    background-color: var(--colors-gray-50);
+                    background-color: var(--colors-delta-50);
                 }
 
                 .fixed-right-cell {
-                    background-color: var(--colors-gray-50);
+                    background-color: var(--colors-delta-50);
                 }
             }
         }
@@ -212,20 +220,37 @@
                 }
             }
 
-            &:first-child {
-                border-left: 0.5px solid transparent;
+            // Figma _table row DS spacing for content columns: `table/row-left-right` 8px at the row
+            // edges and `table/between-cells` 20px between cells (10px a side). Internal columns
+            // (select/expand/drag/actions/show-text) and narrow ones (<= COMPACT_COLUMN_MAX_WIDTH)
+            // keep their 5px so fixed-width controls and icons fit.
+            &.data-cell {
+                padding-left: 10px;
+                padding-right: 10px;
+
+                &:first-child {
+                    padding-left: 8px;
+                }
+
+                &:last-child {
+                    padding-right: 8px;
+                }
             }
 
-            &:last-child {
-                border-right: 0.5px solid transparent;
+            // Figma mega cell: checkbox slot, then a 4px gap to the text (x 44 = 38 + 6).
+            &.select-cell + .data-cell {
+                padding-left: 6px;
             }
 
+            // Figma Checked (36956-168925): table/bg-row-selected #f3fafa = gama-25.
             &.selected {
                 background-color: var(--colors-gama-25);
             }
 
+            // Figma Selected (45318-213491): table/bg-row-focus white + 2px border/selected
+            // #1ca1a1 (gama-400) frame — distinct from the delta-50 hover and the gama-25 Checked fill.
             &.single-selection {
-                background-color: var(--colors-gama-25);
+                background-color: white;
                 box-shadow:
                     inset 0 2px 0 0 var(--colors-gama-400),
                     inset 0 -2px 0 0 var(--colors-gama-400);
@@ -377,9 +402,10 @@
         opacity: 0;
     }
 
+    // Figma table row DS Header (36956-168917): 32px including its 1px top + bottom lines.
     .show-table-header {
         position: relative;
-        height: 32px;
+        height: 30px;
         width: 100%;
         min-width: 0;
         overflow: hidden;
@@ -405,14 +431,25 @@
             text-overflow: ellipsis;
             white-space: nowrap;
             padding: 0;
-            border-top: 0.5px solid var(--colors-delta-200);
-            border-bottom: 0.5px solid var(--colors-delta-200);
-            &:first-child {
-                border-left: 0.5px solid transparent;
+            border-top: 1px solid var(--colors-delta-200);
+            border-bottom: 1px solid var(--colors-delta-200);
+
+            // Same horizontal spacing as the body cells, so header labels line up with cell text.
+            &.data-cell > .show-table-header {
+                padding-left: 10px;
+                padding-right: 10px;
             }
 
-            &:last-child {
-                border-right: 0.5px solid transparent;
+            &.data-cell:first-child > .show-table-header {
+                padding-left: 8px;
+            }
+
+            &.data-cell:last-child > .show-table-header {
+                padding-right: 8px;
+            }
+
+            &.select-cell + .data-cell > .show-table-header {
+                padding-left: 6px;
             }
 
             &.hide-header {
@@ -578,5 +615,7 @@
     width: 100%;
     height: 100%;
     margin: 0;
-    padding: 0 0 0 8px;
+    // Figma table Checkbox cell: 8px row edge + a 32px slot centring the 16px box → box at x16.
+    // The cell adds its 5px padding, so 11px here.
+    padding: 0 0 0 11px;
 }

@@ -46,6 +46,16 @@ export const CheckIcon = (props: SVGProps<SVGSVGElement>): JSX.Element => (
     </svg>
 )
 
+// Figma Checkbox-checked (11360-32028) "Check" glyph, re-based from its 20px frame onto the 16px box:
+// a filled tick, not a stroke, so it renders identically at every size. Keeps the `<title>` the old
+// CheckIcon had: it is the accessible name of a table checkbox rendered without a label.
+const FigmaCheckGlyph = (): JSX.Element => (
+    <svg viewBox='0 0 16 16' width='100%' height='100%' fill='currentColor'>
+        <title>Check icon</title>
+        <path d='M6 12.4L2 8.4L3.4 7L6 9.6L12.6 3L14 4.4L6 12.4Z' />
+    </svg>
+)
+
 /**
  * Table's native `<input type="checkbox">` (replaces `@base-ui/react`). Mirrors the main
  * `StyledCheckbox`; state drives the SCSS `data-*` selectors. TASK-201.
@@ -83,7 +93,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
         className,
     )
     const checkboxClasses = cn(styles['Checkbox'], styles[`size-${size}`], indeterminate && styles['Indeterminate'])
-    const CheckboxIcon = indeterminate ? IndeterminateIcon : CheckIcon
+    const CheckboxIcon = indeterminate ? IndeterminateIcon : FigmaCheckGlyph
 
     const handlePointerDown = React.useCallback(
         (e: React.PointerEvent) => {
@@ -119,7 +129,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
             {!isHideWrapper && isRippleEnabled && <span ref={rippleRef} className={styles['CheckboxRippleContainer']} />}
             <span className={checkboxClasses}>
                 <span className={styles['Indicator']}>
-                    <CheckboxIcon strokeWidth={size === 'small' ? 3 : 2} />
+                    <CheckboxIcon />
                 </span>
             </span>
         </>
