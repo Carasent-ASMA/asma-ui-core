@@ -1,9 +1,12 @@
 @use 'sass:map';
 
 // Figma Checkbox (node 15385-19713): box 20px inside a 40px touch/hover target.
+// Small keeps every concentric layer the same parity as its 15px box (target 39, focus frame 25,
+// gap 19) so each one is inset by whole pixels; a 38px target put the box on a half pixel and
+// the hover circle rendered visibly off-centre.
 $checkbox-sizes: (
     medium: 40px,
-    small: 38px,
+    small: 39px,
 );
 
 @mixin checkbox-dimensions($size) {
@@ -109,7 +112,8 @@ $checkbox-sizes: (
         &::before {
             width: var(--cb-frame-size);
             height: var(--cb-frame-size);
-            z-index: 0;
+            // Above the opaque hover circle (z-index 0), so a hovered focused/error checkbox keeps its frame.
+            z-index: 1;
             border-radius: var(--cb-frame-radius);
             background: var(--cb-frame-color);
         }
@@ -238,8 +242,8 @@ $checkbox-sizes: (
     }
 
     &.size-small .CheckboxRippleContainer::after {
-        width: 38px;
-        height: 38px;
+        width: 39px;
+        height: 39px;
     }
 }
 
