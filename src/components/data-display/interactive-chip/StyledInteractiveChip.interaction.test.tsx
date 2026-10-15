@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { afterEach, describe, it } from 'vitest'
-import { expect, userEvent } from 'src/test-utils/interaction-api'
+import { expect, fn, userEvent } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { StyledInteractiveChip } from './StyledInteractiveChip'
 
@@ -35,18 +35,23 @@ describe('StyledInteractiveChip keyboard contract', () => {
         await expect(chip).toHaveAttribute('aria-checked', 'true')
     })
 
-    it('keeps a disabled chip out of the Tab order (2.1.1)', async () => {
+    it('keeps a disabled chip in the Tab order, announced as disabled, and inert (2.1.1, DIS-3)', async () => {
+        /* Reversed from "out of the Tab order" (ASMA-8139): the disabled-states pattern keeps a
+         * disabled action focusable with `aria-disabled`, so keyboard users can find it and its reason. */
+        const onClick = fn()
         const { container } = mount(
-            <>
-                <StyledInteractiveChip dataTest='disabled-chip' label='Unavailable' type='checkbox' disabled />
-                <button type='button'>After</button>
-            </>,
+            <StyledInteractiveChip dataTest='disabled-chip' label='Unavailable' type='checkbox' disabled onClick={onClick} />,
         )
         const disabledChip = container.querySelector<HTMLElement>('[data-testid="disabled-chip"]')!
-        const after = container.querySelector<HTMLButtonElement>('button')!
 
+        await expect(disabledChip).toHaveAttribute('aria-disabled', 'true')
         await userEvent.tab()
-        await expect(document.activeElement).toBe(after)
-        await expect(disabledChip).not.toHaveFocus()
+        await expect(document.activeElement).toBe(disabledChip)
+
+        await userEvent.keyboard(' ')
+        await userEvent.keyboard('{Enter}')
+        disabledChip.click()
+        await expect(onClick).not.toHaveBeenCalled()
+        await expect(disabledChip).toHaveAttribute('aria-checked', 'false')
     })
 })

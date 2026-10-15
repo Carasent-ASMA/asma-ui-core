@@ -46,7 +46,9 @@
             background-color: var(--colors-button-#{$type}-#{$color}-focused-bg-color) #{!important};
         }
 
-        &:disabled {
+        // `aria-disabled` is the focusable disabled state (disabled-states DIS-3): same look as `:disabled`.
+        &:disabled,
+        &[aria-disabled='true'] {
             cursor: not-allowed;
             color: var(--colors-button-#{$type}-#{$color}-disabled-text-color) #{!important};
             background-color: var(--colors-button-#{$type}-#{$color}-disabled-bg-color) #{!important};

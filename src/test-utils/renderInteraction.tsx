@@ -97,6 +97,23 @@ export const cleanup = (): void => {
     document.querySelectorAll('dialog[open]').forEach((node) => (node as HTMLDialogElement).close())
     document.body.style.overflow = ''
     document.documentElement.style.overflow = ''
+    resetFocusStartingPoint()
+}
+
+/**
+ * Puts the browser's sequential focus navigation starting point back at the top of the document, so
+ * the next test's first real Tab reaches its first control. Without this the point stays wherever the
+ * previous test left it — on a node that has since been removed — and in a shuffled run that first Tab
+ * landed on `<body>` or past the end of the page (the flaky-test detector caught StyledTimePicker and
+ * StyledAccordion doing exactly this). Focusing a throwaway element at the start of `<body>` and
+ * removing it is the only standard way to move that point.
+ */
+const resetFocusStartingPoint = (): void => {
+    const anchor = document.createElement('span')
+    anchor.tabIndex = -1
+    document.body.prepend(anchor)
+    anchor.focus({ preventScroll: true })
+    anchor.remove()
 }
 
 /**

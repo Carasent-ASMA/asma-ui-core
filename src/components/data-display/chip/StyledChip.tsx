@@ -125,6 +125,10 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
         ref,
     ) => {
         const interactive = !readOnly && !disabled && (!!clickable || !!onClick)
+        // A chip that would be clickable but is disabled stays a focusable, announced control
+        // (`aria-disabled`) whose activation does nothing (disabled-states DIS-3): keyboard users can
+        // reach it and its tooltip. A plain, non-clickable chip has nothing to reach.
+        const focusableDisabled = !readOnly && !!disabled && (!!clickable || !!onClick)
         const startSlot = avatar ?? icon
         const hasDelete = Boolean(onDelete && !readOnly)
         const hasStart = Boolean(startSlot)
@@ -165,10 +169,19 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                 aria-label={ariaLabel}
                 data-hovered={dataHovered}
                 data-focus={dataFocus}
-                role={roleOverride ?? (interactive ? 'button' : undefined)}
+                role={roleOverride ?? (interactive || focusableDisabled ? 'button' : undefined)}
                 aria-checked={roleOverride ? ariaChecked : undefined}
                 aria-readonly={roleOverride ? ariaReadonly : undefined}
-                tabIndex={readOnly || disabled ? undefined : interactive ? tabIndex ?? 0 : tabIndex}
+                aria-disabled={focusableDisabled ? true : undefined}
+                tabIndex={
+                    focusableDisabled
+                        ? tabIndex ?? 0
+                        : readOnly || disabled
+                          ? undefined
+                          : interactive
+                            ? tabIndex ?? 0
+                            : tabIndex
+                }
                 onClick={disabled || readOnly ? undefined : onClick}
                 onKeyDown={disabled || readOnly ? undefined : handleKeyDown}
                 onMouseDown={disabled || readOnly ? undefined : onMouseDown}
@@ -180,7 +193,8 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                     !consumerSetsMaxWidth && 'max-w-full',
                     size === 'small' ? 'h-6' : 'h-8',
                     readOnly && 'pointer-events-none',
-                    disabled && 'pointer-events-none opacity-[0.38]',
+                    disabled && 'opacity-[0.38]',
+                    disabled && (focusableDisabled ? 'cursor-not-allowed' : 'pointer-events-none'),
                     interactive &&
                         cn(
                             'cursor-pointer outline-none',

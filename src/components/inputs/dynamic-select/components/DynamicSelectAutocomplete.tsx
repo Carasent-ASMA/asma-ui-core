@@ -203,6 +203,17 @@ export const DynamicSelectAutocomplete = forwardRef(
                     renderOption={(props, option, state) => {
                         const disabled = typeof option === 'object' ? !!option?.disabled : false
                         const tooltipTitle = getOptionTooltip ? getOptionTooltip(option) : null
+                        // Focus stays on the input (aria-activedescendant), so a disabled option's reason
+                        // is wired as its description and its tooltip opens while the keyboard is on it
+                        // (disabled-states DIS-2); hover still opens it as before.
+                        const reasonId = disabled && tooltipTitle ? `${props.id}-reason` : undefined
+                        const tooltipOpen = reasonId && props['data-active'] !== undefined ? true : undefined
+                        // aria-hidden keeps the reason out of the option's name; aria-describedby still reads it.
+                        const reason = reasonId && (
+                            <span id={reasonId} className='sr-only' aria-hidden='true'>
+                                {tooltipTitle}
+                            </span>
+                        )
 
                         if (multiple) {
                             // Reuse the selected flag the autocomplete already computed for this row
@@ -234,14 +245,16 @@ export const DynamicSelectAutocomplete = forwardRef(
                                             'cursor-not-allowed bg-delta-50 aria-selected:!bg-delta-50 hover:!bg-delta-50 [&_*]:cursor-not-allowed',
                                     )}
                                     aria-disabled={disabled}
+                                    aria-describedby={reasonId}
                                 >
+                                    {reason}
                                     {props['data-active'] !== undefined && (
                                         <span
                                             aria-hidden='true'
                                             className='border-l-solid pointer-events-none absolute inset-y-0 left-0 border-l-[3px] border-focus-ring'
                                         />
                                     )}
-                                    <StyledTooltip arrow title={tooltipTitle}>
+                                    <StyledTooltip arrow title={tooltipTitle} open={tooltipOpen}>
                                         <>
                                             <StyledCheckbox
                                                 disabled={disabled}
@@ -293,14 +306,16 @@ export const DynamicSelectAutocomplete = forwardRef(
                                 )}
                                 onClick={!disabled ? props.onClick : undefined}
                                 aria-disabled={disabled}
+                                aria-describedby={reasonId}
                             >
+                                {reason}
                                 {props['data-active'] !== undefined && (
                                     <span
                                         aria-hidden='true'
                                         className='border-l-solid pointer-events-none absolute inset-y-0 left-0 border-l-[3px] border-focus-ring'
                                     />
                                 )}
-                                <StyledTooltip arrow title={tooltipTitle}>
+                                <StyledTooltip arrow title={tooltipTitle} open={tooltipOpen}>
                                     <>
                                         <span className='w-5 min-w-5'>
                                             {isSelected && (

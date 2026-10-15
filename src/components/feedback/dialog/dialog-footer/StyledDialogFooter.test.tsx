@@ -118,7 +118,7 @@ describe('StyledDialogFooter (ASMA-7099)', () => {
         expect(html).not.toContain('>Use as standard<')
     })
 
-    it('shows a spinner and disables the button while loading, keeping the label', () => {
+    it('shows a spinner and makes the button busy while loading, keeping the label', () => {
         /* The footers this replaces swapped the label FOR a spinner, which changed the
          * button width mid-submit and forced hard-coded `w-[98px]` workarounds. */
         const html = renderToStaticMarkup(
@@ -126,8 +126,21 @@ describe('StyledDialogFooter (ASMA-7099)', () => {
         )
 
         expect(html).toContain('Save filter')
-        expect(html).toContain('disabled')
         expect(html).toContain('aria-busy="true"')
+        /* Busy keeps focus: `aria-disabled`, never native `disabled` (disabled-states DIS-8). */
+        expect(html).toContain('aria-disabled="true"')
+        expect(html).not.toMatch(/\sdisabled=""/)
+    })
+
+    it('renders a disabled button focusable, with aria-disabled instead of native disabled', () => {
+        /* Native `disabled` drops the button out of the Tab order, so keyboard users could never
+         * reach its tooltip (disabled-states DIS-2, DIS-3). */
+        const html = renderToStaticMarkup(
+            <StyledDialogFooter primaryAction={{ label: 'Save', disabled: true, tooltip: 'Locked for editing' }} />,
+        )
+
+        expect(html).toContain('aria-disabled="true"')
+        expect(html).not.toMatch(/\sdisabled=""/)
     })
 
     it('renders an endIcon on a right-cluster button', () => {

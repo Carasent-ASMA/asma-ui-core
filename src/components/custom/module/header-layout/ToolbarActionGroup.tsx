@@ -37,9 +37,11 @@ export function ToolbarActionButton({
              * `type="submit"`, which fires the form instead (StyledDialogFooter footers commonly
              * sit inside one). */
             type='button'
-            disabled={action.disabled}
+            /* `aria-disabled`, not native `disabled`: a disabled action stays in the Tab order so a
+             * keyboard user can find it (disabled-states DIS-3); the click is blocked instead. */
+            aria-disabled={action.disabled ? true : undefined}
             startIcon={action.icon}
-            onClick={action.onClick}
+            onClick={action.disabled ? undefined : action.onClick}
             /* An explicit ariaLabel always wins (e.g. a badge count appended to the name);
              * otherwise the visible label is the accessible name and needs no duplication. */
             aria-label={showLabel && action.ariaLabel == null ? undefined : accessibleLabel}

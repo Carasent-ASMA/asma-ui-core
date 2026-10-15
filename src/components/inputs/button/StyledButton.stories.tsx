@@ -108,6 +108,40 @@ export const Disabled: Story = {
     },
 }
 
+/**
+ * `aria-disabled="true"` is the focusable disabled state (ASMA disabled-states DIS-3): it looks exactly
+ * like native `disabled` but stays in the Tab order, so keyboard users can reach the control and the
+ * tooltip that says why. `StyledButton` only styles it — the caller blocks the action, as
+ * `StyledDialogFooter` and the toolbar do.
+ */
+export const AriaDisabled: Story = {
+    render: (args) => (
+        <div className='flex gap-4'>
+            <StyledButton {...args} dataTest='native-disabled' disabled>
+                Native disabled
+            </StyledButton>
+            <StyledButton {...args} dataTest='aria-disabled' aria-disabled='true'>
+                Aria disabled
+            </StyledButton>
+        </div>
+    ),
+    play: async ({ canvas }) => {
+        const native = canvas.getByRole('button', { name: 'Native disabled' })
+        const aria = canvas.getByRole('button', { name: 'Aria disabled' })
+
+        await expect(aria).not.toBeDisabled()
+        await expect(aria).toHaveAttribute('aria-disabled', 'true')
+        aria.focus()
+        await expect(aria).toHaveFocus()
+
+        const nativeStyle = window.getComputedStyle(native)
+        const ariaStyle = window.getComputedStyle(aria)
+        await expect(ariaStyle.cursor).toBe('not-allowed')
+        await expect(ariaStyle.color).toBe(nativeStyle.color)
+        await expect(ariaStyle.backgroundColor).toBe(nativeStyle.backgroundColor)
+    },
+}
+
 export const Error: Story = {
     args: { error: true },
     play: async ({ canvas }) => {

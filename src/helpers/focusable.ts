@@ -43,3 +43,18 @@ export const tabbableWithin = (root: ParentNode): HTMLElement[] =>
  */
 export const firstTabbable = (root: HTMLElement): HTMLElement | null =>
     isTabbable(root) ? root : (Array.from(root.querySelectorAll<HTMLElement>('*')).find(isTabbable) ?? null)
+
+/**
+ * Like `firstTabbable`, but also accepts an element that is focusable without being in the Tab order
+ * (`tabindex="-1"`) — a roving-tabindex item such as an unselected tab or a menu item, which arrow keys
+ * still move focus to. The tooltip uses it to describe that item rather than its wrapper, which inside
+ * a `tablist` or `menu` would be a child those roles do not allow.
+ */
+const isFocusable = (element: HTMLElement): boolean =>
+    (element.tabIndex >= 0 || element.hasAttribute('tabindex')) &&
+    !element.matches(':disabled') &&
+    !element.closest('[inert]') &&
+    (element.checkVisibility?.() ?? true)
+
+export const firstFocusable = (root: HTMLElement): HTMLElement | null =>
+    isFocusable(root) ? root : (Array.from(root.querySelectorAll<HTMLElement>('*')).find(isFocusable) ?? null)

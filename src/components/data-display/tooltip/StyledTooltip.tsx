@@ -18,7 +18,7 @@ import {
 } from '@floating-ui/react'
 import { cloneElement, Fragment, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactElement, type ReactNode } from 'react'
 import { cn } from 'src/helpers/cn'
-import { firstTabbable } from 'src/helpers/focusable'
+import { firstFocusable, firstTabbable } from 'src/helpers/focusable'
 import { resolveSx } from 'src/helpers/sx'
 import {
     getOpenModalDialogAncestor,
@@ -158,14 +158,21 @@ const TooltipWithFloating = ({
     useEffect(() => {
         const reference = refs.domReference.current
         if (!open || !floatingId || !(reference instanceof HTMLElement)) return
-        const described = firstTabbable(reference) ?? reference
+        // A roving-tabindex item (an unselected tab, a menu item) is focusable but not tabbable.
+        const described = firstTabbable(reference) ?? firstFocusable(reference) ?? reference
         const previous = described.getAttribute('aria-describedby')
+        // A control that already carries this text as a permanent description (a disabled control's
+        // reason, kept in the DOM so it is read the moment focus arrives) would hear it twice.
+        // Compared with `title`, not the popup: the portalled popup is not in the DOM yet on this pass.
+        const tooltipText = typeof title === 'string' || typeof title === 'number' ? String(title).trim() : ''
+        const text = (id: string): string | undefined => document.getElementById(id)?.textContent?.trim()
+        if (tooltipText && previous?.split(/\s+/).some((id) => text(id) === tooltipText)) return
         described.setAttribute('aria-describedby', previous ? `${previous} ${floatingId}` : floatingId)
         return () => {
             if (previous === null) described.removeAttribute('aria-describedby')
             else described.setAttribute('aria-describedby', previous)
         }
-    }, [open, refs.domReference, floatingId])
+    }, [open, refs.domReference, floatingId, title])
 
     // A Fragment has no DOM node to act as the reference, so it gets a `display: contents` host:
     // that host carries the ref and the handlers while its children keep their exact place in the

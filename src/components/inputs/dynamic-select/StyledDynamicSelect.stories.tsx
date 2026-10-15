@@ -690,6 +690,58 @@ export const LongLabelsAndDisabledOptions: Story = {
     render: () => <SelectFrame title='Plans' options={longLabelOptions} />,
 }
 
+/**
+ * Chip path (≤5 options): an option that cannot be chosen stays in the Tab order as an `aria-disabled`
+ * chip, and its `getOptionTooltip` reason opens on keyboard focus as well as hover (ASMA
+ * disabled-states DIS-2, DIS-3). Choosing it does nothing.
+ */
+export const DisabledOptionChipGroup: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
+    render: () => <SelectFrame title='Status' options={createOptions(5)} />,
+    play: async ({ canvas }) => {
+        const archived = canvas.getByRole('radio', { name: 'Archived' })
+        await expect(archived).toHaveAttribute('aria-disabled', 'true')
+
+        archived.focus()
+        await expect(archived).toHaveFocus()
+        await expect(await within(document.body).findByRole('tooltip')).toHaveTextContent('Disabled')
+        await expect(archived).toHaveAccessibleDescription('Disabled')
+
+        await userEvent.keyboard(' ')
+        await expect(archived).not.toBeChecked()
+    },
+}
+
+/**
+ * Autocomplete path (6+ options): the arrow keys land on an option that cannot be chosen, its reason
+ * opens as a tooltip and is the option's accessible description, and Enter leaves the value unchanged
+ * (WAI-ARIA APG listbox; ASMA disabled-states DIS-2, DIS-3).
+ */
+export const DisabledOptionAutocomplete: Story = {
+    render: () => <SelectFrame title='Status' options={createOptions(12)} />,
+    play: async ({ canvasElement }) => {
+        const { canvas, input } = getAutocomplete(canvasElement)
+        const active = (): HTMLElement | null =>
+            canvasElement.ownerDocument.getElementById(input.getAttribute('aria-activedescendant') ?? '')
+
+        input.focus()
+        await userEvent.keyboard('{ArrowDown}')
+        await canvas.findByRole('listbox')
+        await expect(active()).toHaveTextContent('Active')
+
+        // Paused, Pending review, then Archived — the disabled one is not skipped.
+        await userEvent.keyboard('{ArrowDown}{ArrowDown}{ArrowDown}')
+        await expect(active()).toHaveTextContent('Archived')
+        await expect(active()).toHaveAttribute('aria-disabled', 'true')
+        await expect(active()).toHaveAccessibleDescription('Disabled')
+        await expect(await canvas.findByRole('tooltip')).toHaveTextContent('Disabled')
+
+        await userEvent.keyboard('{Enter}')
+        await expect(input).toHaveValue('')
+    },
+}
+
 export const FocusDemo: Story = {
     render: () => {
         const ref = useRef<HTMLInputElement>(null)
