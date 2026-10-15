@@ -64,7 +64,11 @@ describe('StyledAccordion keyboard contract', () => {
         // just that the next Tab happened to go elsewhere.
         await expect(tabbableWithin(panel)).toHaveLength(0)
 
-        await userEvent.tab()
+        // The trigger is the accordion's first Tab stop. Focus is placed on it directly rather than
+        // reached with a first Tab from wherever the previous test left the document: in a shuffled
+        // run, a portal another suite leaked can sit earlier in the sequence (flaky-test report).
+        await expect(tabbableWithin(container)[0]).toBe(trigger)
+        trigger.focus()
         await expect(document.activeElement).toBe(trigger)
         await userEvent.tab()
         await expect(panel.contains(document.activeElement)).toBe(false)
@@ -82,8 +86,13 @@ describe('StyledAccordion keyboard contract', () => {
             </StyledAccordion>,
         )
         const panel = container.querySelector<HTMLElement>('[role="region"]')!
+        const trigger = container.querySelector<HTMLButtonElement>('button[aria-expanded]')!
 
-        await userEvent.tab()
+        // Start on the trigger rather than at whatever the first Tab reaches: in a shuffled run the
+        // document's focus starting point is left by the previous test, so Enter could land elsewhere
+        // and the accordion never open (failed 1 of 5 in the nightly flaky-test run).
+        trigger.focus()
+        await expect(document.activeElement).toBe(trigger)
         await userEvent.keyboard('{Enter}')
         await waitFor(() =>
             expect(container.querySelector('button[aria-expanded]')).toHaveAttribute('aria-expanded', 'true'),

@@ -111,7 +111,9 @@ export const StyledTabs: FC<StyledTabsProps> = ({
         const keys = ['ArrowRight', 'ArrowLeft', 'Home', 'End']
         if (!keys.includes(event.key)) return
         event.preventDefault()
-        const tabs = Array.from(nodesRef.current.values()).filter((n) => !n.disabled)
+        // Disabled tabs stay in the arrow-key order (WAI-ARIA APG tabs pattern; disabled-states DIS-3):
+        // focus may land on one, but `StyledTab` will not select it.
+        const tabs = Array.from(nodesRef.current.values())
         if (tabs.length === 0) return
         const activeIndex = tabs.findIndex((n) => n === document.activeElement)
         let nextIndex = activeIndex

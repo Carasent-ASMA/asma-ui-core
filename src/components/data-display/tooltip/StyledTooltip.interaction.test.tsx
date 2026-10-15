@@ -365,6 +365,30 @@ describe('StyledTooltip keyboard contract', () => {
         await expect(tip()).toBeNull()
     })
 
+    it('does not repeat a reason the control already carries as its description (4.1.2)', async () => {
+        /* A disabled control keeps its reason in the DOM so it is read the moment focus arrives
+         * (disabled-states DIS-2); adding the tooltip's copy would read it twice. */
+        const { container } = mount(
+            <StyledTooltip title='Only an administrator can delete' enterDelay={0}>
+                <span>
+                    <button type='button' data-testid='with-reason' aria-disabled='true' aria-describedby='reason'>
+                        Delete
+                    </button>
+                    <span id='reason' hidden>
+                        Only an administrator can delete
+                    </span>
+                </span>
+            </StyledTooltip>,
+        )
+        const trigger = container.querySelector<HTMLButtonElement>('[data-testid="with-reason"]')!
+
+        await userEvent.tab()
+        await waitFor(() => expect(tip()).not.toBeNull())
+
+        await expect(trigger).toHaveAttribute('aria-describedby', 'reason')
+        await expect(trigger).toHaveAccessibleDescription('Only an administrator can delete')
+    })
+
     it('renders the trigger alone when there is no title (4.1.2)', async () => {
         const { container } = mount(
             <StyledTooltip title={null}>

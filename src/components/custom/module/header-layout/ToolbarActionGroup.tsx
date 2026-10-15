@@ -1,4 +1,4 @@
-import { Fragment, useState, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useReportDialogBusy } from 'src/components/feedback/dialog/DialogBusyContext'
 import { StyledButton } from 'src/components/inputs/button'
 import { DotsVerticalIcon } from 'src/components/icons'
@@ -52,13 +52,17 @@ export function ToolbarActionButton({
              * `type="submit"`, which fires the form instead (StyledDialogFooter footers commonly
              * sit inside one). */
             type='button'
-            disabled={action.disabled}
+            /* A reasoned action is soft-disabled by StyledButton itself (reason on hover, focus and
+             * tap); a reasonless one still stays in the Tab order with `aria-disabled` and its click
+             * removed, so a keyboard user can find it (disabled-states DIS-3). */
+            disabled={Boolean(action.disabled) && Boolean(action.disabledReason)}
+            aria-disabled={action.disabled ? true : undefined}
             disabledReason={action.disabledReason}
             loading={action.loading}
             holdsDialog={action.holdsDialog}
             loadingAnnouncement={inProgressLabel}
             startIcon={action.icon}
-            onClick={action.onClick}
+            onClick={action.disabled ? undefined : action.onClick}
             /* An explicit ariaLabel always wins (e.g. a badge count appended to the name);
              * otherwise the visible label is the accessible name and needs no duplication. */
             aria-label={showLabel && action.ariaLabel == null ? undefined : accessibleLabel}
@@ -170,28 +174,25 @@ export function ToolbarActionGroup({
                         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                     >
-                        {overflowActions.map((action, index) => (
-                            <Fragment key={action.id}>
-                                {index > 0 && <hr className='m-0 border-0 border-t border-solid border-delta-200' />}
-
-                                <StyledMenuItem
-                                    {...overflowItemState(action, inProgressLabel)}
-                                    onClick={() => {
-                                        setAnchorEl(null)
-                                        action.onClick()
-                                    }}
+                        {overflowActions.map((action) => (
+                            <StyledMenuItem
+                                key={action.id}
+                                {...overflowItemState(action, inProgressLabel)}
+                                onClick={() => {
+                                    setAnchorEl(null)
+                                    action.onClick()
+                                }}
+                            >
+                                <div
+                                    className={cn(
+                                        'flex items-center gap-2',
+                                        action.tone === 'danger' ? 'text-beta-500' : 'text-delta-700',
+                                    )}
                                 >
-                                    <div
-                                        className={cn(
-                                            'flex items-center gap-2',
-                                            action.tone === 'danger' ? 'text-beta-500' : 'text-delta-700',
-                                        )}
-                                    >
-                                        {action.icon}
-                                        <span>{action.label}</span>
-                                    </div>
-                                </StyledMenuItem>
-                            </Fragment>
+                                    {action.icon}
+                                    <span>{action.label}</span>
+                                </div>
+                            </StyledMenuItem>
                         ))}
                     </StyledMenu>
                 </>

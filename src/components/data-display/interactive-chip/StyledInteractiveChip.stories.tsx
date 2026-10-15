@@ -157,6 +157,42 @@ export const Checkbox_Focused: Story = {
     },
 }
 
+/**
+ * A disabled chip stays in the Tab order with `aria-disabled` (ASMA disabled-states DIS-3), so keyboard
+ * and screen-reader users find it — and the tooltip a caller wraps it in, as `StyledDynamicSelect`
+ * does for an option that cannot be chosen. Space, Enter and click leave it unchanged.
+ */
+export const Checkbox_Disabled: Story = {
+    args: {
+        label: 'Already in use',
+        type: 'checkbox',
+        checked: false,
+    },
+    render: (args) => (
+        <StyledInteractiveChip
+            dataTest='interactive-chip-disabled'
+            label={args.label}
+            type={args.type}
+            checked={args.checked}
+            disabled
+            onClick={() => undefined}
+        />
+    ),
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement)
+        const chip = canvas.getByRole('checkbox', { name: 'Already in use' })
+
+        await expect(chip).toHaveAttribute('aria-disabled', 'true')
+        await userEvent.tab()
+        await expect(chip).toHaveFocus()
+
+        await userEvent.keyboard(' ')
+        await userEvent.keyboard('{Enter}')
+        chip.click()
+        await expect(chip).not.toBeChecked()
+    },
+}
+
 export const Checkbox_Readonly: Story = {
     args: {
         label: 'Checkbox readonly',

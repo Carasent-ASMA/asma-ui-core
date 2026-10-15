@@ -1,7 +1,10 @@
 import {
     useEffect,
+    useId,
     useLayoutEffect,
+    useMemo,
     useRef,
+    useState,
     type CSSProperties,
     type HTMLAttributes,
     type ReactNode,
@@ -14,8 +17,10 @@ import { resolveSx } from 'src/helpers/sx'
 import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
 import { registerOpenModalDialog } from 'src/hooks/useTopLayer.hook'
 import { DialogBusyContext, useDialogBusyBoundary } from './DialogBusyContext'
+import { warnUnnamedDialog } from 'src/helpers/warnUnnamedDialog'
 import style from './StyledDialog.module.scss'
 import type { UiCoreLocale } from 'src/helpers/uiCoreLocale'
+import { StyledDialogTitleContext } from './dialogTitleContext'
 
 export type DialogCloseReason = 'escapeKeyDown' | 'backdropClick'
 export type DialogMaxWidth = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
@@ -71,6 +76,16 @@ export interface IStyledDialogProps {
     /** @figmaProp header Title (Page title 24 SemiBold, delta-800) */
     dialogTitle?: ReactNode
     dialogHeaderNode?: ReactNode
+    /**
+     * @figmaProp none — accessibility
+     * The dialog's accessible name when it shows no visible title: neither `dialogTitle`, a
+     * `<StyledDialogTitle>` child nor `dialogLabel`. A visible title or label always wins: the dialog
+     * is `aria-labelledby` it. Without any of these, the dialog is named by the first heading
+     * (`h1`–`h6` or `role="heading"`) in its content; with no heading either it stays unnamed and a
+     * development-only warning names its `dataTest`. `dataTest` is never used as a name — it is a
+     * test hook, not text.
+     */
+    ariaLabel?: string
 }
 
 // MUI Dialog maxWidth → px (v5 breakpoints; xs special-cased to 444 like MUI).
@@ -115,7 +130,17 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     dialogLabel,
     dialogTitle,
     dialogHeaderNode,
+    ariaLabel,
 }) => {
+    // WCAG 4.1.2: named by what the user sees — the `dialogTitle`, else a `<StyledDialogTitle>` child,
+    // else the label line; else `ariaLabel`; else the first heading in the content (effect below).
+    const titleId = useId()
+    const labelId = useId()
+    // A title rendered as a child (`<StyledDialogTitle>`) reports its actual id through context,
+    // including an explicit id supplied by the consumer.
+    const [titleChildId, setTitleChildId] = useState<string>()
+    const titleContext = useMemo(() => ({ titleId, setTitleId: setTitleChildId }), [titleId])
+    const labelledBy = dialogTitle ? titleId : (titleChildId ?? (dialogLabel ? labelId : undefined))
     const isMobile = useMobileMediaQuery()
     const dialogRef = useRef<HTMLDialogElement>(null)
     const openerRef = useRef<HTMLElement | null>(null)
@@ -124,6 +149,30 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     const isFullScreen = fullScreen ?? isMobile
     // While a button inside runs an action, no dismissal goes through (see DialogBusyContext).
     const { busy, busyReason: busyText, contextValue } = useDialogBusyBoundary(busyReason, locale)
+    const fallbackHeadingId = useId()
+    const [headingLabelId, setHeadingLabelId] = useState<string>()
+    const warnedUnnamedRef = useRef(false)
+
+    // No title, label or `ariaLabel`: name the dialog by the first heading its content renders, so a
+    // custom header still names it (WCAG 4.1.2). Re-runs whenever the dialog re-renders with new
+    // content. The id goes through state so React alone writes `aria-labelledby`: setting it on the
+    // node here raced a `<StyledDialogTitle>` child registering its id one render later, and this
+    // effect's cleanup removed the attribute React had just set.
+    useLayoutEffect(() => {
+        const node = dialogRef.current
+        const named = Boolean(labelledBy) || Boolean(ariaLabel)
+        const heading =
+            node && open && !named
+                ? node.querySelector<HTMLElement>('h1, h2, h3, h4, h5, h6, [role="heading"]')
+                : null
+        if (heading && !heading.id) heading.id = fallbackHeadingId
+        const next = heading?.id
+        if (next !== headingLabelId) setHeadingLabelId(next)
+        if (node && open && !named && !heading && !warnedUnnamedRef.current) {
+            warnedUnnamedRef.current = true
+            warnUnnamedDialog(dataTest)
+        }
+    }, [open, labelledBy, ariaLabel, children, headingLabelId, fallbackHeadingId, dataTest])
 
     useEffect(() => {
         if (prevOpenRef.current && !open) {
@@ -223,7 +272,8 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
             ref={dialogRef}
             tabIndex={-1}
             data-testid={dataTest}
-            aria-label={dataTest}
+            aria-labelledby={labelledBy ?? headingLabelId}
+            aria-label={labelledBy || headingLabelId ? undefined : ariaLabel}
             onCancel={handleCancel}
             onKeyDown={(event) => {
                 if (!busy || event.key !== 'Escape') return
@@ -294,13 +344,13 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                     <div className='box-border flex w-full min-w-0 max-w-full justify-between px-4 pt-4'>
                         <div className='flex min-w-0 flex-1 flex-col justify-start gap-0.5'>
                             {dialogLabel && (
-                                <div className='flex h-8 items-center text-sm font-normal leading-5 text-delta-600'>
+                                <div id={labelId} className='flex h-8 items-center text-sm font-normal leading-5 text-delta-600'>
                                     {dialogLabel}
                                 </div>
                             )}
                             {dialogTitle && (
                                 // Figma dialog title = Page title 24/32 SemiBold, text delta-800.
-                                <div className='flex text-2xl font-semibold leading-8 text-delta-800'>
+                                <div id={titleId} className='flex text-2xl font-semibold leading-8 text-delta-800'>
                                     {dialogTitle}
                                 </div>
                             )}
@@ -331,7 +381,9 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                     </div>
                 )}
 
-                <DialogBusyContext.Provider value={contextValue}>{children}</DialogBusyContext.Provider>
+                <StyledDialogTitleContext.Provider value={titleContext}>
+                    <DialogBusyContext.Provider value={contextValue}>{children}</DialogBusyContext.Provider>
+                </StyledDialogTitleContext.Provider>
             </div>
         </dialog>
     )

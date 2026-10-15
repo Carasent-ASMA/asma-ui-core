@@ -45,6 +45,7 @@ const actionKey = (id: string, showLabel: boolean): string => `dialog-footer-act
 export interface StyledDialogFooterButton {
     label: string
     onClick?: () => void
+    /** Rendered as `aria-disabled`, not native `disabled`: the button stays focusable, so keyboard users reach its `tooltip`. A click does nothing. */
     disabled?: boolean
     /** `submit` lets the footer drive the surrounding `<form>` without a click handler. */
     type?: 'button' | 'submit' | 'reset'
@@ -201,10 +202,14 @@ export function StyledDialogFooter({
     ): JSX.Element => {
         /* On a disabled button the tooltip is the reason it is unavailable: StyledButton keeps it
          * focusable and shows the reason on hover, focus and tap (disabled-states DIS-1…DIS-4).
-         * Loading keeps focus on the button instead of disabling it (submit-buttons §6). */
+         * Loading keeps focus on the button instead of disabling it (submit-buttons §6). A disabled
+         * button without a reason is still `aria-disabled`, not native `disabled`, so it stays in
+         * the Tab order (DIS-3); its click is blocked here, and `preventDefault` also stops a
+         * `type="submit"` button submitting its form. */
         const busySecondary = key === 'secondary' && dialogBusy?.busy
         const disabled = Boolean(button.disabled) || Boolean(busySecondary)
         const disabledReason = busySecondary ? (dialogBusy.busyReason ?? WAIT_UNTIL_SAVED[locale]) : button.tooltip
+        const blocked = disabled || Boolean(button.loading)
         const element = (
             <StyledButton
                 locale={locale}
@@ -213,12 +218,13 @@ export function StyledDialogFooter({
                 error={button.tone === 'danger'}
                 size='medium'
                 type={button.type ?? 'button'}
-                disabled={disabled}
+                disabled={disabled && Boolean(disabledReason)}
+                aria-disabled={blocked || undefined}
                 disabledReason={disabledReason}
                 loading={Boolean(button.loading)}
                 startIcon={button.icon}
                 endIcon={button.endIcon}
-                onClick={button.onClick}
+                onClick={blocked ? (event) => event.preventDefault() : button.onClick}
                 aria-label={button.ariaLabel}
             >
                 {button.label}

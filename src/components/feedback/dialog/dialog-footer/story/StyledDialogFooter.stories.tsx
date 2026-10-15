@@ -281,9 +281,16 @@ export const DisabledPrimaryExplainsItself: Story = {
 
         /* aria-disabled, not native: the button stays focusable and receives pointer events,
          * so the reason is reachable by hover, keyboard and screen reader (disabled-states DIS-3). */
+        await expect(save).not.toBeDisabled()
         await expect(save).toHaveAttribute('aria-disabled', 'true')
         await expect(save).toHaveAccessibleDescription('Locked for editing')
         await userEvent.hover(save)
+        await waitFor(async () => expect(within(document.body).getByRole('tooltip')).toHaveTextContent('Locked for editing'))
+        await userEvent.unhover(save)
+
+        /* Keyboard users reach the same reason by focusing the button. */
+        save.focus()
+        await expect(save).toHaveFocus()
         await waitFor(async () => expect(within(document.body).getByRole('tooltip')).toHaveTextContent('Locked for editing'))
     },
 }
@@ -302,6 +309,8 @@ export const PrimaryLoading: Story = {
         const canvas = within(canvasElement)
         const save = canvas.getByRole('button', { name: /Save filter/ })
 
+        /* Busy keeps focus: `aria-disabled`, not native `disabled` (disabled-states DIS-8). */
+        await expect(save).not.toBeDisabled()
         await expect(save).toHaveAttribute('aria-disabled', 'true')
         await expect(save).toHaveAttribute('aria-busy', 'true')
         await expect(save).toHaveTextContent('Save filter')

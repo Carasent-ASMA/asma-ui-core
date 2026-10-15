@@ -96,7 +96,7 @@ interface ChipTabIndexInput {
     readOnly?: boolean
     disabled?: boolean
     interactive: boolean
-    reasoned: boolean
+    focusableDisabled: boolean
     tabIndex?: number
 }
 
@@ -105,10 +105,10 @@ const getChipTabIndex = ({
     readOnly,
     disabled,
     interactive,
-    reasoned,
+    focusableDisabled,
     tabIndex,
 }: ChipTabIndexInput): number | undefined => {
-    if (reasoned) return tabIndex ?? 0
+    if (focusableDisabled) return tabIndex ?? 0
     if (readOnly || disabled) return undefined
     if (interactive) return tabIndex ?? 0
     return tabIndex
@@ -156,7 +156,11 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
     ) => {
         const actionable = !readOnly && (!!clickable || !!onClick)
         const interactive = actionable && !disabled
-        const reasoned = actionable && Boolean(disabled) && Boolean(disabledReason)
+        // A chip that would be clickable but is disabled stays a focusable, announced control
+        // (`aria-disabled`) whose activation does nothing (disabled-states DIS-3): keyboard users can
+        // reach it and its reason. A plain, non-clickable chip has nothing to reach.
+        const focusableDisabled = actionable && Boolean(disabled)
+        const reasoned = focusableDisabled && Boolean(disabledReason)
         const startSlot = avatar ?? icon
         const hasDelete = Boolean(onDelete && !readOnly)
         const hasStart = Boolean(startSlot)
@@ -197,11 +201,11 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                 aria-label={ariaLabel}
                 data-hovered={dataHovered}
                 data-focus={dataFocus}
-                role={roleOverride ?? (interactive || reasoned ? 'button' : undefined)}
-                aria-disabled={reasoned || undefined}
+                role={roleOverride ?? (interactive || focusableDisabled ? 'button' : undefined)}
+                aria-disabled={focusableDisabled || undefined}
                 aria-checked={roleOverride ? ariaChecked : undefined}
                 aria-readonly={roleOverride ? ariaReadonly : undefined}
-                tabIndex={getChipTabIndex({ readOnly, disabled, interactive, reasoned, tabIndex })}
+                tabIndex={getChipTabIndex({ readOnly, disabled, interactive, focusableDisabled, tabIndex })}
                 onClick={disabled || readOnly ? undefined : onClick}
                 onKeyDown={disabled || readOnly ? undefined : handleKeyDown}
                 onMouseDown={disabled || readOnly ? undefined : onMouseDown}
@@ -213,9 +217,10 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                     !consumerSetsMaxWidth && 'max-w-full',
                     size === 'small' ? 'h-6' : 'h-8',
                     readOnly && 'pointer-events-none',
-                    // Pointer events stay on so the not-allowed cursor shows; activation is already
-                    // blocked because the handlers are removed while disabled (disabled-states §6).
-                    disabled && 'cursor-not-allowed opacity-[0.38]',
+                    // A focusable disabled chip keeps its pointer events so the not-allowed cursor shows;
+                    // activation is already blocked because the handlers are removed while disabled.
+                    disabled && 'opacity-[0.38]',
+                    disabled && (focusableDisabled ? 'cursor-not-allowed' : 'pointer-events-none'),
                     interactive &&
                         cn(
                             'cursor-pointer outline-none',

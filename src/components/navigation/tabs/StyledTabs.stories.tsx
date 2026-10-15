@@ -253,3 +253,40 @@ const ScrollableTabs = () => {
         </StyledTabs>
     )
 }
+
+const DisabledTabWithReasonExample = (): JSX.Element => {
+    const [value, setValue] = useState('settings')
+    return (
+        <StyledTabs value={value} onChange={(_event, next) => setValue(next as string)}>
+            <StyledTab value='settings' label='Settings' />
+            <StyledTab value='modules' label='Modules' disabled tooltip='Save the template as a draft first, then add modules' />
+            <StyledTab value='history' label='History' />
+        </StyledTabs>
+    )
+}
+
+/**
+ * A disabled tab stays on the arrow-key path (WAI-ARIA APG tabs; ASMA disabled-states DIS-3) and
+ * says why through `tooltip`, on hover and on keyboard focus, as its accessible description
+ * (DIS-1, DIS-2). Enter and Space do not select it.
+ */
+export const DisabledTabWithReason: Story = {
+    render: () => <DisabledTabWithReasonExample />,
+    play: async ({ canvas, userEvent }) => {
+        const [settings, modules] = canvas.getAllByRole('tab')
+        const reason = 'Save the template as a draft first, then add modules'
+
+        await expect(modules).toHaveAttribute('aria-disabled', 'true')
+        await expect(modules).not.toBeDisabled()
+        await expect(modules).toHaveAccessibleDescription(reason)
+
+        settings!.focus()
+        await userEvent.keyboard('{ArrowRight}')
+        await expect(modules).toHaveFocus()
+        await waitFor(async () => expect(document.querySelector('[role="tooltip"]')).toHaveTextContent(reason))
+
+        await userEvent.keyboard('{Enter}')
+        await expect(modules).toHaveAttribute('aria-selected', 'false')
+        await expect(settings).toHaveAttribute('aria-selected', 'true')
+    },
+}

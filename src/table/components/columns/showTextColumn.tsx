@@ -2,7 +2,11 @@ import { ChevronDownIcon } from 'src/table/shared-components/ChevronDownIcon'
 import { StyledButton } from 'src/table/shared-components/button'
 import { SHOW_FULL_TEXT_ID, type CellContext, type ColumnDef } from 'src/table/types'
 
-export function generateShowFullTextColumn<TData>(isFixed: boolean, rowHeight?: number): ColumnDef<TData, unknown> {
+export function generateShowFullTextColumn<TData>(
+    isFixed: boolean,
+    rowHeight?: number,
+    locale?: 'en' | 'no',
+): ColumnDef<TData, unknown> {
     return {
         id: SHOW_FULL_TEXT_ID,
         minSize: 38,
@@ -12,13 +16,21 @@ export function generateShowFullTextColumn<TData>(isFixed: boolean, rowHeight?: 
         enableSorting: false,
         header: () => null,
         cell: (info: CellContext<TData, unknown>) => {
-            return <ShowFullTextCell info={info} rowHeight={rowHeight} />
+            return <ShowFullTextCell info={info} locale={locale} rowHeight={rowHeight} />
         },
         fixedLeft: isFixed,
     }
 }
 
-function ShowFullTextCell<TData>({ info, rowHeight }: { info: CellContext<TData, unknown>; rowHeight?: number }) {
+function ShowFullTextCell<TData>({
+    info,
+    locale,
+    rowHeight,
+}: {
+    info: CellContext<TData, unknown>
+    locale?: 'en' | 'no'
+    rowHeight?: number
+}) {
     const canRenderSubRows = info.row.getCanExpand()
     const isExpanded = info.row.isExpanded()
 
@@ -28,7 +40,15 @@ function ShowFullTextCell<TData>({ info, rowHeight }: { info: CellContext<TData,
                 dataTest='expand-text-button'
                 // Icon-only: without this the button has no accessible name at all
                 // (axe `button-name`, ASMA-8143).
-                aria-label={isExpanded ? 'Collapse text' : 'Show full text'}
+                aria-label={
+                    locale === 'no'
+                        ? isExpanded
+                            ? `Skjul full tekst for rad ${info.row.index + 1}`
+                            : `Vis full tekst for rad ${info.row.index + 1}`
+                        : isExpanded
+                          ? `Collapse full text for row ${info.row.index + 1}`
+                          : `Show full text for row ${info.row.index + 1}`
+                }
                 size='small'
                 variant='textGray'
                 onClick={(event) => {

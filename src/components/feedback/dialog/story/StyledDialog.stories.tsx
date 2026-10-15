@@ -226,6 +226,41 @@ export const Headerless: Story = {
     render: (args) => <DialogStoryFrame {...args} />,
 }
 
+/**
+ * Accessible name (WCAG 4.1.2): with no `dialogTitle`, `dialogLabel` or `ariaLabel`, the dialog is
+ * named by the first heading in its content — a custom header still names it. Never by `dataTest`.
+ */
+export const NamedByContentHeading: Story = {
+    render: () => (
+        <StyledDialog open dataTest='named-by-heading' showCloseIcon={false}>
+            <StyledDialogContent>
+                <h2 className='m-0 text-2xl font-semibold text-delta-800'>Share with pathfinder</h2>
+                <p>Choose who this group is shared with.</p>
+            </StyledDialogContent>
+        </StyledDialog>
+    ),
+    play: async () => {
+        const dialog = await screen.findByRole('dialog')
+        await expect(dialog).toHaveAccessibleName('Share with pathfinder')
+        await expect(dialog).not.toHaveAttribute('aria-label', 'named-by-heading')
+    },
+}
+
+/**
+ * Accessible name (WCAG 4.1.2): `ariaLabel` names a dialog that shows no title, label or heading. A
+ * visible title or label always wins over it.
+ */
+export const NamedByAriaLabel: Story = {
+    render: () => (
+        <StyledDialog open dataTest='named-by-aria-label' ariaLabel='Session expiring' showCloseIcon={false}>
+            <StyledDialogContent>Your session expires in two minutes.</StyledDialogContent>
+        </StyledDialog>
+    ),
+    play: async () => {
+        await expect(await screen.findByRole('dialog')).toHaveAccessibleName('Session expiring')
+    },
+}
+
 export const CustomHeaderNode: Story = {
     args: {
         dialogHeaderNode: (

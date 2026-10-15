@@ -34,7 +34,7 @@ import {
     type ReactNode,
 } from 'react'
 import { cn } from 'src/helpers/cn'
-import { firstFocusable } from 'src/helpers/focusable'
+import { firstFocusable, firstTabbable } from 'src/helpers/focusable'
 import { resolveSx } from 'src/helpers/sx'
 import {
     getOpenModalDialogAncestor,
@@ -261,25 +261,40 @@ const TooltipWithFloating = ({
     const describes = Boolean(persistentDescription) || open
 
     // APG puts `aria-describedby` on the *trigger*, but by house rule the child handed in is a
-    // wrapper span, not the control a screen reader lands on — so the id goes on the focusable
-    // control inside it. `firstFocusable`, not `firstTabbable`: a reasoned control inside a collapsed
-    // accordion panel (`inert`) or a hidden parent is still the target, and the panel opening does
-    // not re-render this component. Last resort is the reference itself: a decorative or disabled
-    // subtree has nothing focusable, and an unassociated description is worse than one on the wrapper.
+    // wrapper span, not the control a screen reader lands on — so the id goes on the control inside
+    // it: the tabbable one first, else a roving-tabindex item (an unselected tab, a menu item), else
+    // any focusable one, so a reasoned control inside a collapsed accordion panel (`inert`) or a
+    // hidden parent is still the target (the panel opening does not re-render this component). Last
+    // resort is the reference itself: a decorative or disabled subtree has nothing focusable, and an
+    // unassociated description is worse than one on the wrapper.
+    const describedTarget = (reference: HTMLElement): HTMLElement =>
+        firstTabbable(reference) ?? firstFocusable(reference) ?? reference
+    // A control that already carries this text as a permanent description (a disabled control's
+    // reason, kept in the DOM so it is read the moment focus arrives) would hear it twice. Compared
+    // with `title`, not the popup: the portalled popup is not in the DOM yet on this pass.
+    const tooltipText = typeof title === 'string' || typeof title === 'number' ? String(title).trim() : ''
+    const appendDescription = (described: HTMLElement, describedById: string): void => {
+        const previous = described.getAttribute('aria-describedby')
+        const ids = previous?.split(/\s+/) ?? []
+        if (ids.includes(describedById)) return
+        const text = (id: string): string | undefined => document.getElementById(id)?.textContent?.trim()
+        if (tooltipText && ids.some((id) => id !== describedById && text(id) === tooltipText)) return
+        described.setAttribute('aria-describedby', previous ? `${previous} ${describedById}` : describedById)
+    }
+
     useEffect(() => {
         const reference = refs.domReference.current
         if (!describes || !describedById || !(reference instanceof HTMLElement)) return
-        const described = firstFocusable(reference) ?? reference
-        const previous = described.getAttribute('aria-describedby')
-        if (previous?.split(/\s+/).includes(describedById)) return
-        described.setAttribute('aria-describedby', previous ? `${previous} ${describedById}` : describedById)
+        const described = describedTarget(reference)
+        appendDescription(described, describedById)
         return () => {
             const remaining = described.getAttribute('aria-describedby')?.split(/\s+/)
                 .filter((id) => id && id !== describedById).join(' ')
             if (remaining) described.setAttribute('aria-describedby', remaining)
             else described.removeAttribute('aria-describedby')
         }
-    }, [describes, refs.domReference, describedById])
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- the helpers read only these values
+    }, [describes, refs.domReference, describedById, tooltipText])
 
     // React owns the trigger's own `aria-describedby` too: adding or removing helper/error text
     // rewrites the attribute, which drops the reason id and never re-runs the effect above. Re-append
@@ -288,10 +303,7 @@ const TooltipWithFloating = ({
     useEffect(() => {
         const reference = refs.domReference.current
         if (!describes || !describedById || !(reference instanceof HTMLElement)) return
-        const described = firstFocusable(reference) ?? reference
-        const previous = described.getAttribute('aria-describedby')
-        if (previous?.split(/\s+/).includes(describedById)) return
-        described.setAttribute('aria-describedby', previous ? `${previous} ${describedById}` : describedById)
+        appendDescription(describedTarget(reference), describedById)
     })
 
     // A Fragment has no DOM node to act as the reference, so it gets a `display: contents` host:

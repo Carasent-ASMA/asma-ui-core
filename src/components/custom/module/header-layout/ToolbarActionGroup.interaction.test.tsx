@@ -1,8 +1,8 @@
 import { afterEach, describe, it, vi } from 'vitest'
-import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
+import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import type { DynamicToolbarAction } from './planToolbarActions'
-import { ToolbarActionGroup } from './ToolbarActionGroup'
+import { ToolbarActionButton, ToolbarActionGroup } from './ToolbarActionGroup'
 
 /**
  * The overflow menu's trigger has to dismiss the menu it opened (ASMA-8151). `StyledPopover`
@@ -101,6 +101,31 @@ describe('a loading toolbar action (disabled-states DIS-8)', () => {
         await expect(item).toHaveAttribute('aria-disabled', 'true')
         await waitFor(() => expect(item).toHaveAccessibleDescription('Pågår'))
         item.click()
+        await expect(onClick).not.toHaveBeenCalled()
+    })
+})
+
+/* A disabled toolbar action stays in the Tab order (disabled-states DIS-3): `aria-disabled`, not
+ * native `disabled`, which would leave a keyboard user unable to find it or its reason. */
+describe('a disabled toolbar action', () => {
+    afterEach(cleanup)
+
+    it('is reachable with Tab, announced as disabled, and does nothing when pressed', async () => {
+        const onClick = fn()
+        const { container } = mount(
+            <ToolbarActionButton action={{ id: 'add', label: 'Add', onClick, disabled: true }} showLabel />,
+        )
+        const button = container.querySelector<HTMLButtonElement>('[data-testid="dynamic-toolbar-action-add"]')!
+
+        await expect(button).not.toBeDisabled()
+        await expect(button).toHaveAttribute('aria-disabled', 'true')
+
+        await userEvent.tab()
+        await expect(document.activeElement).toBe(button)
+
+        await userEvent.keyboard('{Enter}')
+        // Playwright refuses to click an `aria-disabled` element, so the pointer press is dispatched directly.
+        button.click()
         await expect(onClick).not.toHaveBeenCalled()
     })
 })

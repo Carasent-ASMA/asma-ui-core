@@ -1,7 +1,7 @@
 import { describe, it } from 'vitest'
 import { expect } from 'src/test-utils/interaction-api'
 import { mount } from 'src/test-utils/renderInteraction'
-import { firstTabbable, tabbableWithin } from './focusable'
+import { firstFocusable, firstTabbable, tabbableWithin } from './focusable'
 
 /**
  * Pins the browser-computed contract: no tag list, so the guard is that the *behaviour* matches what
@@ -60,5 +60,30 @@ describe('focusable helpers', () => {
         await expect(firstTabbable(at('bare'))).toBe(at('bare'))
         await expect(firstTabbable(at('wrapper'))).toBe(at('inner'))
         await expect(firstTabbable(at('inert'))).toBeNull()
+    })
+    it('finds a roving-tabindex item that Tab skips but arrow keys reach (4.1.2)', async () => {
+        const { container } = mount(
+            <>
+                <span data-testid='roving-wrapper'>
+                    <button data-testid='roving' tabIndex={-1}>
+                        Modules
+                    </button>
+                </span>
+                <span data-testid='plain'>
+                    <em>decorative only</em>
+                </span>
+                <span data-testid='disabled-wrapper'>
+                    <button data-testid='disabled' tabIndex={-1} disabled>
+                        off
+                    </button>
+                </span>
+            </>,
+        )
+        const at = (id: string): HTMLElement => container.querySelector<HTMLElement>(`[data-testid="${id}"]`)!
+
+        await expect(firstTabbable(at('roving-wrapper'))).toBeNull()
+        await expect(firstFocusable(at('roving-wrapper'))).toBe(at('roving'))
+        await expect(firstFocusable(at('plain'))).toBeNull()
+        await expect(firstFocusable(at('disabled-wrapper'))).toBeNull()
     })
 })

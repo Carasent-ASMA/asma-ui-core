@@ -244,16 +244,15 @@ describe('ASMA-8220 touch hardening', () => {
             }
 
             // Designed heights survive: the chip's Figma 32px, the select trigger's 40px (kept in
-            // step with StyledInputField), and the accordion trigger's 72px.
+            // step with StyledInputField), the Figma Menus item 40px option row (same as the
+            // StyledSelectAutocomplete compact row), and the accordion trigger's 72px.
             await expect(container.querySelector('[data-testid="chip"]')!.getBoundingClientRect().height).toBe(32)
             await expect(container.querySelector('[data-testid="select"]')!.getBoundingClientRect().height).toBe(40)
+            await expect(container.querySelector('[role="option"]')!.getBoundingClientRect().height).toBe(40)
             await expect(container.querySelector('[data-testid="accordion"]')!.getBoundingClientRect().height).toBe(72)
-            // The chevron and the option row already clear 44px without any override.
+            // The chevron already clears 44px without any override.
             await expect(
                 container.querySelector('[data-testid="chevron"]')!.getBoundingClientRect().height,
-            ).toBeGreaterThanOrEqual(44)
-            await expect(
-                container.querySelector('[role="option"]')!.getBoundingClientRect().height,
             ).toBeGreaterThanOrEqual(44)
             // And the clear button stays the 18px icon in 2px padding it has always been — the one
             // opt-in here that does NOT reach 44px, deliberately: a hit area that big would sit over

@@ -2,6 +2,7 @@ import type { CSSProperties, MouseEvent, ReactNode } from 'react'
 import { cn } from 'src/helpers/cn'
 import { StyledPopover, type PopoverCloseReason, type PopoverOrigin } from '../../utils/popover'
 import { StyledMenuList } from './StyledMenuList'
+import styles from './StyledMenu.module.scss'
 export type MenuCloseReason = PopoverCloseReason | 'tabKeyDown'
 
 export interface MenuProps {
@@ -23,11 +24,9 @@ export interface MenuProps {
     keepMounted?: boolean
 }
 
-// Menu paper look (border + soft shadow) applied as flat sx → inline so it overrides StyledPopover's
-// base class shadow without tailwind-merge (dropped in Phase 0).
+// Menu outline; Float elevation and white background come from StyledPopover.
 const MENU_PAPER_STYLE = {
     border: '1px solid var(--colors-delta-300)',
-    boxShadow: '0px 2px 4px 0px rgba(34, 33, 51, 0.15)',
 }
 
 /**
@@ -77,7 +76,7 @@ export const StyledMenu = ({
                focus-steal the rule guards against. */
             // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus={autoFocus}
-            className={classes?.list}
+            className={cn(styles['anchoredList'], classes?.list)}
             onClick={onClick}
             // WAI-ARIA Menu pattern, Tab: "When focus is on a menuitem ... move focus out of the
             // menu and close all menus". The condition is load-bearing, not decoration — `StyledMenu`

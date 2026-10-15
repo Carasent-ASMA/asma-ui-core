@@ -3,7 +3,7 @@ import { useState } from 'react'
 
 import { StyledInputField, type StyledInputFieldProps } from '../StyledInputField'
 import { StyledChip } from 'src/components/data-display/chip'
-import { expect } from 'storybook/test'
+import { expect, waitFor } from 'storybook/test'
 
 /**
  * Connects the (controlled) field to React state so every story is *live* — typing, clearing, and
@@ -272,6 +272,44 @@ export const MultilineEmpty: Story = {
     },
 }
 
+const LONG_TEXT = Array.from({ length: 12 }, (_, i) => `Line ${i + 1}`).join('\n')
+
+/** Capped by `maxRows`: grows to the cap, then scrolls instead of clipping. */
+export const MultilineMaxRowsScrolls: Story = {
+    args: { className: 'w-[320px]', label: 'Notes', multiline: true, maxRows: 4, value: LONG_TEXT },
+    play: async ({ canvas }) => {
+        const textarea = canvas.getByTestId('storybook-input') as HTMLTextAreaElement
+        await waitFor(async () => {
+            await expect(getComputedStyle(textarea).overflowY).toBe('auto')
+            await expect(textarea.scrollHeight).toBeGreaterThan(textarea.clientHeight)
+        })
+    },
+}
+
+/** Fixed `rows` (the v2 questionnaire editor's shape): same scrolling behaviour. */
+export const MultilineFixedRowsScrolls: Story = {
+    args: { className: 'w-[320px]', label: 'Notes', multiline: true, rows: 4, value: LONG_TEXT },
+    play: async ({ canvas }) => {
+        const textarea = canvas.getByTestId('storybook-input') as HTMLTextAreaElement
+        await waitFor(async () => {
+            await expect(getComputedStyle(textarea).overflowY).toBe('auto')
+            await expect(textarea.scrollHeight).toBeGreaterThan(textarea.clientHeight)
+        })
+    },
+}
+
+/** readOnly ignores the row cap and shows the whole value (MLF-2). */
+export const MultilineReadOnlyShowsAll: Story = {
+    args: { className: 'w-[320px]', label: 'Notes', multiline: true, maxRows: 3, readOnly: true, value: LONG_TEXT },
+    play: async ({ canvas }) => {
+        const textarea = canvas.getByTestId('storybook-input') as HTMLTextAreaElement
+        await waitFor(async () => {
+            await expect(textarea.scrollHeight).toBeLessThanOrEqual(textarea.clientHeight + 1)
+            await expect(getComputedStyle(textarea).overflowY).toBe('hidden')
+        })
+    },
+}
+
 export const AriaInvalid: Story = {
     args: {
         error: true,
@@ -518,24 +556,3 @@ export const Gallery: Story = {
         )
     },
 }
-
-// export const CustomLabel: Story = {
-//     args: {
-//         id: 'email',
-//         label: undefined,
-//     },
-//     render: (args) => {
-//         return (
-//             <>
-//                 <StyledFormLabel title='Email' />
-//
-//                 <StyledInputField {...args} />
-//             </>
-//         )
-//     },
-//     play: async ({ canvas }) => {
-//         const input = canvas.getByLabelText('Email')
-//
-//         await expect(input).toBeInTheDocument()
-//     },
-// }

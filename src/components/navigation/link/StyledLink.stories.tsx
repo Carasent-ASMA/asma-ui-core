@@ -41,6 +41,11 @@ export const Link = (): JSX.Element => {
     )
 }
 
+/** No `href`: the link renders a real `<button>` so Enter/Space activate it (WCAG 2.1.1). */
+export const Button: StoryObj<typeof meta> = {
+    render: () => <StyledLink content='Button-like action' onClick={() => console.log('Button clicked')} />,
+}
+
 // ─── Gallery ────────────────────────────────────────────────────────────────
 // Full Figma variant matrix (Design-System "Standalone Links" 14759-18162):
 // Size (Base/Medium) × State (Enabled/Hovered/Focused/Visited/Disabled). Interactive states are

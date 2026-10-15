@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { afterEach, describe, it } from 'vitest'
+import { afterEach, describe, it, vi } from 'vitest'
 import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { cleanup, mount, tabbableWithin } from 'src/test-utils/renderInteraction'
 import { StyledDialog } from './StyledDialog'
+import { StyledDialogTitle } from './StyledDialogTitle'
 import { StyledInputField } from 'src/components/inputs/input-field'
 import { StyledMenu } from 'src/components/navigation/menu/StyledMenu'
 import { StyledMenuItem } from 'src/components/navigation/menu/StyledMenuItem'
@@ -368,19 +369,133 @@ describe('StyledDialog keyboard & focus contract', () => {
         await expect(document.activeElement).toBe(opener)
     })
 
-    /* FINDING ASMA-8139-D — WCAG 4.1.2 (name/role/value). src/components/feedback/dialog/StyledDialog.tsx.
-     * The dialog names itself `aria-label={dataTest}`, i.e. with the test hook. A screen reader
-     * announces "confirm dialog" / "sms-send-modal dialog" — an internal identifier, not the
-     * human-readable title the component already receives as `dialogTitle`. The heading text is
-     * present in the DOM but is not wired as the accessible name.
-     * Not fixed here: changing the accessible name affects every consumer's e2e selectors and
-     * announcements. Escalated to the coordinator.
+    /* FINDING ASMA-8139-D — WCAG 4.1.2 (name/role/value). The dialog used to name itself
+     * `aria-label={dataTest}`, so a screen reader announced the test hook instead of the title it
+     * shows. Fixed by ASMA-8464 (title prop, `<StyledDialogTitle>` child, `ariaLabel`) and extended
+     * here (label line, first content heading, development warning).
      * @see docs/a11y-keyboard-contract.md */
-    it.skip('takes its accessible name from the dialog title, not the test hook (4.1.2)', async () => {
+    it('takes its accessible name from the dialog title, not the test hook (4.1.2)', async () => {
         const { container } = mount(<DialogFixture />)
         await userEvent.click(container.querySelector('[data-testid="opener"]')!)
         await waitFor(() => expect(dialogEl()).not.toBeNull())
 
         await expect(dialogEl()).toHaveAccessibleName('Confirm')
+    })
+
+    /* Most consumers render the title as a child instead of passing `dialogTitle` (advoca's
+     * privacy-consent modal is the one this finding was raised against), so that path has to name
+     * the dialog too — otherwise the fix only moves it from a wrong name to no name at all. */
+    it('is named by a <StyledDialogTitle> child as well as by the prop (4.1.2)', async () => {
+        mount(
+            <StyledDialog dataTest='privacy-modal' open>
+                <StyledDialogTitle>Privacy policy</StyledDialogTitle>
+            </StyledDialog>,
+        )
+
+        const dialog = (): HTMLDialogElement | null => document.querySelector('dialog[data-testid="privacy-modal"]')
+        await waitFor(() => expect(dialog()).not.toBeNull())
+        await waitFor(() => expect(dialog()).toHaveAccessibleName('Privacy policy'))
+    })
+
+    it('uses a child title’s explicit id as the dialog label target (4.1.2)', async () => {
+        mount(
+            <StyledDialog dataTest='explicit-title-modal' open>
+                <StyledDialogTitle id='privacy-policy-title'>Privacy policy</StyledDialogTitle>
+            </StyledDialog>,
+        )
+
+        const dialog = (): HTMLDialogElement | null => document.querySelector('dialog[data-testid="explicit-title-modal"]')
+        await waitFor(() => expect(dialog()).toHaveAccessibleName('Privacy policy'))
+        await expect(dialog()).toHaveAttribute('aria-labelledby', 'privacy-policy-title')
+    })
+
+    it('falls back to ariaLabel only when no title is rendered (4.1.2)', async () => {
+        mount(<StyledDialog dataTest='bare-modal' open ariaLabel='Session expired' />)
+
+        const dialog = (): HTMLDialogElement | null => document.querySelector('dialog[data-testid="bare-modal"]')
+        await waitFor(() => expect(dialog()).not.toBeNull())
+        await expect(dialog()).toHaveAccessibleName('Session expired')
+    })
+
+    it.each([
+        ['dialogTitle', <StyledDialog dataTest='title-modal' open dialogTitle='Delete document' />, 'Delete document'],
+        [
+            'a child StyledDialogTitle with an automatic id',
+            <StyledDialog dataTest='child-title-modal' open><StyledDialogTitle>Delete document</StyledDialogTitle></StyledDialog>,
+            'Delete document',
+        ],
+        [
+            'a child StyledDialogTitle with an explicit id',
+            <StyledDialog dataTest='explicit-child-title-modal' open><StyledDialogTitle id='delete-title'>Delete document</StyledDialogTitle></StyledDialog>,
+            'Delete document',
+        ],
+        ['ariaLabel without a title', <StyledDialog dataTest='aria-label-modal' open ariaLabel='Delete document' />, 'Delete document'],
+        [
+            'a title and ariaLabel together',
+            <StyledDialog dataTest='title-wins-modal' open ariaLabel='Wrong name' dialogTitle='Delete document' />,
+            'Delete document',
+        ],
+    ])('announces the correct name with %s (4.1.2)', async (_configuration, dialogNode, expectedName) => {
+        mount(dialogNode)
+        await expect(document.querySelector('dialog')).toHaveAccessibleName(expectedName)
+    })
+
+    it('falls back to the label line, then to ariaLabel, and never to the test hook (4.1.2)', async () => {
+        const { unmount } = mount(
+            <StyledDialog open dataTest='labelled' dialogLabel='Pathway' showCloseIcon={false}>
+                body
+            </StyledDialog>,
+        )
+        await waitFor(() => expect(document.querySelector('[data-testid="labelled"]')).not.toBeNull())
+        await expect(document.querySelector('[data-testid="labelled"]')).toHaveAccessibleName('Pathway')
+        unmount()
+
+        mount(
+            <StyledDialog open dataTest='named' ariaLabel='Unsaved changes' showCloseIcon={false}>
+                body
+            </StyledDialog>,
+        )
+        await waitFor(() => expect(document.querySelector('[data-testid="named"]')).not.toBeNull())
+        await expect(document.querySelector('[data-testid="named"]')).toHaveAccessibleName('Unsaved changes')
+        await expect(document.querySelector('[data-testid="named"]')).not.toHaveAttribute('aria-label', 'named')
+    })
+
+    it('with no title, label or ariaLabel, is named by the first heading in its content (4.1.2)', async () => {
+        mount(
+            <StyledDialog open dataTest='custom-header' showCloseIcon={false}>
+                <h2>Share with pathfinder</h2>
+                <p>body</p>
+            </StyledDialog>,
+        )
+        await waitFor(() => expect(document.querySelector('[data-testid="custom-header"]')).not.toBeNull())
+        await expect(document.querySelector('[data-testid="custom-header"]')).toHaveAccessibleName(
+            'Share with pathfinder',
+        )
+    })
+
+    it('prefers a visible title over a heading in its content (4.1.2)', async () => {
+        mount(
+            <StyledDialog open dataTest='titled' dialogTitle='Confirm' showCloseIcon={false}>
+                <h2>Section</h2>
+            </StyledDialog>,
+        )
+        await waitFor(() => expect(document.querySelector('[data-testid="titled"]')).not.toBeNull())
+        await expect(document.querySelector('[data-testid="titled"]')).toHaveAccessibleName('Confirm')
+    })
+
+    it('warns in development when nothing can name it, and never falls back to the test hook (4.1.2)', async () => {
+        const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+        try {
+            mount(
+                <StyledDialog open dataTest='nameless' showCloseIcon={false}>
+                    <p>body</p>
+                </StyledDialog>,
+            )
+            await waitFor(() => expect(document.querySelector('[data-testid="nameless"]')).not.toBeNull())
+            await expect(document.querySelector('[data-testid="nameless"]')).not.toHaveAttribute('aria-label')
+            await expect(warn).toHaveBeenCalledWith(expect.stringContaining('"nameless" has no accessible name'))
+        } finally {
+            warn.mockRestore()
+        }
     })
 })

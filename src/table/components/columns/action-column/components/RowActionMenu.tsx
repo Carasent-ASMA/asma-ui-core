@@ -40,7 +40,6 @@ export function RowActionMenu<TData>({
     if (!shouldShowButton) return <div className='flex w-[40px] items-center justify-center' />
 
     const disabled = state.state === 'disabled'
-    const reasoned = disabled && Boolean(state.tooltipTitle)
 
     const button = (
         <StyledButton
@@ -50,8 +49,9 @@ export function RowActionMenu<TData>({
             aria-expanded={open}
             variant='text'
             size='small'
-            disabled={disabled && !reasoned}
-            aria-disabled={reasoned || undefined}
+            /* `aria-disabled`, not native `disabled`: the ⋮ stays in the Tab order so keyboard users
+             * reach it and its reason (disabled-states DIS-2, DIS-3). A press only shows the reason. */
+            aria-disabled={disabled || undefined}
             onClick={(e) => {
                 e.stopPropagation()
                 e.preventDefault()
@@ -92,10 +92,9 @@ export function RowActionMenu<TData>({
                         persistentDescription
                     >
                         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions --
-                            not a control: `{button}` is the real StyledButton. With a reason it stays
-                            focusable (`aria-disabled`) so the reason is reachable by keyboard; without one
-                            it is natively disabled. This span only keeps the click/touch from reaching
-                            the row. */}
+                            not a control: `{button}` is the real, focusable (`aria-disabled`) StyledButton
+                            whose reason is reachable by keyboard. This span only keeps the click/touch
+                            from reaching the row. */}
                         <span
                             className='cursor-not-allowed'
                             onTouchStart={(e) => {

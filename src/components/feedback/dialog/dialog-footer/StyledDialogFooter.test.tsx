@@ -130,6 +130,20 @@ describe('StyledDialogFooter (ASMA-7099)', () => {
         expect(html).not.toContain('disabled=""')
         expect(html).toContain('aria-disabled="true"')
         expect(html).toContain('aria-busy="true"')
+        /* Busy keeps focus: `aria-disabled`, never native `disabled` (disabled-states DIS-8). */
+        expect(html).toContain('aria-disabled="true"')
+        expect(html).not.toMatch(/\sdisabled=""/)
+    })
+
+    it('renders a disabled button focusable, with aria-disabled instead of native disabled', () => {
+        /* Native `disabled` drops the button out of the Tab order, so keyboard users could never
+         * reach its tooltip (disabled-states DIS-2, DIS-3). */
+        const html = renderToStaticMarkup(
+            <StyledDialogFooter primaryAction={{ label: 'Save', disabled: true, tooltip: 'Locked for editing' }} />,
+        )
+
+        expect(html).toContain('aria-disabled="true"')
+        expect(html).not.toMatch(/\sdisabled=""/)
     })
 
     it('renders an endIcon on a right-cluster button', () => {

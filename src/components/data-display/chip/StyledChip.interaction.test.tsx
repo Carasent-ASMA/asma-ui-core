@@ -12,8 +12,15 @@ const chip = (): HTMLElement => document.querySelector<HTMLElement>('[data-testi
 describe('StyledChip disabledReason', () => {
     afterEach(cleanup)
 
-    it('keeps a plain disabled chip out of the tab order', async () => {
+    it('keeps a disabled clickable chip focusable even without its own reason (DIS-3)', async () => {
         mount(<StyledChip dataTest='filter' label='Open' onClick={() => undefined} disabled />)
+
+        await expect(chip()).toHaveAttribute('tabindex', '0')
+        await expect(chip()).toHaveAttribute('aria-disabled', 'true')
+    })
+
+    it('keeps a disabled non-clickable chip out of the tab order', async () => {
+        mount(<StyledChip dataTest='filter' label='Open' disabled />)
 
         await expect(chip()).not.toHaveAttribute('tabindex')
         await expect(chip()).not.toHaveAttribute('aria-disabled')
