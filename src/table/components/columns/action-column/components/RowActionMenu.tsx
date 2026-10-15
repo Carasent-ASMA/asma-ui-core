@@ -6,7 +6,7 @@ import { DotsVerticalIcon } from 'src/table/shared-components/DotsVerticalIcon'
 
 import { StyledMenuItem } from 'src/table/shared-components/StyledMenuItem'
 import { isCustomAction, type IAction, type ICustomAction, type RowActionsState } from 'src/table/types'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { StyledButton } from 'src/table/shared-components/button'
 import { StyledTooltip } from 'src/table/shared-components/tooltip'
 import { CircleWarningOutlineIcon } from 'src/table/shared-components/CircleWarningOutlineIcon'
@@ -38,9 +38,15 @@ export function RowActionMenu<TData>({
         state.state !== 'hidden' && (hasVisibleActions || showNoActions || state.state === 'disabled')
 
     const [disabledTooltipOpen, setDisabledTooltipOpen] = useState(false)
+    // Only a tooltip opened by touch closes itself: there is no hover to end and no focus to leave.
+    const openedByTouchRef = useRef(false)
+    const openDisabledTooltip = (byTouch: boolean): void => {
+        openedByTouchRef.current = byTouch
+        setDisabledTooltipOpen(true)
+    }
 
     useEffect(() => {
-        if (!disabledTooltipOpen) return
+        if (!disabledTooltipOpen || !openedByTouchRef.current) return
         const t = window.setTimeout(() => setDisabledTooltipOpen(false), 1600)
         return () => window.clearTimeout(t)
     }, [disabledTooltipOpen])
@@ -57,12 +63,17 @@ export function RowActionMenu<TData>({
             aria-expanded={open}
             variant='text'
             size='small'
-            disabled={disabled}
+            /* `aria-disabled`, not native `disabled`: the ⋮ stays in the Tab order so keyboard users
+             * reach it and its reason (disabled-states DIS-2, DIS-3). A press only shows the reason. */
+            aria-disabled={disabled ? true : undefined}
             onClick={(e) => {
                 e.stopPropagation()
                 e.preventDefault()
 
-                if (disabled) return
+                if (disabled) {
+                    openDisabledTooltip(false)
+                    return
+                }
 
                 // `onMouseDown` preserves table selection, so a pointer click does not natively
                 // focus this button. The menu trigger—not its containing row—owns keyboard focus.
@@ -95,20 +106,27 @@ export function RowActionMenu<TData>({
                         arrow
                         placement={state.tooltipPlacement ?? 'top'}
                         open={disabledTooltipOpen}
-                        onOpen={() => setDisabledTooltipOpen(true)}
+                        onOpen={() => openDisabledTooltip(false)}
                         onClose={() => setDisabledTooltipOpen(false)}
                     >
-                        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions --
-                            not a control: `{button}` is a real (disabled) StyledButton — correctly
-                            excluded from the tab order by the native `disabled` attribute. This span only
-                            swallows the click/touch so a disabled button can still show its tooltip on
-                            hover/touch (disabled buttons don't reliably fire pointer events). */}
+                        {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions --
+                            not a control: `{button}` inside is the (aria-disabled, focusable) control. A
+                            controlled tooltip turns off its own hover and focus listeners, so this wrapper
+                            opens it on hover, on the button's focus (focus events bubble) and on touch, and
+                            closes it on leave, blur and Escape. */}
                         <span
                             className='cursor-not-allowed'
+                            onMouseEnter={() => openDisabledTooltip(false)}
+                            onMouseLeave={() => setDisabledTooltipOpen(false)}
+                            onFocus={() => openDisabledTooltip(false)}
+                            onBlur={() => setDisabledTooltipOpen(false)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Escape') setDisabledTooltipOpen(false)
+                            }}
                             onTouchStart={(e) => {
                                 e.stopPropagation()
                                 e.preventDefault()
-                                setDisabledTooltipOpen(true)
+                                openDisabledTooltip(true)
                             }}
                             onClick={(e) => {
                                 e.stopPropagation()

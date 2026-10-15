@@ -294,6 +294,11 @@ export function StyledSelectAutocomplete<
     )
     const enabledActiveIndexes =
         allowSelectAll && isMultiple ? [-1, ...enabledOptionIndexes] : enabledOptionIndexes
+    // Arrow keys, Home and End visit disabled options too (WAI-ARIA APG listbox; disabled-states
+    // DIS-3), so a keyboard or screen-reader user finds an option that cannot be chosen, and why.
+    // Enter and Space still refuse it; opening still lands on the selected or first enabled option.
+    const navigableOptionIndexes = visibleOptions.map((_option, index) => index)
+    const activeIndexes = allowSelectAll && isMultiple ? [-1, ...navigableOptionIndexes] : navigableOptionIndexes
     const selectedOptionIndex = visibleOptions.findIndex(isSelected)
 
     useEffect(() => {
@@ -344,11 +349,11 @@ export function StyledSelectAutocomplete<
     }
 
     const moveActiveOption = (direction: -1 | 1): void => {
-        if (enabledActiveIndexes.length === 0) return
+        if (activeIndexes.length === 0) return
         setActiveIndex((index) => {
-            const position = enabledActiveIndexes.indexOf(index ?? selectedOptionIndex)
-            if (position === -1) return enabledActiveIndexes[direction === 1 ? 0 : enabledActiveIndexes.length - 1] ?? null
-            return enabledActiveIndexes[Math.min(Math.max(position + direction, 0), enabledActiveIndexes.length - 1)] ?? null
+            const position = activeIndexes.indexOf(index ?? selectedOptionIndex)
+            if (position === -1) return activeIndexes[direction === 1 ? 0 : activeIndexes.length - 1] ?? null
+            return activeIndexes[Math.min(Math.max(position + direction, 0), activeIndexes.length - 1)] ?? null
         })
     }
 
@@ -406,7 +411,7 @@ export function StyledSelectAutocomplete<
             moveActiveOption(event.key === 'ArrowDown' ? 1 : -1)
         } else if (event.key === 'Home' || event.key === 'End') {
             event.preventDefault()
-            setActiveIndex(enabledActiveIndexes[event.key === 'Home' ? 0 : enabledActiveIndexes.length - 1] ?? null)
+            setActiveIndex(activeIndexes[event.key === 'Home' ? 0 : activeIndexes.length - 1] ?? null)
         } else if (event.key === ' ' && activeIndex === -1) {
             event.preventDefault()
             toggleSelectAll(event)

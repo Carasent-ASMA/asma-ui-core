@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { expect, fn, userEvent } from 'storybook/test'
 import { useState } from 'react'
 import { ArchiveIcon, PlusIcon } from 'src/components/icons'
 import { StyledFilterButton } from 'src/components/utils/filter-menu/StyledFilterButton'
@@ -360,5 +361,45 @@ export const LongSelectionLabel: Story = {
                 />
             </div>
         )
+    },
+}
+
+const onNewReferenceEvent = fn()
+
+/**
+ * A disabled action stays in the Tab order with `aria-disabled` (ASMA disabled-states DIS-3); Enter,
+ * Space and click do nothing. To say why, pass a `render` that wraps the button in a tooltip.
+ */
+export const DisabledActionFocusable: Story = {
+    render: () => (
+        <DynamicToolbar
+            dataTest='disabled-action-toolbar'
+            title='Reference events'
+            afterSearchActions={[
+                {
+                    id: 'new',
+                    label: 'New reference event',
+                    icon: <PlusIcon width={24} height={24} />,
+                    onClick: onNewReferenceEvent,
+                    disabled: true,
+                },
+            ]}
+        />
+    ),
+    play: async ({ canvas }) => {
+        // The toolbar also renders an off-screen measuring copy; act on the visible button.
+        const button = canvas
+            .getAllByRole('button', { name: 'New reference event' })
+            .find((candidate) => candidate.checkVisibility())!
+
+        await expect(button).toHaveAttribute('aria-disabled', 'true')
+        await expect(button).not.toBeDisabled()
+        button.focus()
+        await expect(button).toHaveFocus()
+
+        await userEvent.keyboard('{Enter}')
+        await userEvent.keyboard(' ')
+        button.click()
+        await expect(onNewReferenceEvent).not.toHaveBeenCalled()
     },
 }

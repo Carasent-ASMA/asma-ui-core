@@ -87,7 +87,7 @@ describe('StyledMenu keyboard contract', () => {
         await waitFor(() => expect(document.activeElement).toBe(items()[0]))
     })
 
-    it('moves through items with the arrow keys, skipping disabled, and wraps (2.1.1)', async () => {
+    it('moves through items with the arrow keys, disabled ones included, and wraps (2.1.1)', async () => {
         const { container } = mount(<MenuFixture />)
         await openMenu(container)
         await waitFor(() => expect(document.activeElement).toBe(items()[0]))
@@ -95,7 +95,10 @@ describe('StyledMenu keyboard contract', () => {
         await userEvent.keyboard('{ArrowDown}')
         await expect(document.activeElement).toBe(items()[1])
 
-        // 'Archive' is disabled and must be skipped.
+        // 'Archive' is disabled but stays reachable, so its state and reason can be found (DIS-3).
+        await userEvent.keyboard('{ArrowDown}')
+        await expect(document.activeElement).toBe(items()[2])
+
         await userEvent.keyboard('{ArrowDown}')
         await expect(document.activeElement).toBe(items()[3])
 
@@ -106,7 +109,7 @@ describe('StyledMenu keyboard contract', () => {
         await expect(document.activeElement).toBe(items()[3])
     })
 
-    it('jumps to the first/last enabled item with Home/End (2.1.1)', async () => {
+    it('jumps to the first/last item with Home/End (2.1.1)', async () => {
         const { container } = mount(<MenuFixture />)
         await openMenu(container)
         await waitFor(() => expect(document.activeElement).toBe(items()[0]))
@@ -142,15 +145,30 @@ describe('StyledMenu keyboard contract', () => {
         await expect(onPick).toHaveBeenCalledWith('duplicate')
     })
 
+    it('keeps exactly one item in the Tab order — the focused one (roving tabindex, 2.1.1)', async () => {
+        const { container } = mount(<MenuFixture />)
+        await openMenu(container)
+        await waitFor(() => expect(document.activeElement).toBe(items()[0]))
+
+        const tabStops = (): HTMLElement[] => items().filter((item) => item.tabIndex === 0)
+        await expect(tabStops()).toEqual([items()[0]])
+
+        await userEvent.keyboard('{ArrowDown}{ArrowDown}')
+        await expect(document.activeElement).toBe(items()[2])
+        await expect(tabStops()).toEqual([items()[2]])
+    })
+
     it('does not activate a disabled item from the keyboard (4.1.2)', async () => {
         const onPick = fn()
         const { container } = mount(<MenuFixture onPick={onPick} />)
         await openMenu(container)
         await waitFor(() => expect(document.activeElement).toBe(items()[0]))
 
-        // Arrow keys skip it, so reach it directly and confirm activation is still refused.
-        items()[2]!.focus()
+        // Arrow keys reach it; activation is still refused.
+        await userEvent.keyboard('{ArrowDown}{ArrowDown}')
+        await expect(document.activeElement).toBe(items()[2])
         await userEvent.keyboard('{Enter}')
+        await userEvent.keyboard(' ')
 
         await expect(onPick).not.toHaveBeenCalled()
     })

@@ -265,7 +265,7 @@ export const SingleLeftActionStaysInline: Story = {
     },
 }
 
-/** A disabled primary explains itself on hover — the reason these footers use a tooltip. */
+/** A disabled primary explains itself on hover and on keyboard focus — the reason these footers use a tooltip. */
 export const DisabledPrimaryExplainsItself: Story = {
     render: () => (
         <Paper width={600}>
@@ -279,10 +279,16 @@ export const DisabledPrimaryExplainsItself: Story = {
         const canvas = within(canvasElement)
         const save = canvas.getByRole('button', { name: 'Save changes' })
 
-        await expect(save).toBeDisabled()
-        /* Hovering the disabled button itself would emit no pointer events — the wrapper is
-         * what makes the explanation reachable at all. */
-        await userEvent.hover(save.parentElement as HTMLElement)
+        /* `aria-disabled`, not native `disabled`: it stays in the Tab order (disabled-states DIS-3). */
+        await expect(save).not.toBeDisabled()
+        await expect(save).toHaveAttribute('aria-disabled', 'true')
+        await userEvent.hover(save)
+        await waitFor(async () => expect(within(document.body).getByText('Locked for editing')).toBeVisible())
+        await userEvent.unhover(save)
+
+        /* Keyboard users reach the same reason by focusing the button. */
+        save.focus()
+        await expect(save).toHaveFocus()
         await waitFor(async () => expect(within(document.body).getByText('Locked for editing')).toBeVisible())
     },
 }
@@ -301,7 +307,9 @@ export const PrimaryLoading: Story = {
         const canvas = within(canvasElement)
         const save = canvas.getByRole('button', { name: /Save filter/ })
 
-        await expect(save).toBeDisabled()
+        /* Busy keeps focus: `aria-disabled`, not native `disabled` (disabled-states DIS-8). */
+        await expect(save).not.toBeDisabled()
+        await expect(save).toHaveAttribute('aria-disabled', 'true')
         await expect(save).toHaveAttribute('aria-busy', 'true')
         await expect(save).toHaveTextContent('Save filter')
     },

@@ -62,7 +62,7 @@ element itself, in JavaScript, from document order — it walks straight out of 
 focus trap and reports an escape no real user could perform. This cost a false failure during
 development before the switch. `expect` still comes from `storybook/test`, for the jest-dom matchers.
 
-Two traps the harness now guards, both of which produced a *wrong answer* before being fixed:
+Traps the harness now guards, each of which produced a *wrong answer* before being fixed:
 
 - **The viewport is pinned to 1280×720** (matching VRT). `StyledDatePicker` and `StyledTimePicker`
   branch on `useIsMobileView()` (≤768px) into a bottom-sheet `Drawer`, and `StyledDialog` goes
@@ -75,6 +75,13 @@ Two traps the harness now guards, both of which produced a *wrong answer* before
   computed style against the element's own baseline so a background swap counts as an indicator just
   as much as an outline does. Worth knowing beyond this suite: a transparent outline is invisible to
   the naive hand-rolled check *and* to axe, which has no focus-visibility rule at all.
+- **The focus starting point is reset between tests.** A real Tab starts from the browser's sequential
+  focus navigation starting point, which survives the previous test's unmount and sits on a node that
+  no longer exists. In a shuffled run the first Tab of the next test then landed on `<body>` or past
+  the end of the page — `StyledTimePicker` "is reachable by Tab" and `StyledAccordion` "reaches the
+  panel controls" both failed intermittently in the nightly flaky-test run for this reason. `cleanup()`
+  now focuses a throwaway element at the top of `<body>` and removes it, which moves the point back to
+  the start.
 - **Anchor overlay assertions on a stable inner node**, not the popper wrapper. Poppers that mount
   through a `Fade` churn their outer nodes while the transition settles, so a wrapper query can read
   "gone" for a frame and make an Escape assertion pass for the wrong reason. Finding K below was
@@ -106,9 +113,14 @@ The following findings were resolved by ASMA-8087 and are enforced by the `inter
 | I | `feedback/snack-bar/StyledSnackbar.tsx` | Built-in message fallback is an atomic polite status region |
 | K | `datetime/.../StyledTimePicker.tsx` | Escape and Tab close the desktop popup without trapping focus |
 
+Resolved after ASMA-8087, also enforced by the `interaction` project:
+
+| ID | Component | Resolution |
+| --- | --- | --- |
+| D | `feedback/dialog/StyledDialog.tsx` | Named by its visible title, else its label line, else `ariaLabel`, else the first heading in its content; never by `dataTest`. A development-only warning names a dialog that has none of them |
+
 | ID | SC | Component | Status |
 | --- | --- | --- | --- |
-| D | 4.1.2 | `feedback/dialog/StyledDialog.tsx` | Dialog is named by its test hook |
 | J | 2.1.1 | `datetime/.../time-picker/TimePickerInput.tsx` | Deferred: keyboard-open/panel operation |
 
 **L (found during the ASMA-8087 review, 2026-09-17) — WCAG 2.1.2 / 2.4.3, `navigation/menu/StyledMenu.tsx`.**
@@ -180,6 +192,14 @@ an internal identifier — even though the component already receives a human-re
 and renders it. Low effort to fix, but it changes an accessible name every consumer's e2e selectors
 and announcements may depend on, so it needs routing rather than a drive-by patch.
 
+**Resolved.** The dialog is `aria-labelledby` its visible title, else its label line; else it takes
+the new `ariaLabel` prop; else it is labelled by the first heading (`h1`–`h6` or `role="heading"`) its
+content renders, so a custom header in `children` still names it. A dialog with none of these stays
+unnamed — an internal identifier is worse than no name — and a development-only `console.warn` names
+its `dataTest` so the caller can add one. No consumer in asma-modules selected a dialog by the old
+name. Covered in `StyledDialog.interaction.test.tsx` and the `NamedByContentHeading` and
+`NamedByAriaLabel` stories.
+
 ### E — Closing a menu drops focus to `<body>` (2.4.3)
 
 Same shape as C, different owner. `StyledPopover` unmounts the portalled overlay while DOM focus is
@@ -235,6 +255,33 @@ and passing, so the function is operable and this is not a total 2.1.1 block. Wh
 the panel itself — its eraser, its confirm button, its "now" affordance — so keyboard and pointer
 users get materially different capabilities.
 
+## Disabled controls stay focusable
+
+The ASMA [disabled-states pattern](https://github.com/Carasent-ASMA/asma-modules/blob/master/_docs/ux/patterns/pattern-disabled-states.md)
+(approved 2026-09-29) requires a disabled action to stay focusable with `aria-disabled`, give its
+reason on hover, focus and tap, and do nothing when activated (DIS-2, DIS-3, DIS-4); a running action
+is busy, not removed from the Tab order (DIS-8). WCAG 2.1.1 does not require either way — a disabled
+control has no function to operate — so this is the rule that decides, and it follows the WAI-ARIA
+APG, which keeps disabled menu items, tabs, listbox options and toolbar buttons focusable so
+screen-reader users can find them. Native `disabled` is kept only on `StyledButton` itself, which
+leaves the choice to its caller.
+
+| Component | Disabled behaviour | Covered by |
+| --- | --- | --- |
+| `inputs/button/StyledButton` | `[aria-disabled="true"]` gets the same disabled tokens and not-allowed cursor as `:disabled`, with no hover | story `AriaDisabled` |
+| `feedback/dialog/.../StyledDialogFooter` | `disabled` and `loading` render `aria-disabled` (plus `aria-busy` when loading); the click is blocked, including a form submit; the `tooltip` opens on focus | `StyledDialogFooter.test.tsx`, stories `DisabledPrimaryExplainsItself`, `PrimaryLoading` |
+| `custom/module/header-layout/ToolbarActionButton` | `aria-disabled`, click blocked | `ToolbarActionGroup.interaction.test.tsx`, story `DisabledActionFocusable` |
+| `navigation/menu/StyledMenuList` | Arrow keys, Home and End visit disabled items; opening still focuses the first enabled item; `StyledMenuItem` refuses Enter and Space. Roving tabindex keeps exactly one item — the focused one, else the first enabled — in the Tab order, so a scrolling (7.5-row capped) menu has a keyboard-reachable stop | `StyledMenu.interaction.test.tsx`, stories `DisabledItemReachable`, `ScrollableMenu` |
+| `navigation/tabs/StyledTab` | `aria-disabled`, on the arrow-key path, not selectable; the new `tooltip` prop is its accessible description | `StyledTabs.interaction.test.tsx`, story `DisabledTabWithReason` |
+| `data-display/chip/StyledChip` | A disabled chip that would be clickable stays a focusable, `aria-disabled` control; a plain chip is unchanged | `StyledInteractiveChip.interaction.test.tsx`, stories `Checkbox_Disabled`, `DisabledOptionChipGroup` |
+| `inputs/select-autocomplete/StyledSelectAutocomplete` | The active-descendant cursor visits disabled options; Enter and Space refuse them; opening still lands on the selected or first enabled option | `StyledSelectAutocomplete.interaction.test.tsx`, story `DisabledOptionAutocomplete` |
+| `inputs/dynamic-select/.../DynamicSelectAutocomplete` | A disabled option's `getOptionTooltip` reason is its accessible description and opens while the keyboard is on it | story `DisabledOptionAutocomplete` |
+| `table/.../RowActionMenu` | With every action disabled, the ⋮ is `aria-disabled`; its reason opens on hover, focus and tap and closes on leave, blur and Escape; only a touch-opened reason closes itself after 1.6 s | `RowActionMenu.interaction.test.tsx`, story `Table/Row Action Menu › DisabledWithReason` |
+| `data-display/tooltip/StyledTooltip` | Describes the first focusable control in its wrapper when nothing is tabbable, so a roving-tabindex item (an unselected tab) is described rather than its wrapper; does not add itself when the control is already described by the same text, so a permanent reason is not read twice | `focusable.interaction.test.tsx`, `StyledTooltip.interaction.test.tsx` |
+
+This reverses one earlier assertion: `StyledInteractiveChip.interaction.test.tsx` had kept a disabled
+chip out of the Tab order (ASMA-8087), before the pattern was approved.
+
 ## SC 2.4.11 Focus Not Obscured (Minimum) — AA
 
 `StyledSelect.focus-obscured.interaction.test.tsx` covers a criterion nothing else in this epic
@@ -265,7 +312,6 @@ All five currently pass.
   interaction test as the precondition for adopting the checkbox `decorative` prop, which is what
   would clear the `nested-interactive` axe violation recorded in
   [`a11y-allowlist.md`](./a11y-allowlist.md). Tracked there; not written here.
-- Dialog accessible naming (finding D) and TimePicker keyboard-open/panel operation (finding J)
-  remain deferred to their owning follow-ups.
+- TimePicker keyboard-open/panel operation (finding J) remains deferred to its owning follow-up.
 - Focus indicator **contrast** (1.4.11) and **size** (2.4.13, AAA) are not asserted here — see the
   criteria table above for who owns what. This suite answers 2.4.7 and 2.4.11 only.

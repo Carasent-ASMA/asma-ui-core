@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { userEvent, within } from 'storybook/test'
+import { expect, fn, userEvent, within } from 'storybook/test'
 import { StyledMenu, type MenuProps } from './StyledMenu'
 import { useState, type FC } from 'react'
 import { StyledMenuList } from './StyledMenuList'
@@ -60,6 +60,45 @@ export const Gallery: Story = {
             </StyledMenuList>
         </div>
     ),
+}
+
+const onArchive = fn()
+
+/**
+ * A disabled item stays on the arrow-key path (WAI-ARIA APG menu; ASMA disabled-states DIS-3), so a
+ * keyboard or screen-reader user finds it and the reason it carries; Enter and Space do nothing on it.
+ * Opening a menu still focuses the first enabled item.
+ */
+export const DisabledItemReachable: Story = {
+    render: () => (
+        <div style={{ width: 280 }}>
+            <StyledMenuList autoFocus>
+                <StyledMenuItem>Rename</StyledMenuItem>
+                <StyledMenuItem disabled onClick={onArchive}>
+                    <span className='flex flex-col'>
+                        <span>Archive</span>
+                        <span className='text-sm'>A shared template cannot be changed here</span>
+                    </span>
+                </StyledMenuItem>
+                <StyledMenuItem>Delete</StyledMenuItem>
+            </StyledMenuList>
+        </div>
+    ),
+    play: async ({ canvas, userEvent }) => {
+        const [rename, archive, remove] = canvas.getAllByRole('menuitem')
+        await expect(rename).toHaveFocus()
+
+        await userEvent.keyboard('{ArrowDown}')
+        await expect(archive).toHaveFocus()
+        await expect(archive).toHaveAttribute('aria-disabled', 'true')
+
+        await userEvent.keyboard('{Enter}')
+        await userEvent.keyboard(' ')
+        await expect(onArchive).not.toHaveBeenCalled()
+
+        await userEvent.keyboard('{ArrowDown}')
+        await expect(remove).toHaveFocus()
+    },
 }
 
 const StyledMenuExample: FC<{ args: Partial<MenuProps> }> = ({ args }) => {

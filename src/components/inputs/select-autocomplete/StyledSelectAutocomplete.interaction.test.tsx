@@ -389,3 +389,40 @@ describe('StyledSelectAutocomplete keyboard contract', () => {
         await expect(document.querySelector('[data-testid="cursor-Alpha"]')).toBeNull()
     })
 })
+
+/* Disabled options stay on the virtual cursor's path (WAI-ARIA APG listbox; disabled-states DIS-3), so
+ * keyboard and screen-reader users find an option that cannot be chosen; choosing it is still refused. */
+describe('StyledSelectAutocomplete disabled options', () => {
+    afterEach(cleanup)
+
+    it('lands on a disabled option with the arrow keys but does not choose it', async () => {
+        const onChange = fn()
+        mount(
+            <StyledSelectAutocomplete<string, false, false, false>
+                dataTest='ac'
+                options={OPTIONS}
+                value={null}
+                getOptionDisabled={(option) => option === 'Bravo'}
+                onChange={(_event, next) => {
+                    onChange(next)
+                }}
+                renderInput={(params) => <StyledInputField {...params} dataTest='ac-input' label='Team' />}
+            />,
+        )
+
+        input().focus()
+        await userEvent.keyboard('{ArrowDown}')
+        await waitFor(() => expect(listbox()).not.toBeNull())
+        await expect(activeOption()).toHaveTextContent('Alpha')
+
+        await userEvent.keyboard('{ArrowDown}')
+        await expect(activeOption()).toHaveTextContent('Bravo')
+        await expect(activeOption()).toHaveAttribute('aria-disabled', 'true')
+
+        await userEvent.keyboard('{Enter}')
+        await expect(onChange).not.toHaveBeenCalled()
+
+        await userEvent.keyboard('{ArrowDown}')
+        await expect(activeOption()).toHaveTextContent('Charlie')
+    })
+})

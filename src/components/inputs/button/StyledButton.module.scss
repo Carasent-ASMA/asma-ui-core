@@ -48,7 +48,10 @@
             background-color: var(--colors-button-#{$type}-#{$color}-focused-bg-color) #{!important};
         }
 
-        &:disabled {
+        // `aria-disabled` is the focusable disabled state (disabled-states DIS-3): it keeps the button in
+        // the Tab order, so it needs the same look. Declared after :hover/:active, so it wins over both.
+        &:disabled,
+        &[aria-disabled='true'] {
             cursor: not-allowed #{!important};
             color: var(--colors-button-#{$type}-#{$color}-disabled-text-color) #{!important};
             background-color: var(--colors-button-#{$type}-#{$color}-disabled-bg-color) #{!important};

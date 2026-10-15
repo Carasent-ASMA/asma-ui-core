@@ -43,6 +43,7 @@ const actionKey = (id: string, showLabel: boolean): string => `dialog-footer-act
 export interface StyledDialogFooterButton {
     label: string
     onClick?: () => void
+    /** Rendered as `aria-disabled`, not native `disabled`: the button stays focusable, so keyboard users reach its `tooltip`. A click does nothing. */
     disabled?: boolean
     /** `submit` lets the footer drive the surrounding `<form>` without a click handler. */
     type?: 'button' | 'submit' | 'reset'
@@ -54,7 +55,8 @@ export interface StyledDialogFooterButton {
     /** Trailing icon. `loading` supplies its own and wins. */
     endIcon?: ReactNode
     /**
-     * Shows a spinner after the label and disables the button. Consumers previously swapped
+     * Shows a spinner after the label and makes the button busy (`aria-busy`, `aria-disabled`): it
+     * keeps focus and ignores further presses. Consumers previously swapped
      * the label *for* a spinner, which changes the button's width mid-submit — hence the
      * hard-coded `w-[98px]` workarounds in the footers this replaces. Keeping the label
      * makes the width stable on its own.
@@ -62,8 +64,8 @@ export interface StyledDialogFooterButton {
     loading?: boolean
     /**
      * Wraps the button in a `StyledTooltip`. Falsy renders no tooltip, so the common
-     * `tooltip={disabled && 'Locked for editing'}` reads naturally. A disabled button does
-     * not emit pointer events, so the tooltip is anchored on a wrapper around it.
+     * `tooltip={disabled && 'Locked for editing'}` reads naturally. It opens on hover and on
+     * keyboard focus, since a disabled button stays focusable.
      */
     tooltip?: ReactNode
     dataTest?: string
@@ -186,6 +188,11 @@ export function StyledDialogFooter({
         fallbackVariant: StyledButtonType,
         key: string,
     ): JSX.Element => {
+        /* `aria-disabled`, not native `disabled` (disabled-states DIS-3, DIS-8): native `disabled`
+         * drops the button out of the Tab order, so its tooltip was unreachable from the keyboard
+         * and a button turning busy under focus threw focus to <body>. The click is blocked here
+         * instead; `preventDefault` also stops a `type="submit"` button submitting its form. */
+        const blocked = Boolean(button.disabled) || Boolean(button.loading)
         const element = (
             <StyledButton
                 dataTest={button.dataTest ?? `${dataTest}-${key}`}
@@ -193,10 +200,10 @@ export function StyledDialogFooter({
                 error={button.tone === 'danger'}
                 size='medium'
                 type={button.type ?? 'button'}
-                disabled={Boolean(button.disabled) || Boolean(button.loading)}
+                aria-disabled={blocked || undefined}
                 startIcon={button.icon}
                 endIcon={button.loading ? <LoadingIcon width={20} height={20} /> : button.endIcon}
-                onClick={button.onClick}
+                onClick={blocked ? (event) => event.preventDefault() : button.onClick}
                 aria-label={button.ariaLabel}
                 aria-busy={button.loading}
             >
@@ -208,9 +215,8 @@ export function StyledDialogFooter({
             return element
         }
 
-        /* A disabled button emits no pointer events, so the tooltip listens on a wrapper —
-         * otherwise the "why is this disabled?" tooltip never shows, which is the only
-         * reason these footers use one. */
+        /* `StyledTooltip` describes the first tabbable element inside its wrapper — the button —
+         * so the "why is this disabled?" reason is announced on focus as well as shown on hover. */
         return (
             <StyledTooltip arrow title={button.tooltip}>
                 <span className='inline-flex'>{element}</span>
