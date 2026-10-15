@@ -59,7 +59,7 @@ export const CountryCodeOptions = ({
                     selected={country.iso2 === selectedIso2}
                     active={index === activeIndex}
                     onClick={() => onSelect(country.iso2)}
-                    className='border-0 border-b border-solid border-delta-100'
+                    className='border-0 border-b border-solid border-delta-100 last:border-b-0'
                 >
                     {/* One wrapper: StyledSelectItem puts children inside a single flex-1 span,
                         so the name/code split has to happen in here. */}

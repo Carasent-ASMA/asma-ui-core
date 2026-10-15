@@ -238,8 +238,9 @@ export const DynamicSelectAutocomplete = forwardRef(
                                     onClick={!disabled ? props.onClick : undefined}
                                     className={cn(
                                         // Figma Menus item: Body Base 16/lh24. Row density: 'compact'
-                                        // = 40px (default), 'regular' = 48px.
-                                        'relative flex cursor-pointer items-center gap-x-1 bg-white px-2 text-base aria-selected:bg-gama-50 hover:bg-delta-50',
+                                        // = 40px (default), 'regular' = 48px. `box-border` keeps the
+                                        // listbox's 1px separator inside that height.
+                                        'relative box-border flex cursor-pointer items-center gap-x-1 bg-white px-2 text-base aria-selected:bg-gama-50 hover:bg-delta-50',
                                         rowSize === 'regular' ? 'min-h-12' : 'min-h-10',
                                         disabled &&
                                             'cursor-not-allowed bg-delta-50 aria-selected:!bg-delta-50 hover:!bg-delta-50 [&_*]:cursor-not-allowed',
@@ -298,8 +299,9 @@ export const DynamicSelectAutocomplete = forwardRef(
                                 key={props.id}
                                 className={cn(
                                     // Figma Menus item: Body Base 16/lh24. Row density: 'compact' =
-                                    // 40px (default), 'regular' = 48px.
-                                    'relative flex cursor-pointer items-center gap-x-1 px-2 text-base aria-selected:bg-gama-50 hover:bg-delta-50',
+                                    // 40px (default), 'regular' = 48px. `box-border` keeps the
+                                    // listbox's 1px separator inside that height.
+                                    'relative box-border flex cursor-pointer items-center gap-x-1 px-2 text-base aria-selected:bg-gama-50 hover:bg-delta-50',
                                     rowSize === 'regular' ? 'min-h-12' : 'min-h-10',
                                     disabled &&
                                         'cursor-not-allowed bg-delta-50 aria-selected:!bg-delta-50 hover:!bg-delta-50 [&_*]:cursor-not-allowed',
