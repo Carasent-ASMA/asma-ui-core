@@ -217,9 +217,11 @@ $checkbox-sizes: (
     .CheckboxRippleContainer::after {
         content: '';
         @extend %ripple-base;
-        width: 40px; // matches Figma 40px touch/hover target
+        // Figma Hovered (node 15424-87984): a solid bg/hover-default (#f0f2f4 = delta-50) circle
+        // filling the 40px touch target, the same for every type and theme.
+        width: 40px;
         height: 40px;
-        background: var(--colors-gama-300);
+        background: var(--colors-delta-50);
         border-radius: 50%;
         top: 50%;
         left: 50%;
@@ -231,7 +233,7 @@ $checkbox-sizes: (
     &:hover .CheckboxRippleContainer::after,
     &[data-hovered] .CheckboxRippleContainer::after,
     &:has(input[data-hovered]) .CheckboxRippleContainer::after {
-        opacity: 0.07;
+        opacity: 1;
         transform: translate(-50%, -50%) scale(1);
     }
 

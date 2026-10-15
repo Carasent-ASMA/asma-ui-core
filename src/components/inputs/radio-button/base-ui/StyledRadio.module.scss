@@ -95,7 +95,9 @@
 .RadioHover {
     .RadioRippleContainer::after {
         content: '';
-        background: var(--colors-gama-300);
+        // Figma Hovered (node 18095-26694): a solid bg/hover-default (#f0f2f4 = delta-50) circle
+        // filling the 40px touch target.
+        background: var(--colors-delta-50);
         border-radius: 50%;
         top: 50%;
         left: 50%;
@@ -109,7 +111,7 @@
         @include radio-wrapper-size(small);
     }
     &:hover .RadioRippleContainer::after {
-        opacity: 0.07;
+        opacity: 1;
         transform: translate(-50%, -50%) scale(1);
     }
 }
@@ -202,7 +204,7 @@
         background-color: var(--colors-delta-500);
     }
 
-    &.RadioHover:hover::after {
+    &.RadioHover:hover .RadioRippleContainer::after {
         opacity: 0;
     }
 }
