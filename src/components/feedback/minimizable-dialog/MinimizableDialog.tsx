@@ -7,6 +7,7 @@ import styles from './MinimizableDialog.module.scss'
 import { StyledMenu, StyledMenuItem } from 'src/components/navigation/menu'
 import { useToggleMenuVisibility } from 'src/hooks/useToggleMenuVisibility.hook'
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
+import { useBackCloses } from 'src/hooks/useBackCloses.hook'
 import { StyledTooltip } from 'src/components/data-display/tooltip'
 import type { IMinimizableDialogProps } from './types'
 import {
@@ -70,6 +71,11 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     // Only the fullscreen state shows a page-covering backdrop (below) and is actually modal — the
     // default corner-docked panel is a non-modal floating widget that must NOT trap focus.
     useFocusTrap(open && isFullScreenActive, panelRef, closeWhenIdle)
+
+    // ASMA-8471: only the fullscreen, non-minimized state is a real modal layer worth a Back press —
+    // the corner-docked and minimized states are non-modal floating widgets the page stays usable
+    // around. `closeWhenIdle` already no-ops while the primary action is busy, same as its ✕/Esc path.
+    useBackCloses({ active: open && isFullScreenActive, requestClose: closeWhenIdle })
 
     // Both panels stay mounted — the `hidden` class is only `h-0 w-0`, so the hidden one's controls
     // would still be tabbable. `inert` is what actually removes it from the tab order, and it is set

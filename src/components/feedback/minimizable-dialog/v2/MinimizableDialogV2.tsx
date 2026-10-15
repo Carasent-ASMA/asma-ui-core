@@ -12,6 +12,7 @@ import { useTranslations } from './useTranslations'
 import { useControlledProps } from './useControlledProps'
 import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
+import { useBackCloses } from 'src/hooks/useBackCloses.hook'
 import { DialogBusyContext, useDialogBusyBoundary } from 'src/components/feedback/dialog/DialogBusyContext'
 
 export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) => {
@@ -115,6 +116,11 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
     // Only the fullscreen state shows a page-covering backdrop (below) and is actually modal — the
     // default corner-docked panel is a non-modal floating widget that must NOT trap focus.
     useFocusTrap(open && isFullScreenActive, modalRef, handleClose)
+
+    // ASMA-8471: only the fullscreen, non-minimized state is a real modal layer worth a Back press —
+    // the corner-docked and minimized states are non-modal floating widgets the page stays usable
+    // around. `handleClose` already no-ops while busy, same as its ✕ path.
+    useBackCloses({ active: open && isFullScreenActive, requestClose: handleClose })
 
     const fullScreenDialogStyle: React.CSSProperties | undefined = isFullScreenActive
         ? isMobile

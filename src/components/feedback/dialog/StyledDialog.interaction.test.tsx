@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { StrictMode, useState } from 'react'
 import { afterEach, describe, it, vi } from 'vitest'
 import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
@@ -11,6 +11,7 @@ import { StyledMenuItem } from 'src/components/navigation/menu/StyledMenuItem'
 import { StyledSelect } from 'src/components/inputs/select/StyledSelect'
 import { StyledSelectAutocomplete } from 'src/components/inputs/select-autocomplete/StyledSelectAutocomplete'
 import { StyledSelectItem } from 'src/components/inputs/select/StyledSelectItem'
+import { getOverlayBackStackSize, requestCloseTopOverlayBack } from 'src/hooks/useBackCloses.hook'
 
 /**
  * Keyboard & focus contract — StyledDialog (ASMA-8139).
@@ -497,5 +498,254 @@ describe('StyledDialog keyboard & focus contract', () => {
         } finally {
             warn.mockRestore()
         }
+    })
+})
+
+/**
+ * ASMA-8471 — native Back closes the top ui-core overlay through its own close path.
+ *
+ * `requestCloseTopOverlayBack()` is the one function a real `asma-core-helpers` history adapter calls
+ * on an owned traversal (a fake adapter, per TASK-021) — calling it directly here exercises the exact
+ * same path a desktop/Firefox/Safari Back press takes. The native `cancel`/`close` dispatches below
+ * exercise `StyledDialog`'s own Android close-watcher arbitration (CON-007) instead: a real
+ * `dialog.close()` runs the browser's actual close algorithm and fires a genuine non-cancelable
+ * `close` event, which is what a second rapid Back does when the first `cancel` was prevented.
+ */
+describe('StyledDialog native Back (ASMA-8471)', () => {
+    afterEach(cleanup)
+
+    const dialogByTest = (dataTest: string): HTMLDialogElement | null =>
+        document.querySelector<HTMLDialogElement>(`dialog[data-testid="${dataTest}"]`)
+
+    it('closes only the top of two stacked dialogs, one Back at a time (TEST-007 / BACK-2)', async () => {
+        const onOuterClose = fn()
+        const onInnerClose = fn()
+        // Documents opens from INSIDE Share, after Share has already mounted and registered — the
+        // same sequence BACK-2's fixture describes. Mounting both from the same initial render would
+        // register Documents before Share (child effects run before parent effects on mount) and
+        // invert the stack, so the inner dialog is opened via a later, separate commit on purpose.
+        const Fixture = (): JSX.Element => {
+            const [outerOpen, setOuterOpen] = useState(true)
+            const [innerOpen, setInnerOpen] = useState(false)
+            return (
+                <>
+                    {outerOpen && (
+                        <StyledDialog
+                            dataTest='share'
+                            dialogTitle='Share'
+                            open
+                            onClose={() => {
+                                onOuterClose()
+                                setOuterOpen(false)
+                            }}
+                        >
+                            <StyledButton dataTest='open-documents' onClick={() => setInnerOpen(true)}>
+                                Documents
+                            </StyledButton>
+                            {innerOpen && (
+                                <StyledDialog
+                                    dataTest='documents'
+                                    dialogTitle='Documents'
+                                    open
+                                    onClose={() => {
+                                        onInnerClose()
+                                        setInnerOpen(false)
+                                    }}
+                                />
+                            )}
+                        </StyledDialog>
+                    )}
+                </>
+            )
+        }
+        const { container } = mount(<Fixture />)
+        await waitFor(() => expect(dialogByTest('share')).not.toBeNull())
+        await userEvent.click(container.querySelector('[data-testid="open-documents"]')!)
+        await waitFor(() => expect(dialogByTest('documents')).not.toBeNull())
+
+        void requestCloseTopOverlayBack()
+        await waitFor(() => expect(dialogByTest('documents')).toBeNull())
+        await expect(onInnerClose).toHaveBeenCalledTimes(1)
+        await expect(onOuterClose).not.toHaveBeenCalled()
+        await expect(dialogByTest('share')).not.toBeNull()
+
+        void requestCloseTopOverlayBack()
+        await waitFor(() => expect(dialogByTest('share')).toBeNull())
+        await expect(onOuterClose).toHaveBeenCalledTimes(1)
+    })
+
+    it('a dirty dialog opens its confirmation on Back, Back dismisses the confirmation (not confirms), and the next Back asks again (TEST-008)', async () => {
+        const onDelete = fn()
+        const Fixture = (): JSX.Element => {
+            const [open, setOpen] = useState(true)
+            const [confirmOpen, setConfirmOpen] = useState(false)
+            return (
+                <>
+                    {open && (
+                        <StyledDialog dataTest='editor' dialogTitle='Editor' open onClose={() => setConfirmOpen(true)}>
+                            {confirmOpen && (
+                                <StyledDialog
+                                    dataTest='confirm'
+                                    dialogTitle='Discard changes?'
+                                    open
+                                    onClose={() => setConfirmOpen(false)}
+                                >
+                                    <StyledButton dataTest='discard' onClick={() => (onDelete(), setOpen(false))}>
+                                        Discard
+                                    </StyledButton>
+                                </StyledDialog>
+                            )}
+                        </StyledDialog>
+                    )}
+                </>
+            )
+        }
+        mount(<Fixture />)
+        await waitFor(() => expect(dialogByTest('editor')).not.toBeNull())
+        await expect(dialogByTest('confirm')).toBeNull()
+
+        // First Back: the editor is dirty, so it asks instead of closing.
+        void requestCloseTopOverlayBack()
+        await waitFor(() => expect(dialogByTest('confirm')).not.toBeNull())
+
+        // Second Back: dismisses the confirmation itself (the safe choice) — it never confirms.
+        void requestCloseTopOverlayBack()
+        await waitFor(() => expect(dialogByTest('confirm')).toBeNull())
+        await expect(dialogByTest('editor')).not.toBeNull()
+        await expect(onDelete).not.toHaveBeenCalled()
+
+        // Third Back: the editor is still dirty, so it asks again.
+        void requestCloseTopOverlayBack()
+        await waitFor(() => expect(dialogByTest('confirm')).not.toBeNull())
+    })
+
+    it('latches a Promise-returning onClose: Back does nothing while it is pending (TEST-009)', async () => {
+        const onClose = fn()
+        let resolveSave: (() => void) | undefined
+        const Fixture = (): JSX.Element => {
+            const [open, setOpen] = useState(true)
+            return open ? (
+                <StyledDialog
+                    dataTest='async-confirm'
+                    dialogTitle='Save?'
+                    open
+                    onClose={() => {
+                        onClose()
+                        return new Promise<void>((resolve) => {
+                            resolveSave = () => {
+                                resolve()
+                                setOpen(false)
+                            }
+                        })
+                    }}
+                />
+            ) : (
+                <></>
+            )
+        }
+        mount(<Fixture />)
+        await waitFor(() => expect(dialogByTest('async-confirm')).not.toBeNull())
+
+        void requestCloseTopOverlayBack()
+        await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
+
+        // Latched while the save is in flight — a repeated Back is a no-op, not a second save.
+        void requestCloseTopOverlayBack()
+        void requestCloseTopOverlayBack()
+        await expect(onClose).toHaveBeenCalledTimes(1)
+        await expect(dialogByTest('async-confirm')).not.toBeNull()
+
+        resolveSave?.()
+        await waitFor(() => expect(dialogByTest('async-confirm')).toBeNull())
+    })
+
+    it('a no-safe-choice dialog ignores Back and does not fall through to the dialog underneath (TEST-010)', async () => {
+        const onOuterClose = fn()
+        // Same sequencing concern as TEST-007: the inner dialog opens from a later, separate commit
+        // so it registers (and becomes the registry top) strictly after the outer one.
+        const Fixture = (): JSX.Element => {
+            const [innerOpen, setInnerOpen] = useState(false)
+            return (
+                <StyledDialog dataTest='outer' dialogTitle='Outer' open onClose={onOuterClose}>
+                    <StyledButton dataTest='open-processing' onClick={() => setInnerOpen(true)}>
+                        Process
+                    </StyledButton>
+                    {innerOpen && (
+                        <StyledDialog dataTest='no-safe-choice' dialogTitle='Processing' open disableEscapeKeyDown>
+                            <p>Please wait…</p>
+                        </StyledDialog>
+                    )}
+                </StyledDialog>
+            )
+        }
+        const { container } = mount(<Fixture />)
+        await waitFor(() => expect(dialogByTest('outer')).not.toBeNull())
+        await userEvent.click(container.querySelector('[data-testid="open-processing"]')!)
+        await waitFor(() => expect(dialogByTest('no-safe-choice')).not.toBeNull())
+
+        void requestCloseTopOverlayBack()
+
+        await expect(dialogByTest('no-safe-choice')).not.toBeNull()
+        await expect(onOuterClose).not.toHaveBeenCalled()
+    })
+
+    it('reports the registry-only path: a StrictMode mount/cleanup/mount leaves one registration, and a full cycle makes no history calls (TEST-011 / TEST-012)', async () => {
+        const pushState = vi.spyOn(window.history, 'pushState')
+        const replaceState = vi.spyOn(window.history, 'replaceState')
+        const back = vi.spyOn(window.history, 'back')
+        const go = vi.spyOn(window.history, 'go')
+
+        const onClose = fn()
+        const { unmount } = mount(
+            <StrictMode>
+                <StyledDialog dataTest='strict' dialogTitle='Strict' open onClose={onClose}>
+                    <p>body</p>
+                </StyledDialog>
+            </StrictMode>,
+        )
+        await waitFor(() => expect(dialogByTest('strict')).not.toBeNull())
+        await expect(getOverlayBackStackSize()).toBe(1)
+
+        void requestCloseTopOverlayBack()
+        await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
+
+        unmount()
+        await expect(getOverlayBackStackSize()).toBe(0)
+
+        await expect(pushState).not.toHaveBeenCalled()
+        await expect(replaceState).not.toHaveBeenCalled()
+        await expect(back).not.toHaveBeenCalled()
+        await expect(go).not.toHaveBeenCalled()
+
+        pushState.mockRestore()
+        replaceState.mockRestore()
+        back.mockRestore()
+        go.mockRestore()
+    })
+
+    it('native cancel (first Back) is prevented and delegated to the registry; native close (forced second Back) re-shows a dialog that declined (CON-007/RISK-003)', async () => {
+        mount(
+            <StyledDialog dataTest='android' dialogTitle='Processing' open disableEscapeKeyDown>
+                <p>Please wait…</p>
+            </StyledDialog>,
+        )
+        const dialog = await waitFor(() => {
+            const node = dialogByTest('android')
+            if (!node) throw new Error('dialog not mounted yet')
+            return node
+        })
+        await waitFor(() => expect(dialog.matches(':modal')).toBe(true))
+
+        // First Back: the native close watcher fires a cancelable `cancel`. Nothing can close this
+        // dialog (no safe choice), so it stays modal.
+        const cancelEvent = new Event('cancel', { cancelable: true })
+        dialog.dispatchEvent(cancelEvent)
+        await expect(cancelEvent.defaultPrevented).toBe(true)
+        await expect(dialog.matches(':modal')).toBe(true)
+
+        // Second Back, no tap in between: the close watcher forces the dialog shut regardless,
+        // firing a non-cancelable `close` while React's `open` is still `true` — the zombie case.
+        dialog.close()
+        await waitFor(() => expect(dialog.matches(':modal')).toBe(true))
     })
 })

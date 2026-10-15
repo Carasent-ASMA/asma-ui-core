@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { MinimizableDialog } from './MinimizableDialog'
+import { getOverlayBackStackSize, requestCloseTopOverlayBack } from 'src/hooks/useBackCloses.hook'
 
 describe('MinimizableDialog keyboard contract', () => {
     afterEach(cleanup)
@@ -222,5 +223,61 @@ describe('MinimizableDialog busy and disabled footer (disabled-states DIS-8, R05
 
         await expect(byTest(container, 'cancel-button')[0]).not.toHaveAttribute('aria-disabled')
         await expect(byTest(container, 'save-button')[0]).not.toHaveAttribute('aria-busy')
+    })
+})
+
+describe('MinimizableDialog native Back (ASMA-8471)', () => {
+    afterEach(cleanup)
+
+    it('closes through onClose while fullscreen', async () => {
+        const onClose = fn()
+        mount(
+            <MinimizableDialog dataTest='dialog' open fullScreenState title='Editor' onClose={onClose}>
+                <p>Content</p>
+            </MinimizableDialog>,
+        )
+        await waitFor(() => expect(document.querySelector('[role="dialog"]')).not.toBeNull())
+
+        void requestCloseTopOverlayBack()
+
+        await expect(onClose).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not register while docked (not a modal layer)', async () => {
+        const onClose = fn()
+        mount(
+            <MinimizableDialog dataTest='dialog' open title='Editor' onClose={onClose}>
+                <p>Content</p>
+            </MinimizableDialog>,
+        )
+        await waitFor(() => expect(document.querySelectorAll('[data-testid="dialog"]')).not.toHaveLength(0))
+        await expect(getOverlayBackStackSize()).toBe(0)
+
+        void requestCloseTopOverlayBack()
+
+        await expect(onClose).not.toHaveBeenCalled()
+    })
+
+    it('waits while the primary action runs, same as its ✕/Esc path', async () => {
+        const onClose = fn()
+        mount(
+            <MinimizableDialog
+                dataTest='dialog'
+                open
+                fullScreenState
+                title='Editor'
+                onClose={onClose}
+                primaryButtonText='Save'
+                onPrimaryButtonClick={() => undefined}
+                primaryButtonLoading
+            >
+                <p>Content</p>
+            </MinimizableDialog>,
+        )
+        await waitFor(() => expect(document.querySelector('[role="dialog"]')).not.toBeNull())
+
+        void requestCloseTopOverlayBack()
+
+        await expect(onClose).not.toHaveBeenCalled()
     })
 })
