@@ -165,7 +165,7 @@ export const StyledButton = ({
         <button
             {...otherProps}
             disabled={Boolean(disabled) && !blocked}
-            aria-disabled={blocked || undefined}
+            aria-disabled={blocked ? true : otherProps['aria-disabled']}
             aria-busy={loading ? true : otherProps['aria-busy']}
             onClick={handleClick}
             className={clsx(

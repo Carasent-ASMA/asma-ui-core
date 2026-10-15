@@ -158,6 +158,20 @@ describe('StyledButton disabledReason', () => {
         await waitFor(() => expect(tip()).toBeNull())
     })
 
+    it('keeps a caller aria-disabled on a button it does not block', async () => {
+        const onClick = vi.fn()
+        mount(
+            <StyledButton dataTest='guarded' aria-disabled='true' onClick={onClick}>
+                Save
+            </StyledButton>,
+        )
+
+        await expect(byTest('guarded')).toHaveAttribute('aria-disabled', 'true')
+        await expect(byTest('guarded')).not.toBeDisabled()
+        byTest('guarded').click()
+        await expect(onClick).toHaveBeenCalledTimes(1)
+    })
+
     it('ignores the reason when the button is enabled', async () => {
         mount(
             <StyledButton dataTest='enabled' disabledReason='Locked for editing'>
