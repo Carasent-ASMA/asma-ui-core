@@ -508,8 +508,8 @@ export const StyledSelect = ({
                             // and separates its rows from the container — see the equivalent rule on
                             // StyledSelectAutocomplete's listbox for why it does not live on the row.
                             'z-[1300] m-0 max-h-72 list-none overflow-auto rounded border border-solid border-delta-300 bg-white px-0 py-2 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
-                            '[&>li:not(:last-child)]:border-0 [&>li:not(:last-child)]:border-b',
-                            '[&>li:not(:last-child)]:border-solid [&>li:not(:last-child)]:border-delta-200',
+                            // Inset shadow, not a border, so the separator keeps rows at exactly 40px.
+                            '[&>li:not(:last-child)]:shadow-[inset_0_-1px_0_var(--colors-delta-200)]',
                             MenuProps?.className,
                         )}
                     >

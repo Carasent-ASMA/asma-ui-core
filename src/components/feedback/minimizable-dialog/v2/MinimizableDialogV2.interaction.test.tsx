@@ -113,12 +113,12 @@ describe('MinimizableDialogV2 keyboard contract', () => {
         // Reopen from the opener: the trap engages here and captures it.
         opener.focus()
         await userEvent.keyboard('{Enter}')
-        await waitFor(() => expect(container.querySelector('[role="dialog"]')).not.toBeNull())
+        await waitFor(() => expect(container.querySelector('[role="dialog"][aria-modal="true"]')).not.toBeNull())
 
         toggle().focus()
         await userEvent.keyboard('{Enter}')
 
-        await waitFor(() => expect(container.querySelector('[role="dialog"]')).toBeNull())
+        await waitFor(() => expect(container.querySelector('[role="dialog"][aria-modal="true"]')).toBeNull())
         await expect(document.activeElement).toBe(toggle())
         await expect(document.activeElement).not.toBe(opener)
     })
@@ -133,7 +133,7 @@ describe('MinimizableDialogV2 keyboard contract', () => {
                 <button type='button'>After</button>
             </>,
         )
-        const dialog = container.querySelector<HTMLElement>('[role="dialog"]')!
+        const dialog = container.querySelector<HTMLElement>('[role="dialog"][aria-modal="true"]')!
         const minimizedPanel = container.querySelector('[data-testid="dialog-v2"]')!.parentElement!
         const visibleCloseButton = (): HTMLButtonElement =>
             Array.from(container.querySelectorAll<HTMLButtonElement>('[data-testid="close-button"]')).find(
@@ -222,5 +222,53 @@ describe('MinimizableDialogV2 keyboard contract', () => {
         await userEvent.keyboard('{Enter}')
         await waitFor(() => expect(fullscreenButton).toHaveAccessibleName('Exit fullscreen'))
         await expect(document.activeElement).toBe(fullscreenButton)
+    })
+
+    it('hands focus back to the opener when the docked dialog closes (2.4.3)', async () => {
+        const Fixture = (): JSX.Element => {
+            const [open, setOpen] = useState(false)
+            return (
+                <>
+                    <button type='button' data-testid='opener' onClick={() => setOpen(true)}>
+                        Open
+                    </button>
+                    <MinimizableDialogV2 dataTest='dialog-v2' open={open} title='Editor' onClose={() => setOpen(false)}>
+                        <button type='button'>Content action</button>
+                    </MinimizableDialogV2>
+                </>
+            )
+        }
+        const { container } = mount(<Fixture />)
+        const opener = container.querySelector<HTMLButtonElement>('[data-testid="opener"]')!
+
+        opener.focus()
+        await userEvent.keyboard('{Enter}')
+        await waitFor(() => expect(document.activeElement).toHaveAccessibleName('Close'))
+        await userEvent.keyboard('{Enter}')
+
+        await waitFor(() => expect(document.activeElement).toBe(opener))
+    })
+
+    it('announces the docked panel as a named non-modal dialog, which Escape does not close (4.1.2)', async () => {
+        const onClose = fn()
+        const { container } = mount(
+            <MinimizableDialogV2 dataTest='dialog-v2' open label='Task' title={<h2>Weekly report</h2>} onClose={onClose}>
+                <button type='button'>Content action</button>
+            </MinimizableDialogV2>,
+        )
+        const dialog = container.querySelector<HTMLElement>('[role="dialog"]')!
+
+        // Focus lands on Close at open, so a screen reader reads this name before the button.
+        await expect(dialog).toHaveAccessibleName('Task Weekly report')
+        await expect(dialog).not.toHaveAttribute('aria-modal')
+        await expect(dialog.contains(document.activeElement)).toBe(true)
+
+        // Docked is non-modal: nothing is trapped and Close is reachable, so Escape is left to whatever
+        // popup inside the panel may be open instead of closing the whole panel.
+        Array.from(dialog.querySelectorAll<HTMLButtonElement>('button'))
+            .find((b) => b.textContent === 'Content action')!
+            .focus()
+        await userEvent.keyboard('{Escape}')
+        await expect(onClose).not.toHaveBeenCalled()
     })
 })
