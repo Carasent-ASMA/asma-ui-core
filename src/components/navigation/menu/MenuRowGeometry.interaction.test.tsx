@@ -11,6 +11,9 @@ import { StyledSelectItem } from 'src/components/inputs/select/StyledSelectItem'
 import { StyledSelectAutocomplete } from 'src/components/inputs/select-autocomplete/StyledSelectAutocomplete'
 import { StyledDynamicSelect } from 'src/components/inputs/dynamic-select/StyledDynamicSelect'
 import { StyledInputField } from 'src/components/inputs/input-field'
+import { StyledButton } from 'src/components/inputs/button/StyledButton'
+import { StyledTable } from 'src/table/components/StyledTableIndex'
+import { StyledMenu } from './StyledMenu'
 
 /**
  * Figma Menus item (wXrXt5uKNNzV2DnQCgyYZH 16741-35895): every single-line row is exactly 40px with
@@ -146,5 +149,59 @@ describe('Menu rows match the Figma Menus item (40px, 8px top/bottom)', () => {
         await userEvent.click(container.querySelector<HTMLElement>('[role="combobox"]')!)
         await waitFor(() => expect(options().length).toBeGreaterThan(1))
         await expectFigmaRows(options())
+    })
+})
+
+const AnchoredMenuFixture = (): JSX.Element => {
+    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+    return (
+        <>
+            <StyledButton dataTest='geometry-menu-trigger' onClick={(event) => setAnchorEl(event.currentTarget)}>
+                Actions
+            </StyledButton>
+            <StyledMenu open={!!anchorEl} anchorEl={anchorEl} onClose={() => setAnchorEl(null)}>
+                {LABELS.slice(0, 3).map((label) => (
+                    <StyledMenuItem key={label}>{label}</StyledMenuItem>
+                ))}
+            </StyledMenu>
+        </>
+    )
+}
+
+// Figma Menus (16073-21753): 1px border + 8px + rows + 8px + 1px border = 218px for five rows.
+describe('Menu popovers pad their list 8px top and bottom', () => {
+    afterEach(cleanup)
+
+    const expectListPadding = async (): Promise<void> => {
+        const list = await waitFor(() => {
+            const found = document.querySelector<HTMLElement>('[role="menu"]')
+            if (!found) throw new Error('menu not open')
+            return found
+        })
+        const style = getComputedStyle(list)
+        await expect({ paddingTop: style.paddingTop, paddingBottom: style.paddingBottom }).toEqual({
+            paddingTop: '8px',
+            paddingBottom: '8px',
+        })
+        await expectFigmaRows(menuItems())
+    }
+
+    it('StyledMenu', async () => {
+        const { container } = mount(<AnchoredMenuFixture />)
+        await userEvent.click(container.querySelector<HTMLElement>('[data-testid="geometry-menu-trigger"]')!)
+        await expectListPadding()
+    })
+
+    it('StyledTable row actions menu', async () => {
+        mount(
+            <StyledTable
+                locale='en'
+                columns={[{ accessorKey: 'name', header: 'Name' }]}
+                data={[{ id: 'r-1', name: 'Signed' }]}
+                actions={() => LABELS.slice(0, 3).map((label) => ({ label, onClick: () => undefined }))}
+            />,
+        )
+        document.querySelector<HTMLButtonElement>('[data-test="row-actions-button"]')!.click()
+        await expectListPadding()
     })
 })
