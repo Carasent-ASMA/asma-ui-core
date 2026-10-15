@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef } from 'react'
+import React, { useId, useLayoutEffect, useRef } from 'react'
 import { firstTabbable } from 'src/helpers/focusable'
 import clsx from 'clsx'
 import { CloseBtn } from '../components/CloseBtn'
@@ -47,6 +47,9 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
     const closeButtonRef = useRef<HTMLButtonElement | null>(null)
     const minimizedCloseButtonRef = useRef<HTMLButtonElement | null>(null)
     const wasOpenRef = useRef(false)
+    const returnFocusRef = useRef<HTMLElement | null>(null)
+    const titleId = useId()
+    const labelId = useId()
 
     const { minimized, setMinimized, fullScreen, setFullScreen } = useControlledProps(props)
     const isFullScreenActive = fullScreen && !minimized
@@ -71,9 +74,22 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
 
     useLayoutEffect(() => {
         const justOpened = open && !wasOpenRef.current
+        const justClosed = !open && wasOpenRef.current
         wasOpenRef.current = open
 
+        // Closing unmounts the focused Close button; unless focus already went somewhere on purpose,
+        // hand it back to whatever opened the dialog instead of dropping it on <body> (WCAG 2.4.3).
+        if (justClosed) {
+            const opener = returnFocusRef.current
+            returnFocusRef.current = null
+            const focusWasLost = !document.activeElement || document.activeElement === document.body
+            if (focusWasLost && opener?.isConnected) opener.focus({ preventScroll: true })
+            return
+        }
+
         if (!justOpened) return
+
+        returnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
 
         const panel = minimized ? minimizedPanelRef.current : modalRef.current
         const closeButton = minimized ? minimizedCloseButtonRef.current : closeButtonRef.current
@@ -123,6 +139,8 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
         : undefined
 
     if (!open) return null
+
+    const nameIds = label ? `${labelId} ${titleId}` : titleId
 
     return (
         <>
@@ -174,11 +192,12 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
             <div
                 style={{ zIndex: 51, ...style, ...fullScreenDialogStyle }}
                 ref={modalRef}
-                // Semantic dialog identity only while actually modal (backdrop shown) — the corner-
-                // docked state is a non-modal widget and shouldn't announce as a dialog.
-                role={isFullScreenActive ? 'dialog' : undefined}
+                // Always a named dialog, so a screen reader announces label + title when focus lands on
+                // Close at open. Modal only in fullscreen (backdrop + focus trap); corner-docked it is a
+                // non-modal dialog — no aria-modal, nothing trapped.
+                role='dialog'
                 aria-modal={isFullScreenActive ? true : undefined}
-                aria-label={isFullScreenActive && typeof title === 'string' ? title : undefined}
+                aria-labelledby={nameIds}
                 className={cn(
                     styles['dialog'],
                     minimized && styles['hidden'],
@@ -191,6 +210,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                     <div className='flex items-center justify-between'>
                         {!label ? (
                             <div
+                                id={titleId}
                                 className={cn(
                                     'font-semibold text-delta-800',
                                     isMobile ? 'line-clamp-2 text-xl' : 'line-clamp-1 text-2xl',
@@ -199,7 +219,9 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                                 {title}
                             </div>
                         ) : (
-                            <div className='text-sm text-delta-700'>{label}</div>
+                            <div id={labelId} className='text-sm text-delta-700'>
+                                {label}
+                            </div>
                         )}
 
                         <div className='flex items-center gap-x-1'>
@@ -230,6 +252,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
 
                     {label && (
                         <div
+                            id={titleId}
                             className={cn(
                                 'font-semibold text-delta-800',
                                 isMobile ? 'line-clamp-2 text-xl' : 'line-clamp-1 text-2xl',

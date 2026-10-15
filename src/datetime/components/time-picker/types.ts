@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { AriaAttributes, ReactNode } from 'react'
 
 /** 
     * @param notBeforeTime - Start time of the range. Selected time must be after this value.
@@ -26,6 +26,11 @@ export interface StyledTimePickerProps {
      * Unlike `notBeforeTime`, it never shows an error.
      */
     minTime?: Date
+    /**
+     * Extra ARIA attributes for the text input (e.g. `aria-label`, `aria-required`) — for a visible
+     * label rendered outside the picker. Without them the input is named by `title` or `label`.
+     */
+    inputAriaProps?: AriaAttributes
 }
 
 export type IPopupStateType = JSX.Element
