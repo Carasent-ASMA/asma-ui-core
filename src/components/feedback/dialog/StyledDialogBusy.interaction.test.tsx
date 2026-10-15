@@ -368,4 +368,33 @@ describe('StyledDialog explains busy dismissal controls', () => {
         await expect(container.querySelector('[data-testid="cancel"]')).toHaveAccessibleDescription(reason)
     })
 
+    it('holds a minimizable dialog while a header action is loading', async () => {
+        const onClose = vi.fn()
+        const fixture = (loading: boolean): JSX.Element => (
+            <MinimizableDialogV2
+                open
+                dataTest='editor'
+                title='Editor'
+                onClose={onClose}
+                actionNode={
+                    <StyledButton dataTest='save' loading={loading}>
+                        Save
+                    </StyledButton>
+                }
+            >
+                Body
+            </MinimizableDialogV2>
+        )
+        const { container, rerender } = mount(fixture(true))
+        const close = container.querySelectorAll<HTMLButtonElement>('[data-testid="close-button"]')[1]!
+        await expect(close).toHaveAttribute('aria-disabled', 'true')
+        await expect(close).toHaveAccessibleDescription(busyReason)
+        close.click()
+        await expect(onClose).not.toHaveBeenCalled()
+
+        rerender(fixture(false))
+        await waitFor(async () => expect(close).not.toHaveAttribute('aria-disabled'))
+        close.click()
+        await expect(onClose).toHaveBeenCalledTimes(1)
+    })
 })

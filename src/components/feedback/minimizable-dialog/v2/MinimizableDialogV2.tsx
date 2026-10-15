@@ -203,7 +203,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                         )}
 
                         <div className='flex items-center gap-x-1'>
-                            {actionNode}
+                            <DialogBusyContext.Provider value={contextValue}>{actionNode}</DialogBusyContext.Provider>
                             <MinimizeBtn
                                 visibility={showMinimizeIcon && !isMobile && !fullScreen}
                                 type='minimize'
