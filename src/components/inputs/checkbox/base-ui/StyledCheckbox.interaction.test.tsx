@@ -77,3 +77,38 @@ describe.each([
         await expect(isEntirelyObscured(box), 'the hover halo entirely covers the checkbox box').toBe(false)
     })
 })
+
+/**
+ * ASMA-8338 press-ripple regression. The opaque hover halo is a `::after` painted after the ripple at
+ * the same stacking level, so a hovered press animated invisibly underneath it. The ripple is frozen
+ * at full size (its 400 ms grow-in starts at scale 0, which has no hit area) and probed at a point
+ * inside the halo but outside the 16px box: the topmost element there must be the ripple itself, not
+ * the element that owns the halo pseudo-element.
+ */
+describe.each([
+    ['input', false],
+    ['table', true],
+] as const)('%s StyledCheckbox press ripple', (_copy, table) => {
+    afterEach(cleanup)
+
+    it('paints the press ripple above the hover halo (ASMA-8338)', async () => {
+        const { container } = mount(<CheckboxFixture table={table} />)
+        const input = container.querySelector<HTMLInputElement>('input:not([disabled])')!
+        const wrapper = input.closest('label')!
+
+        await userEvent.hover(wrapper)
+        // Let the halo finish its 200 ms grow-in (scale 0.7 → 1) so the probe point is inside it.
+        await new Promise((resolve) => setTimeout(resolve, 300))
+        wrapper.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
+        const ripple = wrapper.querySelector<HTMLElement>('[class*="RippleContainer"] > span')
+        await expect(ripple, 'a press appends a ripple').not.toBeNull()
+        ripple!.style.animation = 'none'
+        ripple!.style.transform = 'translate(-50%, -50%) scale(1)'
+
+        const rect = wrapper.getBoundingClientRect()
+        // 8px below the top edge, horizontally centred: inside the 40px halo, above the 16px box
+        // (which starts 12px down).
+        const topmost = document.elementFromPoint(rect.left + rect.width / 2, rect.top + 8)
+        await expect(topmost, 'the hover halo paints over the press ripple').toBe(ripple)
+    })
+})

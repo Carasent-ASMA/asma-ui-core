@@ -117,6 +117,9 @@ $checkbox-sizes: (
     @extend %ripple-base;
     overflow: hidden;
     border-radius: 50%;
+    // Above the opaque hover halo (.CheckboxHover::after, z-index 0, painted last as the wrapper's
+    // pseudo-element), so the press ripple stays visible; .Checkbox (z-index 1, later) stays on top.
+    z-index: 1;
 }
 
 .CheckboxRipple {
