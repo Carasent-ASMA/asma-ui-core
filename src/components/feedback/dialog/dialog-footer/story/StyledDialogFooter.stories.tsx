@@ -265,7 +265,7 @@ export const SingleLeftActionStaysInline: Story = {
     },
 }
 
-/** A disabled primary explains itself on hover and on keyboard focus — the reason these footers use a tooltip. */
+/** A disabled primary explains itself on hover, focus and tap — the reason these footers use a tooltip. */
 export const DisabledPrimaryExplainsItself: Story = {
     render: () => (
         <Paper width={600}>
@@ -279,17 +279,19 @@ export const DisabledPrimaryExplainsItself: Story = {
         const canvas = within(canvasElement)
         const save = canvas.getByRole('button', { name: 'Save changes' })
 
-        /* `aria-disabled`, not native `disabled`: it stays in the Tab order (disabled-states DIS-3). */
+        /* aria-disabled, not native: the button stays focusable and receives pointer events,
+         * so the reason is reachable by hover, keyboard and screen reader (disabled-states DIS-3). */
         await expect(save).not.toBeDisabled()
         await expect(save).toHaveAttribute('aria-disabled', 'true')
+        await expect(save).toHaveAccessibleDescription('Locked for editing')
         await userEvent.hover(save)
-        await waitFor(async () => expect(within(document.body).getByText('Locked for editing')).toBeVisible())
+        await waitFor(async () => expect(within(document.body).getByRole('tooltip')).toHaveTextContent('Locked for editing'))
         await userEvent.unhover(save)
 
         /* Keyboard users reach the same reason by focusing the button. */
         save.focus()
         await expect(save).toHaveFocus()
-        await waitFor(async () => expect(within(document.body).getByText('Locked for editing')).toBeVisible())
+        await waitFor(async () => expect(within(document.body).getByRole('tooltip')).toHaveTextContent('Locked for editing'))
     },
 }
 

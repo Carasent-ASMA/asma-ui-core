@@ -62,6 +62,7 @@ exports[`asma-ui-core public API surface > keeps every runtime export of the pac
   "DeleteOutlineIcon",
   "DescriptionIcon",
   "DescriptionOutlineIcon",
+  "DialogBusyContext",
   "DnsIcon",
   "DnsOutlineIcon",
   "DoneAllIcon",
@@ -307,8 +308,10 @@ exports[`asma-ui-core public API surface > keeps every runtime export of the pac
   "setMidnightTime",
   "setZeroTime",
   "useDatePickerValidation",
+  "useDialogBusyBoundary",
   "useDynamicToolbarLayout",
   "usePopupState",
+  "useReportDialogBusy",
   "useRouteHeadingFocus",
   "useSnackbar",
 ]

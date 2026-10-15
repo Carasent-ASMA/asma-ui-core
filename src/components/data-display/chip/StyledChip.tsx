@@ -6,6 +6,7 @@ import {
     type ReactElement,
     type ReactNode,
 } from 'react'
+import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip'
 import { CloseIcon } from 'src/components/icons'
 import { consumerOverrides } from 'src/helpers/classOverride'
 import { cn } from 'src/helpers/cn'
@@ -43,6 +44,12 @@ export interface StyledChipProps {
     size?: 'small' | 'medium'
     /** @figmaProp State = true→"Disabled" */
     disabled?: boolean
+    /**
+     * @figmaProp none — behavioral. Why a clickable chip is unavailable. With `disabled` the chip stays
+     * focusable (`aria-disabled`), ignores activation and shows the reason on hover, focus and tap
+     * (disabled-states DIS-1…DIS-3).
+     */
+    disabledReason?: ReactNode
     /** @figmaProp State = true→"Read only" */
     readOnly?: boolean
     /** @figmaProp State = drives interactive Hovered/Focused/Pressed via native events */
@@ -85,6 +92,28 @@ export interface StyledChipProps {
     'data-focus'?: string
 }
 
+interface ChipTabIndexInput {
+    readOnly?: boolean
+    disabled?: boolean
+    interactive: boolean
+    focusableDisabled: boolean
+    tabIndex?: number
+}
+
+/** A disabled chip that explains itself stays a tab stop so the reason can be reached (DIS-3). */
+const getChipTabIndex = ({
+    readOnly,
+    disabled,
+    interactive,
+    focusableDisabled,
+    tabIndex,
+}: ChipTabIndexInput): number | undefined => {
+    if (focusableDisabled) return tabIndex ?? 0
+    if (readOnly || disabled) return undefined
+    if (interactive) return tabIndex ?? 0
+    return tabIndex
+}
+
 /**
  * Native replacement for MUI `Chip` — a styled element with optional avatar/icon start slot, a
  * label, and a delete button. Interactive hover/focus/active visuals also respond to the
@@ -98,6 +127,7 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
             label,
             size = 'medium',
             disabled,
+            disabledReason,
             readOnly,
             clickable,
             icon,
@@ -124,11 +154,13 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
         },
         ref,
     ) => {
-        const interactive = !readOnly && !disabled && (!!clickable || !!onClick)
+        const actionable = !readOnly && (!!clickable || !!onClick)
+        const interactive = actionable && !disabled
         // A chip that would be clickable but is disabled stays a focusable, announced control
         // (`aria-disabled`) whose activation does nothing (disabled-states DIS-3): keyboard users can
-        // reach it and its tooltip. A plain, non-clickable chip has nothing to reach.
-        const focusableDisabled = !readOnly && !!disabled && (!!clickable || !!onClick)
+        // reach it and its reason. A plain, non-clickable chip has nothing to reach.
+        const focusableDisabled = actionable && Boolean(disabled)
+        const reasoned = focusableDisabled && Boolean(disabledReason)
         const startSlot = avatar ?? icon
         const hasDelete = Boolean(onDelete && !readOnly)
         const hasStart = Boolean(startSlot)
@@ -162,7 +194,7 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
         const consumerSetsWidth = consumerOverrides(className, 'width')
         const consumerSetsMaxWidth = consumerOverrides(className, 'max-width')
 
-        return (
+        const chip = (
             <div
                 ref={ref}
                 data-testid={dataTest}
@@ -170,18 +202,10 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                 data-hovered={dataHovered}
                 data-focus={dataFocus}
                 role={roleOverride ?? (interactive || focusableDisabled ? 'button' : undefined)}
+                aria-disabled={focusableDisabled || undefined}
                 aria-checked={roleOverride ? ariaChecked : undefined}
                 aria-readonly={roleOverride ? ariaReadonly : undefined}
-                aria-disabled={focusableDisabled ? true : undefined}
-                tabIndex={
-                    focusableDisabled
-                        ? tabIndex ?? 0
-                        : readOnly || disabled
-                          ? undefined
-                          : interactive
-                            ? tabIndex ?? 0
-                            : tabIndex
-                }
+                tabIndex={getChipTabIndex({ readOnly, disabled, interactive, focusableDisabled, tabIndex })}
                 onClick={disabled || readOnly ? undefined : onClick}
                 onKeyDown={disabled || readOnly ? undefined : handleKeyDown}
                 onMouseDown={disabled || readOnly ? undefined : onMouseDown}
@@ -193,6 +217,8 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                     !consumerSetsMaxWidth && 'max-w-full',
                     size === 'small' ? 'h-6' : 'h-8',
                     readOnly && 'pointer-events-none',
+                    // A focusable disabled chip keeps its pointer events so the not-allowed cursor shows;
+                    // activation is already blocked because the handlers are removed while disabled.
                     disabled && 'opacity-[0.38]',
                     disabled && (focusableDisabled ? 'cursor-not-allowed' : 'pointer-events-none'),
                     interactive &&
@@ -222,9 +248,7 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                         {startSlot}
                     </span>
                 )}
-                <span className={cn('min-w-0 truncate', classes?.label)}>
-                    {label}
-                </span>
+                <span className={cn('min-w-0 truncate', classes?.label)}>{label}</span>
                 {onDelete && !readOnly && (
                     <button
                         type='button'
@@ -254,6 +278,17 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                     </button>
                 )}
             </div>
+        )
+
+        return (
+            <StyledTooltip
+                title={disabledReason}
+                open={reasoned ? undefined : false}
+                openOnTap={reasoned}
+                persistentDescription={reasoned}
+            >
+                {chip}
+            </StyledTooltip>
         )
     },
 )

@@ -8,11 +8,13 @@ export const CloseBtn: React.FC<{
     onClick: () => void
     tooltipTitle: string
     buttonRef?: React.Ref<HTMLButtonElement>
-}> = ({ showCloseIcon, tooltipTitle, onClick, buttonRef }) => {
+    /** While set, the button is soft-disabled with this reason (e.g. a save is running). */
+    disabledReason?: React.ReactNode
+}> = ({ showCloseIcon, tooltipTitle, onClick, buttonRef, disabledReason }) => {
     if (!showCloseIcon) return null
 
     return (
-        <StyledTooltip title={tooltipTitle} placement='top'>
+        <StyledTooltip title={tooltipTitle} placement='top' open={disabledReason ? false : undefined}>
             <div>
                 <StyledButton
                     dataTest='close-button'
@@ -20,6 +22,8 @@ export const CloseBtn: React.FC<{
                     aria-label={tooltipTitle}
                     variant='textGray'
                     size='small'
+                    disabled={Boolean(disabledReason)}
+                    disabledReason={disabledReason}
                     onClick={onClick}
                     endIcon={<CloseIcon height={20} width={20} color='text-delta-700' />}
                 />

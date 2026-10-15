@@ -88,6 +88,15 @@ describe('StyledDynamicSelect — read-only single select', () => {
         expect(html).not.toContain('clear-selection-btn')
     })
 
+    it('has no clear-selection button on a disabled chip group either', () => {
+        const html = renderToStaticMarkup(
+            <StyledDynamicSelect dataTest='ro' options={FEW} value='After' onChange={noop} disabled />,
+        )
+
+        expect(html).toContain('data-testid="ic-After"')
+        expect(html).not.toContain('clear-selection-btn')
+    })
+
     it('resolves the label from the matching option, honouring valueKey and labelKey', () => {
         interface Rule {
             id: string

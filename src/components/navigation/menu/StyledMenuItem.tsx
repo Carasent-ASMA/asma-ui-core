@@ -43,6 +43,13 @@ export interface StyledMenuItemProps {
     onMouseUp?: (event: MouseEvent<HTMLLIElement>) => void
     /** @figmaProp State = true→"Disabled" */
     disabled?: boolean
+    /**
+     * @figmaProp none — behavioral. Why the item is unavailable. With `disabled` the item stays in
+     * arrow-key navigation and shows the reason on hover, focus and tap (disabled-states DIS-1…DIS-3).
+     */
+    disabledReason?: ReactNode
+    /** @figmaProp none — behavioral. The item's action is running; pair it with `disabled` and a reason. */
+    'aria-busy'?: boolean
     /** @figmaProp State = true→"Selected" */
     selected?: boolean
     /** Compact vertical padding (MUI `MenuItem` `dense` parity, DEC-003). */
@@ -71,6 +78,8 @@ export const StyledMenuItem = ({
     onMouseDown,
     onMouseUp,
     disabled,
+    disabledReason,
+    'aria-busy': ariaBusy,
     selected,
     dense,
     tooltip,
@@ -90,10 +99,14 @@ export const StyledMenuItem = ({
         }
     }
 
+    const reasoned = Boolean(disabled) && Boolean(disabledReason)
+
     const row = (
         <li
             role='menuitem'
             aria-disabled={disabled ? true : undefined}
+            aria-busy={ariaBusy ? true : undefined}
+            data-has-reason={reasoned ? '' : undefined}
             tabIndex={-1}
             data-test={dataTest}
             data-testid={dataTestId}
@@ -132,15 +145,21 @@ export const StyledMenuItem = ({
         </li>
     )
 
-    const title = tooltip ?? (takenCheckbox(children) ? alreadyAddedLabel() : undefined)
+    const title = reasoned ? disabledReason : (tooltip ?? (takenCheckbox(children) ? alreadyAddedLabel() : undefined))
 
     // StyledTooltip clones its child, so the `<li>` stays a direct `<ul>` child — no wrapper, no
-    // broken list semantics. An absent title renders the row alone.
-    return title ? (
-        <StyledTooltip title={title} arrow placement='top'>
+    // broken list semantics. It is always rendered, even without a title, so an item that turns
+    // disabled while its action runs is not remounted and keeps focus.
+    return (
+        <StyledTooltip
+            title={title}
+            open={title ? undefined : false}
+            arrow={!reasoned}
+            placement={reasoned ? 'left' : 'top'}
+            openOnTap={reasoned}
+            persistentDescription={reasoned}
+        >
             {row}
         </StyledTooltip>
-    ) : (
-        row
     )
 }

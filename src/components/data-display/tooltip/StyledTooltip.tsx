@@ -14,9 +14,25 @@ import {
     useInteractions,
     useMergeRefs,
     useRole,
+    type ElementProps,
     type Placement,
 } from '@floating-ui/react'
-import { cloneElement, Fragment, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactElement, type ReactNode } from 'react'
+import {
+    cloneElement,
+    Fragment,
+    useCallback,
+    useEffect,
+    useId,
+    useLayoutEffect,
+    useMemo,    useRef,
+    useState,
+    type CSSProperties,
+    type PointerEvent,
+    type MutableRefObject,
+    type SyntheticEvent,
+    type ReactElement,
+    type ReactNode,
+} from 'react'
 import { cn } from 'src/helpers/cn'
 import { firstFocusable, firstTabbable } from 'src/helpers/focusable'
 import { resolveSx } from 'src/helpers/sx'
@@ -64,34 +80,94 @@ export interface TooltipProps {
     disableHoverListener?: boolean
     disableFocusListener?: boolean
     disableTouchListener?: boolean
+    /**
+     * A tap on a touch screen toggles the tooltip; it stays until the next tap, a tap outside,
+     * scroll or Escape — never a timer (disabled-states DIS-2, §5). Hover stays mouse-only so the
+     * emulated mouse events after a tap cannot toggle it a second time.
+     */
+    openOnTap?: boolean
+    /**
+     * The text stays in the DOM and the trigger references it through `aria-describedby` while the
+     * tooltip is closed, so a screen reader announces it on focus (disabled-states DIS-2, 4.1.2).
+     */
+    persistentDescription?: boolean
+    /** Share the persistent description with every focusable item in a composite control. */
+    persistentDescriptionId?: string
     offsetDistance?: number
     className?: string
     slotProps?: TooltipSlotProps
 }
 
+interface TooltipReference {
+    element: Element | null
+    setReference?: (node: Element | null) => void
+    getReferenceProps?: ReturnType<typeof useInteractions>['getReferenceProps']
+}
+
+// The interaction hooks below use these reference events. Forward them through the bridge so
+// mounting or updating the floating sibling never changes the trigger's place in the React tree.
+const REFERENCE_EVENTS = [
+    'onFocus',
+    'onBlur',
+    'onMouseEnter',
+    'onMouseLeave',
+    'onMouseMove',
+    'onPointerDown',
+    'onPointerEnter',
+    'onPointerUp',
+    'onKeyDown',
+] as const
+
 /**
  * Tooltip built on `@floating-ui/react` (replaces MUI `Tooltip`) — hover(+`enterDelay`)/focus open,
  * dismiss on blur/esc, `flip`/`shift` collision handling, optional arrow, portalled. Empty `title`
- * renders the child alone (MUI parity). Preserves the `#363E4A` design and the `title`/`placement`/
+ * renders the child alone (MUI parity); a Fragment child keeps its `display: contents` wrapper so
+ * it does not remount when a title appears. Preserves the `#363E4A` design and the `title`/`placement`/
  * `arrow`/`enterDelay`/`open`/`slotProps` surface (DEC-003). TASK-301.
  */
-export const StyledTooltip = (props: TooltipProps): JSX.Element => {
-    // Fast path: with no tooltip text there is nothing to show, so render the child alone and — crucially —
-    // mount NONE of the `@floating-ui` hooks below. Callers wrap large lists (e.g. every autocomplete
-    // option row) in a tooltip whose `title` is usually null; instantiating useFloating/useHover/… per
-    // row is what made those lists lag. Hooks can't be conditional, so the machinery lives in an inner
-    // component that is only mounted when there is a title. (MUI parity: empty title → child alone.)
-    // Treat any falsy title (except the number 0, a legitimate label) as "no tooltip" — MUI parity.
-    // Call sites use the `title={condition && 'text'}` idiom, which yields `false` when the condition
-    // is off; without catching `false` here the machinery mounts and, with `arrow`, paints a stray
-    // empty dark bubble + arrow on hover.
-    if (!props.title && props.title !== 0) return props.children
-    return <TooltipWithFloating {...props} />
+export const StyledTooltip = ({ children, ...props }: TooltipProps): JSX.Element => {
+    const bridge = useRef<TooltipReference>({ element: null })
+    const setReference = useCallback((node: Element | null) => {
+        bridge.current.element = node
+        bridge.current.setReference?.(node)
+    }, [])
+    const isFragment = children.type === Fragment
+    const child = isFragment ? <span style={{ display: 'contents' }}>{children}</span> : children
+    const childProps = child.props as Record<string, unknown>
+    // Read data properties only: React 18's props.ref and React 19's element.ref have warning getters.
+    const existingRef = (
+        Object.getOwnPropertyDescriptor(childProps, 'ref')?.value
+        ?? Object.getOwnPropertyDescriptor(child, 'ref')?.value
+    ) as React.Ref<Element> | undefined
+    const childRef = useMergeRefs([setReference, existingRef])
+    const eventProps = useMemo(
+        () => Object.fromEntries(REFERENCE_EVENTS.map((name) => [
+            name,
+            (event: SyntheticEvent) => {
+                const handlers = bridge.current.getReferenceProps?.(childProps) ?? childProps
+                const handler = handlers[name] as ((event: SyntheticEvent) => void) | undefined
+                handler?.(event)
+            },
+        ])),
+        [childProps],
+    )
+
+    const hasTitle = Boolean(props.title) || props.title === 0
+
+    // The trigger always occupies the first slot. With an empty title no Floating UI interaction
+    // or positioning hooks mount, even for the reason wrappers used in large option lists.
+    return (
+        <>
+            {hasTitle ? cloneElement(child, { ...eventProps, ref: childRef }) : child}
+            {hasTitle && <TooltipWithFloating {...props} referenceRef={bridge} isFragment={isFragment} />}
+        </>
+    )
 }
 
 const TooltipWithFloating = ({
     title,
-    children,
+    referenceRef,
+    isFragment,
     placement = 'top',
     arrow = false,
     enterDelay = 500,
@@ -101,13 +177,18 @@ const TooltipWithFloating = ({
     onClose,
     disableHoverListener,
     disableFocusListener,
+    openOnTap,
+    persistentDescription: requestedPersistentDescription,
+    persistentDescriptionId,
     offsetDistance,
     className,
     slotProps,
-}: TooltipProps): JSX.Element => {
+}: Omit<TooltipProps, 'children'> & { referenceRef: MutableRefObject<TooltipReference>; isFragment: boolean }): JSX.Element => {
     const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
     const isControlled = controlledOpen !== undefined
-    const open = controlledOpen ?? uncontrolledOpen
+    const hasTitle = Boolean(title) || title === 0
+    const open = hasTitle && (controlledOpen ?? uncontrolledOpen)
+    const persistentDescription = hasTitle && requestedPersistentDescription
     const arrowRef = useRef<SVGSVGElement>(null)
 
     const setOpen = (next: boolean): void => {
@@ -137,12 +218,36 @@ const TooltipWithFloating = ({
         enabled: !isControlled && !disableHoverListener,
         delay: { open: enterDelay, close: leaveDelay },
         move: false,
+        mouseOnly: Boolean(openOnTap),
         handleClose: safePolygon(),
     })
     const focus = useFocus(context, { enabled: !isControlled && !disableFocusListener })
-    const dismiss = useDismiss(context)
+    const dismiss = useDismiss(context, { ancestorScroll: Boolean(openOnTap) })
     const role = useRole(context, { role: 'tooltip' })
-    const { getReferenceProps, getFloatingProps } = useInteractions([hover, focus, dismiss, role])
+    const tap: ElementProps = {
+        reference: {
+            onPointerUp: (event: PointerEvent<Element>) => {
+                if (!openOnTap || event.pointerType !== 'touch') return
+                setOpen(!open)
+            },
+        },
+    }
+    const { getReferenceProps, getFloatingProps } = useInteractions([hover, focus, dismiss, role, tap])
+
+    useLayoutEffect(() => {
+        const bridge = referenceRef.current
+        bridge.setReference = refs.setReference
+        refs.setReference(bridge.element)
+        return () => {
+            bridge.setReference = undefined
+            bridge.getReferenceProps = undefined
+            refs.setReference(null)
+        }
+    }, [referenceRef, refs])
+
+    useLayoutEffect(() => {
+        referenceRef.current.getReferenceProps = getReferenceProps
+    }, [referenceRef, getReferenceProps])
     const portalRoot = open ? getOpenModalDialogAncestor(refs.domReference.current) : undefined
     const usePopoverLayer = shouldUsePopoverTopLayer(portalRoot)
     const floatingRef = useTopLayerRef(refs.setFloating, usePopoverLayer)
@@ -150,56 +255,74 @@ const TooltipWithFloating = ({
     // `useRole` already mints the floating element's id and puts it on the floating node — reuse it
     // instead of a second `useId`, so nothing overrides a Floating UI internal.
     const { floatingId } = context
+    const generatedDescriptionId = useId()
+    const descriptionId = persistentDescriptionId ?? generatedDescriptionId
+    const describedById = persistentDescription ? descriptionId : floatingId
+    const describes = Boolean(persistentDescription) || open
 
     // APG puts `aria-describedby` on the *trigger*, but by house rule the child handed in is a
-    // wrapper span, not the control a screen reader lands on — so the id goes on the focusable
-    // control inside it. Last resort is the reference itself: a decorative or disabled subtree has
-    // nothing focusable, and an unassociated description is worse than one on the wrapper.
+    // wrapper span, not the control a screen reader lands on — so the id goes on the control inside
+    // it: the tabbable one first, else a roving-tabindex item (an unselected tab, a menu item), else
+    // any focusable one, so a reasoned control inside a collapsed accordion panel (`inert`) or a
+    // hidden parent is still the target (the panel opening does not re-render this component). Last
+    // resort is the reference itself: a decorative or disabled subtree has nothing focusable, and an
+    // unassociated description is worse than one on the wrapper.
+    const describedTarget = (reference: HTMLElement): HTMLElement =>
+        firstTabbable(reference) ?? firstFocusable(reference) ?? reference
+    // A control that already carries this text as a permanent description (a disabled control's
+    // reason, kept in the DOM so it is read the moment focus arrives) would hear it twice. Compared
+    // with `title`, not the popup: the portalled popup is not in the DOM yet on this pass.
+    const tooltipText = typeof title === 'string' || typeof title === 'number' ? String(title).trim() : ''
+    const appendDescription = (described: HTMLElement, describedById: string): void => {
+        const previous = described.getAttribute('aria-describedby')
+        const ids = previous?.split(/\s+/) ?? []
+        if (ids.includes(describedById)) return
+        const text = (id: string): string | undefined => document.getElementById(id)?.textContent?.trim()
+        if (tooltipText && ids.some((id) => id !== describedById && text(id) === tooltipText)) return
+        described.setAttribute('aria-describedby', previous ? `${previous} ${describedById}` : describedById)
+    }
+
     useEffect(() => {
         const reference = refs.domReference.current
-        if (!open || !floatingId || !(reference instanceof HTMLElement)) return
-        // A roving-tabindex item (an unselected tab, a menu item) is focusable but not tabbable.
-        const described = firstTabbable(reference) ?? firstFocusable(reference) ?? reference
-        const previous = described.getAttribute('aria-describedby')
-        // A control that already carries this text as a permanent description (a disabled control's
-        // reason, kept in the DOM so it is read the moment focus arrives) would hear it twice.
-        // Compared with `title`, not the popup: the portalled popup is not in the DOM yet on this pass.
-        const tooltipText = typeof title === 'string' || typeof title === 'number' ? String(title).trim() : ''
-        const text = (id: string): string | undefined => document.getElementById(id)?.textContent?.trim()
-        if (tooltipText && previous?.split(/\s+/).some((id) => text(id) === tooltipText)) return
-        described.setAttribute('aria-describedby', previous ? `${previous} ${floatingId}` : floatingId)
+        if (!describes || !describedById || !(reference instanceof HTMLElement)) return
+        const described = describedTarget(reference)
+        appendDescription(described, describedById)
         return () => {
-            if (previous === null) described.removeAttribute('aria-describedby')
-            else described.setAttribute('aria-describedby', previous)
+            const remaining = described.getAttribute('aria-describedby')?.split(/\s+/)
+                .filter((id) => id && id !== describedById).join(' ')
+            if (remaining) described.setAttribute('aria-describedby', remaining)
+            else described.removeAttribute('aria-describedby')
         }
-    }, [open, refs.domReference, floatingId, title])
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- the helpers read only these values
+    }, [describes, refs.domReference, describedById, tooltipText])
+
+    // React owns the trigger's own `aria-describedby` too: adding or removing helper/error text
+    // rewrites the attribute, which drops the reason id and never re-runs the effect above. Re-append
+    // it after any render where it went missing, keeping whatever ids the caller put there. Declared
+    // after the effect above so it never pre-empts the cleanup registration on the first commit.
+    useEffect(() => {
+        const reference = refs.domReference.current
+        if (!describes || !describedById || !(reference instanceof HTMLElement)) return
+        appendDescription(describedTarget(reference), describedById)
+    })
 
     // A Fragment has no DOM node to act as the reference, so it gets a `display: contents` host:
     // that host carries the ref and the handlers while its children keep their exact place in the
     // parent's layout (a plain <span> would adopt them and break a flex row). Generating no box of
     // its own, it also needs a virtual reference, or positioning lands at the page origin.
-    const isFragment = children.type === Fragment
-    const child = isFragment ? <span style={{ display: 'contents' }}>{children}</span> : children
     useLayoutEffect(() => {
         const host = refs.domReference.current
         if (!isFragment || !host) return
         refs.setPositionReference({ contextElement: host, getBoundingClientRect: () => contentsRect(host) })
     }, [isFragment, refs])
 
-    // Merge our reference ref with any ref the child already carries (React 18 element.ref).
-    const childRef = useMergeRefs([refs.setReference, (child as { ref?: React.Ref<unknown> }).ref])
-    // Drop Floating UI's generated `aria-describedby`: it would land on the wrapper that the effect
-    // above deliberately looks past. `cloneElement` merges over the child's own props, so a value
-    // the caller set themselves survives untouched.
-    const { ['aria-describedby']: _generated, ...referenceProps } = getReferenceProps({
-        ref: childRef,
-        ...(child.props as Record<string, unknown>),
-    })
-    const reference = cloneElement(child, referenceProps)
-
     return (
         <>
-            {reference}
+            {persistentDescription && (
+                <span id={descriptionId} hidden>
+                    {title}
+                </span>
+            )}
             {open && (
                 <FloatingPortal root={portalRoot}>
                     <div

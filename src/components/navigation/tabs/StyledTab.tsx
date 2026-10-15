@@ -1,4 +1,4 @@
-import { useCallback, useId, type FC, type ReactNode } from 'react'
+import { useCallback, type FC, type ReactNode } from 'react'
 import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip'
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
@@ -23,9 +23,15 @@ export interface StyledTabProps {
      */
     disabled?: boolean
     /**
+     * @figmaProp none — behavioral. Why the tab is unavailable. With `disabled` the tab stays in
+     * arrow-key navigation and shows the reason on hover, focus and tap (disabled-states DIS-1…DIS-3).
+     */
+    disabledReason?: ReactNode
+    /**
      * @figmaProp none — a11y
      * Tooltip on the tab, opened by hover and keyboard focus and read as the tab's description —
      * typically why a `disabled` tab is unavailable (disabled-states DIS-1, DIS-2). Falsy renders none.
+     * A `disabledReason` takes its place while the tab is disabled.
      */
     tooltip?: ReactNode
     className?: string
@@ -39,10 +45,17 @@ export interface StyledTabProps {
  * `StyledTabs` context and reports its node so the parent can position the active indicator.
  * Public props (`value`/`label`/`disabled`/`className`) preserved (DEC-003). TASK-202.
  */
-export const StyledTab: FC<StyledTabProps> = ({ value, label, disabled, tooltip, className, sx, index }) => {
+export const StyledTab: FC<StyledTabProps> = ({
+    value,
+    label,
+    disabled,
+    disabledReason,
+    tooltip,
+    className,
+    sx,
+    index,
+}) => {
     const ctx = useTabsContext()
-    const tooltipId = useId()
-    const describedBy = tooltip ? `${tooltipId}-reason` : undefined
     const effectiveValue = value !== undefined ? value : index
     const selected = ctx ? ctx.value === effectiveValue : false
     const hasTextSize = /\btext-(?:xs|sm|base|lg|xl|\[)/.test(className ?? '')
@@ -58,6 +71,9 @@ export const StyledTab: FC<StyledTabProps> = ({ value, label, disabled, tooltip,
         [ctx, effectiveValue],
     )
 
+    const reason = disabled && disabledReason ? disabledReason : tooltip
+    const reasoned = Boolean(disabled) && Boolean(reason)
+
     const tab = (
         <button
             ref={ref}
@@ -65,7 +81,6 @@ export const StyledTab: FC<StyledTabProps> = ({ value, label, disabled, tooltip,
             role='tab'
             aria-selected={selected}
             aria-disabled={disabled ? true : undefined}
-            aria-describedby={describedBy}
             tabIndex={selected ? 0 : -1}
             data-tab-value={
                 typeof effectiveValue === 'string' || typeof effectiveValue === 'number'
@@ -116,19 +131,18 @@ export const StyledTab: FC<StyledTabProps> = ({ value, label, disabled, tooltip,
         </button>
     )
 
-    if (!tooltip) return tab
-
-    // A Fragment child gets a `display: contents` host, so the tooltip adds no box to the tab row. The
-    // tab carries its own description: under roving tabindex an unselected tab is `tabIndex=-1`, which
-    // the tooltip's "first tabbable" lookup skips, and the reason must be in the DOM before focus lands.
+    // The tab carries its own description, kept in the DOM so it is read the moment focus lands: under
+    // roving tabindex an unselected tab is `tabIndex=-1`, which the tooltip still finds as a focusable
+    // roving item. Always rendered, so a tab that turns disabled is not remounted.
     return (
-        <StyledTooltip title={tooltip} arrow>
-            <>
-                {tab}
-                <span id={describedBy} hidden>
-                    {tooltip}
-                </span>
-            </>
+        <StyledTooltip
+            title={reason}
+            open={reason ? undefined : false}
+            arrow
+            openOnTap={reasoned}
+            persistentDescription={Boolean(reason)}
+        >
+            {tab}
         </StyledTooltip>
     )
 }

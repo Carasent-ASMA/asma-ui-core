@@ -31,6 +31,8 @@ export interface IMinimizableDialogV2Props {
         fullscreen?: string
     }
     locale?: ILocale
+    /** Why Close and Cancel wait while an action inside runs; defaults to "Wait until saved" in `locale`. */
+    busyReason?: ReactNode
     dataTest: string
     style?: React.CSSProperties
     /**

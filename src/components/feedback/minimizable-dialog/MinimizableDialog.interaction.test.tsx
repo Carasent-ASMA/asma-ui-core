@@ -113,3 +113,114 @@ describe('MinimizableDialog keyboard contract', () => {
         await expect(document.activeElement).toBe(fullscreenButton)
     })
 })
+
+describe('MinimizableDialog busy and disabled footer (disabled-states DIS-8, R05-23)', () => {
+    afterEach(cleanup)
+
+    const byTest = (container: HTMLElement, id: string): HTMLButtonElement[] =>
+        Array.from(container.querySelectorAll<HTMLButtonElement>(`[data-testid="${id}"]`))
+
+    it('waits while the primary action runs: secondary soft-disabled, X ignored, primary busy', async () => {
+        const onClose = fn()
+        const onCancel = fn()
+        const onSave = fn()
+        const { container } = mount(
+            <MinimizableDialog
+                dataTest='dialog'
+                open
+                title='Editor'
+                onClose={onClose}
+                primaryButtonText='Save'
+                secondaryButtonText='Cancel'
+                onPrimaryButtonClick={onSave}
+                onSecondaryButtonClick={onCancel}
+                primaryButtonLoading
+            >
+                <p>Content</p>
+            </MinimizableDialog>,
+        )
+        const [cancel] = byTest(container, 'cancel-button')
+        const [save] = byTest(container, 'save-button')
+        const close = byTest(container, 'close-button')[1]!
+
+        await expect(cancel).toHaveAttribute('aria-disabled', 'true')
+        await expect(cancel).not.toBeDisabled()
+        await waitFor(() => expect(cancel).toHaveAccessibleDescription('Wait until saved'))
+        await expect(save).toHaveAttribute('aria-busy', 'true')
+        await expect(save).toHaveAccessibleName('Save')
+
+        cancel!.click()
+        cancel!.focus()
+        await userEvent.keyboard('{Enter}')
+        save!.click()
+        close.click()
+
+        await expect(onCancel).not.toHaveBeenCalled()
+        await expect(onSave).not.toHaveBeenCalled()
+        await expect(onClose).not.toHaveBeenCalled()
+    })
+
+    it('announces the busy state in the dialog locale', async () => {
+        const { container } = mount(
+            <MinimizableDialog
+                dataTest='dialog'
+                open
+                title='Editor'
+                locale='no'
+                onClose={() => undefined}
+                primaryButtonText='Lagre'
+                secondaryButtonText='Avbryt'
+                onPrimaryButtonClick={() => undefined}
+                onSecondaryButtonClick={() => undefined}
+                primaryButtonLoading
+            />,
+        )
+
+        await expect(container.querySelector('[role="status"]')).toHaveTextContent('Pågår')
+        await waitFor(() =>
+            expect(byTest(container, 'cancel-button')[0]).toHaveAccessibleDescription('Vent til lagringen er ferdig'),
+        )
+    })
+
+    it('keeps a disabled primary focusable with its reason', async () => {
+        const onSave = fn()
+        const { container } = mount(
+            <MinimizableDialog
+                dataTest='dialog'
+                open
+                title='Editor'
+                onClose={() => undefined}
+                primaryButtonText='Save'
+                onPrimaryButtonClick={onSave}
+                primaryButtonDisabled
+                primaryButtonDisabledReason='Fill in the name first'
+            />,
+        )
+        const [save] = byTest(container, 'save-button')
+
+        save!.focus()
+        await expect(document.activeElement).toBe(save)
+        await expect(save).toHaveAttribute('aria-disabled', 'true')
+        await waitFor(() => expect(save).toHaveAccessibleDescription('Fill in the name first'))
+        save!.click()
+        await expect(onSave).not.toHaveBeenCalled()
+    })
+
+    it('keeps the footer buttons enabled when idle', async () => {
+        const { container } = mount(
+            <MinimizableDialog
+                dataTest='dialog'
+                open
+                title='Editor'
+                onClose={() => undefined}
+                primaryButtonText='Save'
+                secondaryButtonText='Cancel'
+                onPrimaryButtonClick={() => undefined}
+                onSecondaryButtonClick={() => undefined}
+            />,
+        )
+
+        await expect(byTest(container, 'cancel-button')[0]).not.toHaveAttribute('aria-disabled')
+        await expect(byTest(container, 'save-button')[0]).not.toHaveAttribute('aria-busy')
+    })
+})

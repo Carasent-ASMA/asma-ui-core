@@ -1,5 +1,6 @@
 import React, { type AnchorHTMLAttributes, type ButtonHTMLAttributes, type MouseEvent, type ReactNode } from 'react'
 import clsx from 'clsx'
+import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip'
 import style from './StyledLink.module.scss'
 
 /**
@@ -13,6 +14,12 @@ export type StyledLinkProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'onC
     onClick?: (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void
     /** @figmaProp State = true→"Disabled" (renders a non-interactive <span>, delta-300) */
     disabled?: boolean
+    /**
+     * @figmaProp none — behavioral. Why the link is unavailable. With `disabled` the link stays
+     * focusable (`aria-disabled`), does not navigate and shows the reason on hover, focus and tap
+     * (disabled-states DIS-1…DIS-3). Without it a disabled link stays a plain `<span>`.
+     */
+    disabledReason?: ReactNode
     /** @figmaProp Size = small→"Base" (14/20) | large→"Medium" (16/24); xs (12/20) = none (no DS size) */
     size?: 'small' | 'large' | 'xs'
     /** @figmaProp none — ref */
@@ -40,6 +47,7 @@ export type StyledLinkProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'onC
 export const StyledLink: React.FC<StyledLinkProps> = ({
     href,
     disabled,
+    disabledReason,
     size = 'large',
     dataTest,
     reflink,
@@ -62,7 +70,7 @@ export const StyledLink: React.FC<StyledLinkProps> = ({
             break
     }
 
-    if (disabled) {
+    if (disabled && !disabledReason) {
         return (
             <span className={clsx(style['styled-link'], style['styled-link-disabled'], textSize, className)}>
                 {content}
@@ -71,12 +79,31 @@ export const StyledLink: React.FC<StyledLinkProps> = ({
         )
     }
 
+    const withReason = (node: React.ReactElement) => (
+        <StyledTooltip
+            title={disabledReason}
+            open={disabled ? undefined : false}
+            openOnTap={Boolean(disabled)}
+            persistentDescription={Boolean(disabled)}
+        >
+            {node}
+        </StyledTooltip>
+    )
+
+    const handleClick = (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+        if (disabled) {
+            event.preventDefault()
+            return
+        }
+        onClick?.(event)
+    }
+
     if (!href) {
         if (!onClick && import.meta.env.DEV) {
             console.warn('StyledLink requires either href or onClick.')
         }
 
-        return (
+        return withReason(
             <button
                 {...(otherProps as ButtonHTMLAttributes<HTMLButtonElement>)}
                 data-testid={dataTest}
@@ -85,33 +112,51 @@ export const StyledLink: React.FC<StyledLinkProps> = ({
                 // holds a ref loses it silently.
                 ref={reflink as React.Ref<HTMLButtonElement> | undefined}
                 type='button'
-                onClick={onClick}
+                aria-disabled={disabled ? true : otherProps['aria-disabled']}
+                onClick={handleClick}
                 className={clsx(
                     style['styled-link'],
                     style['styled-link-button'],
-                    'asma-touch-ready',
+                    disabled ? style['styled-link-disabled'] : 'asma-touch-ready',
                     textSize,
                     className,
                 )}
             >
                 {content}
                 {contentNode}
-            </button>
+            </button>,
         )
     }
 
-    return (
+    return withReason(
         <a
             {...otherProps}
             data-testid={dataTest}
             ref={reflink}
-            href={href}
+            href={disabled ? undefined : href}
+            role={disabled ? 'link' : otherProps.role}
+            aria-disabled={disabled ? true : otherProps['aria-disabled']}
+            // Without `href` the anchor leaves the Tab order; a disabled link keeps its stop (DIS-3).
+            tabIndex={disabled ? 0 : otherProps.tabIndex}
+            onClick={handleClick}
+            onKeyDown={(event) => {
+                if (disabled && event.key === 'Enter') {
+                    event.preventDefault()
+                    return
+                }
+                otherProps.onKeyDown?.(event)
+            }}
             // ASMA-8220 (TB-14): `.styled-link:active` already recolours to gama-500, so touch-ready
             // (tap-flash + double-tap-zoom removal) rather than pressable.
-            className={clsx(style['styled-link'], 'asma-touch-ready', textSize, className)}
+            className={clsx(
+                style['styled-link'],
+                disabled ? style['styled-link-disabled'] : 'asma-touch-ready',
+                textSize,
+                className,
+            )}
         >
             {content}
             {contentNode}
-        </a>
+        </a>,
     )
 }

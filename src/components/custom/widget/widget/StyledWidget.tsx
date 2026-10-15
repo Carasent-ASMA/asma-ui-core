@@ -31,6 +31,11 @@ export interface StyledWidgetProps {
         onClick?: () => void
         hide?: boolean
         disabled?: boolean
+        /**
+         * @figmaProp none — behavioral. Why "view more" is unavailable. With `disabled` the button stays
+         * focusable and shows the reason on hover, focus and tap (disabled-states DIS-1…DIS-4).
+         */
+        disabledReason?: ReactNode
     }
     /**
      * @param {string} persistKey - Unique key to persist expanded state
@@ -89,6 +94,7 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
                     {!viewMore.hide ? (
                         <StyledButton
                             disabled={viewMore.disabled}
+                            disabledReason={viewMore.disabledReason}
                             dataTest='view-more'
                             variant='text'
                             endIcon={

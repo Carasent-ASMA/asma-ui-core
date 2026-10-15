@@ -16,8 +16,10 @@ import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
 import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
 import { registerOpenModalDialog } from 'src/hooks/useTopLayer.hook'
+import { DialogBusyContext, useDialogBusyBoundary } from './DialogBusyContext'
 import { warnUnnamedDialog } from 'src/helpers/warnUnnamedDialog'
 import style from './StyledDialog.module.scss'
+import type { UiCoreLocale } from 'src/helpers/uiCoreLocale'
 import { StyledDialogTitleContext } from './dialogTitleContext'
 
 export type DialogCloseReason = 'escapeKeyDown' | 'backdropClick'
@@ -62,6 +64,10 @@ export interface IStyledDialogProps {
     classes?: { paper?: string; root?: string }
     PaperProps?: DialogPaperProps
     slotProps?: { paper?: DialogPaperProps; backdrop?: Record<string, unknown>; transition?: { onExited?: () => void } }
+    /** Why close and Cancel wait while an action runs; defaults to "Wait until saved" in `locale`. */
+    busyReason?: ReactNode
+    /** Language of the default busy reason; defaults to English. */
+    locale?: UiCoreLocale
     onCloseText?: ReactNode
     /** @figmaProp none — behavioral */
     showCloseIcon?: boolean
@@ -117,6 +123,8 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     classes,
     PaperProps,
     slotProps,
+    busyReason,
+    locale = 'en',
     onCloseText,
     showCloseIcon = true,
     dialogLabel,
@@ -139,6 +147,8 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     const escapeHandledRef = useRef(false)
     const prevOpenRef = useRef(open)
     const isFullScreen = fullScreen ?? isMobile
+    // While a button inside runs an action, no dismissal goes through (see DialogBusyContext).
+    const { busy, busyReason: busyText, contextValue } = useDialogBusyBoundary(busyReason, locale)
     const fallbackHeadingId = useId()
     const [headingLabelId, setHeadingLabelId] = useState<string>()
     const warnedUnnamedRef = useRef(false)
@@ -219,7 +229,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     } = (slotProps?.backdrop ?? {}) as HTMLAttributes<HTMLDivElement>
 
     const requestEscapeClose = (event: SyntheticEvent | Event): void => {
-        if (escapeHandledRef.current) return
+        if (busy || escapeHandledRef.current) return
         escapeHandledRef.current = true
         window.setTimeout(() => {
             escapeHandledRef.current = false
@@ -265,6 +275,13 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
             aria-labelledby={labelledBy ?? headingLabelId}
             aria-label={labelledBy || headingLabelId ? undefined : ariaLabel}
             onCancel={handleCancel}
+            onKeyDown={(event) => {
+                if (!busy || event.key !== 'Escape') return
+                // Block only an Escape aimed at this dialog's own layer. One bubbling out of a nested
+                // dialog must reach that dialog's window listener, which ignores a defaultPrevented
+                // event — the busy outer layer would otherwise keep the inner one from closing.
+                if ((event.target as Element).closest('dialog[open]') === dialogRef.current) event.preventDefault()
+            }}
             className={cn(
                 style['StyledDialog'],
                 'fixed inset-0 m-0 h-full max-h-none w-full max-w-none items-center justify-center overflow-hidden border-0 bg-transparent p-0 outline-none open:flex',
@@ -290,7 +307,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                 style={backdropStyle}
                 onClick={(event) => {
                     backdropOnClick?.(event)
-                    if (!event.defaultPrevented) onClose?.(event, 'backdropClick')
+                    if (!event.defaultPrevented && !busy) onClose?.(event, 'backdropClick')
                 }}
             />
             <div
@@ -348,6 +365,8 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                                     size='small'
                                     endIcon={<CloseIcon width={20} height={20} />}
                                     className='max-w-full shrink-0 whitespace-nowrap'
+                                    disabled={busy}
+                                    disabledReason={busyText}
                                     onClick={(event) => onClose?.(event, 'escapeKeyDown')}
                                     style={{
                                         color: 'var(--colors-delta-800)',
@@ -362,7 +381,9 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                     </div>
                 )}
 
-                <StyledDialogTitleContext.Provider value={titleContext}>{children}</StyledDialogTitleContext.Provider>
+                <StyledDialogTitleContext.Provider value={titleContext}>
+                    <DialogBusyContext.Provider value={contextValue}>{children}</DialogBusyContext.Provider>
+                </StyledDialogTitleContext.Provider>
             </div>
         </dialog>
     )

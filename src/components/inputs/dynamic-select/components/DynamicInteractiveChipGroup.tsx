@@ -200,7 +200,7 @@ export const DynamicInteractiveChipGroup = forwardRef(
                         <span>-</span>
                     )}
                 </div>
-                {!required && hasValue && !readOnly && (
+                {!required && hasValue && !readOnly && !disabled && (
                     <StyledButton
                         dataTest='clear-selection-btn'
                         variant='text'

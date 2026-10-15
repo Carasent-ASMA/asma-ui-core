@@ -12,6 +12,9 @@ export interface SubmitChangedOptions {
     touchInvalidFields?: boolean
 }
 
+/**
+ * Does not set react-hook-form `formState.isSubmitting`; callers drive the busy state from their own pending flag.
+ */
 export async function submitChanged<TFieldValues extends FieldValues>(
     methods: UseFormReturn<TFieldValues>,
     onPatch: SubmitChangedPatch<TFieldValues>,

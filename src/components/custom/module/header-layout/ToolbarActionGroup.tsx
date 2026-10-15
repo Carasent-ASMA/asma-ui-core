@@ -1,10 +1,22 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
+import { useReportDialogBusy } from 'src/components/feedback/dialog/DialogBusyContext'
 import { StyledButton } from 'src/components/inputs/button'
 import { DotsVerticalIcon } from 'src/components/icons'
 import { StyledMenu } from 'src/components/navigation/menu/StyledMenu'
 import { StyledMenuItem } from 'src/components/navigation/menu/StyledMenuItem'
 import { cn } from 'src/helpers/cn'
 import type { DynamicToolbarAction, PlannedToolbarActions } from './planToolbarActions'
+
+const DEFAULT_IN_PROGRESS = 'In progress'
+
+/** More-menu item state: a running action is disabled with the busy reason (disabled-states DIS-8). */
+export function overflowItemState(
+    action: DynamicToolbarAction,
+    inProgressLabel = DEFAULT_IN_PROGRESS,
+): { disabled?: boolean; disabledReason?: ReactNode; 'aria-busy'?: boolean } {
+    if (!action.loading) return { disabled: action.disabled, disabledReason: action.disabledReason }
+    return { disabled: true, disabledReason: inProgressLabel, 'aria-busy': true }
+}
 
 /** True when the plan renders anything (inline buttons or the More menu). */
 export function hasPlannedActions(plan?: PlannedToolbarActions): boolean {
@@ -15,10 +27,13 @@ export function ToolbarActionButton({
     action,
     showLabel,
     selectionTone = false,
+    inProgressLabel,
 }: {
     action: DynamicToolbarAction
     showLabel: boolean
     selectionTone?: boolean
+    /** Busy announcement of a `loading` action, in the toolbar locale. */
+    inProgressLabel?: string
 }): JSX.Element {
     if (action.render) {
         return action.render({ showLabel })
@@ -37,9 +52,15 @@ export function ToolbarActionButton({
              * `type="submit"`, which fires the form instead (StyledDialogFooter footers commonly
              * sit inside one). */
             type='button'
-            /* `aria-disabled`, not native `disabled`: a disabled action stays in the Tab order so a
-             * keyboard user can find it (disabled-states DIS-3); the click is blocked instead. */
+            /* A reasoned action is soft-disabled by StyledButton itself (reason on hover, focus and
+             * tap); a reasonless one still stays in the Tab order with `aria-disabled` and its click
+             * removed, so a keyboard user can find it (disabled-states DIS-3). */
+            disabled={Boolean(action.disabled) && Boolean(action.disabledReason)}
             aria-disabled={action.disabled ? true : undefined}
+            disabledReason={action.disabledReason}
+            loading={action.loading}
+            holdsDialog={action.holdsDialog}
+            loadingAnnouncement={inProgressLabel}
             startIcon={action.icon}
             onClick={action.disabled ? undefined : action.onClick}
             /* An explicit ariaLabel always wins (e.g. a badge count appended to the name);
@@ -82,9 +103,12 @@ export function ToolbarActionGroup({
     className,
     selectionTone = false,
     registerActionWidth,
+    inProgressLabel = DEFAULT_IN_PROGRESS,
 }: {
     plan: PlannedToolbarActions
     overflowMenuLabel: string
+    /** Reason and busy announcement of a `loading` action, in the toolbar locale. */
+    inProgressLabel?: string
     className?: string
     selectionTone?: boolean
     /**
@@ -96,6 +120,10 @@ export function ToolbarActionGroup({
 }): JSX.Element | null {
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
     const { inlineActions, overflowActions, showMoreMenu } = plan
+    /* A menu item is not a StyledButton, so a running action in the More menu reports itself here. */
+    useReportDialogBusy(
+        showMoreMenu && overflowActions.some((action) => Boolean(action.loading) && action.holdsDialog !== false),
+    )
 
     if (!inlineActions.length && !showMoreMenu) {
         return null
@@ -110,6 +138,7 @@ export function ToolbarActionGroup({
                         action={action}
                         showLabel={showLabel}
                         selectionTone={selectionTone}
+                        inProgressLabel={inProgressLabel}
                     />
                 )
 
@@ -148,7 +177,7 @@ export function ToolbarActionGroup({
                         {overflowActions.map((action) => (
                             <StyledMenuItem
                                 key={action.id}
-                                disabled={action.disabled}
+                                {...overflowItemState(action, inProgressLabel)}
                                 onClick={() => {
                                     setAnchorEl(null)
                                     action.onClick()
