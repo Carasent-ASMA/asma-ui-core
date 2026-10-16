@@ -92,8 +92,7 @@ describe('StyledBadge notification contract', () => {
             await expect(countStyle.width).toBe('20px')
             await expect(countStyle.height).toBe('20px')
             await expect(countStyle.paddingInline).toBe('6px')
-            await expect(countStyle.borderWidth).toBe('1px')
-            await expect(countStyle.borderColor).toBe('rgb(162, 194, 0)')
+            await expect(countStyle.boxShadow).toBe('rgb(162, 194, 0) 0px 0px 0px 1px inset')
             await expect(countStyle.backgroundColor).toBe('rgb(217, 242, 86)')
             await expect(countStyle.color).toBe('rgb(64, 77, 0)')
             await expect(countStyle.fontSize).toBe('14px')
@@ -109,9 +108,21 @@ describe('StyledBadge notification contract', () => {
 
         await expect(dotStyle.width).toBe('12px')
         await expect(dotStyle.height).toBe('12px')
-        await expect(dotStyle.borderWidth).toBe('2px')
-        await expect(dotStyle.borderColor).toBe('rgb(119, 143, 0)')
+        await expect(dotStyle.boxShadow).toBe('rgb(119, 143, 0) 0px 0px 0px 2px inset')
         await expect(dotStyle.backgroundColor).toBe('rgb(217, 242, 86)')
+    })
+
+    it('strokes the ring inside, so it costs the pill no width', async () => {
+        const { container } = mount(<StyledBadge dataTest='wide-count' badgeContent={28} />)
+        const pill = container.querySelector<HTMLElement>('[data-testid="wide-count"] span[aria-hidden="true"]')!
+        const text = document.createRange()
+        text.selectNodeContents(pill)
+
+        // Figma strokes the ring on the inside: a two-digit count is the label plus 6px either
+        // side, 28px for its own "28". A CSS border charged 2px on top and made that 30px.
+        await expect(getComputedStyle(pill).borderWidth).toBe('0px')
+        await expect(pill.offsetWidth - pill.clientWidth).toBe(0)
+        await expect(Math.round(pill.getBoundingClientRect().width - text.getBoundingClientRect().width)).toBe(12)
     })
 
     it('keeps a hostless dot in normal flow so its neighbours lay out around it', async () => {
@@ -129,8 +140,7 @@ describe('StyledBadge notification contract', () => {
         // The same circle the anchored variant paints.
         await expect(style.width).toBe('12px')
         await expect(style.height).toBe('12px')
-        await expect(style.borderWidth).toBe('2px')
-        await expect(style.borderColor).toBe('rgb(119, 143, 0)')
+        await expect(style.boxShadow).toBe('rgb(119, 143, 0) 0px 0px 0px 2px inset')
         await expect(style.backgroundColor).toBe('rgb(217, 242, 86)')
 
         // Anchoring a hostless dot collapses the root to 0x0 and paints the dot over its neighbour.
@@ -154,8 +164,7 @@ describe('StyledBadge notification contract', () => {
 
         // The same pill the anchored variant paints.
         await expect(style.height).toBe('20px')
-        await expect(style.borderWidth).toBe('1px')
-        await expect(style.borderColor).toBe('rgb(162, 194, 0)')
+        await expect(style.boxShadow).toBe('rgb(162, 194, 0) 0px 0px 0px 1px inset')
         await expect(style.backgroundColor).toBe('rgb(217, 242, 86)')
 
         // A hostless count used to collapse the root to 0x0 and hang the pill off its corner,
@@ -206,7 +215,7 @@ describe('StyledBadge notification contract', () => {
             await expect(style.height).toBe('8px')
             await expect(style.backgroundColor).toBe(getComputedStyle(probe).backgroundColor)
             // The ring belongs to the notification dot; Parent=Unread/Filter are flat.
-            await expect(style.borderWidth).toBe('0px')
+            await expect(style.boxShadow).toBe('none')
             await expect(root.getBoundingClientRect().width).toBe(8)
 
             unmount()
@@ -221,8 +230,7 @@ describe('StyledBadge notification contract', () => {
         const style = getComputedStyle(dot)
 
         await expect(style.width).toBe('12px')
-        await expect(style.borderWidth).toBe('2px')
-        await expect(style.borderColor).toBe('rgb(119, 143, 0)')
+        await expect(style.boxShadow).toBe('rgb(119, 143, 0) 0px 0px 0px 2px inset')
     })
 
     it('puts className on the root of a hostless dot so callers can place it', async () => {

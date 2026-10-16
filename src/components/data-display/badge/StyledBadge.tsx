@@ -148,14 +148,17 @@ export const StyledBadge = ({
 
     const vertical = anchorOrigin?.vertical ?? 'top'
     const horizontal = anchorOrigin?.horizontal ?? 'right'
-    const primaryBorderStyle: CSSProperties =
+    /**
+     * Figma strokes the ring on the inside, so it costs no layout space. A CSS border does, and
+     * that 2px widened a two-digit count to 30px against Figma's 28px and left a one-digit count
+     * 6px of content box for an 8px digit. An inset shadow paints the same ring for free.
+     */
+    const primaryRingStyle: CSSProperties =
         color === 'primary' && !isAccentDot
             ? {
-                  borderColor: isDot
-                      ? 'var(--colors-badge-border-dot)'
-                      : 'var(--colors-badge-border-count)',
-                  borderStyle: 'solid',
-                  borderWidth: isDot ? 'var(--border-badge-dot)' : 'var(--border-badge-count)',
+                  boxShadow: isDot
+                      ? 'inset 0 0 0 var(--border-badge-dot) var(--colors-badge-border-dot)'
+                      : 'inset 0 0 0 var(--border-badge-count) var(--colors-badge-border-count)',
               }
             : {}
 
@@ -204,6 +207,8 @@ export const StyledBadge = ({
                               : size === 'small'
                                 ? 'h-[16px] w-max min-w-[16px] rounded-[20px] px-[4px] text-[0.75rem]'
                                 : 'h-[20px] min-w-[20px] rounded-[20px] px-[6px] text-sm leading-5',
+                        // One digit measures 8.05px, so padding alone leaves the pill 20.05px wide.
+                        // Pinning it keeps Figma's exact 20px circle rather than a hair of an oval.
                         !isDot && size === 'medium' && isSingleDigitCount && 'w-[20px]',
                         !isStandalone && className,
                         slotProps?.badge?.className,
@@ -211,7 +216,7 @@ export const StyledBadge = ({
                     style={{
                         ...(COLOR_STYLE[color] ?? COLOR_STYLE['default']),
                         ...(isAccentDot ? { backgroundColor: 'var(--colors-gama-500)' } : {}),
-                        ...primaryBorderStyle,
+                        ...primaryRingStyle,
                         ...badgeSlotStyle,
                         ...slotProps?.badge?.style,
                     }}
