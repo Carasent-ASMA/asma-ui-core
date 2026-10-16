@@ -51,7 +51,10 @@ interface OverlayBackRegistry {
 interface OverlayBackAdapter {
     v?: number
     enabled?: boolean
+    pendingNavigation?: boolean
     register?: (requestClose: OverlayBackRequestClose) => () => void
+    continuePendingNavigation?: () => void
+    failOpenPendingNavigation?: () => void
 }
 
 declare global {
@@ -151,7 +154,16 @@ export function registerOverlayBackCloser(
         unregistered = true
         const index = registry.entries.indexOf(entry)
         if (index !== -1) registry.entries.splice(index, 1)
-        if (registry.entries.length === 0) releaseAdapterIfStillEmpty(registry)
+        if (registry.entries.length === 0) {
+            releaseAdapterIfStillEmpty(registry)
+            return
+        }
+        queueMicrotask(() => {
+            const overlayBack = getSharedWindow()?.__ASMA__SHELL__?.overlayBack
+            if (registry.entries.length > 0 && overlayBack?.pendingNavigation) {
+                overlayBack.continuePendingNavigation?.()
+            }
+        })
     }
 }
 
@@ -178,6 +190,13 @@ export function requestCloseTopOverlayBack(): false | void | Promise<unknown> {
         top.pending = true
         const clearLatch = (): void => {
             top.pending = false
+            globalThis.setTimeout(() => {
+                const registry = getOverlayBackRegistry()
+                const overlayBack = getSharedWindow()?.__ASMA__SHELL__?.overlayBack
+                if (registry.entries.includes(top) && overlayBack?.pendingNavigation) {
+                    overlayBack.failOpenPendingNavigation?.()
+                }
+            }, 0)
         }
         result.then(clearLatch, clearLatch)
     }

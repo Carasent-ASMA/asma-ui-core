@@ -212,7 +212,10 @@ describe('overlay-back registry', () => {
         interface FakeOverlayBackAdapter {
             v?: number
             enabled?: boolean
-            register?: (requestClose: () => void | Promise<unknown>) => () => void
+            pendingNavigation?: boolean
+            register?: (requestClose: () => false | void | Promise<unknown>) => () => void
+            continuePendingNavigation?: () => void
+            failOpenPendingNavigation?: () => void
         }
 
         const installFakeShell = (
@@ -285,6 +288,39 @@ describe('overlay-back registry', () => {
 
             await Promise.resolve()
             expect(unregisterSpy).toHaveBeenCalledTimes(1)
+        })
+
+        it('continues a pending route when the current top unregisters and another layer remains', async () => {
+            const continuePendingNavigation = vi.fn()
+            installFakeShell({ v: 1, pendingNavigation: true, continuePendingNavigation })
+            const unregisterLower = registerOverlayBackCloser(vi.fn())
+            const unregisterTop = registerOverlayBackCloser(vi.fn())
+
+            unregisterTop()
+            await Promise.resolve()
+
+            expect(continuePendingNavigation).toHaveBeenCalledTimes(1)
+            unregisterLower()
+        })
+
+        it('fails open when an async close settles but leaves its layer mounted', async () => {
+            let settle: (() => void) | undefined
+            const failOpenPendingNavigation = vi.fn()
+            installFakeShell({ v: 1, pendingNavigation: true, failOpenPendingNavigation })
+            const unregister = registerOverlayBackCloser(
+                () =>
+                    new Promise<void>((resolve) => {
+                        settle = resolve
+                    }),
+            )
+            void requestCloseTopOverlayBack()
+
+            settle?.()
+            await Promise.resolve()
+            await new Promise((resolve) => globalThis.setTimeout(resolve, 0))
+
+            expect(failOpenPendingNavigation).toHaveBeenCalledTimes(1)
+            unregister()
         })
 
         it('StrictMode cleanup/setup defers the release by a microtask, and re-registration cancels it (no transient drain)', async () => {
