@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { afterEach, describe, it } from 'vitest'
+import { page } from 'vitest/browser'
 import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, isEntirelyObscured, mount, tabbableWithin } from 'src/test-utils/renderInteraction'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
+import { getOverlayBackStackSize, requestCloseTopOverlayBack } from 'src/hooks/useBackCloses.hook'
 import { PopoverSheet, type PopoverSheetProps } from './PopoverSheet'
 
 /**
@@ -136,6 +138,42 @@ describe('PopoverSheet — info variant', () => {
         await userEvent.keyboard('{Escape}')
         await expect(panelOf()).toBeNull()
         await expectFocusReturnedTo(trigger)
+    })
+
+    it('Back closes the desktop popover through its single wrapper registration', async () => {
+        const { container } = mount(<Fixture />)
+        const trigger = triggerOf(container)
+        await userEvent.click(trigger)
+        await waitFor(() => expect(panelOf()).not.toBeNull())
+        await expect(getOverlayBackStackSize()).toBe(1)
+
+        void requestCloseTopOverlayBack()
+
+        await waitFor(() => expect(panelOf()).toBeNull())
+        await waitFor(() => expect(document.activeElement).toBe(trigger))
+        await expect(getOverlayBackStackSize()).toBe(0)
+    })
+
+    it('keeps exactly one Back registration while resizing between popover and sheet', async () => {
+        await page.viewport(744, 720)
+        try {
+            const { container } = mount(<ActionFixture />)
+            await userEvent.click(triggerOf(container))
+            await waitFor(() => expect(panelOf()).not.toBeNull())
+            await expect(getOverlayBackStackSize()).toBe(1)
+
+            await page.viewport(743, 720)
+            await waitFor(() => expect(document.querySelector('dialog[data-test="pop"]')).not.toBeNull())
+            await expect(getOverlayBackStackSize()).toBe(1)
+
+            await page.viewport(744, 720)
+            await waitFor(() => expect(document.querySelector('dialog[data-test="pop"]')).toBeNull())
+            await waitFor(() => expect(panelOf()).not.toBeNull())
+            await expect(getOverlayBackStackSize()).toBe(1)
+        } finally {
+            cleanup()
+            await page.viewport(1280, 720)
+        }
     })
 })
 

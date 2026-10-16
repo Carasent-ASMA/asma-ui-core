@@ -25,6 +25,8 @@ export interface DrawerProps {
     ModalProps?: { keepMounted?: boolean }
     /** Trigger element — when inside a modal `<dialog>`, portal into it so the sheet is interactive. */
     anchorEl?: Element | null
+    /** Set `false` when a wrapper already owns the Back-close registration. */
+    registerBackClose?: boolean
     children?: ReactNode
 }
 
@@ -80,6 +82,7 @@ export const StyledDrawer: FC<DrawerProps> = ({
     PaperProps,
     ModalProps,
     anchorEl,
+    registerBackClose = true,
     children,
 }) => {
     const isTemporary = variant === 'temporary'
@@ -126,6 +129,13 @@ export const StyledDrawer: FC<DrawerProps> = ({
     // Escape is already handled above (kept separate since it needs the real event/reason for
     // `onClose`) — this only adds the Tab-cycling half of the trap for this backdrop-blocking modal.
     useFocusTrap(open && isTemporary, panelRef)
+
+    // Only `temporary` blocks the page behind it (MUT-014) — `persistent`/`permanent` are in-flow
+    // panels, not overlays, so Back has nothing to do with them.
+    useBackCloses({
+        active: open && isTemporary && registerBackClose,
+        requestClose: () => (onClose ? onClose({} as Event, 'escapeKeyDown') : false),
+    })
 
     if (isTemporary && !open && !ModalProps?.keepMounted) return null
 

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { afterEach, describe, it } from 'vitest'
 import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
-import { getOverlayBackStackSize } from 'src/hooks/useBackCloses.hook'
+import { getOverlayBackStackSize, requestCloseTopOverlayBack } from 'src/hooks/useBackCloses.hook'
 import { StyledDialog } from 'src/components/feedback/dialog/StyledDialog'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { StyledDrawer } from './StyledDrawer'
@@ -11,17 +11,29 @@ describe('StyledDrawer back registration', () => {
     afterEach(cleanup)
 
     it('only a temporary drawer joins the back stack', async () => {
+        const closeTemporary = fn()
         mount(
-            <StyledDrawer open variant='temporary' onClose={() => undefined}>
+            <StyledDrawer open variant='temporary' onClose={closeTemporary}>
                 Panel
             </StyledDrawer>,
         )
         await waitFor(() => expect(getOverlayBackStackSize()).toBe(1))
+        void requestCloseTopOverlayBack()
+        await expect(closeTemporary).toHaveBeenCalledTimes(1)
 
         cleanup()
 
         mount(
             <StyledDrawer open variant='persistent' onClose={() => undefined}>
+                Panel
+            </StyledDrawer>,
+        )
+        await expect(getOverlayBackStackSize()).toBe(0)
+
+        cleanup()
+
+        mount(
+            <StyledDrawer open variant='permanent' onClose={() => undefined}>
                 Panel
             </StyledDrawer>,
         )

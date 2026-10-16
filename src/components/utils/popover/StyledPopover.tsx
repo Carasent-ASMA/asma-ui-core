@@ -14,6 +14,7 @@ import {
 import { cn } from 'src/helpers/cn'
 import { tabbableWithin } from 'src/helpers/focusable'
 import { resolveSx } from 'src/helpers/sx'
+import { useBackCloses } from 'src/hooks/useBackCloses.hook'
 import {
     getOpenModalDialogAncestor,
     shouldUsePopoverTopLayer,
@@ -54,6 +55,8 @@ export interface StyledPopoverProps {
      * dialog in the same tick it opens.
      */
     keepMounted?: boolean
+    /** Set `false` when a wrapper already owns the Back-close registration. */
+    registerBackClose?: boolean
 }
 
 const DEFAULT_ANCHOR: PopoverOrigin = { vertical: 'bottom', horizontal: 'left' }
@@ -106,6 +109,7 @@ export const StyledPopover = ({
     children,
     keepMounted = false,
     tabIntoContent = true,
+    registerBackClose = true,
 }: StyledPopoverProps): JSX.Element | null => {
     const placement = useMemo(
         () => toPlacement(anchorOrigin, transformOrigin),
@@ -145,6 +149,12 @@ export const StyledPopover = ({
         escapeKey: true,
     })
     const { getFloatingProps } = useInteractions([dismiss])
+
+    useBackCloses({
+        active: open && registerBackClose,
+        requestClose: () => (onClose ? onClose({}, 'escapeKeyDown') : false),
+    })
+
     // Body portal → Popover API top layer. Inside a modal dialog → portal in + z-index only.
     const usePopoverLayer = shouldUsePopoverTopLayer(portalRoot)
     const floatingRef = useMergeRefs([useTopLayerRef(refs.setFloating, usePopoverLayer)])

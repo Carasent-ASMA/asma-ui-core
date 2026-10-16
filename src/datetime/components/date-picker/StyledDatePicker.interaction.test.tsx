@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { afterEach, describe, it } from 'vitest'
 import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
+import { requestCloseTopOverlayBack } from 'src/hooks/useBackCloses.hook'
 import { StyledDatePicker } from './StyledDatePicker'
 
 /**
@@ -134,6 +135,19 @@ describe('StyledDatePicker keyboard contract', () => {
 
         await waitFor(() => expect(calendar()).toBeNull())
         await expect(document.activeElement).toBe(calendarButton(container))
+    })
+
+    it('Back closes the calendar without selecting a date', async () => {
+        const onPick = fn()
+        const { container } = mount(<DatePickerFixture onPick={onPick} />)
+        await userEvent.click(calendarButton(container))
+        await waitFor(() => expect(calendar()).not.toBeNull())
+
+        void requestCloseTopOverlayBack()
+
+        await waitFor(() => expect(calendar()).toBeNull())
+        await expect(field(container)).toHaveValue('')
+        await expect(onPick).not.toHaveBeenCalled()
     })
 
     it('closes the calendar on Tab without blocking normal focus movement (2.1.2)', async () => {
