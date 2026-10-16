@@ -2,10 +2,15 @@ import { useState } from 'react'
 import { afterEach, beforeEach, describe, it } from 'vitest'
 import { page } from 'vitest/browser'
 import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
-import { getOverlayBackStackSize, registerOverlayBackCloser } from 'src/hooks/useBackCloses.hook'
+import {
+    getOverlayBackStackSize,
+    registerOverlayBackCloser,
+    requestCloseTopOverlayBack,
+} from 'src/hooks/useBackCloses.hook'
 import { cleanup, mount, tabbableWithin } from 'src/test-utils/renderInteraction'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { StyledDialog } from 'src/components/feedback/dialog/StyledDialog'
+import { StyledDrawer } from 'src/components/navigation/drawer/StyledDrawer'
 import { StyledSelect } from 'src/components/inputs/select/StyledSelect'
 import { StyledSelectItem } from 'src/components/inputs/select/StyledSelectItem'
 import { PopoverSheet, type PopoverSheetProps } from '../popover/PopoverSheet'
@@ -242,6 +247,28 @@ describe('StyledBottomSheet — as the mobile Action popover', () => {
             await expect(closeSheet).toHaveBeenCalledTimes(1)
             await expect(closeSheet).toHaveBeenCalledWith('escape')
             await expect(closeDialog).not.toHaveBeenCalled()
+        })
+
+        it('Back closes an initially-open drawer before its parent sheet', async () => {
+            const closeSheet = fn()
+            const Fixture = (): JSX.Element => {
+                const [drawerOpen, setDrawerOpen] = useState(true)
+                return (
+                    <StyledBottomSheet dataTest='sheet' open onClose={closeSheet}>
+                        <StyledDrawer open={drawerOpen} variant='temporary' onClose={() => setDrawerOpen(false)}>
+                            <StyledButton dataTest='drawer-control'>Drawer control</StyledButton>
+                        </StyledDrawer>
+                    </StyledBottomSheet>
+                )
+            }
+            mount(<Fixture />)
+            await waitFor(() => expect(document.querySelector('[data-testid="drawer-control"]')).not.toBeNull())
+
+            void requestCloseTopOverlayBack()
+
+            await waitFor(() => expect(document.querySelector('[data-testid="drawer-control"]')).toBeNull())
+            await expect(sheet()).not.toBeNull()
+            await expect(closeSheet).not.toHaveBeenCalled()
         })
 
         it('a native dialog cancel', async () => {

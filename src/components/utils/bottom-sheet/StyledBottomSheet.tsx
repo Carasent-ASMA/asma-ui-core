@@ -151,6 +151,7 @@ export const StyledBottomSheet = ({
     useBackCloses({
         active: open && registerBackClose,
         requestClose: () => onCloseRef.current('escape'),
+        ownerRef: dialogRef,
     })
 
     useLayoutEffect(() => {

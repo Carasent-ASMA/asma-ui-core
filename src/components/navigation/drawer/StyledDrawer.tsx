@@ -135,6 +135,7 @@ export const StyledDrawer: FC<DrawerProps> = ({
     useBackCloses({
         active: open && isTemporary && registerBackClose,
         requestClose: () => (onClose ? onClose({} as Event, 'escapeKeyDown') : false),
+        ownerRef: panelRef,
     })
 
     if (isTemporary && !open && !ModalProps?.keepMounted) return null

@@ -153,6 +153,7 @@ export const StyledPopover = ({
     useBackCloses({
         active: open && registerBackClose,
         requestClose: () => (onClose ? onClose({}, 'escapeKeyDown') : false),
+        ownerRef: refs.floating,
     })
 
     // Body portal → Popover API top layer. Inside a modal dialog → portal in + z-index only.
