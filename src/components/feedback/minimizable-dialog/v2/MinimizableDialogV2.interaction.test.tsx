@@ -3,6 +3,8 @@ import { useRef, useState } from 'react'
 import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { MinimizableDialogV2 } from './MinimizableDialogV2'
+import { getOverlayBackStackSize, requestCloseTopOverlayBack } from 'src/hooks/useBackCloses.hook'
+import { useReportDialogBusy } from 'src/components/feedback/dialog/DialogBusyContext'
 
 describe('MinimizableDialogV2 keyboard contract', () => {
     afterEach(cleanup)
@@ -269,6 +271,73 @@ describe('MinimizableDialogV2 keyboard contract', () => {
             .find((b) => b.textContent === 'Content action')!
             .focus()
         await userEvent.keyboard('{Escape}')
+        await expect(onClose).not.toHaveBeenCalled()
+    })
+})
+
+describe('MinimizableDialogV2 native Back (ASMA-8471)', () => {
+    afterEach(cleanup)
+
+    it('closes through handleClose while fullscreen', async () => {
+        const onClose = fn()
+        mount(
+            <MinimizableDialogV2 dataTest='dialog-v2' open fullScreenState title='Editor' onClose={onClose}>
+                <p>Content</p>
+            </MinimizableDialogV2>,
+        )
+        await waitFor(() => expect(document.querySelector('[role="dialog"]')).not.toBeNull())
+
+        void requestCloseTopOverlayBack()
+
+        await expect(onClose).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not register while docked (not a modal layer)', async () => {
+        const onClose = fn()
+        mount(
+            <MinimizableDialogV2 dataTest='dialog-v2' open title='Editor' onClose={onClose}>
+                <p>Content</p>
+            </MinimizableDialogV2>,
+        )
+        await waitFor(() => expect(document.querySelectorAll('[data-testid="dialog-v2"]')).not.toHaveLength(0))
+        await expect(getOverlayBackStackSize()).toBe(0)
+
+        void requestCloseTopOverlayBack()
+
+        await expect(onClose).not.toHaveBeenCalled()
+    })
+
+    it('does not register once minimized, even while fullscreen', async () => {
+        const onClose = fn()
+        mount(
+            <MinimizableDialogV2 dataTest='dialog-v2' open fullScreenState minimizedState title='Editor' onClose={onClose}>
+                <p>Content</p>
+            </MinimizableDialogV2>,
+        )
+        await waitFor(() => expect(document.querySelectorAll('[data-testid="dialog-v2"]')).not.toHaveLength(0))
+        await expect(getOverlayBackStackSize()).toBe(0)
+
+        void requestCloseTopOverlayBack()
+        await expect(onClose).not.toHaveBeenCalled()
+    })
+
+    it('waits while busy, same as its ✕ path', async () => {
+        const onClose = fn()
+        const BusyMarker = (): null => {
+            useReportDialogBusy(true)
+            return null
+        }
+        mount(
+            <MinimizableDialogV2 dataTest='dialog-v2' open fullScreenState title='Editor' onClose={onClose}>
+                <BusyMarker />
+                <p>Content</p>
+            </MinimizableDialogV2>,
+        )
+        await waitFor(() => expect(document.querySelector('[role="dialog"]')).not.toBeNull())
+
+        const result = requestCloseTopOverlayBack()
+
+        await expect(result).toBe(false)
         await expect(onClose).not.toHaveBeenCalled()
     })
 })

@@ -16,6 +16,12 @@ import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
 import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
 import { registerOpenModalDialog } from 'src/hooks/useTopLayer.hook'
+import {
+    isOverlayBackEnabled,
+    OverlayBackOwnerContext,
+    requestCloseTopOverlayBack,
+    useBackCloses,
+} from 'src/hooks/useBackCloses.hook'
 import { DialogBusyContext, useDialogBusyBoundary } from './DialogBusyContext'
 import { warnUnnamedDialog } from 'src/helpers/warnUnnamedDialog'
 import style from './StyledDialog.module.scss'
@@ -40,7 +46,12 @@ interface DialogPaperProps {
  */
 export interface IStyledDialogProps {
     open: boolean
-    onClose?: (event: SyntheticEvent | Event, reason: DialogCloseReason) => void
+    /**
+     * ✕, Escape and (ASMA-8471) native Back all funnel through this. Returning a Promise (a dirty or
+     * async confirmation) latches the dialog against Back while it is pending (`requestCloseTopOverlayBack`);
+     * returning nothing leaves it unlatched, so a repeated Back repeats the same dismissal attempt.
+     */
+    onClose?: (event: SyntheticEvent | Event, reason: DialogCloseReason) => void | Promise<unknown>
     children?: ReactNode
     dataTest: string
     maxWidth?: DialogMaxWidth
@@ -145,6 +156,29 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     const dialogRef = useRef<HTMLDialogElement>(null)
     const openerRef = useRef<HTMLElement | null>(null)
     const escapeHandledRef = useRef(false)
+    // ASMA-8471: a genuine Escape KEYDOWN just happened, so the keyboard path below (which Floating
+    // UI's inner layers can legitimately pre-empt via `stopPropagation` before `window` ever sees it —
+    // no `defaultPrevented` involved) is already the authority on what should happen. `cancel` fires
+    // on this dialog for that SAME key press regardless (that is exactly why it used to be a deliberate
+    // no-op — CON-007), so `handleCancel` must step back whenever a keydown caused it. Populated by a
+    // CAPTURE-phase listener (below), which — unlike a bubble listener — cannot be short-circuited by
+    // any descendant's `stopPropagation()`, so it reliably fires for every Escape regardless of what
+    // happens further down. Left `false` is exactly the CON-007 signal: no keyboard was involved at
+    // all, i.e. a real Android hardware/gesture Back.
+    const recentEscapeKeydownRef = useRef(false)
+    // ASMA-8471: the close contract's latch — set while an in-flight `onClose` Promise (a dirty or
+    // async confirmation) is pending, regardless of which path started it (Back, Escape or the close
+    // button all funnel through `requestDialogClose`). Cleared ONLY when that same Promise settles;
+    // never by a render, a new `onClose` identity, or any other user input.
+    const closePendingRef = useRef(false)
+    // ASMA-8471: the latest COMMITTED `open` — updated from an effect (so it reflects the value React
+    // has actually committed), not read as a closure-captured prop, because the native-close recovery
+    // effect below can still be reacting to an earlier `onClose` call's settlement after `open` has
+    // since changed underneath it (see the effect's own comment).
+    const openRef = useRef(open)
+    useEffect(() => {
+        openRef.current = open
+    }, [open])
     const prevOpenRef = useRef(open)
     const isFullScreen = fullScreen ?? isMobile
     // While a button inside runs an action, no dismissal goes through (see DialogBusyContext).
@@ -228,21 +262,94 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
         ...backdropProps
     } = (slotProps?.backdrop ?? {}) as HTMLAttributes<HTMLDivElement>
 
-    const requestEscapeClose = (event: SyntheticEvent | Event): void => {
-        if (busy || escapeHandledRef.current) return
+    // ASMA-8471: the ONE place that actually calls `onClose` and applies the close-contract latch —
+    // Back, Escape, the close button and the backdrop all funnel through this, so a Promise started
+    // from any one of them blocks every one of the others until it settles (not just a repeat of the
+    // same path). `busy` (a running primary action) and the latch share the same early-return: both
+    // mean "a dismissal is already not safe to run right now".
+    const requestDialogClose = (event: SyntheticEvent | Event, reason: DialogCloseReason): void | Promise<unknown> => {
+        if (busy || closePendingRef.current) return undefined
+        const result = onClose?.(event, reason)
+        if (result && typeof result.then === 'function') {
+            closePendingRef.current = true
+            const clearLatch = (): void => {
+                closePendingRef.current = false
+            }
+            result.then(clearLatch, clearLatch)
+        }
+        return result
+    }
+
+    const requestEscapeClose = (event: SyntheticEvent | Event): false | void | Promise<unknown> => {
+        if (escapeHandledRef.current) return false
         escapeHandledRef.current = true
         window.setTimeout(() => {
             escapeHandledRef.current = false
         }, 0)
-        onClose?.(event, 'escapeKeyDown')
+        return requestDialogClose(event, 'escapeKeyDown')
     }
 
-    // Native ESC / cancel — never auto-close; the consumer owns `open`. Closing is requested from
-    // the window-level listener below, which nested layers are able to pre-empt; `cancel` fires even
-    // when one of them took the key, so it must not close anything by itself.
-    const handleCancel = (event: React.SyntheticEvent<HTMLDialogElement>): void => {
-        event.preventDefault()
+    // ASMA-8471 BACK-3 mapping: with a safe close (`onClose` set and Escape not disabled), Back acts
+    // like ✕/Escape. With no safe choice, this is still registered — as a no-op — so the guard stays
+    // on top of the stack and the page doesn't move; it is deliberately NOT skipped in favour of
+    // whatever is underneath (BACK-2: one press closes one layer, not "the nearest dismissible one").
+    const requestBackClose = (event?: Event): false | void | Promise<unknown> => {
+        if (!onClose || disableEscapeKeyDown || busy || closePendingRef.current) return false
+        return requestEscapeClose(event ?? new Event('overlayBack'))
     }
+    useBackCloses({ active: open, requestClose: requestBackClose, ownerRef: dialogRef })
+
+    // Native ESC / cancel — never auto-close; the consumer owns `open`. `cancel` fires on the platform
+    // close-watcher stack for a keyboard Escape the same way it does for a real Back — so it must step
+    // back whenever a keydown caused it (`recentEscapeKeydownRef`), leaving the keyboard path (or
+    // whatever inner layer pre-empted it) as the sole authority there, same as always.
+    //
+    // ASMA-8471 CON-007: on Android Chrome this `<dialog>` is itself a close watcher, so a native Back
+    // fires `cancel` here directly — no `popstate`, no history adapter involved, no keydown at all.
+    // `requestClose` goes through the registry TOP (`requestCloseTopOverlayBack`), not this dialog's
+    // own `requestBackClose`, so a dialog that isn't actually topmost never closes out from under one
+    // that is.
+    const handleCancel = (event: React.SyntheticEvent<HTMLDialogElement>): void => {
+        if (event.cancelable) event.preventDefault()
+        if (recentEscapeKeydownRef.current) return
+        if (!isOverlayBackEnabled()) return
+        void requestCloseTopOverlayBack()
+    }
+
+    // ASMA-8471 CON-007/RISK-003: a SECOND native Back with no tap in between force-closes the close
+    // watcher even though `cancel` was just prevented, firing a non-cancelable `close` while React's
+    // `open` is still `true` — the "zombie dialog" the spike measured. Ask the registry top to close
+    // (same path as the first Back); if it declines (no safe choice, or a close started elsewhere —
+    // Escape, the close button — is already pending), the dialog is re-shown so the user never ends up
+    // on a half-dismissed page.
+    useEffect(() => {
+        const node = dialogRef.current
+        if (!node || !open) return undefined
+        let attemptPending = false
+        // Deferred to the next frame so it runs AFTER React commits whatever render is in flight —
+        // `openRef.current` is only trustworthy once that commit's effect has run, and `node.open`
+        // only reflects the final DOM state once the browser has actually painted it.
+        const scheduleReshow = (): void => {
+            requestAnimationFrame(() => {
+                attemptPending = false
+                if (openRef.current && node.isConnected && !node.open) {
+                    node.showModal()
+                    node.focus({ preventScroll: true })
+                }
+            })
+        }
+        const handleNativeClose = (): void => {
+            if (attemptPending) return
+            attemptPending = true
+            // A close already in flight must not be started again. Either way the native dialog is
+            // already shut, so put it back on the next frame while React still has it open. Waiting
+            // for the close Promise would leave a closed dialog on screen for the whole save.
+            if (isOverlayBackEnabled() && !closePendingRef.current) void requestCloseTopOverlayBack()
+            scheduleReshow()
+        }
+        node.addEventListener('close', handleNativeClose)
+        return () => node.removeEventListener('close', handleNativeClose)
+    }, [open])
 
     // Escape is heard on `window`, deliberately last in the event path. Every dismissible layer this
     // dialog can contain — menus, popovers, selects, the filter menu — consumes Escape on a
@@ -256,14 +363,34 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
         if (!open || disableEscapeKeyDown) return
         const closeOnEscape = (event: KeyboardEvent): void => {
             if (event.key !== 'Escape' || event.defaultPrevented) return
-            // Stacked dialogs: only the innermost one the user is actually in responds.
-            const focused = document.activeElement
-            if (focused instanceof Element && focused.closest('dialog[open]') !== dialogRef.current) return
-            requestEscapeClose(event)
+            event.preventDefault()
+            event.stopImmediatePropagation()
+            void requestCloseTopOverlayBack(event)
         }
         window.addEventListener('keydown', closeOnEscape)
         return () => window.removeEventListener('keydown', closeOnEscape)
     })
+
+    // ASMA-8471: mark that a keyboard Escape is the reason `cancel` is about to fire, so `handleCancel`
+    // steps back and leaves the keyboard path above as the sole authority (see `recentEscapeKeydownRef`).
+    // CAPTURE phase on `window` is the one position nothing below can pre-empt: capture runs window
+    // first, top-down, before any inner layer's bubble-phase `stopPropagation()` (Floating UI's
+    // `useDismiss` does exactly that, with no `preventDefault`) ever gets a chance to run — a bubble
+    // listener here would never see those presses at all. Reset via the same 0ms pattern as
+    // `escapeHandledRef`: long enough to outlive the `cancel` this same key press triggers, short
+    // enough to never bleed into the NEXT one.
+    useEffect(() => {
+        if (!open) return undefined
+        const markEscapeKeydown = (event: KeyboardEvent): void => {
+            if (event.key !== 'Escape') return
+            recentEscapeKeydownRef.current = true
+            window.setTimeout(() => {
+                recentEscapeKeydownRef.current = false
+            }, 0)
+        }
+        window.addEventListener('keydown', markEscapeKeydown, true)
+        return () => window.removeEventListener('keydown', markEscapeKeydown, true)
+    }, [open])
 
     if (!open) return null
 
@@ -307,7 +434,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                 style={backdropStyle}
                 onClick={(event) => {
                     backdropOnClick?.(event)
-                    if (!event.defaultPrevented && !busy) onClose?.(event, 'backdropClick')
+                    if (!event.defaultPrevented) void requestDialogClose(event, 'backdropClick')
                 }}
             />
             <div
@@ -367,7 +494,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                                     className='max-w-full shrink-0 whitespace-nowrap'
                                     disabled={busy}
                                     disabledReason={busyText}
-                                    onClick={(event) => onClose?.(event, 'escapeKeyDown')}
+                                    onClick={(event) => void requestEscapeClose(event)}
                                     style={{
                                         color: 'var(--colors-delta-800)',
                                         paddingRight: '6px',
@@ -381,9 +508,11 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                     </div>
                 )}
 
-                <StyledDialogTitleContext.Provider value={titleContext}>
-                    <DialogBusyContext.Provider value={contextValue}>{children}</DialogBusyContext.Provider>
-                </StyledDialogTitleContext.Provider>
+                <OverlayBackOwnerContext.Provider value={dialogRef}>
+                    <StyledDialogTitleContext.Provider value={titleContext}>
+                        <DialogBusyContext.Provider value={contextValue}>{children}</DialogBusyContext.Provider>
+                    </StyledDialogTitleContext.Provider>
+                </OverlayBackOwnerContext.Provider>
             </div>
         </dialog>
     )

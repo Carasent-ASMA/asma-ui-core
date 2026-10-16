@@ -7,6 +7,7 @@ import styles from './MinimizableDialog.module.scss'
 import { StyledMenu, StyledMenuItem } from 'src/components/navigation/menu'
 import { useToggleMenuVisibility } from 'src/hooks/useToggleMenuVisibility.hook'
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
+import { OverlayBackOwnerContext, useBackCloses } from 'src/hooks/useBackCloses.hook'
 import { StyledTooltip } from 'src/components/data-display/tooltip'
 import type { IMinimizableDialogProps } from './types'
 import {
@@ -60,8 +61,9 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
 
     // A running primary action keeps the panel open (Esc / X would hide the running request).
     const busyReason = locale === 'en' ? 'Wait until saved' : 'Vent til lagringen er ferdig'
-    const closeWhenIdle = (): void => {
-        if (!primaryButtonLoading) onClose()
+    const closeWhenIdle = (): false | void => {
+        if (primaryButtonLoading) return false
+        onClose()
     }
 
     const fullScreen = fullScreenState ?? fullscreen
@@ -70,6 +72,11 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     // Only the fullscreen state shows a page-covering backdrop (below) and is actually modal — the
     // default corner-docked panel is a non-modal floating widget that must NOT trap focus.
     useFocusTrap(open && isFullScreenActive, panelRef, closeWhenIdle)
+
+    // ASMA-8471: only the fullscreen, non-minimized state is a real modal layer worth a Back press —
+    // the corner-docked and minimized states are non-modal floating widgets the page stays usable
+    // around. `closeWhenIdle` already no-ops while the primary action is busy, same as its ✕/Esc path.
+    useBackCloses({ active: open && isFullScreenActive, requestClose: closeWhenIdle, ownerRef: panelRef })
 
     // Both panels stay mounted — the `hidden` class is only `h-0 w-0`, so the hidden one's controls
     // would still be tabbable. `inert` is what actually removes it from the tab order, and it is set
@@ -221,6 +228,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                 )}
                 data-testid={dataTest}
             >
+                <OverlayBackOwnerContext.Provider value={panelRef}>
                 <div className='flex flex-col gap-y-2 border-b-[1px] border-delta-200 p-4'>
                     <div className='flex items-center justify-between'>
                         {!label ? (
@@ -368,6 +376,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                         </>
                     )}
                 </div>
+                </OverlayBackOwnerContext.Provider>
             </div>
         </>
     )

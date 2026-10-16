@@ -6,7 +6,6 @@ import { DatePickerInputIndex } from './components/DatePickerInputIndex'
 import { useIsMobileView } from 'src/datetime/hooks/useWindowWidthSize.hook'
 import { StyledDrawer as Drawer } from 'src/components/navigation/drawer'
 import { StyledDayPicker } from './components/StyledDayPicker'
-import { useBackNavigationClose } from 'src/datetime/hooks/useBackNavigationClose.hook'
 
 /**
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#14333-90631
@@ -49,7 +48,6 @@ export const StyledDatePicker = (props: DatePickerProps): JSX.Element => {
         return () => document.removeEventListener('keydown', handleKeyDown)
     }, [anchorEl])
 
-    useBackNavigationClose({ open: !!anchorEl, onClose })
     const sharedProps: DatePickerProps = {
         ...props,
         validateOnCalendarClose,
