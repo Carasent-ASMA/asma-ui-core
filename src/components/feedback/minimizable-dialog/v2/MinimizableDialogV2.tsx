@@ -12,7 +12,7 @@ import { useTranslations } from './useTranslations'
 import { useControlledProps } from './useControlledProps'
 import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
-import { useBackCloses } from 'src/hooks/useBackCloses.hook'
+import { OverlayBackOwnerContext, useBackCloses } from 'src/hooks/useBackCloses.hook'
 import { DialogBusyContext, useDialogBusyBoundary } from 'src/components/feedback/dialog/DialogBusyContext'
 
 export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) => {
@@ -120,7 +120,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
     // ASMA-8471: only the fullscreen, non-minimized state is a real modal layer worth a Back press —
     // the corner-docked and minimized states are non-modal floating widgets the page stays usable
     // around. `handleClose` already no-ops while busy, same as its ✕ path.
-    useBackCloses({ active: open && isFullScreenActive, requestClose: handleClose })
+    useBackCloses({ active: open && isFullScreenActive, requestClose: handleClose, ownerRef: modalRef })
 
     const fullScreenDialogStyle: React.CSSProperties | undefined = isFullScreenActive
         ? isMobile
@@ -212,6 +212,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                     isFullScreenActive && 'fixed z-[53] duration-0',
                 )}
             >
+                <OverlayBackOwnerContext.Provider value={modalRef}>
                 <div className={cn('flex flex-col border-b-[1px] border-delta-200 px-4', isMobile ? 'py-3' : 'py-4')}>
                     <div className='flex items-center justify-between'>
                         {!label ? (
@@ -276,6 +277,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                 >
                     <DialogBusyContext.Provider value={contextValue}>{children}</DialogBusyContext.Provider>
                 </div>
+                </OverlayBackOwnerContext.Provider>
             </div>
         </>
     )

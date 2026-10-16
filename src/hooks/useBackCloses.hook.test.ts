@@ -65,6 +65,39 @@ describe('overlay-back registry', () => {
         unregisterParent()
     })
 
+    it('orders an initially portalled child by ref identity before either DOM ref is populated', () => {
+        const closeParent = vi.fn()
+        const closeChild = vi.fn()
+        const parentOwnerRef = { current: null }
+        const childOwnerRef = { current: null }
+        const unregisterChild = registerOverlayBackCloser(
+            closeChild,
+            null,
+            null,
+            childOwnerRef,
+            parentOwnerRef,
+        )
+        const unregisterParent = registerOverlayBackCloser(closeParent, null, null, parentOwnerRef)
+
+        void requestCloseTopOverlayBack()
+
+        expect(closeChild).toHaveBeenCalledTimes(1)
+        expect(closeParent).not.toHaveBeenCalled()
+        unregisterChild()
+        unregisterParent()
+    })
+
+    it('forwards a keyboard event to the top closer', () => {
+        const requestClose = vi.fn()
+        const event = { type: 'keydown' } as Event
+        const unregister = registerOverlayBackCloser(requestClose)
+
+        void requestCloseTopOverlayBack(event)
+
+        expect(requestClose).toHaveBeenCalledWith(event)
+        unregister()
+    })
+
     it('latches a Promise-returning close: Back does nothing until it settles (TEST-009)', async () => {
         let resolvePending: (() => void) | undefined
         const requestClose = vi.fn(

@@ -25,13 +25,15 @@ export const OVERLAY_BACK_REGISTRY_VERSION = 1
 
 /** Returns nothing: no latch, a repeated Back repeats the dismissal. Returns a Promise: the entry
  *  latches until it settles, and Back on a latched top does nothing (see `requestCloseTopOverlayBack`). */
-export type OverlayBackRequestClose = () => false | void | Promise<unknown>
+export type OverlayBackRequestClose = (event?: Event) => false | void | Promise<unknown>
 
 interface OverlayBackEntry {
     requestClose: OverlayBackRequestClose
     pending: boolean
     owner: Element | null
     parentOwner: Element | null
+    ownerRef?: RefObject<Element | null>
+    parentOwnerRef?: RefObject<Element | null>
 }
 
 interface OverlayBackAdapterState {
@@ -88,6 +90,13 @@ let nodeFallbackRegistry: OverlayBackRegistry | undefined
 const isPromiseLike = (value: unknown): value is Promise<unknown> =>
     typeof value === 'object' && value !== null && typeof (value as Promise<unknown>).then === 'function'
 
+function isOwnedBy(child: OverlayBackEntry, parent: OverlayBackEntry): boolean {
+    if (child.parentOwnerRef && child.parentOwnerRef === parent.ownerRef) return true
+    const childParent = child.parentOwnerRef?.current ?? child.parentOwner
+    const parentOwner = parent.ownerRef?.current ?? parent.owner
+    return !!childParent && !!parentOwner && (childParent === parentOwner || parentOwner.contains(childParent))
+}
+
 /**
  * The stack went from empty to non-empty: register our ONE long-lived closer with the history
  * adapter, if a compatible one is live. The closer itself never goes stale — it always delegates to
@@ -134,15 +143,19 @@ export function registerOverlayBackCloser(
     requestClose: OverlayBackRequestClose,
     owner: Element | null = null,
     parentOwner: Element | null = null,
+    ownerRef?: RefObject<Element | null>,
+    parentOwnerRef?: RefObject<Element | null>,
 ): () => void {
     const registry = getOverlayBackRegistry()
-    const entry: OverlayBackEntry = { requestClose, pending: false, owner, parentOwner }
+    const entry: OverlayBackEntry = { requestClose, pending: false, owner, parentOwner, ownerRef, parentOwnerRef }
     // React commits a nested child's effect before its parent's. Keep DOM-nested surfaces above
     // their ancestor even when portals prevent DOM containment.
-    const nestedEntryIndex = owner
+    const nestedEntryIndex = owner || ownerRef
         ? registry.entries.findIndex(
               (candidate) =>
-                  candidate.parentOwner === owner || (candidate.owner !== null && owner.contains(candidate.owner)),
+                  (ownerRef !== undefined && candidate.parentOwnerRef === ownerRef) ||
+                  candidate.parentOwner === owner ||
+                  (owner !== null && candidate.owner !== null && owner.contains(candidate.owner)),
           )
         : -1
     registry.entries.splice(nestedEntryIndex === -1 ? registry.entries.length : nestedEntryIndex, 0, entry)
@@ -179,13 +192,17 @@ export const OverlayBackOwnerContext = createContext<RefObject<Element | null> |
  * one closer registered with the history adapter (`asma-core-helpers`, a separate package) delegates
  * to on an owned traversal.
  */
-export function requestCloseTopOverlayBack(): false | void | Promise<unknown> {
+export function requestCloseTopOverlayBack(event?: Event): false | void | Promise<unknown> {
     const { entries } = getOverlayBackRegistry()
-    const top = entries[entries.length - 1]
+    const top = entries.reduce<OverlayBackEntry | undefined>((selected, candidate) => {
+        if (!selected || isOwnedBy(candidate, selected)) return candidate
+        if (isOwnedBy(selected, candidate)) return selected
+        return candidate
+    }, undefined)
     if (!top) return undefined
     if (top.pending) return false
 
-    const result = top.requestClose()
+    const result = top.requestClose(event)
     if (isPromiseLike(result)) {
         top.pending = true
         const clearLatch = (): void => {
@@ -245,9 +262,11 @@ export function useBackCloses({
     useEffect(() => {
         if (!active) return undefined
         return registerOverlayBackCloser(
-            () => requestCloseRef.current(),
+            (event) => requestCloseRef.current(event),
             ownerRef?.current ?? null,
             parentOwnerRef?.current ?? null,
+            ownerRef,
+            parentOwnerRef,
         )
     }, [active, ownerRef, parentOwnerRef])
 }

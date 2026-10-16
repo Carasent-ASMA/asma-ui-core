@@ -149,7 +149,7 @@ describe('StyledDialog keyboard & focus contract', () => {
         await userEvent.keyboard('{Escape}')
 
         await waitFor(() => expect(dialogEl()).toBeNull())
-        await expect(onClose).toHaveBeenCalledWith(expect.anything(), 'escapeKeyDown')
+        await expect(onClose).toHaveBeenCalledWith(expect.any(KeyboardEvent), 'escapeKeyDown')
     })
 
     it('fires onClose exactly once per Escape press (2.1.2)', async () => {
