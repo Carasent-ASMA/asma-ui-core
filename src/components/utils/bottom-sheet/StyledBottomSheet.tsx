@@ -4,7 +4,12 @@ import { CloseIcon } from 'src/components/icons/close-icon/CloseIcon'
 import { IndeterminateIcon } from 'src/components/icons/indeterminate-icon/IndeterminateIcon'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { cn } from 'src/helpers/cn'
-import { isOverlayBackEnabled, requestCloseTopOverlayBack, useBackCloses } from 'src/hooks/useBackCloses.hook'
+import {
+    isOverlayBackEnabled,
+    OverlayBackOwnerContext,
+    requestCloseTopOverlayBack,
+    useBackCloses,
+} from 'src/hooks/useBackCloses.hook'
 import { useBodyScrollLock } from 'src/hooks/useBodyScrollLock.hook'
 import { useDebouncedValue } from 'src/hooks/useDebouncedValue.hook'
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
@@ -130,7 +135,9 @@ export const StyledBottomSheet = ({
             if (event.key !== 'Escape' || event.defaultPrevented) return
             const focused = document.activeElement
             if (focused instanceof Element && focused.closest('dialog[open]') !== dialogRef.current) return
-            onCloseRef.current('escape')
+            event.preventDefault()
+            event.stopImmediatePropagation()
+            void requestCloseTopOverlayBack()
         }
         window.addEventListener('keydown', markEscapeKeydown, true)
         window.addEventListener('keydown', closeOnEscape)
@@ -258,8 +265,9 @@ export const StyledBottomSheet = ({
                 'fixed inset-0 m-0 h-full max-h-none w-full max-w-none flex-col items-center justify-end overflow-hidden border-0 bg-transparent p-0 outline-none open:flex',
             )}
         >
-            {/* Scrim: a convenience duplicate of the close button, not a control — hidden from AT. */}
-            <div
+            <OverlayBackOwnerContext.Provider value={dialogRef}>
+                {/* Scrim: a convenience duplicate of the close button, not a control — hidden from AT. */}
+                <div
                 aria-hidden='true'
                 data-testid={`${dataTest}-scrim`}
                 onClick={() => {
@@ -350,7 +358,8 @@ export const StyledBottomSheet = ({
                         {extraActions}
                     </div>
                 )}
-            </div>
+                </div>
+            </OverlayBackOwnerContext.Provider>
         </dialog>
     )
 }

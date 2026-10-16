@@ -92,4 +92,27 @@ describe('StyledDrawer back registration', () => {
         await expect(container.querySelector('[data-testid="outer-dialog"]')).not.toBeNull()
         await expect(closeDialog).not.toHaveBeenCalled()
     })
+
+    it('Back closes an initially-open nested drawer before its parent drawer', async () => {
+        const closeOuter = fn()
+        const Fixture = (): JSX.Element => {
+            const [innerOpen, setInnerOpen] = useState(true)
+            return (
+                <StyledDrawer open variant='temporary' onClose={closeOuter}>
+                    <StyledButton dataTest='outer-control'>Outer control</StyledButton>
+                    <StyledDrawer open={innerOpen} variant='temporary' onClose={() => setInnerOpen(false)}>
+                        <StyledButton dataTest='inner-control'>Inner control</StyledButton>
+                    </StyledDrawer>
+                </StyledDrawer>
+            )
+        }
+        mount(<Fixture />)
+        await waitFor(() => expect(document.querySelector('[data-testid="inner-control"]')).not.toBeNull())
+
+        void requestCloseTopOverlayBack()
+
+        await waitFor(() => expect(document.querySelector('[data-testid="inner-control"]')).toBeNull())
+        await expect(document.querySelector('[data-testid="outer-control"]')).not.toBeNull()
+        await expect(closeOuter).not.toHaveBeenCalled()
+    })
 })

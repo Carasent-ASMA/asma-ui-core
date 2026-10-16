@@ -14,7 +14,7 @@ import {
 import { cn } from 'src/helpers/cn'
 import { tabbableWithin } from 'src/helpers/focusable'
 import { resolveSx } from 'src/helpers/sx'
-import { useBackCloses } from 'src/hooks/useBackCloses.hook'
+import { OverlayBackOwnerContext, useBackCloses } from 'src/hooks/useBackCloses.hook'
 import {
     getOpenModalDialogAncestor,
     shouldUsePopoverTopLayer,
@@ -285,7 +285,7 @@ export const StyledPopover = ({
                     slotProps?.paper?.className,
                 )}
             >
-                {children}
+                <OverlayBackOwnerContext.Provider value={refs.floating}>{children}</OverlayBackOwnerContext.Provider>
             </div>
         </FloatingPortal>
     )

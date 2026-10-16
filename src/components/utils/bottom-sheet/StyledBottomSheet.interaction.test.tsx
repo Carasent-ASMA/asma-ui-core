@@ -5,9 +5,11 @@ import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { getOverlayBackStackSize, registerOverlayBackCloser } from 'src/hooks/useBackCloses.hook'
 import { cleanup, mount, tabbableWithin } from 'src/test-utils/renderInteraction'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
+import { StyledDialog } from 'src/components/feedback/dialog/StyledDialog'
 import { StyledSelect } from 'src/components/inputs/select/StyledSelect'
 import { StyledSelectItem } from 'src/components/inputs/select/StyledSelectItem'
 import { PopoverSheet, type PopoverSheetProps } from '../popover/PopoverSheet'
+import { StyledBottomSheet } from './StyledBottomSheet'
 
 /**
  * Keyboard, focus and dismissal contract — StyledBottomSheet (ASMA-8184), exercised the way it ships:
@@ -204,6 +206,42 @@ describe('StyledBottomSheet — as the mobile Action popover', () => {
             await expect(topClose).not.toHaveBeenCalled()
             await expect(sheet()).not.toBeNull()
             unregisterTop()
+        })
+
+        it('Escape closes a sheet nested in a dialog exactly once', async () => {
+            const closeDialog = fn()
+            const closeSheet = fn()
+            const Fixture = (): JSX.Element => {
+                const [sheetOpen, setSheetOpen] = useState(true)
+                return (
+                    <StyledDialog dataTest='outer-dialog' dialogTitle='Outer' open onClose={closeDialog}>
+                        <StyledBottomSheet
+                            dataTest='sheet'
+                            open={sheetOpen}
+                            onClose={(reason) => {
+                                closeSheet(reason)
+                                setSheetOpen(false)
+                            }}
+                        >
+                            Content
+                        </StyledBottomSheet>
+                    </StyledDialog>
+                )
+            }
+            mount(<Fixture />)
+            const dialog = await waitFor(() => {
+                const node = sheet()
+                if (!node) throw new Error('sheet not mounted')
+                return node
+            })
+            dialog.focus()
+
+            await userEvent.keyboard('{Escape}')
+
+            await waitFor(() => expect(sheet()).toBeNull())
+            await expect(closeSheet).toHaveBeenCalledTimes(1)
+            await expect(closeSheet).toHaveBeenCalledWith('escape')
+            await expect(closeDialog).not.toHaveBeenCalled()
         })
 
         it('a native dialog cancel', async () => {
