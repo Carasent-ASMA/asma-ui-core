@@ -58,8 +58,8 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
     // While a button inside runs an action (e.g. Save), closing would hide the running request.
     const { busy, busyReason, contextValue } = useDialogBusyBoundary(busyReasonProp ?? t.waitUntilSaved)
 
-    const handleClose = () => {
-        if (busy) return
+    const handleClose = (): false | void => {
+        if (busy) return false
         setMinimized(false)
         onClose()
     }

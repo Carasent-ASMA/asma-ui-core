@@ -302,8 +302,9 @@ describe('MinimizableDialog native Back (ASMA-8471)', () => {
         )
         await waitFor(() => expect(document.querySelector('[role="dialog"]')).not.toBeNull())
 
-        void requestCloseTopOverlayBack()
+        const result = requestCloseTopOverlayBack()
 
+        await expect(result).toBe(false)
         await expect(onClose).not.toHaveBeenCalled()
     })
 })

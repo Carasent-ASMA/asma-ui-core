@@ -61,8 +61,9 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
 
     // A running primary action keeps the panel open (Esc / X would hide the running request).
     const busyReason = locale === 'en' ? 'Wait until saved' : 'Vent til lagringen er ferdig'
-    const closeWhenIdle = (): void => {
-        if (!primaryButtonLoading) onClose()
+    const closeWhenIdle = (): false | void => {
+        if (primaryButtonLoading) return false
+        onClose()
     }
 
     const fullScreen = fullScreenState ?? fullscreen
