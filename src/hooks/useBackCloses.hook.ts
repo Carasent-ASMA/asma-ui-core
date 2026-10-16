@@ -25,7 +25,7 @@ export const OVERLAY_BACK_REGISTRY_VERSION = 1
 
 /** Returns nothing: no latch, a repeated Back repeats the dismissal. Returns a Promise: the entry
  *  latches until it settles, and Back on a latched top does nothing (see `requestCloseTopOverlayBack`). */
-export type OverlayBackRequestClose = () => void | Promise<unknown>
+export type OverlayBackRequestClose = () => false | void | Promise<unknown>
 
 interface OverlayBackEntry {
     requestClose: OverlayBackRequestClose
@@ -151,10 +151,11 @@ export function registerOverlayBackCloser(requestClose: OverlayBackRequestClose)
  * one closer registered with the history adapter (`asma-core-helpers`, a separate package) delegates
  * to on an owned traversal.
  */
-export function requestCloseTopOverlayBack(): void | Promise<unknown> {
+export function requestCloseTopOverlayBack(): false | void | Promise<unknown> {
     const { entries } = getOverlayBackRegistry()
     const top = entries[entries.length - 1]
-    if (!top || top.pending) return undefined
+    if (!top) return undefined
+    if (top.pending) return false
 
     const result = top.requestClose()
     if (isPromiseLike(result)) {

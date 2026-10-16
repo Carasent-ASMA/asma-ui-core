@@ -275,8 +275,8 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
         return result
     }
 
-    const requestEscapeClose = (event: SyntheticEvent | Event): void | Promise<unknown> => {
-        if (escapeHandledRef.current) return undefined
+    const requestEscapeClose = (event: SyntheticEvent | Event): false | void | Promise<unknown> => {
+        if (escapeHandledRef.current) return false
         escapeHandledRef.current = true
         window.setTimeout(() => {
             escapeHandledRef.current = false
@@ -288,8 +288,8 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     // like ✕/Escape. With no safe choice, this is still registered — as a no-op — so the guard stays
     // on top of the stack and the page doesn't move; it is deliberately NOT skipped in favour of
     // whatever is underneath (BACK-2: one press closes one layer, not "the nearest dismissible one").
-    const requestBackClose = (): void | Promise<unknown> => {
-        if (!onClose || disableEscapeKeyDown) return undefined
+    const requestBackClose = (): false | void | Promise<unknown> => {
+        if (!onClose || disableEscapeKeyDown || busy || closePendingRef.current) return false
         return requestEscapeClose(new Event('overlayBack'))
     }
     useBackCloses({ active: open, requestClose: requestBackClose })
