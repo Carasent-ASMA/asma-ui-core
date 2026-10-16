@@ -341,3 +341,69 @@ describe('MinimizableDialogV2 native Back (ASMA-8471)', () => {
         await expect(onClose).not.toHaveBeenCalled()
     })
 })
+
+describe('MinimizableDialogV2 native Back (ASMA-8471)', () => {
+    afterEach(cleanup)
+
+    it('closes through handleClose while fullscreen', async () => {
+        const onClose = fn()
+        mount(
+            <MinimizableDialogV2 dataTest='dialog-v2' open fullScreenState title='Editor' onClose={onClose}>
+                <p>Content</p>
+            </MinimizableDialogV2>,
+        )
+        await waitFor(() => expect(document.querySelector('[role="dialog"]')).not.toBeNull())
+
+        void requestCloseTopOverlayBack()
+
+        await expect(onClose).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not register while docked (not a modal layer)', async () => {
+        const onClose = fn()
+        mount(
+            <MinimizableDialogV2 dataTest='dialog-v2' open title='Editor' onClose={onClose}>
+                <p>Content</p>
+            </MinimizableDialogV2>,
+        )
+        await waitFor(() => expect(document.querySelectorAll('[data-testid="dialog-v2"]')).not.toHaveLength(0))
+        await expect(getOverlayBackStackSize()).toBe(0)
+
+        void requestCloseTopOverlayBack()
+
+        await expect(onClose).not.toHaveBeenCalled()
+    })
+
+    it('does not register once minimized, even while fullscreen', async () => {
+        const onClose = fn()
+        mount(
+            <MinimizableDialogV2 dataTest='dialog-v2' open fullScreenState minimizedState title='Editor' onClose={onClose}>
+                <p>Content</p>
+            </MinimizableDialogV2>,
+        )
+        await waitFor(() => expect(document.querySelectorAll('[data-testid="dialog-v2"]')).not.toHaveLength(0))
+        await expect(getOverlayBackStackSize()).toBe(0)
+
+        void requestCloseTopOverlayBack()
+        await expect(onClose).not.toHaveBeenCalled()
+    })
+
+    it('waits while busy, same as its ✕ path', async () => {
+        const onClose = fn()
+        const BusyMarker = (): null => {
+            useReportDialogBusy(true)
+            return null
+        }
+        mount(
+            <MinimizableDialogV2 dataTest='dialog-v2' open fullScreenState title='Editor' onClose={onClose}>
+                <BusyMarker />
+                <p>Content</p>
+            </MinimizableDialogV2>,
+        )
+        await waitFor(() => expect(document.querySelector('[role="dialog"]')).not.toBeNull())
+
+        void requestCloseTopOverlayBack()
+
+        await expect(onClose).not.toHaveBeenCalled()
+    })
+})

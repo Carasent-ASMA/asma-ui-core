@@ -98,9 +98,11 @@ export const StyledBottomSheet = ({
     const isShortViewport = useShortViewportMediaQuery()
 
     const onCloseRef = useRef(onClose)
+    const openRef = useRef(open)
     useEffect(() => {
         onCloseRef.current = onClose
-    }, [onClose])
+        openRef.current = open
+    }, [onClose, open])
 
     const { dragHandleProps, dragOffset } = useDragToDismiss(sheetRef, () => {
         onCloseRef.current('drag')
@@ -133,6 +135,32 @@ export const StyledBottomSheet = ({
             const target = returnFocusRef.current
             if (target?.isConnected) target.focus({ preventScroll: true })
         }
+    }, [open])
+
+    // A second Android Back force-closes the native dialog while React still wants it open.
+    // Ask the registry top to close, then put the dialog back only if this sheet is still open.
+    useEffect(() => {
+        const node = dialogRef.current
+        if (!node || !open) return undefined
+        let attemptPending = false
+        const scheduleReshow = (): void => {
+            requestAnimationFrame(() => {
+                attemptPending = false
+                if (openRef.current && node.isConnected && !node.open) {
+                    node.showModal()
+                    node.focus({ preventScroll: true })
+                }
+            })
+        }
+        const handleNativeClose = (): void => {
+            if (attemptPending) return
+            attemptPending = true
+            const result = requestCloseTopOverlayBack()
+            if (result && typeof result.then === 'function') result.then(scheduleReshow, scheduleReshow)
+            else scheduleReshow()
+        }
+        node.addEventListener('close', handleNativeClose)
+        return () => node.removeEventListener('close', handleNativeClose)
     }, [open])
 
     const displayedCount = useDebouncedValue(resultCount, RESULT_COUNT_DEBOUNCE_MS)

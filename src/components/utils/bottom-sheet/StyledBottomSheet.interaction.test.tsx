@@ -138,6 +138,15 @@ describe('StyledBottomSheet — as the mobile Action popover', () => {
             await waitFor(() => expect(document.activeElement).toBe(trigger()))
         })
 
+        it('a native dialog cancel', async () => {
+            mount(<FilterFixture />)
+            const dialog = await openSheet()
+            dialog.dispatchEvent(new Event('cancel', { cancelable: true }))
+
+            await waitFor(() => expect(sheet()).toBeNull())
+            await waitFor(() => expect(document.activeElement).toBe(trigger()))
+        })
+
         it('the close button', async () => {
             mount(<FilterFixture />)
             await openSheet()
