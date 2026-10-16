@@ -4,6 +4,7 @@ import { cn } from 'src/helpers/cn'
 import { useHelperAlertRole } from 'src/helpers/useHelperAlertRole'
 import { warnMissingErrorMessage } from 'src/helpers/warnMissingErrorMessage'
 import { useWrap } from '../helpers/useWrap'
+import { DynamicSelectTitle } from './DynamicSelectTitle'
 import { forwardRef, useEffect, useId } from 'react'
 import { CloseIcon } from 'src/components/icons'
 
@@ -19,6 +20,7 @@ export const DynamicInteractiveChipGroup = forwardRef(
             readOnly,
             multiple,
             title,
+            titleSize,
             disabled,
             onChange,
             required,
@@ -111,7 +113,7 @@ export const DynamicInteractiveChipGroup = forwardRef(
 
         return (
             <div data-testid={`${dataTest}-dynamic-radio-group`} className='relative flex flex-col gap-y-1'>
-                {title && <span className='text-base font-semibold text-delta-800'>{title}</span>}
+                <DynamicSelectTitle title={title} titleSize={titleSize} />
                 {/* HACK for calculating overflow layout */}
                 <div
                     aria-hidden

@@ -4,6 +4,7 @@ import { expect, userEvent, within } from 'storybook/test'
 import { StyledDynamicSelect } from './StyledDynamicSelect'
 import { StyledSwitch } from '../switch'
 import { StyledButton, StyledFormControlLabel, StyledFormLabel, StyledInputField } from 'asma-ui-core'
+import { CalendarIcon } from 'src/components/icons'
 
 type Option = {
     id: string
@@ -780,6 +781,167 @@ export const FocusDemo: Story = {
         // const canvas = within(canvasElement)
         await userEvent.click(canvas.getByTestId('focus-select-btn'))
         await expect(canvas.getByRole('combobox')).toHaveFocus()
+    },
+}
+
+const MODE_OPTIONS: Option[] = [
+    { id: 'after', name: 'After' },
+    { id: 'before', name: 'Before' },
+    { id: 'same-day', name: 'Same day as' },
+]
+
+/** A title node: an icon, the label and a required marker — what a plain `string` title cannot carry. */
+const referenceEventTitle = (required: boolean) => (
+    <span className='flex items-center gap-1'>
+        <CalendarIcon width={16} height={16} className='shrink-0 text-gama-600' />
+        {`Reference event${required ? '*' : ''}`}
+    </span>
+)
+
+const TitleCell = ({ caption, children }: { caption: string; children: React.ReactNode }) => (
+    <div className='flex min-w-0 flex-col gap-y-3 rounded-lg border border-delta-200 p-4'>
+        <span className='text-xs uppercase tracking-wide text-delta-700'>{caption}</span>
+        {children}
+    </div>
+)
+
+const TitleOptionsFrame = () => {
+    const [mode, setMode] = useState<Option | null>(MODE_OPTIONS[2]!)
+    const [status, setStatus] = useState<Option | null>(createOptions(12)[0]!)
+    const props = {
+        multiple: false as const,
+        valueKey: 'id' as const,
+        labelKey: 'name' as const,
+        size: 'small' as const,
+    }
+
+    return (
+        <div className='grid max-w-[960px] grid-cols-1 gap-4 p-6 md:grid-cols-3'>
+            <TitleCell caption='title: string (unchanged)'>
+                <StyledDynamicSelect<Option>
+                    {...props}
+                    dataTest='title-string-chips'
+                    title='Send module'
+                    options={MODE_OPTIONS}
+                    value={mode}
+                    onChange={setMode}
+                />
+                <StyledDynamicSelect<Option>
+                    {...props}
+                    dataTest='title-string-autocomplete'
+                    title='Status'
+                    options={createOptions(12)}
+                    value={status}
+                    onChange={setStatus}
+                />
+                <StyledDynamicSelect<Option>
+                    {...props}
+                    dataTest='title-string-read-only'
+                    title='Send module'
+                    options={MODE_OPTIONS}
+                    value={mode}
+                    onChange={setMode}
+                    readOnly
+                />
+            </TitleCell>
+
+            <TitleCell caption="titleSize='lg' (section title 18/28)">
+                <StyledDynamicSelect<Option>
+                    {...props}
+                    dataTest='title-lg-chips'
+                    title='Send module*'
+                    titleSize='lg'
+                    options={MODE_OPTIONS}
+                    value={mode}
+                    onChange={setMode}
+                />
+                <StyledDynamicSelect<Option>
+                    {...props}
+                    dataTest='title-lg-read-only'
+                    title='Send module'
+                    titleSize='lg'
+                    options={MODE_OPTIONS}
+                    value={mode}
+                    onChange={setMode}
+                    readOnly
+                />
+            </TitleCell>
+
+            <TitleCell caption='title: ReactNode (icon + required marker)'>
+                <StyledDynamicSelect<Option>
+                    {...props}
+                    dataTest='title-node-autocomplete'
+                    title={referenceEventTitle(true)}
+                    options={createOptions(12)}
+                    value={status}
+                    onChange={setStatus}
+                />
+                <StyledDynamicSelect<Option>
+                    {...props}
+                    dataTest='title-node-read-only'
+                    title={referenceEventTitle(false)}
+                    options={createOptions(12)}
+                    value={status}
+                    onChange={setStatus}
+                    readOnly
+                />
+            </TitleCell>
+
+            <TitleCell caption='read-only: stacked StyledFormLabel (before)'>
+                <div className='flex flex-col gap-1'>
+                    <StyledFormLabel title='If the time has passed' />
+                    <StyledDynamicSelect<Option>
+                        {...props}
+                        dataTest='title-stacked-read-only'
+                        options={MODE_OPTIONS}
+                        value={mode}
+                        onChange={setMode}
+                        readOnly
+                    />
+                </div>
+            </TitleCell>
+
+            <TitleCell caption='read-only: own title (after)'>
+                <StyledDynamicSelect<Option>
+                    {...props}
+                    dataTest='title-own-read-only'
+                    title='If the time has passed'
+                    options={MODE_OPTIONS}
+                    value={mode}
+                    onChange={setMode}
+                    readOnly
+                />
+            </TitleCell>
+        </div>
+    )
+}
+
+/**
+ * `title` takes a node (an icon, a required marker) as well as a string, and `titleSize` picks Body Base
+ * 16/24 (default) or Section title 18/28. Every variant — chips, autocomplete, read-only text — draws the
+ * title the same way, and a string title renders exactly as before.
+ *
+ * The last two cells compare the read-only case: a separate `StyledFormLabel` stacked on the select adds
+ * its input-title bottom padding on top of the consumer's gap; passing `title` lets the select own the
+ * tighter title-to-text gap instead.
+ */
+export const TitleSizesAndNodeTitles: Story = {
+    render: () => <TitleOptionsFrame />,
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement)
+
+        // A node title keeps its markup — the icon renders inside the title.
+        const nodeReadOnly = canvas.getByTestId('title-node-read-only-read-only')
+        await expect(nodeReadOnly.querySelector('svg')).not.toBeNull()
+        await expect(nodeReadOnly).toHaveTextContent('Reference event')
+
+        // `lg` switches the type ramp; the default stays Body Base.
+        await expect(within(canvas.getByTestId('title-lg-read-only-read-only')).getByText('Send module')).toHaveClass(
+            'text-lg/7',
+        )
+        await expect(
+            within(canvas.getByTestId('title-string-read-only-read-only')).getByText('Send module'),
+        ).toHaveClass('text-base')
     },
 }
 

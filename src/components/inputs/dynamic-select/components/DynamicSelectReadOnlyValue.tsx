@@ -1,8 +1,9 @@
 import type { DynamicSelectOption, StyledDynamicSelectProps } from '../types'
+import { DynamicSelectTitle } from './DynamicSelectTitle'
 
 type DynamicSelectReadOnlyValueProps<TOption extends DynamicSelectOption> = Pick<
     StyledDynamicSelectProps<TOption>,
-    'dataTest' | 'options' | 'title' | 'valueKey' | 'labelKey' | 'renderLabel'
+    'dataTest' | 'options' | 'title' | 'titleSize' | 'valueKey' | 'labelKey' | 'renderLabel'
 > & {
     value: TOption | null
 }
@@ -21,6 +22,7 @@ export const DynamicSelectReadOnlyValue = <TOption extends DynamicSelectOption>(
     options,
     value,
     title,
+    titleSize,
     valueKey = 'value' as DynamicSelectReadOnlyValueProps<TOption>['valueKey'],
     labelKey = 'label' as DynamicSelectReadOnlyValueProps<TOption>['labelKey'],
     renderLabel,
@@ -44,7 +46,7 @@ export const DynamicSelectReadOnlyValue = <TOption extends DynamicSelectOption>(
 
     return (
         <div data-testid={`${dataTest}-read-only`} className='flex flex-col gap-y-1'>
-            {title && <span className='text-base font-semibold text-delta-800'>{title}</span>}
+            <DynamicSelectTitle title={title} titleSize={titleSize} />
             <div
                 data-testid={`${dataTest}-read-only-value`}
                 className='text-base/6 text-delta-700'
