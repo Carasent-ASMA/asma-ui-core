@@ -9,9 +9,11 @@ type StyledBadgePurpose = 'notification' | 'unread' | 'filter'
 
 /**
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#15181-43817
- * Figma "Badge". Notification count = 20px lime pill with a 1px border and Helper-Semibold 14/20;
- * `dot` = 12px lime circle with a stronger 2px border. Other colors and `small` are legacy app
- * extensions with no matching Figma notification variant.
+ * Figma "Badge". Notification count = 20px lime pill with a 1px ring and Helper-Semibold 14/20;
+ * `dot` = 12px lime circle with a stronger 2px ring. Both rings are stroked on the inside, as
+ * Figma draws them, so they cost no layout space: a count is its label plus 6px either side and
+ * nothing more. Other colors and `small` are legacy app extensions with no matching Figma
+ * notification variant.
  *
  * Pass children to decorate them — the badge anchors to their corner. Pass none and the badge,
  * count or dot, becomes a flow element (for the dot, Figma `Size=Dot`, node 44267-214524), for a
