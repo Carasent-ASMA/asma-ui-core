@@ -63,6 +63,29 @@ describe('StyledDynamicSelect — read-only single select', () => {
         expect(html.indexOf('Send module')).toBeLessThan(html.indexOf('data-testid="ro-read-only-value"'))
     })
 
+    it('renders a node title — icon and all — straight above the value, at the requested size', () => {
+        const html = renderToStaticMarkup(
+            <StyledDynamicSelect
+                dataTest='ro'
+                title={
+                    <span data-testid='ro-title-node'>
+                        <svg /> Reference event
+                    </span>
+                }
+                titleSize='lg'
+                options={FEW}
+                value='After'
+                onChange={noop}
+                readOnly
+            />,
+        )
+
+        expect(html).toContain('data-testid="ro-title-node"')
+        expect(html).toContain('text-lg/7')
+        // Title and value share one tight column: the select owns the gap, not a stacked form label.
+        expect(html).toMatch(/data-testid="ro-read-only" class="flex flex-col gap-y-1"/)
+    })
+
     it('drops the helper and error row', () => {
         const html = renderToStaticMarkup(
             <StyledDynamicSelect

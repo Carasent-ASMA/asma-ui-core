@@ -39,8 +39,13 @@ export interface StyledInteractiveChipProps extends ComponentProps<typeof Styled
 // That's why the old inline `sx` treatment was silently dead (only its box-shadow survived). We win
 // deterministically with arbitrary-variant classes carrying (0,3,0) specificity via the chip's
 // always-present `data-testid`+`role` (radio), outranking the base/hover/focus/active utilities.
+//
+// The 2px is a 1px border plus a 1px inset shadow in the same colour, not `border-2`: a thicker border
+// widened the selected chip by 2px and pushed every chip after it in the row sideways on each pick.
+// The shadow paints inside the border without taking space. The focus ring is an `::after` overlay
+// (StyledChip.module.scss), so it doesn't compete for `box-shadow`.
 const SELECTED_RADIO_CLASS =
-    '[&[data-testid][role]]:border-2 [&[data-testid][role]]:border-gama-400 [&[data-testid][role]]:bg-gama-25'
+    '[&[data-testid][role]]:border-gama-400 [&[data-testid][role]]:shadow-[inset_0_0_0_1px_var(--colors-gama-400)] [&[data-testid][role]]:bg-gama-25'
 
 // Figma _BASE_Tag Checkbox/Radio (nodes 18832-25686 / 18832-25900): the chip is `padding-left: 0`
 // but the control is a 40px-wide box whose centring leaves ~10px between the chip border and the

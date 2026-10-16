@@ -4,6 +4,7 @@ import { StyledSelectAutocomplete } from '../../select-autocomplete'
 import type { StyledDynamicSelectProps, DynamicSelectOption, StyledDynamicSelectComponent } from '../types'
 import { LoadingIcon, PlusIconCircle, CheckIcon } from 'src/components/icons'
 import { DynamicInteractiveChipGroup } from './DynamicInteractiveChipGroup'
+import { DynamicSelectTitle } from './DynamicSelectTitle'
 import { forwardRef, useCallback, useState } from 'react'
 import { cn } from 'src/helpers/cn'
 
@@ -25,6 +26,7 @@ export const DynamicSelectAutocomplete = forwardRef(
             size,
             rowSize = 'compact',
             title,
+            titleSize,
             noOptionsText,
             placeholder,
             disabled,
@@ -108,11 +110,7 @@ export const DynamicSelectAutocomplete = forwardRef(
 
         return (
             <div className='flex w-full flex-col gap-y-1'>
-                {title && (
-                    <span id={titleId} className='text-base font-semibold text-delta-800'>
-                        {title}
-                    </span>
-                )}
+                <DynamicSelectTitle id={titleId} title={title} titleSize={titleSize} />
                 <StyledSelectAutocomplete<TOption, boolean, boolean, false>
                     open={open}
                     onOpen={handleOpen}
