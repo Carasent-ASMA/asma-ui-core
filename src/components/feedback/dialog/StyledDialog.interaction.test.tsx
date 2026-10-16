@@ -1,5 +1,5 @@
 import { StrictMode, useState } from 'react'
-import { afterEach, describe, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, it, vi } from 'vitest'
 import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { cleanup, mount, tabbableWithin } from 'src/test-utils/renderInteraction'
@@ -516,7 +516,18 @@ describe('StyledDialog keyboard & focus contract', () => {
  * `close` event, which is what a second rapid Back does when the first `cancel` was prevented.
  */
 describe('StyledDialog native Back (ASMA-8471)', () => {
-    afterEach(cleanup)
+    let previousShell: Window['__ASMA__SHELL__']
+    beforeEach(() => {
+        previousShell = window.__ASMA__SHELL__
+        window.__ASMA__SHELL__ = {
+            ...previousShell,
+            overlayBack: { ...previousShell?.overlayBack, v: 1, enabled: true },
+        }
+    })
+    afterEach(() => {
+        cleanup()
+        window.__ASMA__SHELL__ = previousShell
+    })
 
     const dialogByTest = (dataTest: string): HTMLDialogElement | null =>
         document.querySelector<HTMLDialogElement>(`dialog[data-testid="${dataTest}"]`)
@@ -753,6 +764,24 @@ describe('StyledDialog native Back (ASMA-8471)', () => {
         // firing a non-cancelable `close` while React's `open` is still `true` — the zombie case.
         dialog.close()
         await waitFor(() => expect(dialog.matches(':modal')).toBe(true))
+    })
+
+    it('the host kill switch prevents native Back from invoking the close path', async () => {
+        window.__ASMA__SHELL__!.overlayBack!.enabled = false
+        const onClose = fn()
+        mount(<StyledDialog dataTest='disabled-back' dialogTitle='Disabled' open onClose={onClose} />)
+        const dialog = await waitFor(() => {
+            const node = dialogByTest('disabled-back')
+            if (!node) throw new Error('dialog not mounted yet')
+            return node
+        })
+
+        const cancelEvent = new Event('cancel', { cancelable: true })
+        dialog.dispatchEvent(cancelEvent)
+
+        await expect(cancelEvent.defaultPrevented).toBe(true)
+        await expect(onClose).not.toHaveBeenCalled()
+        await expect(dialog.matches(':modal')).toBe(true)
     })
 
     it('a forced native close re-shows the dialog while an async close is still pending', async () => {

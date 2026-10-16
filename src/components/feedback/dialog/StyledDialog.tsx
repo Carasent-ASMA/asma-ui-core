@@ -16,7 +16,7 @@ import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
 import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
 import { registerOpenModalDialog } from 'src/hooks/useTopLayer.hook'
-import { requestCloseTopOverlayBack, useBackCloses } from 'src/hooks/useBackCloses.hook'
+import { isOverlayBackEnabled, requestCloseTopOverlayBack, useBackCloses } from 'src/hooks/useBackCloses.hook'
 import { DialogBusyContext, useDialogBusyBoundary } from './DialogBusyContext'
 import { warnUnnamedDialog } from 'src/helpers/warnUnnamedDialog'
 import style from './StyledDialog.module.scss'
@@ -307,6 +307,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     const handleCancel = (event: React.SyntheticEvent<HTMLDialogElement>): void => {
         if (event.cancelable) event.preventDefault()
         if (recentEscapeKeydownRef.current) return
+        if (!isOverlayBackEnabled()) return
         void requestCloseTopOverlayBack()
     }
 
@@ -338,7 +339,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
             // A close already in flight must not be started again. Either way the native dialog is
             // already shut, so put it back on the next frame while React still has it open. Waiting
             // for the close Promise would leave a closed dialog on screen for the whole save.
-            if (!closePendingRef.current) void requestCloseTopOverlayBack()
+            if (isOverlayBackEnabled() && !closePendingRef.current) void requestCloseTopOverlayBack()
             scheduleReshow()
         }
         node.addEventListener('close', handleNativeClose)

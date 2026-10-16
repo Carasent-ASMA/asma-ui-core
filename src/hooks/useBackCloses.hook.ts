@@ -177,6 +177,12 @@ export function hasOverlayBackAdapter(): boolean {
     return getSharedWindow()?.__ASMA__SHELL__?.overlayBack?.v === 1
 }
 
+/** Native close-watcher events are part of the feature and must respect the host kill switch. */
+export function isOverlayBackEnabled(): boolean {
+    const overlayBack = getSharedWindow()?.__ASMA__SHELL__?.overlayBack
+    return overlayBack?.v === 1 && overlayBack.enabled === true
+}
+
 /**
  * Register a surface onto the overlay-back stack while `active`, so native Back closes it through its
  * own `requestClose` — see {@link requestCloseTopOverlayBack} for the arbitration. This hook never
