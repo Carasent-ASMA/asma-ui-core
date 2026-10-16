@@ -292,7 +292,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
         if (!onClose || disableEscapeKeyDown || busy || closePendingRef.current) return false
         return requestEscapeClose(new Event('overlayBack'))
     }
-    useBackCloses({ active: open, requestClose: requestBackClose })
+    useBackCloses({ active: open, requestClose: requestBackClose, ownerRef: dialogRef })
 
     // Native ESC / cancel — never auto-close; the consumer owns `open`. `cancel` fires on the platform
     // close-watcher stack for a keyboard Escape the same way it does for a real Back — so it must step

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, type RefObject } from 'react'
 
 /**
  * ASMA-8471 — native Back closes the top ui-core overlay through its own close path.
@@ -30,6 +30,7 @@ export type OverlayBackRequestClose = () => false | void | Promise<unknown>
 interface OverlayBackEntry {
     requestClose: OverlayBackRequestClose
     pending: boolean
+    owner: Element | null
 }
 
 interface OverlayBackAdapterState {
@@ -125,10 +126,15 @@ function releaseAdapterIfStillEmpty(registry: OverlayBackRegistry): void {
  * stops being eligible to receive Back (closes, or is no longer the active layer) — see
  * {@link useBackCloses} for the React lifecycle wrapper every consumer actually uses.
  */
-export function registerOverlayBackCloser(requestClose: OverlayBackRequestClose): () => void {
+export function registerOverlayBackCloser(requestClose: OverlayBackRequestClose, owner: Element | null = null): () => void {
     const registry = getOverlayBackRegistry()
-    const entry: OverlayBackEntry = { requestClose, pending: false }
-    registry.entries.push(entry)
+    const entry: OverlayBackEntry = { requestClose, pending: false, owner }
+    // React commits a nested child's effect before its parent's. Keep DOM-nested surfaces above
+    // their ancestor even when the ancestor therefore registers last.
+    const nestedEntryIndex = owner
+        ? registry.entries.findIndex((candidate) => candidate.owner !== null && owner.contains(candidate.owner))
+        : -1
+    registry.entries.splice(nestedEntryIndex === -1 ? registry.entries.length : nestedEntryIndex, 0, entry)
     if (registry.entries.length === 1) registerWithAdapterIfLive(registry)
 
     let unregistered = false
@@ -195,9 +201,11 @@ export function isOverlayBackEnabled(): boolean {
 export function useBackCloses({
     active,
     requestClose,
+    ownerRef,
 }: {
     active: boolean
     requestClose: OverlayBackRequestClose
+    ownerRef?: RefObject<Element | null>
 }): void {
     const requestCloseRef = useRef(requestClose)
     useEffect(() => {
@@ -206,6 +214,6 @@ export function useBackCloses({
 
     useEffect(() => {
         if (!active) return undefined
-        return registerOverlayBackCloser(() => requestCloseRef.current())
-    }, [active])
+        return registerOverlayBackCloser(() => requestCloseRef.current(), ownerRef?.current ?? null)
+    }, [active, ownerRef])
 }
