@@ -16,7 +16,12 @@ import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
 import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
 import { registerOpenModalDialog } from 'src/hooks/useTopLayer.hook'
-import { isOverlayBackEnabled, requestCloseTopOverlayBack, useBackCloses } from 'src/hooks/useBackCloses.hook'
+import {
+    isOverlayBackEnabled,
+    OverlayBackOwnerContext,
+    requestCloseTopOverlayBack,
+    useBackCloses,
+} from 'src/hooks/useBackCloses.hook'
 import { DialogBusyContext, useDialogBusyBoundary } from './DialogBusyContext'
 import { warnUnnamedDialog } from 'src/helpers/warnUnnamedDialog'
 import style from './StyledDialog.module.scss'
@@ -503,9 +508,11 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                     </div>
                 )}
 
-                <StyledDialogTitleContext.Provider value={titleContext}>
-                    <DialogBusyContext.Provider value={contextValue}>{children}</DialogBusyContext.Provider>
-                </StyledDialogTitleContext.Provider>
+                <OverlayBackOwnerContext.Provider value={dialogRef}>
+                    <StyledDialogTitleContext.Provider value={titleContext}>
+                        <DialogBusyContext.Provider value={contextValue}>{children}</DialogBusyContext.Provider>
+                    </StyledDialogTitleContext.Provider>
+                </OverlayBackOwnerContext.Provider>
             </div>
         </dialog>
     )

@@ -50,6 +50,21 @@ describe('overlay-back registry', () => {
         expect(getOverlayBackStackSize()).toBe(0)
     })
 
+    it('keeps a portalled child above its parent when React registers the child first', () => {
+        const closeParent = vi.fn()
+        const closeChild = vi.fn()
+        const parentOwner = { contains: () => false } as unknown as Element
+        const unregisterChild = registerOverlayBackCloser(closeChild, null, parentOwner)
+        const unregisterParent = registerOverlayBackCloser(closeParent, parentOwner)
+
+        void requestCloseTopOverlayBack()
+
+        expect(closeChild).toHaveBeenCalledTimes(1)
+        expect(closeParent).not.toHaveBeenCalled()
+        unregisterChild()
+        unregisterParent()
+    })
+
     it('latches a Promise-returning close: Back does nothing until it settles (TEST-009)', async () => {
         let resolvePending: (() => void) | undefined
         const requestClose = vi.fn(

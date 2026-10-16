@@ -1,4 +1,4 @@
-import { useEffect, useRef, type RefObject } from 'react'
+import { createContext, useContext, useEffect, useRef, type RefObject } from 'react'
 
 /**
  * ASMA-8471 — native Back closes the top ui-core overlay through its own close path.
@@ -31,6 +31,7 @@ interface OverlayBackEntry {
     requestClose: OverlayBackRequestClose
     pending: boolean
     owner: Element | null
+    parentOwner: Element | null
 }
 
 interface OverlayBackAdapterState {
@@ -126,13 +127,20 @@ function releaseAdapterIfStillEmpty(registry: OverlayBackRegistry): void {
  * stops being eligible to receive Back (closes, or is no longer the active layer) — see
  * {@link useBackCloses} for the React lifecycle wrapper every consumer actually uses.
  */
-export function registerOverlayBackCloser(requestClose: OverlayBackRequestClose, owner: Element | null = null): () => void {
+export function registerOverlayBackCloser(
+    requestClose: OverlayBackRequestClose,
+    owner: Element | null = null,
+    parentOwner: Element | null = null,
+): () => void {
     const registry = getOverlayBackRegistry()
-    const entry: OverlayBackEntry = { requestClose, pending: false, owner }
+    const entry: OverlayBackEntry = { requestClose, pending: false, owner, parentOwner }
     // React commits a nested child's effect before its parent's. Keep DOM-nested surfaces above
-    // their ancestor even when the ancestor therefore registers last.
+    // their ancestor even when portals prevent DOM containment.
     const nestedEntryIndex = owner
-        ? registry.entries.findIndex((candidate) => candidate.owner !== null && owner.contains(candidate.owner))
+        ? registry.entries.findIndex(
+              (candidate) =>
+                  candidate.parentOwner === owner || (candidate.owner !== null && owner.contains(candidate.owner)),
+          )
         : -1
     registry.entries.splice(nestedEntryIndex === -1 ? registry.entries.length : nestedEntryIndex, 0, entry)
     if (registry.entries.length === 1) registerWithAdapterIfLive(registry)
@@ -146,6 +154,8 @@ export function registerOverlayBackCloser(requestClose: OverlayBackRequestClose,
         if (registry.entries.length === 0) releaseAdapterIfStillEmpty(registry)
     }
 }
+
+export const OverlayBackOwnerContext = createContext<RefObject<Element | null> | undefined>(undefined)
 
 /**
  * Act on the topmost registered overlay, honouring the close contract's latch: a top entry whose
@@ -207,6 +217,7 @@ export function useBackCloses({
     requestClose: OverlayBackRequestClose
     ownerRef?: RefObject<Element | null>
 }): void {
+    const parentOwnerRef = useContext(OverlayBackOwnerContext)
     const requestCloseRef = useRef(requestClose)
     useEffect(() => {
         requestCloseRef.current = requestClose
@@ -214,6 +225,10 @@ export function useBackCloses({
 
     useEffect(() => {
         if (!active) return undefined
-        return registerOverlayBackCloser(() => requestCloseRef.current(), ownerRef?.current ?? null)
-    }, [active, ownerRef])
+        return registerOverlayBackCloser(
+            () => requestCloseRef.current(),
+            ownerRef?.current ?? null,
+            parentOwnerRef?.current ?? null,
+        )
+    }, [active, ownerRef, parentOwnerRef])
 }
