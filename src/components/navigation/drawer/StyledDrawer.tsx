@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, type CSSProperties, type FC, type R
 import { FloatingPortal } from '@floating-ui/react'
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
+import { requestCloseTopOverlayBack, useBackCloses } from 'src/hooks/useBackCloses.hook'
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
 import { getOpenModalDialogAncestor, shouldUsePopoverTopLayer, TOP_LAYER_PROPS } from 'src/hooks/useTopLayer.hook'
 
@@ -113,11 +114,14 @@ export const StyledDrawer: FC<DrawerProps> = ({
     useEffect(() => {
         if (!open || !isTemporary) return
         const onKey = (event: KeyboardEvent): void => {
-            if (event.key === 'Escape') onClose?.(event, 'escapeKeyDown')
+            if (event.key !== 'Escape' || event.defaultPrevented) return
+            event.preventDefault()
+            event.stopImmediatePropagation()
+            void requestCloseTopOverlayBack()
         }
-        document.addEventListener('keydown', onKey)
-        return () => document.removeEventListener('keydown', onKey)
-    }, [open, isTemporary, onClose])
+        window.addEventListener('keydown', onKey)
+        return () => window.removeEventListener('keydown', onKey)
+    }, [open, isTemporary])
 
     // Escape is already handled above (kept separate since it needs the real event/reason for
     // `onClose`) — this only adds the Tab-cycling half of the trap for this backdrop-blocking modal.

@@ -215,7 +215,7 @@ describe('StyledBottomSheet — as the mobile Action popover', () => {
             await waitFor(() => expect(document.activeElement).toBe(trigger()))
         })
 
-        it('the host kill switch prevents native Back from closing the sheet', async () => {
+        it('the host kill switch preserves the sheet’s pre-feature native cancel behavior', async () => {
             window.__ASMA__SHELL__!.overlayBack!.enabled = false
             mount(<FilterFixture />)
             const dialog = await openSheet()
@@ -224,7 +224,8 @@ describe('StyledBottomSheet — as the mobile Action popover', () => {
             dialog.dispatchEvent(cancelEvent)
 
             await expect(cancelEvent.defaultPrevented).toBe(true)
-            await expect(sheet()).not.toBeNull()
+            await waitFor(() => expect(sheet()).toBeNull())
+            await waitFor(() => expect(document.activeElement).toBe(trigger()))
         })
 
         it('the close button', async () => {

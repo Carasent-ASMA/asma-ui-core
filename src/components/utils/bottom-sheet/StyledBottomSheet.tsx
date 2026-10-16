@@ -232,7 +232,10 @@ export const StyledBottomSheet = ({
     const handleCancel = (event: SyntheticEvent<HTMLDialogElement>): void => {
         if (event.cancelable) event.preventDefault()
         if (recentEscapeKeydownRef.current) return
-        if (!isOverlayBackEnabled()) return
+        if (!isOverlayBackEnabled()) {
+            onCloseRef.current('escape')
+            return
+        }
         // Route through the registry's topmost entry rather than this sheet's own `onClose`: a
         // native `cancel` always fires on the top-layer modal, which isn't necessarily the logical
         // top overlay (e.g. a popover stacked above it without its own native dialog).
