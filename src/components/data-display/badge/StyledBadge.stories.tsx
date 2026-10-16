@@ -30,6 +30,14 @@ type Story = StoryObj<typeof StyledBadge>
 const BADGE_TABLE_ROWS = ['Notification', 'Unread (table)', 'Filters applied'] as const
 
 export const Default: Story = {
+    parameters: {
+        docs: {
+            description: {
+                story:
+                    'The two shapes side by side: a count when the quantity changes what you would do, a dot when only the fact of unseen activity matters.',
+            },
+        },
+    },
     render: () => (
         <table className='table-fixed border-collapse text-delta-700'>
             <colgroup>
@@ -51,6 +59,64 @@ export const Default: Story = {
                 ))}
             </tbody>
         </table>
+    ),
+}
+
+/**
+ * Each badge sits in a dashed box cut to the size Figma specifies, so a sizing regression shows
+ * up here as a badge that no longer fills or no longer fits its box.
+ */
+const SpecBox = ({ label, width, height, children }: SpecBoxProps) => (
+    <div className='flex flex-col items-center gap-2'>
+        {/* `box-content` keeps the dashed rule outside the measured area, so the box is exactly
+            the Figma size and the badge either fills it or visibly does not. */}
+        <div
+            className={`box-content flex items-center justify-center border border-dashed border-[#8747E6] ${width} ${height}`}
+        >
+            {children}
+        </div>
+        <span className='text-xs text-delta-700'>{label}</span>
+    </div>
+)
+
+interface SpecBoxProps {
+    label: string
+    width: string
+    height: string
+    children: React.ReactNode
+}
+
+export const FigmaSizing: Story = {
+    parameters: {
+        docs: {
+            description: {
+                story:
+                    'Figma strokes both rings on the inside, so they cost no layout space: a count is its label plus 6px either side and nothing more. That makes one digit a 20px circle and two digits a 28px pill. Drawing the ring as a CSS border instead charged 2px on top of each, which is why a one-digit count used to come out an oval.',
+            },
+        },
+    },
+    render: () => (
+        <div className='flex items-end gap-6'>
+            <SpecBox label='1 digit — 20×20' width='w-[20px]' height='h-[20px]'>
+                <StyledBadge dataTest='sizing-one-digit' badgeContent={1} />
+            </SpecBox>
+
+            <SpecBox label='2 digits — 28×20' width='w-[28px]' height='h-[20px]'>
+                <StyledBadge dataTest='sizing-two-digits' badgeContent={28} />
+            </SpecBox>
+
+            <SpecBox label='capped — label + 12' width='w-[36px]' height='h-[20px]'>
+                <StyledBadge dataTest='sizing-capped' badgeContent={100} />
+            </SpecBox>
+
+            <SpecBox label='notification dot — 12×12' width='w-[12px]' height='h-[12px]'>
+                <StyledBadge dataTest='sizing-dot' variant='dot' />
+            </SpecBox>
+
+            <SpecBox label='unread dot — 8×8' width='w-[8px]' height='h-[8px]'>
+                <StyledBadge dataTest='sizing-unread-dot' variant='dot' purpose='unread' />
+            </SpecBox>
+        </div>
     ),
 }
 
@@ -202,6 +268,14 @@ export const BadgeColorVariants: Story = {
 }
 
 export const BadgeOverflowRule: Story = {
+    parameters: {
+        docs: {
+            description: {
+                story:
+                    'A count always caps at `99+`; `max` is ignored. The pill grows with its label — 20px at one digit, 28px at two — because the ring is stroked inside and only the 6px side padding adds to the text.',
+            },
+        },
+    },
     render: () => (
         <div className='flex items-center gap-4'>
             <div className='flex w-5 justify-center'>
