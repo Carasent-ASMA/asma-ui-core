@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
     getOverlayBackStackSize,
     hasOverlayBackAdapter,
+    isOverlayBackEnabled,
     registerOverlayBackCloser,
     requestCloseTopOverlayBack,
 } from './useBackCloses.hook'
@@ -163,13 +164,18 @@ describe('overlay-back registry', () => {
         })
 
         it('reports an adapter only when overlayBack.v === 1', () => {
-            const real = fakeWindow({ __ASMA__SHELL__: { overlayBack: { v: 1 } } })
+            const real = fakeWindow({ __ASMA__SHELL__: { overlayBack: { v: 1, enabled: false } } })
             globals.window = real
             globals.document = { defaultView: real }
             expect(hasOverlayBackAdapter()).toBe(true)
+            expect(isOverlayBackEnabled()).toBe(false)
 
-            real.__ASMA__SHELL__ = { overlayBack: { v: 2 } }
+            real.__ASMA__SHELL__ = { overlayBack: { v: 1, enabled: true } }
+            expect(isOverlayBackEnabled()).toBe(true)
+
+            real.__ASMA__SHELL__ = { overlayBack: { v: 2, enabled: true } }
             expect(hasOverlayBackAdapter()).toBe(false)
+            expect(isOverlayBackEnabled()).toBe(false)
         })
     })
 
