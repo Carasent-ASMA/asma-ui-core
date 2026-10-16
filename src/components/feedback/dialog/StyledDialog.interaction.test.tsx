@@ -755,6 +755,28 @@ describe('StyledDialog native Back (ASMA-8471)', () => {
         await waitFor(() => expect(dialog.matches(':modal')).toBe(true))
     })
 
+    it('a forced native close re-shows the dialog while an async close is still pending', async () => {
+        mount(
+            <StyledDialog
+                dataTest='slow-close'
+                dialogTitle='Saving'
+                open
+                onClose={() => new Promise(() => undefined)}
+            >
+                <p>Saving…</p>
+            </StyledDialog>,
+        )
+        const dialog = await waitFor(() => {
+            const node = dialogByTest('slow-close')
+            if (!node) throw new Error('dialog not mounted yet')
+            return node
+        })
+        await waitFor(() => expect(dialog.matches(':modal')).toBe(true))
+
+        dialog.close()
+        await waitFor(() => expect(dialog.matches(':modal')).toBe(true))
+    })
+
     it('native cancel invokes the registry TOP, not this dialog’s own close, when something else is stacked above it (CON-007)', async () => {
         // A mutation that swapped `requestCloseTopOverlayBack()` in `handleCancel` for a call to THIS
         // dialog's own close would make this assertion fail: `topSpy` (registered directly through the

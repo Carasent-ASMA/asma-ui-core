@@ -335,15 +335,11 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
         const handleNativeClose = (): void => {
             if (attemptPending) return
             attemptPending = true
-            if (closePendingRef.current) {
-                // A close is already in flight from somewhere else (Escape, the close button, an
-                // earlier Back) — don't invoke `onClose` a second time, just re-show once settled.
-                scheduleReshow()
-                return
-            }
-            const result = requestCloseTopOverlayBack() as Promise<unknown> | undefined
-            if (result && typeof result.then === 'function') result.then(scheduleReshow, scheduleReshow)
-            else scheduleReshow()
+            // A close already in flight must not be started again. Either way the native dialog is
+            // already shut, so put it back on the next frame while React still has it open. Waiting
+            // for the close Promise would leave a closed dialog on screen for the whole save.
+            if (!closePendingRef.current) void requestCloseTopOverlayBack()
+            scheduleReshow()
         }
         node.addEventListener('close', handleNativeClose)
         return () => node.removeEventListener('close', handleNativeClose)
