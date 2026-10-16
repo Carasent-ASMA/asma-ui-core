@@ -155,9 +155,8 @@ export const StyledBottomSheet = ({
         const handleNativeClose = (): void => {
             if (attemptPending) return
             attemptPending = true
-            const result = requestCloseTopOverlayBack()
-            if (result && typeof result.then === 'function') result.then(scheduleReshow, scheduleReshow)
-            else scheduleReshow()
+            void requestCloseTopOverlayBack()
+            scheduleReshow()
         }
         node.addEventListener('close', handleNativeClose)
         return () => node.removeEventListener('close', handleNativeClose)
