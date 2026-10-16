@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { afterEach, beforeEach, describe, it } from 'vitest'
 import { page } from 'vitest/browser'
 import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
+import { getOverlayBackStackSize } from 'src/hooks/useBackCloses.hook'
 import { cleanup, mount, tabbableWithin } from 'src/test-utils/renderInteraction'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { PopoverSheet, type PopoverSheetProps } from '../popover/PopoverSheet'
@@ -77,6 +78,7 @@ describe('StyledBottomSheet — as the mobile Action popover', () => {
         const dialog = await openSheet()
 
         await expect(dialog.open).toBe(true)
+        await expect(getOverlayBackStackSize()).toBe(1)
         await expect(dialog).toHaveAttribute('aria-modal', 'true')
         await expect(dialog).toHaveAccessibleName('Filtrer søknader')
         await expect(trigger()).toHaveAttribute('aria-haspopup', 'dialog')

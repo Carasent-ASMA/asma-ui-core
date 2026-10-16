@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { afterEach, describe, it } from 'vitest'
 import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
+import { requestCloseTopOverlayBack } from 'src/hooks/useBackCloses.hook'
 import { cleanup, describeFocusIndicator, focusStyleOf, mount } from 'src/test-utils/renderInteraction'
 import { StyledSelect } from './StyledSelect'
 import { StyledSelectItem } from './StyledSelectItem'
@@ -225,6 +226,20 @@ describe('StyledSelect keyboard contract', () => {
 
         await waitFor(() => expect(listbox()).toBeNull())
         await waitFor(() => expect(document.activeElement).toBe(button))
+        await expect(button).toHaveAttribute('aria-expanded', 'false')
+    })
+
+    it('Back closes the list without choosing a value', async () => {
+        const { container } = mount(<SelectFixture />)
+        const button = trigger(container)
+        button.focus()
+        await userEvent.keyboard('{ArrowDown}')
+        await waitFor(() => expect(listbox()).not.toBeNull())
+
+        void requestCloseTopOverlayBack()
+
+        await waitFor(() => expect(listbox()).toBeNull())
+        await expect(button).toHaveTextContent('Paused')
         await expect(button).toHaveAttribute('aria-expanded', 'false')
     })
 
