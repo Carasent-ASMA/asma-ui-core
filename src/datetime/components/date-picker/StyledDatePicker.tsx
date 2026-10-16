@@ -6,6 +6,8 @@ import { DatePickerInputIndex } from './components/DatePickerInputIndex'
 import { useIsMobileView } from 'src/datetime/hooks/useWindowWidthSize.hook'
 import { StyledDrawer as Drawer } from 'src/components/navigation/drawer'
 import { StyledDayPicker } from './components/StyledDayPicker'
+import { isOverlayBackEnabled, useBackCloses } from 'src/hooks/useBackCloses.hook'
+import { useBackNavigationClose } from 'src/datetime/hooks/useBackNavigationClose.hook'
 
 /**
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#14333-90631
@@ -48,6 +50,9 @@ export const StyledDatePicker = (props: DatePickerProps): JSX.Element => {
         return () => document.removeEventListener('keydown', handleKeyDown)
     }, [anchorEl])
 
+    useBackCloses({ active: !!anchorEl, requestClose: onClose })
+    useBackNavigationClose({ open: !!anchorEl && !isOverlayBackEnabled(), onClose })
+
     const sharedProps: DatePickerProps = {
         ...props,
         validateOnCalendarClose,
@@ -64,7 +69,13 @@ export const StyledDatePicker = (props: DatePickerProps): JSX.Element => {
                 />
             )}
             {isMobile && (
-                <Drawer anchor={'bottom'} open={!!anchorEl} onClose={onClose} anchorEl={anchorEl}>
+                <Drawer
+                    anchor={'bottom'}
+                    open={!!anchorEl}
+                    onClose={onClose}
+                    anchorEl={anchorEl}
+                    registerBackClose={false}
+                >
                     {/* Bottom-sheet needs breathing room below the footer (+ device safe-area/home
                         indicator) — otherwise the calendar footer hugs the screen edge. */}
                     <div className='mx-auto max-w-[360px] px-2 pb-[max(1.5rem,env(safe-area-inset-bottom))]'>

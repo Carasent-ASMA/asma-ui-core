@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { afterEach, describe, it } from 'vitest'
 import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { StyledInputField } from 'src/components/inputs/input-field'
+import { requestCloseTopOverlayBack } from 'src/hooks/useBackCloses.hook'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { StyledSelectAutocomplete } from './StyledSelectAutocomplete'
 
@@ -264,6 +265,20 @@ describe('StyledSelectAutocomplete keyboard contract', () => {
         await expect(document.activeElement).toHaveTextContent('Before')
         await userEvent.tab()
         await expect(document.activeElement).toBe(input())
+    })
+
+    it('Back closes without selecting the keyboard-active option', async () => {
+        const onChange = fn()
+        mount(<AutocompleteFixture onChange={onChange} />)
+        input().focus()
+        await userEvent.keyboard('{ArrowDown}{ArrowDown}')
+        await waitFor(() => expect(listbox()).not.toBeNull())
+
+        void requestCloseTopOverlayBack()
+
+        await waitFor(() => expect(listbox()).toBeNull())
+        await expect(onChange).not.toHaveBeenCalled()
+        await expect(input()).toHaveValue('')
     })
 
     /* FINDING ASMA-8139-G — WCAG 2.1.1 (keyboard). src/components/inputs/select-autocomplete/

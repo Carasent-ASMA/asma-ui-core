@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { afterEach, describe, it } from 'vitest'
 import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
+import { getOverlayBackStackSize, requestCloseTopOverlayBack } from 'src/hooks/useBackCloses.hook'
 import { StyledTimePicker } from './StyledTimePicker'
 
 /**
@@ -149,6 +150,18 @@ describe('StyledTimePicker keyboard contract', () => {
         await userEvent.keyboard('{Escape}')
         await waitFor(() => expect(panel()).toBeNull())
         await expect(document.activeElement).toBe(field(container))
+    })
+
+    it('Back closes the time panel without selecting a time', async () => {
+        const onSelect = fn()
+        const { container } = mount(<TimePickerFixture onSelect={onSelect} />)
+        await openPanel(container)
+        await expect(getOverlayBackStackSize()).toBe(1)
+
+        void requestCloseTopOverlayBack()
+
+        await waitFor(() => expect(panel()).toBeNull())
+        await expect(onSelect).not.toHaveBeenCalled()
     })
 
     it('closes the time panel on Tab without blocking focus movement (2.1.2)', async () => {

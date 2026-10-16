@@ -32,6 +32,7 @@ import { HelperRow } from 'src/helpers/HelperRow'
 import { resolveSx } from 'src/helpers/sx'
 import { useHelperRowBudget } from 'src/helpers/useHelperRowBudget'
 import { useHelperSlot } from 'src/helpers/useHelperSlot'
+import { useBackCloses } from 'src/hooks/useBackCloses.hook'
 import {
     getOpenModalDialogAncestor,
     shouldUsePopoverTopLayer,
@@ -215,6 +216,7 @@ export const StyledSelect = ({
     const dismiss = useDismiss(context)
     const role = useRole(context, { role: 'listbox' })
     const { getReferenceProps, getFloatingProps } = useInteractions([click, dismiss, role])
+    useBackCloses({ active: open, requestClose: () => handleOpenChange(false) })
     // Portal INTO the trigger's modal <dialog> (if any) so the listbox isn't inert. Popover API
     // only when body-portalled — nested showPopover inside a dialog breaks on mobile Safari.
     const [portalRoot, setPortalRoot] = useState<HTMLElement>()

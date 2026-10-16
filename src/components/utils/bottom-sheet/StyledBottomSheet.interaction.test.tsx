@@ -1,10 +1,20 @@
 import { useState } from 'react'
 import { afterEach, beforeEach, describe, it } from 'vitest'
 import { page } from 'vitest/browser'
-import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
+import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
+import {
+    getOverlayBackStackSize,
+    registerOverlayBackCloser,
+    requestCloseTopOverlayBack,
+} from 'src/hooks/useBackCloses.hook'
 import { cleanup, mount, tabbableWithin } from 'src/test-utils/renderInteraction'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
+import { StyledDialog } from 'src/components/feedback/dialog/StyledDialog'
+import { StyledDrawer } from 'src/components/navigation/drawer/StyledDrawer'
+import { StyledSelect } from 'src/components/inputs/select/StyledSelect'
+import { StyledSelectItem } from 'src/components/inputs/select/StyledSelectItem'
 import { PopoverSheet, type PopoverSheetProps } from '../popover/PopoverSheet'
+import { StyledBottomSheet } from './StyledBottomSheet'
 
 /**
  * Keyboard, focus and dismissal contract — StyledBottomSheet (ASMA-8184), exercised the way it ships:
@@ -64,11 +74,18 @@ const openSheet = async (): Promise<HTMLDialogElement> => {
 }
 
 describe('StyledBottomSheet — as the mobile Action popover', () => {
+    let previousShell: Window['__ASMA__SHELL__']
     beforeEach(async () => {
+        previousShell = window.__ASMA__SHELL__
+        window.__ASMA__SHELL__ = {
+            ...previousShell,
+            overlayBack: { ...previousShell?.overlayBack, v: 1, enabled: true },
+        }
         await page.viewport(PHONE.width, PHONE.height)
     })
     afterEach(async () => {
         cleanup()
+        window.__ASMA__SHELL__ = previousShell
         await page.viewport(DESKTOP.width, DESKTOP.height)
     })
 
@@ -77,6 +94,7 @@ describe('StyledBottomSheet — as the mobile Action popover', () => {
         const dialog = await openSheet()
 
         await expect(dialog.open).toBe(true)
+        await expect(getOverlayBackStackSize()).toBe(1)
         await expect(dialog).toHaveAttribute('aria-modal', 'true')
         await expect(dialog).toHaveAccessibleName('Filtrer søknader')
         await expect(trigger()).toHaveAttribute('aria-haspopup', 'dialog')
@@ -134,6 +152,143 @@ describe('StyledBottomSheet — as the mobile Action popover', () => {
             await openSheet()
             await userEvent.keyboard('{Escape}')
 
+            await waitFor(() => expect(sheet()).toBeNull())
+            await waitFor(() => expect(document.activeElement).toBe(trigger()))
+        })
+
+        it('Escape still closes the sheet while the overlay Back feature is disabled', async () => {
+            window.__ASMA__SHELL__!.overlayBack!.enabled = false
+            mount(<FilterFixture />)
+            await openSheet()
+
+            await userEvent.keyboard('{Escape}')
+
+            await waitFor(() => expect(sheet()).toBeNull())
+            await waitFor(() => expect(document.activeElement).toBe(trigger()))
+        })
+
+        it('Escape closes a nested select without also closing the sheet', async () => {
+            mount(
+                <PopoverSheet
+                    dataTest='sheet'
+                    variant='action'
+                    title='Filter'
+                    renderTrigger={({ ref, triggerProps }) => (
+                        <StyledButton dataTest='sheet-trigger' refLink={ref} type='button' {...triggerProps}>
+                            Filter
+                        </StyledButton>
+                    )}
+                >
+                    <StyledSelect dataTest='nested-select' name='Status' value='active'>
+                        <StyledSelectItem value='active'>Active</StyledSelectItem>
+                        <StyledSelectItem value='paused'>Paused</StyledSelectItem>
+                    </StyledSelect>
+                </PopoverSheet>,
+            )
+            await openSheet()
+            const select = document.querySelector<HTMLButtonElement>('[data-testid="nested-select"]')!
+            select.focus()
+            await userEvent.keyboard('{ArrowDown}')
+            await waitFor(() => expect(document.querySelector('[role="listbox"]')).not.toBeNull())
+
+            await userEvent.keyboard('{Escape}')
+
+            await waitFor(() => expect(document.querySelector('[role="listbox"]')).toBeNull())
+            await expect(sheet()).not.toBeNull()
+        })
+
+        it('a nested Escape-owned cancel does not request a second registry close', async () => {
+            mount(<FilterFixture />)
+            const dialog = await openSheet()
+            const nestedControl = byTestId('narrow')
+            nestedControl.addEventListener('keydown', (event) => event.stopPropagation())
+            const topClose = fn()
+            const unregisterTop = registerOverlayBackCloser(topClose)
+
+            nestedControl.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }))
+            dialog.dispatchEvent(new Event('cancel', { cancelable: true }))
+
+            await expect(topClose).not.toHaveBeenCalled()
+            await expect(sheet()).not.toBeNull()
+            unregisterTop()
+        })
+
+        it('Escape closes a sheet nested in a dialog exactly once', async () => {
+            const closeDialog = fn()
+            const closeSheet = fn()
+            const Fixture = (): JSX.Element => {
+                const [sheetOpen, setSheetOpen] = useState(true)
+                return (
+                    <StyledDialog dataTest='outer-dialog' dialogTitle='Outer' open onClose={closeDialog}>
+                        <StyledBottomSheet
+                            dataTest='sheet'
+                            open={sheetOpen}
+                            onClose={(reason) => {
+                                closeSheet(reason)
+                                setSheetOpen(false)
+                            }}
+                        >
+                            Content
+                        </StyledBottomSheet>
+                    </StyledDialog>
+                )
+            }
+            mount(<Fixture />)
+            const dialog = await waitFor(() => {
+                const node = sheet()
+                if (!node) throw new Error('sheet not mounted')
+                return node
+            })
+            dialog.focus()
+
+            await userEvent.keyboard('{Escape}')
+
+            await waitFor(() => expect(sheet()).toBeNull())
+            await expect(closeSheet).toHaveBeenCalledTimes(1)
+            await expect(closeSheet).toHaveBeenCalledWith('escape')
+            await expect(closeDialog).not.toHaveBeenCalled()
+        })
+
+        it('Back closes an initially-open drawer before its parent sheet', async () => {
+            const closeSheet = fn()
+            const Fixture = (): JSX.Element => {
+                const [drawerOpen, setDrawerOpen] = useState(true)
+                return (
+                    <StyledBottomSheet dataTest='sheet' open onClose={closeSheet}>
+                        <StyledDrawer open={drawerOpen} variant='temporary' onClose={() => setDrawerOpen(false)}>
+                            <StyledButton dataTest='drawer-control'>Drawer control</StyledButton>
+                        </StyledDrawer>
+                    </StyledBottomSheet>
+                )
+            }
+            mount(<Fixture />)
+            await waitFor(() => expect(document.querySelector('[data-testid="drawer-control"]')).not.toBeNull())
+
+            void requestCloseTopOverlayBack()
+
+            await waitFor(() => expect(document.querySelector('[data-testid="drawer-control"]')).toBeNull())
+            await expect(sheet()).not.toBeNull()
+            await expect(closeSheet).not.toHaveBeenCalled()
+        })
+
+        it('a native dialog cancel', async () => {
+            mount(<FilterFixture />)
+            const dialog = await openSheet()
+            dialog.dispatchEvent(new Event('cancel', { cancelable: true }))
+
+            await waitFor(() => expect(sheet()).toBeNull())
+            await waitFor(() => expect(document.activeElement).toBe(trigger()))
+        })
+
+        it('the host kill switch preserves the sheet’s pre-feature native cancel behavior', async () => {
+            window.__ASMA__SHELL__!.overlayBack!.enabled = false
+            mount(<FilterFixture />)
+            const dialog = await openSheet()
+            const cancelEvent = new Event('cancel', { cancelable: true })
+
+            dialog.dispatchEvent(cancelEvent)
+
+            await expect(cancelEvent.defaultPrevented).toBe(true)
             await waitFor(() => expect(sheet()).toBeNull())
             await waitFor(() => expect(document.activeElement).toBe(trigger()))
         })
