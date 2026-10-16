@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { afterEach, beforeEach, describe, it } from 'vitest'
 import { page } from 'vitest/browser'
-import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
-import { getOverlayBackStackSize } from 'src/hooks/useBackCloses.hook'
+import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
+import { getOverlayBackStackSize, registerOverlayBackCloser } from 'src/hooks/useBackCloses.hook'
 import { cleanup, mount, tabbableWithin } from 'src/test-utils/renderInteraction'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { StyledSelect } from 'src/components/inputs/select/StyledSelect'
@@ -188,6 +188,22 @@ describe('StyledBottomSheet — as the mobile Action popover', () => {
 
             await waitFor(() => expect(document.querySelector('[role="listbox"]')).toBeNull())
             await expect(sheet()).not.toBeNull()
+        })
+
+        it('a nested Escape-owned cancel does not request a second registry close', async () => {
+            mount(<FilterFixture />)
+            const dialog = await openSheet()
+            const nestedControl = byTestId('narrow')
+            nestedControl.addEventListener('keydown', (event) => event.stopPropagation())
+            const topClose = fn()
+            const unregisterTop = registerOverlayBackCloser(topClose)
+
+            nestedControl.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }))
+            dialog.dispatchEvent(new Event('cancel', { cancelable: true }))
+
+            await expect(topClose).not.toHaveBeenCalled()
+            await expect(sheet()).not.toBeNull()
+            unregisterTop()
         })
 
         it('a native dialog cancel', async () => {
