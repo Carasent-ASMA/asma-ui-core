@@ -154,7 +154,7 @@ export function registerOverlayBackCloser(
         ? registry.entries.findIndex(
               (candidate) =>
                   (ownerRef !== undefined && candidate.parentOwnerRef === ownerRef) ||
-                  candidate.parentOwner === owner ||
+                  (owner !== null && candidate.parentOwner === owner) ||
                   (owner !== null && candidate.owner !== null && owner.contains(candidate.owner)),
           )
         : -1

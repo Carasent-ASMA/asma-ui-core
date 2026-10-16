@@ -87,6 +87,27 @@ describe('overlay-back registry', () => {
         unregisterParent()
     })
 
+    it('keeps an unrelated root portal above an earlier root overlay while its ref is empty', () => {
+        const closeEarlierRoot = vi.fn()
+        const closePortalledRoot = vi.fn()
+        const earlierOwner = { contains: () => false } as unknown as Element
+        const portalledOwnerRef = { current: null }
+        const unregisterEarlierRoot = registerOverlayBackCloser(closeEarlierRoot, earlierOwner)
+        const unregisterPortalledRoot = registerOverlayBackCloser(
+            closePortalledRoot,
+            null,
+            null,
+            portalledOwnerRef,
+        )
+
+        void requestCloseTopOverlayBack()
+
+        expect(closePortalledRoot).toHaveBeenCalledTimes(1)
+        expect(closeEarlierRoot).not.toHaveBeenCalled()
+        unregisterPortalledRoot()
+        unregisterEarlierRoot()
+    })
+
     it('forwards a keyboard event to the top closer', () => {
         const requestClose = vi.fn()
         const event = { type: 'keydown' } as Event
