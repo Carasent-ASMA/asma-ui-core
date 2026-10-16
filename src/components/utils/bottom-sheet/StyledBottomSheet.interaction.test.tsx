@@ -5,6 +5,8 @@ import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { getOverlayBackStackSize } from 'src/hooks/useBackCloses.hook'
 import { cleanup, mount, tabbableWithin } from 'src/test-utils/renderInteraction'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
+import { StyledSelect } from 'src/components/inputs/select/StyledSelect'
+import { StyledSelectItem } from 'src/components/inputs/select/StyledSelectItem'
 import { PopoverSheet, type PopoverSheetProps } from '../popover/PopoverSheet'
 
 /**
@@ -145,6 +147,47 @@ describe('StyledBottomSheet — as the mobile Action popover', () => {
 
             await waitFor(() => expect(sheet()).toBeNull())
             await waitFor(() => expect(document.activeElement).toBe(trigger()))
+        })
+
+        it('Escape still closes the sheet while the overlay Back feature is disabled', async () => {
+            window.__ASMA__SHELL__!.overlayBack!.enabled = false
+            mount(<FilterFixture />)
+            await openSheet()
+
+            await userEvent.keyboard('{Escape}')
+
+            await waitFor(() => expect(sheet()).toBeNull())
+            await waitFor(() => expect(document.activeElement).toBe(trigger()))
+        })
+
+        it('Escape closes a nested select without also closing the sheet', async () => {
+            mount(
+                <PopoverSheet
+                    dataTest='sheet'
+                    variant='action'
+                    title='Filter'
+                    renderTrigger={({ ref, triggerProps }) => (
+                        <StyledButton dataTest='sheet-trigger' refLink={ref} type='button' {...triggerProps}>
+                            Filter
+                        </StyledButton>
+                    )}
+                >
+                    <StyledSelect dataTest='nested-select' name='Status' value='active'>
+                        <StyledSelectItem value='active'>Active</StyledSelectItem>
+                        <StyledSelectItem value='paused'>Paused</StyledSelectItem>
+                    </StyledSelect>
+                </PopoverSheet>,
+            )
+            await openSheet()
+            const select = document.querySelector<HTMLButtonElement>('[data-testid="nested-select"]')!
+            select.focus()
+            await userEvent.keyboard('{ArrowDown}')
+            await waitFor(() => expect(document.querySelector('[role="listbox"]')).not.toBeNull())
+
+            await userEvent.keyboard('{Escape}')
+
+            await waitFor(() => expect(document.querySelector('[role="listbox"]')).toBeNull())
+            await expect(sheet()).not.toBeNull()
         })
 
         it('a native dialog cancel', async () => {

@@ -60,6 +60,8 @@ export interface StyledBottomSheetProps {
     closeLabel?: string
     /** @figmaProp none — style escape hatch, applied to the sheet container */
     className?: string
+    /** Set `false` when a wrapper already owns the Back-close registration. */
+    registerBackClose?: boolean
 }
 
 /**
@@ -90,11 +92,13 @@ export const StyledBottomSheet = ({
     resultCount,
     closeLabel = 'Lukk',
     className,
+    registerBackClose = true,
 }: StyledBottomSheetProps): JSX.Element | null => {
     const titleId = useId()
     const dialogRef = useRef<HTMLDialogElement | null>(null)
     const sheetRef = useRef<HTMLDivElement | null>(null)
     const returnFocusRef = useRef<HTMLElement | null>(null)
+    const recentEscapeKeydownRef = useRef(false)
     const [isShown, setIsShown] = useState(false)
     const isShortViewport = useShortViewportMediaQuery()
 
@@ -112,6 +116,35 @@ export const StyledBottomSheet = ({
     useBodyScrollLock(open)
     // Wraps Tab inside the sheet — a native modal <dialog> alone lets Tab escape to the browser UI.
     useFocusTrap(open, dialogRef)
+
+    useEffect(() => {
+        if (!open) return undefined
+        const markEscapeKeydown = (event: KeyboardEvent): void => {
+            if (event.key !== 'Escape') return
+            recentEscapeKeydownRef.current = true
+            window.setTimeout(() => {
+                recentEscapeKeydownRef.current = false
+            }, 0)
+        }
+        const closeOnEscape = (event: KeyboardEvent): void => {
+            if (event.key !== 'Escape' || event.defaultPrevented) return
+            const focused = document.activeElement
+            if (focused instanceof Element && focused.closest('dialog[open]') !== dialogRef.current) return
+            onCloseRef.current('escape')
+        }
+        window.addEventListener('keydown', markEscapeKeydown, true)
+        window.addEventListener('keydown', closeOnEscape)
+        return () => {
+            window.removeEventListener('keydown', markEscapeKeydown, true)
+            window.removeEventListener('keydown', closeOnEscape)
+        }
+    }, [open])
+
+    // Same close path as Escape — never selects/commits anything (see component docblock).
+    useBackCloses({
+        active: open && registerBackClose,
+        requestClose: () => onCloseRef.current('escape'),
+    })
 
     useLayoutEffect(() => {
         const node = dialogRef.current
@@ -198,6 +231,7 @@ export const StyledBottomSheet = ({
 
     const handleCancel = (event: SyntheticEvent<HTMLDialogElement>): void => {
         if (event.cancelable) event.preventDefault()
+        if (recentEscapeKeydownRef.current) return
         if (!isOverlayBackEnabled()) return
         // Route through the registry's topmost entry rather than this sheet's own `onClose`: a
         // native `cancel` always fires on the top-layer modal, which isn't necessarily the logical
