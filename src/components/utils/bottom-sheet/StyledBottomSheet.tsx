@@ -4,6 +4,7 @@ import { CloseIcon } from 'src/components/icons/close-icon/CloseIcon'
 import { IndeterminateIcon } from 'src/components/icons/indeterminate-icon/IndeterminateIcon'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { cn } from 'src/helpers/cn'
+import { isOverlayBackEnabled, requestCloseTopOverlayBack, useBackCloses } from 'src/hooks/useBackCloses.hook'
 import { useBodyScrollLock } from 'src/hooks/useBodyScrollLock.hook'
 import { useDebouncedValue } from 'src/hooks/useDebouncedValue.hook'
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
@@ -155,7 +156,7 @@ export const StyledBottomSheet = ({
         const handleNativeClose = (): void => {
             if (attemptPending) return
             attemptPending = true
-            void requestCloseTopOverlayBack()
+            if (isOverlayBackEnabled()) void requestCloseTopOverlayBack()
             scheduleReshow()
         }
         node.addEventListener('close', handleNativeClose)
@@ -196,8 +197,12 @@ export const StyledBottomSheet = ({
     const isDragging = dragOffset > 0
 
     const handleCancel = (event: SyntheticEvent<HTMLDialogElement>): void => {
-        event.preventDefault()
-        onClose('escape')
+        if (event.cancelable) event.preventDefault()
+        if (!isOverlayBackEnabled()) return
+        // Route through the registry's topmost entry rather than this sheet's own `onClose`: a
+        // native `cancel` always fires on the top-layer modal, which isn't necessarily the logical
+        // top overlay (e.g. a popover stacked above it without its own native dialog).
+        void requestCloseTopOverlayBack()
     }
 
     return (

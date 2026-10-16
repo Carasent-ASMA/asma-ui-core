@@ -65,11 +65,18 @@ const openSheet = async (): Promise<HTMLDialogElement> => {
 }
 
 describe('StyledBottomSheet — as the mobile Action popover', () => {
+    let previousShell: Window['__ASMA__SHELL__']
     beforeEach(async () => {
+        previousShell = window.__ASMA__SHELL__
+        window.__ASMA__SHELL__ = {
+            ...previousShell,
+            overlayBack: { ...previousShell?.overlayBack, v: 1, enabled: true },
+        }
         await page.viewport(PHONE.width, PHONE.height)
     })
     afterEach(async () => {
         cleanup()
+        window.__ASMA__SHELL__ = previousShell
         await page.viewport(DESKTOP.width, DESKTOP.height)
     })
 
@@ -147,6 +154,18 @@ describe('StyledBottomSheet — as the mobile Action popover', () => {
 
             await waitFor(() => expect(sheet()).toBeNull())
             await waitFor(() => expect(document.activeElement).toBe(trigger()))
+        })
+
+        it('the host kill switch prevents native Back from closing the sheet', async () => {
+            window.__ASMA__SHELL__!.overlayBack!.enabled = false
+            mount(<FilterFixture />)
+            const dialog = await openSheet()
+            const cancelEvent = new Event('cancel', { cancelable: true })
+
+            dialog.dispatchEvent(cancelEvent)
+
+            await expect(cancelEvent.defaultPrevented).toBe(true)
+            await expect(sheet()).not.toBeNull()
         })
 
         it('the close button', async () => {
