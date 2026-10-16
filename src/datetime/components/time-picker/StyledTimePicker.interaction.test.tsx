@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { afterEach, describe, it } from 'vitest'
 import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
-import { requestCloseTopOverlayBack } from 'src/hooks/useBackCloses.hook'
+import { getOverlayBackStackSize, requestCloseTopOverlayBack } from 'src/hooks/useBackCloses.hook'
 import { StyledTimePicker } from './StyledTimePicker'
 
 /**
@@ -156,6 +156,7 @@ describe('StyledTimePicker keyboard contract', () => {
         const onSelect = fn()
         const { container } = mount(<TimePickerFixture onSelect={onSelect} />)
         await openPanel(container)
+        await expect(getOverlayBackStackSize()).toBe(1)
 
         void requestCloseTopOverlayBack()
 

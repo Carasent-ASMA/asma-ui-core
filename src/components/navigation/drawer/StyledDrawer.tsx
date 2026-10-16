@@ -120,7 +120,7 @@ export const StyledDrawer: FC<DrawerProps> = ({
             if (event.key !== 'Escape' || event.defaultPrevented) return
             event.preventDefault()
             event.stopImmediatePropagation()
-            void requestCloseTopOverlayBack()
+            void requestCloseTopOverlayBack(event)
         }
         window.addEventListener('keydown', onKey)
         return () => window.removeEventListener('keydown', onKey)
@@ -134,7 +134,7 @@ export const StyledDrawer: FC<DrawerProps> = ({
     // panels, not overlays, so Back has nothing to do with them.
     useBackCloses({
         active: open && isTemporary && registerBackClose,
-        requestClose: () => (onClose ? onClose({} as Event, 'escapeKeyDown') : false),
+        requestClose: (event) => (onClose ? onClose(event ?? new Event('overlayBack'), 'escapeKeyDown') : false),
         ownerRef: panelRef,
     })
 

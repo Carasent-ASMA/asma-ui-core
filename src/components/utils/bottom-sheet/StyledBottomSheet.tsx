@@ -1,4 +1,13 @@
-import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode, type SyntheticEvent } from 'react'
+import {
+    useEffect,
+    useId,
+    useLayoutEffect,
+    useRef,
+    useState,
+    type ReactNode,
+    type RefObject,
+    type SyntheticEvent,
+} from 'react'
 
 import { CloseIcon } from 'src/components/icons/close-icon/CloseIcon'
 import { IndeterminateIcon } from 'src/components/icons/indeterminate-icon/IndeterminateIcon'
@@ -67,6 +76,8 @@ export interface StyledBottomSheetProps {
     className?: string
     /** Set `false` when a wrapper already owns the Back-close registration. */
     registerBackClose?: boolean
+    /** Logical owner supplied by a wrapper that must keep one identity across responsive variants. */
+    ownerRef?: RefObject<Element | null>
 }
 
 /**
@@ -98,11 +109,13 @@ export const StyledBottomSheet = ({
     closeLabel = 'Lukk',
     className,
     registerBackClose = true,
+    ownerRef,
 }: StyledBottomSheetProps): JSX.Element | null => {
     const titleId = useId()
     const dialogRef = useRef<HTMLDialogElement | null>(null)
     const sheetRef = useRef<HTMLDivElement | null>(null)
     const returnFocusRef = useRef<HTMLElement | null>(null)
+    const overlayOwnerRef = ownerRef ?? dialogRef
     const recentEscapeKeydownRef = useRef(false)
     const [isShown, setIsShown] = useState(false)
     const isShortViewport = useShortViewportMediaQuery()
@@ -137,7 +150,7 @@ export const StyledBottomSheet = ({
             if (focused instanceof Element && focused.closest('dialog[open]') !== dialogRef.current) return
             event.preventDefault()
             event.stopImmediatePropagation()
-            void requestCloseTopOverlayBack()
+            void requestCloseTopOverlayBack(event)
         }
         window.addEventListener('keydown', markEscapeKeydown, true)
         window.addEventListener('keydown', closeOnEscape)
@@ -151,7 +164,7 @@ export const StyledBottomSheet = ({
     useBackCloses({
         active: open && registerBackClose,
         requestClose: () => onCloseRef.current('escape'),
-        ownerRef: dialogRef,
+        ownerRef: overlayOwnerRef,
     })
 
     useLayoutEffect(() => {
@@ -266,7 +279,7 @@ export const StyledBottomSheet = ({
                 'fixed inset-0 m-0 h-full max-h-none w-full max-w-none flex-col items-center justify-end overflow-hidden border-0 bg-transparent p-0 outline-none open:flex',
             )}
         >
-            <OverlayBackOwnerContext.Provider value={dialogRef}>
+            <OverlayBackOwnerContext.Provider value={overlayOwnerRef}>
                 {/* Scrim: a convenience duplicate of the close button, not a control — hidden from AT. */}
                 <div
                 aria-hidden='true'

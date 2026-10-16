@@ -15,7 +15,7 @@ import {
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { cn } from 'src/helpers/cn'
 import { firstTabbable } from 'src/helpers/focusable'
-import { useBackCloses } from 'src/hooks/useBackCloses.hook'
+import { OverlayBackOwnerContext, useBackCloses } from 'src/hooks/useBackCloses.hook'
 import { useDebouncedValue } from 'src/hooks/useDebouncedValue.hook'
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
 import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
@@ -237,7 +237,7 @@ export const PopoverSheet = ({
         changeOpen(false)
     }, [changeOpen])
 
-    useBackCloses({ active: isOpen, requestClose: close })
+    useBackCloses({ active: isOpen, requestClose: close, ownerRef: panelRef })
 
     // Focus is managed by hand rather than with `FloatingFocusManager`, because that renders focus
     // guards (`tabindex=0` + `aria-hidden`) which axe fails as `aria-hidden-focus` — a rule this
@@ -370,6 +370,7 @@ export const PopoverSheet = ({
                     open={isOpen}
                     onClose={close}
                     registerBackClose={false}
+                    ownerRef={panelRef}
                     title={title}
                     ariaLabel={ariaLabel}
                     viewResultsAction={viewResultsAction}
@@ -414,6 +415,7 @@ export const PopoverSheet = ({
                         // whole surface — same pairing as StyledDialog.
                         className={cn('z-[1300]', POPOVER_SURFACE_CLASSNAME, className)}
                     >
+                        <OverlayBackOwnerContext.Provider value={panelRef}>
                         <PopoverAnatomy
                             dataTest={dataTest}
                             title={title}
@@ -426,6 +428,7 @@ export const PopoverSheet = ({
                         >
                             {resolveSlot(children)}
                         </PopoverAnatomy>
+                        </OverlayBackOwnerContext.Provider>
                     </div>
                 </FloatingPortal>
             )}

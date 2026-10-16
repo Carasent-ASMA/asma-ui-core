@@ -7,7 +7,8 @@ import { getTimeFromValue } from './helpers/getTimeFromValue'
 import { TimePickerInput } from './TimePickerInput'
 import { TimePickerPanel } from './components/TimePickerPanel'
 import { useIsMobileView } from 'src/datetime/hooks/useWindowWidthSize.hook'
-import { useBackCloses } from 'src/hooks/useBackCloses.hook'
+import { isOverlayBackEnabled, useBackCloses } from 'src/hooks/useBackCloses.hook'
+import { useBackNavigationClose } from 'src/datetime/hooks/useBackNavigationClose.hook'
 import { StyledDrawer } from 'src/components/navigation/drawer'
 import type { StyledTimePickerProps } from './types'
 import { isBeforeMinTime } from './helpers/minTime'
@@ -28,6 +29,7 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
     const popupState = usePopupState({ variant: 'popper', popupId: 'time-picker-popper' })
     const isMobile = useIsMobileView()
     useBackCloses({ active: popupState.isOpen, requestClose: popupState.close })
+    useBackNavigationClose({ open: isMobile && popupState.isOpen && !isOverlayBackEnabled(), onClose: popupState.close })
 
     // Destructured up front so the effect closes over the three values it actually uses instead of the
     // whole popup-state object — otherwise the handler reads `popupState.*` at call time and the deps

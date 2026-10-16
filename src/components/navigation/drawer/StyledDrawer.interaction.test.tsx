@@ -42,6 +42,7 @@ describe('StyledDrawer back registration', () => {
 
     it('Escape closes a nested temporary drawer without also closing its dialog', async () => {
         const closeDialog = fn()
+        const closeDrawer = fn()
         const Fixture = (): JSX.Element => {
             const [drawerOpen, setDrawerOpen] = useState(false)
             return (
@@ -49,7 +50,14 @@ describe('StyledDrawer back registration', () => {
                     <StyledButton dataTest='open-drawer' onClick={() => setDrawerOpen(true)}>
                         Open drawer
                     </StyledButton>
-                    <StyledDrawer open={drawerOpen} variant='temporary' onClose={() => setDrawerOpen(false)}>
+                    <StyledDrawer
+                        open={drawerOpen}
+                        variant='temporary'
+                        onClose={(event, reason) => {
+                            closeDrawer(event, reason)
+                            setDrawerOpen(false)
+                        }}
+                    >
                         <StyledButton dataTest='drawer-control'>Drawer control</StyledButton>
                     </StyledDrawer>
                 </StyledDialog>
@@ -62,11 +70,13 @@ describe('StyledDrawer back registration', () => {
             if (!node) throw new Error('drawer not mounted')
             return node
         })
+        await waitFor(() => expect(getOverlayBackStackSize()).toBe(2))
         control.focus()
 
         await userEvent.keyboard('{Escape}')
 
         await waitFor(() => expect(document.querySelector('[data-testid="drawer-control"]')).toBeNull())
+        await expect(closeDrawer).toHaveBeenCalledWith(expect.any(KeyboardEvent), 'escapeKeyDown')
         await expect(container.querySelector('[data-testid="outer-dialog"]')).not.toBeNull()
         await expect(closeDialog).not.toHaveBeenCalled()
     })
@@ -95,12 +105,20 @@ describe('StyledDrawer back registration', () => {
 
     it('Back closes an initially-open nested drawer before its parent drawer', async () => {
         const closeOuter = fn()
+        const closeInner = fn()
         const Fixture = (): JSX.Element => {
             const [innerOpen, setInnerOpen] = useState(true)
             return (
                 <StyledDrawer open variant='temporary' onClose={closeOuter}>
                     <StyledButton dataTest='outer-control'>Outer control</StyledButton>
-                    <StyledDrawer open={innerOpen} variant='temporary' onClose={() => setInnerOpen(false)}>
+                    <StyledDrawer
+                        open={innerOpen}
+                        variant='temporary'
+                        onClose={(event, reason) => {
+                            closeInner(event, reason)
+                            setInnerOpen(false)
+                        }}
+                    >
                         <StyledButton dataTest='inner-control'>Inner control</StyledButton>
                     </StyledDrawer>
                 </StyledDrawer>
@@ -108,9 +126,11 @@ describe('StyledDrawer back registration', () => {
         }
         mount(<Fixture />)
         await waitFor(() => expect(document.querySelector('[data-testid="inner-control"]')).not.toBeNull())
+        await waitFor(() => expect(getOverlayBackStackSize()).toBe(2))
 
         void requestCloseTopOverlayBack()
 
+        await expect([closeInner.mock.calls.length, closeOuter.mock.calls.length]).toEqual([1, 0])
         await waitFor(() => expect(document.querySelector('[data-testid="inner-control"]')).toBeNull())
         await expect(document.querySelector('[data-testid="outer-control"]')).not.toBeNull()
         await expect(closeOuter).not.toHaveBeenCalled()

@@ -152,7 +152,7 @@ export const StyledPopover = ({
 
     useBackCloses({
         active: open && registerBackClose,
-        requestClose: () => (onClose ? onClose({}, 'escapeKeyDown') : false),
+        requestClose: (event) => (onClose ? onClose(event ?? new Event('overlayBack'), 'escapeKeyDown') : false),
         ownerRef: refs.floating,
     })
 
