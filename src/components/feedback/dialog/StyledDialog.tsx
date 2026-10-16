@@ -358,10 +358,9 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
         if (!open || disableEscapeKeyDown) return
         const closeOnEscape = (event: KeyboardEvent): void => {
             if (event.key !== 'Escape' || event.defaultPrevented) return
-            // Stacked dialogs: only the innermost one the user is actually in responds.
-            const focused = document.activeElement
-            if (focused instanceof Element && focused.closest('dialog[open]') !== dialogRef.current) return
-            void requestEscapeClose(event)
+            event.preventDefault()
+            event.stopImmediatePropagation()
+            void requestCloseTopOverlayBack()
         }
         window.addEventListener('keydown', closeOnEscape)
         return () => window.removeEventListener('keydown', closeOnEscape)
