@@ -26,6 +26,7 @@ import { StyledChip } from 'src/components/data-display/chip'
 import { CheckIcon, ChevronDownIcon, CloseIcon, PlusIconCircle } from 'src/components/icons'
 import { StyledCheckbox } from 'src/components/inputs/checkbox/base-ui/StyledCheckbox'
 import { cn } from 'src/helpers/cn'
+import { useBackCloses } from 'src/hooks/useBackCloses.hook'
 import {
     getOpenModalDialogAncestor,
     shouldUsePopoverTopLayer,
@@ -337,6 +338,7 @@ export function StyledSelectAutocomplete<
     const dismiss = useDismiss(context)
     const role = useRole(context, { role: 'listbox' })
     const { getReferenceProps, getFloatingProps, getItemProps } = useInteractions([dismiss, role])
+    useBackCloses({ active: open, requestClose: () => setOpen(false) })
     const referenceRef = useMergeRefs([refs.setReference])
     // Portal INTO the trigger's modal <dialog> when present (inertness). Popover API only for body portal.
     const portalRoot = useMemo(() => (open ? getOpenModalDialogAncestor(refs.reference.current) : undefined), [open, refs])

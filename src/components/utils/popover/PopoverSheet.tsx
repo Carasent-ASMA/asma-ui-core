@@ -15,6 +15,7 @@ import {
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { cn } from 'src/helpers/cn'
 import { firstTabbable } from 'src/helpers/focusable'
+import { useBackCloses } from 'src/hooks/useBackCloses.hook'
 import { useDebouncedValue } from 'src/hooks/useDebouncedValue.hook'
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
 import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
@@ -236,6 +237,8 @@ export const PopoverSheet = ({
         changeOpen(false)
     }, [changeOpen])
 
+    useBackCloses({ active: isOpen, requestClose: close })
+
     // Focus is managed by hand rather than with `FloatingFocusManager`, because that renders focus
     // guards (`tabindex=0` + `aria-hidden`) which axe fails as `aria-hidden-focus` — a rule this
     // package drove to zero in ASMA-8143 by fixing, not waiving. Turning the guards off is not an
@@ -366,6 +369,7 @@ export const PopoverSheet = ({
                     dataTest={dataTest}
                     open={isOpen}
                     onClose={close}
+                    registerBackClose={false}
                     title={title}
                     ariaLabel={ariaLabel}
                     viewResultsAction={viewResultsAction}
