@@ -23,8 +23,9 @@ StrictMode's replayed effects are a no-op.
 Layout planning works from measured widths: the title is measured as an
 unconstrained copy in the measurement strip, and the leading control and the
 non-shrinking status slot are both subtracted from the action budget before labels
-may collapse. The base height is identical at every width; `sticky` headers compact
-once stuck (`data-stuck`) and write their measured height as `scroll-padding-top`
+may collapse. The base height is 72px (16px padding) at 744px and wider, and 64px
+(12px padding) below 744px or when `compact` is set; content may expand it. `sticky` headers
+compact once stuck (`data-stuck`) and write their measured height as `scroll-padding-top`
 on the nearest scroll container, so a pinned header never covers keyboard-focused
 content. The leading navigation control and heading semantics survive loading and
 search, and focus moves into and out of the search slot.

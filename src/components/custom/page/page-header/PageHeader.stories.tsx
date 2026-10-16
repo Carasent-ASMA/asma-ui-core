@@ -67,7 +67,8 @@ const meta = {
                     'contracts, `focusKey` moves focus to it on every route change), wraps to a 2-line max ' +
                     'then truncates while the full string stays the accessible name, icon-only controls carry ' +
                     'aria-labels, targets are ≥40×40px, and the badge conveys a number — never colour alone. ' +
-                    'The base height is identical at every width; content may expand it. With `sticky`, the ' +
+                    'The base height is 72px (16px padding) at 744px and wider, and 64px (12px padding) below ' +
+                    '744px or when `compact` is set; content may expand it. With `sticky`, the ' +
                     'header compacts once scrolled (`data-stuck`) — give the scroll container ' +
                     '`scroll-padding-top` at least the compacted header height so pinned headers never cover ' +
                     'focused content.',
