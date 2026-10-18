@@ -145,6 +145,7 @@ export const StyledSelect = ({
     labelId,
 }: StyledSelectProps): JSX.Element => {
     const ctx = useFormControlContext()
+    // The context id is the StyledInputLabel's id; with no label element it is ignored and `name` names it.
     const listboxId = `${dataTest}-listbox`
     const isStandard = variant === 'standard'
     const isError = error ?? ctx?.error ?? false
@@ -418,7 +419,7 @@ export const StyledSelect = ({
                 // value text happens to be visible — which is either absent (nameless trigger, the
                 // axe `button-name` bug) or, when present, an ambiguous name on its own (a screen
                 // reader announcing just the selected value, e.g. "Paused", doesn't say what the field is).
-                aria-labelledby={labelId}
+                aria-labelledby={labelId ?? ctx?.labelId}
                 aria-label={!labelId ? name : undefined}
                 aria-invalid={isError ? true : undefined}
                 aria-describedby={showHelperSlot ? helperId : undefined}
@@ -506,7 +507,7 @@ export const StyledSelect = ({
                         // popup is a separate element from the trigger and needs its own accessible name
                         // (axe `aria-input-field-name`); relying on `name` alone left it nameless for any
                         // consumer using only an external `labelId` label, which is the common case.
-                        aria-labelledby={labelId}
+                        aria-labelledby={labelId ?? ctx?.labelId}
                         aria-label={!labelId ? name : undefined}
                         {...(usePopoverLayer ? TOP_LAYER_PROPS : {})}
                         style={{

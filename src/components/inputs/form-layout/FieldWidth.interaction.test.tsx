@@ -130,6 +130,27 @@ describe('field width pattern: labels above the field (WID-4)', () => {
         await expect(input).toBeRequired()
     })
 
+    it('names a select by the label above it in the same form control', async () => {
+        const { container } = mount(
+            <>
+                <StyledFormControl>
+                    <StyledInputLabel>Enhet</StyledInputLabel>
+                    <StyledSelect dataTest='unit' value=''>
+                        <StyledSelectItem value='kg'>kg</StyledSelectItem>
+                    </StyledSelect>
+                </StyledFormControl>
+                <StyledFormControl>
+                    <StyledSelect dataTest='period' name='Periode' value=''>
+                        <StyledSelectItem value='week'>Uke</StyledSelectItem>
+                    </StyledSelect>
+                </StyledFormControl>
+            </>,
+        )
+
+        await expect(within(container).getByRole('combobox', { name: 'Enhet' })).toBeInTheDocument()
+        await expect(within(container).getByRole('combobox', { name: 'Periode' })).toBeInTheDocument()
+    })
+
     it('keeps the floating label inside the search field (§10)', async () => {
         const { container } = mount(<StyledSearchField dataTest='search' label='Søk' value='Ola' />)
 
