@@ -207,7 +207,7 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
                 />
             )}
             {counterEnabled && (
-                <CharacterCounter id={counterId} length={value.length} limit={counterLimit} locale={locale} />
+                <CharacterCounter id={counterId} length={value.length} limit={counterLimit} locale={locale} className='self-end' />
             )}
         </div>
     )

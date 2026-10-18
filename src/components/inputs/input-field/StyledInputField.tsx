@@ -412,7 +412,7 @@ export const StyledInputField = ({
         fieldRef: rootRef,
         rowRef: helperRowRef,
         rowStyle: helperRowStyle,
-    } = useHelperRowBudget(expandHelperText && showHelperSlot)
+    } = useHelperRowBudget(expandHelperText && showHelperSlot && !showCounter)
 
     const sharedProps = {
         ...htmlInputPropsWithoutStyle,
@@ -650,27 +650,40 @@ export const StyledInputField = ({
                 )}
             </div>
 
-            {showHelperSlot && (
-                <HelperRow
-                    ref={helperRowRef}
-                    id={helperId}
-                    role={helperAlertRole}
-                    error={error}
-                    message={helperText}
-                    hideErrorIcon={slotProps?.formHelperText?.hideErrorIcon}
-                    className={cn('mr-[14px] box-border items-start', slotProps?.formHelperText?.className)}
-                    style={{ ...helperRowStyle, ...resolveSx(slotProps?.formHelperText?.sx) }}
-                />
-            )}
-
-            {showCounter && resolvedMaxLength && (
-                <CharacterCounter
-                    id={counterId}
-                    length={valueLength}
-                    limit={resolvedMaxLength}
-                    locale={locale}
-                    className='pt-1'
-                />
+            {showCounter && resolvedMaxLength ? (
+                <div className='flex items-start justify-between gap-4'>
+                    {showHelperSlot && (
+                        <HelperRow
+                            id={helperId}
+                            role={helperAlertRole}
+                            error={error}
+                            message={helperText}
+                            hideErrorIcon={slotProps?.formHelperText?.hideErrorIcon}
+                            className={cn('box-border min-w-0 flex-1 items-start', slotProps?.formHelperText?.className)}
+                            style={resolveSx(slotProps?.formHelperText?.sx)}
+                        />
+                    )}
+                    <CharacterCounter
+                        id={counterId}
+                        length={valueLength}
+                        limit={resolvedMaxLength}
+                        locale={locale}
+                        className='ml-auto shrink-0 whitespace-nowrap pt-1'
+                    />
+                </div>
+            ) : (
+                showHelperSlot && (
+                    <HelperRow
+                        ref={helperRowRef}
+                        id={helperId}
+                        role={helperAlertRole}
+                        error={error}
+                        message={helperText}
+                        hideErrorIcon={slotProps?.formHelperText?.hideErrorIcon}
+                        className={cn('mr-[14px] box-border items-start', slotProps?.formHelperText?.className)}
+                        style={{ ...helperRowStyle, ...resolveSx(slotProps?.formHelperText?.sx) }}
+                    />
+                )
             )}
         </div>
     )

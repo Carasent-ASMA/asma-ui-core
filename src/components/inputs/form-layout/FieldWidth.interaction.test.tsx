@@ -314,6 +314,18 @@ describe('field width pattern: character counter (WID-2, Q12)', () => {
         await expect(liveRegion).toHaveTextContent('21 av 30 tegn')
     })
 
+    it('puts the count on the hint line, at the right edge of the field', async () => {
+        const { container } = mount(
+            <StyledInputField dataTest='title' label='Tittel' helperText='Kort og tydelig' maxLength={50} counter value='Hei' />,
+        )
+
+        const field = root(container, 'full').getBoundingClientRect()
+        const hint = within(container).getByText('Kort og tydelig').getBoundingClientRect()
+        const count = within(container).getByText('3 of 50 characters').getBoundingClientRect()
+        await expect(Math.abs(count.bottom - hint.bottom)).toBeLessThanOrEqual(1)
+        await expect(Math.round(field.right - count.right)).toBe(0)
+    })
+
     it('counts in the text area in the chosen language', async () => {
         const { container } = mount(
             <StyledTextarea label='Notat' value='Hei' counter counterLimit={100} maxLength={100} locale='en' onChange={() => undefined} />,
