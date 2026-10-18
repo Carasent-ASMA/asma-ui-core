@@ -22,8 +22,10 @@ Full or one of three steps, and a form is one column of at most 600 px.
   still works and is deprecated.
 - **Labels above the field.** `StyledInputField` and `StyledInputLabel` take
   `labelPlacement?: 'above' | 'floating'`, default `'above'`. The label is no longer cut with an
-  ellipsis; it wraps. `StyledSearchField` keeps its floating label, the one exception the pattern
-  allows. The date and time pickers show `title` or `label` above the field.
+  ellipsis; it wraps. Its required mark is hidden from screen readers; the control is `required`.
+  `fieldLabelAboveClass()` gives other libraries (rich text) the same label look.
+  `StyledSearchField` keeps its floating label, the one exception the pattern allows. The date and
+  time pickers show `title` or `label` above the field.
 - **`StyledFormColumn`** limits a form to the 600 px column, left-aligned.
 - **`StyledFieldPair`** puts two fields in a row, 16 px apart: each field keeps its step, a Full
   field takes the rest of the row and is never narrower than S, and the pair stacks when the row is

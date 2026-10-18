@@ -510,7 +510,7 @@ export const StyledInputField = ({
                     style={{ ...resolveSx(slotProps?.inputLabel?.['sx']), ...slotProps?.inputLabel?.style }}
                 >
                     {label}
-                    {required && ' *'}
+                    {required && <span aria-hidden='true'>&nbsp;*</span>}
                 </label>
             )}
             <div className='relative overflow-visible'>

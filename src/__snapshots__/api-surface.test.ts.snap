@@ -296,6 +296,7 @@ exports[`asma-ui-core public API surface > keeps every runtime export of the pac
   "defaultTimePickerHelperMessages",
   "enqueueSnackbar",
   "estimateToolbarActionWidth",
+  "fieldLabelAboveClass",
   "fieldWidthForMaxLength",
   "fieldWidthStyle",
   "formatResultsLabel",

@@ -126,6 +126,8 @@ describe('field width pattern: labels above the field (WID-4)', () => {
         await expect(getComputedStyle(label).textOverflow).not.toBe('ellipsis')
         await expect(label.scrollWidth).toBeLessThanOrEqual(label.clientWidth)
         await expect(container.querySelector('legend')).toBeNull()
+        await expect(label.querySelector('[aria-hidden="true"]')).toHaveTextContent('*')
+        await expect(input).toBeRequired()
     })
 
     it('keeps the floating label inside the search field (§10)', async () => {

@@ -184,7 +184,7 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
             {caption && (
                 <label id={titleId} htmlFor={inputId} className={fieldLabelAboveClass({ disabled: rest.disabled })}>
                     {caption}
-                    {!title && required && ' *'}
+                    {!title && required && <span aria-hidden='true'>&nbsp;*</span>}
                 </label>
             )}
 

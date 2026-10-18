@@ -53,7 +53,7 @@ export const StyledInputLabel = ({
                 className={cn(fieldLabelAboveClass({ disabled: disabled ?? ctx?.disabled }), className)}
             >
                 {children}
-                {isRequired && ' *'}
+                {isRequired && <span aria-hidden='true'>&nbsp;*</span>}
             </label>
         )
     }
