@@ -1,0 +1,8 @@
+:root {
+    /* Field width pattern (ASMA-8489, WID-1/WID-3): four widths only, in rem so they grow with text. */
+    --field-width-xs: 8rem; /* 128px: postal code, year, age, time */
+    --field-width-s: 12.5rem; /* 200px: date, phone number, national ID, amount */
+    --field-width-m: 20rem; /* 320px: IBAN, long codes */
+    --form-column-width: 37.5rem; /* 600px: the one form column */
+    --field-width-full: var(--form-column-width);
+}

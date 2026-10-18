@@ -224,6 +224,25 @@ describe('design token layer', () => {
         expect([...orphans].sort()).toEqual([])
     })
 
+    it('sets the field width scale in rem, with Full capped by the form column', () => {
+        const valueOf = (property: string): string | undefined =>
+            themeAgnosticDeclarations(property).at(0)?.value
+
+        expect({
+            xs: valueOf('--field-width-xs'),
+            s: valueOf('--field-width-s'),
+            m: valueOf('--field-width-m'),
+            column: valueOf('--form-column-width'),
+            full: valueOf('--field-width-full'),
+        }).toEqual({
+            xs: '8rem',
+            s: '12.5rem',
+            m: '20rem',
+            column: '37.5rem',
+            full: 'var(--form-column-width)',
+        })
+    })
+
     it('routes twConfigs colors through the matching semantic token', () => {
         // When a semantic --colors-<key> exists, the Tailwind key must consume it rather than
         // reaching past it into the raw palette, or themes cannot override that utility.

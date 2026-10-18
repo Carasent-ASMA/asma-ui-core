@@ -4,7 +4,9 @@ import twConfigs from './tw-configs/twConfigs.json'
 const boxShadow = twConfigs.boxShadow,
     animation = twConfigs.animation,
     keyframes = twConfigs.keyframes,
-    fontFamily = twConfigs.fontFamily
+    fontFamily = twConfigs.fontFamily,
+    width = twConfigs.width,
+    maxWidth = twConfigs.maxWidth
 
 export default {
     mode: 'jit',
@@ -18,6 +20,8 @@ export default {
             boxShadow,
             animation,
             keyframes,
+            width,
+            maxWidth,
         },
     },
     darkMode: 'media',
