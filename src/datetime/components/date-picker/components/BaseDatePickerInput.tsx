@@ -72,7 +72,7 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
     const { maskRef } = useDatePickerMask()
     const titleId = useId()
     const inputId = useId()
-    // The label sits above the field, beside nothing, so the calendar button lines up with the input.
+    // One caption above the whole row, so the calendar button lines up with the input, not the label.
     const caption = title ?? label
     const [value, setValue] = useState(selected ? getValue(selected, dateFormat) : '')
 
