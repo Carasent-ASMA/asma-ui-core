@@ -164,10 +164,10 @@ export const StyledPhoneField = ({
                     />
                     <StyledInputField
                         dataTest={`${dataTest}-number`}
-                        // Grows with the container but never past 200 px. Figma draws it at 205 on
-                        // desktop and 158 in the mobile body, so the cap only bites where the row
-                        // has room to spare — a phone number has no use for the extra width.
-                        className='max-w-[200px]'
+                        // S: grows with the container but never past 12.5rem (200 px). Figma draws it
+                        // at 205 on desktop and 158 in the mobile body, so the cap only bites where
+                        // the row has room to spare — a phone number has no use for the extra width.
+                        width='s'
                         id={fieldId}
                         name={name}
                         value={displayValue}
@@ -177,7 +177,6 @@ export const StyledPhoneField = ({
                         error={error}
                         disabled={disabled}
                         required={required}
-                        fullWidth
                         // Figma aligns the message with the number input's left edge, not the
                         // pair's — so the input owns the one helper slot, and with it the
                         // always-mounted row, `aria-describedby`, `role=alert` and the

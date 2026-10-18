@@ -8,7 +8,7 @@ export function StyledCalendarPickerSelectYear(props: DropdownProps): JSX.Elemen
     const ariaLabel = props['aria-label']
 
     return (
-        <StyledFormControl style={{ marginLeft: '4px' }}>
+        <StyledFormControl style={{ display: 'inline-flex', width: 'auto', maxWidth: 'none', marginLeft: '4px' }}>
             <StyledSelect
                 dataTest='StyledCalendarPickerSelectYear'
                 size='small'

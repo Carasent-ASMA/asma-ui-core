@@ -1,9 +1,10 @@
 import type { DynamicSelectOption, StyledDynamicSelectProps } from '../types'
+import { fieldWidthStyle } from 'src/components/inputs/field-styles'
 import { DynamicSelectTitle } from './DynamicSelectTitle'
 
 type DynamicSelectReadOnlyValueProps<TOption extends DynamicSelectOption> = Pick<
     StyledDynamicSelectProps<TOption>,
-    'dataTest' | 'options' | 'title' | 'titleSize' | 'valueKey' | 'labelKey' | 'renderLabel'
+    'dataTest' | 'options' | 'title' | 'titleSize' | 'width' | 'valueKey' | 'labelKey' | 'renderLabel'
 > & {
     value: TOption | null
 }
@@ -23,6 +24,7 @@ export const DynamicSelectReadOnlyValue = <TOption extends DynamicSelectOption>(
     value,
     title,
     titleSize,
+    width = 'full',
     valueKey = 'value' as DynamicSelectReadOnlyValueProps<TOption>['valueKey'],
     labelKey = 'label' as DynamicSelectReadOnlyValueProps<TOption>['labelKey'],
     renderLabel,
@@ -45,7 +47,12 @@ export const DynamicSelectReadOnlyValue = <TOption extends DynamicSelectOption>(
             : (options.find((option) => getOptionValue(option) === getOptionValue(value)) ?? value)
 
     return (
-        <div data-testid={`${dataTest}-read-only`} className='flex flex-col gap-y-1'>
+        <div
+            data-testid={`${dataTest}-read-only`}
+            className='flex flex-col gap-y-1'
+            data-field-width={width}
+            style={fieldWidthStyle(width)}
+        >
             <DynamicSelectTitle title={title} titleSize={titleSize} />
             <div
                 data-testid={`${dataTest}-read-only-value`}

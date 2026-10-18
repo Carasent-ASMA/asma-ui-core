@@ -34,6 +34,8 @@ export const StyledSearchField: FC<StyledSearchFieldProps> = ({
             <StyledInputField
                 size='small'
                 variant='outlined'
+                // Field width pattern §10: the search field keeps its label inside the field.
+                labelPlacement='floating'
                 value={value}
                 reserveHelperText={false}
                 // Figma: floating label only when focused/filled; at rest the label string is the placeholder.
@@ -119,6 +121,8 @@ export const StyledSearchField: FC<StyledSearchFieldProps> = ({
                 {...props}
                 sx={{
                     width: props.fullWidth ? '100%' : 'var(--dynamic-toolbar-search-width, 160px)',
+                    // Toolbars are outside the form column (pattern §11 Q7), so the Full cap does not apply.
+                    maxWidth: 'none',
                     ...(props.sx as object),
                 }}
             />

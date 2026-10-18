@@ -10,6 +10,7 @@ import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
 import { OverlayBackOwnerContext, useBackCloses } from 'src/hooks/useBackCloses.hook'
 import { StyledTooltip } from 'src/components/data-display/tooltip'
 import type { IMinimizableDialogProps } from './types'
+import { fullScreenFieldWidthVars } from 'src/components/inputs/field-styles'
 import {
     ArrowExpandIcon,
     ArrowShrinkIcon,
@@ -98,6 +99,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
               transform: 'translate(-50%, -50%)',
               width: 'min(1000px, calc(100vw - 32px))',
               height: '95dvh',
+              ...fullScreenFieldWidthVars,
           }
         : undefined
 

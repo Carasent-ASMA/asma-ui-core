@@ -41,7 +41,7 @@ import {
     useTopLayerRef,
 } from 'src/hooks/useTopLayer.hook'
 import { useFormControlContext } from '../../miscellaneous/FormControlContext'
-import { outlineClass, type FieldSize } from '../field-styles'
+import { fieldWidthStyle, outlineClass, type FieldSize, type FieldWidth } from '../field-styles'
 import type { StyledSelectItemProps } from './StyledSelectItem'
 
 export interface SelectChangeEvent<T = unknown> {
@@ -86,6 +86,9 @@ export interface StyledSelectProps {
     displayEmpty?: boolean
     multiple?: boolean
     renderValue?: (value: unknown) => ReactNode
+    /** Field width pattern step; Full by default. `variant="standard"` keeps its content width. */
+    width?: FieldWidth
+    /** @deprecated Fields are Full by default; use `width`. */
     fullWidth?: boolean
     className?: string
     style?: CSSProperties
@@ -129,7 +132,8 @@ export const StyledSelect = ({
     displayEmpty,
     multiple,
     renderValue,
-    fullWidth,
+    width = 'full',
+    fullWidth: _fullWidth,
     className,
     style,
     sx,
@@ -381,8 +385,14 @@ export const StyledSelect = ({
     return (
         <div
             ref={fieldRef}
-            className={cn('group relative inline-flex flex-col', fullWidth && 'w-full', className)}
-            style={{ fontFamily: 'Roboto, Helvetica, Arial, sans-serif', ...resolveSx(sx), ...style }}
+            className={cn('group relative flex-col', isStandard ? 'inline-flex' : 'flex', className)}
+            data-field-width={isStandard ? undefined : width}
+            style={{
+                ...(isStandard ? {} : fieldWidthStyle(width)),
+                fontFamily: 'Roboto, Helvetica, Arial, sans-serif',
+                ...resolveSx(sx),
+                ...style,
+            }}
         >
             <button
                 ref={setReference}
@@ -422,7 +432,6 @@ export const StyledSelect = ({
                     setFocused(false)
                     onBlur?.(event)
                 }}
-                style={{ minWidth: hasValue && !isStandard ? 105 : undefined }}
                 className={cn(
                     'relative flex w-full items-center justify-between text-left outline-none',
                     // Figma field text = Body Base 16/lh24 (`text-base`), h40 (matches StyledInputField/field-styles).

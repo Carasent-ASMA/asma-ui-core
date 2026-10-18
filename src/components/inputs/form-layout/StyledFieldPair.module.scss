@@ -1,0 +1,38 @@
+// Field width pattern WID-9: two fields in a row, 16px apart, that stack by themselves when the row is
+// too narrow (flex-wrap, no breakpoint). Fields line up on their top edge, so a pair's labels must fit
+// on one line.
+.fieldset {
+    margin: 0;
+    border: 0;
+    padding: 0;
+    min-width: 0;
+}
+
+.legend {
+    padding: 0;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 1rem;
+
+    > [data-field-width='xs'] {
+        flex: 0 1 var(--field-width-xs);
+    }
+
+    > [data-field-width='s'] {
+        flex: 0 1 var(--field-width-s);
+    }
+
+    > [data-field-width='m'] {
+        flex: 0 1 var(--field-width-m);
+    }
+
+    // A Full field takes the rest of the row, never less than S; two Full fields share it equally.
+    > [data-field-width='full'] {
+        flex: 1 1 var(--field-width-s);
+        min-width: min(100%, var(--field-width-s));
+    }
+}

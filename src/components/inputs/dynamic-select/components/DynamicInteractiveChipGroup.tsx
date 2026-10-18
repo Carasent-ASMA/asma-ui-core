@@ -1,4 +1,5 @@
 import { ErrorOutlineIcon, Skeleton, StyledButton, StyledChip, StyledInteractiveChip, StyledTooltip } from 'src'
+import { fieldWidthStyle } from 'src/components/inputs/field-styles'
 import type { DynamicSelectOption, StyledDynamicSelectComponent, StyledDynamicSelectProps } from '../types'
 import { cn } from 'src/helpers/cn'
 import { useHelperAlertRole } from 'src/helpers/useHelperAlertRole'
@@ -21,6 +22,7 @@ export const DynamicInteractiveChipGroup = forwardRef(
             multiple,
             title,
             titleSize,
+            width = 'full',
             disabled,
             onChange,
             required,
@@ -112,7 +114,12 @@ export const DynamicInteractiveChipGroup = forwardRef(
         })
 
         return (
-            <div data-testid={`${dataTest}-dynamic-radio-group`} className='relative flex flex-col gap-y-1'>
+            <div
+                data-testid={`${dataTest}-dynamic-radio-group`}
+                className='relative flex flex-col gap-y-1'
+                data-field-width={width}
+                style={fieldWidthStyle(width)}
+            >
                 <DynamicSelectTitle title={title} titleSize={titleSize} />
                 {/* HACK for calculating overflow layout */}
                 <div

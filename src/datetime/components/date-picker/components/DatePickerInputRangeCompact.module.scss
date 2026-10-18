@@ -1,5 +1,5 @@
 .styled-date-picker-input-range-compact {
-    @apply flex gap-7 items-center flex-wrap w-fit cursor-pointer #{!important};
+    @apply flex gap-4 items-start flex-wrap w-fit cursor-pointer #{!important};
     &.range-compact-disabled {
         @apply pointer-events-none text-gama-300 #{!important};
     }

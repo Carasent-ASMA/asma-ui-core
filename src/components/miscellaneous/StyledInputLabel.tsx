@@ -1,6 +1,12 @@
 import type { ReactNode } from 'react'
 import { cn } from 'src/helpers/cn'
-import { floatingLabelClass, floatingLabelLayoutStyle, type FieldSize } from '../inputs/field-styles'
+import {
+    fieldLabelAboveClass,
+    floatingLabelClass,
+    floatingLabelLayoutStyle,
+    type FieldLabelPlacement,
+    type FieldSize,
+} from '../inputs/field-styles'
 import { useFormControlContext } from './FormControlContext'
 
 export interface InputLabelProps {
@@ -13,13 +19,15 @@ export interface InputLabelProps {
     size?: FieldSize
     /** Force the shrunk (floated) state; otherwise derived from the surrounding FormControl. */
     shrink?: boolean
+    /** `above` (default) or `floating`, as on `StyledInputField`. */
+    labelPlacement?: FieldLabelPlacement
     className?: string
 }
 
 /**
- * Floating field label (replaces MUI `InputLabel`). Reads focus/filled/error/size from the
- * surrounding `StyledFormControl`; `shrink` lifts it onto the border. Public props preserved
- * (DEC-003). TASK-401.
+ * Field label (replaces MUI `InputLabel`), above the field by default. The `floating` placement reads
+ * focus/filled/error/size from the surrounding `StyledFormControl`; `shrink` lifts it onto the border.
+ * Public props preserved (DEC-003). TASK-401.
  */
 export const StyledInputLabel = ({
     children,
@@ -30,11 +38,25 @@ export const StyledInputLabel = ({
     error,
     size,
     shrink,
+    labelPlacement = 'above',
     className,
 }: InputLabelProps): JSX.Element => {
     const ctx = useFormControlContext()
     const isShrunk = shrink ?? (ctx ? ctx.focused || ctx.filled : false)
     const isRequired = required ?? ctx?.required ?? false
+
+    if (labelPlacement === 'above') {
+        return (
+            <label
+                htmlFor={htmlFor}
+                id={id ?? ctx?.labelId}
+                className={cn(fieldLabelAboveClass({ disabled: disabled ?? ctx?.disabled }), className)}
+            >
+                {children}
+                {isRequired && ' *'}
+            </label>
+        )
+    }
 
     return (
         <label
