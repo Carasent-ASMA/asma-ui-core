@@ -108,16 +108,32 @@ const CounterField = (): JSX.Element => {
                 dataTest='title'
                 label='Tittel'
                 maxLength={100}
-                counter
                 locale='no'
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
             />
+            <StyledInputField dataTest='with-hint' label='Med hint' helperText='Kort og tydelig' maxLength={100} locale='no' />
+            <StyledInputField
+                dataTest='with-error'
+                label='Med feil'
+                error
+                helperText='Fyll inn tittel'
+                maxLength={100}
+                locale='no'
+            />
+            <StyledInputField dataTest='disabled' label='Deaktivert' disabled maxLength={100} locale='no' value='Fylt inn' />
+            <StyledInputField dataTest='locked' label='Låst' readOnly maxLength={100} locale='no' value='Fylt inn' />
+            <StyledInputField
+                dataTest='postal-code'
+                label='Postnummer'
+                width='xs'
+                maxLength={4}
+                counter={false}
+                locale='no'
+            />
             <StyledTextarea
                 dataTest='note'
                 label='Notat'
-                counter
-                counterLimit={500}
                 maxLength={500}
                 locale='no'
                 value={note}
