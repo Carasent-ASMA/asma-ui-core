@@ -82,7 +82,10 @@ export interface StyledInputFieldProps {
     expandHelperText?: boolean
     /** Character limit; also readable from `slotProps.htmlInput.maxLength`. */
     maxLength?: number
-    /** Shows the count against `maxLength` as the user types, for free text with a limit. */
+    /**
+     * Count against `maxLength`, on by default whenever the field has a limit (WID-12). Pass `false`
+     * for a fixed format such as a postal code, whose length the label or hint already states.
+     */
     counter?: boolean
     /** Language of the counter text. */
     locale?: UiCoreLocale
@@ -232,7 +235,7 @@ export const StyledInputField = ({
     const controlId = htmlInputRest.id ?? fieldId
     const resolvedMaxLength = maxLength ?? htmlInputRest.maxLength
     const counterId = `${fieldId}-counter`
-    const showCounter = Boolean(counter && resolvedMaxLength && !readOnly)
+    const showCounter = counter !== false && Boolean(resolvedMaxLength)
     const valueLength = isControlled ? String(value ?? '').length : uncontrolledLength
 
     const isFloatingLabel = labelPlacement === 'floating' && Boolean(label)
@@ -412,7 +415,7 @@ export const StyledInputField = ({
         fieldRef: rootRef,
         rowRef: helperRowRef,
         rowStyle: helperRowStyle,
-    } = useHelperRowBudget(expandHelperText && showHelperSlot && !showCounter)
+    } = useHelperRowBudget(expandHelperText && showHelperSlot)
 
     const sharedProps = {
         ...htmlInputPropsWithoutStyle,
@@ -651,41 +654,27 @@ export const StyledInputField = ({
                 )}
             </div>
 
-            {showCounter && resolvedMaxLength ? (
-                <div className='flex items-start justify-between gap-4'>
-                    {showHelperSlot && (
-                        <HelperRow
-                            id={helperId}
-                            role={helperAlertRole}
-                            error={error}
-                            message={helperText}
-                            hideErrorIcon={slotProps?.formHelperText?.hideErrorIcon}
-                            className={cn('box-border min-w-0 flex-1 items-start', slotProps?.formHelperText?.className)}
-                            style={resolveSx(slotProps?.formHelperText?.sx)}
-                        />
-                    )}
-                    <CharacterCounter
-                        id={counterId}
-                        length={valueLength}
-                        limit={resolvedMaxLength}
-                        locale={locale}
-                        className='ml-auto shrink-0 whitespace-nowrap pt-1'
-                    />
-                </div>
-            ) : (
-                showHelperSlot && (
-                    <HelperRow
-                        ref={helperRowRef}
-                        id={helperId}
-                        role={helperAlertRole}
-                        error={error}
-                        message={helperText}
-                        hideErrorIcon={slotProps?.formHelperText?.hideErrorIcon}
-                        className={cn('mr-[14px] box-border items-start', slotProps?.formHelperText?.className)}
-                        style={{ ...helperRowStyle, ...resolveSx(slotProps?.formHelperText?.sx) }}
-                    />
-                )
+            {showHelperSlot && (
+                <HelperRow
+                    ref={helperRowRef}
+                    id={helperId}
+                    role={helperAlertRole}
+                    error={error}
+                    message={helperText}
+                    hideErrorIcon={slotProps?.formHelperText?.hideErrorIcon}
+                    className={cn('mr-[14px] box-border items-start', slotProps?.formHelperText?.className)}
+                    style={{ ...helperRowStyle, ...resolveSx(slotProps?.formHelperText?.sx) }}
+                />
             )}
+            {showCounter && resolvedMaxLength ? (
+                <CharacterCounter
+                    id={counterId}
+                    length={valueLength}
+                    limit={resolvedMaxLength}
+                    locale={locale}
+                    className='pt-1'
+                />
+            ) : null}
         </div>
     )
 }

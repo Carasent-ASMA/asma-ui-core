@@ -118,7 +118,9 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
 }) => {
     const textAreaInnerRef = useRef<HTMLTextAreaElement>(null)
     const textAreaRef = refLink ?? textAreaInnerRef
-    const counterEnabled = !!(counter && counterLimit)
+    // WID-12: a limit always shows its count, unless the caller opts out with `counter={false}`.
+    const counterLimitResolved = counterLimit ?? (Number.isFinite(maxLength) ? maxLength : undefined)
+    const counterEnabled = counter !== false && Boolean(counterLimitResolved)
 
     const descriptionId = useId()
     const counterId = useId()
@@ -206,9 +208,14 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
                     maxLength={maxLength}
                 />
             )}
-            {counterEnabled && (
-                <CharacterCounter id={counterId} length={value.length} limit={counterLimit} locale={locale} className='self-end' />
-            )}
+            {counterEnabled && counterLimitResolved && variant === 'active' ? (
+                <CharacterCounter
+                    id={counterId}
+                    length={value.length}
+                    limit={counterLimitResolved}
+                    locale={locale}
+                />
+            ) : null}
         </div>
     )
 }

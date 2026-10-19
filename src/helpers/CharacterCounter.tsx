@@ -21,7 +21,8 @@ export interface CharacterCounterProps {
 
 /**
  * The count of a free-text field with a character limit, such as *12 av 100 tegn* (field width
- * pattern WID-2, Q12), so typed text is never cut without notice.
+ * pattern WID-2, WID-12), so typed text is never cut without notice.
+ * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#45907-218317
  */
 export const CharacterCounter = ({ id, length, limit, locale = 'en', className }: CharacterCounterProps): JSX.Element => {
     const text = counterText[locale](length, limit)

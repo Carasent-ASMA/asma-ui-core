@@ -345,7 +345,7 @@ describe('field width pattern: full-screen minimizable dialog (WID-10)', () => {
     })
 })
 
-describe('field width pattern: character counter (WID-2, Q12)', () => {
+describe('field width pattern: character counter (WID-2, WID-12)', () => {
     afterEach(cleanup)
 
     it('shows the count as the user types and announces it only near the limit', async () => {
@@ -356,7 +356,6 @@ describe('field width pattern: character counter (WID-2, Q12)', () => {
                     dataTest='title'
                     label='Tittel'
                     maxLength={30}
-                    counter
                     locale='no'
                     value={value}
                     onChange={(event) => setValue(event.target.value)}
@@ -367,6 +366,7 @@ describe('field width pattern: character counter (WID-2, Q12)', () => {
         const input = within(container).getByLabelText('Tittel')
         const liveRegion = container.querySelector('[aria-live="polite"]')!
 
+        await expect(within(container).getByText('0 av 30 tegn')).toBeInTheDocument()
         await userEvent.type(input, 'Hei')
         await expect(within(container).getByText('3 av 30 tegn')).toBeInTheDocument()
         await expect(liveRegion).toHaveTextContent('')
@@ -377,24 +377,82 @@ describe('field width pattern: character counter (WID-2, Q12)', () => {
         await expect(liveRegion).toHaveTextContent('24 av 30 tegn')
     })
 
-    it('puts the count on the hint line, at the right edge of the field', async () => {
+    it('puts the count on its own line, on the left, under the hint (WID-12)', async () => {
         const { container } = mount(
-            <StyledInputField dataTest='title' label='Tittel' helperText='Kort og tydelig' maxLength={50} counter value='Hei' />,
+            <StyledInputField dataTest='title' label='Tittel' helperText='Kort og tydelig' maxLength={50} value='Hei' />,
         )
 
         const field = root(container, 'full').getBoundingClientRect()
         const hint = within(container).getByText('Kort og tydelig').getBoundingClientRect()
         const count = within(container).getByText('3 of 50 characters').getBoundingClientRect()
-        await expect(Math.abs(count.bottom - hint.bottom)).toBeLessThanOrEqual(1)
-        await expect(Math.round(field.right - count.right)).toBe(0)
+        await expect(count.top).toBeGreaterThanOrEqual(hint.bottom)
+        await expect(Math.round(count.left - field.left)).toBe(0)
     })
 
-    it('counts in the text area in the chosen language', async () => {
+    it('puts the count under the error and lists the error first for screen readers', async () => {
         const { container } = mount(
-            <StyledTextarea label='Notat' value='Hei' counter counterLimit={100} maxLength={100} locale='en' onChange={() => undefined} />,
+            <StyledInputField
+                dataTest='title'
+                label='Tittel'
+                error
+                helperText='Fyll inn tittel'
+                maxLength={50}
+                value=''
+            />,
         )
 
-        await expect(within(container).getByText('3 of 100 characters')).toBeInTheDocument()
+        const input = within(container).getByLabelText('Tittel')
+        const error = within(container).getByText('Fyll inn tittel')
+        const count = within(container).getByText('0 of 50 characters')
+        await expect(count.getBoundingClientRect().top).toBeGreaterThanOrEqual(error.getBoundingClientRect().bottom)
+
+        const [first, second] = input.getAttribute('aria-describedby')!.split(' ')
+        await expect(container.querySelector(`[id="${first}"]`)).toHaveTextContent('Fyll inn tittel')
+        await expect(second).toContain('counter')
+    })
+
+    it('keeps the count readable on read-only and disabled fields, like the hint', async () => {
+        const { container } = mount(
+            <>
+                <StyledInputField dataTest='locked' label='Låst' readOnly maxLength={50} value='Hei' />
+                <StyledInputField dataTest='disabled' label='Av' disabled maxLength={50} value='Hei' />
+            </>,
+        )
+
+        const counts = within(container).getAllByText('3 of 50 characters')
+        await expect(counts).toHaveLength(2)
+        for (const count of counts) await expect(count).toHaveClass('text-delta-600')
+    })
+
+    it('shows no count for a fixed format that opts out', async () => {
+        const { container } = mount(
+            <StyledInputField dataTest='postal' label='Postnummer' width='xs' maxLength={4} counter={false} value='0150' />,
+        )
+
+        await expect(within(container).queryByText(/of 4 characters/)).toBeNull()
+        await expect(within(container).getByLabelText('Postnummer').getAttribute('aria-describedby')).toBeNull()
+    })
+
+    it('counts in the text area from maxLength alone, on the left under the field', async () => {
+        const { container } = mount(
+            <StyledTextarea label='Notat' value='Hei' maxLength={100} locale='en' onChange={() => undefined} />,
+        )
+
+        const textarea = within(container).getByLabelText('Notat')
+        const count = within(container).getByText('3 of 100 characters')
+        await expect(count.getBoundingClientRect().top).toBeGreaterThanOrEqual(textarea.getBoundingClientRect().bottom)
+        await expect(Math.round(count.getBoundingClientRect().left - textarea.getBoundingClientRect().left)).toBe(0)
         await expect(container.querySelector('[aria-live="polite"]')).toHaveTextContent('')
+    })
+
+    it('shows no count in the text area when it opts out or is view-only', async () => {
+        const { container } = mount(
+            <>
+                <StyledTextarea label='Uten' value='Hei' maxLength={100} counter={false} onChange={() => undefined} />
+                <StyledTextarea label='Visning' value='Hei' variant='view_only' />
+            </>,
+        )
+
+        await expect(within(container).queryByText(/of 100 characters/)).toBeNull()
     })
 })
