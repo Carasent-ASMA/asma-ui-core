@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { MinimizableDialog } from './MinimizableDialog'
+import { StyledDialog } from 'src/components/feedback/dialog/StyledDialog'
 import { getOverlayBackStackSize, requestCloseTopOverlayBack } from 'src/hooks/useBackCloses.hook'
 
 describe('MinimizableDialog keyboard contract', () => {
@@ -228,6 +229,19 @@ describe('MinimizableDialog busy and disabled footer (disabled-states DIS-8, R05
 
 describe('MinimizableDialog native Back (ASMA-8471)', () => {
     afterEach(cleanup)
+    afterEach(() => {
+        delete window.__ASMA__SHELL__
+    })
+
+    /** The window-scoped stack itself, not the module accessor — a component that registered into a
+     *  per-bundle copy of the registry instead would still satisfy `getOverlayBackStackSize()`. */
+    const backRegistryEntries = (): unknown[] => window.__asmaOverlayBackRegistry__?.entries ?? []
+
+    /** Stand in for the `asma-core-helpers` adapter deferring a `history.push` behind the top
+     *  overlay. No `register`, so nothing tries to drive a real guard from here. */
+    const setPendingNavigation = (pendingNavigation: boolean): void => {
+        window.__ASMA__SHELL__ = { overlayBack: { v: 1, enabled: true, pendingNavigation } }
+    }
 
     it('closes through onClose while fullscreen', async () => {
         const onClose = fn()
@@ -243,18 +257,33 @@ describe('MinimizableDialog native Back (ASMA-8471)', () => {
         await expect(onClose).toHaveBeenCalledTimes(1)
     })
 
-    it('does not register while docked (not a modal layer)', async () => {
+    it('closes through onClose while docked, the same way ✕ does (REQ-002)', async () => {
         const onClose = fn()
         mount(
             <MinimizableDialog dataTest='dialog' open title='Editor' onClose={onClose}>
                 <p>Content</p>
             </MinimizableDialog>,
         )
-        await waitFor(() => expect(document.querySelectorAll('[data-testid="dialog"]')).not.toHaveLength(0))
-        await expect(getOverlayBackStackSize()).toBe(0)
+        await waitFor(() => expect(backRegistryEntries()).toHaveLength(1))
 
         void requestCloseTopOverlayBack()
 
+        await expect(onClose).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not register once minimized while docked', async () => {
+        const onClose = fn()
+        const { container } = mount(
+            <MinimizableDialog dataTest='dialog' open title='Editor' onClose={onClose}>
+                <p>Content</p>
+            </MinimizableDialog>,
+        )
+        await waitFor(() => expect(backRegistryEntries()).toHaveLength(1))
+
+        await userEvent.click(container.querySelectorAll<HTMLButtonElement>('[data-testid="minimize-button"]')[1]!)
+
+        await waitFor(() => expect(backRegistryEntries()).toHaveLength(0))
+        void requestCloseTopOverlayBack()
         await expect(onClose).not.toHaveBeenCalled()
     })
 
@@ -282,6 +311,186 @@ describe('MinimizableDialog native Back (ASMA-8471)', () => {
 
         void requestCloseTopOverlayBack()
         await expect(onClose).not.toHaveBeenCalled()
+    })
+
+    /** A docked panel and a modal `StyledDialog`, each opened independently of the other. */
+    const DockedUnderDialogFixture = ({
+        dialogOpen,
+        panelOpen,
+        onDialogClose,
+        onPanelClose,
+    }: {
+        dialogOpen: boolean
+        panelOpen: boolean
+        onDialogClose: () => void
+        onPanelClose: () => void
+    }): JSX.Element => (
+        <>
+            <StyledDialog dataTest='confirm' dialogTitle='Confirm' open={dialogOpen} onClose={onDialogClose}>
+                <p>Dialog content</p>
+            </StyledDialog>
+            <MinimizableDialog dataTest='dialog' open={panelOpen} title='Editor' onClose={onPanelClose}>
+                <p>Content</p>
+            </MinimizableDialog>
+        </>
+    )
+
+    it('closes a StyledDialog opened over a docked panel first, and the panel second (BACK-2)', async () => {
+        const onDialogClose = fn()
+        const onPanelClose = fn()
+        const { rerender } = mount(
+            <DockedUnderDialogFixture
+                dialogOpen={false}
+                panelOpen
+                onDialogClose={onDialogClose}
+                onPanelClose={onPanelClose}
+            />,
+        )
+        await waitFor(() => expect(backRegistryEntries()).toHaveLength(1))
+
+        rerender(
+            <DockedUnderDialogFixture dialogOpen panelOpen onDialogClose={onDialogClose} onPanelClose={onPanelClose} />,
+        )
+        await waitFor(() => expect(backRegistryEntries()).toHaveLength(2))
+
+        void requestCloseTopOverlayBack()
+        await expect(onDialogClose).toHaveBeenCalledTimes(1)
+        await expect(onPanelClose).not.toHaveBeenCalled()
+
+        rerender(
+            <DockedUnderDialogFixture
+                dialogOpen={false}
+                panelOpen
+                onDialogClose={onDialogClose}
+                onPanelClose={onPanelClose}
+            />,
+        )
+        await waitFor(() => expect(backRegistryEntries()).toHaveLength(1))
+
+        void requestCloseTopOverlayBack()
+        await expect(onPanelClose).toHaveBeenCalledTimes(1)
+    })
+
+    it('keeps a StyledDialog on top when the docked panel opens UNDER it (RISK-010)', async () => {
+        const onDialogClose = fn()
+        const onPanelClose = fn()
+        // The inverse order: the panel registers LAST, so plain registration order would hand it the
+        // Back press even though the modal <dialog> covers it and makes it inert.
+        const { rerender } = mount(
+            <DockedUnderDialogFixture
+                dialogOpen
+                panelOpen={false}
+                onDialogClose={onDialogClose}
+                onPanelClose={onPanelClose}
+            />,
+        )
+        await waitFor(() => expect(backRegistryEntries()).toHaveLength(1))
+
+        rerender(
+            <DockedUnderDialogFixture dialogOpen panelOpen onDialogClose={onDialogClose} onPanelClose={onPanelClose} />,
+        )
+        await waitFor(() => expect(backRegistryEntries()).toHaveLength(2))
+
+        void requestCloseTopOverlayBack()
+        await expect(onDialogClose).toHaveBeenCalledTimes(1)
+        await expect(onPanelClose).not.toHaveBeenCalled()
+
+        rerender(
+            <DockedUnderDialogFixture
+                dialogOpen={false}
+                panelOpen
+                onDialogClose={onDialogClose}
+                onPanelClose={onPanelClose}
+            />,
+        )
+        await waitFor(() => expect(backRegistryEntries()).toHaveLength(1))
+
+        void requestCloseTopOverlayBack()
+        await expect(onPanelClose).toHaveBeenCalledTimes(1)
+    })
+
+    it('closes a StyledDialog opened from inside a fullscreen panel first, then the panel', async () => {
+        const onDialogClose = fn()
+        const onPanelClose = fn()
+        const PanelWithInnerDialog = ({ dialogOpen }: { dialogOpen: boolean }): JSX.Element => (
+            <MinimizableDialog dataTest='dialog' open fullScreenState title='Editor' onClose={onPanelClose}>
+                <StyledDialog dataTest='confirm' dialogTitle='Confirm' open={dialogOpen} onClose={onDialogClose}>
+                    <p>Dialog content</p>
+                </StyledDialog>
+            </MinimizableDialog>
+        )
+        const { rerender } = mount(<PanelWithInnerDialog dialogOpen={false} />)
+        await waitFor(() => expect(backRegistryEntries()).toHaveLength(1))
+
+        rerender(<PanelWithInnerDialog dialogOpen />)
+        await waitFor(() => expect(backRegistryEntries()).toHaveLength(2))
+
+        void requestCloseTopOverlayBack()
+        await expect(onDialogClose).toHaveBeenCalledTimes(1)
+        await expect(onPanelClose).not.toHaveBeenCalled()
+
+        rerender(<PanelWithInnerDialog dialogOpen={false} />)
+        await waitFor(() => expect(backRegistryEntries()).toHaveLength(1))
+
+        void requestCloseTopOverlayBack()
+        await expect(onPanelClose).toHaveBeenCalledTimes(1)
+    })
+
+    it('refuses a deferred route change while docked, so navigating leaves the panel open', async () => {
+        const onClose = fn()
+        mount(
+            <MinimizableDialog dataTest='dialog' open title='Editor' onClose={onClose}>
+                <p>Content</p>
+            </MinimizableDialog>,
+        )
+        await waitFor(() => expect(backRegistryEntries()).toHaveLength(1))
+
+        setPendingNavigation(true)
+        // `false` is the adapter's fail-open signal: strip the guard, navigate, leave this open.
+        await expect(requestCloseTopOverlayBack()).toBe(false)
+        await expect(onClose).not.toHaveBeenCalled()
+
+        setPendingNavigation(false)
+        void requestCloseTopOverlayBack()
+        await expect(onClose).toHaveBeenCalledTimes(1)
+    })
+
+    it('still closes on a deferred route change while fullscreen', async () => {
+        const onClose = fn()
+        mount(
+            <MinimizableDialog dataTest='dialog' open fullScreenState title='Editor' onClose={onClose}>
+                <p>Content</p>
+            </MinimizableDialog>,
+        )
+        await waitFor(() => expect(backRegistryEntries()).toHaveLength(1))
+
+        setPendingNavigation(true)
+        void requestCloseTopOverlayBack()
+
+        await expect(onClose).toHaveBeenCalledTimes(1)
+    })
+
+    it('keeps exactly one registration across a fullscreen ↔ docked toggle (GUD-002)', async () => {
+        const { container } = mount(
+            <MinimizableDialog dataTest='dialog' open title='Editor' onClose={() => undefined}>
+                <p>Content</p>
+            </MinimizableDialog>,
+        )
+        await waitFor(() => expect(backRegistryEntries()).toHaveLength(1))
+        const [registeredWhileDocked] = backRegistryEntries()
+        const fullscreenButton = container.querySelector<HTMLButtonElement>('[data-testid="fullscreen-button"]')!
+
+        await userEvent.click(fullscreenButton)
+        await waitFor(() => expect(fullscreenButton).toHaveAccessibleName('Exit full screen'))
+        await expect(backRegistryEntries()).toHaveLength(1)
+        // The SAME entry object, not a replacement: the effect never re-ran, so under a live history
+        // adapter the armed guard survives the toggle instead of draining and re-arming.
+        await expect(backRegistryEntries()[0]).toBe(registeredWhileDocked)
+
+        await userEvent.click(fullscreenButton)
+        await waitFor(() => expect(fullscreenButton).toHaveAccessibleName('Full screen'))
+        await expect(backRegistryEntries()).toHaveLength(1)
+        await expect(backRegistryEntries()[0]).toBe(registeredWhileDocked)
     })
 
     it('waits while the primary action runs, same as its ✕/Esc path', async () => {

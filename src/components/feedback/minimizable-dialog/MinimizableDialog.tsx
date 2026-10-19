@@ -7,7 +7,7 @@ import styles from './MinimizableDialog.module.scss'
 import { StyledMenu, StyledMenuItem } from 'src/components/navigation/menu'
 import { useToggleMenuVisibility } from 'src/hooks/useToggleMenuVisibility.hook'
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
-import { OverlayBackOwnerContext, useBackCloses } from 'src/hooks/useBackCloses.hook'
+import { isOverlayBackNavigationPending, OverlayBackOwnerContext, useBackCloses } from 'src/hooks/useBackCloses.hook'
 import { StyledTooltip } from 'src/components/data-display/tooltip'
 import type { IMinimizableDialogProps } from './types'
 import { fullScreenFieldWidthVars } from 'src/components/inputs/field-styles'
@@ -74,10 +74,26 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     // default corner-docked panel is a non-modal floating widget that must NOT trap focus.
     useFocusTrap(open && isFullScreenActive, panelRef, closeWhenIdle)
 
-    // ASMA-8471: only the fullscreen, non-minimized state is a real modal layer worth a Back press —
-    // the corner-docked and minimized states are non-modal floating widgets the page stays usable
-    // around. `closeWhenIdle` already no-ops while the primary action is busy, same as its ✕/Esc path.
-    useBackCloses({ active: open && isFullScreenActive, requestClose: closeWhenIdle, ownerRef: panelRef })
+    // ASMA-8471 / REQ-002: Back closes this panel whenever it is showing — docked as well as
+    // fullscreen — through `closeWhenIdle`, the very callback ✕ uses (BACK-3), which already no-ops
+    // while the primary action is busy. Docked is deliberately included even though it is non-modal
+    // and Escape is left alone there: to a phone user the docked panel is still "the thing that is
+    // open", and the CRM organization panel never closing on Back was the headline defect.
+    // `minimized` is the one state that does NOT register — a collapsed title bar is not an overlay
+    // to dismiss, and Back must reach whatever is behind it instead.
+    // Ordering (RISK-010) is not decided here: this panel is a plain z-indexed <div>, and the
+    // registry skips any entry covered by an open native modal <dialog>, so a `StyledDialog` on top
+    // keeps the Back press however late this panel mounted. `panelRef` is what makes that work.
+    //
+    // The one case Back and a route change part ways: while DOCKED this panel is a shell-level
+    // widget that deliberately outlives navigation, so it refuses the adapter's close-before-push
+    // (`pendingNavigation`) and lets the route change run around it. Fullscreen is a real modal
+    // layer, so there it closes first like anything else.
+    const requestBackClose = (): false | void => {
+        if (!isFullScreenActive && isOverlayBackNavigationPending()) return false
+        return closeWhenIdle()
+    }
+    useBackCloses({ active: open && !minimized, requestClose: requestBackClose, ownerRef: panelRef })
 
     // Both panels stay mounted — the `hidden` class is only `h-0 w-0`, so the hidden one's controls
     // would still be tabbable. `inert` is what actually removes it from the tab order, and it is set

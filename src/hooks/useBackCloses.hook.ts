@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useRef, type RefObject } from 'react'
+import { getTopmostOpenModalDialog } from 'src/hooks/useTopLayer.hook'
 
 /**
  * ASMA-8471 — native Back closes the top ui-core overlay through its own close path.
@@ -95,6 +96,55 @@ function isOwnedBy(child: OverlayBackEntry, parent: OverlayBackEntry): boolean {
     const childParent = child.parentOwnerRef?.current ?? child.parentOwner
     const parentOwner = parent.ownerRef?.current ?? parent.owner
     return !!childParent && !!parentOwner && (childParent === parentOwner || parentOwner.contains(childParent))
+}
+
+/**
+ * RISK-010, visual eligibility: entries are stored in mount order, but Back must act on the
+ * **effective top**. This predicate is the whole of that correction — the one place to change if the
+ * rule ever moves.
+ *
+ * A native modal opened with `showModal()` enters the browser top layer: it paints above every
+ * z-index in the page AND marks everything outside its own subtree `inert` (see `useTopLayer.hook`).
+ * An overlay whose owner element sits outside that dialog is therefore neither visible as the top
+ * layer nor clickable — so it must not become the Back target merely by having registered later. The
+ * clearest case is a docked `MinimizableDialog`, a plain `<div>`, opened while a `StyledDialog` is
+ * already up.
+ *
+ * - `StyledDialog`'s own entry owns the `<dialog>` itself, so `contains` holds and it stays eligible.
+ * - A popover portalled INTO the dialog (`getOpenModalDialogAncestor`) is inside it, so it still
+ *   outranks the dialog, exactly as before.
+ * - A surface that promoted ITSELF into the top layer through the Popover API is above the dialog
+ *   and stays hit-testable there, even though it is portalled to `document.body` and so fails the
+ *   containment test. A nested `temporary` `StyledDrawer` opened without an `anchorEl` is exactly
+ *   this: `shouldUsePopoverTopLayer` sends it to `showPopover()` precisely because it has no dialog
+ *   to portal into. Containment alone would hand its Back press to the dialog underneath it.
+ * - An entry with no owner at all (`StyledSelect`, `StyledSelectAutocomplete`, both pickers) is left
+ *   eligible: nothing is known about where it paints, and guessing would silently drop it.
+ *
+ * Skipping a covered entry here, rather than having it unregister while the dialog is open, keeps
+ * the stack non-empty throughout: the history adapter's guard is never drained and re-armed, and the
+ * panel is the top again — with no re-registration, and so no second trip through the adapter's
+ * arming gate — the moment the dialog closes.
+ *
+ * `__asmaOpenModalDialogRegistry__` is the source of truth rather than the DOM because it holds
+ * `showModal()` CALL order, which is the real top-layer order and, for nested dialogs, disagrees
+ * with document order.
+ */
+function isCoveredByOpenModalDialog(entry: OverlayBackEntry): boolean {
+    const topmostModalDialog = getTopmostOpenModalDialog()
+    if (!topmostModalDialog) return false
+    const owner = entry.ownerRef?.current ?? entry.owner
+    if (!owner) return false
+    if (topmostModalDialog.contains(owner)) return false
+    return !isInTopLayer(owner)
+}
+
+/** Shown through the Popover API, so the element is in the browser top layer in its own right.
+ *  Feature-detected rather than `try`/`catch`: `:popover-open` is a selector error where the API is
+ *  unsupported, and there `showPopover` is missing too. */
+function isInTopLayer(element: Element): boolean {
+    if (!(element instanceof HTMLElement) || typeof element.showPopover !== 'function') return false
+    return element.matches(':popover-open')
 }
 
 /**
@@ -195,6 +245,7 @@ export const OverlayBackOwnerContext = createContext<RefObject<Element | null> |
 export function requestCloseTopOverlayBack(event?: Event): false | void | Promise<unknown> {
     const { entries } = getOverlayBackRegistry()
     const top = entries.reduce<OverlayBackEntry | undefined>((selected, candidate) => {
+        if (isCoveredByOpenModalDialog(candidate)) return selected
         if (!selected || isOwnedBy(candidate, selected)) return candidate
         if (isOwnedBy(selected, candidate)) return selected
         return candidate
@@ -230,6 +281,19 @@ export function hasOverlayBackAdapter(): boolean {
     return getSharedWindow()?.__ASMA__SHELL__?.overlayBack?.v === 1
 }
 
+/**
+ * `true` while the history adapter is holding a route change, waiting for the top overlay to close
+ * before it navigates (design-plan rule 1 — `push` is deferred, not cancelled).
+ *
+ * A surface that is *meant* to outlive navigation — the shell-level docked minimizable panels — tells
+ * the adapter so by returning `false` from its closer in this window. The adapter reads that as
+ * fail-open: it strips the guard, runs the navigation, and leaves the surface open. Anything that
+ * should close on navigation simply ignores this and closes as usual.
+ */
+export function isOverlayBackNavigationPending(): boolean {
+    return getSharedWindow()?.__ASMA__SHELL__?.overlayBack?.pendingNavigation === true
+}
+
 /** Native close-watcher events are part of the feature and must respect the host kill switch. */
 export function isOverlayBackEnabled(): boolean {
     const overlayBack = getSharedWindow()?.__ASMA__SHELL__?.overlayBack
@@ -243,6 +307,10 @@ export function isOverlayBackEnabled(): boolean {
  * `asma-core-helpers`' own listener (CON-002/CON-009) and duplicate work the adapter already owns. The
  * adapter registration itself (see {@link registerOverlayBackCloser}) is driven purely by the stack's
  * empty/non-empty transitions, not by this hook.
+ *
+ * Pass `ownerRef` wherever the surface has a stable root element: it is what places the entry
+ * relative to a nested child (`isOwnedBy`) and to an open native modal
+ * ({@link isCoveredByOpenModalDialog}).
  */
 export function useBackCloses({
     active,
