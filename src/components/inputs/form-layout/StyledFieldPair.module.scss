@@ -18,16 +18,21 @@
     align-items: flex-start;
     gap: 1rem;
 
+    // flex-shrink: 0, not 1 — an XS/S/M field keeps its step (WID-9), it never narrows. This also
+    // sidesteps a nested-flex sizing bug: with shrink enabled, a browser can size this *row* itself
+    // (its own max-content contribution, when the pair sits inside another flex row next to sibling
+    // content) far smaller than its children's true combined width, wrapping them even with plenty
+    // of room to spare. flex-wrap still wraps correctly in a genuinely narrow container either way.
     > [data-field-width='xs'] {
-        flex: 0 1 var(--field-width-xs);
+        flex: 0 0 var(--field-width-xs);
     }
 
     > [data-field-width='s'] {
-        flex: 0 1 var(--field-width-s);
+        flex: 0 0 var(--field-width-s);
     }
 
     > [data-field-width='m'] {
-        flex: 0 1 var(--field-width-m);
+        flex: 0 0 var(--field-width-m);
     }
 
     // A Full field takes the rest of the row, never less than S; two Full fields share it equally.

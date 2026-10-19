@@ -269,6 +269,29 @@ describe('field width pattern: form column and pairs (WID-1, WID-9)', () => {
         await expect(container.firstElementChild!.scrollWidth).toBeLessThanOrEqual(300)
     })
 
+    it('keeps a pair of XS fields side by side even nested inside another flex row (WID-9)', async () => {
+        // Regression: a StyledFieldPair placed as a flex item next to sibling content (e.g. a
+        // trailing "before" label, as the calendar reminder row does) must not let its own
+        // intrinsic sizing collapse and wrap its children even though there is plenty of room.
+        const { container } = mount(
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, width: 526 }}>
+                <StyledFieldPair>
+                    <StyledInputField dataTest='value' label='Value' width='xs' />
+                    <StyledSelect dataTest='unit' name='Unit' value='' width='xs'>
+                        <StyledSelectItem value='minutes'>Minutes</StyledSelectItem>
+                    </StyledSelect>
+                </StyledFieldPair>
+                <span>before</span>
+            </div>,
+        )
+
+        const [value, unit] = Array.from(container.querySelectorAll('[data-field-width="xs"]')).map((element) =>
+            element.getBoundingClientRect(),
+        )
+        await expect(value!.top).toBe(unit!.top)
+        await expect(unit!.left - value!.right).toBe(16)
+    })
+
     it('groups parts that only make sense together under a fieldset and legend (1.3.1)', async () => {
         const { container } = mount(
             <StyledFieldPair legend='Telefon'>
