@@ -24,6 +24,10 @@ Full or one of three steps, and a form is one column of at most 600 px.
   `labelPlacement?: 'above' | 'floating'`, default `'above'`. The label is no longer cut with an
   ellipsis; it wraps. Its required mark is hidden from screen readers; the control is `required`.
   `fieldLabelAboveClass()` gives other libraries (rich text) the same label look.
+  The label's spacing sits on a wrapper, because apps in the shell ship
+  `label { padding: 0 !important }`. A required `StyledSelect` (in a required `StyledFormControl`) and
+  date field are `aria-required`; a select is named by the `StyledInputLabel` in its form control.
+  The date picker shows `title` and `label` together when both are set.
   `StyledSearchField` keeps its floating label, the one exception the pattern allows. The date and
   time pickers show `title` or `label` above the field.
 - **`StyledFormColumn`** limits a form to the 600 px column, left-aligned.
@@ -42,4 +46,7 @@ Full or one of three steps, and a form is one column of at most 600 px.
 the kernel pin moves to it. Raise the kernel pin only after each app has had its visual check
 (ASMA-8489, stages 2 and 3). Forms get taller, so dialogs with fixed heights need checking. A field
 in a table, toolbar or filter bar that relied on `fullWidth` to grow past 600 px can pass
-`style={{ maxWidth: 'none' }}`.
+`style={{ maxWidth: 'none' }}`. The width and `display: flex` are inline styles, so a width from a
+CSS module or `@apply` no longer wins (a Tailwind utility still does, through `important`), and fields
+that were `inline-flex` are now block-level: two fields placed inline without a flex row stack. To
+widen a subtree, override both `--form-column-width` and `--field-width-full`.

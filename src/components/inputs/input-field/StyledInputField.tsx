@@ -435,9 +435,9 @@ export const StyledInputField = ({
         value,
         defaultValue,
         'aria-invalid': error ? true : undefined,
-        // The visible label lives in the aria-hidden notch `<legend>` (decorative), so associate it
-        // with the control via `aria-label` for a real accessible name (and `getByLabelText`). An
-        // explicit `aria-label`/`aria-labelledby` on `htmlInput` (e.g. Autocomplete) still wins.
+        // A string label also names the control through `aria-label` (the floating label's text lives in
+        // the aria-hidden notch `<legend>`). An explicit `aria-label`/`aria-labelledby` on `htmlInput`
+        // (e.g. Autocomplete) still wins.
         'aria-label':
             htmlInputRest['aria-label'] ??
             (htmlInputRest['aria-labelledby']
@@ -504,14 +504,15 @@ export const StyledInputField = ({
             }}
         >
             {label && !isFloatingLabel && (
-                <label
-                    htmlFor={controlId}
+                <div
                     className={cn(fieldLabelAboveClass({ disabled }), slotProps?.inputLabel?.className)}
                     style={{ ...resolveSx(slotProps?.inputLabel?.['sx']), ...slotProps?.inputLabel?.style }}
                 >
-                    {label}
-                    {required && <span aria-hidden='true'>&nbsp;*</span>}
-                </label>
+                    <label htmlFor={controlId}>
+                        {label}
+                        {required && <span aria-hidden='true'>&nbsp;*</span>}
+                    </label>
+                </div>
             )}
             <div className='relative overflow-visible'>
                 {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions -- not independently
@@ -633,7 +634,7 @@ export const StyledInputField = ({
 
                 {isFloatingLabel && (
                     <label
-                        htmlFor={fieldId}
+                        htmlFor={controlId}
                         className={cn(
                             floatingLabelClass({ shrink, focused, error, disabled, readOnly, size }),
                             slotProps?.inputLabel?.className,

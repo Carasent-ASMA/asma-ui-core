@@ -72,8 +72,6 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
     const { maskRef } = useDatePickerMask()
     const titleId = useId()
     const inputId = useId()
-    // One caption above the whole row, so the calendar button lines up with the input, not the label.
-    const caption = title ?? label
     const [value, setValue] = useState(selected ? getValue(selected, dateFormat) : '')
 
     // Keep `value` in sync with `selected`/`dateFormat` without an effect — the React-recommended
@@ -181,11 +179,19 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
 
     return (
         <div className='cursor-default' data-field-width={width} style={fieldWidthStyle(width)}>
-            {caption && (
-                <label id={titleId} htmlFor={inputId} className={fieldLabelAboveClass({ disabled: rest.disabled })}>
-                    {caption}
-                    {!title && required && <span aria-hidden='true'>&nbsp;*</span>}
-                </label>
+            {/* Title and label sit above the whole row, so the calendar button lines up with the input. */}
+            {title && (
+                <div id={titleId} className={fieldLabelAboveClass({ disabled: rest.disabled })}>
+                    {title}
+                </div>
+            )}
+            {label && (
+                <div className={fieldLabelAboveClass({ disabled: rest.disabled })}>
+                    <label htmlFor={inputId}>
+                        {label}
+                        {required && <span aria-hidden='true'>&nbsp;*</span>}
+                    </label>
+                </div>
             )}
 
             {/* Figma node 38285-181679: the input and the 40px calendar button, 4px apart, fill the step. */}
@@ -211,7 +217,8 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
                             slotProps={{
                                 formHelperText: { sx: { marginTop: '4px', marginLeft: 0, marginRight: 0 } },
                                 htmlInput: {
-                                    ...getTitleLabelling({ title: caption, titleId, inputAriaProps }),
+                                    'aria-required': required || undefined,
+                                    ...getTitleLabelling({ title, titleId, label, inputAriaProps }),
                                     // The editable field renders the space-scaffold mask ('  /  /    '),
                                     // so it MUST use a monospace font — see DATE_INPUT_FONT_FAMILY. With a
                                     // proportional font (Roboto) the day/year space slots collapse to

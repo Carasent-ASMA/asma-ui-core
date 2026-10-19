@@ -13,10 +13,7 @@ export interface StyledTimePickerProps {
     readOnly?: boolean
     inputClassName?: string
     dataTest: string
-    /**
-     * Field width pattern step; defaults to XS. A number is a fixed `px` width.
-     * @deprecated number — use a step.
-     */
+    /** Field width pattern step; defaults to XS. A number (a fixed `px` width) is deprecated: use a step. */
     width?: FieldWidth | number
     error?: boolean
     helperText?: ReactNode

@@ -151,6 +151,46 @@ describe('field width pattern: labels above the field (WID-4)', () => {
         await expect(within(container).getByRole('combobox', { name: 'Periode' })).toBeInTheDocument()
     })
 
+    it('keeps the gap under the label when the page resets label padding', async () => {
+        const reset = document.createElement('style')
+        reset.textContent = 'label { margin: 0 !important; padding: 0 !important; }'
+        document.head.appendChild(reset)
+        try {
+            const { container } = mount(<StyledInputField dataTest='city' label='Poststed' />)
+            const label = container.querySelector('label')!
+            await expect(getComputedStyle(label).paddingBottom).toBe('0px')
+            await expect(getComputedStyle(label.parentElement!).paddingBottom).toBe('4px')
+        } finally {
+            reset.remove()
+        }
+    })
+
+    it('marks a required select and date field for screen readers', async () => {
+        const { container } = mount(
+            <>
+                <StyledFormControl required>
+                    <StyledInputLabel>Enhet</StyledInputLabel>
+                    <StyledSelect dataTest='unit' value=''>
+                        <StyledSelectItem value='kg'>kg</StyledSelectItem>
+                    </StyledSelect>
+                </StyledFormControl>
+                <StyledDatePicker mode='single' dataTest='date' label='Dato' required selected={undefined} />
+            </>,
+        )
+
+        await expect(within(container).getByRole('combobox', { name: 'Enhet' })).toHaveAttribute('aria-required', 'true')
+        await expect(within(container).getByRole('textbox', { name: 'Dato' })).toHaveAttribute('aria-required', 'true')
+    })
+
+    it('shows both the title and the label of a date field', async () => {
+        const { container } = mount(
+            <StyledDatePicker mode='single' dataTest='date' title='Periode' label='Startdato' selected={undefined} />,
+        )
+
+        await expect(within(container).getByText('Periode')).toBeInTheDocument()
+        await expect(within(container).getByLabelText('Startdato')).toBeInTheDocument()
+    })
+
     it('keeps the floating label inside the search field (§10)', async () => {
         const { container } = mount(<StyledSearchField dataTest='search' label='Søk' value='Ola' />)
 
@@ -310,8 +350,8 @@ describe('field width pattern: character counter (WID-2, Q12)', () => {
         await expect(input).toHaveAttribute('maxlength', '30')
         await expect(input.getAttribute('aria-describedby')).toContain('counter')
 
-        await userEvent.type(input, ' og hopp og sprett')
-        await expect(liveRegion).toHaveTextContent('21 av 30 tegn')
+        await userEvent.type(input, ' og hopp og sprett nå')
+        await expect(liveRegion).toHaveTextContent('24 av 30 tegn')
     })
 
     it('puts the count on the hint line, at the right edge of the field', async () => {

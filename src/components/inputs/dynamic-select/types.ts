@@ -48,7 +48,7 @@ interface DynamicSelectCommonProps<TOption extends DynamicSelectOption> {
     title?: React.ReactNode
     /** @figmaProp none — title typography: `'base'` Body Base SemiBold 16/24 (default), `'lg'` Section title 18/28. */
     titleSize?: 'base' | 'lg'
-    /** Field width pattern step. A dynamic select is always Full (WID-5); the prop exists for parity. */
+    /** Field width pattern step. The pattern keeps a dynamic select Full (WID-5); Full is the default. */
     width?: FieldWidth
     /** @figmaProp none — app size (chips/buttons). Defaults to `'medium'`. */
     size?: 'small' | 'medium'

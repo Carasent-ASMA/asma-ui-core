@@ -102,6 +102,8 @@ export interface StyledSelectProps {
      * above). Without it (and no `name`/placeholder/value text), the trigger has no accessible name
      * at all — a common gap when a floating/external label isn't referenced. */
     labelId?: string
+    /** Marks the trigger `aria-required`; also read from a surrounding `StyledFormControl`. */
+    required?: boolean
     children?: ReactNode
     MenuProps?: { className?: string }
     /** Forwarded to the trigger button, merged with the internal focus tracking (e.g. validate on blur). */
@@ -143,6 +145,7 @@ export const StyledSelect = ({
     onFocus,
     onBlur,
     labelId,
+    required,
 }: StyledSelectProps): JSX.Element => {
     const ctx = useFormControlContext()
     // The context id is the StyledInputLabel's id; with no label element it is ignored and `name` names it.
@@ -422,6 +425,7 @@ export const StyledSelect = ({
                 aria-labelledby={labelId ?? ctx?.labelId}
                 aria-label={!labelId ? name : undefined}
                 aria-invalid={isError ? true : undefined}
+                aria-required={(required ?? ctx?.required) || undefined}
                 aria-describedby={showHelperSlot ? helperId : undefined}
                 aria-disabled={isDisabled ? true : undefined}
                 disabled={isDisabled}

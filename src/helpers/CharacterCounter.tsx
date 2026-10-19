@@ -8,7 +8,7 @@ const counterText: Record<UiCoreLocale, (length: number, limit: number) => strin
 
 /** Screen readers hear the count only once the user is close to the limit, not on every keystroke. */
 export const isNearCharacterLimit = (length: number, limit: number): boolean =>
-    limit - length <= Math.max(10, Math.ceil(limit * 0.1))
+    limit - length <= Math.max(1, Math.min(10, Math.ceil(limit * 0.2)))
 
 export interface CharacterCounterProps {
     /** Id of the visible count, for the field's `aria-describedby`. */

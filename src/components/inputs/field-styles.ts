@@ -67,7 +67,10 @@ export const fieldWidthForMaxLength = (maxLength: number): FieldWidth => {
 
 export type FieldLabelPlacement = 'above' | 'floating'
 
-/** The label above a field, as `StyledPhoneField` draws it. It wraps and is never truncated (TRUNC-4). */
+/**
+ * The label above a field, as `StyledPhoneField` draws it. It wraps and is never truncated (TRUNC-4).
+ * Put it on a wrapper around the `<label>`: apps in the shell ship `label { padding: 0 !important }`.
+ */
 export const fieldLabelAboveClass = ({ disabled }: { disabled?: boolean } = {}): string =>
     cn(
         'block pb-1 text-base font-semibold',

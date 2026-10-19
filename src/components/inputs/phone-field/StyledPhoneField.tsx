@@ -1,6 +1,6 @@
 import { useId, type ReactNode } from 'react'
 import { cn } from 'src/helpers/cn'
-import type { FieldSize } from '../field-styles'
+import { fieldLabelAboveClass, type FieldSize } from '../field-styles'
 import { StyledLink } from '../../navigation/link/StyledLink'
 import { StyledInputField } from '../input-field/StyledInputField'
 import { CountryCodeSelect } from './CountryCodeSelect'
@@ -124,10 +124,12 @@ export const StyledPhoneField = ({
     return (
         <div className={cn('flex flex-col', className)} data-testid={`${dataTest}-root`}>
             {label != null && (
-                <label id={labelId} htmlFor={fieldId} className='pb-1 text-base font-semibold text-delta-800'>
-                    {label}
-                    {required === true && <span aria-hidden='true'>&nbsp;*</span>}
-                </label>
+                <div className={fieldLabelAboveClass()}>
+                    <label id={labelId} htmlFor={fieldId}>
+                        {label}
+                        {required === true && <span aria-hidden='true'>&nbsp;*</span>}
+                    </label>
+                </div>
             )}
 
             {readOnly === true ? (

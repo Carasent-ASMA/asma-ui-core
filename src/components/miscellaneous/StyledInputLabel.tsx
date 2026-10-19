@@ -47,14 +47,12 @@ export const StyledInputLabel = ({
 
     if (labelPlacement === 'above') {
         return (
-            <label
-                htmlFor={htmlFor}
-                id={id ?? ctx?.labelId}
-                className={cn(fieldLabelAboveClass({ disabled: disabled ?? ctx?.disabled }), className)}
-            >
-                {children}
-                {isRequired && <span aria-hidden='true'>&nbsp;*</span>}
-            </label>
+            <div className={cn(fieldLabelAboveClass({ disabled: disabled ?? ctx?.disabled }), className)}>
+                <label htmlFor={htmlFor} id={id ?? ctx?.labelId}>
+                    {children}
+                    {isRequired && <span aria-hidden='true'>&nbsp;*</span>}
+                </label>
+            </div>
         )
     }
 
