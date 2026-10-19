@@ -5,6 +5,7 @@ import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { MinimizableDialog } from './MinimizableDialog'
 import { StyledDialog } from 'src/components/feedback/dialog/StyledDialog'
 import { getOverlayBackStackSize, requestCloseTopOverlayBack } from 'src/hooks/useBackCloses.hook'
+import { registerOpenModalDialog } from 'src/hooks/useTopLayer.hook'
 
 describe('MinimizableDialog keyboard contract', () => {
     afterEach(cleanup)
@@ -467,6 +468,39 @@ describe('MinimizableDialog native Back (ASMA-8471)', () => {
         setPendingNavigation(true)
         void requestCloseTopOverlayBack()
 
+        await expect(onClose).toHaveBeenCalledTimes(1)
+    })
+
+    it('consumes Back as a no-op, reported as false, when an unregistered modal covers every entry', async () => {
+        const onClose = fn()
+        mount(
+            <MinimizableDialog dataTest='dialog' open title='Editor' onClose={onClose}>
+                <p>Content</p>
+            </MinimizableDialog>,
+        )
+        await waitFor(() => expect(backRegistryEntries()).toHaveLength(1))
+
+        // A modal <dialog> from a ui-core too old to register for Back — the only way the whole
+        // stack ends up covered. It reaches the top-layer registry but never joins the Back stack.
+        const legacyDialog = document.createElement('dialog')
+        document.body.appendChild(legacyDialog)
+        legacyDialog.showModal()
+        const unregisterLegacyDialog = registerOpenModalDialog(legacyDialog)
+
+        try {
+            // Closing the panel here would close the WRONG layer and discard content the user
+            // cannot see. `false` rather than `undefined` so a deferred push fails open at once
+            // instead of waiting out a closer that is never going to run.
+            await expect(requestCloseTopOverlayBack()).toBe(false)
+            await expect(onClose).not.toHaveBeenCalled()
+        } finally {
+            unregisterLegacyDialog()
+            legacyDialog.close()
+            legacyDialog.remove()
+        }
+
+        // Nothing was lost: dismissing that dialog by its own path makes the panel the top again.
+        void requestCloseTopOverlayBack()
         await expect(onClose).toHaveBeenCalledTimes(1)
     })
 

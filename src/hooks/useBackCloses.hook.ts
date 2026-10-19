@@ -230,6 +230,17 @@ export function registerOverlayBackCloser(
     }
 }
 
+/**
+ * Declares "overlays rendered below me in the React tree are nested inside me", which is what makes
+ * one Back press close the inner one first (BACK-2).
+ *
+ * Needed because an overlay is usually portalled out of its parent's DOM subtree, so DOM
+ * containment cannot carry the relationship — only the React tree still knows it. Wrap your
+ * surface's children in `<OverlayBackOwnerContext.Provider value={yourOwnerRef}>`, passing the same
+ * ref you gave {@link useBackCloses} as `ownerRef`. Every ui-core overlay already does this; an app
+ * wiring up an overlay of its own should too, otherwise a ui-core overlay opened inside it is
+ * ordered by registration time alone and Back may close the outer surface first.
+ */
 export const OverlayBackOwnerContext = createContext<RefObject<Element | null> | undefined>(undefined)
 
 /**
@@ -250,7 +261,13 @@ export function requestCloseTopOverlayBack(event?: Event): false | void | Promis
         if (isOwnedBy(selected, candidate)) return selected
         return candidate
     }, undefined)
-    if (!top) return undefined
+    // A non-empty stack with nothing eligible means every entry is covered by a modal `<dialog>`
+    // that did not register for Back — only reachable from a bundle too old to have this code. The
+    // press is deliberately a no-op (closing a covered entry would close the WRONG layer and discard
+    // state the user cannot even see), but report it as `false`, not `undefined`: on a deferred
+    // `push` that distinction is what lets the adapter fail open straight away instead of waiting
+    // out its stalled-close timeout for a closer that is never going to run.
+    if (!top) return entries.length > 0 ? false : undefined
     if (top.pending) return false
 
     const result = top.requestClose(event)
@@ -312,15 +329,32 @@ export function isOverlayBackEnabled(): boolean {
  * relative to a nested child (`isOwnedBy`) and to an open native modal
  * ({@link isCoveredByOpenModalDialog}).
  */
-export function useBackCloses({
-    active,
-    requestClose,
-    ownerRef,
-}: {
+export interface UseBackClosesOptions {
+    /**
+     * Register while `true`, unregister while `false` — normally the surface's own "is showing"
+     * state. Keep it off for a state that is visible but not dismissable as an overlay (a minimized
+     * panel), so Back reaches whatever is behind it instead.
+     */
     active: boolean
+    /**
+     * The surface's existing close path — the same function its ✕ or Escape already calls. Never a
+     * synthetic key event. Return nothing for a plain dismissal; return a Promise to latch the
+     * surface while an async close runs (Back does nothing until it settles); return `false` to
+     * refuse this press, which is also how a surface that must survive navigation opts out of the
+     * adapter's deferred route change.
+     */
     requestClose: OverlayBackRequestClose
+    /**
+     * The surface's own root element — the one that is actually painted on top. Pass it wherever
+     * there is one. It is what lets Back order this surface against an overlay nested inside it and
+     * against an open native modal `<dialog>`; without it the entry is ordered by registration
+     * time alone. For a surface promoted into the top layer via the Popover API, this must be the
+     * element carrying the `popover` attribute, not a wrapper around it.
+     */
     ownerRef?: RefObject<Element | null>
-}): void {
+}
+
+export function useBackCloses({ active, requestClose, ownerRef }: UseBackClosesOptions): void {
     const parentOwnerRef = useContext(OverlayBackOwnerContext)
     const requestCloseRef = useRef(requestClose)
     useEffect(() => {

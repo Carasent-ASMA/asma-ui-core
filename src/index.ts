@@ -82,7 +82,12 @@ export * from './hooks/useRouteHeadingFocus'
 // with this hook. Named exports, not `export *`: `registerOverlayBackCloser` and
 // `requestCloseTopOverlayBack` are the internal arbitration and stay private, because calling them
 // directly bypasses the React lifecycle this hook owns.
-export { useBackCloses, type OverlayBackRequestClose } from './hooks/useBackCloses.hook'
+export {
+    useBackCloses,
+    OverlayBackOwnerContext,
+    type OverlayBackRequestClose,
+    type UseBackClosesOptions,
+} from './hooks/useBackCloses.hook'
 
 // MUI-free reimplementations (TASK-102/403).
 export {
