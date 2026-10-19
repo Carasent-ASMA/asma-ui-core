@@ -217,7 +217,7 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
                             slotProps={{
                                 formHelperText: { sx: { marginTop: '4px', marginLeft: 0, marginRight: 0 } },
                                 htmlInput: {
-                                    'aria-required': required || undefined,
+                                    'aria-required': required ? true : undefined,
                                     ...getTitleLabelling({ title, titleId, label, inputAriaProps }),
                                     // The editable field renders the space-scaffold mask ('  /  /    '),
                                     // so it MUST use a monospace font — see DATE_INPUT_FONT_FAMILY. With a
