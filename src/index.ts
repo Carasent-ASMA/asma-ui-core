@@ -78,6 +78,17 @@ export * from './components/custom/pathfinder-card/PathfinderCard'
 export * from './hooks/usePopupState'
 export * from './hooks/useRouteHeadingFocus'
 
+// ASMA-8471: an app with an overlay that is NOT a ui-core component wires it into the Back stack
+// with this hook. Named exports, not `export *`: `registerOverlayBackCloser` and
+// `requestCloseTopOverlayBack` are the internal arbitration and stay private, because calling them
+// directly bypasses the React lifecycle this hook owns.
+export {
+    useBackCloses,
+    OverlayBackOwnerContext,
+    type OverlayBackRequestClose,
+    type UseBackClosesOptions,
+} from './hooks/useBackCloses.hook'
+
 // MUI-free reimplementations (TASK-102/403).
 export {
     Paper,
