@@ -312,6 +312,7 @@ exports[`asma-ui-core public API surface > keeps every runtime export of the pac
   "resolveToolbarActionWidth",
   "setMidnightTime",
   "setZeroTime",
+  "useBackCloses",
   "useDatePickerValidation",
   "useDialogBusyBoundary",
   "useDynamicToolbarLayout",
