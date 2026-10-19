@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useRef, type RefObject } from 'react'
-import { getTopmostOpenModalDialog } from 'src/hooks/useTopLayer.hook'
+import { findTopmostConnectedModalDialog } from 'src/hooks/useTopLayer.hook'
 
 /**
  * ASMA-8471 — native Back closes the top ui-core overlay through its own close path.
@@ -83,8 +83,14 @@ function getOverlayBackRegistry(): OverlayBackRegistry {
     const sharedWindow = getSharedWindow()
     // No DOM at all — module-scope is a safe fallback since there is only ever one instance in that
     // process.
-    if (!sharedWindow) return (nodeFallbackRegistry ??= createRegistry())
-    return (sharedWindow.__asmaOverlayBackRegistry__ ??= createRegistry())
+    const registry = !sharedWindow
+        ? (nodeFallbackRegistry ??= createRegistry())
+        : (sharedWindow.__asmaOverlayBackRegistry__ ??= createRegistry())
+    // An older copy of this module may own the adapter callback. It reads `entries` at call time and
+    // reduces with no coverage check, so the filter has to live on the shared array, not only in
+    // this copy's reducer.
+    registry.entries = withCoverageFilter(registry.entries)
+    return registry
 }
 let nodeFallbackRegistry: OverlayBackRegistry | undefined
 
@@ -130,8 +136,46 @@ function isOwnedBy(child: OverlayBackEntry, parent: OverlayBackEntry): boolean {
  * `showModal()` CALL order, which is the real top-layer order and, for nested dialogs, disagrees
  * with document order.
  */
+/** A dialog the browser just force-closed is still the top layer until React unregisters it. */
+function entryOwns(element: Element): boolean {
+    return getOverlayBackRegistry().entries.some((entry) => (entry.ownerRef?.current ?? entry.owner) === element)
+}
+
+const coverageFilteredEntries = new WeakSet<OverlayBackEntry[]>()
+
+/**
+ * Skip entries a native modal is covering, for EVERY reducer that walks this array. A 3.109 bundle
+ * keeps the adapter callback (`() => requestCloseTopOverlayBack()` closed over its own function)
+ * until the stack drains, and that function has no coverage check. It does read `registry.entries`
+ * at call time, so filtering `reduce` on the shared array is what makes its choice match ours.
+ * `splice`, `findIndex` and `indexOf` still see every entry: a covered panel has to stay registered.
+ */
+function withCoverageFilter(entries: OverlayBackEntry[]): OverlayBackEntry[] {
+    if (coverageFilteredEntries.has(entries)) return entries
+    coverageFilteredEntries.add(entries)
+    const reduce = entries.reduce.bind(entries)
+    Object.defineProperty(entries, 'reduce', {
+        configurable: true,
+        value(
+            callback: (
+                previous: OverlayBackEntry | undefined,
+                current: OverlayBackEntry,
+                index: number,
+                array: OverlayBackEntry[],
+            ) => OverlayBackEntry | undefined,
+            initialValue?: OverlayBackEntry,
+        ) {
+            return reduce((selected, candidate, index, array) => {
+                if (isCoveredByOpenModalDialog(candidate)) return selected
+                return callback(selected, candidate, index, array)
+            }, initialValue)
+        },
+    })
+    return entries
+}
+
 function isCoveredByOpenModalDialog(entry: OverlayBackEntry): boolean {
-    const topmostModalDialog = getTopmostOpenModalDialog()
+    const topmostModalDialog = findTopmostConnectedModalDialog((dialog) => dialog.open || entryOwns(dialog))
     if (!topmostModalDialog) return false
     const owner = entry.ownerRef?.current ?? entry.owner
     if (!owner) return false
