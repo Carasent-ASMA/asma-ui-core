@@ -10,6 +10,7 @@ import styles from './MinimizableDialogV2.module.scss'
 import type { IMinimizableDialogV2Props } from './types'
 import { useTranslations } from './useTranslations'
 import { useControlledProps } from './useControlledProps'
+import { fullScreenFieldWidthVars } from 'src/components/inputs/field-styles'
 import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
 import { OverlayBackOwnerContext, useBackCloses } from 'src/hooks/useBackCloses.hook'
@@ -141,6 +142,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                   width: 'min(1000px, calc(100vw - 32px))',
                   maxWidth: 'min(1000px, calc(100vw - 32px))',
                   height: '95dvh',
+                  ...fullScreenFieldWidthVars,
               }
         : undefined
 

@@ -163,5 +163,19 @@
                 "transform": "rotate(360deg)"
             }
         }
+    },
+    "width": {
+        "field-xs": "var(--field-width-xs)",
+        "field-s": "var(--field-width-s)",
+        "field-m": "var(--field-width-m)",
+        "field-full": "var(--field-width-full)",
+        "form-column": "var(--form-column-width)"
+    },
+    "maxWidth": {
+        "field-xs": "var(--field-width-xs)",
+        "field-s": "var(--field-width-s)",
+        "field-m": "var(--field-width-m)",
+        "field-full": "var(--field-width-full)",
+        "form-column": "var(--form-column-width)"
     }
 }

@@ -4,6 +4,7 @@
 @import 'color-variables/fretexTokens.css';
 @import 'color-variables/jadeTokens.css';
 @import 'typographyTokens.css';
+@import 'fieldWidthTokens.css';
 
 @tailwind base;
 @tailwind components;

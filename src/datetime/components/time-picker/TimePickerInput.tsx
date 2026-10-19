@@ -6,6 +6,8 @@ import { StyledInputField } from 'src/datetime/shared-components/StyledInputFiel
 import { ClockOutlineIcon } from 'src/datetime/shared-components/ClockOutlineIcon'
 import { useInputMask } from 'src/helpers/inputMask'
 import { getTitleLabelling } from 'src/datetime/helpers/getTitleLabelling'
+import { fieldLabelAboveClass } from 'src/components/inputs/field-styles'
+import { timePickerWidthProps } from './helpers/timePickerWidth'
 
 export const TimePickerInput: React.FC<
     StyledTimePickerProps & {
@@ -48,7 +50,6 @@ export const TimePickerInput: React.FC<
     const inputRootRef = useRef<HTMLDivElement | null>(null)
     const titleId = useId()
 
-
     useEffect(() => {
         if (inputRootRef.current) {
             popupState.setAnchorEl(inputRootRef.current)
@@ -57,9 +58,9 @@ export const TimePickerInput: React.FC<
     }, [])
 
     return (
-        <div style={{ height: readOnly ? '40px' : '75px' }}>
+        <div {...timePickerWidthProps(width)}>
             {title && (
-                <div id={titleId} className='pb-1 font-roboto font-semibold text-delta-800'>
+                <div id={titleId} className={fieldLabelAboveClass({ disabled })}>
                     {title}
                 </div>
             )}
@@ -113,11 +114,7 @@ export const TimePickerInput: React.FC<
                     },
                 }}
                 value={localValue}
-                sx={{
-                    maxWidth: width ?? 130,
-                    width,
-                    minWidth: width,
-                }}
+                sx={typeof width === 'number' ? { maxWidth: width, width, minWidth: width } : undefined}
                 disabled={disabled}
                 readOnly={readOnly}
                 className={inputClassName}

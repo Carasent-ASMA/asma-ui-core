@@ -1,4 +1,5 @@
 import { StyledCheckbox, StyledChip, StyledTooltip } from 'src'
+import { fieldWidthStyle } from 'src/components/inputs/field-styles'
 import { StyledInputField } from '../../input-field'
 import { StyledSelectAutocomplete } from '../../select-autocomplete'
 import type { StyledDynamicSelectProps, DynamicSelectOption, StyledDynamicSelectComponent } from '../types'
@@ -27,6 +28,7 @@ export const DynamicSelectAutocomplete = forwardRef(
             rowSize = 'compact',
             title,
             titleSize,
+            width = 'full',
             noOptionsText,
             placeholder,
             disabled,
@@ -109,7 +111,7 @@ export const DynamicSelectAutocomplete = forwardRef(
         const titleId = title ? `${dataTest}-title` : undefined
 
         return (
-            <div className='flex w-full flex-col gap-y-1'>
+            <div className='flex flex-col gap-y-1' data-field-width={width} style={fieldWidthStyle(width)}>
                 <DynamicSelectTitle id={titleId} title={title} titleSize={titleSize} />
                 <StyledSelectAutocomplete<TOption, boolean, boolean, false>
                     open={open}

@@ -25,6 +25,7 @@ import {
 import { StyledChip } from 'src/components/data-display/chip'
 import { CheckIcon, ChevronDownIcon, CloseIcon, PlusIconCircle } from 'src/components/icons'
 import { StyledCheckbox } from 'src/components/inputs/checkbox/base-ui/StyledCheckbox'
+import { fieldWidthStyle, type FieldWidth } from 'src/components/inputs/field-styles'
 import { cn } from 'src/helpers/cn'
 import { useBackCloses } from 'src/hooks/useBackCloses.hook'
 import {
@@ -158,6 +159,9 @@ export interface StyledSelectAutocompleteProps<
     multiple?: Multiple
     allowSelectAll?: boolean
     selectAllLabel?: string
+    /** Field width pattern step; Full by default. */
+    width?: FieldWidth
+    /** @deprecated Fields are Full by default; use `width`. */
     fullWidth?: boolean
     /** Accepted for MUI parity; single-select already omits selected options via filtering. */
     filterSelectedOptions?: boolean
@@ -217,7 +221,8 @@ export function StyledSelectAutocomplete<
     multiple,
     allowSelectAll,
     selectAllLabel = 'Select all',
-    fullWidth,
+    width = 'full',
+    fullWidth: _fullWidth,
     classes,
     inputValue: controlledInput,
     onInputChange,
@@ -627,7 +632,11 @@ export function StyledSelectAutocomplete<
     const someSelected = selectedArray.length > 0 && !allSelected
 
     return (
-        <div className={cn(style['styledSelectAutocompleteWrapper'], !fullWidth && 'w-auto', wrapperClassName, className)}>
+        <div
+            className={cn(style['styledSelectAutocompleteWrapper'], wrapperClassName, className)}
+            data-field-width={width}
+            style={fieldWidthStyle(width)}
+        >
             {renderInput(renderInputParams)}
             {open && (
                 <FloatingPortal root={portalRoot}>

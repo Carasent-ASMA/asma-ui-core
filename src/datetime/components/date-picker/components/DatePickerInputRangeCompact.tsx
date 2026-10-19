@@ -22,6 +22,7 @@ export const DatePickerInputRangeCompact: React.FC<{
         disabledDays,
         validateOnCalendarClose,
         onValidatedOnce,
+        width,
         ...rangeFieldProps
     } = datePickerProps
 
@@ -55,6 +56,7 @@ export const DatePickerInputRangeCompact: React.FC<{
                 disabledDays={disabledDays}
                 validateOnCalendarClose={validateOnCalendarClose}
                 onValidatedOnce={onValidatedOnce}
+                width={width}
                 // spread "from" field props
                 label={rangeFieldProps.labelFrom}
                 error={rangeFieldProps.errorFrom}
@@ -83,6 +85,7 @@ export const DatePickerInputRangeCompact: React.FC<{
                 disabledDays={disabledDays}
                 validateOnCalendarClose={validateOnCalendarClose}
                 onValidatedOnce={onValidatedOnce}
+                width={width}
                 label={rangeFieldProps.labelTo}
                 error={rangeFieldProps.errorTo}
                 helperText={rangeFieldProps.helperTextTo}

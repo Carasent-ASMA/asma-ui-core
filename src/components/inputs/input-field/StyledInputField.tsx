@@ -17,18 +17,24 @@ import {
 } from 'react'
 import { CloseIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
+import { CharacterCounter } from 'src/helpers/CharacterCounter'
 import { HelperRow } from 'src/helpers/HelperRow'
+import type { UiCoreLocale } from 'src/helpers/uiCoreLocale'
 import { resolveSx } from 'src/helpers/sx'
 import { useHelperRowBudget } from 'src/helpers/useHelperRowBudget'
 import { useHelperSlot } from 'src/helpers/useHelperSlot'
 import {
+    fieldLabelAboveClass,
+    fieldWidthStyle,
     floatingLabelClass,
     floatingLabelLayoutStyle,
     notchedLegendClass,
     notchedOutlineClass,
     singleLineInputLayoutStyle,
     singleLineShellLayoutStyle,
+    type FieldLabelPlacement,
     type FieldSize,
+    type FieldWidth,
 } from '../field-styles'
 import styles from './StyledInputField.module.scss'
 
@@ -54,8 +60,13 @@ type HtmlInputSlot = InputHTMLAttributes<HTMLInputElement> & { ref?: Ref<HTMLInp
 export interface StyledInputFieldProps {
     /** @figmaProp none — test hook */
     dataTest: string
-    /** @figmaProp Label element (floating) */
+    /** @figmaProp Label element */
     label?: ReactNode
+    /**
+     * `above` (default): the label sits above the field and wraps. `floating`: inside the field, only
+     * where a label above has no room, such as the search field (field width pattern §10).
+     */
+    labelPlacement?: FieldLabelPlacement
     /** @figmaProp Filled = (value != '')→"on" | else→"off" */
     value?: string | number
     /** @figmaProp Filled = (defaultValue != '')→"on" | else→"off" */
@@ -69,6 +80,12 @@ export interface StyledInputFieldProps {
     helperText?: ReactNode
     reserveHelperText?: boolean
     expandHelperText?: boolean
+    /** Character limit; also readable from `slotProps.htmlInput.maxLength`. */
+    maxLength?: number
+    /** Shows the count against `maxLength` as the user types, for free text with a limit. */
+    counter?: boolean
+    /** Language of the counter text. */
+    locale?: UiCoreLocale
     /** @figmaProp State = true→"Disabled" */
     disabled?: boolean
     /** @figmaProp State = true→"Read only" */
@@ -94,6 +111,9 @@ export interface StyledInputFieldProps {
     size?: FieldSize
     /** Accepted for API parity; the design always renders outlined. */
     variant?: string
+    /** Field width pattern step, `width: 100%; max-width: <step>`. Full fills the form column. */
+    width?: FieldWidth
+    /** @deprecated Fields are Full by default; use `width`. */
     fullWidth?: boolean
     className?: string
     style?: CSSProperties
@@ -113,7 +133,7 @@ export interface StyledInputFieldProps {
 }
 
 /**
- * Outlined text field with a floating label (replaces MUI `TextField`). Self-contained: manages its
+ * Outlined text field with its label above it (replaces MUI `TextField`). Self-contained: manages its
  * own focus/value state to drive the shared field styling ([[field-styles]]); supports multiline,
  * start/end adornments, an optional clear button, and error/helper text. Public props preserved
  *
@@ -124,6 +144,7 @@ export interface StyledInputFieldProps {
 export const StyledInputField = ({
     dataTest,
     label,
+    labelPlacement = 'above',
     value,
     defaultValue,
     onChange,
@@ -133,6 +154,9 @@ export const StyledInputField = ({
     helperText,
     reserveHelperText,
     expandHelperText = true,
+    maxLength,
+    counter,
+    locale,
     disabled,
     readOnly,
     required,
@@ -149,7 +173,8 @@ export const StyledInputField = ({
     minRows,
     maxRows,
     size = 'medium',
-    fullWidth,
+    width = 'full',
+    fullWidth: _fullWidth,
     className,
     style,
     sx,
@@ -172,6 +197,7 @@ export const StyledInputField = ({
     const [endAdornmentPad, setEndAdornmentPad] = useState<number | undefined>(undefined)
     const [focused, setFocused] = useState(false)
     const [hasValueUncontrolled, setHasValueUncontrolled] = useState(defaultValue != null && defaultValue !== '')
+    const [uncontrolledLength, setUncontrolledLength] = useState(String(defaultValue ?? '').length)
 
     const isControlled = value !== undefined
     const hasValue = isControlled ? value !== '' && value != null : hasValueUncontrolled
@@ -203,7 +229,13 @@ export const StyledInputField = ({
     // `name`, falling back to `id`.
     const resolvedAutoComplete = autoComplete ?? htmlInputRest.autoComplete
     const resolvedName = name ?? htmlInputRest.name
+    const controlId = htmlInputRest.id ?? fieldId
+    const resolvedMaxLength = maxLength ?? htmlInputRest.maxLength
+    const counterId = `${fieldId}-counter`
+    const showCounter = Boolean(counter && resolvedMaxLength && !readOnly)
+    const valueLength = isControlled ? String(value ?? '').length : uncontrolledLength
 
+    const isFloatingLabel = labelPlacement === 'floating' && Boolean(label)
     const shrink = focused || hasValue || hasStartAdornment
 
     // Sizes the multiline textarea and decides whether it scrolls.
@@ -252,6 +284,7 @@ export const StyledInputField = ({
         if (readOnly) return
         if (!isControlled) {
             setHasValueUncontrolled(event.target.value !== '')
+            setUncontrolledLength(event.target.value.length)
             // Uncontrolled: nothing else re-runs the layout effect while typing.
             syncTextareaLayout()
         }
@@ -365,7 +398,7 @@ export const StyledInputField = ({
     // placeholder must stay hidden until the label floats up (`shrink`) — otherwise the two texts
     // overlap. With no label there is nothing to overlap, so the placeholder should show at rest like
     // a plain input. Gating purely on `shrink` wrongly hid the placeholder for label-less fields.
-    const showPlaceholder = shrink || !label
+    const showPlaceholder = shrink || !isFloatingLabel
 
     const { show: showHelperSlot, role: helperAlertRole } = useHelperSlot(
         'StyledInputField',
@@ -379,7 +412,7 @@ export const StyledInputField = ({
         fieldRef: rootRef,
         rowRef: helperRowRef,
         rowStyle: helperRowStyle,
-    } = useHelperRowBudget(expandHelperText && showHelperSlot)
+    } = useHelperRowBudget(expandHelperText && showHelperSlot && !showCounter)
 
     const sharedProps = {
         ...htmlInputPropsWithoutStyle,
@@ -390,8 +423,9 @@ export const StyledInputField = ({
         // name (Chromium `HTMLFormControlElement::NameForAutofill`). Dropping it left every call site
         // that passes neither with no autofill key at all, so Chrome stopped saving and suggesting
         // previously entered values. An explicit `slotProps.htmlInput.id` still wins (MUI parity).
-        id: htmlInputRest.id ?? fieldId,
+        id: controlId,
         name: resolvedName,
+        maxLength: resolvedMaxLength,
         placeholder: showPlaceholder ? placeholder : undefined,
         disabled,
         readOnly,
@@ -401,9 +435,9 @@ export const StyledInputField = ({
         value,
         defaultValue,
         'aria-invalid': error ? true : undefined,
-        // The visible label lives in the aria-hidden notch `<legend>` (decorative), so associate it
-        // with the control via `aria-label` for a real accessible name (and `getByLabelText`). An
-        // explicit `aria-label`/`aria-labelledby` on `htmlInput` (e.g. Autocomplete) still wins.
+        // A string label also names the control through `aria-label` (the floating label's text lives in
+        // the aria-hidden notch `<legend>`). An explicit `aria-label`/`aria-labelledby` on `htmlInput`
+        // (e.g. Autocomplete) still wins.
         'aria-label':
             htmlInputRest['aria-label'] ??
             (htmlInputRest['aria-labelledby']
@@ -411,7 +445,10 @@ export const StyledInputField = ({
                 : typeof label === 'string' && label !== ''
                   ? label
                   : undefined),
-        'aria-describedby': showHelperSlot ? helperId : htmlInputRest['aria-describedby'],
+        'aria-describedby':
+            [showHelperSlot ? helperId : htmlInputRest['aria-describedby'], showCounter ? counterId : undefined]
+                .filter(Boolean)
+                .join(' ') || undefined,
         onChange: handleChange,
         onFocus: handleFocus,
         onBlur: handleBlur,
@@ -456,18 +493,27 @@ export const StyledInputField = ({
             ref={rootRef}
             className={cn('group relative min-w-0 flex-col', className)}
             onClick={onClick}
+            data-field-width={width}
             style={{
-                // Keep the default shrink-to-fit field when `fullWidth` is omitted, but switch the
-                // full-width variant to block-level flex so it wraps inside popovers/dialog rows
-                // instead of preserving the old inline-flex min-content behaviour.
-                display: fullWidth ? 'flex' : 'inline-flex',
-                width: fullWidth ? '100%' : 235,
+                display: 'flex',
+                ...fieldWidthStyle(width),
                 fontFamily: 'Roboto, Helvetica, Arial, sans-serif',
                 letterSpacing: '0.00938em',
                 ...resolveSx(sx),
                 ...style,
             }}
         >
+            {label && !isFloatingLabel && (
+                <div
+                    className={cn(fieldLabelAboveClass({ disabled }), slotProps?.inputLabel?.className)}
+                    style={{ ...resolveSx(slotProps?.inputLabel?.['sx']), ...slotProps?.inputLabel?.style }}
+                >
+                    <label htmlFor={controlId}>
+                        {label}
+                        {required && <span aria-hidden='true'>&nbsp;*</span>}
+                    </label>
+                </div>
+            )}
             <div className='relative overflow-visible'>
                 {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions -- not independently
                     interactive: this shell wraps the REAL <input>/<textarea> below, which is already
@@ -566,7 +612,7 @@ export const StyledInputField = ({
                         )
                     )}
 
-                    {label ? (
+                    {isFloatingLabel ? (
                         <fieldset
                             aria-hidden
                             className={notchedOutlineClass({ focused, error, disabled, readOnly, notched: true })}
@@ -586,9 +632,9 @@ export const StyledInputField = ({
                     )}
                 </div>
 
-                {label && (
+                {isFloatingLabel && (
                     <label
-                        htmlFor={fieldId}
+                        htmlFor={controlId}
                         className={cn(
                             floatingLabelClass({ shrink, focused, error, disabled, readOnly, size }),
                             slotProps?.inputLabel?.className,
@@ -605,17 +651,40 @@ export const StyledInputField = ({
                 )}
             </div>
 
-            {showHelperSlot && (
-                <HelperRow
-                    ref={helperRowRef}
-                    id={helperId}
-                    role={helperAlertRole}
-                    error={error}
-                    message={helperText}
-                    hideErrorIcon={slotProps?.formHelperText?.hideErrorIcon}
-                    className={cn('mr-[14px] box-border items-start', slotProps?.formHelperText?.className)}
-                    style={{ ...helperRowStyle, ...resolveSx(slotProps?.formHelperText?.sx) }}
-                />
+            {showCounter && resolvedMaxLength ? (
+                <div className='flex items-start justify-between gap-4'>
+                    {showHelperSlot && (
+                        <HelperRow
+                            id={helperId}
+                            role={helperAlertRole}
+                            error={error}
+                            message={helperText}
+                            hideErrorIcon={slotProps?.formHelperText?.hideErrorIcon}
+                            className={cn('box-border min-w-0 flex-1 items-start', slotProps?.formHelperText?.className)}
+                            style={resolveSx(slotProps?.formHelperText?.sx)}
+                        />
+                    )}
+                    <CharacterCounter
+                        id={counterId}
+                        length={valueLength}
+                        limit={resolvedMaxLength}
+                        locale={locale}
+                        className='ml-auto shrink-0 whitespace-nowrap pt-1'
+                    />
+                </div>
+            ) : (
+                showHelperSlot && (
+                    <HelperRow
+                        ref={helperRowRef}
+                        id={helperId}
+                        role={helperAlertRole}
+                        error={error}
+                        message={helperText}
+                        hideErrorIcon={slotProps?.formHelperText?.hideErrorIcon}
+                        className={cn('mr-[14px] box-border items-start', slotProps?.formHelperText?.className)}
+                        style={{ ...helperRowStyle, ...resolveSx(slotProps?.formHelperText?.sx) }}
+                    />
+                )
             )}
         </div>
     )

@@ -12,6 +12,8 @@ import { useBackNavigationClose } from 'src/datetime/hooks/useBackNavigationClos
 import { StyledDrawer } from 'src/components/navigation/drawer'
 import type { StyledTimePickerProps } from './types'
 import { isBeforeMinTime } from './helpers/minTime'
+import { timePickerWidthProps } from './helpers/timePickerWidth'
+import { cn } from 'src/helpers/cn'
 
 /**
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#15561-37391
@@ -143,7 +145,10 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
 
     if (isMobile)
         return (
-            <div className='relative h-auto w-auto'>
+            <div
+                className={cn('relative h-auto', typeof props.width === 'number' && 'w-auto')}
+                {...timePickerWidthProps(props.width)}
+            >
                 <div className='m-0 flex h-fit items-center justify-center p-0'>{input}</div>
                 {/* Drawer owns backdrop/Escape dismissal — no ClickAwayListener (its portalled
                     content would register as a click-away and close the sheet on any tap inside). */}
@@ -170,7 +175,10 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
 
     return (
         <ClickAwayListener mouseEvent='onMouseDown' onClickAway={popupState.close}>
-            <div className='relative h-auto w-auto'>
+            <div
+                className={cn('relative h-auto', typeof props.width === 'number' && 'w-auto')}
+                {...timePickerWidthProps(props.width)}
+            >
                 <div className='m-0 flex h-fit items-center justify-center p-0'>{input}</div>
                 {popupState.isOpen && (
                     <TimePickerPopper

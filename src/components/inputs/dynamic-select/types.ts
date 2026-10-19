@@ -1,3 +1,4 @@
+import type { FieldWidth } from 'src/components/inputs/field-styles'
 import type { StyledSelectAutocompleteProps } from '../select-autocomplete'
 import type React from 'react'
 
@@ -47,6 +48,8 @@ interface DynamicSelectCommonProps<TOption extends DynamicSelectOption> {
     title?: React.ReactNode
     /** @figmaProp none — title typography: `'base'` Body Base SemiBold 16/24 (default), `'lg'` Section title 18/28. */
     titleSize?: 'base' | 'lg'
+    /** Field width pattern step. The pattern keeps a dynamic select Full (WID-5); Full is the default. */
+    width?: FieldWidth
     /** @figmaProp none — app size (chips/buttons). Defaults to `'medium'`. */
     size?: 'small' | 'medium'
     /**

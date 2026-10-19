@@ -39,6 +39,44 @@ export const singleLineInputLayoutStyle = ({
 export const floatingLabelLayoutStyle = (shrink: boolean): CSSProperties =>
     shrink ? { top: 0, transform: 'translateY(-50%)' } : { top: '50%', transform: 'translateY(-50%)' }
 
+/** Field width pattern (ASMA-8489): XS 8rem, S 12.5rem, M 20rem, Full up to the 37.5rem form column. */
+export type FieldWidth = 'xs' | 's' | 'm' | 'full'
+
+/** `width: 100%; max-width: <step>`, so a field shrinks in a narrower container and never overflows it. */
+export const fieldWidthStyle = (width: FieldWidth): CSSProperties => ({
+    width: '100%',
+    maxWidth: `var(--field-width-${width})`,
+})
+
+/**
+ * Full screen is the one place a field may be wider than 600 px (WID-10): Full fields and the form
+ * column fill the dialog's content width, while XS, S and M keep their step.
+ */
+export const fullScreenFieldWidthVars = {
+    '--field-width-full': '100%',
+    '--form-column-width': '100%',
+}
+
+/** The step a character limit picks (WID-2): up to 9 characters XS, 15 S, 27 M, longer Full. */
+export const fieldWidthForMaxLength = (maxLength: number): FieldWidth => {
+    if (maxLength <= 9) return 'xs'
+    if (maxLength <= 15) return 's'
+    if (maxLength <= 27) return 'm'
+    return 'full'
+}
+
+export type FieldLabelPlacement = 'above' | 'floating'
+
+/**
+ * The label above a field, as `StyledPhoneField` draws it. It wraps and is never truncated (TRUNC-4).
+ * Put it on a wrapper around the `<label>`: apps in the shell ship `label { padding: 0 !important }`.
+ */
+export const fieldLabelAboveClass = ({ disabled }: { disabled?: boolean } = {}): string =>
+    cn(
+        'block pb-1 text-base font-semibold',
+        disabled ? 'text-delta-300' : 'text-delta-800',
+    )
+
 /**
  * Shared outlined-field styling so `StyledInputField`, `StyledInputLabel` (+ `StyledFormControl`)
  * and `StyledSelect` render an identical border + floating label without MUI. TASK-401.

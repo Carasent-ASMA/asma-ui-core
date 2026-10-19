@@ -1,4 +1,5 @@
 import type { AriaAttributes, ReactNode } from 'react'
+import type { FieldWidth } from 'src/components/inputs/field-styles'
 
 /** 
     * @param notBeforeTime - Start time of the range. Selected time must be after this value.
@@ -12,7 +13,8 @@ export interface StyledTimePickerProps {
     readOnly?: boolean
     inputClassName?: string
     dataTest: string
-    width?: number
+    /** Field width pattern step; defaults to XS. A number (a fixed `px` width) is deprecated: use a step. */
+    width?: FieldWidth | number
     error?: boolean
     helperText?: ReactNode
     label?: string

@@ -1,4 +1,5 @@
 import { StyledInputField } from 'src/datetime/shared-components/StyledInputField'
+import { fieldLabelAboveClass, fieldWidthStyle, type FieldWidth } from 'src/components/inputs/field-styles'
 import { DatePickerButton } from './DatePickerButton'
 import { getTitleLabelling } from 'src/datetime/helpers/getTitleLabelling'
 import { useDatePickerMask } from '../hooks/useDatePickerMask'
@@ -35,6 +36,7 @@ export interface IBaseDatePickerInput {
     required?: boolean
     minDate?: Date
     inputAriaProps?: AriaAttributes
+    width?: FieldWidth
 }
 
 export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
@@ -61,6 +63,7 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
         hideDefaultHelperText,
         required,
         minDate,
+        width = 's',
         ...rest
     } = props
 
@@ -68,6 +71,7 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
         useDatePickerValidation(defaultDatePickerValidationMessages)
     const { maskRef } = useDatePickerMask()
     const titleId = useId()
+    const inputId = useId()
     const [value, setValue] = useState(selected ? getValue(selected, dateFormat) : '')
 
     // Keep `value` in sync with `selected`/`dateFormat` without an effect — the React-recommended
@@ -173,24 +177,30 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
         onInputChange?.(isValidDateFns(parsed) ? parsed : undefined)
     }
 
-    // Figma node 38285-181679: the editable trigger is 156 input + 4 gap + 40 button = 200 total.
-    const width = readOnly ? 120 : 156
-    const height = readOnly ? 40 : 75
-
     return (
-        <div className='cursor-default'>
+        <div className='cursor-default' data-field-width={width} style={fieldWidthStyle(width)}>
+            {/* Title and label sit above the whole row, so the calendar button lines up with the input. */}
             {title && (
-                <div id={titleId} className='pb-1 font-roboto font-semibold text-delta-800'>
+                <div id={titleId} className={fieldLabelAboveClass({ disabled: rest.disabled })}>
                     {title}
                 </div>
             )}
+            {label && (
+                <div className={fieldLabelAboveClass({ disabled: rest.disabled })}>
+                    <label htmlFor={inputId}>
+                        {label}
+                        {required && <span aria-hidden='true'>&nbsp;*</span>}
+                    </label>
+                </div>
+            )}
 
-            <div className='flex gap-1' style={{ height }}>
-                <div style={{ width }}>
+            {/* Figma node 38285-181679: the input and the 40px calendar button, 4px apart, fill the step. */}
+            <div className='flex items-start gap-1'>
+                <div className='min-w-0 flex-1'>
                     <div className='relative'>
                         <StyledInputField
                             {...rest}
-                            label={label}
+                            id={inputId}
                             readOnly={readOnly}
                             data-testid={rest.dataTest}
                             autoComplete='off'
@@ -199,7 +209,6 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
                             size='small'
                             value={readOnly ? value.replaceAll('/', '.') : value}
                             className={inputClassName}
-                            style={{ width }}
                             error={hasError}
                             onBlur={!readOnly ? handleBlur : undefined}
                             // Render the helper/error through the InputField's own helper row (single
@@ -208,6 +217,7 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
                             slotProps={{
                                 formHelperText: { sx: { marginTop: '4px', marginLeft: 0, marginRight: 0 } },
                                 htmlInput: {
+                                    'aria-required': required ? true : undefined,
                                     ...getTitleLabelling({ title, titleId, label, inputAriaProps }),
                                     // The editable field renders the space-scaffold mask ('  /  /    '),
                                     // so it MUST use a monospace font — see DATE_INPUT_FONT_FAMILY. With a
