@@ -97,7 +97,8 @@ const readImportedStyleSheets = (): string[] => {
     for (const match of entryPointCss.matchAll(importPattern)) {
         const importPath = match.groups?.['path']
 
-        if (!importPath?.endsWith('.css')) {
+        // Only our own token sheets; package imports (`tailwindcss/theme.css`) hold no theme tokens.
+        if (!importPath?.startsWith('.') || !importPath.endsWith('.css')) {
             continue
         }
 

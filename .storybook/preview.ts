@@ -1,4 +1,3 @@
-import 'tailwindcss/index.css'
 import './normalize.css'
 import '../src/styles/index.css'
 import type { Preview, ReactRenderer } from '@storybook/react-vite'
