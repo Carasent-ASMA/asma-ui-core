@@ -27,10 +27,6 @@
 
 @config '../../tailwind.config.ts';
 
-@theme {
-    --font-roboto: 'Roboto', sans-serif;
-}
-
 @utility flip-180 {
     transform: rotate(180deg);
 }
