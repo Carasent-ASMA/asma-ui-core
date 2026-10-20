@@ -203,7 +203,6 @@ export default defineConfig({
                         'react-dom/client',
                         ...Object.keys(packageJson.dependencies ?? {}),
                     ],
-                    exclude: ['@tailwindcss/oxide', '@tailwindcss/oxide-linux-x64-gnu'],
                 },
                 test: {
                     name: 'interaction',
