@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 /** One message for a live region. `id` changes on every `announce`, so a repeated text is read again. */
 export interface PickerAnnouncement {
@@ -29,7 +29,10 @@ export const useAnnouncer = (): [PickerAnnouncement | undefined, (text: string) 
  * reliably announced (ALT-005).
  *
  * The text is emptied and set again on the next frame, so the same message twice in a row
- * (`0 valgt` after two clears) is read out again.
+ * (`0 valgt` after two clears) is read out again. Both steps write the DOM directly, not React
+ * state: two state updates that land before React renders merge into "no change", and an unchanged
+ * region is not read out again. The frame's delay also lets a closing dialog leave the top layer
+ * first, so a message set as it closes is heard.
  */
 export const PickerLiveRegion = ({
     announcement,
@@ -38,20 +41,19 @@ export const PickerLiveRegion = ({
     announcement?: PickerAnnouncement
     dataTest?: string
 }): JSX.Element => {
-    const [text, setText] = useState('')
+    const regionRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
-        // Clear first, set next frame: a repeated message must change the DOM to be read again.
-        // eslint-disable-next-line react-hooks/set-state-in-effect, react-you-might-not-need-an-effect/no-adjust-state-on-prop-change
-        setText('')
+        const region = regionRef.current
+        if (!region) return undefined
+        region.textContent = ''
         if (!announcement) return undefined
-        const id = requestAnimationFrame(() => setText(announcement.text))
+        const id = requestAnimationFrame(() => {
+            region.textContent = announcement.text
+        })
         return () => cancelAnimationFrame(id)
     }, [announcement])
 
-    return (
-        <div role='status' aria-live='polite' aria-atomic='true' className='sr-only' data-testid={dataTest}>
-            {text}
-        </div>
-    )
+    // No children: React leaves the text to the effect above.
+    return <div ref={regionRef} role='status' aria-live='polite' aria-atomic='true' className='sr-only' data-testid={dataTest} />
 }
