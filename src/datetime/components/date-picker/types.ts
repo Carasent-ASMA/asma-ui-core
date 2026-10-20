@@ -7,6 +7,8 @@ export type CalendarProps = React.ComponentProps<typeof DayPicker>
 type CommonDatePickerProps = {
     dateFormat?: string
     readOnly?: boolean
+    /** A locked field (disabled-states DIS-9): read-only with a lock icon; the reason opens on hover, focus and tap. */
+    lockedReason?: React.ReactNode
     className?: string
     inputClassName?: string
     disabledDays?: Matcher | Matcher[]
