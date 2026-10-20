@@ -367,7 +367,7 @@ export function StyledSlider<T>({
     )
 
     return (
-        <div className={cn('flex max-w-form-column flex-col gap-3', isVertical && 'h-full')}>
+        <div className={cn('max-w-form-column flex flex-col gap-3', isVertical && 'h-full')}>
             {!isVertical && (fromLabel ?? toLabel) && (
                 <div className='grid w-full grid-cols-2 gap-4'>
                     {!isVertical && fromLabel && (
