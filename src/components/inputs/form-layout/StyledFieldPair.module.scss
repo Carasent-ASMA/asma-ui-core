@@ -1,0 +1,43 @@
+// Field width pattern WID-9: two fields in a row, 16px apart, that stack by themselves when the row is
+// too narrow (flex-wrap, no breakpoint). Fields line up on their top edge, so a pair's labels must fit
+// on one line.
+.fieldset {
+    margin: 0;
+    border: 0;
+    padding: 0;
+    min-width: 0;
+}
+
+.legend {
+    padding: 0;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 1rem;
+
+    // flex-shrink: 0, not 1 — an XS/S/M field keeps its step (WID-9), it never narrows. This also
+    // sidesteps a nested-flex sizing bug: with shrink enabled, a browser can size this *row* itself
+    // (its own max-content contribution, when the pair sits inside another flex row next to sibling
+    // content) far smaller than its children's true combined width, wrapping them even with plenty
+    // of room to spare. flex-wrap still wraps correctly in a genuinely narrow container either way.
+    > [data-field-width='xs'] {
+        flex: 0 0 var(--field-width-xs);
+    }
+
+    > [data-field-width='s'] {
+        flex: 0 0 var(--field-width-s);
+    }
+
+    > [data-field-width='m'] {
+        flex: 0 0 var(--field-width-m);
+    }
+
+    // A Full field takes the rest of the row, never less than S; two Full fields share it equally.
+    > [data-field-width='full'] {
+        flex: 1 1 var(--field-width-s);
+        min-width: min(100%, var(--field-width-s));
+    }
+}

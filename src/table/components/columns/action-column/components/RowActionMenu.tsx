@@ -6,7 +6,7 @@ import { DotsVerticalIcon } from 'src/table/shared-components/DotsVerticalIcon'
 
 import { StyledMenuItem } from 'src/table/shared-components/StyledMenuItem'
 import { isCustomAction, type IAction, type ICustomAction, type RowActionsState } from 'src/table/types'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 import { StyledButton } from 'src/table/shared-components/button'
 import { StyledTooltip } from 'src/table/shared-components/tooltip'
 import { CircleWarningOutlineIcon } from 'src/table/shared-components/CircleWarningOutlineIcon'
@@ -37,14 +37,6 @@ export function RowActionMenu<TData>({
     const shouldShowButton =
         state.state !== 'hidden' && (hasVisibleActions || showNoActions || state.state === 'disabled')
 
-    const [disabledTooltipOpen, setDisabledTooltipOpen] = useState(false)
-
-    useEffect(() => {
-        if (!disabledTooltipOpen) return
-        const t = window.setTimeout(() => setDisabledTooltipOpen(false), 1600)
-        return () => window.clearTimeout(t)
-    }, [disabledTooltipOpen])
-
     if (!shouldShowButton) return <div className='flex w-[40px] items-center justify-center' />
 
     const disabled = state.state === 'disabled'
@@ -57,7 +49,9 @@ export function RowActionMenu<TData>({
             aria-expanded={open}
             variant='text'
             size='small'
-            disabled={disabled}
+            /* `aria-disabled`, not native `disabled`: the ⋮ stays in the Tab order so keyboard users
+             * reach it and its reason (disabled-states DIS-2, DIS-3). A press only shows the reason. */
+            aria-disabled={disabled || undefined}
             onClick={(e) => {
                 e.stopPropagation()
                 e.preventDefault()
@@ -94,21 +88,18 @@ export function RowActionMenu<TData>({
                         title={state.tooltipTitle}
                         arrow
                         placement={state.tooltipPlacement ?? 'top'}
-                        open={disabledTooltipOpen}
-                        onOpen={() => setDisabledTooltipOpen(true)}
-                        onClose={() => setDisabledTooltipOpen(false)}
+                        openOnTap
+                        persistentDescription
                     >
                         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions --
-                            not a control: `{button}` is a real (disabled) StyledButton — correctly
-                            excluded from the tab order by the native `disabled` attribute. This span only
-                            swallows the click/touch so a disabled button can still show its tooltip on
-                            hover/touch (disabled buttons don't reliably fire pointer events). */}
+                            not a control: `{button}` is the real, focusable (`aria-disabled`) StyledButton
+                            whose reason is reachable by keyboard. This span only keeps the click/touch
+                            from reaching the row. */}
                         <span
                             className='cursor-not-allowed'
                             onTouchStart={(e) => {
                                 e.stopPropagation()
                                 e.preventDefault()
-                                setDisabledTooltipOpen(true)
                             }}
                             onClick={(e) => {
                                 e.stopPropagation()
@@ -142,7 +133,7 @@ export function RowActionMenu<TData>({
                                 <span>{noActionsLabel}</span>
                             </div>
                         ) : (
-                            <MenuList disablePadding>
+                            <MenuList>
                                 {allActions.map((action, index) => {
                                     if (isCustomAction(action)) {
                                         const CustomComponent = action.component(tableData.row, handleClose)
@@ -152,6 +143,28 @@ export function RowActionMenu<TData>({
                                     }
 
                                     if (action.hide) return null
+
+                                    if (action.disabled && action.tooltipTitle) {
+                                        return (
+                                            <StyledMenuItem
+                                                key={index}
+                                                className={action.className}
+                                                disabled
+                                                disabledReason={action.tooltipTitle}
+                                                reasonPlacement={action.tooltipPlacement ?? 'left'}
+                                                onMouseDown={(e) => {
+                                                    e.stopPropagation()
+                                                    e.preventDefault()
+                                                }}
+                                                onMouseUp={(e) => {
+                                                    e.stopPropagation()
+                                                    e.preventDefault()
+                                                }}
+                                            >
+                                                {action.label}
+                                            </StyledMenuItem>
+                                        )
+                                    }
 
                                     return (
                                         <StyledTooltip

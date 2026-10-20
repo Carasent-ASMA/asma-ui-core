@@ -214,6 +214,40 @@ export const ColorThemes = () => (
     </div>
 )
 
+// ─── Min time ───────────────────────────────────────────────────────────────
+// `minTime` disables earlier cells with the Figma Time item `State=Disabled` treatment (node
+// 15086-19871: delta-400 text, no fill, not-allowed cursor). Fixed times keep the static panel
+// deterministic: hour 11 and minutes 30 and earlier are disabled, 35 is the first enabled minute.
+const MIN_TIME = new Date(2024, 0, 1, 12, 32)
+const MIN_TIME_VALUE = new Date(2024, 0, 1, 12, 40)
+
+/** Live field (pick or type a time before 12:32 to see it refused) + a static open panel. */
+export const MinTime = () => {
+    const [value, setValue] = useState<Date | undefined>(MIN_TIME_VALUE)
+    return (
+        <div className='flex items-start gap-8'>
+            <StyledTimePicker
+                dataTest='min-time'
+                label='Time'
+                placeholder='Time'
+                value={value}
+                minTime={MIN_TIME}
+                onSelect={setValue}
+            />
+            <div className='w-44 rounded-lg border border-solid border-delta-300 bg-white pb-px shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]'>
+                <TimePickerPanel
+                    dataTest='min-time-panel'
+                    value={MIN_TIME_VALUE}
+                    minTime={MIN_TIME}
+                    onSelect={noopSelect}
+                    handleClear={noopSelect}
+                    onConfirm={noopSelect}
+                />
+            </div>
+        </div>
+    )
+}
+
 // ─── Mobile ─────────────────────────────────────────────────────────────────
 const MobileExample = () => {
     const [value, setValue] = useState<Date | undefined>()

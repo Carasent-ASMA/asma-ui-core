@@ -1,15 +1,19 @@
 import type { StyledTimePickerProps } from './types'
 import { type PopupState } from 'src/hooks/usePopupState'
 import { HelperText, defaultTimePickerHelperMessages } from './components/HelperText'
-import { useRef, type ChangeEvent, useEffect, type MouseEvent as ReactMouseEvent } from 'react'
+import { useRef, type ChangeEvent, useEffect, useId, type MouseEvent as ReactMouseEvent } from 'react'
 import { StyledInputField } from 'src/datetime/shared-components/StyledInputField'
 import { ClockOutlineIcon } from 'src/datetime/shared-components/ClockOutlineIcon'
 import { useInputMask } from 'src/helpers/inputMask'
+import { getTitleLabelling } from 'src/datetime/helpers/getTitleLabelling'
+import { fieldLabelAboveClass } from 'src/components/inputs/field-styles'
+import { timePickerWidthProps } from './helpers/timePickerWidth'
 
 export const TimePickerInput: React.FC<
     StyledTimePickerProps & {
         popupState: PopupState
         handleChange: (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => void
+        handleBlur?: () => void
         isValidTime: boolean
         isValidEndTime: boolean
         localValue: string
@@ -27,11 +31,13 @@ export const TimePickerInput: React.FC<
         locale = 'en',
         popupState,
         handleChange,
+        handleBlur,
         isValidTime,
         isValidEndTime,
         localValue,
         title,
         readOnly,
+        inputAriaProps,
     } = props
 
     const inputRef = useInputMask({
@@ -42,7 +48,7 @@ export const TimePickerInput: React.FC<
 
     const hasError = !isValidTime || !isValidEndTime || !!error
     const inputRootRef = useRef<HTMLDivElement | null>(null)
-
+    const titleId = useId()
 
     useEffect(() => {
         if (inputRootRef.current) {
@@ -52,8 +58,12 @@ export const TimePickerInput: React.FC<
     }, [])
 
     return (
-        <div style={{ height: readOnly ? '40px' : '75px' }}>
-            {title && <div className='font-roboto text-delta-800 pb-1 font-semibold'>{title}</div>}
+        <div {...timePickerWidthProps(width)}>
+            {title && (
+                <div id={titleId} className={fieldLabelAboveClass({ disabled })}>
+                    {title}
+                </div>
+            )}
             <StyledInputField
                 inputRef={inputRef}
                 autoComplete='off'
@@ -74,7 +84,9 @@ export const TimePickerInput: React.FC<
                     />
                 }
                 onChange={handleChange}
+                onBlur={handleBlur}
                 slotProps={{
+                    htmlInput: getTitleLabelling({ title, titleId, label, inputAriaProps }),
                     input: {
                         ref: inputRootRef,
                         onClick: (e: ReactMouseEvent<HTMLElement>) => {
@@ -102,11 +114,7 @@ export const TimePickerInput: React.FC<
                     },
                 }}
                 value={localValue}
-                sx={{
-                    maxWidth: width ?? 130,
-                    width,
-                    minWidth: width,
-                }}
+                sx={typeof width === 'number' ? { maxWidth: width, width, minWidth: width } : undefined}
                 disabled={disabled}
                 readOnly={readOnly}
                 className={inputClassName}

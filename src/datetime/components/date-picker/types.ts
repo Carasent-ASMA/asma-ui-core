@@ -1,4 +1,6 @@
+import type { AriaAttributes } from 'react'
 import type { DayPicker, Matcher } from 'react-day-picker'
+import type { FieldWidth } from 'src/components/inputs/field-styles'
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
@@ -14,6 +16,8 @@ type CommonDatePickerProps = {
     validateOnCalendarClose?: boolean
     onValidatedOnce?: () => void
     required?: boolean
+    /** Field width pattern step of each date field, calendar button included. Defaults to S. */
+    width?: FieldWidth
 } & CalendarProps
 
 export interface DatePickerSingleFieldProps {
@@ -28,6 +32,11 @@ export interface DatePickerSingleFieldProps {
     disallowPast?: boolean
     disallowFuture?: boolean
     hideDefaultHelperText?: boolean
+    /**
+     * Extra ARIA attributes for the text input (e.g. `aria-label`, `aria-required`). Without them the
+     * input is named by `title`, which is otherwise plain text above the field.
+     */
+    inputAriaProps?: AriaAttributes
 }
 
 export interface DatePickerRangeFieldProps {

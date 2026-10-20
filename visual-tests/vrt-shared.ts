@@ -59,6 +59,16 @@ export const prepareStoryFrame = async (page: Page, storyId: string): Promise<vo
     await page.waitForFunction(() => document.body.classList.contains('sb-show-main'))
     await expect(page.locator('.sb-preparing-story')).toBeHidden()
     await expect(page.locator('.sb-errordisplay')).toBeHidden()
+    // Wait for the story's play function to finish. `sb-show-main` is set when the story renders, and
+    // the DOM can go quiet for longer than the settle window before a play step (a click, a typed
+    // value) runs — so a story was sometimes captured mid-play, e.g. the toast in
+    // `feedback-toast-notification--inside-dialog` half-entered (~800px, passed on retry).
+    await page.waitForFunction(() => {
+        type Render = { phase?: string }
+        const render = (window as unknown as { __STORYBOOK_PREVIEW__?: { currentRender?: Render } })
+            .__STORYBOOK_PREVIEW__?.currentRender
+        return ['played', 'completing', 'completed', 'finished', 'errored', 'aborted'].includes(render?.phase ?? '')
+    })
     await page.evaluate(() => document.fonts.ready)
     await page.evaluate(() => {
         document.querySelectorAll('animate, animateTransform, animateMotion, set').forEach((el) => {

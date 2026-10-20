@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { afterEach, describe, it } from 'vitest'
+import { page } from 'vitest/browser'
 import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, isEntirelyObscured, mount, tabbableWithin } from 'src/test-utils/renderInteraction'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
+import { getOverlayBackStackSize, requestCloseTopOverlayBack } from 'src/hooks/useBackCloses.hook'
 import { PopoverSheet, type PopoverSheetProps } from './PopoverSheet'
 
 /**
@@ -137,6 +139,42 @@ describe('PopoverSheet — info variant', () => {
         await expect(panelOf()).toBeNull()
         await expectFocusReturnedTo(trigger)
     })
+
+    it('Back closes the desktop popover through its single wrapper registration', async () => {
+        const { container } = mount(<Fixture />)
+        const trigger = triggerOf(container)
+        await userEvent.click(trigger)
+        await waitFor(() => expect(panelOf()).not.toBeNull())
+        await expect(getOverlayBackStackSize()).toBe(1)
+
+        void requestCloseTopOverlayBack()
+
+        await waitFor(() => expect(panelOf()).toBeNull())
+        await waitFor(() => expect(document.activeElement).toBe(trigger))
+        await expect(getOverlayBackStackSize()).toBe(0)
+    })
+
+    it('keeps exactly one Back registration while resizing between popover and sheet', async () => {
+        await page.viewport(744, 720)
+        try {
+            const { container } = mount(<ActionFixture />)
+            await userEvent.click(triggerOf(container))
+            await waitFor(() => expect(panelOf()).not.toBeNull())
+            await expect(getOverlayBackStackSize()).toBe(1)
+
+            await page.viewport(743, 720)
+            await waitFor(() => expect(document.querySelector('dialog[data-test="pop"]')).not.toBeNull())
+            await expect(getOverlayBackStackSize()).toBe(1)
+
+            await page.viewport(744, 720)
+            await waitFor(() => expect(document.querySelector('dialog[data-test="pop"]')).toBeNull())
+            await waitFor(() => expect(panelOf()).not.toBeNull())
+            await expect(getOverlayBackStackSize()).toBe(1)
+        } finally {
+            cleanup()
+            await page.viewport(1280, 720)
+        }
+    })
 })
 
 describe('PopoverSheet — action variant', () => {
@@ -158,9 +196,31 @@ describe('PopoverSheet — action variant', () => {
         await expect(panelOf()).toHaveAccessibleName('Filtrer søknader')
     })
 
-    it('moves focus to the first control on open', async () => {
+    it('moves focus to the first control when opened from the keyboard', async () => {
+        const { container } = mount(<ActionFixture />)
+        triggerOf(container).focus()
+        await userEvent.keyboard('{Enter}')
+
+        await waitFor(() => expect(document.activeElement).toHaveTextContent('First'))
+    })
+
+    it('focuses no control when opened with a pointer — focus rests on the surface itself', async () => {
         const { container } = mount(<ActionFixture />)
         await userEvent.click(triggerOf(container))
+        const panel = panelOf()!
+
+        await waitFor(() => expect(document.activeElement).toBe(panel))
+        // Two frames later it has still not moved on to a control.
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+        await expect(document.activeElement).toBe(panel)
+    })
+
+    it('reaches the first control with one Tab after a pointer open', async () => {
+        const { container } = mount(<ActionFixture />)
+        await userEvent.click(triggerOf(container))
+        await waitFor(() => expect(document.activeElement).toBe(panelOf()))
+
+        await userEvent.keyboard('{Tab}')
 
         await expect(document.activeElement).toHaveTextContent('First')
     })

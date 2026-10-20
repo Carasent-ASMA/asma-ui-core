@@ -1,9 +1,11 @@
 import { StyledCheckbox, StyledChip, StyledTooltip } from 'src'
+import { fieldWidthStyle } from 'src/components/inputs/field-styles'
 import { StyledInputField } from '../../input-field'
 import { StyledSelectAutocomplete } from '../../select-autocomplete'
 import type { StyledDynamicSelectProps, DynamicSelectOption, StyledDynamicSelectComponent } from '../types'
 import { LoadingIcon, PlusIconCircle, CheckIcon } from 'src/components/icons'
 import { DynamicInteractiveChipGroup } from './DynamicInteractiveChipGroup'
+import { DynamicSelectTitle } from './DynamicSelectTitle'
 import { forwardRef, useCallback, useState } from 'react'
 import { cn } from 'src/helpers/cn'
 
@@ -25,6 +27,8 @@ export const DynamicSelectAutocomplete = forwardRef(
             size,
             rowSize = 'compact',
             title,
+            titleSize,
+            width = 'full',
             noOptionsText,
             placeholder,
             disabled,
@@ -107,12 +111,8 @@ export const DynamicSelectAutocomplete = forwardRef(
         const titleId = title ? `${dataTest}-title` : undefined
 
         return (
-            <div className='flex w-full flex-col gap-y-1'>
-                {title && (
-                    <span id={titleId} className='text-delta-800 text-base font-semibold'>
-                        {title}
-                    </span>
-                )}
+            <div className='flex flex-col gap-y-1' data-field-width={width} style={fieldWidthStyle(width)}>
+                <DynamicSelectTitle id={titleId} title={title} titleSize={titleSize} />
                 <StyledSelectAutocomplete<TOption, boolean, boolean, false>
                     open={open}
                     onOpen={handleOpen}
@@ -203,6 +203,17 @@ export const DynamicSelectAutocomplete = forwardRef(
                     renderOption={(props, option, state) => {
                         const disabled = typeof option === 'object' ? !!option?.disabled : false
                         const tooltipTitle = getOptionTooltip ? getOptionTooltip(option) : null
+                        // Focus stays on the input (aria-activedescendant), so a disabled option's reason
+                        // is wired as its description and its tooltip opens while the keyboard is on it
+                        // (disabled-states DIS-2); hover still opens it as before.
+                        const reasonId = disabled && tooltipTitle ? `${props.id}-reason` : undefined
+                        const tooltipOpen = reasonId && props['data-active'] !== undefined ? true : undefined
+                        // aria-hidden keeps the reason out of the option's name; aria-describedby still reads it.
+                        const reason = reasonId && (
+                            <span id={reasonId} className='sr-only' aria-hidden='true'>
+                                {tooltipTitle}
+                            </span>
+                        )
 
                         if (multiple) {
                             // Reuse the selected flag the autocomplete already computed for this row
@@ -228,20 +239,22 @@ export const DynamicSelectAutocomplete = forwardRef(
                                     className={cn(
                                         // Figma Menus item: Body Base 16/lh24. Row density: 'compact'
                                         // = 40px (default), 'regular' = 48px.
-                                        'aria-selected:bg-gama-50 hover:bg-delta-50 relative flex cursor-pointer items-center gap-x-1 bg-white px-2 text-base',
+                                        'aria-selected:bg-gama-50 hover:bg-delta-50 relative box-border flex cursor-pointer items-center gap-x-1 bg-white p-2 text-base',
                                         rowSize === 'regular' ? 'min-h-12' : 'min-h-10',
                                         disabled &&
                                             'bg-delta-50 aria-selected:bg-delta-50! hover:bg-delta-50! cursor-not-allowed **:cursor-not-allowed',
                                     )}
                                     aria-disabled={disabled}
+                                    aria-describedby={reasonId}
                                 >
+                                    {reason}
                                     {props['data-active'] !== undefined && (
                                         <span
                                             aria-hidden='true'
                                             className='border-l-solid border-focus-ring pointer-events-none absolute inset-y-0 left-0 border-l-[3px]'
                                         />
                                     )}
-                                    <StyledTooltip arrow title={tooltipTitle}>
+                                    <StyledTooltip arrow title={tooltipTitle} open={tooltipOpen}>
                                         <>
                                             <StyledCheckbox
                                                 disabled={disabled}
@@ -253,6 +266,8 @@ export const DynamicSelectAutocomplete = forwardRef(
                                                 // real one (even inert-ed with aria-hidden/tabIndex) is
                                                 // still a genuine axe `nested-interactive` violation.
                                                 decorative
+                                                // No 38px hover wrapper: it would push the row past 40px.
+                                                hideWrapper
                                                 className='min-w-[36px]'
                                                 checked={isSelected}
                                             />
@@ -286,21 +301,23 @@ export const DynamicSelectAutocomplete = forwardRef(
                                 className={cn(
                                     // Figma Menus item: Body Base 16/lh24. Row density: 'compact' =
                                     // 40px (default), 'regular' = 48px.
-                                    'aria-selected:bg-gama-50 hover:bg-delta-50 relative flex cursor-pointer items-center gap-x-1 px-2 text-base',
+                                    'aria-selected:bg-gama-50 hover:bg-delta-50 relative box-border flex cursor-pointer items-center gap-x-1 p-2 text-base',
                                     rowSize === 'regular' ? 'min-h-12' : 'min-h-10',
                                     disabled &&
                                         'bg-delta-50 aria-selected:bg-delta-50! hover:bg-delta-50! cursor-not-allowed **:cursor-not-allowed',
                                 )}
                                 onClick={!disabled ? props.onClick : undefined}
                                 aria-disabled={disabled}
+                                aria-describedby={reasonId}
                             >
+                                {reason}
                                 {props['data-active'] !== undefined && (
                                     <span
                                         aria-hidden='true'
                                         className='border-l-solid border-focus-ring pointer-events-none absolute inset-y-0 left-0 border-l-[3px]'
                                     />
                                 )}
-                                <StyledTooltip arrow title={tooltipTitle}>
+                                <StyledTooltip arrow title={tooltipTitle} open={tooltipOpen}>
                                     <>
                                         <span className='w-5 min-w-5'>
                                             {isSelected && (

@@ -108,6 +108,112 @@ export const Disabled: Story = {
     },
 }
 
+const VARIANT_ROW = ['contained', 'outlined', 'text'] as const
+
+/**
+ * Soft-disabled with a reason (disabled-states DIS-1…DIS-5): focusable, `aria-disabled`, the
+ * not-allowed cursor and no hover or pressed state; the reason opens on hover, focus and tap.
+ */
+export const DisabledWithReason: Story = {
+    render: (args) => (
+        <Stack direction='row' spacing={2}>
+            {VARIANT_ROW.map((variant) => (
+                <StyledButton
+                    {...args}
+                    key={variant}
+                    dataTest={`reason-${variant}`}
+                    variant={variant}
+                    disabled
+                    disabledReason='Add a recipient first'
+                >
+                    Send
+                </StyledButton>
+            ))}
+            <StyledButton
+                {...args}
+                dataTest='reason-icon'
+                variant='outlined'
+                aria-label='Filter'
+                startIcon={<FilterIcon width={24} height={24} />}
+                disabled
+                disabledReason='No filters for this list'
+            >
+                {undefined}
+            </StyledButton>
+        </Stack>
+    ),
+    play: async ({ canvas }) => {
+        const send = canvas.getAllByRole('button', { name: 'Send' })
+        for (const button of send) {
+            await expect(button).not.toBeDisabled()
+            await expect(button).toHaveAttribute('aria-disabled', 'true')
+        }
+        await expect(canvas.getByRole('button', { name: 'Filter' })).toHaveAccessibleDescription('No filters for this list')
+    },
+}
+
+/** Busy (DIS-8): the spinner sits over the hidden label, so the button keeps its size; `aria-busy`. */
+export const Loading: Story = {
+    render: (args) => (
+        <Stack direction='row' spacing={2}>
+            {VARIANT_ROW.map((variant) => (
+                <StyledButton {...args} key={variant} dataTest={`loading-${variant}`} variant={variant} loading>
+                    Save
+                </StyledButton>
+            ))}
+            <StyledButton
+                {...args}
+                dataTest='loading-icon'
+                variant='outlined'
+                aria-label='Refresh'
+                startIcon={<FilterIcon width={24} height={24} />}
+                loading
+            >
+                {undefined}
+            </StyledButton>
+        </Stack>
+    ),
+    play: async ({ canvas }) => {
+        for (const button of canvas.getAllByRole('button', { name: 'Save' })) {
+            await expect(button).toHaveAttribute('aria-busy', 'true')
+        }
+    },
+}
+
+/**
+ * `aria-disabled="true"` is the focusable disabled state (ASMA disabled-states DIS-3): it looks exactly
+ * like native `disabled` but stays in the Tab order, so keyboard users can reach the control and the
+ * tooltip that says why. `StyledButton` only styles it — the caller blocks the action, as
+ * `StyledDialogFooter` and the toolbar do.
+ */
+export const AriaDisabled: Story = {
+    render: (args) => (
+        <div className='flex gap-4'>
+            <StyledButton {...args} dataTest='native-disabled' disabled>
+                Native disabled
+            </StyledButton>
+            <StyledButton {...args} dataTest='aria-disabled' aria-disabled='true'>
+                Aria disabled
+            </StyledButton>
+        </div>
+    ),
+    play: async ({ canvas }) => {
+        const native = canvas.getByRole('button', { name: 'Native disabled' })
+        const aria = canvas.getByRole('button', { name: 'Aria disabled' })
+
+        await expect(aria).not.toBeDisabled()
+        await expect(aria).toHaveAttribute('aria-disabled', 'true')
+        aria.focus()
+        await expect(aria).toHaveFocus()
+
+        const nativeStyle = window.getComputedStyle(native)
+        const ariaStyle = window.getComputedStyle(aria)
+        await expect(ariaStyle.cursor).toBe('not-allowed')
+        await expect(ariaStyle.color).toBe(nativeStyle.color)
+        await expect(ariaStyle.backgroundColor).toBe(nativeStyle.backgroundColor)
+    },
+}
+
 export const Error: Story = {
     args: { error: true },
     play: async ({ canvas }) => {

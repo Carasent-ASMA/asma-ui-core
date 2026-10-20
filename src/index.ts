@@ -33,6 +33,7 @@ export * from './components/inputs/radio-button'
 export * from './components/inputs/label'
 export * from './components/inputs/dynamic-select'
 export * from './components/inputs/phone-field'
+export * from './components/inputs/form-layout'
 
 // pickers
 export * from './datetime/components/date-picker'
@@ -76,6 +77,17 @@ export * from './components/custom/pathfinder-card/PathfinderCard'
 // hooks
 export * from './hooks/usePopupState'
 export * from './hooks/useRouteHeadingFocus'
+
+// ASMA-8471: an app with an overlay that is NOT a ui-core component wires it into the Back stack
+// with this hook. Named exports, not `export *`: `registerOverlayBackCloser` and
+// `requestCloseTopOverlayBack` are the internal arbitration and stay private, because calling them
+// directly bypasses the React lifecycle this hook owns.
+export {
+    useBackCloses,
+    OverlayBackOwnerContext,
+    type OverlayBackRequestClose,
+    type UseBackClosesOptions,
+} from './hooks/useBackCloses.hook'
 
 // MUI-free reimplementations (TASK-102/403).
 export {

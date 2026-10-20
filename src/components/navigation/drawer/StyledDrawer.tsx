@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, type CSSProperties, type FC, type R
 import { FloatingPortal } from '@floating-ui/react'
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
+import { OverlayBackOwnerContext, requestCloseTopOverlayBack, useBackCloses } from 'src/hooks/useBackCloses.hook'
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
 import { getOpenModalDialogAncestor, shouldUsePopoverTopLayer, TOP_LAYER_PROPS } from 'src/hooks/useTopLayer.hook'
 
@@ -24,6 +25,8 @@ export interface DrawerProps {
     ModalProps?: { keepMounted?: boolean }
     /** Trigger element — when inside a modal `<dialog>`, portal into it so the sheet is interactive. */
     anchorEl?: Element | null
+    /** Set `false` when a wrapper already owns the Back-close registration. */
+    registerBackClose?: boolean
     children?: ReactNode
 }
 
@@ -79,6 +82,7 @@ export const StyledDrawer: FC<DrawerProps> = ({
     PaperProps,
     ModalProps,
     anchorEl,
+    registerBackClose = true,
     children,
 }) => {
     const isTemporary = variant === 'temporary'
@@ -113,21 +117,33 @@ export const StyledDrawer: FC<DrawerProps> = ({
     useEffect(() => {
         if (!open || !isTemporary) return
         const onKey = (event: KeyboardEvent): void => {
-            if (event.key === 'Escape') onClose?.(event, 'escapeKeyDown')
+            if (event.key !== 'Escape' || event.defaultPrevented) return
+            event.preventDefault()
+            event.stopImmediatePropagation()
+            void requestCloseTopOverlayBack(event)
         }
-        document.addEventListener('keydown', onKey)
-        return () => document.removeEventListener('keydown', onKey)
-    }, [open, isTemporary, onClose])
+        window.addEventListener('keydown', onKey)
+        return () => window.removeEventListener('keydown', onKey)
+    }, [open, isTemporary])
 
     // Escape is already handled above (kept separate since it needs the real event/reason for
     // `onClose`) — this only adds the Tab-cycling half of the trap for this backdrop-blocking modal.
     useFocusTrap(open && isTemporary, panelRef)
 
+    // Only `temporary` blocks the page behind it (MUT-014) — `persistent`/`permanent` are in-flow
+    // panels, not overlays, so Back has nothing to do with them.
+    useBackCloses({
+        active: open && isTemporary && registerBackClose,
+        requestClose: (event) => (onClose ? onClose(event ?? new Event('overlayBack'), 'escapeKeyDown') : false),
+        ownerRef: panelRef,
+    })
+
     if (isTemporary && !open && !ModalProps?.keepMounted) return null
 
     return (
         <FloatingPortal root={portalRoot}>
-            {isTemporary && !hideBackdrop && open && (
+            <OverlayBackOwnerContext.Provider value={panelRef}>
+                {isTemporary && !hideBackdrop && open && (
                 // Mouse-only backdrop dismiss; Escape (handled above) is the keyboard equivalent.
                 // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
                 <div
@@ -141,8 +157,8 @@ export const StyledDrawer: FC<DrawerProps> = ({
                     style={usesPopoverTopLayer ? UA_POPOVER_BACKDROP_RESET : undefined}
                     onClick={(event) => onClose?.(event, 'backdropClick')}
                 />
-            )}
-            <div
+                )}
+                <div
                 ref={(node) => {
                     panelRef.current = node
                     promoteToTopLayer(node)
@@ -165,9 +181,10 @@ export const StyledDrawer: FC<DrawerProps> = ({
                     ...resolveSx(sx),
                     ...resolveSx(PaperProps?.sx),
                 }}
-            >
-                {children}
-            </div>
+                >
+                    {children}
+                </div>
+            </OverlayBackOwnerContext.Provider>
         </FloatingPortal>
     )
 }

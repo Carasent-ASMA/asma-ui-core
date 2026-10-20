@@ -223,6 +223,9 @@ ASMA-8136 baseline was 124 across 33). Every row below is a story that still car
 | --- | --- | --- |
 | `Playground` (Playground) | `color-contrast` | Elements must meet minimum colour contrast ratio thresholds |
 | `Variants` (Variants) | `color-contrast` | Elements must meet minimum colour contrast ratio thresholds |
+| `Norwegian` (Norwegian) | `color-contrast` | `StyledEmptyPage` text delta-500 on white = 3.55:1. Pre-existing, but masked until the flaky-test sweep: axe ran during the 300 ms fade-in and skipped the still-invisible text |
+| `CustomEmptyText` (Custom Empty Text) | `color-contrast` | Same `StyledEmptyPage` delta-500 text as above |
+| `WithoutFilters` (Without Filters) | `color-contrast` | Same `StyledEmptyPage` delta-500 text as above |
 
 ### `src/components/feedback/minimizable-dialog/stories/MinimizableDialogStack.stories.tsx`
 

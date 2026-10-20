@@ -9,7 +9,7 @@ import {
 } from 'react'
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
-import type { FieldSize } from '../inputs/field-styles'
+import { fieldWidthStyle, type FieldSize, type FieldWidth } from '../inputs/field-styles'
 import { FormControlContext, type FormControlContextValue } from './FormControlContext'
 
 export interface FormControlProps {
@@ -18,6 +18,9 @@ export interface FormControlProps {
     disabled?: boolean
     required?: boolean
     size?: FieldSize
+    /** Field width pattern step of the field it wraps; Full by default. */
+    width?: FieldWidth
+    /** @deprecated Fields are Full by default; use `width`. */
     fullWidth?: boolean
     /** Accepted for API parity; the design always renders outlined. */
     variant?: string
@@ -43,7 +46,8 @@ export const StyledFormControl = ({
     disabled = false,
     required = false,
     size = 'medium',
-    fullWidth,
+    width = 'full',
+    fullWidth: _fullWidth,
     className,
     style,
     sx,
@@ -81,8 +85,9 @@ export const StyledFormControl = ({
                 convenience. Giving the wrapper its own role='button'/tabIndex would misrepresent a
                 multi-control container as one control to assistive tech. */}
             <div
-                className={cn('relative inline-flex flex-col', fullWidth && 'w-full', className)}
-                style={{ ...resolveSx(sx), ...style }}
+                className={cn('relative flex-col', className)}
+                data-field-width={width}
+                style={{ display: 'flex', ...fieldWidthStyle(width), ...resolveSx(sx), ...style }}
                 onFocus={onFocus}
                 onBlur={onBlur}
                 onClick={onClick}

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { expect, fn, userEvent, within } from 'storybook/test'
 import { StyledMenu, type MenuProps } from './StyledMenu'
 import { useState, type FC } from 'react'
 import { StyledMenuList } from './StyledMenuList'
@@ -37,20 +38,67 @@ export const Menu: Story = {
 }
 
 /**
- * Menu item state gallery (Figma Menus node 16073-19226): Enabled / Hovered (forced) / Selected /
- * Disabled, inside the standard menu surface. Hover is CSS-driven, forced via `pseudo-hover`.
+ * Menu item state gallery (Figma Menus node 16073-21583): Enabled / Hovered (forced) / Selected /
+ * Disabled, with the separator between every row. Hover is CSS-driven, forced via `pseudo-hover`.
+ * The second list shows a caller-supplied tooltip. A checked disabled checkbox with no tooltip
+ * uses the default "Allerede lagt til" / "Already added".
  */
 export const Gallery: Story = {
     render: () => (
-        <div style={{ width: 240 }}>
-            <StyledMenuList>
+        <div className='flex items-start gap-8' style={{ width: 520 }}>
+            <StyledMenuList className='w-60'>
                 <StyledMenuItem>Enabled</StyledMenuItem>
                 <StyledMenuItem className='pseudo-hover'>Hovered</StyledMenuItem>
                 <StyledMenuItem selected>Selected</StyledMenuItem>
                 <StyledMenuItem disabled>Disabled</StyledMenuItem>
             </StyledMenuList>
+            <StyledMenuList className='w-60'>
+                <StyledMenuItem>Free option</StyledMenuItem>
+                <StyledMenuItem selected tooltip='Already in use'>
+                    Taken option
+                </StyledMenuItem>
+            </StyledMenuList>
         </div>
     ),
+}
+
+const onArchive = fn()
+
+/**
+ * A disabled item stays on the arrow-key path (WAI-ARIA APG menu; ASMA disabled-states DIS-3), so a
+ * keyboard or screen-reader user finds it and the reason it carries; Enter and Space do nothing on it.
+ * Opening a menu still focuses the first enabled item.
+ */
+export const DisabledItemReachable: Story = {
+    render: () => (
+        <div style={{ width: 280 }}>
+            <StyledMenuList autoFocus>
+                <StyledMenuItem>Rename</StyledMenuItem>
+                <StyledMenuItem disabled onClick={onArchive}>
+                    <span className='flex flex-col'>
+                        <span>Archive</span>
+                        <span className='text-sm'>A shared template cannot be changed here</span>
+                    </span>
+                </StyledMenuItem>
+                <StyledMenuItem>Delete</StyledMenuItem>
+            </StyledMenuList>
+        </div>
+    ),
+    play: async ({ canvas, userEvent }) => {
+        const [rename, archive, remove] = canvas.getAllByRole('menuitem')
+        await expect(rename).toHaveFocus()
+
+        await userEvent.keyboard('{ArrowDown}')
+        await expect(archive).toHaveFocus()
+        await expect(archive).toHaveAttribute('aria-disabled', 'true')
+
+        await userEvent.keyboard('{Enter}')
+        await userEvent.keyboard(' ')
+        await expect(onArchive).not.toHaveBeenCalled()
+
+        await userEvent.keyboard('{ArrowDown}')
+        await expect(remove).toHaveFocus()
+    },
 }
 
 const StyledMenuExample: FC<{ args: Partial<MenuProps> }> = ({ args }) => {
@@ -131,4 +179,27 @@ const StyledMenuExample: FC<{ args: Partial<MenuProps> }> = ({ args }) => {
             </div>
         </>
     )
+}
+
+export const ScrollableMenu: Story = {
+    play: async ({ canvasElement }) => {
+        await userEvent.click(within(canvasElement).getByRole('button', { name: 'Show 12 actions' }))
+    },
+    render: function ScrollableMenuStory() {
+        const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+        return (
+            <>
+                <StyledButton dataTest='long-menu-trigger' onClick={(event) => setAnchorEl(event.currentTarget)}>
+                    Show 12 actions
+                </StyledButton>
+                <StyledMenu open={!!anchorEl} anchorEl={anchorEl} onClose={() => setAnchorEl(null)}>
+                    {Array.from({ length: 12 }, (_, index) => (
+                        <StyledMenuItem key={index} onClick={() => setAnchorEl(null)}>
+                            Action {index + 1}
+                        </StyledMenuItem>
+                    ))}
+                </StyledMenu>
+            </>
+        )
+    },
 }

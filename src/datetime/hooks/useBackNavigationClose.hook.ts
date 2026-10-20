@@ -1,22 +1,28 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
-export const useBackNavigationClose = ({ open, onClose }: { open: boolean; onClose: () => void }): null => {
+const LEGACY_PICKER_BACK_MARKER = '__asmaPickerBack'
+
+/** Keeps the pre-adapter picker Back behavior while the host rollout flag is off. */
+export const useBackNavigationClose = ({ open, onClose }: { open: boolean; onClose: () => void }): void => {
+    const onCloseRef = useRef(onClose)
     useEffect(() => {
-        if (!open) return
+        onCloseRef.current = onClose
+    }, [onClose])
 
-        window.history.pushState({ modal: true }, '')
+    useEffect(() => {
+        if (!open) return undefined
 
-        window.addEventListener('popstate', onClose)
+        const win = window.rawWindow ?? window
+        const marker = crypto.randomUUID()
+        const close = (): void => onCloseRef.current()
+        win.history.pushState({ ...win.history.state, [LEGACY_PICKER_BACK_MARKER]: marker }, '', win.location.href)
+        win.addEventListener('popstate', close)
 
         return () => {
-            window.removeEventListener('popstate', onClose)
-
-            const state = window.history.state as { modal?: boolean } | null
-            if (state?.modal) {
-                window.history.back()
+            win.removeEventListener('popstate', close)
+            if ((win.history.state as Record<string, unknown> | null)?.[LEGACY_PICKER_BACK_MARKER] === marker) {
+                win.history.back()
             }
         }
     }, [open])
-
-    return null
 }

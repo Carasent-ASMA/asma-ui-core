@@ -25,7 +25,9 @@ import {
 import { StyledChip } from 'src/components/data-display/chip'
 import { CheckIcon, ChevronDownIcon, CloseIcon, PlusIconCircle } from 'src/components/icons'
 import { StyledCheckbox } from 'src/components/inputs/checkbox/base-ui/StyledCheckbox'
+import { fieldWidthStyle, type FieldWidth } from 'src/components/inputs/field-styles'
 import { cn } from 'src/helpers/cn'
+import { useBackCloses } from 'src/hooks/useBackCloses.hook'
 import {
     getOpenModalDialogAncestor,
     shouldUsePopoverTopLayer,
@@ -157,6 +159,9 @@ export interface StyledSelectAutocompleteProps<
     multiple?: Multiple
     allowSelectAll?: boolean
     selectAllLabel?: string
+    /** Field width pattern step; Full by default. */
+    width?: FieldWidth
+    /** @deprecated Fields are Full by default; use `width`. */
     fullWidth?: boolean
     /** Accepted for MUI parity; single-select already omits selected options via filtering. */
     filterSelectedOptions?: boolean
@@ -216,7 +221,8 @@ export function StyledSelectAutocomplete<
     multiple,
     allowSelectAll,
     selectAllLabel = 'Select all',
-    fullWidth,
+    width = 'full',
+    fullWidth: _fullWidth,
     classes,
     inputValue: controlledInput,
     onInputChange,
@@ -294,6 +300,11 @@ export function StyledSelectAutocomplete<
     )
     const enabledActiveIndexes =
         allowSelectAll && isMultiple ? [-1, ...enabledOptionIndexes] : enabledOptionIndexes
+    // Arrow keys, Home and End visit disabled options too (WAI-ARIA APG listbox; disabled-states
+    // DIS-3), so a keyboard or screen-reader user finds an option that cannot be chosen, and why.
+    // Enter and Space still refuse it; opening still lands on the selected or first enabled option.
+    const navigableOptionIndexes = visibleOptions.map((_option, index) => index)
+    const activeIndexes = allowSelectAll && isMultiple ? [-1, ...navigableOptionIndexes] : navigableOptionIndexes
     const selectedOptionIndex = visibleOptions.findIndex(isSelected)
 
     useEffect(() => {
@@ -332,6 +343,7 @@ export function StyledSelectAutocomplete<
     const dismiss = useDismiss(context)
     const role = useRole(context, { role: 'listbox' })
     const { getReferenceProps, getFloatingProps, getItemProps } = useInteractions([dismiss, role])
+    useBackCloses({ active: open, requestClose: () => setOpen(false) })
     const referenceRef = useMergeRefs([refs.setReference])
     // Portal INTO the trigger's modal <dialog> when present (inertness). Popover API only for body portal.
     const portalRoot = useMemo(() => (open ? getOpenModalDialogAncestor(refs.reference.current) : undefined), [open, refs])
@@ -344,11 +356,11 @@ export function StyledSelectAutocomplete<
     }
 
     const moveActiveOption = (direction: -1 | 1): void => {
-        if (enabledActiveIndexes.length === 0) return
+        if (activeIndexes.length === 0) return
         setActiveIndex((index) => {
-            const position = enabledActiveIndexes.indexOf(index ?? selectedOptionIndex)
-            if (position === -1) return enabledActiveIndexes[direction === 1 ? 0 : enabledActiveIndexes.length - 1] ?? null
-            return enabledActiveIndexes[Math.min(Math.max(position + direction, 0), enabledActiveIndexes.length - 1)] ?? null
+            const position = activeIndexes.indexOf(index ?? selectedOptionIndex)
+            if (position === -1) return activeIndexes[direction === 1 ? 0 : activeIndexes.length - 1] ?? null
+            return activeIndexes[Math.min(Math.max(position + direction, 0), activeIndexes.length - 1)] ?? null
         })
     }
 
@@ -406,7 +418,7 @@ export function StyledSelectAutocomplete<
             moveActiveOption(event.key === 'ArrowDown' ? 1 : -1)
         } else if (event.key === 'Home' || event.key === 'End') {
             event.preventDefault()
-            setActiveIndex(enabledActiveIndexes[event.key === 'Home' ? 0 : enabledActiveIndexes.length - 1] ?? null)
+            setActiveIndex(activeIndexes[event.key === 'Home' ? 0 : activeIndexes.length - 1] ?? null)
         } else if (event.key === ' ' && activeIndex === -1) {
             event.preventDefault()
             toggleSelectAll(event)
@@ -536,7 +548,7 @@ export function StyledSelectAutocomplete<
         // also grow `aria-disabled` rows, which are not pressable at all.
         'asma-pressable',
         // Figma Menus item: Body Base 16/lh24, text delta-800.
-        'text-delta-800 relative box-border flex cursor-pointer items-center gap-x-3 px-3 py-1.5 text-base',
+        'text-delta-800 relative box-border flex cursor-pointer items-center gap-x-3 px-3 py-2 text-base',
         // Row density: 'compact' = 40px (Figma Menus item); 'regular' = roomier 48px. min-height only,
         // so a wrapped 2-line label still grows the row past this.
         rowSize === 'regular' ? 'min-h-12' : 'min-h-10',
@@ -620,7 +632,11 @@ export function StyledSelectAutocomplete<
     const someSelected = selectedArray.length > 0 && !allSelected
 
     return (
-        <div className={cn(style['styledSelectAutocompleteWrapper'], !fullWidth && 'w-auto', wrapperClassName, className)}>
+        <div
+            className={cn(style['styledSelectAutocompleteWrapper'], wrapperClassName, className)}
+            data-field-width={width}
+            style={fieldWidthStyle(width)}
+        >
             {renderInput(renderInputParams)}
             {open && (
                 <FloatingPortal root={portalRoot}>
@@ -659,8 +675,9 @@ export function StyledSelectAutocomplete<
                             // `last:border-b-0` rule from ours drew a stray line under the final
                             // option. One structural rule cannot come apart like that: no stylesheet,
                             // no separators at all, which still reads correctly.
-                            '[&>li:not(:last-child)]:border-0 [&>li:not(:last-child)]:border-b',
-                            '[&>li:not(:last-child)]:border-delta-200 [&>li:not(:last-child)]:border-solid',
+                            // Painted as an inset shadow, not a border: a border adds 1px to the row,
+                            // and every Figma Menus item is exactly 40px (8px + 24px + 8px).
+                            '[&>li:not(:last-child)]:shadow-[inset_0_-1px_0_var(--colors-delta-200)]',
                             classes?.listbox,
                             slotProps?.popper?.className,
                         )}
@@ -688,7 +705,7 @@ export function StyledSelectAutocomplete<
                                     // checkboxes line up in a single column. It stays clickable to toggle
                                     // select-all, so hover deepens the grey rather than turning the header
                                     // green like a selected option.
-                                    className='border-delta-200 text-delta-600 hover:bg-delta-50 relative flex h-8 cursor-pointer items-center gap-x-3 border-0 border-b border-solid bg-(--colors-gray-10) px-3 text-xs font-semibold tracking-[0.2px] uppercase'
+                                    className='text-delta-600 hover:bg-delta-50 relative box-border flex h-8 cursor-pointer items-center gap-x-3 bg-(--colors-gray-10) px-3 text-xs font-semibold tracking-[0.2px] uppercase'
                                 >
                                     {activeIndex === -1 && (
                                         <span

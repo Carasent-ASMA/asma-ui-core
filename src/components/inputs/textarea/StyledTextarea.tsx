@@ -1,5 +1,8 @@
 import React, { useEffect, useId, useRef, type ChangeEvent, type MutableRefObject, type ReactNode } from 'react'
 import { useHelperSlot } from 'src/helpers/useHelperSlot'
+import { CharacterCounter } from 'src/helpers/CharacterCounter'
+import type { UiCoreLocale } from 'src/helpers/uiCoreLocale'
+import { fieldWidthStyle, type FieldWidth } from '../field-styles'
 import styles from './StyledTextarea.module.scss'
 
 export interface TextareaCommonProps {
@@ -15,6 +18,10 @@ export interface TextareaCommonProps {
     containerClassName?: string
     className?: string
     dataTest?: string
+    /** Field width pattern step; a text area is Full. */
+    width?: FieldWidth
+    /** Language of the character counter. */
+    locale?: UiCoreLocale
 }
 
 export interface TextAreaNotEditableProps {
@@ -105,11 +112,15 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
     refLink,
     dataTest,
     counterLimit,
+    width = 'full',
+    locale,
     ...otherProps
 }) => {
     const textAreaInnerRef = useRef<HTMLTextAreaElement>(null)
     const textAreaRef = refLink ?? textAreaInnerRef
-    const counterEnabled = !!(counter && counterLimit)
+    // WID-12: a limit always shows its count, unless the caller opts out with `counter={false}`.
+    const counterLimitResolved = counterLimit ?? (Number.isFinite(maxLength) ? maxLength : undefined)
+    const counterEnabled = counter !== false && Boolean(counterLimitResolved)
 
     const descriptionId = useId()
     const counterId = useId()
@@ -156,7 +167,12 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
           : otherProps.placeholder
 
     return (
-        <div className={`relative flex flex-col gap-1 ${containerClassName}`} data-testid={dataTest}>
+        <div
+            className={`relative flex flex-col gap-1 ${containerClassName}`}
+            data-testid={dataTest}
+            data-field-width={width}
+            style={fieldWidthStyle(width)}
+        >
             <label htmlFor={textAreaId} className={`${styles['label']} ${styles[textType]} ${labelClassName}`}>
                 {label}
             </label>
@@ -185,26 +201,21 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
                     aria-label={otherProps['aria-label'] ?? fallbackName}
                     id={textAreaId}
                     ref={textAreaRef}
-                    className={`${styles['textarea']} ${styles[textareaType]} ${className} ${
-                        counterEnabled ? 'pb-[32px]' : ''
-                    }`}
+                    className={`${styles['textarea']} ${styles[textareaType]} ${className}`}
                     wrap='soft'
                     value={value}
                     disabled={disabled}
                     maxLength={maxLength}
                 />
             )}
-            {counterEnabled && (
-                <>
-                    <div className='font-roboto pointer-events-none absolute right-3 bottom-3 flex h-[15px] justify-end text-[10px]'>
-                        {value.length}/{counterLimit}
-                    </div>
-
-                    <div id={counterId} aria-live='polite' className='sr-only'>
-                        {counterLimit - value.length} characters remaining
-                    </div>
-                </>
-            )}
+            {counterEnabled && counterLimitResolved && variant === 'active' ? (
+                <CharacterCounter
+                    id={counterId}
+                    length={value.length}
+                    limit={counterLimitResolved}
+                    locale={locale}
+                />
+            ) : null}
         </div>
     )
 }

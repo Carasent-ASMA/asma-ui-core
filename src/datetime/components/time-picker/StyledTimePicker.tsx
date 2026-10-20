@@ -7,9 +7,13 @@ import { getTimeFromValue } from './helpers/getTimeFromValue'
 import { TimePickerInput } from './TimePickerInput'
 import { TimePickerPanel } from './components/TimePickerPanel'
 import { useIsMobileView } from 'src/datetime/hooks/useWindowWidthSize.hook'
+import { isOverlayBackEnabled, useBackCloses } from 'src/hooks/useBackCloses.hook'
 import { useBackNavigationClose } from 'src/datetime/hooks/useBackNavigationClose.hook'
 import { StyledDrawer } from 'src/components/navigation/drawer'
 import type { StyledTimePickerProps } from './types'
+import { isBeforeMinTime } from './helpers/minTime'
+import { timePickerWidthProps } from './helpers/timePickerWidth'
+import { cn } from 'src/helpers/cn'
 
 /**
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#15561-37391
@@ -23,11 +27,11 @@ import type { StyledTimePickerProps } from './types'
  * instead of the popper, matching `StyledDatePicker`. Non-annotated props are behavioral.
  */
 export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
-    const { value, onSelect, notBeforeTime } = props
+    const { value, onSelect, notBeforeTime, minTime } = props
     const popupState = usePopupState({ variant: 'popper', popupId: 'time-picker-popper' })
     const isMobile = useIsMobileView()
-    // Android back must close the bottom sheet, not leave the page (parity with StyledDatePicker).
-    useBackNavigationClose({ open: isMobile && popupState.isOpen, onClose: popupState.close })
+    useBackCloses({ active: popupState.isOpen, requestClose: popupState.close })
+    useBackNavigationClose({ open: isMobile && popupState.isOpen && !isOverlayBackEnabled(), onClose: popupState.close })
 
     // Destructured up front so the effect closes over the three values it actually uses instead of the
     // whole popup-state object — otherwise the handler reads `popupState.*` at call time and the deps
@@ -80,6 +84,10 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
         }
 
         setIsValidTime(true)
+
+        // Keep the field dirty and the consumer's value untouched; handleBlur reverts it — no error shown.
+        if (isBeforeMinTime(validTime, minTime)) return
+
         const isNotBeforeStartTime = checkValidEndTime(validTime)
 
         if (isNotBeforeStartTime) {
@@ -92,6 +100,9 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
     }
 
     const handleSelect = (selectedTime: Date | undefined) => {
+        // Disabled cells cannot fire, so this only guards a stale panel after `minTime` moved on.
+        if (selectedTime && isBeforeMinTime(selectedTime, minTime)) return
+
         setIsValidTime(true)
 
         if (checkValidEndTime(selectedTime)) {
@@ -104,6 +115,11 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
         onSelect(undefined)
         setLocalValue(selectedTime ? format(selectedTime, 'HH:mm') : '')
         setIsDirty(true)
+    }
+
+    const handleBlur = () => {
+        // A typed time before `minTime` is never committed: show the last valid value again.
+        if (isDirty && parsedLocalTime && isBeforeMinTime(parsedLocalTime, minTime)) setIsDirty(false)
     }
 
     const handleClear = () => {
@@ -121,6 +137,7 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
             isValidTime={isValidTime}
             isValidEndTime={isValidEndTime}
             handleChange={handleChange}
+            handleBlur={handleBlur}
         />
     )
 
@@ -128,7 +145,10 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
 
     if (isMobile)
         return (
-            <div className='relative size-auto'>
+            <div
+                className={cn('relative h-auto', typeof props.width === 'number' && 'w-auto')}
+                {...timePickerWidthProps(props.width)}
+            >
                 <div className='m-0 flex h-fit items-center justify-center p-0'>{input}</div>
                 {/* Drawer owns backdrop/Escape dismissal — no ClickAwayListener (its portalled
                     content would register as a click-away and close the sheet on any tap inside). */}
@@ -137,11 +157,13 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
                     open={popupState.isOpen}
                     onClose={popupState.close}
                     anchorEl={popupState.anchorEl}
+                    registerBackClose={false}
                 >
                     <div className='mx-auto w-full max-w-[360px] px-4 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))]'>
                         <TimePickerPanel
                             dataTest={props.dataTest}
                             value={value}
+                            minTime={minTime}
                             onSelect={handleSelect}
                             handleClear={handleClear}
                             onConfirm={popupState.close}
@@ -153,7 +175,10 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
 
     return (
         <ClickAwayListener mouseEvent='onMouseDown' onClickAway={popupState.close}>
-            <div className='relative size-auto'>
+            <div
+                className={cn('relative h-auto', typeof props.width === 'number' && 'w-auto')}
+                {...timePickerWidthProps(props.width)}
+            >
                 <div className='m-0 flex h-fit items-center justify-center p-0'>{input}</div>
                 {popupState.isOpen && (
                     <TimePickerPopper

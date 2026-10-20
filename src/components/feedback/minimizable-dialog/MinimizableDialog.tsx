@@ -7,15 +7,16 @@ import styles from './MinimizableDialog.module.scss'
 import { StyledMenu, StyledMenuItem } from 'src/components/navigation/menu'
 import { useToggleMenuVisibility } from 'src/hooks/useToggleMenuVisibility.hook'
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
+import { isOverlayBackNavigationPending, OverlayBackOwnerContext, useBackCloses } from 'src/hooks/useBackCloses.hook'
 import { StyledTooltip } from 'src/components/data-display/tooltip'
 import type { IMinimizableDialogProps } from './types'
+import { fullScreenFieldWidthVars } from 'src/components/inputs/field-styles'
 import {
     ArrowExpandIcon,
     ArrowShrinkIcon,
     CloseIcon,
     DotsVerticalIcon,
     KeyboardCapslockIcon,
-    LoadingIcon,
     MinimizeIcon,
 } from 'src/components/icons'
 
@@ -36,6 +37,8 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     className = '',
     primaryButtonText,
     primaryButtonLoading = false,
+    primaryButtonDisabled,
+    primaryButtonDisabledReason,
     secondaryButtonText,
     onPrimaryButtonClick,
     onSecondaryButtonClick,
@@ -57,12 +60,40 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     const panelRef = useRef<HTMLDivElement | null>(null)
     const minimizedPanelRef = useRef<HTMLDivElement | null>(null)
 
+    // A running primary action keeps the panel open (Esc / X would hide the running request).
+    const busyReason = locale === 'en' ? 'Wait until saved' : 'Vent til lagringen er ferdig'
+    const closeWhenIdle = (): false | void => {
+        if (primaryButtonLoading) return false
+        onClose()
+    }
+
     const fullScreen = fullScreenState ?? fullscreen
     const isFullScreenActive = fullScreen && !minimized
 
     // Only the fullscreen state shows a page-covering backdrop (below) and is actually modal — the
     // default corner-docked panel is a non-modal floating widget that must NOT trap focus.
-    useFocusTrap(open && isFullScreenActive, panelRef, onClose)
+    useFocusTrap(open && isFullScreenActive, panelRef, closeWhenIdle)
+
+    // ASMA-8471 / REQ-002: Back closes this panel whenever it is showing — docked as well as
+    // fullscreen — through `closeWhenIdle`, the very callback ✕ uses (BACK-3), which already no-ops
+    // while the primary action is busy. Docked is deliberately included even though it is non-modal
+    // and Escape is left alone there: to a phone user the docked panel is still "the thing that is
+    // open", and the CRM organization panel never closing on Back was the headline defect.
+    // `minimized` is the one state that does NOT register — a collapsed title bar is not an overlay
+    // to dismiss, and Back must reach whatever is behind it instead.
+    // Ordering (RISK-010) is not decided here: this panel is a plain z-indexed <div>, and the
+    // registry skips any entry covered by an open native modal <dialog>, so a `StyledDialog` on top
+    // keeps the Back press however late this panel mounted. `panelRef` is what makes that work.
+    //
+    // The one case Back and a route change part ways: while DOCKED this panel is a shell-level
+    // widget that deliberately outlives navigation, so it refuses the adapter's close-before-push
+    // (`pendingNavigation`) and lets the route change run around it. Fullscreen is a real modal
+    // layer, so there it closes first like anything else.
+    const requestBackClose = (): false | void => {
+        if (!isFullScreenActive && isOverlayBackNavigationPending()) return false
+        return closeWhenIdle()
+    }
+    useBackCloses({ active: open && !minimized, requestClose: requestBackClose, ownerRef: panelRef })
 
     // Both panels stay mounted — the `hidden` class is only `h-0 w-0`, so the hidden one's controls
     // would still be tabbable. `inert` is what actually removes it from the tab order, and it is set
@@ -84,6 +115,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
               transform: 'translate(-50%, -50%)',
               width: 'min(1000px, calc(100vw - 32px))',
               height: '95dvh',
+              ...fullScreenFieldWidthVars,
           }
         : undefined
 
@@ -98,6 +130,35 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     const showPrimaryButton = primaryButtonText ?? primaryButtonLoading
 
     const showButtons = showPrimaryButton || secondaryButtonText
+
+    // While the primary action runs, the secondary action waits with the same reason as Esc and X (DIS-8).
+    const footerButtons = (
+        <>
+            {secondaryButtonText && onSecondaryButtonClick && (
+                <StyledButton
+                    dataTest='cancel-button'
+                    variant='outlined'
+                    disabled={primaryButtonLoading}
+                    disabledReason={busyReason}
+                    onClick={onSecondaryButtonClick}
+                >
+                    {secondaryButtonText}
+                </StyledButton>
+            )}
+            {showPrimaryButton && onPrimaryButtonClick && (
+                <StyledButton
+                    dataTest='save-button'
+                    loading={primaryButtonLoading}
+                    locale={locale}
+                    disabled={primaryButtonDisabled}
+                    disabledReason={primaryButtonDisabledReason}
+                    onClick={onPrimaryButtonClick}
+                >
+                    {primaryButtonText}
+                </StyledButton>
+            )}
+        </>
+    )
 
     // Toggling makes the panel holding the just-pressed button inert, so focus has to be handed to
     // the panel that became visible or it dies there (WCAG 2.4.3). Aim for the counterpart toggle;
@@ -146,14 +207,19 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                             </StyledTooltip>
                         )}
                         {showCloseIcon && (
-                            <StyledTooltip title={locale === 'en' ? 'Close' : 'Lukk'}>
+                            <StyledTooltip
+                                title={locale === 'en' ? 'Close' : 'Lukk'}
+                                open={primaryButtonLoading ? false : undefined}
+                            >
                                 <div>
                                     <StyledButton
                                         dataTest='close-button'
                                         aria-label={!onCloseText ? (locale === 'en' ? 'Close' : 'Lukk') : undefined}
                                         variant='textGray'
                                         size='small'
-                                        onClick={onClose}
+                                        disabled={primaryButtonLoading}
+                                        disabledReason={busyReason}
+                                        onClick={closeWhenIdle}
                                         endIcon={<CloseIcon height={20} width={20} color='text-delta-700' />}
                                     >
                                         {onCloseText}
@@ -180,6 +246,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                 )}
                 data-testid={dataTest}
             >
+                <OverlayBackOwnerContext.Provider value={panelRef}>
                 <div className='border-delta-200 flex flex-col gap-y-2 border-b p-4'>
                     <div className='flex items-center justify-between'>
                         {!label ? (
@@ -238,14 +305,19 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                             )}
 
                             {showCloseIcon && (
-                                <StyledTooltip title={locale === 'en' ? 'Close' : 'Lukk'}>
+                                <StyledTooltip
+                                    title={locale === 'en' ? 'Close' : 'Lukk'}
+                                    open={primaryButtonLoading ? false : undefined}
+                                >
                                     <div>
                                         <StyledButton
                                             dataTest='close-button'
                                             aria-label={!onCloseText ? (locale === 'en' ? 'Close' : 'Lukk') : undefined}
                                             variant='textGray'
                                             size='small'
-                                            onClick={onClose}
+                                            disabled={primaryButtonLoading}
+                                            disabledReason={busyReason}
+                                            onClick={closeWhenIdle}
                                             endIcon={<CloseIcon height={20} width={20} color='text-delta-700' />}
                                         >
                                             {onCloseText}
@@ -260,7 +332,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                 </div>
 
                 <div className={clsx('flex flex-col', fullScreen && !minimized && 'h-[87dvh]')}>
-                    <div className='grow overflow-y-auto'>
+                    <div className='grow overflow-y-auto overscroll-contain'>
                         {typeof children === 'function' ? children({ fullScreen }) : children}
                     </div>
 
@@ -303,24 +375,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                             {footerInfo}
                             {showButtons ? (
                                 <div className={cn('flex justify-end gap-x-2', btnContainerClassName)}>
-                                    {secondaryButtonText && onSecondaryButtonClick && (
-                                        <StyledButton
-                                            dataTest='cancel-button'
-                                            variant='outlined'
-                                            onClick={onSecondaryButtonClick}
-                                        >
-                                            {secondaryButtonText}
-                                        </StyledButton>
-                                    )}
-                                    {showPrimaryButton && onPrimaryButtonClick && (
-                                        <StyledButton
-                                            dataTest='save-button'
-                                            startIcon={primaryButtonLoading && <LoadingIcon width={24} height={24} />}
-                                            onClick={onPrimaryButtonClick}
-                                        >
-                                            {primaryButtonText}
-                                        </StyledButton>
-                                    )}
+                                    {footerButtons}
                                 </div>
                             ) : null}
                         </div>
@@ -333,29 +388,13 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                                         btnContainerClassName,
                                     )}
                                 >
-                                    {secondaryButtonText && onSecondaryButtonClick && (
-                                        <StyledButton
-                                            dataTest='cancel-button'
-                                            variant='outlined'
-                                            onClick={onSecondaryButtonClick}
-                                        >
-                                            {secondaryButtonText}
-                                        </StyledButton>
-                                    )}
-                                    {showPrimaryButton && onPrimaryButtonClick && (
-                                        <StyledButton
-                                            dataTest='save-button'
-                                            startIcon={primaryButtonLoading && <LoadingIcon width={24} height={24} />}
-                                            onClick={onPrimaryButtonClick}
-                                        >
-                                            {primaryButtonText}
-                                        </StyledButton>
-                                    )}
+                                    {footerButtons}
                                 </div>
                             ) : null}
                         </>
                     )}
                 </div>
+                </OverlayBackOwnerContext.Provider>
             </div>
         </>
     )

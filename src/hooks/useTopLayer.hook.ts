@@ -136,14 +136,25 @@ export function registerOpenModalDialog(dialog: HTMLDialogElement): () => void {
  * modal is open. Stale entries (a dialog torn down without its cleanup running) are skipped rather
  * than trusted, so a missed unregister can never strand an overlay in a detached subtree.
  */
-export function getTopmostOpenModalDialog(): HTMLDialogElement | undefined {
+/**
+ * The newest connected modal `<dialog>` for which `accept` returns true.
+ * `getTopmostOpenModalDialog` is the `dialog.open` case. Back arbitration passes a wider accept,
+ * because a forced native close sets `open` to false before React unregisters the dialog.
+ */
+export function findTopmostConnectedModalDialog(
+    accept: (dialog: HTMLDialogElement) => boolean,
+): HTMLDialogElement | undefined {
     const { dialogs } = getOpenModalDialogRegistry()
     for (let index = dialogs.length - 1; index >= 0; index -= 1) {
         const dialog = dialogs[index]
-        if (dialog?.isConnected && dialog.open) return dialog
+        if (dialog?.isConnected && accept(dialog)) return dialog
     }
 
     return undefined
+}
+
+export function getTopmostOpenModalDialog(): HTMLDialogElement | undefined {
+    return findTopmostConnectedModalDialog((dialog) => dialog.open)
 }
 
 const subscribeToOpenModalDialogs = (listener: () => void): (() => void) => {

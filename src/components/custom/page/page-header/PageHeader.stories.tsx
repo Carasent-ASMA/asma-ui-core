@@ -43,6 +43,8 @@ const secondaryActions: PageHeaderAction[] = [
     { id: 'archive', label: 'Archive', onClick: noop, priority: 50 },
 ]
 
+const OBSERVER_WAIT = { timeout: 5000 }
+
 const Frame = ({ width, children }: { width: number; children: React.ReactNode }) => (
     <div className='rounded-lg border border-delta-200 bg-white' style={{ width }}>
         {children}
@@ -258,7 +260,10 @@ export const StickyOnScroll: Story = {
 
         scroller.scrollTop = 400
 
-        await waitFor(async () => expect(header).toHaveAttribute('data-stuck', 'true'))
+        /* `data-stuck` flips from an IntersectionObserver callback, which Chromium delivers only
+         * after a rendering frame. On a loaded CI runner that took longer than waitFor's default
+         * 1000 ms (failed on PR #242), so the observer-driven waits get more headroom. */
+        await waitFor(async () => expect(header).toHaveAttribute('data-stuck', 'true'), OBSERVER_WAIT)
         await expect(
             canvas.queryByText('Context line — hidden while the header is stuck'),
         ).not.toBeInTheDocument()
@@ -275,7 +280,7 @@ export const StickyOnScroll: Story = {
         })
 
         scroller.scrollTop = 0
-        await waitFor(async () => expect(header).toHaveAttribute('data-stuck', 'false'))
+        await waitFor(async () => expect(header).toHaveAttribute('data-stuck', 'false'), OBSERVER_WAIT)
     },
 }
 

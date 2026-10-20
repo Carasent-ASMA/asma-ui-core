@@ -8,12 +8,19 @@ import { DND_HANDLE_COLUMN_ID, type CellContext, type ColumnDef } from 'src/tabl
 export function generateDndHandleColumn<TData>(
     custom_props?: ColumnDef<TData, unknown>,
     rowHeight?: number,
+    locale?: 'en' | 'no',
 ): ColumnDef<TData, unknown> {
     return {
         enableHiding: false,
         enableSorting: false,
         header: () => null,
-        cell: ({ row }: CellContext<TData, unknown>) => <RowDragHandleCell rowId={row.id} rowHeight={rowHeight} />,
+        cell: ({ row }: CellContext<TData, unknown>) => (
+            <RowDragHandleCell
+                ariaLabel={locale === 'no' ? `Endre rekkefølge på rad ${row.index + 1}` : `Reorder row ${row.index + 1}`}
+                rowId={row.id}
+                rowHeight={rowHeight}
+            />
+        ),
         minSize: 50,
         size: 50,
         ...custom_props,
@@ -23,16 +30,18 @@ export function generateDndHandleColumn<TData>(
 
 export const RowDragHandleCell: FC<
     Partial<Omit<Arguments, 'id'>> & {
+        ariaLabel?: string
         rowId: string
         rowHeight?: number
     }
-> = ({ rowId, rowHeight, ...rest }): JSX.Element => {
+> = ({ ariaLabel, rowId, rowHeight, ...rest }): JSX.Element => {
     const { attributes, listeners } = useSortable({ id: rowId, ...rest })
 
     return (
         <div
             {...attributes}
             {...listeners}
+            aria-label={ariaLabel}
             style={{
                 height: rowHeight ?? 'auto',
             }}

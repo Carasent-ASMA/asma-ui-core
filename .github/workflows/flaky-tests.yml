@@ -1,0 +1,58 @@
+name: 'Flaky tests'
+
+# Repeat-run flake detector (scripts/detect-flaky.ts). The storybook and interaction suites run in
+# real Chromium and lean on async browser delivery (IntersectionObserver, ResizeObserver, transitions,
+# focus), so a test can pass locally and on its PR and still fail one CI run in N on an unrelated
+# change — e.g. PageHeader "Sticky On Scroll" failing on the MinimizableDialog PR #242.
+#
+# Deliberately NOT on pull_request: repeating real-browser suites on every PR costs too much CI time.
+# It runs nightly and on demand over the whole of both suites, shuffled, to find flakes on master and
+# order dependencies (stories leaking state into the next one in the same iframe). Before merging a
+# change you suspect of flaking, run it locally against only the affected files:
+#   pnpm test:flaky --changed origin/master
+#
+# A test that fails in SOME runs is "flaky"; in EVERY run, "broken". Both fail the job; the step
+# summary lists each with its failure count and last failure message.
+on:
+    schedule:
+        - cron: '0 2 * * 1-5'
+    workflow_dispatch:
+        inputs:
+            runs:
+                description: 'How many times to run each suite'
+                default: '10'
+
+jobs:
+    flaky:
+        name: Flaky-test detector (repeat runs, real Chromium)
+        runs-on: ubuntu-latest
+        timeout-minutes: 60
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v5
+            # Same disk reclaim as the a11y and interaction jobs.
+            - name: Free disk space
+              run: |
+                  sudo rm -rf /usr/share/dotnet /usr/local/lib/android "$AGENT_TOOLSDIRECTORY" /opt/ghc /usr/local/share/boost || true
+                  docker image prune -af || true
+            - uses: actions/setup-node@v6
+              with:
+                  node-version: 24.14.0
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: latest
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+            - name: Install Playwright browsers
+              run: pnpm exec playwright install --with-deps chromium
+            - name: Detect flaky tests (full suites)
+              env:
+                  RUNS: ${{ inputs.runs || '5' }}
+              run: pnpm test:flaky --runs "$RUNS" --shuffle
+            - name: Upload run reports
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: flaky-test-reports
+                  path: node_modules/.cache/flaky/
+                  if-no-files-found: ignore

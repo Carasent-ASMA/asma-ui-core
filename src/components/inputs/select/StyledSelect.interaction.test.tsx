@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { afterEach, describe, it } from 'vitest'
-import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
+import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
+import { requestCloseTopOverlayBack } from 'src/hooks/useBackCloses.hook'
 import { cleanup, describeFocusIndicator, focusStyleOf, mount } from 'src/test-utils/renderInteraction'
 import { StyledSelect } from './StyledSelect'
 import { StyledSelectItem } from './StyledSelectItem'
@@ -10,7 +11,7 @@ import { StyledSelectItem } from './StyledSelectItem'
  * WAI-ARIA combobox/listbox pattern; WCAG 2.1.1, 2.1.2, 2.4.3, 2.4.7, 4.1.2.
  */
 
-const SelectFixture = ({ allowClear = false }: { allowClear?: boolean }): JSX.Element => {
+const SelectFixture = ({ allowClear = false, onChangeSpy }: { allowClear?: boolean; onChangeSpy?: () => void }): JSX.Element => {
     const [value, setValue] = useState<unknown>('b')
     return (
         <StyledSelect
@@ -18,7 +19,10 @@ const SelectFixture = ({ allowClear = false }: { allowClear?: boolean }): JSX.El
             name='Status'
             allowClear={allowClear}
             value={value}
-            onChange={(event) => setValue(event.target.value)}
+            onChange={(event) => {
+                onChangeSpy?.()
+                setValue(event.target.value)
+            }}
         >
             <StyledSelectItem value='a'>Active</StyledSelectItem>
             <StyledSelectItem value='b'>Paused</StyledSelectItem>
@@ -226,6 +230,23 @@ describe('StyledSelect keyboard contract', () => {
         await waitFor(() => expect(listbox()).toBeNull())
         await waitFor(() => expect(document.activeElement).toBe(button))
         await expect(button).toHaveAttribute('aria-expanded', 'false')
+    })
+
+    it('Back closes the list without choosing a value', async () => {
+        const onChange = fn()
+        const { container } = mount(<SelectFixture onChangeSpy={onChange} />)
+        const button = trigger(container)
+        button.focus()
+        await userEvent.keyboard('{ArrowDown}')
+        await userEvent.keyboard('{ArrowDown}')
+        await waitFor(() => expect(listbox()).not.toBeNull())
+
+        void requestCloseTopOverlayBack()
+
+        await waitFor(() => expect(listbox()).toBeNull())
+        await expect(button).toHaveTextContent('Paused')
+        await expect(button).toHaveAttribute('aria-expanded', 'false')
+        await expect(onChange).not.toHaveBeenCalled()
     })
 
     it('preserves the multi-select selection when Escape closes the list (2.1.2)', async () => {

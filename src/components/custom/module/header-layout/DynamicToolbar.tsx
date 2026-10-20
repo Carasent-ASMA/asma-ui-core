@@ -366,6 +366,7 @@ export function DynamicToolbar(props: DynamicToolbarProps): ReactElement {
                     afterSearchActionsPlan={afterSearchActionsPlan}
                     showPageActions={showPageActions}
                     overflowMenuLabel={t.more}
+                    inProgressLabel={t.inProgress}
                     align={layoutMode === 'compact' ? 'start' : 'end'}
                 />
                 {isSelectionMode && selectionRow}
@@ -415,6 +416,7 @@ export function DynamicToolbar(props: DynamicToolbarProps): ReactElement {
                         bulkActionsPlan={bulkActionsPlan}
                         showPageActions={showPageActions}
                         overflowMenuLabel={t.more}
+                        inProgressLabel={t.inProgress}
                         searchMeasureRef={searchMeasureRef}
                     />
                 </div>

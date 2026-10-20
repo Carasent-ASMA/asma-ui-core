@@ -1,14 +1,27 @@
-import { useEffect, useRef, type CSSProperties, type ElementType, type HTMLAttributes, type ReactNode } from 'react'
+import { type CSSProperties, type ElementType, type HTMLAttributes, type ReactNode } from 'react'
 import clsx from 'clsx'
 import { resolveSx } from 'src/helpers/sx'
 
 type StyledBadgeSize = 'medium' | 'small'
 
+/** Figma's `Parent` axis. It sets the dot's size and fill together, which is why it is not a colour. */
+type StyledBadgePurpose = 'notification' | 'unread' | 'filter'
+
 /**
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#15181-43817
- * Figma "Badge". Notification count = 20px lime pill with a 1px border and Helper-Semibold 14/20;
- * `dot` = 12px lime circle with a stronger 2px border. Other colors and `small` are legacy app
- * extensions with no matching Figma notification variant.
+ * Figma "Badge". Notification count = 20px lime pill with a 1px ring and Helper-Semibold 14/20;
+ * `dot` = 12px lime circle with a stronger 2px ring. Both rings are stroked on the inside, as
+ * Figma draws them, so they cost no layout space: a count is its label plus 6px either side and
+ * nothing more. Other colors and `small` are legacy app extensions with no matching Figma
+ * notification variant.
+ *
+ * Pass children to decorate them — the badge anchors to their corner. Pass none and the badge,
+ * count or dot, becomes a flow element (for the dot, Figma `Size=Dot`, node 44267-214524), for a
+ * table cell or a marker in a row, and `className` then applies to the badge's own root so the
+ * caller can place it.
+ *
+ * `purpose` selects Figma's `Parent`: the default notification dot, or the 8px solid primary dot
+ * that marks something unread or a filter as active.
  */
 interface BadgeProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'color'> {
     /** @figmaProp Badge content (the number/label) */
@@ -19,8 +32,17 @@ interface BadgeProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'color'> {
     max?: number
     /** @deprecated A zero notification count is always omitted. */
     showZero?: boolean
-    /** @figmaProp Size = dot→"Dot" (12px) | standard→"Default" count badge */
+    /**
+     * @figmaProp Size = dot→"Dot" (12px) | standard→"Default" count badge
+     * With no children the badge renders in normal flow rather than anchored to a corner.
+     */
     variant?: 'standard' | 'dot'
+    /**
+     * @figmaProp Parent = notification→the lime ringed dot | unread/filter→an 8px solid primary dot
+     * `unread` and `filter` are the same mark in Figma and differ only in meaning. Dots only: a
+     * count badge is always the notification pill.
+     */
+    purpose?: StyledBadgePurpose
     /** Polite live-update text. Keep this contextual and include the real, uncapped count. */
     statusMessage?: string
     invisible?: boolean
@@ -53,13 +75,16 @@ const COLOR_STYLE: Record<string, CSSProperties> = {
 }
 
 // Rectangular anchor placement (MUI default). vertical-horizontal → position + translate + origin.
+// Nested rather than `${vertical}-${horizontal}`: the eslint rule
+// `better-tailwindcss/no-concatenated-classes` rejects dynamic class construction, and v4's
+// scanner can only see literal class names.
 const ANCHOR_CLASS = {
     top: {
         right: 'top-0 right-0 translate-x-1/2 -translate-y-1/2 origin-[100%_0%]',
         left: 'top-0 left-0 -translate-x-1/2 -translate-y-1/2 origin-[0%_0%]',
     },
     bottom: {
-        right: 'bottom-0 right-0 translate-x-1/2 translate-y-1/2 origin-bottom-right',
+        right: 'bottom-0 right-0 translate-x-1/2 translate-y-1/2 origin-[100%_100%]',
         left: 'bottom-0 left-0 -translate-x-1/2 translate-y-1/2 origin-[0%_100%]',
     },
 } as const
@@ -80,6 +105,7 @@ export const StyledBadge = ({
     max: _max,
     showZero: _showZero,
     variant = 'standard',
+    purpose = 'notification',
     statusMessage,
     invisible,
     anchorOrigin,
@@ -93,18 +119,10 @@ export const StyledBadge = ({
     slotProps,
     component: _component,
     tabIndex: _tabIndex,
+    'aria-label': ariaLabel,
     ...props
 }: StyledBadgeProps): JSX.Element => {
-    const statusRef = useRef<HTMLSpanElement>(null)
     const count = typeof badgeContent === 'number' ? badgeContent : undefined
-    const previousCountRef = useRef(count)
-
-    useEffect(() => {
-        if (count === previousCountRef.current) return
-
-        previousCountRef.current = count
-        if (statusRef.current) statusRef.current.textContent = statusMessage ?? ''
-    }, [count, statusMessage])
 
     const sxObject = (sx && typeof sx === 'object' && !Array.isArray(sx) ? sx : {}) as Record<string, unknown>
     const badgeSlotStyle: CSSProperties = resolveSx(sxObject[SX_BADGE_SLOT])
@@ -113,32 +131,74 @@ export const StyledBadge = ({
     )
 
     const isDot = variant === 'dot'
-    const isZeroHidden = !isDot && (badgeContent === 0 || badgeContent === undefined || badgeContent === null)
+    /**
+     * Figma `Parent=Unread` and `Parent=Filter` are one mark drawn two ways in meaning only: an 8px
+     * solid `gama/500-primary` circle, with no ring. The ring belongs to `Parent=Notification`,
+     * where the lime fill needs the contrast to survive sitting over a busy icon.
+     */
+    const isAccentDot = isDot && purpose !== 'notification'
+    /**
+     * A badge with no host to decorate is a legitimate use, not a mistake: Figma's "Size=Dot" is a
+     * 12px circle in its own right, and a count pill is just as often anchored to a container the
+     * caller positions itself. Anchoring either one anyway would collapse the root to 0x0 and let
+     * the badge paint over whatever sits beside it, so the hostless form stays in normal flow.
+     */
+    const isStandalone = children === undefined
+    const isZeroHidden =
+        !isDot && (badgeContent === 0 || badgeContent === undefined || badgeContent === null)
     const hidden = !!invisible || isZeroHidden
 
     const displayContent: ReactNode = isDot
         ? null
         : typeof badgeContent === 'number' && badgeContent > 99
-        ? '99+'
-        : badgeContent
+          ? '99+'
+          : badgeContent
     const isSingleDigitCount = typeof badgeContent === 'number' && badgeContent > 0 && badgeContent < 10
 
     const vertical = anchorOrigin?.vertical ?? 'top'
     const horizontal = anchorOrigin?.horizontal ?? 'right'
-    const primaryBorderStyle: CSSProperties =
-        color === 'primary'
+    /**
+     * Figma strokes the ring on the inside, so it costs no layout space. A CSS border does, and
+     * that 2px widened a two-digit count to 30px against Figma's 28px and left a one-digit count
+     * 6px of content box for an 8px digit. An inset shadow paints the same ring for free.
+     */
+    const primaryRingStyle: CSSProperties =
+        color === 'primary' && !isAccentDot
             ? {
-                  borderColor: isDot ? 'var(--colors-badge-border-dot)' : 'var(--colors-badge-border-count)',
-                  borderStyle: 'solid',
-                  borderWidth: isDot ? 'var(--border-badge-dot)' : 'var(--border-badge-count)',
+                  boxShadow: isDot
+                      ? 'inset 0 0 0 var(--border-badge-dot) var(--colors-badge-border-dot)'
+                      : 'inset 0 0 0 var(--border-badge-count) var(--colors-badge-border-count)',
               }
             : {}
 
+    /**
+     * An anchored badge is decoration: the host it wraps already announces the state. A hostless
+     * badge has no such host, so when the caller names it we expose that name instead of leaving the
+     * state carried by colour alone (WCAG 2.2 AA 1.4.1). A bare `aria-label` on a span is not
+     * reliably surfaced, so it needs a role to land on. A hidden badge renders no shape at all, so
+     * it keeps neither role nor name — a named image that cannot be seen misleads.
+     */
+    const standaloneRole = isStandalone && !hidden && ariaLabel ? { role: 'img', 'aria-label': ariaLabel } : {}
+    const anchoredLabel = !isStandalone && ariaLabel ? { 'aria-label': ariaLabel } : {}
+
+    /**
+     * `className` styles the badge itself, which for an anchored badge is the inner span. A hostless
+     * badge has no host, so there the badge *is* the outer element and the class belongs on the root
+     * — otherwise positioning it would place it inside its own box. `relative` goes with it, since it
+     * exists only to anchor an absolutely positioned badge and would fight a caller's `absolute` for
+     * an unpredictable win on stylesheet order.
+     */
+    const rootClassName = isStandalone
+        ? clsx('inline-flex shrink-0 align-middle', className)
+        : 'relative inline-flex shrink-0 align-middle'
+
     return (
         <span
-            className='relative inline-flex shrink-0 align-middle'
+            className={rootClassName}
             data-testid={dataTest}
             style={rootStyle}
+            {...anchoredLabel}
+            {...standaloneRole}
             {...props}
         >
             {children}
@@ -146,20 +206,26 @@ export const StyledBadge = ({
                 <span
                     aria-hidden='true'
                     className={clsx(
-                        'font-roboto absolute z-1 box-border flex items-center justify-center font-semibold whitespace-nowrap',
-                        ANCHOR_CLASS[vertical][horizontal],
-                        isDot
-                            ? 'size-[12px] min-w-[12px] rounded-full p-0'
-                            : size === 'small'
-                            ? 'h-[16px] w-max min-w-[16px] rounded-[20px] px-[4px] text-[0.75rem]'
-                            : 'h-[20px] min-w-[20px] rounded-[20px] px-[6px] text-sm/5',
+                        'font-roboto box-border flex items-center justify-center font-semibold whitespace-nowrap',
+                        !isStandalone && 'absolute z-1',
+                        !isStandalone && ANCHOR_CLASS[vertical][horizontal],
+                        isAccentDot
+                            ? 'size-[8px] min-w-[8px] rounded-full p-0'
+                            : isDot
+                              ? 'size-[12px] min-w-[12px] rounded-full p-0'
+                              : size === 'small'
+                                ? 'h-[16px] w-max min-w-[16px] rounded-[20px] px-[4px] text-[0.75rem]'
+                                : 'h-[20px] min-w-[20px] rounded-[20px] px-[6px] text-sm/5',
+                        // One digit measures 8.05px, so padding alone leaves the pill 20.05px wide.
+                        // Pinning it keeps Figma's exact 20px circle rather than a hair of an oval.
                         !isDot && size === 'medium' && isSingleDigitCount && 'w-[20px]',
-                        className,
+                        !isStandalone && className,
                         slotProps?.badge?.className,
                     )}
                     style={{
                         ...(COLOR_STYLE[color] ?? COLOR_STYLE['default']),
-                        ...primaryBorderStyle,
+                        ...(isAccentDot ? { backgroundColor: 'var(--colors-gama-500)' } : {}),
+                        ...primaryRingStyle,
                         ...badgeSlotStyle,
                         ...slotProps?.badge?.style,
                     }}
@@ -167,7 +233,11 @@ export const StyledBadge = ({
                     {displayContent}
                 </span>
             )}
-            <span ref={statusRef} aria-atomic='true' aria-live='polite' className='sr-only' role='status' />
+            {/* Keep contextual status text in the accessibility tree from first render; subsequent
+                changes are announced politely. A hidden badge must not contribute stale status. */}
+            <span aria-atomic='true' aria-live='polite' className='sr-only' role='status'>
+                {hidden || count === undefined ? '' : (statusMessage ?? '')}
+            </span>
         </span>
     )
 }

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { afterEach, describe, it } from 'vitest'
 import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
+import { getOverlayBackStackSize, requestCloseTopOverlayBack } from 'src/hooks/useBackCloses.hook'
 import { StyledDatePicker } from './StyledDatePicker'
 
 /**
@@ -136,6 +137,42 @@ describe('StyledDatePicker keyboard contract', () => {
         await expect(document.activeElement).toBe(calendarButton(container))
     })
 
+    it('Back closes the calendar without selecting a date', async () => {
+        const onPick = fn()
+        const { container } = mount(<DatePickerFixture onPick={onPick} />)
+        await userEvent.click(calendarButton(container))
+        await waitFor(() => expect(calendar()).not.toBeNull())
+        await expect(getOverlayBackStackSize()).toBe(1)
+
+        void requestCloseTopOverlayBack()
+
+        await waitFor(() => expect(calendar()).toBeNull())
+        await expect(field(container)).toHaveValue('')
+        await expect(onPick).not.toHaveBeenCalled()
+    })
+
+    it('keeps legacy browser Back closing while the host adapter is absent', async () => {
+        const sharedWindow = window.rawWindow ?? window
+        const shell = sharedWindow.__ASMA__SHELL__
+        sharedWindow.__ASMA__SHELL__ = undefined
+        try {
+            const { container } = mount(<DatePickerFixture />)
+            await userEvent.click(calendarButton(container))
+            await waitFor(() => expect(calendar()).not.toBeNull())
+            await waitFor(() =>
+                expect((sharedWindow.history.state as Record<string, unknown>)['__asmaPickerBack']).toEqual(
+                    expect.any(String),
+                ),
+            )
+
+            sharedWindow.history.back()
+
+            await waitFor(() => expect(calendar()).toBeNull())
+        } finally {
+            sharedWindow.__ASMA__SHELL__ = shell
+        }
+    })
+
     it('closes the calendar on Tab without blocking normal focus movement (2.1.2)', async () => {
         const { container } = mount(<DatePickerFixture />)
         calendarButton(container).focus()
@@ -189,5 +226,26 @@ describe('StyledDatePicker keyboard contract', () => {
         // Read-only keeps the value announced to AT but offers no calendar trigger to focus.
         await expect(container.querySelector('input')).toHaveAttribute('readonly')
         await expect(container.querySelector('button[aria-label="Open calendar"]')).toBeNull()
+    })
+
+    it('names the field by its title, or by inputAriaProps when given (1.3.1, 4.1.2)', async () => {
+        const { container } = mount(
+            <>
+                <StyledDatePicker dataTest='titled' mode='single' selected={undefined} onSelect={() => undefined} title='Start date*' />
+                <StyledDatePicker
+                    dataTest='named'
+                    mode='single'
+                    selected={undefined}
+                    onSelect={() => undefined}
+                    title='End date*'
+                    inputAriaProps={{ 'aria-label': 'End date', 'aria-required': true }}
+                />
+            </>,
+        )
+
+        await expect(container.querySelector('input[data-testid="titled"]')).toHaveAccessibleName('Start date*')
+        const named = container.querySelector('input[data-testid="named"]')
+        await expect(named).toHaveAccessibleName('End date')
+        await expect(named).toHaveAttribute('aria-required', 'true')
     })
 })

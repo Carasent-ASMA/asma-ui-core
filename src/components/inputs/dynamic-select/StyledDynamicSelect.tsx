@@ -1,5 +1,6 @@
 import { DynamicInteractiveChipGroup } from './components/DynamicInteractiveChipGroup'
 import { DynamicSelectAutocomplete } from './components/DynamicSelectAutocomplete'
+import { DynamicSelectReadOnlyValue } from './components/DynamicSelectReadOnlyValue'
 import type { DynamicSelectOption, StyledDynamicSelectComponent, StyledDynamicSelectProps } from './types'
 import { forwardRef } from 'react'
 
@@ -23,6 +24,9 @@ import { forwardRef } from 'react'
  * are behavioral / MUI `Autocomplete` API-parity.
  *
  * **Rendering strategy:**
+ * - `readOnly` + single (not `multiple`) → plain text (`DynamicSelectReadOnlyValue`), whatever the
+ *   option count: the title, then the selected label (or `-`). No chip, no input, no helper row.
+ *   `readOnly` + `multiple` is unaffected and follows the rules below.
  * - `1–5 options` → renders as an interactive chip group (`DynamicInteractiveChipGroup`).
  *   Chips behave as radio buttons (single) or checkboxes (multiple).
  *   Long labels automatically switch to a vertical stacked layout.
@@ -100,7 +104,8 @@ import { forwardRef } from 'react'
  * ---
  *
  * @example
- * // 4. Read-only display – only selected options are shown
+ * // 4. Read-only display – single: the selected label as plain text; multiple: only the selected
+ * //    options, as chips
  * <StyledDynamicSelect
  *   dataTest="status-readonly"
  *   options={statuses}
@@ -177,6 +182,10 @@ export const StyledDynamicSelect = forwardRef(
         ref: React.Ref<HTMLInputElement>,
     ) => {
         const { options } = props
+
+        // Read-only single select is plain text whatever the option count. Multiple keeps its
+        // chips — `props.multiple` narrows `value` to a single option here.
+        if (props.readOnly && !props.multiple) return <DynamicSelectReadOnlyValue<TOption> {...props} />
 
         if (options.length > 0 && options.length <= 5)
             return <DynamicInteractiveChipGroup<TOption> {...props} ref={ref} />

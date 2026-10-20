@@ -37,10 +37,24 @@ export const ClickAwayListener = ({
     const nodeRef = useRef<Element | null>(null)
     const callbackRef = useRef(onClickAway)
     const syntheticEventRef = useRef(false)
+    const activatedRef = useRef(false)
 
     useEffect(() => {
         callbackRef.current = onClickAway
     }, [onClickAway])
+
+    // React 18+ runs this effect synchronously when a click mounts the listener, while that click
+    // is still bubbling to `document`; it would count as a click away and close a popup the
+    // moment it opens. Arm on the next tick, as MUI does (facebook/react#20074). ASMA-8421.
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            activatedRef.current = true
+        }, 0)
+        return () => {
+            clearTimeout(timer)
+            activatedRef.current = false
+        }
+    }, [])
 
     useEffect(() => {
         const handler = (event: Event) => {
@@ -49,6 +63,7 @@ export const ClickAwayListener = ({
             syntheticEventRef.current = false
 
             if (
+                activatedRef.current &&
                 node &&
                 event.target instanceof Node &&
                 !node.contains(event.target) &&

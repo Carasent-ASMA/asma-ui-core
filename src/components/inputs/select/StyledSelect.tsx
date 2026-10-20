@@ -32,6 +32,7 @@ import { HelperRow } from 'src/helpers/HelperRow'
 import { resolveSx } from 'src/helpers/sx'
 import { useHelperRowBudget } from 'src/helpers/useHelperRowBudget'
 import { useHelperSlot } from 'src/helpers/useHelperSlot'
+import { useBackCloses } from 'src/hooks/useBackCloses.hook'
 import {
     getOpenModalDialogAncestor,
     shouldUsePopoverTopLayer,
@@ -40,7 +41,7 @@ import {
     useTopLayerRef,
 } from 'src/hooks/useTopLayer.hook'
 import { useFormControlContext } from '../../miscellaneous/FormControlContext'
-import { outlineClass, type FieldSize } from '../field-styles'
+import { fieldWidthStyle, outlineClass, type FieldSize, type FieldWidth } from '../field-styles'
 import type { StyledSelectItemProps } from './StyledSelectItem'
 
 export interface SelectChangeEvent<T = unknown> {
@@ -85,6 +86,9 @@ export interface StyledSelectProps {
     displayEmpty?: boolean
     multiple?: boolean
     renderValue?: (value: unknown) => ReactNode
+    /** Field width pattern step; Full by default. `variant="standard"` keeps its content width. */
+    width?: FieldWidth
+    /** @deprecated Fields are Full by default; use `width`. */
     fullWidth?: boolean
     className?: string
     style?: CSSProperties
@@ -98,6 +102,8 @@ export interface StyledSelectProps {
      * above). Without it (and no `name`/placeholder/value text), the trigger has no accessible name
      * at all — a common gap when a floating/external label isn't referenced. */
     labelId?: string
+    /** Marks the trigger `aria-required`; also read from a surrounding `StyledFormControl`. */
+    required?: boolean
     children?: ReactNode
     MenuProps?: { className?: string }
     /** Forwarded to the trigger button, merged with the internal focus tracking (e.g. validate on blur). */
@@ -128,7 +134,8 @@ export const StyledSelect = ({
     displayEmpty,
     multiple,
     renderValue,
-    fullWidth,
+    width = 'full',
+    fullWidth: _fullWidth,
     className,
     style,
     sx,
@@ -138,8 +145,10 @@ export const StyledSelect = ({
     onFocus,
     onBlur,
     labelId,
+    required,
 }: StyledSelectProps): JSX.Element => {
     const ctx = useFormControlContext()
+    // The context id is the StyledInputLabel's id; with no label element it is ignored and `name` names it.
     const listboxId = `${dataTest}-listbox`
     const isStandard = variant === 'standard'
     const isError = error ?? ctx?.error ?? false
@@ -215,6 +224,7 @@ export const StyledSelect = ({
     const dismiss = useDismiss(context)
     const role = useRole(context, { role: 'listbox' })
     const { getReferenceProps, getFloatingProps } = useInteractions([click, dismiss, role])
+    useBackCloses({ active: open, requestClose: () => handleOpenChange(false) })
     // Portal INTO the trigger's modal <dialog> (if any) so the listbox isn't inert. Popover API
     // only when body-portalled — nested showPopover inside a dialog breaks on mobile Safari.
     const [portalRoot, setPortalRoot] = useState<HTMLElement>()
@@ -379,8 +389,14 @@ export const StyledSelect = ({
     return (
         <div
             ref={fieldRef}
-            className={cn('group relative inline-flex flex-col', fullWidth && 'w-full', className)}
-            style={{ fontFamily: 'Roboto, Helvetica, Arial, sans-serif', ...resolveSx(sx), ...style }}
+            className={cn('group relative flex-col', isStandard ? 'inline-flex' : 'flex', className)}
+            data-field-width={isStandard ? undefined : width}
+            style={{
+                ...(isStandard ? {} : fieldWidthStyle(width)),
+                fontFamily: 'Roboto, Helvetica, Arial, sans-serif',
+                ...resolveSx(sx),
+                ...style,
+            }}
         >
             <button
                 ref={setReference}
@@ -406,9 +422,10 @@ export const StyledSelect = ({
                 // value text happens to be visible — which is either absent (nameless trigger, the
                 // axe `button-name` bug) or, when present, an ambiguous name on its own (a screen
                 // reader announcing just the selected value, e.g. "Paused", doesn't say what the field is).
-                aria-labelledby={labelId}
+                aria-labelledby={labelId ?? ctx?.labelId}
                 aria-label={!labelId ? name : undefined}
                 aria-invalid={isError ? true : undefined}
+                aria-required={(required ?? ctx?.required) ? true : undefined}
                 aria-describedby={showHelperSlot ? helperId : undefined}
                 aria-disabled={isDisabled ? true : undefined}
                 disabled={isDisabled}
@@ -420,7 +437,6 @@ export const StyledSelect = ({
                     setFocused(false)
                     onBlur?.(event)
                 }}
-                style={{ minWidth: hasValue && !isStandard ? 105 : undefined }}
                 className={cn(
                     'relative flex w-full items-center justify-between text-left outline-hidden',
                     // Figma field text = Body Base 16/lh24 (`text-base`), h40 (matches StyledInputField/field-styles).
@@ -495,7 +511,7 @@ export const StyledSelect = ({
                         // popup is a separate element from the trigger and needs its own accessible name
                         // (axe `aria-input-field-name`); relying on `name` alone left it nameless for any
                         // consumer using only an external `labelId` label, which is the common case.
-                        aria-labelledby={labelId}
+                        aria-labelledby={labelId ?? ctx?.labelId}
                         aria-label={!labelId ? name : undefined}
                         {...(usePopoverLayer ? TOP_LAYER_PROPS : {})}
                         style={{
@@ -508,8 +524,8 @@ export const StyledSelect = ({
                             // and separates its rows from the container — see the equivalent rule on
                             // StyledSelectAutocomplete's listbox for why it does not live on the row.
                             'border-delta-300 z-1300 m-0 max-h-72 list-none overflow-auto rounded-sm border border-solid bg-white px-0 py-2 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
-                            '[&>li:not(:last-child)]:border-0 [&>li:not(:last-child)]:border-b',
-                            '[&>li:not(:last-child)]:border-delta-200 [&>li:not(:last-child)]:border-solid',
+                            // Inset shadow, not a border, so the separator keeps rows at exactly 40px.
+                            '[&>li:not(:last-child)]:shadow-[inset_0_-1px_0_var(--colors-delta-200)]',
                             MenuProps?.className,
                         )}
                     >

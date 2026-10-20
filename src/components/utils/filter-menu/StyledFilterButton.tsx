@@ -1,4 +1,5 @@
 import { StyledButton, type StyledButtonProps } from '../../inputs/button'
+import { StyledBadge } from '../../data-display/badge'
 import { FilterIcon } from '../../icons'
 import { useDynamicToolbarLayout } from '../../custom/module/header-layout/DynamicToolbarLayoutContext'
 import clsx from 'clsx'
@@ -6,7 +7,7 @@ import clsx from 'clsx'
 /**
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#16741-35884 (Design-System · "Filter button") — button-only variant
  * of `StyledFilterMenu` (no popover). Aligned `StyledButton` (Outlined) + the "Filters applied" badge:
- * an 8px `gama-400` dot at top-right when `filterIsActive`.
+ * Figma's `Parent=Filter` dot at top-right when `filterIsActive`.
  *
  * Custom props:
  * @param filterIsActive - needed to determine whether or not to show the dot in the top right corner indicating some changes were made
@@ -44,12 +45,12 @@ export const StyledFilterButton: React.FC<StyledButtonProps & StyledFilterMenuPr
                     {!isLabelHidden && (label ?? 'Filter')}
                 </StyledButton>
                 {filterIsActive && (
-                    <div
-                        className={clsx(
-                            'bg-gama-400 absolute size-2 rounded-full',
-                            size === 'large' ? 'top-2 right-2' : 'top-1 right-1',
-                        )}
-                    ></div>
+                    <StyledBadge
+                        dataTest='filter-button-active-dot'
+                        variant='dot'
+                        purpose='filter'
+                        className={clsx('absolute', size === 'large' ? 'top-2 right-2' : 'top-1 right-1')}
+                    />
                 )}
             </div>
         </>

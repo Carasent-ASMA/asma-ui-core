@@ -20,6 +20,12 @@ const meta = {
         dataTest: 'filtered-empty-state',
         isFiltered: true,
     },
+    /* StyledEmptyPage fades in (`animate-opacity-in`, 300 ms). axe runs right after play, so without
+     * this it could sample the text mid-fade and report a contrast ratio of 1.09–2.19 instead of
+     * the settled colour — a flake, caught by `pnpm test:flaky`. */
+    play: async ({ canvasElement }) => {
+        await Promise.all(canvasElement.getAnimations({ subtree: true }).map((animation) => animation.finished))
+    },
 } satisfies Meta<typeof StyledFilteredEmptyState>
 
 export default meta
@@ -57,6 +63,9 @@ export const Variants: Story = {
 }
 
 export const Norwegian: Story = {
+    // axe: color-contrast (StyledEmptyPage text delta-500 #7a899e on white = 3.55:1, below 4.5:1). Was
+    // masked by the fade-in until the meta play above waited for it. ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: {
         dataTest: 'filtered-empty-state-no',
         locale: 'no',
@@ -66,6 +75,9 @@ export const Norwegian: Story = {
 }
 
 export const CustomEmptyText: Story = {
+    // axe: color-contrast (StyledEmptyPage text delta-500 #7a899e on white = 3.55:1, below 4.5:1). Was
+    // masked by the fade-in until the meta play above waited for it. ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: {
         dataTest: 'filtered-empty-state-custom-empty-text',
         emptyText: 'No work records',
@@ -75,6 +87,9 @@ export const CustomEmptyText: Story = {
 }
 
 export const WithoutFilters: Story = {
+    // axe: color-contrast (StyledEmptyPage text delta-500 #7a899e on white = 3.55:1, below 4.5:1). Was
+    // masked by the fade-in until the meta play above waited for it. ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
     args: {
         dataTest: 'filtered-empty-state-no-filter',
         isFiltered: false,

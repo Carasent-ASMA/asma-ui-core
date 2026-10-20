@@ -262,7 +262,8 @@ export const CountryCodeSelect = ({
                     anchorEl={triggerEl}
                     onClose={picker.dismiss}
                     tabIntoContent={false}
-                    slotProps={{ paper: { className: 'flex max-h-80 w-80 flex-col overflow-hidden' } }}
+                    // Figma Menus surface: 8px above the first row and below the last.
+                    slotProps={{ paper: { className: 'flex max-h-80 w-80 flex-col overflow-hidden py-2' } }}
                 >
                     {options}
                 </StyledPopover>

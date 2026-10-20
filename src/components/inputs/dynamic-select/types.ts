@@ -1,3 +1,4 @@
+import type { FieldWidth } from 'src/components/inputs/field-styles'
 import type { StyledSelectAutocompleteProps } from '../select-autocomplete'
 import type React from 'react'
 
@@ -31,12 +32,24 @@ interface DynamicSelectCommonProps<TOption extends DynamicSelectOption> {
     dataTest: string
     /** @figmaProp option-count column — 1–5 → Chips select, 6–10 → Select (dropdown), 11+ → Autocomplete. */
     options: TOption[]
-    /** @figmaProp State = true→"Read-only" (non-interactive; selected value(s) shown as plain chips). */
+    /**
+     * @figmaProp State = true→"Read-only" (non-interactive). Single: the selected label as plain text
+     * (`-` when empty), no chip, input or helper row, at any option count. Multiple: the selected
+     * values as plain chips.
+     */
     readOnly?: boolean
     /** Prevents the built-in clear button from appearing even when a value is set. Applies to autocomplete only. */
     disableClearable?: boolean
-    /** @figmaProp Title (Body Base SemiBold 16, text-icon/title-label delta-800) above the control. */
-    title?: string
+    /**
+     * @figmaProp Title (text-icon/title-label delta-800) above the control. A node, so a title can carry
+     * an icon or a required marker. Prefer it over a separate form label stacked on the select: the
+     * select owns the title-to-control gap, which is tighter in read-only (title over plain text).
+     */
+    title?: React.ReactNode
+    /** @figmaProp none — title typography: `'base'` Body Base SemiBold 16/24 (default), `'lg'` Section title 18/28. */
+    titleSize?: 'base' | 'lg'
+    /** Field width pattern step. The pattern keeps a dynamic select Full (WID-5); Full is the default. */
+    width?: FieldWidth
     /** @figmaProp none — app size (chips/buttons). Defaults to `'medium'`. */
     size?: 'small' | 'medium'
     /**

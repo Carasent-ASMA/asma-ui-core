@@ -2,7 +2,11 @@ import { type CellContext } from '@tanstack/react-table'
 import { EXPAND_COLUMN_ID, type ColumnDef } from '../../types'
 import { ChevronDownIcon } from 'src/table/shared-components/ChevronDownIcon'
 
-export function generateExpandColumn<TData>(isFixed: boolean, rowHeight?: number): ColumnDef<TData, unknown> {
+export function generateExpandColumn<TData>(
+    isFixed: boolean,
+    rowHeight?: number,
+    locale?: 'en' | 'no',
+): ColumnDef<TData, unknown> {
     return {
         id: EXPAND_COLUMN_ID,
         minSize: 50,
@@ -19,7 +23,15 @@ export function generateExpandColumn<TData>(isFixed: boolean, rowHeight?: number
                 // keyboard and had no accessible name/state for assistive tech.
                 <button
                     type='button'
-                    aria-label={isExpanded ? 'Collapse row' : 'Expand row'}
+                    aria-label={
+                        locale === 'no'
+                            ? isExpanded
+                                ? `Skjul rad ${cell.row.index + 1}`
+                                : `Utvid rad ${cell.row.index + 1}`
+                            : isExpanded
+                              ? `Collapse row ${cell.row.index + 1}`
+                              : `Expand row ${cell.row.index + 1}`
+                    }
                     aria-expanded={isExpanded}
                     className='flex w-full items-center justify-center border-0 bg-transparent p-0 outline-hidden focus:outline-hidden'
                     onClick={() => cell.row.getToggleExpandedHandler()()}

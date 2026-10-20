@@ -4,7 +4,7 @@ import type { StyledTimePickerProps } from '../types'
 import styles from '../StyledTimePicker.module.scss'
 type TimePickerBodyProps = Omit<StyledTimePickerProps, 'placeholder' | 'disabled' | 'inputClassName'>
 
-export const TimePickerBody: React.FC<Omit<TimePickerBodyProps, 'anchorOrigin'>> = ({ value, onSelect, dataTest }) => {
+export const TimePickerBody: React.FC<Omit<TimePickerBodyProps, 'anchorOrigin'>> = ({ value, onSelect, dataTest, minTime }) => {
     const ref = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -25,8 +25,8 @@ export const TimePickerBody: React.FC<Omit<TimePickerBodyProps, 'anchorOrigin'>>
 
     return (
         <div ref={ref} data-test={dataTest} className={styles['styled-time-picker-root']}>
-            <TimePickerColumn type='hours' value={value} onSelect={onSelect} />
-            <TimePickerColumn type='minutes' value={value} onSelect={onSelect} />
+            <TimePickerColumn type='hours' value={value} onSelect={onSelect} minTime={minTime} />
+            <TimePickerColumn type='minutes' value={value} onSelect={onSelect} minTime={minTime} />
         </div>
     )
 }

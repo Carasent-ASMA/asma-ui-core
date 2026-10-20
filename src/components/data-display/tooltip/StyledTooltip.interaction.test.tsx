@@ -1,12 +1,22 @@
-import { afterEach, describe, it } from 'vitest'
+import { afterEach, describe, it, vi } from 'vitest'
 import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
+import { StyledAccordion } from 'src/components/utils/accordion/base-ui/StyledAccordion'
+import { StyledAccordionDetails } from 'src/components/utils/accordion/base-ui/StyledAccordionDetails'
+import { StyledAccordionSummary } from 'src/components/utils/accordion/base-ui/StyledAccordionSummary'
 import { cleanup, isEntirelyObscured, mount } from 'src/test-utils/renderInteraction'
 import { StyledTooltip } from './StyledTooltip'
 
 /**
  * Keyboard & focus contract — StyledTooltip (ASMA-8139).
  * WCAG 1.4.13 (content on hover or focus), 2.1.1, 4.1.2.
+ *
+ * Every test that expects focus to OPEN the tooltip tabs in with `userEvent.tab()` instead of
+ * calling `.focus()`. Floating UI's `useFocus` is `visibleOnly`, so it opens only when the trigger
+ * matches `:focus-visible` — and Chromium grants that to a programmatic focus only while its last
+ * input modality was the keyboard. A pointer-driven test running earlier in the same page leaves it
+ * in pointer mode, and the tooltip then never appears: with `--sequence.shuffle` (the flaky-test
+ * detector) that is an order dependency, not a flake. Tabbing in presses a real key through CDP.
  */
 
 const TooltipFixture = (): JSX.Element => (
@@ -58,7 +68,9 @@ describe('StyledTooltip keyboard contract', () => {
         await expect(getComputedStyle(host).display).toBe('flex')
         await expect(grow.getBoundingClientRect().width).toBeGreaterThan(0)
 
-        container.querySelector<HTMLButtonElement>('[data-testid="tip-target"]')!.focus()
+        // Tab in, never .focus(): focus opens the tooltip only while `:focus-visible` matches.
+        await userEvent.tab()
+        await expect(document.activeElement).toBe(container.querySelector('[data-testid="tip-target"]'))
         await waitFor(() => expect(tip()).not.toBeNull())
         await expect(container.querySelector('[data-testid="tip-target"]')).toHaveAttribute(
             'aria-describedby',
@@ -89,7 +101,9 @@ describe('StyledTooltip keyboard contract', () => {
         // `flex: 1` share for itself and leave `grow` at its intrinsic text width.
         await expect(grow.getBoundingClientRect().width).toBeGreaterThan(200)
 
-        target.focus()
+        // Tab in, never .focus(): focus opens the tooltip only while `:focus-visible` matches.
+        await userEvent.tab()
+        await expect(document.activeElement).toBe(target)
         await waitFor(() => expect(tip()).not.toBeNull())
         await expect(target).toHaveAccessibleDescription('Archive this thread')
     })
@@ -109,7 +123,9 @@ describe('StyledTooltip keyboard contract', () => {
         )
         const target = container.querySelector<HTMLButtonElement>('[data-testid="tip-target"]')!
 
-        target.focus()
+        // Tab in, never .focus(): focus opens the tooltip only while `:focus-visible` matches.
+        await userEvent.tab()
+        await expect(document.activeElement).toBe(target)
         await waitFor(() => expect(tip()).not.toBeNull())
 
         const anchor = target.getBoundingClientRect()
@@ -152,6 +168,28 @@ describe('StyledTooltip keyboard contract', () => {
         await waitFor(() => expect(tip()).not.toBeNull())
 
         await expect(wrapper).toHaveAttribute('aria-describedby', tip()!.id)
+    })
+
+    it('describes a control inside a collapsed accordion panel (disabled-states DIS-2, 4.1.2)', async () => {
+        const { container } = mount(
+            <StyledAccordion>
+                <StyledAccordionSummary>Details</StyledAccordionSummary>
+                <StyledAccordionDetails>
+                    <StyledButton dataTest='panel-action' disabled disabledReason='Locked after signing'>
+                        Sign
+                    </StyledButton>
+                </StyledAccordionDetails>
+            </StyledAccordion>,
+        )
+        const input = container.querySelector<HTMLButtonElement>('[data-testid="panel-action"]')!
+
+        // The collapsed panel is `inert`, which `isTabbable` rejects — the id then landed on the
+        // wrapper and opening the panel could not move it. It must sit on the control already.
+        await waitFor(() => expect(input).toHaveAccessibleDescription('Locked after signing'))
+
+        await userEvent.click(container.querySelector('button')!)
+        input.focus()
+        await expect(input).toHaveAccessibleDescription('Locked after signing')
     })
 
     it('leaves no aria-describedby residue once the tooltip closes (4.1.2)', async () => {
@@ -211,7 +249,9 @@ describe('StyledTooltip keyboard contract', () => {
         const { container } = mount(<TooltipFixture />)
         const target = container.querySelector<HTMLButtonElement>('[data-testid="tip-target"]')!
 
-        target.focus()
+        // Tab in, never .focus(): focus opens the tooltip only while `:focus-visible` matches.
+        await userEvent.tab()
+        await expect(document.activeElement).toBe(target)
         await waitFor(() => expect(tip()).not.toBeNull())
         await expect(isEntirelyObscured(target)).toBe(false)
     })
@@ -259,6 +299,111 @@ describe('StyledTooltip keyboard contract', () => {
         await expect(trigger).toHaveAttribute('aria-describedby', 'hint')
     })
 
+    it('keeps its reason when the trigger adds helper text (4.1.2)', async () => {
+        // React owns the trigger's `aria-describedby`: a helper row appearing rewrites the attribute.
+        // The reason id must be re-appended rather than dropped while the control stays disabled.
+        const fixture = (helperText?: string): JSX.Element => (
+            <>
+                <StyledTooltip title='Only administrators' persistentDescription>
+                    <button
+                        type='button'
+                        data-testid='status'
+                        aria-describedby={helperText ? 'status-helper' : undefined}
+                    >
+                        Status
+                    </button>
+                </StyledTooltip>
+                {helperText && <span id='status-helper'>{helperText}</span>}
+            </>
+        )
+        const { container, rerender } = mount(fixture())
+        const trigger = container.querySelector<HTMLElement>('[data-testid="status"]')!
+
+        await waitFor(() => expect(trigger).toHaveAccessibleDescription('Only administrators'))
+
+        rerender(fixture('Choose a status'))
+
+        await expect(trigger).toHaveAccessibleDescription('Choose a status Only administrators')
+    })
+
+    it('toggles on tap with openOnTap and needs no timer (disabled-states DIS-2)', async () => {
+        const { container } = mount(
+            <StyledTooltip title='Locked for editing' openOnTap>
+                <span data-testid='tap-trigger'>
+                    <StyledButton dataTest='tap-target'>Edit</StyledButton>
+                </span>
+            </StyledTooltip>,
+        )
+        const trigger = container.querySelector<HTMLElement>('[data-testid="tap-trigger"]')!
+        const tapOn = (node: HTMLElement): void => {
+            node.dispatchEvent(new PointerEvent('pointerup', { pointerType: 'touch', bubbles: true }))
+        }
+
+        tapOn(trigger)
+        await waitFor(() => expect(tip()).not.toBeNull())
+        await expect(tip()).toHaveTextContent('Locked for editing')
+
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+        await expect(tip()).not.toBeNull()
+
+        tapOn(trigger)
+        await waitFor(() => expect(tip()).toBeNull())
+    })
+
+    it('ignores a mouse pointerup even with openOnTap (disabled-states DIS-2)', async () => {
+        const { container } = mount(
+            <StyledTooltip title='Locked for editing' openOnTap disableHoverListener>
+                <span data-testid='tap-trigger'>
+                    <StyledButton dataTest='tap-target'>Edit</StyledButton>
+                </span>
+            </StyledTooltip>,
+        )
+        const trigger = container.querySelector<HTMLElement>('[data-testid="tap-trigger"]')!
+
+        trigger.dispatchEvent(new PointerEvent('pointerup', { pointerType: 'mouse', bubbles: true }))
+
+        await new Promise((resolve) => setTimeout(resolve, 100))
+        await expect(tip()).toBeNull()
+    })
+
+    it('describes the trigger while closed with persistentDescription (disabled-states DIS-2, 4.1.2)', async () => {
+        const { container } = mount(
+            <StyledTooltip title='Locked for editing' persistentDescription>
+                <span>
+                    <StyledButton dataTest='persist-target'>Edit</StyledButton>
+                </span>
+            </StyledTooltip>,
+        )
+        const target = container.querySelector<HTMLButtonElement>('[data-testid="persist-target"]')!
+
+        await waitFor(() => expect(target).toHaveAccessibleDescription('Locked for editing'))
+        await expect(tip()).toBeNull()
+    })
+
+    it('does not repeat a reason the control already carries as its description (4.1.2)', async () => {
+        /* A disabled control keeps its reason in the DOM so it is read the moment focus arrives
+         * (disabled-states DIS-2); adding the tooltip's copy would read it twice. */
+        const { container } = mount(
+            <StyledTooltip title='Only an administrator can delete' enterDelay={0}>
+                <span>
+                    <button type='button' data-testid='with-reason' aria-disabled='true' aria-describedby='reason'>
+                        Delete
+                    </button>
+                    <span id='reason' hidden>
+                        Only an administrator can delete
+                    </span>
+                </span>
+            </StyledTooltip>,
+        )
+        const trigger = container.querySelector<HTMLButtonElement>('[data-testid="with-reason"]')!
+
+        await userEvent.tab()
+        await waitFor(() => expect(tip()).not.toBeNull())
+
+        await expect(trigger).toHaveAttribute('aria-describedby', 'reason')
+        await expect(trigger).toHaveAccessibleDescription('Only an administrator can delete')
+    })
+
     it('renders the trigger alone when there is no title (4.1.2)', async () => {
         const { container } = mount(
             <StyledTooltip title={null}>
@@ -269,5 +414,20 @@ describe('StyledTooltip keyboard contract', () => {
         await expect(container.querySelector('[data-testid="bare"]')).not.toBeNull()
         await expect(container.querySelector('[data-testid="bare"]')).not.toHaveAttribute('aria-describedby')
         await expect(tip()).toBeNull()
+    })
+
+    it('hands a function component child no ref when there is no title (4.1.2)', async () => {
+        const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+        try {
+            mount(
+                <StyledTooltip title=''>
+                    <StyledButton dataTest='bare'>Bare</StyledButton>
+                </StyledTooltip>,
+            )
+
+            await expect(consoleError).not.toHaveBeenCalled()
+        } finally {
+            consoleError.mockRestore()
+        }
     })
 })

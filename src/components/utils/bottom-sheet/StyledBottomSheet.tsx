@@ -1,9 +1,24 @@
-import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode, type SyntheticEvent } from 'react'
+import {
+    useEffect,
+    useId,
+    useLayoutEffect,
+    useRef,
+    useState,
+    type ReactNode,
+    type RefObject,
+    type SyntheticEvent,
+} from 'react'
 
 import { CloseIcon } from 'src/components/icons/close-icon/CloseIcon'
 import { IndeterminateIcon } from 'src/components/icons/indeterminate-icon/IndeterminateIcon'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { cn } from 'src/helpers/cn'
+import {
+    isOverlayBackEnabled,
+    OverlayBackOwnerContext,
+    requestCloseTopOverlayBack,
+    useBackCloses,
+} from 'src/hooks/useBackCloses.hook'
 import { useBodyScrollLock } from 'src/hooks/useBodyScrollLock.hook'
 import { useDebouncedValue } from 'src/hooks/useDebouncedValue.hook'
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
@@ -59,6 +74,10 @@ export interface StyledBottomSheetProps {
     closeLabel?: string
     /** @figmaProp none — style escape hatch, applied to the sheet container */
     className?: string
+    /** Set `false` when a wrapper already owns the Back-close registration. */
+    registerBackClose?: boolean
+    /** Logical owner supplied by a wrapper that must keep one identity across responsive variants. */
+    ownerRef?: RefObject<Element | null>
 }
 
 /**
@@ -89,18 +108,24 @@ export const StyledBottomSheet = ({
     resultCount,
     closeLabel = 'Lukk',
     className,
+    registerBackClose = true,
+    ownerRef,
 }: StyledBottomSheetProps): JSX.Element | null => {
     const titleId = useId()
     const dialogRef = useRef<HTMLDialogElement | null>(null)
     const sheetRef = useRef<HTMLDivElement | null>(null)
     const returnFocusRef = useRef<HTMLElement | null>(null)
+    const overlayOwnerRef = ownerRef ?? dialogRef
+    const recentEscapeKeydownRef = useRef(false)
     const [isShown, setIsShown] = useState(false)
     const isShortViewport = useShortViewportMediaQuery()
 
     const onCloseRef = useRef(onClose)
+    const openRef = useRef(open)
     useEffect(() => {
         onCloseRef.current = onClose
-    }, [onClose])
+        openRef.current = open
+    }, [onClose, open])
 
     const { dragHandleProps, dragOffset } = useDragToDismiss(sheetRef, () => {
         onCloseRef.current('drag')
@@ -109,6 +134,38 @@ export const StyledBottomSheet = ({
     useBodyScrollLock(open)
     // Wraps Tab inside the sheet — a native modal <dialog> alone lets Tab escape to the browser UI.
     useFocusTrap(open, dialogRef)
+
+    useEffect(() => {
+        if (!open) return undefined
+        const markEscapeKeydown = (event: KeyboardEvent): void => {
+            if (event.key !== 'Escape') return
+            recentEscapeKeydownRef.current = true
+            window.setTimeout(() => {
+                recentEscapeKeydownRef.current = false
+            }, 0)
+        }
+        const closeOnEscape = (event: KeyboardEvent): void => {
+            if (event.key !== 'Escape' || event.defaultPrevented) return
+            const focused = document.activeElement
+            if (focused instanceof Element && focused.closest('dialog[open]') !== dialogRef.current) return
+            event.preventDefault()
+            event.stopImmediatePropagation()
+            void requestCloseTopOverlayBack(event)
+        }
+        window.addEventListener('keydown', markEscapeKeydown, true)
+        window.addEventListener('keydown', closeOnEscape)
+        return () => {
+            window.removeEventListener('keydown', markEscapeKeydown, true)
+            window.removeEventListener('keydown', closeOnEscape)
+        }
+    }, [open])
+
+    // Same close path as Escape — never selects/commits anything (see component docblock).
+    useBackCloses({
+        active: open && registerBackClose,
+        requestClose: () => onCloseRef.current('escape'),
+        ownerRef: overlayOwnerRef,
+    })
 
     useLayoutEffect(() => {
         const node = dialogRef.current
@@ -133,6 +190,31 @@ export const StyledBottomSheet = ({
             const target = returnFocusRef.current
             if (target?.isConnected) target.focus({ preventScroll: true })
         }
+    }, [open])
+
+    // A second Android Back force-closes the native dialog while React still wants it open.
+    // Ask the registry top to close, then put the dialog back only if this sheet is still open.
+    useEffect(() => {
+        const node = dialogRef.current
+        if (!node || !open) return undefined
+        let attemptPending = false
+        const scheduleReshow = (): void => {
+            requestAnimationFrame(() => {
+                attemptPending = false
+                if (openRef.current && node.isConnected && !node.open) {
+                    node.showModal()
+                    node.focus({ preventScroll: true })
+                }
+            })
+        }
+        const handleNativeClose = (): void => {
+            if (attemptPending) return
+            attemptPending = true
+            if (isOverlayBackEnabled()) void requestCloseTopOverlayBack()
+            scheduleReshow()
+        }
+        node.addEventListener('close', handleNativeClose)
+        return () => node.removeEventListener('close', handleNativeClose)
     }, [open])
 
     const displayedCount = useDebouncedValue(resultCount, RESULT_COUNT_DEBOUNCE_MS)
@@ -169,8 +251,16 @@ export const StyledBottomSheet = ({
     const isDragging = dragOffset > 0
 
     const handleCancel = (event: SyntheticEvent<HTMLDialogElement>): void => {
-        event.preventDefault()
-        onClose('escape')
+        if (event.cancelable) event.preventDefault()
+        if (recentEscapeKeydownRef.current) return
+        if (!isOverlayBackEnabled()) {
+            onCloseRef.current('escape')
+            return
+        }
+        // Route through the registry's topmost entry rather than this sheet's own `onClose`: a
+        // native `cancel` always fires on the top-layer modal, which isn't necessarily the logical
+        // top overlay (e.g. a popover stacked above it without its own native dialog).
+        void requestCloseTopOverlayBack()
     }
 
     return (
@@ -189,8 +279,9 @@ export const StyledBottomSheet = ({
                 'fixed inset-0 m-0 size-full max-h-none max-w-none flex-col items-center justify-end overflow-hidden border-0 bg-transparent p-0 outline-hidden open:flex',
             )}
         >
-            {/* Scrim: a convenience duplicate of the close button, not a control — hidden from AT. */}
-            <div
+            <OverlayBackOwnerContext.Provider value={overlayOwnerRef}>
+                {/* Scrim: a convenience duplicate of the close button, not a control — hidden from AT. */}
+                <div
                 aria-hidden='true'
                 data-testid={`${dataTest}-scrim`}
                 onClick={() => {
@@ -281,7 +372,8 @@ export const StyledBottomSheet = ({
                         {extraActions}
                     </div>
                 )}
-            </div>
+                </div>
+            </OverlayBackOwnerContext.Provider>
         </dialog>
     )
 }

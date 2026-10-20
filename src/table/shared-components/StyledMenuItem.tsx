@@ -1,9 +1,13 @@
 import type { KeyboardEvent, MouseEvent, ReactNode } from 'react'
+import { StyledTooltip, type TooltipProps } from 'src/components/data-display/tooltip/StyledTooltip'
 import { cn } from 'src/table/helpers/cn'
 
 export interface StyledMenuItemProps {
     children?: ReactNode
     disabled?: boolean
+    /** Why a disabled item can't be used; keeps it reachable by arrow keys and shows the reason. */
+    disabledReason?: ReactNode
+    reasonPlacement?: TooltipProps['placement']
     selected?: boolean
     className?: string
     classes?: { root?: string }
@@ -19,6 +23,8 @@ export interface StyledMenuItemProps {
 export const StyledMenuItem = ({
     children,
     disabled,
+    disabledReason,
+    reasonPlacement = 'left',
     selected,
     className,
     classes,
@@ -34,19 +40,22 @@ export const StyledMenuItem = ({
         }
     }
 
-    return (
+    const reasoned = Boolean(disabled) && Boolean(disabledReason)
+    const item = (
         <li
             role='menuitem'
             aria-disabled={disabled ? true : undefined}
+            data-has-reason={reasoned || undefined}
             tabIndex={-1}
-            onClick={disabled ? undefined : onClick}
+            onClick={disabled ? (event) => event.stopPropagation() : onClick}
             onKeyDown={handleKeyDown}
             onMouseDown={onMouseDown}
             onMouseUp={onMouseUp}
             className={cn(
                 // Figma "Menus item / Only Label" (wXrXt5uKNNzV2DnQCgyYZH 16045-31269): resting text is
                 // text-icon/body #49525f (delta-700), NOT the inherited near-black; hover fill is delta-50.
-                'text-delta-700 flex items-center px-3 py-2.5 text-base outline-hidden',
+                // h40 = py8 + Body Base lh24.
+                'text-delta-700 box-border flex min-h-10 items-center px-3 py-2 text-base outline-hidden',
                 disabled ? 'cursor-not-allowed' : 'hover:bg-delta-50 cursor-pointer',
                 selected && 'bg-gama-50',
                 classes?.root,
@@ -61,5 +70,11 @@ export const StyledMenuItem = ({
         >
             {children}
         </li>
+    )
+    if (!reasoned) return item
+    return (
+        <StyledTooltip title={disabledReason} arrow placement={reasonPlacement} openOnTap persistentDescription>
+            {item}
+        </StyledTooltip>
     )
 }

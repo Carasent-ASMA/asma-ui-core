@@ -7,6 +7,7 @@
 @import './color-variables/fretexTokens.css';
 @import './color-variables/jadeTokens.css';
 @import './typographyTokens.css';
+@import './fieldWidthTokens.css';
 
 /*
  * Theme and utilities only — no preflight. v3 ran with `corePlugins.preflight: false`, which v4

@@ -28,6 +28,8 @@ export const DatePickerInputSingle: React.FC<{
         selected,
         title,
         hideDefaultHelperText,
+        inputAriaProps,
+        width,
     } = datePickerProps
 
     return (
@@ -55,6 +57,8 @@ export const DatePickerInputSingle: React.FC<{
             onValidatedOnce={onValidatedOnce}
             title={title}
             hideDefaultHelperText={hideDefaultHelperText}
+            inputAriaProps={inputAriaProps}
+            width={width}
         />
     )
 }

@@ -58,7 +58,8 @@ export function VirtualizedList<TItem>({
     }
 
     return (
-        <div className={className} data-testid={dataTest} ref={scrollRef}>
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable content must be keyboard-focusable (WCAG 2.1.1).
+        <div className={className} data-testid={dataTest} ref={scrollRef} tabIndex={0}>
             <div className='relative w-full' style={{ height: virtualizer.getTotalSize() }}>
                 {virtualizer.getVirtualItems().map((virtualItem) => {
                     const item = items[virtualItem.index]

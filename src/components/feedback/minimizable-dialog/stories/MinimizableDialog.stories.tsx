@@ -133,3 +133,21 @@ export const DialogMinimizable = (): JSX.Element => {
         </div>
     )
 }
+
+/** Saving (DIS-8): the primary button is busy; Cancel and X wait with "Wait until saved". */
+export const BusyFooter = (): JSX.Element => (
+    <MinimizableDialog
+        dataTest='busy-dialog'
+        open
+        title='Ny stilling'
+        onClose={() => undefined}
+        className='w-[520px]'
+        primaryButtonText='Save'
+        primaryButtonLoading
+        onPrimaryButtonClick={() => undefined}
+        secondaryButtonText='Cancel'
+        onSecondaryButtonClick={() => undefined}
+    >
+        <p className='p-4'>Content</p>
+    </MinimizableDialog>
+)

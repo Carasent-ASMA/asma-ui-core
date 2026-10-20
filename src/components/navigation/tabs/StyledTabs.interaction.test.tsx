@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { afterEach, describe, it } from 'vitest'
-import { expect, userEvent } from 'src/test-utils/interaction-api'
+import { expect, userEvent, waitFor, within } from 'src/test-utils/interaction-api'
 import { cleanup, describeFocusIndicator, focusStyleOf, mount } from 'src/test-utils/renderInteraction'
 import { StyledTab } from './StyledTab'
 import { StyledTabs } from './StyledTabs'
@@ -16,7 +16,7 @@ const TabsFixture = ({ initial = 'one' }: { initial?: string }): JSX.Element => 
         <StyledTabs value={value} onChange={(_event, next) => setValue(next as string)}>
             <StyledTab value='one' label='One' />
             <StyledTab value='two' label='Two' />
-            <StyledTab value='three' label='Three' disabled />
+            <StyledTab value='three' label='Three' disabled tooltip='Save first' />
             <StyledTab value='four' label='Four' />
         </StyledTabs>
     )
@@ -55,7 +55,10 @@ describe('StyledTabs keyboard contract', () => {
         await userEvent.keyboard('{ArrowRight}')
         await expect(document.activeElement).toBe(tabs[1])
 
-        // 'three' is disabled and must be skipped, not focused.
+        // 'three' is disabled but stays reachable, so its state and reason can be found (DIS-3).
+        await userEvent.keyboard('{ArrowRight}')
+        await expect(document.activeElement).toBe(tabs[2])
+
         await userEvent.keyboard('{ArrowRight}')
         await expect(document.activeElement).toBe(tabs[3])
 
@@ -68,7 +71,31 @@ describe('StyledTabs keyboard contract', () => {
         await expect(document.activeElement).toBe(tabs[3])
     })
 
-    it('moves focus to the first/last enabled tab with Home/End (2.1.1)', async () => {
+    it('keeps a disabled tab with a reason reachable but unselectable (disabled-states DIS-3)', async () => {
+        const ReasonFixture = (): JSX.Element => {
+            const [value, setValue] = useState<string>('one')
+            return (
+                <StyledTabs value={value} onChange={(_event, next) => setValue(next as string)}>
+                    <StyledTab value='one' label='One' />
+                    <StyledTab value='two' label='Two' disabled disabledReason='Only administrators can open this' />
+                </StyledTabs>
+            )
+        }
+        const { container } = mount(<ReasonFixture />)
+        const tabs = tabsOf(container)
+        tabs[0]!.focus()
+
+        await userEvent.keyboard('{ArrowRight}')
+        await expect(document.activeElement).toBe(tabs[1])
+        await expect(tabs[1]).toHaveAttribute('aria-disabled', 'true')
+        await expect(tabs[1]).toHaveAccessibleDescription('Only administrators can open this')
+
+        await userEvent.keyboard('{Enter}')
+        await expect(tabs[0]).toHaveAttribute('aria-selected', 'true')
+        await expect(tabs[1]).toHaveAttribute('aria-selected', 'false')
+    })
+
+    it('moves focus to the first/last tab with Home/End (2.1.1)', async () => {
         const { container } = mount(<TabsFixture />)
         const tabs = tabsOf(container)
         tabs[1]!.focus()
@@ -89,9 +116,28 @@ describe('StyledTabs keyboard contract', () => {
         await userEvent.keyboard('{Enter}')
         await expect(tabs[1]).toHaveAttribute('aria-selected', 'true')
 
-        await userEvent.keyboard('{ArrowRight}')
+        await userEvent.keyboard('{ArrowRight}{ArrowRight}')
         await userEvent.keyboard(' ')
         await expect(tabs[3]).toHaveAttribute('aria-selected', 'true')
+    })
+
+    it('focuses a disabled tab, gives its reason, and does not select it (DIS-2, DIS-3)', async () => {
+        const { container } = mount(<TabsFixture />)
+        const tabs = tabsOf(container)
+
+        await expect(tabs[2]).toHaveAttribute('aria-disabled', 'true')
+        await expect(tabs[2]).not.toBeDisabled()
+
+        tabs[1]!.focus()
+        await userEvent.keyboard('{ArrowRight}')
+        await expect(document.activeElement).toBe(tabs[2])
+        await waitFor(async () => expect(within(document.body).getByRole('tooltip')).toHaveTextContent('Save first'))
+        await expect(tabs[2]).toHaveAccessibleDescription('Save first')
+
+        await userEvent.keyboard('{Enter}')
+        await userEvent.keyboard(' ')
+        await expect(tabs[2]).toHaveAttribute('aria-selected', 'false')
+        await expect(tabs[0]).toHaveAttribute('aria-selected', 'true')
     })
 
     it('does not change selection on focus alone — manual activation (3.2.1)', async () => {

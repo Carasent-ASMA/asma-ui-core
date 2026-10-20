@@ -58,9 +58,19 @@ export const StyledFormControlLabel = ({
     const labelTextId = useId()
     const hasOwnAccessibleName =
         controlProps['aria-label'] != null || controlProps['aria-labelledby'] != null
+    // `label=''` is not a label. It still renders (an empty span is a flex child and holds the
+    // row's `gap`, so dropping it would move the control), but it must not be pointed at:
+    // `aria-labelledby` to a blank span leaves the control unnamed while looking wired up.
+    const hasLabelText = typeof label === 'string' ? label.trim().length > 0 : label != null
     // Only worth emitting the id if there is a control to point it at, some text to point with,
     // and the control has not already named itself.
-    const shouldLabelControl = isValidElement(control) && label != null && !hasOwnAccessibleName
+    const shouldLabelControl = isValidElement(control) && hasLabelText && !hasOwnAccessibleName
+
+    if (!hasLabelText && !hasOwnAccessibleName && import.meta.env.DEV) {
+        console.warn(
+            'StyledFormControlLabel: the control has no accessible name — pass a non-empty `label`, or set `aria-label`/`aria-labelledby` on the control itself.',
+        )
+    }
 
     const injected = isValidElement(control)
         ? cloneElement(control, {

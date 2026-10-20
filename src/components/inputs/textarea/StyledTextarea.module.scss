@@ -2,9 +2,9 @@
     &.#{$type} {
         // Figma Input field text = Body Base 16/lh24, text delta-800, radius 4.
         // box-border so the JS auto-resize height (rows*lineHeight + paddings) is exact.
-        // Default width only — deliberately NOT !important so a consumer `className` (e.g. `w-full!`)
-        // can size the field to its container.
-        width: 400px;
+        // Fills the root, which carries the field width step. Deliberately NOT !important so a
+        // consumer `className` can still size the field.
+        width: 100%;
         box-sizing: border-box #{!important};
         font-family: Roboto #{!important};
         font-size: 1rem #{!important};

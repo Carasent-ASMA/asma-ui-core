@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { afterEach, describe, it } from 'vitest'
 import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
+import { requestCloseTopOverlayBack } from 'src/hooks/useBackCloses.hook'
 import { StyledPopover } from './StyledPopover'
 
 const PopoverFixture = (): JSX.Element => {
@@ -52,6 +53,16 @@ const TextPopoverFixture = (): JSX.Element => {
 
 describe('StyledPopover keyboard contract', () => {
     afterEach(cleanup)
+
+    it('Back closes the popover through its own close path', async () => {
+        const { container } = mount(<PopoverFixture />)
+        await userEvent.click(container.querySelector<HTMLButtonElement>('[data-testid="trigger"]')!)
+        await waitFor(() => expect(document.querySelector('[data-testid="popover-action"]')).not.toBeNull())
+
+        void requestCloseTopOverlayBack()
+
+        await waitFor(() => expect(document.querySelector('[data-testid="popover-action"]')).toBeNull())
+    })
 
     it('closes on Tab and preserves normal forward focus movement', async () => {
         const { container } = mount(<PopoverFixture />)

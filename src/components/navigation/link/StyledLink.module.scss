@@ -29,6 +29,24 @@
 
 .styled-link-disabled {
     color: var(--colors-delta-300);
+
+    // A disabled link that carries its reason stays focusable (disabled-states DIS-3, DIS-5).
+    &[aria-disabled='true'] {
+        cursor: not-allowed;
+    }
+
+    &[aria-disabled='true']:focus-visible {
+        outline: none;
+        box-shadow: inset 0 0 0 3px var(--colors-focus-ring) #{!important};
+    }
+}
+
+// Only the hrefless variant, which renders a real `<button>`. Resets the two UA button defaults
+// that `<a>` does not have, so the button is pixel-identical to the anchor. Scoped rather than
+// folded into `.styled-link` so the `<a>` and disabled `<span>` variants keep their own cursor.
+.styled-link-button {
+    background: transparent;
+    cursor: pointer;
 }
 
 .styled-link-xs {

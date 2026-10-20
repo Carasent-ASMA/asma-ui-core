@@ -1,9 +1,11 @@
 import { ErrorOutlineIcon, Skeleton, StyledButton, StyledChip, StyledInteractiveChip, StyledTooltip } from 'src'
+import { fieldWidthStyle } from 'src/components/inputs/field-styles'
 import type { DynamicSelectOption, StyledDynamicSelectComponent, StyledDynamicSelectProps } from '../types'
 import { cn } from 'src/helpers/cn'
 import { useHelperAlertRole } from 'src/helpers/useHelperAlertRole'
 import { warnMissingErrorMessage } from 'src/helpers/warnMissingErrorMessage'
 import { useWrap } from '../helpers/useWrap'
+import { DynamicSelectTitle } from './DynamicSelectTitle'
 import { forwardRef, useEffect, useId } from 'react'
 import { CloseIcon } from 'src/components/icons'
 
@@ -19,6 +21,8 @@ export const DynamicInteractiveChipGroup = forwardRef(
             readOnly,
             multiple,
             title,
+            titleSize,
+            width = 'full',
             disabled,
             onChange,
             required,
@@ -110,8 +114,13 @@ export const DynamicInteractiveChipGroup = forwardRef(
         })
 
         return (
-            <div data-testid={`${dataTest}-dynamic-radio-group`} className='relative flex flex-col gap-y-1'>
-                {title && <span className='text-delta-800 text-base font-semibold'>{title}</span>}
+            <div
+                data-testid={`${dataTest}-dynamic-radio-group`}
+                className='relative flex flex-col gap-y-1'
+                data-field-width={width}
+                style={fieldWidthStyle(width)}
+            >
+                <DynamicSelectTitle title={title} titleSize={titleSize} />
                 {/* HACK for calculating overflow layout */}
                 <div
                     aria-hidden
@@ -200,7 +209,7 @@ export const DynamicInteractiveChipGroup = forwardRef(
                         <span>-</span>
                     )}
                 </div>
-                {!required && hasValue && !readOnly && (
+                {!required && hasValue && !readOnly && !disabled && (
                     <StyledButton
                         dataTest='clear-selection-btn'
                         variant='text'

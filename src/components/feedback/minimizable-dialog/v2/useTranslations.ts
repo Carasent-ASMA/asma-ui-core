@@ -4,6 +4,7 @@ import type { ILocale } from './types'
 const translations = {
     en: {
         close: 'Close',
+        waitUntilSaved: 'Wait until saved',
         expand: 'Expand',
         minimize: 'Minimize',
         fullscreen: 'Fullscreen',
@@ -11,6 +12,7 @@ const translations = {
     },
     no: {
         close: 'Lukk',
+        waitUntilSaved: 'Vent til lagringen er ferdig',
         expand: 'Utvid',
         minimize: 'Minimer',
         fullscreen: 'Fullskjerm',
