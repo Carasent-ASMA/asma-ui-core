@@ -8,6 +8,44 @@ export interface InteractionCapture {
     act: (page: Page) => Promise<void>
 }
 
+type ViewportSize = { width: number; height: number }
+
+const PHONE: ViewportSize = { width: 390, height: 844 }
+const PHONE_LANDSCAPE: ViewportSize = { width: 844, height: 390 }
+const ZOOM_400: ViewportSize = { width: 320, height: 256 }
+
+/**
+ * ASMA-8468: below 744 × 480 CSS px a searchable select opens as a full-screen picker. The story
+ * loads and plays at 1280 × 720, then the window shrinks to `size`. A list the story left open is
+ * handed over to the picker, as zooming or narrowing a desktop window does; otherwise the first
+ * field is tapped. `scrollToEnd` scrolls the list to its end (the 50-row notice).
+ */
+const openPicker =
+    (size: ViewportSize, { scrollToEnd = false } = {}) =>
+    async (page: Page): Promise<void> => {
+        await page.setViewportSize(size)
+        const listbox = page.locator('dialog[open] [role="listbox"]').last()
+        if ((await page.locator('[role="listbox"]').count()) === 0) await page.getByRole('combobox').first().click()
+        await listbox.waitFor({ state: 'visible' })
+        // Park the pointer on the header: the tap left it where the field was, now over a picker row
+        // (hover colour). The click also makes the last input a pointer one, as on a phone, so a
+        // `play` that opened the list with synthetic events leaves no keyboard ring on the ×.
+        await page.mouse.click(1, 1)
+        if (scrollToEnd) {
+            await page
+                .locator('dialog[open] [data-testid$="-body"]')
+                .last()
+                .evaluate((body) => body.scrollTo({ top: body.scrollHeight }))
+        }
+    }
+
+/** One full-screen picker capture: `<storyId>--picker[-<variant>]--open.png`. */
+const pickerCapture = (storyId: string, act: InteractionCapture['act'], variant?: string): InteractionCapture => ({
+    storyId,
+    screenshot: `${storyId}--picker${variant ? `-${variant}` : ''}--open.png`,
+    act,
+})
+
 /**
  * Open-state captures — complements `stories.spec.ts` (default/closed glance only).
  * Golden baselines remain v3.34.0; run `pnpm vrt:accept` after intentional visual changes.
@@ -132,4 +170,23 @@ export const INTERACTION_CAPTURES: InteractionCapture[] = [
             await page.getByRole('listbox').waitFor({ state: 'visible' })
         },
     },
+    // ASMA-8468 full-screen picker. One choice with a value: the *Clear selection* row, the chosen
+    // row on bg/selected. Without a value: no clear row.
+    pickerCapture('inputs-styled-dynamic-select--single-select-autocomplete', openPicker(PHONE)),
+    pickerCapture('inputs-styled-dynamic-select--playground', openPicker(PHONE)),
+    // Several choices: the selection row; the one-row header at a phone's landscape and at 400 % zoom.
+    pickerCapture('inputs-styled-dynamic-select--multiple-select-autocomplete', openPicker(PHONE)),
+    pickerCapture('inputs-styled-dynamic-select--multiple-select-autocomplete', openPicker(PHONE_LANDSCAPE), 'landscape'),
+    pickerCapture('inputs-styled-dynamic-select--multiple-select-autocomplete', openPicker(ZOOM_400), 'zoom-400'),
+    // 50 rows, then *Showing 50 of N*.
+    pickerCapture('inputs-styled-dynamic-select--large-multiple-select-autocomplete', openPicker(PHONE, { scrollToEnd: true }), 'end'),
+    // A long title and long labels wrap in full.
+    pickerCapture('inputs-styled-dynamic-select--long-title-and-labels', openPicker(PHONE)),
+    // The autocomplete's own rows (check icon, checkbox, *Select all*) and a field with no label.
+    pickerCapture('inputs-styled-select-autocomplete--single-select-variant', openPicker(PHONE)),
+    pickerCapture('inputs-styled-select-autocomplete--select-all-toggles-all-options', openPicker(PHONE)),
+    // Opened from a filter Bottom Sheet: the picker is on top (REQ-020).
+    pickerCapture('utils-styled-bottom-sheet--with-searchable-select', openPicker(PHONE)),
+    // The country-code picker on the same shell.
+    pickerCapture('inputs-phone-field--default', openPicker(PHONE)),
 ]

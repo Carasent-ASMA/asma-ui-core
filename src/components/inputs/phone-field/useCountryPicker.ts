@@ -34,7 +34,8 @@ export interface CountryPicker {
     activeIndex: number | null
     optionId: (index: number) => string
     openWithKeyboard: (direction: -1 | 1) => void
-    select: (iso2: string) => void
+    /** Chooses a country; `close = false` keeps the list open (Space). */
+    select: (iso2: string, close?: boolean) => void
     dismiss: () => void
     handleKeyDown: (event: KeyboardEvent<HTMLElement>) => void
 }
