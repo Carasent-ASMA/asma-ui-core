@@ -33,17 +33,17 @@ const SEVERITY_ICONS: Record<AlertColor, JSX.Element> = {
 }
 
 const TITLE_SEVERITY_CLASSES = {
-    success: styles['title-success'],
-    info: styles['title-info'],
-    warning: styles['title-warning'],
-    error: styles['title-error'],
+    success: styles['title_success'],
+    info: styles['title_info'],
+    warning: styles['title_warning'],
+    error: styles['title_error'],
 } as const
 
 const MESSAGE_SEVERITY_CLASSES = {
-    success: styles['message-success'],
-    info: styles['message-info'],
-    warning: styles['message-warning'],
-    error: styles['message-error'],
+    success: styles['message_success'],
+    info: styles['message_info'],
+    warning: styles['message_warning'],
+    error: styles['message_error'],
 } as const
 
 export const StyledDefaultSnackbar = forwardRef<HTMLDivElement, StyledDefaultSnackbarProps>((props, ref) => {
