@@ -10,6 +10,13 @@ import { StyledTooltip } from './StyledTooltip'
 /**
  * Keyboard & focus contract — StyledTooltip (ASMA-8139).
  * WCAG 1.4.13 (content on hover or focus), 2.1.1, 4.1.2.
+ *
+ * Every test that expects focus to OPEN the tooltip tabs in with `userEvent.tab()` instead of
+ * calling `.focus()`. Floating UI's `useFocus` is `visibleOnly`, so it opens only when the trigger
+ * matches `:focus-visible` — and Chromium grants that to a programmatic focus only while its last
+ * input modality was the keyboard. A pointer-driven test running earlier in the same page leaves it
+ * in pointer mode, and the tooltip then never appears: with `--sequence.shuffle` (the flaky-test
+ * detector) that is an order dependency, not a flake. Tabbing in presses a real key through CDP.
  */
 
 const TooltipFixture = (): JSX.Element => (
@@ -61,7 +68,9 @@ describe('StyledTooltip keyboard contract', () => {
         await expect(getComputedStyle(host).display).toBe('flex')
         await expect(grow.getBoundingClientRect().width).toBeGreaterThan(0)
 
-        container.querySelector<HTMLButtonElement>('[data-testid="tip-target"]')!.focus()
+        // Tab in, never .focus(): focus opens the tooltip only while `:focus-visible` matches.
+        await userEvent.tab()
+        await expect(document.activeElement).toBe(container.querySelector('[data-testid="tip-target"]'))
         await waitFor(() => expect(tip()).not.toBeNull())
         await expect(container.querySelector('[data-testid="tip-target"]')).toHaveAttribute(
             'aria-describedby',
@@ -92,7 +101,9 @@ describe('StyledTooltip keyboard contract', () => {
         // `flex: 1` share for itself and leave `grow` at its intrinsic text width.
         await expect(grow.getBoundingClientRect().width).toBeGreaterThan(200)
 
-        target.focus()
+        // Tab in, never .focus(): focus opens the tooltip only while `:focus-visible` matches.
+        await userEvent.tab()
+        await expect(document.activeElement).toBe(target)
         await waitFor(() => expect(tip()).not.toBeNull())
         await expect(target).toHaveAccessibleDescription('Archive this thread')
     })
@@ -112,7 +123,9 @@ describe('StyledTooltip keyboard contract', () => {
         )
         const target = container.querySelector<HTMLButtonElement>('[data-testid="tip-target"]')!
 
-        target.focus()
+        // Tab in, never .focus(): focus opens the tooltip only while `:focus-visible` matches.
+        await userEvent.tab()
+        await expect(document.activeElement).toBe(target)
         await waitFor(() => expect(tip()).not.toBeNull())
 
         const anchor = target.getBoundingClientRect()
@@ -236,7 +249,9 @@ describe('StyledTooltip keyboard contract', () => {
         const { container } = mount(<TooltipFixture />)
         const target = container.querySelector<HTMLButtonElement>('[data-testid="tip-target"]')!
 
-        target.focus()
+        // Tab in, never .focus(): focus opens the tooltip only while `:focus-visible` matches.
+        await userEvent.tab()
+        await expect(document.activeElement).toBe(target)
         await waitFor(() => expect(tip()).not.toBeNull())
         await expect(isEntirelyObscured(target)).toBe(false)
     })
