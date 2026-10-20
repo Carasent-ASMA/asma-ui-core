@@ -29,7 +29,7 @@ const renderFlag = (iso2: string): JSX.Element => (
         data-country={iso2.toLowerCase()}
         width={24}
         height={16}
-        className='h-4 w-6 shrink-0 rounded-sm'
+        className='h-4 w-6 shrink-0 rounded-xs'
     />
 )
 

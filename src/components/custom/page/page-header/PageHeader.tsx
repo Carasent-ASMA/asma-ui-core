@@ -259,7 +259,7 @@ export function PageHeader({
                 className={cn(
                     /* Same base height across breakpoints; content may expand it. */
                     'flex w-full items-center gap-2 px-4',
-                    stuck ? 'min-h-[56px] py-2 shadow-sm' : 'min-h-[64px] py-3',
+                    stuck ? 'min-h-[56px] py-2 shadow-xs' : 'min-h-[64px] py-3',
                     sticky && 'bg-delta-50 sticky top-0 z-30',
                     className,
                 )}

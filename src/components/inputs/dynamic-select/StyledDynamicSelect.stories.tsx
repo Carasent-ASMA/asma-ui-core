@@ -127,7 +127,7 @@ function SelectFrame(props: {
 
     return (
         <div className='grid min-h-screen gap-6 p-6 lg:grid-cols-[1fr_320px]'>
-            <section className='rounded-2xl border border-delta-200 bg-white p-4 shadow-sm'>
+            <section className='rounded-2xl border border-delta-200 bg-white p-4 shadow-xs'>
                 <div className='mb-4'>
                     <h2 className='text-lg font-semibold text-delta-900'>{title}</h2>
                     <p className='text-sm text-delta-600'>
@@ -184,7 +184,7 @@ function SelectFrame(props: {
                 </div>
             </section>
 
-            <aside className='rounded-2xl border border-delta-200 bg-delta-50 p-4 shadow-sm'>
+            <aside className='rounded-2xl border border-delta-200 bg-delta-50 p-4 shadow-xs'>
                 <StyledFormLabel title='Extras' className='mb-3 flex items-center' />
 
                 <div className='flex flex-col gap-3'>
@@ -259,7 +259,7 @@ function PlaygroundFrame() {
 
     return (
         <div className='grid min-h-screen gap-6 p-6 lg:grid-cols-[1fr_320px]'>
-            <section className='rounded-2xl border border-delta-200 bg-white p-4 shadow-sm'>
+            <section className='rounded-2xl border border-delta-200 bg-white p-4 shadow-xs'>
                 <div className='mb-4 flex items-center justify-between gap-4'>
                     <div>
                         <h2 className='text-lg font-semibold text-delta-900'>Playground</h2>
@@ -329,7 +329,7 @@ function PlaygroundFrame() {
                 </div>
             </section>
 
-            <aside className='rounded-2xl border border-delta-200 bg-delta-50 p-4 shadow-sm'>
+            <aside className='rounded-2xl border border-delta-200 bg-delta-50 p-4 shadow-xs'>
                 <StyledFormLabel title='Controls' className='mb-3 flex items-center' />
 
                 <div className='flex flex-col gap-3'>
