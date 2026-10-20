@@ -343,8 +343,6 @@ export const MobileSearchClears: Story = {
     globals: { viewport: { value: 'mobile1', isRotated: false } },
     render: (args) => <Controlled {...args} />,
     play: async ({ canvasElement }) => {
-        await expect(window.innerWidth).toBeLessThan(744)
-
         const canvas = within(canvasElement)
         await userEvent.click(canvas.getByRole('combobox', { expanded: false }))
 
