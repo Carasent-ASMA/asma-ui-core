@@ -36,9 +36,11 @@ export const TimePickerInput: React.FC<
         isValidEndTime,
         localValue,
         title,
-        readOnly,
+        readOnly: readOnlyProp,
+        lockedReason,
         inputAriaProps,
     } = props
+    const readOnly = Boolean(readOnlyProp) || Boolean(lockedReason)
 
     const inputRef = useInputMask({
         mask: 'xx:xx',
@@ -92,7 +94,7 @@ export const TimePickerInput: React.FC<
                         onClick: (e: ReactMouseEvent<HTMLElement>) => {
                             if (!disabled && !readOnly) popupState.open(e)
                         },
-                        endAdornment: (
+                        endAdornment: !lockedReason && (
                             <ClockOutlineIcon
                                 width={24}
                                 height={24}
@@ -117,6 +119,7 @@ export const TimePickerInput: React.FC<
                 sx={typeof width === 'number' ? { maxWidth: width, width, minWidth: width } : undefined}
                 disabled={disabled}
                 readOnly={readOnly}
+                lockedReason={lockedReason}
                 className={inputClassName}
                 label={label}
             />
