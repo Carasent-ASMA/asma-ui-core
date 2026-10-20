@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, type KeyboardEvent } from 'react'
 import { cn } from 'src/helpers/cn'
 import { StyledSelectItem } from '../select/StyledSelectItem'
 import type { PhoneCountryChoice, RenderCountryFlag } from './types'
@@ -16,6 +16,13 @@ export interface CountryCodeOptionsProps {
     label: string
     renderFlag?: RenderCountryFlag
     className?: string
+    /**
+     * Makes the list a Tab stop of its own (the mobile sheet, ASMA-8468), driven by these keys and
+     * the 3 px active-row marker. Without it the list is only driven from the combobox (desktop).
+     */
+    onKeyDown?: (event: KeyboardEvent<HTMLElement>) => void
+    /** Tabbing into the list: put the active-row marker on a row. */
+    onFocus?: () => void
 }
 
 /**
@@ -33,7 +40,10 @@ export const CountryCodeOptions = ({
     label,
     renderFlag,
     className,
+    onKeyDown,
+    onFocus,
 }: CountryCodeOptionsProps): JSX.Element => {
+    const isKeyboardTarget = onKeyDown !== undefined
     const listRef = useRef<HTMLUListElement>(null)
 
     useEffect(() => {
@@ -50,8 +60,15 @@ export const CountryCodeOptions = ({
             role='listbox'
             aria-label={label}
             data-testid={`${dataTest}-listbox`}
+            // A scrolling list with no Tab stop of its own is made focusable by the browser anyway —
+            // with a plain outline and no arrow keys — so the sheet makes it a real one.
+            tabIndex={isKeyboardTarget ? 0 : undefined}
+            aria-activedescendant={isKeyboardTarget && activeIndex !== null ? optionId(activeIndex) : undefined}
+            onKeyDown={onKeyDown}
+            onFocus={onFocus}
             className={cn(
                 'm-0 min-h-0 flex-1 list-none overflow-y-auto p-0',
+                isKeyboardTarget && visible.length > 0 && 'outline-none',
                 // Figma Menus separator (border/separator, delta-200) between rows, as in StyledSelect:
                 // an inset shadow, not a border, so every row stays exactly 40px, and set on the list so
                 // the last row never gets one (no row-level `last:` rule that another bundle can drop).
