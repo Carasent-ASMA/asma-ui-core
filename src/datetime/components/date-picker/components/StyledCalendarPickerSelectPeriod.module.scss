@@ -5,13 +5,31 @@
             background-color: var(--scrollbar-track) !important;
             border-radius: var(--scrollbar-track-radius) !important;
         }
+        &::-webkit-scrollbar-track:hover {
+            background-color: var(--scrollbar-track-hover, var(--scrollbar-track)) !important;
+        }
+        &::-webkit-scrollbar-track:active {
+            background-color: var(--scrollbar-track-active, var(--scrollbar-track-hover, var(--scrollbar-track))) !important;
+        }
         &::-webkit-scrollbar-thumb {
             background-color: var(--scrollbar-thumb) !important;
             border-radius: var(--scrollbar-thumb-radius) !important;
         }
+        &::-webkit-scrollbar-thumb:hover {
+            background-color: var(--scrollbar-thumb-hover, var(--scrollbar-thumb)) !important;
+        }
+        &::-webkit-scrollbar-thumb:active {
+            background-color: var(--scrollbar-thumb-active, var(--scrollbar-thumb-hover, var(--scrollbar-thumb))) !important;
+        }
         &::-webkit-scrollbar-corner {
             background-color: var(--scrollbar-corner) !important;
             border-radius: var(--scrollbar-corner-radius) !important;
+        }
+        &::-webkit-scrollbar-corner:hover {
+            background-color: var(--scrollbar-corner-hover, var(--scrollbar-corner)) !important;
+        }
+        &::-webkit-scrollbar-corner:active {
+            background-color: var(--scrollbar-corner-active, var(--scrollbar-corner-hover, var(--scrollbar-corner))) !important;
         }
         scrollbar-color: var(--scrollbar-thumb, initial) var(--scrollbar-track, initial) !important;
         &::-webkit-scrollbar {

@@ -1,5 +1,5 @@
 .styled-calendar-day-picker {
-    font-family: var(--font-roboto) !important;
+    font-family: Roboto !important;
     margin: 0 !important;
     --rdp-day-width: 40px;
     --rdp-day-height: 40px;
@@ -17,8 +17,8 @@
     display: flex;
     flex-direction: column;
     gap: 14px;
-    margin-top: calc(var(--spacing) * 4);
-    margin-bottom: calc(var(--spacing) * 4);
+    margin-top: 1rem;
+    margin-bottom: 1rem;
 
     @media (min-width: 640px) {
         flex-direction: row;
@@ -47,7 +47,7 @@
     display: none;
     font-size: 16px;
     line-height: 24px;
-    font-weight: var(--font-weight-medium);
+    font-weight: 500;
     color: var(--colors-delta-700);
 }
 
@@ -63,7 +63,6 @@
     align-items: center;
     border-radius: 4px;
     border-width: 1px;
-    border-style: solid;
     color: var(--colors-delta-700);
     border-color: var(--colors-delta-500);
 }
@@ -91,13 +90,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: var(--font-weight-normal);
+    font-weight: 400;
     color: var(--colors-delta-600);
 }
 
 .head_cell:not(:first-child) {
     border-bottom-width: 1px;
-    border-bottom-style: solid;
 }
 
 .row {
@@ -147,7 +145,6 @@
 
     &.focus-visible {
         outline-width: 2px;
-        outline-style: solid;
         outline-color: var(--colors-gama-500) !important;
         z-index: 50;
     }
@@ -158,10 +155,9 @@
         font-size: 16px !important;
         line-height: 24px !important;
         background-color: var(--colors-gama-50) !important;
-        font-weight: var(--font-weight-semibold) !important;
+        font-weight: 600 !important;
         color: var(--colors-delta-800) !important;
         border-width: 2px !important;
-        border-style: solid !important;
         border-color: var(--colors-gama-400) !important;
 
         &:hover {
@@ -171,7 +167,7 @@
 
     &.day_selected .day {
         background-color: var(--colors-gama-500) !important;
-        color: var(--color-white) !important;
+        color: #fff !important;
     }
 }
 
@@ -179,35 +175,35 @@
     // Figma Selected day = gama-500 fill, white text, radius 8, with a white inset ring
     // (2px gama border + 4px white gap in Figma; approximated here with an inset white outline).
     background-color: var(--colors-gama-500) !important;
-    color: var(--color-white) !important;
+    color: #fff !important;
     border-radius: 8px !important;
-    box-shadow: var(--shadow-lg) !important;
-    outline: 2px solid var(--color-white) !important;
+    box-shadow: 0 10px 15px -3px #0000001a, 0 4px 6px -4px #0000001a !important;
+    outline: 2px solid #fff !important;
     outline-offset: -4px !important;
 
     .day {
         background-color: var(--colors-gama-500) !important;
-        color: var(--color-white) !important;
+        color: #fff !important;
         border-radius: 8px !important;
 
         &:hover {
             background-color: var(--colors-gama-600) !important;
-            color: var(--color-white) !important;
+            color: #fff !important;
         }
     }
 
     &:hover {
         background-color: var(--colors-gama-600) !important;
-        color: var(--color-white) !important;
+        color: #fff !important;
     }
 
     &.day_selected.rdp-day_range_end.day_outside {
         background-color: var(--colors-gama-600) !important;
-        color: var(--color-white) !important;
+        color: #fff !important;
 
         .day {
             background-color: var(--colors-gama-600) !important;
-            color: var(--color-white) !important;
+            color: #fff !important;
         }
     }
 
@@ -216,7 +212,8 @@
         color: var(--colors-delta-800) !important;
         border-radius: 0 !important;
         border-style: none !important;
-        outline-style: none !important;
+        outline: 2px solid transparent !important;
+        outline-offset: 2px !important;
         box-shadow: none !important;
 
         &:hover {
@@ -229,14 +226,14 @@
     // Figma "Other month" = Regular weight, delta-600 (needs !important to beat the base .day semibold).
     .day {
         color: var(--colors-delta-600) !important;
-        font-weight: var(--font-weight-normal) !important;
+        font-weight: 400 !important;
     }
 }
 
 .day_disabled {
     .day {
         color: var(--colors-delta-300) !important;
-        font-weight: var(--font-weight-normal) !important;
+        font-weight: 400 !important;
         cursor: not-allowed !important;
     }
 }
@@ -247,7 +244,8 @@
         color: var(--colors-delta-800) !important;
         border-radius: 0 !important;
         border-style: none !important;
-        outline-style: none !important;
+        outline: 2px solid transparent !important;
+        outline-offset: 2px !important;
         box-shadow: none !important;
 
         &:hover {
@@ -263,11 +261,11 @@
 .weeknumber {
     background-color: var(--colors-delta-50);
     width: 40px;
-    margin-right: var(--spacing);
+    margin-right: 0.25rem;
     color: var(--colors-delta-700);
-    font-weight: var(--font-weight-normal);
+    font-weight: 400;
     font-size: 14px;
-    padding: calc(var(--spacing) * 2);
+    padding: 0.5rem;
     text-align: center;
     vertical-align: middle;
 }
@@ -276,11 +274,11 @@
     background-color: var(--colors-delta-50);
     width: 40px;
     height: 40px;
-    margin-right: var(--spacing);
+    margin-right: 0.25rem;
     color: var(--colors-delta-600);
     font-size: 14px;
     line-height: 20px;
-    font-weight: var(--font-weight-normal);
+    font-weight: 400;
     text-align: center;
     vertical-align: middle;
     border-top-left-radius: 4px;

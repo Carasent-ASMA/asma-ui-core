@@ -5,17 +5,17 @@
         // Default width only — deliberately NOT !important so a consumer `className` (e.g. `w-full!`)
         // can size the field to its container.
         width: 400px;
-        box-sizing: border-box;
-        font-family: var(--font-roboto);
-        font-size: var(--text-base);
-        font-weight: var(--font-weight-normal);
-        border-radius: 0.25rem;
-        outline-style: solid;
-        padding: calc(var(--spacing) * 3);
-        resize: none;
-        transition-duration: 75ms;
-        line-height: calc(var(--spacing) * 6);
-        border-style: none;
+        box-sizing: border-box #{!important};
+        font-family: Roboto #{!important};
+        font-size: 1rem #{!important};
+        font-weight: 400 #{!important};
+        border-radius: 0.25rem #{!important};
+        outline-style: solid #{!important};
+        padding: 0.75rem #{!important};
+        resize: none #{!important};
+        transition-duration: 75ms #{!important};
+        line-height: 1.5rem #{!important};
+        border-style: none #{!important};
         color: var(--colors-input-#{$type}-text-color) #{!important};
         background-color: var(--colors-input-#{$type}-bg-color) #{!important};
         outline-color: var(--colors-input-#{$type}-outline-color) #{!important};
@@ -68,10 +68,10 @@
 @mixin label($type) {
     &.#{$type} {
         // Figma field Title = Body Base SemiBold 16/lh24, text-icon/title-label delta-800.
-        font-family: var(--font-roboto);
-        font-size: var(--text-base);
-        line-height: calc(var(--spacing) * 6);
-        font-weight: var(--font-weight-semibold);
+        font-family: Roboto;
+        font-size: 1rem;
+        line-height: 1.5rem;
+        font-weight: 600;
         width: fit-content;
         color: var(--colors-input-label-#{$type}-text-color);
     }
@@ -80,9 +80,9 @@
 @mixin description($type) {
     &.#{$type} {
         // Figma Helper = 14/lh20, text-icon/helper delta-600.
-        font-family: var(--font-roboto);
-        font-size: var(--text-sm);
-        line-height: calc(var(--spacing) * 5);
+        font-family: Roboto;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
         color: var(--colors-input-description-#{$type}-text-color);
     }
 }
