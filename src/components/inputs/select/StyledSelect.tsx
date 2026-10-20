@@ -422,7 +422,7 @@ export const StyledSelect = ({
                 }}
                 style={{ minWidth: hasValue && !isStandard ? 105 : undefined }}
                 className={cn(
-                    'relative flex w-full items-center justify-between text-left outline-none',
+                    'relative flex w-full items-center justify-between text-left outline-hidden',
                     // Figma field text = Body Base 16/lh24 (`text-base`), h40 (matches StyledInputField/field-styles).
                     // `standard` shares the outlined geometry (h40, px-3, radius) — only its border is
                     // deferred to focus, via `borderless` on the outline overlay below.

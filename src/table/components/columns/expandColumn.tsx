@@ -21,7 +21,7 @@ export function generateExpandColumn<TData>(isFixed: boolean, rowHeight?: number
                     type='button'
                     aria-label={isExpanded ? 'Collapse row' : 'Expand row'}
                     aria-expanded={isExpanded}
-                    className='flex w-full items-center justify-center border-0 bg-transparent p-0 outline-none focus:outline-none'
+                    className='flex w-full items-center justify-center border-0 bg-transparent p-0 outline-hidden focus:outline-hidden'
                     onClick={() => cell.row.getToggleExpandedHandler()()}
                     style={{ height: rowHeight ?? 'auto' }}
                 >

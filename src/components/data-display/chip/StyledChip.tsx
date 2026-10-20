@@ -183,7 +183,7 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                     disabled && 'pointer-events-none opacity-[0.38]',
                     interactive &&
                         cn(
-                            'cursor-pointer outline-none',
+                            'cursor-pointer outline-hidden',
                             // ASMA-8220 (TB-14): touch-ready, not pressable — the `active:` colours
                             // below are the designed pressed state, so no opacity layer over them.
                             // No `asma-touch-target`: the fixed h-6/h-8 heights are the Figma chip.

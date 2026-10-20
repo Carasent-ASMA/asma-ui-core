@@ -354,7 +354,7 @@ export const StyledInputField = ({
 
     const inputClasses = cn(
         styles['Input'],
-        'peer text-delta-800 placeholder:text-delta-500 border-0 bg-transparent text-base tracking-[0.00938em] outline-none', // Figma field text delta/800 #363e4a
+        'peer text-delta-800 placeholder:text-delta-500 border-0 bg-transparent text-base tracking-[0.00938em] outline-hidden', // Figma field text delta/800 #363e4a
         isAdornmentList
             ? 'box-border h-8 min-w-[60px] flex-1 p-0 leading-[23px]'
             : multiline

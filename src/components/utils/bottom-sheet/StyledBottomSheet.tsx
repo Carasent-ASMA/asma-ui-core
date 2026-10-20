@@ -186,7 +186,7 @@ export const StyledBottomSheet = ({
             onCancel={handleCancel}
             className={cn(
                 style['StyledBottomSheet'],
-                'fixed inset-0 m-0 size-full max-h-none max-w-none flex-col items-center justify-end overflow-hidden border-0 bg-transparent p-0 outline-none open:flex',
+                'fixed inset-0 m-0 size-full max-h-none max-w-none flex-col items-center justify-end overflow-hidden border-0 bg-transparent p-0 outline-hidden open:flex',
             )}
         >
             {/* Scrim: a convenience duplicate of the close button, not a control — hidden from AT. */}
@@ -208,7 +208,7 @@ export const StyledBottomSheet = ({
                 className={cn(
                     // `border-solid` + `box-border` are load-bearing: Tailwind runs with preflight off,
                     // so a bare `border` paints nothing and widths fall back to content-box.
-                    'border-delta-300 text-delta-700 relative box-border flex w-full max-w-[640px] flex-col border border-solid bg-white outline-none',
+                    'border-delta-300 text-delta-700 relative box-border flex w-full max-w-[640px] flex-col border border-solid bg-white outline-hidden',
                     isShortViewport ? 'h-full max-h-none rounded-none' : 'max-h-[90dvh] rounded-t-[28px]',
                     // Utilities ship `!important`, so while dragging the transform classes are dropped
                     // rather than out-ranked by the inline offset.

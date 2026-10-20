@@ -129,7 +129,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
             openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
             node.showModal()
             // showModal() focuses the first focusable element (the header close button) — move focus
-            // back to the shell, which has tabIndex={-1} + outline-none, so no :focus ring paints.
+            // back to the shell, which has tabIndex={-1} + outline-hidden, so no :focus ring paints.
             node.focus({ preventScroll: true })
             // Some engines defer showModal()'s first-focusable step until after this turn; re-assert
             // focus next frame so it wins. Guard `node.open` in case the dialog closed in between.
@@ -217,7 +217,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
             onCancel={handleCancel}
             className={cn(
                 style['StyledDialog'],
-                'fixed inset-0 m-0 size-full max-h-none max-w-none items-center justify-center overflow-hidden border-0 bg-transparent p-0 outline-none open:flex',
+                'fixed inset-0 m-0 size-full max-h-none max-w-none items-center justify-center overflow-hidden border-0 bg-transparent p-0 outline-hidden open:flex',
                 scroll === 'body' && 'overflow-y-auto',
                 className,
                 classes?.root,

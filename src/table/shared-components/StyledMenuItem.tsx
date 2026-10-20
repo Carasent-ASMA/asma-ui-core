@@ -46,7 +46,7 @@ export const StyledMenuItem = ({
             className={cn(
                 // Figma "Menus item / Only Label" (wXrXt5uKNNzV2DnQCgyYZH 16045-31269): resting text is
                 // text-icon/body #49525f (delta-700), NOT the inherited near-black; hover fill is delta-50.
-                'text-delta-700 flex items-center px-3 py-2.5 text-base outline-none',
+                'text-delta-700 flex items-center px-3 py-2.5 text-base outline-hidden',
                 disabled ? 'cursor-not-allowed' : 'hover:bg-delta-50 cursor-pointer',
                 selected && 'bg-gama-50',
                 classes?.root,

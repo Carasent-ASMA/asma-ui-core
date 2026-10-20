@@ -316,12 +316,12 @@ describe('StyledSelect keyboard contract', () => {
     })
 
     /* FINDING ASMA-8139-B — WCAG 2.4.7 (focus visible). src/components/inputs/select/StyledSelectItem.tsx.
-     * The option row is `outline-none` with no `focus`/`focus-visible` rule, and arrow-key navigation
+     * The option row is `outline-hidden` with no `focus`/`focus-visible` rule, and arrow-key navigation
      * moves REAL DOM focus onto it (StyledSelect's `handleKeyDown` calls `.focus()`). Measured on the
-     * focused option: `outline: 2px solid rgba(0,0,0,0)` (Tailwind's `outline-none` is a transparent
-     * outline, not an absent one), `box-shadow: none`, `background: rgba(0,0,0,0)`. So a keyboard user
-     * driving the open listbox has no way to see where they are. The `selected` row's `bg-gama-50` is
-     * selection state, not focus, and does not move with the arrow keys.
+     * focused option: `outline: 2px solid rgba(0,0,0,0)` (the v3 outline reset this replaces was a
+     * transparent outline, not an absent one), `box-shadow: none`, `background: rgba(0,0,0,0)`. So a
+     * keyboard user driving the open listbox has no way to see where they are. The `selected` row's
+     * `bg-gama-50` is selection state, not focus, and does not move with the arrow keys.
      * Not fixed here: adding a focus ring is a visual change to a shared component and would move VRT
      * baselines — exactly the design-gated class ASMA-8137 fenced off. Escalated to the coordinator.
      * @see docs/a11y-keyboard-contract.md */

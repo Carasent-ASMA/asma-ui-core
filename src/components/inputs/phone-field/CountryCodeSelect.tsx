@@ -160,7 +160,7 @@ export const CountryCodeSelect = ({
                             ref={desktopInputRef}
                             role='combobox'
                             data-testid={`${dataTest}-search`}
-                            className='w-12 min-w-0 border-0 bg-transparent p-0 text-base outline-none'
+                            className='w-12 min-w-0 border-0 bg-transparent p-0 text-base outline-hidden'
                             value={query}
                             placeholder={dialCode}
                             onChange={(event) => setQuery(event.target.value)}
@@ -184,7 +184,7 @@ export const CountryCodeSelect = ({
                             aria-hidden='true'
                             aria-expanded
                             onClick={picker.dismiss}
-                            className='ml-auto flex shrink-0 cursor-pointer border-0 bg-transparent p-0 outline-none focus:shadow-none focus:ring-0 focus:outline-none'
+                            className='ml-auto flex shrink-0 cursor-pointer border-0 bg-transparent p-0 outline-hidden focus:shadow-none focus:ring-0 focus:outline-hidden'
                         >
                             <ChevronDownIcon width={20} height={20} className='flip-180' />
                         </button>
@@ -210,7 +210,7 @@ export const CountryCodeSelect = ({
                         onFocus={() => setFocused(true)}
                         onBlur={() => setFocused(false)}
                         className={cn(
-                            'relative z-1 flex w-full items-center gap-1.5 border-0 bg-transparent p-0 text-base outline-none focus:shadow-none focus:ring-0 focus:outline-none',
+                            'relative z-1 flex w-full items-center gap-1.5 border-0 bg-transparent p-0 text-base outline-hidden focus:shadow-none focus:ring-0 focus:outline-hidden',
                             disabled ? 'text-delta-300 cursor-not-allowed' : 'text-delta-800 cursor-pointer',
                         )}
                     >

@@ -31,7 +31,7 @@ export const StyledMenuItem = ({ children, selected, disabled, className, onClic
             onClick={disabled ? undefined : onClick}
             onKeyDown={handleKeyDown}
             className={cn(
-                'text-delta-700 flex items-center gap-x-1 p-2 text-base outline-none',
+                'text-delta-700 flex items-center gap-x-1 p-2 text-base outline-hidden',
                 disabled ? 'cursor-not-allowed' : 'hover:bg-delta-50 cursor-pointer',
                 selected && 'bg-gama-50 hover:bg-gama-50',
                 className,
