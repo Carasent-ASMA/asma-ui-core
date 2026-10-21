@@ -1,8 +1,8 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
 import { ChevronDownIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
-import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
-import { StyledDialog } from '../../feedback/dialog/StyledDialog'
+import { useFullScreenPickerMediaQuery } from 'src/hooks/useMediaQuery.hook'
+import { FullScreenPicker } from '../full-screen-picker/FullScreenPicker'
 import { StyledPopover } from '../../utils/popover/StyledPopover'
 import { notchedOutlineClass, SINGLE_LINE_FIELD_HEIGHT_PX } from '../field-styles'
 import { StyledSearchField } from '../search-field/StyledSearchField'
@@ -35,9 +35,10 @@ export interface CountryCodeSelectProps {
  * - **Desktop** — the trigger *is* the combobox. Opening it turns the calling-code slot into an
  *   input and typing filters the list below, which is what Figma draws (the open trigger carries a
  *   text cursor, and the menu holds rows only — node 8565:284950 has no search field).
- * - **Mobile** — a full-screen sheet with its own search box, per node 8699:112423. The break is
- *   `StyledDialog`'s own `fullScreen ?? isMobile` default (≤743 px), so the two never disagree
- *   about what "mobile" means.
+ * - **Mobile** — a full-screen sheet with its own search box, per node 8699:112423, drawn by the
+ *   shared `FullScreenPicker` (ASMA-8468). The break is the selects' picker break — below 744 px
+ *   wide **or** at most 480 px high (D-002) — so a landscape phone gets the sheet too, not a
+ *   popover squeezed against the keyboard.
  */
 export const CountryCodeSelect = ({
     dataTest,
@@ -60,7 +61,7 @@ export const CountryCodeSelect = ({
     const desktopInputRef = useRef<HTMLInputElement>(null)
     const triggerButtonRef = useRef<HTMLButtonElement>(null)
     const wasOpen = useRef(false)
-    const isMobile = useMobileMediaQuery()
+    const isMobile = useFullScreenPickerMediaQuery()
     const listId = `${useId()}-country-listbox`
 
     const selected = countries.find((country) => country.iso2 === value)
@@ -98,7 +99,24 @@ export const CountryCodeSelect = ({
         wasOpen.current = open
     }, [open])
 
-    const options = (
+    // In the modal sheet Tab moves between the sheet's controls; only the desktop popover closes on it.
+    const handleSheetKeyDown = (event: KeyboardEvent<HTMLElement>): void => {
+        if (event.key !== 'Tab') picker.handleKeyDown(event)
+    }
+
+    // On the sheet's list Space always chooses and keeps the sheet open, even with a query typed:
+    // there is no text to type into. Enter chooses and closes.
+    const handleSheetListKeyDown = (event: KeyboardEvent<HTMLElement>): void => {
+        if (event.key !== ' ') {
+            handleSheetKeyDown(event)
+            return
+        }
+        event.preventDefault()
+        const active = picker.activeIndex === null ? undefined : picker.visible[picker.activeIndex]
+        if (active !== undefined) picker.select(active.iso2, false)
+    }
+
+    const renderOptions = (inSheet: boolean): JSX.Element => (
         <CountryCodeOptions
             dataTest={dataTest}
             visible={picker.visible}
@@ -109,6 +127,8 @@ export const CountryCodeSelect = ({
             listId={listId}
             label={selectCountryLabel}
             renderFlag={renderFlag}
+            onKeyDown={inSheet ? handleSheetListKeyDown : undefined}
+            onFocus={inSheet && picker.activeIndex === null ? () => picker.openWithKeyboard(1) : undefined}
         />
     )
 
@@ -195,7 +215,8 @@ export const CountryCodeSelect = ({
                         type='button'
                         data-testid={dataTest}
                         disabled={disabled}
-                        aria-haspopup='listbox'
+                        // On a small viewport it opens the full-screen sheet, a dialog.
+                        aria-haspopup={isMobile ? 'dialog' : 'listbox'}
                         aria-expanded={open}
                         aria-controls={open ? listId : undefined}
                         aria-labelledby={labelledBy}
@@ -226,36 +247,34 @@ export const CountryCodeSelect = ({
             </div>
 
             {isMobile ? (
-                <StyledDialog
+                <FullScreenPicker
                     open={open}
                     onClose={picker.dismiss}
                     dataTest={`${dataTest}-dialog`}
-                    dialogTitle={selectCountryLabel}
-                    showCloseIcon
-                    fullWidth
+                    title={selectCountryLabel}
+                    // The name `StyledDialog`'s own close button gave this sheet before.
+                    closeLabel='Close'
+                    search={
+                        <StyledSearchField
+                            dataTest={`${dataTest}-search`}
+                            label={searchPlaceholder}
+                            value={query}
+                            fullWidth
+                            onChange={(event) => setQuery(event.target.value)}
+                            onClear={() => setQuery('')}
+                            onKeyDown={handleSheetKeyDown}
+                            // Deliberately no `allowClear`: that flag reaches `StyledInputField`
+                            // through the rest props and renders *its* clear button, while
+                            // `StyledSearchField` destructures `onClear` for its own adornment and
+                            // never forwards it — so the input's button calls an undefined handler
+                            // and the cross does nothing. The search field already renders a wired
+                            // clear whenever the value is non-empty.
+                            slotProps={{ htmlInput: comboboxAria }}
+                        />
+                    }
                 >
-                    <div className='flex min-h-0 flex-1 flex-col'>
-                        {/* Figma mobile sheet: 360 wide container, 328 wide search field — 16 px each side. */}
-                        <div className='shrink-0 p-4'>
-                            <StyledSearchField
-                                dataTest={`${dataTest}-search`}
-                                label={searchPlaceholder}
-                                value={query}
-                                onChange={(event) => setQuery(event.target.value)}
-                                onClear={() => setQuery('')}
-                                onKeyDown={picker.handleKeyDown}
-                                // Deliberately no `allowClear`: that flag reaches `StyledInputField`
-                                // through the rest props and renders *its* clear button, while
-                                // `StyledSearchField` destructures `onClear` for its own adornment and
-                                // never forwards it — so the input's button calls an undefined handler
-                                // and the cross does nothing. The search field already renders a wired
-                                // clear whenever the value is non-empty.
-                                slotProps={{ htmlInput: comboboxAria }}
-                            />
-                        </div>
-                        {options}
-                    </div>
-                </StyledDialog>
+                    {renderOptions(true)}
+                </FullScreenPicker>
             ) : (
                 <StyledPopover
                     open={open}
@@ -265,7 +284,7 @@ export const CountryCodeSelect = ({
                     // Figma Menus surface: 8px above the first row and below the last.
                     slotProps={{ paper: { className: 'flex max-h-80 w-80 flex-col overflow-hidden py-2' } }}
                 >
-                    {options}
+                    {renderOptions(false)}
                 </StyledPopover>
             )}
         </>

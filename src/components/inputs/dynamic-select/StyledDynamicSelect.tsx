@@ -32,7 +32,10 @@ import { forwardRef } from 'react'
  *   Long labels automatically switch to a vertical stacked layout.
  *   When `!required` and a value is selected, a "Clear selection" button is shown.
  * - `0 or 6+ options` → renders as a searchable autocomplete (`DynamicSelectAutocomplete`).
- *   All autocomplete option counts remain filterable and keyboard-operable.
+ *   All autocomplete option counts remain filterable and keyboard-operable. Below 744 CSS px wide
+ *   or at most 480 CSS px high it opens as a full-screen picker titled by `title` (ASMA-8468). A
+ *   picker opened on 0 options closes when 1–5 options arrive, because the field then becomes a
+ *   chip group (D-005, RISK-008).
  *
  * **Option types:**
  * Options can be primitives (`string | number | boolean`) or objects. When using objects,

@@ -692,6 +692,22 @@ export const LongLabelsAndDisabledOptions: Story = {
 }
 
 /**
+ * A long title and long labels in the searchable mode. On a phone the full-screen picker wraps both
+ * in full — title and rows grow, nothing is cut off (ASMA-8468 REQ-003, REQ-018).
+ */
+export const LongTitleAndLabels: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
+    render: () => (
+        <SelectFrame
+            title='Preferred follow-up plan after the rehabilitation stay, including self-reporting at home'
+            multiple
+            options={[...longLabelOptions, ...createOptions(12).slice(5)]}
+        />
+    ),
+}
+
+/**
  * Chip path (≤5 options): an option that cannot be chosen stays in the Tab order as an `aria-disabled`
  * chip, and its `getOptionTooltip` reason opens on keyboard focus as well as hover (ASMA
  * disabled-states DIS-2, DIS-3). Choosing it does nothing.

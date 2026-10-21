@@ -36,6 +36,13 @@ import {
     useTopLayerRef,
 } from 'src/hooks/useTopLayer.hook'
 import { LoadingIcon } from 'src/table/shared-components/LoadingIcon'
+import { useFullScreenPickerMediaQuery } from 'src/hooks/useMediaQuery.hook'
+import { PickerLiveRegion, useAnnouncer } from 'src/components/inputs/full-screen-picker/PickerLiveRegion'
+import { getPickerText, type PickerText } from 'src/components/inputs/full-screen-picker/pickerCopy'
+import { readFieldName, type FieldName } from './readFieldName'
+import { getDraftChanges } from './draftChanges'
+import { nextActiveIndex } from './listboxCursor'
+import { SelectAutocompletePicker } from './SelectAutocompletePicker'
 import style from './StyledSelectAutocomplete.module.scss'
 
 export type AutocompleteChangeReason = 'createOption' | 'selectOption' | 'removeOption' | 'clear' | 'blur'
@@ -45,6 +52,8 @@ export interface AutocompleteRenderOptionState {
     selected: boolean
     index: number
     inputValue: string
+    /** The row is drawn in the full-screen picker (ASMA-8468): show the full label, no line clamp. */
+    inPicker?: boolean
 }
 
 /** Props the combobox hands to `renderInput`; spread straight onto `StyledInputField`. */
@@ -64,7 +73,7 @@ export interface AutocompleteRenderInputParams {
     }
 }
 
-type OptionLiProps = HTMLAttributes<HTMLLIElement> & {
+export type OptionLiProps = HTMLAttributes<HTMLLIElement> & {
     key?: string
     ref?: React.Ref<HTMLLIElement>
     [dataAttr: `data-${string}`]: unknown
@@ -172,6 +181,22 @@ export interface StyledSelectAutocompleteProps<
     /** Style/class the portalled listbox (MUI `slotProps.popper` parity); e.g. raise its z-index above an overlay. */
     slotProps?: { popper?: { className?: string; style?: CSSProperties } }
     sx?: unknown
+    /**
+     * Title of the full-screen picker on a small viewport (ASMA-8468). Defaults to the field's label,
+     * read when the picker opens from the input's `<label>`, `aria-labelledby` or `aria-label`. With
+     * none, there is no title and the dialog and list are named by the placeholder, else by
+     * `pickerText.search`.
+     */
+    pickerTitle?: ReactNode
+    /** Overrides for any picker string (*Ferdig*, *Fjern valget*, counts, …). */
+    pickerText?: Partial<PickerText>
+    /** Language of the default picker copy. Defaults to English, like the rest of ui-core. */
+    locale?: 'no' | 'en'
+    /**
+     * Keep the attached list on every viewport. By default the list opens as a full-screen picker
+     * below 744 CSS px wide or at most 480 CSS px high (ASMA-8468).
+     */
+    disableFullScreenPicker?: boolean
 }
 
 const objectLabel = <T,>(option: T): string => {
@@ -233,8 +258,16 @@ export function StyledSelectAutocomplete<
     wrapperClassName,
     getOptionDisabled,
     slotProps,
+    pickerTitle,
+    pickerText,
+    locale = 'en',
+    disableFullScreenPicker,
 }: StyledSelectAutocompleteProps<T, Multiple, DisableClearable, FreeSolo>): JSX.Element {
     const isMultiple = multiple === true
+    const isPicker = useFullScreenPickerMediaQuery() && !disableFullScreenPicker
+    const [fieldName, setFieldName] = useState<FieldName>({ label: '', name: '' })
+    const [fieldAnnouncement, announceToField] = useAnnouncer()
+    const resolvedPickerText = getPickerText(locale, pickerText)
     const getLabel = getOptionLabel ?? objectLabel
     const isEqual = (a: T, b: T): boolean => (isOptionEqualToValue ? isOptionEqualToValue(a, b) : a === b)
 
@@ -246,6 +279,9 @@ export function StyledSelectAutocomplete<
         // onClick and ArrowDown handler both call setOpen(true) and previously ignored readOnly.
         if (next && (readOnly || disabled)) return
         if (controlledOpen === undefined) setUncontrolledOpen(next)
+        // Read on every opening, not only in picker mode: the viewport can cross into picker mode
+        // while the attached list is open.
+        if (next) setFieldName(readFieldName(inputRef.current))
         if (next) onOpen?.()
         else {
             setActiveIndex(null)
@@ -340,10 +376,12 @@ export function StyledSelectAutocomplete<
             }),
         ],
     })
-    const dismiss = useDismiss(context)
+    // The picker is a modal dialog outside the floating element: an outside-press here would close it.
+    const dismiss = useDismiss(context, { enabled: !isPicker })
     const role = useRole(context, { role: 'listbox' })
     const { getReferenceProps, getFloatingProps, getItemProps } = useInteractions([dismiss, role])
-    useBackCloses({ active: open, requestClose: () => setOpen(false) })
+    // In picker mode the picker's `StyledDialog` is the one Back entry (TASK-014 e).
+    useBackCloses({ active: open && !isPicker, requestClose: () => setOpen(false) })
     const referenceRef = useMergeRefs([refs.setReference])
     // Portal INTO the trigger's modal <dialog> when present (inertness). Popover API only for body portal.
     const portalRoot = useMemo(() => (open ? getOpenModalDialogAncestor(refs.reference.current) : undefined), [open, refs])
@@ -357,11 +395,7 @@ export function StyledSelectAutocomplete<
 
     const moveActiveOption = (direction: -1 | 1): void => {
         if (activeIndexes.length === 0) return
-        setActiveIndex((index) => {
-            const position = activeIndexes.indexOf(index ?? selectedOptionIndex)
-            if (position === -1) return activeIndexes[direction === 1 ? 0 : activeIndexes.length - 1] ?? null
-            return activeIndexes[Math.min(Math.max(position + direction, 0), activeIndexes.length - 1)] ?? null
-        })
+        setActiveIndex((index) => nextActiveIndex(activeIndexes, index, selectedOptionIndex, direction))
     }
 
     const emitChange = (event: SyntheticEvent, option: T, close = !isMultiple || !disableCloseOnSelect): void => {
@@ -386,6 +420,23 @@ export function StyledSelectAutocomplete<
     const clearValue = (event: SyntheticEvent): void => {
         onChange?.(event, (isMultiple ? [] : null) as never, 'clear', undefined)
         setInputValue(event, '', 'clear')
+    }
+
+    // Picker *Fjern valget*: the announcement goes to the field's live region, which is still there
+    // once the dialog has closed.
+    const clearFromPicker = (event: SyntheticEvent): void => {
+        clearValue(event)
+        setOpen(false)
+        announceToField(resolvedPickerText.cleared)
+    }
+
+    // Picker *Ferdig*: replay the draft as the per-tick events the attached list sends (D-007).
+    const applyPickerDraft = (event: SyntheticEvent, draft: T[]): void => {
+        for (const { value: next, reason, option } of getDraftChanges(selectedArray, draft, isEqual)) {
+            onChange?.(event, next as never, reason, option === undefined ? undefined : { option })
+        }
+        setInputValue(event, '', 'reset')
+        setOpen(false)
     }
 
     const toggleSelectAll = (event: SyntheticEvent): void => {
@@ -516,6 +567,8 @@ export function StyledSelectAutocomplete<
         helperText,
         value: inputValue,
         onChange: (event) => {
+            // Picker mode: the field is a trigger, search happens in the picker.
+            if (isPicker) return
             setActiveIndex(null)
             setInputValue(event, event.target.value, 'input')
             if (!open) setOpen(true)
@@ -533,6 +586,10 @@ export function StyledSelectAutocomplete<
                 'aria-activedescendant': activeOptionId,
                 autoComplete: 'off',
                 readOnly,
+                // Picker mode: tapping the field opens the picker, never the on-screen keyboard —
+                // also when focus comes back to it on close (REQ-006) — and the popup it opens is a
+                // dialog, which screen readers announce instead of "list".
+                ...(isPicker ? { inputMode: 'none', 'aria-haspopup': 'dialog' } : {}),
             },
             input: { ref: referenceRef, startAdornment: tags, endAdornment },
         },
@@ -585,14 +642,16 @@ export function StyledSelectAutocomplete<
                         decorative
                     />
                 ) : (
-                    <span className='w-5'>
+                    // `flex` in the picker: an inline 20 px icon sits on the text baseline and grows the
+                    // selected row to 43 px, off Figma's 40 (the attached list still has that 2.5 px).
+                    <span className={cn('w-5', state.inPicker && 'flex')}>
                         {state.selected && <CheckIcon width={20} height={20} className='text-gama-500' />}
                     </span>
                 )}
                 {/* Long labels wrap to a second line and only then ellipsise (ASMA-7847): one
                     clipped line hid which organisation a row actually was. `wrap-break-word` mirrors
                     Figma's `word-break: break-word`, so an unbroken name still wraps. */}
-                <span className='line-clamp-2 min-w-0 flex-1 wrap-break-word'>{getLabel(option)}</span>
+                <span className={cn(!state.inPicker && 'line-clamp-2', 'min-w-0 flex-1 wrap-break-word')}>{getLabel(option)}</span>
             </li>
         )
     }
@@ -638,7 +697,40 @@ export function StyledSelectAutocomplete<
             style={fieldWidthStyle(width)}
         >
             {renderInput(renderInputParams)}
-            {open && (
+            {isPicker && (
+                <>
+                    <PickerLiveRegion announcement={fieldAnnouncement} dataTest={`${dataTest}-live`} />
+                    <SelectAutocompletePicker<T>
+                        open={open}
+                        dataTest={dataTest}
+                        listboxId={listboxId}
+                        title={pickerTitle ?? (fieldName.label || undefined)}
+                        name={typeof pickerTitle === 'string' ? pickerTitle : fieldName.name || resolvedPickerText.search}
+                        text={resolvedPickerText}
+                        options={options}
+                        multiple={isMultiple}
+                        value={isMultiple ? selectedArray : singleValue}
+                        clearable={!disableClearable && !readOnly}
+                        isEqual={isEqual}
+                        isOptionDisabled={isOptionDisabled}
+                        getLabel={getLabel}
+                        getOptionKey={getOptionKey}
+                        filterOptions={filterOptions}
+                        renderOptionRow={renderOption ?? defaultRenderOption}
+                        optionRowClassName={optionRowClassName}
+                        loading={loading}
+                        loadingText={loadingText}
+                        noOptionsText={noOptionsText}
+                        allowSelectAll={allowSelectAll}
+                        selectAllLabel={selectAllLabel}
+                        onSelect={emitChange}
+                        onClear={clearFromPicker}
+                        onApply={applyPickerDraft}
+                        onCancel={() => setOpen(false)}
+                    />
+                </>
+            )}
+            {open && !isPicker && (
                 <FloatingPortal root={portalRoot}>
                     <ul
                         ref={floatingRef}

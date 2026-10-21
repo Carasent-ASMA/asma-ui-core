@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { useState } from 'react'
 
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { FilterIcon } from 'src/components/icons/filter-icon/FilterIcon'
+import { StyledDynamicSelect } from 'src/components/inputs/dynamic-select/StyledDynamicSelect'
 import { PopoverSheet } from '../popover/PopoverSheet'
 import { ChipGroup, KARTLEGGING, noop } from '../popover/story/popoverStoryFixtures'
 import { StyledBottomSheet } from './StyledBottomSheet'
@@ -59,6 +61,37 @@ export const Filter: Story = {
     render: () => (
         <Screen>
             <FilterSheet initiallyOpen />
+        </Screen>
+    ),
+}
+
+type RoleOption = { value: string; label: string }
+const ROLE_OPTIONS: RoleOption[] = [
+    'Initial function assessment',
+    'Goal attainment after the stay',
+    'Activities of daily living',
+    'Follow-up after discharge',
+    'Sleep and recovery',
+    'Practical needs at home',
+    'Physical function and mobility',
+    'Quality of life before rehabilitation',
+].map((label) => ({ value: label, label }))
+
+const RoleSelect = (): JSX.Element => {
+    const [role, setRole] = useState<RoleOption | null>(ROLE_OPTIONS[3] ?? null)
+    return <StyledDynamicSelect<RoleOption> dataTest='sheet-role' title='Role' options={ROLE_OPTIONS} value={role} onChange={setRole} />
+}
+
+/**
+ * A searchable select (6+ options) inside a filter sheet. On a phone it opens its full-screen picker
+ * above the sheet; closing the picker returns to the sheet (ASMA-8468 REQ-020).
+ */
+export const WithSearchableSelect: Story = {
+    render: () => (
+        <Screen>
+            <SheetDemo dataTest='select-sheet' label='Filter' title='Filtrer søknader' resultCount={12} initiallyOpen>
+                <RoleSelect />
+            </SheetDemo>
         </Screen>
     ),
 }
