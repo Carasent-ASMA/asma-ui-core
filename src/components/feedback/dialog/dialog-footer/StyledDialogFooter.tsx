@@ -178,14 +178,24 @@ export function StyledDialogFooter({
         }
 
         /* A lone action: width still decides label vs icon-only, and whether even the icon fits. */
-        return planToolbarActions({
+        const planned = planToolbarActions({
             actions: visibleLeftActions,
             availableWidth: leftAvailableWidth,
             collapseLabels: true,
             resolveActionWidth: (action, showLabel) => widths[actionKey(action.id, showLabel)],
             moreButtonWidthPx: widths[KEY_MORE_BUTTON],
         })
-    }, [visibleLeftActions, leftAvailableWidth, widths])
+
+        /* Figma `Mobile`: the left action is icon-only even when its label would fit (ASMA-8259).
+         * The label stays its accessible name. An action that may not hide its label keeps it. */
+        if (!compact) return planned
+        return {
+            ...planned,
+            inlineActions: planned.inlineActions.map((planAction) =>
+                planAction.action.canHideLabel === false ? planAction : { ...planAction, showLabel: false },
+            ),
+        }
+    }, [visibleLeftActions, leftAvailableWidth, widths, compact])
 
     /* A running action in the More menu holds the dialog too: its menu item is not a StyledButton,
      * so StyledButton's own reporting never sees it. Inline actions already report through their
