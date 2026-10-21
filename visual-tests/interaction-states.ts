@@ -178,7 +178,7 @@ export const INTERACTION_CAPTURES: InteractionCapture[] = [
     pickerCapture('inputs-styled-dynamic-select--multiple-select-autocomplete', openPicker(PHONE)),
     pickerCapture('inputs-styled-dynamic-select--multiple-select-autocomplete', openPicker(PHONE_LANDSCAPE), 'landscape'),
     pickerCapture('inputs-styled-dynamic-select--multiple-select-autocomplete', openPicker(ZOOM_400), 'zoom-400'),
-    // 50 rows, then *Showing 50 of N*.
+    // Every option, scrolled to the end (LIST-4: no row limit, no *Showing 50 of N*).
     pickerCapture('inputs-styled-dynamic-select--large-multiple-select-autocomplete', openPicker(PHONE, { scrollToEnd: true }), 'end'),
     // A long title and long labels wrap in full.
     pickerCapture('inputs-styled-dynamic-select--long-title-and-labels', openPicker(PHONE)),

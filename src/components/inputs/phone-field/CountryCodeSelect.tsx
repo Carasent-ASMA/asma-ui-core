@@ -129,6 +129,7 @@ export const CountryCodeSelect = ({
             renderFlag={renderFlag}
             onKeyDown={inSheet ? handleSheetListKeyDown : undefined}
             onFocus={inSheet && picker.activeIndex === null ? () => picker.openWithKeyboard(1) : undefined}
+            open={open}
         />
     )
 
