@@ -96,7 +96,8 @@ type AutocompleteValue<T, Multiple, DisableClearable, FreeSolo> = Multiple exten
 /**
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#20474-29075
  * Figma "Autocomplete". The trigger is the outlined **Input field** (shared `field-styles`: 40px,
- * border enabled delta-500/`#7a899e`, hover gama-300, focus gama-400 `#1ca1a1`, error error-500),
+ * border enabled delta-500/`#7a899e`, hover gama-300, focus 3px `color.focus.ring`, error error-500,
+ * error + focus 3px error-500),
  * so the field **State** (Enabled/Hovered/Focused/Error/Read-only) ← focus/open + `error`/`readOnly`/
  * `disabled`. **Filled** ← selected value(s): single fills the input text, multiple renders **Tag
  * chips** (`StyledChip`: h32, radius25, label 16/delta-700 — node 20475-29954). The dropdown is the

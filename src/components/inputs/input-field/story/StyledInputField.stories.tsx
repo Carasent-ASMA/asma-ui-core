@@ -120,6 +120,24 @@ export const Error: Story = {
     },
 }
 
+/** ASMA-8561: error + focused = 1px error-500 border + 2px inset error-500 edge (3px, layout-neutral). */
+export const ErrorFocused: Story = {
+    args: {
+        error: true,
+        helperText: 'Required field',
+        value: 'Wrong value',
+    },
+    play: async ({ canvas }) => {
+        const input = canvas.getByTestId('storybook-input')
+        input.focus()
+
+        const shell = canvas.getByTestId('storybook-input-shell')
+        await expect(input).toHaveFocus()
+        await expect(shell.getBoundingClientRect().height).toBe(40)
+        await expect(input).toHaveAttribute('aria-invalid', 'true')
+    },
+}
+
 export const ReservedHelperSlot: Story = {
     // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
     parameters: { a11y: { test: 'todo' } },

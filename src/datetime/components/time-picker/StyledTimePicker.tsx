@@ -18,7 +18,8 @@ import { cn } from 'src/helpers/cn'
 /**
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#15561-37391
  * Figma has no distinct time-picker-popover component — the trigger is the outlined **Input field**
- * (`field-styles`: 40px, border delta-500 / hover gama-300 / focus gama-400 / error error-500) with
+ * (`field-styles`: 40px, border delta-500 / hover gama-300 / focus 3px `color.focus.ring` / error
+ * error-500 / error + focus 3px error-500) with
  * a trailing **clock icon** (delta-700 like the select/search field icons; delta-300 when disabled).
  * The dropdown follows the **Menus** surface (delta-300 border + Menus shadow `0 2 4 rgba(34,33,51,
  * .15)`): scrollable hour/minute columns of 36px cells — hover delta-50, "now" gama-50 (like the
@@ -54,7 +55,9 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
     const externalValue = value ? format(value, 'HH:mm') : ''
     const [localValue, setLocalValue] = useState(externalValue)
     const [isDirty, setIsDirty] = useState(false)
-    const [isValidTime, setIsValidTime] = useState(true)
+    // ADR-0017 REQ-001/002: the error shows only after blur (or a panel pick) and clears on the first
+    // valid change; typing never introduces one. ASMA-8561
+    const [showError, setShowError] = useState(false)
     const resolvedLocalValue = isDirty ? localValue : externalValue
 
     const checkValidEndTime = (next?: Date) => {
@@ -62,28 +65,31 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
     }
 
     const parsedLocalTime = resolvedLocalValue.length === 5 ? getTimeFromValue(resolvedLocalValue, value) : null
-    const isValidEndTime = parsedLocalTime ? checkValidEndTime(parsedLocalTime) : true
+    const isValidTime = !showError || resolvedLocalValue === '' || parsedLocalTime !== null
+    const isValidEndTime = !showError || !parsedLocalTime || checkValidEndTime(parsedLocalTime)
+
+    /** Complete, parsable and not before `notBeforeTime`; an empty field is valid (required is the form's job). */
+    const isCommittableTime = (text: string): boolean => {
+        if (text === '') return true
+        const parsed = getTimeFromValue(text, value)
+        return parsed !== null && checkValidEndTime(parsed)
+    }
 
     const handleChange = (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
         const nextValue = e.target.value
 
         setIsDirty(true)
         setLocalValue(nextValue)
+        if (isCommittableTime(nextValue)) setShowError(false)
 
-        if (nextValue.length !== 5) {
-            setIsValidTime(false)
-            return
-        }
+        if (nextValue.length !== 5) return
 
         const validTime = getTimeFromValue(nextValue, value)
 
         if (!validTime) {
             onSelect(undefined)
-            setIsValidTime(false)
             return
         }
-
-        setIsValidTime(true)
 
         // Keep the field dirty and the consumer's value untouched; handleBlur reverts it — no error shown.
         if (isBeforeMinTime(validTime, minTime)) return
@@ -103,9 +109,11 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
         // Disabled cells cannot fire, so this only guards a stale panel after `minTime` moved on.
         if (selectedTime && isBeforeMinTime(selectedTime, minTime)) return
 
-        setIsValidTime(true)
+        // A pick is a finished entry (the input may already have blurred), so validate it now.
+        const isNotBeforeStartTime = checkValidEndTime(selectedTime)
+        setShowError(!isNotBeforeStartTime)
 
-        if (checkValidEndTime(selectedTime)) {
+        if (isNotBeforeStartTime) {
             onSelect(selectedTime)
             setLocalValue(selectedTime ? format(selectedTime, 'HH:mm') : '')
             setIsDirty(false)
@@ -118,15 +126,19 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
     }
 
     const handleBlur = () => {
+        if (!isDirty) return
         // A typed time before `minTime` is never committed: show the last valid value again.
-        if (isDirty && parsedLocalTime && isBeforeMinTime(parsedLocalTime, minTime)) setIsDirty(false)
+        if (parsedLocalTime && isBeforeMinTime(parsedLocalTime, minTime)) setIsDirty(false)
+        // An emptied field holds no time: uncommit it rather than keep the last value hidden.
+        else if (localValue === '') onSelect(undefined)
+        else if (!isCommittableTime(localValue)) setShowError(true)
     }
 
     const handleClear = () => {
         onSelect(undefined)
         setLocalValue('')
         setIsDirty(false)
-        setIsValidTime(true)
+        setShowError(false)
     }
 
     const input = (
