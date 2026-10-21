@@ -401,3 +401,34 @@ describe('PopoverSheet — position stability', () => {
         await expect(panel!.getBoundingClientRect().left).toBe(left)
     })
 })
+
+describe('PopoverSheet — surface edge', () => {
+    afterEach(cleanup)
+
+    it('paints the 1px edge above the Close button, so its hover fill cannot cover it', async () => {
+        const { container } = mount(<Fixture />)
+        await userEvent.click(triggerOf(container))
+        const panel = panelOf()
+        await expect(panel).not.toBeNull()
+
+        const close = panel!.querySelector<HTMLButtonElement>('[data-testid="pop-close"]')!
+        const edge = panel!.querySelector<HTMLElement>('[data-test="pop-edge"]')!
+        await userEvent.hover(close)
+
+        const edgeStyle = getComputedStyle(edge)
+        await expect(edgeStyle.position).toBe('absolute')
+        await expect(edgeStyle.pointerEvents).toBe('none')
+        await expect(edgeStyle.boxShadow).toMatch(/inset/)
+        await expect(getComputedStyle(panel!).boxShadow).not.toMatch(/inset/)
+        await expect(close.compareDocumentPosition(edge) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+
+        const panelRect = panel!.getBoundingClientRect()
+        const edgeRect = edge.getBoundingClientRect()
+        await expect([edgeRect.top, edgeRect.right, edgeRect.width, edgeRect.height]).toEqual([
+            panelRect.top,
+            panelRect.right,
+            panelRect.width,
+            panelRect.height,
+        ])
+    })
+})
