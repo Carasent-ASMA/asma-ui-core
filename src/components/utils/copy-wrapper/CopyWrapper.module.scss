@@ -2,11 +2,13 @@
     &:hover,
     &:focus-within {
         .hidden-copy {
-            @apply opacity-100 pointer-events-auto;
+            opacity: 1;
+            pointer-events: auto;
         }
     }
 }
 
 .hidden-copy {
-    @apply opacity-0 pointer-events-none;
+    opacity: 0;
+    pointer-events: none;
 }

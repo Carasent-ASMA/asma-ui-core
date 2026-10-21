@@ -90,8 +90,8 @@ const HighlightingLabelsTable = (): JSX.Element => {
                     {HIGHLIGHTING_TABLE_COLUMNS.map((column, index) => (
                         <th
                             key={column}
-                            className={`border border-solid border-delta-200 p-4 pl-6 text-left font-semibold ${
-                                index === 0 ? 'text-2xl' : 'text-center text-base'
+                            className={`border border-solid border-delta-200 p-4 pl-6 font-semibold ${
+                                index === 0 ? 'text-left text-2xl' : 'text-center text-base'
                             }`}
                         >
                             {column}

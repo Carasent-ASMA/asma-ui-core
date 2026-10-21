@@ -31,7 +31,7 @@ export const StyledLoading: FC<StyledLoadingProps> = ({ isLoading, className = '
     return (
         <div
             className={clsx(
-                'flex h-[50px] w-full animate-opacity-appear-3 items-center justify-center text-gama-500',
+                'animate-opacity-appear-3 text-gama-500 flex h-[50px] w-full items-center justify-center',
                 className,
             )}
         >

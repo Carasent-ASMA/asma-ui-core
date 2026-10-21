@@ -159,7 +159,7 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
                     anchorEl={popupState.anchorEl}
                     registerBackClose={false}
                 >
-                    <div className='mx-auto w-full max-w-[360px] px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2'>
+                    <div className='mx-auto w-full max-w-[360px] px-4 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))]'>
                         <TimePickerPanel
                             dataTest={props.dataTest}
                             value={value}

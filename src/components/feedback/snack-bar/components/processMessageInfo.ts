@@ -7,7 +7,7 @@ export function processMessageInfo(messageInfo: string | ReactNode, options?: Me
     enqueueSnackbar({
         variant: 'info',
         message: messageInfo,
-        className: 'flex h-10 items-center gap-1 rounded-lg bg-gama-700 pl-2 pr-1 text-sm text-white !min-w-[100px] !max-w-[400px]',
+        className: 'flex h-10 items-center gap-1 rounded-lg bg-gama-700 pl-2 pr-1 text-sm text-white min-w-[100px]! max-w-[400px]!',
         anchorOrigin: {
             vertical: 'bottom',
             horizontal: 'center',

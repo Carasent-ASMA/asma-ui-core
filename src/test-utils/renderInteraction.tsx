@@ -149,8 +149,8 @@ export const focusStyleOf = (element: Element): FocusStyle => {
 
 /**
  * `null` when the element paints no perceivable focus indicator, otherwise the property that
- * changed. An `outline` is only counted when it is actually drawn (`outline-none` compiles to
- * `outline-style: solid; outline-width: 0` in places, which paints nothing).
+ * changed. An `outline` is only counted when it is actually drawn (`outline-hidden` compiles to
+ * `outline-style: none` in normal mode, which paints nothing).
  */
 export const describeFocusIndicator = (before: FocusStyle, after: FocusStyle): string | null => {
     const paintsOutline =

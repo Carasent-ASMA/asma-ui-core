@@ -116,7 +116,7 @@ export const StyledMenuItem = ({
             onKeyDown={handleKeyDown}
             className={cn(
                 // Figma Menus item (node 16073-21583): h40, py8, label Body Base 16px.
-                'box-border flex items-center px-4 text-base outline-none focus-visible:shadow-[inset_3px_0_var(--colors-focus-ring)]',
+                'box-border flex items-center px-4 text-base outline-hidden focus-visible:shadow-[inset_3px_0_var(--colors-focus-ring)]',
                 dense ? 'min-h-8 py-1' : 'min-h-10 py-2',
                 // ASMA-8210: the item had no pressed state at all, and at 40px (32px dense) both
                 // variants sit under the 44px touch height — safe for the touch-target override,
@@ -133,8 +133,8 @@ export const StyledMenuItem = ({
                 // fill on hover (the node's bg/hover-selected equals the resting selected colour),
                 // so the hover utility is simply absent there rather than out-ranked.
                 disabled
-                    ? 'cursor-not-allowed text-delta-300 aria-disabled:text-delta-300'
-                    : cn('cursor-pointer text-delta-700', !selected && 'hover:bg-delta-50'),
+                    ? 'text-delta-300 aria-disabled:text-delta-300 cursor-not-allowed'
+                    : cn('text-delta-700 cursor-pointer', !selected && 'hover:bg-delta-50'),
                 selected && cn('bg-gama-50', classes?.selected),
                 classes?.root,
                 className,

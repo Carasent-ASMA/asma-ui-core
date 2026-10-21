@@ -245,7 +245,7 @@ export const useIconsList = ({
         },
         {
             name: 'FindReplacePeopleIcon',
-            component: <FindReplacePeopleIcon className='h-[26px] w-[26px]' />,
+            component: <FindReplacePeopleIcon className='size-[26px]' />,
             clipboardText: '<FindReplacePeopleIcon />',
             tags: ['find replace people'],
         },

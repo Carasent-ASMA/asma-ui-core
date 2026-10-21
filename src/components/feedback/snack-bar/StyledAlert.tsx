@@ -123,7 +123,7 @@ export const StyledAlert = ({
     return (
         <div
             role={role}
-            className={cn('flex items-center gap-2 rounded text-sm', PADDING_CLASS[variant], VARIANT_CLASS[variant][severity], className)}
+            className={cn('flex items-center gap-2 rounded-sm text-sm', PADDING_CLASS[variant], VARIANT_CLASS[variant][severity], className)}
             style={resolveSx(sx)}
         >
             {shownIcon && <span className={cn('flex shrink-0 items-center', ICON_CLASS[variant][severity])}>{shownIcon}</span>}
@@ -134,7 +134,7 @@ export const StyledAlert = ({
                         type='button'
                         aria-label='Close'
                         onClick={onClose}
-                        className='flex h-8 min-w-8 shrink-0 items-center justify-center rounded border-0 bg-transparent px-1.5 hover:bg-black/10'
+                        className='flex h-8 min-w-8 shrink-0 items-center justify-center rounded-sm border-0 bg-transparent px-1.5 hover:bg-black/10'
                     >
                         <CloseIcon width={20} height={20} />
                     </button>

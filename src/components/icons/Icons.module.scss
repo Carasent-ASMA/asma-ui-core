@@ -1,7 +1,14 @@
 .all-icons-container {
-    @apply flex h-full w-full flex-wrap items-center gap-5 bg-gray-100 p-5;
+    display: flex;
+    height: 100%;
+    width: 100%;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.25rem;
+    background-color: #f3f4f6;
+    padding: 1.25rem;
 }
 
 .icon {
-    @apply /* animate-opacity-appear-3 */ cursor-pointer;
+    cursor: pointer;
 }

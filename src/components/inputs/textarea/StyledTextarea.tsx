@@ -186,9 +186,9 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
                 </span>
             )}
             {variant === 'view_only' ? (
-                <div className='pt-3 font-roboto text-base font-normal text-delta-700'>{value}</div>
+                <div className='font-roboto text-delta-700 pt-3 text-base font-normal'>{value}</div>
             ) : variant === 'not_editable' ? (
-                <div className='rounded bg-delta-50 p-3 font-roboto text-base font-normal text-delta-700'>{value}</div>
+                <div className='bg-delta-50 font-roboto text-delta-700 rounded-sm p-3 text-base font-normal'>{value}</div>
             ) : (
                 <textarea
                     {...otherProps}

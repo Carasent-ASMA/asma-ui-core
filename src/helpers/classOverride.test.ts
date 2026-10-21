@@ -16,7 +16,7 @@ describe('consumerOverrides — reliable overrides without tailwind-merge', () =
         })
         it('matches with surrounding classes and the ! important prefix', () => {
             expect(consumerOverrides('flex px-0 gap-2', 'padding')).toBe(true)
-            expect(consumerOverrides('w-fit !p-4', 'padding')).toBe(true)
+            expect(consumerOverrides('w-fit p-4!', 'padding')).toBe(true)
         })
         it('does not match margin or unrelated classes', () => {
             expect(consumerOverrides('mx-2 gap-1', 'padding')).toBe(false)

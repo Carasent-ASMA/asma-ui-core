@@ -75,12 +75,19 @@ const COLOR_STYLE: Record<string, CSSProperties> = {
 }
 
 // Rectangular anchor placement (MUI default). vertical-horizontal → position + translate + origin.
-const ANCHOR_CLASS: Record<string, string> = {
-    'top-right': 'top-0 right-0 translate-x-1/2 -translate-y-1/2 origin-[100%_0%]',
-    'top-left': 'top-0 left-0 -translate-x-1/2 -translate-y-1/2 origin-[0%_0%]',
-    'bottom-right': 'bottom-0 right-0 translate-x-1/2 translate-y-1/2 origin-[100%_100%]',
-    'bottom-left': 'bottom-0 left-0 -translate-x-1/2 translate-y-1/2 origin-[0%_100%]',
-}
+// Nested rather than `${vertical}-${horizontal}`: the eslint rule
+// `better-tailwindcss/no-concatenated-classes` rejects dynamic class construction, and v4's
+// scanner can only see literal class names.
+const ANCHOR_CLASS = {
+    top: {
+        right: 'top-0 right-0 translate-x-1/2 -translate-y-1/2 origin-[100%_0%]',
+        left: 'top-0 left-0 -translate-x-1/2 -translate-y-1/2 origin-[0%_0%]',
+    },
+    bottom: {
+        right: 'bottom-0 right-0 translate-x-1/2 translate-y-1/2 origin-[100%_100%]',
+        left: 'bottom-0 left-0 -translate-x-1/2 translate-y-1/2 origin-[0%_100%]',
+    },
+} as const
 
 const SX_BADGE_SLOT = '& .MuiBadge-badge'
 
@@ -199,16 +206,16 @@ export const StyledBadge = ({
                 <span
                     aria-hidden='true'
                     className={clsx(
-                        'box-border flex items-center justify-center whitespace-nowrap font-roboto font-semibold',
-                        !isStandalone && 'absolute z-[1]',
-                        !isStandalone && ANCHOR_CLASS[`${vertical}-${horizontal}`],
+                        'font-roboto box-border flex items-center justify-center font-semibold whitespace-nowrap',
+                        !isStandalone && 'absolute z-1',
+                        !isStandalone && ANCHOR_CLASS[vertical][horizontal],
                         isAccentDot
-                            ? 'h-[8px] w-[8px] min-w-[8px] rounded-full p-0'
+                            ? 'size-[8px] min-w-[8px] rounded-full p-0'
                             : isDot
-                              ? 'h-[12px] w-[12px] min-w-[12px] rounded-full p-0'
+                              ? 'size-[12px] min-w-[12px] rounded-full p-0'
                               : size === 'small'
                                 ? 'h-[16px] w-max min-w-[16px] rounded-[20px] px-[4px] text-[0.75rem]'
-                                : 'h-[20px] min-w-[20px] rounded-[20px] px-[6px] text-sm leading-5',
+                                : 'h-[20px] min-w-[20px] rounded-[20px] px-[6px] text-sm/5',
                         // One digit measures 8.05px, so padding alone leaves the pill 20.05px wide.
                         // Pinning it keeps Figma's exact 20px circle rather than a hair of an oval.
                         !isDot && size === 'medium' && isSingleDigitCount && 'w-[20px]',

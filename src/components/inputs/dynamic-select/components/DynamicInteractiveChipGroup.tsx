@@ -125,7 +125,7 @@ export const DynamicInteractiveChipGroup = forwardRef(
                 <div
                     aria-hidden
                     ref={containerRef}
-                    className='pointer-events-none absolute left-0 top-0 flex flex-wrap gap-2 opacity-0'
+                    className='pointer-events-none absolute top-0 left-0 flex flex-wrap gap-2 opacity-0'
                     style={{ width: '100%' }}
                 >
                     {visibleOptions.map((o) => {
@@ -184,8 +184,8 @@ export const DynamicInteractiveChipGroup = forwardRef(
                                                 classes={
                                                     wrapDisabled
                                                         ? {
-                                                              root: 'border-none outline-none bg-transparent w-full flex justify-start h-full min-h-[40px] shadow-none',
-                                                              label: 'block whitespace-normal break-words overflow-visible',
+                                                              root: 'border-none outline-hidden bg-transparent w-full flex justify-start h-full min-h-[40px] shadow-none',
+                                                              label: 'block whitespace-normal wrap-break-word overflow-visible',
                                                           }
                                                         : {
                                                               root: 'min-h-[32px] h-full',
@@ -231,7 +231,7 @@ export const DynamicInteractiveChipGroup = forwardRef(
                     id={helperId}
                     role={helperAlertRole}
                     className={cn(
-                        'flex min-h-[24px] items-center gap-1 pt-1 text-sm/5 text-delta-600',
+                        'text-delta-600 flex min-h-[24px] items-center gap-1 pt-1 text-sm/5',
                         error && 'text-error-500',
                     )}
                 >

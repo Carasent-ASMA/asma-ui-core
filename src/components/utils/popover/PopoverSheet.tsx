@@ -259,7 +259,7 @@ export const PopoverSheet = ({
     // action surface moves on to its first control in the next frame — the hook's own focus call is
     // an rAF scheduled by an earlier effect, so this one runs after it by queue order rather than by
     // luck. Opened with a pointer, it stays on the shell: no field is focused, and the shell's
-    // `outline-none` draws no ring, while the trap, Escape and focus return keep working.
+    // `outline-hidden` draws no ring, while the trap, Escape and focus return keep working.
     useEffect(() => {
         if (!panelNode) return
         if (isDialog && !openedWithKeyboard) return
@@ -410,10 +410,10 @@ export const PopoverSheet = ({
                             maxWidth,
                             maxHeight: maxHeightPx,
                         }}
-                        // `outline-none` (in the shared chrome) pairs with the shell's tabIndex={-1}:
+                        // `outline-hidden` (in the shared chrome) pairs with the shell's tabIndex={-1}:
                         // focusing the container on open must not paint a UA focus ring around the
                         // whole surface — same pairing as StyledDialog.
-                        className={cn('z-[1300]', POPOVER_SURFACE_CLASSNAME, className)}
+                        className={cn('z-1300', POPOVER_SURFACE_CLASSNAME, className)}
                     >
                         <OverlayBackOwnerContext.Provider value={panelRef}>
                         <PopoverAnatomy

@@ -342,11 +342,11 @@ export function SelectAutocompletePicker<T>({
                 className={cn(
                     // The 16 px side insets come from the `FullScreenPicker` body.
                     'm-0 list-none p-0 [&>li:not(:last-child)]:shadow-[inset_0_-1px_0_var(--colors-delta-200)]',
-                    activeIndexes.length > 0 && 'outline-none',
+                    activeIndexes.length > 0 && 'outline-hidden',
                     // Figma picker rows (set on the list, so custom `renderOption` rows follow too; the
                     // *No matches* / loading row keeps its own look): label `text-icon/body` (delta-700),
                     // 16 px after the label (row `pr-8` + label `pr-8`).
-                    '[&>li[role=option]]:pr-4 [&>li[role=option]]:text-delta-700',
+                    '[&>li[role=option]]:text-delta-700 [&>li[role=option]]:pr-4',
                     // Several choices: a ticked row stays white, the checkbox carries the state.
                     // One choice: `pl-8 gap-4` around the 20 px check; selected row on `bg/selected`
                     // (#f3fafa = gama-25), also while hovered.
@@ -372,7 +372,7 @@ export function SelectAutocompletePicker<T>({
                         {activeIndex === -1 && (
                             <span
                                 aria-hidden='true'
-                                className='border-l-solid pointer-events-none absolute inset-y-0 left-0 border-l-[3px] border-focus-ring'
+                                className='border-l-solid border-focus-ring pointer-events-none absolute inset-y-0 left-0 border-l-[3px]'
                             />
                         )}
                         <StyledCheckbox
@@ -384,13 +384,13 @@ export function SelectAutocompletePicker<T>({
                             hideWrapper
                             decorative
                         />
-                        <span className='min-w-0 flex-1 break-words'>{selectAllLabel}</span>
+                        <span className='min-w-0 flex-1 wrap-break-word'>{selectAllLabel}</span>
                     </li>
                 )}
                 {listContent}
             </ul>
             {!loading && filtered.length > PICKER_ROW_LIMIT && (
-                <p className='m-0 px-3 py-2 text-sm text-delta-600' data-testid={`${dataTest}-picker-truncated`}>
+                <p className='text-delta-600 m-0 px-3 py-2 text-sm' data-testid={`${dataTest}-picker-truncated`}>
                     {text.truncated(PICKER_ROW_LIMIT, filtered.length)}
                 </p>
             )}
@@ -422,7 +422,7 @@ interface SelectionRowProps {
 const SelectionRow = ({ dataTest, count, clearAllLabel, clearAllShown, doneLabel, onClearAll, onDone }: SelectionRowProps): JSX.Element => (
     <div className='flex items-center justify-between gap-6 px-4 py-2' data-testid={`${dataTest}-picker-selection-row`}>
         <div className='flex min-w-0 flex-wrap items-center gap-x-1'>
-            <span className='text-base text-delta-600' data-testid={`${dataTest}-picker-count`}>
+            <span className='text-delta-600 text-base' data-testid={`${dataTest}-picker-count`}>
                 {count}
             </span>
             {clearAllLabel !== undefined && (

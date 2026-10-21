@@ -46,7 +46,7 @@ export const Avatar = ({
     return (
         <div
             className={clsx(
-                'relative flex shrink-0 items-center justify-center overflow-hidden font-roboto',
+                'font-roboto relative flex shrink-0 items-center justify-center overflow-hidden',
                 VARIANT_CLASS[variant] ?? VARIANT_CLASS['circular'],
                 className,
             )}
@@ -55,7 +55,7 @@ export const Avatar = ({
         >
             {src || srcSet ? (
                 <img
-                    className='h-full w-full object-cover text-transparent'
+                    className='size-full object-cover text-transparent'
                     src={src}
                     srcSet={srcSet}
                     alt={alt}

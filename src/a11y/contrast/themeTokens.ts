@@ -91,13 +91,14 @@ const parseBlocks = (css: string): StyleBlock[] => {
 
 const readImportedStyleSheets = (): string[] => {
     const entryPointCss = stripComments(readFileSync(STYLES_ENTRY_POINT, 'utf8'))
-    const importPattern = /@import\s+['"](?<path>[^'"]+)['"]\s*;/g
+    const importPattern = /@import\s+['"](?<path>[^'"]+)['"][^;]*;/g
     const contents: string[] = []
 
     for (const match of entryPointCss.matchAll(importPattern)) {
         const importPath = match.groups?.['path']
 
-        if (!importPath?.endsWith('.css')) {
+        // Only our own token sheets; package imports (`tailwindcss/theme.css`) hold no theme tokens.
+        if (!importPath?.startsWith('.') || !importPath.endsWith('.css')) {
             continue
         }
 

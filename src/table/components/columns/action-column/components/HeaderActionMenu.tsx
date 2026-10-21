@@ -198,7 +198,7 @@ export function HeaderActionMenu<TData>({
                                                         className='pointer-events-none'
                                                     />
                                                 </span>
-                                                <span className='font-roboto text-base text-delta-700'>
+                                                <span className='font-roboto text-delta-700 text-base'>
                                                     {column.columnDef.pinnedHeaderText ??
                                                         (typeof column.columnDef.header === 'string'
                                                             ? column.columnDef.header

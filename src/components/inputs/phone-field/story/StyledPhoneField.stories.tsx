@@ -29,13 +29,12 @@ const renderFlag = (iso2: string): JSX.Element => (
         data-country={iso2.toLowerCase()}
         width={24}
         height={16}
-        className='h-4 w-6 shrink-0 rounded-sm'
+        className='h-4 w-6 shrink-0 rounded-xs'
     />
 )
 
 /** Stands in for `formatNationalAsYouType` so the story stays free of phone metadata. */
-const groupInPairs = (nationalNumber: string): string =>
-    (nationalNumber.match(/\d{1,2}/g) ?? []).join(' ')
+const groupInPairs = (nationalNumber: string): string => (nationalNumber.match(/\d{1,2}/g) ?? []).join(' ')
 
 const meta: Meta<typeof StyledPhoneField> = {
     title: 'Inputs/Phone Field',
@@ -243,7 +242,7 @@ export const OnTintedPanelWithFlag: Story = {
 
         await expect(flag).not.toBeNull()
         // Painted above the outline overlay, not behind it.
-        await expect(shell.querySelector('.z-\\[1\\]')).toContainElement(flag as HTMLElement)
+        await expect(shell.querySelector('.z-1')).toContainElement(flag as HTMLElement)
     },
 }
 

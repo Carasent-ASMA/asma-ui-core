@@ -1,10 +1,11 @@
 import { readFileSync, readdirSync } from 'node:fs'
 import { relative, resolve } from 'node:path'
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 /// <reference types="vitest/config" />
 import { defineConfig } from 'vitest/config'
 import dts from 'vite-plugin-dts'
-import * as packageJson from './package.json'
+import packageJson from './package.json'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin'
@@ -74,13 +75,110 @@ const emitIconCompatibilityAssets = () => ({
     },
 })
 
-const currentDirectory = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url))
+/** Minimal structural subset of PostCSS's `Root`/`Rule`/`Declaration`, so this file needs no `postcss` dependency. */
+interface PostcssDeclaration {
+    prop: string
+    value: string
+    remove: () => void
+    clone: (overrides?: { prop?: string; value?: string }) => PostcssDeclaration
+}
+
+interface PostcssRule {
+    selector: string
+    walkDecls: (callback: (declaration: PostcssDeclaration) => void) => void
+    append: (declaration: PostcssDeclaration) => unknown
+}
+
+interface PostcssRoot {
+    walkDecls: (callback: (declaration: PostcssDeclaration) => void) => void
+    walkRules: (callback: (rule: PostcssRule) => void) => void
+}
+
+/**
+ * v3 ran with `corePlugins.preflight: false`, so a width utility (`border`, `border-b`, `border-t`,
+ * `border-x`, …) emitted only `border-*-width` and drew nothing — `border-style` kept its initial
+ * `none`. Tailwind v4 also emits `border-style: var(--tw-border-style)` (default `solid`) from the
+ * same utilities, which paints 1px hairlines and adds 1px to every auto-sized box. That is a
+ * production change, not a Storybook one: Ad Voca has a global `*{border:0 solid}` reset, the shell
+ * (`shell/asma-app-shell/src/styles/index.scss`) has none, and the committed VRT baselines were
+ * captured against v3. Dropping only the generated `var(--tw-border-style)` declarations restores
+ * v3 rendering everywhere while keeping every explicit style intact (`border-solid`,
+ * `border-dashed`, `border-none`, and our custom `border-*-solid` utilities all emit a literal).
+ *
+ * Remove this shim once the team adopts v4 border behaviour and re-baselines.
+ */
+const GENERATED_BORDER_STYLE_PROPERTY = /^border(-(top|right|bottom|left|inline|block)(-(start|end))?)?-style$/
+
+const stripGeneratedBorderStyles = {
+    postcssPlugin: 'asma-strip-generated-border-style',
+    Once(root: PostcssRoot) {
+        root.walkDecls((declaration) => {
+            if (!GENERATED_BORDER_STYLE_PROPERTY.test(declaration.prop)) return
+            // PostCSS keeps `!important` on the declaration, not in `value`, so this covers both.
+            if (declaration.value.trim() !== 'var(--tw-border-style)') return
+            declaration.remove()
+        })
+    },
+}
+
+/**
+ * `space-y-*` / `space-x-*` are the second place where v4 assumes preflight reset every margin.
+ * v3 spaced the *following* siblings (`> :not([hidden]) ~ :not([hidden])`) with `margin-top` /
+ * `margin-left`; v4 spaces every child except the last with `margin-block-end` **and** pins
+ * `margin-block-start: 0`, so the user-agent margins of `<p>`/`<ul>`/`<li>` — still present because
+ * preflight is off — stop collapsing as they did. A `space-y-2` card holding a `<p>` and a `<ul>`
+ * grows by 64px (DataDisplay/AIDisclosure "Documentation"). Rewriting the generated rule back to
+ * v3's selector and margin sides restores the baselines; for children without margins the two
+ * forms are already equivalent, so nothing else moves.
+ *
+ * Remove this shim together with the border-style one.
+ */
+const restoreV3SpaceBetween = {
+    postcssPlugin: 'asma-restore-v3-space-between',
+    Once(root: PostcssRoot) {
+        root.walkRules((rule) => {
+            const axis = /\.-?space-([xy])-/.exec(rule.selector)?.[1]
+            if (axis !== 'y' && axis !== 'x') return
+            if (!rule.selector.includes(':not(:last-child)')) return
+
+            const [blockStart, blockEnd, start, end] =
+                axis === 'y'
+                    ? ['margin-block-start', 'margin-block-end', 'margin-top', 'margin-bottom']
+                    : ['margin-inline-start', 'margin-inline-end', 'margin-left', 'margin-right']
+
+            let startOffset: PostcssDeclaration | undefined
+            let endOffset: PostcssDeclaration | undefined
+            rule.walkDecls((declaration) => {
+                if (declaration.prop === blockStart) startOffset = declaration
+                if (declaration.prop === blockEnd) endOffset = declaration
+            })
+            if (!startOffset || !endOffset) return
+
+            // v3: margin-top = spacing * (1 - reverse) (v4's block-end), margin-bottom = spacing * reverse
+            rule.append(endOffset.clone({ prop: start }))
+            rule.append(startOffset.clone({ prop: end }))
+            startOffset.remove()
+            endOffset.remove()
+            rule.selector = rule.selector.replace(':not(:last-child)', ':not([hidden]) ~ :not([hidden])')
+            // v4 wraps the rule in `:where()`, which zeroes its specificity so a margin utility such
+            // as `m-0` wins. v3's selector took precedence over those utilities; drop the wrapper so
+            // the cascade order matches master (e.g. StyledFormControlLabel's `m-0` inside a
+            // `space-y-2` panel).
+            const unwrapped = /^:where\((.*)\)$/.exec(rule.selector)
+            if (unwrapped?.[1]) rule.selector = unwrapped[1]
+        })
+    },
+}
+
+const currentDirectory =
+    typeof import.meta.dirname !== 'undefined' ? import.meta.dirname : path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
     plugins: [
         react({
             jsxRuntime: 'automatic',
         }),
+        tailwindcss(),
         dts({
             insertTypesEntry: true,
             //rollupTypes: true,
@@ -110,6 +208,11 @@ export default defineConfig({
         alias: {
             src: path.resolve(currentDirectory, 'src'),
             'asma-ui-core': path.resolve(currentDirectory, 'src', 'index.ts'),
+        },
+    },
+    css: {
+        postcss: {
+            plugins: [stripGeneratedBorderStyles, restoreV3SpaceBetween],
         },
     },
     build: {

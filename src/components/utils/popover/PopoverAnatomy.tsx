@@ -26,7 +26,7 @@ const CLOSE_COLUMN_WIDTH = 40
  * caller, so the Gallery story can render the same surface statically in a grid.
  */
 export const POPOVER_SURFACE_CLASSNAME =
-    'box-border flex flex-col overflow-hidden rounded-lg bg-white text-delta-700 outline-none shadow-[inset_0_0_0_1px_var(--colors-delta-300),0px_4px_40px_0px_#22213366]'
+    'box-border flex flex-col overflow-hidden rounded-lg bg-white text-delta-700 outline-hidden shadow-[inset_0_0_0_1px_var(--colors-delta-300),0px_4px_40px_0px_#22213366]'
 
 export interface PopoverAnatomyProps {
     dataTest: string
@@ -92,7 +92,7 @@ export const PopoverAnatomy = ({
                 {title && (
                     <div
                         id={titleId}
-                        className='shrink-0 truncate pb-1 pl-4 pr-10 pt-2 text-lg font-semibold leading-7 text-delta-800'
+                        className='text-delta-800 shrink-0 truncate pt-2 pr-10 pb-1 pl-4 text-lg/7 font-semibold'
                     >
                         {title}
                     </div>
@@ -100,14 +100,14 @@ export const PopoverAnatomy = ({
                 <div
                     ref={bodyRef}
                     className={cn(
-                        'flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto py-2 pl-4 [scrollbar-gutter:stable]',
+                        'flex min-h-0 flex-1 scrollbar-gutter-stable flex-col gap-4 overflow-y-auto py-2 pl-4',
                         !title && gutter.overflows && 'mt-10',
                     )}
                     style={{ paddingRight: Math.max(0, CLOSE_COLUMN_WIDTH - gutter.width) }}
                 >
                     {children}
                 </div>
-                <div className='absolute right-0 top-0'>
+                <div className='absolute top-0 right-0'>
                     <StyledButton
                         dataTest={`${dataTest}-close`}
                         variant='textGray'

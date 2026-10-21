@@ -32,6 +32,20 @@ const SEVERITY_ICONS: Record<AlertColor, JSX.Element> = {
     warning: <WarningAmberOutlineIcon height={24} width={24} />,
 }
 
+const TITLE_SEVERITY_CLASSES = {
+    success: styles['title_success'],
+    info: styles['title_info'],
+    warning: styles['title_warning'],
+    error: styles['title_error'],
+} as const
+
+const MESSAGE_SEVERITY_CLASSES = {
+    success: styles['message_success'],
+    info: styles['message_info'],
+    warning: styles['message_warning'],
+    error: styles['message_error'],
+} as const
+
 export const StyledDefaultSnackbar = forwardRef<HTMLDivElement, StyledDefaultSnackbarProps>((props, ref) => {
     const { id, message, severity, action, title, ...rest } = omit(props, [
         'anchorOrigin',
@@ -47,7 +61,7 @@ export const StyledDefaultSnackbar = forwardRef<HTMLDivElement, StyledDefaultSna
         <SnackbarContent ref={ref} role='alert' {...rest}>
             <div className={clsx(styles['container'], styles[severity])}>
                 <div className={styles['header']}>
-                    <div className={clsx(styles['title'], styles[`title_${severity}`])}>
+                    <div className={clsx(styles['title'], TITLE_SEVERITY_CLASSES[severity])}>
                         {SEVERITY_ICONS[severity]}
                         <span>{title ?? severity}</span>
                     </div>
@@ -55,14 +69,14 @@ export const StyledDefaultSnackbar = forwardRef<HTMLDivElement, StyledDefaultSna
                     <button
                         type='button'
                         aria-label='close'
-                        className='flex items-center justify-center rounded border-0 bg-transparent p-[2px] hover:bg-black/10'
+                        className='flex items-center justify-center rounded-sm border-0 bg-transparent p-[2px] hover:bg-black/10'
                         onClick={() => closeSnackbar(id)}
                     >
                         <CloseIcon width={20} height={20} color='#49525F' />
                     </button>
                 </div>
 
-                <div className={clsx(styles['message'], styles[`message_${severity}`])}>{message}</div>
+                <div className={clsx(styles['message'], MESSAGE_SEVERITY_CLASSES[severity])}>{message}</div>
 
                 {action ? <div>{typeof action === 'function' ? action(id) : action}</div> : null}
             </div>

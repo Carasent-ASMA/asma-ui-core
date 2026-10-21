@@ -27,7 +27,7 @@ export const StyledFormHelperText = ({
     return (
         <p
             className={cn(
-                'm-0 min-h-6 text-sm leading-6',
+                'm-0 min-h-6 text-sm/6',
                 isError ? 'text-error-500' : isDisabled ? 'text-gray-300' : 'text-delta-600',
                 className,
             )}

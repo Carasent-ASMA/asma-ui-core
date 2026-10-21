@@ -438,7 +438,7 @@ export const StyledSelect = ({
                     onBlur?.(event)
                 }}
                 className={cn(
-                    'relative flex w-full items-center justify-between text-left outline-none',
+                    'relative flex w-full items-center justify-between text-left outline-hidden',
                     // Figma field text = Body Base 16/lh24 (`text-base`), h40 (matches StyledInputField/field-styles).
                     // `standard` shares the outlined geometry (h40, px-3, radius) — only its border is
                     // deferred to focus, via `borderless` on the outline overlay below.
@@ -467,7 +467,7 @@ export const StyledSelect = ({
                         <span
                             aria-hidden='true'
                             data-testid='select-clear-button'
-                            className='invisible flex items-center justify-center rounded-full p-[2px] group-focus-within:visible hover:bg-gama-100'
+                            className='hover:bg-gama-100 invisible flex items-center justify-center rounded-full p-[2px] group-focus-within:visible'
                             onClick={(event) => {
                                 event.stopPropagation()
                                 handleClear()
@@ -523,7 +523,7 @@ export const StyledSelect = ({
                             // Figma Menus (node 34522-151497): the list is padded `8px 0` (was 4px)
                             // and separates its rows from the container — see the equivalent rule on
                             // StyledSelectAutocomplete's listbox for why it does not live on the row.
-                            'z-[1300] m-0 max-h-72 list-none overflow-auto rounded border border-solid border-delta-300 bg-white px-0 py-2 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
+                            'border-delta-300 z-1300 m-0 max-h-72 list-none overflow-auto rounded-sm border border-solid bg-white px-0 py-2 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
                             // Inset shadow, not a border, so the separator keeps rows at exactly 40px.
                             '[&>li:not(:last-child)]:shadow-[inset_0_-1px_0_var(--colors-delta-200)]',
                             MenuProps?.className,

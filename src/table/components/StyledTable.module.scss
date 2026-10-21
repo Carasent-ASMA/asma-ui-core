@@ -21,9 +21,11 @@
         --table-hscroll-h: 12px;
     }
 
-    @apply w-full text-base;
     display: flex;
     flex-direction: column;
+    width: 100%;
+    font-size: 1rem;
+    line-height: 1.5rem;
 
     .table-wrapper {
         height: 100%;
