@@ -126,15 +126,15 @@ const PickerSheet = ({ dataTest, title, closeLabel, search, headerRow, children,
         <div className='flex min-h-0 flex-col' style={{ height: visibleHeight }}>
             <div
                 data-testid={`${dataTest}-header`}
-                className='flex shrink-0 flex-col border-0 border-b border-solid border-delta-200 bg-white'
+                className='border-delta-200 flex shrink-0 flex-col border-0 border-b border-solid bg-white'
             >
                 <div className='flex items-start gap-2'>
                     {title !== undefined && (
-                        <h2 className='m-0 min-w-0 flex-1 break-words pl-4 pt-2 text-[20px] font-semibold leading-7 text-delta-800'>
+                        <h2 className='text-delta-800 m-0 min-w-0 flex-1 pt-2 pl-4 text-[20px]/7 font-semibold wrap-break-word'>
                             {title}
                         </h2>
                     )}
-                    {isShort && <div className='min-w-0 max-w-[240px] flex-1 pt-2'>{search}</div>}
+                    {isShort && <div className='max-w-[240px] min-w-0 flex-1 pt-2'>{search}</div>}
                     {/* Figma Close: 40 × 40 with a 24 px × in `text-icon/body` (the Quaternary colour).
                         A fixed width, not `px-2`: the button's 1 px border would make it 42 wide. */}
                     <StyledButton
@@ -143,7 +143,7 @@ const PickerSheet = ({ dataTest, title, closeLabel, search, headerRow, children,
                         aria-label={closeLabel}
                         variant='textGray'
                         startIcon={<CloseIcon width={24} height={24} />}
-                        className='ml-auto h-10 w-10 min-w-10 shrink-0 px-0'
+                        className='ml-auto size-10 min-w-10 shrink-0 px-0'
                         onClick={() => onClose('closeButton')}
                     />
                 </div>

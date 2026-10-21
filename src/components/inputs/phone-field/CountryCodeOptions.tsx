@@ -68,7 +68,7 @@ export const CountryCodeOptions = ({
             onFocus={onFocus}
             className={cn(
                 'm-0 min-h-0 flex-1 list-none overflow-y-auto p-0',
-                isKeyboardTarget && visible.length > 0 && 'outline-none',
+                isKeyboardTarget && visible.length > 0 && 'outline-hidden',
                 // Figma Menus separator (border/separator, delta-200) between rows, as in StyledSelect:
                 // an inset shadow, not a border, so every row stays exactly 40px, and set on the list so
                 // the last row never gets one (no row-level `last:` rule that another bundle can drop).
