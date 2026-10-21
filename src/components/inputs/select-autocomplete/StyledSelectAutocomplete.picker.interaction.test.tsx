@@ -267,6 +267,21 @@ describe('StyledSelectAutocomplete — full-screen picker (ASMA-8468)', () => {
             await expect(document.activeElement).toBe(list)
         })
 
+        it('moves no focus when reopened by a tap after a choice, though the field kept focus', async () => {
+            await page.viewport(390, 844)
+            mount(<Fixture />)
+            await openPicker()
+            await userEvent.click(row('Bravo'))
+            await waitFor(() => expect(picker()).toBeNull())
+            await waitFor(() => expect(document.activeElement).toBe(field()))
+            await userEvent.click(field())
+            await waitFor(() => expect(picker()).not.toBeNull())
+            await nextFrames()
+            await nextFrames()
+            await expect(document.activeElement).toBe(picker())
+            await expect(rows().filter((node) => node.hasAttribute('data-active'))).toHaveLength(0)
+        })
+
         it('moves no focus when opened by a tap: no ring on the ×, no marker in the list', async () => {
             await page.viewport(390, 844)
             mount(<Fixture multiple />)
