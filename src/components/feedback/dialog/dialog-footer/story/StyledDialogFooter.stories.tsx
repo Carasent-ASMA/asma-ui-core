@@ -109,8 +109,8 @@ export const Gallery: Story = {
                     },
                 },
                 {
-                    /* A short label still fits at 360px; the icon-only step is in Reflow. */
-                    caption: 'Mobile 360 — one action, short label still fits',
+                    /* Figma Mobile: the lone left action is icon-only even though its label would fit (ASMA-8259). */
+                    caption: 'Mobile 360 — one action, icon only',
                     width: 360,
                     props: {
                         leftActions: [deleteAction],
