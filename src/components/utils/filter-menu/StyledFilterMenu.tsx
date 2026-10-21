@@ -5,6 +5,7 @@ import { FilterIcon } from '../../icons'
 import { StyledPopover, type StyledPopoverProps } from '../popover'
 import { useDynamicToolbarLayout } from '../../custom/module/header-layout/DynamicToolbarLayoutContext'
 import clsx from 'clsx'
+import { filterButtonText } from './filterButtonText'
 
 /**
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#16741-35884 (Design-System · "Filter button")
@@ -15,13 +16,15 @@ import clsx from 'clsx'
  *
  * Custom props:
  * @param filterIsActive - needed to determine whether or not to show the dot in the top right corner indicating some changes were made
+ * @param activeCount - how many filter values differ from the page default; shown as `Filter (N)` and implies the dot when `filterIsActive` is omitted
  * @param popoverContent
  * @param hideLabel - icon-only mode. When omitted, follows the surrounding DynamicToolbar layout (filterIconOnly).
  */
 
 interface StyledFilterMenuProps {
     dataTest: string
-    filterIsActive: boolean
+    filterIsActive?: boolean
+    activeCount?: number
     popoverContent: ((props: { isOpen: boolean; onClose: () => void }) => ReactNode) | ReactNode
     disabled?: boolean
     size?: 'small' | 'large' | 'medium'
@@ -70,6 +73,7 @@ const isReactNode = (element: unknown): element is ReactNode => {
 
 export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
     filterIsActive,
+    activeCount,
     popoverContent,
     dataTest,
     disabled,
@@ -83,6 +87,8 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
     const { onAnchorClick, onClose, anchorEl } = useAnchor()
     const { filterIconOnly } = useDynamicToolbarLayout()
     const isLabelHidden = hideLabel ?? filterIconOnly
+    const text = filterButtonText(label, activeCount)
+    const isDotShown = filterIsActive ?? !!activeCount
     const customAnchor = anchorNode?.({ isOpen: !!anchorEl, onClose })
     const popoverId = React.useId()
 
@@ -103,15 +109,15 @@ export const StyledFilterMenu: React.FC<StyledFilterMenuProps> = ({
                         onClick={onAnchorClick}
                         size={size}
                         dataTest={dataTest}
-                        aria-label={isLabelHidden ? (label ?? 'Filter') : undefined}
+                        aria-label={isLabelHidden ? text : undefined}
                         aria-haspopup='true'
                         aria-expanded={!!anchorEl}
                         aria-controls={anchorEl ? popoverId : undefined}
                     >
-                        {!isLabelHidden && (label ?? 'Filter')}
+                        {!isLabelHidden && text}
                     </StyledButton>
                 )}
-                {filterIsActive && (
+                {isDotShown && (
                     <StyledBadge
                         dataTest={`${dataTest}-active-dot`}
                         variant='dot'
