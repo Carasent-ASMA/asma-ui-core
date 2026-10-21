@@ -159,6 +159,24 @@ export const Gallery: Story = {
     },
 }
 
+export const Error: Story = {
+    args: { error: true, errorText: 'Error text' },
+    render: (args) => <Controlled {...args} />,
+}
+
+/** ASMA-8561: error + focused = 1px error-500 border + 2px inset error-500 edge (3px, layout-neutral). */
+export const ErrorFocused: Story = {
+    args: { error: true, errorText: 'Error text' },
+    render: (args) => <Controlled {...args} />,
+    play: async ({ canvasElement }) => {
+        const trigger = within(canvasElement).getByRole('combobox')
+        trigger.focus()
+
+        await expect(trigger).toHaveFocus()
+        await expect(trigger).toHaveAttribute('aria-invalid', 'true')
+    },
+}
+
 export const SelectOption: Story = {
     render: (args) => <Controlled {...args} />,
     play: async ({ canvasElement, userEvent }) => {

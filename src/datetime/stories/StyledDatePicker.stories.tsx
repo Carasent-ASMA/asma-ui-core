@@ -64,3 +64,36 @@ export const KeyboardEntry: StoryObj<typeof StyledDatePicker> = {
         await expect(input).toHaveValue('15/06/2024')
     },
 }
+
+const ErrorExample = (): JSX.Element => {
+    const [date, setDate] = useState<Date>()
+    return (
+        <StyledDatePicker
+            dataTest='error-date'
+            mode='single'
+            selected={date}
+            onSelect={setDate}
+            onInputChange={setDate}
+            label='Date'
+            dateFormat='dd.MM.yyyy'
+            error
+            errorText='Required'
+        />
+    )
+}
+
+export const Error: StoryObj<typeof StyledDatePicker> = {
+    render: () => <ErrorExample />,
+}
+
+/** ASMA-8561: error + focused = 1px error-500 border + 2px inset error-500 edge (3px, layout-neutral). */
+export const ErrorFocused: StoryObj<typeof StyledDatePicker> = {
+    render: () => <ErrorExample />,
+    play: async ({ canvas }) => {
+        const input = canvas.getByTestId('error-date')
+        input.focus()
+
+        await expect(input).toHaveFocus()
+        await expect(input).toHaveAttribute('aria-invalid', 'true')
+    },
+}

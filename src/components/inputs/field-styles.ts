@@ -93,7 +93,13 @@ interface FieldState {
     borderless?: boolean
 }
 
-/** The border overlay (an absolutely-positioned sibling so width changes never reflow the input). */
+/** Error + focused: the 1px error border plus a 2px inset edge = 3px, layout-neutral like the focus ring. ASMA-8561 */
+const ERROR_FOCUS_SHADOW = 'shadow-[inset_0_0_0_2px_var(--colors-error-500)]'
+
+/**
+ * The border overlay (an absolutely-positioned sibling so width changes never reflow the input).
+ * States: resting 1px delta-500 · focused 3px focus-ring · error 1px error-500 · error + focused 3px error-500.
+ */
 export const outlineClass = ({ focused, error, disabled, readOnly, borderless }: FieldState): string =>
     cn(
         'pointer-events-none absolute inset-0 rounded border border-solid transition-colors',
@@ -104,13 +110,13 @@ export const outlineClass = ({ focused, error, disabled, readOnly, borderless }:
               : readOnly
                 ? 'border-delta-200'
                 : error
-                  ? 'border-error-500'
+                  ? cn('border-error-500', focused && ERROR_FOCUS_SHADOW)
                   : focused
                     ? 'border-focus-ring shadow-[inset_0_0_0_2px_var(--colors-focus-ring)]'
                     : 'border-delta-500 group-hover:border-2 group-hover:border-gama-300', // Figma border/hover #60bdbd
     )
 
-/** MUI-compatible fieldset outline used by text fields with floating labels. */
+/** MUI-compatible fieldset outline used by text fields with floating labels. Same states as `outlineClass`. */
 export const notchedOutlineClass = ({
     focused,
     error,
@@ -127,7 +133,7 @@ export const notchedOutlineClass = ({
             : readOnly
               ? 'border-delta-200'
             : error
-              ? 'border-error-500'
+              ? cn('border-error-500', focused && ERROR_FOCUS_SHADOW)
               : focused
                 ? 'border-focus-ring shadow-[inset_0_0_0_2px_var(--colors-focus-ring)]'
                 : 'border-delta-500 group-hover:border-2 group-hover:border-gama-300', // Figma border/hover #60bdbd

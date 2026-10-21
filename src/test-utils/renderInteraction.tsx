@@ -164,6 +164,19 @@ export const describeFocusIndicator = (before: FocusStyle, after: FocusStyle): s
     return null
 }
 
+/**
+ * A colour token (e.g. `--colors-error-500`) as the computed `rgb(…)` string, for comparing computed styles.
+ * Call it outside `waitFor`: the probe element it mounts would re-trigger waitFor's MutationObserver.
+ */
+export const resolveTokenColor = (token: string): string => {
+    const probe = document.createElement('span')
+    probe.style.color = `var(${token})`
+    document.body.append(probe)
+    const color = getComputedStyle(probe).color
+    probe.remove()
+    return color
+}
+
 /** Every element in `root` that a Tab press can land on, in document order. */
 export const tabbableWithin = (root: ParentNode): HTMLElement[] =>
     Array.from(
