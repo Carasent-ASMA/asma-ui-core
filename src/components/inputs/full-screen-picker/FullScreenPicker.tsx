@@ -2,7 +2,7 @@ import { useEffect, useRef, type ReactNode } from 'react'
 import { StyledDialog, type DialogCloseReason } from 'src/components/feedback/dialog/StyledDialog'
 import { CloseIcon } from 'src/components/icons'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
-import { useShortViewportMediaQuery } from 'src/hooks/useMediaQuery.hook'
+import { usePickerOneRowHeaderMediaQuery } from 'src/hooks/useMediaQuery.hook'
 import { isKeyboardModality, trackInputModality } from './inputModality'
 import { PickerLiveRegion, type PickerAnnouncement } from './PickerLiveRegion'
 import { useVisualViewportHeight } from './useVisualViewportHeight'
@@ -36,7 +36,8 @@ export interface FullScreenPickerProps {
  * search, optional selection/clear row; 1 px `border/separator` delta-200 under it) and one scrolling
  * **List**. Title = Mobile/Page title, SemiBold 20/28, `text-icon/title-label` delta-800, wraps.
  * Close = 40 × 40 Quaternary button with a 24 px ×. Search row = `pt-8 px-16`. On a short viewport
- * (`Variant2`, ≤ 480 px high) title, search (max 240 px) and close share the first row.
+ * (`Variant2`, ≤ 480 px high and ≥ 480 px wide — a phone in landscape, not an upright phone whose
+ * keyboard is up) title, search (max 240 px) and close share the first row.
  *
  * The shared shell for every full-screen picker in ui-core: `StyledSelectAutocomplete` and
  * `CountryCodeSelect` both render through it (ASMA-8468). Presentation only — the caller owns the
@@ -100,7 +101,7 @@ export const FullScreenPicker = ({
 type PickerSheetProps = Omit<FullScreenPickerProps, 'open' | 'fallbackName'>
 
 const PickerSheet = ({ dataTest, title, closeLabel, search, headerRow, children, announcement, onClose }: PickerSheetProps): JSX.Element => {
-    const isShort = useShortViewportMediaQuery()
+    const isShort = usePickerOneRowHeaderMediaQuery()
     const visibleHeight = useVisualViewportHeight()
     const closeRef = useRef<HTMLButtonElement>(null)
     const bodyRef = useRef<HTMLDivElement>(null)

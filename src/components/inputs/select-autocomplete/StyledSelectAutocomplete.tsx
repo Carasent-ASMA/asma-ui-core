@@ -69,7 +69,12 @@ export interface AutocompleteRenderInputParams {
     onKeyDown: (event: KeyboardEvent<HTMLInputElement>) => void
     slotProps: {
         htmlInput: Record<string, unknown> & { ref?: React.Ref<HTMLInputElement> }
-        input: { ref: React.Ref<HTMLDivElement>; startAdornment?: ReactNode; endAdornment?: ReactNode }
+        input: {
+            ref: React.Ref<HTMLDivElement>
+            startAdornment?: ReactNode
+            endAdornment?: ReactNode
+            onClick?: (event: React.MouseEvent<HTMLElement>) => void
+        }
     }
 }
 
@@ -560,6 +565,17 @@ export function StyledSelectAutocomplete<
         </span>
     )
 
+    // The whole field box opens the list (the picker on a phone), not only the text line under the
+    // chips — except its own controls: the chips, their ×, and the clear and popup buttons.
+    const openFromFieldBox = (event: React.MouseEvent<HTMLElement>): void => {
+        if (disabled || readOnly || !(event.target instanceof Element)) return
+        // Only controls inside the box count: the field itself may sit in a clickable card or a link.
+        const control = event.target.closest('button, a, [role="button"], [data-chip]')
+        if (control && event.currentTarget.contains(control)) return
+        inputRef.current?.focus()
+        setOpen(true)
+    }
+
     const renderInputParams: AutocompleteRenderInputParams = {
         disabled,
         size,
@@ -592,7 +608,7 @@ export function StyledSelectAutocomplete<
                 // dialog, which screen readers announce instead of "list".
                 ...(isPicker ? { inputMode: 'none', 'aria-haspopup': 'dialog' } : {}),
             },
-            input: { ref: referenceRef, startAdornment: tags, endAdornment },
+            input: { ref: referenceRef, startAdornment: tags, endAdornment, onClick: openFromFieldBox },
         },
     }
 
