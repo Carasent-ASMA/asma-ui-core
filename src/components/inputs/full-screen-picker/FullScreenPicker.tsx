@@ -3,6 +3,7 @@ import { StyledDialog, type DialogCloseReason } from 'src/components/feedback/di
 import { CloseIcon } from 'src/components/icons'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { useShortViewportMediaQuery } from 'src/hooks/useMediaQuery.hook'
+import { isKeyboardModality, trackInputModality } from './inputModality'
 import { PickerLiveRegion, type PickerAnnouncement } from './PickerLiveRegion'
 import { useVisualViewportHeight } from './useVisualViewportHeight'
 
@@ -75,6 +76,8 @@ export const FullScreenPicker = ({
     ...sheet
 }: FullScreenPickerProps): JSX.Element => {
     const hasTitle = title !== undefined && title !== null && title !== false && title !== ''
+    // Mounted while closed (one per select on a phone form), so it sees the press that opens it.
+    useEffect(trackInputModality, [])
 
     return (
         <StyledDialog
@@ -103,16 +106,15 @@ const PickerSheet = ({ dataTest, title, closeLabel, search, headerRow, children,
     const bodyRef = useRef<HTMLDivElement>(null)
 
     // `StyledDialog` parks focus on its own shell after `showModal()` (and again a frame later), where
-    // it shows no ring — to a keyboard user focus seems to vanish. When the browser treats that focus
-    // as keyboard focus (the shell matches `:focus-visible`), move it to where the user came for: the
-    // list, so the arrows work at once, as in the attached list — or the close button if the list is
-    // not a Tab stop. Neither is a text field, so the on-screen keyboard stays down (REQ-006). After
-    // a tap it stays on the shell: no ring and no marker (Figma draws none). Only while focus is still
-    // on the shell.
+    // it shows no ring — to a keyboard user focus seems to vanish. When the picker was opened from the
+    // keyboard, move it to where the user came for: the list, so the arrows work at once, as in the
+    // attached list — or the close button if the list is not a Tab stop. Neither is a text field, so
+    // the on-screen keyboard stays down (REQ-006). After a tap or a click it stays on the shell: no
+    // ring and no marker (Figma draws none). Only while focus is still on the shell.
     useEffect(() => {
         const id = requestAnimationFrame(() => {
             const shell = closeRef.current?.closest('dialog')
-            if (!shell || document.activeElement !== shell || !shell.matches(':focus-visible')) return
+            if (!shell || document.activeElement !== shell || !isKeyboardModality()) return
             const list = bodyRef.current?.querySelector<HTMLElement>('[role="listbox"]')
             const target = list && list.tabIndex >= 0 ? list : closeRef.current
             target?.focus({ preventScroll: true })
