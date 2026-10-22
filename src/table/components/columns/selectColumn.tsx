@@ -72,39 +72,57 @@ export function selectColumn<TData>(isFixed: boolean, rowHeight?: number, locale
             )
         },
         cell: ({ cell }: CellContext<TData, unknown>) => {
-            const disabled = !cell.row.getCanSelect()
+            const locked = !cell.row.getCanSelect()
+            const checked = cell.row.getIsSelected()
+            /*
+             * A row that is **ticked and locked** is not a disabled control, it is a read-only one:
+             * it says "already taken", and the greyed `delta-200` fill said "unavailable", which in a
+             * picker reads as a row you may not have rather than one you already do. `readOnly` is the
+             * state the checkbox has always shipped for this (Figma State=Read-only — white box,
+             * `delta-500` border and tick); this is its first use.
+             *
+             * An **unticked** locked row keeps `disabled`, and must: read-only renders a plain empty
+             * box, which is exactly what a selectable row looks like, so the one thing the user needs
+             * to know about that row would stop being visible.
+             *
+             * Neither is operable — the wrapper below ignores click and keyboard either way, and
+             * `aria-disabled` keeps saying so.
+             */
+            const disabled = locked && !checked
+            const readOnly = locked && checked
 
             return (
                 <div
                     role='checkbox'
-                    tabIndex={disabled ? -1 : 0}
+                    tabIndex={locked ? -1 : 0}
                     aria-label={labels.selectRow(cell.row.index + 1)}
                     aria-checked={cell.row.getIsSelected()}
-                    aria-disabled={disabled}
+                    aria-disabled={locked}
                     style={{ height: rowHeight ?? 'auto' }}
                     className={style['select-control']}
                     onClick={() => {
-                        if (disabled) return
+                        if (locked) return
                         cell.row.toggleSelected()
                     }}
                     onMouseDown={stopMouseEvent}
                     onMouseUp={stopMouseEvent}
                     onKeyDown={(event) => {
-                        if (disabled) return
+                        if (locked) return
                         handleToggleKeyDown(event, () => cell.row.toggleSelected())
                     }}
                 >
                     <StyledTooltip arrow placement='top-start' title={cell.row.getRowSelectionTooltip()}>
-                        <span className={disabled ? style['cursor-not-allowed'] : undefined}>
+                        <span className={locked ? style['cursor-not-allowed'] : undefined}>
                             {/* `decorative` — see the header checkbox above. */}
                             <StyledCheckbox
                                 size='small'
                                 dataTest='cell-select'
                                 decorative
-                                checked={cell.row.getIsSelected()}
+                                checked={checked}
                                 // DO NOT REMOVE needed for layout consistency
                                 hideWrapper
                                 disabled={disabled}
+                                readOnly={readOnly}
                                 className='pointer-events-none'
                             />
                         </span>

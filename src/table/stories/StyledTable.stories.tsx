@@ -505,3 +505,105 @@ export const ActiveRow: Story = {
         for (const row of activeRows) await expect(row.id).toBe('2')
     },
 }
+
+interface PickerRow {
+    id: string
+    name: string
+    kind: string
+}
+
+const pickerRows: PickerRow[] = [
+    { id: 'attached', name: 'Pain and energy management', kind: 'Questionnaire' },
+    { id: 'free', name: 'Weekly check-in', kind: 'Questionnaire' },
+    { id: 'archived', name: 'Discharge summary (archived)', kind: 'Document' },
+]
+
+const pickerColumns: ColumnDef<PickerRow>[] = [
+    { accessorKey: 'name', header: 'Name', size: 360 },
+    { accessorKey: 'kind', header: 'Type', size: 160 },
+]
+
+/** Attached content is ticked; the archived row is pickable by nobody and was never ticked. */
+const lockedRowReason = (id: string): string | null => {
+    if (id === 'attached') return 'Already selected'
+    if (id === 'archived') return 'Archived — cannot be added'
+    return null
+}
+
+/**
+ * **A row you cannot tick, and why.** The pattern a picker needs: content that is already attached
+ * stays visible and ticked rather than disappearing from the list, and the table has to say *why* it
+ * will not budge — without implying the row is somehow forbidden.
+ *
+ * Three states, three different things to say:
+ *
+ * | Row | `getCanSelect()` | Ticked | Checkbox | Reads as |
+ * | --- | --- | --- | --- | --- |
+ * | Already selected | `false` | yes | **read-only** — white box, `delta-500` border and tick | "you already have this" |
+ * | Free to pick | `true` | no | enabled | "go ahead" |
+ * | Archived | `false` | no | **disabled** — `delta-200` | "not available to you" |
+ *
+ * Why the first two locked rows differ: `readOnly` draws the box exactly as a plain *unticked
+ * selectable* box is drawn, so using it where nothing is ticked would hide the only fact worth
+ * knowing. And `disabled`'s grey fill over a tick says "unavailable", which is the opposite of
+ * "already yours" — that mismatch is what this split fixes.
+ *
+ * Everything else is the same for both locked kinds, and comes from the column for free: the cell
+ * ignores click and keyboard, carries `aria-disabled`, drops out of the tab order, and paints the
+ * not-allowed cursor over the checkbox.
+ *
+ * **What the consumer writes** — the predicate decides *which* rows lock, `getRowSelectionTooltip`
+ * supplies the reason (hover the checkbox), and ticking comes from `rowSelection` state as usual:
+ *
+ * ```tsx
+ * <StyledTable
+ *     enableRowSelection={(row) => !attachedIds.has(row.original.id)}
+ *     getRowSelectionTooltip={(row) => (row.getCanSelect() ? null : i18n.strings.already_selected)}
+ *     state={{ rowSelection, columnVisibility: { select: true } }}
+ * />
+ * ```
+ */
+export const LockedRows: Story = {
+    // axe: empty-table-header (table header cell has no text). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
+    render: () => (
+        <div className='w-[640px]' data-test='locked-rows'>
+            <StyledTable
+                columns={pickerColumns}
+                data={pickerRows}
+                enableRowSelection={(row) => lockedRowReason(row.original.id) === null}
+                getRowSelectionTooltip={(row) => lockedRowReason(row.original.id)}
+                hideFooter
+                initialState={{ columnVisibility: { select: true }, rowSelection: { attached: true } }}
+                state={{ rowSelection: { attached: true } }}
+                uniqueKey='locked-rows'
+            />
+        </div>
+    ),
+    /*
+     * Deliberately no hover here: an open Floating-UI tooltip oscillates between frames and would
+     * cost this story a VRT skip (see `datadisplay-tooltip--hovered`). The tooltip itself is covered
+     * in a real browser by `selectColumn.lockedRow.interaction.test.tsx`; what the story asserts is
+     * the part a reader is looking at — that the three checkboxes are three different states.
+     */
+    play: async ({ canvasElement }) => {
+        const control = (rowId: string) =>
+            canvasElement.querySelector<HTMLElement>(`tr[id="${rowId}"] [role="checkbox"]`)!
+        const box = (rowId: string) =>
+            control(rowId).querySelector<HTMLElement>('[data-test="cell-select"] > span:last-of-type')!
+
+        // Ticked + locked: read-only, so the box keeps its white fill rather than the disabled grey.
+        await expect(control('attached')).toHaveAttribute('aria-checked', 'true')
+        await expect(control('attached')).toHaveAttribute('aria-disabled', 'true')
+        await expect(getComputedStyle(box('attached')).backgroundColor).toBe('rgb(255, 255, 255)')
+
+        // Unticked + locked: still disabled, or it would be indistinguishable from the free row.
+        await expect(getComputedStyle(box('archived')).borderColor).not.toBe(
+            getComputedStyle(box('free')).borderColor,
+        )
+
+        // Free to pick: untouched by any of this.
+        await expect(control('free')).toHaveAttribute('aria-disabled', 'false')
+        await expect(control('free')).toHaveAttribute('tabindex', '0')
+    },
+}
