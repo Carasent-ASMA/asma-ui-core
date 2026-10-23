@@ -51,6 +51,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     footerInfo,
     locale = 'en',
     enableFullscreen = true,
+    fullscreenLockedReason,
     fullScreenState,
     handleFullScreenState,
 }) => {
@@ -69,6 +70,8 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
 
     const fullScreen = fullScreenState ?? fullscreen
     const isFullScreenActive = fullScreen && !minimized
+    /** A dialog that only runs fullscreen: the toggle is shown disabled, never taken away. */
+    const isFullscreenLocked = Boolean(fullscreenLockedReason)
 
     // Only the fullscreen state shows a page-covering backdrop (below) and is actually modal — the
     // default corner-docked panel is a non-modal floating widget that must NOT trap focus.
@@ -162,8 +165,8 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
 
     // Toggling makes the panel holding the just-pressed button inert, so focus has to be handed to
     // the panel that became visible or it dies there (WCAG 2.4.3). Aim for the counterpart toggle;
-    // fall back to whatever is reachable, because that toggle is optional — hidden on mobile, in
-    // fullscreen, or by `showMinimizeIcon`/`showExpandIcon`.
+    // fall back to whatever is reachable, because that toggle is optional — hidden on mobile, or by
+    // `showMinimizeIcon`/`showExpandIcon`.
     const toggleMinimized = (): void => {
         const revealed = minimized ? panelRef : minimizedPanelRef
         setMinimized(!minimized)
@@ -257,7 +260,10 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
 
                         <div className='flex items-center gap-x-1'>
                             {actionNode}
-                            {showMinimizeIcon && !fullScreen && (
+                            {/* Offered in fullscreen too: taking it away left the header's learned
+                                triad a control short, and a dialog the user had sent fullscreen could
+                                only be closed, not parked (hide-or-disable HOD-4). */}
+                            {showMinimizeIcon && (
                                 <StyledTooltip title={locale === 'en' ? 'Minimize' : 'Minimer'}>
                                     <div>
                                         <StyledButton
@@ -275,17 +281,24 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                                     </div>
                                 </StyledTooltip>
                             )}
-                            {enableFullscreen && showFullScreenIcon && (
-                                <StyledTooltip title={fullScreenTooltipTitle}>
+                            {/* A locked dialog keeps the control and explains itself, rather than
+                                dropping it — see `fullscreenLockedReason`. */}
+                            {(enableFullscreen || isFullscreenLocked) && showFullScreenIcon && (
+                                <StyledTooltip
+                                    title={fullScreenTooltipTitle}
+                                    open={isFullscreenLocked ? false : undefined}
+                                >
                                     <div>
                                         <StyledButton
                                             dataTest='fullscreen-button'
                                             aria-label={!onFullScreenText ? fullScreenTooltipTitle : undefined}
                                             variant='textGray'
                                             size='small'
+                                            disabled={isFullscreenLocked}
+                                            disabledReason={fullscreenLockedReason}
                                             onClick={() => {
                                                 if (fullScreenState !== undefined && handleFullScreenState) {
-                                                    handleFullScreenState()
+                                                    handleFullScreenState(!fullScreen)
                                                 } else {
                                                     setFullscreen(!fullscreen)
                                                 }

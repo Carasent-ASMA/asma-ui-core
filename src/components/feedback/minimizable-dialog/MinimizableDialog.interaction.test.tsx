@@ -551,3 +551,97 @@ describe('MinimizableDialog native Back (ASMA-8471)', () => {
         await expect(onClose).not.toHaveBeenCalled()
     })
 })
+
+/**
+ * Same contract as `MinimizableDialogV2`: the header's minimize / fullscreen / close triad is a
+ * place people have learned, so a control is disabled with its reason rather than taken out of it
+ * (hide-or-disable HOD-4, disabled-states DIS-1/2/3).
+ */
+describe('MinimizableDialog header controls stay in place', () => {
+    afterEach(cleanup)
+
+    const minimizeButtons = (container: HTMLElement): HTMLButtonElement[] =>
+        Array.from(container.querySelectorAll<HTMLButtonElement>('[data-testid="minimize-button"]'))
+
+    it('offers Minimize in fullscreen, not only when docked', async () => {
+        const { container } = mount(
+            <MinimizableDialog dataTest='dialog' open fullScreenState title='Editor' onClose={() => undefined}>
+                <p>Content</p>
+            </MinimizableDialog>,
+        )
+
+        // Two toggles are mounted at all times, one per panel; the maximized panel's is the second.
+        await expect(minimizeButtons(container)).toHaveLength(2)
+    })
+
+    it('minimizes out of fullscreen into the docked bar', async () => {
+        const { container } = mount(
+            <MinimizableDialog dataTest='dialog' open fullScreenState title='Editor' onClose={() => undefined}>
+                <p>Content</p>
+            </MinimizableDialog>,
+        )
+        const maximized = minimizeButtons(container)[1]!
+
+        await userEvent.click(maximized)
+
+        await waitFor(() => expect(maximized.closest('[inert]')).not.toBeNull())
+    })
+
+    it('shows the fullscreen toggle disabled, with its reason, when fullscreen cannot be left', async () => {
+        const { container } = mount(
+            <MinimizableDialog
+                dataTest='dialog'
+                open
+                fullScreenState
+                enableFullscreen={false}
+                fullscreenLockedReason='This editor only opens fullscreen'
+                title='Editor'
+                onClose={() => undefined}
+            >
+                <p>Content</p>
+            </MinimizableDialog>,
+        )
+        const toggle = container.querySelector<HTMLButtonElement>('[data-testid="fullscreen-button"]')!
+
+        // In place, not gone; focusable, not natively disabled (DIS-3).
+        await expect(toggle).not.toBeNull()
+        await expect(toggle).toHaveAttribute('aria-disabled', 'true')
+        await expect(toggle).not.toHaveAttribute('disabled')
+
+        toggle.focus()
+        await expect(document.activeElement).toBe(toggle)
+        // The reason reaches keyboard users, not hover only (DIS-2).
+        await waitFor(() => expect(document.body.textContent).toContain('This editor only opens fullscreen'))
+    })
+
+    it('leaves the toggle hidden when the dialog simply has no fullscreen', async () => {
+        const { container } = mount(
+            <MinimizableDialog dataTest='dialog' open enableFullscreen={false} title='Editor' onClose={() => undefined}>
+                <p>Content</p>
+            </MinimizableDialog>,
+        )
+
+        await expect(container.querySelector('[data-testid="fullscreen-button"]')).toBeNull()
+    })
+
+    it('tells a controlled consumer which fullscreen state was asked for', async () => {
+        const handleFullScreenState = fn()
+        const { container } = mount(
+            <MinimizableDialog
+                dataTest='dialog'
+                open
+                fullScreenState={false}
+                handleFullScreenState={handleFullScreenState}
+                title='Editor'
+                onClose={() => undefined}
+            >
+                <p>Content</p>
+            </MinimizableDialog>,
+        )
+
+        await userEvent.click(container.querySelector<HTMLButtonElement>('[data-testid="fullscreen-button"]')!)
+
+        // The argument is the state being requested, not a bare toggle ping.
+        await expect(handleFullScreenState).toHaveBeenCalledWith(true)
+    })
+})
