@@ -17,6 +17,7 @@ export const DatePickerInputSingle: React.FC<{
         disabledDays,
         dataTest,
         readOnly,
+        lockedReason,
         errorText,
         disallowFuture,
         disallowPast,
@@ -37,6 +38,7 @@ export const DatePickerInputSingle: React.FC<{
             dataTest={dataTest}
             inputClassName={inputClassName}
             readOnly={readOnly}
+            lockedReason={lockedReason}
             disabled={!!disabled}
             helperText={helperText}
             onClick={onClick}
