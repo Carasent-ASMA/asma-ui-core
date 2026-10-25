@@ -115,3 +115,39 @@ describe('StyledDialogFooter disabled reason on touch (ASMA-8308, disabled-state
         })
     }
 })
+
+describe('StyledDialogFooter left action on mobile (ASMA-8259)', () => {
+    afterEach(cleanup)
+
+    const mountAt = (width: number): HTMLButtonElement => {
+        const { container } = mount(
+            <div style={{ width }}>
+                <StyledDialogFooter
+                    leftActions={[
+                        {
+                            id: 'delete',
+                            label: 'Delete',
+                            dataTest: 'delete',
+                            tone: 'danger',
+                            icon: <svg aria-hidden width={24} height={24} />,
+                            onClick: () => undefined,
+                        },
+                    ]}
+                    secondaryAction={{ label: 'Cancel' }}
+                    primaryAction={{ label: 'Save' }}
+                />
+            </div>,
+        )
+        return container.querySelector<HTMLButtonElement>('[data-testid="delete"]')!
+    }
+
+    it('shows only the icon in a narrow footer, with the label as its name', async () => {
+        await waitFor(() => expect(mountAt(360).textContent).toBe(''))
+        await expect(document.querySelector('[data-testid="delete"]')).toHaveAccessibleName('Delete')
+    })
+
+    it('keeps the label in a wide footer', async () => {
+        mountAt(800)
+        await waitFor(() => expect(document.querySelector('[data-testid="delete"]')).toHaveTextContent('Delete'))
+    })
+})

@@ -11,6 +11,13 @@ const boxShadow = twConfigs.boxShadow,
 export default {
     mode: 'jit',
     important: true,
+    future: {
+        // `hover:` / `group-hover:` only where a real pointer hovers (`(hover: hover) and (pointer:
+        // fine)`), as Tailwind 4 does by default. On a touch screen the browser keeps an emulated
+        // pointer at the last tap: when a picker or menu closed on a tap, the element underneath
+        // took the hover style and kept it (ASMA-8468).
+        hoverOnlyWhenSupported: true,
+    },
     blocklist: ['rotate-180'],
     content: ['src/**/*.{js,jsx,ts,tsx}'],
     theme: {

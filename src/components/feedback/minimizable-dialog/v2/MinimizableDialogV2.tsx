@@ -22,6 +22,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
         showMinimizeIcon = true,
         showExpandIcon = true,
         enableFullscreen = true,
+        fullscreenLockedReason,
         title,
         label,
         children,
@@ -55,6 +56,8 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
 
     const { minimized, setMinimized, fullScreen, setFullScreen } = useControlledProps(props)
     const isFullScreenActive = fullScreen && !minimized
+    /** A dialog that only runs fullscreen: the toggle is shown disabled, never taken away. */
+    const isFullscreenLocked = Boolean(fullscreenLockedReason)
 
     // While a button inside runs an action (e.g. Save), closing would hide the running request.
     const { busy, busyReason, contextValue } = useDialogBusyBoundary(busyReasonProp ?? t.waitUntilSaved)
@@ -101,8 +104,8 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
 
     // Toggling makes the panel holding the just-pressed button inert, so focus has to be handed to
     // the panel that became visible or it dies there (WCAG 2.4.3). Aim for the counterpart toggle;
-    // fall back to whatever is reachable, because that toggle is optional — hidden on mobile, in
-    // fullscreen, or by `showMinimizeIcon`/`showExpandIcon`.
+    // fall back to whatever is reachable, because that toggle is optional — hidden on mobile, or by
+    // `showMinimizeIcon`/`showExpandIcon`.
     const toggleMinimized = (): void => {
         const revealed = minimized ? modalRef : minimizedPanelRef
         setMinimized(!minimized)
@@ -204,11 +207,14 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
             {/* Maximized */}
             {isFullScreenActive && (
                 // Mouse-only backdrop convenience; the keyboard-accessible equivalent is the
-                // FullScreenBtn toggle in the header (a real <button> via StyledButton).
+                // FullScreenBtn toggle in the header (a real <button> via StyledButton). It follows
+                // that toggle's state: while fullscreen is locked the toggle is disabled, so the
+                // backdrop must not be a way around it either.
                 // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
                 <div
                     className='fixed inset-0 z-[52] bg-[rgb(98,110,126)] bg-opacity-70'
                     onClick={() => {
+                        if (isFullscreenLocked) return
                         setFullScreen(false)
                     }}
                 />
@@ -251,14 +257,22 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
 
                         <div className='flex items-center gap-x-1'>
                             <DialogBusyContext.Provider value={contextValue}>{actionNode}</DialogBusyContext.Provider>
+                            {/* Minimize is offered in fullscreen too. Taking it away there left the
+                                header's learned triad a control short, and a dialog the user had sent
+                                fullscreen could only be closed, not parked — minimizing simply drops
+                                out of fullscreen into the docked bar, and expanding restores it
+                                (hide-or-disable HOD-4). */}
                             <MinimizeBtn
-                                visibility={showMinimizeIcon && !isMobile && !fullScreen}
+                                visibility={showMinimizeIcon && !isMobile}
                                 type='minimize'
                                 onClick={toggleMinimized}
                                 tooltipTitle={t.minimize}
                             />
                             <FullScreenBtn
-                                showFullScreenIcon={enableFullscreen && !isMobile}
+                                /* A locked dialog keeps the control and explains itself, rather than
+                                   dropping it — see `fullscreenLockedReason`. */
+                                showFullScreenIcon={(enableFullscreen || isFullscreenLocked) && !isMobile}
+                                disabledReason={fullscreenLockedReason}
                                 fullScreen={fullScreen}
                                 onClick={() => {
                                     setFullScreen(!fullScreen)

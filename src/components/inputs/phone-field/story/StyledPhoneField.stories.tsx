@@ -106,6 +106,25 @@ export const Error: Story = {
     },
 }
 
+/** ASMA-8561: the number box shows the 3px error-500 edge; the country-code box stays neutral (D-007). */
+export const ErrorFocused: Story = {
+    args: {
+        country: 'NO',
+        dataTest: 'phone',
+        value: '12345678',
+        error: true,
+        helperText: 'Enter a valid phone number',
+    },
+    render: (args) => <Controlled {...args} />,
+    play: async ({ canvasElement }) => {
+        const input = within(canvasElement).getByRole('textbox')
+        input.focus()
+
+        await expect(input).toHaveFocus()
+        await expect(input).toHaveAttribute('aria-invalid', 'true')
+    },
+}
+
 export const Disabled: Story = {
     args: { country: 'NO', dataTest: 'phone', value: '48012345', disabled: true },
     render: (args) => <Controlled {...args} />,

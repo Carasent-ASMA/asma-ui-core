@@ -29,6 +29,8 @@
             background-color: var(--colors-input-#{$type}-active-bg-color) #{!important};
             outline-color: var(--colors-input-#{$type}-active-outline-color) #{!important};
             outline-width: var(--input-#{$type}-active-outline-width) #{!important};
+            // 3px drawn inside the box, like the field-styles inset edge.
+            outline-offset: -3px #{!important};
             cursor: var(--input-#{$type}-active-cursor) #{!important};
         }
 
@@ -37,6 +39,8 @@
             background-color: var(--colors-input-#{$type}-focus-bg-color) #{!important};
             outline-color: var(--colors-input-#{$type}-focus-outline-color) #{!important};
             outline-width: var(--input-#{$type}-focus-outline-width) #{!important};
+            // 3px drawn inside the box, like the field-styles inset edge.
+            outline-offset: -3px #{!important};
             cursor: var(--input-#{$type}-focus-cursor) #{!important};
         }
 

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { afterEach, describe, it } from 'vitest'
 import { expect, fn, page, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { StyledInputField } from 'src/components/inputs/input-field'
@@ -58,6 +58,11 @@ const openPicker = async (): Promise<void> => {
     await waitFor(() => expect(picker()).not.toBeNull())
 }
 
+const centerOf = (node: Element): number => {
+    const box = node.getBoundingClientRect()
+    return box.top + box.height / 2
+}
+
 const nextFrames = (): Promise<void> => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
 
 describe('StyledSelectAutocomplete — full-screen picker (ASMA-8468)', () => {
@@ -105,6 +110,39 @@ describe('StyledSelectAutocomplete — full-screen picker (ASMA-8468)', () => {
             await new Promise((resolve) => setTimeout(resolve, 300))
             await expect(document.activeElement).not.toBe(search())
             await expect(document.activeElement?.tagName).not.toBe('INPUT')
+        })
+    })
+
+    describe('the field box opens it', () => {
+        // The text line sits under the chips; the rest of the box opened nothing before.
+        const shell = (): HTMLElement => field().closest<HTMLElement>('[data-testid$="-shell"], [data-testid$="-adornment-list"]')!
+
+        it.each([
+            [390, 844, 'the picker'],
+            [1280, 720, 'the attached list'],
+        ])('a click on its empty space opens %s at %i × %i, a click on a chip does not', async (width, height) => {
+            await page.viewport(width, height)
+            mount(<Fixture multiple initial={['Alpha', 'Bravo']} />)
+            const isOpen = (): boolean => picker() !== null || document.querySelector('[role="listbox"]') !== null
+            await userEvent.click(document.querySelector('[data-testid="selected-chip-Alpha"]')!)
+            await nextFrames()
+            await expect(isOpen()).toBe(false)
+            // The box's top right corner, clear of the chips and of the buttons at the right.
+            const box = shell().getBoundingClientRect()
+            await userEvent.click(shell(), { position: { x: box.width - 70, y: 6 } })
+            await waitFor(() => expect(isOpen()).toBe(true))
+        })
+
+        it('opens from its empty space also inside a clickable card', async () => {
+            await page.viewport(390, 844)
+            mount(
+                <div role='button' tabIndex={0}>
+                    <Fixture multiple initial={['Alpha']} />
+                </div>,
+            )
+            const box = shell().getBoundingClientRect()
+            await userEvent.click(shell(), { position: { x: box.width - 70, y: 6 } })
+            await waitFor(() => expect(picker()).not.toBeNull())
         })
     })
 
@@ -174,15 +212,46 @@ describe('StyledSelectAutocomplete — full-screen picker (ASMA-8468)', () => {
     })
 
     describe('one choice (REQ-009, REQ-010, REQ-011)', () => {
-        it('marks the chosen option and scrolls it into view on open', async () => {
+        it('marks the chosen option and opens with it in the middle of the list, past row 50 too (LIST-10, AC 7)', async () => {
             await page.viewport(390, 844)
-            mount(<Fixture options={MANY} initial='Option 040' />)
+            mount(<Fixture options={MANY} initial='Option 080' />)
             await openPicker()
-            const chosen = row('Option 040')
+            const chosen = row('Option 080')
             await expect(chosen).toHaveAttribute('aria-selected', 'true')
-            const list = byTestId('ac-picker-body')!.getBoundingClientRect()
-            await waitFor(() => expect(chosen.getBoundingClientRect().bottom).toBeLessThanOrEqual(list.bottom + 0.5))
-            await expect(chosen.getBoundingClientRect().top).toBeGreaterThanOrEqual(list.top - 0.5)
+            await waitFor(() => expect(Math.abs(centerOf(chosen) - centerOf(byTestId('ac-picker-body')!))).toBeLessThanOrEqual(20))
+        })
+
+        it('opens at the chosen option once options still loading at the opening arrive (LIST-10)', async () => {
+            const LoadingFixture = (): JSX.Element => {
+                const [options, setOptions] = useState<readonly string[]>([])
+                useEffect(() => {
+                    const id = window.setTimeout(() => setOptions(MANY), 400)
+                    return () => window.clearTimeout(id)
+                }, [])
+                return (
+                    <StyledSelectAutocomplete<string, false, false, false>
+                        dataTest='ac'
+                        options={options}
+                        loading={options.length === 0}
+                        value='Option 080'
+                        onChange={() => undefined}
+                        renderInput={(params) => <StyledInputField {...params} dataTest='ac-input' label='Team' />}
+                    />
+                )
+            }
+            await page.viewport(390, 844)
+            mount(<LoadingFixture />)
+            await openPicker()
+            await waitFor(() => expect(rows()).toHaveLength(MANY.length))
+            await waitFor(() => expect(Math.abs(centerOf(row('Option 080')) - centerOf(byTestId('ac-picker-body')!))).toBeLessThanOrEqual(20))
+        })
+
+        it('opens at the top with nothing chosen (LIST-10)', async () => {
+            await page.viewport(390, 844)
+            mount(<Fixture options={MANY} />)
+            await openPicker()
+            await nextFrames()
+            await expect(byTestId('ac-picker-body')!.scrollTop).toBe(0)
         })
 
         it('chooses and closes on tap, focus back on the field', async () => {
@@ -265,6 +334,21 @@ describe('StyledSelectAutocomplete — full-screen picker (ASMA-8468)', () => {
             // Stays there: the dialog's own focus step must not take it back a frame later.
             await nextFrames()
             await expect(document.activeElement).toBe(list)
+        })
+
+        it('moves no focus when reopened by a tap after a choice, though the field kept focus', async () => {
+            await page.viewport(390, 844)
+            mount(<Fixture />)
+            await openPicker()
+            await userEvent.click(row('Bravo'))
+            await waitFor(() => expect(picker()).toBeNull())
+            await waitFor(() => expect(document.activeElement).toBe(field()))
+            await userEvent.click(field())
+            await waitFor(() => expect(picker()).not.toBeNull())
+            await nextFrames()
+            await nextFrames()
+            await expect(document.activeElement).toBe(picker())
+            await expect(rows().filter((node) => node.hasAttribute('data-active'))).toHaveLength(0)
         })
 
         it('moves no focus when opened by a tap: no ring on the ×, no marker in the list', async () => {
@@ -454,6 +538,43 @@ describe('StyledSelectAutocomplete — full-screen picker (ASMA-8468)', () => {
             }
         })
 
+        it('several choices: opens at the first ticked option in the list order (LIST-10, AC 7)', async () => {
+            await page.viewport(390, 844)
+            mount(<Fixture multiple options={MANY} initial={['Option 100', 'Option 070']} />)
+            await openPicker()
+            await waitFor(() => expect(Math.abs(centerOf(row('Option 070')) - centerOf(byTestId('ac-picker-body')!))).toBeLessThanOrEqual(20))
+        })
+
+        it('never runs *Ferdig* over the count or *Fjern alle valg* on a small screen with a larger text size', async () => {
+            await page.viewport(320, 640)
+            // A larger text size, as an iPhone's text setting gives: it scales px fonts too.
+            const larger = document.createElement('style')
+            larger.textContent = '[data-testid="ac-picker-selection-row"] * { font-size: 32px !important; line-height: 40px !important }'
+            document.head.append(larger)
+            try {
+                mount(<Fixture multiple initial={['Alpha']} />)
+                await openPicker()
+                // The text's own extent, not the boxes: a squeezed box lets its text run out of it.
+                const textOf = (id: string): DOMRect => {
+                    const range = document.createRange()
+                    range.selectNodeContents(byTestId(id)!)
+                    return range.getBoundingClientRect()
+                }
+                const done = byTestId('ac-picker-done')!.getBoundingClientRect()
+                const count = textOf('ac-picker-count')
+                const clearAll = textOf('ac-picker-clear-all')
+                const rowBox = byTestId('ac-picker-selection-row')!.getBoundingClientRect()
+                const overlaps = (a: DOMRect, b: DOMRect): boolean =>
+                    a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom
+                // Never over the count or the clear button, and still inside the row.
+                await expect(overlaps(done, count)).toBe(false)
+                await expect(overlaps(done, clearAll)).toBe(false)
+                await expect(done.right).toBeLessThanOrEqual(rowBox.right + 0.5)
+            } finally {
+                larger.remove()
+            }
+        })
+
         it('hides *Fjern alle valg* on a required field, keeps *Ferdig* in place', async () => {
             await page.viewport(390, 844)
             mount(<Fixture multiple required initial={['Alpha']} />)
@@ -492,15 +613,14 @@ describe('StyledSelectAutocomplete — full-screen picker (ASMA-8468)', () => {
             await expect(field()).toHaveValue('')
         })
 
-        it('draws at most 50 rows, then asks the user to search', async () => {
+        it('lists every option, with no row limit and no *Viser 50 av N* notice (LIST-4, AC 13)', async () => {
             await page.viewport(390, 844)
             mount(<Fixture options={MANY} />)
             await openPicker()
-            await expect(rows()).toHaveLength(50)
-            await expect(byTestId('ac-picker-truncated')).toHaveTextContent('Viser 50 av 120. Søk for å finne flere.')
+            await expect(rows()).toHaveLength(MANY.length)
+            await expect(picker()!.textContent).not.toContain('Viser')
             await userEvent.type(search(), 'Option 11')
             await waitFor(() => expect(rows()).toHaveLength(10))
-            await expect(byTestId('ac-picker-truncated')).toBeNull()
         })
 
         it('gives every row at least 40 × 40 px and the full, unclamped label', async () => {
