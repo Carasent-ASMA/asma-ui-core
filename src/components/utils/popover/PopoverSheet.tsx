@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useRef, useState, type MouseEvent, type ReactNode } from 'react'
+import { useCallback, useEffect, useId, useRef, useState, type FocusEvent, type MouseEvent, type ReactNode } from 'react'
 import {
     autoUpdate,
     flip,
@@ -15,7 +15,7 @@ import {
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { cn } from 'src/helpers/cn'
 import { firstTabbable } from 'src/helpers/focusable'
-import { OverlayBackOwnerContext, useBackCloses } from 'src/hooks/useBackCloses.hook'
+import { OverlayBackOwnerContext, requestCloseTopOverlayBack, useBackCloses } from 'src/hooks/useBackCloses.hook'
 import { useDebouncedValue } from 'src/hooks/useDebouncedValue.hook'
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
 import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
@@ -59,19 +59,6 @@ const MAX_WIDTH_PX = { info: 472, action: 472 } as const
 const MAX_HEIGHT_RATIO = 0.6
 const MOBILE_WIDTH = 'calc(100vw - 32px)'
 
-/**
- * Follow the trigger on scroll / ancestor resize, but ignore ResizeObserver on the
- * floating node itself. Chip wrap and autocomplete tag growth change the sheet's
- * height (sometimes a sub-pixel of width); default `autoUpdate` then re-runs
- * `shift` and the surface jumps left-right even when the consumer pinned the
- * width. `layoutShift` still tracks the trigger relocating.
- */
-const followTriggerWhileMounted = (
-    reference: Parameters<typeof autoUpdate>[0],
-    floating: Parameters<typeof autoUpdate>[1],
-    update: () => void,
-): ReturnType<typeof autoUpdate> => autoUpdate(reference, floating, update, { elementResize: false })
-
 /** @figmaNode wXrXt5uKNNzV2DnQCgyYZH#44531-233781 (Design-System · "_Popover") */
 export interface PopoverSheetProps {
     /** @figmaProp none — test hook */
@@ -113,7 +100,21 @@ export interface PopoverSheetProps {
     onOpenChange?: (isOpen: boolean) => void
     /** @figmaProp none — style escape hatch, applied to the surface */
     className?: string
+    /**
+     * Which trigger edge the surface lines up with. `auto` picks once per open: `end` when the
+     * trigger's centre is in the right half of the viewport, otherwise `start`.
+     * @figmaProp none — behavioral
+     */
+    align?: 'start' | 'end' | 'auto'
+    /**
+     * CSS selectors for overlays rendered outside React (e.g. DevExtreme's `.dx-overlay-wrapper`).
+     * Pressing or focusing inside them counts as inside the surface.
+     * @figmaProp none — behavioral
+     */
+    ignoreOutside?: string[]
 }
+
+type Side = 'top' | 'bottom'
 
 /**
  * ASMA Design System **Popover** (ASMA-8183) — an anchored overlay with the DS surface, an optional
@@ -151,6 +152,8 @@ export const PopoverSheet = ({
     ariaLabel,
     onOpenChange,
     className,
+    align = 'auto',
+    ignoreOutside,
 }: PopoverSheetProps): JSX.Element => {
     const panelId = useId()
     const titleId = `${panelId}-title`
@@ -158,6 +161,12 @@ export const PopoverSheet = ({
     const [isOpen, setIsOpen] = useState(false)
     const [portalRoot, setPortalRoot] = useState<HTMLElement>()
     const [maxHeightPx, setMaxHeightPx] = useState<number>()
+    // Position is decided once per open and then only follows the trigger: the edge from where the
+    // trigger sits, the side from the first positioning, and the width only ever grows. Content
+    // changing while open (chips, counts, async options) must not move the surface.
+    const [openAlign, setOpenAlign] = useState<'start' | 'end'>('start')
+    const [lockedSide, setLockedSide] = useState<Side>()
+    const [minWidthPx, setMinWidthPx] = useState(MIN_WIDTH_PX)
 
     const isMobile = useMobileMediaQuery()
     const isDialog = variant === 'action'
@@ -174,40 +183,28 @@ export const PopoverSheet = ({
         [onOpenChange],
     )
 
-    const { refs, floatingStyles, context } = useFloating({
+    const { refs, floatingStyles, context, placement, isPositioned } = useFloating({
         open: isOpen,
         onOpenChange: changeOpen,
-        placement: 'bottom-start',
+        placement: `${lockedSide ?? 'bottom'}-${openAlign}`,
         strategy: 'fixed',
-        whileElementsMounted: followTriggerWhileMounted,
+        whileElementsMounted: autoUpdate,
         middleware: [
             offset(8),
-            ...(keepBelowTrigger ? [] : [flip({ padding: 8 })]),
+            ...(keepBelowTrigger || lockedSide
+                ? []
+                : [flip({ padding: 8, crossAxis: false, flipAlignment: false })]),
             shift({ padding: 8 }),
             sizeMiddleware({
                 padding: 8,
-                apply({ availableHeight }) {
+                apply({ availableHeight, rects }) {
                     setMaxHeightPx(Math.min(availableHeight, Math.round(window.innerHeight * MAX_HEIGHT_RATIO)))
+                    if (!isMobile) setMinWidthPx((current) => Math.max(current, rects.floating.width))
                 },
             }),
         ],
     })
-
-    // The trigger owns opening, so a press on it must not also register as an outside-press — on touch
-    // that races the popover shut in the same tap. Pressing a *different* popover's trigger is still
-    // outside, which is what gives "only one popover open at a time" for free.
-    // Off in sheet mode: with no floating element every press inside the sheet would count as an
-    // outside press and close it. The sheet owns its own dismiss routes.
-    const dismiss = useDismiss(context, {
-        enabled: !isSheet,
-        escapeKey: true,
-        outsidePress: (event) => {
-            const trigger = triggerRef.current
-            if (trigger && event.target instanceof Node && trigger.contains(event.target)) return false
-            return true
-        },
-    })
-    const { getFloatingProps } = useInteractions([dismiss])
+    if (isOpen && isPositioned && !lockedSide) setLockedSide(placement.startsWith('top') ? 'top' : 'bottom')
 
     const usePopoverLayer = shouldUsePopoverTopLayer(portalRoot)
     // Tracked as state as well as a ref: `FloatingPortal` creates its portal node in an effect, so
@@ -233,11 +230,72 @@ export const PopoverSheet = ({
         [refs],
     )
 
+    // Focus inside portalled children (select listbox, calendar, tooltip, a full-screen picker) never
+    // lands in the panel's DOM, but its React focus event still bubbles through the panel. The panel
+    // records the target; document listeners run after React's and compare against it.
+    const treeFocusTargetRef = useRef<EventTarget | null>(null)
+    const ignoreOutsideSelector = ignoreOutside?.length ? ignoreOutside.join(',') : undefined
+    const ignoreOutsideRef = useRef(ignoreOutsideSelector)
+    useEffect(() => {
+        ignoreOutsideRef.current = ignoreOutsideSelector
+    }, [ignoreOutsideSelector])
+    const isInsideLayer = useCallback((target: EventTarget | null): boolean => {
+        if (!(target instanceof Element)) return false
+        if (panelRef.current?.contains(target) || triggerRef.current?.contains(target)) return true
+        if (treeFocusTargetRef.current === target) return true
+        const selector = ignoreOutsideRef.current
+        return selector !== undefined && target.closest(selector) !== null
+    }, [])
+    const lastPanelFocusRef = useRef<HTMLElement | null>(null)
+    const recordTreeFocus = useCallback((event: FocusEvent) => {
+        treeFocusTargetRef.current = event.target
+        if (event.target instanceof HTMLElement && panelRef.current?.contains(event.target)) {
+            lastPanelFocusRef.current = event.target
+        }
+    }, [])
+
+    // The trigger owns opening, so a press on it must not also register as an outside-press — on touch
+    // that races the popover shut in the same tap. Pressing a *different* popover's trigger is still
+    // outside, which is what gives "only one popover open at a time" for free. Presses inside React
+    // children are already ignored by Floating UI; this also keeps other floating layers, a nested
+    // dialog and `ignoreOutside` overlays (not rendered by React) from counting as outside.
+    // Off in sheet mode: with no floating element every press inside the sheet would count as an
+    // outside press and close it. The sheet owns its own dismiss routes.
+    // Escape is not handed to `useDismiss` — see the window listener below.
+    const dismiss = useDismiss(context, {
+        enabled: !isSheet,
+        escapeKey: false,
+        outsidePress: (event) => {
+            const target = event.target
+            if (!(target instanceof Element)) return true
+            if (isInsideLayer(target) || target.closest('[data-floating-ui-portal]')) return false
+            const dialog = target.closest('dialog[open], [role="dialog"]')
+            return !dialog || dialog.contains(panelRef.current)
+        },
+    })
+    const { getFloatingProps } = useInteractions([dismiss])
+
     const close = useCallback(() => {
         changeOpen(false)
     }, [changeOpen])
 
     useBackCloses({ active: isOpen, requestClose: close, ownerRef: panelRef })
+
+    // Escape is heard on `window`, after every nested layer had its turn — same model as
+    // `StyledDialog`. A select, autocomplete, date picker or calendar that handles Escape claims it
+    // with `preventDefault()` or `stopPropagation()`; anything left closes the innermost open layer
+    // through the Back stack, which is this surface unless a child registered above it (#271).
+    useEffect(() => {
+        if (!isOpen || isSheet) return
+        const closeOnEscape = (event: KeyboardEvent): void => {
+            if (event.key !== 'Escape' || event.defaultPrevented || event.isComposing) return
+            event.preventDefault()
+            event.stopImmediatePropagation()
+            void requestCloseTopOverlayBack(event)
+        }
+        window.addEventListener('keydown', closeOnEscape)
+        return () => window.removeEventListener('keydown', closeOnEscape)
+    }, [isOpen, isSheet])
 
     // Focus is managed by hand rather than with `FloatingFocusManager`, because that renders focus
     // guards (`tabindex=0` + `aria-hidden`) which axe fails as `aria-hidden-focus` — a rule this
@@ -275,19 +333,47 @@ export const PopoverSheet = ({
     // Info is deliberately NOT trapped: Tab walks out of the surface and closing follows the focus.
     // Tab-out is the one close route that does not pull focus back to the trigger — doing so would
     // make Tab unable to move past the popover at all.
+    // Focus moving into a portalled child (a tooltip, a picker) is not leaving: that is decided on the
+    // `focusin` that follows, once the panel has seen the child's React focus event.
+    // Action is trapped by `useFocusTrap`, which only handles Tab inside the panel; Tab out of a
+    // portalled child (the calendar's last control) can still land outside, and a closing child can
+    // drop focus to <body>. A frame later — so a child that restores focus itself wins — focus goes
+    // back to the last control focused in the panel (the calendar's anchor), else the first one.
     useEffect(() => {
-        if (!panelNode || isDialog) return
+        if (!panelNode) return
 
-        const handleFocusOut = (event: FocusEvent): void => {
-            const next = event.relatedTarget
-            if (next instanceof Node && (panelNode.contains(next) || triggerRef.current?.contains(next))) return
-            close()
+        let frame = 0
+        const restoreIfLost = (): void => {
+            cancelAnimationFrame(frame)
+            frame = requestAnimationFrame(() => {
+                const active = document.activeElement
+                if (!panelNode.isConnected || (active && active !== document.body && isInsideLayer(active))) return
+                const last = lastPanelFocusRef.current
+                const target = last?.isConnected && panelNode.contains(last) ? last : (firstTabbable(panelNode) ?? panelNode)
+                target.focus({ preventScroll: true })
+            })
         }
-        panelNode.addEventListener('focusout', handleFocusOut)
+        const handleFocusOut = (event: globalThis.FocusEvent): void => {
+            if (event.relatedTarget === null) close()
+        }
+        const handleLayerFocusOut = (event: globalThis.FocusEvent): void => {
+            if (event.relatedTarget === null && isInsideLayer(event.target)) restoreIfLost()
+        }
+        const handleFocusIn = (event: globalThis.FocusEvent): void => {
+            if (!panelNode.isConnected || isInsideLayer(event.target)) return
+            if (isDialog) restoreIfLost()
+            else close()
+        }
+        if (isDialog) document.addEventListener('focusout', handleLayerFocusOut)
+        else panelNode.addEventListener('focusout', handleFocusOut)
+        document.addEventListener('focusin', handleFocusIn)
         return () => {
+            cancelAnimationFrame(frame)
+            document.removeEventListener('focusout', handleLayerFocusOut)
             panelNode.removeEventListener('focusout', handleFocusOut)
+            document.removeEventListener('focusin', handleFocusIn)
         }
-    }, [panelNode, isDialog, close])
+    }, [panelNode, isDialog, close, isInsideLayer])
 
     // Every other close route owes the trigger its focus back. When the surface was dismissed by a
     // pointer press on something non-focusable, focus falls to <body> and a keyboard user loses
@@ -320,6 +406,12 @@ export const PopoverSheet = ({
         /* Capture the element before setState: React nulls `e.currentTarget` once the handler
          * returns, so reading it lazily yields null and we lose the dialog portal root. */
         setPortalRoot(getOpenModalDialogAncestor(event.currentTarget))
+        const rect = event.currentTarget.getBoundingClientRect()
+        const triggerInRightHalf = rect.left + rect.width / 2 > window.innerWidth / 2
+        setOpenAlign(align === 'auto' ? (triggerInRightHalf ? 'end' : 'start') : align)
+        setLockedSide(undefined)
+        setMinWidthPx(MIN_WIDTH_PX)
+        setMaxHeightPx(Math.round(window.innerHeight * MAX_HEIGHT_RATIO))
         // Enter/Space on a button dispatch a synthetic `click` with `detail === 0`; a real pointer
         // click counts at least 1.
         setOpenedWithKeyboard(event.detail === 0)
@@ -393,8 +485,10 @@ export const PopoverSheet = ({
                 <FloatingPortal root={portalRoot}>
                     <div
                         {...getFloatingProps()}
+                        onFocusCapture={recordTreeFocus}
                         ref={floatingRef}
                         id={panelId}
+                        data-placement={placement}
                         data-test={dataTest}
                         data-testid={dataTest}
                         role={isDialog ? 'dialog' : undefined}
@@ -405,7 +499,7 @@ export const PopoverSheet = ({
                         style={{
                             ...(usePopoverLayer ? TOP_LAYER_RESET_STYLE : {}),
                             ...floatingStyles,
-                            minWidth: MIN_WIDTH_PX,
+                            minWidth: isMobile ? MIN_WIDTH_PX : minWidthPx,
                             width,
                             maxWidth,
                             maxHeight: maxHeightPx,
