@@ -232,7 +232,11 @@ $checkbox-sizes: (
         transform: translate(-50%, -50%) scale(0.7);
     }
 
+    // Figma Checkbox+Label Hovered: hovering the option text shows the circle too, not only the 40px
+    // control — any enclosing <label> (StyledFormControlLabel, or a consumer's label around the
+    // checkbox and its text) counts. `CheckboxHover` is only present when enabled and editable.
     &:hover .CheckboxRippleContainer::after,
+    label:hover & .CheckboxRippleContainer::after,
     &[data-hovered] .CheckboxRippleContainer::after,
     &:has(input[data-hovered]) .CheckboxRippleContainer::after {
         opacity: 1;
