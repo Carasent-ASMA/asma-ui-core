@@ -9,6 +9,11 @@ type CommonDatePickerProps = {
     readOnly?: boolean
     /** A locked field (disabled-states DIS-9): read-only with a lock icon; the reason opens on hover, focus and tap. */
     lockedReason?: React.ReactNode
+    /**
+     * A read-only value the user can change elsewhere (disabled-states DIS-6): the date as text-like,
+     * focusable text with no calendar button; the reason says where it can be changed.
+     */
+    readOnlyReason?: React.ReactNode
     className?: string
     inputClassName?: string
     disabledDays?: Matcher | Matcher[]

@@ -16,6 +16,7 @@ export interface IBaseDatePickerInput {
     disabled: boolean
     readOnly?: boolean
     lockedReason?: React.ReactNode
+    readOnlyReason?: React.ReactNode
     onClick: (e: React.MouseEvent<HTMLDivElement | HTMLButtonElement>) => void
     selected: Date | undefined
     dateFormat?: string
@@ -58,6 +59,7 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
         inputAriaProps,
         readOnly: readOnlyProp,
         lockedReason,
+        readOnlyReason,
         disallowPast,
         disallowFuture,
         validateOnCalendarClose,
@@ -69,7 +71,7 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
         ...rest
     } = props
 
-    const readOnly = Boolean(readOnlyProp) || Boolean(lockedReason)
+    const readOnly = Boolean(readOnlyProp) || Boolean(lockedReason) || Boolean(readOnlyReason)
     const { validationError, handleValidation, errHelperText, clearValidation } =
         useDatePickerValidation(defaultDatePickerValidationMessages)
     const { maskRef } = useDatePickerMask()
@@ -206,6 +208,7 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
                             id={inputId}
                             readOnly={readOnly}
                             lockedReason={lockedReason}
+                            readOnlyReason={readOnlyReason}
                             data-testid={rest.dataTest}
                             autoComplete='off'
                             inputRef={!readOnly ? maskRef : undefined}
