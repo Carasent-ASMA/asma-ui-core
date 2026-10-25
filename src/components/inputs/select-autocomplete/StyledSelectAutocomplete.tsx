@@ -69,7 +69,12 @@ export interface AutocompleteRenderInputParams {
     onKeyDown: (event: KeyboardEvent<HTMLInputElement>) => void
     slotProps: {
         htmlInput: Record<string, unknown> & { ref?: React.Ref<HTMLInputElement> }
-        input: { ref: React.Ref<HTMLDivElement>; startAdornment?: ReactNode; endAdornment?: ReactNode }
+        input: {
+            ref: React.Ref<HTMLDivElement>
+            startAdornment?: ReactNode
+            endAdornment?: ReactNode
+            onClick?: (event: React.MouseEvent<HTMLElement>) => void
+        }
     }
 }
 
@@ -96,7 +101,8 @@ type AutocompleteValue<T, Multiple, DisableClearable, FreeSolo> = Multiple exten
 /**
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#20474-29075
  * Figma "Autocomplete". The trigger is the outlined **Input field** (shared `field-styles`: 40px,
- * border enabled delta-500/`#7a899e`, hover gama-300, focus gama-400 `#1ca1a1`, error error-500),
+ * border enabled delta-500/`#7a899e`, hover gama-300, focus 3px `color.focus.ring`, error error-500,
+ * error + focus 3px error-500),
  * so the field **State** (Enabled/Hovered/Focused/Error/Read-only) ← focus/open + `error`/`readOnly`/
  * `disabled`. **Filled** ← selected value(s): single fills the input text, multiple renders **Tag
  * chips** (`StyledChip`: h32, radius25, label 16/delta-700 — node 20475-29954). The dropdown is the
@@ -559,6 +565,17 @@ export function StyledSelectAutocomplete<
         </span>
     )
 
+    // The whole field box opens the list (the picker on a phone), not only the text line under the
+    // chips — except its own controls: the chips, their ×, and the clear and popup buttons.
+    const openFromFieldBox = (event: React.MouseEvent<HTMLElement>): void => {
+        if (disabled || readOnly || !(event.target instanceof Element)) return
+        // Only controls inside the box count: the field itself may sit in a clickable card or a link.
+        const control = event.target.closest('button, a, [role="button"], [data-chip]')
+        if (control && event.currentTarget.contains(control)) return
+        inputRef.current?.focus()
+        setOpen(true)
+    }
+
     const renderInputParams: AutocompleteRenderInputParams = {
         disabled,
         size,
@@ -591,7 +608,7 @@ export function StyledSelectAutocomplete<
                 // dialog, which screen readers announce instead of "list".
                 ...(isPicker ? { inputMode: 'none', 'aria-haspopup': 'dialog' } : {}),
             },
-            input: { ref: referenceRef, startAdornment: tags, endAdornment },
+            input: { ref: referenceRef, startAdornment: tags, endAdornment, onClick: openFromFieldBox },
         },
     }
 

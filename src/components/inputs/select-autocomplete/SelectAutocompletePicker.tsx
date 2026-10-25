@@ -9,8 +9,6 @@ import { cn } from 'src/helpers/cn'
 import { nextActiveIndex } from './listboxCursor'
 import type { AutocompleteRenderOptionState, OptionLiProps } from './StyledSelectAutocomplete'
 
-/** REQ-017: the picker draws at most this many rows, then a notice asks the user to search. */
-const PICKER_ROW_LIMIT = 50
 /** REQ-016: the match count is announced once typing pauses, not on every keystroke. */
 const MATCH_ANNOUNCE_DELAY_MS = 500
 
@@ -124,6 +122,7 @@ export function SelectAutocompletePicker<T>({
     const isSelected = (option: T): boolean =>
         multiple ? draft.some((chosen) => isEqual(option, chosen)) : singleValue !== null && isEqual(option, singleValue)
 
+    // LIST-4: every option, with no row limit, so the chosen one is always there to open at.
     const filtered = useMemo(() => {
         const base = [...options]
         if (filterOptions) return filterOptions(base, { inputValue: query })
@@ -132,10 +131,9 @@ export function SelectAutocompletePicker<T>({
         // getLabel is a render-time helper of the parent; options/query/filterOptions are the inputs.
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [options, query, filterOptions])
-    const visible = filtered.slice(0, PICKER_ROW_LIMIT)
     const hasSelectAll = Boolean(allowSelectAll && multiple)
-    const activeIndexes = hasSelectAll ? [-1, ...visible.map((_option, index) => index)] : visible.map((_option, index) => index)
-    const selectedIndex = visible.findIndex(isSelected)
+    const activeIndexes = hasSelectAll ? [-1, ...filtered.map((_option, index) => index)] : filtered.map((_option, index) => index)
+    const selectedIndex = filtered.findIndex(isSelected)
 
     const { noMatches, matchCount } = text
     useEffect(() => {
@@ -147,12 +145,22 @@ export function SelectAutocompletePicker<T>({
         return () => window.clearTimeout(id)
     }, [announce, filtered.length, query, noMatches, matchCount])
 
+    // LIST-10 (AC 7): the picker opens with the chosen option in the middle of the list — with several,
+    // the first ticked one in the list's order; with none, at the top. The keyboard starts from the
+    // same option (`selectedIndex`). Once per opening, when the rows are there: options still loading
+    // at the opening are scrolled to when they arrive. A DOM side effect, not state.
+    const openedAtChoice = useRef(false)
     useEffect(() => {
-        // REQ-009: the chosen option is in view when the picker opens. A DOM side effect, not state.
-        // eslint-disable-next-line react-you-might-not-need-an-effect/no-adjust-state-on-prop-change
-        if (open && selectedIndex >= 0) rowRefs.current[selectedIndex]?.scrollIntoView({ block: 'nearest' })
-        // eslint-disable-next-line react-hooks/exhaustive-deps -- once per opening
-    }, [open])
+        if (!open) {
+            openedAtChoice.current = false
+            return
+        }
+        if (openedAtChoice.current || loading) return
+        openedAtChoice.current = true
+        // eslint-disable-next-line react-you-might-not-need-an-effect/no-adjust-state-on-prop-change -- a DOM scroll
+        if (selectedIndex >= 0) rowRefs.current[selectedIndex]?.scrollIntoView({ block: 'center' })
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- once per opening, when loaded
+    }, [open, loading])
 
     // `aria-activedescendant` moves the virtual cursor but does not scroll; the row is already drawn.
     const moveCursorTo = (index: number | null): void => {
@@ -183,7 +191,7 @@ export function SelectAutocompletePicker<T>({
 
     const activateCurrent = (event: SyntheticEvent, close: boolean): void => {
         if (activeIndex === -1) toggleAll()
-        else if (activeIndex !== null && visible[activeIndex] !== undefined) choose(event, visible[activeIndex], close)
+        else if (activeIndex !== null && filtered[activeIndex] !== undefined) choose(event, filtered[activeIndex], close)
     }
 
     // Escape is left to `StyledDialog`, so close button, Escape and Back share one cancel path.
@@ -224,7 +232,7 @@ export function SelectAutocompletePicker<T>({
     const optionId = (index: number): string => `${dataTest}-option-${index}`
     let activeOptionId: string | undefined
     if (activeIndex === -1 && hasSelectAll) activeOptionId = `${dataTest}-select-all`
-    else if (activeIndex !== null && visible[activeIndex] !== undefined) activeOptionId = optionId(activeIndex)
+    else if (activeIndex !== null && filtered[activeIndex] !== undefined) activeOptionId = optionId(activeIndex)
 
     const renderRow = (option: T, index: number): ReactNode => {
         const disabled = isOptionDisabled(option)
@@ -258,14 +266,14 @@ export function SelectAutocompletePicker<T>({
                 </li>
             )
         }
-        if (visible.length === 0) {
+        if (filtered.length === 0) {
             return (
                 <li role='presentation' className={emptyRowClassName} data-testid={`${dataTest}-picker-empty`}>
                     {query === '' ? noOptionsText : text.noMatches}
                 </li>
             )
         }
-        return visible.map(renderRow)
+        return filtered.map(renderRow)
     }
     // eslint-disable-next-line react-hooks/refs -- per-row ref callbacks feed scrollIntoView
     const listContent = renderListContent()
@@ -389,11 +397,6 @@ export function SelectAutocompletePicker<T>({
                 )}
                 {listContent}
             </ul>
-            {!loading && filtered.length > PICKER_ROW_LIMIT && (
-                <p className='m-0 px-3 py-2 text-sm text-delta-600' data-testid={`${dataTest}-picker-truncated`}>
-                    {text.truncated(PICKER_ROW_LIMIT, filtered.length)}
-                </p>
-            )}
         </FullScreenPicker>
     )
 }
@@ -412,16 +415,20 @@ interface SelectionRowProps {
 
 /**
  * Figma "Selected row" (several choices): count + *Clear all selections* on the left, *Done* pinned
- * right. The left group wraps onto two lines before *Done* ever moves or wraps; 24 px keep the
- * clear button off *Done* (REQ-013, REQ-014).
+ * right; 24 px keep the clear button off *Done* (REQ-013, REQ-014). The left group wraps onto two
+ * lines first. Only when *Done* does not fit beside even its narrowest form — a small screen with a
+ * larger text size — does *Done* wrap onto a line of its own, still on the right, instead of
+ * running over the count.
  *
  * With nothing ticked the clear button keeps its place, only invisible (`visibility: hidden` —
  * neither focusable nor read out). On a narrow screen the group wraps onto two lines, and the first
  * tick must not grow the row, push the list down or move *Done* (AC 10).
  */
 const SelectionRow = ({ dataTest, count, clearAllLabel, clearAllShown, doneLabel, onClearAll, onDone }: SelectionRowProps): JSX.Element => (
-    <div className='flex items-center justify-between gap-6 px-4 py-2' data-testid={`${dataTest}-picker-selection-row`}>
-        <div className='flex min-w-0 flex-wrap items-center gap-x-1'>
+    <div className='flex flex-wrap items-center gap-x-6 gap-y-2 px-4 py-2' data-testid={`${dataTest}-picker-selection-row`}>
+        {/* Basis 0 and a min-content floor: the row breaks before *Done* only when the group cannot
+            shrink any further; otherwise the group takes the room left and wraps inside it. */}
+        <div className='flex min-w-min flex-[1_1_0%] flex-wrap items-center gap-x-1'>
             <span className='text-base text-delta-600' data-testid={`${dataTest}-picker-count`}>
                 {count}
             </span>
@@ -436,7 +443,7 @@ const SelectionRow = ({ dataTest, count, clearAllLabel, clearAllShown, doneLabel
                 </StyledButton>
             )}
         </div>
-        <StyledButton dataTest={`${dataTest}-picker-done`} variant='contained' className='shrink-0 whitespace-nowrap' onClick={onDone}>
+        <StyledButton dataTest={`${dataTest}-picker-done`} variant='contained' className='ml-auto shrink-0 whitespace-nowrap' onClick={onDone}>
             {doneLabel}
         </StyledButton>
     </div>

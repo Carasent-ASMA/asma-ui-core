@@ -2,7 +2,8 @@ import { useEffect, useRef, type ReactNode } from 'react'
 import { StyledDialog, type DialogCloseReason } from 'src/components/feedback/dialog/StyledDialog'
 import { CloseIcon } from 'src/components/icons'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
-import { useShortViewportMediaQuery } from 'src/hooks/useMediaQuery.hook'
+import { usePickerOneRowHeaderMediaQuery } from 'src/hooks/useMediaQuery.hook'
+import { isKeyboardModality, trackInputModality } from './inputModality'
 import { PickerLiveRegion, type PickerAnnouncement } from './PickerLiveRegion'
 import { useVisualViewportHeight } from './useVisualViewportHeight'
 
@@ -35,7 +36,8 @@ export interface FullScreenPickerProps {
  * search, optional selection/clear row; 1 px `border/separator` delta-200 under it) and one scrolling
  * **List**. Title = Mobile/Page title, SemiBold 20/28, `text-icon/title-label` delta-800, wraps.
  * Close = 40 × 40 Quaternary button with a 24 px ×. Search row = `pt-8 px-16`. On a short viewport
- * (`Variant2`, ≤ 480 px high) title, search (max 240 px) and close share the first row.
+ * (`Variant2`, ≤ 480 px high and ≥ 480 px wide — a phone in landscape, not an upright phone whose
+ * keyboard is up) title, search (max 240 px) and close share the first row.
  *
  * The shared shell for every full-screen picker in ui-core: `StyledSelectAutocomplete` and
  * `CountryCodeSelect` both render through it (ASMA-8468). Presentation only — the caller owns the
@@ -75,6 +77,8 @@ export const FullScreenPicker = ({
     ...sheet
 }: FullScreenPickerProps): JSX.Element => {
     const hasTitle = title !== undefined && title !== null && title !== false && title !== ''
+    // Mounted while closed (one per select on a phone form), so it sees the press that opens it.
+    useEffect(trackInputModality, [])
 
     return (
         <StyledDialog
@@ -97,22 +101,21 @@ export const FullScreenPicker = ({
 type PickerSheetProps = Omit<FullScreenPickerProps, 'open' | 'fallbackName'>
 
 const PickerSheet = ({ dataTest, title, closeLabel, search, headerRow, children, announcement, onClose }: PickerSheetProps): JSX.Element => {
-    const isShort = useShortViewportMediaQuery()
+    const isShort = usePickerOneRowHeaderMediaQuery()
     const visibleHeight = useVisualViewportHeight()
     const closeRef = useRef<HTMLButtonElement>(null)
     const bodyRef = useRef<HTMLDivElement>(null)
 
     // `StyledDialog` parks focus on its own shell after `showModal()` (and again a frame later), where
-    // it shows no ring — to a keyboard user focus seems to vanish. When the browser treats that focus
-    // as keyboard focus (the shell matches `:focus-visible`), move it to where the user came for: the
-    // list, so the arrows work at once, as in the attached list — or the close button if the list is
-    // not a Tab stop. Neither is a text field, so the on-screen keyboard stays down (REQ-006). After
-    // a tap it stays on the shell: no ring and no marker (Figma draws none). Only while focus is still
-    // on the shell.
+    // it shows no ring — to a keyboard user focus seems to vanish. When the picker was opened from the
+    // keyboard, move it to where the user came for: the list, so the arrows work at once, as in the
+    // attached list — or the close button if the list is not a Tab stop. Neither is a text field, so
+    // the on-screen keyboard stays down (REQ-006). After a tap or a click it stays on the shell: no
+    // ring and no marker (Figma draws none). Only while focus is still on the shell.
     useEffect(() => {
         const id = requestAnimationFrame(() => {
             const shell = closeRef.current?.closest('dialog')
-            if (!shell || document.activeElement !== shell || !shell.matches(':focus-visible')) return
+            if (!shell || document.activeElement !== shell || !isKeyboardModality()) return
             const list = bodyRef.current?.querySelector<HTMLElement>('[role="listbox"]')
             const target = list && list.tabIndex >= 0 ? list : closeRef.current
             target?.focus({ preventScroll: true })

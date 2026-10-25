@@ -72,7 +72,14 @@ interface DynamicSelectCommonProps<TOption extends DynamicSelectOption> {
      */
     required?: boolean
     helperText?: React.ReactNode
-    /** Completely removes the helper text block below the autocomplete */
+    /**
+     * Stops the helper row being *reserved* below the control. A real `helperText` or an `error` still
+     * renders it, growing the layout at that moment — so nothing is silently swallowed.
+     *
+     * On the autocomplete variant it removes the block outright, which is what it has always done
+     * there. On the chip-group variant (1–5 options) it opts out of a 28px row that would otherwise
+     * sit empty under the chips.
+     */
     disableHelperText?: boolean
     /**
      * Key of `TOption` used as the option's identity for comparison and as the chip/tag key.

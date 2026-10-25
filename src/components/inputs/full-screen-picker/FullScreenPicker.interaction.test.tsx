@@ -93,8 +93,16 @@ describe('FullScreenPicker (ASMA-8468)', () => {
         await expect(heading.scrollWidth).toBeLessThanOrEqual(heading.clientWidth)
     })
 
-    it('puts the search under the title in portrait (REQ-004)', async () => {
-        await page.viewport(390, 844)
+    it.each([
+        [390, 844],
+        // An upright phone with its keyboard up: short, but too narrow for the one-row header — moving
+        // the focused search there would drop the keyboard (REQ-007).
+        [390, 400],
+        [390, 480],
+        [479, 400],
+        [320, 256],
+    ])('puts the search under the title at %i × %i (REQ-004)', async (width, height) => {
+        await page.viewport(width, height)
         mount(<Fixture />)
         await waitFor(() => expect(dialog()).not.toBeNull())
         await expect(rectOf('[data-testid="fsp-search"]').top).toBeGreaterThanOrEqual(rectOf('dialog h2').bottom)
@@ -102,8 +110,9 @@ describe('FullScreenPicker (ASMA-8468)', () => {
 
     it.each([
         [844, 390],
-        [320, 256],
-        [390, 480],
+        [568, 320],
+        [480, 320],
+        [1280, 480],
     ])('shares the first row between title, search and close at %i × %i (REQ-007)', async (width, height) => {
         await page.viewport(width, height)
         mount(<Fixture />)

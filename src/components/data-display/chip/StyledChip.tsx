@@ -198,6 +198,8 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
             <div
                 ref={ref}
                 data-testid={dataTest}
+                // Lets a field around chips tell a click on a chip from one on its empty space.
+                data-chip=''
                 aria-label={ariaLabel}
                 data-hovered={dataHovered}
                 data-focus={dataFocus}

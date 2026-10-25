@@ -23,6 +23,8 @@ export interface CountryCodeOptionsProps {
     onKeyDown?: (event: KeyboardEvent<HTMLElement>) => void
     /** Tabbing into the list: put the active-row marker on a row. */
     onFocus?: () => void
+    /** The list is showing: each opening starts at the chosen country (LIST-10, AC 17). */
+    open?: boolean
 }
 
 /**
@@ -42,9 +44,24 @@ export const CountryCodeOptions = ({
     className,
     onKeyDown,
     onFocus,
+    open,
 }: CountryCodeOptionsProps): JSX.Element => {
     const isKeyboardTarget = onKeyDown !== undefined
     const listRef = useRef<HTMLUListElement>(null)
+
+    useEffect(() => {
+        // LIST-10 (AC 17): the list opens with the chosen country in the middle, also after a tap —
+        // the effect below only follows the keyboard's active row. A frame later, once the sheet or
+        // popover is laid out.
+        if (!open) return undefined
+        const id = requestAnimationFrame(() => {
+            const index = visible.findIndex((country) => country.iso2 === selectedIso2)
+            if (index < 0) return
+            listRef.current?.querySelector(`#${CSS.escape(optionId(index))}`)?.scrollIntoView({ block: 'center' })
+        })
+        return () => cancelAnimationFrame(id)
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- once per opening
+    }, [open])
 
     useEffect(() => {
         // Keep the active row in view: `aria-activedescendant` moves the virtual cursor but does

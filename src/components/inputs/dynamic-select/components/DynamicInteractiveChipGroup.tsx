@@ -2,8 +2,7 @@ import { ErrorOutlineIcon, Skeleton, StyledButton, StyledChip, StyledInteractive
 import { fieldWidthStyle } from 'src/components/inputs/field-styles'
 import type { DynamicSelectOption, StyledDynamicSelectComponent, StyledDynamicSelectProps } from '../types'
 import { cn } from 'src/helpers/cn'
-import { useHelperAlertRole } from 'src/helpers/useHelperAlertRole'
-import { warnMissingErrorMessage } from 'src/helpers/warnMissingErrorMessage'
+import { useHelperSlot } from 'src/helpers/useHelperSlot'
 import { useWrap } from '../helpers/useWrap'
 import { DynamicSelectTitle } from './DynamicSelectTitle'
 import { forwardRef, useEffect, useId } from 'react'
@@ -28,6 +27,7 @@ export const DynamicInteractiveChipGroup = forwardRef(
             required,
             error,
             helperText,
+            disableHelperText,
             valueKey = 'value',
             labelKey = 'label',
             renderLabel,
@@ -38,8 +38,22 @@ export const DynamicInteractiveChipGroup = forwardRef(
             clearSelectionLabel,
         } = props
         const helperId = useId()
-        warnMissingErrorMessage('DynamicInteractiveChipGroup', error, helperText)
-        const helperAlertRole = useHelperAlertRole(error)
+        /*
+         * The same slot rule every other input in this library follows, through the same helper:
+         * `disableHelperText` stops reserving the row, and a real message or an error still renders
+         * it — growing the layout at that moment rather than parking 28px under a control that has
+         * nothing to say. Without the prop the row is reserved exactly as before, so no existing
+         * consumer's spacing moves.
+         *
+         * This also replaces the component's own `warnMissingErrorMessage` + `useHelperAlertRole`
+         * pair, which was the hook's body written out by hand.
+         */
+        const { show: showHelper, role: helperAlertRole } = useHelperSlot(
+            'DynamicInteractiveChipGroup',
+            error,
+            helperText,
+            !disableHelperText,
+        )
         const { containerRef, wrapDisabled } = useWrap({ dependencyList: [options, options.length] })
 
         // The overflow-measurement clone below renders real interactive chips (checkbox/radio) —
@@ -227,17 +241,19 @@ export const DynamicInteractiveChipGroup = forwardRef(
                         {clearSelectionLabel ?? (locale === 'en' ? 'Clear selection' : 'Fjern valget')}
                     </StyledButton>
                 )}
-                <div
-                    id={helperId}
-                    role={helperAlertRole}
-                    className={cn(
-                        'flex min-h-[24px] items-center gap-1 pt-1 text-sm/5 text-delta-600',
-                        error && 'text-error-500',
-                    )}
-                >
-                    {error && <ErrorOutlineIcon width={20} height={20} className='min-w-5' />}
-                    <span className='line-clamp-1'>{helperText}</span>
-                </div>
+                {showHelper && (
+                    <div
+                        id={helperId}
+                        role={helperAlertRole}
+                        className={cn(
+                            'flex min-h-[24px] items-center gap-1 pt-1 text-sm/5 text-delta-600',
+                            error && 'text-error-500',
+                        )}
+                    >
+                        {error && <ErrorOutlineIcon width={20} height={20} className='min-w-5' />}
+                        <span className='line-clamp-1'>{helperText}</span>
+                    </div>
+                )}
             </div>
         )
     },

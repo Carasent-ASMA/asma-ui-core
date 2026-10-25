@@ -90,13 +90,56 @@ describe('StyledTimePicker keyboard contract', () => {
         await expect(picked.getMinutes()).toBe(30)
     })
 
-    it('marks an incomplete time invalid instead of committing it (4.1.2)', async () => {
-        const { container } = mount(<TimePickerFixture />)
+    it('shows no error while typing an incomplete time, and marks it invalid on blur (4.1.2, ADR-0017 REQ-001)', async () => {
+        const onSelect = fn()
+        const { container } = mount(<TimePickerFixture onSelect={onSelect} />)
         const input = field(container)
 
         input.focus()
         await userEvent.keyboard('09')
 
+        await waitFor(() => expect(input).toHaveValue('09'))
+        await expect(input).not.toHaveAttribute('aria-invalid')
+        await expect(container).not.toHaveTextContent('Invalid time format')
+
+        input.blur()
+
+        await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
+        await expect(container).toHaveTextContent('Invalid time format')
+        await expect(onSelect).not.toHaveBeenCalled()
+    })
+
+    it('clears the error on the first valid change and never adds one while typing (ADR-0017 REQ-002)', async () => {
+        const { container } = mount(<TimePickerFixture />)
+        const input = field(container)
+
+        input.focus()
+        await userEvent.keyboard('09')
+        input.blur()
+        await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
+
+        input.focus()
+        await userEvent.keyboard('30')
+        await waitFor(() => expect(input).toHaveValue('09:30'))
+        await expect(input).not.toHaveAttribute('aria-invalid')
+
+        await userEvent.keyboard('{Backspace}')
+        await waitFor(() => expect(input).toHaveValue('09:3'))
+        await expect(input).not.toHaveAttribute('aria-invalid')
+
+        input.blur()
+        await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
+    })
+
+    it('does not mark an incomplete time invalid on Enter without a blur', async () => {
+        const { container } = mount(<TimePickerFixture />)
+        const input = field(container)
+
+        input.focus()
+        await userEvent.keyboard('09{Enter}')
+
+        await expect(input).not.toHaveAttribute('aria-invalid')
+        await userEvent.tab()
         await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
     })
 
@@ -287,6 +330,64 @@ describe('StyledTimePicker minTime', () => {
         await waitFor(() => expect(input).toHaveValue('13:00'))
         await expect(onSelect).not.toHaveBeenCalled()
         await expect(input).not.toHaveAttribute('aria-invalid', 'true')
+    })
+
+    it('shows a before-start time as an error only after blur', async () => {
+        const { container } = mount(
+            <StyledTimePicker
+                dataTest='end-time'
+                label='End time'
+                notBeforeTime={new Date(2026, 9, 5, 12, 0)}
+                value={new Date(2026, 9, 5, 13, 0)}
+                onSelect={() => undefined}
+            />,
+        )
+        const input = container.querySelector<HTMLInputElement>('input[data-testid="end-time"]')!
+
+        await userEvent.clear(input)
+        await userEvent.keyboard('1100')
+        await waitFor(() => expect(input).toHaveValue('11:00'))
+        await expect(input).not.toHaveAttribute('aria-invalid')
+
+        input.blur()
+
+        await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
+        await expect(container).toHaveTextContent('Must be after start time')
+    })
+
+    it('uncommits a field emptied by typing on blur, without an error', async () => {
+        const onSelect = fn()
+        const { container } = mount(<MinTimeFixture initial={new Date(2026, 9, 5, 13, 0)} onSelect={onSelect} />)
+        const input = minField(container)
+
+        await userEvent.clear(input)
+        await expect(onSelect).not.toHaveBeenCalled()
+
+        input.blur()
+
+        await waitFor(() => expect(onSelect).toHaveBeenCalledWith(undefined))
+        await expect(input).toHaveValue('')
+        await expect(input).not.toHaveAttribute('aria-invalid')
+    })
+
+    it('shows a before-start time picked from the panel as an error at once (a pick is a finished entry)', async () => {
+        const { container } = mount(
+            <StyledTimePicker
+                dataTest='min-time'
+                label='End time'
+                notBeforeTime={new Date(2026, 9, 5, 12, 0)}
+                value={new Date(2026, 9, 5, 13, 0)}
+                onSelect={() => undefined}
+            />,
+        )
+        const input = minField(container)
+        await openMinPanel(container)
+
+        await userEvent.click(cell(0, '11'))
+
+        await waitFor(() => expect(input).toHaveValue('11:00'))
+        await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
+        await expect(container).toHaveTextContent('Must be after start time')
     })
 
     it('names the field by its title, or by inputAriaProps for a label rendered outside (1.3.1, 4.1.2)', async () => {

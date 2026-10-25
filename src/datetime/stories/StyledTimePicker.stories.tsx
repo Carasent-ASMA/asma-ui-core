@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { expect } from 'storybook/test'
 import { add } from 'date-fns'
 import { useState, type CSSProperties } from 'react'
 import { StyledTimePicker } from 'src/datetime/components/time-picker'
@@ -272,4 +273,57 @@ const MobileExample = () => {
 export const Mobile: StoryObj<typeof StyledTimePicker> = {
     globals: { viewport: { value: 'mobile1', isRotated: false } },
     render: () => <MobileExample />,
+}
+
+// ─── Error ──────────────────────────────────────────────────────────────────
+const ErrorExample = () => {
+    const [value, setValue] = useState<Date | undefined>()
+    return (
+        <StyledTimePicker
+            dataTest='error-time'
+            value={value}
+            onSelect={setValue}
+            label='Time'
+            placeholder='Time'
+            error
+            helperText='Required'
+        />
+    )
+}
+
+export const Error: StoryObj<typeof StyledTimePicker> = {
+    render: () => <ErrorExample />,
+}
+
+/** ASMA-8561: error + focused = 1px error-500 border + 2px inset error-500 edge (3px, layout-neutral). */
+export const ErrorFocused: StoryObj<typeof StyledTimePicker> = {
+    render: () => <ErrorExample />,
+    play: async ({ canvas }) => {
+        const input = canvas.getByTestId('error-time')
+        input.focus()
+
+        await expect(input).toHaveFocus()
+        await expect(input).toHaveAttribute('aria-invalid', 'true')
+    },
+}
+
+/** ADR-0017 REQ-001: an incomplete time stays neutral while typing and shows the error after blur. */
+export const IncompleteTimeOnBlur: StoryObj<typeof StyledTimePicker> = {
+    render: () => {
+        const Example = () => {
+            const [value, setValue] = useState<Date | undefined>()
+            return <StyledTimePicker dataTest='blur-time' value={value} onSelect={setValue} label='Time' />
+        }
+        return <Example />
+    },
+    play: async ({ canvas, userEvent }) => {
+        const input = canvas.getByTestId('blur-time')
+        input.focus()
+        await userEvent.keyboard('09')
+        await expect(input).not.toHaveAttribute('aria-invalid')
+
+        input.blur()
+        await expect(await canvas.findByText('Invalid time format')).toBeInTheDocument()
+        await expect(input).toHaveAttribute('aria-invalid', 'true')
+    },
 }
