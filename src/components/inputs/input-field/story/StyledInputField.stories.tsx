@@ -338,6 +338,24 @@ export const MultilineReadOnlyShowsAll: Story = {
 }
 
 /** The lock icon keeps its room at the end of a multiline locked field. */
+export const ReadOnlyValue: Story = {
+    args: {
+        label: 'Label text',
+        value: 'Filled text',
+        readOnlyReason: 'Change it in Settings',
+    },
+}
+
+export const ReadOnlyValueMultiline: Story = {
+    args: {
+        className: 'w-[320px]',
+        label: 'Notes',
+        multiline: true,
+        value: LONG_TEXT,
+        readOnlyReason: 'Change it in Settings',
+    },
+}
+
 export const LockedMultiline: Story = {
     args: {
         className: 'w-[320px]',

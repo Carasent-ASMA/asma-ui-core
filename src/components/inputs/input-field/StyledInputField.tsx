@@ -101,6 +101,13 @@ export interface StyledInputFieldProps {
      * focus ring. The reason opens on hover, focus and tap and is the field's description.
      */
     lockedReason?: ReactNode
+    /**
+     * @figmaProp State = set→"Read only". A single value inside a form the user is editing that they
+     * cannot change here but can change elsewhere (disabled-states DIS-6): text-like, without border or
+     * fill, focusable and selectable with a focus ring and the default cursor. The reason says where it
+     * can be changed; it opens on hover, focus and tap and is the field's description. `lockedReason` wins.
+     */
+    readOnlyReason?: ReactNode
     required?: boolean
     allowClear?: boolean
     onClear?: () => void
@@ -148,7 +155,11 @@ export interface StyledInputFieldProps {
 const LOCKED_FOCUS_RING =
     'peer-focus-visible:border-focus-ring peer-focus-visible:shadow-[inset_0_0_0_2px_var(--colors-focus-ring)]'
 
-const LockedFieldTooltip = ({ reason, children }: { reason: ReactNode; children: ReactElement }): JSX.Element =>
+// A read-only value has no outline; only the focus ring shows, a little outside the text.
+const READ_ONLY_VALUE_RING =
+    'pointer-events-none absolute -inset-1 rounded peer-focus-visible:shadow-[inset_0_0_0_2px_var(--colors-focus-ring)]'
+
+const FieldReasonTooltip = ({ reason, children }: { reason: ReactNode; children: ReactElement }): JSX.Element =>
     reason === undefined ? (
         children
     ) : (
@@ -185,6 +196,7 @@ export const StyledInputField = ({
     disabled,
     readOnly: readOnlyProp,
     lockedReason,
+    readOnlyReason,
     required,
     allowClear,
     onClear,
@@ -226,7 +238,8 @@ export const StyledInputField = ({
     const [uncontrolledLength, setUncontrolledLength] = useState(String(defaultValue ?? '').length)
 
     const locked = Boolean(lockedReason) || lockedReason === 0
-    const readOnly = Boolean(readOnlyProp) || locked
+    const readOnlyValue = !locked && (Boolean(readOnlyReason) || readOnlyReason === 0)
+    const readOnly = Boolean(readOnlyProp) || locked || readOnlyValue
     const isControlled = value !== undefined
     const hasValue = isControlled ? value !== '' && value != null : hasValueUncontrolled
     const disabledOrReadonly = Boolean(disabled) || Boolean(readOnly)
@@ -268,10 +281,10 @@ export const StyledInputField = ({
     const controlId = htmlInputRest.id ?? fieldId
     const resolvedMaxLength = maxLength ?? htmlInputRest.maxLength
     const counterId = `${fieldId}-counter`
-    const showCounter = counter !== false && Boolean(resolvedMaxLength)
+    const showCounter = counter !== false && Boolean(resolvedMaxLength) && !readOnlyValue
     const valueLength = isControlled ? String(value ?? '').length : uncontrolledLength
 
-    const isFloatingLabel = labelPlacement === 'floating' && Boolean(label)
+    const isFloatingLabel = labelPlacement === 'floating' && Boolean(label) && !readOnlyValue
     const shrink = focused || hasValue || hasStartAdornment
 
     // Sizes the multiline textarea and decides whether it scrolls.
@@ -379,7 +392,7 @@ export const StyledInputField = ({
     const assignRef = useMergeRefs([resolvedRef, captureTextarea])
 
     const { style: htmlInputStyle, ...htmlInputPropsWithoutStyle } = htmlInputRest
-    const isSingleLineShell = !multiline && !isAdornmentList
+    const isSingleLineShell = !multiline && !isAdornmentList && !readOnlyValue
 
     const {
         height: _shellHeight,
@@ -504,13 +517,15 @@ export const StyledInputField = ({
             ? 'box-border h-8 min-w-[60px] flex-1 py-0 pl-0 pr-0 leading-[23px]'
             : multiline
               ? cn('w-full resize-none p-0 pl-0 pr-0 leading-[23px]', styles['Input--multiline'])
-              : cn('w-full', styles['Input--singleLine']),
+              : readOnlyValue
+                ? 'm-0 w-full p-0 text-base leading-[23px]'
+                : cn('w-full', styles['Input--singleLine']),
         'disabled:text-delta-300',
         // Read-only fill lives on the shell (below) so it covers the whole box incl. the multiline
         // padding; keep the field itself transparent to avoid a `bg-transparent`/`bg-delta-50` clash
         // (cn here is plain clsx, no tailwind-merge, so a competing bg is order-dependent/flaky).
         readOnly && 'text-delta-800',
-        locked && 'cursor-default',
+        (locked || readOnlyValue) && 'cursor-default',
         inputSlotClass,
     )
     const singleLineDataProps =
@@ -551,7 +566,7 @@ export const StyledInputField = ({
                     </label>
                 </div>
             )}
-            <LockedFieldTooltip reason={locked ? lockedReason : undefined}>
+            <FieldReasonTooltip reason={locked ? lockedReason : readOnlyValue ? readOnlyReason : undefined}>
                 <div className='relative overflow-visible'>
                     {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions -- not independently
                         interactive: this shell wraps the REAL <input>/<textarea> below, which is already
@@ -562,12 +577,12 @@ export const StyledInputField = ({
                         className={cn(
                             'relative flex',
                             isSingleLineShell && styles['InputShell'],
-                            multiline && 'box-border items-center px-[14px] py-[16.5px]',
+                            multiline && !readOnlyValue && 'box-border items-center px-[14px] py-[16.5px]',
                             isAdornmentList &&
                                 cn(styles['AdornmentList'], userEndAdornment && styles['AdornmentList--endAdornment']),
                             // Read-only surface: fill the whole box (matches the delta-200 border, radius 4).
                             // On the shell (not the input) so it also covers the multiline field's padding.
-                            readOnly && 'rounded bg-delta-50',
+                            readOnly && !readOnlyValue && 'rounded bg-delta-50',
                             // Room for the lock icon, which sits at the end of the multiline box too.
                             locked && multiline && 'pr-[44px]',
                         )}
@@ -652,7 +667,9 @@ export const StyledInputField = ({
                             )
                         )}
 
-                        {isFloatingLabel ? (
+                        {readOnlyValue ? (
+                            <div aria-hidden className={READ_ONLY_VALUE_RING} />
+                        ) : isFloatingLabel ? (
                             <fieldset
                                 aria-hidden
                                 className={cn(
@@ -696,7 +713,7 @@ export const StyledInputField = ({
                         </label>
                     )}
                 </div>
-            </LockedFieldTooltip>
+            </FieldReasonTooltip>
 
             {showHelperSlot && (
                 <HelperRow
