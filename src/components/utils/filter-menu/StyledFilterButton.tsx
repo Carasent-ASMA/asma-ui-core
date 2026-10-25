@@ -3,6 +3,7 @@ import { StyledBadge } from '../../data-display/badge'
 import { FilterIcon } from '../../icons'
 import { useDynamicToolbarLayout } from '../../custom/module/header-layout/DynamicToolbarLayoutContext'
 import clsx from 'clsx'
+import { filterButtonText, isFilterDotShown } from './filterButtonText'
 
 /**
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#16741-35884 (Design-System · "Filter button") — button-only variant
@@ -10,18 +11,22 @@ import clsx from 'clsx'
  * Figma's `Parent=Filter` dot at top-right when `filterIsActive`.
  *
  * Custom props:
- * @param filterIsActive - needed to determine whether or not to show the dot in the top right corner indicating some changes were made
+ * @param filterIsActive - shows the dot in the top right corner indicating some changes were made
+ * @param activeCount - the number of filter controls that differ from the page default (the page computes it); shown as `Filter (N)`, dot when N > 0
  * @param hideLabel - icon-only mode. When omitted, follows the surrounding DynamicToolbar layout (filterIconOnly).
  */
 
 interface StyledFilterMenuProps {
-    filterIsActive: boolean
+    /** Ignored when `activeCount` is given. */
+    filterIsActive?: boolean
+    activeCount?: number
     label?: string
     hideLabel?: boolean
 }
 
 export const StyledFilterButton: React.FC<StyledButtonProps & StyledFilterMenuProps> = ({
     filterIsActive,
+    activeCount,
     label,
     hideLabel,
     size = 'large',
@@ -30,6 +35,8 @@ export const StyledFilterButton: React.FC<StyledButtonProps & StyledFilterMenuPr
 }) => {
     const { filterIconOnly } = useDynamicToolbarLayout()
     const isLabelHidden = hideLabel ?? filterIconOnly
+    const text = filterButtonText(label, activeCount)
+    const isDotShown = isFilterDotShown(filterIsActive, activeCount)
 
     return (
         <>
@@ -37,14 +44,14 @@ export const StyledFilterButton: React.FC<StyledButtonProps & StyledFilterMenuPr
                 <StyledButton
                     {...props}
                     type='button'
-                    aria-label={isLabelHidden ? (label ?? 'Filter') : undefined}
+                    aria-label={isLabelHidden ? text : undefined}
                     startIcon={<FilterIcon width={size === 'large' ? 24 : 20} height={size === 'large' ? 24 : 20} />}
                     variant={variant}
                     size={size}
                 >
-                    {!isLabelHidden && (label ?? 'Filter')}
+                    {!isLabelHidden && text}
                 </StyledButton>
-                {filterIsActive && (
+                {isDotShown && (
                     <StyledBadge
                         dataTest='filter-button-active-dot'
                         variant='dot'
