@@ -607,3 +607,78 @@ export const LockedRows: Story = {
         await expect(control('free')).toHaveAttribute('tabindex', '0')
     },
 }
+
+const rowStateData: TableRow[] = activeRowData.slice(1, 2)
+
+/** One labelled single-row table per Figma `_table row DS` state (Tables page `30076-196588`). */
+interface RowStateProps {
+    activeRowId?: string
+    getRowClassName?: () => string
+    initialState?: { columnVisibility: Record<string, boolean>; rowSelection?: Record<string, boolean> }
+}
+
+const ROW_STATES: { label: string; key: string; props: RowStateProps }[] = [
+    { label: 'Default', key: 'default', props: {} },
+    { label: 'Hovered', key: 'hovered', props: { getRowClassName: () => 'pseudo-hover' } },
+    { label: 'Selected — activeRowId (e.g. opened in a side panel)', key: 'selected', props: { activeRowId: '2' } },
+    { label: 'Selected + hovered (stays white)', key: 'selected-hovered', props: { activeRowId: '2', getRowClassName: () => 'pseudo-hover' } },
+    { label: 'Focused — keyboard', key: 'focused', props: { getRowClassName: () => 'pseudo-focus-visible' } },
+    {
+        label: 'Checked',
+        key: 'checked',
+        props: { initialState: { columnVisibility: { select: true }, rowSelection: { '2': true } } },
+    },
+    {
+        label: 'Checked + selected',
+        key: 'checked-selected',
+        props: { activeRowId: '2', initialState: { columnVisibility: { select: true }, rowSelection: { '2': true } } },
+    },
+    {
+        label: 'Checked + focused',
+        key: 'checked-focused',
+        props: {
+            getRowClassName: () => 'pseudo-focus-visible',
+            initialState: { columnVisibility: { select: true }, rowSelection: { '2': true } },
+        },
+    },
+]
+
+/**
+ * **Row states gallery (ASMA-8338)** — every Figma table-row state at rest, as drawn on the Figma
+ * Tables page (`30076-196588`): Default, **Hovered** (`table/bg-row-hover` delta-50), **Selected**
+ * (`activeRowId` — white with a 2px `border/selected` gama-400 frame, kept on hover), **Focused**
+ * (keyboard — the 3px focus frame), **Checked** (`table/bg-row-selected` gama-25) and their
+ * combinations. Hover and focus are forced with the pseudo-states classes, so the states show
+ * without interaction; the `ActiveRow` story is the live version.
+ *
+ * Rows are 48px with a 1px delta-200 separator, the header is 32px, and content cells use the Figma
+ * spacing (8px row edge, 20px between cells, text 4px after the checkbox slot).
+ */
+export const RowStates: Story = {
+    // axe: empty-table-header (table header cell has no text). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
+    render: () => (
+        <div className='flex w-[720px] flex-col gap-5'>
+            {ROW_STATES.map(({ label, key, props }) => (
+                <div key={key} data-test={`row-state-${key}`} className='flex flex-col gap-1'>
+                    <span className='text-sm font-semibold text-delta-800'>{label}</span>
+                    <StyledTable
+                        columns={consumerColumns.slice(0, 3)}
+                        data={rowStateData}
+                        enableRowSelection
+                        hideFooter
+                        initialState={{ columnVisibility: { select: true } }}
+                        uniqueKey={`row-state-${key}`}
+                        {...props}
+                    />
+                </div>
+            ))}
+        </div>
+    ),
+    play: async ({ canvasElement }) => {
+        const selected = canvasElement.querySelector('[data-test="row-state-selected"] tr[data-active="true"]')
+        await expect(selected).not.toBeNull()
+        const checked = canvasElement.querySelector('[data-test="row-state-checked"] tr[aria-selected="true"]')
+        await expect(checked).not.toBeNull()
+    },
+}
