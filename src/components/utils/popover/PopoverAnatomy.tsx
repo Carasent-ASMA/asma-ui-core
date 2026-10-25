@@ -19,6 +19,11 @@ const CLOSE_COLUMN_WIDTH = 40
  * 40px body padding) needs the full 472px of the frame — with a border only 470px remain and the
  * pair wraps. Figma's stroke takes no width from autolayout, and the inset shadow matches that.
  *
+ * The ring is not on this surface itself: an element's own inset shadow paints beneath its
+ * children, so the Close button's hover fill in the top-right corner covered it. `PopoverAnatomy`
+ * draws it as its last, absolutely positioned layer (`SURFACE_EDGE_CLASSNAME`), above the content.
+ * `relative` makes the surface that layer's containing block where no floating position is set.
+ *
  * `box-border` is load-bearing, not noise: this package builds Tailwind with `preflight: false`, so
  * without it `box-sizing` falls back to `content-box` and a 472px max-width renders 474.
  *
@@ -26,7 +31,10 @@ const CLOSE_COLUMN_WIDTH = 40
  * caller, so the Gallery story can render the same surface statically in a grid.
  */
 export const POPOVER_SURFACE_CLASSNAME =
-    'box-border flex flex-col overflow-hidden rounded-lg bg-white text-delta-700 outline-none shadow-[inset_0_0_0_1px_var(--colors-delta-300),0px_4px_40px_0px_#22213366]'
+    'relative box-border flex flex-col overflow-hidden rounded-lg bg-white text-delta-700 outline-none shadow-[0px_4px_40px_0px_#22213366]'
+
+const SURFACE_EDGE_CLASSNAME =
+    'pointer-events-none absolute inset-0 rounded-[inherit] shadow-[inset_0_0_0_1px_var(--colors-delta-300)]'
 
 export interface PopoverAnatomyProps {
     dataTest: string
@@ -133,6 +141,7 @@ export const PopoverAnatomy = ({
                 </div>
             )}
             {footerActions && <div className='flex shrink-0 flex-col items-end p-3'>{footerActions}</div>}
+            <span aria-hidden data-test={`${dataTest}-edge`} className={SURFACE_EDGE_CLASSNAME} />
         </>
     )
 }
