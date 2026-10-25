@@ -9,5 +9,5 @@ inside the frame. Keyboard focus still shows the 3px Focused frame. The select c
 including the select-all box in the header, show the pointer cursor (locked rows keep not-allowed).
 Hovering a checkbox's or radio's option text (any enclosing `<label>`, e.g.
 `StyledFormControlLabel`) now shows its grey hover circle, as Figma's Checkbox+Label / Radio+Label
-Hovered state does; never on a disabled or read-only control. New `RowStates` story shows every
-table-row state.
+Hovered state does; never on a disabled or read-only control. The 1px row line now sits under every row, the last one included, as
+Figma's `border-b` does. New `RowStates` story shows the six Figma table-row states.

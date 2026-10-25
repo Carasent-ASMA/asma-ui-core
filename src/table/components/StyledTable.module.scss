@@ -152,14 +152,15 @@
         color: var(--colors-gama-500);
     }
 
-    // Figma _table row DS: 1px table/border-default #d3d8df (delta-200) between rows, drawn inside
-    // the 48px row. A background layer takes no layout space (a border made every row after the
-    // first 49px) and sits over the hover/Checked/Selected `background-color` without replacing it.
-    .t-row + .t-row .t-cell {
+    // Figma _table row DS: a 1px table/border-default #d3d8df (delta-200) line under every row (its
+    // `border-b`), the last row included, drawn inside the 48px row. A background layer takes no
+    // layout space (a border made rows 49px) and sits over the hover/Checked/Selected
+    // `background-color` without replacing it; the Selected/Focused frames paint over it.
+    .t-row .t-cell {
         background-image: linear-gradient(var(--colors-delta-200), var(--colors-delta-200));
         background-repeat: no-repeat;
         background-size: 100% 1px;
-        background-position: top;
+        background-position: bottom;
     }
 
     .t-row {

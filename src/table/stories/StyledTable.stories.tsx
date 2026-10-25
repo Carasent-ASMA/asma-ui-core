@@ -613,52 +613,50 @@ const rowStateData: TableRow[] = activeRowData.slice(1, 2)
 /** One labelled single-row table per Figma `_table row DS` state (Tables page `30076-196588`). */
 interface RowStateProps {
     activeRowId?: string
-    getRowClassName?: () => string
     initialState?: { columnVisibility: Record<string, boolean>; rowSelection?: Record<string, boolean> }
 }
 
+const CHECKED = { columnVisibility: { select: true }, rowSelection: { '2': true } }
+
+/** The six Figma `_table row DS` states, in the order and with the names of the Figma Tables page. */
 const ROW_STATES: { label: string; key: string; props: RowStateProps }[] = [
-    { label: 'Default', key: 'default', props: {} },
-    { label: 'Hovered', key: 'hovered', props: { getRowClassName: () => 'pseudo-hover' } },
-    { label: 'Selected — activeRowId (e.g. opened in a side panel)', key: 'selected', props: { activeRowId: '2' } },
-    { label: 'Selected + hovered (stays white)', key: 'selected-hovered', props: { activeRowId: '2', getRowClassName: () => 'pseudo-hover' } },
-    { label: 'Focused — keyboard', key: 'focused', props: { getRowClassName: () => 'pseudo-focus-visible' } },
-    {
-        label: 'Checked',
-        key: 'checked',
-        props: { initialState: { columnVisibility: { select: true }, rowSelection: { '2': true } } },
-    },
-    {
-        label: 'Checked + selected',
-        key: 'checked-selected',
-        props: { activeRowId: '2', initialState: { columnVisibility: { select: true }, rowSelection: { '2': true } } },
-    },
-    {
-        label: 'Checked + focused',
-        key: 'checked-focused',
-        props: {
-            getRowClassName: () => 'pseudo-focus-visible',
-            initialState: { columnVisibility: { select: true }, rowSelection: { '2': true } },
-        },
-    },
+    { label: 'Row • Default enabled', key: 'default', props: {} },
+    { label: 'Row • Hovered', key: 'hovered', props: {} },
+    { label: 'Row • Selected', key: 'selected', props: { activeRowId: '2' } },
+    { label: 'Row • Focused', key: 'focused', props: {} },
+    { label: 'Row • Checked', key: 'checked', props: { initialState: CHECKED } },
+    { label: 'Row • Checked + focused', key: 'checked-focused', props: { initialState: CHECKED } },
 ]
 
 /**
- * **Row states gallery (ASMA-8338)** — every Figma table-row state at rest, as drawn on the Figma
- * Tables page (`30076-196588`): Default, **Hovered** (`table/bg-row-hover` delta-50), **Selected**
- * (`activeRowId` — white with a 2px `border/selected` gama-400 frame, kept on hover), **Focused**
- * (keyboard — the 3px focus frame), **Checked** (`table/bg-row-selected` gama-25) and their
- * combinations. Hover and focus are forced with the pseudo-states classes, so the states show
- * without interaction; the `ActiveRow` story is the live version.
+ * **Row states gallery (ASMA-8338)** — the six Figma table-row states at rest, replicating the Figma
+ * Tables page (`30076-196588`):
  *
- * Rows are 48px with a 1px delta-200 separator, the header is 32px, and content cells use the Figma
- * spacing (8px row edge, 20px between cells, text 4px after the checkbox slot).
+ * | Figma state | How a table gets it | Look |
+ * | --- | --- | --- |
+ * | Row • Default enabled | — | white, 1px `table/border-default` (delta-200) line under the row |
+ * | Row • Hovered | pointer over the row | `table/bg-row-hover` (delta-50) |
+ * | Row • Selected | `activeRowId` — the row opened in a side panel / preview | white + 2px `border/selected` (gama-400) frame, kept on hover |
+ * | Row • Focused | keyboard focus | white + 3px `table/border-focus` (gama-500) frame |
+ * | Row • Checked | ticked in the select column | `table/bg-row-selected` (gama-25) |
+ * | Row • Checked + focused | ticked + keyboard focus | gama-25 + the 3px focus frame |
+ *
+ * Hover and focus are forced on those rows with the pseudo-states addon (selector-targeted, so the
+ * table's own row classes stay untouched) and every state shows without interaction; the `ActiveRow` story is the live version. Rows are 48px, the header 32px, and content
+ * cells use the Figma spacing (8px row edge, 20px between cells, text 4px after the checkbox slot).
  */
 export const RowStates: Story = {
-    // axe: empty-table-header (table header cell has no text). ASMA-8136 allowlist - see docs/a11y-allowlist.md
-    parameters: { a11y: { test: 'todo' } },
+    parameters: {
+        // axe: empty-table-header (table header cell has no text). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+        a11y: { test: 'todo' },
+        pseudo: {
+            hover: ['[data-test="row-state-hovered"] tbody tr'],
+            focusVisible: ['[data-test="row-state-focused"] tbody tr', '[data-test="row-state-checked-focused"] tbody tr'],
+        },
+    },
     render: () => (
-        <div className='flex w-[720px] flex-col gap-5'>
+        // Two columns, so all six states fit one 1280x720 VRT frame.
+        <div className='grid w-[1240px] grid-cols-2 gap-x-8 gap-y-5'>
             {ROW_STATES.map(({ label, key, props }) => (
                 <div key={key} data-test={`row-state-${key}`} className='flex flex-col gap-1'>
                     <span className='text-sm font-semibold text-delta-800'>{label}</span>
