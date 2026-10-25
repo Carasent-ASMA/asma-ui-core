@@ -152,14 +152,15 @@
         color: var(--colors-gama-500);
     }
 
-    // Figma _table row DS: 1px table/border-default #d3d8df (delta-200) between rows, drawn inside
-    // the 48px row. A background layer takes no layout space (a border made every row after the
-    // first 49px) and sits over the hover/Checked/Selected `background-color` without replacing it.
-    .t-row + .t-row .t-cell {
+    // Figma _table row DS: a 1px table/border-default #d3d8df (delta-200) line under every row (its
+    // `border-b`), the last row included, drawn inside the 48px row. A background layer takes no
+    // layout space (a border made rows 49px) and sits over the hover/Checked/Selected
+    // `background-color` without replacing it; the Selected/Focused frames paint over it.
+    .t-row .t-cell {
         background-image: linear-gradient(var(--colors-delta-200), var(--colors-delta-200));
         background-repeat: no-repeat;
         background-size: 100% 1px;
-        background-position: top;
+        background-position: bottom;
     }
 
     .t-row {
@@ -516,13 +517,11 @@
         }
     }
 
-    // Figma table focus state: a 3px frame surrounds the whole header or row without changing
-    // its layout. `:has()` lets the focusable sortable cell activate the header-wide frame.
-    // `data-active` (the `activeRowId` prop) draws the same frame on the row the user is working
-    // with, so it persists after keyboard focus moves on and also shows after a mouse click.
+    // Figma table Focused state (keyboard focus): a 3px focus-ring frame surrounds the whole header
+    // or row without changing its layout. `:has()` lets the focusable sortable cell activate the
+    // header-wide frame.
     .table-header:has(:focus-visible),
-    .t-row:focus-visible,
-    .t-row[data-active='true'] {
+    .t-row:focus-visible {
         .t-cell {
             box-shadow:
                 inset 0 3px 0 0 var(--colors-focus-ring),
@@ -542,6 +541,40 @@
                     inset -3px 0 0 0 var(--colors-focus-ring),
                     inset 0 3px 0 0 var(--colors-focus-ring),
                     inset 0 -3px 0 0 var(--colors-focus-ring),
+                    var(--table-cell-shadow, 0 0 transparent) !important;
+            }
+        }
+    }
+
+    // Figma table Selected state (45318-213491) — the `activeRowId` row, the one the user is working
+    // with (e.g. opened in a side panel): `table/bg-row-focus` white + a 2px `border/selected`
+    // (gama-400) frame around the whole row, including the sticky cells. It stays white on hover so
+    // it is never mistaken for the delta-50 hover; a ticked row keeps its gama-25 Checked fill.
+    // Keyboard focus on that row still shows the Focused frame above.
+    .t-row[data-active='true']:not(:focus-visible) {
+        .t-cell {
+            box-shadow:
+                inset 0 2px 0 0 var(--colors-gama-400),
+                inset 0 -2px 0 0 var(--colors-gama-400),
+                var(--table-cell-shadow, 0 0 transparent) !important;
+
+            &:not(.selected) {
+                background-color: white;
+            }
+
+            &:first-child {
+                box-shadow:
+                    inset 2px 0 0 0 var(--colors-gama-400),
+                    inset 0 2px 0 0 var(--colors-gama-400),
+                    inset 0 -2px 0 0 var(--colors-gama-400),
+                    var(--table-cell-shadow, 0 0 transparent) !important;
+            }
+
+            &:last-child {
+                box-shadow:
+                    inset -2px 0 0 0 var(--colors-gama-400),
+                    inset 0 2px 0 0 var(--colors-gama-400),
+                    inset 0 -2px 0 0 var(--colors-gama-400),
                     var(--table-cell-shadow, 0 0 transparent) !important;
             }
         }
@@ -618,4 +651,12 @@
     // Figma table Checkbox cell: 8px row edge + a 32px slot centring the 16px box → box at x16.
     // The cell adds its 5px padding, so 11px here.
     padding: 0 0 0 11px;
+
+    // It is the control (role=checkbox), so it shows the hand like every clickable target. The
+    // header sets `cursor: default` and rows without `onRowClick` have no cursor class, so the
+    // select-all box used to show the arrow. A locked row (aria-disabled) keeps its not-allowed
+    // cursor from the span inside.
+    &:not([aria-disabled='true']) {
+        cursor: pointer;
+    }
 }

@@ -112,7 +112,10 @@
     &.size-small .RadioRippleContainer::after {
         @include radio-wrapper-size(small);
     }
-    &:hover .RadioRippleContainer::after {
+    // Figma Radio+Label Hovered: hovering the option text (any enclosing <label>) shows the circle
+    // too; never on a disabled or read-only radio.
+    &:hover .RadioRippleContainer::after,
+    label:hover &:not([data-disabled]):not(.ReadOnly) .RadioRippleContainer::after {
         opacity: 1;
         transform: translate(-50%, -50%) scale(1);
     }
