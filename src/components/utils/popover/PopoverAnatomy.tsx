@@ -89,7 +89,8 @@ export const PopoverAnatomy = ({
             keeps exactly Figma's width. See `ClassicScrollbarKeepsDatePickerPairOnOneRow`.
 
             The close control floats over the top of that column instead of occupying a row, but stays
-            LAST in the DOM so `action` still opens on the first body control, not on it. With a title
+            LAST in the DOM — after the footer rows too — so `action` still opens on the first body
+            control, not on it, and Tab walks body, footer, then Close. With a title
             the 40px title row puts the scroll area — and so the bar — below the Close, as Figma draws.
             Without one, a body that scrolls starts 40px down for the same reason: a native bar runs
             the full height of its container, and at the top it would sit under the Close (its up
@@ -115,16 +116,6 @@ export const PopoverAnatomy = ({
                 >
                     {children}
                 </div>
-                <div className='absolute right-0 top-0'>
-                    <StyledButton
-                        dataTest={`${dataTest}-close`}
-                        variant='textGray'
-                        type='button'
-                        aria-label={closeLabel}
-                        onClick={onClose}
-                        startIcon={<CloseIcon width={24} height={24} />}
-                    />
-                </div>
             </div>
             {(viewResultsAction ?? resetAction) && (
                 // Figma draws this row as `justify-between` with "View results (3)" left and the reset
@@ -141,6 +132,18 @@ export const PopoverAnatomy = ({
                 </div>
             )}
             {footerActions && <div className='flex shrink-0 flex-col items-end p-3'>{footerActions}</div>}
+            {/* After the footer rows, so Tab reaches it last: body, footer, then Close. Positioned on the
+                surface (`relative`), whose top-right corner is the content column's. */}
+            <div className='absolute right-0 top-0'>
+                <StyledButton
+                    dataTest={`${dataTest}-close`}
+                    variant='textGray'
+                    type='button'
+                    aria-label={closeLabel}
+                    onClick={onClose}
+                    startIcon={<CloseIcon width={24} height={24} />}
+                />
+            </div>
             <span aria-hidden data-test={`${dataTest}-edge`} className={SURFACE_EDGE_CLASSNAME} />
         </>
     )
