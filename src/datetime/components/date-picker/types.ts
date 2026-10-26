@@ -32,6 +32,8 @@ export interface DatePickerSingleFieldProps {
     disallowPast?: boolean
     disallowFuture?: boolean
     hideDefaultHelperText?: boolean
+    /** Keeps the one-line helper row even without a helper or error, so an error never moves the layout. */
+    reserveHelperText?: boolean
     /**
      * Extra ARIA attributes for the text input (e.g. `aria-label`, `aria-required`). Without them the
      * input is named by `title`, which is otherwise plain text above the field.

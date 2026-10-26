@@ -33,6 +33,7 @@ export interface IBaseDatePickerInput {
     disallowPast?: boolean
     disallowFuture?: boolean
     hideDefaultHelperText?: boolean
+    reserveHelperText?: boolean
     required?: boolean
     minDate?: Date
     inputAriaProps?: AriaAttributes
@@ -61,6 +62,7 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
         validateOnCalendarClose,
         onValidatedOnce,
         hideDefaultHelperText,
+        reserveHelperText,
         required,
         minDate,
         width = 's',
@@ -92,7 +94,6 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
 
     const hasError = !!(validationError || error)
     const rawText = hasError ? (errorText ?? errHelperText) : helperText ?? effectiveDefaultHelper
-
 
     useEffect(() => {
         if (!selected) {
@@ -178,7 +179,7 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
     }
 
     return (
-        <div className='cursor-default' data-field-width={width} style={fieldWidthStyle(width)}>
+        <div className='cursor-default' data-field-width={width} style={fieldWidthStyle(width)} data-helper-room-box=''>
             {/* Title and label sit above the whole row, so the calendar button lines up with the input. */}
             {title && (
                 <div id={titleId} className={fieldLabelAboveClass({ disabled: rest.disabled })}>
@@ -213,7 +214,19 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
                             onBlur={!readOnly ? handleBlur : undefined}
                             // Render the helper/error through the InputField's own helper row (single
                             // source — don't reinvent it); `rawText` is the resolved default/helper/error.
-                            helperText={rawText}
+                            helperText={
+                                rawText == null || rawText === '' ? (
+                                    rawText
+                                ) : (
+                                    <span
+                                        className='block truncate'
+                                        title={typeof rawText === 'string' ? rawText : undefined}
+                                    >
+                                        {rawText}
+                                    </span>
+                                )
+                            }
+                            reserveHelperText={reserveHelperText}
                             slotProps={{
                                 formHelperText: { sx: { marginTop: '4px', marginLeft: 0, marginRight: 0 } },
                                 htmlInput: {

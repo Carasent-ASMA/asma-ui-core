@@ -61,7 +61,7 @@ export const TimePickerInput: React.FC<
     }, [])
 
     return (
-        <div {...timePickerWidthProps(width)}>
+        <div {...timePickerWidthProps(width)} data-helper-room-box=''>
             {title && (
                 <div id={titleId} className={fieldLabelAboveClass({ disabled })}>
                     {title}
