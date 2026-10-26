@@ -80,12 +80,14 @@ export function TableHeader<
                         tabIndex={0}
                         onKeyDown={(event) => {
                             if (event.key !== 'Tab' || event.shiftKey) return
-                            const firstRow = event.currentTarget.closest('table')?.querySelector<HTMLTableRowElement>(
-                                'tbody tr[data-index="0"]',
+                            // Enter the rows on the one the user last worked with — the row that holds the
+                            // roving tab stop — not always on the first.
+                            const activeRow = event.currentTarget.closest('table')?.querySelector<HTMLTableRowElement>(
+                                'tbody tr[tabindex="0"]',
                             )
-                            if (!firstRow) return
+                            if (!activeRow) return
                             event.preventDefault()
-                            firstRow.focus()
+                            activeRow.focus()
                         }}
                     >
                         {leftHeaders.map(({ header, left }) => (

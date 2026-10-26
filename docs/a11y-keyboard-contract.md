@@ -131,6 +131,19 @@ out of the menu or menubar, and close all menus and submenus" — because every 
 `preventDefault`, so the browser still performs the move; `StyledPopover` restores the trigger first,
 and focus continues from there. Covered for Tab and Shift+Tab.
 
+**M (2026-10-26) — WCAG 2.4.3, `table/components/TableRow.tsx`, `table-header/TableHeader.tsx`.**
+Tab walked the table row by row, so leaving a long table took one Tab per row. The rows already keep one
+roving tab stop and move with ArrowUp/ArrowDown; the WAI-ARIA Grid pattern makes Tab an exit from the
+composite. Tab on a row now moves to the first focusable element after the table, and Shift+Tab to the
+header row (or, without one, to the last focusable element before the table). Tab on the header row enters
+the rows on the active row instead of always the first. Covered by
+`TableRow.keyboard.interaction.test.tsx`.
+
+The arrow keys also left the focused row off screen (WCAG 2.4.11): `FocusRowsFeature` focused it with
+`preventScroll: true` and never scrolled. It now scrolls the row just into view (`block: 'nearest'`),
+with a `scroll-margin` that clears the sticky header and the sticky horizontal scrollbar/footer, so a
+row is not left under the header on the way up. Covered by `TableRow.scrollIntoView.interaction.test.tsx`.
+
 H was retired as a false escalation: the popup indicator is intentionally out of the tab order; the focused combobox opens the list with Enter, ArrowDown or ArrowUp.
 
 The detailed passages below are retained investigation history. Their former “not fixed” notes are superseded by the resolved table above.
