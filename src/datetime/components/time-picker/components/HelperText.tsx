@@ -32,16 +32,15 @@ export const HelperText: React.FC<{
     messages = defaultTimePickerHelperMessages,
 }) => {
     const hasError = !isValidTime || !isValidEndTime || !!isMissingTime || !!error
-    const text =
-        error && helperText != null
+    const text = !isValidTime
+        ? messages.invalid[localization]
+        : !isValidEndTime
+          ? messages.afterStartTime[localization]
+          : error && helperText != null
             ? helperText
             : isMissingTime
               ? (messages.required ?? defaultTimePickerHelperMessages.required)[localization]
-              : !isValidTime
-                ? messages.invalid[localization]
-                : !isValidEndTime
-                  ? messages.afterStartTime[localization]
-                  : helperText
+              : helperText
 
     return (
         <span className='flex min-w-0 items-start gap-1'>

@@ -535,6 +535,30 @@ describe('StyledTimePicker required', () => {
         await expect(container).not.toHaveTextContent(/Required$/)
     })
 
+    it('keeps its own before-start message over a form Required for a typed time', async () => {
+        const { container } = mount(
+            <StyledTimePicker
+                dataTest='end-time'
+                label='End time'
+                required
+                error
+                helperText='Required'
+                notBeforeTime={new Date(2026, 9, 5, 12, 0)}
+                value={new Date(2026, 9, 5, 13, 0)}
+                onSelect={() => undefined}
+            />,
+        )
+        const input = container.querySelector<HTMLInputElement>('input[data-testid="end-time"]')!
+
+        await userEvent.clear(input)
+        await userEvent.keyboard('1100')
+        await waitFor(() => expect(input).toHaveValue('11:00'))
+        input.blur()
+
+        await waitFor(() => expect(container).toHaveTextContent('Must be after start time'))
+        await expect(container).not.toHaveTextContent('Required')
+    })
+
     it('shows no error for an empty optional field', async () => {
         const { container } = mount(<TimePickerFixture />)
         const input = field(container)
