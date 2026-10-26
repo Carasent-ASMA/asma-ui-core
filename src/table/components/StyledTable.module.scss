@@ -248,10 +248,11 @@
                 background-color: var(--colors-gama-25);
             }
 
-            // Figma Selected (45318-213491): table/bg-row-focus white + 2px border/selected
-            // #1ca1a1 (gama-400) frame — distinct from the delta-50 hover and the gama-25 Checked fill.
+            // Figma Row • Selected (Tables page instance 36956-179563): table/bg-row-selected
+            // #f3fafa (gama-25) + 2px border/selected #1ca1a1 (gama-400) frame. (The bare component
+            // symbol 45318-213491 still says bg-row-focus white; the Tables page is the reference.)
             &.single-selection {
-                background-color: white;
+                background-color: var(--colors-gama-25);
                 box-shadow:
                     inset 0 2px 0 0 var(--colors-gama-400),
                     inset 0 -2px 0 0 var(--colors-gama-400);
@@ -546,10 +547,11 @@
         }
     }
 
-    // Figma table Selected state (45318-213491) — the `activeRowId` row, the one the user is working
-    // with (e.g. opened in a side panel): `table/bg-row-focus` white + a 2px `border/selected`
-    // (gama-400) frame around the whole row, including the sticky cells. It stays white on hover so
-    // it is never mistaken for the delta-50 hover; a ticked row keeps its gama-25 Checked fill.
+    // Figma Row • Selected (Tables page instance 36956-179563) — the `activeRowId` row, the one the
+    // user is working with (e.g. opened in a side panel): `table/bg-row-selected` #f3fafa (gama-25)
+    // fill + a 2px `border/selected` (gama-400) frame around the whole row, including the sticky
+    // cells. The fill stays on hover so it is never mistaken for the delta-50 hover. (The bare
+    // component symbol 45318-213491 still says bg-row-focus white; the Tables page is the reference.)
     // Keyboard focus on that row still shows the Focused frame above.
     .t-row[data-active='true']:not(:focus-visible) {
         .t-cell {
@@ -558,9 +560,7 @@
                 inset 0 -2px 0 0 var(--colors-gama-400),
                 var(--table-cell-shadow, 0 0 transparent) !important;
 
-            &:not(.selected) {
-                background-color: white;
-            }
+            background-color: var(--colors-gama-25);
 
             &:first-child {
                 box-shadow:

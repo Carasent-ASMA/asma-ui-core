@@ -6,9 +6,9 @@ import { StyledTable } from './StyledTableIndex'
 
 /**
  * `activeRowId` — the row the user is working with (e.g. the one opened in a side panel) is drawn in
- * the Figma table-row Selected state (ASMA-8338): white with a 2px gama-400 frame, full width,
+ * the Figma table-row Selected state (ASMA-8338): the gama-25 fill with a 2px gama-400 frame, full width,
  * including the sticky actions cell, whose own `box-shadow` used to clip any frame drawn from outside.
- * It stays white on hover. Keyboard focus keeps the 3px Focused frame.
+ * The fill stays on hover. Keyboard focus keeps the 3px Focused frame.
  *
  * Asserted on computed styles in a real browser: the frame is pure CSS, so only a browser can tell
  * whether it actually paints.
@@ -59,12 +59,15 @@ describe('StyledTable — activeRowId', () => {
         for (const cell of cells) await expect(shadowOf(cell)).not.toMatch(/3px/)
     })
 
-    it('stays white on hover, unlike the delta-50 hover of other rows', async () => {
+    it('fills the row with table/bg-row-selected (gama-25), kept on hover', async () => {
         mount(<StyledTable locale='en' columns={columns} data={data} activeRowId='r-2' />)
 
+        // Default theme: gama-25 = blue-25 #f2f8fb.
+        const GAMA_25 = 'rgb(242, 248, 251)'
         const active = cellsOf('r-2')
+        for (const cell of active) await expect(getComputedStyle(cell).backgroundColor, 'at rest').toBe(GAMA_25)
         await userEvent.hover(active[0]!)
-        for (const cell of active) await expect(getComputedStyle(cell).backgroundColor).toBe('rgb(255, 255, 255)')
+        for (const cell of active) await expect(getComputedStyle(cell).backgroundColor, 'on hover').toBe(GAMA_25)
     })
 
     it('shows the 3px Focused frame instead when the active row has keyboard focus', async () => {
