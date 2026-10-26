@@ -636,7 +636,7 @@ const ROW_STATES: { label: string; key: string; props: RowStateProps }[] = [
  * | --- | --- | --- |
  * | Row • Default enabled | — | white, 1px `table/border-default` (delta-200) line under the row |
  * | Row • Hovered | pointer over the row | `table/bg-row-hover` (delta-50) |
- * | Row • Selected | `activeRowId` — the row opened in a side panel / preview | white + 2px `border/selected` (gama-400) frame, kept on hover |
+ * | Row • Selected | `activeRowId` — the row opened in a side panel / preview | `table/bg-row-selected` (gama-25) + 2px `border/selected` (gama-400) frame, kept on hover |
  * | Row • Focused | keyboard focus | white + 3px `table/border-focus` (gama-500) frame |
  * | Row • Checked | ticked in the select column | `table/bg-row-selected` (gama-25) |
  * | Row • Checked + focused | ticked + keyboard focus | gama-25 + the 3px focus frame |

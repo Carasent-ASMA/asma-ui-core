@@ -141,9 +141,9 @@ export type StyledTableProps<TData, TCustomData> = {
     getRowClassName?: (row: Row<TData>) => string
     /**
      * The row the user is working with — e.g. the one opened in a side panel or preview — matched
-     * against `row.id`. Drawn in the Figma table-row **Selected** state: white with a 2px
-     * `border/selected` (gama-400) frame around the whole row, kept on hover; a ticked row keeps its
-     * Checked fill inside the frame. Keyboard focus on it still shows the 3px Focused frame. Pass the
+     * against `row.id`. Drawn in the Figma table-row **Selected** state: the `table/bg-row-selected`
+     * (gama-25) fill with a 2px `border/selected` (gama-400) frame around the whole row, kept on
+     * hover. Keyboard focus on it still shows the 3px Focused frame. Pass the
      * opened row's id (and `null` when nothing is open). Opt-in: tables that do not pass it are unchanged.
      */
     activeRowId?: string | null
