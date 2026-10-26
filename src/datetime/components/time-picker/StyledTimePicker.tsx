@@ -28,7 +28,7 @@ import { cn } from 'src/helpers/cn'
  * instead of the popper, matching `StyledDatePicker`. Non-annotated props are behavioral.
  */
 export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
-    const { value, onSelect, notBeforeTime, minTime } = props
+    const { value, onSelect, notBeforeTime, minTime, required } = props
     const popupState = usePopupState({ variant: 'popper', popupId: 'time-picker-popper' })
     const isMobile = useIsMobileView()
     useBackCloses({ active: popupState.isOpen, requestClose: popupState.close })
@@ -67,6 +67,7 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
     const parsedLocalTime = resolvedLocalValue.length === 5 ? getTimeFromValue(resolvedLocalValue, value) : null
     const isValidTime = !showError || resolvedLocalValue === '' || parsedLocalTime !== null
     const isValidEndTime = !showError || !parsedLocalTime || checkValidEndTime(parsedLocalTime)
+    const isMissingTime = !!required && showError && resolvedLocalValue === ''
 
     /** Complete, parsable and not before `notBeforeTime`; an empty field is valid (required is the form's job). */
     const isCommittableTime = (text: string): boolean => {
@@ -80,7 +81,7 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
 
         setIsDirty(true)
         setLocalValue(nextValue)
-        if (isCommittableTime(nextValue)) setShowError(false)
+        if (isMissingTime || isCommittableTime(nextValue)) setShowError(false)
 
         if (nextValue.length !== 5) return
 
@@ -126,6 +127,12 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
     }
 
     const handleBlur = () => {
+        // Leaving for the open panel is not a finished entry: a pick or the eraser settles it.
+        if (required && resolvedLocalValue === '' && !popupState.isOpen) {
+            if (isDirty) onSelect(undefined)
+            setShowError(true)
+            return
+        }
         if (!isDirty) return
         // A typed time before `minTime` is never committed: show the last valid value again.
         if (parsedLocalTime && isBeforeMinTime(parsedLocalTime, minTime)) setIsDirty(false)
@@ -138,7 +145,7 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
         onSelect(undefined)
         setLocalValue('')
         setIsDirty(false)
-        setShowError(false)
+        setShowError(!!required)
     }
 
     const input = (
@@ -148,6 +155,7 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
             localValue={resolvedLocalValue}
             isValidTime={isValidTime}
             isValidEndTime={isValidEndTime}
+            isMissingTime={isMissingTime}
             handleChange={handleChange}
             handleBlur={handleBlur}
         />

@@ -5,16 +5,19 @@ import { OutlineErrorRounded } from 'src/datetime/shared-components/OutlineError
 export interface TimePickerHelperMessages {
     invalid: { en: string; no: string }
     afterStartTime: { en: string; no: string }
+    required?: { en: string; no: string }
 }
 
-export const defaultTimePickerHelperMessages: TimePickerHelperMessages = {
+export const defaultTimePickerHelperMessages: Required<TimePickerHelperMessages> = {
     invalid: { en: 'Invalid time format', no: 'Ugyldig tidsformat' },
     afterStartTime: { en: 'Must be after start time', no: 'Må være etter starttid' },
+    required: { en: 'Required', no: 'Påkrevd' },
 }
 
 export const HelperText: React.FC<{
     isValidTime: boolean
     isValidEndTime: boolean
+    isMissingTime?: boolean
     error?: boolean
     localization: 'en' | 'no'
     helperText?: ReactNode
@@ -22,17 +25,23 @@ export const HelperText: React.FC<{
 }> = ({
     isValidTime,
     isValidEndTime,
+    isMissingTime,
     localization = 'en',
     error,
     helperText,
     messages = defaultTimePickerHelperMessages,
 }) => {
-    const hasError = !isValidTime || !isValidEndTime || !!error
-    const text = !isValidTime
-        ? messages.invalid[localization]
-        : !isValidEndTime
-          ? messages.afterStartTime[localization]
-          : helperText
+    const hasError = !isValidTime || !isValidEndTime || !!isMissingTime || !!error
+    const text =
+        error && helperText != null
+            ? helperText
+            : isMissingTime
+              ? (messages.required ?? defaultTimePickerHelperMessages.required)[localization]
+              : !isValidTime
+                ? messages.invalid[localization]
+                : !isValidEndTime
+                  ? messages.afterStartTime[localization]
+                  : helperText
 
     return (
         <span className='flex items-start gap-1'>
