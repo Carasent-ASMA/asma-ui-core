@@ -6,10 +6,11 @@ ASMA-8667: date and time picker errors say Required for an empty required field 
 line in a reserved helper row.
 
 - **`StyledTimePicker` `required`.** The input is `aria-required`, and an empty field shows
-  *Required* / *Påkrevd* after blur or after the eraser empties it. Leaving the field for the open
+  *Required* / *Obligatorisk* after blur or after the eraser empties it. Leaving the field for the open
   panel waits for the pick. An empty optional field still shows nothing.
-- **Form errors win.** When the consumer passes `error` with `helperText`, the time picker shows
-  that text instead of its own message.
+- **Form errors and own messages.** A typed time that is invalid or before the start keeps the
+  picker's own message; otherwise a consumer `error` with `helperText` replaces the empty-field
+  *Required*.
 - **Emptied required date.** `StyledDatePicker` now calls `onInputChange(undefined)` when a
   required field is emptied, like an optional one, so the consumer no longer keeps the old date.
   Its own *Required* stays when the consumer answers with `selected={undefined}`.

@@ -11,7 +11,7 @@ export interface TimePickerHelperMessages {
 export const defaultTimePickerHelperMessages: Required<TimePickerHelperMessages> = {
     invalid: { en: 'Invalid time format', no: 'Ugyldig tidsformat' },
     afterStartTime: { en: 'Must be after start time', no: 'Må være etter starttid' },
-    required: { en: 'Required', no: 'Påkrevd' },
+    required: { en: 'Required', no: 'Obligatorisk' },
 }
 
 export const HelperText: React.FC<{
