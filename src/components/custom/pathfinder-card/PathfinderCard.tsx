@@ -203,7 +203,9 @@ export function PathfinderCard({
         if (expanded) return sortedItems
 
         const shellPaddingLeft = 24
-        const shellPaddingRight = 24
+        // Shell `p-2` (8) + the compact content's `pr-8` (32). The chevron is absolutely positioned
+        // over the content area, so its own reserve is subtracted on top of this.
+        const shellPaddingRight = 40
         const reservedLead = leadSlot ? Math.max(leadReservePx, measurements.leadWidth + 12) : 0
         const reservedAction = actionSlot ? Math.max(actionReservePx, measurements.actionWidth) : 0
         const chevronReservePx = 24
@@ -243,11 +245,20 @@ export function PathfinderCard({
             <div className={cn(styles['shell'], compact ? styles['shellCompact'] : styles['shellExpanded'])}>
                 {leadSlot ? <div className='shrink-0'>{leadSlot}</div> : null}
 
-                <div className={styles['content']}>
+                <div className={cn(styles['content'], compact && styles['contentCompact'])}>
                     {compact ? (
                         <div className={cn(styles['compactItems'], shouldStackCompactItems && styles['compactItemsStacked'])}>
                             {compactItems.map((item) => (
-                                <div key={item.id} className='shrink-0 whitespace-nowrap'>
+                                <div
+                                    key={item.id}
+                                    // ASMA-8427: a single item wider than the card used to be clipped
+                                    // mid-glyph under the chevron. Items may now shrink, so their own
+                                    // `truncate` text ellipsizes instead.
+                                    className={cn(
+                                        'min-w-0 whitespace-nowrap',
+                                        shouldStackCompactItems ? 'w-full' : 'shrink',
+                                    )}
+                                >
                                     <ItemRenderer item={item} compact={compact} />
                                 </div>
                             ))}

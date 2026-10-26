@@ -124,6 +124,13 @@ export type StyledTableProps<TData, TCustomData> = {
     customActionsNode?: (row: CellContext<TData, unknown>) => ReactNode
     customSubRowData?: Map<string, TCustomData[]>
     headerPin?: boolean
+    /**
+     * Pins the internal actions column's body cells to the right edge (`position: sticky` + shadow).
+     * Set `false` when the column duplicates row content, so it no longer overlays the last data
+     * column; its cells then scroll with the data. The header cell with the pin menu stays pinned
+     * either way.
+     */
+    stickyActions?: boolean
     expandArrow?: boolean
     defaultExpanded?: boolean
     loading?: boolean

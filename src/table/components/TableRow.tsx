@@ -56,6 +56,7 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
         defaultExpanded,
         actions,
         customActionsNode,
+        stickyActions = true,
         textExpandArrow,
         enableMultiRowSelection,
         enableRowSelection,
@@ -99,6 +100,10 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
 
     const cellBandMinHeight = isRowExpanded ? (collapsedRowHeight ?? rowHeight) : rowHeight
 
+    // Mount-only by design: `defaultExpanded` seeds the row's expansion state once, through the
+    // table's own row API. There is no parent to lift this to here — `StyledTable` owns the model
+    // and has already initialised it by the time a row renders.
+    // eslint-disable-next-line react-you-might-not-need-an-effect/no-manage-parent
     useEffect(() => {
         if (defaultExpanded && row.getCanExpand() && !row.getIsExpanded()) {
             row.toggleExpand()
@@ -182,6 +187,16 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
         left: allCells.slice(0, idx).reduce((acc, col) => acc + (col.column.getSize() ?? 0), 0),
     }))
 
+    const hasActionsContent = Boolean(actions) || Boolean(customActionsNode)
+
+    /**
+     * ASMA-8427: a pinned actions column covers the column behind it, so a table whose actions
+     * column is not worth pinning can opt out with `stickyActions={false}`. Those cells then scroll
+     * inline; the header cell with the pin menu stays pinned either way. Tables that do not opt out
+     * keep the Figma behaviour of a pinned actions column (including when it only hosts the pin menu).
+     */
+    const isActionsColumnSticky = stickyActions
+
     const centerCells = useMemo(
         () =>
             positionedCells.filter(
@@ -196,7 +211,9 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
     const rightCells = useMemo(
         () => {
             const pinnedRightCells = positionedCells.filter(
-                (cell) => Boolean(cell.column.columnDef.fixedRight) || cell.column.id === ACTIONS_COLUMN_ID,
+                (cell) =>
+                    Boolean(cell.column.columnDef.fixedRight) ||
+                    (cell.column.id === ACTIONS_COLUMN_ID && isActionsColumnSticky),
             )
 
             return pinnedRightCells.map((cell, index, allCells) => ({
@@ -204,7 +221,7 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
                 right: allCells.slice(index + 1).reduce((acc, col) => acc + (col.column.getSize() ?? 0), 0),
             }))
         },
-        [positionedCells],
+        [positionedCells, isActionsColumnSticky],
     )
 
     const hasActionsColumn = useMemo(
@@ -212,7 +229,9 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
         [rightCells],
     )
 
-    const hasActionsContent = Boolean(actions) || Boolean(customActionsNode)
+    const inlineActionsCell = isActionsColumnSticky
+        ? undefined
+        : positionedCells.find((cell) => cell.column.id === ACTIONS_COLUMN_ID)
 
     const hasFixedRightColumns = useMemo(
         () => rightCells.some((cell) => Boolean(cell.column.columnDef.fixedRight)),
@@ -249,10 +268,18 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
                         cell.column.id === SELECT_COLUMN_ID && style['select-cell'],
                         hasRowClickHandler && 'cursor-pointer',
                         tdClassName,
-                        isActionsCell && style['action-cell'],
-                        isActionsCell && (!hasActionsContent || hasFixedRightColumns) && style['action-cell--no-shadow'],
-                        isActionsCell && Boolean(actions) && leftCells.length && style['shadowed'],
+                        isActionsCell && isActionsColumnSticky && style['action-cell'],
                         isActionsCell &&
+                            isActionsColumnSticky &&
+                            (!hasActionsContent || hasFixedRightColumns) &&
+                            style['action-cell--no-shadow'],
+                        isActionsCell &&
+                            isActionsColumnSticky &&
+                            Boolean(actions) &&
+                            leftCells.length &&
+                            style['shadowed'],
+                        isActionsCell &&
+                            isActionsColumnSticky &&
                             (getRowClassName?.(row) ? getRowClassName?.(row) : style['action-cell-default-background']),
                         isFixedLeft && style['fixed-cell'],
                         isFixedRight && style['fixed-right-cell'],
@@ -317,6 +344,7 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
             rightCells,
             row,
             hasActionsContent,
+            isActionsColumnSticky,
             spaceForCheckmark,
             tdClassName,
         ],
@@ -382,6 +410,11 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
                 )}
 
                 {rightCells.map((cell, idx) => renderCell(cell, leftCells.length + centerCellsToRender.length + idx))}
+
+                {/* Actions column that is not pinned (empty, or `stickyActions={false}`) renders in
+                    the normal column flow so it cannot cover the data behind it. */}
+                {inlineActionsCell &&
+                    renderCell(inlineActionsCell, leftCells.length + centerCellsToRender.length + rightCells.length)}
             </tr>
             {row.getIsExpanded() && (
                 <>
