@@ -22,3 +22,5 @@ line in a reserved helper row.
   for use with `hideDefaultHelperText`. The time picker always keeps its helper row.
 - `HelperRow`'s message may shrink below its content width, so a one-line message can be cut;
   wrapping messages render as before.
+- **Floating `StyledInputLabel`.** At rest the label centres on the 40 px field instead of the
+  whole form control, so a select's reserved helper row or error no longer pushes it down.
