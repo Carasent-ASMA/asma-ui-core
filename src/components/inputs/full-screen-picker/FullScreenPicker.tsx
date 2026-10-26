@@ -5,6 +5,7 @@ import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { usePickerOneRowHeaderMediaQuery } from 'src/hooks/useMediaQuery.hook'
 import { isKeyboardModality, trackInputModality } from './inputModality'
 import { PickerLiveRegion, type PickerAnnouncement } from './PickerLiveRegion'
+import { useReleaseFieldOnKeyboardDismiss } from './useReleaseFieldOnKeyboardDismiss'
 import { useVisualViewportHeight } from './useVisualViewportHeight'
 
 export type FullScreenPickerCloseReason = DialogCloseReason | 'closeButton'
@@ -105,6 +106,7 @@ const PickerSheet = ({ dataTest, title, closeLabel, search, headerRow, children,
     const visibleHeight = useVisualViewportHeight()
     const closeRef = useRef<HTMLButtonElement>(null)
     const bodyRef = useRef<HTMLDivElement>(null)
+    useReleaseFieldOnKeyboardDismiss(closeRef)
 
     // `StyledDialog` parks focus on its own shell after `showModal()` (and again a frame later), where
     // it shows no ring — to a keyboard user focus seems to vanish. When the picker was opened from the
