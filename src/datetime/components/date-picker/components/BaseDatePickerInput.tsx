@@ -4,7 +4,7 @@ import { DatePickerButton } from './DatePickerButton'
 import { getTitleLabelling } from 'src/datetime/helpers/getTitleLabelling'
 import { useDatePickerMask } from '../hooks/useDatePickerMask'
 import { DATE_INPUT_FONT_FAMILY } from 'src/helpers/inputMask'
-import { type AriaAttributes, useEffect, useId, useState } from 'react'
+import { type AriaAttributes, useEffect, useId, useRef, useState } from 'react'
 import { getValue } from '../helpers'
 import { useDatePickerValidation, defaultDatePickerValidationMessages } from '../hooks/useDatePickerValidation'
 import { parse, isValid as isValidDateFns } from 'date-fns'
@@ -75,6 +75,7 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
     const titleId = useId()
     const inputId = useId()
     const [value, setValue] = useState(selected ? getValue(selected, dateFormat) : '')
+    const reportedEmptyRef = useRef(false)
 
     // Keep `value` in sync with `selected`/`dateFormat` without an effect — the React-recommended
     // "adjusting state during render" pattern (https://react.dev/learn/you-might-not-need-an-effect
@@ -97,7 +98,9 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
 
     useEffect(() => {
         if (!selected) {
-            clearValidation()
+            // Our own emptied field coming back as `selected={undefined}` keeps its "Required".
+            if (!reportedEmptyRef.current) clearValidation()
+            reportedEmptyRef.current = false
             return
         }
 
@@ -166,13 +169,14 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
             required,
             minDate,
         })
-        if (isErrorNow) return
-
         const onlyDigits = value.replace(/\D/g, '')
         if (!onlyDigits.length) {
+            reportedEmptyRef.current = !!selected
             onInputChange?.(undefined)
             return
         }
+
+        if (isErrorNow) return
 
         const parsed = parse(value, 'dd/MM/yyyy', new Date())
         onInputChange?.(isValidDateFns(parsed) ? parsed : undefined)
