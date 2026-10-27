@@ -109,3 +109,35 @@ describe('PathfinderCard — collapsed packing', () => {
         })
     })
 })
+
+describe('PathfinderCard — expanded width', () => {
+    afterEach(cleanup)
+
+    it('keeps a value longer than the card inside it, so it can wrap', async () => {
+        const wrappingName: PathfinderCardItem[] = [
+            {
+                id: 'name',
+                order: 1,
+                render: () => (
+                    <span data-test='pathfinder-name' className='whitespace-normal text-lg font-semibold'>
+                        {LONG_NAME}
+                    </span>
+                ),
+            },
+        ]
+        mount(
+            <div style={{ width: 360 }}>
+                <PathfinderCard items={wrappingName} expanded onToggleExpanded={() => undefined} />
+            </div>,
+        )
+
+        const name = await findName()
+        const card = document.querySelector<HTMLElement>('[role="button"]')!
+
+        await waitFor(() => {
+            // Wrapped onto more than one line rather than laid out as one 800px line.
+            if (name.getBoundingClientRect().height < 40) throw new Error('name has not wrapped yet')
+        })
+        await expect(name.getBoundingClientRect().right).toBeLessThanOrEqual(card.getBoundingClientRect().right)
+    })
+})

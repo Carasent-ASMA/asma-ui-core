@@ -261,7 +261,12 @@ export function PathfinderCard({
                     ) : (
                         <div className={styles['expandedItems']}>
                             {sortedItems.map((item) => (
-                                <div key={item.id} className='shrink-0 whitespace-nowrap'>
+                                <div
+                                    key={item.id}
+                                    // ASMA-8427: capped at the card's width, so a value longer than the
+                                    // card can wrap or truncate instead of running past its edge.
+                                    className='min-w-0 max-w-full shrink-0 whitespace-nowrap'
+                                >
                                     <ItemRenderer item={item} compact={compact} />
                                 </div>
                             ))}
