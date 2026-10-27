@@ -125,10 +125,11 @@ export type StyledTableProps<TData, TCustomData> = {
     customSubRowData?: Map<string, TCustomData[]>
     headerPin?: boolean
     /**
-     * Pins the internal actions column's body cells to the right edge (`position: sticky` + shadow).
-     * Set `false` when the column duplicates row content, so it no longer overlays the last data
-     * column; its cells then scroll with the data. The header cell with the pin menu stays pinned
-     * either way.
+     * Pins the internal actions column's body cells to the right edge. By default they are pinned
+     * when the column renders actions (`actions` / `customActionsNode`) or the table has fixed-right
+     * columns; a column that only hosts the header pin menu scrolls with the data. The header cell
+     * with the pin menu stays pinned either way. Not supported as `false` together with fixed-right
+     * columns: their body and header offsets would no longer match.
      */
     stickyActions?: boolean
     expandArrow?: boolean

@@ -203,17 +203,12 @@ export function PathfinderCard({
         if (expanded) return sortedItems
 
         const shellPaddingLeft = 24
-        // Shell `p-2` (8) + the compact content's `pr-8` (32). The chevron is absolutely positioned
-        // over the content area, so its own reserve is subtracted on top of this.
-        const shellPaddingRight = 40
+        // Shell `p-2` (8) + the compact content's `pr-10` (40), which already clears the chevron.
+        const shellPaddingRight = 48
         const reservedLead = leadSlot ? Math.max(leadReservePx, measurements.leadWidth + 12) : 0
         const reservedAction = actionSlot ? Math.max(actionReservePx, measurements.actionWidth) : 0
-        const chevronReservePx = 24
 
-        const availableWidth = Math.max(
-            0,
-            width - shellPaddingLeft - shellPaddingRight - reservedLead - reservedAction - chevronReservePx,
-        )
+        const availableWidth = Math.max(0, width - shellPaddingLeft - shellPaddingRight - reservedLead - reservedAction)
 
         return packCollapsedItems({
             items: sortedItems,

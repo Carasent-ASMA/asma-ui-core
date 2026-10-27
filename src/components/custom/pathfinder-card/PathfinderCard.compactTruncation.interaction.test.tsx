@@ -62,7 +62,7 @@ describe('PathfinderCard — collapsed truncation', () => {
         await expect(getComputedStyle(name).textOverflow).toBe('ellipsis')
     })
 
-    it('stops the value before the chevron instead of running underneath it', async () => {
+    it('stops the value 8px before the chevron instead of running underneath it', async () => {
         mountCollapsed(360)
 
         const name = await findName()
@@ -77,7 +77,35 @@ describe('PathfinderCard — collapsed truncation', () => {
 
         // A 1px tolerance for sub-pixel rounding.
         await expect(nameRow.getBoundingClientRect().right).toBeLessThanOrEqual(
-            chevron.getBoundingClientRect().left + 1,
+            chevron.getBoundingClientRect().left - 8 + 1,
         )
+    })
+})
+
+describe('PathfinderCard — collapsed packing', () => {
+    afterEach(cleanup)
+
+    const fixedItems: PathfinderCardItem[] = [1, 2, 3].map((order) => ({
+        id: `item-${order}`,
+        order,
+        render: () => <span data-test='packed-item' style={{ display: 'inline-block', width: 100 }} />,
+    }))
+
+    it('reserves the chevron once, so items that fit stay visible', async () => {
+        // 404 - 24 (left) - 48 (right, chevron included) = 332 ≥ 3 × 100 + 2 × 12. Reserving the
+        // chevron a second time left 316, and the third item was dropped although it fits.
+        mount(
+            <div style={{ width: 404 }}>
+                <PathfinderCard items={fixedItems} expanded={false} onToggleExpanded={() => undefined} />
+            </div>,
+        )
+
+        await waitFor(() => {
+            // The off-screen measurement copy renders every item too; count only the visible row.
+            const shown = [...document.querySelectorAll('[data-test="packed-item"]')].filter(
+                (item) => !item.closest('[aria-hidden]'),
+            ).length
+            if (shown !== 3) throw new Error(`expected 3 collapsed items, got ${shown}`)
+        })
     })
 })

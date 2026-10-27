@@ -59,7 +59,7 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
         defaultExpanded,
         actions,
         customActionsNode,
-        stickyActions = true,
+        stickyActions,
         textExpandArrow,
         enableMultiRowSelection,
         enableRowSelection,
@@ -103,10 +103,6 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
 
     const cellBandMinHeight = isRowExpanded ? (collapsedRowHeight ?? rowHeight) : rowHeight
 
-    // Mount-only by design: `defaultExpanded` seeds the row's expansion state once, through the
-    // table's own row API. There is no parent to lift this to here — `StyledTable` owns the model
-    // and has already initialised it by the time a row renders.
-    // eslint-disable-next-line react-you-might-not-need-an-effect/no-manage-parent
     useEffect(() => {
         if (defaultExpanded && row.getCanExpand() && !row.getIsExpanded()) {
             row.toggleExpand()
@@ -192,13 +188,15 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
 
     const hasActionsContent = Boolean(actions) || Boolean(customActionsNode)
 
+    const hasFixedRightColumns = positionedCells.some((cell) => Boolean(cell.column.columnDef.fixedRight))
+
     /**
-     * ASMA-8427: a pinned actions column covers the column behind it, so a table whose actions
-     * column is not worth pinning can opt out with `stickyActions={false}`. Those cells then scroll
-     * inline; the header cell with the pin menu stays pinned either way. Tables that do not opt out
-     * keep the Figma behaviour of a pinned actions column (including when it only hosts the pin menu).
+     * ASMA-8427: an actions column that only hosts the header pin menu has empty body cells, and
+     * pinned they only cover the column behind them — so they scroll with the data. The header cell
+     * with the pin menu stays pinned either way. Beside fixed-right columns the column stays pinned,
+     * so the body's right offsets keep matching the header's.
      */
-    const isActionsColumnSticky = stickyActions
+    const isActionsColumnSticky = stickyActions ?? (hasActionsContent || hasFixedRightColumns)
 
     const centerCells = useMemo(
         () =>
@@ -235,11 +233,6 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
     const inlineActionsCell = isActionsColumnSticky
         ? undefined
         : positionedCells.find((cell) => cell.column.id === ACTIONS_COLUMN_ID)
-
-    const hasFixedRightColumns = useMemo(
-        () => rightCells.some((cell) => Boolean(cell.column.columnDef.fixedRight)),
-        [rightCells],
-    )
 
     const leftCells = useMemo(
         () => positionedCells.filter((cell) => cell.column.columnDef.fixedLeft),
@@ -414,8 +407,7 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
 
                 {rightCells.map((cell, idx) => renderCell(cell, leftCells.length + centerCellsToRender.length + idx))}
 
-                {/* Actions column that is not pinned (empty, or `stickyActions={false}`) renders in
-                    the normal column flow so it cannot cover the data behind it. */}
+                {/* An unpinned actions column renders in the normal column flow, after the data. */}
                 {inlineActionsCell &&
                     renderCell(inlineActionsCell, leftCells.length + centerCellsToRender.length + rightCells.length)}
             </tr>

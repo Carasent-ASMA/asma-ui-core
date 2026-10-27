@@ -5,11 +5,10 @@ import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { StyledTable } from './StyledTableIndex'
 
 /**
- * ASMA-8427 — the internal actions column is pinned right by default (the Figma pattern; the
- * pin-menu-only case is asserted by `StyledTable.stories` "Sizing Persistence And Control
- * Alignment"). Consumers whose actions column duplicates row content can opt out with
- * `stickyActions={false}`, which lets the cells scroll with the data while the header cell keeps
- * the pin menu pinned.
+ * ASMA-8427 — the internal actions column's body cells are pinned right only when they have
+ * something to show. A column that only hosts the header pin menu has empty body cells, and pinned
+ * they covered the column behind them, so they scroll with the data. The header cell with the pin
+ * menu stays pinned either way.
  *
  * Asserted on computed styles: `position: sticky` is pure CSS, so only a browser can tell whether
  * the cell actually stops scrolling with the data.
@@ -32,19 +31,21 @@ const cellsOf = (): HTMLTableCellElement[] => [
     ...document.querySelectorAll<HTMLTableCellElement>('tr[id="r-1"] > td'),
 ]
 const lastCell = (): HTMLTableCellElement => cellsOf().at(-1)!
+const pinHeader = (): HTMLElement => document.querySelector<HTMLElement>('thead th:last-child')!
 const positionOf = (cell: HTMLElement): string => getComputedStyle(cell).position
 
 describe('StyledTable — actions column pinning', () => {
     afterEach(cleanup)
 
-    it('pins a pin-menu-only column by default', async () => {
-        mount(<StyledTable locale='en' columns={columns} data={data} />)
+    it('scrolls an empty, pin-menu-only column with the data while the pin stays put', async () => {
+        mount(<StyledTable locale='en' columns={columns} data={data} enableResizing />)
 
         await expect(cellsOf().length).toBe(columns.length + 1)
-        await expect(positionOf(lastCell())).toBe('sticky')
+        await expect(positionOf(lastCell())).not.toBe('sticky')
+        await expect(positionOf(pinHeader())).toBe('sticky')
     })
 
-    it('pins a column that renders actions by default', async () => {
+    it('pins a column that renders actions', async () => {
         mount(
             <StyledTable locale='en' columns={columns} data={data} customActionsNode={() => <span>open</span>} />,
         )
@@ -52,7 +53,14 @@ describe('StyledTable — actions column pinning', () => {
         await expect(positionOf(lastCell())).toBe('sticky')
     })
 
-    it('scrolls the actions column with the data when `stickyActions` is false, while the pin stays put', async () => {
+    it('keeps an empty column pinned beside fixed-right columns, so body and header offsets match', async () => {
+        const withFixedRight: ColumnDef<Row>[] = [columns[0]!, { ...columns[1]!, fixedRight: true }]
+        mount(<StyledTable locale='en' columns={withFixedRight} data={data} />)
+
+        await expect(positionOf(lastCell())).toBe('sticky')
+    })
+
+    it('lets `stickyActions={false}` scroll a column that renders actions', async () => {
         mount(
             <StyledTable
                 locale='en'
@@ -65,9 +73,6 @@ describe('StyledTable — actions column pinning', () => {
         )
 
         await expect(positionOf(lastCell())).not.toBe('sticky')
-
-        // The header cell owns the pin menu and stays pinned either way.
-        const pinHeader = document.querySelector<HTMLElement>('thead th:last-child')
-        await expect(positionOf(pinHeader!)).toBe('sticky')
+        await expect(positionOf(pinHeader())).toBe('sticky')
     })
 })
