@@ -62,7 +62,14 @@ export const StyledTitleChevron: React.FC<StyledTitleChevronProps> = ({
             className,
         )}
     >
-        <span className='min-w-0 truncate'>{children}</span>
+        <span
+            className={cn(
+                'min-w-0 truncate',
+                'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:![overflow-wrap:anywhere]',
+            )}
+        >
+            {children}
+        </span>
         <ChevronRightIcon
             width={SIZE_ICON[size]}
             height={SIZE_ICON[size]}

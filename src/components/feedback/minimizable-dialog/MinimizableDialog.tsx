@@ -185,7 +185,12 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
             <div
                 ref={minimizedPanelRef}
                 style={{ zIndex: 51 }}
-                className={cn(styles['dialog'], !minimized && styles['hidden'])}
+                className={cn(
+                    styles['dialog'],
+                    !minimized && styles['hidden'],
+                    // Narrower than a phone: the minimized bar fits the screen (right-4 + a 16px left gap).
+                    minimized && 'max-xs:w-[calc(100vw-32px)]',
+                )}
             >
                 <div
                     className={clsx('flex items-center justify-between', !minimized && 'hidden')}
@@ -243,6 +248,8 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                 aria-label={isFullScreenActive && typeof title === 'string' ? title : undefined}
                 className={cn(
                     'fixed bottom-4 right-4 z-[51] rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)] transition-all duration-300',
+                    // Narrower than a phone: the docked panel (shrink-to-fit, pinned right) stays on screen.
+                    'max-xs:max-w-[calc(100vw-32px)]',
                     className && !minimized && !fullScreen ? className : '',
                     minimized && '!h-0 !w-0 opacity-0 duration-0',
                     isFullScreenActive && 'fixed duration-0',
@@ -251,9 +258,17 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
             >
                 <OverlayBackOwnerContext.Provider value={panelRef}>
                 <div className='flex flex-col gap-y-2 border-b-[1px] border-delta-200 p-4'>
-                    <div className='flex items-center justify-between'>
+                    {/* Narrower than a phone: the window controls wrap below the title instead of overflowing left. */}
+                    <div className='flex items-center justify-between max-xs:flex-wrap max-xs:gap-y-1'>
                         {!label ? (
-                            <div className='text-2xl font-semibold text-delta-800'>{title}</div>
+                            <div
+                                className={cn(
+                                    'text-2xl font-semibold text-delta-800',
+                                    'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:![overflow-wrap:anywhere]',
+                                )}
+                            >
+                                {title}
+                            </div>
                         ) : (
                             <div className='text-sm text-delta-700'>{label}</div>
                         )}
@@ -341,7 +356,16 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                         </div>
                     </div>
 
-                    {label && <div className='truncate text-2xl font-semibold text-delta-800'>{title}</div>}
+                    {label && (
+                        <div
+                            className={cn(
+                                'truncate text-2xl font-semibold text-delta-800',
+                                'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:![overflow-wrap:anywhere]',
+                            )}
+                        >
+                            {title}
+                        </div>
+                    )}
                 </div>
 
                 <div className={clsx('flex flex-col', fullScreen && !minimized && 'h-[87dvh]')}>

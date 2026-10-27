@@ -19,7 +19,8 @@ export const StyledFormLabel: React.FC<IStyledFormLabel> = ({ title, onClick, cl
 
     return (
         <div
-            className={clsx(styles, className)}
+            // Narrower than a phone: a long word breaks instead of overflowing the screen.
+            className={clsx(styles, 'max-xs:min-w-0 max-xs:hyphens-auto max-xs:![overflow-wrap:anywhere]', className)}
             onClick={onClick}
             onKeyDown={handleKeyDown}
             role={onClick ? 'button' : undefined}

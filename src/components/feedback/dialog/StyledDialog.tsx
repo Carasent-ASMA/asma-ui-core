@@ -468,22 +468,42 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                 }}
             >
                 {(!!dialogLabel || !!dialogTitle || showCloseIcon) && (
-                    <div className='box-border flex w-full min-w-0 max-w-full justify-between px-4 pt-4'>
+                    <div
+                        className={cn(
+                            'box-border flex w-full min-w-0 max-w-full justify-between px-4 pt-4',
+                            // Narrower than a phone: the header buttons go on top (right-aligned), the label
+                            // and the title below them at full width, instead of the buttons covering them.
+                            // DOM order, and so reading and Tab order, stays the same.
+                            'max-xs:flex-col-reverse max-xs:gap-2',
+                        )}
+                    >
                         <div className='flex min-w-0 flex-1 flex-col justify-start gap-0.5'>
                             {dialogLabel && (
-                                <div id={labelId} className='flex h-8 items-center text-sm font-normal leading-5 text-delta-600'>
+                                <div
+                                    id={labelId}
+                                    className={cn(
+                                        'flex h-8 items-center text-sm font-normal leading-5 text-delta-600',
+                                        'max-xs:h-auto max-xs:min-h-8 max-xs:hyphens-auto max-xs:![overflow-wrap:anywhere]',
+                                    )}
+                                >
                                     {dialogLabel}
                                 </div>
                             )}
                             {dialogTitle && (
                                 // Figma dialog title = Page title 24/32 SemiBold, text delta-800.
-                                <div id={titleId} className='flex text-2xl font-semibold leading-8 text-delta-800'>
+                                <div
+                                    id={titleId}
+                                    className={cn(
+                                        'flex text-2xl font-semibold leading-8 text-delta-800',
+                                        'max-xs:hyphens-auto max-xs:![overflow-wrap:anywhere]',
+                                    )}
+                                >
                                     {dialogTitle}
                                 </div>
                             )}
                         </div>
                         {showCloseIcon && (
-                            <div className='flex min-w-0 max-w-full shrink-0 justify-end gap-2'>
+                            <div className='flex min-w-0 max-w-full shrink-0 justify-end gap-2 max-xs:flex-wrap max-xs:gap-y-2'>
                                 {dialogHeaderNode}
                                 <StyledButton
                                     dataTest={`close-button-${dataTest}`}

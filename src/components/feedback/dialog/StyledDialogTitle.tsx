@@ -40,7 +40,11 @@ export const StyledDialogTitle = ({
         <h2
             data-testid='styled-dialog-title'
             id={titleId}
-            className={clsx('mx-3 p-4 text-[20px] font-semibold leading-[20px]', className)}
+            className={clsx(
+                'mx-3 p-4 text-[20px] font-semibold leading-[20px]',
+                'max-xs:hyphens-auto max-xs:![overflow-wrap:anywhere]',
+                className,
+            )}
             style={mergedStyle}
             {...rest}
         >

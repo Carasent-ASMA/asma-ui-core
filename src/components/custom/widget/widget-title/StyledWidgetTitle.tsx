@@ -16,7 +16,16 @@ export const StyledWidgetTitle = forwardRef<HTMLHeadingElement, StyledWidgetTitl
         const Component = props.component ?? 'h2'
 
         return (
-            <Component ref={ref} className={cn(style['styled-widget-title'], props.className)}>
+            <Component
+                ref={ref}
+                className={cn(
+                    style['styled-widget-title'],
+                    // Narrower than a phone: shrinks with its card (`fit-content` would hold it at the
+                    // longest word, past the card edge).
+                    'max-xs:min-w-0 max-xs:hyphens-auto max-xs:![overflow-wrap:anywhere]',
+                    props.className,
+                )}
+            >
                 {props.children}
             </Component>
         )

@@ -119,6 +119,8 @@ export const StyledSearchField: FC<StyledSearchFieldProps> = ({
                     },
                 }}
                 {...props}
+                // Narrower than a phone: never wider than its container (the width is a fixed 160px by default).
+                className={cn('max-xs:max-w-full', props.className)}
                 sx={{
                     width: props.fullWidth ? '100%' : 'var(--dynamic-toolbar-search-width, 160px)',
                     // Toolbars are outside the form column (pattern §11 Q7), so the Full cap does not apply.
