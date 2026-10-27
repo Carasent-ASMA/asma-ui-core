@@ -29,6 +29,9 @@ $checkbox-sizes: (
     align-items: center;
     justify-content: center;
     position: relative;
+    // Never squeezed by a long label beside it (a flex row): the 40px target, and so its round hover
+    // circle, stays 40x40 instead of turning into an oval. The radio wrapper does the same.
+    flex-shrink: 0;
     // Own stacking context: the focus/error frame (z-index 1) and box (2), lifted above the opaque
     // hover halo, stay inside the checkbox instead of painting over a table's sticky cells.
     isolation: isolate;
@@ -232,7 +235,11 @@ $checkbox-sizes: (
         transform: translate(-50%, -50%) scale(0.7);
     }
 
+    // Figma Checkbox+Label Hovered: hovering the option text shows the circle too, not only the 40px
+    // control — any enclosing <label> (StyledFormControlLabel, or a consumer's label around the
+    // checkbox and its text) counts. `CheckboxHover` is only present when enabled and editable.
     &:hover .CheckboxRippleContainer::after,
+    label:hover & .CheckboxRippleContainer::after,
     &[data-hovered] .CheckboxRippleContainer::after,
     &:has(input[data-hovered]) .CheckboxRippleContainer::after {
         opacity: 1;

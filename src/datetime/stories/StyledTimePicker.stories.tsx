@@ -3,6 +3,8 @@ import { expect } from 'storybook/test'
 import { add } from 'date-fns'
 import { useState, type CSSProperties } from 'react'
 import { StyledTimePicker } from 'src/datetime/components/time-picker'
+import { StyledDatePicker } from 'src/datetime/components/date-picker'
+import { StyledFieldPair } from 'src/components/inputs/form-layout/StyledFieldPair'
 import { TimePickerPanel } from 'src/datetime/components/time-picker/components/TimePickerPanel'
 
 const meta = {
@@ -326,4 +328,73 @@ export const IncompleteTimeOnBlur: StoryObj<typeof StyledTimePicker> = {
         await expect(await canvas.findByText('Invalid time format')).toBeInTheDocument()
         await expect(input).toHaveAttribute('aria-invalid', 'true')
     },
+}
+
+/** ASMA-8667: an empty required time shows "Required" after blur, not an invalid format. */
+export const RequiredOnBlur: StoryObj<typeof StyledTimePicker> = {
+    render: () => {
+        const Example = () => {
+            const [value, setValue] = useState<Date | undefined>()
+            return (
+                <StyledTimePicker
+                    dataTest='required-time'
+                    value={value}
+                    onSelect={setValue}
+                    title='Start time*'
+                    required
+                />
+            )
+        }
+        return <Example />
+    },
+    play: async ({ canvas }) => {
+        const input = canvas.getByTestId('required-time')
+        input.focus()
+        input.blur()
+
+        await expect(await canvas.findByText('Required')).toBeInTheDocument()
+        await expect(input).toHaveAttribute('aria-invalid', 'true')
+    },
+}
+
+/**
+ * ASMA-8667: date, start time and end time in one 600px row, each with a reserved helper line.
+ * Errors stay on one line: the last field's message runs into the free room on its right, and a
+ * message with no room left before the next field is cut with an ellipsis.
+ */
+export const ErrorsInARow: StoryObj<typeof StyledTimePicker> = {
+    render: () => (
+        <div style={{ width: 600 }}>
+            <StyledFieldPair>
+                <StyledDatePicker
+                    dataTest='row-date'
+                    mode='single'
+                    selected={undefined}
+                    title='Start date*'
+                    required
+                    reserveHelperText
+                    hideDefaultHelperText
+                    error
+                    errorText='Required'
+                    onSelect={() => undefined}
+                />
+                <StyledTimePicker
+                    dataTest='row-start'
+                    title='Start time*'
+                    required
+                    error
+                    helperText='Ugyldig tidsformat, prøv igjen'
+                    onSelect={() => undefined}
+                />
+                <StyledTimePicker
+                    dataTest='row-end'
+                    title='End time*'
+                    required
+                    error
+                    helperText='Must be after start time'
+                    onSelect={() => undefined}
+                />
+            </StyledFieldPair>
+        </div>
+    ),
 }

@@ -14,13 +14,22 @@ import { StyledDatePicker } from './StyledDatePicker'
  * it is the ONLY way a keyboard user can set a date if the calendar itself is hard to operate.
  */
 
-const DatePickerFixture = ({ onPick = () => undefined }: { onPick?: (date?: Date) => void }): JSX.Element => {
-    const [date, setDate] = useState<Date>()
+const DatePickerFixture = ({
+    onPick = () => undefined,
+    initial,
+    required,
+}: {
+    onPick?: (date?: Date) => void
+    initial?: Date
+    required?: boolean
+}): JSX.Element => {
+    const [date, setDate] = useState<Date | undefined>(initial)
     return (
         <>
             <StyledDatePicker
                 dataTest='kbd-date'
                 mode='single'
+                required={required}
                 selected={date}
                 onSelect={setDate}
                 onInputChange={(next) => {
@@ -114,6 +123,22 @@ describe('StyledDatePicker keyboard contract', () => {
         await userEvent.tab()
 
         await waitFor(() => expect(onPick).toHaveBeenLastCalledWith(undefined))
+    })
+
+    it('reports an emptied required date as empty and keeps showing Required (3.3.1)', async () => {
+        const onPick = fn()
+        const { container } = mount(<DatePickerFixture onPick={onPick} initial={new Date(2024, 5, 15)} required />)
+        const input = field(container)
+
+        input.focus()
+        await userEvent.keyboard(
+            '{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}',
+        )
+        await userEvent.tab()
+
+        await waitFor(() => expect(onPick).toHaveBeenLastCalledWith(undefined))
+        await expect(input).toHaveAttribute('aria-invalid', 'true')
+        await expect(container).toHaveTextContent('Required')
     })
 
     it('opens the calendar from the calendar button by keyboard (2.1.1)', async () => {

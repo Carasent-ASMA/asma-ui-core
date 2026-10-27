@@ -10,22 +10,25 @@ import type { ColumnWindow } from 'src/table/hooks/useColumnVirtualizer'
 import { compact } from 'src/helpers/arrays'
 import { COMPACT_COLUMN_MAX_WIDTH } from 'src/table/helpers/columnSpacing'
 
-const focusNextOutsideTable = (currentRow: HTMLTableRowElement): boolean => {
+/**
+ * Focus the first tabbable element after the table (`'next'`) or the last one before it (`'prev'`).
+ * The rows are a single tab stop, so Tab must jump over the controls inside every row.
+ */
+const focusOutsideTable = (currentRow: HTMLTableRowElement, direction: 'next' | 'prev'): boolean => {
     const table = currentRow.closest('table')
     if (!table) return false
 
-    const next = Array.from(
+    const position = direction === 'next' ? Node.DOCUMENT_POSITION_FOLLOWING : Node.DOCUMENT_POSITION_PRECEDING
+    const candidates = Array.from(
         document.querySelectorAll<HTMLElement>(
             'a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])',
         ),
-    ).find(
-        (element) =>
-            !table.contains(element) && Boolean(table.compareDocumentPosition(element) & Node.DOCUMENT_POSITION_FOLLOWING),
-    )
+    ).filter((element) => !table.contains(element) && Boolean(table.compareDocumentPosition(element) & position))
 
-    if (!next) return false
-    next.focus()
-    return document.activeElement === next
+    const target = direction === 'next' ? candidates[0] : candidates.at(-1)
+    if (!target) return false
+    target.focus()
+    return document.activeElement === target
 }
 
 export function TableRow<TData extends { id: string | number }, TCustomData = Record<string, unknown>>({
@@ -152,19 +155,19 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
 
         switch (e.key) {
             case 'Tab': {
+                // The rows are one tab stop (roving tabindex, WAI-ARIA grid): the arrow keys move between
+                // rows, Tab leaves them — back to the header row, or out of the table.
                 if (e.shiftKey) {
-                    if (row.focusPrevRow()) {
-                        e.preventDefault()
-                        break
-                    }
                     const header = e.currentTarget.closest('table')?.querySelector<HTMLTableRowElement>(
                         'thead tr[tabindex="0"]',
                     )
                     if (header) {
                         e.preventDefault()
                         header.focus()
+                    } else if (focusOutsideTable(e.currentTarget, 'prev')) {
+                        e.preventDefault()
                     }
-                } else if (row.focusNextRow() || focusNextOutsideTable(e.currentTarget)) {
+                } else if (focusOutsideTable(e.currentTarget, 'next')) {
                     e.preventDefault()
                 }
                 break
