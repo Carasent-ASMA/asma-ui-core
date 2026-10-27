@@ -153,6 +153,64 @@ describe('Sort indicator (AC 15)', () => {
     })
 })
 
+const LONG = 'An extremely long column label that cannot possibly fit here'
+const longColumns: ColumnDef<Person>[] = [
+    { accessorKey: 'name', header: LONG, size: 110 },
+    { accessorKey: 'role', header: 'Role', size: 160 },
+]
+
+/** The label ellipsizes and the slot, with its glyph visible, stays inside the column (AC 15, 16). */
+const expectTruncatedWithGlyph = async (label: string): Promise<void> => {
+    const text = labelOf(label)
+    const cell = rect(headerCell(label))
+    const slot = rect(indicator(label))
+
+    await expect(text.scrollWidth).toBeGreaterThan(text.clientWidth)
+    await expect(getComputedStyle(text).textOverflow).toBe('ellipsis')
+    await expect(getComputedStyle(glyphOf(label)).visibility).toBe('visible')
+    await expect(slot.width).toBe(20)
+    await expect(slot.left).toBeGreaterThanOrEqual(cell.left)
+    await expect(slot.right).toBeLessThanOrEqual(cell.right + 0.5)
+    // The glyph is not clipped by the header: all of its 11.67px triangle lies inside the cell.
+    const glyph = rect(glyphOf(label))
+
+    await expect(glyph.left + glyph.width / 2).toBeLessThanOrEqual(cell.right)
+}
+
+describe('Truncated long labels keep the glyph (AC 15, AC 16)', () => {
+    beforeEach(parkPointer)
+    afterEach(cleanup)
+
+    it('a sorted column: the label ellipsizes and the primary glyph stays visible', async () => {
+        mount(table({ columns: longColumns, initialState: { sorting: [{ id: 'name', desc: false }] } }))
+
+        await expect(ariaSorts()[LONG]).toBe('ascending')
+        await expectTruncatedWithGlyph(LONG)
+        await expect(getComputedStyle(indicator(LONG)).color).toBe(resolveColor('var(--colors-gama-500)'))
+    })
+
+    it('a hovered unsorted column: the label ellipsizes and the grey glyph appears on the square', async () => {
+        mount(table({ columns: longColumns }))
+
+        await expect(getComputedStyle(glyphOf(LONG)).visibility).toBe('hidden')
+        await userEvent.hover(sortButton(LONG))
+
+        await expectTruncatedWithGlyph(LONG)
+        await expect(square(LONG).opacity).toBe('1')
+        await expect(getComputedStyle(indicator(LONG)).color).toBe(resolveColor('var(--colors-delta-600)'))
+    })
+
+    it('a hovered sorted column keeps both: truncated label, primary glyph, square', async () => {
+        mount(table({ columns: longColumns, initialState: { sorting: [{ id: 'name', desc: true }] } }))
+
+        await userEvent.hover(sortButton(LONG))
+
+        await expectTruncatedWithGlyph(LONG)
+        await expect(indicator(LONG)).toHaveAttribute('data-sort-direction', 'desc')
+        await expect(square(LONG).opacity).toBe('1')
+    })
+})
+
 describe('Hover and focus (AC 16)', () => {
     beforeEach(parkPointer)
     afterEach(cleanup)
@@ -213,38 +271,59 @@ describe('Hover and focus (AC 16)', () => {
         await expect(ariaSorts()['Name']).toBe('ascending')
     })
 
-    it('ST-11: keyboard focus on a sortable header shows the hover look, Enter sorts, leaving removes it', async () => {
+    it('ST-11a: starting with focus put on the pin (.focus(), no key path reaches it), Shift+Tab reaches a sortable header with the focus look, Tab moves to the next header control, Enter sorts, leaving clears the look', async () => {
         mount(table())
+        const pin = document.querySelector<HTMLElement>('button[aria-haspopup="true"]')!
 
-        // After a key press the next focus matches :focus-visible, as it does for a user on the keyboard.
+        // The only programmatic step. After a key press the focus counts as keyboard focus (`:focus-visible`).
         await userEvent.keyboard('{Shift}')
-        sortButton('Name').focus()
+        pin.focus()
+        await expect(document.activeElement).toBe(pin)
 
-        await expect(document.activeElement).toBe(sortButton('Name'))
-        await expect(sortButton('Name').matches(':focus-visible')).toBe(true)
-        await expect(getComputedStyle(glyphOf('Name')).visibility).toBe('visible')
-        await expect(square('Name').opacity).toBe('1')
-        await expect(getComputedStyle(indicator('Name')).color).toBe(resolveColor('var(--colors-delta-600)'))
+        // Shift+Tab: the sortable header before the pin, with the hover look (grey glyph on the square).
+        await userEvent.keyboard('{Shift>}{Tab}{/Shift}')
+        await expect(document.activeElement).toBe(sortButton('Age'))
+        await expect(sortButton('Age').matches(':focus-visible')).toBe(true)
+        await expect(getComputedStyle(glyphOf('Age')).visibility).toBe('visible')
+        await expect(square('Age').opacity).toBe('1')
+        await expect(getComputedStyle(indicator('Age')).color).toBe(resolveColor('var(--colors-delta-600)'))
 
+        // Enter sorts, and the glyph turns primary.
         await userEvent.keyboard('{Enter}')
-        await expect(ariaSorts()['Name']).toBe('ascending')
-        await expect(getComputedStyle(indicator('Name')).color).toBe(resolveColor('var(--colors-gama-500)'))
+        await expect(ariaSorts()['Age']).toBe('descending')
+        await expect(getComputedStyle(indicator('Age')).color).toBe(resolveColor('var(--colors-gama-500)'))
 
-        // Leaving: Name keeps its sorted glyph but loses the square.
-        sortButton('Role').focus()
-        await expect(square('Name').opacity).toBe('0')
-        await expect(getComputedStyle(glyphOf('Name')).visibility).toBe('visible')
+        // Shift+Tab goes on to the previous header control; Tab comes back to the next one, never down to the rows.
+        await userEvent.keyboard('{Shift>}{Tab}{/Shift}')
+        await expect(document.activeElement).toBe(sortButton('Role'))
         await expect(square('Role').opacity).toBe('1')
+        await expect(square('Age').opacity).toBe('0')
+        await expect(getComputedStyle(glyphOf('Age')).visibility).toBe('visible')
 
-        sortButton('Role').blur()
-        await expect(getComputedStyle(glyphOf('Role')).visibility).toBe('hidden')
+        await userEvent.keyboard('{Tab}')
+        await expect(document.activeElement).toBe(sortButton('Age'))
+        await userEvent.keyboard('{Tab}')
+        await expect(document.activeElement).toBe(pin)
+        await expect(document.activeElement?.closest('tbody')).toBeNull()
+
+        // Leaving cleared every look: an unsorted header shows nothing, a sorted one keeps its glyph only.
         await expect(square('Role').opacity).toBe('0')
+        await expect(getComputedStyle(glyphOf('Role')).visibility).toBe('hidden')
+        await expect(square('Age').opacity).toBe('0')
+
+        // Space sorts too.
+        sortButton('Role').focus()
+        await userEvent.keyboard('{ }')
+        await expect(ariaSorts()['Role']).toBe('ascending')
     })
 
-    // Found while writing ST-11 (ASMA-8597): no key sequence lands on a header sort control. The header row's
-    // Tab handler (ASMA-8087) sends every Tab pressed in the header to the first body row, and Shift+Tab from
-    // the rows reaches only the header row. That is on master, outside this story's scope.
-    it.todo('ST-11: Tab reaches a sortable header (blocked by the header row Tab handler on master)')
+    // Found while writing ST-11 (ASMA-8597), still open and outside this PR: a keyboard user cannot ENTER the
+    // header controls from outside the header (ASMA-8087). Tab pressed on the header row goes to the active body
+    // row, and Shift+Tab from a body row goes to the header row, so the sort headers and the pin, which sit between
+    // them in the tab order, are skipped.
+    it.todo(
+        "header controls (sort headers, pin) aren't reachable by sequential keyboard navigation (WCAG 2.1.1); pending owner decision, ASMA-8087 keyboard model",
+    )
 
     it('A-04: both glyph colours reach 3:1 on the header and on the square in all three themes', async () => {
         mount(table())

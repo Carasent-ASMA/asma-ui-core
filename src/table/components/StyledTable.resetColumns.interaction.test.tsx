@@ -258,7 +258,7 @@ describe('Reset columns', () => {
         await expect(table().getColumn('role')!.getIsVisible()).toBe(false)
     })
 
-    it('A-02: the pin opens with Enter, and Reset columns works from the keyboard and is announced', async () => {
+    it('A-02: starting with focus put on the pin (.focus(), no key path reaches it), Enter opens it, Tab walks the panel to Reset columns without jumping to a body row, and Enter runs it', async () => {
         const { table } = mountHarness()
 
         await act(() => table().setColumnSizing({ name: 260 }))
@@ -267,9 +267,18 @@ describe('Reset columns', () => {
         await waitFor(() => expect(pin().getAttribute('aria-expanded')).toBe('true'))
 
         const reset = popoverButton('Reset columns')
+        const visited: Element[] = []
 
-        reset.focus()
+        for (let presses = 0; presses < 40 && document.activeElement !== reset; presses += 1) {
+            await userEvent.keyboard('{Tab}')
+            visited.push(document.activeElement!)
+        }
+
         await expect(document.activeElement).toBe(reset)
+        // Every column's row control was passed on the way, in order, inside the panel (not the table rows).
+        await expect(visited.some((element) => element.closest('tbody') !== null)).toBe(false)
+        await expect(visited.length).toBeGreaterThanOrEqual(4)
+
         await userEvent.keyboard('{Enter}')
 
         await waitFor(() => expect(widthOf('Name')).toBe(160))
@@ -279,13 +288,30 @@ describe('Reset columns', () => {
         await expect(document.activeElement).not.toBe(document.body)
     })
 
-    // Found while writing A-02 (ASMA-8597): Tab does not take a keyboard user from the pin to Reset columns.
-    // Tab from the pin is first caught by the header row's own Tab handler (ASMA-8087), which moves focus to
-    // the first body row even after the popover moved it into its panel; and past the panel's first control,
-    // Tab leaves the panel for the table rows, because the column rows nest focusable drag handles inside
-    // their buttons. That is the popover's keyboard behaviour on master, outside this story's scope; the
-    // click/tap and keyboard alternative is tracked with ASMA-8145 (docs/nhs-developer-checklist.md 2.5.7).
-    it.todo('A-02: Tab from the pin reaches Reset columns inside the popover')
+    it('A-02: starting with focus put on the pin, Space runs Reset columns too, and Shift+Tab goes back through the panel', async () => {
+        const { table } = mountHarness()
+
+        await act(() => table().setColumnSizing({ name: 260 }))
+        pin().focus()
+        await userEvent.keyboard('{Enter}')
+        await waitFor(() => expect(pin().getAttribute('aria-expanded')).toBe('true'))
+        const reset = popoverButton('Reset columns')
+
+        for (let presses = 0; presses < 40 && document.activeElement !== reset; presses += 1) {
+            await userEvent.keyboard('{Tab}')
+        }
+        await expect(document.activeElement).toBe(reset)
+
+        await userEvent.keyboard('{Shift>}{Tab}{/Shift}')
+        await expect(document.activeElement).not.toBe(reset)
+        await expect(document.activeElement?.closest('tbody')).toBeNull()
+
+        await userEvent.keyboard('{Tab}')
+        await expect(document.activeElement).toBe(reset)
+        await userEvent.keyboard('{ }')
+
+        await waitFor(() => expect(widthOf('Name')).toBe(160))
+    })
 })
 
 describe('Column settings pin dot (AC 18)', () => {
