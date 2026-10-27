@@ -23,23 +23,73 @@ import type { StyledTableProps } from '../types'
  * teal triangle. Every state is checked for the absence of anything drawn behind the glyph.
  */
 
-const table = (props: Partial<Omit<StyledTableProps<Person, Record<string, unknown>>, 'footer' | 'hideFooter'>> = {}): JSX.Element => (
+type TableProps = Partial<Omit<StyledTableProps<Person, Record<string, unknown>>, 'footer' | 'hideFooter'>>
+
+const table = (props: TableProps = {}): JSX.Element => (
     <StyledTable<Person> columns={personColumns} data={people} hideFooter locale='en' {...props} />
 )
 
+/** What an element paints behind itself: the parts a hover or focus square would have to use. */
+interface PaintLook {
+    background: string
+    image: string
+    shadow: string
+}
+
+const lookOf = (element: Element): PaintLook => {
+    const style = getComputedStyle(element)
+
+    return { background: style.backgroundColor, image: style.backgroundImage, shadow: style.boxShadow }
+}
+
+/** What each header cell and its sortable parent paint at rest, taken right after mounting (nothing hovered or focused). */
+const restLooks = new WeakMap<Element, PaintLook>()
+
+const mountHeader = (props: TableProps = {}): ReturnType<typeof mount> => {
+    const view = mount(table(props))
+
+    for (const cell of document.querySelectorAll('thead th')) {
+        restLooks.set(cell, lookOf(cell))
+        if (cell.firstElementChild) restLooks.set(cell.firstElementChild, lookOf(cell.firstElementChild))
+    }
+
+    return view
+}
+
 const indicator = (label: string): HTMLElement => headerCell(label).querySelector<HTMLElement>('[data-sort-state]')!
 const glyphOf = (label: string): SVGElement => indicator(label).querySelector('svg')!
-/** Nothing is drawn behind the glyph in any state: no fill, no shadow, no generated box (UX: no square). */
+/**
+ * Nothing is drawn behind the glyph in any state (UX: no square): the slot holds only the glyph and paints nothing,
+ * has no generated box, and neither the sortable parent nor the header cell paints more than it does at rest.
+ */
 const expectNoSquare = async (label: string): Promise<void> => {
-    const slot = getComputedStyle(indicator(label))
+    const slotElement = indicator(label)
+    const slot = getComputedStyle(slotElement)
 
+    await expect(slotElement.childNodes.length).toBe(1)
+    await expect(slotElement.firstElementChild).toBe(glyphOf(label))
     await expect(slot.backgroundColor).toBe('rgba(0, 0, 0, 0)')
     await expect(slot.backgroundImage).toBe('none')
     await expect(slot.boxShadow).toBe('none')
     await expect(slot.outlineStyle).toBe('none')
-    await expect(getComputedStyle(indicator(label), '::before').content).toBe('none')
-    await expect(getComputedStyle(indicator(label), '::after').content).toBe('none')
+    await expect(getComputedStyle(slotElement, '::before').content).toBe('none')
+    await expect(getComputedStyle(slotElement, '::after').content).toBe('none')
     await expect(getComputedStyle(glyphOf(label)).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+
+    const cell = headerCell(label)
+
+    for (const element of [cell, slotElement.parentElement!]) {
+        const rest = restLooks.get(element)!
+        const now = lookOf(element)
+
+        await expect(now.background).toBe(rest.background)
+        await expect(now.image).toBe(rest.image)
+        // While a control in the header has keyboard focus, the header row draws its own focus frame on every cell
+        // (ASMA-8087): existing styling, so only a cell's shadow is excused then, and only by that frame.
+        const hasFocusFrame = element === cell && cell.closest('thead')!.matches(':has(:focus-visible)')
+
+        if (!hasFocusFrame) await expect(now.shadow).toBe(rest.shadow)
+    }
 }
 const labelOf = (label: string): HTMLElement => headerCell(label).querySelector<HTMLElement>('[class*="header-content"]')!
 const resizerOf = (label: string): HTMLElement => headerCell(label).querySelector<HTMLElement>('[class*="resizer"]')!
@@ -85,7 +135,7 @@ describe('Sort indicator (AC 15)', () => {
     afterEach(cleanup)
 
     it('ST-10: a 20 x 28px slot right after the label, drawing the glyph at 28px', async () => {
-        mount(table())
+        mountHeader()
 
         const slot = rect(indicator('Name'))
         const glyph = rect(glyphOf('Name'))
@@ -101,7 +151,7 @@ describe('Sort indicator (AC 15)', () => {
     })
 
     it('ST-10: a sorted column shows the glyph in gama-500, ascending or descending; the slot is decorative (A-03)', async () => {
-        mount(table())
+        mountHeader()
 
         await userEvent.click(sortButton('Name'))
         await expect(ariaSorts()['Name']).toBe('ascending')
@@ -125,7 +175,7 @@ describe('Sort indicator (AC 15)', () => {
         // `notes` has no accessor, so it cannot sort; it sits in the middle so the pointer can reach it.
         const columns: ColumnDef<Person>[] = [personColumns[0]!, personColumns[3]!, personColumns[1]!]
 
-        mount(table({ columns }))
+        mountHeader({ columns })
 
         await expect(getComputedStyle(glyphOf('Role')).visibility).toBe('hidden')
         await expectNoSquare('Role')
@@ -149,7 +199,7 @@ describe('Sort indicator (AC 15)', () => {
             { accessorKey: 'role', header: 'Role', size: 160 },
         ]
 
-        mount(table({ columns }))
+        mountHeader({ columns })
 
         const label = labelOf('An extremely long column label that cannot possibly fit here')
         const cell = headerCell('An extremely long column label that cannot possibly fit here')
@@ -192,7 +242,7 @@ describe('Truncated long labels keep the glyph (AC 15, AC 16)', () => {
     afterEach(cleanup)
 
     it('a sorted column: the label ellipsizes and the primary glyph stays visible', async () => {
-        mount(table({ columns: longColumns, initialState: { sorting: [{ id: 'name', desc: false }] } }))
+        mountHeader({ columns: longColumns, initialState: { sorting: [{ id: 'name', desc: false }] } })
 
         await expect(ariaSorts()[LONG]).toBe('ascending')
         await expectTruncatedWithGlyph(LONG)
@@ -200,7 +250,7 @@ describe('Truncated long labels keep the glyph (AC 15, AC 16)', () => {
     })
 
     it('a hovered unsorted column: the label ellipsizes and the grey glyph appears, with no square', async () => {
-        mount(table({ columns: longColumns }))
+        mountHeader({ columns: longColumns })
 
         await expect(getComputedStyle(glyphOf(LONG)).visibility).toBe('hidden')
         await userEvent.hover(sortButton(LONG))
@@ -211,7 +261,7 @@ describe('Truncated long labels keep the glyph (AC 15, AC 16)', () => {
     })
 
     it('a hovered sorted column keeps both: truncated label and primary glyph, with no square', async () => {
-        mount(table({ columns: longColumns, initialState: { sorting: [{ id: 'name', desc: true }] } }))
+        mountHeader({ columns: longColumns, initialState: { sorting: [{ id: 'name', desc: true }] } })
 
         await userEvent.hover(sortButton(LONG))
 
@@ -227,7 +277,7 @@ describe('Hover and focus (AC 16)', () => {
     afterEach(cleanup)
 
     it('ST-10: hovering an unsorted column shows only the grey glyph, pointing the way the click sorts', async () => {
-        mount(table())
+        mountHeader()
 
         await userEvent.hover(sortButton('Role'))
 
@@ -242,7 +292,7 @@ describe('Hover and focus (AC 16)', () => {
     })
 
     it('ST-10: a sorted column keeps its primary glyph on hover, with no square', async () => {
-        mount(table())
+        mountHeader()
 
         await userEvent.click(sortButton('Name'))
         await userEvent.unhover(sortButton('Name'))
@@ -261,7 +311,7 @@ describe('Hover and focus (AC 16)', () => {
             { accessorKey: 'id', header: 'Id', size: 160, sortDescFirst: false },
         ]
 
-        mount(table({ columns }))
+        mountHeader({ columns })
 
         await expect(indicator('Name')).toHaveAttribute('data-sort-direction', 'asc')
         await expect(glyphPath('Name')).toBe(ASC_PATH)
@@ -279,7 +329,7 @@ describe('Hover and focus (AC 16)', () => {
     })
 
     it('ST-11a: starting with focus put on the pin (.focus(), no key path reaches it), Shift+Tab reaches a sortable header with the focus look, Tab moves to the next header control, Enter sorts, leaving clears the look', async () => {
-        mount(table())
+        mountHeader()
         const pin = document.querySelector<HTMLElement>('button[aria-haspopup="true"]')!
 
         // The only programmatic step. After a key press the focus counts as keyboard focus (`:focus-visible`).
@@ -337,7 +387,7 @@ describe('Hover and focus (AC 16)', () => {
     )
 
     it('A-04: both glyph colours reach 3:1 on the header in all three themes', async () => {
-        mount(table())
+        mountHeader()
         const original = document.documentElement.getAttribute('data-theme')
 
         try {
@@ -369,7 +419,7 @@ describe('24px resize zone (AC 17)', () => {
     ]
 
     it('ST-12: the zone is 24px wide at the right edge, the visible bar 4px at the edge (UX confirmed, OQ-03)', async () => {
-        mount(table({ columns: narrow, enableColumnResizing: true }))
+        mountHeader({ columns: narrow, enableColumnResizing: true })
 
         const zone = rect(resizerOf('Name'))
         const cell = rect(headerCell('Name'))
@@ -384,7 +434,7 @@ describe('24px resize zone (AC 17)', () => {
     })
 
     it('ST-12: in a 100px column nothing sits under the zone: label and glyph end before it', async () => {
-        mount(table({ columns: narrow, enableColumnResizing: true }))
+        mountHeader({ columns: narrow, enableColumnResizing: true })
 
         const zone = rect(resizerOf('Name'))
         const slot = rect(indicator('Name'))
@@ -402,7 +452,7 @@ describe('24px resize zone (AC 17)', () => {
     })
 
     it('ST-12: pressing on the zone starts a resize and never sorts', async () => {
-        mount(table({ columns: narrow, enableColumnResizing: true }))
+        mountHeader({ columns: narrow, enableColumnResizing: true })
 
         const zone = resizerOf('Name')
         const { left, top } = rect(zone)
@@ -430,7 +480,7 @@ describe('24px resize zone (AC 17)', () => {
     })
 
     it('reserves the zone only where a handle exists; other columns keep their padding', async () => {
-        mount(table({ columns: narrow, enableColumnResizing: true }))
+        mountHeader({ columns: narrow, enableColumnResizing: true })
 
         const padding = (label: string): string =>
             getComputedStyle(headerCell(label).querySelector('[class*="show-table-header"]')!).paddingRight
@@ -443,7 +493,7 @@ describe('24px resize zone (AC 17)', () => {
     })
 
     it('without resizing no handle and no reserved space', async () => {
-        mount(table({ columns: narrow }))
+        mountHeader({ columns: narrow })
 
         await expect(resizerOf('Name')).toBeNull()
         await expect(

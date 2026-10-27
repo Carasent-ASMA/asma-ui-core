@@ -527,7 +527,6 @@
         // its header is hovered or keyboard-focused. Nothing is drawn behind the glyph: UX has no hover square
         // (ASMA-8597, AC 16, comment 94738).
         .sort-indicator {
-            position: relative;
             display: flex;
             flex: 0 0 20px;
             align-items: center;
@@ -538,7 +537,6 @@
         }
 
         .sort-glyph {
-            position: relative;
             flex: none;
             visibility: hidden;
         }

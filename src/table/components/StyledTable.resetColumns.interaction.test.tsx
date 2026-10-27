@@ -37,8 +37,12 @@ interface HarnessApi {
     table: () => Table<Person>
 }
 
-const Harness = ({ onApi, ...props }: Props & { onApi: (api: HarnessApi) => void }): JSX.Element => {
-    const [visibility, setVisibility] = useState<VisibilityState>({})
+const Harness = ({
+    onApi,
+    hiddenByDefault = {},
+    ...props
+}: Props & { onApi: (api: HarnessApi) => void; hiddenByDefault?: VisibilityState }): JSX.Element => {
+    const [visibility, setVisibility] = useState<VisibilityState>(hiddenByDefault)
     const [generation, setGeneration] = useState(0)
     const tableRef = useRef<Table<Person> | null>(null)
 
@@ -380,13 +384,17 @@ describe('Column settings pin dot (AC 18)', () => {
         await act(() => table().setColumnOrder(['age', 'name', 'role', 'notes']))
         await waitFor(() => expect(dot()).not.toBeNull())
 
+        await expect(pin()).toHaveAccessibleName('Column settings, changed')
+
         await userEvent.click(popoverButton('Reset columns'))
         await waitFor(() => expect(headerLabels()).toEqual(['Name', 'Age', 'Notes']))
-        // Reordered no more, but Role is still hidden.
+        // Reordered no more, but Role is still hidden: the dot stays, and so does the name that says it.
         await expect(dot()).not.toBeNull()
+        await expect(pin()).toHaveAccessibleName('Column settings, changed')
 
         await userEvent.click(popoverButton('Role'))
         await waitFor(() => expect(dot()).toBeNull())
+        await expect(pin()).toHaveAccessibleName('Column settings')
     })
 
     it('ST-13: a stored column order shows the dot on the first render (Q9)', async () => {
@@ -401,6 +409,25 @@ describe('Column settings pin dot (AC 18)', () => {
         )
 
         await expect(dotAtFirstCommit).toBe(true)
+    })
+
+    it('ST-13 / OQ-04: a column hidden by default shows the dot and the "changed" name on the first render (Q10)', async () => {
+        let first: { dot: boolean; name: string | null } | undefined
+
+        mount(
+            <>
+                <Harness hiddenByDefault={{ role: false }} onApi={() => undefined} />
+                <FirstCommit
+                    onCommit={() => {
+                        first = { dot: dot() !== null, name: pin().getAttribute('aria-label') }
+                    }}
+                />
+            </>,
+        )
+
+        await expect(first).toEqual({ dot: true, name: 'Column settings, changed' })
+        await expect(headerLabels()).not.toContain('Role')
+        await expect(pin()).toHaveAccessibleName('Column settings, changed')
     })
 
     it('ST-13: a stored order that matches the definition order shows no dot', async () => {
