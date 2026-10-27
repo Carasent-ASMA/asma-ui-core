@@ -15,22 +15,25 @@ interface Row {
     c: string
 }
 
-const columns: ColumnDef<Row, any>[] = [
+const columns: ColumnDef<Row, unknown>[] = [
     { accessorKey: 'a', header: 'A' },
     { accessorKey: 'b', header: 'B' },
     { accessorKey: 'c', header: 'C', enableHiding: false },
     { id: 'select', header: 'Select' },
 ]
 
-const makeTable = (defs: ColumnDef<Row, any>[], state: Partial<TableState> = {}) => {
+const isColumnA = (column: ColumnDef<Row, unknown>): boolean =>
+    'accessorKey' in column && column.accessorKey === 'a'
+
+const makeTable = (defs: ColumnDef<Row, unknown>[], state: Partial<TableState> = {}) => {
     const table = createTable<Row>({
         columns: defs,
         data: [],
         getCoreRowModel: getCoreRowModel(),
         onStateChange: () => undefined,
         renderFallbackValue: null,
-        state: {} as TableState,
-    } as never)
+        state: {},
+    })
 
     table.setOptions((previous) => ({ ...previous, state: { ...table.initialState, ...state } }))
 
@@ -78,7 +81,7 @@ describe('column layout (ASMA-8597, the dot on the column settings pin)', () => 
         expect(hasReorderedColumns(makeTable(columns, { columnOrder: stored }))).toBe(true)
 
         // Column `a` is gone from the definitions. The stored order lists `a`, which no longer exists.
-        const withoutA = columns.filter((column) => !('accessorKey' in column && column.accessorKey === 'a'))
+        const withoutA = columns.filter((column) => !isColumnA(column))
         const table = makeTable(withoutA, { columnOrder: stored })
 
         expect(getDefinitionColumnOrder(table)).toEqual(['b', 'c', 'select'])
@@ -94,7 +97,7 @@ describe('column layout (ASMA-8597, the dot on the column settings pin)', () => 
 
         table.setOptions((previous) => ({
             ...previous,
-            columns: columns.filter((column) => !('accessorKey' in column && column.accessorKey === 'a')),
+            columns: columns.filter((column) => !isColumnA(column)),
         }))
 
         expect(getDefinitionColumnOrder(table)).toEqual(['b', 'c', 'select'])
@@ -103,7 +106,7 @@ describe('column layout (ASMA-8597, the dot on the column settings pin)', () => 
     })
 
     it('reads group columns in definition order', () => {
-        const grouped: ColumnDef<Row, any>[] = [
+        const grouped: ColumnDef<Row, unknown>[] = [
             { accessorKey: 'a', header: 'A' },
             {
                 header: 'Group',

@@ -1,6 +1,6 @@
 import type { ColumnDef } from '@tanstack/react-table'
 import { afterEach, beforeEach, describe, it } from 'vitest'
-import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
+import { expect, userEvent } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import {
     ariaSorts,

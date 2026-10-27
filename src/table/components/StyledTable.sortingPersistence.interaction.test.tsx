@@ -100,7 +100,7 @@ describe('StyledTable sorting persistence (persistSorting)', () => {
         await userEvent.click(sortButton('Role'))
 
         await waitFor(() => expect(callsFor(setItem.mock.calls, SORT_KEY)).toHaveLength(3))
-        await expect(callsFor(setItem.mock.calls, SORT_KEY).map(([, value]) => JSON.parse(String(value)))).toEqual([
+        await expect(callsFor(setItem.mock.calls, SORT_KEY).map(([, value]) => JSON.parse(String(value)) as unknown)).toEqual([
             { v: 1, sorting: [{ id: 'name', desc: false }] },
             { v: 1, sorting: [{ id: 'name', desc: true }] },
             { v: 1, sorting: [{ id: 'role', desc: false }] },

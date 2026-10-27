@@ -31,7 +31,10 @@ const SizedTable = (props: Props): JSX.Element => (
 )
 
 const widthOf = (label: string): number => Number.parseFloat(headerCell(label).style.width)
-const stored = (key: string): unknown => JSON.parse(localStorage.getItem(key) ?? 'null')
+const stored = (key: string): unknown => JSON.parse(localStorage.getItem(key) ?? 'null') as unknown
+/** Whether the saved width map for `key` holds a number for column `id`. */
+const hasSavedWidth = (key: string, id: string): boolean =>
+    typeof (stored(key) as Record<string, unknown> | null)?.[id] === 'number'
 const resizer = (label: string): HTMLElement => headerCell(label).querySelector<HTMLElement>('[class*="resizer"]')!
 
 const mouse = (type: string, target: EventTarget, clientX: number): void => {
@@ -159,7 +162,7 @@ describe('StyledTable saved column widths', () => {
         mount(<SizedTable columnResizeMode='onChange' />)
 
         await drag('Name', 60)
-        await waitFor(() => expect(stored(SIZING_KEY)).toMatchObject({ name: expect.any(Number) }))
+        await waitFor(() => expect(hasSavedWidth(SIZING_KEY, 'name')).toBe(true))
 
         // Double-click on the handle resets the column's width: the state is the default again.
         mouse('dblclick', resizer('Name'), 0)
@@ -232,7 +235,7 @@ describe('StyledTable saved column widths: key change (AC 14)', () => {
 
         await drag('Role', 50)
 
-        await waitFor(() => expect(stored(OTHER_SIZING_KEY)).toMatchObject({ role: expect.any(Number) }))
+        await waitFor(() => expect(hasSavedWidth(OTHER_SIZING_KEY, 'role')).toBe(true))
         await expect(stored(SIZING_KEY)).toEqual({ name: 240 })
     })
 })

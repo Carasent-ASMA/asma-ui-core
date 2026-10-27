@@ -8,7 +8,7 @@ interface Row {
     owner: { name: string }
 }
 
-const makeTable = (columns: ColumnDef<Row, any>[], options: ColumnResolutionOptions = {}) => {
+const makeTable = (columns: ColumnDef<Row, unknown>[], options: ColumnResolutionOptions = {}) => {
     const table = createTable<Row>({
         columns,
         data: [],
@@ -24,7 +24,7 @@ const makeTable = (columns: ColumnDef<Row, any>[], options: ColumnResolutionOpti
     return table
 }
 
-const fromTable = (columns: ColumnDef<Row, any>[], options: ColumnResolutionOptions = {}) =>
+const fromTable = (columns: ColumnDef<Row, unknown>[], options: ColumnResolutionOptions = {}) =>
     makeTable(columns, options)
         .getAllLeafColumns()
         .map((column) => ({
@@ -35,7 +35,7 @@ const fromTable = (columns: ColumnDef<Row, any>[], options: ColumnResolutionOpti
 
 describe('getLeafColumnInfos (ASMA-8597)', () => {
     it('U-I01: ids and sortability equal a real TanStack table for id, dotted accessorKey, string header and groups', () => {
-        const columns: ColumnDef<Row, any>[] = [
+        const columns: ColumnDef<Row, unknown>[] = [
             { id: 'explicit', accessorKey: 'name', header: 'Explicit' },
             { accessorKey: 'owner.name', header: 'Owner' },
             { id: 'computed', accessorFn: (row) => row.name.length, header: () => null },
@@ -65,7 +65,7 @@ describe('getLeafColumnInfos (ASMA-8597)', () => {
     })
 
     it('follows the table options and defaultColumn like TanStack does', () => {
-        const columns: ColumnDef<Row, any>[] = [
+        const columns: ColumnDef<Row, unknown>[] = [
             { accessorKey: 'name', header: 'Name' },
             { accessorKey: 'id', header: 'Id', enableSorting: true, enableMultiSort: true },
         ]

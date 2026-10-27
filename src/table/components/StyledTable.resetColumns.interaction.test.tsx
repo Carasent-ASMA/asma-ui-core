@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import type { SortingState, Table, VisibilityState } from '@tanstack/react-table'
 import { afterEach, beforeEach, describe, it, vi } from 'vitest'
 import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
@@ -37,12 +37,14 @@ interface HarnessApi {
     table: () => Table<Person>
 }
 
-const Harness = ({ api, ...props }: Props & { api: { current: HarnessApi | null } }): JSX.Element => {
+const Harness = ({ onApi, ...props }: Props & { onApi: (api: HarnessApi) => void }): JSX.Element => {
     const [visibility, setVisibility] = useState<VisibilityState>({})
     const [generation, setGeneration] = useState(0)
     const tableRef = useRef<Table<Person> | null>(null)
 
-    api.current = { table: () => tableRef.current! }
+    useLayoutEffect(() => {
+        onApi({ table: () => tableRef.current! })
+    }, [onApi])
 
     return (
         <>
@@ -72,9 +74,12 @@ const Harness = ({ api, ...props }: Props & { api: { current: HarnessApi | null 
 
 const mountHarness = (props: Props = {}) => {
     const api: { current: HarnessApi | null } = { current: null }
-    const view = mount(<Harness api={api} {...props} />)
+    const onApi = (next: HarnessApi): void => {
+        api.current = next
+    }
+    const view = mount(<Harness onApi={onApi} {...props} />)
 
-    return { api, view, table: () => api.current!.table() }
+    return { onApi, view, table: () => api.current!.table() }
 }
 
 const headerLabels = (): string[] =>
@@ -182,11 +187,11 @@ describe('Reset columns', () => {
     })
 
     it('resetColumnOrder() sets [] (the live definition order), not a list captured when the table was created', async () => {
-        const { api, view, table } = mountHarness()
+        const { onApi, view, table } = mountHarness()
 
         await act(() => table().setColumnOrder(['age', 'name', 'role', 'notes']))
         // `role` leaves the column definitions while the table stays mounted.
-        view.rerender(<Harness api={api} columns={personColumns.filter((column) => 'accessorKey' in column && column.accessorKey !== 'role')} />)
+        view.rerender(<Harness onApi={onApi} columns={personColumns.filter((column) => 'accessorKey' in column && column.accessorKey !== 'role')} />)
         await waitFor(() => expect(headerLabels()).not.toContain('Role'))
 
         await act(() => table().resetColumnOrder())
@@ -337,7 +342,7 @@ describe('Column settings pin dot (AC 18)', () => {
 
         mount(
             <>
-                <Harness api={{ current: null }} />
+                <Harness onApi={() => undefined} />
                 <FirstCommit onCommit={() => (dotAtFirstCommit = dot() !== null)} />
             </>,
         )
