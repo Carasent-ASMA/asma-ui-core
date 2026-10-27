@@ -118,7 +118,12 @@ export const SizingPersistenceAndControlAlignment: Story = {
     parameters: { a11y: { test: 'todo' } },
     loaders: [
         () => {
-            localStorage.setItem(COLUMN_SIZING_KEY, JSON.stringify({ name: 240 }))
+            // A flat map saved before ASMA-8597, with a column that no longer exists and a value that is not a
+            // width: the width still loads, the rest is dropped (AC 4, AC 7).
+            localStorage.setItem(
+                COLUMN_SIZING_KEY,
+                JSON.stringify({ name: 240, 'column-that-was-removed': 500, description: 'wide' }),
+            )
             return {}
         },
     ],
@@ -127,9 +132,17 @@ export const SizingPersistenceAndControlAlignment: Story = {
         const nameHeader = Array.from(canvasElement.querySelectorAll<HTMLElement>('th')).find(
             (header) => header.textContent === 'Workspace name',
         )
+        const descriptionHeader = Array.from(canvasElement.querySelectorAll<HTMLElement>('th')).find(
+            (header) => header.textContent === 'Description',
+        )
 
         await expect(nameHeader).toBeDefined()
         await expect(nameHeader?.style.width).toBe('240px')
+        await expect(descriptionHeader?.style.width).toBe('160px')
+        // Mounting writes nothing: the legacy entry is still exactly what was saved.
+        await expect(localStorage.getItem(COLUMN_SIZING_KEY)).toBe(
+            JSON.stringify({ name: 240, 'column-that-was-removed': 500, description: 'wide' }),
+        )
         await expect(consumerColumns).toHaveLength(7)
 
         const checkboxes = Array.from(canvasElement.querySelectorAll<HTMLElement>('[role="checkbox"]'))
@@ -680,5 +693,94 @@ export const RowStates: Story = {
         await expect(selected).not.toBeNull()
         const checked = canvasElement.querySelector('[data-test="row-state-checked"] tr[aria-selected="true"]')
         await expect(checked).not.toBeNull()
+    },
+}
+
+const indicatorRows: TableRow[] = [
+    { ...data[0]!, id: 'i1', name: 'Alpha' },
+    { ...data[1]!, id: 'i2', name: 'Beta' },
+]
+
+const indicatorColumns: ColumnDef<TableRow>[] = [
+    { accessorKey: 'name', header: 'Ascending', size: 150 },
+    { accessorKey: 'role', header: 'Descending', size: 150 },
+    { accessorKey: 'description', header: 'Unsorted', size: 150 },
+    { accessorKey: 'updatedBy', header: 'A very long column label that gets truncated', size: 150 },
+    { id: 'unsortable', header: 'Unsortable', size: 150 },
+]
+
+/**
+ * ASMA-8597, AC 15 and 16: the Figma sort indicator. Ascending and descending (a two-column sort) show the
+ * primary glyph; an unsorted column shows nothing until it is hovered or focused, then a grey glyph pointing
+ * the way the next click sorts; a long label truncates and keeps its slot; an unsortable column shows nothing.
+ * The hover and focus states are captured by the interaction captures in `visual-tests/interaction-states.ts`.
+ * The grey square behind a hovered glyph is provisional (ASMA-8597 OQ-01).
+ */
+export const SortIndicatorStates: Story = {
+    render: () => (
+        <div className='w-[860px]'>
+            <StyledTable
+                columns={indicatorColumns}
+                data={indicatorRows}
+                hideFooter
+                initialState={{
+                    sorting: [
+                        { id: 'name', desc: false },
+                        { id: 'role', desc: true },
+                    ],
+                }}
+                locale='en'
+            />
+        </div>
+    ),
+    play: async ({ canvasElement }) => {
+        const header = (label: string) =>
+            Array.from(canvasElement.querySelectorAll<HTMLElement>('th')).find((cell) =>
+                cell.textContent?.startsWith(label),
+            )!
+        const indicator = (label: string) => header(label).querySelector<HTMLElement>('[data-sort-state]')
+
+        await expect(header('Ascending')).toHaveAttribute('aria-sort', 'ascending')
+        await expect(header('Descending')).toHaveAttribute('aria-sort', 'descending')
+        await expect(header('Unsorted')).toHaveAttribute('aria-sort', 'none')
+        await expect(indicator('Ascending')).toHaveAttribute('data-sort-direction', 'asc')
+        await expect(indicator('Descending')).toHaveAttribute('data-sort-direction', 'desc')
+        await expect(indicator('Unsortable')).toBeNull()
+        await expect(getComputedStyle(indicator('Unsorted')!.querySelector('svg')!).visibility).toBe('hidden')
+    },
+}
+
+const resizeColumns: ColumnDef<TableRow>[] = [
+    { accessorKey: 'name', header: 'Narrow column', size: 100, minSize: 100 },
+    { accessorKey: 'role', header: 'Role', size: 180 },
+    { accessorKey: 'description', header: 'Description', size: 220 },
+]
+
+/**
+ * ASMA-8597, AC 17: with resizing on, each handle is a 24px zone at the column's right edge. The header
+ * content reserves it, so in a 100px column the glyph ends before the zone and never sits under it. The 4px
+ * bar stays at the edge (provisional, OQ-03) and shows on hover; the VRT capture hovers the narrow column.
+ */
+export const ResizeHandle: Story = {
+    render: () => (
+        <div className='w-[640px]'>
+            <StyledTable columns={resizeColumns} data={indicatorRows} enableColumnResizing hideFooter locale='en' />
+        </div>
+    ),
+    play: async ({ canvasElement }) => {
+        const narrow = Array.from(canvasElement.querySelectorAll<HTMLElement>('th')).find((cell) =>
+            cell.textContent?.startsWith('Narrow column'),
+        )!
+        const zone = narrow.querySelector<HTMLElement>('[class*="resizer"]')!
+        const glyph = narrow.querySelector<SVGElement>('[data-sort-state] svg')!
+        const zoneBox = zone.getBoundingClientRect()
+        const glyphBox = glyph.getBoundingClientRect()
+
+        await expect(zoneBox.width).toBe(24)
+        await expect(getComputedStyle(zone, '::after').width).toBe('4px')
+        await expect(glyphBox.right).toBeLessThanOrEqual(zoneBox.left + 14)
+        const hit = document.elementFromPoint(glyphBox.left + glyphBox.width / 2, glyphBox.top + glyphBox.height / 2)
+
+        await expect(zone.contains(hit)).toBe(false)
     },
 }
