@@ -2,8 +2,7 @@ import { flexRender, type Header } from '@tanstack/react-table'
 import { useMemo } from 'react'
 import clsx from 'clsx'
 import style from '../StyledTable.module.scss'
-import { DropUpIcon } from 'src/table/shared-components/DropUpIcon'
-import { DropDownIcon } from 'src/table/shared-components/DropDownIcon'
+import { SortIndicator } from './SortIndicator'
 import { ACTIONS_COLUMN_ID, INTERNAL_COLUMN_IDS, SELECT_COLUMN_ID, type StyledTableProps } from 'src/table/types'
 import { getTableHeaderStyle } from 'src/table/helpers/getTableHeaderStyle'
 import { useRootContext } from 'src/table/context/RootContext'
@@ -61,6 +60,12 @@ export function TableHeaderCell<
               : 'none'
         : undefined
 
+    const showResizeHandle =
+        tableCanResize &&
+        (!enableResizing ? header.id !== lastColumn?.id : true) &&
+        header.column.getCanResize() &&
+        !INTERNAL_COLUMN_IDS.includes(header.column.id)
+
     return (
         <th
             key={header.id}
@@ -87,6 +92,8 @@ export function TableHeaderCell<
                     'flex items-center justify-start',
                     hideHeader ? style['hide-table-header'] : style['show-table-header'],
                     canSort && style['sortable-column'],
+                    // The handle's 24px zone is reserved on the right, so nothing sits under it.
+                    showResizeHandle && style['has-resize-zone'],
                     header.column.columnDef.className,
                 )}
                 role={canSort ? 'button' : undefined}
@@ -113,33 +120,30 @@ export function TableHeaderCell<
                 <div className={style['header-content']}>
                     {flexRender(header.column.columnDef.header, header.getContext())}
                 </div>
-                {{
-                    asc: <DropUpIcon className={style['sort-icon']} />,
-                    desc: <DropDownIcon className={style['sort-icon']} />,
-                }[header.column.getIsSorted() as string] ?? null}
-                {tableCanResize &&
-                    (!enableResizing ? header.id !== lastColumn?.id : true) &&
-                    header.column.getCanResize() &&
-                    !INTERNAL_COLUMN_IDS.includes(header.column.id) && (
-                        <div
-                            {...{
-                                onDoubleClick: () => header.column.resetSize(),
-                                onMouseDown: (e) => {
-                                    e.stopPropagation()
-                                    enableResizingFlag()
-                                    header.getResizeHandler()(e)
-                                },
-                                onTouchStart: (e) => {
-                                    e.stopPropagation()
-                                    enableResizingFlag()
-                                    header.getResizeHandler()(e)
-                                },
-                                className: `${style['resizer']} ${
-                                    header.column.getIsResizing() ? style['isResizing'] : ''
-                                }`,
-                            }}
-                        />
-                    )}
+                {canSort && (
+                    <SortIndicator
+                        sorted={sortedDirection}
+                        nextDirection={sortedDirection || header.column.getFirstSortDir()}
+                    />
+                )}
+                {showResizeHandle && (
+                    <div
+                        {...{
+                            onDoubleClick: () => header.column.resetSize(),
+                            onMouseDown: (e) => {
+                                e.stopPropagation()
+                                enableResizingFlag()
+                                header.getResizeHandler()(e)
+                            },
+                            onTouchStart: (e) => {
+                                e.stopPropagation()
+                                enableResizingFlag()
+                                header.getResizeHandler()(e)
+                            },
+                            className: `${style['resizer']} ${header.column.getIsResizing() ? style['isResizing'] : ''}`,
+                        }}
+                    />
+                )}
             </div>
         </th>
     )
