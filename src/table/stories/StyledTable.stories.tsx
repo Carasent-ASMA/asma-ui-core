@@ -353,7 +353,9 @@ export const SizingPersistenceAndControlAlignment: Story = {
         scrollContainer!.dispatchEvent(new Event('scroll'))
         await waitFor(() => expect(scrollContainer!.scrollLeft).toBe(300))
         await expect(actionsHeader!.getBoundingClientRect().right).toBe(initialActionsHeaderBounds.right)
-        await expect(actionsCell!.getBoundingClientRect().right).toBe(initialActionsCellBounds.right)
+        // ASMA-8427: this actions column only hosts the header pin menu, so its empty body cells
+        // scroll with the data instead of covering the last column; the pin itself stays put.
+        await expect(actionsCell!.getBoundingClientRect().right).toBe(initialActionsCellBounds.right - 300)
 
         const scrolledCheckboxBounds = rowCheckboxBox!.getBoundingClientRect()
         const scrolledExpandBounds = expandButton!.getBoundingClientRect()

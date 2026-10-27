@@ -59,6 +59,7 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
         defaultExpanded,
         actions,
         customActionsNode,
+        stickyActions,
         textExpandArrow,
         enableMultiRowSelection,
         enableRowSelection,
@@ -185,6 +186,18 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
         left: allCells.slice(0, idx).reduce((acc, col) => acc + (col.column.getSize() ?? 0), 0),
     }))
 
+    const hasActionsContent = Boolean(actions) || Boolean(customActionsNode)
+
+    const hasFixedRightColumns = positionedCells.some((cell) => Boolean(cell.column.columnDef.fixedRight))
+
+    /**
+     * ASMA-8427: an actions column that only hosts the header pin menu has empty body cells, and
+     * pinned they only cover the column behind them — so they scroll with the data. The header cell
+     * with the pin menu stays pinned either way. Beside fixed-right columns the column stays pinned,
+     * so the body's right offsets keep matching the header's.
+     */
+    const isActionsColumnSticky = stickyActions ?? (hasActionsContent || hasFixedRightColumns)
+
     const centerCells = useMemo(
         () =>
             positionedCells.filter(
@@ -199,7 +212,9 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
     const rightCells = useMemo(
         () => {
             const pinnedRightCells = positionedCells.filter(
-                (cell) => Boolean(cell.column.columnDef.fixedRight) || cell.column.id === ACTIONS_COLUMN_ID,
+                (cell) =>
+                    Boolean(cell.column.columnDef.fixedRight) ||
+                    (cell.column.id === ACTIONS_COLUMN_ID && isActionsColumnSticky),
             )
 
             return pinnedRightCells.map((cell, index, allCells) => ({
@@ -207,7 +222,7 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
                 right: allCells.slice(index + 1).reduce((acc, col) => acc + (col.column.getSize() ?? 0), 0),
             }))
         },
-        [positionedCells],
+        [positionedCells, isActionsColumnSticky],
     )
 
     const hasActionsColumn = useMemo(
@@ -215,12 +230,9 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
         [rightCells],
     )
 
-    const hasActionsContent = Boolean(actions) || Boolean(customActionsNode)
-
-    const hasFixedRightColumns = useMemo(
-        () => rightCells.some((cell) => Boolean(cell.column.columnDef.fixedRight)),
-        [rightCells],
-    )
+    const inlineActionsCell = isActionsColumnSticky
+        ? undefined
+        : positionedCells.find((cell) => cell.column.id === ACTIONS_COLUMN_ID)
 
     const leftCells = useMemo(
         () => positionedCells.filter((cell) => cell.column.columnDef.fixedLeft),
@@ -252,10 +264,18 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
                         cell.column.id === SELECT_COLUMN_ID && style['select-cell'],
                         hasRowClickHandler && 'cursor-pointer',
                         tdClassName,
-                        isActionsCell && style['action-cell'],
-                        isActionsCell && (!hasActionsContent || hasFixedRightColumns) && style['action-cell--no-shadow'],
-                        isActionsCell && Boolean(actions) && leftCells.length && style['shadowed'],
+                        isActionsCell && isActionsColumnSticky && style['action-cell'],
                         isActionsCell &&
+                            isActionsColumnSticky &&
+                            (!hasActionsContent || hasFixedRightColumns) &&
+                            style['action-cell--no-shadow'],
+                        isActionsCell &&
+                            isActionsColumnSticky &&
+                            Boolean(actions) &&
+                            leftCells.length &&
+                            style['shadowed'],
+                        isActionsCell &&
+                            isActionsColumnSticky &&
                             (getRowClassName?.(row) ? getRowClassName?.(row) : style['action-cell-default-background']),
                         isFixedLeft && style['fixed-cell'],
                         isFixedRight && style['fixed-right-cell'],
@@ -320,6 +340,7 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
             rightCells,
             row,
             hasActionsContent,
+            isActionsColumnSticky,
             spaceForCheckmark,
             tdClassName,
         ],
@@ -385,6 +406,10 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
                 )}
 
                 {rightCells.map((cell, idx) => renderCell(cell, leftCells.length + centerCellsToRender.length + idx))}
+
+                {/* An unpinned actions column renders in the normal column flow, after the data. */}
+                {inlineActionsCell &&
+                    renderCell(inlineActionsCell, leftCells.length + centerCellsToRender.length + rightCells.length)}
             </tr>
             {row.getIsExpanded() && (
                 <>

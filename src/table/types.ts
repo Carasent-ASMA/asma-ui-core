@@ -124,6 +124,14 @@ export type StyledTableProps<TData, TCustomData> = {
     customActionsNode?: (row: CellContext<TData, unknown>) => ReactNode
     customSubRowData?: Map<string, TCustomData[]>
     headerPin?: boolean
+    /**
+     * Pins the internal actions column's body cells to the right edge. By default they are pinned
+     * when the column renders actions (`actions` / `customActionsNode`) or the table has fixed-right
+     * columns; a column that only hosts the header pin menu scrolls with the data. The header cell
+     * with the pin menu stays pinned either way. Not supported as `false` together with fixed-right
+     * columns: their body and header offsets would no longer match.
+     */
+    stickyActions?: boolean
     expandArrow?: boolean
     defaultExpanded?: boolean
     loading?: boolean
