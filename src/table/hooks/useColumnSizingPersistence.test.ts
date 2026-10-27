@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { columnSizingSignature, getColumnSizingStorageKey, sanitizeColumnSizing, serializeColumnSizing } from './useColumnSizingPersistence'
+import {
+    columnSizingSignature,
+    getColumnSizingStorageKey,
+    sanitizeColumnSizing,
+    serializeColumnSizing,
+    unknownColumnSizing,
+} from './useColumnSizingPersistence'
 
 const known = new Set(['name', 'role', 'age'])
 
@@ -8,7 +14,7 @@ describe('sanitizeColumnSizing (ASMA-8597)', () => {
         expect(sanitizeColumnSizing({ name: 240, role: 120.5 }, known)).toEqual({ name: 240, role: 120.5 })
     })
 
-    it('U-W02: unknown columns are dropped, known ones kept', () => {
+    it('U-W02: widths of unknown columns are not applied (kept aside until they appear), known ones are', () => {
         expect(sanitizeColumnSizing({ name: 240, removed: 300, v: 1 }, known)).toEqual({ name: 240 })
     })
 
@@ -30,6 +36,18 @@ describe('sanitizeColumnSizing (ASMA-8597)', () => {
         // JSON has no NaN or Infinity; those arrive as null, and anything but an object is not a width map.
         for (const raw of [[], [240], null, 'name', 240, true, undefined]) {
             expect(sanitizeColumnSizing(raw, known), String(raw)).toBeUndefined()
+        }
+    })
+
+    it('U-W09: keeps the valid saved widths of columns that are not there yet, and drops everything that is not a width', () => {
+        // `known` is name, role and age. `later` and `extra` are not there yet; the rest are not widths.
+        const raw = { name: 240, later: 150, role: -5, notes: '90', gone: Number.POSITIVE_INFINITY, extra: 80 }
+
+        expect(unknownColumnSizing(raw, known)).toEqual({ later: 150, extra: 80 })
+        // Known columns are applied by the other reader, never here.
+        expect(unknownColumnSizing(raw, new Set(['name', 'later', 'extra']))).toEqual({})
+        for (const bad of [[], null, 'name', 240, undefined]) {
+            expect(unknownColumnSizing(bad, known), String(bad)).toEqual({})
         }
     })
 

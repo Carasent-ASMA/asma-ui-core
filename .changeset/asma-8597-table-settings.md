@@ -29,12 +29,18 @@ these two names.
 
 **Fixes for tables with `uniqueKey` or `persistColumnOrderKey`:**
 
-- Saved widths are checked against the columns: unknown columns and values that are not a width are dropped
-  and the rest is kept. Entries saved before this change still load.
+- Saved widths are checked against the columns: values that are not a width are dropped, widths of columns
+  that don't exist yet are kept aside until those columns appear, and the rest is applied. Entries saved before
+  this change still load.
 - A saved width or order equal to the default is removed instead of written, and mounting a table writes
   nothing.
 - When `uniqueKey` changes while the table is shown, the new key's widths load and the old key's widths are
   no longer written over it.
+- When `uniqueKey` becomes `undefined` (for example while the signed-in user is not known yet), the table goes
+  back to its default widths and nothing is saved, so one user's values are not left on screen.
+- Tab pressed on a control inside the header, such as the column settings popover, is no longer sent to the
+  first body row by the header row's Tab handler. Tab pressed on the header row itself still goes to the
+  active row.
 - Broken, full or blocked `localStorage` (including page size and column order) leaves the table working in
   memory, with no thrown error and no `console.error`.
 

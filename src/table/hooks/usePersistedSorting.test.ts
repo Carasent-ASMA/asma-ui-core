@@ -185,6 +185,17 @@ describe('readPersistedSorting (ASMA-8597)', () => {
         for (const spy of output) expect(spy).not.toHaveBeenCalled()
     })
 
+    it('F3: a saved [] reads back as [] (unsorted), not as undefined (the default), through storage', () => {
+        storage.data.set('table-a:sorting', serializeSorting([]))
+
+        const result = readPersistedSorting('table-a', { sortableColumnIds: ids })
+
+        expect(result).toEqual([])
+        expect(result).not.toBeUndefined()
+        // Nothing saved is a different answer.
+        expect(readPersistedSorting('table-b', { sortableColumnIds: ids })).toBeUndefined()
+    })
+
     it('U-E01: validates against the sortable column ids it is given', () => {
         storage.data.set(
             'table-a:sorting',

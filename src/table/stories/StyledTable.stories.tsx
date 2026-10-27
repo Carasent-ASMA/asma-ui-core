@@ -119,7 +119,7 @@ export const SizingPersistenceAndControlAlignment: Story = {
     loaders: [
         () => {
             // A flat map saved before ASMA-8597, with a column that no longer exists and a value that is not a
-            // width: the width still loads, the rest is dropped (AC 4, AC 7).
+            // width: the width still loads, the rest is not applied (AC 4, AC 7).
             localStorage.setItem(
                 COLUMN_SIZING_KEY,
                 JSON.stringify({ name: 240, 'column-that-was-removed': 500, description: 'wide' }),

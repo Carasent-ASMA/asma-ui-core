@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { SortingState } from '@tanstack/react-table'
+import type { ColumnDef, SortingState } from '@tanstack/react-table'
 import { afterEach, beforeEach, describe, it, vi } from 'vitest'
 import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
@@ -205,6 +205,46 @@ describe('StyledTable sorting persistence (persistSorting)', () => {
         await expect('persistSorting' in table!.options).toBe(false)
     })
 
+    it('U-S06 end to end: a saved sort on columns that cannot sort is dropped, the valid rest is kept', async () => {
+        const columns: ColumnDef<Person>[] = [
+            personColumns[0]!, // name: sortable
+            { accessorKey: 'role', header: 'Role', size: 160, enableSorting: false }, // switched off on the column
+            personColumns[2]!, // age: sortable
+            personColumns[3]!, // notes: no accessor, cannot sort
+        ]
+        const savedBefore = saved([
+            { id: 'notes', desc: false },
+            { id: 'role', desc: true },
+            { id: 'age', desc: true },
+            { id: 'name', desc: false },
+        ])
+
+        localStorage.setItem(SORT_KEY, savedBefore)
+        const first = mount(<PeopleTable columns={columns} />)
+
+        // Only the two sortable columns survive, in their saved order.
+        await expect(ariaSorts()).toEqual({ Name: 'ascending', Age: 'descending' })
+        // Age descending first (41, 35, 29), then name.
+        await expect(bodyNames()).toEqual(['Charlie', 'Bob', 'Alice'])
+        // Mounting writes nothing: the stored value is what was saved.
+        await expect(localStorage.getItem(SORT_KEY)).toBe(savedBefore)
+
+        // A saved sort with no sortable column at all means nothing is saved: the app default applies.
+        first.unmount()
+        localStorage.setItem(SORT_KEY, saved([{ id: 'notes', desc: true }, { id: 'role', desc: false }]))
+        mount(<PeopleTable columns={columns} initialState={{ sorting: [{ id: 'name', desc: true }] }} />)
+
+        await expect(ariaSorts()).toEqual({ Name: 'descending', Age: 'none' })
+    })
+
+    it('U-S06 end to end: with sorting switched off for the whole table every saved entry is dropped', async () => {
+        localStorage.setItem(SORT_KEY, saved([{ id: 'name', desc: false }]))
+
+        mount(<PeopleTable enableSorting={false} />)
+
+        await expect(ariaSorts()).toEqual({})
+    })
+
     it('drops a saved sort for a column that is gone, and uses the default when none is left', async () => {
         localStorage.setItem(SORT_KEY, saved([{ id: 'removed-column', desc: true }]))
 
@@ -308,6 +348,34 @@ describe('StyledTable sorting persistence: key change (AC 14)', () => {
         await expect(localStorage.getItem(SORT_KEY)).toBe(before)
     })
 
+    it('F2: when the key goes away the table returns to the app default and writes nothing; the key coming back reloads', async () => {
+        const defaultSorting: SortingState = [{ id: 'role', desc: false }]
+        localStorage.setItem(SORT_KEY, saved([{ id: 'name', desc: true }]))
+        const before = localStorage.getItem(SORT_KEY)
+        const view = mount(<PeopleTable initialState={{ sorting: defaultSorting }} />)
+
+        await expect(ariaSorts()['Name']).toBe('descending')
+
+        const setItem = vi.spyOn(Storage.prototype, 'setItem')
+        const removeItem = vi.spyOn(Storage.prototype, 'removeItem')
+
+        view.rerender(<PeopleTable initialState={{ sorting: defaultSorting }} uniqueKey={undefined} />)
+
+        // The previous user's sort is not left on screen: the app's default is back.
+        await waitFor(() => expect(ariaSorts()).toMatchObject({ Role: 'ascending', Name: 'none' }))
+        await new Promise((resolve) => setTimeout(resolve, 100))
+        await expect(callsFor(setItem.mock.calls, /:sorting$/)).toHaveLength(0)
+        await expect(callsFor(removeItem.mock.calls, /:sorting$/)).toHaveLength(0)
+
+        // Without a key a sort is not saved either.
+        await userEvent.click(sortButton('Age'))
+        await expect(callsFor(setItem.mock.calls, /:sorting$/)).toHaveLength(0)
+
+        view.rerender(<PeopleTable initialState={{ sorting: defaultSorting }} />)
+        await waitFor(() => expect(ariaSorts()).toMatchObject({ Name: 'descending', Age: 'none' }))
+        await expect(localStorage.getItem(SORT_KEY)).toBe(before)
+    })
+
     it('U-K04: a key that arrives late (undefined, then a value) loads that key\'s sort', async () => {
         localStorage.setItem(SORT_KEY, saved([{ id: 'name', desc: true }]))
         const setItem = vi.spyOn(Storage.prototype, 'setItem')
@@ -397,6 +465,53 @@ describe('StyledTable sorting persistence: controlled sorting (usePersistedSorti
         await waitFor(() => expect(stored(SORT_KEY)).toEqual({ v: 1, sorting: [{ id: 'age', desc: true }] }))
         await expect(callsFor(setItem.mock.calls, SORT_KEY)).toHaveLength(1)
         await expect(requests[requests.length - 1]).toEqual([{ id: 'age', desc: true }])
+    })
+
+    it('F3: a saved [] (the user turned sorting off) is unsorted, not the default, on the first render and after a remount', async () => {
+        localStorage.setItem(SORT_KEY, saved([]))
+        const requests: SortingState[] = []
+        const first = mount(<ServerSortedTable requests={requests} uniqueKey={KEY} />)
+
+        await expect(requests).toEqual([[]])
+        await expect(ariaSorts()).toMatchObject({ Name: 'none', Role: 'none', Age: 'none' })
+
+        // The whole flow: sort, turn it off again, remount: still unsorted, still not the default.
+        first.unmount()
+        localStorage.clear()
+        const second = mount(<ServerSortedTable requests={[]} uniqueKey={KEY} />)
+
+        await expect(ariaSorts()['Name']).toBe('ascending')
+        await userEvent.click(sortButton('Name'))
+        await userEvent.click(sortButton('Name'))
+        await expect(ariaSorts()['Name']).toBe('none')
+        await waitFor(() => expect(stored(SORT_KEY)).toEqual({ v: 1, sorting: [] }))
+
+        second.unmount()
+        const remountRequests: SortingState[] = []
+        mount(<ServerSortedTable requests={remountRequests} uniqueKey={KEY} />)
+
+        await expect(remountRequests).toEqual([[]])
+        await expect(ariaSorts()['Name']).toBe('none')
+    })
+
+    it('F3: the hook alone returns a saved [] on its first render and after a key change, and the default only when nothing is saved', async () => {
+        localStorage.setItem(SORT_KEY, saved([]))
+        localStorage.setItem(OTHER_SORT_KEY, saved([{ id: 'role', desc: true }]))
+        const Probe = ({ uniqueKey }: { uniqueKey: string }): JSX.Element => {
+            const { sorting } = usePersistedSorting({ uniqueKey, defaultSorting, sortableColumnIds })
+
+            return <output data-testid='probe'>{JSON.stringify(sorting)}</output>
+        }
+        const probe = (): string => document.querySelector('[data-testid="probe"]')!.textContent ?? ''
+        const view = mount(<Probe uniqueKey={KEY} />)
+
+        await expect(probe()).toBe('[]')
+
+        view.rerender(<Probe uniqueKey={OTHER_KEY} />)
+        await expect(JSON.parse(probe())).toEqual([{ id: 'role', desc: true }])
+
+        view.rerender(<Probe uniqueKey='nothing-saved-here' />)
+        await expect(JSON.parse(probe())).toEqual(defaultSorting)
     })
 
     it('U-E03 / U-K01: after a key change the hook supplies the new key\'s sort and nothing is written', async () => {
