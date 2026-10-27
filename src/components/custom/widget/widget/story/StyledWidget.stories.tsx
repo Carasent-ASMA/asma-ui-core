@@ -1,6 +1,7 @@
 import type { Meta } from '@storybook/react-vite'
 import { StyledWidget } from '../StyledWidget'
 import { InboxOutboxOutlineIcon } from 'src/components/icons'
+import { StyledButton } from 'src/components/inputs/button'
 import { useState } from 'react'
 
 const meta: Meta = {
@@ -144,6 +145,32 @@ export const Widget = (): JSX.Element => {
 
 // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
 Widget.parameters = { a11y: { test: 'todo' } }
+
+/**
+ * One widget filling the preview: narrow the window or zoom in to see it at small widths. Below
+ * 320px (e.g. a 320px window at 200% zoom) the header and footer items wrap and long words break.
+ */
+export const FluidWidth = (): JSX.Element => (
+    <StyledWidget
+        title='Personvernerklæringer og samtykker'
+        icon={<InboxOutboxOutlineIcon width={24} height={24} />}
+        headerRight={
+            <StyledButton dataTest='widget-header-action' variant='text' size='small'>
+                Legg til
+            </StyledButton>
+        }
+        viewMore={{ viewLessText: 'Vis færre', viewMoreText: 'Vis alle' }}
+        link={{ content: 'Gå til arbeidsforberedende trening', onClick: () => console.log('Click on link') }}
+        isEmpty={false}
+        isLoading={false}
+        emptyText='Ingen data'
+    >
+        <p className='m-0 w-full'>
+            Spørreskjemaet om arbeidsforberedende trening er sendt til deg. Personvernerklæringen må
+            signeres før du kan fortsette.
+        </p>
+    </StyledWidget>
+)
 
 /** "View more" disabled with a reason (disabled-states DIS-1…DIS-4): focusable, reason on hover, focus and tap. */
 export const ViewMoreDisabledWithReason = (): JSX.Element => (

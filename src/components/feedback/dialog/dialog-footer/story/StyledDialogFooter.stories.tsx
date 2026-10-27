@@ -36,8 +36,8 @@ const longExtraActions: DynamicToolbarAction[] = [
     { ...deleteAction, label: 'Delete this event series' },
 ]
 
-/** Figma frames the footer inside a dialog paper, so the stories do too. */
-const Paper = ({ width, children }: { width: number; children: React.ReactNode }) => (
+/** Figma frames the footer inside a dialog paper, so the stories do too. Without `width` it fills the preview. */
+const Paper = ({ width, children }: { width?: number; children: React.ReactNode }) => (
     <div className='overflow-hidden rounded-lg border border-solid border-delta-200 bg-white' style={{ width }}>
         <div className='px-4 py-6 text-delta-700'>Dialogue body</div>
         {children}
@@ -155,6 +155,49 @@ export const Gallery: Story = {
                     </div>
                 </div>
             ))}
+        </div>
+    ),
+}
+
+/**
+ * Each footer fills the preview: narrow the window or zoom in to see it at small widths. Below 320px
+ * (e.g. a 320px window at 200% zoom) the clusters and the buttons wrap instead of leaving the screen.
+ */
+export const FluidWidth: Story = {
+    render: () => (
+        <div className='flex flex-col gap-4'>
+            <Paper>
+                <StyledDialogFooter
+                    secondaryAction={{ label: 'Avbryt', onClick: noop }}
+                    primaryAction={{ label: 'Legg til ny melding', onClick: noop }}
+                />
+            </Paper>
+            <Paper>
+                <StyledDialogFooter
+                    leftActions={[deleteAction]}
+                    secondaryAction={{ label: 'Avbryt', onClick: noop }}
+                    primaryAction={{ label: 'Lagre endringer', onClick: noop }}
+                />
+            </Paper>
+            <Paper>
+                <StyledDialogFooter
+                    leftActions={extraActions}
+                    secondaryAction={{ label: 'Avbryt', onClick: noop }}
+                    primaryAction={{ label: 'Lagre endringer', onClick: noop }}
+                />
+            </Paper>
+            <Paper>
+                <StyledDialogFooter
+                    leadingSlot={
+                        <StyledFormControlLabel
+                            label='Varsle deltakerne'
+                            control={<StyledCheckbox dataTest='notify-fluid' aria-label='Varsle deltakerne' />}
+                        />
+                    }
+                    secondaryAction={{ label: 'Avbryt', onClick: noop }}
+                    primaryAction={{ label: 'Lagre endringer', onClick: noop }}
+                />
+            </Paper>
         </div>
     ),
 }

@@ -9,6 +9,7 @@ import { StyledMenu } from 'src/components/navigation/menu/StyledMenu'
 import { StyledMenuItem } from 'src/components/navigation/menu/StyledMenuItem'
 import { cn } from 'src/helpers/cn'
 import { useElementWidthPx } from 'src/hooks/useElementWidthPx'
+import { useMaxXsMediaQuery } from 'src/hooks/useMediaQuery.hook'
 import { useWidthRegistry } from 'src/hooks/useWidthRegistry'
 
 import {
@@ -165,9 +166,12 @@ export function StyledDialogFooter({
      * and never collapse, so whatever it takes is simply unavailable to the left cluster. */
     const rightClusterWidth = widths[KEY_RIGHT_CLUSTER] ?? 0
     const hasRightCluster = secondaryAction != null || primaryAction != null
+    /* Narrower than a phone the right cluster wraps onto its own line when it does not fit beside
+     * the left one (`max-xs:` classes below), so the left cluster has the whole line. */
+    const belowXs = useMaxXsMediaQuery()
     const leftAvailableWidth = Math.max(
         0,
-        containerWidth - paddingPx * 2 - rightClusterWidth - (hasRightCluster ? GAP_PX : 0),
+        containerWidth - paddingPx * 2 - (belowXs ? 0 : rightClusterWidth + (hasRightCluster ? GAP_PX : 0)),
     )
 
     const plan = useMemo<PlannedToolbarActions>(() => {
@@ -261,6 +265,10 @@ export function StyledDialogFooter({
                  * the footer's own `p-4`, a 100% width overflows the parent wherever box-sizing is
                  * content-box — which also perturbs the width the action planner measures. */
                 'flex items-center justify-end self-stretch border-0 border-t border-solid border-delta-200 bg-white',
+                // Narrower than a phone: the clusters and the right-hand buttons wrap instead of pushing
+                // the secondary button off the left edge (`justify-end` + nowrap); on its own line the
+                // left cluster stays at the left edge.
+                'max-xs:flex-wrap max-xs:justify-between max-xs:gap-y-2',
                 compact ? 'gap-2 p-2' : 'gap-4 p-4',
                 rounded && 'rounded-b-lg',
                 /* Pinned to the bottom of the scroll container. The ASMA design system separates a
@@ -269,7 +277,9 @@ export function StyledDialogFooter({
                 className,
             )}
         >
-            <div className='flex shrink-0 flex-nowrap items-center gap-2'>
+            {/* Narrower than a phone: the left cluster may shrink to the line, so a leading checkbox label
+             * wraps instead of being pushed off the left edge. */}
+            <div className='flex shrink-0 flex-nowrap items-center gap-2 max-xs:min-w-0 max-xs:shrink'>
                 {leadingSlot ?? (
                     <>
                         {plan.inlineActions.map(({ action, showLabel }) => (
@@ -336,10 +346,20 @@ export function StyledDialogFooter({
                  * right edge while the Left cluster stays at the left edge. The measured node is the
                  * inner, non-growing span — measuring the flex-1 wrapper would report the width it
                  * grew to rather than the width the buttons need, leaving the left cluster no budget. */
-                <span className='flex min-w-px flex-1 flex-nowrap items-center justify-end'>
+                <span
+                    className={cn(
+                        'flex min-w-px flex-1 flex-nowrap items-center justify-end',
+                        // Narrower than a phone: when the buttons do not fit beside the left cluster, the
+                        // whole right cluster wraps onto its own line rather than squeezing their labels.
+                        'max-xs:min-w-fit max-xs:flex-wrap max-xs:gap-y-2',
+                    )}
+                >
                     <span
                         ref={register(KEY_RIGHT_CLUSTER)}
-                        className='flex shrink-0 flex-nowrap items-center gap-2'
+                        className={cn(
+                            'flex shrink-0 flex-nowrap items-center gap-2',
+                            'max-xs:max-w-full max-xs:shrink max-xs:flex-wrap max-xs:justify-end',
+                        )}
                     >
                         {secondaryAction && renderButton(secondaryAction, 'outlined', 'secondary')}
                         {primaryAction && renderButton(primaryAction, 'contained', 'primary')}

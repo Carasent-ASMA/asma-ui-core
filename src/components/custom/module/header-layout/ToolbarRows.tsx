@@ -62,7 +62,7 @@ export function SelectionRow({
     bulkActionsPlan: PlannedToolbarActions
 }): JSX.Element {
     return (
-        <div className='flex w-full min-w-0 flex-nowrap items-center justify-between gap-3'>
+        <div className='flex w-full min-w-0 flex-nowrap items-center justify-between gap-3 max-xs:flex-wrap max-xs:gap-y-2'>
             <SelectionIndicator
                 selectedCount={selectedCount}
                 onClearSelection={onClearSelection}
@@ -93,7 +93,8 @@ export function SearchSlot({
             style={expanded ? ({ '--dynamic-toolbar-search-width': '100%' } as CSSProperties) : undefined}
             className={cn(
                 expanded
-                    ? 'min-w-0 flex-1'
+                    ? // Utility row only: narrower than a phone the search takes its own line.
+                      'min-w-0 flex-1 max-xs:basis-full'
                     : 'w-40 shrink-0',
             )}
         >
@@ -103,16 +104,26 @@ export function SearchSlot({
 }
 
 /** Keeps children mounted while hidden so slots fade instead of popping. */
-export function FadeSlot({ visible, children }: { visible: boolean; children: ReactNode }): JSX.Element {
+export function FadeSlot({
+    visible,
+    flattenBelowXs = false,
+    children,
+}: {
+    visible: boolean
+    /** Below xs, drops both wrappers so each child wraps as its own item of the parent row. */
+    flattenBelowXs?: boolean
+    children: ReactNode
+}): JSX.Element {
     return (
         <div
             className={cn(
                 'overflow-hidden whitespace-nowrap transition-[max-width,opacity] duration-200 ease-in-out',
                 visible ? 'max-w-[2000px] opacity-100' : 'pointer-events-none max-w-0 opacity-0',
+                flattenBelowXs && 'max-xs:contents',
             )}
             aria-hidden={!visible}
         >
-            <div className='inline-flex items-center gap-2'>{children}</div>
+            <div className={cn('inline-flex items-center gap-2', flattenBelowXs && 'max-xs:contents')}>{children}</div>
         </div>
     )
 }
@@ -122,14 +133,26 @@ export function TitleText({ title, measureRef }: { title: ToolbarSlot; measureRe
      * while the rendered title is truncated. */
     if (typeof title === 'string') {
         return (
-            <StyledWidgetTitle ref={measureRef} className='!min-w-0 truncate'>
+            <StyledWidgetTitle
+                ref={measureRef}
+                className={cn(
+                    '!min-w-0 truncate',
+                    'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:![overflow-wrap:anywhere]',
+                )}
+            >
                 {title}
             </StyledWidgetTitle>
         )
     }
 
     return (
-        <div ref={measureRef} className='min-w-0 truncate'>
+        <div
+            ref={measureRef}
+            className={cn(
+                'min-w-0 truncate',
+                'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:![overflow-wrap:anywhere]',
+            )}
+        >
             {title}
         </div>
     )
@@ -194,15 +217,20 @@ export function UtilityCluster({
     const hasAfterSearchActions = showPageActions && hasPlannedActions(afterSearchActionsPlan)
     const hasBulkActions = variant === 'inline-selection' && hasPlannedActions(bulkActionsPlan)
     const hasFilterOrSearch = filter != null || search != null
+    /* Narrower than a phone, the utility row wraps button by button: the action groups give up their
+     * nowrap wrappers, so an action that fits stays next to the filter and the next one wraps. */
+    const flattenBelowXs = variant === 'utility-row'
+    const actionGroupClassName = flattenBelowXs ? 'max-xs:contents' : undefined
 
     if (!hasFilterOrSearch && !hasBeforeFilterActions && !hasAfterSearchActions && !hasBulkActions) {
         return null
     }
 
     const beforeFilterBlock = hasBeforeFilterActions ? (
-        <FadeSlot visible={hasBeforeFilterActions}>
+        <FadeSlot visible={hasBeforeFilterActions} flattenBelowXs={flattenBelowXs}>
             <ToolbarActionGroup
                 plan={beforeFilterActionsPlan}
+                className={actionGroupClassName}
                 overflowMenuLabel={overflowMenuLabel}
                 inProgressLabel={inProgressLabel}
             />
@@ -210,10 +238,11 @@ export function UtilityCluster({
     ) : null
 
     const afterSearchBlock = hasAfterSearchActions ? (
-        <FadeSlot visible={hasAfterSearchActions}>
-            <div className='flex flex-nowrap items-center gap-2'>
+        <FadeSlot visible={hasAfterSearchActions} flattenBelowXs={flattenBelowXs}>
+            <div className={cn('flex flex-nowrap items-center gap-2', actionGroupClassName)}>
                 <ToolbarActionGroup
                     plan={afterSearchActionsPlan}
+                    className={actionGroupClassName}
                     overflowMenuLabel={overflowMenuLabel}
                     inProgressLabel={inProgressLabel}
                 />
@@ -233,6 +262,8 @@ export function UtilityCluster({
             className={cn(
                 'flex w-full min-w-0 flex-nowrap items-center gap-2',
                 align === 'end' ? 'justify-end' : 'justify-start',
+                // Narrower than a phone: search, filter and actions wrap, the search on its own line.
+                variant === 'utility-row' && 'max-xs:flex-wrap',
             )}
         >
             {variant === 'inline-selection' && (

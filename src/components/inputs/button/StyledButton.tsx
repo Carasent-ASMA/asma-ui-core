@@ -177,6 +177,11 @@ export const StyledButton = ({
                 BtnStyles[variant],
                 BtnStyles[color],
                 BtnStyles[size],
+                // Narrower than a phone: a label that does not fit wraps inside a button capped at its
+                // container; a label that fits keeps the one-line Figma size (the height floor). Only
+                // the label (the one `div` child) gives up width, the icons keep theirs.
+                'max-xs:h-auto max-xs:max-w-full max-xs:py-1 max-xs:[&>:not(div)]:shrink-0',
+                size === 'small' ? 'max-xs:min-h-8' : 'max-xs:min-h-10',
                 className,
             )}
             // A button with a text label must fit its content: as a flex item in a tight row it would
@@ -195,6 +200,10 @@ export const StyledButton = ({
             {hideWhenBusy(startIcon)}
             {children && (
                 <div
+                    className={clsx(
+                        'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:![overflow-wrap:anywhere]',
+                        'max-xs:text-center',
+                    )}
                     style={{
                         opacity: loading ? 0 : undefined,
                         overflow: 'hidden',

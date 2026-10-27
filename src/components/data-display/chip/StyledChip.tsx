@@ -218,6 +218,10 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                     !consumerSetsWidth && 'w-fit',
                     !consumerSetsMaxWidth && 'max-w-full',
                     size === 'small' ? 'h-6' : 'h-8',
+                    // Narrower than a phone: a label that does not fit wraps and the chip grows. The vertical
+                    // padding moves onto the label (below), so a one-line chip keeps the Figma height.
+                    'max-xs:h-auto max-xs:py-0',
+                    size === 'small' ? 'max-xs:min-h-6' : 'max-xs:min-h-8',
                     readOnly && 'pointer-events-none',
                     // A focusable disabled chip keeps its pointer events so the not-allowed cursor shows;
                     // activation is already blocked because the handlers are removed while disabled.
@@ -253,7 +257,18 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                         {startSlot}
                     </span>
                 )}
-                <span className={cn('min-w-0 truncate', classes?.label)}>{label}</span>
+                <span
+                    className={cn(
+                        'min-w-0 truncate',
+                        'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:![overflow-wrap:anywhere]',
+                        // One 24px line + this = the 32/24px chip minus its 1px borders. The fixed-height
+                        // chip clipped the same overflow invisibly; `h-auto` would grow it to 34/30px.
+                        size === 'small' ? 'max-xs:-my-px' : 'max-xs:py-[3px]',
+                        classes?.label,
+                    )}
+                >
+                    {label}
+                </span>
                 {onDelete && !readOnly && (
                     <button
                         type='button'
