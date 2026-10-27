@@ -40,7 +40,7 @@ export const StyledReadOnlyText: React.FC<IStyledReadOnlyText> = ({
         <span
             id={id}
             data-testid={dataTest}
-            className={cn('text-base text-delta-800 break-words', multiline && 'whitespace-pre-wrap')}
+            className={cn('break-words text-base text-delta-800', multiline && 'whitespace-pre-wrap')}
         >
             {isEmpty(value) ? emptyText : value}
         </span>
