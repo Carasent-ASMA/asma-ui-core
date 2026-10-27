@@ -18,11 +18,12 @@
  * important declaration inside a cascade layer beats every unlayered one, so a layered import would
  * silently break consumer overrides such as Ad Voca's safe-area `dialog:modal` padding over `.p-0`.
  *
- * `source('../')` limits class detection to `src/` (v3 `content`), so README/docs examples are not
- * compiled into the shipped stylesheet.
+ * `source(none)` turns off automatic detection: the config's `content` is the only source, so
+ * README/docs examples are not compiled in, and the package build can leave out story- and
+ * test-only classes (see `tailwind.config.ts`, ASMA-8701).
  */
 @import 'tailwindcss/theme.css' layer(theme);
-@import 'tailwindcss/utilities.css' source('../');
+@import 'tailwindcss/utilities.css' source(none);
 
 @plugin 'tailwind-scrollbar';
 

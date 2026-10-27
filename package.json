@@ -60,7 +60,7 @@
     "scripts": {
         "chromatic": "npx chromatic --config-file chromatic.config.json",
         "dev": "vite",
-        "build": "pnpm ts:check && rm -rf ./dist && vite build",
+        "build": "pnpm ts:check && rm -rf ./dist && ASMA_UI_CORE_LIBRARY_BUILD=1 vite build",
         "ts:check": "tsc",
         "preview": "vite preview",
         "lint": "eslint src/**/*.{ts,tsx} --cache",
