@@ -84,11 +84,7 @@ export const useStyledTable = <
     const columnOrder = usePersistedColumnOrder(persistColumnOrderKey)
     const columnSizingKey = props.enableColumnResizing ? uniqueKey : undefined
     const columnSizingStorageKey = getColumnSizingStorageKey(columnSizingKey)
-    const { saved: persistedColumnSizing, late: lateColumnSizing } = usePersistedColumnSizing(
-        columnSizingKey,
-        leafColumns.map((column) => column.id),
-        defaultColumnSizing,
-    )
+    const persistedColumnSizing = usePersistedColumnSizing(columnSizingKey, defaultColumnSizing)
     // Sorting is saved only when the table opts in (D1) and has a key to save it under.
     const sortingStorageKey = persistSorting ? getSortingStorageKey(uniqueKey) : undefined
     const persistedSorting = useMemo(
@@ -103,7 +99,6 @@ export const useStyledTable = <
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [sortingStorageKey],
     )
-    const knownColumnIdsRef = useRef(new Set(leafColumns.map((column) => column.id)))
     const persistedPageSize = usePersistedPageSize(uniqueKey)
     const resolvedPageSize = persistedPageSize ?? pageSize ?? 50
 
@@ -167,28 +162,6 @@ export const useStyledTable = <
         toSignature: columnSizingSignature,
         toStorage: serializeColumnSizing,
         applyState: (columnSizing) => table.setColumnSizing(columnSizing),
-        // A table that mounts before its columns are known leaves their saved widths unapplied (they are checked
-        // against the columns), but keeps them in `lateColumnSizing`. When those columns appear, load their
-        // widths, never over a width that has changed since mount. This survives a width written in between,
-        // which drops those entries from storage.
-        reconcileKey: leafColumns.map((column) => column.id).join('\u0000'),
-        reconcile: (state) => {
-            const ids = new Set(leafColumns.map((column) => column.id))
-            const known = knownColumnIdsRef.current
-
-            knownColumnIdsRef.current = ids
-
-            let merged: ColumnSizingState | undefined
-
-            for (const [id, width] of Object.entries(lateColumnSizing)) {
-                if (!ids.has(id) || known.has(id)) continue
-                if (state[id] !== undefined && state[id] !== defaultColumnSizing[id]) continue
-
-                merged = { ...(merged ?? state), [id]: width }
-            }
-
-            return merged
-        },
     })
 
     // Reset columns (ASMA-8597, REQ-008): order and widths go back to the defaults of this render, and

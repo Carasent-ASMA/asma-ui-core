@@ -77,13 +77,38 @@ describe('StyledTable saved column widths', () => {
         await expect(widthOf('Age')).toBe(120)
     })
 
-    it('U-W02 / ST-08: widths of unknown columns are not applied, the known ones are (AC 7)', async () => {
-        localStorage.setItem(SIZING_KEY, JSON.stringify({ name: 240, 'column-that-was-removed': 500 }))
+    it('U-W02 / ST-08: a legacy entry with an id that matches no column: known widths apply, the unknown id stays in the state and the next write, has no visible effect and no error (AC 4, AC 7)', async () => {
+        const output = ['error', 'warn'].map((method) => vi.spyOn(console, method as 'error'))
+        const seeded = JSON.stringify({ name: 240, 'column-that-was-removed': 500 })
+        let table: Table<Person> | null = null
+        const ref = {
+            get current() {
+                return table
+            },
+            set current(value: Table<Person> | null) {
+                table = value
+            },
+        }
 
-        mount(<SizedTable />)
+        localStorage.setItem(SIZING_KEY, seeded)
 
+        mount(<SizedTable columnResizeMode='onChange' tableInstanceRef={ref} />)
+
+        // Known widths apply; the unknown id changes nothing on screen.
         await expect(widthOf('Name')).toBe(240)
         await expect(widthOf('Role')).toBe(160)
+        await expect(widthOf('Age')).toBe(120)
+        // It is kept: in the table state, and in the entry (mounting writes nothing).
+        await expect(table!.getState().columnSizing).toEqual({ name: 240, 'column-that-was-removed': 500 })
+        await expect(localStorage.getItem(SIZING_KEY)).toBe(seeded)
+
+        // The next write carries it along.
+        await drag('Role', 40)
+        await waitFor(() => expect(hasSavedWidth(SIZING_KEY, 'role')).toBe(true))
+        await expect(stored(SIZING_KEY)).toMatchObject({ name: 240 })
+        await expect((stored(SIZING_KEY) as Record<string, unknown>)['column-that-was-removed']).toBe(500)
+        await expect(table!.getState().columnSizing['column-that-was-removed']).toBe(500)
+        for (const spy of output) await expect(spy).not.toHaveBeenCalled()
     })
 
     it('U-W03: NaN-like, zero, negative and non-number values are dropped, the valid rest is kept', async () => {
@@ -263,44 +288,53 @@ describe('StyledTable saved column widths: key change (AC 14)', () => {
     })
 })
 
-describe('StyledTable saved column widths: columns that appear after mount (U-W09)', () => {
+describe('StyledTable saved column widths: columns that are not there yet (U-W09, DEC-W)', () => {
     beforeEach(() => localStorage.clear())
     afterEach(() => {
         cleanup()
         vi.restoreAllMocks()
     })
 
-    it('U-W09: a table that mounts before its columns are known gets their saved widths when they appear, and writes nothing', async () => {
-        localStorage.setItem(SIZING_KEY, JSON.stringify({ name: 240, role: 200 }))
-        const before = localStorage.getItem(SIZING_KEY)
-        const view = mount(<SizedTable columns={[]} />)
-        const setItem = vi.spyOn(Storage.prototype, 'setItem')
-        const removeItem = vi.spyOn(Storage.prototype, 'removeItem')
+    const [name, role, age, notes] = personColumns as [
+        (typeof personColumns)[number],
+        (typeof personColumns)[number],
+        (typeof personColumns)[number],
+        (typeof personColumns)[number],
+    ]
 
-        view.rerender(<SizedTable />)
-
-        await waitFor(() => expect(widthOf('Name')).toBe(240))
-        await expect(widthOf('Role')).toBe(200)
-        await expect(widthOf('Age')).toBe(120)
-        await new Promise((resolve) => setTimeout(resolve, 100))
-        // Loading a late column's width is a load, not a change: nothing is written back.
-        await expect(callsFor(setItem.mock.calls, SIZING_KEY)).toHaveLength(0)
-        await expect(callsFor(removeItem.mock.calls, SIZING_KEY)).toHaveLength(0)
-        await expect(localStorage.getItem(SIZING_KEY)).toBe(before)
-    })
-
-    it('U-W09: columns that appear in steps each get their saved width, and one that never appears is never applied', async () => {
-        localStorage.setItem(SIZING_KEY, JSON.stringify({ name: 240, role: 200, age: 150, 'never-defined': 500 }))
+    it('U-W09: a width saved for an absent column stays in the entry, renders when the column appears, and survives a remount', async () => {
+        localStorage.setItem(SIZING_KEY, JSON.stringify({ name: 240, age: 150 }))
         // `notes` has no saved width and stays the last column: the table sizes the last column itself.
-        const [name, role, age, notes] = personColumns as [
-            (typeof personColumns)[number],
-            (typeof personColumns)[number],
-            (typeof personColumns)[number],
-            (typeof personColumns)[number],
-        ]
-        const view = mount(<SizedTable columns={[name, notes]} />)
+        const view = mount(<SizedTable columnResizeMode='onChange' columns={[name, notes]} />)
 
         await expect(widthOf('Name')).toBe(240)
+
+        // A real resize writes the width map: it holds the new width AND the one for the column that is not there.
+        await drag('Name', 60)
+        await waitFor(() => expect(stored(SIZING_KEY)).toEqual({ name: 300, age: 150 }))
+        await expect(widthOf('Name')).toBe(300)
+
+        // The column appears: its saved width is simply there.
+        view.rerender(<SizedTable columnResizeMode='onChange' columns={[name, age, notes]} />)
+        await waitFor(() => expect(widthOf('Age')).toBe(150))
+        await expect(widthOf('Name')).toBe(300)
+        await expect(stored(SIZING_KEY)).toEqual({ name: 300, age: 150 })
+
+        // After a remount both come back.
+        view.unmount()
+        mount(<SizedTable columnResizeMode='onChange' columns={[name, age, notes]} />)
+
+        await expect(widthOf('Name')).toBe(300)
+        await expect(widthOf('Age')).toBe(150)
+    })
+
+    it('U-W09: a column that appears later renders at its saved width, and nothing is written', async () => {
+        const seeded = JSON.stringify({ name: 240, role: 200, age: 150 })
+
+        localStorage.setItem(SIZING_KEY, seeded)
+        const view = mount(<SizedTable columns={[name, notes]} />)
+        const setItem = vi.spyOn(Storage.prototype, 'setItem')
+        const removeItem = vi.spyOn(Storage.prototype, 'removeItem')
 
         view.rerender(<SizedTable columns={[name, role, notes]} />)
         await waitFor(() => expect(widthOf('Role')).toBe(200))
@@ -308,51 +342,21 @@ describe('StyledTable saved column widths: columns that appear after mount (U-W0
         view.rerender(<SizedTable columns={[name, role, age, notes]} />)
         await waitFor(() => expect(widthOf('Age')).toBe(150))
         await expect(widthOf('Name')).toBe(240)
+        await new Promise((resolve) => setTimeout(resolve, 100))
+
+        await expect(callsFor(setItem.mock.calls, SIZING_KEY)).toHaveLength(0)
+        await expect(callsFor(removeItem.mock.calls, SIZING_KEY)).toHaveLength(0)
+        await expect(localStorage.getItem(SIZING_KEY)).toBe(seeded)
+    })
+
+    it('U-W09: a table that mounts with no columns at all gets every saved width when the columns arrive', async () => {
+        localStorage.setItem(SIZING_KEY, JSON.stringify({ name: 240, role: 200 }))
+        const view = mount(<SizedTable columns={[]} />)
+
+        view.rerender(<SizedTable />)
+
+        await waitFor(() => expect(widthOf('Name')).toBe(240))
         await expect(widthOf('Role')).toBe(200)
-    })
-
-    it('U-W09: a late column still gets its saved width after the user resized something in between', async () => {
-        localStorage.setItem(SIZING_KEY, JSON.stringify({ name: 240, age: 150 }))
-        const [name, , age, notes] = personColumns as [
-            (typeof personColumns)[number],
-            (typeof personColumns)[number],
-            (typeof personColumns)[number],
-            (typeof personColumns)[number],
-        ]
-        const view = mount(<SizedTable columnResizeMode='onChange' columns={[name, notes]} />)
-
-        // A real resize writes the width map, and that map has no entry for the column that is not there yet.
-        await drag('Name', 60)
-        await waitFor(() => expect(hasSavedWidth(SIZING_KEY, 'name')).toBe(true))
-        await expect(hasSavedWidth(SIZING_KEY, 'age')).toBe(false)
-
-        view.rerender(<SizedTable columnResizeMode='onChange' columns={[name, age, notes]} />)
-
-        await waitFor(() => expect(widthOf('Age')).toBe(150))
-    })
-
-    it('U-W09: does not override a width that has changed since mount', async () => {
-        localStorage.setItem(SIZING_KEY, JSON.stringify({ age: 150, role: 200 }))
-        // Storage keeps its saved values, so only the "changed since mount" rule can protect the user's width.
-        vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => undefined)
-        let table: Table<Person> | null = null
-        const ref = {
-            get current() {
-                return table
-            },
-            set current(value: Table<Person> | null) {
-                table = value
-            },
-        }
-        const view = mount(<SizedTable columns={[personColumns[0]!, personColumns[3]!]} tableInstanceRef={ref} />)
-
-        // The user (here: the table API) sets `age` before its column exists; `role` is untouched.
-        table!.setColumnSizing({ age: 333 })
-        await new Promise((resolve) => setTimeout(resolve, 50))
-
-        view.rerender(<SizedTable columns={personColumns} tableInstanceRef={ref} />)
-
-        await waitFor(() => expect(widthOf('Role')).toBe(200))
-        await expect(widthOf('Age')).toBe(333)
+        await expect(widthOf('Age')).toBe(120)
     })
 })

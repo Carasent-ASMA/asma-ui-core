@@ -29,9 +29,9 @@ these two names.
 
 **Fixes for tables with `uniqueKey` or `persistColumnOrderKey`:**
 
-- Saved widths are checked against the columns: values that are not a width are dropped, widths of columns
-  that don't exist yet are kept aside until those columns appear, and the rest is applied. Entries saved before
-  this change still load.
+- Saved widths are checked for shape: values that are not a width (not a finite number above 0) are dropped.
+  A width saved for a column that is not there at the moment is kept in the entry, and shows when the column
+  appears, as before; an id that matches no column has no effect. Entries saved before this change still load.
 - A saved width or order equal to the default is removed instead of written, and mounting a table writes
   nothing.
 - When `uniqueKey` changes while the table is shown, the new key's widths load and the old key's widths are

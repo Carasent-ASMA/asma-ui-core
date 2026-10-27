@@ -8,68 +8,35 @@ export const getColumnSizingStorageKey = (uniqueKey?: string): string | undefine
     uniqueKey ? `${uniqueKey}${COLUMN_SIZING_KEY_SUFFIX}` : undefined
 
 /**
- * Checks a parsed `:column-sizing` value, which keeps its legacy unversioned shape `{ "<columnId>": <px> }`
- * so entries saved before ASMA-8597 still load. Only widths of known columns that are finite numbers above 0
- * are returned. Widths of columns that are not there (yet) are not applied but kept aside, see
- * `unknownColumnSizing`; values that are not widths are dropped. `undefined` means there is no usable saved
- * object.
+ * Checks a parsed `:column-sizing` value, which keeps its legacy unversioned shape `{ "<columnId>": <px> }` so
+ * entries saved before ASMA-8597 still load. Every width that is a finite number above 0 is kept, including the
+ * width of a column that is not there at the moment: TanStack applies a width only to a column that exists and
+ * picks it up when the column appears, which is what master does (ASMA-8597, DEC-W). An id that matches no column
+ * therefore has no effect and causes no error. Values that are not widths are dropped. `undefined` means there is
+ * no usable saved object.
  */
-export const sanitizeColumnSizing = (raw: unknown, knownColumnIds: ReadonlySet<string>): ColumnSizingState | undefined => {
+export const sanitizeColumnSizing = (raw: unknown): ColumnSizingState | undefined => {
     if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return undefined
 
     return Object.fromEntries(
         Object.entries(raw).filter(
             (entry): entry is [string, number] =>
-                knownColumnIds.has(entry[0]) &&
-                typeof entry[1] === 'number' &&
-                Number.isFinite(entry[1]) &&
-                entry[1] > 0,
+                typeof entry[1] === 'number' && Number.isFinite(entry[1]) && entry[1] > 0,
         ),
     )
 }
 
-/**
- * The saved widths of columns that are NOT among `knownColumnIds`, in the same shape check. They are not applied
- * (those columns don't exist yet) but kept, so a table that mounts before its columns are known can load them
- * when the columns appear (ASMA-8597, F5, U-W09).
- */
-export const unknownColumnSizing = (raw: unknown, knownColumnIds: ReadonlySet<string>): ColumnSizingState => {
-    if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return {}
-
-    return Object.fromEntries(
-        Object.entries(raw).filter(
-            (entry): entry is [string, number] =>
-                !knownColumnIds.has(entry[0]) &&
-                typeof entry[1] === 'number' &&
-                Number.isFinite(entry[1]) &&
-                entry[1] > 0,
-        ),
-    )
-}
-
-const NO_WIDTHS: ColumnSizingState = {}
-
-/**
- * For this key: the app's widths with the saved ones on top (`saved`, `undefined` when nothing is saved), and the
- * valid saved widths of columns that don't exist yet (`late`).
- */
+/** The app's widths with the saved ones on top, or `undefined` when nothing is saved for this key. */
 export const usePersistedColumnSizing = (
     uniqueKey: string | undefined,
-    leafColumnIds: readonly string[],
     defaultSizing: ColumnSizingState,
-): { saved: ColumnSizingState | undefined; late: ColumnSizingState } =>
+): ColumnSizingState | undefined =>
     useMemo(() => {
         const storageKey = getColumnSizingStorageKey(uniqueKey)
-        const known = new Set(leafColumnIds)
-        const raw = storageKey ? readJson(storageKey) : undefined
-        const saved = sanitizeColumnSizing(raw, known)
+        const saved = storageKey ? sanitizeColumnSizing(readJson(storageKey)) : undefined
 
-        return {
-            saved: saved && { ...defaultSizing, ...saved },
-            late: storageKey ? unknownColumnSizing(raw, known) : NO_WIDTHS,
-        }
-        // Read once per key: a later change of the columns or defaults must not replace the user's widths, and
-        // the late widths must outlive a write made before their columns appear.
+        return saved && { ...defaultSizing, ...saved }
+        // Read once per key: a later change of the defaults must not replace the user's widths.
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [uniqueKey])
 

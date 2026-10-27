@@ -200,6 +200,33 @@ describe('Reset columns', () => {
         await waitFor(() => expect(headerLabels()).toEqual(['Name', 'Age']))
     })
 
+    it('Reset columns clears the widths of absent columns too: a column that appears later gets the default width (DEC-W)', async () => {
+        localStorage.setItem(SIZING_KEY, JSON.stringify({ name: 240, role: 200 }))
+        const [name, role, age, notes] = personColumns as [
+            (typeof personColumns)[number],
+            (typeof personColumns)[number],
+            (typeof personColumns)[number],
+            (typeof personColumns)[number],
+        ]
+        const { onApi, view } = mountHarness({ columns: [name, age, notes] })
+
+        await expect(widthOf('Name')).toBe(240)
+
+        await openPopover()
+        await userEvent.click(popoverButton('Reset columns'))
+
+        await waitFor(() => expect(widthOf('Name')).toBe(160))
+        // The saved entry is gone, `role`'s width included, and stays gone.
+        await expect(localStorage.getItem(SIZING_KEY)).toBeNull()
+
+        // A later column is not given the width that was saved before the reset.
+        view.rerender(<Harness onApi={onApi} columns={[name, role, age, notes]} />)
+        await waitFor(() => expect(headerLabels()).toContain('Role'))
+        await expect(widthOf('Role')).toBe(160)
+        await new Promise((resolve) => setTimeout(resolve, 100))
+        await expect(localStorage.getItem(SIZING_KEY)).toBeNull()
+    })
+
     it('shows the Norwegian texts with locale no', async () => {
         mountHarness({ locale: 'no' })
 
