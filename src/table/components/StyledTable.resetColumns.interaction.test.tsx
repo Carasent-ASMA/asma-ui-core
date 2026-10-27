@@ -427,11 +427,67 @@ describe('Column settings pin dot (AC 18)', () => {
         await expect(Math.abs(icon.top - box.top - 2)).toBeLessThanOrEqual(0.5)
     })
 
-    it('the dot is decorative: the pin keeps its accessible name (OQ-04, provisional)', async () => {
-        localStorage.setItem(ORDER_KEY, JSON.stringify(['role', 'name', 'age', 'notes']))
-        mountHarness()
+    it('OQ-04: the pin says so when the dot shows: "Column settings, changed" / "Kolonneinnstillinger, endret", in both locales', async () => {
+        const names = { en: ['Column settings', 'Column settings, changed'], no: ['Kolonneinnstillinger', 'Kolonneinnstillinger, endret'] } as const
+
+        for (const locale of ['en', 'no'] as const) {
+            const [plain, changed] = names[locale]
+
+            // No dot: the plain name.
+            localStorage.clear()
+            const untouched = mountHarness({ locale })
+            await expect(dot()).toBeNull()
+            await expect(pin()).toHaveAccessibleName(plain)
+            untouched.view.unmount()
+
+            // The dot shows for a stored order that differs from the definition order, from the first render.
+            localStorage.setItem(ORDER_KEY, JSON.stringify(['role', 'name', 'age', 'notes']))
+            const reordered = mountHarness({ locale })
+            await expect(dot()).not.toBeNull()
+            await expect(pin()).toHaveAccessibleName(changed)
+            reordered.view.unmount()
+        }
+    })
+
+    it('OQ-04: the name follows the dot: a hidden column, a reorder, moving back, and Reset all change it', async () => {
+        const { table } = mountHarness()
 
         await expect(pin()).toHaveAccessibleName('Column settings')
+
+        // A hidden column.
+        await openPopover()
+        await userEvent.click(popoverButton('Role'))
+        await waitFor(() => expect(pin()).toHaveAccessibleName('Column settings, changed'))
+        await expect(dot()).not.toBeNull()
+        await userEvent.click(popoverButton('Role'))
+        await waitFor(() => expect(pin()).toHaveAccessibleName('Column settings'))
+        await expect(dot()).toBeNull()
+
+        // A reorder, and moving the column back.
+        await act(() => table().setColumnOrder(['role', 'name', 'age', 'notes']))
+        await waitFor(() => expect(pin()).toHaveAccessibleName('Column settings, changed'))
+        await act(() => table().setColumnOrder(['name', 'role', 'age', 'notes']))
+        await waitFor(() => expect(pin()).toHaveAccessibleName('Column settings'))
+
+        // Reset clears the dot, and the name with it.
+        await act(() => table().setColumnOrder(['age', 'name', 'role', 'notes']))
+        await waitFor(() => expect(pin()).toHaveAccessibleName('Column settings, changed'))
+        await openPopover()
+        await userEvent.click(popoverButton('Reset columns'))
+        await waitFor(() => expect(dot()).toBeNull())
+        await expect(pin()).toHaveAccessibleName('Column settings')
+    })
+
+    it('OQ-04: Norwegian too after a reorder and after Reset', async () => {
+        const { table } = mountHarness({ locale: 'no' })
+
+        await act(() => table().setColumnOrder(['role', 'name', 'age', 'notes']))
+        await waitFor(() => expect(pin()).toHaveAccessibleName('Kolonneinnstillinger, endret'))
+
+        await openPopover()
+        await userEvent.click(popoverButton('Tilbakestill kolonner'))
+        await waitFor(() => expect(pin()).toHaveAccessibleName('Kolonneinnstillinger'))
+        await expect(dot()).toBeNull()
     })
 
     it('U-C03: an order that is [] or equals the definition order removes the saved order', async () => {

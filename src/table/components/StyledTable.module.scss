@@ -3,15 +3,9 @@
     --action-cell-shadow: 0 0 transparent;
     --fixed-cell-shadow: 0 0 transparent;
 
-    // ASMA-8597 PROVISIONAL values: UX (Eugeniu Gutu) has not confirmed these yet, and Figma has no spec for the
-    // first. Change them here, nowhere else.
-    //   OQ-01  hover/focus square behind the sort glyph: 20 x 20px, radius 4px, delta-50.
-    //   OQ-03  resize bar: stays at the column's right edge (0px). Figma centres it in the 24px zone, 10px in.
-    //   OQ-04  (no new pin text) lives in useTranslations.ts and HeaderActionMenu.tsx.
-    --sort-indicator-square-size: 20px; // provisional (ASMA-8597 OQ-01)
-    --sort-indicator-square-radius: 4px; // provisional (ASMA-8597 OQ-01)
-    --sort-indicator-square-color: var(--colors-delta-50); // provisional (ASMA-8597 OQ-01)
-    --resizer-bar-offset: 0px; // provisional (ASMA-8597 OQ-03)
+    // Distance of the 4px resize bar from the right edge of its 24px grab zone. UX confirmed the bar stays at the
+    // edge (ASMA-8597, comment 94738), as the Figma "Resize" frame draws it.
+    --resizer-bar-offset: 0px;
 
     &[data-x-overflow='true'] {
         --action-cell-shadow: -15px 0px 15px rgba(0, 0, 0, 0.1);
@@ -530,7 +524,8 @@
         // Figma "Header with sorting" (ASMA-8597, AC 15, 16): a 20 x 28px slot right after the label, holding
         // the Material arrow_drop glyph drawn at 28px (a 11.67 x 5.83px triangle). A sorted column shows it in
         // the primary colour; an unsorted one shows it grey, pointing the way the next click sorts, only while
-        // its header is hovered or keyboard-focused. The grey square behind it is provisional (OQ-01).
+        // its header is hovered or keyboard-focused. Nothing is drawn behind the glyph: UX has no hover square
+        // (ASMA-8597, AC 16, comment 94738).
         .sort-indicator {
             position: relative;
             display: flex;
@@ -540,19 +535,6 @@
             width: 20px;
             height: 28px;
             color: var(--colors-delta-600);
-
-            &::before {
-                content: '';
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                width: var(--sort-indicator-square-size);
-                height: var(--sort-indicator-square-size);
-                transform: translate(-50%, -50%);
-                border-radius: var(--sort-indicator-square-radius);
-                background-color: var(--sort-indicator-square-color);
-                opacity: 0;
-            }
         }
 
         .sort-glyph {
@@ -569,25 +551,13 @@
             }
         }
 
-        .sortable-column:focus-visible .sort-indicator {
-            &::before {
-                opacity: 1;
-            }
-
-            .sort-glyph {
-                visibility: visible;
-            }
+        .sortable-column:focus-visible .sort-indicator .sort-glyph {
+            visibility: visible;
         }
 
         @media (hover: hover) {
-            .sortable-column:hover .sort-indicator {
-                &::before {
-                    opacity: 1;
-                }
-
-                .sort-glyph {
-                    visibility: visible;
-                }
+            .sortable-column:hover .sort-indicator .sort-glyph {
+                visibility: visible;
             }
         }
 

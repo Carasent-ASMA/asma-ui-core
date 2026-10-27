@@ -16,12 +16,13 @@ these two names.
 
 - Sortable headers draw the Figma indicator: a 20 × 28 px slot right after the label, with the glyph in the
   primary colour when sorted. An unsorted column shows a grey glyph, pointing the way the next click sorts,
-  while its header is hovered or keyboard-focused, on a grey rounded square (provisional until UX confirms).
-  The label truncates with an ellipsis and the slot stays visible.
+  while its header is hovered or keyboard-focused; a sorted column keeps its primary glyph. Nothing is drawn
+  behind the glyph. The label truncates with an ellipsis and the slot stays visible.
 - Where column resizing is on, the resize handle's grab zone is 24 px wide at the column's right edge and the
   header content keeps clear of it. The visible bar looks as before.
 - The column settings pin shows a `StyledBadge` dot, as the Filter button does, when a column is hidden or
-  has been moved.
+  has been moved. The dot is visual, so the pin's accessible name says it too: "Column settings, changed"
+  ("Kolonneinnstillinger, endret"); without the dot it stays "Column settings" ("Kolonneinnstillinger").
 - _Reset order_ is now _Reset columns_ ("Tilbakestill kolonner"): it also resets the widths, restores the
   order to the current column definitions, removes the saved entries and shows "Columns reset". It never
   unhides columns and leaves page size alone. On a `persistSorting` table it resets the sorting to

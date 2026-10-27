@@ -18,11 +18,10 @@ import type { StyledTableProps } from '../types'
 /**
  * The sort indicator, its hover and focus look, and the 24px resize zone (ASMA-8597, REQ-009 to REQ-011,
  * AC 15, 16, 17). Asserted on computed styles and geometry in a real browser: this is all CSS.
- * The hover square is built to a provisional spec (OQ-01), so its three values are read from one place and
- * compared with the values the stylesheet declares for it.
+ * UX's answer (ASMA-8597, comment 94738, AC 16): there is no hover or focus square. Hover and focus on an unsorted
+ * sortable column show only the grey triangle, pointing the way the click will sort; a sorted column keeps its
+ * teal triangle. Every state is checked for the absence of anything drawn behind the glyph.
  */
-
-const SQUARE = { size: 20, radius: '4px', color: 'var(--colors-delta-50)' } // provisional (ASMA-8597 OQ-01)
 
 const table = (props: Partial<Omit<StyledTableProps<Person, Record<string, unknown>>, 'footer' | 'hideFooter'>> = {}): JSX.Element => (
     <StyledTable<Person> columns={personColumns} data={people} hideFooter locale='en' {...props} />
@@ -30,7 +29,18 @@ const table = (props: Partial<Omit<StyledTableProps<Person, Record<string, unkno
 
 const indicator = (label: string): HTMLElement => headerCell(label).querySelector<HTMLElement>('[data-sort-state]')!
 const glyphOf = (label: string): SVGElement => indicator(label).querySelector('svg')!
-const square = (label: string): CSSStyleDeclaration => getComputedStyle(indicator(label), '::before')
+/** Nothing is drawn behind the glyph in any state: no fill, no shadow, no generated box (UX: no square). */
+const expectNoSquare = async (label: string): Promise<void> => {
+    const slot = getComputedStyle(indicator(label))
+
+    await expect(slot.backgroundColor).toBe('rgba(0, 0, 0, 0)')
+    await expect(slot.backgroundImage).toBe('none')
+    await expect(slot.boxShadow).toBe('none')
+    await expect(slot.outlineStyle).toBe('none')
+    await expect(getComputedStyle(indicator(label), '::before').content).toBe('none')
+    await expect(getComputedStyle(indicator(label), '::after').content).toBe('none')
+    await expect(getComputedStyle(glyphOf(label)).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+}
 const labelOf = (label: string): HTMLElement => headerCell(label).querySelector<HTMLElement>('[class*="header-content"]')!
 const resizerOf = (label: string): HTMLElement => headerCell(label).querySelector<HTMLElement>('[class*="resizer"]')!
 const glyphPath = (label: string): string | null => glyphOf(label).querySelector('path')!.getAttribute('d')
@@ -118,7 +128,7 @@ describe('Sort indicator (AC 15)', () => {
         mount(table({ columns }))
 
         await expect(getComputedStyle(glyphOf('Role')).visibility).toBe('hidden')
-        await expect(square('Role').opacity).toBe('0')
+        await expectNoSquare('Role')
         // The slot still takes its 20px, so hovering never shifts the label.
         await expect(rect(indicator('Role')).width).toBe(20)
 
@@ -189,25 +199,26 @@ describe('Truncated long labels keep the glyph (AC 15, AC 16)', () => {
         await expect(getComputedStyle(indicator(LONG)).color).toBe(resolveColor('var(--colors-gama-500)'))
     })
 
-    it('a hovered unsorted column: the label ellipsizes and the grey glyph appears on the square', async () => {
+    it('a hovered unsorted column: the label ellipsizes and the grey glyph appears, with no square', async () => {
         mount(table({ columns: longColumns }))
 
         await expect(getComputedStyle(glyphOf(LONG)).visibility).toBe('hidden')
         await userEvent.hover(sortButton(LONG))
 
         await expectTruncatedWithGlyph(LONG)
-        await expect(square(LONG).opacity).toBe('1')
+        await expectNoSquare(LONG)
         await expect(getComputedStyle(indicator(LONG)).color).toBe(resolveColor('var(--colors-delta-600)'))
     })
 
-    it('a hovered sorted column keeps both: truncated label, primary glyph, square', async () => {
+    it('a hovered sorted column keeps both: truncated label and primary glyph, with no square', async () => {
         mount(table({ columns: longColumns, initialState: { sorting: [{ id: 'name', desc: true }] } }))
 
         await userEvent.hover(sortButton(LONG))
 
         await expectTruncatedWithGlyph(LONG)
         await expect(indicator(LONG)).toHaveAttribute('data-sort-direction', 'desc')
-        await expect(square(LONG).opacity).toBe('1')
+        await expectNoSquare(LONG)
+        await expect(getComputedStyle(indicator(LONG)).color).toBe(resolveColor('var(--colors-gama-500)'))
     })
 })
 
@@ -215,35 +226,31 @@ describe('Hover and focus (AC 16)', () => {
     beforeEach(parkPointer)
     afterEach(cleanup)
 
-    it('ST-10: hovering an unsorted column shows the grey glyph pointing the way the click sorts, on the provisional square', async () => {
+    it('ST-10: hovering an unsorted column shows only the grey glyph, pointing the way the click sorts', async () => {
         mount(table())
 
         await userEvent.hover(sortButton('Role'))
 
         await expect(getComputedStyle(glyphOf('Role')).visibility).toBe('visible')
         await expect(getComputedStyle(indicator('Role')).color).toBe(resolveColor('var(--colors-delta-600)'))
-        // Provisional (ASMA-8597 OQ-01): 20 x 20px, radius 4px, delta-50.
-        await expect(square('Role').opacity).toBe('1')
-        await expect(square('Role').width).toBe(`${SQUARE.size}px`)
-        await expect(square('Role').height).toBe(`${SQUARE.size}px`)
-        await expect(square('Role').borderTopLeftRadius).toBe(SQUARE.radius)
-        await expect(square('Role').backgroundColor).toBe(resolveColor(SQUARE.color))
+        // Only the triangle: 11.67 x 5.83px drawn by a 28px glyph, and no square behind it.
+        await expectNoSquare('Role')
 
         await userEvent.unhover(sortButton('Role'))
         await expect(getComputedStyle(glyphOf('Role')).visibility).toBe('hidden')
-        await expect(square('Role').opacity).toBe('0')
+        await expectNoSquare('Role')
     })
 
-    it('ST-10: a sorted column keeps its primary glyph and gets the square on hover', async () => {
+    it('ST-10: a sorted column keeps its primary glyph on hover, with no square', async () => {
         mount(table())
 
         await userEvent.click(sortButton('Name'))
         await userEvent.unhover(sortButton('Name'))
-        await expect(square('Name').opacity).toBe('0')
+        await expectNoSquare('Name')
 
         await userEvent.hover(sortButton('Name'))
         await expect(getComputedStyle(indicator('Name')).color).toBe(resolveColor('var(--colors-gama-500)'))
-        await expect(square('Name').opacity).toBe('1')
+        await expectNoSquare('Name')
     })
 
     it('U-H01: the hover glyph points where the next click sorts: getFirstSortDir(), sortDescFirst respected', async () => {
@@ -280,12 +287,12 @@ describe('Hover and focus (AC 16)', () => {
         pin.focus()
         await expect(document.activeElement).toBe(pin)
 
-        // Shift+Tab: the sortable header before the pin, with the hover look (grey glyph on the square).
+        // Shift+Tab: the sortable header before the pin, with the hover look: the grey triangle, no square.
         await userEvent.keyboard('{Shift>}{Tab}{/Shift}')
         await expect(document.activeElement).toBe(sortButton('Age'))
         await expect(sortButton('Age').matches(':focus-visible')).toBe(true)
         await expect(getComputedStyle(glyphOf('Age')).visibility).toBe('visible')
-        await expect(square('Age').opacity).toBe('1')
+        await expectNoSquare('Age')
         await expect(getComputedStyle(indicator('Age')).color).toBe(resolveColor('var(--colors-delta-600)'))
 
         // Enter sorts, and the glyph turns primary.
@@ -296,9 +303,13 @@ describe('Hover and focus (AC 16)', () => {
         // Shift+Tab goes on to the previous header control; Tab comes back to the next one, never down to the rows.
         await userEvent.keyboard('{Shift>}{Tab}{/Shift}')
         await expect(document.activeElement).toBe(sortButton('Role'))
-        await expect(square('Role').opacity).toBe('1')
-        await expect(square('Age').opacity).toBe('0')
+        await expect(getComputedStyle(glyphOf('Role')).visibility).toBe('visible')
+        await expect(getComputedStyle(indicator('Role')).color).toBe(resolveColor('var(--colors-delta-600)'))
+        await expectNoSquare('Role')
+        // Age was left: it keeps only its primary glyph.
         await expect(getComputedStyle(glyphOf('Age')).visibility).toBe('visible')
+        await expect(getComputedStyle(indicator('Age')).color).toBe(resolveColor('var(--colors-gama-500)'))
+        await expectNoSquare('Age')
 
         await userEvent.keyboard('{Tab}')
         await expect(document.activeElement).toBe(sortButton('Age'))
@@ -307,9 +318,9 @@ describe('Hover and focus (AC 16)', () => {
         await expect(document.activeElement?.closest('tbody')).toBeNull()
 
         // Leaving cleared every look: an unsorted header shows nothing, a sorted one keeps its glyph only.
-        await expect(square('Role').opacity).toBe('0')
         await expect(getComputedStyle(glyphOf('Role')).visibility).toBe('hidden')
-        await expect(square('Age').opacity).toBe('0')
+        await expectNoSquare('Role')
+        await expect(getComputedStyle(glyphOf('Age')).visibility).toBe('visible')
 
         // Space sorts too.
         sortButton('Role').focus()
@@ -325,7 +336,7 @@ describe('Hover and focus (AC 16)', () => {
         "header controls (sort headers, pin) aren't reachable by sequential keyboard navigation (WCAG 2.1.1); pending owner decision, ASMA-8087 keyboard model",
     )
 
-    it('A-04: both glyph colours reach 3:1 on the header and on the square in all three themes', async () => {
+    it('A-04: both glyph colours reach 3:1 on the header in all three themes', async () => {
         mount(table())
         const original = document.documentElement.getAttribute('data-theme')
 
@@ -336,11 +347,9 @@ describe('Hover and focus (AC 16)', () => {
                 const header = resolveColor('var(--colors-gray-10)')
                 const grey = resolveColor('var(--colors-delta-600)')
                 const primary = resolveColor('var(--colors-gama-500)')
-                const provisionalSquare = resolveColor(SQUARE.color)
 
                 for (const [name, glyph] of [['delta-600', grey], ['gama-500', primary]] as const) {
                     await expect(contrast(glyph, header), `${theme}: ${name} on the header`).toBeGreaterThanOrEqual(3)
-                    await expect(contrast(glyph, provisionalSquare), `${theme}: ${name} on the square`).toBeGreaterThanOrEqual(3)
                 }
             }
         } finally {
@@ -359,7 +368,7 @@ describe('24px resize zone (AC 17)', () => {
         { accessorKey: 'age', header: 'Age', size: 160 },
     ]
 
-    it('ST-12: the zone is 24px wide at the right edge, the visible bar 4px at the edge (provisional, OQ-03)', async () => {
+    it('ST-12: the zone is 24px wide at the right edge, the visible bar 4px at the edge (UX confirmed, OQ-03)', async () => {
         mount(table({ columns: narrow, enableColumnResizing: true }))
 
         const zone = rect(resizerOf('Name'))
@@ -369,12 +378,12 @@ describe('24px resize zone (AC 17)', () => {
         await expect(zone.width).toBe(24)
         await expect(Math.abs(zone.right - cell.right)).toBeLessThanOrEqual(0.5)
         await expect(bar.width).toBe('4px')
-        // Provisional (ASMA-8597 OQ-03): the bar stays at the zone's right edge.
+        // UX confirmed (ASMA-8597 OQ-03): the bar stays at the zone's right edge, as the Figma Resize frame draws it.
         await expect(bar.right).toBe('0px')
         await expect(bar.backgroundColor).toBe(resolveColor('var(--colors-delta-300)'))
     })
 
-    it('ST-12: in a 100px column nothing sits under the zone: label, glyph and square end before it', async () => {
+    it('ST-12: in a 100px column nothing sits under the zone: label and glyph end before it', async () => {
         mount(table({ columns: narrow, enableColumnResizing: true }))
 
         const zone = rect(resizerOf('Name'))

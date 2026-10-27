@@ -190,8 +190,8 @@ export const INTERACTION_CAPTURES: InteractionCapture[] = [
     // The country-code picker on the same shell.
     pickerCapture('inputs-phone-field--default', openPicker(PHONE)),
     // ASMA-8597 sort indicator (AC 15, 16): the states a still screenshot cannot show. A hovered unsorted
-    // column shows the grey glyph on the grey square, a hovered sorted one keeps its primary glyph on the same
-    // square, and keyboard focus looks like hover. The square is provisional (OQ-01).
+    // column shows the grey glyph, a hovered sorted one keeps its primary glyph, and keyboard focus looks like
+    // hover. There is no square behind the glyph (UX, ASMA-8597 comment 94738).
     {
         storyId: 'data-display-styledtable--sort-indicator-states',
         screenshot: 'data-display-styledtable--sort-indicator-states--hover-unsorted--open.png',

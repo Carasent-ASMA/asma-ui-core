@@ -104,7 +104,7 @@ export function HeaderActionMenu<TData>({
         <div className={styles['actions-header-wrapper']}>
             <button
                 type='button'
-                aria-label={t.column_settings}
+                aria-label={showsChangedLayout ? t.column_settings_changed : t.column_settings}
                 aria-haspopup='true'
                 aria-expanded={open}
                 className={styles['actions-header']}

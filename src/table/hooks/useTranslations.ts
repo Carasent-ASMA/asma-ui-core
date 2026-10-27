@@ -7,9 +7,10 @@ const translations = {
         column_reorder_and_hidden: 'This column is fixed and can’t be reordered or hidden.',
         reset_columns: 'Reset columns',
         columns_reset: 'Columns reset',
-        // The pin's name stays this text, with no state added for a changed layout: provisional
-        // (ASMA-8597 OQ-04) until UX decides whether the dot needs a spoken equivalent.
         column_settings: 'Column settings',
+        // The dot on the pin (a hidden or a moved column) is visual only, so the pin's name says it too
+        // (ASMA-8597, UX answer to OQ-04, comment 94738).
+        column_settings_changed: 'Column settings, changed',
     },
     no: {
         column_reorder: 'Denne kolonnen er fast og kan ikke flyttes.',
@@ -18,6 +19,7 @@ const translations = {
         reset_columns: 'Tilbakestill kolonner',
         columns_reset: 'Kolonnene er tilbakestilt',
         column_settings: 'Kolonneinnstillinger',
+        column_settings_changed: 'Kolonneinnstillinger, endret',
     },
 }
 
