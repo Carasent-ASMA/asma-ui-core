@@ -141,3 +141,39 @@ describe('PathfinderCard — expanded width', () => {
         await expect(name.getBoundingClientRect().right).toBeLessThanOrEqual(card.getBoundingClientRect().right)
     })
 })
+
+describe('PathfinderCard — collapsed stacked items', () => {
+    afterEach(cleanup)
+
+    it('keeps the second stacked item at the line start instead of stretching it', async () => {
+        const stacked: PathfinderCardItem[] = [
+            nameItems[0]!,
+            {
+                id: 'process-id',
+                order: 2,
+                // The directory's process ID centres its content inside its own box.
+                render: () => (
+                    <div className='flex justify-center'>
+                        <span data-test='process-id'>Løpenummer: 12637</span>
+                    </div>
+                ),
+            },
+        ]
+        mount(
+            <div style={{ width: 343 }}>
+                <PathfinderCard items={stacked} expanded={false} onToggleExpanded={() => undefined} />
+            </div>,
+        )
+
+        const name = await findName()
+        const processId = [...document.querySelectorAll<HTMLElement>('[data-test="process-id"]')].find(
+            (el) => !el.closest('[aria-hidden]'),
+        )!
+
+        await waitFor(() => {
+            if (processId.getBoundingClientRect().width === 0) throw new Error('not laid out yet')
+        })
+        // A 1px tolerance for sub-pixel rounding.
+        await expect(Math.abs(processId.getBoundingClientRect().left - name.getBoundingClientRect().left)).toBeLessThanOrEqual(1)
+    })
+})

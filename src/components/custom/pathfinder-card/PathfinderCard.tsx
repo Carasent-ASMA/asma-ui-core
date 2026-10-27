@@ -248,10 +248,11 @@ export function PathfinderCard({
                                     key={item.id}
                                     // ASMA-8427: a single item wider than the card used to be clipped
                                     // mid-glyph under the chevron. Items may now shrink, so their own
-                                    // `truncate` text ellipsizes instead.
+                                    // `truncate` text ellipsizes instead. Stacked items are capped at
+                                    // the card's width, not stretched to it, so they stay at the line start.
                                     className={cn(
                                         'min-w-0 whitespace-nowrap',
-                                        shouldStackCompactItems ? 'w-full' : 'shrink',
+                                        shouldStackCompactItems ? 'max-w-full' : 'shrink',
                                     )}
                                 >
                                     <ItemRenderer item={item} compact={compact} />
