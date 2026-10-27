@@ -32,7 +32,11 @@ import type {
     FocusedRow,
     FocusedRowsInstance,
 } from './custom-features/focus-rows'
-import type { OrderedColumnsOptions, OrderedColumnsTableState } from './custom-features/order-columns'
+import type {
+    ColumnSettingsInstance,
+    OrderedColumnsOptions,
+    OrderedColumnsTableState,
+} from './custom-features/order-columns'
 import type { RowSelectionTooltipOptions, RowSelectionTooltipRow } from './custom-features/row-selection-tooltip'
 
 declare module '@tanstack/react-table' {
@@ -43,7 +47,7 @@ declare module '@tanstack/react-table' {
 
     interface Row<TData extends RowData> extends ExpandedRow, FocusedRow, RowSelectionTooltipRow<TData> {}
 
-    interface Table<TData extends RowData> extends ExpandedRowsInstance, FocusedRowsInstance {
+    interface Table<TData extends RowData> extends ExpandedRowsInstance, FocusedRowsInstance, ColumnSettingsInstance {
         getCoreRowModel: () => RowModel<TData>
     }
 
@@ -179,6 +183,13 @@ export type StyledTableProps<TData, TCustomData> = {
      * ensuring that the table state is persisted across sessions for the specific table instance.
      */
     uniqueKey?: string
+    /**
+     * Temporary opt-in (ASMA-8597, owner decision D1, 2026-10-27): save and restore this table's
+     * sorting under `${uniqueKey}:sorting`, and let Reset columns reset it. Needs `uniqueKey`;
+     * ignored without it. Off by default until UX and privacy approve the fleet rollout, which
+     * makes `uniqueKey` alone enough and retires this prop (follow-up ASMA-8698).
+     */
+    persistSorting?: boolean
 } & Omit<
     TTableOptions<TData>,
     'getCoreRowModel' | 'getExpandedRowModel' | 'getFilteredRowModel' | 'getSortedRowModel'

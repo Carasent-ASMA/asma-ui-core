@@ -3,6 +3,10 @@
     --action-cell-shadow: 0 0 transparent;
     --fixed-cell-shadow: 0 0 transparent;
 
+    // Distance of the 4px resize bar from the right edge of its 24px grab zone. UX confirmed the bar stays at the
+    // edge (ASMA-8597, comment 94738), as the Figma "Resize" frame draws it.
+    --resizer-bar-offset: 0px;
+
     &[data-x-overflow='true'] {
         --action-cell-shadow: -15px 0px 15px rgba(0, 0, 0, 0.1);
         --fixed-cell-shadow: 15px 0px 15px rgba(0, 0, 0, 0.1);
@@ -372,21 +376,36 @@
     }
 
     .resizer {
+        // Figma "Resize" frame (ASMA-8597, AC 17): the grab zone is 24px wide at the column's right edge, and
+        // the header content reserves it (`.has-resize-zone`), so nothing sits under it. The visible bar is
+        // the 4px `::after`, drawn as before.
         position: absolute;
         top: 0;
         height: 100%;
         right: 0;
-        width: 4px;
-        background: var(--colors-delta-300);
+        width: 24px;
         cursor: col-resize;
         user-select: none;
         touch-action: none;
-        border-radius: 5px;
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: var(--resizer-bar-offset);
+            width: 4px;
+            background: var(--colors-delta-300);
+            border-radius: 5px;
+        }
     }
 
     .resizer.isResizing {
-        background: var(--colors-gama-500);
         opacity: 1;
+
+        &::after {
+            background: var(--colors-gama-500);
+        }
     }
 
     @media (hover: hover) {
@@ -454,6 +473,13 @@
                 padding-left: 6px;
             }
 
+            // A column with a resize handle keeps its 24px zone free on the right, whatever its padding.
+            > .show-table-header.has-resize-zone,
+            &.data-cell > .show-table-header.has-resize-zone,
+            &.data-cell:last-child > .show-table-header.has-resize-zone {
+                padding-right: 24px;
+            }
+
             &.hide-header {
                 border: none;
             }
@@ -495,9 +521,47 @@
             }
         }
 
-        .sort-icon {
-            flex: 0 0 auto;
-            color: var(--colors-delta-800);
+        // Figma "Header with sorting" (ASMA-8597, AC 15, 16): a 20 x 28px slot right after the label, holding
+        // the Material arrow_drop glyph drawn at 28px (a 11.67 x 5.83px triangle). A sorted column shows it in
+        // the primary colour; an unsorted one shows it grey, pointing the way the next click sorts, only while
+        // its header is hovered or keyboard-focused. Nothing is drawn behind the glyph: UX has no hover square
+        // (ASMA-8597, AC 16, comment 94738).
+        .sort-indicator {
+            display: flex;
+            flex: 0 0 20px;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 28px;
+            color: var(--colors-delta-600);
+        }
+
+        .sort-glyph {
+            flex: none;
+            visibility: hidden;
+        }
+
+        .sort-indicator--sorted {
+            color: var(--colors-gama-500);
+
+            .sort-glyph {
+                visibility: visible;
+            }
+        }
+
+        .sortable-column:focus-visible .sort-indicator .sort-glyph {
+            visibility: visible;
+        }
+
+        @media (hover: hover) {
+            .sortable-column:hover .sort-indicator .sort-glyph {
+                visibility: visible;
+            }
+        }
+
+        // The label keeps its natural width so the glyph follows it, and truncates when the column is narrow.
+        .sortable-column > .header-content {
+            flex: 0 1 auto;
         }
 
         .header-content {

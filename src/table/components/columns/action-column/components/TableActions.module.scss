@@ -22,13 +22,12 @@
     line-height: 0;
 }
 
-.pin-indicator {
+// Figma "Type=Header pin" (11357:59160): an 8px dot whose box sits 2px from the right edge and 4px from the
+// top of the 32px button, i.e. 4px beyond the 20px icon's right edge and 2px above its top. In this 40px
+// button (icon centred, cell 30px high) that is right 6px, top 3px. The dot itself is `StyledBadge`.
+.pin-dot {
     position: absolute;
-    height: 8px;
-    width: 8px;
-    background-color: var(--colors-gama-400);
-    border-radius: 50%;
-    top: 2px;
+    top: 3px;
     right: 6px;
 }
 
