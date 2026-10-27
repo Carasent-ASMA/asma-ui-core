@@ -23,7 +23,7 @@ export const WidgetHeader = (): JSX.Element => {
         <StyledWidgetHeader
             title='Widget header example'
             actions={
-                <div className='flex w-full justify-between'>
+                <div className='flex w-full flex-wrap justify-between gap-2'>
                     <StyledButton
                         dataTest='clear-selected-button'
                         variant='text'

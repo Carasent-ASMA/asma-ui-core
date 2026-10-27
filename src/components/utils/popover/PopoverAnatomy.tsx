@@ -125,13 +125,25 @@ export const PopoverAnatomy = ({
                     className={cn(
                         'flex shrink-0 items-start p-1',
                         viewResultsAction ? 'justify-between' : 'justify-end',
+                        // Narrower than a phone: the reset button wraps onto its own line, still on the
+                        // right, instead of being pushed off screen.
+                        'max-xs:flex-wrap max-xs:gap-y-2 max-xs:[&>:last-child]:ml-auto',
                     )}
                 >
                     {viewResultsAction}
                     {resetAction}
                 </div>
             )}
-            {footerActions && <div className='flex shrink-0 flex-col items-end p-3'>{footerActions}</div>}
+            {footerActions && (
+                <div
+                    className={cn(
+                        'flex shrink-0 flex-col items-end p-3',
+                        (viewResultsAction ?? resetAction) && 'max-xs:pt-1',
+                    )}
+                >
+                    {footerActions}
+                </div>
+            )}
             {/* After the footer rows, so Tab reaches it last: body, footer, then Close. Positioned on the
                 surface (`relative`), whose top-right corner is the content column's. */}
             <div className='absolute right-0 top-0'>

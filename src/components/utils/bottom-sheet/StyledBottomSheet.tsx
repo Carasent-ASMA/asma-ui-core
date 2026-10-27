@@ -354,6 +354,9 @@ export const StyledBottomSheet = ({
                         className={cn(
                             'border-t-solid flex shrink-0 items-start border-t border-delta-200 bg-white p-1',
                             viewResults ? 'justify-between' : 'justify-end',
+                            // Narrower than a phone: the reset button (second, after view results) wraps
+                            // onto its own line, still on the right, instead of being pushed off screen.
+                            'max-xs:flex-wrap max-xs:gap-y-2 max-xs:[&>:nth-child(2)]:ml-auto',
                             !extraActions && 'pb-[max(0.25rem,env(safe-area-inset-bottom))]',
                         )}
                     >
@@ -368,7 +371,12 @@ export const StyledBottomSheet = ({
                     </div>
                 )}
                 {extraActions && (
-                    <div className='flex shrink-0 flex-col items-end bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]'>
+                    <div
+                        className={cn(
+                            'flex shrink-0 flex-col items-end bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]',
+                            hasFooter && 'max-xs:pt-1',
+                        )}
+                    >
                         {extraActions}
                     </div>
                 )}

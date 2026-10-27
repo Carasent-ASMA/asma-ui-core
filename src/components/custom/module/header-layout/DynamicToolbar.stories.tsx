@@ -54,7 +54,8 @@ const ToolbarDemo = ({
     withBeforeFilterAction = false,
     withExtraAfterSearchAction = false,
 }: {
-    width: number
+    /** Fixed container width; omit to fill the preview. */
+    width?: number
     selectedCount?: number
     bulkActionsOverride?: DynamicToolbarAction[]
     withBeforeFilterAction?: boolean
@@ -181,6 +182,19 @@ export const WorkspacesToolbarLayout: Story = {
  */
 export const WorkspacesSelectionMode: Story = {
     render: () => <WorkspacesToolbarDemo width={1180} selectedCount={3} />,
+}
+
+/**
+ * Fills the preview: narrow the window or zoom in to see the toolbar at small widths. Below 320px
+ * (e.g. a 320px window at 200% zoom) the title, the utility row and the selection row wrap.
+ */
+export const FluidWidth: Story = {
+    render: () => <ToolbarDemo withBeforeFilterAction />,
+}
+
+/** `FluidWidth` in selection mode. */
+export const FluidWidthSelectionMode: Story = {
+    render: () => <ToolbarDemo selectedCount={3} />,
 }
 
 /**

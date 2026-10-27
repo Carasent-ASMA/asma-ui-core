@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss'
+import plugin from 'tailwindcss/plugin'
 import twConfigs from './tw-configs/twConfigs.json'
 
 const boxShadow = twConfigs.boxShadow,
@@ -35,5 +36,18 @@ export default {
     corePlugins: {
         preflight: false,
     },
-    plugins: [require('tailwind-scrollbar')],
+    plugins: [
+        require('tailwind-scrollbar'),
+        /* `max-xs:` — below xs (320px), narrower than any phone, e.g. a 320px window at 200% zoom
+         * (WCAG 1.4.10, ASMA-8630).
+         * - Strictly below 320px: `max-[320px]:` would also match 320px.
+         * - Skips content inside table cells: tables scroll horizontally instead.
+         * - `theme` layer: beats apps' `!important` utilities in the later `utilities` layer. */
+        plugin(({ addVariant }) => {
+            addVariant(
+                'max-xs',
+                "@layer theme { @media not all and (min-width: 320px) { &:not(:is(td, th, [role='cell'], [role='gridcell'], [role='columnheader'], [role='rowheader']) *) } }",
+            )
+        }),
+    ],
 } satisfies Config
