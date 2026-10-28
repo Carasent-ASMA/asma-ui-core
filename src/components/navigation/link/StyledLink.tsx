@@ -10,6 +10,13 @@ import style from './StyledLink.module.scss'
  * Disabled = delta-300; Focused/Pressed adds a 1px gama-400 rounded indicator (radius 4, px4/py2).
  * State is derived at runtime from `:hover`/`:focus`/`disabled`, not a prop.
  */
+/** @deprecated ASMA-8705 — `small` → use `large`, `xs` → use `medium`. */
+type LegacyLinkSize = 'small' | 'xs'
+
+const LEGACY_SIZE_TO_SIZE: Record<LegacyLinkSize, 'medium' | 'large'> = { small: 'large', xs: 'medium' }
+
+const warnedLegacySizes = new Set<LegacyLinkSize>()
+
 export type StyledLinkProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'onClick'> & {
     onClick?: (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void
     /** @figmaProp State = true→"Disabled" (renders a non-interactive <span>, delta-300) */
@@ -20,8 +27,14 @@ export type StyledLinkProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'onC
      * (disabled-states DIS-1…DIS-3). Without it a disabled link stays a plain `<span>`.
      */
     disabledReason?: ReactNode
-    /** @figmaProp Size = small→"Base" (14/20) | large→"Medium" (16/24); xs (12/20) = none (no DS size) */
-    size?: 'small' | 'large' | 'xs'
+    /**
+     * @figmaProp Body Base = large→on ("Links/Base link", 16/24) | medium→off ("Links/Helper link", 14/20).
+     * The design system has these two sizes only (ASMA-8705).
+     *
+     * `small` and `xs` are deprecated aliases kept so existing callers keep compiling: `small` renders as
+     * `large` (was 14/20) and `xs` as `medium` (was 12/20). Use `large` / `medium` instead.
+     */
+    size?: 'medium' | 'large' | LegacyLinkSize
     /** @figmaProp none — ref */
     reflink?: React.Ref<HTMLAnchorElement>
     /** @figmaProp none — test hook */
@@ -38,7 +51,7 @@ export type StyledLinkProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'onC
  * @param content -  content of the link - deprecated, has conflicts with HTMLAnchorElement content option
  * @param contentNode -  content of the link
  * @param disabled = disabled
- * @param size -  'large' | 'small'
+ * @param size -  'large' (Base, 16/24) | 'medium' (Helper, 14/20); deprecated: 'small' → large, 'xs' → medium
  * @param refLink -  ref to component
  * @param dataTest -  data-test tag
  * @param classTest - test jsDoc
@@ -57,18 +70,13 @@ export const StyledLink: React.FC<StyledLinkProps> = ({
     onClick,
     ...otherProps
 }) => {
-    let textSize = style['styled-link-large']
-    switch (size) {
-        case 'large':
-            textSize = style['styled-link-large']
-            break
-        case 'small':
-            textSize = style['styled-link-small']
-            break
-        case 'xs':
-            textSize = style['styled-link-xs']
-            break
+    const isLegacySize = size === 'small' || size === 'xs'
+    if (isLegacySize && import.meta.env.DEV && !warnedLegacySizes.has(size)) {
+        warnedLegacySizes.add(size)
+        console.warn(`StyledLink: size="${size}" is deprecated, use size="${LEGACY_SIZE_TO_SIZE[size]}".`)
     }
+    const resolvedSize = isLegacySize ? LEGACY_SIZE_TO_SIZE[size] : size
+    const textSize = resolvedSize === 'medium' ? style['styled-link-medium'] : style['styled-link-large']
 
     if (disabled && !disabledReason) {
         return (
