@@ -130,6 +130,7 @@ exports[`asma-ui-core public API surface > keeps every runtime export of the pac
   "Listbox",
   "LoadCurrentIcon",
   "LoadingIcon",
+  "LocationFilledIcon",
   "LocationIcon",
   "LockIcon",
   "LoginIcon",
