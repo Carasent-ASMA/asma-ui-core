@@ -422,21 +422,27 @@ describe('Contrast of the sorted glyph (A-04, A-05)', () => {
     beforeEach(parkPointer)
     afterEach(cleanup)
 
-    it('A-05: gama-500 at rest is at least 4.4:1 in every theme; gama-400 on hover is the contrast UX accepted (OQ-12)', async () => {
+    it('A-05: the sorted glyph contrast on the header is what UX accepted (OQ-12): gama-500 at rest, gama-400 on hover and focus', async () => {
         mountHeader()
         const original = document.documentElement.getAttribute('data-theme')
-        // `greenish` is the jade theme (Ad Opus). The hover contrasts are 3.02, 2.62 and 2.15: below 3:1 in the default
-        // and fretex themes, which UX accepted in comment 94791; this fails if a token moves them.
-        const accepted = [['greenish', 3.02], ['default', 2.62], ['fretex', 2.15]] as const
+        // `greenish` is the jade theme (Ad Opus). At rest (gama-500) the contrast is at least 4.4:1 everywhere. On hover and
+        // focus (gama-400) it is below 3:1 in the default and fretex themes, which UX accepted in comment 94791. Each ratio
+        // is pinned to two decimals (the exact values are 4.4743, 4.4162 and 4.4998, then 3.0164, 2.6196 and 2.1481), so this
+        // fails if a token moves any of them, in either direction.
+        const accepted = [
+            ['greenish', 4.47, 3.02],
+            ['default', 4.42, 2.62],
+            ['fretex', 4.5, 2.15],
+        ] as const
 
         try {
-            for (const [theme, hoverContrast] of accepted) {
+            for (const [theme, restContrast, hoverContrast] of accepted) {
                 document.documentElement.setAttribute('data-theme', theme)
 
                 const header = resolveColor('var(--colors-gray-10)')
 
-                await expect(contrast(resolveColor('var(--colors-gama-500)'), header), `${theme}: gama-500 at rest`).toBeGreaterThanOrEqual(4.4)
-                await expect(contrast(resolveColor('var(--colors-gama-400)'), header), `${theme}: gama-400 on hover`).toBeCloseTo(hoverContrast, 1)
+                await expect(contrast(resolveColor('var(--colors-gama-500)'), header), `${theme}: gama-500 at rest`).toBeCloseTo(restContrast, 2)
+                await expect(contrast(resolveColor('var(--colors-gama-400)'), header), `${theme}: gama-400 on hover`).toBeCloseTo(hoverContrast, 2)
             }
         } finally {
             if (original) document.documentElement.setAttribute('data-theme', original)
@@ -774,17 +780,21 @@ describe('ST-16: a sorted glyph is gama-500 at rest and gama-400 on hover and :f
         }
     })
 
-    it('keyboard focus (:focus-visible) gives gama-400 too, and leaving the header gives gama-500', async () => {
-        mountHeader({ initialState: { sorting: [{ id: 'name', desc: false }] } })
+    it('keyboard focus (:focus-visible) gives gama-400 too, ascending or descending, and leaving the header gives gama-500', async () => {
+        for (const desc of [false, true]) {
+            mountHeader({ initialState: { sorting: [{ id: 'name', desc }] } })
 
-        await userEvent.keyboard('{Shift}')
-        sortButton('Name').focus()
-        await expect(sortButton('Name').matches(':focus-visible')).toBe(true)
-        await expect(glyphColour('Name')).toBe(GAMA_400())
-        await expectNoSquare('Name')
+            await expect(indicator('Name')).toHaveAttribute('data-sort-direction', desc ? 'desc' : 'asc')
+            await userEvent.keyboard('{Shift}')
+            sortButton('Name').focus()
+            await expect(sortButton('Name').matches(':focus-visible')).toBe(true)
+            await expect(glyphColour('Name')).toBe(GAMA_400())
+            await expectNoSquare('Name')
 
-        sortButton('Name').blur()
-        await expect(glyphColour('Name')).toBe(GAMA_500())
+            sortButton('Name').blur()
+            await expect(glyphColour('Name')).toBe(GAMA_500())
+            cleanup()
+        }
     })
 
     it('focus from a click is :focus without :focus-visible: gama-500 once the pointer is away', async () => {
