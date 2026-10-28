@@ -8,4 +8,4 @@
 
 New `StyledReadOnlyText` shows a value that cannot be changed as text (disabled-states DIS-6, Figma Title + data): the title is Body Base Semibold 16/24 in delta-800 with the value right under it, or "Title: value" on one line with `horizontal`; the value is Body 16/24 in delta-700. Optional `titleIcon` (24px), `titleInfo` (20px), `startIcon` and `endIcon` (24px) sit 4px from the text, and `helperText` (with an optional 20px `helperIcon`) shows under the value in Helper 14/20 delta-600. No field, fill, border or reserved helper row; an empty value shows "-".
 
-`StyledCheckbox` (and the table checkbox) in `readOnly` no longer paints a mark on an unchecked box: as in Figma `State=Read only`, an unchecked box stays empty and only a checked or indeterminate box shows its delta-500 mark.
+`StyledCheckbox` (and the table checkbox) in `readOnly` no longer paints a mark on an unchecked box: as in Figma `State=Read only`, an unchecked box stays empty with a delta-300 outline, and a checked or indeterminate box and its mark are delta-600.

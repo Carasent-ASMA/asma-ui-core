@@ -159,15 +159,20 @@ $checkbox-sizes: (
     pointer-events: none;
     cursor: default;
 
+    // Figma State=Read only (21957:53817/53821): an unchecked box is a delta-300 outline; a checked or
+    // indeterminate box and its mark are delta-600.
     .Checkbox {
         background-color: white;
-        border: var(--cb-border-w) solid var(--colors-delta-500);
+        border: var(--cb-border-w) solid var(--colors-delta-300);
         --cb-border-w: 2px;
     }
 
-    // Figma State=Read only: an unchecked box stays empty; only a checked or indeterminate box shows its mark.
+    &:is([data-checked], [data-indeterminate], .Indeterminate) .Checkbox {
+        border-color: var(--colors-delta-600);
+    }
+
     &:is([data-checked], [data-indeterminate], .Indeterminate) .Indicator {
-        color: var(--colors-delta-500);
+        color: var(--colors-delta-600);
     }
 }
 
@@ -301,5 +306,5 @@ $checkbox-sizes: (
 }
 
 .CheckboxWrapper.ReadOnly .Checkbox {
-    --cb-indicator-color: var(--colors-delta-500);
+    --cb-indicator-color: var(--colors-delta-600);
 }

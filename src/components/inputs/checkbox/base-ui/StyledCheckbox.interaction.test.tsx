@@ -134,7 +134,16 @@ describe.each([
             </>,
         )
 
+        const box = (dataTest: string): CSSStyleDeclaration =>
+            getComputedStyle(
+                container
+                    .querySelector(`[data-testid="${dataTest}"], [data-test="${dataTest}"]`)!
+                    .querySelector<HTMLElement>('[class*="Checkbox_"], [class*="_Checkbox_"]')!,
+            )
+
         await expect(indicatorColor(container, 'unchecked')).toBe('rgba(0, 0, 0, 0)')
-        await expect(indicatorColor(container, 'checked')).not.toBe('rgba(0, 0, 0, 0)')
+        await expect(indicatorColor(container, 'checked')).toBe('rgb(98, 110, 126)')
+        await expect(box('unchecked').borderTopColor).toBe('rgb(189, 196, 207)')
+        await expect(box('checked').borderTopColor).toBe('rgb(98, 110, 126)')
     })
 })
