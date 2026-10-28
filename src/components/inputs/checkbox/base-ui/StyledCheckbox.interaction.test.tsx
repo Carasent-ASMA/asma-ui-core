@@ -112,3 +112,29 @@ describe.each([
         await expect(topmost, 'the hover halo paints over the press ripple').toBe(ripple)
     })
 })
+
+describe.each([
+    ['input', false],
+    ['table', true],
+] as const)('%s StyledCheckbox read-only state (Figma State=Read only)', (_copy, table) => {
+    afterEach(cleanup)
+
+    const indicatorColor = (container: HTMLElement, dataTest: string): string => {
+        const wrapper = container.querySelector<HTMLElement>(`[data-testid="${dataTest}"], [data-test="${dataTest}"]`)!
+        const indicator = wrapper.querySelector<HTMLElement>('[class*="Indicator"]')!
+        return getComputedStyle(indicator).color
+    }
+
+    it('keeps an unchecked box empty and marks a checked one', async () => {
+        const Checkbox = table ? TableStyledCheckbox : StyledCheckbox
+        const { container } = mount(
+            <>
+                <Checkbox dataTest='unchecked' readOnly checked={false} />
+                <Checkbox dataTest='checked' readOnly checked />
+            </>,
+        )
+
+        await expect(indicatorColor(container, 'unchecked')).toBe('rgba(0, 0, 0, 0)')
+        await expect(indicatorColor(container, 'checked')).not.toBe('rgba(0, 0, 0, 0)')
+    })
+})

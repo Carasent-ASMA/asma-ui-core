@@ -163,10 +163,11 @@ $checkbox-sizes: (
         background-color: white;
         border: var(--cb-border-w) solid var(--colors-delta-500);
         --cb-border-w: 2px;
+    }
 
-        .Indicator {
-            color: var(--colors-delta-500);
-        }
+    // Figma State=Read only: an unchecked box stays empty; only a checked or indeterminate box shows its mark.
+    &:is([data-checked], [data-indeterminate], .Indeterminate) .Indicator {
+        color: var(--colors-delta-500);
     }
 }
 
