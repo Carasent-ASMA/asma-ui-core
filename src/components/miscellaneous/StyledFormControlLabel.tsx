@@ -54,6 +54,7 @@ export const StyledFormControlLabel = ({
 }: FormControlLabelProps): JSX.Element => {
     const controlProps = isValidElement(control) ? (control.props as Record<string, unknown>) : {}
     const isDisabled = disabled ?? (controlProps['disabled'] as boolean | undefined) ?? false
+    const isReadOnly = Boolean(controlProps['readOnly'])
 
     const labelTextId = useId()
     const hasOwnAccessibleName =
@@ -87,7 +88,7 @@ export const StyledFormControlLabel = ({
         <label
             className={cn(
                 'm-0 inline-flex items-center gap-2 align-middle text-delta-800',
-                isDisabled ? 'cursor-default' : 'cursor-pointer',
+                isDisabled || isReadOnly ? 'cursor-default' : 'cursor-pointer',
                 PLACEMENT_CLASS[labelPlacement],
                 className,
             )}

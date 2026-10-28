@@ -11,3 +11,5 @@ New `StyledReadOnlyText` shows a value that cannot be changed as text (disabled-
 `StyledCheckbox` (and the table checkbox) in `readOnly` no longer paints a mark on an unchecked box: as in Figma `State=Read only`, an unchecked box stays empty with a delta-300 outline, and a checked or indeterminate box and its mark are delta-600.
 
 `StyledInteractiveChip` of `type='radio'` in `readOnly` now draws its radio in the read-only colours too (unchecked ring delta-300, checked ring and dot delta-500), like a checkbox chip already did.
+
+`StyledFormControlLabel` shows the default cursor, not a pointer, when its control is `readOnly`.

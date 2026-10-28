@@ -51,3 +51,14 @@ describe('hovering the option text shows the control hover circle', () => {
         await expect(haloOpacity(document.querySelector('[data-testid="phone"]')!), 'disabled radio').toBe('0')
     })
 })
+
+describe('a read-only control', () => {
+    afterEach(cleanup)
+
+    it('shows the default cursor on its label, not a pointer', async () => {
+        mount(<StyledFormControlLabel label='Read only' control={<StyledCheckbox dataTest='ro' readOnly checked />} />)
+        const label = [...document.querySelectorAll('label')].find((el) => el.textContent === 'Read only')!
+
+        await expect(getComputedStyle(label).cursor).toBe('default')
+    })
+})
