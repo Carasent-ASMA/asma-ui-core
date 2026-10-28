@@ -23,8 +23,9 @@ const isEmpty = (value: ReactNode): boolean =>
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#15977-29894
  * Figma Input field `State=Read only`: a value that cannot be changed, shown as text under its
  * label (disabled-states DIS-6, a read-only view or a value nobody can change here). The label is
- * Body Base Semibold 16/24 with 4px below it; the value is Body 16/24 in delta-800, with no field,
- * fill, border, padding or reserved helper row. An empty value shows '-'.
+ * Body Base Semibold 16/24 with the value right under it; the value is Body 16/24 in delta-700
+ * (`text-icon/body`), with no field, fill, border, padding or reserved helper row. An empty value
+ * shows '-'.
  */
 export const StyledReadOnlyText: React.FC<IStyledReadOnlyText> = ({
     title,
@@ -36,11 +37,11 @@ export const StyledReadOnlyText: React.FC<IStyledReadOnlyText> = ({
     dataTest,
 }) => (
     <div className={cn('flex min-w-0 flex-col', className)}>
-        {title !== undefined && title !== null && <StyledFormLabel title={title} />}
+        {title !== undefined && title !== null && <StyledFormLabel title={title} className='pb-0' />}
         <span
             id={id}
             data-testid={dataTest}
-            className={cn('break-words text-base text-delta-800', multiline && 'whitespace-pre-wrap')}
+            className={cn('break-words text-base text-delta-700', multiline && 'whitespace-pre-wrap')}
         >
             {isEmpty(value) ? emptyText : value}
         </span>

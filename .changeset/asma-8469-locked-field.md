@@ -6,4 +6,4 @@
 
 `StyledInputField` and the single `StyledDatePicker` also take an opt-in `readOnlyReason` for a read-only value the user can change elsewhere (disabled-states DIS-6, Figma Input field State=Read only): the label above and the value as text, with no border or fill, focusable and selectable with a focus ring and the default cursor, and the reason opens on hover, focus and tap and is the field's accessible description.
 
-New `StyledReadOnlyText` shows a value that cannot be changed as text under its label (disabled-states DIS-6, Figma Input field State=Read only): the label is Body Base Semibold 16/24 with 4px below it, the value is Body 16/24 in delta-800 with no field, fill, border or reserved helper row, and an empty value shows "-".
+New `StyledReadOnlyText` shows a value that cannot be changed as text under its label (disabled-states DIS-6, Figma Input field State=Read only): the label is Body Base Semibold 16/24 with the value right under it (48px together), the value is Body 16/24 in delta-700 with no field, fill, border or reserved helper row, and an empty value shows "-".

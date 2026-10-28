@@ -7,7 +7,7 @@ export default {
         docs: {
             description: {
                 component:
-                    'Figma: Input field State=Read only (15977:29894) — label Body Base Semibold 16/24, 4px, value Body 16/24 delta-800; an empty value shows "-".',
+                    'Figma: Input field State=Read only (15977:29894) — label Body Base Semibold 16/24, value Body 16/24 delta-700 right under it (48px together); an empty value shows "-".',
             },
         },
     },

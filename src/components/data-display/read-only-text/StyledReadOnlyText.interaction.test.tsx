@@ -28,12 +28,13 @@ describe('StyledReadOnlyText', () => {
         await expect(container.querySelector('[data-testid="count"]')).toHaveTextContent('0')
     })
 
-    it('puts 4px between the label and the value and reserves no helper row', async () => {
+    it('puts the value right under the label, 48px together, with no helper row (Figma Read only)', async () => {
         const { container } = mount(<StyledReadOnlyText title='Name' value='Erik' dataTest='name' />)
         const value = container.querySelector<HTMLElement>('[data-testid="name"]')!
         const label = value.previousElementSibling as HTMLElement
 
-        await expect(getComputedStyle(label).paddingBottom).toBe('4px')
+        await expect(getComputedStyle(label).paddingBottom).toBe('0px')
+        await expect((value.parentElement!).getBoundingClientRect().height).toBe(48)
         await expect(value.nextElementSibling).toBeNull()
     })
 })
