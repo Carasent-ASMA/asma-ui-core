@@ -31,7 +31,7 @@ export const HelperRow = forwardRef<HTMLDivElement, HelperRowProps>(
             style={style}
         >
             {error && !hideErrorIcon && <ErrorOutlineIcon width={20} height={20} className='min-w-5 shrink-0' />}
-            <span>{message}</span>
+            <span className='min-w-0'>{message}</span>
         </div>
     ),
 )

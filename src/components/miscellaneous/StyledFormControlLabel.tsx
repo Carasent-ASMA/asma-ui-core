@@ -98,7 +98,12 @@ export const StyledFormControlLabel = ({
             {label != null && (
                 <span
                     id={shouldLabelControl ? labelTextId : undefined}
-                    className={cn('text-sm leading-5 tracking-[0.00938em]', isDisabled && 'text-delta-300')}
+                    className={cn(
+                        'text-sm leading-5 tracking-[0.00938em]',
+                        // Narrower than a phone: a long word breaks instead of pushing past the screen edge.
+                        'max-xs:min-w-0 max-xs:hyphens-auto max-xs:![overflow-wrap:anywhere]',
+                        isDisabled && 'text-delta-300',
+                    )}
                 >
                     {label}
                 </span>

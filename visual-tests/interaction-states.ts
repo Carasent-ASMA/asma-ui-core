@@ -189,4 +189,38 @@ export const INTERACTION_CAPTURES: InteractionCapture[] = [
     pickerCapture('utils-styled-bottom-sheet--with-searchable-select', openPicker(PHONE)),
     // The country-code picker on the same shell.
     pickerCapture('inputs-phone-field--default', openPicker(PHONE)),
+    // ASMA-8597 sort indicator (AC 15, 16): the states a still screenshot cannot show. A hovered unsorted
+    // column shows the grey glyph, a hovered sorted one keeps its primary glyph, and keyboard focus looks like
+    // hover. There is no square behind the glyph (UX, ASMA-8597 comment 94738).
+    {
+        storyId: 'data-display-styledtable--sort-indicator-states',
+        screenshot: 'data-display-styledtable--sort-indicator-states--hover-unsorted--open.png',
+        act: async (page) => {
+            await page.getByRole('button', { name: 'Unsorted', exact: true }).hover()
+        },
+    },
+    {
+        storyId: 'data-display-styledtable--sort-indicator-states',
+        screenshot: 'data-display-styledtable--sort-indicator-states--hover-sorted--open.png',
+        act: async (page) => {
+            await page.getByRole('button', { name: 'Ascending', exact: true }).hover()
+        },
+    },
+    {
+        storyId: 'data-display-styledtable--sort-indicator-states',
+        screenshot: 'data-display-styledtable--sort-indicator-states--focus--open.png',
+        act: async (page) => {
+            // A key press first, so the programmatic focus is keyboard focus (:focus-visible).
+            await page.keyboard.press('Shift')
+            await page.getByRole('button', { name: 'Unsorted', exact: true }).focus()
+        },
+    },
+    // ASMA-8597 resize zone (AC 17): hovering a column shows its 4px bar at the right edge of the 24px zone.
+    {
+        storyId: 'data-display-styledtable--resize-handle',
+        screenshot: 'data-display-styledtable--resize-handle--hover--open.png',
+        act: async (page) => {
+            await page.getByRole('button', { name: 'Narrow column', exact: true }).hover()
+        },
+    },
 ]

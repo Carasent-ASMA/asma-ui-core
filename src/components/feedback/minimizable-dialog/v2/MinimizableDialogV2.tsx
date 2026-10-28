@@ -181,9 +181,21 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                     className={clsx('flex items-center justify-between', !minimized && 'hidden')}
                     data-testid={dataTest}
                 >
-                    <div className='max-w-[303px] truncate pr-1 text-lg font-semibold text-delta-800'>
+                    <div
+                        className={cn(
+                            'max-w-[303px] truncate pr-1 text-lg font-semibold text-delta-800',
+                            'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:![overflow-wrap:anywhere]',
+                        )}
+                    >
                         <StyledTooltip title={title} placement='top'>
-                            <div className='truncate'>{title}</div>
+                            <div
+                                className={cn(
+                                    'truncate',
+                                    'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:![overflow-wrap:anywhere]',
+                                )}
+                            >
+                                {title}
+                            </div>
                         </StyledTooltip>
                     </div>
                     <div className='flex items-center gap-x-1'>
@@ -238,24 +250,37 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
             >
                 <OverlayBackOwnerContext.Provider value={modalRef}>
                 <div className={cn('flex flex-col border-b-[1px] border-delta-200 px-4', isMobile ? 'py-3' : 'py-4')}>
-                    <div className='flex items-center justify-between'>
+                    {/* Narrower than a phone: the window buttons go on top (right-aligned), the label or title
+                        below them at full width, instead of the buttons covering it. DOM order, and so
+                        reading and Tab order, stays the same. */}
+                    <div
+                        className={cn(
+                            'flex items-center justify-between',
+                            'max-xs:flex-col-reverse max-xs:items-stretch max-xs:gap-2',
+                        )}
+                    >
                         {!label ? (
                             <div
                                 id={titleId}
                                 className={cn(
                                     'font-semibold text-delta-800',
                                     isMobile ? 'line-clamp-2 text-xl' : 'line-clamp-1 text-2xl',
+                                    'max-xs:line-clamp-none',
+                                    'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:![overflow-wrap:anywhere]',
                                 )}
                             >
                                 {title}
                             </div>
                         ) : (
-                            <div id={labelId} className='text-sm text-delta-700'>
+                            <div
+                                id={labelId}
+                                className='text-sm text-delta-700 max-xs:hyphens-auto max-xs:![overflow-wrap:anywhere]'
+                            >
                                 {label}
                             </div>
                         )}
 
-                        <div className='flex items-center gap-x-1'>
+                        <div className='flex items-center gap-x-1 max-xs:flex-wrap max-xs:justify-end max-xs:gap-y-2'>
                             <DialogBusyContext.Provider value={contextValue}>{actionNode}</DialogBusyContext.Provider>
                             {/* Minimize is offered in fullscreen too. Taking it away there left the
                                 header's learned triad a control short, and a dialog the user had sent
@@ -295,6 +320,9 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                             className={cn(
                                 'font-semibold text-delta-800',
                                 isMobile ? 'line-clamp-2 text-xl' : 'line-clamp-1 text-2xl',
+                                // Narrower than a phone: the title shows in full instead of clamping.
+                                'max-xs:line-clamp-none',
+                                'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:![overflow-wrap:anywhere]',
                             )}
                         >
                             {title}

@@ -70,7 +70,8 @@ export const StyledInputLabel = ({
                 }),
                 className,
             )}
-            style={floatingLabelLayoutStyle(isShrunk)}
+            // At rest it centres on the 40 px field, not on the control, which also holds the helper row.
+            style={isShrunk ? floatingLabelLayoutStyle(true) : { top: '1.25rem', transform: 'translateY(-50%)' }}
         >
             {children}
             {isRequired && ' *'}

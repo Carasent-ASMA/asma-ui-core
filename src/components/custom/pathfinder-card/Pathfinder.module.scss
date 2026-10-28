@@ -18,6 +18,14 @@
     @apply min-w-0 flex-1 px-4;
 }
 
+/**
+ * ASMA-8427: the chevron is absolutely positioned over the content (16px in, 24px wide), so collapsed
+ * content stops 8px before it — otherwise a long value runs underneath the icon.
+ */
+.contentCompact {
+    @apply pr-10;
+}
+
 .compactItems {
     @apply flex min-w-0 flex-nowrap items-center gap-x-4 overflow-hidden whitespace-nowrap;
 }

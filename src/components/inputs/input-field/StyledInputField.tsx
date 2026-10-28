@@ -521,7 +521,13 @@ export const StyledInputField = ({
               ? cn('w-full resize-none p-0 pl-0 pr-0', readOnlyValue ? 'leading-6' : 'leading-[23px]', styles['Input--multiline'])
               : readOnlyValue
                 ? 'm-0 w-full p-0 text-base leading-6'
-                : cn('w-full', styles['Input--singleLine']),
+                : cn(
+                      'w-full',
+                      styles['Input--singleLine'],
+                      // Narrower than a phone, with nothing at the end: a smaller right inset, so a short
+                      // placeholder ("Søk") still fits next to a start icon.
+                      !showClear && !userEndAdornment && 'max-xs:pr-1.5',
+                  ),
         'disabled:text-delta-300',
         // Read-only fill lives on the shell (below) so it covers the whole box incl. the multiline
         // padding; keep the field itself transparent to avoid a `bg-transparent`/`bg-delta-50` clash

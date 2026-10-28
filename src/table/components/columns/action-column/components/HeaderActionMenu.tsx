@@ -27,6 +27,8 @@ import { StyledButton } from 'src/table/shared-components/button'
 import { compact } from 'src/helpers/arrays'
 import type { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities'
 import { message } from 'src/components/feedback/snack-bar'
+import { StyledBadge } from 'src/components/data-display/badge'
+import { hasChangedColumnLayout } from 'src/table/custom-features/order-columns/columnLayout'
 
 function SortableColumnItem({
     id,
@@ -63,9 +65,8 @@ export function HeaderActionMenu<TData>({
 }): JSX.Element {
     const { anchorEl, open, handleClose, handleOpen } = useToggleMenuVisibility()
 
-    const isAnyColumnHidden = headerData.table
-        .getAllLeafColumns()
-        .some((col) => col.getCanHide() && !col.getIsVisible() && !INTERNAL_COLUMN_IDS.includes(col.id))
+    // The dot marks a column layout the user has changed: a hidden column, or a moved one (ASMA-8597, Q9, Q10).
+    const showsChangedLayout = hasChangedColumnLayout(headerData.table)
 
     const items = headerData.table.getAllLeafColumns()
 
@@ -103,14 +104,21 @@ export function HeaderActionMenu<TData>({
         <div className={styles['actions-header-wrapper']}>
             <button
                 type='button'
-                aria-label={t.column_settings}
+                aria-label={showsChangedLayout ? t.column_settings_changed : t.column_settings}
                 aria-haspopup='true'
                 aria-expanded={open}
                 className={styles['actions-header']}
                 onClick={handleOpen}
             >
                 <PinIcon className={styles['pin-icon']} />
-                {isAnyColumnHidden && <div className={styles['pin-indicator']}></div>}
+                {showsChangedLayout && (
+                    <StyledBadge
+                        dataTest='column-settings-dot'
+                        variant='dot'
+                        purpose='filter'
+                        className={styles['pin-dot']}
+                    />
+                )}
             </button>
             <Popover
                 anchorEl={anchorEl}
@@ -218,11 +226,11 @@ export function HeaderActionMenu<TData>({
                         variant='text'
                         className='h-10'
                         onClick={() => {
-                            headerData.table.resetColumnOrder()
-                            message.info(t.column_order_reset, { closeButton: true })
+                            headerData.table.resetColumnSettings()
+                            message.info(t.columns_reset, { closeButton: true })
                         }}
                     >
-                        {t.reset_order}
+                        {t.reset_columns}
                     </StyledButton>
                 </div>
             </Popover>

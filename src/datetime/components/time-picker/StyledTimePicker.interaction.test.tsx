@@ -408,3 +408,165 @@ describe('StyledTimePicker minTime', () => {
         await expect(named).toHaveAttribute('aria-required', 'true')
     })
 })
+
+describe('StyledTimePicker required', () => {
+    afterEach(cleanup)
+
+    const RequiredFixture = ({
+        initial,
+        error,
+        helperText,
+        onSelect = () => undefined,
+    }: {
+        initial?: Date
+        error?: boolean
+        helperText?: string
+        onSelect?: (date?: Date) => void
+    }): JSX.Element => {
+        const [value, setValue] = useState<Date | undefined>(initial)
+        return (
+            <>
+                <StyledTimePicker
+                    dataTest='required-time'
+                    label='Start time'
+                    required
+                    error={error}
+                    helperText={helperText}
+                    value={value}
+                    onSelect={(next) => {
+                        setValue(next)
+                        onSelect(next)
+                    }}
+                />
+                <button type='button' data-testid='after'>
+                    After
+                </button>
+            </>
+        )
+    }
+
+    const requiredField = (container: HTMLElement): HTMLInputElement =>
+        container.querySelector<HTMLInputElement>('input[data-testid="required-time"]')!
+
+    it('marks the input aria-required', async () => {
+        const { container } = mount(<RequiredFixture />)
+
+        await expect(requiredField(container)).toHaveAttribute('aria-required', 'true')
+    })
+
+    it('shows Required, not an invalid format, when an empty field is left (3.3.1)', async () => {
+        const { container } = mount(<RequiredFixture />)
+        const input = requiredField(container)
+
+        input.focus()
+        await expect(input).not.toHaveAttribute('aria-invalid')
+        await userEvent.tab()
+
+        await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
+        await expect(container).toHaveTextContent('Required')
+        await expect(container).not.toHaveTextContent('Invalid time format')
+    })
+
+    it('uncommits an emptied field and shows Required on blur', async () => {
+        const onSelect = fn()
+        const { container } = mount(<RequiredFixture initial={new Date(2026, 9, 5, 13, 0)} onSelect={onSelect} />)
+        const input = requiredField(container)
+
+        await userEvent.clear(input)
+        input.blur()
+
+        await waitFor(() => expect(onSelect).toHaveBeenCalledWith(undefined))
+        await expect(input).toHaveAttribute('aria-invalid', 'true')
+        await expect(container).toHaveTextContent('Required')
+    })
+
+    it('drops Required on the first keystroke without showing an invalid format', async () => {
+        const { container } = mount(<RequiredFixture />)
+        const input = requiredField(container)
+
+        input.focus()
+        await userEvent.tab()
+        await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
+
+        input.focus()
+        await userEvent.keyboard('0')
+
+        await waitFor(() => expect(input).not.toHaveAttribute('aria-invalid'))
+        await expect(container).not.toHaveTextContent('Required')
+        await expect(container).not.toHaveTextContent('Invalid time format')
+    })
+
+    it('shows Required after the eraser empties the field', async () => {
+        const { container } = mount(<RequiredFixture initial={new Date(2026, 9, 5, 13, 0)} />)
+
+        await userEvent.click(requiredField(container))
+        await waitFor(() => expect(panel()).not.toBeNull(), { timeout: 600 })
+        await userEvent.click(document.querySelector<HTMLElement>('[data-testid="time-picker-erase-button"]')!)
+
+        await waitFor(() => expect(requiredField(container)).toHaveAttribute('aria-invalid', 'true'))
+        await expect(container).toHaveTextContent('Required')
+    })
+
+    it('waits for the panel: no Required while picking, Required once Tab leaves without a pick', async () => {
+        const { container } = mount(<RequiredFixture />)
+        const input = requiredField(container)
+
+        await userEvent.click(input)
+        await waitFor(() => expect(panel()).not.toBeNull(), { timeout: 600 })
+        await expect(input).not.toHaveAttribute('aria-invalid')
+
+        await userEvent.tab()
+
+        await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
+        await expect(container).toHaveTextContent('Required')
+    })
+
+    it('shows the form error text over its own message (form errors win)', async () => {
+        const { container } = mount(<RequiredFixture error helperText='Start time is required' />)
+        const input = requiredField(container)
+
+        await expect(input).toHaveAttribute('aria-invalid', 'true')
+        await expect(container).toHaveTextContent('Start time is required')
+
+        input.focus()
+        await userEvent.tab()
+
+        await expect(container).toHaveTextContent('Start time is required')
+        await expect(container).not.toHaveTextContent(/Required$/)
+    })
+
+    it('keeps its own before-start message over a form Required for a typed time', async () => {
+        const { container } = mount(
+            <StyledTimePicker
+                dataTest='end-time'
+                label='End time'
+                required
+                error
+                helperText='Required'
+                notBeforeTime={new Date(2026, 9, 5, 12, 0)}
+                value={new Date(2026, 9, 5, 13, 0)}
+                onSelect={() => undefined}
+            />,
+        )
+        const input = container.querySelector<HTMLInputElement>('input[data-testid="end-time"]')!
+
+        await userEvent.clear(input)
+        await userEvent.keyboard('1100')
+        await waitFor(() => expect(input).toHaveValue('11:00'))
+        input.blur()
+
+        await waitFor(() => expect(container).toHaveTextContent('Must be after start time'))
+        await expect(container).not.toHaveTextContent('Required')
+    })
+
+    it('shows no error for an empty optional field', async () => {
+        const { container } = mount(<TimePickerFixture />)
+        const input = field(container)
+
+        input.focus()
+        await userEvent.tab()
+
+        await expect(input).not.toHaveAttribute('aria-invalid')
+        await expect(container).not.toHaveTextContent('Required')
+    })
+})

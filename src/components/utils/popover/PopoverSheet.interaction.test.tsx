@@ -242,6 +242,31 @@ describe('PopoverSheet — action variant', () => {
         }
     })
 
+    it('tabs through the body, then the footer rows, and only then to Close (2.4.3)', async () => {
+        const { container } = mount(
+            <ActionFixture
+                footerActions={
+                    <StyledButton dataTest='footer-action' variant='outlined' type='button'>
+                        Handling
+                    </StyledButton>
+                }
+            />,
+        )
+        triggerOf(container).focus()
+        await userEvent.keyboard('{Enter}')
+        await waitFor(() => expect(document.activeElement).toHaveTextContent('First'))
+
+        const order: string[] = []
+        for (let press = 0; press < 5; press += 1) {
+            await userEvent.keyboard('{Tab}')
+            const focused = document.activeElement as HTMLElement
+            order.push(focused.getAttribute('aria-label') ?? focused.textContent?.trim() ?? '')
+        }
+
+        // Close sits in the top corner, but follows the footer in the sequence — it is the last stop.
+        await expect(order).toEqual(['Second', 'Nullstill', 'Handling', 'Lukk', 'First'])
+    })
+
     it('does NOT respond to arrow keys — this is a dialog, not a menu', async () => {
         const { container } = mount(<ActionFixture />)
         await userEvent.click(triggerOf(container))

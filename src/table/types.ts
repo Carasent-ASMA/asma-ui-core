@@ -32,7 +32,11 @@ import type {
     FocusedRow,
     FocusedRowsInstance,
 } from './custom-features/focus-rows'
-import type { OrderedColumnsOptions, OrderedColumnsTableState } from './custom-features/order-columns'
+import type {
+    ColumnSettingsInstance,
+    OrderedColumnsOptions,
+    OrderedColumnsTableState,
+} from './custom-features/order-columns'
 import type { RowSelectionTooltipOptions, RowSelectionTooltipRow } from './custom-features/row-selection-tooltip'
 
 declare module '@tanstack/react-table' {
@@ -43,7 +47,7 @@ declare module '@tanstack/react-table' {
 
     interface Row<TData extends RowData> extends ExpandedRow, FocusedRow, RowSelectionTooltipRow<TData> {}
 
-    interface Table<TData extends RowData> extends ExpandedRowsInstance, FocusedRowsInstance {
+    interface Table<TData extends RowData> extends ExpandedRowsInstance, FocusedRowsInstance, ColumnSettingsInstance {
         getCoreRowModel: () => RowModel<TData>
     }
 
@@ -124,6 +128,14 @@ export type StyledTableProps<TData, TCustomData> = {
     customActionsNode?: (row: CellContext<TData, unknown>) => ReactNode
     customSubRowData?: Map<string, TCustomData[]>
     headerPin?: boolean
+    /**
+     * Pins the internal actions column's body cells to the right edge. By default they are pinned
+     * when the column renders actions (`actions` / `customActionsNode`) or the table has fixed-right
+     * columns; a column that only hosts the header pin menu scrolls with the data. The header cell
+     * with the pin menu stays pinned either way. Not supported as `false` together with fixed-right
+     * columns: their body and header offsets would no longer match.
+     */
+    stickyActions?: boolean
     expandArrow?: boolean
     defaultExpanded?: boolean
     loading?: boolean
@@ -141,9 +153,9 @@ export type StyledTableProps<TData, TCustomData> = {
     getRowClassName?: (row: Row<TData>) => string
     /**
      * The row the user is working with — e.g. the one opened in a side panel or preview — matched
-     * against `row.id`. Drawn in the Figma table-row **Selected** state: white with a 2px
-     * `border/selected` (gama-400) frame around the whole row, kept on hover; a ticked row keeps its
-     * Checked fill inside the frame. Keyboard focus on it still shows the 3px Focused frame. Pass the
+     * against `row.id`. Drawn in the Figma table-row **Selected** state: the `table/bg-row-selected`
+     * (gama-25) fill with a 2px `border/selected` (gama-400) frame around the whole row, kept on
+     * hover. Keyboard focus on it still shows the 3px Focused frame. Pass the
      * opened row's id (and `null` when nothing is open). Opt-in: tables that do not pass it are unchanged.
      */
     activeRowId?: string | null
@@ -171,6 +183,13 @@ export type StyledTableProps<TData, TCustomData> = {
      * ensuring that the table state is persisted across sessions for the specific table instance.
      */
     uniqueKey?: string
+    /**
+     * Temporary opt-in (ASMA-8597, owner decision D1, 2026-10-27): save and restore this table's
+     * sorting under `${uniqueKey}:sorting`, and let Reset columns reset it. Needs `uniqueKey`;
+     * ignored without it. Off by default until UX and privacy approve the fleet rollout, which
+     * makes `uniqueKey` alone enough and retires this prop (follow-up ASMA-8698).
+     */
+    persistSorting?: boolean
 } & Omit<
     TTableOptions<TData>,
     'getCoreRowModel' | 'getExpandedRowModel' | 'getFilteredRowModel' | 'getSortedRowModel'

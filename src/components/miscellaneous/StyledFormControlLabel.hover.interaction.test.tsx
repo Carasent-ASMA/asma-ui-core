@@ -4,6 +4,7 @@ import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { StyledCheckbox } from 'src/components/inputs/checkbox/base-ui/StyledCheckbox'
 import { StyledRadio } from 'src/components/inputs/radio-button/base-ui/StyledRadio'
 import { StyledRadioGroup } from 'src/components/inputs/radio-button/base-ui/StyledRadioGroup'
+import { StyledCheckbox as TableStyledCheckbox } from 'src/table/shared-components/StyledCheckbox'
 import { StyledFormControlLabel } from './StyledFormControlLabel'
 
 /**
@@ -60,5 +61,32 @@ describe('a read-only control', () => {
         const label = [...document.querySelectorAll('label')].find((el) => el.textContent === 'Read only')!
 
         await expect(getComputedStyle(label).cursor).toBe('default')
+    })
+})
+
+/**
+ * ASMA-8338: next to a long label that wraps, the checkbox must keep its 40x40 target. The label is a
+ * flex row, and a shrinkable checkbox was squeezed narrower than it is tall, so its round hover
+ * circle (sized to the target, `border-radius: 50%`) turned into an oval. The radio never shrank.
+ */
+describe('a long wrapping label does not squeeze the control', () => {
+    afterEach(cleanup)
+
+    const LONG =
+        'Show/hide transition: ~300–400ms slide + fade — matches NN/g recommended duration for partially persistent headers, keeping the button and header feeling like one system.'
+
+    it.each([
+        ['checkbox', <StyledCheckbox key='c' dataTest='long' />],
+        ['table checkbox', <TableStyledCheckbox key='t' dataTest='long' />],
+        ['radio', <StyledRadio key='r' dataTest='long' value='a' />],
+    ] as const)('%s keeps its 40x40 target', async (_kind, control) => {
+        mount(
+            <div style={{ width: 320 }}>
+                <StyledFormControlLabel label={LONG} control={control} />
+            </div>,
+        )
+        const target = document.querySelector<HTMLElement>('[data-testid="long"], [data-test="long"]')!
+        const { width, height } = target.getBoundingClientRect()
+        await expect({ width, height }, 'the control target next to wrapping text').toEqual({ width: 40, height: 40 })
     })
 })

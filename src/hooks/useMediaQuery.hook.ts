@@ -25,6 +25,9 @@ export function makeMediaQueryStore(mediaQuery: string) {
 
 export const useMobileMediaQuery = makeMediaQueryStore('(max-width: 743px)')
 
+/** Narrower than any phone — the same query as the `max-xs:` Tailwind variant (tailwind.config.ts). */
+export const useMaxXsMediaQuery = makeMediaQueryStore('not all and (min-width: 320px)')
+
 /** A phone in landscape: too short for a sheet capped at 90vh to leave a usable body. */
 export const useShortViewportMediaQuery = makeMediaQueryStore('(max-height: 480px)')
 

@@ -1,9 +1,11 @@
 import { StyledButton, StyledEmptyPage, StyledLink, StyledLoading, StyledWidgetTitle } from 'asma-ui-core'
 import { useState, type PropsWithChildren, type ReactNode } from 'react'
+import { cn } from 'src/helpers/cn'
 import style from './StyledWidget.module.scss'
 
 import ChevronDownIcon from '../icons/ChevronDownIcon'
 import ChevronUpIcon from '../icons/ChevronUpIcon'
+
 
 /**
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#36956-172116 (Design-System · "Widget")
@@ -73,10 +75,20 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
 
     return (
         <div className={`${style['asma-ui-core-styled-widget']} ${isEmpty ? style['empty-state'] : ''}`}>
-            <div className={style['widget-header-left']}>
-                {icon}
-                {titleNode ?? <StyledWidgetTitle>{title}</StyledWidgetTitle>}
-                <div className={`${style['widget-header-right']} ${headerRightClassName ?? ''}`}>{headerRight}</div>
+            <div className={cn(style['widget-header-left'], 'max-xs:flex-wrap max-xs:gap-y-2')}>
+                {/* The icon keeps its size and a long title wraps beside it (down to its longest word),
+                 * instead of the title's `fit-content` squeezing the icon to nothing. */}
+                {icon && <span className='flex shrink-0'>{icon}</span>}
+                {titleNode ?? <StyledWidgetTitle className='min-w-min'>{title}</StyledWidgetTitle>}
+                <div
+                    className={cn(
+                        style['widget-header-right'],
+                        'max-xs:flex-wrap max-xs:gap-y-2',
+                        headerRightClassName,
+                    )}
+                >
+                    {headerRight}
+                </div>
             </div>
 
             <div className={style['widget-content']}>
@@ -90,7 +102,7 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
             </div>
 
             {showViewMore && (
-                <div className={style['widget-footer']}>
+                <div className={cn(style['widget-footer'], 'max-xs:flex-wrap max-xs:gap-y-2')}>
                     {!viewMore.hide ? (
                         <StyledButton
                             disabled={viewMore.disabled}
@@ -122,7 +134,7 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
                         <StyledLink
                             dataTest='go-to-button'
                             className={style['widget-link']}
-                            size='small'
+                            size='large'
                             href={link.href}
                             onClick={link.onClick}
                             content={link.content}

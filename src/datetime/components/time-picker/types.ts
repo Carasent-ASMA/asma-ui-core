@@ -18,7 +18,10 @@ export interface StyledTimePickerProps {
     /** Field width pattern step; defaults to XS. A number (a fixed `px` width) is deprecated: use a step. */
     width?: FieldWidth | number
     error?: boolean
+    /** Shown under the field; with `error`, it replaces the picker's own message (form errors win). */
     helperText?: ReactNode
+    /** An empty field shows "Required" after blur or the eraser, and the input is `aria-required`. */
+    required?: boolean
     label?: string
     locale?: 'no' | 'en'
     title?: string

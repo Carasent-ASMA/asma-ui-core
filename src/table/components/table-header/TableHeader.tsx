@@ -79,13 +79,25 @@ export function TableHeader<
                         key={headerGroup.id}
                         tabIndex={0}
                         onKeyDown={(event) => {
-                            if (event.key !== 'Tab' || event.shiftKey) return
-                            const firstRow = event.currentTarget.closest('table')?.querySelector<HTMLTableRowElement>(
-                                'tbody tr[data-index="0"]',
+                            // Only Tab pressed on the header row itself goes to the rows (ASMA-8087). A control
+                            // inside it keeps the default: the column settings popover is portalled, but React still
+                            // bubbles its keys to this row, and it has already moved focus into its panel on Tab and
+                            // called `preventDefault` (WCAG 2.1.1, ASMA-8597).
+                            if (
+                                event.key !== 'Tab' ||
+                                event.shiftKey ||
+                                event.defaultPrevented ||
+                                event.target !== event.currentTarget
                             )
-                            if (!firstRow) return
+                                return
+                            // Enter the rows on the one the user last worked with — the row that holds the
+                            // roving tab stop — not always on the first.
+                            const activeRow = event.currentTarget.closest('table')?.querySelector<HTMLTableRowElement>(
+                                'tbody tr[tabindex="0"]',
+                            )
+                            if (!activeRow) return
                             event.preventDefault()
-                            firstRow.focus()
+                            activeRow.focus()
                         }}
                     >
                         {leftHeaders.map(({ header, left }) => (

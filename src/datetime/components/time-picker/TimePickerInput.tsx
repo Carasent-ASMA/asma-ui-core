@@ -16,6 +16,7 @@ export const TimePickerInput: React.FC<
         handleBlur?: () => void
         isValidTime: boolean
         isValidEndTime: boolean
+        isMissingTime?: boolean
         localValue: string
     }
 > = (props) => {
@@ -34,8 +35,10 @@ export const TimePickerInput: React.FC<
         handleBlur,
         isValidTime,
         isValidEndTime,
+        isMissingTime,
         localValue,
         title,
+        required,
         readOnly: readOnlyProp,
         lockedReason,
         inputAriaProps,
@@ -48,7 +51,7 @@ export const TimePickerInput: React.FC<
         showMask: false,
     })
 
-    const hasError = !isValidTime || !isValidEndTime || !!error
+    const hasError = !isValidTime || !isValidEndTime || !!isMissingTime || !!error
     const inputRootRef = useRef<HTMLDivElement | null>(null)
     const titleId = useId()
 
@@ -60,7 +63,7 @@ export const TimePickerInput: React.FC<
     }, [])
 
     return (
-        <div {...timePickerWidthProps(width)}>
+        <div {...timePickerWidthProps(width)} data-helper-room-box=''>
             {title && (
                 <div id={titleId} className={fieldLabelAboveClass({ disabled })}>
                     {title}
@@ -79,7 +82,8 @@ export const TimePickerInput: React.FC<
                     <HelperText
                         isValidTime={isValidTime}
                         isValidEndTime={isValidEndTime}
-                        error={hasError}
+                        isMissingTime={isMissingTime}
+                        error={!!error}
                         localization={locale}
                         helperText={helperText}
                         messages={defaultTimePickerHelperMessages}
@@ -88,7 +92,10 @@ export const TimePickerInput: React.FC<
                 onChange={handleChange}
                 onBlur={handleBlur}
                 slotProps={{
-                    htmlInput: getTitleLabelling({ title, titleId, label, inputAriaProps }),
+                    htmlInput: {
+                        'aria-required': required ? true : undefined,
+                        ...getTitleLabelling({ title, titleId, label, inputAriaProps }),
+                    },
                     input: {
                         ref: inputRootRef,
                         onClick: (e: ReactMouseEvent<HTMLElement>) => {
