@@ -53,6 +53,17 @@ describe('hovering the option text shows the control hover circle', () => {
     })
 })
 
+describe('a read-only control', () => {
+    afterEach(cleanup)
+
+    it('shows the default cursor on its label, not a pointer', async () => {
+        mount(<StyledFormControlLabel label='Read only' control={<StyledCheckbox dataTest='ro' readOnly checked />} />)
+        const label = [...document.querySelectorAll('label')].find((el) => el.textContent === 'Read only')!
+
+        await expect(getComputedStyle(label).cursor).toBe('default')
+    })
+})
+
 /**
  * ASMA-8338: next to a long label that wraps, the checkbox must keep its 40x40 target. The label is a
  * flex row, and a shrinkable checkbox was squeezed narrower than it is tall, so its round hover

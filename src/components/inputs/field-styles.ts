@@ -70,10 +70,12 @@ export type FieldLabelPlacement = 'above' | 'floating'
 /**
  * The label above a field, as `StyledPhoneField` draws it. It wraps and is never truncated (TRUNC-4).
  * Put it on a wrapper around the `<label>`: apps in the shell ship `label { padding: 0 !important }`.
+ * `flush` drops the 4px gap for a read-only value, whose text sits right under its title (Figma Title + data).
  */
-export const fieldLabelAboveClass = ({ disabled }: { disabled?: boolean } = {}): string =>
+export const fieldLabelAboveClass = ({ disabled, flush }: { disabled?: boolean; flush?: boolean } = {}): string =>
     cn(
-        'block pb-1 text-base font-semibold',
+        'block text-base font-semibold',
+        !flush && 'pb-1',
         disabled ? 'text-delta-300' : 'text-delta-800',
     )
 

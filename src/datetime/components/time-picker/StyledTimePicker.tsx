@@ -161,7 +161,7 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
         />
     )
 
-    if (props.disabled || props.readOnly) return input
+    if (props.disabled || props.readOnly || props.lockedReason) return input
 
     if (isMobile)
         return (

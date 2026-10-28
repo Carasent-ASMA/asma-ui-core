@@ -15,6 +15,8 @@ export interface IBaseDatePickerInput {
     inputClassName?: string
     disabled: boolean
     readOnly?: boolean
+    lockedReason?: React.ReactNode
+    readOnlyReason?: React.ReactNode
     onClick: (e: React.MouseEvent<HTMLDivElement | HTMLButtonElement>) => void
     selected: Date | undefined
     dateFormat?: string
@@ -56,7 +58,9 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
         label,
         title,
         inputAriaProps,
-        readOnly,
+        readOnly: readOnlyProp,
+        lockedReason,
+        readOnlyReason,
         disallowPast,
         disallowFuture,
         validateOnCalendarClose,
@@ -69,6 +73,8 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
         ...rest
     } = props
 
+    const readOnly = Boolean(readOnlyProp) || Boolean(lockedReason) || Boolean(readOnlyReason)
+    const readOnlyValue = !lockedReason && Boolean(readOnlyReason)
     const { validationError, handleValidation, errHelperText, clearValidation } =
         useDatePickerValidation(defaultDatePickerValidationMessages)
     const { maskRef } = useDatePickerMask()
@@ -186,12 +192,12 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
         <div className='cursor-default' data-field-width={width} style={fieldWidthStyle(width)} data-helper-room-box=''>
             {/* Title and label sit above the whole row, so the calendar button lines up with the input. */}
             {title && (
-                <div id={titleId} className={fieldLabelAboveClass({ disabled: rest.disabled })}>
+                <div id={titleId} className={fieldLabelAboveClass({ disabled: rest.disabled, flush: readOnlyValue })}>
                     {title}
                 </div>
             )}
             {label && (
-                <div className={fieldLabelAboveClass({ disabled: rest.disabled })}>
+                <div className={fieldLabelAboveClass({ disabled: rest.disabled, flush: readOnlyValue })}>
                     <label htmlFor={inputId}>
                         {label}
                         {required && <span aria-hidden='true'>&nbsp;*</span>}
@@ -207,6 +213,8 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
                             {...rest}
                             id={inputId}
                             readOnly={readOnly}
+                            lockedReason={lockedReason}
+                            readOnlyReason={readOnlyReason}
                             data-testid={rest.dataTest}
                             autoComplete='off'
                             inputRef={!readOnly ? maskRef : undefined}

@@ -239,6 +239,15 @@ export const ReadOnly: Story = {
     },
 }
 
+/** A locked field (disabled-states DIS-9): Figma Input field State=Locked, node 18703:25422. */
+export const Locked: Story = {
+    args: {
+        label: 'Label text',
+        value: 'Filled text',
+        lockedReason: 'Locked for editing after the end date',
+    },
+}
+
 export const WithClear: Story = {
     args: {
         allowClear: true,
@@ -325,6 +334,35 @@ export const MultilineReadOnlyShowsAll: Story = {
             await expect(textarea.scrollHeight).toBeLessThanOrEqual(textarea.clientHeight + 1)
             await expect(getComputedStyle(textarea).overflowY).toBe('hidden')
         })
+    },
+}
+
+/** The lock icon keeps its room at the end of a multiline locked field. */
+export const ReadOnlyValue: Story = {
+    args: {
+        label: 'Label text',
+        value: 'Filled text',
+        readOnlyReason: 'Change it in Settings',
+    },
+}
+
+export const ReadOnlyValueMultiline: Story = {
+    args: {
+        className: 'w-[320px]',
+        label: 'Notes',
+        multiline: true,
+        value: LONG_TEXT,
+        readOnlyReason: 'Change it in Settings',
+    },
+}
+
+export const LockedMultiline: Story = {
+    args: {
+        className: 'w-[320px]',
+        label: 'Notes',
+        multiline: true,
+        value: LONG_TEXT,
+        lockedReason: 'Locked for editing after the end date',
     },
 }
 

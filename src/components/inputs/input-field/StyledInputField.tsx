@@ -11,11 +11,13 @@ import {
     type FocusEvent,
     type HTMLAttributes,
     type InputHTMLAttributes,
+    type ReactElement,
     type ReactNode,
     type Ref,
     type TextareaHTMLAttributes,
 } from 'react'
-import { CloseIcon } from 'src/components/icons'
+import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip'
+import { CloseIcon, LockIcon } from 'src/components/icons'
 import { cn } from 'src/helpers/cn'
 import { CharacterCounter } from 'src/helpers/CharacterCounter'
 import { HelperRow } from 'src/helpers/HelperRow'
@@ -93,6 +95,19 @@ export interface StyledInputFieldProps {
     disabled?: boolean
     /** @figmaProp State = true→"Read only" */
     readOnly?: boolean
+    /**
+     * @figmaProp State = set→"Locked". A field the user normally edits here whose editing is paused
+     * for now (disabled-states DIS-9): read-only, with a lock icon at the end, the default cursor and a
+     * focus ring. The reason opens on hover, focus and tap and is the field's description.
+     */
+    lockedReason?: ReactNode
+    /**
+     * @figmaProp State = set→"Read only". A single value inside a form the user is editing that they
+     * cannot change here but can change elsewhere (disabled-states DIS-6): text-like, without border or
+     * fill, focusable and selectable with a focus ring and the default cursor. The reason says where it
+     * can be changed; it opens on hover, focus and tap and is the field's description. `lockedReason` wins.
+     */
+    readOnlyReason?: ReactNode
     required?: boolean
     allowClear?: boolean
     onClear?: () => void
@@ -135,6 +150,24 @@ export interface StyledInputFieldProps {
     onClick?: (event: React.MouseEvent<HTMLDivElement>) => void
 }
 
+// The outline is a later sibling of the `peer` input. A read-only field gets no focused state, so a
+// locked one draws the field focus ring itself (WCAG 2.4.7).
+const LOCKED_FOCUS_RING =
+    'peer-focus-visible:border-focus-ring peer-focus-visible:shadow-[inset_0_0_0_2px_var(--colors-focus-ring)]'
+
+// A read-only value has no outline; only the focus ring shows, a little outside the text.
+const READ_ONLY_VALUE_RING =
+    'pointer-events-none absolute -inset-1 rounded peer-focus-visible:shadow-[inset_0_0_0_2px_var(--colors-focus-ring)]'
+
+const FieldReasonTooltip = ({ reason, children }: { reason: ReactNode; children: ReactElement }): JSX.Element =>
+    reason === undefined ? (
+        children
+    ) : (
+        <StyledTooltip title={reason} openOnTap persistentDescription>
+            {children}
+        </StyledTooltip>
+    )
+
 /**
  * Outlined text field with its label above it (replaces MUI `TextField`). Self-contained: manages its
  * own focus/value state to drive the shared field styling ([[field-styles]]); supports multiline,
@@ -161,7 +194,9 @@ export const StyledInputField = ({
     counter,
     locale,
     disabled,
-    readOnly,
+    readOnly: readOnlyProp,
+    lockedReason,
+    readOnlyReason,
     required,
     allowClear,
     onClear,
@@ -202,6 +237,9 @@ export const StyledInputField = ({
     const [hasValueUncontrolled, setHasValueUncontrolled] = useState(defaultValue != null && defaultValue !== '')
     const [uncontrolledLength, setUncontrolledLength] = useState(String(defaultValue ?? '').length)
 
+    const locked = Boolean(lockedReason) || lockedReason === 0
+    const readOnlyValue = !locked && (Boolean(readOnlyReason) || readOnlyReason === 0)
+    const readOnly = Boolean(readOnlyProp) || locked || readOnlyValue
     const isControlled = value !== undefined
     const hasValue = isControlled ? value !== '' && value != null : hasValueUncontrolled
     const disabledOrReadonly = Boolean(disabled) || Boolean(readOnly)
@@ -209,7 +247,15 @@ export const StyledInputField = ({
     const startAdornment = slotProps?.input?.startAdornment ?? InputProps?.startAdornment
     const hasStartAdornment = Children.count(startAdornment) > 0
     const isAdornmentList = hasStartAdornment && Array.isArray(startAdornment)
-    const userEndAdornment = slotProps?.input?.endAdornment ?? InputProps?.endAdornment
+    const providedEndAdornment = slotProps?.input?.endAdornment ?? InputProps?.endAdornment
+    const userEndAdornment = locked ? (
+        <>
+            {providedEndAdornment}
+            <LockIcon width={24} height={24} className='text-delta-700' />
+        </>
+    ) : (
+        providedEndAdornment
+    )
     const showClear = Boolean(allowClear && hasValue && !disabledOrReadonly)
 
     // The MUI input slot lets callers pass their own ref via `slotProps.htmlInput.ref` (Autocomplete
@@ -235,10 +281,10 @@ export const StyledInputField = ({
     const controlId = htmlInputRest.id ?? fieldId
     const resolvedMaxLength = maxLength ?? htmlInputRest.maxLength
     const counterId = `${fieldId}-counter`
-    const showCounter = counter !== false && Boolean(resolvedMaxLength)
+    const showCounter = counter !== false && Boolean(resolvedMaxLength) && !readOnlyValue
     const valueLength = isControlled ? String(value ?? '').length : uncontrolledLength
 
-    const isFloatingLabel = labelPlacement === 'floating' && Boolean(label)
+    const isFloatingLabel = labelPlacement === 'floating' && Boolean(label) && !readOnlyValue
     const shrink = focused || hasValue || hasStartAdornment
 
     // Sizes the multiline textarea and decides whether it scrolls.
@@ -346,7 +392,7 @@ export const StyledInputField = ({
     const assignRef = useMergeRefs([resolvedRef, captureTextarea])
 
     const { style: htmlInputStyle, ...htmlInputPropsWithoutStyle } = htmlInputRest
-    const isSingleLineShell = !multiline && !isAdornmentList
+    const isSingleLineShell = !multiline && !isAdornmentList && !readOnlyValue
 
     const {
         height: _shellHeight,
@@ -396,7 +442,7 @@ export const StyledInputField = ({
         // width of the adornment + its 14px right inset + a small gap.
         const next = el ? Math.ceil(el.getBoundingClientRect().width) + 20 : undefined
         setEndAdornmentPad((prev) => (prev === next ? prev : next))
-    }, [isSingleLineShell, showClear, userEndAdornment])
+    }, [isSingleLineShell, showClear, providedEndAdornment, locked])
     // With a label the resting (un-shrunk) label sits in the placeholder position, so the HTML
     // placeholder must stay hidden until the label floats up (`shrink`) — otherwise the two texts
     // overlap. With no label there is nothing to overlap, so the placeholder should show at rest like
@@ -466,23 +512,28 @@ export const StyledInputField = ({
 
     const inputClasses = cn(
         styles['Input'],
-        'peer border-0 bg-transparent text-base tracking-[0.00938em] text-delta-800 outline-none placeholder:text-delta-500', // Figma field text delta/800 #363e4a
+        'peer border-0 bg-transparent text-base tracking-[0.00938em] outline-none placeholder:text-delta-500',
+        // Figma field text delta/800 #363e4a; a read-only value is Title + data `text-icon/body` delta/700 #49525f.
+        readOnlyValue ? 'text-delta-700' : 'text-delta-800',
         isAdornmentList
             ? 'box-border h-8 min-w-[60px] flex-1 py-0 pl-0 pr-0 leading-[23px]'
             : multiline
-              ? cn('w-full resize-none p-0 pl-0 pr-0 leading-[23px]', styles['Input--multiline'])
-              : cn(
-                    'w-full',
-                    styles['Input--singleLine'],
-                    // Narrower than a phone, with nothing at the end: a smaller right inset, so a short
-                    // placeholder ("Søk") still fits next to a start icon.
-                    !showClear && !userEndAdornment && 'max-xs:pr-1.5',
-                ),
+              ? cn('w-full resize-none p-0 pl-0 pr-0', readOnlyValue ? 'leading-6' : 'leading-[23px]', styles['Input--multiline'])
+              : readOnlyValue
+                ? 'm-0 w-full p-0 text-base leading-6'
+                : cn(
+                      'w-full',
+                      styles['Input--singleLine'],
+                      // Narrower than a phone, with nothing at the end: a smaller right inset, so a short
+                      // placeholder ("Søk") still fits next to a start icon.
+                      !showClear && !userEndAdornment && 'max-xs:pr-1.5',
+                  ),
         'disabled:text-delta-300',
         // Read-only fill lives on the shell (below) so it covers the whole box incl. the multiline
         // padding; keep the field itself transparent to avoid a `bg-transparent`/`bg-delta-50` clash
         // (cn here is plain clsx, no tailwind-merge, so a competing bg is order-dependent/flaky).
-        readOnly && 'text-delta-800',
+        readOnly && !readOnlyValue && 'text-delta-800',
+        (locked || readOnlyValue) && 'cursor-default',
         inputSlotClass,
     )
     const singleLineDataProps =
@@ -514,7 +565,7 @@ export const StyledInputField = ({
         >
             {label && !isFloatingLabel && (
                 <div
-                    className={cn(fieldLabelAboveClass({ disabled }), slotProps?.inputLabel?.className)}
+                    className={cn(fieldLabelAboveClass({ disabled, flush: readOnlyValue }), slotProps?.inputLabel?.className)}
                     style={{ ...resolveSx(slotProps?.inputLabel?.['sx']), ...slotProps?.inputLabel?.style }}
                 >
                     <label htmlFor={controlId}>
@@ -523,142 +574,154 @@ export const StyledInputField = ({
                     </label>
                 </div>
             )}
-            <div className='relative overflow-visible'>
-                {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions -- not independently
-                    interactive: this shell wraps the REAL <input>/<textarea> below, which is already
-                    keyboard-operable on its own. `onMouseDown` is a passthrough (MUI-parity
-                    `slotProps.input.onMouseDown`) for mouse-specific shell behaviour, same as
-                    StyledFormControl's focus/blur bubbling — not a control needing its own tabIndex. */}
-                <div
-                    className={cn(
-                        'relative flex',
-                        isSingleLineShell && styles['InputShell'],
-                        multiline && 'box-border items-center px-[14px] py-[16.5px]',
-                        isAdornmentList &&
-                            cn(styles['AdornmentList'], userEndAdornment && styles['AdornmentList--endAdornment']),
-                        // Read-only surface: fill the whole box (matches the delta-200 border, radius 4).
-                        // On the shell (not the input) so it also covers the multiline field's padding.
-                        readOnly && 'rounded bg-delta-50',
-                    )}
-                    ref={mergedInputSlotRef}
-                    onMouseDown={inputSlotOnMouseDown}
-                    {...inputSlotClickProps}
-                    style={shellStyle}
-                    data-testid={isAdornmentList ? `${dataTest}-adornment-list` : `${dataTest}-shell`}
-                >
-                    {hasStartAdornment && (
-                        <span
-                            className={cn(
-                                'items-center text-delta-500',
-                                // `flex` must live only in the non-adornment branch: pairing it with
-                                // `contents` puts two `display` utilities on one element, and when a
-                                // consumer's Tailwind marks utilities `!important` (or orders `flex`
-                                // after `contents`), `flex` wins — the wrapper never dissolves and the
-                                // chip adornment list can't flex-wrap. See [[ui-core-adornment-contents-flex-conflict]].
-                                isAdornmentList ? 'contents' : 'absolute left-3 flex',
-                            )}
-                        >
-                            {startAdornment}
-                        </span>
-                    )}
-                    {multiline ? (
-                        <textarea
-                            {...(sharedProps as unknown as TextareaHTMLAttributes<HTMLTextAreaElement>)}
-                            ref={assignRef}
-                            data-testid={dataTest}
-                            rows={rows ?? minRows ?? 2}
-                            className={inputClasses}
-                        />
-                    ) : (
-                        <input
-                            {...sharedProps}
-                            {...singleLineDataProps}
-                            ref={assignRef}
-                            data-testid={dataTest}
-                            type={type}
-                            className={inputClasses}
-                        />
-                    )}
+            <FieldReasonTooltip reason={locked ? lockedReason : readOnlyValue ? readOnlyReason : undefined}>
+                <div className='relative overflow-visible'>
+                    {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions -- not independently
+                        interactive: this shell wraps the REAL <input>/<textarea> below, which is already
+                        keyboard-operable on its own. `onMouseDown` is a passthrough (MUI-parity
+                        `slotProps.input.onMouseDown`) for mouse-specific shell behaviour, same as
+                        StyledFormControl's focus/blur bubbling — not a control needing its own tabIndex. */}
+                    <div
+                        className={cn(
+                            'relative flex',
+                            isSingleLineShell && styles['InputShell'],
+                            multiline && !readOnlyValue && 'box-border items-center px-[14px] py-[16.5px]',
+                            isAdornmentList &&
+                                cn(styles['AdornmentList'], userEndAdornment && styles['AdornmentList--endAdornment']),
+                            // Read-only surface: fill the whole box (matches the delta-200 border, radius 4).
+                            // On the shell (not the input) so it also covers the multiline field's padding.
+                            readOnly && !readOnlyValue && 'rounded bg-delta-50',
+                            // Room for the lock icon, which sits at the end of the multiline box too.
+                            locked && multiline && 'pr-[44px]',
+                        )}
+                        ref={mergedInputSlotRef}
+                        onMouseDown={inputSlotOnMouseDown}
+                        {...inputSlotClickProps}
+                        style={shellStyle}
+                        data-testid={isAdornmentList ? `${dataTest}-adornment-list` : `${dataTest}-shell`}
+                    >
+                        {hasStartAdornment && (
+                            <span
+                                className={cn(
+                                    'items-center text-delta-500',
+                                    // `flex` must live only in the non-adornment branch: pairing it with
+                                    // `contents` puts two `display` utilities on one element, and when a
+                                    // consumer's Tailwind marks utilities `!important` (or orders `flex`
+                                    // after `contents`), `flex` wins — the wrapper never dissolves and the
+                                    // chip adornment list can't flex-wrap. See [[ui-core-adornment-contents-flex-conflict]].
+                                    isAdornmentList ? 'contents' : 'absolute left-3 flex',
+                                )}
+                            >
+                                {startAdornment}
+                            </span>
+                        )}
+                        {multiline ? (
+                            <textarea
+                                {...(sharedProps as unknown as TextareaHTMLAttributes<HTMLTextAreaElement>)}
+                                ref={assignRef}
+                                data-testid={dataTest}
+                                rows={rows ?? minRows ?? 2}
+                                className={inputClasses}
+                            />
+                        ) : (
+                            <input
+                                {...sharedProps}
+                                {...singleLineDataProps}
+                                ref={assignRef}
+                                data-testid={dataTest}
+                                type={type}
+                                className={inputClasses}
+                            />
+                        )}
 
-                    {showClear ? (
-                        // Native <button> for the role and the pointer affordance, but deliberately OUT
-                        // of the tab order (`tabIndex={-1}`): it appears only while there is a value, so
-                        // tabbing onto it and activating it unmounts the very control that had focus and
-                        // drops focus to <body> (WCAG 2.4.3). No 2.1.1 cost — the field is editable text,
-                        // so a keyboard user clears it the native way (Ctrl/Cmd+A, Delete). Same call the
-                        // autocomplete's trailing affordances already make.
-                        // `aria-label` is required since the only content is an icon.
-                        <button
-                            type='button'
-                            tabIndex={-1}
-                            aria-label='Clear'
-                            data-testid={`${dataTest}-clear`}
-                            // ASMA-8220 (TB-14): `hover:bg-gama-100` is the only feedback it has, so
-                            // pressable (the audit grouped it with the touch-ready controls, but it
-                            // declares no `:active` to preserve). No hit-area: a 44px overlay on this
-                            // ~22px button sits inside the field and would swallow taps meant to place
-                            // the caret in the text it clears.
-                            className='asma-pressable absolute right-4 z-40 flex items-center justify-center rounded-full border-0 bg-transparent p-[2px] duration-300 hover:bg-gama-100'
-                            onClick={(event) => {
-                                event.stopPropagation()
-                                event.preventDefault()
-                                if (!isControlled) setHasValueUncontrolled(false)
-                                onClear?.()
+                        {showClear ? (
+                            // Native <button> for the role and the pointer affordance, but deliberately OUT
+                            // of the tab order (`tabIndex={-1}`): it appears only while there is a value, so
+                            // tabbing onto it and activating it unmounts the very control that had focus and
+                            // drops focus to <body> (WCAG 2.4.3). No 2.1.1 cost — the field is editable text,
+                            // so a keyboard user clears it the native way (Ctrl/Cmd+A, Delete). Same call the
+                            // autocomplete's trailing affordances already make.
+                            // `aria-label` is required since the only content is an icon.
+                            <button
+                                type='button'
+                                tabIndex={-1}
+                                aria-label='Clear'
+                                data-testid={`${dataTest}-clear`}
+                                // ASMA-8220 (TB-14): `hover:bg-gama-100` is the only feedback it has, so
+                                // pressable (the audit grouped it with the touch-ready controls, but it
+                                // declares no `:active` to preserve). No hit-area: a 44px overlay on this
+                                // ~22px button sits inside the field and would swallow taps meant to place
+                                // the caret in the text it clears.
+                                className='asma-pressable absolute right-4 z-40 flex items-center justify-center rounded-full border-0 bg-transparent p-[2px] duration-300 hover:bg-gama-100'
+                                onClick={(event) => {
+                                    event.stopPropagation()
+                                    event.preventDefault()
+                                    if (!isControlled) setHasValueUncontrolled(false)
+                                    onClear?.()
+                                }}
+                            >
+                                <CloseIcon width={18} height={18} />
+                            </button>
+                        ) : (
+                            userEndAdornment && (
+                                // `inset-y-0 items-center` keeps the indicator vertically centred in the field
+                                // even after the chip adornment list grows to multiple rows (Figma icon-right).
+                                <span
+                                    ref={endAdornmentRef}
+                                    className='absolute inset-y-0 right-[14px] flex max-w-[calc(100%-28px)] items-center gap-1'
+                                >
+                                    {userEndAdornment}
+                                </span>
+                            )
+                        )}
+
+                        {readOnlyValue ? (
+                            <div aria-hidden className={READ_ONLY_VALUE_RING} />
+                        ) : isFloatingLabel ? (
+                            <fieldset
+                                aria-hidden
+                                className={cn(
+                                    notchedOutlineClass({ focused, error, disabled, readOnly, notched: true }),
+                                    locked && LOCKED_FOCUS_RING,
+                                )}
+                            >
+                                <legend className={notchedLegendClass(shrink)}>
+                                    <span className='inline-block px-[5px]'>
+                                        {label}
+                                        {required && ' *'}
+                                    </span>
+                                </legend>
+                            </fieldset>
+                        ) : (
+                            <div
+                                aria-hidden
+                                className={cn(
+                                    notchedOutlineClass({ focused, error, disabled, readOnly, notched: false }),
+                                    locked && LOCKED_FOCUS_RING,
+                                )}
+                            />
+                        )}
+                    </div>
+
+                    {isFloatingLabel && (
+                        <label
+                            htmlFor={controlId}
+                            className={cn(
+                                floatingLabelClass({ shrink, focused, error, disabled, readOnly, size }),
+                                slotProps?.inputLabel?.className,
+                            )}
+                            style={{
+                                ...resolveSx(slotProps?.inputLabel?.['sx']),
+                                ...slotProps?.inputLabel?.style,
+                                ...floatingLabelLayoutStyle(shrink),
                             }}
                         >
-                            <CloseIcon width={18} height={18} />
-                        </button>
-                    ) : (
-                        userEndAdornment && (
-                            // `inset-y-0 items-center` keeps the indicator vertically centred in the field
-                            // even after the chip adornment list grows to multiple rows (Figma icon-right).
-                            <span
-                                ref={endAdornmentRef}
-                                className='absolute inset-y-0 right-[14px] flex max-w-[calc(100%-28px)] items-center gap-1'
-                            >
-                                {userEndAdornment}
-                            </span>
-                        )
-                    )}
-
-                    {isFloatingLabel ? (
-                        <fieldset
-                            aria-hidden
-                            className={notchedOutlineClass({ focused, error, disabled, readOnly, notched: true })}
-                        >
-                            <legend className={notchedLegendClass(shrink)}>
-                                <span className='inline-block px-[5px]'>
-                                    {label}
-                                    {required && ' *'}
-                                </span>
-                            </legend>
-                        </fieldset>
-                    ) : (
-                        <div
-                            aria-hidden
-                            className={notchedOutlineClass({ focused, error, disabled, readOnly, notched: false })}
-                        />
+                            {label}
+                            {required && ' *'}
+                        </label>
                     )}
                 </div>
-
-                {isFloatingLabel && (
-                    <label
-                        htmlFor={controlId}
-                        className={cn(
-                            floatingLabelClass({ shrink, focused, error, disabled, readOnly, size }),
-                            slotProps?.inputLabel?.className,
-                        )}
-                        style={{
-                            ...resolveSx(slotProps?.inputLabel?.['sx']),
-                            ...slotProps?.inputLabel?.style,
-                            ...floatingLabelLayoutStyle(shrink),
-                        }}
-                    >
-                        {label}
-                        {required && ' *'}
-                    </label>
-                )}
-            </div>
+            </FieldReasonTooltip>
 
             {showHelperSlot && (
                 <HelperRow

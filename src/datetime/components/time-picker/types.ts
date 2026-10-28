@@ -11,6 +11,8 @@ export interface StyledTimePickerProps {
     placeholder?: string
     disabled?: boolean
     readOnly?: boolean
+    /** A locked field (disabled-states DIS-9): read-only with a lock icon; the reason opens on hover, focus and tap. */
+    lockedReason?: ReactNode
     inputClassName?: string
     dataTest: string
     /** Field width pattern step; defaults to XS. A number (a fixed `px` width) is deprecated: use a step. */
