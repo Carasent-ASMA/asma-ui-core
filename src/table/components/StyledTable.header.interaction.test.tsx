@@ -22,7 +22,8 @@ import type { StyledTableProps } from '../types'
  * sortable column show only the grey triangle, pointing the way the click will sort; a sorted column keeps its
  * teal triangle. Every state is checked for the absence of anything drawn behind the glyph.
  * UX's later answers (comments 94750 and 94751): the 20px slot exists only while the column is sorted, hovered or
- * keyboard-focused (ST-15), and the resize bar is `delta-400` (ST-17).
+ * keyboard-focused (ST-15), and the resize bar is `delta-400` (ST-17). Then OQ-12 (comment 94791, "keep gama-400 for
+ * hover"): a sorted glyph is `gama-400` while its header is hovered or keyboard-focused, `gama-500` otherwise (ST-16).
  */
 
 type TableProps = Partial<Omit<StyledTableProps<Person, Record<string, unknown>>, 'footer' | 'hideFooter'>>
@@ -154,10 +155,12 @@ describe('Sort indicator (AC 15)', () => {
         await expect(Math.abs(slot.left - label.right)).toBeLessThanOrEqual(0.5)
     })
 
-    it('ST-10: a sorted column shows the glyph in gama-500, ascending or descending; the slot is decorative (A-03)', async () => {
+    it('ST-10: a sorted column shows the glyph in gama-500 at rest, ascending or descending; the slot is decorative (A-03)', async () => {
         mountHeader()
 
         await userEvent.click(sortButton('Name'))
+        // Under the pointer the glyph is gama-400 (ST-16); at rest it is gama-500.
+        await userEvent.unhover(sortButton('Name'))
         await expect(ariaSorts()['Name']).toBe('ascending')
         await expect(glyphPath('Name')).toBe(ASC_PATH)
         await expect(getComputedStyle(glyphOf('Name')).visibility).toBe('visible')
@@ -265,7 +268,7 @@ describe('Truncated long labels keep the glyph (AC 15, AC 16)', () => {
         await expect(getComputedStyle(indicator(LONG)).color).toBe(resolveColor('var(--colors-delta-600)'))
     })
 
-    it('a hovered sorted column keeps both: truncated label and primary glyph, with no square', async () => {
+    it('a hovered sorted column keeps both: truncated label and the glyph, now gama-400, with no square', async () => {
         mountHeader({ columns: longColumns, initialState: { sorting: [{ id: 'name', desc: true }] } })
 
         await userEvent.hover(sortButton(LONG))
@@ -273,7 +276,7 @@ describe('Truncated long labels keep the glyph (AC 15, AC 16)', () => {
         await expectTruncatedWithGlyph(LONG)
         await expect(indicator(LONG)).toHaveAttribute('data-sort-direction', 'desc')
         await expectNoSquare(LONG)
-        await expect(getComputedStyle(indicator(LONG)).color).toBe(resolveColor('var(--colors-gama-500)'))
+        await expect(getComputedStyle(indicator(LONG)).color).toBe(resolveColor('var(--colors-gama-400)'))
     })
 })
 
@@ -296,15 +299,17 @@ describe('Hover and focus (AC 16)', () => {
         await expectNoSquare('Role')
     })
 
-    it('ST-10: a sorted column keeps its primary glyph on hover, with no square', async () => {
+    it('ST-10: a sorted column keeps its glyph on hover, lighter (gama-400, ST-16), with no square', async () => {
         mountHeader()
 
         await userEvent.click(sortButton('Name'))
         await userEvent.unhover(sortButton('Name'))
         await expectNoSquare('Name')
 
-        await userEvent.hover(sortButton('Name'))
         await expect(getComputedStyle(indicator('Name')).color).toBe(resolveColor('var(--colors-gama-500)'))
+
+        await userEvent.hover(sortButton('Name'))
+        await expect(getComputedStyle(indicator('Name')).color).toBe(resolveColor('var(--colors-gama-400)'))
         await expectNoSquare('Name')
     })
 
@@ -350,10 +355,10 @@ describe('Hover and focus (AC 16)', () => {
         await expectNoSquare('Age')
         await expect(getComputedStyle(indicator('Age')).color).toBe(resolveColor('var(--colors-delta-600)'))
 
-        // Enter sorts, and the glyph turns primary.
+        // Enter sorts, and the glyph turns primary: gama-400 while the header keeps keyboard focus (ST-16).
         await userEvent.keyboard('{Enter}')
         await expect(ariaSorts()['Age']).toBe('descending')
-        await expect(getComputedStyle(indicator('Age')).color).toBe(resolveColor('var(--colors-gama-500)'))
+        await expect(getComputedStyle(indicator('Age')).color).toBe(resolveColor('var(--colors-gama-400)'))
 
         // Shift+Tab goes on to the previous header control; Tab comes back to the next one, never down to the rows.
         await userEvent.keyboard('{Shift>}{Tab}{/Shift}')
@@ -409,6 +414,33 @@ describe('Hover and focus (AC 16)', () => {
             }
         } finally {
             if (original) document.documentElement.setAttribute('data-theme', original)
+        }
+    })
+})
+
+describe('Contrast of the sorted glyph (A-04, A-05)', () => {
+    beforeEach(parkPointer)
+    afterEach(cleanup)
+
+    it('A-05: gama-500 at rest is at least 4.4:1 in every theme; gama-400 on hover is the contrast UX accepted (OQ-12)', async () => {
+        mountHeader()
+        const original = document.documentElement.getAttribute('data-theme')
+        // `greenish` is the jade theme (Ad Opus). The hover contrasts are 3.02, 2.62 and 2.15: below 3:1 in the default
+        // and fretex themes, which UX accepted in comment 94791; this fails if a token moves them.
+        const accepted = [['greenish', 3.02], ['default', 2.62], ['fretex', 2.15]] as const
+
+        try {
+            for (const [theme, hoverContrast] of accepted) {
+                document.documentElement.setAttribute('data-theme', theme)
+
+                const header = resolveColor('var(--colors-gray-10)')
+
+                await expect(contrast(resolveColor('var(--colors-gama-500)'), header), `${theme}: gama-500 at rest`).toBeGreaterThanOrEqual(4.4)
+                await expect(contrast(resolveColor('var(--colors-gama-400)'), header), `${theme}: gama-400 on hover`).toBeCloseTo(hoverContrast, 1)
+            }
+        } finally {
+            if (original) document.documentElement.setAttribute('data-theme', original)
+            else document.documentElement.removeAttribute('data-theme')
         }
     })
 })
@@ -711,5 +743,77 @@ describe('ST-17: the resize bar is delta-400, and gama-500 while resizing (P2b, 
 
         await expect(zone.className).not.toContain('isResizing')
         await expect(barColour('Name')).toBe(resolveColor('var(--colors-delta-400)'))
+    })
+})
+
+const GAMA_500 = (): string => resolveColor('var(--colors-gama-500)')
+const GAMA_400 = (): string => resolveColor('var(--colors-gama-400)')
+const DELTA_600 = (): string => resolveColor('var(--colors-delta-600)')
+const glyphColour = (label: string): string => getComputedStyle(indicator(label)).color
+
+describe('ST-16: a sorted glyph is gama-500 at rest and gama-400 on hover and :focus-visible (P2b, UX OQ-12, comments 94751 and 94791)', () => {
+    beforeEach(parkPointer)
+    afterEach(cleanup)
+
+    it('ascending or descending: gama-500 at rest, gama-400 while the header is hovered, gama-500 once the pointer has left', async () => {
+        for (const desc of [false, true]) {
+            mountHeader({ initialState: { sorting: [{ id: 'name', desc }, { id: 'age', desc: false }] } })
+
+            await expect(glyphColour('Name')).toBe(GAMA_500())
+
+            await userEvent.hover(sortButton('Name'))
+            await expect(glyphColour('Name')).toBe(GAMA_400())
+            await expect(getComputedStyle(glyphOf('Name')).visibility).toBe('visible')
+            // Only the hovered header: the other sorted one keeps gama-500.
+            await expect(glyphColour('Age')).toBe(GAMA_500())
+
+            await userEvent.unhover(sortButton('Name'))
+            await expect(glyphColour('Name')).toBe(GAMA_500())
+            await expectNoSquare('Name')
+            cleanup()
+        }
+    })
+
+    it('keyboard focus (:focus-visible) gives gama-400 too, and leaving the header gives gama-500', async () => {
+        mountHeader({ initialState: { sorting: [{ id: 'name', desc: false }] } })
+
+        await userEvent.keyboard('{Shift}')
+        sortButton('Name').focus()
+        await expect(sortButton('Name').matches(':focus-visible')).toBe(true)
+        await expect(glyphColour('Name')).toBe(GAMA_400())
+        await expectNoSquare('Name')
+
+        sortButton('Name').blur()
+        await expect(glyphColour('Name')).toBe(GAMA_500())
+    })
+
+    it('focus from a click is :focus without :focus-visible: gama-500 once the pointer is away', async () => {
+        mountHeader()
+
+        await userEvent.click(sortButton('Name'))
+        await expect(ariaSorts()['Name']).toBe('ascending')
+        // Still under the pointer, so hovered.
+        await expect(glyphColour('Name')).toBe(GAMA_400())
+
+        await userEvent.unhover(sortButton('Name'))
+        await expect(document.activeElement).toBe(sortButton('Name'))
+        await expect(sortButton('Name').matches(':focus')).toBe(true)
+        await expect(sortButton('Name').matches(':focus-visible')).toBe(false)
+        await expect(glyphColour('Name')).toBe(GAMA_500())
+    })
+
+    it('an unsorted glyph stays delta-600 on hover and on :focus-visible', async () => {
+        mountHeader()
+
+        await userEvent.hover(sortButton('Role'))
+        await expect(glyphColour('Role')).toBe(DELTA_600())
+        await userEvent.unhover(sortButton('Role'))
+
+        await userEvent.keyboard('{Shift}')
+        sortButton('Role').focus()
+        await expect(sortButton('Role').matches(':focus-visible')).toBe(true)
+        await expect(glyphColour('Role')).toBe(DELTA_600())
+        sortButton('Role').blur()
+        await expect(glyphColour('Role')).toBe(DELTA_600())
     })
 })
