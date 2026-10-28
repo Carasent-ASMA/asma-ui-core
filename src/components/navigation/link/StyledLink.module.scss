@@ -49,16 +49,13 @@
     cursor: pointer;
 }
 
-.styled-link-xs {
-    font-size: 12px;
-    line-height: 20px;
-}
-
-.styled-link-small {
+// Figma "Links/Helper link" (Body Base=off): SemiBold 14/20.
+.styled-link-medium {
     font-size: 14px;
     line-height: 20px;
 }
 
+// Figma "Links/Base link" (Body Base=on): SemiBold 16/24.
 .styled-link-large {
     font-size: 16px;
     line-height: 24px;

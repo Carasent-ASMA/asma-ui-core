@@ -134,7 +134,7 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
                         <StyledLink
                             dataTest='go-to-button'
                             className={style['widget-link']}
-                            size='small'
+                            size='large'
                             href={link.href}
                             onClick={link.onClick}
                             content={link.content}
