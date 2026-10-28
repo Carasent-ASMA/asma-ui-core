@@ -64,5 +64,7 @@ describe('Locked date and time pickers (disabled-states DIS-9)', () => {
         await expect(container.querySelector('button')).toBeNull()
         await expect(container.querySelector('svg')).toBeNull()
         await waitFor(() => expect(input).toHaveAccessibleDescription('Set from the events in the plan'))
+        await expect(getComputedStyle(input).color).toBe('rgb(73, 82, 95)')
+        await expect((container.firstElementChild as HTMLElement).getBoundingClientRect().height).toBe(48)
     })
 })

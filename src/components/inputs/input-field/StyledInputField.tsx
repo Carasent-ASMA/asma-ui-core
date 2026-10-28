@@ -512,19 +512,21 @@ export const StyledInputField = ({
 
     const inputClasses = cn(
         styles['Input'],
-        'peer border-0 bg-transparent text-base tracking-[0.00938em] text-delta-800 outline-none placeholder:text-delta-500', // Figma field text delta/800 #363e4a
+        'peer border-0 bg-transparent text-base tracking-[0.00938em] outline-none placeholder:text-delta-500',
+        // Figma field text delta/800 #363e4a; a read-only value is Title + data `text-icon/body` delta/700 #49525f.
+        readOnlyValue ? 'text-delta-700' : 'text-delta-800',
         isAdornmentList
             ? 'box-border h-8 min-w-[60px] flex-1 py-0 pl-0 pr-0 leading-[23px]'
             : multiline
-              ? cn('w-full resize-none p-0 pl-0 pr-0 leading-[23px]', styles['Input--multiline'])
+              ? cn('w-full resize-none p-0 pl-0 pr-0', readOnlyValue ? 'leading-6' : 'leading-[23px]', styles['Input--multiline'])
               : readOnlyValue
-                ? 'm-0 w-full p-0 text-base leading-[23px]'
+                ? 'm-0 w-full p-0 text-base leading-6'
                 : cn('w-full', styles['Input--singleLine']),
         'disabled:text-delta-300',
         // Read-only fill lives on the shell (below) so it covers the whole box incl. the multiline
         // padding; keep the field itself transparent to avoid a `bg-transparent`/`bg-delta-50` clash
         // (cn here is plain clsx, no tailwind-merge, so a competing bg is order-dependent/flaky).
-        readOnly && 'text-delta-800',
+        readOnly && !readOnlyValue && 'text-delta-800',
         (locked || readOnlyValue) && 'cursor-default',
         inputSlotClass,
     )
@@ -557,7 +559,7 @@ export const StyledInputField = ({
         >
             {label && !isFloatingLabel && (
                 <div
-                    className={cn(fieldLabelAboveClass({ disabled }), slotProps?.inputLabel?.className)}
+                    className={cn(fieldLabelAboveClass({ disabled, flush: readOnlyValue }), slotProps?.inputLabel?.className)}
                     style={{ ...resolveSx(slotProps?.inputLabel?.['sx']), ...slotProps?.inputLabel?.style }}
                 >
                     <label htmlFor={controlId}>

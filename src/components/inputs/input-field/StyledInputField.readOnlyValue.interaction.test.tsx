@@ -73,6 +73,21 @@ describe('StyledInputField read-only value (disabled-states DIS-6)', () => {
         await waitFor(() => expect(tip()).toHaveTextContent(REASON))
     })
 
+    it('looks like plain text: the value right under the title, 48px together, in the Figma colours', async () => {
+        const { container } = mount(
+            <StyledInputField dataTest='name' label='Name' value='Report A' readOnlyReason={REASON} />,
+        )
+        const root = container.firstElementChild as HTMLElement
+        const input = container.querySelector<HTMLInputElement>('input')!
+        const title = container.querySelector('label')!.parentElement!
+
+        await expect(getComputedStyle(title).paddingBottom).toBe('0px')
+        await expect(getComputedStyle(title).color).toBe('rgb(54, 62, 74)')
+        await expect(getComputedStyle(input).color).toBe('rgb(73, 82, 95)')
+        await expect(getComputedStyle(input).lineHeight).toBe('24px')
+        await expect(root.getBoundingClientRect().height).toBe(48)
+    })
+
     it('hides the character counter, which has nothing to count on a value that cannot change', async () => {
         const { container } = mount(
             <StyledInputField dataTest='name' label='Name' value='Report A' maxLength={50} readOnlyReason={REASON} />,

@@ -72,6 +72,7 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
     } = props
 
     const readOnly = Boolean(readOnlyProp) || Boolean(lockedReason) || Boolean(readOnlyReason)
+    const readOnlyValue = !lockedReason && Boolean(readOnlyReason)
     const { validationError, handleValidation, errHelperText, clearValidation } =
         useDatePickerValidation(defaultDatePickerValidationMessages)
     const { maskRef } = useDatePickerMask()
@@ -186,12 +187,12 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
         <div className='cursor-default' data-field-width={width} style={fieldWidthStyle(width)}>
             {/* Title and label sit above the whole row, so the calendar button lines up with the input. */}
             {title && (
-                <div id={titleId} className={fieldLabelAboveClass({ disabled: rest.disabled })}>
+                <div id={titleId} className={fieldLabelAboveClass({ disabled: rest.disabled, flush: readOnlyValue })}>
                     {title}
                 </div>
             )}
             {label && (
-                <div className={fieldLabelAboveClass({ disabled: rest.disabled })}>
+                <div className={fieldLabelAboveClass({ disabled: rest.disabled, flush: readOnlyValue })}>
                     <label htmlFor={inputId}>
                         {label}
                         {required && <span aria-hidden='true'>&nbsp;*</span>}
