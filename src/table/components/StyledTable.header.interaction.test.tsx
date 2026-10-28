@@ -21,6 +21,8 @@ import type { StyledTableProps } from '../types'
  * UX's answer (ASMA-8597, comment 94738, AC 16): there is no hover or focus square. Hover and focus on an unsorted
  * sortable column show only the grey triangle, pointing the way the click will sort; a sorted column keeps its
  * teal triangle. Every state is checked for the absence of anything drawn behind the glyph.
+ * UX's later answers (comments 94750 and 94751): the 20px slot exists only while the column is sorted, hovered or
+ * keyboard-focused (ST-15), and the resize bar is `delta-400` (ST-17).
  */
 
 type TableProps = Partial<Omit<StyledTableProps<Person, Record<string, unknown>>, 'footer' | 'hideFooter'>>
@@ -136,6 +138,8 @@ describe('Sort indicator (AC 15)', () => {
 
     it('ST-10: a 20 x 28px slot right after the label, drawing the glyph at 28px', async () => {
         mountHeader()
+        // An unsorted header has the slot only while it is hovered or focused (ST-15).
+        await userEvent.hover(sortButton('Name'))
 
         const slot = rect(indicator('Name'))
         const glyph = rect(glyphOf('Name'))
@@ -179,8 +183,8 @@ describe('Sort indicator (AC 15)', () => {
 
         await expect(getComputedStyle(glyphOf('Role')).visibility).toBe('hidden')
         await expectNoSquare('Role')
-        // The slot still takes its 20px, so hovering never shifts the label.
-        await expect(rect(indicator('Role')).width).toBe(20)
+        // The slot takes no room at rest (UX, OQ-07); ST-15 pins when it appears.
+        await expect(rect(indicator('Role')).width).toBe(0)
 
         // Nothing to show: no slot, no glyph, no square, and the header is not a control at all.
         const notes = headerCell('Notes').querySelector<HTMLElement>('[class*="show-table-header"]')!
@@ -199,7 +203,8 @@ describe('Sort indicator (AC 15)', () => {
             { accessorKey: 'role', header: 'Role', size: 160 },
         ]
 
-        mountHeader({ columns })
+        // Sorted, so that the slot is there; an unsorted header gets it back on hover or focus (ST-15).
+        mountHeader({ columns, initialState: { sorting: [{ id: 'name', desc: false }] } })
 
         const label = labelOf('An extremely long column label that cannot possibly fit here')
         const cell = headerCell('An extremely long column label that cannot possibly fit here')
@@ -430,11 +435,14 @@ describe('24px resize zone (AC 17)', () => {
         await expect(bar.width).toBe('4px')
         // UX confirmed (ASMA-8597 OQ-03): the bar stays at the zone's right edge, as the Figma Resize frame draws it.
         await expect(bar.right).toBe('0px')
-        await expect(bar.backgroundColor).toBe(resolveColor('var(--colors-delta-300)'))
+        // UX answered OQ-10 (ASMA-8597, comment 94751): the bar is delta-400.
+        await expect(bar.backgroundColor).toBe(resolveColor('var(--colors-delta-400)'))
     })
 
     it('ST-12: in a 100px column nothing sits under the zone: label and glyph end before it', async () => {
         mountHeader({ columns: narrow, enableColumnResizing: true })
+        // The slot shows while the header is hovered (ST-15), which is when it could end up under the zone.
+        await userEvent.hover(sortButton('Name'))
 
         const zone = rect(resizerOf('Name'))
         const slot = rect(indicator('Name'))
@@ -499,5 +507,153 @@ describe('24px resize zone (AC 17)', () => {
         await expect(
             getComputedStyle(headerCell('Name').querySelector('[class*="show-table-header"]')!).paddingRight,
         ).not.toBe('24px')
+    })
+})
+
+const slotWidth = (label: string): number => rect(indicator(label)).width
+
+describe('ST-15: the slot exists only when it has something to show (P2b, UX OQ-07, comments 94750 and 94751)', () => {
+    beforeEach(parkPointer)
+    afterEach(cleanup)
+
+    it('an unsorted header at rest has no slot: 0px wide, drawing nothing, with no overflow and no hit area', async () => {
+        mountHeader()
+
+        const slot = indicator('Role')
+        const parent = sortButton('Role')
+
+        await expect(slotWidth('Role')).toBe(0)
+        await expect(getComputedStyle(slot).overflowX).toBe('hidden')
+        await expect(getComputedStyle(glyphOf('Role')).visibility).toBe('hidden')
+        await expectNoSquare('Role')
+        // The 28px glyph box does not stick out of the collapsed slot: the header gets no extra scrollable width.
+        await expect(parent.scrollWidth).toBeLessThanOrEqual(parent.clientWidth)
+        // And nothing of it can be hit: a point where the glyph box would lie reaches neither the slot nor the glyph.
+        const glyph = rect(glyphOf('Role'))
+        const hit = document.elementFromPoint(glyph.right - 2, glyph.top + glyph.height / 2)
+
+        await expect(slot.contains(hit)).toBe(false)
+    })
+
+    it('hovering the header gives an unsorted column its 20px slot, and leaving takes it back', async () => {
+        mountHeader()
+
+        await userEvent.hover(sortButton('Role'))
+        await expect(slotWidth('Role')).toBe(20)
+        await expect(rect(indicator('Role')).height).toBe(28)
+        await expect(getComputedStyle(glyphOf('Role')).visibility).toBe('visible')
+        // Only the hovered header: the other unsorted ones keep none.
+        await expect(slotWidth('Age')).toBe(0)
+
+        await userEvent.unhover(sortButton('Role'))
+        await expect(slotWidth('Role')).toBe(0)
+    })
+
+    it('keyboard focus (:focus-visible) gives it the slot too, and leaving the header takes it back', async () => {
+        mountHeader()
+
+        // After a key press, programmatic focus counts as keyboard focus.
+        await userEvent.keyboard('{Shift}')
+        sortButton('Role').focus()
+        await expect(sortButton('Role').matches(':focus-visible')).toBe(true)
+        await expect(slotWidth('Role')).toBe(20)
+        await expect(getComputedStyle(glyphOf('Role')).visibility).toBe('visible')
+        await expect(slotWidth('Age')).toBe(0)
+
+        sortButton('Role').blur()
+        await expect(slotWidth('Role')).toBe(0)
+    })
+
+    it('a sorted header always has the slot: at rest, hovered, focused and after leaving', async () => {
+        mountHeader({ initialState: { sorting: [{ id: 'name', desc: false }] } })
+
+        await expect(slotWidth('Name')).toBe(20)
+        await userEvent.hover(sortButton('Name'))
+        await expect(slotWidth('Name')).toBe(20)
+        await userEvent.unhover(sortButton('Name'))
+        await expect(slotWidth('Name')).toBe(20)
+
+        await userEvent.keyboard('{Shift}')
+        sortButton('Name').focus()
+        await expect(slotWidth('Name')).toBe(20)
+        sortButton('Name').blur()
+        await expect(slotWidth('Name')).toBe(20)
+
+        // A column sorted by a click keeps it once the pointer has left.
+        await userEvent.click(sortButton('Role'))
+        await userEvent.unhover(sortButton('Role'))
+        await expect(ariaSorts()['Role']).toBe('ascending')
+        await expect(slotWidth('Role')).toBe(20)
+    })
+
+    it('a truncated unsorted label is 20px shorter while the header is hovered or focused, and leaving restores it', async () => {
+        mountHeader({ columns: longColumns })
+
+        const atRest = rect(labelOf(LONG)).width
+
+        await expect(labelOf(LONG).scrollWidth).toBeGreaterThan(labelOf(LONG).clientWidth)
+
+        await userEvent.hover(sortButton(LONG))
+        await expect(Math.abs(rect(labelOf(LONG)).width - (atRest - 20))).toBeLessThanOrEqual(0.5)
+        await userEvent.unhover(sortButton(LONG))
+        await expect(Math.abs(rect(labelOf(LONG)).width - atRest)).toBeLessThanOrEqual(0.5)
+
+        await userEvent.keyboard('{Shift}')
+        sortButton(LONG).focus()
+        await expect(Math.abs(rect(labelOf(LONG)).width - (atRest - 20))).toBeLessThanOrEqual(0.5)
+        sortButton(LONG).blur()
+        await expect(Math.abs(rect(labelOf(LONG)).width - atRest)).toBeLessThanOrEqual(0.5)
+    })
+})
+
+describe('ST-17: the resize bar is delta-400, and gama-500 while resizing (P2b, UX OQ-10, comment 94751)', () => {
+    beforeEach(parkPointer)
+    afterEach(cleanup)
+
+    const narrow: ColumnDef<Person>[] = [
+        { accessorKey: 'name', header: 'Name', size: 100, minSize: 100 },
+        { accessorKey: 'role', header: 'Role', size: 100, minSize: 100 },
+        { accessorKey: 'age', header: 'Age', size: 160 },
+    ]
+    const barColour = (label: string): string => getComputedStyle(resizerOf(label), '::after').backgroundColor
+
+    it('the bar shows on hover in delta-400, and not at rest', async () => {
+        mountHeader({ columns: narrow, enableColumnResizing: true })
+
+        // Hover-capable devices show the bar only while the header is hovered.
+        await expect(getComputedStyle(resizerOf('Name')).opacity).toBe('0')
+        await userEvent.hover(sortButton('Name'))
+        await expect(getComputedStyle(resizerOf('Name')).opacity).toBe('1')
+        await expect(barColour('Name')).toBe(resolveColor('var(--colors-delta-400)'))
+        await expect(barColour('Name')).not.toBe(resolveColor('var(--colors-delta-300)'))
+    })
+
+    it('while the column is being resized the bar is gama-500, and delta-400 again afterwards', async () => {
+        mountHeader({ columns: narrow, enableColumnResizing: true })
+
+        const zone = resizerOf('Name')
+        const { left, top } = rect(zone)
+        const press = (type: string, target: EventTarget): void => {
+            target.dispatchEvent(
+                new MouseEvent(type, { bubbles: true, cancelable: true, clientX: left + 12, clientY: top + 10, view: window }),
+            )
+        }
+        const settle = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 30))
+
+        press('mousedown', zone)
+        await settle()
+        await expect(zone.className).toContain('isResizing')
+        await expect(getComputedStyle(zone).opacity).toBe('1')
+        await expect(barColour('Name')).toBe(resolveColor('var(--colors-gama-500)'))
+        await expect(barColour('Name')).not.toBe(resolveColor('var(--colors-delta-400)'))
+
+        // End the press the way a real one ends, with a click, so the next header click is not swallowed.
+        press('mouseup', document)
+        await settle()
+        press('click', zone)
+        await settle()
+
+        await expect(zone.className).not.toContain('isResizing')
+        await expect(barColour('Name')).toBe(resolveColor('var(--colors-delta-400)'))
     })
 })

@@ -716,8 +716,9 @@ const indicatorColumns: ColumnDef<TableRow>[] = [
 
 /**
  * ASMA-8597, AC 15 and 16: the Figma sort indicator. Ascending and descending (a two-column sort) show the
- * primary glyph; an unsorted column shows nothing until it is hovered or focused, then a grey glyph pointing
- * the way the next click sorts; a long label truncates and keeps its slot; an unsortable column shows nothing.
+ * primary glyph; an unsorted column shows nothing, and reserves no slot, until it is hovered or focused, then a
+ * grey glyph pointing the way the next click sorts; a long unsorted label truncates and gets its 20px slot back
+ * only while hovered or focused; an unsortable column shows nothing.
  * The hover and focus states are captured by the interaction captures in `visual-tests/interaction-states.ts`.
  * Nothing is drawn behind a hovered glyph: UX has no hover square (ASMA-8597, comment 94738).
  */
@@ -763,13 +764,21 @@ const resizeColumns: ColumnDef<TableRow>[] = [
 
 /**
  * ASMA-8597, AC 17: with resizing on, each handle is a 24px zone at the column's right edge. The header
- * content reserves it, so in a 100px column the glyph ends before the zone and never sits under it. The 4px
- * bar stays at the edge (confirmed by UX, OQ-03) and shows on hover; the VRT capture hovers the narrow column.
+ * content reserves it, so in a 100px column the glyph ends before the zone and never sits under it (the narrow
+ * column is sorted, so its slot shows). The 4px bar stays at the edge (confirmed by UX, OQ-03), is `delta-400`
+ * (UX, OQ-10) and shows on hover; the VRT capture hovers the narrow column.
  */
 export const ResizeHandle: Story = {
     render: () => (
         <div className='w-[640px]'>
-            <StyledTable columns={resizeColumns} data={indicatorRows} enableColumnResizing hideFooter locale='en' />
+            <StyledTable
+                columns={resizeColumns}
+                data={indicatorRows}
+                enableColumnResizing
+                hideFooter
+                initialState={{ sorting: [{ id: 'name', desc: false }] }}
+                locale='en'
+            />
         </div>
     ),
     play: async ({ canvasElement }) => {

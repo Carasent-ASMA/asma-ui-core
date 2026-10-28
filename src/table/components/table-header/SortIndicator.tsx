@@ -7,8 +7,9 @@ import { DropDownIcon } from 'src/table/shared-components/DropDownIcon'
  * The sort indicator slot of a sortable header (Figma "Header with sorting", the 20 × 28 `Sorting` frame).
  * It is decorative: `aria-sort` on the header cell carries the state. A sorted column always shows the
  * glyph in the primary colour; an unsorted one shows it, grey and pointing the way the next click will
- * sort, only while the header is hovered or keyboard-focused. The glyph is in the DOM either way, so the
- * slot never changes the layout.
+ * sort, only while the header is hovered or keyboard-focused. The glyph is in the DOM either way; the
+ * stylesheet gives the slot its 20px only while the column is sorted, hovered or keyboard-focused (UX, ASMA-8597,
+ * comments 94750 and 94751), and collapses it to nothing otherwise.
  */
 export function SortIndicator({
     sorted,
