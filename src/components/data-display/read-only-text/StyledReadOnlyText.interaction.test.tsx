@@ -28,13 +28,44 @@ describe('StyledReadOnlyText', () => {
         await expect(container.querySelector('[data-testid="count"]')).toHaveTextContent('0')
     })
 
-    it('puts the value right under the label, 48px together, with no helper row (Figma Read only)', async () => {
+    it('puts the value right under the title, 48px together, in the Figma colours', async () => {
         const { container } = mount(<StyledReadOnlyText title='Name' value='Erik' dataTest='name' />)
+        const root = container.firstElementChild as HTMLElement
         const value = container.querySelector<HTMLElement>('[data-testid="name"]')!
-        const label = value.previousElementSibling as HTMLElement
 
-        await expect(getComputedStyle(label).paddingBottom).toBe('0px')
-        await expect((value.parentElement!).getBoundingClientRect().height).toBe(48)
-        await expect(value.nextElementSibling).toBeNull()
+        await expect(root.getBoundingClientRect().height).toBe(48)
+        await expect(getComputedStyle(value).color).toBe('rgb(73, 82, 95)')
+        await expect(getComputedStyle(root.firstElementChild as HTMLElement).color).toBe('rgb(54, 62, 74)')
+    })
+
+    it('shows "Title: value" on one 24px line when horizontal', async () => {
+        const { container } = mount(<StyledReadOnlyText horizontal title='ID' value='546646' dataTest='id' />)
+        const root = container.firstElementChild as HTMLElement
+
+        await expect(root).toHaveTextContent('ID:546646')
+        await expect(root.getBoundingClientRect().height).toBe(24)
+    })
+
+    it('shows the helper text under the value in 14/20', async () => {
+        const { container } = mount(
+            <StyledReadOnlyText title='Internal name' value='Plan' helperText='For Samhandling' dataTest='plan' />,
+        )
+        const helper = [...container.querySelectorAll<HTMLElement>('span')].find(
+            (span) => span.textContent === 'For Samhandling',
+        )!
+
+        await expect(getComputedStyle(helper).fontSize).toBe('14px')
+        await expect(getComputedStyle(helper).lineHeight).toBe('20px')
+        await expect(getComputedStyle(helper).color).toBe('rgb(98, 110, 126)')
+    })
+
+    it('puts icons 4px from the text', async () => {
+        const { container } = mount(
+            <StyledReadOnlyText title='Start date' value='11.05.2026' startIcon={<svg data-testid='icon' />} />,
+        )
+        const icon = container.querySelector('[data-testid="icon"]')!.parentElement!
+
+        await expect(icon.getBoundingClientRect().width).toBe(24)
+        await expect(getComputedStyle(icon.parentElement!).columnGap).toBe('4px')
     })
 })
