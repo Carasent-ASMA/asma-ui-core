@@ -41,6 +41,7 @@ export const SheetDemo = ({ label, initiallyOpen = false, children, ...sheetProp
                 {label}
             </StyledButton>
             <StyledBottomSheet
+                locale='no'
                 {...sheetProps}
                 open={open}
                 onClose={() => {
@@ -88,6 +89,7 @@ export const FilterSheet = ({
                 }}
                 title='Filtrer søknader'
                 resultCount={filteredTotal(active)}
+                locale='no'
                 resetAction={
                     <StyledButton
                         dataTest={`${dataTest}-reset`}

@@ -264,7 +264,7 @@ describe('PopoverSheet — action variant', () => {
         }
 
         // Close sits in the top corner, but follows the footer in the sequence — it is the last stop.
-        await expect(order).toEqual(['Second', 'Nullstill', 'Handling', 'Lukk', 'First'])
+        await expect(order).toEqual(['Second', 'Nullstill', 'Handling', 'Close', 'First'])
     })
 
     it('does NOT respond to arrow keys — this is a dialog, not a menu', async () => {
@@ -312,6 +312,22 @@ describe('PopoverSheet — action variant', () => {
         await userEvent.click(document.body.querySelector<HTMLButtonElement>('[data-test="pop"] button')!)
         await expect(panelOf()).toBeNull()
         await expectFocusReturnedTo(trigger)
+    })
+
+    it('reads the result and close labels in the given locale', async () => {
+        const viewResults = (): HTMLElement | null => document.body.querySelector('[data-testid="pop-view-results"]')
+        const close = (): HTMLElement | null => document.body.querySelector('[data-testid="pop-close"]')
+
+        const english = mount(<ActionFixture resultCount={0} locale='en' />)
+        await userEvent.click(triggerOf(english.container))
+        await waitFor(() => expect(viewResults()).toHaveTextContent('No matches'))
+        await expect(close()).toHaveAccessibleName('Close')
+        cleanup()
+
+        const norwegian = mount(<ActionFixture resultCount={3} locale='no' />)
+        await userEvent.click(triggerOf(norwegian.container))
+        await waitFor(() => expect(viewResults()).toHaveTextContent('Vis resultater (3)'))
+        await expect(close()).toHaveAccessibleName('Lukk')
     })
 })
 
