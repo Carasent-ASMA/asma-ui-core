@@ -786,13 +786,18 @@ export const ResizeHandle: Story = {
             cell.textContent?.startsWith('Narrow column'),
         )!
         const zone = narrow.querySelector<HTMLElement>('[class*="resizer"]')!
+        const slot = narrow.querySelector<HTMLElement>('[data-sort-state]')!
         const glyph = narrow.querySelector<SVGElement>('[data-sort-state] svg')!
         const zoneBox = zone.getBoundingClientRect()
+        const slotBox = slot.getBoundingClientRect()
         const glyphBox = glyph.getBoundingClientRect()
 
         await expect(zoneBox.width).toBe(24)
         await expect(getComputedStyle(zone, '::after').width).toBe('4px')
-        await expect(glyphBox.right).toBeLessThanOrEqual(zoneBox.left + 14)
+        // The column is sorted, so its 20px slot shows, and it ends before the zone (the glyph's triangle is
+        // centred in it). The glyph's own 28px box overhangs the slot by 4px, which is why the slot is measured.
+        await expect(slotBox.width).toBe(20)
+        await expect(slotBox.right).toBeLessThanOrEqual(zoneBox.left + 0.5)
         const hit = document.elementFromPoint(glyphBox.left + glyphBox.width / 2, glyphBox.top + glyphBox.height / 2)
 
         await expect(zone.contains(hit)).toBe(false)

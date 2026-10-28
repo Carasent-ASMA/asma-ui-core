@@ -459,6 +459,43 @@ describe('24px resize zone (AC 17)', () => {
         await expect(zoneHit).toBe(resizerOf('Name'))
     })
 
+    it('ST-12: an unsorted resizable header at rest has no slot, its label runs up to the zone, and the collapsed glyph cannot be hit', async () => {
+        const columns: ColumnDef<Person>[] = [
+            { accessorKey: 'name', header: 'Name', size: 100, minSize: 100 },
+            { accessorKey: 'role', header: LONG, size: 100, minSize: 100 },
+            { accessorKey: 'age', header: 'Age', size: 160 },
+        ]
+
+        mountHeader({ columns, enableColumnResizing: true })
+
+        for (const header of ['Name', LONG]) {
+            const zone = rect(resizerOf(header))
+            const slot = indicator(header)
+
+            // Unsorted, at rest, not hovered: no slot (P2b, UX OQ-07), so the label keeps all the room before the zone.
+            await expect(slotWidth(header)).toBe(0)
+            await expect(getComputedStyle(glyphOf(header)).visibility).toBe('hidden')
+            await expect(rect(labelOf(header)).right).toBeLessThanOrEqual(zone.left + 0.5)
+
+            // Nothing of the collapsed 28px glyph box can be hit: not at its centre, which lies at the zone's edge, nor
+            // at its left half, which lies over the label.
+            const glyph = rect(glyphOf(header))
+
+            for (const x of [glyph.left + 2, glyph.left + glyph.width / 2]) {
+                const hit = document.elementFromPoint(x, glyph.top + glyph.height / 2)
+
+                await expect(slot.contains(hit)).toBe(false)
+                await expect(hit).not.toBe(glyphOf(header))
+            }
+        }
+
+        // A truncated label fills the room: it ends exactly where the zone begins, with no 20px slot taken from it.
+        const label = labelOf(LONG)
+
+        await expect(label.scrollWidth).toBeGreaterThan(label.clientWidth)
+        await expect(Math.abs(rect(label).right - rect(resizerOf(LONG)).left)).toBeLessThanOrEqual(0.5)
+    })
+
     it('ST-12: pressing on the zone starts a resize and never sorts', async () => {
         mountHeader({ columns: narrow, enableColumnResizing: true })
 
@@ -562,6 +599,25 @@ describe('ST-15: the slot exists only when it has something to show (P2b, UX OQ-
 
         sortButton('Role').blur()
         await expect(slotWidth('Role')).toBe(0)
+    })
+
+    it('a header clicked until it is unsorted keeps no slot once the pointer leaves: focus from a click is not :focus-visible', async () => {
+        mountHeader()
+
+        // asc, desc, none: the header ends unsorted and, being clicked, still has focus.
+        await userEvent.click(sortButton('Role'))
+        await userEvent.click(sortButton('Role'))
+        await userEvent.click(sortButton('Role'))
+        await expect(ariaSorts()['Role']).toBe('none')
+        await userEvent.unhover(sortButton('Role'))
+
+        // Focus from a pointer press is `:focus`, not `:focus-visible`, and only the latter gives the slot.
+        await expect(document.activeElement).toBe(sortButton('Role'))
+        await expect(sortButton('Role').matches(':focus')).toBe(true)
+        await expect(sortButton('Role').matches(':focus-visible')).toBe(false)
+        await expect(slotWidth('Role')).toBe(0)
+        await expect(getComputedStyle(glyphOf('Role')).visibility).toBe('hidden')
+        await expectNoSquare('Role')
     })
 
     it('a sorted header always has the slot: at rest, hovered, focused and after leaving', async () => {
