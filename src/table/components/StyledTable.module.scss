@@ -395,7 +395,8 @@
             bottom: 0;
             right: var(--resizer-bar-offset);
             width: 4px;
-            background: var(--colors-delta-300);
+            // UX answered OQ-10 (ASMA-8597, comment 94751): the bar is `delta-400`, as Figma draws it.
+            background: var(--colors-delta-400);
             border-radius: 5px;
         }
     }
@@ -526,19 +527,32 @@
         // the primary colour; an unsorted one shows it grey, pointing the way the next click sorts, only while
         // its header is hovered or keyboard-focused. Nothing is drawn behind the glyph: UX has no hover square
         // (ASMA-8597, AC 16, comment 94738).
+        //
+        // The slot exists only when it has something to show (UX answered OQ-07, comments 94750 and 94751):
+        // an unsorted header reserves none at rest, and takes the 20px while it is hovered or keyboard-focused.
+        // A sorted header always keeps it. So a truncated unsorted label is 20px shorter while hovered or focused.
+        // Collapsed, the slot clips its 28px glyph, so it draws nothing, adds no overflow and has no hit area.
         .sort-indicator {
             display: flex;
-            flex: 0 0 20px;
+            flex: 0 0 0;
             align-items: center;
             justify-content: center;
-            width: 20px;
+            width: 0;
             height: 28px;
+            overflow: hidden;
             color: var(--colors-delta-600);
         }
 
         .sort-glyph {
             flex: none;
             visibility: hidden;
+        }
+
+        .sort-indicator--sorted,
+        .sortable-column:focus-visible .sort-indicator {
+            flex-basis: 20px;
+            width: 20px;
+            overflow: visible;
         }
 
         .sort-indicator--sorted {
@@ -549,11 +563,29 @@
             }
         }
 
+        // A sorted glyph is the lighter `gama-400` while its header is hovered or keyboard-focused, and `gama-500`
+        // otherwise (UX, ASMA-8597 OQ-12: comment 94751, point 2, and comment 94791 "keep gama-400 for hover"; focus
+        // shows what hover shows, Q8). An unsorted glyph stays `delta-600`. `gama-400` is below 3:1 on the header
+        // in the default and fretex themes (2.62:1 and 2.15:1), which UX accepted for the hover state.
+        .sortable-column:focus-visible .sort-indicator--sorted {
+            color: var(--colors-gama-400);
+        }
+
         .sortable-column:focus-visible .sort-indicator .sort-glyph {
             visibility: visible;
         }
 
         @media (hover: hover) {
+            .sortable-column:hover .sort-indicator {
+                flex-basis: 20px;
+                width: 20px;
+                overflow: visible;
+            }
+
+            .sortable-column:hover .sort-indicator--sorted {
+                color: var(--colors-gama-400);
+            }
+
             .sortable-column:hover .sort-indicator .sort-glyph {
                 visibility: visible;
             }
