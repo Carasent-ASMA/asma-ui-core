@@ -1,4 +1,4 @@
-import { useId, useState, type KeyboardEvent, type ReactNode } from 'react'
+import { useId, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { ChevronDownIcon } from 'src/components/icons/chevron-down-icon'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { getPickerText } from 'src/components/inputs/full-screen-picker/pickerCopy'
@@ -204,6 +204,8 @@ const Dropdown = ({
     const questionId = useId()
     // The text typed to search the list; `null` while the field shows the answer.
     const [search, setSearch] = useState<string | null>(null)
+    // Typing into a field that shows the answer starts a new search, so the answer is selected on focus.
+    const selectOnClickRef = useRef(false)
     const selected = options.find((option) => option.value === value) ?? null
     const selectedName = selected ? optionName(selected, options.indexOf(selected) + 1, text) : ''
     const showSelectedEmoji = search === null && selected !== null && (selected.label !== '' || !selected.emoji)
@@ -254,6 +256,16 @@ const Dropdown = ({
                         {...params}
                         dataTest={`${dataTest}-input`}
                         placeholder={placeholder}
+                        onFocus={(event) => {
+                            params.onFocus?.()
+                            event.currentTarget.select()
+                            selectOnClickRef.current = true
+                        }}
+                        // The mouse-up of the focusing click would put the caret back; select again.
+                        onClick={(event) => {
+                            if (selectOnClickRef.current && event.target instanceof HTMLInputElement) event.target.select()
+                            selectOnClickRef.current = false
+                        }}
                         slotProps={{
                             htmlInput: { ...params.slotProps.htmlInput, 'aria-labelledby': labelledBy ?? questionId },
                             input: {

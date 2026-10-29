@@ -233,6 +233,17 @@ describe('StyledEmojiChoice dropdown', () => {
         await expect(fieldEmoji()).toBe('😊')
     })
 
+    it('replaces the answer text with what is typed after clicking into the field', async () => {
+        const { container } = mount(<Fixture options={SIX} value='own' />)
+        const combobox = container.querySelector<HTMLInputElement>('[role="combobox"]')!
+
+        await userEvent.click(combobox)
+        await userEvent.keyboard('great')
+
+        await expect(combobox.value).toBe('great')
+        await waitFor(async () => expect(document.querySelectorAll('[role="listbox"] [role="option"]')).toHaveLength(1))
+    })
+
     it('opens a listbox of the same cards, the field value selected, 2 cards and part of a third in view', async () => {
         const { container } = mount(<Fixture options={SIX} value='some' />)
 
