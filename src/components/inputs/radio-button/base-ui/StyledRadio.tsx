@@ -54,7 +54,8 @@ export const StyledRadio = forwardRef<HTMLInputElement, StyledRadioProps>(
 
         const wrapperClasses = cn(
             styles['RadioWrapper'],
-            styles['RadioHover'],
+            // The widget around a decorative radio draws its own hover.
+            !decorative && styles['RadioHover'],
             size === 'small' && styles['size-small'],
             className,
             error && styles['Error'],
