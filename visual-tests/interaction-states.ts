@@ -239,6 +239,12 @@ export const INTERACTION_CAPTURES: InteractionCapture[] = [
             await page.getByRole('combobox').click()
             await page.getByRole('listbox').waitFor({ state: 'visible' })
             await page.mouse.move(1, 1)
+            // The list scrolls the chosen card into view on the next frame.
+            await page.waitForFunction(() => {
+                const list = document.querySelector('[role="listbox"]')?.getBoundingClientRect()
+                const chosen = document.querySelector('[role="listbox"] [aria-selected="true"]')?.getBoundingClientRect()
+                return list && chosen && chosen.bottom <= list.bottom + 1
+            })
         },
     },
     pickerCapture('inputs-styled-emoji-choice--dropdown', openPicker(PHONE)),
