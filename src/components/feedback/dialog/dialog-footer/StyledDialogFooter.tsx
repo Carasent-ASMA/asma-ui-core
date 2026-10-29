@@ -166,8 +166,8 @@ export function StyledDialogFooter({
      * and never collapse, so whatever it takes is simply unavailable to the left cluster. */
     const rightClusterWidth = widths[KEY_RIGHT_CLUSTER] ?? 0
     const hasRightCluster = secondaryAction != null || primaryAction != null
-    /* Narrower than a phone the right cluster wraps onto its own line when it does not fit beside
-     * the left one (`max-xs:` classes below), so the left cluster has the whole line. */
+    /* Narrower than a phone the right-hand buttons wrap one by one after the left cluster (`max-xs:`
+     * classes below), so the left cluster is planned against the whole line. */
     const belowXs = useMaxXsMediaQuery()
     const leftAvailableWidth = Math.max(
         0,
@@ -265,10 +265,11 @@ export function StyledDialogFooter({
                  * the footer's own `p-4`, a 100% width overflows the parent wherever box-sizing is
                  * content-box — which also perturbs the width the action planner measures. */
                 'flex items-center justify-end self-stretch border-0 border-t border-solid border-delta-200 bg-white',
-                // Narrower than a phone: the clusters and the right-hand buttons wrap instead of pushing
-                // the secondary button off the left edge (`justify-end` + nowrap); on its own line the
-                // left cluster stays at the left edge.
-                'max-xs:flex-wrap max-xs:justify-between max-xs:gap-y-2',
+                // Narrower than a phone: the left cluster and each right-hand button wrap one by one instead
+                // of pushing the secondary button off the left edge (`justify-end` + nowrap) — the right
+                // cluster dissolves into this row (`contents`), so e.g. Delete stays beside Cancel when they
+                // fit. The left cluster keeps to the left edge (`mr-auto`), the buttons to the right.
+                'max-xs:flex-wrap max-xs:gap-y-2',
                 compact ? 'gap-2 p-2' : 'gap-4 p-4',
                 rounded && 'rounded-b-lg',
                 /* Pinned to the bottom of the scroll container. The ASMA design system separates a
@@ -279,7 +280,7 @@ export function StyledDialogFooter({
         >
             {/* Narrower than a phone: the left cluster may shrink to the line, so a leading checkbox label
              * wraps instead of being pushed off the left edge. */}
-            <div className='flex shrink-0 flex-nowrap items-center gap-2 max-xs:min-w-0 max-xs:shrink'>
+            <div className='flex shrink-0 flex-nowrap items-center gap-2 max-xs:mr-auto max-xs:min-w-0 max-xs:shrink'>
                 {leadingSlot ?? (
                     <>
                         {plan.inlineActions.map(({ action, showLabel }) => (
@@ -349,16 +350,15 @@ export function StyledDialogFooter({
                 <span
                     className={cn(
                         'flex min-w-px flex-1 flex-nowrap items-center justify-end',
-                        // Narrower than a phone: when the buttons do not fit beside the left cluster, the
-                        // whole right cluster wraps onto its own line rather than squeezing their labels.
-                        'max-xs:min-w-fit max-xs:flex-wrap max-xs:gap-y-2',
+                        // Narrower than a phone the cluster dissolves into the footer row (see above).
+                        'max-xs:contents',
                     )}
                 >
                     <span
                         ref={register(KEY_RIGHT_CLUSTER)}
                         className={cn(
                             'flex shrink-0 flex-nowrap items-center gap-2',
-                            'max-xs:max-w-full max-xs:shrink max-xs:flex-wrap max-xs:justify-end',
+                            'max-xs:contents',
                         )}
                     >
                         {secondaryAction && renderButton(secondaryAction, 'outlined', 'secondary')}

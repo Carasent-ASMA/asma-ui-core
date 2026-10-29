@@ -205,9 +205,11 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
                 </div>
             )}
 
-            {/* Figma node 38285-181679: the input and the 40px calendar button, 4px apart, fill the step. */}
-            <div className='flex items-start gap-1'>
-                <div className='min-w-0 flex-1'>
+            {/* Figma node 38285-181679: the input and the 40px calendar button, 4px apart, fill the step.
+                Narrower than a phone the input never gets narrower than a whole date, and the calendar button
+                wraps below it when they do not fit side by side. */}
+            <div className='flex items-start gap-1 max-xs:flex-wrap max-xs:gap-y-1'>
+                <div className='min-w-0 flex-1 max-xs:min-w-min'>
                     <div className='relative'>
                         <StyledInputField
                             {...rest}
@@ -252,6 +254,9 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
                                         ? {}
                                         : { inputMode: 'numeric' as const, style: { fontFamily: DATE_INPUT_FONT_FAMILY } }),
                                 },
+                                // Narrower than a phone: room for the whole dd/mm/yyyy in the monospace font (`ch`
+                                // is that font's digit), with a smaller inset so it still fits a 160px screen.
+                                input: readOnly ? undefined : { className: 'max-xs:min-w-[calc(10ch+1rem)] max-xs:px-2' },
                             }}
                             onChange={onChange}
                         />

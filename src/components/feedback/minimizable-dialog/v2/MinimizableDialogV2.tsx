@@ -250,13 +250,15 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
             >
                 <OverlayBackOwnerContext.Provider value={modalRef}>
                 <div className={cn('flex flex-col border-b-[1px] border-delta-200 px-4', isMobile ? 'py-3' : 'py-4')}>
-                    {/* Narrower than a phone: the window buttons go on top (right-aligned), the label or title
-                        below them at full width, instead of the buttons covering it. DOM order, and so
-                        reading and Tab order, stays the same. */}
+                    {/* Narrower than a phone the row wraps in reverse, so the window buttons only take a row of
+                        their own (above, right-aligned) when nothing fits beside them: the label stays beside
+                        them when it fits whole; without a label the title stays beside them as on wider
+                        screens, wrapping its words there, and moves below only when its longest word does not
+                        fit. DOM order, and so reading and Tab order, stays the same. */}
                     <div
                         className={cn(
                             'flex items-center justify-between',
-                            'max-xs:flex-col-reverse max-xs:items-stretch max-xs:gap-2',
+                            'max-xs:flex-wrap-reverse max-xs:gap-x-2 max-xs:gap-y-2',
                         )}
                     >
                         {!label ? (
@@ -265,8 +267,11 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                                 className={cn(
                                     'font-semibold text-delta-800',
                                     isMobile ? 'line-clamp-2 text-xl' : 'line-clamp-1 text-2xl',
-                                    'max-xs:line-clamp-none',
-                                    'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:![overflow-wrap:anywhere]',
+                                    'max-xs:line-clamp-none max-xs:hyphens-auto max-xs:whitespace-normal',
+                                    // Beside the buttons, wrapping there, and on a row of its own only when its longest
+                                    // word does not fit (`min-content` basis; `break-words`, not `anywhere`, keeps that a
+                                    // whole word), never under 5rem.
+                                    'max-xs:block max-xs:min-w-[min(100%,5rem)] max-xs:grow max-xs:basis-[min-content] max-xs:break-words',
                                 )}
                             >
                                 {title}
@@ -274,13 +279,15 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                         ) : (
                             <div
                                 id={labelId}
-                                className='text-sm text-delta-700 max-xs:hyphens-auto max-xs:![overflow-wrap:anywhere]'
+                                className='text-sm text-delta-700 max-xs:min-w-0 max-xs:flex-auto max-xs:hyphens-auto max-xs:![overflow-wrap:anywhere]'
                             >
                                 {label}
                             </div>
                         )}
 
-                        <div className='flex items-center gap-x-1 max-xs:flex-wrap max-xs:justify-end max-xs:gap-y-2'>
+                        {/* Narrower than a phone the buttons keep to the top of a wrapped title's row: with the rows
+                            running bottom-up (`wrap-reverse`), the top is `end`. */}
+                        <div className='flex items-center gap-x-1 max-xs:ml-auto max-xs:flex-wrap max-xs:justify-end max-xs:gap-y-2 max-xs:self-end'>
                             <DialogBusyContext.Provider value={contextValue}>{actionNode}</DialogBusyContext.Provider>
                             {/* Minimize is offered in fullscreen too. Taking it away there left the
                                 header's learned triad a control short, and a dialog the user had sent
