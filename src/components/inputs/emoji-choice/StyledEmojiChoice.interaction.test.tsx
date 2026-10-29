@@ -343,3 +343,104 @@ describe('StyledEmojiChoice on a phone', () => {
         await expect(dialog.querySelectorAll('[role="option"]')).toHaveLength(6)
     })
 })
+
+describe('StyledEmojiChoice edge cases', () => {
+    afterEach(cleanup)
+
+    const many = (count: number, label = (n: number) => `Option text ${n}`): EmojiChoiceOption[] =>
+        Array.from({ length: count }, (_, i) => ({ value: `v${i + 1}`, emoji: '😀', label: label(i + 1) }))
+
+    it('keeps 1 and 5 options as a radio list and turns 6 into a dropdown', async () => {
+        for (const [count, radios] of [[1, 1], [5, 5], [6, 0]] as const) {
+            const { container } = mount(<Fixture options={many(count)} />)
+            await expect(container.querySelectorAll('input[type="radio"]')).toHaveLength(radios)
+            await expect(container.querySelectorAll('[role="combobox"]')).toHaveLength(radios ? 0 : 1)
+            cleanup()
+        }
+    })
+
+    it('renders no options without breaking, and no "Show all options" when there is nothing to show', async () => {
+        const { container } = mount(<Fixture options={[]} />)
+        await expect(container.querySelector('fieldset')).toHaveAccessibleName(QUESTION)
+        cleanup()
+
+        const readOnly = mount(<Fixture options={[]} readOnly />)
+        await expect(readOnly.container.querySelector('dd')).toHaveTextContent('No answer')
+        await expect(readOnly.container.querySelector('button[aria-expanded]')).toBeNull()
+    })
+
+    it('shows "No answer" for a value that is not one of the options', async () => {
+        const { container } = mount(<Fixture readOnly value='removed-option' />)
+
+        await expect(container.querySelector('dd')).toHaveTextContent('No answer')
+    })
+
+    it('follows a value changed from outside', async () => {
+        const options = many(3)
+        const { container, rerender } = mount(
+            <StyledEmojiChoice dataTest='emoji' question={QUESTION} options={options} value='v1' />,
+        )
+        await expect(radios(container)[0]).toBeChecked()
+
+        rerender(<StyledEmojiChoice dataTest='emoji' question={QUESTION} options={options} value='v3' />)
+        await expect(radios(container)[2]).toBeChecked()
+        await expect(radios(container)[0]).not.toBeChecked()
+    })
+
+    it('wraps a long word without a space instead of scrolling sideways', async () => {
+        const options = [{ value: 'url', emoji: '🔗', label: 'https://example.com/'.padEnd(160, 'a') }]
+        const { container } = mount(<Fixture options={options} width={320} />)
+        const card = cards(container)[0]!
+
+        await expect(card.scrollWidth).toBeLessThanOrEqual(card.clientWidth)
+    })
+
+    it('scrolls a long dropdown, filters it by typing and says so in Norwegian when nothing matches', async () => {
+        const { container } = mount(<Fixture options={many(12)} locale='no' />)
+        const combobox = container.querySelector<HTMLInputElement>('[role="combobox"]')!
+
+        await userEvent.click(combobox)
+        const listbox = await waitFor(() => document.querySelector<HTMLElement>('[role="listbox"]')!)
+        await expect(listbox.querySelectorAll('[role="option"]')).toHaveLength(12)
+        await expect(listbox.scrollHeight).toBeGreaterThan(listbox.clientHeight)
+
+        await userEvent.type(combobox, 'text 1')
+        await waitFor(async () => expect(listbox.querySelectorAll('[role="option"]')).toHaveLength(4))
+
+        await userEvent.type(combobox, 'zzz')
+        await waitFor(async () => expect(listbox).toHaveTextContent('Ingen treff'))
+    })
+
+    it('names an uploaded image without text by its position, in Norwegian too', async () => {
+        const options = [
+            { value: 'a', label: '', emojiImageSrc: 'data:image/gif;base64,R0lGODlhAQABAAAAACw=' },
+            { value: 'b', label: '', emojiImageSrc: 'data:image/gif;base64,R0lGODlhAQABAAAAACw=' },
+        ]
+        const { container } = mount(<Fixture options={options} locale='no' />)
+
+        await expect(radios(container)[1]).toHaveAccessibleName('Alternativ 2')
+    })
+
+    it('links the error text to the dropdown', async () => {
+        const { container } = mount(<Fixture options={many(6)} error helperText='Velg et svar' />)
+
+        await expect(container).toHaveTextContent('Velg et svar')
+        await expect(container.querySelector('[role="combobox"]')).toHaveAttribute('aria-invalid', 'true')
+    })
+
+    it('keeps the read-only answer and the expanded list in step with the options order', async () => {
+        const { container } = mount(<Fixture readOnly options={many(4)} value='v3' />)
+
+        await userEvent.click(container.querySelector('button[aria-expanded]')!)
+        const items = [...container.querySelectorAll('ul > li')]
+        await expect(items.map((item) => item.textContent?.replace(', selected', ''))).toEqual([
+            '😀Option text 1',
+            '😀Option text 2',
+            '😀Option text 3',
+            '😀Option text 4',
+        ])
+        await expect(items[2]).toHaveTextContent('selected')
+        await expect(items.filter((item) => item.textContent?.includes('selected'))).toHaveLength(1)
+    })
+})
+
