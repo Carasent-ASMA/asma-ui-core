@@ -249,9 +249,11 @@ const Dropdown = ({
                             htmlInput: { ...params.slotProps.htmlInput, 'aria-labelledby': labelledBy ?? questionId },
                             input: {
                                 ...params.slotProps.input,
-                                startAdornment: selected ? (
-                                    <EmojiGlyph option={selected} className={styles['fieldEmoji']} />
-                                ) : undefined,
+                                // Without text the field value already is the emoji character.
+                                startAdornment:
+                                    selected && (selected.label || !selected.emoji) ? (
+                                        <EmojiGlyph option={selected} className={styles['fieldEmoji']} />
+                                    ) : undefined,
                             },
                         }}
                     />
