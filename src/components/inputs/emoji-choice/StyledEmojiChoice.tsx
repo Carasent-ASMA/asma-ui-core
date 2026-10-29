@@ -1,6 +1,7 @@
 import { useId, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { ChevronDownIcon } from 'src/components/icons/chevron-down-icon'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
+import { getPickerText } from 'src/components/inputs/full-screen-picker/pickerCopy'
 import { StyledInputField } from 'src/components/inputs/input-field'
 import { StyledRadio } from 'src/components/inputs/radio-button'
 import { StyledSelectAutocomplete } from 'src/components/inputs/select-autocomplete'
@@ -225,6 +226,7 @@ const Dropdown = ({
                 helperText={helperText}
                 pickerTitle={question}
                 locale={locale}
+                noOptionsText={getPickerText(locale ?? 'en').noMatches}
                 // Figma Menus is 340px tall, its 8px padding and 1px border included.
                 maxListHeight={322}
                 slotProps={{ popper: { className: styles['menu'] } }}
@@ -291,19 +293,23 @@ const ReadOnlyAnswer = ({
                     ) : (
                         <span className={styles['noAnswer']}>{text.noAnswer}</span>
                     )}
-                    <StyledButton
-                        dataTest={`${dataTest}-show-all`}
-                        variant='text'
-                        type='button'
-                        className={styles['showAll']}
-                        aria-expanded={expanded}
-                        aria-controls={listId}
-                        aria-labelledby={`${toggleTextId} ${questionId}`}
-                        endIcon={<ChevronDownIcon width={24} height={24} className={cn(expanded && 'flip-180')} />}
-                        onClick={() => setExpanded(!expanded)}
-                    >
-                        <span id={toggleTextId}>{expanded ? text.hideOptions : text.showAllOptions(options.length)}</span>
-                    </StyledButton>
+                    {options.length > 0 && (
+                        <StyledButton
+                            dataTest={`${dataTest}-show-all`}
+                            variant='text'
+                            type='button'
+                            className={styles['showAll']}
+                            aria-expanded={expanded}
+                            aria-controls={listId}
+                            aria-labelledby={`${toggleTextId} ${questionId}`}
+                            endIcon={<ChevronDownIcon width={24} height={24} className={cn(expanded && 'flip-180')} />}
+                            onClick={() => setExpanded(!expanded)}
+                        >
+                            <span id={toggleTextId}>
+                                {expanded ? text.hideOptions : text.showAllOptions(options.length)}
+                            </span>
+                        </StyledButton>
+                    )}
                 </div>
                 <ul id={listId} hidden={!expanded} className={styles['options']}>
                     {options.map((option, index) => (
