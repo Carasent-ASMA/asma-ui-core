@@ -202,7 +202,11 @@ const Dropdown = ({
     text,
 }: ModeProps): JSX.Element => {
     const questionId = useId()
+    // The text typed to search the list; `null` while the field shows the answer.
+    const [search, setSearch] = useState<string | null>(null)
     const selected = options.find((option) => option.value === value) ?? null
+    const selectedName = selected ? optionName(selected, options.indexOf(selected) + 1, text) : ''
+    const showSelectedEmoji = search === null && selected !== null && (selected.label !== '' || !selected.emoji)
 
     return (
         <div className={cn(styles['dropdown'], className)}>
@@ -221,6 +225,9 @@ const Dropdown = ({
                 getOptionLabel={(option) => optionName(option, options.indexOf(option) + 1, text)}
                 getOptionKey={(option) => option.value}
                 isOptionEqualToValue={(option, current) => option.value === current.value}
+                inputValue={search ?? selectedName}
+                onInputChange={(_event, next, reason) => setSearch(reason === 'input' ? next : null)}
+                onClose={() => setSearch(null)}
                 disableClearable
                 error={error}
                 helperText={helperText}
@@ -253,7 +260,7 @@ const Dropdown = ({
                                 ...params.slotProps.input,
                                 // Without text the field value already is the emoji character.
                                 startAdornment:
-                                    selected && (selected.label || !selected.emoji) ? (
+                                    selected && showSelectedEmoji ? (
                                         <EmojiGlyph option={selected} className={styles['fieldEmoji']} />
                                     ) : undefined,
                             },

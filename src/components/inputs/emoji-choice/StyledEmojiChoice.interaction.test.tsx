@@ -211,6 +211,28 @@ describe('StyledEmojiChoice dropdown', () => {
         await expect(field.closest('[data-field-width]')!.textContent).not.toContain('😊')
     })
 
+    it('hides the answer emoji while searching and shows the answer again when left without a choice', async () => {
+        const { container } = mount(<Fixture options={SIX} value='own' />)
+        const combobox = container.querySelector<HTMLInputElement>('[role="combobox"]')!
+        const fieldEmoji = (): string | undefined =>
+            combobox.closest('[data-field-width]')!.querySelector('[aria-hidden="true"]')?.textContent ?? undefined
+
+        await expect(fieldEmoji()).toBe('😊')
+        await userEvent.clear(combobox)
+        await userEvent.type(combobox, 'great')
+        await expect(combobox.value).toBe('great')
+        await expect(fieldEmoji()).not.toBe('😊')
+
+        await userEvent.keyboard('{Escape}')
+        await expect(combobox.value).toBe('I managed on my own')
+        await expect(fieldEmoji()).toBe('😊')
+
+        await userEvent.type(combobox, 'xyz')
+        await userEvent.tab()
+        await expect(combobox.value).toBe('I managed on my own')
+        await expect(fieldEmoji()).toBe('😊')
+    })
+
     it('opens a listbox of the same cards, the field value selected, 2 cards and part of a third in view', async () => {
         const { container } = mount(<Fixture options={SIX} value='some' />)
 
