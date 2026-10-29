@@ -202,6 +202,15 @@ describe('StyledEmojiChoice dropdown', () => {
         await expect(container.querySelector('[aria-hidden="true"]')).toHaveTextContent('😊')
     })
 
+    it('shows the emoji of an option without text once in the field', async () => {
+        const options = SIX.map((option) => ({ ...option, label: '' }))
+        const { container } = mount(<Fixture options={options} value='own' />)
+        const field = container.querySelector<HTMLInputElement>('[role="combobox"]')!
+
+        await expect(field.value).toBe('😊')
+        await expect(field.closest('[data-field-width]')!.textContent).not.toContain('😊')
+    })
+
     it('opens a listbox of the same cards, the field value selected, 2 cards and part of a third in view', async () => {
         const { container } = mount(<Fixture options={SIX} value='some' />)
 
