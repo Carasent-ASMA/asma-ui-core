@@ -104,6 +104,8 @@ export type StyledButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & 
  * native button pseudo-states + the `disabled` attribute, not a prop.
  * @remarks for icon button add only startIcon prop
  * @remarks for error button no textGray variant
+ * @remarks `type` defaults to `'button'`, not the native `'submit'`. Pass `type='submit'`
+ * explicitly for the button that submits a form.
  *
  * Custom props:
  * @param variant -  'contained' | 'outlined' | 'text' | 'textGray'
@@ -132,6 +134,11 @@ export const StyledButton = ({
     loadingAnnouncement,
     locale = 'en',
     onClick,
+    // The native default is `submit`, so a bare button placed anywhere inside a <form> fires that
+    // form. Almost every button in the fleet is an action that runs its own onClick, and the ones
+    // that really do submit say so (StyledDialogFooter's primaryAction passes `type: 'submit'`),
+    // so `button` is the safe default and an explicit `type` still wins.
+    type = 'button',
     ...otherProps
 }: StyledButtonProps): JSX.Element => {
     // A running save keeps the dialog around it open (no Esc / backdrop / X dismissal).
@@ -164,6 +171,7 @@ export const StyledButton = ({
     const button = (
         <button
             {...otherProps}
+            type={type}
             disabled={Boolean(disabled) && !blocked}
             aria-disabled={blocked ? true : otherProps['aria-disabled']}
             aria-busy={loading ? true : otherProps['aria-busy']}
