@@ -223,6 +223,7 @@ exports[`asma-ui-core public API surface > keeps every runtime export of the pac
   "StyledDialogTitle",
   "StyledDrawer",
   "StyledDynamicSelect",
+  "StyledEmojiChoice",
   "StyledEmptyPage",
   "StyledFieldPair",
   "StyledFilterButton",

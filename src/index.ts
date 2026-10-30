@@ -34,6 +34,7 @@ export * from './components/inputs/switch'
 export * from './components/inputs/radio-button'
 export * from './components/inputs/label'
 export * from './components/inputs/dynamic-select'
+export * from './components/inputs/emoji-choice'
 export * from './components/inputs/phone-field'
 export * from './components/inputs/form-layout'
 

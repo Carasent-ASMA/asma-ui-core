@@ -170,6 +170,8 @@ export interface StyledSelectAutocompleteProps<
     /** @figmaProp popup indicator — defaults to `+` (PlusIconCircle) when multiple, else chevron */
     popupIcon?: ReactNode
     autoHeight?: boolean
+    /** Cap on the attached list's height in px (it still shrinks to the room left in the viewport). Defaults to 320. */
+    maxListHeight?: number
     /** @figmaProp Filled shape — true renders Tag chips + `+` indicator (Figma "multiple select") */
     multiple?: Multiple
     allowSelectAll?: boolean
@@ -249,6 +251,7 @@ export function StyledSelectAutocomplete<
     disableCloseOnSelect,
     popupIcon,
     autoHeight,
+    maxListHeight = 320,
     multiple,
     allowSelectAll,
     selectAllLabel = 'Select all',
@@ -377,7 +380,7 @@ export function StyledSelectAutocomplete<
                 apply({ rects, availableHeight }) {
                     // Match the popup width to the input exactly (not min-width — no wider, no narrower).
                     setPopperWidth(rects.reference.width)
-                    setPopperMaxHeight(autoHeight ? availableHeight - 8 : Math.min(availableHeight - 8, 320))
+                    setPopperMaxHeight(autoHeight ? availableHeight - 8 : Math.min(availableHeight - 8, maxListHeight))
                 },
             }),
         ],

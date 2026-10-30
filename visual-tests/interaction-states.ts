@@ -223,4 +223,37 @@ export const INTERACTION_CAPTURES: InteractionCapture[] = [
             await page.getByRole('button', { name: 'Narrow column', exact: true }).hover()
         },
     },
+    // ASMA-8620 emoji choice: the Figma states a still screenshot cannot show.
+    {
+        storyId: 'inputs-styled-emoji-choice--selected',
+        screenshot: 'inputs-styled-emoji-choice--selected--hover-focus--open.png',
+        act: async (page) => {
+            await page.keyboard.press('Tab')
+            await page.getByText('I managed most of my daily tasks on my own this week').hover()
+        },
+    },
+    {
+        storyId: 'inputs-styled-emoji-choice--dropdown',
+        screenshot: 'inputs-styled-emoji-choice--dropdown--open.png',
+        act: async (page) => {
+            await page.getByRole('combobox').click()
+            await page.getByRole('listbox').waitFor({ state: 'visible' })
+            await page.mouse.move(1, 1)
+            // The list scrolls the chosen card into view on the next frame.
+            await page.waitForFunction(() => {
+                const list = document.querySelector('[role="listbox"]')?.getBoundingClientRect()
+                const chosen = document.querySelector('[role="listbox"] [aria-selected="true"]')?.getBoundingClientRect()
+                return list && chosen && chosen.bottom <= list.bottom + 1
+            })
+        },
+    },
+    pickerCapture('inputs-styled-emoji-choice--dropdown', openPicker(PHONE)),
+    {
+        storyId: 'inputs-styled-emoji-choice--read-only',
+        screenshot: 'inputs-styled-emoji-choice--read-only--open.png',
+        act: async (page) => {
+            await page.getByRole('button', { name: /Show all options/ }).click()
+            await page.mouse.move(1, 1)
+        },
+    },
 ]
