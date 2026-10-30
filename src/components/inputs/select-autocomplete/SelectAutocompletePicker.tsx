@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode, type SyntheticEvent } from 'react'
+import { StyledEmptyPage } from 'src/components/feedback/empty-page/StyledEmptyPage'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { StyledCheckbox } from 'src/components/inputs/checkbox/base-ui/StyledCheckbox'
 import { FullScreenPicker } from 'src/components/inputs/full-screen-picker/FullScreenPicker'
@@ -267,9 +268,13 @@ export function SelectAutocompletePicker<T>({
             )
         }
         if (filtered.length === 0) {
+            const emptyText = query === '' ? noOptionsText : text.noMatches
+            // The full-screen picker shows the Design System empty state, not the attached list's text row;
+            // a node the caller built (often a `StyledEmptyPage` already) renders as given. The row fills the
+            // rest of the sheet, so the empty state sits in its middle.
             return (
-                <li role='presentation' className={emptyRowClassName} data-testid={`${dataTest}-picker-empty`}>
-                    {query === '' ? noOptionsText : text.noMatches}
+                <li role='presentation' data-testid={`${dataTest}-picker-empty`} className='flex grow'>
+                    {typeof emptyText === 'string' ? <StyledEmptyPage emptyText={emptyText} /> : emptyText}
                 </li>
             )
         }
@@ -277,6 +282,7 @@ export function SelectAutocompletePicker<T>({
     }
     // eslint-disable-next-line react-hooks/refs -- per-row ref callbacks feed scrollIntoView
     const listContent = renderListContent()
+    const showsEmptyState = open && !loading && filtered.length === 0
 
     const search = (
         <StyledSearchField
@@ -350,6 +356,8 @@ export function SelectAutocompletePicker<T>({
                 className={cn(
                     // The 16 px side insets come from the `FullScreenPicker` body.
                     'm-0 list-none p-0 [&>li:not(:last-child)]:shadow-[inset_0_-1px_0_var(--colors-delta-200)]',
+                    // Empty: the list fills the picker body's column so its empty state can centre in it.
+                    showsEmptyState && 'flex grow flex-col',
                     activeIndexes.length > 0 && 'outline-none',
                     // Figma picker rows (set on the list, so custom `renderOption` rows follow too; the
                     // *No matches* / loading row keeps its own look): label `text-icon/body` (delta-700),
