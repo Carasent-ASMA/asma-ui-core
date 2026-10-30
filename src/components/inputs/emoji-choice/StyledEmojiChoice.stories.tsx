@@ -74,6 +74,17 @@ export const UploadedImage: Story = {
     },
 }
 
+export const WithoutEmoji: Story = {
+    args: {
+        options: [
+            { value: 'first', label: 'First option without an emoji' },
+            { value: 'second', label: 'Second option without an emoji' },
+            { value: 'third', emoji: '😊', label: 'Third option with an emoji' },
+        ],
+        value: 'first',
+    },
+}
+
 export const Error: Story = { args: { error: true, helperText: 'Choose an answer' } }
 
 export const Dropdown: Story = { args: { options: SIX_OPTIONS, value: 'own' } }
