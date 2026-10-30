@@ -167,6 +167,21 @@ describe('StyledEmojiChoice radio list', () => {
         await expect(cards(container)[1]!.getBoundingClientRect().width).toBeLessThan(200)
     })
 
+    it('leaves no empty emoji slot for an option without an emoji, and keeps the card height', async () => {
+        const options = [
+            { value: 'plain', label: 'Without an emoji' },
+            { value: 'emoji', emoji: '😊', label: 'With an emoji' },
+        ]
+        const { container } = mount(<Fixture options={options} />)
+        const [plain, withEmoji] = cards(container)
+        const text = [...plain!.querySelectorAll<HTMLElement>('span')].findLast((span) => span.textContent === 'Without an emoji')!
+
+        await expect(plain!.querySelectorAll('[aria-hidden="true"]:not([data-checked]):not([data-unchecked])')).toHaveLength(0)
+        // The text block follows the 40px radio right after the 8px padding, inside the 1px border.
+        await expect(text.getBoundingClientRect().left - plain!.getBoundingClientRect().left).toBe(49)
+        await expect(plain!.getBoundingClientRect().height).toBe(withEmoji!.getBoundingClientRect().height)
+    })
+
     it('shows an uploaded emoji image at 88px', async () => {
         const options = [{ value: 'img', label: 'Uploaded', emojiImageSrc: 'data:image/gif;base64,R0lGODlhAQABAAAAACw=' }]
         const { container } = mount(<Fixture options={options} />)

@@ -116,6 +116,15 @@
     width: 100%;
 }
 
+// An option without an emoji keeps the height of one with an emoji, so cards in a list line up.
+.noEmoji {
+    min-height: 100px;
+
+    .readOnlyCard & {
+        min-height: 0;
+    }
+}
+
 .lead {
     display: flex;
     flex-wrap: wrap;

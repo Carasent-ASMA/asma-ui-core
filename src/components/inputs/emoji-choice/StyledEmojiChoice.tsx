@@ -94,21 +94,26 @@ interface RowContentProps {
     radio?: ReactNode
 }
 
-const RowContent = ({ option, position, text, radio }: RowContentProps): JSX.Element => (
-    <span className={styles['content']}>
-        <span className={styles['lead']}>
-            {radio}
-            <span className={styles['emojiSlot']}>
-                <EmojiGlyph option={option} className={styles['emoji']} />
+const RowContent = ({ option, position, text, radio }: RowContentProps): JSX.Element => {
+    const hasEmoji = Boolean(option.emoji) || Boolean(option.emojiImageSrc)
+    return (
+        <span className={cn(styles['content'], !hasEmoji && styles['noEmoji'])}>
+            <span className={styles['lead']}>
+                {radio}
+                {hasEmoji && (
+                    <span className={styles['emojiSlot']}>
+                        <EmojiGlyph option={option} className={styles['emoji']} />
+                    </span>
+                )}
             </span>
+            {option.label ? (
+                <span className={styles['text']}>{option.label}</span>
+            ) : (
+                <span className='sr-only'>{optionName(option, position, text)}</span>
+            )}
         </span>
-        {option.label ? (
-            <span className={styles['text']}>{option.label}</span>
-        ) : (
-            <span className='sr-only'>{optionName(option, position, text)}</span>
-        )}
-    </span>
-)
+    )
+}
 
 // Enter would submit the surrounding form; it chooses the option instead, as on StyledRadio.
 const chooseOnEnter = (event: KeyboardEvent<HTMLInputElement>): void => {
