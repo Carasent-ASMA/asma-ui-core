@@ -100,12 +100,12 @@ describe('StyledTimePicker keyboard contract', () => {
 
         await waitFor(() => expect(input).toHaveValue('09'))
         await expect(input).not.toHaveAttribute('aria-invalid')
-        await expect(container).not.toHaveTextContent('Invalid time format')
+        await expect(container).not.toHaveTextContent('Enter a valid time in HH:mm format.')
 
         input.blur()
 
         await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
-        await expect(container).toHaveTextContent('Invalid time format')
+        await expect(container).toHaveTextContent('Enter a valid time in HH:mm format.')
         await expect(onSelect).not.toHaveBeenCalled()
     })
 
@@ -352,7 +352,7 @@ describe('StyledTimePicker minTime', () => {
         input.blur()
 
         await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
-        await expect(container).toHaveTextContent('Must be after start time')
+        await expect(container).toHaveTextContent('Select a time after start time.')
     })
 
     it('uncommits a field emptied by typing on blur, without an error', async () => {
@@ -387,7 +387,7 @@ describe('StyledTimePicker minTime', () => {
 
         await waitFor(() => expect(input).toHaveValue('11:00'))
         await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
-        await expect(container).toHaveTextContent('Must be after start time')
+        await expect(container).toHaveTextContent('Select a time after start time.')
     })
 
     it('names the field by its title, or by inputAriaProps for a label rendered outside (1.3.1, 4.1.2)', async () => {
@@ -464,7 +464,7 @@ describe('StyledTimePicker required', () => {
 
         await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
         await expect(container).toHaveTextContent('Required')
-        await expect(container).not.toHaveTextContent('Invalid time format')
+        await expect(container).not.toHaveTextContent('Enter a valid time in HH:mm format.')
     })
 
     it('uncommits an emptied field and shows Required on blur', async () => {
@@ -493,7 +493,7 @@ describe('StyledTimePicker required', () => {
 
         await waitFor(() => expect(input).not.toHaveAttribute('aria-invalid'))
         await expect(container).not.toHaveTextContent('Required')
-        await expect(container).not.toHaveTextContent('Invalid time format')
+        await expect(container).not.toHaveTextContent('Enter a valid time in HH:mm format.')
     })
 
     it('shows Required after the eraser empties the field', async () => {
@@ -555,7 +555,7 @@ describe('StyledTimePicker required', () => {
         await waitFor(() => expect(input).toHaveValue('11:00'))
         input.blur()
 
-        await waitFor(() => expect(container).toHaveTextContent('Must be after start time'))
+        await waitFor(() => expect(container).toHaveTextContent('Select a time after start time.'))
         await expect(container).not.toHaveTextContent('Required')
     })
 
