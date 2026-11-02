@@ -24,8 +24,10 @@ import { useDebouncedValue } from 'src/hooks/useDebouncedValue.hook'
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
 import { useShortViewportMediaQuery } from 'src/hooks/useMediaQuery.hook'
 import { registerOpenModalDialog } from 'src/hooks/useTopLayer.hook'
+import type { UiCoreLocale } from 'src/helpers/uiCoreLocale'
 import type { PopoverContentApi, PopoverSlot } from '../popover/PopoverSheet'
 import { formatResultsLabel } from './formatResultsLabel'
+import { SHEET_TEXT } from './sheetCopy'
 import style from './StyledBottomSheet.module.scss'
 import { useDragToDismiss } from './useDragToDismiss.hook'
 
@@ -70,8 +72,10 @@ export interface StyledBottomSheetProps {
      * @figmaProp none — behavioral
      */
     resultCount?: number | null
-    /** @figmaProp none — a11y: accessible name of the close control */
+    /** @figmaProp none — a11y: accessible name of the close control; defaults to "Close" in `locale` */
     closeLabel?: string
+    /** Language of the default result and close labels; defaults to English. */
+    locale?: UiCoreLocale
     /** @figmaProp none — style escape hatch, applied to the sheet container */
     className?: string
     /** Set `false` when a wrapper already owns the Back-close registration. */
@@ -106,7 +110,8 @@ export const StyledBottomSheet = ({
     resetAction,
     footerActions,
     resultCount,
-    closeLabel = 'Lukk',
+    locale = 'en',
+    closeLabel = SHEET_TEXT[locale].close,
     className,
     registerBackClose = true,
     ownerRef,
@@ -218,7 +223,7 @@ export const StyledBottomSheet = ({
     }, [open])
 
     const displayedCount = useDebouncedValue(resultCount, RESULT_COUNT_DEBOUNCE_MS)
-    const resultsLabel = formatResultsLabel(displayedCount)
+    const resultsLabel = formatResultsLabel(displayedCount, locale)
 
     if (!open) return null
 

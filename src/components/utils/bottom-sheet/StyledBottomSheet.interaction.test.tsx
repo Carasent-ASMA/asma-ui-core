@@ -37,6 +37,7 @@ const FilterFixture = (props: FixtureProps): JSX.Element => {
             variant='action'
             title='Filtrer søknader'
             resultCount={count}
+            locale='no'
             renderTrigger={({ ref, triggerProps }) => (
                 <StyledButton dataTest='sheet-trigger' refLink={ref} type='button' {...triggerProps}>
                     Filter
@@ -364,6 +365,17 @@ describe('StyledBottomSheet — as the mobile Action popover', () => {
 
         await userEvent.click(byTestId('huge'))
         await waitFor(() => expect(button).toHaveTextContent('Vis resultater (9999+)'), { timeout: 1500 })
+    })
+
+    it('reads the result and close labels in English when locale is en', async () => {
+        mount(<FilterFixture locale='en' />)
+        await openSheet()
+        const button = byTestId('sheet-view-results')
+        await expect(button).toHaveTextContent('Show results (248)')
+        await expect(byTestId('sheet-close')).toHaveAccessibleName('Close')
+
+        await userEvent.click(byTestId('empty'))
+        await waitFor(() => expect(button).toHaveTextContent('No matches'), { timeout: 1500 })
     })
 
     it('does not respond to arrow keys — a dialog, not a menu', async () => {

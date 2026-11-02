@@ -19,7 +19,9 @@ import { OverlayBackOwnerContext, requestCloseTopOverlayBack, useBackCloses } fr
 import { useDebouncedValue } from 'src/hooks/useDebouncedValue.hook'
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
 import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
+import type { UiCoreLocale } from 'src/helpers/uiCoreLocale'
 import { formatResultsLabel } from '../bottom-sheet/formatResultsLabel'
+import { SHEET_TEXT } from '../bottom-sheet/sheetCopy'
 import { StyledBottomSheet } from '../bottom-sheet/StyledBottomSheet'
 import { PopoverAnatomy, POPOVER_SURFACE_CLASSNAME } from './PopoverAnatomy'
 import {
@@ -92,8 +94,10 @@ export interface PopoverSheetProps {
      * @figmaProp none — behavioral
      */
     resultCount?: number | null
-    /** @figmaProp none — a11y: accessible name of the close control */
+    /** @figmaProp none — a11y: accessible name of the close control; defaults to "Close" in `locale` */
     closeLabel?: string
+    /** Language of the default result and close labels; defaults to English. */
+    locale?: UiCoreLocale
     /** @figmaProp none — a11y: required when `variant='action'` and no `title` is given, so the dialog has a name */
     ariaLabel?: string
     /** @figmaProp none — behavioral */
@@ -148,7 +152,8 @@ export const PopoverSheet = ({
     resetAction,
     footerActions,
     resultCount,
-    closeLabel = 'Lukk',
+    locale = 'en',
+    closeLabel = SHEET_TEXT[locale].close,
     ariaLabel,
     onOpenChange,
     className,
@@ -437,7 +442,7 @@ export const PopoverSheet = ({
         viewResultsAction ??
         (resultCount === undefined ? undefined : (
             <StyledButton dataTest={`${dataTest}-view-results`} type='button' variant='text' onClick={close}>
-                {formatResultsLabel(displayedCount)}
+                {formatResultsLabel(displayedCount, locale)}
             </StyledButton>
         ))
 
@@ -469,6 +474,7 @@ export const PopoverSheet = ({
                     resetAction={resetAction}
                     footerActions={footerActions}
                     resultCount={resultCount}
+                    locale={locale}
                     closeLabel={closeLabel}
                     className={className}
                 >
