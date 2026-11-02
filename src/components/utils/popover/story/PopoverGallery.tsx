@@ -60,7 +60,7 @@ const GallerySurface = ({
     children: ReactNode
     className?: string
 }): JSX.Element => (
-    <div className={cn(POPOVER_SURFACE_CLASSNAME, className)} style={{ width }}>
+    <div className={cn('relative', POPOVER_SURFACE_CLASSNAME, className)} style={{ width }}>
         <PopoverAnatomy
             dataTest={id}
             title={withTitle ? 'Title' : undefined}

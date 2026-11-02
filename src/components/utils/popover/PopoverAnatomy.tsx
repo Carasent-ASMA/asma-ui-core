@@ -22,7 +22,10 @@ const CLOSE_COLUMN_WIDTH = 40
  * The ring is not on this surface itself: an element's own inset shadow paints beneath its
  * children, so the Close button's hover fill in the top-right corner covered it. `PopoverAnatomy`
  * draws it as its last, absolutely positioned layer (`SURFACE_EDGE_CLASSNAME`), above the content.
- * `relative` makes the surface that layer's containing block where no floating position is set.
+ * The surface carries no `position` class: utilities here ship `!important`, so `relative` beat
+ * Floating UI's inline `position: fixed`. Inside a modal `<dialog>` (no top layer to rescue it) the
+ * sheet then rendered off-screen and focusing it scrolled the dialog sideways. The caller's
+ * position (the sheet's inline `fixed`, the Gallery's `relative`) is that layer's containing block.
  *
  * `box-border` is load-bearing, not noise: this package builds Tailwind with `preflight: false`, so
  * without it `box-sizing` falls back to `content-box` and a 472px max-width renders 474.
@@ -31,7 +34,7 @@ const CLOSE_COLUMN_WIDTH = 40
  * caller, so the Gallery story can render the same surface statically in a grid.
  */
 export const POPOVER_SURFACE_CLASSNAME =
-    'relative box-border flex flex-col overflow-hidden rounded-lg bg-white text-delta-700 outline-none shadow-[0px_4px_40px_0px_#22213366]'
+    'box-border flex flex-col overflow-hidden rounded-lg bg-white text-delta-700 outline-none shadow-[0px_4px_40px_0px_#22213366]'
 
 const SURFACE_EDGE_CLASSNAME =
     'pointer-events-none absolute inset-0 rounded-[inherit] shadow-[inset_0_0_0_1px_var(--colors-delta-300)]'
@@ -145,7 +148,7 @@ export const PopoverAnatomy = ({
                 </div>
             )}
             {/* After the footer rows, so Tab reaches it last: body, footer, then Close. Positioned on the
-                surface (`relative`), whose top-right corner is the content column's. */}
+                surface (its caller's position), whose top-right corner is the content column's. */}
             <div className='absolute right-0 top-0'>
                 <StyledButton
                     dataTest={`${dataTest}-close`}
