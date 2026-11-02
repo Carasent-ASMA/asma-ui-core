@@ -34,8 +34,9 @@ export interface StyledWidgetProps {
         hide?: boolean
         disabled?: boolean
         /**
-         * @figmaProp none — behavioral. Why "view more" is unavailable. With `disabled` the button stays
-         * focusable and shows the reason on hover, focus and tap (disabled-states DIS-1…DIS-4).
+         * Read-only helper text shown in place of View more when `disabled` is set and the list is
+         * collapsed (ASMA-8699). Not a control: no click, focus, hover, or tooltip. View less stays
+         * a button so an expanded list can still collapse.
          */
         disabledReason?: ReactNode
     }
@@ -72,6 +73,9 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
 
     const showLink = !!link && !link.hide
     const showViewMore = !!viewMore && !viewMore.hide
+    // `disabled` means nothing further is hidden. Keep View less clickable after an expand whose
+    // caller leaves `disabled` true (pathfinders raise the limit and then report that all fit).
+    const allItemsShown = Boolean(viewMore?.disabled) && !expanded && viewMore?.disabledReason != null
 
     return (
         <div className={`${style['asma-ui-core-styled-widget']} ${isEmpty ? style['empty-state'] : ''}`}>
@@ -103,12 +107,18 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
 
             {showViewMore && (
                 <div className={cn(style['widget-footer'], 'max-xs:flex-wrap max-xs:gap-y-2')}>
-                    {!viewMore.hide ? (
+                    {allItemsShown ? (
+                        <p className={style['widget-all-shown']} data-testid='all-items-shown'>
+                            {viewMore.disabledReason}
+                        </p>
+                    ) : (
                         <StyledButton
-                            disabled={viewMore.disabled}
-                            disabledReason={viewMore.disabledReason}
                             dataTest='view-more'
                             variant='text'
+                            // A reason replaces the button. Without one, a collapsed View more stays
+                            // disabled. View less stays enabled so an expanded list can still collapse.
+                            disabled={Boolean(viewMore.disabled) && !expanded}
+                            disabledReason={expanded ? undefined : viewMore.disabledReason}
                             endIcon={
                                 expanded ? (
                                     <ChevronUpIcon width={20} height={20} />
@@ -126,8 +136,6 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
                         >
                             {expanded ? viewMore.viewLessText : viewMore.viewMoreText}
                         </StyledButton>
-                    ) : (
-                        <div />
                     )}
 
                     {showLink ? (

@@ -46,6 +46,7 @@ export const Widget = (): JSX.Element => {
                         viewLessText: 'View less',
                         viewMoreText: 'View more',
                         disabled: true,
+                        disabledReason: 'All items are shown',
                         hide: false,
                         onClick: () => console.log('Click on viewMore button'),
                     }}
@@ -65,6 +66,7 @@ export const Widget = (): JSX.Element => {
                         viewLessText: 'View less',
                         viewMoreText: 'View more',
                         disabled: true,
+                        disabledReason: 'All items are shown',
                         hide: false,
                         onClick: () => console.log('Click on viewMore button'),
                     }}
@@ -172,7 +174,7 @@ export const FluidWidth = (): JSX.Element => (
     </StyledWidget>
 )
 
-/** "View more" disabled with a reason (disabled-states DIS-1…DIS-4): focusable, reason on hover, focus and tap. */
+/** All items shown (ASMA-8699): helper text in the View more slot. Not a button, not focusable, no tooltip. */
 export const ViewMoreDisabledWithReason = (): JSX.Element => (
     <div className='w-[400px] p-4'>
         <StyledWidget
