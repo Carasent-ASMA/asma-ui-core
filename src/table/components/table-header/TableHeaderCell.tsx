@@ -123,7 +123,8 @@ export function TableHeaderCell<
                 {canSort && (
                     <SortIndicator
                         sorted={sortedDirection}
-                        nextDirection={sortedDirection || header.column.getFirstSortDir()}
+                        firstDirection={header.column.getFirstSortDir()}
+                        nextOrder={header.column.getNextSortingOrder()}
                     />
                 )}
                 {showResizeHandle && (

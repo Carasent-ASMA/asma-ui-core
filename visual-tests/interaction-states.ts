@@ -189,9 +189,10 @@ export const INTERACTION_CAPTURES: InteractionCapture[] = [
     pickerCapture('utils-styled-bottom-sheet--with-searchable-select', openPicker(PHONE)),
     // The country-code picker on the same shell.
     pickerCapture('inputs-phone-field--default', openPicker(PHONE)),
-    // ASMA-8597 sort indicator (AC 15, 16): the states a still screenshot cannot show. A hovered unsorted
-    // column shows the grey glyph, a hovered sorted one keeps its primary glyph, and keyboard focus looks like
-    // hover. There is no square behind the glyph (UX, ASMA-8597 comment 94738).
+    // ASMA-8597 sort indicator (AC 15, 16): the states a still screenshot cannot show. A hovered header previews
+    // the state after the click (UX round 3, 2026-11-02): an unsorted column the grey glyph, an ascending one the
+    // teal descending glyph, a descending one (the next click removes the sort) the grey ascending glyph; keyboard
+    // focus looks like hover. There is no square behind the glyph (UX, ASMA-8597 comment 94738).
     {
         storyId: 'data-display-styledtable--sort-indicator-states',
         screenshot: 'data-display-styledtable--sort-indicator-states--hover-unsorted--open.png',
@@ -208,6 +209,13 @@ export const INTERACTION_CAPTURES: InteractionCapture[] = [
     },
     {
         storyId: 'data-display-styledtable--sort-indicator-states',
+        screenshot: 'data-display-styledtable--sort-indicator-states--hover-removal--open.png',
+        act: async (page) => {
+            await page.getByRole('button', { name: 'Descending', exact: true }).hover()
+        },
+    },
+    {
+        storyId: 'data-display-styledtable--sort-indicator-states',
         screenshot: 'data-display-styledtable--sort-indicator-states--focus--open.png',
         act: async (page) => {
             // A key press first, so the programmatic focus is keyboard focus (:focus-visible).
@@ -215,12 +223,37 @@ export const INTERACTION_CAPTURES: InteractionCapture[] = [
             await page.getByRole('button', { name: 'Unsorted', exact: true }).focus()
         },
     },
-    // ASMA-8597 resize zone (AC 17): hovering a column shows its 4px bar at the right edge of the 24px zone.
+    // ASMA-8597 resize zone (AC 17): hovering a column shows its 4px x 24px bar at the right edge of the 24 x 28px zone;
+    // with the pointer over the zone it is filled gama-50 and the bar is gama-400 (UX round 3, 2026-11-02).
     {
         storyId: 'data-display-styledtable--resize-handle',
         screenshot: 'data-display-styledtable--resize-handle--hover--open.png',
         act: async (page) => {
             await page.getByRole('button', { name: 'Narrow column', exact: true }).hover()
+        },
+    },
+    {
+        storyId: 'data-display-styledtable--resize-handle',
+        screenshot: 'data-display-styledtable--resize-handle--zone-hover--open.png',
+        act: async (page) => {
+            const header = page.getByRole('button', { name: 'Narrow column', exact: true })
+            const box = await header.boundingBox()
+
+            // 12px from the control's right edge, halfway down: over the zone.
+            await header.hover({ position: { x: (box?.width ?? 0) - 12, y: 15 } })
+        },
+    },
+    {
+        storyId: 'data-display-styledtable--resize-handle',
+        screenshot: 'data-display-styledtable--resize-handle--dragging--open.png',
+        act: async (page) => {
+            const header = page.getByRole('button', { name: 'Narrow column', exact: true })
+            const box = await header.boundingBox()
+
+            // Press on the zone and drag a little: the look while the column is being resized.
+            await header.hover({ position: { x: (box?.width ?? 0) - 12, y: 15 } })
+            await page.mouse.down()
+            await page.mouse.move((box?.x ?? 0) + (box?.width ?? 0) + 8, (box?.y ?? 0) + 15, { steps: 4 })
         },
     },
 ]

@@ -716,9 +716,13 @@ const indicatorColumns: ColumnDef<TableRow>[] = [
 
 /**
  * ASMA-8597, AC 15 and 16: the Figma sort indicator. Ascending and descending (a two-column sort) show the
- * primary glyph; an unsorted column shows nothing, and reserves no slot, until it is hovered or focused, then a
- * grey glyph pointing the way the next click sorts; a long unsorted label truncates and gets its 20px slot back
- * only while hovered or focused; an unsortable column shows nothing.
+ * primary glyph at rest; an unsorted column shows nothing, and reserves no slot, until it is hovered or focused;
+ * a long unsorted label truncates and gets its 20px slot back only while hovered or focused; an unsortable column
+ * shows nothing.
+ * While a header is hovered or `:focus-visible` it previews the state after the click (UX round 3, 2026-11-02): an
+ * unsorted column a grey glyph pointing the way the first click sorts; an ascending one a teal descending glyph; a
+ * descending one, whose next click removes the sort, the grey ascending glyph. The colour never changes on a sorted
+ * header's hover.
  * The hover and focus states are captured by the interaction captures in `visual-tests/interaction-states.ts`.
  * Nothing is drawn behind a hovered glyph: UX has no hover square (ASMA-8597, comment 94738).
  */
@@ -745,6 +749,8 @@ export const SortIndicatorStates: Story = {
                 cell.textContent?.startsWith(label),
             )!
         const indicator = (label: string) => header(label).querySelector<HTMLElement>('[data-sort-state]')
+        const glyph = (label: string, which: 'current' | 'preview') =>
+            indicator(label)!.querySelector<SVGElement>(`[class*="sort-glyph--${which}"]`)!
 
         await expect(header('Ascending')).toHaveAttribute('aria-sort', 'ascending')
         await expect(header('Descending')).toHaveAttribute('aria-sort', 'descending')
@@ -752,7 +758,18 @@ export const SortIndicatorStates: Story = {
         await expect(indicator('Ascending')).toHaveAttribute('data-sort-direction', 'asc')
         await expect(indicator('Descending')).toHaveAttribute('data-sort-direction', 'desc')
         await expect(indicator('Unsortable')).toBeNull()
-        await expect(getComputedStyle(indicator('Unsorted')!.querySelector('svg')!).visibility).toBe('hidden')
+        // At rest: a sorted column shows its current glyph; an unsorted one shows nothing.
+        await expect(getComputedStyle(glyph('Ascending', 'current')).visibility).toBe('visible')
+        await expect(getComputedStyle(glyph('Ascending', 'preview')).visibility).toBe('hidden')
+        await expect(getComputedStyle(glyph('Unsorted', 'current')).visibility).toBe('hidden')
+        await expect(getComputedStyle(glyph('Unsorted', 'preview')).visibility).toBe('hidden')
+        // What a hover or keyboard focus will show: the state after the click.
+        await expect(indicator('Ascending')).toHaveAttribute('data-preview-direction', 'desc')
+        await expect(indicator('Ascending')).toHaveAttribute('data-preview-tone', 'primary')
+        await expect(indicator('Descending')).toHaveAttribute('data-preview-direction', 'asc')
+        await expect(indicator('Descending')).toHaveAttribute('data-preview-tone', 'neutral')
+        await expect(indicator('Unsorted')).toHaveAttribute('data-preview-direction', 'asc')
+        await expect(indicator('Unsorted')).toHaveAttribute('data-preview-tone', 'neutral')
     },
 }
 
@@ -763,10 +780,13 @@ const resizeColumns: ColumnDef<TableRow>[] = [
 ]
 
 /**
- * ASMA-8597, AC 17: with resizing on, each handle is a 24px zone at the column's right edge. The header
- * content reserves it, so in a 100px column the glyph ends before the zone and never sits under it (the narrow
- * column is sorted, so its slot shows). The 4px bar stays at the edge (confirmed by UX, OQ-03), is `delta-400`
- * (UX, OQ-10) and shows on hover; the VRT capture hovers the narrow column.
+ * ASMA-8597, AC 17 (Figma "Resize" 46298:231237 and "Handle" 46298:231480): with resizing on, each handle is a
+ * 24 x 28px zone (4px radius) at the column's right edge, centred in the header content. The header content reserves
+ * its 24px width, so in a 100px column the glyph ends before the zone and never sits under it (the narrow column is
+ * sorted, so its slot shows). The bar is 4 x 24px (4px radius), centred in the zone at its right edge (UX, OQ-03),
+ * `delta-400` (UX, OQ-10) while the header is hovered; with the pointer over the zone the zone is filled `gama-50`
+ * and the bar is `gama-400`, and so it is while dragging (UX round 3, 2026-11-02). The VRT captures hover the narrow
+ * column and its zone.
  */
 export const ResizeHandle: Story = {
     render: () => (
@@ -793,7 +813,11 @@ export const ResizeHandle: Story = {
         const glyphBox = glyph.getBoundingClientRect()
 
         await expect(zoneBox.width).toBe(24)
+        await expect(zoneBox.height).toBe(28)
+        await expect(getComputedStyle(zone).borderRadius).toBe('4px')
         await expect(getComputedStyle(zone, '::after').width).toBe('4px')
+        await expect(getComputedStyle(zone, '::after').height).toBe('24px')
+        await expect(getComputedStyle(zone, '::after').borderRadius).toBe('4px')
         // The column is sorted, so its 20px slot shows, and it ends before the zone (the glyph's triangle is
         // centred in it). The glyph's own 28px box overhangs the slot by 4px, which is why the slot is measured.
         await expect(slotBox.width).toBe(20)
