@@ -38,6 +38,7 @@ export const DynamicInteractiveChipGroup = forwardRef(
             clearSelectionLabel,
         } = props
         const helperId = useId()
+        const titleId = useId()
         /*
          * The same slot rule every other input in this library follows, through the same helper:
          * `disableHelperText` stops reserving the row, and a real message or an error still renders
@@ -128,13 +129,19 @@ export const DynamicInteractiveChipGroup = forwardRef(
         })
 
         return (
+            // ARIA 1.1 and axe keep aria-invalid global; REQ-005 puts the chip group's validity on the group.
+            // eslint-disable-next-line jsx-a11y/role-supports-aria-props
             <div
                 data-testid={`${dataTest}-dynamic-radio-group`}
+                role='group'
+                aria-labelledby={title ? titleId : undefined}
+                aria-invalid={error ? true : undefined}
+                aria-describedby={showHelper ? helperId : undefined}
                 className='relative flex flex-col gap-y-1'
                 data-field-width={width}
                 style={fieldWidthStyle(width)}
             >
-                <DynamicSelectTitle title={title} titleSize={titleSize} />
+                <DynamicSelectTitle id={titleId} title={title} titleSize={titleSize} />
                 {/* HACK for calculating overflow layout */}
                 <div
                     aria-hidden
