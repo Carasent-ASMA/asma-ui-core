@@ -46,6 +46,7 @@ export const Widget = (): JSX.Element => {
                         viewLessText: 'View less',
                         viewMoreText: 'View more',
                         disabled: true,
+                        disabledReason: 'All items are shown',
                         hide: false,
                         onClick: () => console.log('Click on viewMore button'),
                     }}
@@ -65,6 +66,7 @@ export const Widget = (): JSX.Element => {
                         viewLessText: 'View less',
                         viewMoreText: 'View more',
                         disabled: true,
+                        disabledReason: 'All items are shown',
                         hide: false,
                         onClick: () => console.log('Click on viewMore button'),
                     }}
