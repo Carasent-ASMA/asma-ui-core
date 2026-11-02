@@ -7,6 +7,7 @@ import { ACTIONS_COLUMN_ID, INTERNAL_COLUMN_IDS, SELECT_COLUMN_ID, type StyledTa
 import { getTableHeaderStyle } from 'src/table/helpers/getTableHeaderStyle'
 import { useRootContext } from 'src/table/context/RootContext'
 import { COMPACT_COLUMN_MAX_WIDTH } from 'src/table/helpers/columnSpacing'
+import { getSortPreview } from 'src/table/helpers/sortPreview'
 
 export function TableHeaderCell<
     TData extends {
@@ -52,6 +53,13 @@ export function TableHeaderCell<
 
     const canSort = header.column.getCanSort()
     const sortedDirection = header.column.getIsSorted()
+    const sorting = header.getContext().table.getState().sorting
+    const sortPreview = getSortPreview({
+        sorted: sortedDirection,
+        firstDirection: header.column.getFirstSortDir(),
+        nextOrder: header.column.getNextSortingOrder(),
+        isLastSortEntry: sorting[sorting.length - 1]?.id === header.column.id,
+    })
     const ariaSort = canSort
         ? sortedDirection === 'asc'
             ? 'ascending'
@@ -124,7 +132,7 @@ export function TableHeaderCell<
                     <SortIndicator
                         sorted={sortedDirection}
                         firstDirection={header.column.getFirstSortDir()}
-                        nextOrder={header.column.getNextSortingOrder()}
+                        preview={sortPreview}
                     />
                 )}
                 {showResizeHandle && (

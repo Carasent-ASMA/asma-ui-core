@@ -405,7 +405,8 @@
     }
 
     // While the column is being resized the zone and the bar look as they do with the pointer over the zone
-    // (owner, 2026-11-02): a `gama-50` fill and a `gama-400` bar.
+    // (owner, 2026-11-02): a `gama-50` fill and a `gama-400` bar. This rule is deliberately outside the
+    // `(hover: hover)` block below, so a drag looks the same on every device, touch-only ones included.
     .resizer.isResizing {
         opacity: 1;
         background: var(--colors-gama-50);
@@ -425,7 +426,8 @@
         }
 
         // Figma "Resize hovered" (46521:216701): the pointer over the zone fills it with `gama-50` and colours the bar
-        // `gama-400`. Touch-only devices have no hover: there the bar stays grey and always visible, with no fill.
+        // `gama-400`. Touch-only devices have no hover: at rest the bar stays grey and always visible, with no fill,
+        // until a drag starts (`.isResizing` above).
         .resizer:hover {
             background: var(--colors-gama-50);
 

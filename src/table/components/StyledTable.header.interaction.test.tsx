@@ -460,11 +460,12 @@ describe('Contrast of the sorted glyph (A-04, A-05)', () => {
     beforeEach(parkPointer)
     afterEach(cleanup)
 
-    it('A-05: a sorted glyph is gama-500 in every state and has at least 4.4:1 on the header in every theme; gama-400 is gone (P2d)', async () => {
+    it('A-05: a sorted glyph is gama-500 at rest and when the next click sorts again, with at least 4.4:1 on the header in every theme; the removal preview is delta-600 and gama-400 is gone (P2d)', async () => {
         mountHeader({ initialState: { sorting: [{ id: 'name', desc: false }] } })
         const original = document.documentElement.getAttribute('data-theme')
-        // `greenish` is the jade theme (Ad Opus). The preview of the next sort is gama-500 too (UX round 3, 2026-11-02), so
-        // the OQ-12 exception for gama-400 on hover and focus (3.02:1, 2.62:1 and 2.15:1) no longer exists. Each ratio is
+        // `greenish` is the jade theme (Ad Opus). The preview of a click that sorts again is gama-500 too (UX round 3,
+        // 2026-11-02; the removal preview is delta-600, which A-04 holds to 3:1), so the OQ-12 exception for gama-400 on
+        // hover and focus (3.02:1, 2.62:1 and 2.15:1) no longer exists. Each ratio is
         // pinned to two decimals (the exact values are 4.4743, 4.4162 and 4.4998), so this fails if a token moves any of
         // them, in either direction.
         const accepted = [
@@ -591,6 +592,54 @@ describe('24px resize zone (AC 17)', () => {
 
         await expect(label.scrollWidth).toBeGreaterThan(label.clientWidth)
         await expect(Math.abs(rect(label).right - rect(resizerOf(LONG)).left)).toBeLessThanOrEqual(0.5)
+    })
+
+    it('ST-12: fixed-left and fixed-right resizable columns have the same zone and bar, flush with their cell, and the same zone hover look', async () => {
+        const columns: ColumnDef<Person>[] = [
+            { accessorKey: 'name', header: 'Name', size: 120, minSize: 100, fixedLeft: true },
+            { accessorKey: 'role', header: 'Role', size: 160, minSize: 100 },
+            { accessorKey: 'age', header: 'Age', size: 120, minSize: 100, fixedRight: true },
+        ]
+
+        // `enableResizing` gives the last column a handle too, and here the last column is the fixed-right one.
+        mountHeader({ columns, enableColumnResizing: true, enableResizing: true })
+
+        await expect(headerCell('Name').className).toContain('t-cell__fixed')
+        await expect(headerCell('Age').className).toContain('t-cell__fixed-right')
+
+        for (const label of ['Name', 'Role', 'Age']) {
+            const zoneElement = resizerOf(label)
+
+            await expect(zoneElement, `${label} has a handle`).not.toBeNull()
+
+            const zone = rect(zoneElement)
+            const cell = rect(headerCell(label))
+            const content = rect(headerCell(label).querySelector('[class*="show-table-header"]')!)
+            const bar = getComputedStyle(zoneElement, '::after')
+
+            await expect(zone.width, `${label}: zone width`).toBe(24)
+            await expect(zone.height, `${label}: zone height`).toBe(28)
+            await expect(Math.abs(zone.right - cell.right), `${label}: zone flush with its cell`).toBeLessThanOrEqual(0.5)
+            await expect(
+                Math.abs(zone.top + zone.height / 2 - (content.top + content.height / 2)),
+                `${label}: zone centred in the header content`,
+            ).toBeLessThanOrEqual(0.5)
+            // The bar sits at the zone's right edge (`--resizer-bar-offset` is 0), 4 x 24.
+            await expect(bar.right, `${label}: bar right edge`).toBe('0px')
+            await expect(bar.width).toBe('4px')
+            await expect(bar.height).toBe('24px')
+            await expect(Number.parseFloat(bar.top) + Number.parseFloat(bar.height) / 2).toBe(zone.height / 2)
+
+            // The pointer over the zone: the same fill and bar colour as in a plain column.
+            const control = sortButton(label)
+
+            await userEvent.hover(control, { position: { x: control.clientWidth - 12, y: 15 } })
+            await expect(zoneElement.matches(':hover'), `${label}: pointer over the zone`).toBe(true)
+            await expect(getComputedStyle(zoneElement).backgroundColor, `${label}: zone fill`).toBe(resolveColor('var(--colors-gama-50)'))
+            await expect(getComputedStyle(zoneElement, '::after').backgroundColor, `${label}: bar on zone hover`).toBe(
+                resolveColor('var(--colors-gama-400)'),
+            )
+        }
     })
 
     it('ST-12: pressing on the zone starts a resize and never sorts', async () => {
@@ -769,7 +818,11 @@ const glyphColour = (label: string): string => getComputedStyle(indicator(label)
 
 type Direction = 'asc' | 'desc'
 /** What the user sees in a header's slot: which glyph, which way it points, in which of the two colours. */
-type Look = { shown: 'none' } | { shown: 'current' | 'preview'; direction: Direction; colour: 'primary' | 'neutral' }
+interface Look {
+    shown: 'none' | 'current' | 'preview'
+    direction?: Direction
+    colour?: 'primary' | 'neutral'
+}
 
 const lookOfHeader = (label: string): { shown: string; direction?: string; colour?: string } => {
     const shown = isShown(currentGlyph(label)) ? 'current' : isShown(previewGlyph(label)) ? 'preview' : 'none'
@@ -856,7 +909,7 @@ describe('ST-16: a hovered or :focus-visible header previews the state after the
         await expect(lookOfHeader(label)).toEqual(rest)
     })
 
-    it('a sorted glyph never changes colour on hover or focus: gama-500 at rest and in the preview, never gama-400', async () => {
+    it('a sorted glyph is gama-500 at rest and in a preview that sorts again, delta-600 in the removal preview, and never gama-400', async () => {
         for (const desc of [false, true]) {
             mountPreview('Name', desc ? 'desc' : 'asc')
 
@@ -872,7 +925,27 @@ describe('ST-16: a hovered or :focus-visible header previews the state after the
         }
     })
 
-    it('the preview is what the click produces: the next state is the glyph the header showed under the pointer', async () => {
+    it('for a sorted column the preview is what a plain click produces, in direction and colour: ascending, descending, then removed', async () => {
+        mountPreview('Name', 'asc')
+
+        // Ascending: the click sorts descending, previewed in teal, and the header then rests that way.
+        await userEvent.hover(sortButton('Name'))
+        await expect(lookOfHeader('Name')).toEqual(preview('desc', 'primary'))
+        await userEvent.click(sortButton('Name'))
+        await expect(ariaSorts()['Name']).toBe('descending')
+        await userEvent.unhover(sortButton('Name'))
+        await expect(lookOfHeader('Name')).toEqual(current('desc'))
+
+        // Descending: the click removes the sort, previewed as the grey first direction; the header then shows nothing.
+        await userEvent.hover(sortButton('Name'))
+        await expect(lookOfHeader('Name')).toEqual(preview('asc', 'neutral'))
+        await userEvent.click(sortButton('Name'))
+        await expect(ariaSorts()['Name']).toBe('none')
+        await userEvent.unhover(sortButton('Name'))
+        await expect(lookOfHeader('Name')).toEqual(NONE)
+    })
+
+    it('an unsorted header previews the way its first click sorts, in grey (UX keeps the unsorted look); the click then sorts it that way, in teal', async () => {
         mountPreview('Name', null)
 
         await userEvent.hover(sortButton('Name'))
@@ -881,20 +954,6 @@ describe('ST-16: a hovered or :focus-visible header previews the state after the
         await expect(ariaSorts()['Name']).toBe('ascending')
         await userEvent.unhover(sortButton('Name'))
         await expect(lookOfHeader('Name')).toEqual(current('asc'))
-
-        await userEvent.hover(sortButton('Name'))
-        await expect(lookOfHeader('Name')).toEqual(preview('desc', 'primary'))
-        await userEvent.click(sortButton('Name'))
-        await expect(ariaSorts()['Name']).toBe('descending')
-        await userEvent.unhover(sortButton('Name'))
-        await expect(lookOfHeader('Name')).toEqual(current('desc'))
-
-        await userEvent.hover(sortButton('Name'))
-        await expect(lookOfHeader('Name')).toEqual(preview('asc', 'neutral'))
-        await userEvent.click(sortButton('Name'))
-        await expect(ariaSorts()['Name']).toBe('none')
-        await userEvent.unhover(sortButton('Name'))
-        await expect(lookOfHeader('Name')).toEqual(NONE)
     })
 
     it('a mouse click and then the pointer leaving shows the new rest state: focus from a click is not :focus-visible, so no stale preview', async () => {
@@ -922,6 +981,116 @@ describe('ST-16: a hovered or :focus-visible header previews the state after the
         await expect(document.activeElement).toBe(sortButton('Name'))
         await expect(lookOfHeader('Name')).toEqual(NONE)
         await expect(slotWidth('Name')).toBe(0)
+    })
+})
+
+type Aria = 'ascending' | 'descending' | 'none'
+type SortSpec = [id: string, direction: Direction][]
+
+const mountSorted = (sorting: SortSpec, props: TableProps = {}): void => {
+    mountHeader({
+        columns: previewColumns,
+        initialState: { sorting: sorting.map(([id, direction]) => ({ id, desc: direction === 'desc' })) },
+        ...props,
+    })
+}
+
+const ariaOf = (sorting: SortSpec): Record<string, Aria> =>
+    Object.fromEntries(
+        ['Name', 'Role', 'Age'].map((label) => {
+            const entry = sorting.find(([id]) => id === label.toLowerCase())
+
+            return [label, entry ? (entry[1] === 'asc' ? 'ascending' : 'descending') : 'none']
+        }),
+    )
+
+const ALL_NONE = { Name: 'none', Role: 'none', Age: 'none' } as const
+
+/**
+ * A plain click on one column of a multi-sort (TanStack's `toggleSorting(undefined, false)`): a sorted column that is
+ * NOT the last entry replaces the whole sorting by itself and is never removed (a removal becomes ascending); the
+ * last entry toggles in place and a removal drops only it. The preview must say which, and a real click must agree.
+ * Name sorts ascending first; Role is `sortDescFirst`; Age is a number, so it sorts descending first.
+ */
+const MULTI_CASES: {
+    name: string
+    label: string
+    sorting: SortSpec
+    hover: Look
+    after: Record<string, Aria>
+    rest: Look
+}[] = [
+    { name: 'not last, ascending-first, ascending (flips, alone)', label: 'Name', sorting: [['name', 'asc'], ['age', 'desc']], hover: preview('desc', 'primary'), after: { ...ALL_NONE, Name: 'descending' }, rest: current('desc') },
+    { name: 'not last, ascending-first, descending (the removal becomes ascending, alone)', label: 'Name', sorting: [['name', 'desc'], ['age', 'desc']], hover: preview('asc', 'primary'), after: { ...ALL_NONE, Name: 'ascending' }, rest: current('asc') },
+    { name: 'not last, descending-first, ascending (the removal becomes ascending, alone)', label: 'Role', sorting: [['role', 'asc'], ['age', 'asc']], hover: preview('asc', 'primary'), after: { ...ALL_NONE, Role: 'ascending' }, rest: current('asc') },
+    { name: 'not last, descending-first, descending (flips to ascending, alone)', label: 'Role', sorting: [['role', 'desc'], ['name', 'asc']], hover: preview('asc', 'primary'), after: { ...ALL_NONE, Role: 'ascending' }, rest: current('asc') },
+    { name: 'last, number column, descending (flips in place)', label: 'Age', sorting: [['name', 'asc'], ['age', 'desc']], hover: preview('asc', 'primary'), after: { ...ALL_NONE, Name: 'ascending', Age: 'ascending' }, rest: current('asc') },
+    { name: 'last, number column, ascending (removed, the others stay)', label: 'Age', sorting: [['name', 'asc'], ['age', 'asc']], hover: preview('desc', 'neutral'), after: { ...ALL_NONE, Name: 'ascending' }, rest: NONE },
+    { name: 'last, ascending-first, ascending (flips in place)', label: 'Name', sorting: [['age', 'desc'], ['name', 'asc']], hover: preview('desc', 'primary'), after: { ...ALL_NONE, Age: 'descending', Name: 'descending' }, rest: current('desc') },
+    { name: 'last, ascending-first, descending (removed, the others stay)', label: 'Name', sorting: [['age', 'desc'], ['name', 'desc']], hover: preview('asc', 'neutral'), after: { ...ALL_NONE, Age: 'descending' }, rest: NONE },
+    { name: 'last, descending-first, ascending (removed, the others stay)', label: 'Role', sorting: [['name', 'asc'], ['role', 'asc']], hover: preview('desc', 'neutral'), after: { ...ALL_NONE, Name: 'ascending' }, rest: NONE },
+    { name: 'last, descending-first, descending (flips in place)', label: 'Role', sorting: [['name', 'asc'], ['role', 'desc']], hover: preview('asc', 'primary'), after: { ...ALL_NONE, Name: 'ascending', Role: 'ascending' }, rest: current('asc') },
+    { name: 'unsorted among sorted columns (grey first direction; the click replaces the sorting by it)', label: 'Role', sorting: [['name', 'asc'], ['age', 'asc']], hover: preview('desc', 'neutral'), after: { ...ALL_NONE, Role: 'descending' }, rest: current('desc') },
+]
+
+describe('ST-16: in a multi-sort the preview is the plain click, which replaces the sorting unless the column is the last entry (TanStack toggleSorting)', () => {
+    beforeEach(parkPointer)
+    afterEach(cleanup)
+
+    it.each(MULTI_CASES)('$name: the preview, and the rendered state after a real plain click', async ({ label, sorting, hover, after, rest }) => {
+        mountSorted(sorting)
+
+        await expect(ariaSorts()).toEqual(ariaOf(sorting))
+
+        await userEvent.hover(sortButton(label))
+        await expect(lookOfHeader(label)).toEqual(hover)
+        // The preview never changes `aria-sort`: it is the current state.
+        await expect(ariaSorts()).toEqual(ariaOf(sorting))
+
+        await userEvent.click(sortButton(label))
+        await userEvent.unhover(sortButton(label))
+        await expect(ariaSorts()).toEqual(after)
+        await expect(lookOfHeader(label)).toEqual(rest)
+
+        // The preview equals the rendered state: a primary preview is the direction the header now has, in teal.
+        if (hover.colour === 'primary') await expect(rest).toEqual(current(hover.direction!))
+    })
+
+    it.each(MULTI_CASES)('$name: :focus-visible previews the same', async ({ label, sorting, hover }) => {
+        mountSorted(sorting)
+
+        await userEvent.keyboard('{Shift}')
+        sortButton(label).focus()
+        await expect(sortButton(label).matches(':focus-visible')).toBe(true)
+        await expect(lookOfHeader(label)).toEqual(hover)
+    })
+})
+
+describe('ST-16: with enableSortingRemoval: false a sorted column never previews the grey removal', () => {
+    beforeEach(parkPointer)
+    afterEach(cleanup)
+
+    it.each([
+        { label: 'Name', direction: 'asc' as const, hover: preview('desc', 'primary'), after: 'descending' },
+        { label: 'Name', direction: 'desc' as const, hover: preview('asc', 'primary'), after: 'ascending' },
+        { label: 'Role', direction: 'asc' as const, hover: preview('desc', 'primary'), after: 'descending' },
+        { label: 'Role', direction: 'desc' as const, hover: preview('asc', 'primary'), after: 'ascending' },
+    ])('$label, $direction: the opposite direction in teal under hover and :focus-visible, and the click does that', async ({ label, direction, hover, after }) => {
+        mountSorted([[label.toLowerCase(), direction]], { enableSortingRemoval: false })
+
+        await userEvent.hover(sortButton(label))
+        await expect(lookOfHeader(label)).toEqual(hover)
+        await userEvent.unhover(sortButton(label))
+
+        await userEvent.keyboard('{Shift}')
+        sortButton(label).focus()
+        await expect(lookOfHeader(label)).toEqual(hover)
+        sortButton(label).blur()
+
+        await userEvent.click(sortButton(label))
+        await userEvent.unhover(sortButton(label))
+        await expect(ariaSorts()[label]).toBe(after)
+        await expect(lookOfHeader(label)).toEqual(current(hover.direction!))
     })
 })
 
@@ -1010,25 +1179,15 @@ describe('ST-17: the resize bar and zone while the header is hovered and while d
         await expect(barColour('Name')).toBe(DELTA_400())
     })
 
-    it('on a touch-only device (no hover) the bar stays a grey, always visible delta-400 with no fill, and :hover previews nothing: every hover look sits in the (hover: hover) block', async () => {
-        // The browser here can hover, so the rules are read instead: a touch-only device ignores the media block
-        // (`@media (hover: hover)`) and so gets only what stands outside it.
-        mountHeader({ columns: narrow, enableColumnResizing: true })
-
-        const hoverLooks: string[] = []
-        const outsideHover: string[] = []
+    /** The table's rules about the resize zone and the sort slot, and whether each sits inside a `(hover: hover)` block. */
+    const stylesheetRules = (): { selector: string; inHoverBlock: boolean; hidesAtRest: boolean }[] => {
+        const found: { selector: string; inHoverBlock: boolean; hidesAtRest: boolean }[] = []
         const walk = (rules: CSSRuleList, inHoverBlock: boolean): void => {
             for (const rule of Array.from(rules)) {
                 if (rule instanceof CSSMediaRule) {
                     walk(rule.cssRules, inHoverBlock || /\(hover:\s*hover\)/.test(rule.conditionText))
-                } else if (rule instanceof CSSStyleRule && /resizer|sort-indicator|sort-glyph/.test(rule.selectorText)) {
-                    const hides = rule.style.opacity === '0'
-
-                    const isHoverLook = rule.selectorText.includes(':hover') || hides
-
-                    // Anything that is a hover look, or hides the zone until the header is hovered.
-                    if (isHoverLook) hoverLooks.push(`${inHoverBlock ? 'in' : 'OUT'}: ${rule.selectorText}`)
-                    if (isHoverLook && !inHoverBlock) outsideHover.push(rule.selectorText)
+                } else if (rule instanceof CSSStyleRule && /resizer|isResizing|sort-indicator|sort-glyph/.test(rule.selectorText)) {
+                    found.push({ selector: rule.selectorText, inHoverBlock, hidesAtRest: rule.style.opacity === '0' })
                 }
             }
         }
@@ -1041,15 +1200,39 @@ describe('ST-17: the resize bar and zone while the header is hovered and while d
             }
         }
 
+        return found
+    }
+
+    it('on a touch-only device (no hover) the bar stays a grey, always visible delta-400 with no fill, and :hover previews nothing: every hover look sits in the (hover: hover) block', async () => {
+        // The browser here can hover, so the rules are read instead: a touch-only device ignores the media block
+        // (`@media (hover: hover)`) and so gets only what stands outside it.
+        mountHeader({ columns: narrow, enableColumnResizing: true })
+
+        // Anything that is a hover look, or hides the zone until the header is hovered.
+        const hoverLooks = stylesheetRules().filter((rule) => rule.selector.includes(':hover') || rule.hidesAtRest)
+        const outsideHover = hoverLooks.filter((rule) => !rule.inHoverBlock).map((rule) => rule.selector)
+
         // The rules exist (so this is not vacuous): the zone's `opacity: 0`, the header reveal, the zone's hover look and
         // the sort preview on hover.
         await expect(hoverLooks.length).toBeGreaterThanOrEqual(6)
-        await expect(hoverLooks.some((rule) => /resizer\S*:hover/.test(rule))).toBe(true)
-        await expect(hoverLooks.some((rule) => /sortable-column\S*:hover .*sort-glyph--preview/.test(rule))).toBe(true)
+        await expect(hoverLooks.some((rule) => /resizer\S*:hover/.test(rule.selector))).toBe(true)
+        await expect(hoverLooks.some((rule) => /sortable-column\S*:hover .*sort-glyph--preview/.test(rule.selector))).toBe(true)
         await expect(outsideHover, `outside the (hover: hover) block: ${outsideHover.join(' | ')}`).toEqual([])
 
         // So a device without hover has the rest look: the zone is shown (no `opacity: 0` outside the block) in delta-400.
         await expect(barColour('Name')).toBe(DELTA_400())
         await expect(zoneFill('Name')).toBe(TRANSPARENT)
+    })
+
+    it('while a column is dragged the zone and bar look the same on every device: the .isResizing rules sit outside the (hover: hover) block', async () => {
+        mountHeader({ columns: narrow, enableColumnResizing: true })
+
+        const dragging = stylesheetRules().filter((rule) => rule.selector.includes('isResizing'))
+
+        // The zone's fill and `opacity: 1`, and its bar: two rules at least, and none of them inside the hover block, so
+        // a touch drag shows the `gama-50` fill and the `gama-400` bar as a mouse drag does.
+        await expect(dragging.length).toBeGreaterThanOrEqual(2)
+        await expect(dragging.some((rule) => rule.selector.includes('::after'))).toBe(true)
+        await expect(dragging.filter((rule) => rule.inHoverBlock).map((rule) => rule.selector)).toEqual([])
     })
 })
