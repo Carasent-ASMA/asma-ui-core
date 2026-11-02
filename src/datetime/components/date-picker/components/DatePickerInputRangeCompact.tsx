@@ -24,6 +24,7 @@ export const DatePickerInputRangeCompact: React.FC<{
         validateOnCalendarClose,
         onValidatedOnce,
         width,
+        messages,
         ...rangeFieldProps
     } = datePickerProps
 
@@ -59,6 +60,7 @@ export const DatePickerInputRangeCompact: React.FC<{
                 validateOnCalendarClose={validateOnCalendarClose}
                 onValidatedOnce={onValidatedOnce}
                 width={width}
+                messages={messages}
                 // spread "from" field props
                 label={rangeFieldProps.labelFrom}
                 error={rangeFieldProps.errorFrom}
@@ -89,6 +91,7 @@ export const DatePickerInputRangeCompact: React.FC<{
                 validateOnCalendarClose={validateOnCalendarClose}
                 onValidatedOnce={onValidatedOnce}
                 width={width}
+                messages={messages}
                 label={rangeFieldProps.labelTo}
                 error={rangeFieldProps.errorTo}
                 helperText={rangeFieldProps.helperTextTo}
