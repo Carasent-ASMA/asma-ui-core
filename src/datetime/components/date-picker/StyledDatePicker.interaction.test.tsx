@@ -285,7 +285,12 @@ describe('StyledDatePicker messages', () => {
         locale,
         required,
         disabledDays,
-    }: Pick<IDatePickerSingle, 'messages' | 'locale' | 'required' | 'disabledDays'>): JSX.Element => {
+        disallowPast,
+        disallowFuture,
+    }: Pick<
+        IDatePickerSingle,
+        'messages' | 'locale' | 'required' | 'disabledDays' | 'disallowPast' | 'disallowFuture'
+    >): JSX.Element => {
         const [date, setDate] = useState<Date>()
         const [, setRenders] = useState(0)
         return (
@@ -300,6 +305,8 @@ describe('StyledDatePicker messages', () => {
                     locale={locale}
                     required={required}
                     disabledDays={disabledDays}
+                    disallowPast={disallowPast}
+                    disallowFuture={disallowFuture}
                     messages={messages && { ...messages }}
                 />
                 <button type='button' data-testid='rerender' onClick={() => setRenders((n) => n + 1)}>
@@ -332,6 +339,30 @@ describe('StyledDatePicker messages', () => {
         await typeAndLeave(container, '15062024')
 
         await expect(container).toHaveTextContent('Velg en annen dato.')
+    })
+
+    it('asks for today or a later date when past dates are not allowed', async () => {
+        const { container } = mount(<MessagesFixture disallowPast />)
+
+        await typeAndLeave(container, '01012000')
+
+        await expect(container).toHaveTextContent('Select today or a future date.')
+    })
+
+    it('asks for today or an earlier date when future dates are not allowed', async () => {
+        const { container } = mount(<MessagesFixture disallowFuture />)
+
+        await typeAndLeave(container, '01012099')
+
+        await expect(container).toHaveTextContent('Select today or an earlier date.')
+    })
+
+    it('keeps the unavailable-date message for a disabled day that is also in the past', async () => {
+        const { container } = mount(<MessagesFixture disallowFuture disabledDays={new Date(2000, 0, 1)} />)
+
+        await typeAndLeave(container, '01012000')
+
+        await expect(container).toHaveTextContent('Select another date.')
     })
 
     const formatOverride = { invalidFormat: { en: 'Use the catalog format.', no: 'Bruk katalogformatet.' } }

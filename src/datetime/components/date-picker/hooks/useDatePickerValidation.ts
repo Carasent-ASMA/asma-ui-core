@@ -1,7 +1,7 @@
-import { parse, isValid as isValidDateFns, startOfDay } from 'date-fns'
+import { parse, isValid as isValidDateFns, startOfDay, startOfToday } from 'date-fns'
 import { useCallback, useState } from 'react'
 import type { Matcher } from 'react-day-picker'
-import { buildDisabled, isDisabledDate } from '../helpers'
+import { isDisabledDate } from '../helpers'
 
 export interface DatePickerValidationMessages {
     required: string
@@ -168,8 +168,10 @@ export const useDatePickerValidation = (
             }
 
             // 5) check disabled date
-            const mergedDisabled = buildDisabled(disabledDays, disallowPast, disallowFuture)
-            if (isDisabledDate({ parsedDate: parsed, disabledDays: mergedDisabled })) return fail('dateDisabled')
+            const today = startOfToday()
+            if (disallowPast && startOfDay(parsed) < today) return fail('pastNotAllowed')
+            if (disallowFuture && startOfDay(parsed) > today) return fail('futureNotAllowed')
+            if (isDisabledDate({ parsedDate: parsed, disabledDays })) return fail('dateDisabled')
 
             clearValidation()
             return false
