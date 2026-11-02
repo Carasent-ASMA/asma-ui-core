@@ -4,6 +4,7 @@ import { page } from 'vitest/browser'
 import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, isEntirelyObscured, mount, tabbableWithin } from 'src/test-utils/renderInteraction'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
+import { StyledDialog } from 'src/components/feedback/dialog/StyledDialog'
 import { StyledInputField } from 'src/components/inputs/input-field'
 import { StyledSelect } from 'src/components/inputs/select/StyledSelect'
 import { StyledSelectItem } from 'src/components/inputs/select/StyledSelectItem'
@@ -446,6 +447,28 @@ describe('PopoverSheet — position stability', () => {
         await userEvent.click(panel!.querySelector('button')!)
         await waitFor(() => expect(panel!.getBoundingClientRect().width).toBeGreaterThan(300))
         await expect(panel!.getBoundingClientRect().left).toBe(left)
+    })
+
+    it('opens at its trigger inside a modal dialog, not off-screen (ASMA-6809)', async () => {
+        mount(
+            <StyledDialog open onClose={() => undefined} dataTest='dlg'>
+                <Fixture variant='action' />
+            </StyledDialog>,
+        )
+        await waitFor(() => expect(document.querySelector('[data-testid="pop-trigger"]')).not.toBeNull())
+        const trigger = document.querySelector<HTMLButtonElement>('[data-testid="pop-trigger"]')!
+        await userEvent.click(trigger)
+        await waitFor(() => expect(panelOf()).not.toBeNull())
+        const panel = panelOf()!
+
+        await expect(panel.closest('dialog')).not.toBeNull()
+        await expect(getComputedStyle(panel).position).toBe('fixed')
+        await waitFor(() =>
+            expect(
+                Math.abs(panel.getBoundingClientRect().top - trigger.getBoundingClientRect().bottom),
+            ).toBeLessThanOrEqual(16),
+        )
+        await expect(panel.getBoundingClientRect().right).toBeLessThanOrEqual(window.innerWidth)
     })
 
     const EdgeFixture = ({
