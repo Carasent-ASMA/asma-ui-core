@@ -33,6 +33,7 @@ export const DatePickerInputSingle: React.FC<{
         reserveHelperText,
         inputAriaProps,
         width,
+        messages,
     } = datePickerProps
 
     return (
@@ -65,6 +66,7 @@ export const DatePickerInputSingle: React.FC<{
             reserveHelperText={reserveHelperText}
             inputAriaProps={inputAriaProps}
             width={width}
+            messages={messages}
         />
     )
 }

@@ -1,5 +1,6 @@
 import type { AriaAttributes, ReactNode } from 'react'
 import type { FieldWidth } from 'src/components/inputs/field-styles'
+import type { TimePickerHelperMessages } from './components/HelperText'
 
 /** 
     * @param notBeforeTime - Start time of the range. Selected time must be after this value.
@@ -38,6 +39,8 @@ export interface StyledTimePickerProps {
      * label rendered outside the picker. Without them the input is named by `title` or `label`.
      */
     inputAriaProps?: AriaAttributes
+    /** Per-key `{ en, no }` overrides of the built-in messages, merged over the defaults. */
+    messages?: Partial<TimePickerHelperMessages>
 }
 
 export type IPopupStateType = JSX.Element

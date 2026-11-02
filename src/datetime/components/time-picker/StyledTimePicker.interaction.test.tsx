@@ -570,3 +570,49 @@ describe('StyledTimePicker required', () => {
         await expect(container).not.toHaveTextContent('Required')
     })
 })
+
+describe('StyledTimePicker messages', () => {
+    afterEach(cleanup)
+
+    const invalidOverride = { invalid: { en: 'Use the catalog time.', no: 'Bruk katalogtiden.' } }
+
+    it('shows a per-key override in the picker language', async () => {
+        const { container } = mount(
+            <StyledTimePicker
+                dataTest='msg-time'
+                label='Time'
+                locale='no'
+                messages={invalidOverride}
+                onSelect={() => undefined}
+            />,
+        )
+        const input = container.querySelector<HTMLInputElement>('input[data-testid="msg-time"]')!
+
+        input.focus()
+        await userEvent.keyboard('09')
+        input.blur()
+
+        await waitFor(() => expect(container).toHaveTextContent('Bruk katalogtiden.'))
+    })
+
+    it('keeps the default for every key that is not overridden', async () => {
+        const { container } = mount(
+            <StyledTimePicker
+                dataTest='msg-end'
+                label='End time'
+                notBeforeTime={new Date(2026, 9, 5, 12, 0)}
+                value={new Date(2026, 9, 5, 13, 0)}
+                messages={invalidOverride}
+                onSelect={() => undefined}
+            />,
+        )
+        const input = container.querySelector<HTMLInputElement>('input[data-testid="msg-end"]')!
+
+        await userEvent.clear(input)
+        await userEvent.keyboard('1100')
+        await waitFor(() => expect(input).toHaveValue('11:00'))
+        input.blur()
+
+        await waitFor(() => expect(container).toHaveTextContent('Select a time after start time.'))
+    })
+})

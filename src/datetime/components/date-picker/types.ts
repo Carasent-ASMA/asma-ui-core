@@ -1,6 +1,7 @@
 import type { AriaAttributes } from 'react'
 import type { DayPicker, Matcher } from 'react-day-picker'
 import type { FieldWidth } from 'src/components/inputs/field-styles'
+import type { DatePickerMessages } from './hooks/useDatePickerValidation'
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
@@ -25,6 +26,11 @@ type CommonDatePickerProps = {
     required?: boolean
     /** Field width pattern step of each date field, calendar button included. Defaults to S. */
     width?: FieldWidth
+    /**
+     * Per-key `{ en, no }` overrides of the built-in validation messages, merged over the defaults.
+     * Unlike `errorText`, every other message keeps its default.
+     */
+    messages?: DatePickerMessages
 } & CalendarProps
 
 export interface DatePickerSingleFieldProps {
