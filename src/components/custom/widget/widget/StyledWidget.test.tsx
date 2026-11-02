@@ -53,4 +53,23 @@ describe('StyledWidget footer (ASMA-8699)', () => {
         expect(html).toContain('View more')
         expect(html).not.toContain('data-testid="all-items-shown"')
     })
+
+    it('keeps View more disabled when nothing more fits and no reason text is given', () => {
+        const html = renderToStaticMarkup(
+            <StyledWidget
+                {...base}
+                viewMore={{
+                    viewMoreText: 'View more',
+                    viewLessText: 'View less',
+                    disabled: true,
+                }}
+            >
+                <span>row</span>
+            </StyledWidget>,
+        )
+
+        expect(html).toContain('data-testid="view-more"')
+        expect(html).toContain('disabled')
+        expect(html).not.toContain('data-testid="all-items-shown"')
+    })
 })

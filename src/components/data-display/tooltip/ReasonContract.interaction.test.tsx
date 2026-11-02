@@ -2,7 +2,6 @@ import type { ReactElement } from 'react'
 import { afterEach, describe, it, vi } from 'vitest'
 import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
-import { StyledWidget } from '../../custom/widget/widget/StyledWidget'
 import { StyledInteractiveChip } from '../interactive-chip/StyledInteractiveChip'
 
 /**
@@ -23,30 +22,9 @@ interface Fixture {
     unchanged?: (control: HTMLElement) => Promise<void>
 }
 
+// Widget View more left this contract in ASMA-8699: a reason replaces the button with
+// read-only text (StyledWidget.test.tsx). A disabled button with no reason stays a button.
 const fixtures: Fixture[] = [
-    {
-        name: 'widget view more (disabledReason)',
-        selector: '[data-testid="view-more"]',
-        state: ['aria-disabled', 'true'],
-        render: (onActivate) => (
-            <StyledWidget
-                title='Chats'
-                isLoading={false}
-                isEmpty={false}
-                emptyText='No chats'
-                viewMore={{
-                    viewMoreText: 'View more',
-                    viewLessText: 'View less',
-                    disabled: true,
-                    disabledReason: reason,
-                    onClick: onActivate,
-                }}
-            >
-                <p>Content</p>
-            </StyledWidget>
-        ),
-        unchanged: async (control) => expect(control).toHaveTextContent('View more'),
-    },
     {
         name: 'interactive chip (disabledReason)',
         selector: '[role="checkbox"]',

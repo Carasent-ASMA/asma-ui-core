@@ -111,10 +111,14 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
                         <p className={style['widget-all-shown']} data-testid='all-items-shown'>
                             {viewMore.disabledReason}
                         </p>
-                    ) : !viewMore.hide ? (
+                    ) : (
                         <StyledButton
                             dataTest='view-more'
                             variant='text'
+                            // A reason replaces the button. Without one, a collapsed View more stays
+                            // disabled. View less stays enabled so an expanded list can still collapse.
+                            disabled={Boolean(viewMore.disabled) && !expanded}
+                            disabledReason={expanded ? undefined : viewMore.disabledReason}
                             endIcon={
                                 expanded ? (
                                     <ChevronUpIcon width={20} height={20} />
@@ -132,8 +136,6 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
                         >
                             {expanded ? viewMore.viewLessText : viewMore.viewMoreText}
                         </StyledButton>
-                    ) : (
-                        <div />
                     )}
 
                     {showLink ? (

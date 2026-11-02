@@ -174,7 +174,7 @@ export const FluidWidth = (): JSX.Element => (
     </StyledWidget>
 )
 
-/** "View more" disabled with a reason (disabled-states DIS-1…DIS-4): focusable, reason on hover, focus and tap. */
+/** All items shown (ASMA-8699): helper text in the View more slot. Not a button, not focusable, no tooltip. */
 export const ViewMoreDisabledWithReason = (): JSX.Element => (
     <div className='w-[400px] p-4'>
         <StyledWidget
