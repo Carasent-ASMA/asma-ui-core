@@ -41,8 +41,9 @@ export function TableHeader<
             )}
             style={styles}
             ref={tableHeaderRef}
-            // A hidden header keeps its column names in the accessibility tree (it is not `inert`), but none of its
-            // controls is a tab stop, so the keyboard skips it (ASMA-8702).
+            // A hidden header keeps its column names in the accessibility tree (it is not `inert`), and its own
+            // controls are not tab stops, so the keyboard skips it (ASMA-8702). A consumer's control in a hidden
+            // header cell is the consumer's to make `tabIndex={-1}`: see the `hideHeader` prop.
             data-header-hidden={hideHeader ? 'true' : undefined}
         >
             {headerGroups.map((headerGroup) => {

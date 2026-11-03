@@ -13,5 +13,7 @@ the pin opens the column settings, and Tab reaches Reset columns.
   column. Before, the header row was one stop that went straight to the body.
 - A table with `hideHeader` skips its header: its sort headers, pin and select-all checkbox are not tab stops, while
   its column names and `aria-sort` stay in the accessibility tree. With no header control at all, Tab goes straight to
-  the body.
+  the body. A hidden header must not contain tab stops of your own (a button or link in a header cell): give them
+  `tabIndex={-1}`, or Tab reaches them with no visible focus. The table sets an internal `meta.hideHeader` for this;
+  it is marked `@internal`, and apps must not set it.
 - Shift+Tab from the footer's row count goes back into the table at the active row; it used to go to the header row.

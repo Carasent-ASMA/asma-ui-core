@@ -69,7 +69,11 @@ declare module '@tanstack/react-table' {
     }
     interface TableMeta<TData extends RowData> {
         locale?: 'no' | 'en' | (TData extends never ? never : never)
-        /** `hideHeader` of the table: its header controls (sort, pin, select all) are not tab stops (ASMA-8702). */
+        /**
+         * @internal Set by `StyledTable` from its `hideHeader` prop, so that its own header controls (the sort header,
+         * the pin and the select-all checkbox) can drop their tab stops (ASMA-8702). Apps must not set it: the table
+         * writes it, and a `meta` an app passes replaces the table's. Use the `hideHeader` prop.
+         */
         hideHeader?: boolean
     }
 
@@ -167,6 +171,12 @@ export type StyledTableProps<TData, TCustomData> = {
     ) => void
     renderSubRows?: (props: { rows: TCustomData[]; row: TData }) => ReactElement | null
     getRowSelectionIds?: (ids: string[]) => void
+    /**
+     * Hides the header visually. It stays in the accessibility tree (column names and `aria-sort` are still announced)
+     * and its own controls (the sort header, the pin, the select-all checkbox) are not tab stops. **A hidden header must
+     * not contain tab stops of your own** (a button or link in a header cell): they stay tab stops with no visible focus.
+     * Give such a control `tabIndex={-1}`, or do not put one there (ASMA-8702).
+     */
     hideHeader?: boolean
     pageSize?: number
     enableResizing?: boolean

@@ -347,6 +347,32 @@ describe('StyledTable with no header controls (K-08, K-09)', () => {
         await expect(await tab(true)).toBe('Before')
     })
 
+    // The contract of `hideHeader` (ASMA-8702, DeepSeek's audit): the table drops the tab stops of its OWN header
+    // controls, and sends no focus to a consumer's. A control the consumer puts in a hidden header cell is still a tab
+    // stop the browser reaches, with no visible focus. The rule: a hidden header must not contain consumer tab stops, or
+    // the consumer gives them `tabIndex={-1}`. This test names the rule and pins both halves; `inert` is not the answer
+    // (it would take the column names out of the accessibility tree).
+    it("K-09 (the hideHeader contract): a consumer's tab stop in a hidden header IS reached by Tab; with tabIndex={-1} it is skipped", async () => {
+        const menu = (tabIndex?: number): ColumnDef<Row>[] => [
+            { accessorKey: 'name', header: () => <button type='button' tabIndex={tabIndex}>Menu</button>, enableSorting: false },
+        ]
+
+        // The consumer's button, as it is: a tab stop in the hidden header. Tab stops on it, invisibly, before the rows.
+        mountBetweenButtons({ hideHeader: true, columns: menu(), headerPin: false })
+        button('Before').focus()
+        await userEvent.keyboard('{Tab}')
+        await expect(document.activeElement, 'a consumer tab stop in a hidden header is reached').toBe(button('Menu'))
+        await expect(await tab()).toBe('row r-1')
+
+        // The rule's fix: tabIndex={-1}, and the keyboard skips the hidden header entirely.
+        cleanup()
+        mountBetweenButtons({ hideHeader: true, columns: menu(-1), headerPin: false })
+        button('Before').focus()
+        await expect(await tab()).toBe('row r-1')
+        // The control is still in the accessibility tree and the DOM, only not a stop.
+        await expect(button('Menu').tabIndex).toBe(-1)
+    })
+
     it('a visible header is not marked hidden', async () => {
         mountBetweenButtons()
 

@@ -161,7 +161,11 @@ before the rows in the DOM, but the rows' own controls come after them:
   tabbable (`tabIndex` -1, set from the table's `meta.hideHeader`), and `getHeaderControls` returns none for it
   (the `thead` carries `data-header-hidden`). The header is **not** `inert` or `aria-hidden`: its column headers and
   `aria-sort` stay in the accessibility tree, which a test checks in Chrome's own accessibility tree. A control a
-  consumer puts in a hidden header is the consumer's: it stays a stop, and the focus is never sent to it.
+  consumer puts in a hidden header is the consumer's: it stays a stop, and the focus is never sent to it. **The
+  contract (also in the `hideHeader` prop's JSDoc): a hidden header must not contain tab stops of the consumer's
+  (a button or link in a header cell), or the consumer gives them `tabIndex={-1}`.** Otherwise Tab reaches them with no
+  visible focus. K-09 pins both halves. `meta.hideHeader`, which the table sets so that its own controls can drop their
+  tab stops, is `@internal`: apps must not set it.
 - "Header control" means a control Tab would stop on now: a tab index of 0 or more, rendered, not `hidden`,
   `visibility: hidden` or inside an `inert` or `hidden` ancestor. A button with `tabindex="-1"` is not one.
 

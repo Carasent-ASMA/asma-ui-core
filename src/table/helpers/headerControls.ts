@@ -19,7 +19,8 @@ const isTabbable = (element: HTMLElement): boolean =>
  * The controls in a table's header that Tab reaches, in DOM order, which is visual order: the fixed-left headers
  * render first and the fixed-right ones last, the pin included. `thead` belongs to this table only: a table nested in a
  * row has its own. A hidden header (`hideHeader`, marked `data-header-hidden`) has none: its built-in controls are not
- * tab stops, and a control a consumer puts in a hidden header is the consumer's, not a place to send the focus to.
+ * tab stops, and the focus is never sent to a control a consumer puts in it. Such a control stays a tab stop the browser
+ * reaches (a hidden header must not contain consumer tab stops: they set `tabIndex={-1}`, see the `hideHeader` prop).
  */
 export const getHeaderControls = (table: HTMLTableElement | null | undefined): HTMLElement[] => {
     const header = table?.tHead
