@@ -45,7 +45,7 @@ export function TableRowCountSelect<TData>({
         optionCount: amountOfRowsOptions.length,
         selectedIndex,
         onSelect: (index) => handleRowsChange(amountOfRowsOptions[index]!),
-        focusHeaderOnShiftTab: true,
+        focusTableOnShiftTab: true,
     })
 
     return (

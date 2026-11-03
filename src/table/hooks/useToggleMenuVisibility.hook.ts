@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState, type KeyboardEvent, type MouseEvent, type RefObject } from 'react'
+import { getActiveBodyRow } from 'src/table/helpers/headerControls'
 
 interface ToggleMenuVisibility {
     open: boolean
@@ -17,15 +18,20 @@ interface KeyboardSelectMenuOptions {
     optionCount: number
     selectedIndex: number
     onSelect: (index: number) => void
-    focusHeaderOnShiftTab?: boolean
+    focusTableOnShiftTab?: boolean
 }
 
-const focusClosestTableHeader = (trigger: HTMLElement | null): boolean => {
+/**
+ * Shift+Tab from a control after the table, such as the footer's row count, goes back into the table at its roving
+ * tab stop: the active body row. The header row used to be that stop; it is not one any more (ASMA-8702), and the
+ * rows' own controls would otherwise be the browser's previous stop.
+ */
+const focusClosestTableRows = (trigger: HTMLElement | null): boolean => {
     let container = trigger?.parentElement
     while (container) {
-        const header = container.querySelector<HTMLTableRowElement>('table thead tr[tabindex="0"]')
-        if (header) {
-            header.focus()
+        const row = getActiveBodyRow(container.querySelector<HTMLTableElement>('table'))
+        if (row) {
+            row.focus()
             return true
         }
         container = container.parentElement
@@ -53,7 +59,7 @@ export const useKeyboardSelectMenu = ({
     optionCount,
     selectedIndex,
     onSelect,
-    focusHeaderOnShiftTab = false,
+    focusTableOnShiftTab = false,
 }: KeyboardSelectMenuOptions): KeyboardSelectMenu => {
     const { open, anchorEl, handleOpen, handleClose: closeMenu } = useToggleMenuVisibility()
     const triggerRef = useRef<HTMLButtonElement>(null)
@@ -77,10 +83,10 @@ export const useKeyboardSelectMenu = ({
     const handleKeyDown = useCallback(
         (event: KeyboardEvent<HTMLButtonElement>) => {
             if (
-                focusHeaderOnShiftTab &&
+                focusTableOnShiftTab &&
                 event.key === 'Tab' &&
                 event.shiftKey &&
-                focusClosestTableHeader(triggerRef.current)
+                focusClosestTableRows(triggerRef.current)
             ) {
                 event.preventDefault()
                 handleClose()
@@ -126,7 +132,7 @@ export const useKeyboardSelectMenu = ({
         },
         [
             activeIndex,
-            focusHeaderOnShiftTab,
+            focusTableOnShiftTab,
             handleClose,
             handleOpen,
             moveActiveOption,

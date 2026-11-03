@@ -5,6 +5,7 @@ import { ACTIONS_COLUMN_ID, type StyledTableProps } from 'src/table/types'
 import { cn } from 'src/table/helpers/cn'
 import { type CSSProperties } from 'react'
 import type { ColumnWindow } from 'src/table/hooks/useColumnVirtualizer'
+import { getActiveBodyRow, getLastHeaderControl } from 'src/table/helpers/headerControls'
 
 export function TableHeader<
     TData extends {
@@ -24,7 +25,7 @@ export function TableHeader<
     tableWidth: number | null
     columnWindow: ColumnWindow
 }): JSX.Element {
-    const { stickyHeader = false, tableHeaderRef, tableHeaderStyle = {} } = styledTableProps
+    const { stickyHeader = false, hideHeader = false, tableHeaderRef, tableHeaderStyle = {} } = styledTableProps
     const headerGroups = table.getHeaderGroups()
 
     const styles: CSSProperties = {
@@ -40,6 +41,8 @@ export function TableHeader<
             )}
             style={styles}
             ref={tableHeaderRef}
+            // A hidden header is skipped by the keyboard entirely (ASMA-8702): no invisible tab stops.
+            {...(hideHeader ? { inert: '' } : {})}
         >
             {headerGroups.map((headerGroup) => {
                 const positionedHeaders = headerGroup.headers.map((header, index, allHeaders) => ({
@@ -77,24 +80,24 @@ export function TableHeader<
                 return (
                     <tr
                         key={headerGroup.id}
-                        tabIndex={0}
+                        // The header row is not a tab stop (ASMA-8702): Tab walks the sortable headers and the pin in
+                        // visual order. The body is one roving tab stop (ASMA-8087), so Tab leaves the header for the
+                        // body here, not through whatever follows the header in the DOM.
                         onKeyDown={(event) => {
-                            // Only Tab pressed on the header row itself goes to the rows (ASMA-8087). A control
-                            // inside it keeps the default: the column settings popover is portalled, but React still
-                            // bubbles its keys to this row, and it has already moved focus into its panel on Tab and
-                            // called `preventDefault` (WCAG 2.1.1, ASMA-8597).
-                            if (
-                                event.key !== 'Tab' ||
-                                event.shiftKey ||
-                                event.defaultPrevented ||
-                                event.target !== event.currentTarget
-                            )
-                                return
+                            // Only Tab pressed on the LAST header control goes to the rows. Every other control keeps
+                            // the default, which is the next control. A Tab that something handled already is left
+                            // alone: the column settings popover is portalled, but React still bubbles its keys to
+                            // this row, and it has moved focus into its panel on Tab and called `preventDefault`
+                            // (WCAG 2.1.1, ASMA-8597).
+                            if (event.key !== 'Tab' || event.shiftKey || event.defaultPrevented) return
+
+                            const table = event.currentTarget.closest('table')
+
+                            if (event.target !== getLastHeaderControl(table)) return
                             // Enter the rows on the one the user last worked with — the row that holds the
                             // roving tab stop — not always on the first.
-                            const activeRow = event.currentTarget.closest('table')?.querySelector<HTMLTableRowElement>(
-                                'tbody tr[tabindex="0"]',
-                            )
+                            const activeRow = getActiveBodyRow(table)
+
                             if (!activeRow) return
                             event.preventDefault()
                             activeRow.focus()

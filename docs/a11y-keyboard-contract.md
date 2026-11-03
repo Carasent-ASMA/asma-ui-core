@@ -134,10 +134,37 @@ and focus continues from there. Covered for Tab and Shift+Tab.
 **M (2026-10-26) — WCAG 2.4.3, `table/components/TableRow.tsx`, `table-header/TableHeader.tsx`.**
 Tab walked the table row by row, so leaving a long table took one Tab per row. The rows already keep one
 roving tab stop and move with ArrowUp/ArrowDown; the WAI-ARIA Grid pattern makes Tab an exit from the
-composite. Tab on a row now moves to the first focusable element after the table, and Shift+Tab to the
-header row (or, without one, to the last focusable element before the table). Tab on the header row enters
-the rows on the active row instead of always the first. Covered by
-`TableRow.keyboard.interaction.test.tsx`.
+composite. Tab on a row now moves to the first focusable element after the table, and Shift+Tab goes back
+(to the last header control since ASMA-8702, see N below; without one, to the last focusable element before
+the table). Covered by `TableRow.keyboard.interaction.test.tsx`.
+
+**N (ASMA-8702, 2026-11) — WCAG 2.1.1 / 2.4.3, `table/components/table-header/TableHeader.tsx`, `TableRow.tsx`,
+`helpers/headerControls.ts`.**
+The header row was the table's one tab stop (`<tr tabindex="0">`), and the sort buttons and the column settings
+pin came after it in the DOM, so no Tab or Shift+Tab sequence reached them (found while testing ASMA-8597). The
+header row is no longer a tab stop. Tab moves through the sortable headers and then the pin, in visual order
+(the fixed-left headers render first and the fixed-right ones, the pin included, last). Enter and Space on a
+header sort it; Enter on the pin opens the column settings, and Tab then reaches Reset columns. The body model
+of ASMA-8087 is kept: the rows are one roving tab stop, Up and Down move between them, Enter acts, and Tab
+leaves the table forwards. The two halves of the round trip are explicit, because the header controls come
+before the rows in the DOM, but the rows' own controls come after them:
+
+- Tab on the **last** header control moves focus to the active body row, the one the user left, instead of the
+  next tabbable element in the DOM. A Tab that something already handled (`defaultPrevented`, as the portalled
+  popover does) is left alone.
+- Shift+Tab from the active body row moves focus to the **last header control**. Without a header control
+  (nothing sortable, `headerPin={false}`) Tab goes straight to the active row, and Shift+Tab leaves the table
+  backwards.
+- Shift+Tab from the footer's row count select goes back into the table at the active row (it used to go to the
+  header row, which is not a tab stop any more).
+- `hideHeader` makes the header `inert`, so a hidden header has no invisible tab stops (it also leaves the
+  accessibility tree).
+
+Wide tables get one tab stop per sortable column. Centre headers are column-virtualised, but Tab still reaches
+every one in order: focusing a header scrolls it into view, which renders the next ones. Covered by
+`TableHeader.keyboard.interaction.test.tsx` (K-01 to K-10, K-13, K-14), `TableRow.keyboard.interaction.test.tsx`
+(K-11), and `StyledTable.header.interaction.test.tsx` (ST-11c, K-12), `StyledTable.resetColumns.interaction.test.tsx`
+(K-07).
 
 The arrow keys also left the focused row off screen (WCAG 2.4.11): `FocusRowsFeature` focused it with
 `preventScroll: true` and never scrolled. It now scrolls the row just into view (`block: 'nearest'`),

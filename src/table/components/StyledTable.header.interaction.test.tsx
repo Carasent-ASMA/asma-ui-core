@@ -372,13 +372,14 @@ describe('Hover and focus (AC 16)', () => {
         await expect(ariaSorts()['Name']).toBe('ascending')
     })
 
-    it('ST-11a: starting with focus put on the pin (.focus(), no key path reaches it), Shift+Tab reaches a sortable header with the focus look, Tab moves to the next header control, Enter sorts, leaving clears the look', async () => {
+    it('ST-11a: Shift+Tab from the body lands on the pin, then reaches a sortable header with the focus look, Tab moves to the next header control, Enter sorts, leaving clears the look', async () => {
         mountHeader()
         const pin = document.querySelector<HTMLElement>('button[aria-haspopup="true"]')!
 
-        // The only programmatic step. After a key press the focus counts as keyboard focus (`:focus-visible`).
-        await userEvent.keyboard('{Shift}')
-        pin.focus()
+        // The only programmatic step puts the focus on the active body row. The pin is reached by a real Shift+Tab
+        // (ASMA-8702), so the focus counts as keyboard focus (`:focus-visible`).
+        document.querySelector<HTMLElement>('tbody tr[tabindex="0"]')!.focus()
+        await userEvent.keyboard('{Shift>}{Tab}{/Shift}')
         await expect(document.activeElement).toBe(pin)
 
         // Shift+Tab: the sortable header before the pin, with the hover look: the grey triangle, no square.
@@ -420,19 +421,41 @@ describe('Hover and focus (AC 16)', () => {
         await expectNoSquare('Role')
         await expectShown('Age', 'current')
 
-        // Space sorts too.
-        sortButton('Role').focus()
+        // Space sorts too, on a header reached by Shift+Tab from the pin.
+        await userEvent.keyboard('{Shift>}{Tab}{Tab}{/Shift}')
+        await expect(document.activeElement).toBe(sortButton('Role'))
         await userEvent.keyboard('{ }')
         await expect(ariaSorts()['Role']).toBe('ascending')
     })
 
-    // Found while writing ST-11 (ASMA-8597), still open and outside this PR: a keyboard user cannot ENTER the
-    // header controls from outside the header (ASMA-8087). Tab pressed on the header row goes to the active body
-    // row, and Shift+Tab from a body row goes to the header row, so the sort headers and the pin, which sit between
-    // them in the tab order, are skipped.
-    it.todo(
-        "header controls (sort headers, pin) aren't reachable by sequential keyboard navigation (WCAG 2.1.1); pending owner decision, ASMA-8087 keyboard model",
-    )
+    // K-12 (ASMA-8702). It was an `it.todo` (ST-11c): a keyboard user could not ENTER the header controls from outside
+    // the header, because the header row was the one tab stop and the controls came after it in the DOM.
+    it('ST-11c / K-12: the header controls are reachable by sequential keyboard navigation (WCAG 2.1.1): Tab from before the table walks the sort headers and the pin, and Enter sorts', async () => {
+        mount(
+            <div>
+                <button type='button'>Before</button>
+                {table()}
+            </div>,
+        )
+        const pin = document.querySelector<HTMLElement>('button[aria-haspopup="true"]')!
+        const stops: (Element | null)[] = []
+
+        document.querySelector<HTMLElement>('button')!.focus()
+
+        // Name, Role and Age sort; Notes does not; then the pin. No `.focus()` on a header or the pin.
+        for (let presses = 0; presses < 4; presses += 1) {
+            await userEvent.keyboard('{Tab}')
+            stops.push(document.activeElement)
+        }
+
+        await expect(stops).toEqual([sortButton('Name'), sortButton('Role'), sortButton('Age'), pin])
+        await expect(stops.some((stop) => stop?.closest('tbody'))).toBe(false)
+
+        await userEvent.keyboard('{Shift>}{Tab}{/Shift}')
+        await expect(document.activeElement).toBe(sortButton('Age'))
+        await userEvent.keyboard('{Enter}')
+        await expect(ariaSorts()['Age']).toBe('descending')
+    })
 
     it('A-04: both glyph colours reach 3:1 on the header in all three themes', async () => {
         mountHeader()
