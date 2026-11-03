@@ -105,7 +105,9 @@ export function TableHeaderCell<
                     header.column.columnDef.className,
                 )}
                 role={canSort ? 'button' : undefined}
-                tabIndex={canSort ? 0 : undefined}
+                // A hidden header keeps its names and `aria-sort` in the accessibility tree, but its sort control is
+                // not a tab stop: there would be nothing to see where the focus is (ASMA-8702).
+                tabIndex={canSort && !hideHeader ? 0 : undefined}
                 onClick={(e) => {
                     const sortingHandler = header.column.getToggleSortingHandler()
                     if (!isResizing && sortingHandler) {

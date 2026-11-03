@@ -157,12 +157,27 @@ before the rows in the DOM, but the rows' own controls come after them:
   backwards.
 - Shift+Tab from the footer's row count select goes back into the table at the active row (it used to go to the
   header row, which is not a tab stop any more).
-- `hideHeader` makes the header `inert`, so a hidden header has no invisible tab stops (it also leaves the
-  accessibility tree).
+- `hideHeader`: a hidden header has no tab stops. Its sort headers, the pin and the select-all checkbox are not
+  tabbable (`tabIndex` -1, set from the table's `meta.hideHeader`), and `getHeaderControls` returns none for it
+  (the `thead` carries `data-header-hidden`). The header is **not** `inert` or `aria-hidden`: its column headers and
+  `aria-sort` stay in the accessibility tree, which a test checks in Chrome's own accessibility tree. A control a
+  consumer puts in a hidden header is the consumer's: it stays a stop, and the focus is never sent to it.
+- "Header control" means a control Tab would stop on now: a tab index of 0 or more, rendered, not `hidden`,
+  `visibility: hidden` or inside an `inert` or `hidden` ancestor. A button with `tabindex="-1"` is not one.
+
+**What is unchanged, and not new in ASMA-8702 (ASMA-8087's body model; the same on master `7fe83452`).**
+Shift+Tab from after a table enters at the active row only when the rows hold no tabbable controls of their own.
+With a control in each row (a button, a checkbox), the browser's previous stop is the **last row's control**; Shift+Tab
+then walks back through the rows' controls to the active row, and from the row to the last header control, so there is
+no trap, but the way back takes one press per control. A focused control inside a row does not move the roving tab
+stop, and the row handlers act only on the row itself, so Shift+Tab on a row's control is the browser's. These are
+pinned by K-20 and K-21. An end-of-table focus sentinel (or a retarget) that sends Shift+Tab from after the table to
+the active row, and tracking the active row from a focused cell control, would change ASMA-8087's body model; they are
+a question for its owner (see the pull request), possibly a follow-up.
 
 Wide tables get one tab stop per sortable column. Centre headers are column-virtualised, but Tab still reaches
 every one in order: focusing a header scrolls it into view, which renders the next ones. Covered by
-`TableHeader.keyboard.interaction.test.tsx` (K-01 to K-10, K-13, K-14), `TableRow.keyboard.interaction.test.tsx`
+`TableHeader.keyboard.interaction.test.tsx` (K-01 to K-10, K-13 to K-21), `TableRow.keyboard.interaction.test.tsx`
 (K-11), and `StyledTable.header.interaction.test.tsx` (ST-11c, K-12), `StyledTable.resetColumns.interaction.test.tsx`
 (K-07).
 

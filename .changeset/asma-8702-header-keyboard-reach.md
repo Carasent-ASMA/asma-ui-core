@@ -11,6 +11,7 @@ the pin opens the column settings, and Tab reaches Reset columns.
   between rows, Enter, and Tab leaving the table forwards.
 - Behaviour change in every table: the header is now in the Tab sequence, so a wide table has one tab stop per sortable
   column. Before, the header row was one stop that went straight to the body.
-- A table with `hideHeader` skips its header entirely (the header is `inert`, so it also leaves the accessibility
-  tree). With no header control at all, Tab goes straight to the body.
+- A table with `hideHeader` skips its header: its sort headers, pin and select-all checkbox are not tab stops, while
+  its column names and `aria-sort` stay in the accessibility tree. With no header control at all, Tab goes straight to
+  the body.
 - Shift+Tab from the footer's row count goes back into the table at the active row; it used to go to the header row.

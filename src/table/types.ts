@@ -69,6 +69,8 @@ declare module '@tanstack/react-table' {
     }
     interface TableMeta<TData extends RowData> {
         locale?: 'no' | 'en' | (TData extends never ? never : never)
+        /** `hideHeader` of the table: its header controls (sort, pin, select all) are not tab stops (ASMA-8702). */
+        hideHeader?: boolean
     }
 
     interface ColumnDefBase<TData extends RowData, TValue = unknown> extends ColumnDefExtensions<TData, TValue> {

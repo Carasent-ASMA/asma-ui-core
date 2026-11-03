@@ -10,7 +10,11 @@ import { StyledTable } from './StyledTableIndex'
  *
  * ASMA-8702 (K-11): the header row is no longer a tab stop. Going back from a row with Shift+Tab lands on the LAST
  * header control (the pin), and entering the rows from the header starts from that control. The body model itself
- * (roving tab stop, arrows, Tab leaves forwards, entering on the row the user left) is ASMA-8087's and is unchanged.
+ * (roving tab stop, arrows, Tab leaves forwards) is ASMA-8087's and is unchanged.
+ *
+ * Shift+Tab from AFTER the table enters at the active row only when the rows hold no tabbable controls of their own, as
+ * in these tables. With a control in each row the browser's previous stop is the last row's control: that is
+ * ASMA-8087's body model too, the same on master, and `TableHeader.keyboard.interaction.test.tsx` pins it (K-20, K-21).
  */
 
 interface Row {
@@ -75,14 +79,22 @@ describe('StyledTable — keyboard between rows', () => {
         await expect(document.activeElement?.getAttribute('aria-haspopup')).toBe('true')
     })
 
-    it('K-11: enters the rows on the row the user left, from the last header control and from after the table', async () => {
+    it('K-11: Tab from the last header control enters the rows on the row the user left, reached by real keys', async () => {
         mountBetweenButtons()
         row('r-1').focus()
         await userEvent.keyboard('{ArrowDown}{ArrowDown}')
 
-        lastHeaderControl().focus()
+        await userEvent.keyboard('{Shift>}{Tab}{/Shift}')
+        await expect(document.activeElement, 'Shift+Tab from the row').toBe(lastHeaderControl())
+
         await userEvent.keyboard('{Tab}')
         await expect(document.activeElement, 'Tab from the last header control').toBe(row('r-3'))
+    })
+
+    it('K-11: from after the table, when the rows hold no controls of their own, Shift+Tab enters on the row the user left', async () => {
+        mountBetweenButtons()
+        row('r-1').focus()
+        await userEvent.keyboard('{ArrowDown}{ArrowDown}')
 
         button('After').focus()
         await userEvent.keyboard('{Shift>}{Tab}{/Shift}')

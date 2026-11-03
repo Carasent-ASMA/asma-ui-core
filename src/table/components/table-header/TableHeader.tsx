@@ -41,8 +41,9 @@ export function TableHeader<
             )}
             style={styles}
             ref={tableHeaderRef}
-            // A hidden header is skipped by the keyboard entirely (ASMA-8702): no invisible tab stops.
-            {...(hideHeader ? { inert: '' } : {})}
+            // A hidden header keeps its column names in the accessibility tree (it is not `inert`), but none of its
+            // controls is a tab stop, so the keyboard skips it (ASMA-8702).
+            data-header-hidden={hideHeader ? 'true' : undefined}
         >
             {headerGroups.map((headerGroup) => {
                 const positionedHeaders = headerGroup.headers.map((header, index, allHeaders) => ({
