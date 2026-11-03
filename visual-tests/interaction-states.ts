@@ -6,6 +6,11 @@ export interface InteractionCapture {
     /** Baseline filename, e.g. `datetime-datepicker--date-picker--calendar-open.png`. */
     screenshot: string
     act: (page: Page) => Promise<void>
+    /**
+     * Per-pixel colour tolerance (Playwright `threshold`, default 0.2). Lower it where a state is a light
+     * tint the default does not see, e.g. the card's hover, selected and disabled fills.
+     */
+    threshold?: number
 }
 
 type ViewportSize = { width: number; height: number }
@@ -45,6 +50,73 @@ const pickerCapture = (storyId: string, act: InteractionCapture['act'], variant?
     screenshot: `${storyId}--picker${variant ? `-${variant}` : ''}--open.png`,
     act,
 })
+
+/** Grow the window to the whole story, so a story wider or taller than 1280 × 720 is captured in full. */
+const fitWholeStory = async (page: Page): Promise<void> => {
+    const size = await page.evaluate(() => ({ width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight }))
+    await page.setViewportSize({ width: Math.max(1280, size.width), height: Math.max(720, size.height) })
+    await page.mouse.move(0, 0)
+}
+
+/** Card light tints (delta-50, gama-25) sit below the default colour tolerance. */
+const CARD_TINT_THRESHOLD = 0.02
+
+/** ASMA-8318 card: whole matrices the 1280 × 720 glance cuts off, and the states a still story cannot show. */
+const CARD_CAPTURES: InteractionCapture[] = [
+    ...(['gallery', 'all-types', 'narrow-320'] as const).map((story) => ({
+        storyId: `datadisplay-card--${story}`,
+        screenshot: `datadisplay-card--${story}--whole--open.png`,
+        act: fitWholeStory,
+        threshold: CARD_TINT_THRESHOLD,
+    })),
+    {
+        storyId: 'datadisplay-card--opens-dialog',
+        screenshot: 'datadisplay-card--opens-dialog--dialog-selected--open.png',
+        act: async (page) => {
+            await page.locator('[data-testid="card-dialog"] [data-card-link]').click()
+            await page.locator('[data-testid="card-dialog"][data-selected]').waitFor()
+            await page.mouse.move(1279, 719)
+        },
+        threshold: CARD_TINT_THRESHOLD,
+    },
+    {
+        storyId: 'datadisplay-card--partially-clickable',
+        screenshot: 'datadisplay-card--partially-clickable--menu--open.png',
+        act: async (page) => {
+            await page.locator('[data-testid="card-workspace-menu-trigger"]').click()
+            await page.getByRole('menu').waitFor({ state: 'visible' })
+            await page.mouse.move(1279, 719)
+        },
+    },
+    {
+        storyId: 'datadisplay-card--partially-clickable',
+        screenshot: 'datadisplay-card--partially-clickable--view-details--open.png',
+        act: async (page) => {
+            await page.locator('[data-testid="card-workspace"] [data-testid="view-details-trigger"]').click()
+            await page.getByText('Created 12.01.2026 by Kari Nordmann.').waitFor({ state: 'visible' })
+            await page.mouse.move(1279, 719)
+        },
+    },
+    {
+        storyId: 'datadisplay-card--custom-menu-popover',
+        screenshot: 'datadisplay-card--custom-menu-popover--popover--open.png',
+        act: async (page) => {
+            await page.locator('[data-testid="card-custom-menu-menu-trigger"]').click()
+            await page.getByText('The document is shared with your therapist.').waitFor({ state: 'visible' })
+            await page.mouse.move(1279, 719)
+        },
+    },
+    {
+        storyId: 'datadisplay-card--select-mode',
+        screenshot: 'datadisplay-card--select-mode--checked--open.png',
+        act: async (page) => {
+            await page.locator('[data-testid="card-Module 1-checkbox"]').click()
+            await page.getByText('1 selected').waitFor({ state: 'visible' })
+            await page.mouse.move(1279, 719)
+        },
+        threshold: CARD_TINT_THRESHOLD,
+    },
+]
 
 /**
  * Open-state captures — complements `stories.spec.ts` (default/closed glance only).
@@ -289,4 +361,5 @@ export const INTERACTION_CAPTURES: InteractionCapture[] = [
             await page.mouse.move(1, 1)
         },
     },
+    ...CARD_CAPTURES,
 ]
