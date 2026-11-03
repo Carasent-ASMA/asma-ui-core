@@ -1,5 +1,6 @@
 import { useId, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { ChevronDownIcon } from 'src/components/icons/chevron-down-icon'
+import { CloseIcon } from 'src/components/icons/close-icon'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { getPickerText } from 'src/components/inputs/full-screen-picker/pickerCopy'
 import { StyledInputField } from 'src/components/inputs/input-field'
@@ -27,6 +28,11 @@ export interface StyledEmojiChoiceProps {
     options: readonly EmojiChoiceOption[]
     value?: string | null
     onValueChange?: (value: string, option: EmojiChoiceOption) => void
+    /**
+     * @figmaProp none — an optional question: *Clear selection* under the options while one is chosen,
+     * as on `StyledDynamicSelect`. Leave unset for a required question.
+     */
+    onClear?: () => void
     /** The question text. Shown above the options unless `aria-labelledby` points at a heading you render. */
     question: string
     'aria-labelledby'?: string
@@ -46,6 +52,7 @@ interface EmojiChoiceText {
     hideOptions: string
     selected: string
     option: (position: number) => string
+    clearSelection: string
 }
 
 const TEXT: Record<UiCoreLocale, EmojiChoiceText> = {
@@ -55,6 +62,7 @@ const TEXT: Record<UiCoreLocale, EmojiChoiceText> = {
         hideOptions: 'Hide options',
         selected: 'selected',
         option: (position) => `Option ${position}`,
+        clearSelection: 'Clear selection',
     },
     no: {
         noAnswer: 'Ingen svar',
@@ -62,6 +70,7 @@ const TEXT: Record<UiCoreLocale, EmojiChoiceText> = {
         hideOptions: 'Skjul alternativ',
         selected: 'valgt',
         option: (position) => `Alternativ ${position}`,
+        clearSelection: 'Fjern valget',
     },
 }
 
@@ -115,6 +124,30 @@ const RowContent = ({ option, position, text, radio }: RowContentProps): JSX.Ele
     )
 }
 
+interface ClearSelectionProps {
+    dataTest: string
+    text: EmojiChoiceText
+    onClear: () => void
+    /** The button leaves with the answer; focus moves here instead of to the page. */
+    focusAfter: () => HTMLElement | null | undefined
+}
+
+const ClearSelection = ({ dataTest, text, onClear, focusAfter }: ClearSelectionProps): JSX.Element => (
+    <StyledButton
+        dataTest={`${dataTest}-clear`}
+        variant='text'
+        type='button'
+        className={styles['clear']}
+        startIcon={<CloseIcon width={24} height={24} />}
+        onClick={() => {
+            onClear()
+            focusAfter()?.focus()
+        }}
+    >
+        {text.clearSelection}
+    </StyledButton>
+)
+
 // Enter would submit the surrounding form; it chooses the option instead, as on StyledRadio.
 const chooseOnEnter = (event: KeyboardEvent<HTMLInputElement>): void => {
     if (event.key !== 'Enter') return
@@ -127,6 +160,7 @@ const RadioList = ({
     options,
     value,
     onValueChange,
+    onClear,
     question,
     'aria-labelledby': labelledBy,
     name,
@@ -137,7 +171,9 @@ const RadioList = ({
 }: ModeProps): JSX.Element => {
     const generatedName = useId()
     const helperId = useId()
+    const optionsRef = useRef<HTMLDivElement>(null)
     const { show: showHelper, role: helperRole } = useHelperSlot('StyledEmojiChoice', error, helperText)
+    const hasAnswer = options.some((option) => option.value === value)
 
     return (
         // An explicit role: the questionnaire wires its question and errors to `[role="group"]`.
@@ -149,7 +185,7 @@ const RadioList = ({
             className={cn(styles['group'], className)}
         >
             {!labelledBy && <legend className={styles['question']}>{question}</legend>}
-            <div className={styles['options']}>
+            <div ref={optionsRef} className={styles['options']}>
                 {options.map((option, index) => {
                     const checked = option.value === value
                     return (
@@ -179,6 +215,14 @@ const RadioList = ({
                     )
                 })}
             </div>
+            {onClear && hasAnswer && (
+                <ClearSelection
+                    dataTest={dataTest}
+                    text={text}
+                    onClear={onClear}
+                    focusAfter={() => optionsRef.current?.querySelector('input')}
+                />
+            )}
             {showHelper && (
                 <HelperRow
                     id={helperId}
@@ -197,6 +241,7 @@ const Dropdown = ({
     options,
     value,
     onValueChange,
+    onClear,
     question,
     'aria-labelledby': labelledBy,
     error,
@@ -207,6 +252,7 @@ const Dropdown = ({
     text,
 }: ModeProps): JSX.Element => {
     const questionId = useId()
+    const dropdownRef = useRef<HTMLDivElement>(null)
     // The text typed to search the list; `null` while the field shows the answer.
     const [search, setSearch] = useState<string | null>(null)
     // Typing into a field that shows the answer starts a new search, so the answer is selected on focus.
@@ -216,7 +262,7 @@ const Dropdown = ({
     const showSelectedEmoji = search === null && selected !== null && (selected.label !== '' || !selected.emoji)
 
     return (
-        <div className={cn(styles['dropdown'], className)}>
+        <div ref={dropdownRef} className={cn(styles['dropdown'], className)}>
             {!labelledBy && (
                 <span id={questionId} className={styles['question']}>
                     {question}
@@ -285,6 +331,14 @@ const Dropdown = ({
                     />
                 )}
             />
+            {onClear && selected && (
+                <ClearSelection
+                    dataTest={dataTest}
+                    text={text}
+                    onClear={onClear}
+                    focusAfter={() => dropdownRef.current?.querySelector('input')}
+                />
+            )}
         </div>
     )
 }
