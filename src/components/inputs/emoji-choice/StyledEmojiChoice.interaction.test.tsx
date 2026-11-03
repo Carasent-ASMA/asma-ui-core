@@ -19,9 +19,9 @@ const SIX: EmojiChoiceOption[] = [
     { value: 'best', emoji: '🤩', label: 'The best week' },
 ]
 
-type FixtureProps = Partial<StyledEmojiChoiceProps> & { onChange?: (value: string) => void; width?: number }
+type FixtureProps = Partial<StyledEmojiChoiceProps> & { onChange?: (value: string) => void; width?: number; clearable?: boolean }
 
-const Fixture = ({ onChange, width = 632, value: initial = null, ...props }: FixtureProps): JSX.Element => {
+const Fixture = ({ onChange, width = 632, value: initial = null, clearable, ...props }: FixtureProps): JSX.Element => {
     const [value, setValue] = useState(initial)
     return (
         <div style={{ width }}>
@@ -35,6 +35,7 @@ const Fixture = ({ onChange, width = 632, value: initial = null, ...props }: Fix
                     setValue(next)
                     onChange?.(next)
                 }}
+                onClear={clearable ? () => setValue(null) : undefined}
             />
             <button type='button'>After</button>
         </div>
@@ -293,6 +294,102 @@ describe('StyledEmojiChoice dropdown', () => {
         await expect(document.querySelector('[role="listbox"]')).not.toBeNull()
         await userEvent.keyboard('{Escape}')
         await expect(document.querySelector('[role="listbox"]')).toBeNull()
+    })
+})
+
+describe('StyledEmojiChoice clear selection', () => {
+    afterEach(cleanup)
+
+    const clearButton = (container: HTMLElement): HTMLButtonElement | null =>
+        container.querySelector<HTMLButtonElement>('[data-testid="emoji-clear"]')
+
+    it('shows "Clear selection" on an optional question only while an answer is chosen', async () => {
+        const { container } = mount(<Fixture clearable />)
+
+        await expect(clearButton(container)).toBeNull()
+        await userEvent.click(cards(container)[1]!)
+        await expect(clearButton(container)).toHaveAccessibleName('Clear selection')
+        await expect(clearButton(container)).toHaveAttribute('type', 'button')
+    })
+
+    it('shows no "Clear selection" on a required question', async () => {
+        const { container } = mount(<Fixture value='some' />)
+
+        await expect(clearButton(container)).toBeNull()
+    })
+
+    it('empties the answer and moves focus to the question, from the keyboard too', async () => {
+        const { container } = mount(<Fixture clearable value='some' />)
+        const group = container.querySelector('fieldset')!
+
+        clearButton(container)!.focus()
+        await userEvent.keyboard('{Enter}')
+
+        await expect(radios(container).every((radio) => !radio.checked)).toBe(true)
+        await expect(clearButton(container)).toBeNull()
+        await expect(document.activeElement).toBe(group)
+        await expect(group).toHaveAccessibleName(QUESTION)
+        await expect(getComputedStyle(group).outlineStyle).toBe('none')
+
+        await userEvent.tab()
+        await expect(document.activeElement).toBe(radios(container)[0])
+    })
+
+    it('keeps the page where it was when the first option is out of view', async () => {
+        const { container } = mount(
+            // Positioned like the questionnaire's question box, so the hidden radios scroll with it.
+            <div style={{ position: 'relative', height: 240, overflow: 'auto' }} data-testid='scroller'>
+                <Fixture clearable value='own' />
+                <div style={{ height: 600 }} />
+            </div>,
+        )
+        const scroller = container.querySelector<HTMLElement>('[data-testid="scroller"]')!
+        const button = clearButton(container)!
+
+        button.scrollIntoView({ block: 'end' })
+        const scrolled = scroller.scrollTop
+        await expect(scrolled).toBeGreaterThan(200)
+
+        await userEvent.click(button)
+
+        await expect(clearButton(container)).toBeNull()
+        await expect(scroller.scrollTop).toBe(scrolled)
+    })
+
+    it('sits under the options and above the error text', async () => {
+        const { container } = mount(<Fixture clearable value='some' error helperText='Choose an answer' />)
+        const button = clearButton(container)!
+        const lastCard = cards(container).at(-1)!.getBoundingClientRect()
+        const helper = container.querySelector('fieldset')!.lastElementChild!.getBoundingClientRect()
+
+        await expect(button.getBoundingClientRect().top).toBeGreaterThanOrEqual(lastCard.bottom + 8)
+        await expect(button.getBoundingClientRect().bottom).toBeLessThanOrEqual(helper.top)
+        await expect(button.getBoundingClientRect().left).toBe(lastCard.left)
+    })
+
+    it('clears the dropdown and focuses its field without opening the list', async () => {
+        const { container } = mount(<Fixture clearable options={SIX} value='great' />)
+        const combobox = container.querySelector<HTMLInputElement>('[role="combobox"]')!
+
+        await userEvent.click(clearButton(container)!)
+
+        await expect(combobox.value).toBe('')
+        await expect(combobox.closest('[data-field-width]')!.querySelector('[aria-hidden="true"]')?.textContent ?? '').not.toContain('😄')
+        await expect(document.activeElement).toBe(combobox)
+        await expect(document.querySelector('[role="listbox"]')).toBeNull()
+        await expect(clearButton(container)).toBeNull()
+    })
+
+    it('has no "Clear selection" when read-only', async () => {
+        const { container } = mount(<Fixture clearable readOnly value='some' />)
+
+        await expect(clearButton(container)).toBeNull()
+    })
+
+    it('speaks Norwegian', async () => {
+        const { container } = mount(<Fixture clearable locale='no' value='some' />)
+
+        await expect(clearButton(container)).toHaveAccessibleName('Fjern valget')
     })
 })
 

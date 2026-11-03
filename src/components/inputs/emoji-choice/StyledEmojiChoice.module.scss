@@ -33,6 +33,10 @@
     padding: 0;
     min-width: 0;
     max-width: var(--form-column-width);
+
+    &:focus {
+        outline: none;
+    }
 }
 
 .question {
@@ -254,4 +258,8 @@ $emoji-fonts: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-se
 .showAll {
     --colors-button-text-common-focused-bg-color: transparent;
     --colors-button-text-common-focused-text-color: var(--colors-button-text-common-text-color);
+}
+
+.clear {
+    margin-top: 8px;
 }
