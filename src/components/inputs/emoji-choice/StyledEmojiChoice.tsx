@@ -128,7 +128,7 @@ interface ClearSelectionProps {
     dataTest: string
     text: EmojiChoiceText
     onClear: () => void
-    /** The button leaves with the answer; focus moves here instead of to the page. */
+    /** The button leaves with the answer; focus moves here, without scrolling, instead of to the page. */
     focusAfter: () => HTMLElement | null | undefined
 }
 
@@ -141,7 +141,7 @@ const ClearSelection = ({ dataTest, text, onClear, focusAfter }: ClearSelectionP
         startIcon={<CloseIcon width={24} height={24} />}
         onClick={() => {
             onClear()
-            focusAfter()?.focus()
+            focusAfter()?.focus({ preventScroll: true })
         }}
     >
         {text.clearSelection}
@@ -171,13 +171,16 @@ const RadioList = ({
 }: ModeProps): JSX.Element => {
     const generatedName = useId()
     const helperId = useId()
-    const optionsRef = useRef<HTMLDivElement>(null)
+    const groupRef = useRef<HTMLFieldSetElement>(null)
     const { show: showHelper, role: helperRole } = useHelperSlot('StyledEmojiChoice', error, helperText)
     const hasAnswer = options.some((option) => option.value === value)
 
     return (
         // An explicit role: the questionnaire wires its question and errors to `[role="group"]`.
         <fieldset
+            ref={groupRef}
+            // Takes focus after *Clear selection*, so the page stays where the reader is.
+            tabIndex={-1}
             role='group'
             aria-labelledby={labelledBy}
             aria-describedby={showHelper ? helperId : undefined}
@@ -185,7 +188,7 @@ const RadioList = ({
             className={cn(styles['group'], className)}
         >
             {!labelledBy && <legend className={styles['question']}>{question}</legend>}
-            <div ref={optionsRef} className={styles['options']}>
+            <div className={styles['options']}>
                 {options.map((option, index) => {
                     const checked = option.value === value
                     return (
@@ -220,7 +223,7 @@ const RadioList = ({
                     dataTest={dataTest}
                     text={text}
                     onClear={onClear}
-                    focusAfter={() => optionsRef.current?.querySelector('input')}
+                    focusAfter={() => groupRef.current}
                 />
             )}
             {showHelper && (

@@ -318,16 +318,42 @@ describe('StyledEmojiChoice clear selection', () => {
         await expect(clearButton(container)).toBeNull()
     })
 
-    it('empties the answer and keeps focus in the question, from the keyboard too', async () => {
+    it('empties the answer and moves focus to the question, from the keyboard too', async () => {
         const { container } = mount(<Fixture clearable value='some' />)
+        const group = container.querySelector('fieldset')!
 
         clearButton(container)!.focus()
         await userEvent.keyboard('{Enter}')
 
         await expect(radios(container).every((radio) => !radio.checked)).toBe(true)
         await expect(clearButton(container)).toBeNull()
+        await expect(document.activeElement).toBe(group)
+        await expect(group).toHaveAccessibleName(QUESTION)
+        await expect(getComputedStyle(group).outlineStyle).toBe('none')
+
+        await userEvent.tab()
         await expect(document.activeElement).toBe(radios(container)[0])
-        await expect(radios(container)[0]!.checked).toBe(false)
+    })
+
+    it('keeps the page where it was when the first option is out of view', async () => {
+        const { container } = mount(
+            // Positioned like the questionnaire's question box, so the hidden radios scroll with it.
+            <div style={{ position: 'relative', height: 240, overflow: 'auto' }} data-testid='scroller'>
+                <Fixture clearable value='own' />
+                <div style={{ height: 600 }} />
+            </div>,
+        )
+        const scroller = container.querySelector<HTMLElement>('[data-testid="scroller"]')!
+        const button = clearButton(container)!
+
+        button.scrollIntoView({ block: 'end' })
+        const scrolled = scroller.scrollTop
+        await expect(scrolled).toBeGreaterThan(200)
+
+        await userEvent.click(button)
+
+        await expect(clearButton(container)).toBeNull()
+        await expect(scroller.scrollTop).toBe(scrolled)
     })
 
     it('sits under the options and above the error text', async () => {

@@ -33,6 +33,10 @@
     padding: 0;
     min-width: 0;
     max-width: var(--form-column-width);
+
+    &:focus {
+        outline: none;
+    }
 }
 
 .question {
