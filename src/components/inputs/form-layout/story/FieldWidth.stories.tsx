@@ -114,6 +114,15 @@ const CounterField = (): JSX.Element => {
             />
             <StyledInputField dataTest='with-hint' label='Med hint' helperText='Kort og tydelig' maxLength={100} locale='no' />
             <StyledInputField
+                dataTest='reserved'
+                label='Påkrevd, uten hint'
+                required
+                reserveHelperText
+                helperText=' '
+                maxLength={100}
+                locale='no'
+            />
+            <StyledInputField
                 dataTest='with-error'
                 label='Med feil'
                 error
