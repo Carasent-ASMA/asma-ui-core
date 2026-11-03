@@ -455,6 +455,7 @@ export const StyledInputField = ({
         helperText,
         reserveHelperText,
         readOnly,
+        showCounter,
     )
 
     const {
