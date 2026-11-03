@@ -1,0 +1,205 @@
+// Card shell states (ASMA-8318). Selectors that need `:has()`, `::after` or media features live here,
+// not in Tailwind utilities. Values: Figma 9Q7C7JYPgnUSsrX1L8v40t (card component set 4808:169482).
+// @see asma-modules/_docs/ux/components/component-card.md:209 — §6 States
+
+@mixin focus-ring-edge {
+    --card-edge: var(--colors-focus-ring);
+
+    box-shadow: 0 0 0 2px var(--colors-focus-ring);
+    // The ring shows at once: its 1px edge must not fade in behind the shadow.
+    transition: background-color 150ms ease-out;
+
+    &[data-pressed] {
+        transition: none;
+    }
+
+    &[data-accent] {
+        box-shadow:
+            0 0 0 2px var(--colors-focus-ring),
+            -1px 0 0 2px var(--colors-focus-ring);
+    }
+}
+
+.card {
+    // Colour of the edge on top, right and bottom. The leading edge keeps the type colour in every
+    // state, as in Figma, where it is a separate layer inside the edge.
+    // `--card-border-color` is the app's resting edge (set in `classes.root`); state rules set `--card-edge` itself.
+    --card-edge: var(--card-border-color, var(--colors-delta-300));
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 37.5rem;
+    padding: 0.25rem;
+    border: 1px solid var(--card-edge);
+    border-radius: 0.75rem;
+    background-color: #fff;
+    text-align: left;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+
+    // The type colour on the leading edge is decoration only (§3 Container).
+    &[data-accent] {
+        border-left: 0.3125rem solid var(--card-accent);
+    }
+
+    // Selected: a 2px `border/selected` (gama-400) edge and a gama-25 tint (Figma 5981:158778). The
+    // second pixel is an inset shadow, so the layout does not move. "Vises nå" carries the state;
+    // the edge is decoration (CARD-11).
+    &[data-selected] {
+        --card-edge: var(--colors-gama-400);
+
+        background-color: var(--colors-gama-25);
+        box-shadow: inset 0 0 0 1px var(--card-edge);
+
+        &[data-accent] {
+            box-shadow:
+                inset 0 1px 0 var(--card-edge),
+                inset -1px 0 0 var(--card-edge),
+                inset 0 -1px 0 var(--card-edge);
+        }
+    }
+
+    // Overdue: warning tint and border on every side (Figma Overdue variant, CARD-10).
+    &[data-overdue] {
+        --card-edge: var(--colors-warning-500);
+
+        background-color: var(--colors-warning-50);
+        box-shadow: none;
+    }
+
+    // Disabled: the item cannot be opened now (Figma 7334:33933). Grey fill, the not-allowed cursor and
+    // no hover or pressed look (DIS-5); the leading edge turns grey in `Card.tsx`.
+    &[data-disabled] {
+        background-color: var(--colors-delta-50);
+        cursor: not-allowed;
+
+        .link {
+            cursor: not-allowed;
+        }
+    }
+}
+
+// The title link stretches its hit area over the whole card (CARD-3); on a partially clickable card without
+// a CTA label over its title row only (below).
+.link {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    outline: none;
+
+    // Absolute insets start at the padding box, so pull them out over the border and the
+    // leading edge: a tap on the edge or a rounded corner opens the card too (AC-3).
+    &::after {
+        content: '';
+        position: absolute;
+        inset: -1px;
+        z-index: 0;
+        border-radius: 0.75rem;
+    }
+}
+
+.card[data-hit-area='card'][data-accent] .link::after {
+    left: -0.3125rem;
+}
+
+// Partially clickable without a CTA label (none, or a CTA button): the stretched hit area covers the
+// title row only, not the whole card, so a tap beside a control never opens the item (Figma note 5021:142373).
+.card[data-hit-area='title'] {
+    [data-card-title-row] {
+        position: relative;
+    }
+
+    .link::after {
+        inset: 0;
+        border-radius: 0.25rem;
+    }
+}
+
+.card[data-model='full'],
+.card[data-model='partial'] {
+    // Hover tints the card while the pointer is on its link's hit area: the whole card when fully
+    // clickable, the title row when partially; never while a control is hovered (CARD-15).
+    @media (hover: hover) {
+        &:not([data-overdue], [data-pressed], [data-disabled]):has(.link:hover):not(:has([data-card-control]:hover, .link:active)) {
+            background-color: var(--colors-delta-50);
+
+            // Selected + Hovered keeps the selected hue one step darker (Figma `bg/hover-selected`).
+            &[data-selected] {
+                background-color: var(--colors-gama-50);
+            }
+        }
+    }
+
+    // The chevron after the title nudges 4px forward while the card is hovered, as the Workspaces cards
+    // did; not while a control is hovered, and not with reduced motion. The CTA's chevron stays put.
+    [data-card-chevron] > svg {
+        transition: transform 300ms;
+    }
+
+    @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+        &:not([data-disabled]):has(.link:hover):not(:has([data-card-control]:hover)) [data-card-chevron] > svg {
+            transform: translateX(0.25rem);
+        }
+    }
+
+    // Pressed: instant in, eased out, held ~100 ms by `data-pressed` (pressed-state pattern). The
+    // edge turns gama-300; the leading edge keeps its type colour (Figma 7042:149677).
+    transition:
+        background-color 150ms ease-out,
+        border-color 150ms ease-out;
+
+    &:not([data-disabled]):has(.link:active),
+    &[data-pressed] {
+        --card-edge: var(--colors-gama-300);
+
+        background-color: var(--colors-gama-100);
+        box-shadow: none;
+        transition: none;
+
+        // Forced colours drop the fill, so the press shows on the border (pressed-state pattern).
+        @media (forced-colors: active) {
+            --card-edge: Highlight;
+        }
+    }
+
+    // Focus: a 3px ring that is the card's outer edge, with the leading edge whole inside it (Figma
+    // 5035:165679). The 1px edge turns focus colour and an outer shadow adds 2px (3px beside the
+    // leading edge), so nothing moves (focus-state pattern). Stacks with selected and pressed.
+    &:has(.link:focus-visible) {
+        @include focus-ring-edge;
+
+        @media (forced-colors: active) {
+            outline: 3px solid CanvasText;
+            box-shadow: none;
+        }
+    }
+}
+
+// Fallback for engines without `:has()`: keep the focus ring, drop the scoped hover.
+@supports not selector(:has(*)) {
+    .card[data-model='full']:focus-within,
+    .card[data-model='partial']:focus-within {
+        @include focus-ring-edge;
+    }
+}
+
+// Apps (Ad Voca shell, editor, artifact) give h1–h6 their own type with !important in their `base` layer.
+// For !important an earlier layer wins, so the title's type sits in `theme`, before `base`. Apps tune it
+// with the variables, e.g. `[--card-title-size:1.125rem]` in `classes.title`.
+@layer theme {
+    .card [data-card-title] {
+        font-size: var(--card-title-size, 1rem) !important;
+        line-height: var(--card-title-leading, 1.5rem) !important;
+        font-weight: var(--card-title-weight, 600) !important;
+        user-select: text !important;
+    }
+}
