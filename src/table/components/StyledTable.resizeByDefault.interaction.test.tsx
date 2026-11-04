@@ -420,6 +420,12 @@ describe('U-R13: a column group', () => {
 describe('U-R14 (RISK-27): a narrow sortable column crosses the compact-padding threshold', () => {
     const paddingOf = (label: string): string =>
         getComputedStyle(headerCell(label).querySelector('[class*="show-table-header"]')!).paddingLeft
+    /** The padding of the column's body cell: the `td` in the same position as the header cell (`TableRow.tsx`). */
+    const bodyPaddingOf = (label: string): string => {
+        const position = [...document.querySelectorAll('thead th')].indexOf(headerCell(label))
+
+        return getComputedStyle(document.querySelectorAll('tbody tr')[0]!.children[position]!).paddingLeft
+    }
 
     it('U-R14: a sortable column declared at 50 px opens at 70 and takes the data-cell padding; a non-sortable 50 px column keeps the compact padding', async () => {
         mountTable({
@@ -434,8 +440,10 @@ describe('U-R14 (RISK-27): a narrow sortable column crosses the compact-padding 
         // 70 px is above the 64 px compact limit (`COMPACT_COLUMN_MAX_WIDTH`), so it is a data cell: 10 px.
         await expect(widthOf('Sortable 50')).toBe(70)
         await expect(paddingOf('Sortable 50')).toBe('10px')
+        await expect(bodyPaddingOf('Sortable 50')).toBe('10px')
         await expect(widthOf('Plain 50')).toBe(50)
         await expect(paddingOf('Plain 50')).toBe('5px')
+        await expect(bodyPaddingOf('Plain 50')).toBe('5px')
     })
 
     it('U-R14: a sortable column declared at 44 px opens at 64 px, still within the limit, and keeps the compact padding', async () => {
@@ -449,6 +457,7 @@ describe('U-R14 (RISK-27): a narrow sortable column crosses the compact-padding 
 
         await expect(widthOf('Sortable 44')).toBe(64)
         await expect(paddingOf('Sortable 44')).toBe('5px')
+        await expect(bodyPaddingOf('Sortable 44')).toBe('5px')
     })
 })
 

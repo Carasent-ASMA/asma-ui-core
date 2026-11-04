@@ -15,15 +15,16 @@ every table, so this is a minor release.
   writes `${uniqueKey}:column-sizing`; an entry saved earlier stays untouched. A table that sets `enableColumnResizing`
   itself, as `true`, saves as before. To save widths, write `enableColumnResizing` and give the table a per-user
   `uniqueKey`.
-- **A narrow column keeps its declared width as its minimum.** A column with no `minSize` now gets the smaller of 100 px
-  and its default width, so turning resizing on never widens a column past its default. Columns declared below 100 px in
-  tables that already resized (about 19) are no longer pushed up to 100 px.
+- **A narrow column is no longer pushed up to 100 px.** A column with no `minSize` now gets as its minimum the smaller of
+  100 px and its default width after the +20 px below (a sortable 50 px column opens at 70 px with a 70 px minimum; a
+  column that cannot sort keeps 50 px), so turning resizing on never widens a column past its default. Columns declared
+  below 100 px in tables that already resized (about 19) are no longer pushed up to 100 px.
 - **Sortable columns are 20 px wider by default**, so the sort triangle fits: `size` (150 when none is set, or the table's
   `defaultColumn.size`), and `minSize` and `maxSize` when set, grow by 20 px. This includes sortable columns that opt out of
-  resizing, which keep no handle (a `minSize === maxSize` column stays fixed, at the new width). Columns that cannot sort,
-  ui-core's own columns and group headers keep their widths. A width a user saved, an app's `initialState.columnSizing` and a
+  resizing, which keep no handle (a `minSize === maxSize` column stays fixed, at the new width). Columns that cannot sort
+  and ui-core's own columns keep their widths. A width a user saved, an app's `initialState.columnSizing` and a
   controlled `state.columnSizing` are applied as given, and Reset columns returns to the new defaults. A group header gets no
-  20 px of its own: its width is the sum of its leaves. An app that feeds a remembered width back as `size` gets the 20 px
+  20 px of its own: its span follows its leaves, so a group of two sortable 120 px columns is 280 px. An app that feeds a remembered width back as `size` gets the 20 px
   on it.
 - **A narrow sortable column can change its padding.** Columns of 64 px or less keep the compact 5 px cell padding, wider
   ones take the normal 10 px. A sortable column declared at 45 to 64 px now opens at 65 to 84 px and takes the 10 px
