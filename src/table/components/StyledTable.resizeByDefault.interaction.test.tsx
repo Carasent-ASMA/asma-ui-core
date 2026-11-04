@@ -340,17 +340,115 @@ describe('D16: +20 px for a sortable data column', () => {
         await expect(widthOf('Role')).toBe(ROLE)
     })
 
-    it('U-R11: resetting a column to its default (double-click on the handle) returns it to size + 20 and removes the entry', async () => {
-        mountTable({ enableColumnResizing: true, uniqueKey: KEY })
+    // The rule is on the whole state: `usePersistedStateWriter` removes the entry when the state equals the app's default
+    // (`initialState.columnSizing`, here `{}`) and writes it otherwise. It does not compare each column with its own width.
+    it('U-R11: a double-click on each changed handle, and Reset columns, bring the state back to the default and remove the entry', async () => {
+        const { table } = mountTable({ enableColumnResizing: true, uniqueKey: KEY })
 
         await drag('Name', 60)
+        await drag('Role', 30)
         await expect(widthOf('Name')).toBe(NAME + 60)
-        await expect(stored(SIZING_KEY)).toEqual({ name: NAME + 60 })
+        await expect(stored(SIZING_KEY)).toEqual({ name: NAME + 60, role: ROLE + 30 })
 
+        // One column is back to size + 20, the other is still changed: the entry stays, with that column only.
         mouse('dblclick', handle('Name')!, 0)
         await settle()
         await expect(widthOf('Name')).toBe(NAME)
+        await expect(stored(SIZING_KEY)).toEqual({ role: ROLE + 30 })
+
+        // The last changed column is back: the state is the default, and the entry is removed.
+        mouse('dblclick', handle('Role')!, 0)
+        await settle()
+        await expect(widthOf('Role')).toBe(ROLE)
         await expect(localStorage.getItem(SIZING_KEY)).toBeNull()
+
+        // Reset columns does the same for several changed columns at once.
+        await drag('Name', 40)
+        await drag('Age', 20)
+        await expect(stored(SIZING_KEY)).toEqual({ name: NAME + 40, age: 140 + 20 })
+        table().resetColumnSettings()
+        await settle()
+        await expect(widthOf('Name')).toBe(NAME)
+        await expect(widthOf('Age')).toBe(140)
+        await expect(localStorage.getItem(SIZING_KEY)).toBeNull()
+    })
+
+    it('U-R11: a mouse drag that lands exactly on the default width (size + 20) writes an explicit entry: the rule compares the whole state, not each column', async () => {
+        mountTable({ enableColumnResizing: true, uniqueKey: KEY })
+
+        await drag('Name', 60)
+        await drag('Name', -60)
+
+        // Back at the default width, but by a drag: the state is `{ name: 180 }`, not `{}`, so it is written.
+        await expect(widthOf('Name')).toBe(NAME)
+        await expect(stored(SIZING_KEY)).toEqual({ name: NAME })
+    })
+})
+
+describe('U-R13: a column group', () => {
+    const groupColumns: ColumnDef<Person>[] = [
+        {
+            header: 'Group',
+            columns: [
+                { accessorKey: 'name', header: 'Name', size: 120 },
+                { accessorKey: 'role', header: 'Role', size: 120 },
+            ],
+        },
+        { id: 'notes', header: 'Notes', size: 120 },
+    ]
+
+    it("U-R13: the group's header shows a handle, and dragging it resizes its leaves; the group gets no +20 of its own and its span follows its leaves", async () => {
+        const { table } = mountTable({ columns: groupColumns })
+
+        // Two sortable 120 px leaves: 140 + 140 = 280. The group has no size of its own, so nothing is added to it.
+        await expect(widthOf('Name')).toBe(140)
+        await expect(widthOf('Role')).toBe(140)
+        await expect(widthOf('Group')).toBe(280)
+        // TanStack's own default (150) for a definition with no size; nothing is added.
+        await expect(table().getColumn('Group')!.columnDef.size).toBe(150)
+
+        // TanStack's own behaviour, which a table that already resized has always had: the group has a handle, and
+        // dragging it spreads the change over its leaves by their share.
+        await expect(hasHandle('Group')).toBe(true)
+        await drag('Group', 40)
+        await expect(widthOf('Name')).toBe(160)
+        await expect(widthOf('Role')).toBe(160)
+        await expect(widthOf('Group')).toBe(320)
+    })
+})
+
+describe('U-R14 (RISK-27): a narrow sortable column crosses the compact-padding threshold', () => {
+    const paddingOf = (label: string): string =>
+        getComputedStyle(headerCell(label).querySelector('[class*="show-table-header"]')!).paddingLeft
+
+    it('U-R14: a sortable column declared at 50 px opens at 70 and takes the data-cell padding; a non-sortable 50 px column keeps the compact padding', async () => {
+        mountTable({
+            columns: [
+                { id: 'first', header: 'First', size: 120, enableSorting: false },
+                { accessorKey: 'name', header: 'Sortable 50', size: 50 },
+                { id: 'plain', header: 'Plain 50', size: 50 },
+                { id: 'notes', header: 'Notes', size: 120 },
+            ],
+        })
+
+        // 70 px is above the 64 px compact limit (`COMPACT_COLUMN_MAX_WIDTH`), so it is a data cell: 10 px.
+        await expect(widthOf('Sortable 50')).toBe(70)
+        await expect(paddingOf('Sortable 50')).toBe('10px')
+        await expect(widthOf('Plain 50')).toBe(50)
+        await expect(paddingOf('Plain 50')).toBe('5px')
+    })
+
+    it('U-R14: a sortable column declared at 44 px opens at 64 px, still within the limit, and keeps the compact padding', async () => {
+        mountTable({
+            columns: [
+                { id: 'first', header: 'First', size: 120, enableSorting: false },
+                { accessorKey: 'name', header: 'Sortable 44', size: 44 },
+                { id: 'notes', header: 'Notes', size: 120 },
+            ],
+        })
+
+        await expect(widthOf('Sortable 44')).toBe(64)
+        await expect(paddingOf('Sortable 44')).toBe('5px')
     })
 })
 
