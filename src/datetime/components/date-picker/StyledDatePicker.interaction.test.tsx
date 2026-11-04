@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { afterEach, describe, it } from 'vitest'
 import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
-import { cleanup, mount } from 'src/test-utils/renderInteraction'
+import { cleanup, mount, tabbableWithin } from 'src/test-utils/renderInteraction'
 import { getOverlayBackStackSize, requestCloseTopOverlayBack } from 'src/hooks/useBackCloses.hook'
 import { StyledDatePicker } from './StyledDatePicker'
 
@@ -52,6 +52,8 @@ const field = (container: HTMLElement): HTMLInputElement =>
 const calendarButton = (container: HTMLElement): HTMLButtonElement =>
     container.querySelector<HTMLButtonElement>('button[aria-label="Open calendar"]')!
 const calendar = (): HTMLElement | null => document.querySelector<HTMLElement>('.rdp, [role="grid"], table')
+// The whole calendar panel: month and year menus, the day grid and the footer buttons.
+const picker = (): HTMLElement | null => document.querySelector<HTMLElement>('[data-test="calendar-picker"]')
 
 describe('StyledDatePicker keyboard contract', () => {
     afterEach(cleanup)
@@ -198,24 +200,48 @@ describe('StyledDatePicker keyboard contract', () => {
         }
     })
 
-    it('closes the calendar on Tab without blocking normal focus movement (2.1.2)', async () => {
+    it('moves focus onto the selected day when the calendar opens (2.1.1, 2.4.3)', async () => {
+        const { container } = mount(<DatePickerFixture initial={new Date(2024, 5, 15)} />)
+        calendarButton(container).focus()
+        await userEvent.keyboard('{Enter}')
+
+        await waitFor(() => expect(picker()?.contains(document.activeElement)).toBe(true))
+        await expect(document.activeElement).toHaveTextContent(/^15$/)
+
+        // The arrow keys now move between days without first hunting for the grid.
+        await userEvent.keyboard('{ArrowRight}')
+        await waitFor(() => expect(document.activeElement).toHaveTextContent(/^16$/))
+    })
+
+    it('moves focus onto today when the calendar opens with no date (2.4.3)', async () => {
         const { container } = mount(<DatePickerFixture />)
         calendarButton(container).focus()
         await userEvent.keyboard('{Enter}')
-        await waitFor(() => expect(calendar()).not.toBeNull())
 
+        await waitFor(() => expect(picker()?.contains(document.activeElement)).toBe(true))
+        await expect(document.activeElement).toHaveTextContent(new RegExp(`^${new Date().getDate()}$`))
+    })
+
+    it('closes the calendar on Tab past its last control without blocking focus movement (2.1.2)', async () => {
+        const { container } = mount(<DatePickerFixture />)
+        calendarButton(container).focus()
+        await userEvent.keyboard('{Enter}')
+        await waitFor(() => expect(picker()?.contains(document.activeElement)).toBe(true))
+
+        tabbableWithin(picker()!).at(-1)!.focus()
         await userEvent.tab()
 
         await waitFor(() => expect(calendar()).toBeNull())
         await expect(document.activeElement).toBe(container.querySelector('[data-testid="after"]'))
     })
 
-    it('closes the calendar on Shift+Tab without blocking reverse focus movement (2.1.2)', async () => {
+    it('closes the calendar on Shift+Tab before its first control without blocking reverse focus movement (2.1.2)', async () => {
         const { container } = mount(<DatePickerFixture />)
         calendarButton(container).focus()
         await userEvent.keyboard('{Enter}')
-        await waitFor(() => expect(calendar()).not.toBeNull())
+        await waitFor(() => expect(picker()?.contains(document.activeElement)).toBe(true))
 
+        tabbableWithin(picker()!)[0]!.focus()
         await userEvent.tab({ shift: true })
 
         await waitFor(() => expect(calendar()).toBeNull())

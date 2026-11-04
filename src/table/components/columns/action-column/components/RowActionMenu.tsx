@@ -6,7 +6,7 @@ import { DotsVerticalIcon } from 'src/table/shared-components/DotsVerticalIcon'
 
 import { StyledMenuItem } from 'src/table/shared-components/StyledMenuItem'
 import { isCustomAction, type IAction, type ICustomAction, type RowActionsState } from 'src/table/types'
-import React, { useMemo } from 'react'
+import React, { useId, useMemo, useState } from 'react'
 import { StyledButton } from 'src/table/shared-components/button'
 import { StyledTooltip } from 'src/table/shared-components/tooltip'
 import { CircleWarningOutlineIcon } from 'src/table/shared-components/CircleWarningOutlineIcon'
@@ -21,6 +21,10 @@ export function RowActionMenu<TData>({
     rowActionsState?: (row: Row<TData>) => RowActionsState | undefined
 }): JSX.Element {
     const { anchorEl, open, handleClose, handleOpen } = useToggleMenuVisibility()
+    // Like the selects: Enter/Space on the ⋮ puts focus (and its bar) on the first item; a mouse open
+    // leaves focus on the ⋮, and the first arrow key moves it into the menu.
+    const [openedByKeyboard, setOpenedByKeyboard] = useState(false)
+    const menuId = useId()
     const allActions = actions(tableData.row)
     const state = rowActionsState?.(tableData.row) ?? { state: 'enabled' as const }
     const locale = tableData.table.options.meta?.locale
@@ -64,8 +68,18 @@ export function RowActionMenu<TData>({
                 if (open) {
                     handleClose()
                 } else {
+                    // A click from Enter/Space carries no pointer press count.
+                    setOpenedByKeyboard(e.detail === 0)
                     handleOpen(e)
                 }
+            }}
+            onKeyDown={(e) => {
+                if (!open || (e.key !== 'ArrowDown' && e.key !== 'ArrowUp')) return
+                e.preventDefault()
+                e.stopPropagation()
+                const items = document.getElementById(menuId)?.querySelectorAll<HTMLElement>('[role="menuitem"]')
+                if (!items?.length) return
+                items[e.key === 'ArrowDown' ? 0 : items.length - 1]?.focus()
             }}
             onMouseDown={(e) => {
                 e.stopPropagation()
@@ -114,10 +128,13 @@ export function RowActionMenu<TData>({
                 )}
                 {state.state === 'enabled' && (
                     <Popover
+                        id={menuId}
                         open={open}
                         anchorEl={anchorEl}
                         onClose={handleClose}
                         onClick={handleClose}
+                        // Same as `StyledMenu`: the arrow keys, not Tab, step from the ⋮ into the menu.
+                        tabIntoContent={false}
                         anchorOrigin={{
                             horizontal: 'right',
                             vertical: 'bottom',
@@ -133,7 +150,13 @@ export function RowActionMenu<TData>({
                                 <span>{noActionsLabel}</span>
                             </div>
                         ) : (
-                            <MenuList>
+                            <MenuList
+                                /* Custom StyledMenuList prop (an imperative `.focus()`, not the native
+                                   attribute): WAI-ARIA Menu pattern — opening the ⋮ by keyboard moves focus
+                                   onto the first item, so the arrow keys work at once. */
+                                // eslint-disable-next-line jsx-a11y/no-autofocus
+                                autoFocus={openedByKeyboard}
+                            >
                                 {allActions.map((action, index) => {
                                     if (isCustomAction(action)) {
                                         const CustomComponent = action.component(tableData.row, handleClose)
