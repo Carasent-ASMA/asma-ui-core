@@ -36,7 +36,9 @@ export const StyledMenuItem = ({
         if (disabled) return
         if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault()
-            onClick?.(event as unknown as MouseEvent<HTMLLIElement>)
+            // A real click, not a direct `onClick` call: it also bubbles to the row-action popover's
+            // own `onClick`, which closes the menu exactly as a pointer press does.
+            event.currentTarget.click()
         }
     }
 
@@ -56,6 +58,8 @@ export const StyledMenuItem = ({
                 // text-icon/body #49525f (delta-700), NOT the inherited near-black; hover fill is delta-50.
                 // h40 = py8 + Body Base lh24.
                 'box-border flex min-h-10 items-center px-3 py-2 text-base text-delta-700 outline-none',
+                // Keyboard focus = the 3px focus-ring bar on the left, as on every other menu item.
+                'focus-visible:shadow-[inset_3px_0_var(--colors-focus-ring)]',
                 disabled ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-delta-50',
                 selected && 'bg-gama-50',
                 classes?.root,

@@ -93,6 +93,11 @@ export const StyledDayPicker: React.FC<{
 
     return (
         <DayPicker
+            // The calendar only ever renders in its popover or bottom sheet: opening it moves focus onto
+            // the selected day (else today) so the arrow keys work at once, instead of leaving it on the
+            // trigger, from where Tab only closes the calendar again.
+            // eslint-disable-next-line jsx-a11y/no-autofocus
+            autoFocus
             {...dayPickerPropsRest}
              disabled={disabledMerged}
             month={month}
