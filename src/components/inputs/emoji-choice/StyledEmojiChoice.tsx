@@ -29,8 +29,9 @@ export interface StyledEmojiChoiceProps {
     value?: string | null
     onValueChange?: (value: string, option: EmojiChoiceOption) => void
     /**
-     * @figmaProp none — an optional question: *Clear selection* under the options while one is chosen,
-     * as on `StyledDynamicSelect`. Leave unset for a required question.
+     * @figmaProp none — an optional question: *Clear selection* under the radio list while an option is
+     * chosen, as on `StyledDynamicSelect`; the dropdown clears with the field's own clear button.
+     * Leave unset for a required question.
      */
     onClear?: () => void
     /** The question text. Shown above the options unless `aria-labelledby` points at a heading you render. */
@@ -255,7 +256,6 @@ const Dropdown = ({
     text,
 }: ModeProps): JSX.Element => {
     const questionId = useId()
-    const dropdownRef = useRef<HTMLDivElement>(null)
     // The text typed to search the list; `null` while the field shows the answer.
     const [search, setSearch] = useState<string | null>(null)
     // Typing into a field that shows the answer starts a new search, so the answer is selected on focus.
@@ -265,18 +265,19 @@ const Dropdown = ({
     const showSelectedEmoji = search === null && selected !== null && (selected.label !== '' || !selected.emoji)
 
     return (
-        <div ref={dropdownRef} className={cn(styles['dropdown'], className)}>
+        <div className={cn(styles['dropdown'], className)}>
             {!labelledBy && (
                 <span id={questionId} className={styles['question']}>
                     {question}
                 </span>
             )}
-            <StyledSelectAutocomplete<EmojiChoiceOption, false, true>
+            <StyledSelectAutocomplete<EmojiChoiceOption, false, boolean>
                 dataTest={dataTest}
                 options={options}
                 value={selected}
                 onChange={(_event, option) => {
                     if (option) onValueChange?.(option.value, option)
+                    else onClear?.()
                 }}
                 getOptionLabel={(option) => optionName(option, options.indexOf(option) + 1, text)}
                 getOptionKey={(option) => option.value}
@@ -284,7 +285,7 @@ const Dropdown = ({
                 inputValue={search ?? selectedName}
                 onInputChange={(_event, next, reason) => setSearch(reason === 'input' ? next : null)}
                 onClose={() => setSearch(null)}
-                disableClearable
+                disableClearable={!onClear}
                 error={error}
                 helperText={helperText}
                 pickerTitle={question}
@@ -334,14 +335,6 @@ const Dropdown = ({
                     />
                 )}
             />
-            {onClear && selected && (
-                <ClearSelection
-                    dataTest={dataTest}
-                    text={text}
-                    onClear={onClear}
-                    focusAfter={() => dropdownRef.current?.querySelector('input')}
-                />
-            )}
         </div>
     )
 }

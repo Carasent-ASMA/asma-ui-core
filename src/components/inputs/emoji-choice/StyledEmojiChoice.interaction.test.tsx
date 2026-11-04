@@ -367,17 +367,45 @@ describe('StyledEmojiChoice clear selection', () => {
         await expect(button.getBoundingClientRect().left).toBe(lastCard.left)
     })
 
-    it('clears the dropdown and focuses its field without opening the list', async () => {
+    it('clears the dropdown with the clear button in its field, not with "Clear selection"', async () => {
+        const { container } = mount(<Fixture clearable options={SIX} value='great' />)
+        const combobox = container.querySelector<HTMLInputElement>('[role="combobox"]')!
+        const fieldClear = (): HTMLButtonElement | null =>
+            combobox.closest('[data-field-width]')!.querySelector<HTMLButtonElement>('button[aria-label="Clear"]')
+
+        await expect(container.querySelector('button:not([tabindex="-1"])')?.textContent ?? '').not.toContain('Clear selection')
+        await expect(getComputedStyle(fieldClear()!).visibility).toBe('hidden')
+
+        combobox.focus()
+        await expect(getComputedStyle(fieldClear()!).visibility).toBe('visible')
+        await userEvent.click(fieldClear()!)
+
+        await expect(combobox.value).toBe('')
+        await expect(fieldClear()).toBeNull()
+        await expect(document.activeElement).toBe(combobox)
+        await expect(document.querySelector('[role="listbox"]')).toBeNull()
+    })
+
+    it('clears the dropdown with Backspace once the field text is gone', async () => {
         const { container } = mount(<Fixture clearable options={SIX} value='great' />)
         const combobox = container.querySelector<HTMLInputElement>('[role="combobox"]')!
 
-        await userEvent.click(clearButton(container)!)
+        combobox.focus()
+        await userEvent.keyboard('{Backspace}')
+        await expect(combobox.value).toBe('')
+        await userEvent.keyboard('{Backspace}')
+        await userEvent.tab()
 
         await expect(combobox.value).toBe('')
         await expect(combobox.closest('[data-field-width]')!.querySelector('[aria-hidden="true"]')?.textContent ?? '').not.toContain('😄')
-        await expect(document.activeElement).toBe(combobox)
-        await expect(document.querySelector('[role="listbox"]')).toBeNull()
-        await expect(clearButton(container)).toBeNull()
+    })
+
+    it('has no clear button in the field of a required dropdown', async () => {
+        const { container } = mount(<Fixture options={SIX} value='great' />)
+        const combobox = container.querySelector<HTMLInputElement>('[role="combobox"]')!
+
+        combobox.focus()
+        await expect(combobox.closest('[data-field-width]')!.querySelector('button[aria-label="Clear"]')).toBeNull()
     })
 
     it('has no "Clear selection" when read-only', async () => {
