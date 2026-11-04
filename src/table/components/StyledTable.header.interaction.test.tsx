@@ -683,8 +683,8 @@ describe('24px resize zone (AC 17)', () => {
         await expect(padding('Age')).toBe('10px')
     })
 
-    it('without resizing no handle and no reserved space', async () => {
-        mountHeader({ columns: narrow })
+    it('with enableColumnResizing={false} no handle and no reserved space (resizing is on by default since D15)', async () => {
+        mountHeader({ columns: narrow, enableColumnResizing: false })
 
         await expect(resizerOf('Name')).toBeNull()
         await expect(

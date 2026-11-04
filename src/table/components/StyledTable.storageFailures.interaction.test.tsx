@@ -6,6 +6,9 @@ import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { ariaSorts, headerCell, people, personColumns, sortButton, type Person } from 'src/test-utils/tableFixture'
 import { StyledTable } from './StyledTableIndex'
 import type { StyledTableProps } from '../types'
+/** The default width of the fixture's sortable 160 px columns: the declared 160 plus 20 px (ASMA-8597, D16). */
+const SORTABLE_160 = 180
+
 
 /**
  * Broken, full, blocked or corrupt storage (ASMA-8597, REQ-007, AC 7, AC 8): the table keeps working in
@@ -87,7 +90,7 @@ describe('StyledTable with broken storage', () => {
         mount(<BrokenStorageTable />)
 
         await expect(ariaSorts()['Name']).toBe('ascending')
-        await expect(widthOf('Name')).toBe(160)
+        await expect(widthOf('Name')).toBe(SORTABLE_160)
         await expect(tableRef.current!.getState().pagination.pageSize).toBe(20)
         await expect(tableRef.current!.getState().columnOrder).toEqual([])
 
@@ -123,7 +126,7 @@ describe('StyledTable with broken storage', () => {
         await act(() => tableRef.current!.setColumnOrder(['role', 'name', 'age', 'notes']))
         await expect(tableRef.current!.getState().columnOrder).toEqual(['role', 'name', 'age', 'notes'])
         await act(() => tableRef.current!.resetColumnSettings())
-        await expect(widthOf('Name')).toBe(160)
+        await expect(widthOf('Name')).toBe(SORTABLE_160)
         await expect(ariaSorts()['Name']).toBe('ascending')
         await expectNoOutput()
     })

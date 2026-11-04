@@ -17,6 +17,9 @@ import {
 import { SnackbarProvider } from 'src/components/feedback/snack-bar/SnackbarProvider'
 import { StyledTable } from './StyledTableIndex'
 import type { StyledTableProps } from '../types'
+/** The default width of the fixture's sortable 160 px columns: the declared 160 plus 20 px (ASMA-8597, D16). */
+const SORTABLE_160 = 180
+
 
 /**
  * Reset columns and the column settings dot (ASMA-8597, REQ-008, REQ-012; owner decision D1 for sorting).
@@ -151,7 +154,7 @@ describe('Reset columns', () => {
 
         await waitFor(() => expect(isShown('Columns reset')).toBe(true))
         await waitFor(() => expect(headerLabels()).toEqual(['Name', 'Age', 'Notes']))
-        await expect(widthOf('Name')).toBe(160)
+        await expect(widthOf('Name')).toBe(SORTABLE_160)
         await expect(ariaSorts()).toMatchObject({ Name: 'ascending', Age: 'none' })
         await expect(localStorage.getItem(SORT_KEY)).toBeNull()
         await expect(localStorage.getItem(SIZING_KEY)).toBeNull()
@@ -164,7 +167,7 @@ describe('Reset columns', () => {
         await userEvent.click(document.querySelector<HTMLElement>('body > div button')!)
         await waitFor(() => expect(headerLabels()).toEqual(['Name', 'Age', 'Notes']))
         await expect(ariaSorts()).toMatchObject({ Name: 'ascending' })
-        await expect(widthOf('Name')).toBe(160)
+        await expect(widthOf('Name')).toBe(SORTABLE_160)
     })
 
     it('restores the app\'s defaults even when the table started from saved settings (trap A)', async () => {
@@ -184,7 +187,7 @@ describe('Reset columns', () => {
 
         await waitFor(() => expect(headerLabels()).toEqual(['Name', 'Role', 'Age', 'Notes']))
         await expect(ariaSorts()).toMatchObject({ Name: 'ascending', Age: 'none' })
-        await expect(widthOf('Name')).toBe(160)
+        await expect(widthOf('Name')).toBe(SORTABLE_160)
         await expect(localStorage.getItem(SORT_KEY)).toBeNull()
         await expect(localStorage.getItem(SIZING_KEY)).toBeNull()
         await expect(localStorage.getItem(ORDER_KEY)).toBeNull()
@@ -219,14 +222,14 @@ describe('Reset columns', () => {
         await openPopover()
         await userEvent.click(popoverButton('Reset columns'))
 
-        await waitFor(() => expect(widthOf('Name')).toBe(160))
+        await waitFor(() => expect(widthOf('Name')).toBe(SORTABLE_160))
         // The saved entry is gone, `role`'s width included, and stays gone.
         await expect(localStorage.getItem(SIZING_KEY)).toBeNull()
 
         // A later column is not given the width that was saved before the reset.
         view.rerender(<Harness onApi={onApi} columns={[name, role, age, notes]} />)
         await waitFor(() => expect(headerLabels()).toContain('Role'))
-        await expect(widthOf('Role')).toBe(160)
+        await expect(widthOf('Role')).toBe(SORTABLE_160)
         await new Promise((resolve) => setTimeout(resolve, 100))
         await expect(localStorage.getItem(SIZING_KEY)).toBeNull()
     })
@@ -268,7 +271,7 @@ describe('Reset columns', () => {
         await userEvent.click(popoverButton('Reset columns'))
 
         await waitFor(() => expect(headerLabels()).toEqual(['Name', 'Role', 'Age', 'Notes']))
-        await expect(widthOf('Name')).toBe(160)
+        await expect(widthOf('Name')).toBe(SORTABLE_160)
         await expect(ariaSorts()['Age']).toBe('descending')
         await expect(callsFor(setItem.mock.calls, SORT_KEY)).toHaveLength(0)
         await expect(callsFor(removeItem.mock.calls, SORT_KEY)).toHaveLength(0)
@@ -312,7 +315,7 @@ describe('Reset columns', () => {
 
         await userEvent.keyboard('{Enter}')
 
-        await waitFor(() => expect(widthOf('Name')).toBe(160))
+        await waitFor(() => expect(widthOf('Name')).toBe(SORTABLE_160))
         await waitFor(() => expect(isShown('Columns reset')).toBe(true))
         // The snackbar sits in a live region, so it is announced, and focus has not been thrown to the page.
         await expect(document.querySelector('[role="status"], [role="alert"], [aria-live]')).not.toBeNull()
@@ -341,7 +344,7 @@ describe('Reset columns', () => {
         await expect(document.activeElement).toBe(reset)
         await userEvent.keyboard('{ }')
 
-        await waitFor(() => expect(widthOf('Name')).toBe(160))
+        await waitFor(() => expect(widthOf('Name')).toBe(SORTABLE_160))
     })
 })
 

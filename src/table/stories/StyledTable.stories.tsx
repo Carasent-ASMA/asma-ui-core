@@ -138,7 +138,8 @@ export const SizingPersistenceAndControlAlignment: Story = {
 
         await expect(nameHeader).toBeDefined()
         await expect(nameHeader?.style.width).toBe('240px')
-        await expect(descriptionHeader?.style.width).toBe('160px')
+        // Declared 160 px, and sortable: 20 px wider by default since ASMA-8597's UX round 4 (D16).
+        await expect(descriptionHeader?.style.width).toBe('180px')
         // Mounting writes nothing: the legacy entry is still exactly what was saved.
         await expect(localStorage.getItem(COLUMN_SIZING_KEY)).toBe(
             JSON.stringify({ name: 240, 'column-that-was-removed': 500, description: 'wide' }),
@@ -825,5 +826,169 @@ export const ResizeHandle: Story = {
         const hit = document.elementFromPoint(glyphBox.left + glyphBox.width / 2, glyphBox.top + glyphBox.height / 2)
 
         await expect(zone.contains(hit)).toBe(false)
+    },
+}
+
+const headerOf = (canvasElement: HTMLElement, label: string): HTMLElement =>
+    Array.from(canvasElement.querySelectorAll<HTMLElement>('th')).find((cell) => cell.textContent?.trim() === label)!
+const handleOf = (canvasElement: HTMLElement, label: string): HTMLElement | null =>
+    headerOf(canvasElement, label).querySelector<HTMLElement>('[class*="resizer"]')
+
+const defaultsColumns: ColumnDef<TableRow>[] = [
+    { accessorKey: 'name', header: 'Name', size: 160 },
+    { accessorKey: 'role', header: 'Role', size: 160, enableResizing: false },
+    { accessorKey: 'description', header: 'Description', size: 120, enableSorting: false },
+    { accessorKey: 'updatedBy', header: 'Updated by', size: 120 },
+    { id: 'last', header: 'Last column', size: 120, enableSorting: false },
+]
+
+/**
+ * ASMA-8597, UX round 4 (D15, D16, DEC-NARROW): a table that does not pass `enableColumnResizing` resizes. Every data
+ * column has a handle (on hover), except ui-core's own columns (the select checkbox and the pin), a column that opts out
+ * with `enableResizing: false` (Role), and the last data column, which keeps filling the remaining width. Sortable columns
+ * open 20 px wider than they declare (Name 160 -> 180, Updated by 120 -> 140); a column that cannot sort keeps its width.
+ * It has a `uniqueKey` but does not set `enableColumnResizing`, so it does not save its widths (D17).
+ */
+export const ResizableByDefault: Story = {
+    loaders: [
+        () => {
+            localStorage.clear()
+            return {}
+        },
+    ],
+    render: () => (
+        <div className='w-[920px]'>
+            <StyledTable
+                columns={defaultsColumns}
+                data={indicatorRows}
+                enableRowSelection
+                hideFooter
+                initialState={{ columnVisibility: { select: true } }}
+                locale='en'
+                uniqueKey='p2e-resizable-by-default'
+            />
+        </div>
+    ),
+    play: async ({ canvasElement }) => {
+        // Handles: the data columns that may resize.
+        await expect(handleOf(canvasElement, 'Name')).not.toBeNull()
+        await expect(handleOf(canvasElement, 'Updated by')).not.toBeNull()
+        await expect(handleOf(canvasElement, 'Description')).not.toBeNull()
+        // No handle: an opt-out, the last data column, the select column and the pin.
+        await expect(handleOf(canvasElement, 'Role')).toBeNull()
+        await expect(handleOf(canvasElement, 'Last column')).toBeNull()
+        const selectCell = canvasElement.querySelector<HTMLElement>('thead th [role="checkbox"]')!.closest('th')!
+        const pinCell = canvasElement.querySelector<HTMLElement>('thead th button[aria-haspopup="true"]')!.closest('th')!
+
+        await expect(selectCell.querySelector('[class*="resizer"]')).toBeNull()
+        await expect(pinCell.querySelector('[class*="resizer"]')).toBeNull()
+        // D16: sortable columns are 20 px wider; one that cannot sort is as declared. The last column fills the width.
+        await expect(headerOf(canvasElement, 'Name').style.width).toBe('180px')
+        await expect(headerOf(canvasElement, 'Role').style.width).toBe('180px')
+        await expect(headerOf(canvasElement, 'Description').style.width).toBe('120px')
+        await expect(headerOf(canvasElement, 'Updated by').style.width).toBe('140px')
+        await expect(headerOf(canvasElement, 'Last column').style.width).toBe('100%')
+        // D17: no widths are saved.
+        await expect(localStorage.getItem('p2e-resizable-by-default:column-sizing')).toBeNull()
+    },
+}
+
+const widthColumns: ColumnDef<TableRow>[] = [
+    { accessorKey: 'name', header: 'Sortable 120', size: 120 },
+    { id: 'plain', header: 'Plain', size: 120 },
+    { accessorKey: 'role', header: 'Saved width', size: 120 },
+    { accessorKey: 'description', header: 'Sortable, no size' },
+    { id: 'last', header: 'Last column', size: 120 },
+]
+
+/**
+ * ASMA-8597, UX round 4 (D16): every sortable data column's default width is 20 px wider, which is what its triangle needs.
+ * A sortable column declaring 120 px opens at 140; one declaring nothing at TanStack's 150 + 20; a column that cannot sort
+ * stays at 120. A width the user saved (here 240 for "Saved width", under an explicit `enableColumnResizing`) is applied
+ * as saved, without the 20 px.
+ */
+export const SortableWidthPlus20: Story = {
+    loaders: [
+        () => {
+            localStorage.clear()
+            localStorage.setItem('p2e-sortable-width:column-sizing', JSON.stringify({ role: 240 }))
+            return {}
+        },
+    ],
+    render: () => (
+        <div className='w-[900px]'>
+            <StyledTable
+                columns={widthColumns}
+                data={indicatorRows}
+                enableColumnResizing
+                hideFooter
+                locale='en'
+                uniqueKey='p2e-sortable-width'
+            />
+        </div>
+    ),
+    play: async ({ canvasElement }) => {
+        await expect(headerOf(canvasElement, 'Sortable 120').style.width).toBe('140px')
+        await expect(headerOf(canvasElement, 'Plain').style.width).toBe('120px')
+        await expect(headerOf(canvasElement, 'Saved width').style.width).toBe('240px')
+        await expect(headerOf(canvasElement, 'Sortable, no size').style.width).toBe('170px')
+    },
+}
+
+const triangleColumns: ColumnDef<TableRow>[] = [
+    { accessorKey: 'name', header: 'Ascending', size: 130 },
+    { accessorKey: 'role', header: 'Descending', size: 130 },
+    { accessorKey: 'description', header: 'A long label that is cut short by the column', size: 100 },
+    { accessorKey: 'updatedBy', header: 'Unsorted', size: 130 },
+    { id: 'last', header: 'Last column', size: 120 },
+]
+
+/**
+ * ASMA-8597, UX round 4 (D16, ST-20): the visible sort triangle is at most 20 px wide, in a slot that is exactly 20 px, and
+ * it overlaps neither the label nor the resize zone, with a short label and with a truncated one. Resizing is on by default,
+ * so each of these columns has a zone at its right edge. The hover and focus states are measured by the interaction test.
+ */
+export const TriangleFitsSlot: Story = {
+    loaders: [
+        () => {
+            localStorage.clear()
+            return {}
+        },
+    ],
+    render: () => (
+        <div className='w-[860px]'>
+            <StyledTable
+                columns={triangleColumns}
+                data={indicatorRows}
+                hideFooter
+                initialState={{
+                    sorting: [
+                        { id: 'name', desc: false },
+                        { id: 'role', desc: true },
+                        { id: 'description', desc: false },
+                    ],
+                }}
+                locale='en'
+            />
+        </div>
+    ),
+    play: async ({ canvasElement }) => {
+        const overlaps = (left: DOMRect, right: DOMRect): boolean => left.left < right.right - 0.5 && left.right > right.left + 0.5
+
+        for (const label of ['Ascending', 'Descending', 'A long label that is cut short by the column']) {
+            const cell = headerOf(canvasElement, label)
+            const slot = cell.querySelector<HTMLElement>('[data-sort-state]')!
+            const glyph = Array.from(slot.querySelectorAll<SVGElement>('svg')).find(
+                (svg) => getComputedStyle(svg).visibility === 'visible',
+            )!
+            const triangle = glyph.querySelector('path')!.getBoundingClientRect()
+            const text = cell.querySelector<HTMLElement>('[class*="header-content"]')!.getBoundingClientRect()
+            const zone = cell.querySelector<HTMLElement>('[class*="resizer"]')!.getBoundingClientRect()
+
+            await expect(slot.getBoundingClientRect().width).toBe(20)
+            await expect(triangle.width).toBeLessThanOrEqual(20)
+            await expect(overlaps(triangle, text)).toBe(false)
+            await expect(overlaps(triangle, zone)).toBe(false)
+        }
     },
 }

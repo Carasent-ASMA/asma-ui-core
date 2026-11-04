@@ -190,6 +190,22 @@ export type StyledTableProps<TData, TCustomData> = {
      * makes `uniqueKey` alone enough and retires this prop (follow-up ASMA-8698).
      */
     persistSorting?: boolean
+    /**
+     * Whether the table's columns can be resized with the pointer. **On by default** (ASMA-8597, UX round 4, D15): every data
+     * column has a handle, except ui-core's own columns (select, expand, actions, drag handle, show full text), a column that
+     * opts out with `enableResizing: false` or has a fixed width (`minSize` equal to `maxSize`), and the last data column,
+     * which keeps filling the remaining width (unless the table sets `enableResizing`). `enableColumnResizing={false}` turns
+     * resizing off for the table.
+     *
+     * Saving the widths is a separate opt-in (D17): widths are read and written under `${uniqueKey}:column-sizing` only when
+     * a table sets `enableColumnResizing` itself, as `true`. A table that gets resizing from the default resizes in memory only.
+     * Give it a per-user `uniqueKey` (`getTableSettingsKey` of asma-core-helpers) and write `enableColumnResizing` to save.
+     *
+     * A column without a `minSize` gets the smaller of 100 px and its default width as its minimum. Every sortable data column
+     * is 20 px wider by default (so its sort triangle fits), and so are its `minSize` and `maxSize` when set; widths a user
+     * saved and the app's `initialState.columnSizing` are applied as given.
+     */
+    enableColumnResizing?: boolean
 } & Omit<
     TTableOptions<TData>,
     'getCoreRowModel' | 'getExpandedRowModel' | 'getFilteredRowModel' | 'getSortedRowModel'

@@ -34,9 +34,9 @@ import {
 import { usePersistedStateWriter } from './usePersistedStateWriter'
 import { RowSelectionTooltipFeature } from 'src/table/custom-features/row-selection-tooltip/RowSelectionTooltipFeature'
 import { getLeafColumnInfos } from '../helpers/columnIds'
+import { resolveColumnSizingDefaults } from '../helpers/columnSizingDefaults'
 import { tableStorage } from '../helpers/tableStorage'
 
-const DEFAULT_RESIZABLE_COLUMN_MIN_SIZE = 100
 const NO_SORTING: SortingState = []
 const NO_COLUMN_SIZING: ColumnSizingState = {}
 
@@ -69,20 +69,23 @@ export const useStyledTable = <
     const defaultSorting = initialState?.sorting ?? NO_SORTING
     const defaultColumnSizing = initialState?.columnSizing ?? NO_COLUMN_SIZING
 
-    const resolvedDefaultColumn = props.enableColumnResizing
-        ? {
-              minSize: DEFAULT_RESIZABLE_COLUMN_MIN_SIZE,
-              ...defaultColumn,
-          }
-        : defaultColumn
+    // Resizing is on in every table unless it passes `enableColumnResizing={false}` (D15). Widths are saved only when the
+    // app wrote the prop as `true` (D17), so a table that gets resizing from the default resizes in memory only.
+    const canResize = props.enableColumnResizing ?? true
+    const savesWidths = props.enableColumnResizing === true
+    // The default widths (D16, DEC-NARROW) are resolved on the definitions, before TanStack sees them.
+    const sizedColumns = useMemo(
+        () => resolveColumnSizingDefaults(columns, { defaultColumn, enableSorting: rest.enableSorting, canResize }),
+        [columns, defaultColumn, rest.enableSorting, canResize],
+    )
     const leafColumns = getLeafColumnInfos(columns, {
-        defaultColumn: resolvedDefaultColumn,
+        defaultColumn,
         enableSorting: rest.enableSorting,
         enableMultiSort: rest.enableMultiSort,
     })
 
     const columnOrder = usePersistedColumnOrder(persistColumnOrderKey)
-    const columnSizingKey = props.enableColumnResizing ? uniqueKey : undefined
+    const columnSizingKey = savesWidths ? uniqueKey : undefined
     const columnSizingStorageKey = getColumnSizingStorageKey(columnSizingKey)
     const persistedColumnSizing = usePersistedColumnSizing(columnSizingKey, defaultColumnSizing)
     // Sorting is saved only when the table opts in (D1) and has a key to save it under.
@@ -104,7 +107,7 @@ export const useStyledTable = <
 
     const table = useReactTable({
         _features: [ExpandedRowsFeature, FocusedRowsFeature, OrderColumnsFeature, RowSelectionTooltipFeature],
-        columns,
+        columns: sizedColumns,
         data,
         meta: { locale: locale ?? 'en' },
         initialState: {
@@ -130,8 +133,10 @@ export const useStyledTable = <
             rest.getRowId ??
             ((row: TData, _index: number, parent?: Row<TData>) =>
                 parent ? [parent.id, row.id].join('.') : row.id.toString()),
-        defaultColumn: resolvedDefaultColumn,
+        defaultColumn,
         ...rest,
+        // After `...rest`, so the resolved default is what TanStack gets whether or not the app passed the prop (D15).
+        enableColumnResizing: canResize,
     })
 
     if (tableInstanceRef) {
