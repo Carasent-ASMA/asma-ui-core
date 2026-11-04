@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { afterEach, beforeEach, describe, it } from 'vitest'
+import { afterEach, beforeEach, describe, it, vi } from 'vitest'
 import { page } from 'vitest/browser'
 import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import {
@@ -174,6 +174,24 @@ describe('StyledBottomSheet — as the mobile Action popover', () => {
 
             await waitFor(() => expect(sheet()).toBeNull())
             await waitFor(() => expect(document.activeElement).toBe(trigger()))
+        })
+
+        it('returns focus without a ring after a pointer close, and with one after Escape', async () => {
+            // Chromium already hides the ring after a pointer press, so the option is what Safari needs.
+            const focus = vi.spyOn(HTMLElement.prototype, 'focus')
+            mount(<FilterFixture />)
+
+            await openSheet()
+            await userEvent.click(byTestId('sheet-close'))
+            await waitFor(() => expect(document.activeElement).toBe(trigger()))
+            await expect(focus.mock.contexts.at(-1)).toBe(trigger())
+            await expect(focus.mock.lastCall?.[0]).toMatchObject({ focusVisible: false })
+
+            await openSheet()
+            await userEvent.keyboard('{Escape}')
+            await waitFor(() => expect(document.activeElement).toBe(trigger()))
+            await expect(focus.mock.lastCall?.[0]).toMatchObject({ focusVisible: true })
+            focus.mockRestore()
         })
 
         it('Escape still closes the sheet while the overlay Back feature is disabled', async () => {

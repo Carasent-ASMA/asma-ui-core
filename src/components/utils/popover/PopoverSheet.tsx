@@ -13,6 +13,7 @@ import {
 } from '@floating-ui/react'
 
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
+import { isKeyboardModality, trackInputModality } from 'src/components/inputs/full-screen-picker/inputModality'
 import { cn } from 'src/helpers/cn'
 import { firstTabbable } from 'src/helpers/focusable'
 import { OverlayBackOwnerContext, requestCloseTopOverlayBack, useBackCloses } from 'src/hooks/useBackCloses.hook'
@@ -386,6 +387,7 @@ export const PopoverSheet = ({
     const wasOpen = useRef(false)
     useEffect(() => {
         if (isOpen) {
+            trackInputModality()
             wasOpen.current = true
             return
         }
@@ -396,7 +398,9 @@ export const PopoverSheet = ({
         // Deferred a frame on purpose: the dismiss fires on `pointerdown`, and the browser's own
         // default handling for the rest of that click would blur anything we focused synchronously.
         const frame = requestAnimationFrame(() => {
-            if (document.activeElement === document.body) trigger.focus()
+            if (document.activeElement === document.body) {
+                trigger.focus({ focusVisible: isKeyboardModality() })
+            }
         })
         return () => {
             cancelAnimationFrame(frame)

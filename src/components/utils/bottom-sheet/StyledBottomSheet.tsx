@@ -12,6 +12,7 @@ import {
 import { CloseIcon } from 'src/components/icons/close-icon/CloseIcon'
 import { IndeterminateIcon } from 'src/components/icons/indeterminate-icon/IndeterminateIcon'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
+import { isKeyboardModality, trackInputModality } from 'src/components/inputs/full-screen-picker/inputModality'
 import { cn } from 'src/helpers/cn'
 import {
     isOverlayBackEnabled,
@@ -182,6 +183,7 @@ export const StyledBottomSheet = ({
     useLayoutEffect(() => {
         const node = dialogRef.current
         if (!open || !node) return
+        trackInputModality()
 
         // Remembered before showModal() moves focus, so it can go back to the trigger on close.
         const focused = document.activeElement instanceof HTMLElement ? document.activeElement : null
@@ -201,7 +203,9 @@ export const StyledBottomSheet = ({
             // land on the trigger.
             if (node.open) node.close()
             const target = returnFocusRef.current
-            if (target?.isConnected) target.focus({ preventScroll: true })
+            // After a tap or click the trigger takes focus without a ring: Safari would otherwise paint one,
+            // because a scripted focus inherits the focus-visible state of the sheet it leaves.
+            if (target?.isConnected) target.focus({ preventScroll: true, focusVisible: isKeyboardModality() })
         }
     }, [open, triggerRef])
 
