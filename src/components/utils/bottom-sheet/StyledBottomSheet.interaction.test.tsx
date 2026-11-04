@@ -10,6 +10,7 @@ import {
 import { cleanup, mount, tabbableWithin } from 'src/test-utils/renderInteraction'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { StyledDialog } from 'src/components/feedback/dialog/StyledDialog'
+import { StyledDialogContent } from 'src/components/feedback/dialog/StyledDialogContent'
 import { StyledDrawer } from 'src/components/navigation/drawer/StyledDrawer'
 import { StyledSelect } from 'src/components/inputs/select/StyledSelect'
 import { StyledSelectItem } from 'src/components/inputs/select/StyledSelectItem'
@@ -151,6 +152,24 @@ describe('StyledBottomSheet — as the mobile Action popover', () => {
         it('Escape', async () => {
             mount(<FilterFixture />)
             await openSheet()
+            await userEvent.keyboard('{Escape}')
+
+            await waitFor(() => expect(sheet()).toBeNull())
+            await waitFor(() => expect(document.activeElement).toBe(trigger()))
+        })
+
+        it('returns focus to the trigger, not to a focusable container that held focus on open', async () => {
+            // Safari never focuses a tapped button: focus goes to its nearest focusable ancestor, such as
+            // a dialog's scrollable content, and returning there painted that container's focus ring.
+            mount(
+                <StyledDialogContent>
+                    <FilterFixture />
+                </StyledDialogContent>,
+            )
+            document.querySelector<HTMLElement>('[data-test="styled-dialog-content"]')!.focus()
+            trigger().click()
+            await waitFor(() => expect(sheet()).not.toBeNull())
+
             await userEvent.keyboard('{Escape}')
 
             await waitFor(() => expect(sheet()).toBeNull())

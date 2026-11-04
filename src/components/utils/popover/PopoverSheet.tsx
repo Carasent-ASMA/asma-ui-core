@@ -468,6 +468,7 @@ export const PopoverSheet = ({
                     onClose={close}
                     registerBackClose={false}
                     ownerRef={panelRef}
+                    triggerRef={triggerRef}
                     title={title}
                     ariaLabel={ariaLabel}
                     viewResultsAction={viewResultsAction}
