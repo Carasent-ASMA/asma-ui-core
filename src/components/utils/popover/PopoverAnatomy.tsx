@@ -148,12 +148,16 @@ export const PopoverAnatomy = ({
                 </div>
             )}
             {/* After the footer rows, so Tab reaches it last: body, footer, then Close. Positioned on the
-                surface (its caller's position), whose top-right corner is the content column's. */}
-            <div className='absolute right-0 top-0'>
+                surface (its caller's position), whose top-right corner is the content column's.
+                The surface clips that corner to its 8px radius, so the button takes the same radius there,
+                and while focused it rises above the edge layer: otherwise the corner cuts the focus ring
+                and the 1px edge paints over its top and right sides. */}
+            <div className='absolute right-0 top-0 [&:has(:focus-visible)]:z-[1]'>
                 <StyledButton
                     dataTest={`${dataTest}-close`}
                     variant='textGray'
                     type='button'
+                    className='rounded-tr-lg'
                     aria-label={closeLabel}
                     onClick={onClose}
                     startIcon={<CloseIcon width={24} height={24} />}
