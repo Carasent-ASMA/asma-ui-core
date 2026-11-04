@@ -5,6 +5,10 @@ import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { callsFor, headerCell, people, personColumns, type Person } from 'src/test-utils/tableFixture'
 import { StyledTable } from './StyledTableIndex'
 import type { StyledTableProps } from '../types'
+/** Default widths of the fixture's sortable columns: the declared 160 and 120 px, plus 20 px each (ASMA-8597, D16). */
+const SORTABLE_160 = 180
+const SORTABLE_120 = 140
+
 
 /**
  * Saved column widths (ASMA-8597, REQ-003, REQ-004, REQ-005): the legacy flat `:column-sizing` map keeps
@@ -74,7 +78,7 @@ describe('StyledTable saved column widths', () => {
 
         await expect(widthOf('Name')).toBe(240)
         await expect(widthOf('Role')).toBe(200)
-        await expect(widthOf('Age')).toBe(120)
+        await expect(widthOf('Age')).toBe(SORTABLE_120)
     })
 
     it('U-W02 / ST-08: a legacy entry with an id that matches no column: known widths apply, the unknown id stays in the state and the next write, has no visible effect and no error (AC 4, AC 7)', async () => {
@@ -96,8 +100,8 @@ describe('StyledTable saved column widths', () => {
 
         // Known widths apply; the unknown id changes nothing on screen.
         await expect(widthOf('Name')).toBe(240)
-        await expect(widthOf('Role')).toBe(160)
-        await expect(widthOf('Age')).toBe(120)
+        await expect(widthOf('Role')).toBe(SORTABLE_160)
+        await expect(widthOf('Age')).toBe(SORTABLE_120)
         // It is kept: in the table state, and in the entry (mounting writes nothing).
         await expect(table!.getState().columnSizing).toEqual({ name: 240, 'column-that-was-removed': 500 })
         await expect(localStorage.getItem(SIZING_KEY)).toBe(seeded)
@@ -116,8 +120,8 @@ describe('StyledTable saved column widths', () => {
 
         mount(<SizedTable />)
 
-        await expect(widthOf('Name')).toBe(160)
-        await expect(widthOf('Role')).toBe(160)
+        await expect(widthOf('Name')).toBe(SORTABLE_160)
+        await expect(widthOf('Role')).toBe(SORTABLE_160)
         await expect(widthOf('Age')).toBe(150)
     })
 
@@ -165,11 +169,11 @@ describe('StyledTable saved column widths', () => {
         const setItem = vi.spyOn(Storage.prototype, 'setItem')
 
         const withoutResizing = mount(<SizedTable enableColumnResizing={false} />)
-        await expect(widthOf('Name')).toBe(160)
+        await expect(widthOf('Name')).toBe(SORTABLE_160)
         withoutResizing.unmount()
 
         mount(<SizedTable uniqueKey={undefined} />)
-        await expect(widthOf('Name')).toBe(160)
+        await expect(widthOf('Name')).toBe(SORTABLE_160)
 
         await expect(callsFor(getItem.mock.calls, SIZING_KEY)).toHaveLength(0)
         await expect(callsFor(setItem.mock.calls, /:column-sizing$/)).toHaveLength(0)
@@ -194,7 +198,7 @@ describe('StyledTable saved column widths', () => {
         mouse('dblclick', resizer('Name'), 0)
 
         await waitFor(() => expect(localStorage.getItem(SIZING_KEY)).toBeNull())
-        await expect(widthOf('Name')).toBe(160)
+        await expect(widthOf('Name')).toBe(SORTABLE_160)
     })
 })
 
@@ -230,7 +234,7 @@ describe('StyledTable saved column widths: key change (AC 14)', () => {
         view.rerender(<SizedTable uniqueKey={OTHER_KEY} />)
 
         // The new key has nothing saved: the table shows its defaults, not the old key's 240.
-        await waitFor(() => expect(widthOf('Name')).toBe(160))
+        await waitFor(() => expect(widthOf('Name')).toBe(SORTABLE_160))
         await new Promise((resolve) => setTimeout(resolve, 100))
 
         await expect(callsFor(setItem.mock.calls, /:column-sizing$/)).toHaveLength(0)
@@ -244,7 +248,7 @@ describe('StyledTable saved column widths: key change (AC 14)', () => {
         const setItem = vi.spyOn(Storage.prototype, 'setItem')
         const view = mount(<SizedTable uniqueKey={undefined} />)
 
-        await expect(widthOf('Name')).toBe(160)
+        await expect(widthOf('Name')).toBe(SORTABLE_160)
 
         view.rerender(<SizedTable />)
 
@@ -264,7 +268,7 @@ describe('StyledTable saved column widths: key change (AC 14)', () => {
 
         view.rerender(<SizedTable uniqueKey={undefined} />)
 
-        await waitFor(() => expect(widthOf('Name')).toBe(160))
+        await waitFor(() => expect(widthOf('Name')).toBe(SORTABLE_160))
         await new Promise((resolve) => setTimeout(resolve, 100))
         await expect(callsFor(setItem.mock.calls, /:column-sizing$/)).toHaveLength(0)
         await expect(callsFor(removeItem.mock.calls, /:column-sizing$/)).toHaveLength(0)
@@ -279,7 +283,7 @@ describe('StyledTable saved column widths: key change (AC 14)', () => {
         const view = mount(<SizedTable columnResizeMode='onChange' />)
 
         view.rerender(<SizedTable columnResizeMode='onChange' uniqueKey={OTHER_KEY} />)
-        await waitFor(() => expect(widthOf('Name')).toBe(160))
+        await waitFor(() => expect(widthOf('Name')).toBe(SORTABLE_160))
 
         await drag('Role', 50)
 
@@ -357,6 +361,6 @@ describe('StyledTable saved column widths: columns that are not there yet (U-W09
 
         await waitFor(() => expect(widthOf('Name')).toBe(240))
         await expect(widthOf('Role')).toBe(200)
-        await expect(widthOf('Age')).toBe(120)
+        await expect(widthOf('Age')).toBe(SORTABLE_120)
     })
 })
