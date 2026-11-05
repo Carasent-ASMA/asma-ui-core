@@ -203,13 +203,19 @@ export type StyledTableProps<TData, TCustomData> = {
      *
      * The table then owns visibility: do not pass `state.columnVisibility` or `onColumnVisibilityChange` (development builds
      * warn). The old unscoped entries are migrated once, by the first user who opens the table on a browser, and then
-     * deleted: `persistColumnOrderKey`'s order, and the visibility entry named by `legacyColumnVisibilityKey`.
+     * deleted (only after the user's own entry is written): `persistColumnOrderKey`'s order, and the visibility entry named by
+     * `legacyColumnVisibilityKey`. A table with this prop and no `uniqueKey` saves nothing and leaves the old entries alone.
+     *
+     * The table also keeps its state in step with its props: a column added later takes its definition position in an order
+     * the user changed, and a changed `initialState` default reaches the user who had not changed that column.
      */
     persistColumnLayout?: boolean
     /**
      * The key an app used to save its column visibility under before it opted in with `persistColumnLayout`: a raw
-     * `{ [columnId]: boolean }` map of the whole visibility state. It is read and deleted once, to carry the user's layout
-     * over (ASMA-8695, D-MIGRATE). Only read by a table with `persistColumnLayout` and a `uniqueKey`; ignored otherwise.
+     * `{ [columnId]: boolean }` map of the whole visibility state. It is read once, to carry the user's layout over into the
+     * user's own entry, and deleted once that entry is written (if storage refuses the write the old entry stays, and the
+     * next visit tries again). Reset columns deletes it too. Used only by a table with `persistColumnLayout` **and** a
+     * `uniqueKey`; without a key the table neither reads nor deletes it (ASMA-8695, D-MIGRATE).
      */
     legacyColumnVisibilityKey?: string
     /**

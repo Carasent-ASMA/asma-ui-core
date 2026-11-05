@@ -23,8 +23,8 @@ describe('tableStorage (ASMA-8597, REQ-007)', () => {
         for (const spy of output) expect(spy).not.toHaveBeenCalled()
     }
 
-    it('reads, writes and removes like localStorage', () => {
-        tableStorage.set('k', 'v')
+    it('reads, writes and removes like localStorage, and set says whether it wrote', () => {
+        expect(tableStorage.set('k', 'v')).toBe(true)
         expect(tableStorage.get('k')).toBe('v')
         tableStorage.remove('k')
         expect(tableStorage.get('k')).toBeNull()
@@ -53,6 +53,8 @@ describe('tableStorage (ASMA-8597, REQ-007)', () => {
         })
 
         expect(() => tableStorage.set('k', 'v')).not.toThrow()
+        // A caller that must not delete something unless the replacement is saved (ASMA-8695) can tell.
+        expect(tableStorage.set('k', 'v')).toBe(false)
         expectSilent()
     })
 

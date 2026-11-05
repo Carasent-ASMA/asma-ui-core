@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useLayoutEffect, useMemo } from 'react'
 import type { ColumnOrderState, Table, VisibilityState } from '@tanstack/react-table'
 import { INTERNAL_COLUMN_IDS } from '../types'
 import { readJson, tableStorage } from '../helpers/tableStorage'
@@ -53,11 +53,19 @@ export const sanitizeColumnOrder = (raw: unknown): string[] | undefined => {
     return order.length > 0 ? order : undefined
 }
 
-/** A visibility entry for an id is kept unless it is not a boolean, names an internal column, or names a column that cannot hide. */
+/**
+ * A visibility entry for an id is kept unless it names an internal column or a column that cannot hide. An id that no column
+ * has is kept: a column that appears later picks up its saved state, as a saved order and saved widths do (ASMA-8597, DEC-W).
+ * Only the id of a column that is there, and cannot hide, is dropped (ASMA-8695, DEC-02).
+ */
 const keepsVisibilityOf = (id: string, columns: readonly LeafColumnInfo[]): boolean =>
     !INTERNAL_COLUMN_IDS.includes(id) && columns.find((column) => column.id === id)?.canHide !== false
 
-/** Checks a parsed `:column-visibility` value and returns the valid differences, or `undefined` when nothing usable is saved. */
+/**
+ * Checks a parsed `:column-visibility` value and returns the valid differences, or `undefined` when nothing usable is saved.
+ * Values that are not booleans are dropped, and so are the ids of internal columns and of columns that cannot hide; **ids of
+ * columns that are not there at the moment are kept** (DEC-W).
+ */
 export const sanitizeColumnVisibility = (
     raw: unknown,
     columns: readonly LeafColumnInfo[],
@@ -116,94 +124,219 @@ interface SavedColumnLayoutOptions {
     defaultVisibility: VisibilityState
 }
 
+/** One old entry to migrate: it is deleted only once the new entry that replaces it is written, or when nothing replaces it. */
+interface MigrationItem {
+    legacyKey: string
+    /** The entry that takes over the old layout; absent when the old value is invalid or equals the default. */
+    write?: { key: string; value: string }
+}
+
+/** What was read for the table's current key, as read: missing columns are not placed yet, and the defaults are not applied. */
+interface RawSavedColumnLayout {
+    orderKey: string | undefined
+    visibilityKey: string | undefined
+    order: string[] | undefined
+    /** The saved visibility differences from the defaults. */
+    visibility: Record<string, boolean> | undefined
+    /** What the one-time migration of the old entries changes in storage; applied once, in an effect. */
+    migration: MigrationItem[]
+}
+
 export interface SavedColumnLayout {
     orderKey: string | undefined
     visibilityKey: string | undefined
-    /** The saved order to open with, missing columns already at their definition position (DEC-03). */
+    /** The saved order to open with, missing columns at their definition position (DEC-03), for the columns of this render. */
     order: string[] | undefined
-    /** The whole visibility state to open with: the defaults with the saved differences on top. */
+    /** The whole visibility state to open with: this render's defaults with the saved differences on top. */
     visibility: VisibilityState | undefined
-    /** What the one-time migration of the old entries changes in storage; applied once, in an effect. */
-    migration: { writes: [key: string, value: string][]; removes: string[] }
 }
 
-const readSavedColumnLayout = (options: SavedColumnLayoutOptions): SavedColumnLayout => {
+const readSavedColumnLayout = (options: SavedColumnLayoutOptions): RawSavedColumnLayout => {
     const { enabled, uniqueKey, legacyOrderKey, legacyVisibilityKey, columns, defaultOrder, defaultVisibility } = options
     const orderKey = enabled ? getColumnOrderStorageKey(uniqueKey) : undefined
     const visibilityKey = enabled ? getColumnVisibilityStorageKey(uniqueKey) : undefined
     const definitionIds = columns.map((column) => column.id)
-    const migration: SavedColumnLayout['migration'] = { writes: [], removes: [] }
+    const migration: MigrationItem[] = []
     let order: string[] | undefined
-    let visibility: VisibilityState | undefined
+    let visibility: Record<string, boolean> | undefined
 
     if (orderKey) {
         if (tableStorage.get(orderKey) !== null) {
             order = sanitizeColumnOrder(readJson(orderKey))
         } else if (legacyOrderKey && tableStorage.get(legacyOrderKey) !== null) {
-            // The first user who opens the table on this browser takes over the old, shared order (D-MIGRATE); the old
-            // entry is deleted either way, so it is never read again, and an invalid one is not migrated.
-            migration.removes.push(legacyOrderKey)
-
+            // The first user who opens the table on this browser takes over the old, shared order (D-MIGRATE). The old entry
+            // is deleted once the new one is written, or at once when there is nothing to write (an invalid value, or one
+            // equal to the default), so it is never read again.
             const legacy = parseLegacyOrder(readJson(legacyOrderKey))
             const isDefault =
                 legacy === undefined ||
                 effectiveColumnOrder(insertMissingColumns(legacy, definitionIds), definitionIds).join() ===
                     effectiveColumnOrder(defaultOrder, definitionIds).join()
 
-            if (legacy && !isDefault) {
-                order = legacy
-                migration.writes.push([orderKey, JSON.stringify({ v: FORMAT_VERSION, order: legacy })])
-            }
-        }
+            if (legacy && !isDefault) order = legacy
 
-        if (order) order = insertMissingColumns(order, definitionIds)
+            migration.push({
+                legacyKey: legacyOrderKey,
+                ...(legacy && !isDefault && { write: { key: orderKey, value: JSON.stringify({ v: FORMAT_VERSION, order: legacy }) } }),
+            })
+        }
     }
 
     if (visibilityKey) {
-        let changes: Record<string, boolean> | undefined
-
         if (tableStorage.get(visibilityKey) !== null) {
-            changes = sanitizeColumnVisibility(readJson(visibilityKey), columns)
+            visibility = sanitizeColumnVisibility(readJson(visibilityKey), columns)
         } else if (legacyVisibilityKey && tableStorage.get(legacyVisibilityKey) !== null) {
-            migration.removes.push(legacyVisibilityKey)
-            changes = parseLegacyVisibility(readJson(legacyVisibilityKey), columns, defaultVisibility)
+            visibility = parseLegacyVisibility(readJson(legacyVisibilityKey), columns, defaultVisibility)
 
-            if (changes) migration.writes.push([visibilityKey, JSON.stringify({ v: FORMAT_VERSION, visibility: changes })])
+            migration.push({
+                legacyKey: legacyVisibilityKey,
+                ...(visibility && {
+                    write: { key: visibilityKey, value: JSON.stringify({ v: FORMAT_VERSION, visibility }) },
+                }),
+            })
         }
-
-        if (changes) visibility = { ...defaultVisibility, ...changes }
     }
 
     return { orderKey, visibilityKey, order, visibility, migration }
 }
 
 /**
+ * The layout to open with, from what was read and the columns and defaults of **this** render: a column that the saved order
+ * does not list goes to its definition position (DEC-03), and the saved visibility lands on the current defaults. Derived on
+ * every render, so a change of the columns or of the defaults is never left behind in a value read once.
+ */
+const deriveSavedColumnLayout = (
+    raw: RawSavedColumnLayout,
+    columns: readonly LeafColumnInfo[],
+    defaultVisibility: VisibilityState,
+): SavedColumnLayout => {
+    const changes =
+        raw.visibility &&
+        Object.fromEntries(Object.entries(raw.visibility).filter(([id]) => keepsVisibilityOf(id, columns)))
+
+    return {
+        orderKey: raw.orderKey,
+        visibilityKey: raw.visibilityKey,
+        order: raw.order && insertMissingColumns(raw.order, columns.map((column) => column.id)),
+        visibility: changes && Object.keys(changes).length > 0 ? { ...defaultVisibility, ...changes } : undefined,
+    }
+}
+
+/**
  * Reads the saved layout of the table's current key, once per key, and migrates the old unscoped entries once (D-MIGRATE).
  * Reading is pure; the migration's writes and deletes happen in an effect, and are idempotent, so StrictMode's second run
- * changes nothing. Needs to run before the table is created, because the saved layout is part of its initial state.
+ * changes nothing. **An old entry is deleted only after the entry that replaces it is written**: when storage refuses the
+ * write (it is full or blocked) the old layout stays, and the next visit tries again. Needs to run before the table is
+ * created, because the saved layout is part of its initial state.
  */
 export const useSavedColumnLayout = (options: SavedColumnLayoutOptions): SavedColumnLayout => {
     const orderKey = options.enabled ? getColumnOrderStorageKey(options.uniqueKey) : undefined
     const visibilityKey = options.enabled ? getColumnVisibilityStorageKey(options.uniqueKey) : undefined
 
-    const saved = useMemo(
+    const raw = useMemo(
         () => readSavedColumnLayout(options),
-        // Read once per key and legacy key: a later change of the defaults or of the columns must not replace what the user
-        // chose, and the columns of that render are the ones the saved layout is checked against.
+        // Storage is read once per key and legacy key. What the layout is made of (the columns, the defaults) is applied on
+        // every render below, so the value read once never goes stale.
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [orderKey, visibilityKey, options.legacyOrderKey, options.legacyVisibilityKey],
     )
 
     useEffect(() => {
-        for (const [key, value] of saved.migration.writes) tableStorage.set(key, value)
-        for (const key of saved.migration.removes) tableStorage.remove(key)
-    }, [saved])
+        for (const { legacyKey, write } of raw.migration) {
+            // Keep the old entry when the new one could not be saved: deleting it would lose the user's layout.
+            if (write && !tableStorage.set(write.key, write.value)) continue
 
-    return saved
+            tableStorage.remove(legacyKey)
+        }
+    }, [raw])
+
+    return deriveSavedColumnLayout(raw, options.columns, options.defaultVisibility)
+}
+
+interface ColumnLayoutInputs {
+    /** What the table state was last brought in line with. */
+    signature: string
+    definitionIds: readonly string[]
+    defaultOrder: ColumnOrderState
+    defaultVisibility: VisibilityState
+}
+
+/** The inputs each table's state was last brought in line with, by table instance. */
+const reconciledInputs = new WeakMap<object, ColumnLayoutInputs>()
+
+const sameIds = (left: readonly string[], right: readonly string[]): boolean =>
+    left.length === right.length && left.every((id, index) => id === right[index])
+
+const sameVisibility = (left: VisibilityState, right: VisibilityState): boolean =>
+    [...new Set([...Object.keys(left), ...Object.keys(right)])].every((id) => (left[id] ?? true) === (right[id] ?? true))
+
+/**
+ * Keeps the table's state in step with the columns and the defaults of the current render (ASMA-8695, audit): the state was
+ * created from what the first render knew, and TanStack never revisits it.
+ *
+ * - **A new column** goes to its definition position in an order the user changed (DEC-03), as it does when a saved order is
+ *   read; a user who has not moved anything stays on the definition order.
+ * - **A changed default** reaches the user who had not changed that column: the order follows the new `initialState.columnOrder`
+ *   while the user is on the old default, and each column's visibility follows the new default unless the user changed it.
+ *   What the user changed stays. Without this the dot would show a difference the user never made.
+ *
+ * Returns `true` for the render in which the state is not yet in step: the writers wait (nothing is saved for a state that is
+ * about to change), so a changed default is never saved as the user's choice.
+ */
+export const useColumnLayoutReconcile = <TData>(
+    table: Table<TData>,
+    options: {
+        enabled: boolean
+        definitionIds: readonly string[]
+        defaultOrder: ColumnOrderState
+        defaultVisibility: VisibilityState
+        controlledVisibility: boolean
+    },
+): boolean => {
+    const { enabled, definitionIds, defaultOrder, defaultVisibility, controlledVisibility } = options
+    const current: ColumnLayoutInputs = {
+        signature: JSON.stringify([definitionIds, defaultOrder, Object.entries(defaultVisibility).sort()]),
+        definitionIds,
+        defaultOrder,
+        defaultVisibility,
+    }
+    // The inputs of the last commit, kept outside React state: reading them in render is how the writers learn that this
+    // render's state is not in step yet, and an update of React state would only repeat the render that finds out.
+    const seen = reconciledInputs.get(table) ?? current
+    const pending = enabled && seen.signature !== current.signature
+
+    useLayoutEffect(() => {
+        const before = reconciledInputs.get(table)
+
+        reconciledInputs.set(table, current)
+
+        if (!enabled || !before || before.signature === current.signature) return
+
+        const order = table.getState().columnOrder
+        const wasOnDefault =
+            effectiveColumnOrder(order, before.definitionIds).join() ===
+            effectiveColumnOrder(before.defaultOrder, before.definitionIds).join()
+        const nextOrder = wasOnDefault ? defaultOrder : insertMissingColumns(order, definitionIds)
+
+        if (!sameIds(nextOrder, order)) table.setColumnOrder(nextOrder)
+
+        if (!controlledVisibility) {
+            const visibility = table.getState().columnVisibility
+            const nextVisibility = { ...defaultVisibility, ...diffColumnVisibility(visibility, before.defaultVisibility) }
+
+            if (!sameVisibility(nextVisibility, visibility)) table.setColumnVisibility(nextVisibility)
+        }
+        // Only a change of the inputs reconciles; the closure is that render's.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [table, enabled, current.signature])
+
+    return pending
 }
 
 interface ColumnLayoutWriterOptions {
     saved: SavedColumnLayout
+    /** `true` while the state is about to be brought in line with new columns or defaults: nothing is written yet. */
+    reconciling: boolean
     defaultOrder: ColumnOrderState
     defaultVisibility: VisibilityState
     /** The app owns `state.columnVisibility`: a key change blocks writes but does not set the state itself. */
@@ -212,7 +345,7 @@ interface ColumnLayoutWriterOptions {
 
 /** Saves the table's order and visibility under the keys of `saved`, by the storage rule of `usePersistedStateWriter`. */
 export const useColumnLayoutWriter = <TData>(table: Table<TData>, options: ColumnLayoutWriterOptions): void => {
-    const { saved, defaultOrder, defaultVisibility, controlledVisibility } = options
+    const { saved, reconciling, defaultOrder, defaultVisibility, controlledVisibility } = options
     // Read live: the columns may change while the table stays mounted, so a list taken once would go stale (ASMA-8597, trap A).
     const definitionIds = getDefinitionColumnOrder(table)
 
@@ -221,6 +354,7 @@ export const useColumnLayoutWriter = <TData>(table: Table<TData>, options: Colum
         state: table.getState().columnOrder,
         defaultValue: defaultOrder,
         saved: saved.order,
+        settled: !reconciling,
         // `[]` and the definition order are the same layout, so moving a column back removes the entry.
         toSignature: (order) => JSON.stringify(effectiveColumnOrder(order, definitionIds)),
         toStorage: (order) => JSON.stringify({ v: FORMAT_VERSION, order: uniqueStrings(order) }),
@@ -232,6 +366,7 @@ export const useColumnLayoutWriter = <TData>(table: Table<TData>, options: Colum
         state: table.getState().columnVisibility,
         defaultValue: defaultVisibility,
         saved: saved.visibility,
+        settled: !reconciling,
         controlled: controlledVisibility,
         toSignature: (visibility) => columnVisibilitySignature(visibility, defaultVisibility),
         toStorage: (visibility) =>

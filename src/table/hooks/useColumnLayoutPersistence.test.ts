@@ -34,7 +34,7 @@ describe('the saved column layout entries (ASMA-8695, DEC-02)', () => {
         expect(sanitizeColumnOrder(raw)).toBeUndefined()
     })
 
-    it('U-S04: a versioned visibility keeps booleans for columns that may hide, drops internal columns and ones that cannot hide', () => {
+    it('U-S04: a versioned visibility keeps booleans for columns that may hide and for ids no column has yet (DEC-W), and drops internal columns and ones that cannot hide', () => {
         const columns = [column('a'), column('b', false), column('select'), column('c')]
 
         expect(
@@ -43,6 +43,8 @@ describe('the saved column layout entries (ASMA-8695, DEC-02)', () => {
                 columns,
             ),
         ).toEqual({ a: false, ghost: false })
+        // `ghost` is no column's id (yet): it is kept, so a column that appears later picks up its saved state.
+        // `b` is a column that cannot hide, `select` is internal, and `c` holds no boolean: those are dropped.
     })
 
     it.each([

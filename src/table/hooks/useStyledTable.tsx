@@ -34,7 +34,7 @@ import {
     sortingSignature,
 } from './usePersistedSorting'
 import { usePersistedStateWriter } from './usePersistedStateWriter'
-import { useColumnLayoutWriter, useSavedColumnLayout } from './useColumnLayoutPersistence'
+import { useColumnLayoutReconcile, useColumnLayoutWriter, useSavedColumnLayout } from './useColumnLayoutPersistence'
 import { RowSelectionTooltipFeature } from 'src/table/custom-features/row-selection-tooltip/RowSelectionTooltipFeature'
 import { getLeafColumnInfos } from '../helpers/columnIds'
 import { resolveColumnSizingDefaults } from '../helpers/columnSizingDefaults'
@@ -173,8 +173,18 @@ export const useStyledTable = <
 
     usePersistColumnOrder(table, layoutOptedIn ? undefined : persistColumnOrderKey)
 
+    // Brings the state in step with new columns and changed defaults before anything is saved (ASMA-8695).
+    const reconcilingLayout = useColumnLayoutReconcile(table, {
+        enabled: layoutOptedIn,
+        definitionIds: leafColumns.map((column) => column.id),
+        defaultOrder: defaultColumnOrder,
+        defaultVisibility: defaultColumnVisibility,
+        controlledVisibility: rest.state?.columnVisibility !== undefined,
+    })
+
     useColumnLayoutWriter(table, {
         saved: savedLayout,
+        reconciling: reconcilingLayout,
         defaultOrder: defaultColumnOrder,
         defaultVisibility: defaultColumnVisibility,
         controlledVisibility: rest.state?.columnVisibility !== undefined,
@@ -235,11 +245,14 @@ export const useStyledTable = <
             table.setSorting(defaultSorting)
         }
 
-        const layoutStorageKeys = layoutOptedIn
-            ? [savedLayout.orderKey, savedLayout.visibilityKey, legacyColumnVisibilityKey]
+        // An opted-in table without a per-user key does not own the old keys: it neither migrates nor deletes them.
+        const hasLayoutKeys = layoutOptedIn && savedLayout.orderKey !== undefined
+        const layoutStorageKeys = hasLayoutKeys
+            ? [savedLayout.orderKey, savedLayout.visibilityKey, persistColumnOrderKey, legacyColumnVisibilityKey]
             : []
+        const unscopedOrderKey = layoutOptedIn ? undefined : persistColumnOrderKey
 
-        for (const storageKey of [sortingStorageKey, columnSizingStorageKey, persistColumnOrderKey, ...layoutStorageKeys]) {
+        for (const storageKey of [sortingStorageKey, columnSizingStorageKey, unscopedOrderKey, ...layoutStorageKeys]) {
             if (storageKey) tableStorage.remove(storageKey)
         }
     }
