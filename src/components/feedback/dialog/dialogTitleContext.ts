@@ -13,6 +13,11 @@ export interface StyledDialogTitleContextValue {
     titleId: string
     /** Registers the title's actual id, including an explicit caller-supplied id. */
     setTitleId: (titleId: string | undefined) => void
+    /**
+     * The header's title row (ASMA-8737). The title renders there, so it sits under the header
+     * actions at full width and pins, scrolls and hides together with the rest of the header.
+     */
+    titleSlot?: HTMLElement | null
 }
 
 export const StyledDialogTitleContext = createContext<StyledDialogTitleContextValue | null>(null)

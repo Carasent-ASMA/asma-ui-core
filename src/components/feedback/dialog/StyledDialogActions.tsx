@@ -22,6 +22,8 @@ export const StyledDialogActions = ({
     return (
         <div
             data-testid='styled-dialog-actions'
+            // Pinned to the bottom of the dialog body while header and content scroll (ASMA-8737).
+            data-dialog-footer=''
             className='m-0 flex shrink-0 justify-center p-0'
             style={mergedStyle}
             {...(rest)}

@@ -17,7 +17,7 @@ import { Fetching } from './Fetching'
 import { TableFooter } from './table-footer/TableFooter'
 
 import { useProxyHorizontalScrollSync } from './columns/helpers/useProxyHorizontalScrollSync'
-import { useElementHeightPx } from './columns/helpers/useElementHeightPx'
+import { useElementHeightPx } from 'src/hooks/useElementHeightPx'
 
 import style from './StyledTable.module.scss'
 import { useColumnVirtualizer } from 'src/table/hooks/useColumnVirtualizer'
