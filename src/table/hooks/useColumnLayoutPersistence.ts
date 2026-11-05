@@ -264,9 +264,6 @@ interface ColumnLayoutInputs {
 /** The inputs each table's state was last brought in line with, by table instance. */
 const reconciledInputs = new WeakMap<object, ColumnLayoutInputs>()
 
-const sameIds = (left: readonly string[], right: readonly string[]): boolean =>
-    left.length === right.length && left.every((id, index) => id === right[index])
-
 const sameVisibility = (left: VisibilityState, right: VisibilityState): boolean =>
     [...new Set([...Object.keys(left), ...Object.keys(right)])].every((id) => (left[id] ?? true) === (right[id] ?? true))
 
@@ -318,7 +315,10 @@ export const useColumnLayoutReconcile = <TData>(
             effectiveColumnOrder(before.defaultOrder, before.definitionIds).join()
         const nextOrder = wasOnDefault ? defaultOrder : insertMissingColumns(order, definitionIds)
 
-        if (!sameIds(nextOrder, order)) table.setColumnOrder(nextOrder)
+        // Always, even when the order is the same: the update renders the table once more, and that render is the one in
+        // which the writers are told they may write (`reconciling` is false again). Without it a change the user made in the
+        // render that found the new inputs, or an entry that now equals a changed default, would wait for some later render.
+        table.setColumnOrder(nextOrder)
 
         if (!controlledVisibility) {
             const visibility = table.getState().columnVisibility
@@ -335,7 +335,7 @@ export const useColumnLayoutReconcile = <TData>(
 
 interface ColumnLayoutWriterOptions {
     saved: SavedColumnLayout
-    /** `true` while the state is about to be brought in line with new columns or defaults: nothing is written yet. */
+    /** `true` in the render that finds new columns or defaults, before the state is brought in line: nothing is written yet. */
     reconciling: boolean
     defaultOrder: ColumnOrderState
     defaultVisibility: VisibilityState

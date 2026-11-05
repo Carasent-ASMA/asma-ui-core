@@ -35,6 +35,7 @@ import {
 } from './usePersistedSorting'
 import { usePersistedStateWriter } from './usePersistedStateWriter'
 import { useColumnLayoutReconcile, useColumnLayoutWriter, useSavedColumnLayout } from './useColumnLayoutPersistence'
+import { normalizeDefaultColumnOrder } from '../custom-features/order-columns/columnLayout'
 import { RowSelectionTooltipFeature } from 'src/table/custom-features/row-selection-tooltip/RowSelectionTooltipFeature'
 import { getLeafColumnInfos } from '../helpers/columnIds'
 import { resolveColumnSizingDefaults } from '../helpers/columnSizingDefaults'
@@ -96,7 +97,9 @@ export const useStyledTable = <
     // Per-user column order and visibility, behind an explicit opt-in (ASMA-8695). A table that does not opt in keeps the
     // unscoped `persistColumnOrderKey` and the visibility its app owns, exactly as before (REQ-08).
     const layoutOptedIn = persistColumnLayout === true
-    const defaultColumnOrder = initialState?.columnOrder ?? NO_COLUMN_ORDER
+    const definitionIds = leafColumns.map((column) => column.id)
+    // The app's order with the columns it does not name at their definition position (DEC-03), as in a saved order.
+    const defaultColumnOrder = normalizeDefaultColumnOrder(initialState?.columnOrder ?? NO_COLUMN_ORDER, definitionIds)
     const defaultColumnVisibility = initialState?.columnVisibility ?? DEFAULT_COLUMN_VISIBILITY
     const savedLayout = useSavedColumnLayout({
         enabled: layoutOptedIn,
@@ -144,6 +147,7 @@ export const useStyledTable = <
             ...initialState,
             // A table that opted in with `persistColumnLayout` also lets a saved order and saved visibility beat the app's
             // (ASMA-8695, REQ-02); any other table keeps its order of precedence (REQ-08).
+            ...(layoutOptedIn && defaultColumnOrder.length > 0 && { columnOrder: defaultColumnOrder }),
             ...(savedLayout.order && { columnOrder: savedLayout.order }),
             ...(savedLayout.visibility && { columnVisibility: savedLayout.visibility }),
             // Saved values beat the app's own, widths and sorting alike (ASMA-8597, trap B). Sorting is
@@ -176,7 +180,7 @@ export const useStyledTable = <
     // Brings the state in step with new columns and changed defaults before anything is saved (ASMA-8695).
     const reconcilingLayout = useColumnLayoutReconcile(table, {
         enabled: layoutOptedIn,
-        definitionIds: leafColumns.map((column) => column.id),
+        definitionIds,
         defaultOrder: defaultColumnOrder,
         defaultVisibility: defaultColumnVisibility,
         controlledVisibility: rest.state?.columnVisibility !== undefined,

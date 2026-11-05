@@ -10,6 +10,7 @@ import {
     hasReorderedColumns,
     insertMissingColumns,
     isDefaultColumnOrder,
+    normalizeDefaultColumnOrder,
 } from './columnLayout'
 
 interface Row {
@@ -193,6 +194,12 @@ describe('effectiveColumnOrder, insertMissingColumns and the visibility differen
     it('U-L07: ids that no column has are kept, and a complete order is left as it is', () => {
         expect(insertMissingColumns(['ghost', 'b', 'a'], ['a', 'b'])).toEqual(['ghost', 'b', 'a'])
         expect(insertMissingColumns([], ['a', 'b'])).toEqual(['a', 'b'])
+    })
+
+    it('U-L10: the default order takes the columns it does not name at their definition position; no order stays the definition order', () => {
+        expect(normalizeDefaultColumnOrder([], definition)).toEqual([])
+        expect(normalizeDefaultColumnOrder(['c', 'a', 'b', 'd'], ['a', 'b', 'x', 'c', 'd'])).toEqual(['c', 'a', 'b', 'x', 'd'])
+        expect(normalizeDefaultColumnOrder(definition, definition)).toEqual(definition)
     })
 
     it('U-L08: the visibility difference keeps only what differs from the default, never an internal column', () => {

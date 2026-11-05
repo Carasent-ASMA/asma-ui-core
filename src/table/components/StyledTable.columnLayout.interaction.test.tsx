@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { ColumnDef, Table } from '@tanstack/react-table'
 import { afterEach, beforeEach, describe, it, vi } from 'vitest'
 import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
@@ -479,7 +480,7 @@ describe('StyledTable per-user column layout', () => {
         }
         const legacy = { legacyColumnVisibilityKey: LEGACY_VISIBILITY_KEY, persistColumnOrderKey: LEGACY_ORDER_KEY }
 
-        it('L-11: when the new entries cannot be written the old ones stay, the layout is still applied in memory, and the next visit tries again', async () => {
+        it('L-16: when the new entries cannot be written the old ones stay, the layout is still applied in memory, and the next visit tries again', async () => {
             localStorage.setItem(LEGACY_ORDER_KEY, JSON.stringify(MOVED_ORDER))
             localStorage.setItem(LEGACY_VISIBILITY_KEY, JSON.stringify({ age: false }))
             refuse(/:column-(?:order|visibility)$/)
@@ -506,7 +507,7 @@ describe('StyledTable per-user column layout', () => {
             await expect(localStorage.getItem(LEGACY_VISIBILITY_KEY)).toBeNull()
         })
 
-        it('L-11: each old entry goes only when its own replacement was written: a failed visibility write keeps the old visibility, not the order', async () => {
+        it('L-16: each old entry goes only when its own replacement was written: a failed visibility write keeps the old visibility, not the order', async () => {
             localStorage.setItem(LEGACY_ORDER_KEY, JSON.stringify(MOVED_ORDER))
             localStorage.setItem(LEGACY_VISIBILITY_KEY, JSON.stringify({ age: false }))
             refuse(/:column-visibility$/)
@@ -520,7 +521,7 @@ describe('StyledTable per-user column layout', () => {
             await expect(localStorage.getItem(LEGACY_VISIBILITY_KEY)).not.toBeNull()
         })
 
-        it('L-11: an old entry with nothing to migrate is deleted even when storage refuses writes: nothing replaces it', async () => {
+        it('L-16: an old entry with nothing to migrate is deleted even when storage refuses writes: nothing replaces it', async () => {
             localStorage.setItem(LEGACY_ORDER_KEY, JSON.stringify({ not: 'an order' }))
             localStorage.setItem(LEGACY_VISIBILITY_KEY, JSON.stringify([true]))
             refuse(/:column-(?:order|visibility)$/)
@@ -543,7 +544,7 @@ describe('StyledTable per-user column layout', () => {
             personColumns[3]!,
         ]
 
-        it('DEC-03 while mounted: a column that appears takes its definition position in an order the user changed', async () => {
+        it('L-17: a column that appears takes its definition position in an order the user changed', async () => {
             localStorage.setItem(ORDER_KEY, JSON.stringify({ v: 1, order: ['age', 'name', 'role', 'notes', 'actions'] }))
             const view = mount(<LayoutTable />)
             await expect(headerLabels()).toEqual(['Age', 'Name', 'Role', 'Notes'])
@@ -558,7 +559,7 @@ describe('StyledTable per-user column layout', () => {
             )
         })
 
-        it('a user who has not moved anything stays on the definition order when a column appears, and nothing is saved', async () => {
+        it('L-17: a user who has not moved anything stays on the definition order when a column appears, and nothing is saved', async () => {
             const view = mount(<LayoutTable />)
             const setItem = vi.spyOn(Storage.prototype, 'setItem')
 
@@ -570,7 +571,7 @@ describe('StyledTable per-user column layout', () => {
             await expect(dot()).toBeNull()
         })
 
-        it('a changed default visibility reaches the column the user did not change, keeps the one they did, and the dot stays in step', async () => {
+        it('L-18: a changed default visibility reaches the column the user did not change, keeps the one they did, and the dot stays in step', async () => {
             const view = mount(<LayoutTable initialState={{ columnVisibility: { notes: false } }} />)
             await toggleInPopover('Age')
             await waitFor(() => expect(stored(VISIBILITY_KEY)).toEqual({ v: 1, visibility: { age: false } }))
@@ -591,7 +592,7 @@ describe('StyledTable per-user column layout', () => {
             await waitFor(() => expect(localStorage.getItem(VISIBILITY_KEY)).toBeNull())
         })
 
-        it('a changed default is not saved as the user\'s choice: a user on the defaults writes nothing when the app changes them', async () => {
+        it('L-18: a changed default is not saved as the user\'s choice: a user on the defaults writes nothing when the app changes them', async () => {
             const view = mount(<LayoutTable initialState={{ columnVisibility: { notes: false } }} />)
             await settle()
             const setItem = vi.spyOn(Storage.prototype, 'setItem')
@@ -605,7 +606,65 @@ describe('StyledTable per-user column layout', () => {
             await expect(localStorage.getItem(VISIBILITY_KEY)).toBeNull()
         })
 
-        it('a changed default order reaches a user who has not moved a column, and leaves one who has', async () => {
+        it('L-17: a column that appears takes its definition position in the app\'s own default order too, with no dot and nothing saved', async () => {
+            const appOrder = ['role', 'age', 'name', 'notes', 'actions']
+            const view = mount(<LayoutTable initialState={{ columnOrder: appOrder }} />)
+            await expect(headerLabels()).toEqual(['Role', 'Age', 'Name', 'Notes'])
+            const setItem = vi.spyOn(Storage.prototype, 'setItem')
+
+            view.rerender(<LayoutTable columns={extraColumns} initialState={{ columnOrder: appOrder }} />)
+            await settle()
+
+            // `extra` follows `role` in the definition, so it follows `role` here, not the pin at the end.
+            await expect(headerLabels()).toEqual(['Role', 'Extra', 'Age', 'Name', 'Notes'])
+            await expect(dot()).toBeNull()
+            await expect(callsFor(setItem.mock.calls, /:column-(?:order|visibility)$/)).toEqual([])
+        })
+
+        it('L-18: a change the user makes in the same render as a new column is saved, not lost', async () => {
+            const Both = (): JSX.Element => {
+                const [withExtra, setWithExtra] = useState(false)
+
+                return (
+                    <>
+                        <button
+                            type='button'
+                            onClick={() => {
+                                // One event handler, so React renders once with both: the new column and the user's change.
+                                setWithExtra(true)
+                                table().getColumn('age')!.toggleVisibility(false)
+                            }}
+                        >
+                            Change both
+                        </button>
+                        <LayoutTable columns={withExtra ? extraColumns : personColumns} />
+                    </>
+                )
+            }
+
+            mount(<Both />)
+            await userEvent.click(document.querySelector<HTMLElement>('button[type="button"]')!)
+            await settle()
+
+            await expect(headerLabels()).toEqual(['Name', 'Role', 'Extra', 'Notes'])
+            await waitFor(() => expect(stored(VISIBILITY_KEY)).toEqual({ v: 1, visibility: { age: false } }))
+        })
+
+        it('L-18: a saved entry that becomes equal to a changed default is removed at once, with no other change', async () => {
+            localStorage.setItem(VISIBILITY_KEY, JSON.stringify({ v: 1, visibility: { age: false } }))
+            const view = mount(<LayoutTable />)
+            await expect(headerLabels()).toEqual(['Name', 'Role', 'Notes'])
+
+            // The app now hides Age by default: what the user saved is the default, and the state does not change.
+            view.rerender(<LayoutTable initialState={{ columnVisibility: { age: false } }} />)
+            await settle()
+
+            await expect(localStorage.getItem(VISIBILITY_KEY)).toBeNull()
+            await expect(headerLabels()).toEqual(['Name', 'Role', 'Notes'])
+            await expect(dot()).toBeNull()
+        })
+
+        it('L-18: a changed default order reaches a user who has not moved a column, and leaves one who has', async () => {
             const first = ['role', 'age', 'name', 'notes', 'actions']
             const second = ['age', 'role', 'name', 'notes', 'actions']
             const view = mount(<LayoutTable initialState={{ columnOrder: first }} />)

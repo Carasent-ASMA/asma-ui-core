@@ -54,6 +54,15 @@ export const insertMissingColumns = (order: readonly string[], definitionIds: re
     return result
 }
 
+/**
+ * The order a table with `persistColumnLayout` opens with when the user has saved none: its `initialState.columnOrder`, with
+ * the columns that list does not name at their definition position (DEC-03), as in a saved order; `[]` stays `[]`, the
+ * definition order. Used for every comparison with "the default" (the dot, the storage rule, Reset), so the same list is the
+ * default everywhere (ASMA-8695, audit round 2).
+ */
+export const normalizeDefaultColumnOrder = (order: ColumnOrderState, definitionIds: readonly string[]): string[] =>
+    order.length > 0 ? insertMissingColumns(order, definitionIds) : []
+
 /** A column that has no entry in a visibility state is visible. */
 const isVisibleIn = (visibility: VisibilityState, id: string): boolean => visibility[id] ?? true
 
