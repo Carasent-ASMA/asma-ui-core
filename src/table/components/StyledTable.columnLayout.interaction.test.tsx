@@ -482,7 +482,7 @@ describe('StyledTable per-user column layout', () => {
         it('L-11: when the new entries cannot be written the old ones stay, the layout is still applied in memory, and the next visit tries again', async () => {
             localStorage.setItem(LEGACY_ORDER_KEY, JSON.stringify(MOVED_ORDER))
             localStorage.setItem(LEGACY_VISIBILITY_KEY, JSON.stringify({ age: false }))
-            refuse(/:column-(order|visibility)$/)
+            refuse(/:column-(?:order|visibility)$/)
 
             const view = mount(<LayoutTable {...legacy} />)
             await settle()
@@ -523,7 +523,7 @@ describe('StyledTable per-user column layout', () => {
         it('L-11: an old entry with nothing to migrate is deleted even when storage refuses writes: nothing replaces it', async () => {
             localStorage.setItem(LEGACY_ORDER_KEY, JSON.stringify({ not: 'an order' }))
             localStorage.setItem(LEGACY_VISIBILITY_KEY, JSON.stringify([true]))
-            refuse(/:column-(order|visibility)$/)
+            refuse(/:column-(?:order|visibility)$/)
 
             mount(<LayoutTable {...legacy} />)
             await settle()
