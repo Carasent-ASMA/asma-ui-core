@@ -6,6 +6,11 @@ export interface OrderedColumnsTableState {
 
 export interface OrderedColumnsOptions {
     onColumnOrderChange?: OnChangeFn<ColumnOrderState>
+    /**
+     * Saves the column order under this key, unscoped: every user of a browser shares it, so give it only to a table that
+     * has no per-user option. A table with `persistColumnLayout` (ASMA-8695) saves the order under its own `uniqueKey`
+     * instead, and reads this key once, as the old entry to migrate, and then deletes it.
+     */
     persistColumnOrderKey?: string
 }
 
