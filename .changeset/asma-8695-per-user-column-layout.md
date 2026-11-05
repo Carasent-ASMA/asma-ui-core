@@ -15,7 +15,9 @@ a copy of an app hook). It is an opt-in, so no table changes until its app asks.
   them.** On a table that opts in the table owns the visibility: do not pass `state.columnVisibility` or
   `onColumnVisibilityChange` (a development build warns).
 - **A column that is not in a saved order appears at its definition position,** not at the end, so an app no longer needs a
-  helper that inserts a new column into the saved order.
+  helper that inserts a new column into the saved order. The same goes for a column that `initialState.columnOrder` does not
+  list, and for a column that is added while the table is mounted. The table also keeps its state in step with a changed
+  `initialState` default, for the columns the user did not change.
 - **The column settings dot follows the defaults** on a table that opts in: no dot for a column that is hidden by default; a
   dot once the order, or a column's visibility, differs from the default. Other tables keep today's rule.
 - **Reset columns also restores the default visibility** on a table that opts in (it unhides what the user hid and hides what

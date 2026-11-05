@@ -207,7 +207,9 @@ export type StyledTableProps<TData, TCustomData> = {
      * `legacyColumnVisibilityKey`. A table with this prop and no `uniqueKey` saves nothing and leaves the old entries alone.
      *
      * The table also keeps its state in step with its props: a column added later takes its definition position in an order
-     * the user changed, and a changed `initialState` default reaches the user who had not changed that column.
+     * the user changed, and a changed `initialState` default reaches the user who had not changed that column. A column that
+     * an order does not list, a saved one or `initialState.columnOrder`, appears at its definition position, not at the end
+     * (so a partial `initialState.columnOrder` no longer puts the listed columns first on a table that opts in).
      */
     persistColumnLayout?: boolean
     /**
