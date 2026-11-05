@@ -191,6 +191,28 @@ export type StyledTableProps<TData, TCustomData> = {
      */
     persistSorting?: boolean
     /**
+     * Opt-in (ASMA-8695, D-OPTIN): save and restore this table's column order under `${uniqueKey}:column-order` and its
+     * column visibility under `${uniqueKey}:column-visibility`. Needs a per-user `uniqueKey` (`getTableSettingsKey` of
+     * asma-core-helpers); without one nothing is saved. Off by default: a table that does not set it behaves as before.
+     *
+     * Declare the layout the table opens with in `initialState.columnOrder` and `initialState.columnVisibility`; they are
+     * the defaults, so a column hidden by default is hidden for every user until one shows it. A saved layout beats them
+     * (the saved order and visibility, not `initialState`, decide what a user sees), the column settings dot follows the
+     * defaults (no dot for a column that is hidden by default), a column missing from a saved order appears at its
+     * definition position, and Reset columns also restores the default visibility.
+     *
+     * The table then owns visibility: do not pass `state.columnVisibility` or `onColumnVisibilityChange` (development builds
+     * warn). The old unscoped entries are migrated once, by the first user who opens the table on a browser, and then
+     * deleted: `persistColumnOrderKey`'s order, and the visibility entry named by `legacyColumnVisibilityKey`.
+     */
+    persistColumnLayout?: boolean
+    /**
+     * The key an app used to save its column visibility under before it opted in with `persistColumnLayout`: a raw
+     * `{ [columnId]: boolean }` map of the whole visibility state. It is read and deleted once, to carry the user's layout
+     * over (ASMA-8695, D-MIGRATE). Only read by a table with `persistColumnLayout` and a `uniqueKey`; ignored otherwise.
+     */
+    legacyColumnVisibilityKey?: string
+    /**
      * Whether the table's columns can be resized with the pointer. **On by default** (ASMA-8597, UX round 4, D15): every data
      * column has a handle, except ui-core's own columns (select, expand, actions, drag handle, show full text), a column that
      * opts out with `enableResizing: false` or has a fixed width (`minSize` equal to `maxSize`), and the last data column,
