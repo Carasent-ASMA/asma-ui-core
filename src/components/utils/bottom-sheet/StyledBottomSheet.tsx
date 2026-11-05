@@ -12,6 +12,7 @@ import {
 import { CloseIcon } from 'src/components/icons/close-icon/CloseIcon'
 import { IndeterminateIcon } from 'src/components/icons/indeterminate-icon/IndeterminateIcon'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
+import { isKeyboardModality, trackInputModality } from 'src/components/inputs/full-screen-picker/inputModality'
 import { cn } from 'src/helpers/cn'
 import {
     isOverlayBackEnabled,
@@ -82,6 +83,12 @@ export interface StyledBottomSheetProps {
     registerBackClose?: boolean
     /** Logical owner supplied by a wrapper that must keep one identity across responsive variants. */
     ownerRef?: RefObject<Element | null>
+    /**
+     * The control that opened the sheet; focus returns to it on close. Without it the sheet returns
+     * focus to whatever was focused on open — in Safari a tap never focuses a button, so that is the
+     * nearest focusable ancestor (a dialog's scrollable content), which then shows a focus ring.
+     */
+    triggerRef?: RefObject<HTMLElement | null>
 }
 
 /**
@@ -115,6 +122,7 @@ export const StyledBottomSheet = ({
     className,
     registerBackClose = true,
     ownerRef,
+    triggerRef,
 }: StyledBottomSheetProps): JSX.Element | null => {
     const titleId = useId()
     const dialogRef = useRef<HTMLDialogElement | null>(null)
@@ -175,9 +183,11 @@ export const StyledBottomSheet = ({
     useLayoutEffect(() => {
         const node = dialogRef.current
         if (!open || !node) return
+        trackInputModality()
 
         // Remembered before showModal() moves focus, so it can go back to the trigger on close.
-        returnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
+        const focused = document.activeElement instanceof HTMLElement ? document.activeElement : null
+        returnFocusRef.current = triggerRef?.current ?? focused
         if (!node.open) node.showModal()
         node.focus({ preventScroll: true })
         const frame = requestAnimationFrame(() => {
@@ -193,9 +203,11 @@ export const StyledBottomSheet = ({
             // land on the trigger.
             if (node.open) node.close()
             const target = returnFocusRef.current
-            if (target?.isConnected) target.focus({ preventScroll: true })
+            // After a tap or click the trigger takes focus without a ring: Safari would otherwise paint one,
+            // because a scripted focus inherits the focus-visible state of the sheet it leaves.
+            if (target?.isConnected) target.focus({ preventScroll: true, focusVisible: isKeyboardModality() })
         }
-    }, [open])
+    }, [open, triggerRef])
 
     // A second Android Back force-closes the native dialog while React still wants it open.
     // Ask the registry top to close, then put the dialog back only if this sheet is still open.

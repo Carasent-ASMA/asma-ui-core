@@ -15,7 +15,7 @@ for (const capture of INTERACTION_CAPTURES) {
     test(`open ${capture.screenshot}`, async ({ page }) => {
         await prepareStoryFrame(page, capture.storyId)
         await capture.act(page)
-        await expect(page).toHaveScreenshot(capture.screenshot)
+        await expect(page).toHaveScreenshot(capture.screenshot, capture.threshold === undefined ? {} : { threshold: capture.threshold })
     })
 }
 

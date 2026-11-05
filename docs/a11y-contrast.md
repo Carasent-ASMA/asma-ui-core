@@ -405,6 +405,19 @@ content. All four severities pass (4.76–7.67).
 
 `--colors-delta-200` hairlines are structural, not control boundaries. Not asserted.
 
+### Card (ASMA-8318)
+
+Card pairs on every state surface are asserted in `contrastPairs.ts`. Two known deviations are kept by
+decision (Maxim, ASMA-8318) and not asserted:
+
+- **Pressed surface (`gama-100`):** helper text `delta-600` is 3.99:1 and the unchecked checkbox border
+  `delta-500` is 2.74:1. The state lasts about 100 ms and the title and body stay above 6:1 (2026-10-30).
+  The contract asks for 4.5:1 while pressed (CARD-15), so this goes to the UX authority.
+- **`gama-500` text on tinted states:** the call-to-action on hover and selected, *Viewing now* on
+  selected (about 4.3:1), and the Event date in the stories on selected and overdue. This is the
+  contract's accepted Q14 risk (2026-11-02). The card stories exclude only `[data-card-viewing-now]` and
+  `[data-card-event-date]` from axe's `color-contrast` rule.
+
 ### `--colors-cardea--grey-*`
 
 Bare HSL component triples (`210deg 16% 95%`), consumed as `hsl(var(--…) / <alpha-value>)`. Not

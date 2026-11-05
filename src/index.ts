@@ -3,6 +3,7 @@ import './styles/index.css'
 export * from './helpers'
 // data-display
 export * from './components/data-display/badge'
+export * from './components/data-display/card'
 export * from './components/data-display/chip'
 export * from './components/data-display/interactive-chip'
 export * from './components/data-display/tooltip'

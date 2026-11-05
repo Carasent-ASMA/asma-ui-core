@@ -612,3 +612,73 @@ export const Gallery: Story = {
         )
     },
 }
+
+const HELPER_AREA_CASES = [
+    { title: 'Hint + counter', props: { helperText: 'Visible to the client', maxLength: 100 } },
+    { title: 'No hint: counter directly under the input', props: { reserveHelperText: true, helperText: ' ', maxLength: 100 } },
+    { title: 'Error + counter', props: { error: true, helperText: 'Enter a title', maxLength: 100 } },
+    { title: 'No hint, no error, no counter: one empty line', props: { reserveHelperText: true } },
+] as const
+
+/** ASMA-8777: the hint or error and the counter under the input, with no empty line above the counter. */
+export const HelperAreaWithCounter: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
+    render: () => (
+        <div className='flex w-[400px] flex-col gap-6'>
+            {HELPER_AREA_CASES.map(({ title, props }) => (
+                <div key={title} className='flex flex-col gap-2'>
+                    <span className='text-xs text-delta-600'>{title}</span>
+                    <StatefulField label='Title' required dataTest={`helper-area-${title}`} {...props} />
+                </div>
+            ))}
+        </div>
+    ),
+    play: async ({ canvasElement }) => {
+        const counterField = canvasElement.querySelector('[data-testid="helper-area-No hint: counter directly under the input"]')
+        await expect(counterField).toHaveAttribute('aria-describedby', expect.stringMatching(/^[^ ]*-counter$/))
+        const shell = canvasElement.querySelector('[data-testid="helper-area-No hint: counter directly under the input-shell"]')
+        const counter = canvasElement.ownerDocument.getElementById(counterField!.getAttribute('aria-describedby')!)
+        await expect(counter!.getBoundingClientRect().top - shell!.getBoundingClientRect().bottom).toBe(0)
+    },
+}
+
+const RequiredCounterField = (): JSX.Element => {
+    const [value, setValue] = useState('')
+    const [touched, setTouched] = useState(false)
+    const [withHint, setWithHint] = useState(false)
+    const error = touched && value.trim() === ''
+
+    return (
+        <div className='flex w-[400px] flex-col gap-4'>
+            <label className='flex items-center gap-2 text-sm'>
+                <input type='checkbox' checked={withHint} onChange={(event) => setWithHint(event.target.checked)} />
+                With hint
+            </label>
+            <StyledInputField
+                dataTest='required-counter'
+                label='Title'
+                required
+                reserveHelperText
+                maxLength={100}
+                value={value}
+                error={error}
+                helperText={error ? 'Enter a title' : withHint ? 'Visible to the client' : ' '}
+                onChange={(event) => setValue(event.target.value)}
+                onBlur={() => setTouched(true)}
+                onClear={() => setValue('')}
+            />
+            <StyledInputField dataTest='next-field' label='Next field' />
+        </div>
+    )
+}
+
+/**
+ * ASMA-8777: leave *Title* empty (Tab out) to see the error push the counter down; type to resolve it
+ * and the counter moves back up under the input, or under the hint when *With hint* is on.
+ */
+export const CounterMovesWithError: Story = {
+    // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
+    render: () => <RequiredCounterField />,
+}

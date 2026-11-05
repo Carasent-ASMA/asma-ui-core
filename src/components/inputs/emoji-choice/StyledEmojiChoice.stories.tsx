@@ -35,7 +35,12 @@ const Controlled = (props: StyledEmojiChoiceProps): JSX.Element => {
     const [value, setValue] = useState(props.value)
     return (
         <div className='w-[632px] p-4'>
-            <StyledEmojiChoice {...props} value={value} onValueChange={(next) => setValue(next)} />
+            <StyledEmojiChoice
+                {...props}
+                value={value}
+                onValueChange={(next) => setValue(next)}
+                onClear={props.onClear ? () => setValue(null) : undefined}
+            />
         </div>
     )
 }
@@ -84,6 +89,11 @@ export const WithoutEmoji: Story = {
         value: 'first',
     },
 }
+
+/** An optional question: *Clear selection* while an answer is chosen. */
+export const Optional: Story = { args: { value: 'own', onClear: () => undefined } }
+
+export const OptionalDropdown: Story = { args: { options: SIX_OPTIONS, value: 'own', onClear: () => undefined } }
 
 export const Error: Story = { args: { error: true, helperText: 'Choose an answer' } }
 

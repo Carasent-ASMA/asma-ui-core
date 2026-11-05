@@ -1,5 +1,6 @@
 import { useId, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { ChevronDownIcon } from 'src/components/icons/chevron-down-icon'
+import { CloseIcon } from 'src/components/icons/close-icon'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { getPickerText } from 'src/components/inputs/full-screen-picker/pickerCopy'
 import { StyledInputField } from 'src/components/inputs/input-field'
@@ -27,6 +28,12 @@ export interface StyledEmojiChoiceProps {
     options: readonly EmojiChoiceOption[]
     value?: string | null
     onValueChange?: (value: string, option: EmojiChoiceOption) => void
+    /**
+     * @figmaProp none — an optional question: *Clear selection* under the radio list while an option is
+     * chosen, as on `StyledDynamicSelect`; the dropdown clears with the field's own clear button.
+     * Leave unset for a required question.
+     */
+    onClear?: () => void
     /** The question text. Shown above the options unless `aria-labelledby` points at a heading you render. */
     question: string
     'aria-labelledby'?: string
@@ -46,6 +53,7 @@ interface EmojiChoiceText {
     hideOptions: string
     selected: string
     option: (position: number) => string
+    clearSelection: string
 }
 
 const TEXT: Record<UiCoreLocale, EmojiChoiceText> = {
@@ -55,6 +63,7 @@ const TEXT: Record<UiCoreLocale, EmojiChoiceText> = {
         hideOptions: 'Hide options',
         selected: 'selected',
         option: (position) => `Option ${position}`,
+        clearSelection: 'Clear selection',
     },
     no: {
         noAnswer: 'Ingen svar',
@@ -62,6 +71,7 @@ const TEXT: Record<UiCoreLocale, EmojiChoiceText> = {
         hideOptions: 'Skjul alternativ',
         selected: 'valgt',
         option: (position) => `Alternativ ${position}`,
+        clearSelection: 'Fjern valget',
     },
 }
 
@@ -115,6 +125,30 @@ const RowContent = ({ option, position, text, radio }: RowContentProps): JSX.Ele
     )
 }
 
+interface ClearSelectionProps {
+    dataTest: string
+    text: EmojiChoiceText
+    onClear: () => void
+    /** The button leaves with the answer; focus moves here, without scrolling, instead of to the page. */
+    focusAfter: () => HTMLElement | null | undefined
+}
+
+const ClearSelection = ({ dataTest, text, onClear, focusAfter }: ClearSelectionProps): JSX.Element => (
+    <StyledButton
+        dataTest={`${dataTest}-clear`}
+        variant='text'
+        type='button'
+        className={styles['clear']}
+        startIcon={<CloseIcon width={24} height={24} />}
+        onClick={() => {
+            onClear()
+            focusAfter()?.focus({ preventScroll: true })
+        }}
+    >
+        {text.clearSelection}
+    </StyledButton>
+)
+
 // Enter would submit the surrounding form; it chooses the option instead, as on StyledRadio.
 const chooseOnEnter = (event: KeyboardEvent<HTMLInputElement>): void => {
     if (event.key !== 'Enter') return
@@ -127,6 +161,7 @@ const RadioList = ({
     options,
     value,
     onValueChange,
+    onClear,
     question,
     'aria-labelledby': labelledBy,
     name,
@@ -137,11 +172,16 @@ const RadioList = ({
 }: ModeProps): JSX.Element => {
     const generatedName = useId()
     const helperId = useId()
+    const groupRef = useRef<HTMLFieldSetElement>(null)
     const { show: showHelper, role: helperRole } = useHelperSlot('StyledEmojiChoice', error, helperText)
+    const hasAnswer = options.some((option) => option.value === value)
 
     return (
         // An explicit role: the questionnaire wires its question and errors to `[role="group"]`.
         <fieldset
+            ref={groupRef}
+            // Takes focus after *Clear selection*, so the page stays where the reader is.
+            tabIndex={-1}
             role='group'
             aria-labelledby={labelledBy}
             aria-describedby={showHelper ? helperId : undefined}
@@ -179,6 +219,14 @@ const RadioList = ({
                     )
                 })}
             </div>
+            {onClear && hasAnswer && (
+                <ClearSelection
+                    dataTest={dataTest}
+                    text={text}
+                    onClear={onClear}
+                    focusAfter={() => groupRef.current}
+                />
+            )}
             {showHelper && (
                 <HelperRow
                     id={helperId}
@@ -197,6 +245,7 @@ const Dropdown = ({
     options,
     value,
     onValueChange,
+    onClear,
     question,
     'aria-labelledby': labelledBy,
     error,
@@ -222,12 +271,13 @@ const Dropdown = ({
                     {question}
                 </span>
             )}
-            <StyledSelectAutocomplete<EmojiChoiceOption, false, true>
+            <StyledSelectAutocomplete<EmojiChoiceOption, false, boolean>
                 dataTest={dataTest}
                 options={options}
                 value={selected}
                 onChange={(_event, option) => {
                     if (option) onValueChange?.(option.value, option)
+                    else onClear?.()
                 }}
                 getOptionLabel={(option) => optionName(option, options.indexOf(option) + 1, text)}
                 getOptionKey={(option) => option.value}
@@ -235,7 +285,7 @@ const Dropdown = ({
                 inputValue={search ?? selectedName}
                 onInputChange={(_event, next, reason) => setSearch(reason === 'input' ? next : null)}
                 onClose={() => setSearch(null)}
-                disableClearable
+                disableClearable={!onClear}
                 error={error}
                 helperText={helperText}
                 pickerTitle={question}

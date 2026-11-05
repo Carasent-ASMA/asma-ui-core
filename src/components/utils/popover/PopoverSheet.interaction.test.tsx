@@ -959,4 +959,23 @@ describe('PopoverSheet — surface edge', () => {
             panelRect.height,
         ])
     })
+
+    it('lifts the focused Close above the edge and rounds it with the surface corner', async () => {
+        const { container } = mount(<Fixture />)
+        await userEvent.click(triggerOf(container))
+        const panel = panelOf()
+        await expect(panel).not.toBeNull()
+
+        const close = panel!.querySelector<HTMLButtonElement>('[data-testid="pop-close"]')!
+        const closeSlot = close.parentElement!
+        await expect(getComputedStyle(close).borderTopRightRadius).toBe(getComputedStyle(panel!).borderTopRightRadius)
+
+        await userEvent.hover(close)
+        await expect(getComputedStyle(closeSlot).zIndex).toBe('auto')
+
+        await userEvent.keyboard('{Tab}')
+        await expect(document.activeElement).toBe(close)
+        await expect(close.matches(':focus-visible')).toBe(true)
+        await expect(getComputedStyle(closeSlot).zIndex).toBe('1')
+    })
 })

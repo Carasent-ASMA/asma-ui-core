@@ -7,6 +7,7 @@ import { ACTIONS_COLUMN_ID, INTERNAL_COLUMN_IDS, SELECT_COLUMN_ID, type StyledTa
 import { getTableHeaderStyle } from 'src/table/helpers/getTableHeaderStyle'
 import { useRootContext } from 'src/table/context/RootContext'
 import { COMPACT_COLUMN_MAX_WIDTH } from 'src/table/helpers/columnSpacing'
+import { hasFixedWidth } from 'src/table/helpers/columnSizingDefaults'
 import { getSortPreview } from 'src/table/helpers/sortPreview'
 
 export function TableHeaderCell<
@@ -72,6 +73,7 @@ export function TableHeaderCell<
         tableCanResize &&
         (!enableResizing ? header.id !== lastColumn?.id : true) &&
         header.column.getCanResize() &&
+        !hasFixedWidth(header.column.columnDef) &&
         !INTERNAL_COLUMN_IDS.includes(header.column.id)
 
     return (

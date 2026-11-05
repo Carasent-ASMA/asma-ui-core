@@ -221,7 +221,7 @@ export const StyledTable = <TData extends RowWithId, TCustomData = Record<string
                 <TableHeader
                     table={table}
                     styledTableProps={options}
-                    tableCanResize={!!options.enableColumnResizing}
+                    tableCanResize={options.enableColumnResizing ?? true}
                     tableWidth={null}
                     columnWindow={columnWindow}
                 />
