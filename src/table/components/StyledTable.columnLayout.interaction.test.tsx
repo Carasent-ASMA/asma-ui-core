@@ -652,11 +652,11 @@ describe('StyledTable per-user column layout', () => {
 
         it('L-18: a saved entry that becomes equal to a changed default is removed at once, with no other change', async () => {
             localStorage.setItem(VISIBILITY_KEY, JSON.stringify({ v: 1, visibility: { age: false } }))
-            const view = mount(<LayoutTable />)
+            const view = mount(<LayoutTable initialState={{ columnVisibility: { select: false } }} />)
             await expect(headerLabels()).toEqual(['Name', 'Role', 'Notes'])
 
-            // The app now hides Age by default: what the user saved is the default, and the state does not change.
-            view.rerender(<LayoutTable initialState={{ columnVisibility: { age: false } }} />)
+            // The app now hides Age by default: what the user saved is the default, and the state does not change at all.
+            view.rerender(<LayoutTable initialState={{ columnVisibility: { select: false, age: false } }} />)
             await settle()
 
             await expect(localStorage.getItem(VISIBILITY_KEY)).toBeNull()
