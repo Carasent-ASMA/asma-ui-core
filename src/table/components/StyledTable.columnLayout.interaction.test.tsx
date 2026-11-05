@@ -498,6 +498,24 @@ describe('StyledTable per-user column layout', () => {
             await expect(dot()).toBeNull()
         })
 
+        it('L-12: Reset columns also removes an entry that already equals the default, which the storage rule alone would leave', async () => {
+            // A stale layout: what is saved matches the defaults, so the state never changes and nothing removes it.
+            localStorage.setItem(ORDER_KEY, JSON.stringify({ v: 1, order: DEFINITION_ORDER }))
+            localStorage.setItem(VISIBILITY_KEY, JSON.stringify({ v: 1, visibility: { age: true } }))
+
+            mount(<LayoutTable />)
+            await settle()
+            await expect(headerLabels()).toEqual(['Name', 'Role', 'Age', 'Notes'])
+            await expect(localStorage.getItem(ORDER_KEY)).not.toBeNull()
+
+            await openPopover()
+            await userEvent.click(popoverButton('Reset columns'))
+            await settle()
+
+            await expect(localStorage.getItem(ORDER_KEY)).toBeNull()
+            await expect(localStorage.getItem(VISIBILITY_KEY)).toBeNull()
+        })
+
         it('L-12: Reset columns puts the order back to the app\'s initialState.columnOrder, not to the definition order', async () => {
             const appOrder = ['role', 'age', 'name', 'notes', 'actions']
 
