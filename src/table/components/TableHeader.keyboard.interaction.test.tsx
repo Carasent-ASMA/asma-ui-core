@@ -669,3 +669,51 @@ describe('StyledTable header reach in a wide, column-virtualised table (K-10)', 
         await expect(document.activeElement?.isConnected).toBe(true)
     })
 })
+
+describe('StyledTable header with column resizing on (K-22)', () => {
+    afterEach(cleanup)
+
+    const threeColumns: ColumnDef<Row>[] = [
+        { accessorKey: 'name', header: 'Name' },
+        { accessorKey: 'role', header: 'Role' },
+        { id: 'extra', header: 'Extra', enableSorting: false },
+    ]
+    const resizeHandles = (): HTMLElement[] =>
+        [...document.querySelectorAll<HTMLElement>('thead [class*="resizer"]')]
+
+    // Resizing is on by default (ASMA-8597, UX round 4), and an explicit `enableColumnResizing` turns on width saving too.
+    it.each([
+        ['by default', {}],
+        ['with enableColumnResizing', { enableColumnResizing: true }],
+    ] as const)('K-22: a resize handle is not a tab stop, %s: Tab and Shift+Tab walk the headers and the pin, never a handle', async (_label, props) => {
+        mountBetweenButtons({ columns: threeColumns, ...props })
+        button('Before').focus()
+
+        // The table has handles (Name and Role; the last data column fills the width), and none of them can take the focus.
+        await expect(resizeHandles()).toHaveLength(2)
+        for (const handle of resizeHandles()) {
+            await expect(handle.tabIndex).toBe(-1)
+            await expect(handle.hasAttribute('tabindex')).toBe(false)
+        }
+
+        await expect(await tab()).toBe('header Name')
+        await expect(await tab()).toBe('header Role')
+        await expect(await tab()).toBe('pin')
+        await expect(await tab()).toBe('row r-1')
+        await expect(await tab(true)).toBe('pin')
+        await expect(await tab(true)).toBe('header Role')
+        await expect(await tab(true)).toBe('header Name')
+        await expect(await tab(true)).toBe('Before')
+    })
+
+    it('K-22: a Tab that reaches a resize handle is not taken: the header row leaves it to the browser', async () => {
+        mountBetweenButtons({ columns: threeColumns })
+
+        const handle = resizeHandles()[0]!
+        const tabPress = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true })
+
+        handle.dispatchEvent(tabPress)
+
+        await expect(tabPress.defaultPrevented).toBe(false)
+    })
+})
