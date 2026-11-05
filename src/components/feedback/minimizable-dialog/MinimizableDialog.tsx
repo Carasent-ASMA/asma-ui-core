@@ -1,5 +1,5 @@
 import { StyledButton } from 'src/components/inputs/button'
-import React, { useLayoutEffect, useRef, useState } from 'react'
+import React, { useId, useLayoutEffect, useRef, useState } from 'react'
 import { firstTabbable } from 'src/helpers/focusable'
 import clsx from 'clsx'
 import { cn } from 'src/helpers/cn'
@@ -11,6 +11,12 @@ import { isOverlayBackNavigationPending, OverlayBackOwnerContext, useBackCloses 
 import { StyledTooltip } from 'src/components/data-display/tooltip'
 import type { IMinimizableDialogProps } from './types'
 import { fullScreenFieldWidthVars } from 'src/components/inputs/field-styles'
+import { useDialogHeaderPinning } from 'src/components/feedback/dialog/useDialogHeaderPinning'
+import {
+    DIALOG_HEADER_ACTIONS_ROW_CLASSES,
+    DIALOG_HEADER_CLASSES,
+    DIALOG_TITLE_CLASSES,
+} from 'src/components/feedback/dialog/dialogHeaderStyles'
 import {
     ArrowExpandIcon,
     ArrowShrinkIcon,
@@ -60,6 +66,11 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     const { open: extraActionsOpen, anchorEl, handleOpen, handleClose } = useToggleMenuVisibility()
     const panelRef = useRef<HTMLDivElement | null>(null)
     const minimizedPanelRef = useRef<HTMLDivElement | null>(null)
+    const titleId = useId()
+    // ASMA-8737: header + content scroll together; the header is sticky only while pinned.
+    const bodyRef = useRef<HTMLDivElement>(null)
+    const headerElementRef = useRef<HTMLDivElement | null>(null)
+    const { headerRef: measureHeaderRef, pinned, hidden: headerHidden, scrollPaddingTop } = useDialogHeaderPinning(bodyRef)
 
     // A running primary action keeps the panel open (Esc / X would hide the running request).
     const busyReason = locale === 'en' ? 'Wait until saved' : 'Vent til lagringen er ferdig'
@@ -106,6 +117,11 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
         panelRef.current?.toggleAttribute('inert', minimized)
         minimizedPanelRef.current?.toggleAttribute('inert', !minimized)
     }, [minimized])
+
+    // PIN-7: a header stepped aside for the on-screen keyboard leaves the tab order too.
+    useLayoutEffect(() => {
+        headerElementRef.current?.toggleAttribute('inert', headerHidden)
+    })
 
     if (!open) return null
 
@@ -196,7 +212,18 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                     className={clsx('flex items-center justify-between', !minimized && 'hidden')}
                     data-testid={dataTest}
                 >
-                    <div className='truncate text-lg font-semibold text-delta-800'>{title}</div>
+                    {/* The bar alone stays one line; the full title shows on hover and on keyboard focus. */}
+                    <StyledTooltip title={title} placement='top'>
+                        <div
+                            // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- a keyboard user reaches the truncated title's tooltip here
+                            tabIndex={0}
+                            data-testid='minimized-title'
+                            // Inset ring: the bar clips overflow, so an outside outline would be cut off.
+                            className='min-w-0 truncate text-lg font-semibold text-delta-800 focus-visible:[outline-offset:-2px]'
+                        >
+                            {title}
+                        </div>
+                    </StyledTooltip>
                     <div className='flex items-center gap-x-1'>
                         {showExpandIcon && (
                             <StyledTooltip title={locale === 'en' ? 'Expand' : 'Utvid'}>
@@ -245,7 +272,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                 // docked state is a non-modal widget and shouldn't announce as a dialog.
                 role={isFullScreenActive ? 'dialog' : undefined}
                 aria-modal={isFullScreenActive ? true : undefined}
-                aria-label={isFullScreenActive && typeof title === 'string' ? title : undefined}
+                aria-labelledby={isFullScreenActive ? titleId : undefined}
                 className={cn(
                     'fixed bottom-4 right-4 z-[51] rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)] transition-all duration-300',
                     // Narrower than a phone: the docked panel (shrink-to-fit, pinned right) stays on screen.
@@ -257,23 +284,39 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                 data-testid={dataTest}
             >
                 <OverlayBackOwnerContext.Provider value={panelRef}>
-                <div className='flex flex-col gap-y-2 border-b-[1px] border-delta-200 p-4'>
-                    {/* Narrower than a phone: the window controls wrap below the title instead of overflowing left. */}
-                    <div className='flex items-center justify-between max-xs:flex-wrap max-xs:gap-y-1'>
-                        {!label ? (
-                            <div
-                                className={cn(
-                                    'text-2xl font-semibold text-delta-800',
-                                    'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:![overflow-wrap:anywhere]',
-                                )}
-                            >
-                                {title}
+                <div className={clsx('flex flex-col', fullScreen && !minimized && 'h-full')}>
+                {/* ASMA-8737: the header scrolls in here with the content, and is sticky only while it is
+                    pinned; the footer below stays put. */}
+                <div
+                    ref={bodyRef}
+                    data-dialog-body=''
+                    className='flex min-h-0 flex-grow flex-col overflow-y-auto overscroll-contain'
+                    style={{ scrollPaddingTop }}
+                >
+                <div
+                    ref={(node) => {
+                        headerElementRef.current = node
+                        measureHeaderRef(node)
+                    }}
+                    data-dialog-header=''
+                    data-header-pinned={pinned ? 'true' : 'false'}
+                    aria-hidden={headerHidden || undefined}
+                    hidden={headerHidden}
+                    className={cn(
+                        DIALOG_HEADER_CLASSES,
+                        'rounded-t-lg border-b-[1px] border-delta-200',
+                        pinned && 'sticky top-0 z-[2]',
+                        headerHidden && 'hidden',
+                    )}
+                >
+                    <div className={DIALOG_HEADER_ACTIONS_ROW_CLASSES}>
+                        {label && (
+                            <div className='min-w-0 flex-auto hyphens-auto text-sm text-delta-700 [overflow-wrap:anywhere]'>
+                                {label}
                             </div>
-                        ) : (
-                            <div className='text-sm text-delta-700'>{label}</div>
                         )}
 
-                        <div className='flex items-center gap-x-1'>
+                        <div className='ml-auto flex items-center gap-x-1 max-xs:flex-wrap max-xs:justify-end max-xs:gap-y-1'>
                             {actionNode}
                             {/* Offered in fullscreen too: taking it away left the header's learned
                                 triad a control short, and a dialog the user had sent fullscreen could
@@ -356,22 +399,14 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                         </div>
                     </div>
 
-                    {label && (
-                        <div
-                            className={cn(
-                                'truncate text-2xl font-semibold text-delta-800',
-                                'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:![overflow-wrap:anywhere]',
-                            )}
-                        >
-                            {title}
-                        </div>
-                    )}
+                    {/* Its own full-width row, never truncated or clamped (ASMA-8737). */}
+                    <div id={titleId} className={DIALOG_TITLE_CLASSES}>
+                        {title}
+                    </div>
+                </div>
+                <div className='flex-grow'>{typeof children === 'function' ? children({ fullScreen }) : children}</div>
                 </div>
 
-                <div className={clsx('flex flex-col', fullScreen && !minimized && 'h-[87dvh]')}>
-                    <div className='flex-grow overflow-y-auto overscroll-contain'>
-                        {typeof children === 'function' ? children({ fullScreen }) : children}
-                    </div>
 
                     {(((Array.isArray(extraActions) && extraActions.length) || typeof extraActions === 'function') &&
                         extraActionsText) ||

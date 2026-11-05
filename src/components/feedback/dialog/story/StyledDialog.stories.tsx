@@ -301,6 +301,55 @@ export const LongContentScrollable: Story = {
     },
 }
 
+const longTitleContent = (
+    <StyledDialogContent>
+        {Array.from({ length: 16 }, (_, index) => (
+            <p key={index} style={{ marginTop: index === 0 ? 0 : 16 }}>
+                {index + 1}. Liro watched the flowers sway in the breeze, and the city slowly softened around the secret
+                garden.
+            </p>
+        ))}
+    </StyledDialogContent>
+)
+
+/**
+ * ASMA-8737: the full title on its own row under the actions, wrapping, never truncated. The header
+ * is at most 25% of the viewport height here, so it stays pinned while the content scrolls under it.
+ */
+export const LongTitlePinned: Story = {
+    render: (args) => (
+        <DialogStoryFrame
+            {...args}
+            dialogLabel={undefined}
+            dialogHeaderNode={undefined}
+            dialogTitle='Responsibility group meeting: review of the individual plan, medication changes and home care hours after discharge'
+        >
+            {longTitleContent}
+        </DialogStoryFrame>
+    ),
+}
+
+/**
+ * ASMA-8737: a header taller than 25% of the viewport height scrolls away with the content instead
+ * of taking the space the content needs; the footer stays pinned.
+ */
+export const LongTitleScrolls: Story = {
+    render: (args) => (
+        <DialogStoryFrame
+            {...args}
+            dialogLabel={undefined}
+            dialogHeaderNode={undefined}
+            dialogTitle={Array.from(
+                { length: 4 },
+                () =>
+                    'Responsibility group meeting: review of the individual plan, medication changes and home care hours after discharge, with the GP, the home care nurse and the family.',
+            ).join(' ')}
+        >
+            {longTitleContent}
+        </DialogStoryFrame>
+    ),
+}
+
 /**
  * `scroll='body'` + `fullScreen` — the shape the storage document dialogs use. The paper must stack
  * the header above the content across the full width; while `flex-col` was gated on

@@ -82,6 +82,18 @@ export * from './components/custom/pathfinder-card/PathfinderCard'
 export * from './hooks/usePopupState'
 export * from './hooks/useRouteHeadingFocus'
 
+// ASMA-8737: the shared pieces of pinned bars, for overlays that build their own header.
+export { useOnScreenKeyboardOpen, isOnScreenKeyboardOpen } from './hooks/useOnScreenKeyboard'
+export { useElementHeightPx } from './hooks/useElementHeightPx'
+export { useVisualViewportHeight } from './hooks/useVisualViewportHeight'
+export { useLayoutViewportHeight } from './hooks/useLayoutViewportHeight'
+export { useShortScreenMediaQuery } from './hooks/useMediaQuery.hook'
+export {
+    useDialogHeaderPinning,
+    PINNED_HEADER_MAX_VIEWPORT_SHARE,
+    type DialogHeaderPinning,
+} from './components/feedback/dialog/useDialogHeaderPinning'
+
 // ASMA-8471: an app with an overlay that is NOT a ui-core component wires it into the Back stack
 // with this hook. Named exports, not `export *`: `registerOverlayBackCloser` and
 // `requestCloseTopOverlayBack` are the internal arbitration and stay private, because calling them
