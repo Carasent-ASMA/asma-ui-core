@@ -9,6 +9,7 @@ import { useRootContext } from 'src/table/context/RootContext'
 import type { ColumnWindow } from 'src/table/hooks/useColumnVirtualizer'
 import { compact } from 'src/helpers/arrays'
 import { COMPACT_COLUMN_MAX_WIDTH } from 'src/table/helpers/columnSpacing'
+import { getLastHeaderControl } from 'src/table/helpers/headerControls'
 
 /**
  * Focus the first tabbable element after the table (`'next'`) or the last one before it (`'prev'`).
@@ -152,14 +153,15 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
         switch (e.key) {
             case 'Tab': {
                 // The rows are one tab stop (roving tabindex, WAI-ARIA grid): the arrow keys move between
-                // rows, Tab leaves them — back to the header row, or out of the table.
+                // rows, Tab leaves them — back to the last header control (the pin, or the last sortable header),
+                // or out of the table. The header controls come before the rows in the DOM, but the rows' own
+                // controls come after them, so the browser's Shift+Tab would not land on the header (ASMA-8702).
                 if (e.shiftKey) {
-                    const header = e.currentTarget.closest('table')?.querySelector<HTMLTableRowElement>(
-                        'thead tr[tabindex="0"]',
-                    )
-                    if (header) {
+                    const lastHeaderControl = getLastHeaderControl(e.currentTarget.closest('table'))
+
+                    if (lastHeaderControl) {
                         e.preventDefault()
-                        header.focus()
+                        lastHeaderControl.focus()
                     } else if (focusOutsideTable(e.currentTarget, 'prev')) {
                         e.preventDefault()
                     }

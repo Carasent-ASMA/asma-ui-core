@@ -109,7 +109,7 @@ export const useStyledTable = <
         _features: [ExpandedRowsFeature, FocusedRowsFeature, OrderColumnsFeature, RowSelectionTooltipFeature],
         columns: sizedColumns,
         data,
-        meta: { locale: locale ?? 'en' },
+        meta: { locale: locale ?? 'en', hideHeader: Boolean(rest.hideHeader) },
         initialState: {
             pagination: { pageIndex: 0, pageSize: resolvedPageSize },
             columnVisibility: {

@@ -44,7 +44,8 @@ export function selectColumn<TData>(isFixed: boolean, rowHeight?: number, locale
             return (
                 <div
                     role='checkbox'
-                    tabIndex={0}
+                    // Not a tab stop in a hidden header (`hideHeader`), where nothing shows where the focus is.
+                    tabIndex={table.options.meta?.hideHeader ? -1 : 0}
                     aria-label={labels.selectAll}
                     aria-checked={table.getIsSomeRowsSelected() ? 'mixed' : table.getIsAllRowsSelected()}
                     className={style['select-control']}

@@ -134,10 +134,62 @@ and focus continues from there. Covered for Tab and Shift+Tab.
 **M (2026-10-26) — WCAG 2.4.3, `table/components/TableRow.tsx`, `table-header/TableHeader.tsx`.**
 Tab walked the table row by row, so leaving a long table took one Tab per row. The rows already keep one
 roving tab stop and move with ArrowUp/ArrowDown; the WAI-ARIA Grid pattern makes Tab an exit from the
-composite. Tab on a row now moves to the first focusable element after the table, and Shift+Tab to the
-header row (or, without one, to the last focusable element before the table). Tab on the header row enters
-the rows on the active row instead of always the first. Covered by
-`TableRow.keyboard.interaction.test.tsx`.
+composite. Tab on a row now moves to the first focusable element after the table, and Shift+Tab goes back
+(to the last header control since ASMA-8702, see N below; without one, to the last focusable element before
+the table). Covered by `TableRow.keyboard.interaction.test.tsx`.
+
+**N (ASMA-8702, 2026-11) — WCAG 2.1.1 / 2.4.3, `table/components/table-header/TableHeader.tsx`, `TableRow.tsx`,
+`helpers/headerControls.ts`.**
+The header row was the table's one tab stop (`<tr tabindex="0">`), and the sort buttons and the column settings
+pin came after it in the DOM, so no Tab or Shift+Tab sequence reached them (found while testing ASMA-8597). The
+header row is no longer a tab stop. Tab moves through the sortable headers and then the pin, in visual order
+(the fixed-left headers render first and the fixed-right ones, the pin included, last). Enter and Space on a
+header sort it; Enter on the pin opens the column settings, and Tab then reaches Reset columns. The body model
+of ASMA-8087 is kept: the rows are one roving tab stop, Up and Down move between them, Enter acts, and Tab
+leaves the table forwards. The two halves of the round trip are explicit, because the header controls come
+before the rows in the DOM, but the rows' own controls come after them:
+
+- Tab on the **last** header control moves focus to the active body row, the one the user left, instead of the
+  next tabbable element in the DOM. A Tab that something already handled (`defaultPrevented`, as the portalled
+  popover does) is left alone.
+- Shift+Tab from the active body row moves focus to the **last header control**. Without a header control
+  (nothing sortable, `headerPin={false}`) Tab goes straight to the active row, and Shift+Tab leaves the table
+  backwards.
+- Shift+Tab from the footer's row count select goes back into the table at the active row (it used to go to the
+  header row, which is not a tab stop any more).
+- `hideHeader`: a hidden header has no tab stops. Its sort headers, the pin and the select-all checkbox are not
+  tabbable (`tabIndex` -1, set from the table's `meta.hideHeader`), and `getHeaderControls` returns none for it
+  (the `thead` carries `data-header-hidden`). The header is **not** `inert` or `aria-hidden`: its column headers and
+  `aria-sort` stay in the accessibility tree, which a test checks in Chrome's own accessibility tree. A control a
+  consumer puts in a hidden header is the consumer's: it stays a stop, and the focus is never sent to it. **The
+  contract (also in the `hideHeader` prop's JSDoc): a hidden header must not contain tab stops of the consumer's
+  (a button or link in a header cell), or the consumer gives them `tabIndex={-1}`.** Otherwise Tab reaches them with no
+  visible focus. K-09 pins both halves. `meta.hideHeader`, which the table sets so that its own controls can drop their
+  tab stops, is `@internal`: apps must not set it.
+- **The resize handle is not a tab stop.** Column resizing is on in every table by default (ASMA-8597), and the handle is
+  a pointer-only element with no tab index and no key handler: Tab and Shift+Tab walk past it, and a Tab that reaches the
+  header row from it is left to the browser. Resizing from the keyboard is ASMA-8694. K-22 pins this with resizing on by
+  default and with `enableColumnResizing`.
+- "Header control" means a control Tab would stop on now: a tab index of 0 or more, rendered, not `hidden`,
+  `visibility: hidden` or inside an `inert` or `hidden` ancestor. A button with `tabindex="-1"` is not one.
+
+**What is unchanged, and not new in ASMA-8702 (ASMA-8087's body model; the same on master `7fe83452`).**
+Shift+Tab from after a table enters at the active row only when the rows hold no tabbable controls of their own.
+With a control in each row (a button, a checkbox), the browser's previous stop is the **last row's control**; Shift+Tab
+then walks back through the rows' controls to the active row, and from the row to the last header control, so there is
+no trap, but the way back takes one press per control. A focused control inside a row does not move the roving tab
+stop, and the row handlers act only on the row itself, so Shift+Tab on a row's control is the browser's. These are
+pinned by K-20 and K-21. An end-of-table focus sentinel (or a retarget) that sends Shift+Tab from after the table to
+the active row, and tracking the active row from a focused cell control, would change ASMA-8087's body model. ASMA-8702
+leaves them as they are (decided with the owner on 2026-11-05, who did not wait for the ASMA-8087 author's review): every
+control stays reachable and nothing traps the focus, only the way back is longer. A retarget would be a separate change.
+
+Wide tables get one tab stop per sortable column. Centre headers are column-virtualised, but Tab still reaches
+every one in order: focusing a header scrolls it into view, which renders the next ones. Covered by
+`TableHeader.keyboard.interaction.test.tsx` (K-01 to K-10, K-13 to K-22), `TableRow.keyboard.interaction.test.tsx`
+(K-11), and `StyledTable.header.interaction.test.tsx` (ST-11c, K-12), `StyledTable.resetColumns.interaction.test.tsx`
+(K-07). The Storybook stories `Table/Keyboard reach` (`KeyboardReach`, `HiddenHeader`, `RowControls`) let a person try the
+whole round trip with the keyboard.
 
 The arrow keys also left the focused row off screen (WCAG 2.4.11): `FocusRowsFeature` focused it with
 `preventScroll: true` and never scrolled. It now scrolls the row just into view (`block: 'nearest'`),

@@ -107,6 +107,8 @@ export function HeaderActionMenu<TData>({
                 aria-label={showsChangedLayout ? t.column_settings_changed : t.column_settings}
                 aria-haspopup='true'
                 aria-expanded={open}
+                // Not a tab stop in a hidden header (`hideHeader`), where nothing shows where the focus is.
+                tabIndex={headerData.table.options.meta?.hideHeader ? -1 : undefined}
                 className={styles['actions-header']}
                 onClick={handleOpen}
             >
