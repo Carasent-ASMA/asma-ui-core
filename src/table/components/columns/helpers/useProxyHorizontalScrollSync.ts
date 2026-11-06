@@ -2,8 +2,9 @@ import { useLayoutEffect, useRef, type RefObject } from 'react'
 
 interface ProxyHorizontalScrollSync {
     // RefObject<T> already types `current` as `T | null` — an explicit `T | null` here would make
-    // this a DIFFERENT (wider) instantiation that a plain `<div ref={...}>` no longer accepts (see
-    // the JSX `ref` assignability note on useElementHeightPx.ts).
+    // this a DIFFERENT (wider) instantiation that a plain `<div ref={...}>` no longer accepts:
+    // TypeScript compares two `RefObject<...>` instantiations by their type arguments, not by the
+    // expanded `current` type.
     tableScrollRef: RefObject<HTMLDivElement>
     tableXRef: RefObject<HTMLDivElement>
     hScrollRef: RefObject<HTMLDivElement>

@@ -256,6 +256,8 @@ export function StyledDialogFooter({
         <div
             ref={containerRef}
             data-testid={dataTest}
+            // Inside a `StyledDialog` the footer stays pinned while header and content scroll (ASMA-8737).
+            data-dialog-footer=''
             className={cn(
                 /* `self-stretch` is load-bearing: a footer is a full-width bar, but with no explicit
                  * cross-axis sizing it inherits the parent's align-items. A parent that centres or
