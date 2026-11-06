@@ -195,6 +195,7 @@ describe('Dialog header pinning (ASMA-8737)', () => {
             }
         })
 
+
         it('leaves a header that already scrolls alone', async () => {
             await page.viewport(390, 660)
             const { viewport, restore } = stubVisualViewport(660)
@@ -217,6 +218,72 @@ describe('Dialog header pinning (ASMA-8737)', () => {
             }
         })
     })
+
+        it('a full-screen dialog scrolls its header on a short screen', async () => {
+            await page.viewport(390, 340)
+            mount(
+                <StyledDialog open fullScreen dataTest='pin' dialogTitle='Full screen' onClose={() => undefined}>
+                    <StyledDialogContent>
+                        <div style={{ height: 3000 }}>Tall content</div>
+                    </StyledDialogContent>
+                </StyledDialog>,
+            )
+            await waitFor(() => expect(header()).toHaveAttribute('data-header-pinned', 'false'))
+            await expect(getComputedStyle(header()).position).toBe('static')
+        })
+
+        it('a dialog with no footer still scrolls its header on a short screen', async () => {
+            await page.viewport(390, 340)
+            mount(
+                <StyledDialog open dataTest='pin' dialogTitle='No footer' onClose={() => undefined}>
+                    <StyledDialogContent>
+                        <div style={{ height: 3000 }}>Tall content</div>
+                    </StyledDialogContent>
+                </StyledDialog>,
+            )
+            await waitFor(() => expect(header()).toHaveAttribute('data-header-pinned', 'false'))
+            await expect(dialog().querySelector('[data-testid="styled-dialog-actions"]')).toBeNull()
+        })
+
+        it('Escape still closes the dialog after the header has scrolled away', async () => {
+            await page.viewport(844, 340)
+            let closed = false
+            mount(
+                <StyledDialog
+                    open
+                    dataTest='pin'
+                    dialogTitle='Short screen'
+                    onClose={() => {
+                        closed = true
+                    }}
+                >
+                    <StyledDialogContent>
+                        <div style={{ height: 3000 }}>Tall content</div>
+                    </StyledDialogContent>
+                </StyledDialog>,
+            )
+            await waitFor(() => expect(header()).toHaveAttribute('data-header-pinned', 'false'))
+            body().scrollTop = 400
+            await waitFor(() => expect(header().getBoundingClientRect().bottom).toBeLessThanOrEqual(body().getBoundingClientRect().top))
+            await userEvent.keyboard('{Escape}')
+            await waitFor(() => expect(closed).toBe(true))
+        })
+
+        it('keeps focus when pinning flips', async () => {
+            await page.viewport(390, 660)
+            mount(
+                <Fixture title={lines(3)}>
+                    <input aria-label='Name' data-testid='field' />
+                </Fixture>,
+            )
+            await waitFor(() => expect(header()).toHaveAttribute('data-header-pinned', 'true'))
+            await nextFrames()
+            const field = dialog().querySelector<HTMLInputElement>('[data-testid="field"]')!
+            field.focus()
+            await page.viewport(390, 340)
+            await waitFor(() => expect(header()).toHaveAttribute('data-header-pinned', 'false'))
+            await expect(document.activeElement).toBe(field)
+        })
 })
 
 describe('Minimizable dialog titles (ASMA-8737, REQ-003, 004)', () => {
@@ -299,6 +366,18 @@ describe('Minimizable dialog titles (ASMA-8737, REQ-003, 004)', () => {
             </MinimizableDialog>,
         )
         await expectMinimizedTooltip(container)
+    })
+
+    it('MinimizableDialogV2 pins its header by the same rule', async () => {
+        await page.viewport(844, 340)
+        const { container } = mount(
+            <MinimizableDialogV2 dataTest='v2' open title='Short' onClose={() => undefined}>
+                <div style={{ height: 3000 }}>Body</div>
+            </MinimizableDialogV2>,
+        )
+        await waitFor(() => expect(header(container)).toHaveAttribute('data-header-pinned', 'false'))
+        await page.viewport(1280, 720)
+        await waitFor(() => expect(header(container)).toHaveAttribute('data-header-pinned', 'true'))
     })
 
     it('MinimizableDialog pins its header by the same rule', async () => {
