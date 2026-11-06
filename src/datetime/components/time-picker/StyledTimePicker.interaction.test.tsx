@@ -704,6 +704,9 @@ describe('StyledTimePicker isTimeDisabled', () => {
         await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
         await expect(input).toHaveValue('23:00')
         await expect(container.textContent).toContain(REASON)
-        await expect(onSelect).not.toHaveBeenCalledWith(expect.objectContaining({ getHours: expect.anything() }))
+        // Nothing in the blocked window was ever committed upward. Stated as "no call carried 23:00"
+        // rather than a matcher, which both says the actual claim and keeps `any` out of the test.
+        const committed = onSelect.mock.calls.map((call) => call[0] as Date | undefined)
+        await expect(committed.some((picked) => picked instanceof Date && picked.getHours() === 23)).toBe(false)
     })
 })
