@@ -37,7 +37,7 @@ const meta = {
                     '  `Ingen treff` at zero (still enabled), `9999+` cap, and an in-sheet live region — the',
                     '  list behind is inert, so its own live region cannot announce.',
                     "- **`locale`** sets the language of that label and of the close button's name; pass the",
-                    "  app's `i18n.code`. English (*Show results*, *No matches*, *Close*) is the default.",
+                    "  app's `i18n.code`. English (*View results*, *No matches*, *Close*) is the default.",
                     '- The title must name the object: `Handlinger — søknad 4417`, not just `Handlinger`.',
                 ].join('\n'),
             },

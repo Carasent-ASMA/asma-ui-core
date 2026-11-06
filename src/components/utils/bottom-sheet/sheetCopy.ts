@@ -5,7 +5,7 @@ import type { UiCoreLocale } from 'src/helpers/uiCoreLocale'
  *
  * @see asma-modules/_docs/ux/specs/spec-design-system-bottom-sheet.md:116 — Copy and label guidelines
  */
-export const SHEET_TEXT: Record<UiCoreLocale, { close: string; showResults: string; noMatches: string }> = {
-    no: { close: 'Lukk', showResults: 'Vis resultater', noMatches: 'Ingen treff' },
-    en: { close: 'Close', showResults: 'Show results', noMatches: 'No matches' },
+export const SHEET_TEXT: Record<UiCoreLocale, { close: string; viewResults: string; noMatches: string }> = {
+    no: { close: 'Lukk', viewResults: 'Vis resultater', noMatches: 'Ingen treff' },
+    en: { close: 'Close', viewResults: 'View results', noMatches: 'No matches' },
 }
