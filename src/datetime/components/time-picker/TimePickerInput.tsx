@@ -17,6 +17,8 @@ export const TimePickerInput: React.FC<
         isValidTime: boolean
         isValidEndTime: boolean
         isMissingTime?: boolean
+        /** Set only while the current entry is one `isTimeDisabled` refuses; carries its reason. */
+        disabledTimeError?: React.ReactNode
         localValue: string
     }
 > = (props) => {
@@ -36,6 +38,7 @@ export const TimePickerInput: React.FC<
         isValidTime,
         isValidEndTime,
         isMissingTime,
+        disabledTimeError,
         localValue,
         title,
         required,
@@ -51,7 +54,7 @@ export const TimePickerInput: React.FC<
         showMask: false,
     })
 
-    const hasError = !isValidTime || !isValidEndTime || !!isMissingTime || !!error
+    const hasError = !isValidTime || !isValidEndTime || !!isMissingTime || !!error || !!disabledTimeError
     const inputRootRef = useRef<HTMLDivElement | null>(null)
     const titleId = useId()
 
@@ -79,6 +82,9 @@ export const TimePickerInput: React.FC<
                 size='small'
                 error={hasError}
                 helperText={
+                    // The consumer's own reason wins: it names the actual rule, where the built-in
+                    // catalogue could only say "invalid time".
+                    disabledTimeError ?? (
                     <HelperText
                         isValidTime={isValidTime}
                         isValidEndTime={isValidEndTime}
@@ -88,6 +94,7 @@ export const TimePickerInput: React.FC<
                         helperText={helperText}
                         messages={defaultTimePickerHelperMessages}
                     />
+                    )
                 }
                 onChange={handleChange}
                 onBlur={handleBlur}

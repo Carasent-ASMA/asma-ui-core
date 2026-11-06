@@ -9,7 +9,7 @@ import { TimePickerPanel } from './components/TimePickerPanel'
 export const TimePickerPopper: React.FC<StyledTimePickerProps & { popupState: PopupState; handleClear: () => void }> = (
     props,
 ) => {
-    const { popupState, dataTest, value, minTime, onSelect, handleClear } = props
+    const { popupState, dataTest, value, minTime, isTimeDisabled, disabledTimeReason, onSelect, handleClear } = props
 
     return (
         <Popper
@@ -27,6 +27,8 @@ export const TimePickerPopper: React.FC<StyledTimePickerProps & { popupState: Po
                             dataTest={dataTest}
                             value={value}
                             minTime={minTime}
+                            isTimeDisabled={isTimeDisabled}
+                            disabledTimeReason={disabledTimeReason}
                             onSelect={onSelect}
                             handleClear={handleClear}
                             onConfirm={() => popupState.close()}

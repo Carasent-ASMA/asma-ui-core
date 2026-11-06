@@ -570,3 +570,143 @@ describe('StyledTimePicker required', () => {
         await expect(container).not.toHaveTextContent('Required')
     })
 })
+
+/**
+ * `isTimeDisabled` (ASMA-8761): an arbitrary, possibly midnight-wrapping band of clock times is
+ * refused — and unlike `minTime`, refused *loudly*, because the rule lives in the consumer and the
+ * field cannot show it. The motivating case is a customer's quiet hours for patient SMS.
+ */
+describe('StyledTimePicker isTimeDisabled', () => {
+    afterEach(cleanup)
+
+    /** 22:00–06:00, the shape that no pair of bounds can express because it wraps midnight. */
+    const quietHours = (time: Date): boolean => {
+        const minutes = time.getHours() * 60 + time.getMinutes()
+        return minutes >= 22 * 60 || minutes < 6 * 60
+    }
+
+    const REASON = 'SMS is not sent between 22:00 and 06:00'
+
+    const QuietFixture = ({
+        initial,
+        predicate = quietHours,
+        onSelect = () => undefined,
+    }: {
+        initial?: Date
+        predicate?: (time: Date) => boolean
+        onSelect?: (date?: Date) => void
+    }): JSX.Element => {
+        const [value, setValue] = useState<Date | undefined>(initial)
+        return (
+            <StyledTimePicker
+                dataTest='quiet-time'
+                label='Send time'
+                value={value}
+                isTimeDisabled={predicate}
+                disabledTimeReason={REASON}
+                onSelect={(next) => {
+                    setValue(next)
+                    onSelect(next)
+                }}
+            />
+        )
+    }
+
+    const quietField = (container: HTMLElement): HTMLInputElement =>
+        container.querySelector<HTMLInputElement>('input[data-testid="quiet-time"]')!
+    const openQuietPanel = async (container: HTMLElement): Promise<void> => {
+        await userEvent.click(quietField(container))
+        await waitFor(() => expect(panel()).not.toBeNull(), { timeout: 600 })
+    }
+    const quietColumns = (): HTMLElement[] => {
+        const body = document.querySelector<HTMLElement>('[data-test="quiet-time-time-picker-body"]')!
+        return Array.from(body.children) as HTMLElement[]
+    }
+    const quietCell = (column: 0 | 1, label: string): HTMLButtonElement =>
+        Array.from(quietColumns()[column]!.querySelectorAll('button')).find((b) => b.textContent === label)!
+
+    it('refuses every hour inside a window that wraps midnight, and no others', async () => {
+        const { container } = mount(<QuietFixture initial={new Date(2026, 9, 5, 12, 0)} />)
+        await openQuietPanel(container)
+
+        // Both sides of midnight, which is the half a `maxTime` could not have described.
+        await expect(quietCell(0, '22')).toHaveAttribute('aria-disabled', 'true')
+        await expect(quietCell(0, '23')).toHaveAttribute('aria-disabled', 'true')
+        await expect(quietCell(0, '00')).toHaveAttribute('aria-disabled', 'true')
+        await expect(quietCell(0, '05')).toHaveAttribute('aria-disabled', 'true')
+        // The boundary is exclusive at the opening: 06:00 is the first hour SMS may go out.
+        await expect(quietCell(0, '06')).not.toHaveAttribute('aria-disabled')
+        await expect(quietCell(0, '21')).not.toHaveAttribute('aria-disabled')
+    })
+
+    it('keeps an hour available when only some of its minutes are refused', async () => {
+        // 06:00–06:30 rejects half of hour 6. Greying the hour would strand the minutes it allows,
+        // which is the same rule `minTime` already follows.
+        const halfHour = (time: Date): boolean => time.getHours() === 6 && time.getMinutes() < 30
+        const { container } = mount(<QuietFixture initial={new Date(2026, 9, 5, 6, 45)} predicate={halfHour} />)
+        await openQuietPanel(container)
+
+        await expect(quietCell(0, '06')).not.toHaveAttribute('aria-disabled')
+        await expect(quietCell(1, '25')).toHaveAttribute('aria-disabled', 'true')
+        await expect(quietCell(1, '30')).not.toHaveAttribute('aria-disabled')
+    })
+
+    it('leaves a refused cell focusable so its reason is reachable without a mouse', async () => {
+        const { container } = mount(<QuietFixture initial={new Date(2026, 9, 5, 12, 0)} />)
+        await openQuietPanel(container)
+        const blocked = quietCell(0, '23')
+
+        // Native `disabled` would be skipped by Tab and silent on pointer events in Chrome and
+        // Safari alike, so neither a keyboard nor a mouse user could ever learn why the cell is out.
+        await expect(blocked).not.toHaveAttribute('disabled')
+        await expect(blocked).toHaveAttribute('aria-disabled', 'true')
+        blocked.focus()
+        await expect(document.activeElement).toBe(blocked)
+    })
+
+    it('shows the reason when a refused cell is hovered', async () => {
+        const { container } = mount(<QuietFixture initial={new Date(2026, 9, 5, 12, 0)} />)
+        await openQuietPanel(container)
+
+        await userEvent.hover(quietCell(0, '23'))
+
+        await waitFor(() => expect(document.body.textContent).toContain(REASON), { timeout: 1500 })
+    })
+
+    it('commits nothing when a refused cell is clicked', async () => {
+        const onSelect = fn()
+        const { container } = mount(<QuietFixture initial={new Date(2026, 9, 5, 12, 0)} onSelect={onSelect} />)
+        await openQuietPanel(container)
+
+        // A raw DOM click, deliberately, rather than `userEvent.click`: the runner's actionability
+        // check treats `aria-disabled` as not-enabled and refuses to click at all — which is itself
+        // the proof that assistive tech and the browser both read the cell as unavailable. What is
+        // left to prove is the handler's own refusal, the thing that holds if a click does land.
+        quietCell(0, '23').dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
+
+        await expect(quietField(container)).toHaveValue('12:00')
+        await expect(onSelect).not.toHaveBeenCalled()
+    })
+
+    it('errors on a typed refused time rather than reverting it the way minTime does', async () => {
+        const onSelect = fn()
+        const { container } = mount(<QuietFixture initial={new Date(2026, 9, 5, 12, 0)} onSelect={onSelect} />)
+        const input = quietField(container)
+
+        await userEvent.clear(input)
+        await userEvent.keyboard('2300')
+        await waitFor(() => expect(input).toHaveValue('23:00'))
+
+        input.blur()
+
+        // The text the author typed stays put — an error that names a value they can no longer see
+        // would be unactionable — and the consumer's own reason is what the field reports.
+        await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
+        await expect(input).toHaveValue('23:00')
+        await expect(container.textContent).toContain(REASON)
+        // Nothing in the blocked window was ever committed upward. Stated as "no call carried 23:00"
+        // rather than a matcher, which both says the actual claim and keeps `any` out of the test.
+        const committed = onSelect.mock.calls.map((call) => call[0] as Date | undefined)
+        await expect(committed.some((picked) => picked instanceof Date && picked.getHours() === 23)).toBe(false)
+    })
+})
