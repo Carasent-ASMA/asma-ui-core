@@ -697,6 +697,42 @@ describe('PopoverSheet — position stability', () => {
         await expect(Math.abs(after.right - before.right)).toBeLessThanOrEqual(1)
     })
 
+    it('follows a trigger that wraps to another row instead of leaving it behind', async () => {
+        const WrapFixture = (): JSX.Element => {
+            const [wrapped, setWrapped] = useState(false)
+            return (
+                <div style={{ position: 'fixed', top: wrapped ? 100 : 40, right: wrapped ? 420 : 16 }}>
+                    <PopoverSheet
+                        dataTest='wrap-pop'
+                        variant='action'
+                        title='Filter'
+                        renderTrigger={({ ref, triggerProps }) => (
+                            <button ref={ref} type='button' style={{ width: 96 }} {...triggerProps}>
+                                Filter
+                            </button>
+                        )}
+                    >
+                        <button type='button' onClick={() => setWrapped(true)}>
+                            Pick
+                        </button>
+                        <div style={{ width: 200, height: 48 }}>canvas</div>
+                    </PopoverSheet>
+                </div>
+            )
+        }
+
+        mount(<WrapFixture />)
+        await userEvent.click(rowTrigger())
+        await waitFor(() => expect(panelOf('wrap-pop')).toHaveAttribute('data-placement', 'bottom-end'))
+        const panel = panelOf('wrap-pop')!
+
+        await userEvent.click(edgeButton(panel, 'Pick'))
+        await waitFor(() =>
+            expect(Math.abs(panel.getBoundingClientRect().right - rowTrigger().getBoundingClientRect().right)).toBeLessThanOrEqual(1),
+        )
+        await expect(Math.abs(panel.getBoundingClientRect().top - rowTrigger().getBoundingClientRect().bottom)).toBeLessThanOrEqual(16)
+    })
+
     it('aligns to where the trigger is now on the next open', async () => {
         mount(<RowFixture style={{ position: 'fixed', top: 40, left: 16 }} />)
         await userEvent.click(rowTrigger())

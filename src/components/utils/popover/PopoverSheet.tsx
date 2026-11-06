@@ -65,8 +65,9 @@ const MOBILE_WIDTH = 'calc(100vw - 32px)'
 
 /**
  * Keeps the aligned edge where the first positioning of an open put it. Applying a filter grows the
- * trigger label ("Filter (1)"), and a search field beside it gives way, so the trigger's own edge
- * moves and the surface would follow it. A viewport resize lets it re-anchor; `release` starts over.
+ * trigger label ("Filter (N)"), and a search field beside it gives way, so the trigger's own edge
+ * moves and the surface would follow it. The edge is held only while it still falls on the trigger:
+ * a trigger that wraps to another row, or a viewport resize, re-anchors it. `release` starts over.
  */
 const createHoldAlignedEdge = (): Middleware & { release: () => void } => {
     let held: { x: number; atEnd: boolean; viewportWidth: number } | undefined
@@ -75,7 +76,9 @@ const createHoldAlignedEdge = (): Middleware & { release: () => void } => {
         fn: ({ x, rects, placement }) => {
             const atEnd = placement.endsWith('-end')
             const width = rects.floating.width
-            if (held?.atEnd !== atEnd || held.viewportWidth !== window.innerWidth) {
+            const { x: triggerLeft, width: triggerWidth } = rects.reference
+            const onTrigger = held !== undefined && held.x >= triggerLeft - 1 && held.x <= triggerLeft + triggerWidth + 1
+            if (!onTrigger || held?.atEnd !== atEnd || held.viewportWidth !== window.innerWidth) {
                 held = { x: atEnd ? x + width : x, atEnd, viewportWidth: window.innerWidth }
                 return {}
             }
