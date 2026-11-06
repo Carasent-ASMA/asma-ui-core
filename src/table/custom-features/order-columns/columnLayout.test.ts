@@ -1,11 +1,16 @@
 import { createTable, getCoreRowModel, type ColumnDef, type TableState } from '@tanstack/react-table'
 import { describe, expect, it } from 'vitest'
 import {
+    columnVisibilitySignature,
+    diffColumnVisibility,
+    effectiveColumnOrder,
     getDefinitionColumnOrder,
     hasChangedColumnLayout,
     hasHiddenColumns,
     hasReorderedColumns,
+    insertMissingColumns,
     isDefaultColumnOrder,
+    normalizeDefaultColumnOrder,
 } from './columnLayout'
 
 interface Row {
@@ -118,5 +123,95 @@ describe('column layout (ASMA-8597, the dot on the column settings pin)', () => 
         ]
 
         expect(getDefinitionColumnOrder(makeTable(grouped, { columnOrder: ['c', 'b', 'a'] }))).toEqual(['a', 'b', 'c'])
+    })
+})
+
+describe('column layout against the table\'s defaults (ASMA-8695, Q10)', () => {
+    const withDefaults = (
+        state: Partial<TableState>,
+        defaults: { order: string[]; visibility: Record<string, boolean> } | undefined,
+    ) => {
+        const table = makeTable(columns, state)
+
+        table.columnLayoutDefaults = defaults
+
+        return table
+    }
+
+    it('U-L01: with defaults, a column hidden by default is no change; showing it, or hiding a default-visible one, is', () => {
+        const defaults = { order: [], visibility: { b: false } }
+
+        expect(hasChangedColumnLayout(withDefaults({ columnVisibility: { b: false } }, defaults))).toBe(false)
+        expect(hasHiddenColumns(withDefaults({ columnVisibility: { b: true } }, defaults))).toBe(true)
+        expect(hasHiddenColumns(withDefaults({ columnVisibility: { a: false, b: false } }, defaults))).toBe(true)
+        expect(hasHiddenColumns(withDefaults({ columnVisibility: { b: false, a: true } }, defaults))).toBe(false)
+    })
+
+    it('U-L02: without defaults, any hidden column the user may hide is a change, as before ASMA-8695', () => {
+        expect(hasHiddenColumns(withDefaults({ columnVisibility: { b: false } }, undefined))).toBe(true)
+        expect(hasHiddenColumns(withDefaults({ columnVisibility: {} }, undefined))).toBe(false)
+    })
+
+    it('U-L03: a column that cannot hide, and an internal column, never count, with or without defaults', () => {
+        const defaults = { order: [], visibility: {} }
+
+        expect(hasHiddenColumns(withDefaults({ columnVisibility: { c: false, select: false } }, defaults))).toBe(false)
+        expect(hasHiddenColumns(withDefaults({ columnVisibility: { c: false, select: false } }, undefined))).toBe(false)
+    })
+
+    it('U-L04: with defaults, the default order is the app\'s order, and the definition order is the change', () => {
+        const defaults = { order: ['b', 'a', 'c', 'select'], visibility: {} }
+
+        expect(hasReorderedColumns(withDefaults({ columnOrder: ['b', 'a', 'c', 'select'] }, defaults))).toBe(false)
+        expect(hasReorderedColumns(withDefaults({ columnOrder: [] }, defaults))).toBe(true)
+        expect(hasReorderedColumns(withDefaults({ columnOrder: ['a', 'b', 'c', 'select'] }, defaults))).toBe(true)
+        // Without defaults the default is the definition order, as before.
+        expect(hasReorderedColumns(withDefaults({ columnOrder: ['b', 'a', 'c', 'select'] }, undefined))).toBe(true)
+    })
+})
+
+describe('effectiveColumnOrder, insertMissingColumns and the visibility difference (ASMA-8695)', () => {
+    const definition = ['a', 'b', 'c', 'd']
+
+    it('U-L05: the effective order lists the saved ids that exist first, then the rest in definition order', () => {
+        expect(effectiveColumnOrder([], definition)).toEqual(definition)
+        expect(effectiveColumnOrder(['c', 'a'], definition)).toEqual(['c', 'a', 'b', 'd'])
+        expect(effectiveColumnOrder(['ghost', 'c', 'c'], definition)).toEqual(['c', 'a', 'b', 'd'])
+        expect(effectiveColumnOrder(definition, definition)).toEqual(effectiveColumnOrder([], definition))
+    })
+
+    it('U-L06: DEC-03, a missing column goes right after the closest earlier column of the definition that the order lists', () => {
+        // `x` sits between `b` and `c` in the definition.
+        expect(insertMissingColumns(['c', 'a', 'b', 'd'], ['a', 'b', 'x', 'c', 'd'])).toEqual(['c', 'a', 'b', 'x', 'd'])
+        // Nothing before it is listed: right before the closest later one.
+        expect(insertMissingColumns(['c', 'd'], ['x', 'c', 'd'])).toEqual(['x', 'c', 'd'])
+        // Several missing columns, in definition order.
+        expect(insertMissingColumns(['d', 'a'], ['a', 'x', 'y', 'd'])).toEqual(['d', 'a', 'x', 'y'])
+        // Nothing listed at all: at the end.
+        expect(insertMissingColumns(['ghost'], ['a', 'b'])).toEqual(['ghost', 'a', 'b'])
+    })
+
+    it('U-L07: ids that no column has are kept, and a complete order is left as it is', () => {
+        expect(insertMissingColumns(['ghost', 'b', 'a'], ['a', 'b'])).toEqual(['ghost', 'b', 'a'])
+        expect(insertMissingColumns([], ['a', 'b'])).toEqual(['a', 'b'])
+    })
+
+    it('U-L10: the default order takes the columns it does not name at their definition position; no order stays the definition order', () => {
+        expect(normalizeDefaultColumnOrder([], definition)).toEqual([])
+        expect(normalizeDefaultColumnOrder(['c', 'a', 'b', 'd'], ['a', 'b', 'x', 'c', 'd'])).toEqual(['c', 'a', 'b', 'x', 'd'])
+        expect(normalizeDefaultColumnOrder(definition, definition)).toEqual(definition)
+    })
+
+    it('U-L08: the visibility difference keeps only what differs from the default, never an internal column', () => {
+        expect(diffColumnVisibility({ a: false, b: true, select: true }, { select: false })).toEqual({ a: false })
+        expect(diffColumnVisibility({ a: true, b: false }, { b: false })).toEqual({})
+        expect(diffColumnVisibility({ a: true }, { a: false })).toEqual({ a: true })
+        expect(diffColumnVisibility({}, { a: false })).toEqual({})
+    })
+
+    it('U-L09: the same differences in any key order are the same visibility', () => {
+        expect(columnVisibilitySignature({ a: false, b: false }, {})).toBe(columnVisibilitySignature({ b: false, a: false }, {}))
+        expect(columnVisibilitySignature({ a: false }, { a: false })).toBe(columnVisibilitySignature({}, {}))
+        expect(columnVisibilitySignature({ a: false }, {})).not.toBe(columnVisibilitySignature({}, {}))
     })
 })

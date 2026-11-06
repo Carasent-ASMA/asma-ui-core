@@ -7,6 +7,8 @@ export interface LeafColumnInfo {
     id: string
     canSort: boolean
     canMultiSort: boolean
+    /** Whether the column settings popover may hide it (ASMA-8695: a saved visibility never holds a column that cannot). */
+    canHide: boolean
 }
 
 /** The parts of a TanStack column definition that decide a column's id and whether it can sort. */
@@ -17,6 +19,7 @@ export interface ColumnDefLike {
     header?: unknown
     enableSorting?: boolean
     enableMultiSort?: boolean
+    enableHiding?: boolean
     columns?: readonly ColumnDefLike[]
 }
 
@@ -24,6 +27,7 @@ export interface ColumnResolutionOptions {
     defaultColumn?: ColumnDefLike
     enableSorting?: boolean
     enableMultiSort?: boolean
+    enableHiding?: boolean
 }
 
 const resolveId = (def: ColumnDefLike): string | undefined => {
@@ -60,6 +64,7 @@ export const getLeafColumnInfos = (
                 id,
                 canSort: (def.enableSorting ?? true) && (options.enableSorting ?? true) && hasAccessor,
                 canMultiSort: def.enableMultiSort ?? options.enableMultiSort ?? hasAccessor,
+                canHide: (def.enableHiding ?? true) && (options.enableHiding ?? true),
             })
         }
     }

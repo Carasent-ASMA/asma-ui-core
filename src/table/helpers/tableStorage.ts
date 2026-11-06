@@ -11,11 +11,15 @@ export const tableStorage = {
             return null
         }
     },
-    set(key: string, value: string): void {
+    /** `true` when the value was written, `false` when storage refused it (quota, blocked): the setting stays in memory only. */
+    set(key: string, value: string): boolean {
         try {
             localStorage.setItem(key, value)
+
+            return true
         } catch {
             // Quota or blocked storage: the setting stays in memory only.
+            return false
         }
     },
     remove(key: string): void {

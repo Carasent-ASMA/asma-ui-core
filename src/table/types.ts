@@ -203,6 +203,36 @@ export type StyledTableProps<TData, TCustomData> = {
      */
     persistSorting?: boolean
     /**
+     * Opt-in (ASMA-8695, D-OPTIN): save and restore this table's column order under `${uniqueKey}:column-order` and its
+     * column visibility under `${uniqueKey}:column-visibility`. Needs a per-user `uniqueKey` (`getTableSettingsKey` of
+     * asma-core-helpers); without one nothing is saved. Off by default: a table that does not set it behaves as before.
+     *
+     * Declare the layout the table opens with in `initialState.columnOrder` and `initialState.columnVisibility`; they are
+     * the defaults, so a column hidden by default is hidden for every user until one shows it. A saved layout beats them
+     * (the saved order and visibility, not `initialState`, decide what a user sees), the column settings dot follows the
+     * defaults (no dot for a column that is hidden by default), a column missing from a saved order appears at its
+     * definition position, and Reset columns also restores the default visibility.
+     *
+     * The table then owns visibility: do not pass `state.columnVisibility` or `onColumnVisibilityChange` (development builds
+     * warn). The old unscoped entries are migrated once, by the first user who opens the table on a browser, and then
+     * deleted (only after the user's own entry is written): `persistColumnOrderKey`'s order, and the visibility entry named by
+     * `legacyColumnVisibilityKey`. A table with this prop and no `uniqueKey` saves nothing and leaves the old entries alone.
+     *
+     * The table also keeps its state in step with its props: a column added later takes its definition position in an order
+     * the user changed, and a changed `initialState` default reaches the user who had not changed that column. A column that
+     * an order does not list, a saved one or `initialState.columnOrder`, appears at its definition position, not at the end
+     * (so a partial `initialState.columnOrder` no longer puts the listed columns first on a table that opts in).
+     */
+    persistColumnLayout?: boolean
+    /**
+     * The key an app used to save its column visibility under before it opted in with `persistColumnLayout`: a raw
+     * `{ [columnId]: boolean }` map of the whole visibility state. It is read once, to carry the user's layout over into the
+     * user's own entry, and deleted once that entry is written (if storage refuses the write the old entry stays, and the
+     * next visit tries again). Reset columns deletes it too. Used only by a table with `persistColumnLayout` **and** a
+     * `uniqueKey`; without a key the table neither reads nor deletes it (ASMA-8695, D-MIGRATE).
+     */
+    legacyColumnVisibilityKey?: string
+    /**
      * Whether the table's columns can be resized with the pointer. **On by default** (ASMA-8597, UX round 4, D15): every data
      * column has a handle, except ui-core's own columns (select, expand, actions, drag handle, show full text), a column that
      * opts out with `enableResizing: false` or has a fixed width (`minSize` equal to `maxSize`), and the last data column,

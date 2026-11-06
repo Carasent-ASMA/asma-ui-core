@@ -31,6 +31,7 @@ const fromTable = (columns: ColumnDef<Row, unknown>[], options: ColumnResolution
             id: column.id,
             canSort: column.getCanSort(),
             canMultiSort: column.getCanMultiSort(),
+            canHide: column.getCanHide(),
         }))
 
 describe('getLeafColumnInfos (ASMA-8597)', () => {
@@ -42,6 +43,7 @@ describe('getLeafColumnInfos (ASMA-8597)', () => {
             { header: 'Only a header' },
             { accessorKey: 'name', header: 'Same key', enableSorting: false },
             { accessorKey: 'id', header: 'Single', enableMultiSort: false },
+            { id: 'fixed', accessorKey: 'name', header: 'Cannot hide', enableHiding: false },
             {
                 header: 'Group',
                 columns: [
@@ -59,6 +61,7 @@ describe('getLeafColumnInfos (ASMA-8597)', () => {
             'Only a header',
             'name',
             'id',
+            'fixed',
             'name',
             'nested',
         ])
@@ -75,6 +78,9 @@ describe('getLeafColumnInfos (ASMA-8597)', () => {
             { defaultColumn: { enableSorting: false } },
             { defaultColumn: { enableMultiSort: false } },
             { enableSorting: false, defaultColumn: { enableSorting: true } },
+            { enableHiding: false },
+            { defaultColumn: { enableHiding: false } },
+            { enableHiding: false, defaultColumn: { enableHiding: true } },
         ]
 
         for (const options of cases) {
@@ -86,7 +92,7 @@ describe('getLeafColumnInfos (ASMA-8597)', () => {
 
     it('skips a column without any usable id instead of throwing', () => {
         expect(getLeafColumnInfos([{ header: () => null }, { id: 'ok', accessorKey: 'name' }])).toEqual([
-            { id: 'ok', canSort: true, canMultiSort: true },
+            { id: 'ok', canSort: true, canMultiSort: true, canHide: true },
         ])
     })
 })
