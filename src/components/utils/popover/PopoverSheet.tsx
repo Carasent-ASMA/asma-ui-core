@@ -10,6 +10,7 @@ import {
     useFloating,
     useInteractions,
     useMergeRefs,
+    type Middleware,
 } from '@floating-ui/react'
 
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
@@ -61,6 +62,33 @@ const MIN_WIDTH_PX = 240
 const MAX_WIDTH_PX = { info: 472, action: 472 } as const
 const MAX_HEIGHT_RATIO = 0.6
 const MOBILE_WIDTH = 'calc(100vw - 32px)'
+
+/**
+ * Keeps the aligned edge where the first positioning of an open put it. Applying a filter grows the
+ * trigger label ("Filter (N)"), and a search field beside it gives way, so the trigger's own edge
+ * moves and the surface would follow it. The edge is held only while it still falls on the trigger:
+ * a trigger that wraps to another row, or a viewport resize, re-anchors it. `release` starts over.
+ */
+const createHoldAlignedEdge = (): Middleware & { release: () => void } => {
+    let held: { x: number; atEnd: boolean; viewportWidth: number } | undefined
+    return {
+        name: 'holdAlignedEdge',
+        fn: ({ x, rects, placement }) => {
+            const atEnd = placement.endsWith('-end')
+            const width = rects.floating.width
+            const { x: triggerLeft, width: triggerWidth } = rects.reference
+            const onTrigger = held !== undefined && held.x >= triggerLeft - 1 && held.x <= triggerLeft + triggerWidth + 1
+            if (!onTrigger || held?.atEnd !== atEnd || held.viewportWidth !== window.innerWidth) {
+                held = { x: atEnd ? x + width : x, atEnd, viewportWidth: window.innerWidth }
+                return {}
+            }
+            return { x: atEnd ? held.x - width : held.x }
+        },
+        release: () => {
+            held = undefined
+        },
+    }
+}
 
 /** @figmaNode wXrXt5uKNNzV2DnQCgyYZH#44531-233781 (Design-System · "_Popover") */
 export interface PopoverSheetProps {
@@ -167,12 +195,14 @@ export const PopoverSheet = ({
     const [isOpen, setIsOpen] = useState(false)
     const [portalRoot, setPortalRoot] = useState<HTMLElement>()
     const [maxHeightPx, setMaxHeightPx] = useState<number>()
-    // Position is decided once per open and then only follows the trigger: the edge from where the
-    // trigger sits, the side from the first positioning, and the width only ever grows. Content
-    // changing while open (chips, counts, async options) must not move the surface.
+    // Position is decided once per open: the edge from where the trigger sits, held at its first x
+    // (`holdAlignedEdge`), the side from the first positioning, and the width only ever grows. Only
+    // the vertical position follows the trigger, so the surface scrolls with it. Content or a trigger
+    // label changing while open (chips, counts, async options) must not move the surface.
     const [openAlign, setOpenAlign] = useState<'start' | 'end'>('start')
     const [lockedSide, setLockedSide] = useState<Side>()
     const [minWidthPx, setMinWidthPx] = useState(MIN_WIDTH_PX)
+    const [holdAlignedEdge] = useState(createHoldAlignedEdge)
 
     const isMobile = useMobileMediaQuery()
     const isDialog = variant === 'action'
@@ -200,6 +230,7 @@ export const PopoverSheet = ({
             ...(keepBelowTrigger || lockedSide
                 ? []
                 : [flip({ padding: 8, crossAxis: false, flipAlignment: false })]),
+            holdAlignedEdge,
             shift({ padding: 8 }),
             sizeMiddleware({
                 padding: 8,
@@ -419,6 +450,7 @@ export const PopoverSheet = ({
         const triggerInRightHalf = rect.left + rect.width / 2 > window.innerWidth / 2
         setOpenAlign(align === 'auto' ? (triggerInRightHalf ? 'end' : 'start') : align)
         setLockedSide(undefined)
+        holdAlignedEdge.release()
         setMinWidthPx(MIN_WIDTH_PX)
         setMaxHeightPx(Math.round(window.innerHeight * MAX_HEIGHT_RATIO))
         // Enter/Space on a button dispatch a synthetic `click` with `detail === 0`; a real pointer
