@@ -12,6 +12,7 @@ import { useBackNavigationClose } from 'src/datetime/hooks/useBackNavigationClos
 import { StyledDrawer } from 'src/components/navigation/drawer'
 import type { StyledTimePickerProps } from './types'
 import { isBeforeMinTime } from './helpers/minTime'
+import { isTimeRejected } from './helpers/disabledTime'
 import { timePickerWidthProps } from './helpers/timePickerWidth'
 import { cn } from 'src/helpers/cn'
 
@@ -28,7 +29,7 @@ import { cn } from 'src/helpers/cn'
  * instead of the popper, matching `StyledDatePicker`. Non-annotated props are behavioral.
  */
 export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
-    const { value, onSelect, notBeforeTime, minTime, required } = props
+    const { value, onSelect, notBeforeTime, minTime, required, isTimeDisabled, disabledTimeReason } = props
     const popupState = usePopupState({ variant: 'popper', popupId: 'time-picker-popper' })
     const isMobile = useIsMobileView()
     useBackCloses({ active: popupState.isOpen, requestClose: popupState.close })
@@ -64,16 +65,28 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
         return !next || !notBeforeTime || !isValid(notBeforeTime) || !isBefore(next, notBeforeTime)
     }
 
+    /**
+     * `isTimeDisabled` behaves like `notBeforeTime`, not like `minTime`: a rejected entry is refused
+     * *loudly*. `minTime` reverts in silence because "nothing before 12:35" is self-evident from the
+     * greyed cells, but a predicate encodes a rule the field cannot show — a consumer's quiet hours,
+     * say — and silently restoring the previous value would read as the entry having been accepted.
+     */
+    const checkNotDisabled = (next?: Date) => !isTimeRejected(next, isTimeDisabled)
+
     const parsedLocalTime = resolvedLocalValue.length === 5 ? getTimeFromValue(resolvedLocalValue, value) : null
     const isValidTime = !showError || resolvedLocalValue === '' || parsedLocalTime !== null
     const isValidEndTime = !showError || !parsedLocalTime || checkValidEndTime(parsedLocalTime)
     const isMissingTime = !!required && showError && resolvedLocalValue === ''
+    // The reason doubles as the message, so the tooltip on a rejected cell and the error under the
+    // field cannot drift apart. Undefined unless *this* entry is the one being refused.
+    const disabledTimeError =
+        showError && isTimeRejected(parsedLocalTime ?? undefined, isTimeDisabled) ? disabledTimeReason : undefined
 
     /** Complete, parsable and not before `notBeforeTime`; an empty field is valid (required is the form's job). */
     const isCommittableTime = (text: string): boolean => {
         if (text === '') return true
         const parsed = getTimeFromValue(text, value)
-        return parsed !== null && checkValidEndTime(parsed)
+        return parsed !== null && checkValidEndTime(parsed) && checkNotDisabled(parsed)
     }
 
     const handleChange = (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
@@ -95,6 +108,13 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
         // Keep the field dirty and the consumer's value untouched; handleBlur reverts it — no error shown.
         if (isBeforeMinTime(validTime, minTime)) return
 
+        if (!checkNotDisabled(validTime)) {
+            // Keep the text the author typed so the error names something they can see, and leave
+            // the consumer's value uncommitted. `handleBlur` raises the error once the entry ends.
+            onSelect(undefined)
+            return
+        }
+
         const isNotBeforeStartTime = checkValidEndTime(validTime)
 
         if (isNotBeforeStartTime) {
@@ -109,6 +129,12 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
     const handleSelect = (selectedTime: Date | undefined) => {
         // Disabled cells cannot fire, so this only guards a stale panel after `minTime` moved on.
         if (selectedTime && isBeforeMinTime(selectedTime, minTime)) return
+        // Same guard for the predicate: an inert cell refuses its own click, but the rule can change
+        // under an open panel, and a minute pick carries the hour from `value` rather than the cell.
+        if (!checkNotDisabled(selectedTime)) {
+            setShowError(true)
+            return
+        }
 
         // A pick is a finished entry (the input may already have blurred), so validate it now.
         const isNotBeforeStartTime = checkValidEndTime(selectedTime)
@@ -156,6 +182,7 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
             isValidTime={isValidTime}
             isValidEndTime={isValidEndTime}
             isMissingTime={isMissingTime}
+            disabledTimeError={disabledTimeError}
             handleChange={handleChange}
             handleBlur={handleBlur}
         />
@@ -184,6 +211,8 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
                             dataTest={props.dataTest}
                             value={value}
                             minTime={minTime}
+                            isTimeDisabled={isTimeDisabled}
+                            disabledTimeReason={disabledTimeReason}
                             onSelect={handleSelect}
                             handleClear={handleClear}
                             onConfirm={popupState.close}
