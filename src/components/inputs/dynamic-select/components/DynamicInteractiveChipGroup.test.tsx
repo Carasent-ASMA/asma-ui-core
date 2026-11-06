@@ -79,4 +79,38 @@ describe('DynamicInteractiveChipGroup', () => {
             expect(html).toContain('Pick one')
         })
     })
+
+    describe('group semantics (SH-P04)', () => {
+        const attr = (html: string, name: string): string | undefined =>
+            new RegExp(`role="group"[^>]*\\s${name}="([^"]*)"`).exec(html)?.[1] ??
+            new RegExp(`\\s${name}="([^"]*)"[^>]*role="group"`).exec(html)?.[1]
+
+        it('names the group by its title', () => {
+            const html = renderToStaticMarkup(
+                createElement(DynamicInteractiveChipGroup, { ...baseProps, title: 'Shift' }),
+            )
+            const titleId = attr(html, 'aria-labelledby')
+            expect(titleId).toBeTruthy()
+            expect(html).toMatch(new RegExp(`id="${titleId}"[^>]*>Shift<`))
+        })
+
+        it('marks the group invalid and describes it by the error message', () => {
+            const html = renderToStaticMarkup(
+                createElement(DynamicInteractiveChipGroup, { ...baseProps, error: true, helperText: 'Pick one' }),
+            )
+            const helperId = attr(html, 'aria-describedby')
+            expect(attr(html, 'aria-invalid')).toBe('true')
+            expect(html).toMatch(new RegExp(`id="${helperId}" role="alert"`))
+        })
+
+        it('is not invalid without an error, and describes nothing when the helper row is gone', () => {
+            const html = renderToStaticMarkup(
+                createElement(DynamicInteractiveChipGroup, { ...baseProps, disableHelperText: true }),
+            )
+            expect(html).toContain('role="group"')
+            expect(attr(html, 'aria-invalid')).toBeUndefined()
+            expect(attr(html, 'aria-describedby')).toBeUndefined()
+            expect(attr(html, 'aria-labelledby')).toBeUndefined()
+        })
+    })
 })

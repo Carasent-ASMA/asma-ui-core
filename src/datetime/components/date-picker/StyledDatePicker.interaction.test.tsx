@@ -3,7 +3,9 @@ import { afterEach, describe, it } from 'vitest'
 import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount, tabbableWithin } from 'src/test-utils/renderInteraction'
 import { getOverlayBackStackSize, requestCloseTopOverlayBack } from 'src/hooks/useBackCloses.hook'
+import { nb } from 'date-fns/locale'
 import { StyledDatePicker } from './StyledDatePicker'
+import type { IDatePickerSingle } from './types'
 
 /**
  * Keyboard & focus contract — StyledDatePicker (ASMA-8139).
@@ -298,5 +300,134 @@ describe('StyledDatePicker keyboard contract', () => {
         const named = container.querySelector('input[data-testid="named"]')
         await expect(named).toHaveAccessibleName('End date')
         await expect(named).toHaveAttribute('aria-required', 'true')
+    })
+})
+
+describe('StyledDatePicker messages', () => {
+    afterEach(cleanup)
+
+    const MessagesFixture = ({
+        messages,
+        locale,
+        required,
+        disabledDays,
+        disallowPast,
+        disallowFuture,
+    }: Pick<
+        IDatePickerSingle,
+        'messages' | 'locale' | 'required' | 'disabledDays' | 'disallowPast' | 'disallowFuture'
+    >): JSX.Element => {
+        const [date, setDate] = useState<Date>()
+        const [, setRenders] = useState(0)
+        return (
+            <>
+                <StyledDatePicker
+                    dataTest='msg-date'
+                    mode='single'
+                    label='Date'
+                    selected={date}
+                    onSelect={setDate}
+                    onInputChange={setDate}
+                    locale={locale}
+                    required={required}
+                    disabledDays={disabledDays}
+                    disallowPast={disallowPast}
+                    disallowFuture={disallowFuture}
+                    messages={messages && { ...messages }}
+                />
+                <button type='button' data-testid='rerender' onClick={() => setRenders((n) => n + 1)}>
+                    Rerender
+                </button>
+            </>
+        )
+    }
+
+    const typeAndLeave = async (container: HTMLElement, digits: string): Promise<HTMLInputElement> => {
+        const input = container.querySelector<HTMLInputElement>('input[data-testid="msg-date"]')!
+        input.focus()
+        await userEvent.keyboard(digits)
+        await userEvent.tab()
+        await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
+        return input
+    }
+
+    it('shows the Figma copy by default', async () => {
+        const { container } = mount(<MessagesFixture />)
+
+        await typeAndLeave(container, '32012024')
+
+        await expect(container).toHaveTextContent('Enter a valid day.')
+    })
+
+    it('asks for another date in Norwegian when the date is unavailable', async () => {
+        const { container } = mount(<MessagesFixture locale={nb} disabledDays={new Date(2024, 5, 15)} />)
+
+        await typeAndLeave(container, '15062024')
+
+        await expect(container).toHaveTextContent('Velg en annen dato.')
+    })
+
+    it('asks for today or a later date when past dates are not allowed', async () => {
+        const { container } = mount(<MessagesFixture disallowPast />)
+
+        await typeAndLeave(container, '01012000')
+
+        await expect(container).toHaveTextContent('Select today or a future date.')
+    })
+
+    it('asks for today or an earlier date when future dates are not allowed', async () => {
+        const { container } = mount(<MessagesFixture disallowFuture />)
+
+        await typeAndLeave(container, '01012099')
+
+        await expect(container).toHaveTextContent('Select today or an earlier date.')
+    })
+
+    it('keeps the unavailable-date message for a disabled day that is also in the past', async () => {
+        const { container } = mount(<MessagesFixture disallowFuture disabledDays={new Date(2000, 0, 1)} />)
+
+        await typeAndLeave(container, '01012000')
+
+        await expect(container).toHaveTextContent('Select another date.')
+    })
+
+    const formatOverride = { invalidFormat: { en: 'Use the catalog format.', no: 'Bruk katalogformatet.' } }
+
+    it('shows a per-key override', async () => {
+        const { container } = mount(<MessagesFixture messages={formatOverride} />)
+
+        await typeAndLeave(container, '1506')
+
+        await expect(container).toHaveTextContent('Use the catalog format.')
+    })
+
+    it('keeps the default for every key that is not overridden', async () => {
+        const { container } = mount(<MessagesFixture messages={formatOverride} />)
+
+        await typeAndLeave(container, '32062024')
+
+        await expect(container).toHaveTextContent('Enter a valid day.')
+    })
+
+    it('uses the Norwegian override with a Norwegian locale', async () => {
+        const messages = { required: { en: 'Fill in the date.', no: 'Fyll inn datoen.' } }
+        const { container } = mount(<MessagesFixture messages={messages} locale={nb} required />)
+        const input = container.querySelector<HTMLInputElement>('input[data-testid="msg-date"]')!
+
+        input.focus()
+        await userEvent.tab()
+
+        await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
+        await expect(container).toHaveTextContent('Fyll inn datoen.')
+    })
+
+    it('keeps a typed-date error when the parent re-renders with a new messages object', async () => {
+        const { container } = mount(<MessagesFixture messages={{}} />)
+        const input = await typeAndLeave(container, '1506')
+
+        await userEvent.click(container.querySelector<HTMLButtonElement>('[data-testid="rerender"]')!)
+
+        await expect(input).toHaveAttribute('aria-invalid', 'true')
+        await expect(container).toHaveTextContent('Enter a valid date in DD.MM.YYYY format.')
     })
 })

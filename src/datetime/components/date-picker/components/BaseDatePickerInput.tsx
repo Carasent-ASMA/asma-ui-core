@@ -4,9 +4,13 @@ import { DatePickerButton } from './DatePickerButton'
 import { getTitleLabelling } from 'src/datetime/helpers/getTitleLabelling'
 import { useDatePickerMask } from '../hooks/useDatePickerMask'
 import { DATE_INPUT_FONT_FAMILY } from 'src/helpers/inputMask'
-import { type AriaAttributes, useEffect, useId, useRef, useState } from 'react'
+import { type AriaAttributes, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { getValue } from '../helpers'
-import { useDatePickerValidation, defaultDatePickerValidationMessages } from '../hooks/useDatePickerValidation'
+import {
+    type DatePickerMessages,
+    mergeDatePickerMessages,
+    useDatePickerValidation,
+} from '../hooks/useDatePickerValidation'
 import { parse, isValid as isValidDateFns } from 'date-fns'
 import type { DayPickerProps as ReactDayPickerProps, Matcher } from 'react-day-picker'
 
@@ -40,6 +44,7 @@ export interface IBaseDatePickerInput {
     minDate?: Date
     inputAriaProps?: AriaAttributes
     width?: FieldWidth
+    messages?: DatePickerMessages
 }
 
 export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
@@ -70,13 +75,14 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
         required,
         minDate,
         width = 's',
+        messages,
         ...rest
     } = props
 
     const readOnly = Boolean(readOnlyProp) || Boolean(lockedReason) || Boolean(readOnlyReason)
     const readOnlyValue = !lockedReason && Boolean(readOnlyReason)
-    const { validationError, handleValidation, errHelperText, clearValidation } =
-        useDatePickerValidation(defaultDatePickerValidationMessages)
+    const catalog = useMemo(() => mergeDatePickerMessages(messages), [messages])
+    const { validationError, handleValidation, errHelperText, clearValidation } = useDatePickerValidation(catalog)
     const { maskRef } = useDatePickerMask()
     const titleId = useId()
     const inputId = useId()
