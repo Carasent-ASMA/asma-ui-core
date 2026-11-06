@@ -223,7 +223,7 @@ describe('StyledDynamicSelect — multiple autocomplete field height', () => {
     })
 
     it('grows to the filled chip row once something is selected', async () => {
-        mount(<Fixture multiple initial={[EIGHT[0]]} />)
+        mount(<Fixture multiple initial={EIGHT.slice(0, 1)} />)
         await waitFor(() => expect(shell()).not.toBeNull())
         await expect(shell().getBoundingClientRect().height).toBeGreaterThan(56)
     })
