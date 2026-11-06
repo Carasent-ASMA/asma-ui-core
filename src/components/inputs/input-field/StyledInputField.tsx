@@ -247,6 +247,8 @@ export const StyledInputField = ({
     const startAdornment = slotProps?.input?.startAdornment ?? InputProps?.startAdornment
     const hasStartAdornment = Children.count(startAdornment) > 0
     const isAdornmentList = hasStartAdornment && Array.isArray(startAdornment)
+    // A chip list with no chips yet still arrives as an array (e.g. `[null]`), which counts as one child.
+    const isEmptyAdornmentList = isAdornmentList && Children.toArray(startAdornment).length === 0
     const providedEndAdornment = slotProps?.input?.endAdornment ?? InputProps?.endAdornment
     const userEndAdornment = locked ? (
         <>
@@ -588,7 +590,11 @@ export const StyledInputField = ({
                             isSingleLineShell && styles['InputShell'],
                             multiline && !readOnlyValue && 'box-border items-center px-[14px] py-[16.5px]',
                             isAdornmentList &&
-                                cn(styles['AdornmentList'], userEndAdornment && styles['AdornmentList--endAdornment']),
+                                cn(
+                                    styles['AdornmentList'],
+                                    userEndAdornment && styles['AdornmentList--endAdornment'],
+                                    isEmptyAdornmentList && styles['AdornmentList--empty'],
+                                ),
                             // Read-only surface: fill the whole box (matches the delta-200 border, radius 4).
                             // On the shell (not the input) so it also covers the multiline field's padding.
                             readOnly && !readOnlyValue && 'rounded bg-delta-50',

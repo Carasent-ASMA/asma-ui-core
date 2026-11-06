@@ -85,10 +85,10 @@ $field-height: 40px;
 
 // Chip/autocomplete adornment list = the Figma "filled" autocomplete field (node 20475-29954):
 // `py 16`, left inset 16 (Icon-left = two 8px spacings), chip gap 8, `flex-wrap` so chips wrap and the
-// field grows (min-height floors it at 40 when momentarily empty). Filled with a 32px chip row this is
-// 16 + 32 + 16 = 64px — Figma deliberately gives the chip field more vertical room than the 40px
-// (`py 8`) empty state. `--endAdornment` reserves the Figma right icon column (72px) so wrapping chips
-// never slide under the clear/add indicator.
+// field grows. Filled with a 32px chip row this is 16 + 32 + 16 = 64px — Figma deliberately gives the
+// chip field more vertical room than the 40px empty state (node 20474-28991). `--empty` is that state:
+// the 32px input row with 4px above and below. `--endAdornment` reserves the Figma right icon column
+// (72px) so wrapping chips never slide under the clear/add indicator.
 .AdornmentList {
     box-sizing: border-box;
     // Chip rows prefer the sum of all chips on one line. Inside a content-sized
@@ -105,5 +105,10 @@ $field-height: 40px;
 
     &--endAdornment {
         padding-right: 72px;
+    }
+
+    &--empty {
+        padding-top: 4px;
+        padding-bottom: 4px;
     }
 }
