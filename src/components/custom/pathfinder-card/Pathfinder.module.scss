@@ -40,7 +40,7 @@
  * content stops 8px before it — otherwise a long value runs underneath the icon.
  */
 .contentCompact {
-    @apply pr-10;
+    padding-right: 2.5rem;
 }
 
 .compactItems {
