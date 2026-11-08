@@ -217,6 +217,36 @@ const restoreV3TransformUtilities = {
     },
 }
 
+/**
+ * v4's `leading-*` also sets `--tw-leading`, and its `text-*` reads it. v3 set neither, so a v3
+ * `text-*` and a `leading-*` simply competed by order. A copy that keeps the variable reaches into
+ * other apps' rules too: the chat app ships a layered `!important` `.text-base` that reads
+ * `--tw-leading`, so in Ad Opus every multiline input field lost 1px per row and the editor's
+ * questionnaires shifted 2px per field. Dropping the variable restores v3's line heights everywhere.
+ *
+ * Remove together with the transform shim.
+ */
+const LEADING_FALLBACK = /^var\(--tw-leading,(.+)\)$/
+
+const restoreV3LineHeightUtilities = {
+    postcssPlugin: 'asma-restore-v3-line-height-utilities',
+    Once(root: PostcssRoot) {
+        root.walkRules((rule) => {
+            const leadingVariables: PostcssDeclaration[] = []
+            let setsLineHeight = false
+            rule.walkDecls((declaration) => {
+                if (declaration.prop === '--tw-leading') leadingVariables.push(declaration)
+                if (declaration.prop !== 'line-height') return
+                setsLineHeight = true
+                const fallback = LEADING_FALLBACK.exec(declaration.value.trim())?.[1]
+                if (fallback) declaration.value = fallback.trim()
+            })
+            // Only utilities that also set `line-height`: the defaults block's `--tw-leading: initial` is harmless.
+            if (setsLineHeight) leadingVariables.forEach((declaration) => declaration.remove())
+        })
+    },
+}
+
 const currentDirectory =
     typeof import.meta.dirname !== 'undefined' ? import.meta.dirname : path.dirname(fileURLToPath(import.meta.url))
 
@@ -263,6 +293,7 @@ export default defineConfig({
                 stripGeneratedBorderStyles,
                 restoreV3SpaceBetween,
                 restoreV3TransformUtilities,
+                restoreV3LineHeightUtilities,
             ],
         },
     },
