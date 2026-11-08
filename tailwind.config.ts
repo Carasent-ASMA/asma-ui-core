@@ -26,10 +26,11 @@ export default {
     // mode: 'jit',
     important: true,
     future: {
-        // `hover:` / `group-hover:` only where a real pointer hovers (`(hover: hover) and (pointer:
-        // fine)`), as Tailwind 4 does by default. On a touch screen the browser keeps an emulated
-        // pointer at the last tap: when a picker or menu closed on a tap, the element underneath
-        // took the hover style and kept it (ASMA-8468).
+        // `hover:` / `group-hover:` / `peer-hover:` only where a real pointer hovers (`(hover: hover)
+        // and (pointer: fine)`). On a touch screen the browser keeps an emulated pointer at the last
+        // tap: when a picker or menu closed on a tap, the element underneath took the hover style and
+        // kept it (ASMA-8468). v4 IGNORES `future`, so the behaviour is redefined with
+        // `@custom-variant hover` in `src/styles/index.css`; both stay until the team decides.
         hoverOnlyWhenSupported: true,
     },
     blocklist: ['rotate-180'],

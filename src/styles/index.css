@@ -29,6 +29,22 @@
 
 @config '../../tailwind.config.ts';
 
+/*
+ * ASMA-8468: v3 compiled `future.hoverOnlyWhenSupported: true` (see `tailwind.config.ts`) into
+ * `@media (hover: hover) and (pointer: fine)`. On a touch screen the browser keeps an emulated
+ * pointer at the last tap: when a picker or menu closed on a tap, the element underneath took the
+ * hover style and kept it. v4 ignores `future` and ships only `@media (hover: hover)`, so the
+ * variant is redefined here — and with it `group-hover:` / `peer-hover:`, which compound on it.
+ * Keep both until the team decides otherwise.
+ */
+@custom-variant hover {
+    @media (hover: hover) and (pointer: fine) {
+        &:hover {
+            @slot;
+        }
+    }
+}
+
 @utility flip-180 {
     transform: rotate(180deg);
 }
