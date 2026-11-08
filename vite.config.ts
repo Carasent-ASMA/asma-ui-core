@@ -170,6 +170,53 @@ const restoreV3SpaceBetween = {
     },
 }
 
+/*
+ * The shims below exist because `dist/style.css` never renders alone in production. Every micro app
+ * inlines its own pinned ui-core copy, so until all of them upgrade, v3 copies and this v4 copy
+ * style the same class names on the same page.
+ */
+
+/**
+ * v3 drew `translate-*`, `rotate-*` and `scale-*` through one `transform` declaration; v4 moved them
+ * to the separate `translate`, `rotate` and `scale` properties. Next to a v3 copy, an element gets
+ * both and moves twice: the vertical Slider's tick labels sat 12px below their dots in Ad Voca, and
+ * a Badge would sit a full half-size off its corner. Writing the v3 `transform` back makes both
+ * copies set the same property to the same value. The fallbacks cover `--tw-rotate` and
+ * `--tw-skew-*`, which v4 never sets. v4 also writes scales as percentages (`75%`) where v3 wrote
+ * numbers (`.75`); they are converted so both copies agree.
+ *
+ * Remove once no app ships a v3 ui-core copy.
+ */
+const V3_TRANSFORM =
+    'translate(var(--tw-translate-x, 0), var(--tw-translate-y, 0)) rotate(var(--tw-rotate, 0)) ' +
+    'skewX(var(--tw-skew-x, 0)) skewY(var(--tw-skew-y, 0)) scaleX(var(--tw-scale-x, 1)) scaleY(var(--tw-scale-y, 1))'
+
+const restoreV3TransformUtilities = {
+    postcssPlugin: 'asma-restore-v3-transform-utilities',
+    Once(root: PostcssRoot) {
+        root.walkRules((rule) => {
+            rule.walkDecls((declaration) => {
+                const value = declaration.value.trim()
+                if (/^--tw-scale-[xyz]$/.test(declaration.prop) && value.endsWith('%')) {
+                    declaration.value = String(Number.parseFloat(value) / 100)
+                } else if (declaration.prop === 'translate' && value === 'var(--tw-translate-x) var(--tw-translate-y)') {
+                    declaration.prop = 'transform'
+                    declaration.value = V3_TRANSFORM
+                } else if (declaration.prop === 'scale' && value === 'var(--tw-scale-x) var(--tw-scale-y)') {
+                    declaration.prop = 'transform'
+                    declaration.value = V3_TRANSFORM
+                } else if (declaration.prop === 'transform' && value.startsWith('var(--tw-rotate-x,)')) {
+                    // The bare `transform` utility: an identity transform in v3, `none` in v4.
+                    declaration.value = V3_TRANSFORM
+                } else if (declaration.prop === 'rotate' && /\.-?rotate-/.test(rule.selector)) {
+                    rule.append(declaration.clone({ prop: 'transform', value: V3_TRANSFORM }))
+                    declaration.prop = '--tw-rotate'
+                }
+            })
+        })
+    },
+}
+
 const currentDirectory =
     typeof import.meta.dirname !== 'undefined' ? import.meta.dirname : path.dirname(fileURLToPath(import.meta.url))
 
@@ -212,7 +259,11 @@ export default defineConfig({
     },
     css: {
         postcss: {
-            plugins: [stripGeneratedBorderStyles, restoreV3SpaceBetween],
+            plugins: [
+                stripGeneratedBorderStyles,
+                restoreV3SpaceBetween,
+                restoreV3TransformUtilities,
+            ],
         },
     },
     build: {
