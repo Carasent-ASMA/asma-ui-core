@@ -34,6 +34,8 @@
  * utility, so another app's theme variable cannot change it, and a v3 copy of the same class on
  * the page draws the same thing.
  *
+ * - Colours: v4 redrew the default palette in oklch (`bg-red-700` on the error snackbar,
+ *   `text-gray-300` on disabled helper text).
  * - `rounded-sm` and `shadow-sm` keep their v3 sizes (2px, the small shadow). v4 shifted both
  *   scales one step and the upgrade codemod renamed classes to follow, but production matches by
  *   name: the chat app ships layered `!important` `.rounded-sm` / `.shadow-sm` that win over every
@@ -42,6 +44,9 @@
  *   `rounded-[4px]` because v4 reads `rounded-sm` as the 2px step.
  */
 @theme inline {
+    --color-red-700: #b91c1c;
+    --color-gray-300: #d1d5db;
+    --color-gray-600: #4b5563;
     --radius-sm: 0.125rem;
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
