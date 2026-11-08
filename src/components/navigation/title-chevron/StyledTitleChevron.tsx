@@ -51,7 +51,7 @@ export const StyledTitleChevron: React.FC<StyledTitleChevronProps> = ({
         data-testid={dataTest}
         onClick={onClick}
         className={cn(
-            'group flex min-h-11 w-full cursor-pointer items-center rounded-sm border-0 bg-transparent p-0 text-left',
+            'group flex min-h-11 w-full cursor-pointer items-center rounded-[4px] border-0 bg-transparent p-0 text-left',
             'text-delta-800 font-semibold transition-colors duration-300',
             SIZE_TEXT[size],
             'hover:text-gama-500 focus-visible:text-gama-500 active:text-gama-600',

@@ -114,8 +114,8 @@ export const toToolbarAction = (action: PageHeaderAction): DynamicToolbarAction 
 function LoadingSkeleton({ compact }: { compact: boolean }): JSX.Element {
     return (
         <div className='flex w-full min-w-0 items-center justify-between gap-2' aria-hidden>
-            <div className={cn('bg-delta-100 animate-pulse rounded-sm', compact ? 'h-6 w-3/5' : 'h-8 w-2/5 max-w-[500px]')} />
-            <div className='bg-delta-100 h-10 w-14 shrink-0 animate-pulse rounded-sm' />
+            <div className={cn('bg-delta-100 animate-pulse rounded-[4px]', compact ? 'h-6 w-3/5' : 'h-8 w-2/5 max-w-[500px]')} />
+            <div className='bg-delta-100 h-10 w-14 shrink-0 animate-pulse rounded-[4px]' />
         </div>
     )
 }
@@ -259,7 +259,7 @@ export function PageHeader({
                 className={cn(
                     /* Same base height across breakpoints; content may expand it. */
                     'flex w-full items-center gap-2 px-4',
-                    stuck ? 'min-h-[56px] py-2 shadow-xs' : 'min-h-[64px] py-3',
+                    stuck ? 'min-h-[56px] py-2 shadow-sm' : 'min-h-[64px] py-3',
                     sticky && 'bg-delta-50 sticky top-0 z-30',
                     className,
                 )}

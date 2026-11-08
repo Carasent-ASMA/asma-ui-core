@@ -104,7 +104,7 @@ const ERROR_FOCUS_SHADOW = 'shadow-[inset_0_0_0_2px_var(--colors-error-500)]'
  */
 export const outlineClass = ({ focused, error, disabled, readOnly, borderless }: FieldState): string =>
     cn(
-        'pointer-events-none absolute inset-0 rounded-sm border border-solid transition-colors',
+        'pointer-events-none absolute inset-0 rounded-[4px] border border-solid transition-colors',
         borderless && !focused
             ? 'border-transparent'
             : disabled
@@ -127,7 +127,7 @@ export const notchedOutlineClass = ({
     notched = true,
 }: FieldState & { notched?: boolean }): string =>
     cn(
-        'pointer-events-none absolute z-0 m-0 box-border min-w-0 overflow-hidden rounded-sm border border-solid transition-colors',
+        'pointer-events-none absolute z-0 m-0 box-border min-w-0 overflow-hidden rounded-[4px] border border-solid transition-colors',
         // ponytail: notch only when a label needs the gap — no label = inset-0 so border is exactly 40px
         notched ? 'inset-x-0 top-[-5px] bottom-0 px-2 py-0' : 'inset-0',
         disabled

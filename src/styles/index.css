@@ -30,6 +30,23 @@
 @config '../../tailwind.config.ts';
 
 /*
+ * v3 values for the theme keys whose v4 defaults differ. `inline` writes the literal into each
+ * utility, so another app's theme variable cannot change it, and a v3 copy of the same class on
+ * the page draws the same thing.
+ *
+ * - `rounded-sm` and `shadow-sm` keep their v3 sizes (2px, the small shadow). v4 shifted both
+ *   scales one step and the upgrade codemod renamed classes to follow, but production matches by
+ *   name: the chat app ships layered `!important` `.rounded-sm` / `.shadow-sm` that win over every
+ *   app's copy, so a renamed `rounded-xs` would have dropped the phone-field flag from the 4px it
+ *   shows today to 2px. Class names stay as on master, and the old `rounded` uses are written
+ *   `rounded-[4px]` because v4 reads `rounded-sm` as the 2px step.
+ */
+@theme inline {
+    --radius-sm: 0.125rem;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+/*
  * ASMA-8468: v3 compiled `future.hoverOnlyWhenSupported: true` (see `tailwind.config.ts`) into
  * `@media (hover: hover) and (pointer: fine)`. On a touch screen the browser keeps an emulated
  * pointer at the last tap: when a picker or menu closed on a tap, the element underneath took the

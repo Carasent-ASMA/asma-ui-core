@@ -63,7 +63,7 @@ export const StyledMenu = ({
         keepMounted={keepMounted}
         slotProps={{
             paper: {
-                className: cn('rounded-sm', classes?.paper, slotProps?.paper?.className),
+                className: cn('rounded-[4px]', classes?.paper, slotProps?.paper?.className),
                 sx: [MENU_PAPER_STYLE, slotProps?.paper?.sx],
                 style: slotProps?.paper?.style,
             },

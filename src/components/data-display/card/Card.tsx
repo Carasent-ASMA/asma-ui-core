@@ -129,7 +129,7 @@ const CardHeaderTypeRow = ({ type, status, overdue, ids, hasTopRow, isDisabled }
                 {status && (
                     <span className='inline-flex min-w-0 items-center gap-2'>
                         {status.label}
-                        {status.squareColor && <span aria-hidden='true' className='size-3 shrink-0 rounded-xs' style={{ backgroundColor: status.squareColor }} />}
+                        {status.squareColor && <span aria-hidden='true' className='size-3 shrink-0 rounded-sm' style={{ backgroundColor: status.squareColor }} />}
                     </span>
                 )}
                 {overdue && (

@@ -591,7 +591,7 @@ export const StyledInputField = ({
                                 cn(styles['AdornmentList'], userEndAdornment && styles['AdornmentList--endAdornment']),
                             // Read-only surface: fill the whole box (matches the delta-200 border, radius 4).
                             // On the shell (not the input) so it also covers the multiline field's padding.
-                            readOnly && !readOnlyValue && 'bg-delta-50 rounded-sm',
+                            readOnly && !readOnlyValue && 'bg-delta-50 rounded-[4px]',
                             // Room for the lock icon, which sits at the end of the multiline box too.
                             locked && multiline && 'pr-[44px]',
                         )}

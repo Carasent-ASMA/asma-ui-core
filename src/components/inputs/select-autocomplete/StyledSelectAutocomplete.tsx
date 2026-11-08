@@ -773,7 +773,7 @@ export function StyledSelectAutocomplete<
                             // border/outline delta-300 (#bdc4cf), Menus shadow. Matches StyledSelect/StyledMenu.
                             // Figma Menus (node 34522-151497) pads the list `8px 0` — the rows run
                             // edge to edge horizontally, with 8px of breathing room top and bottom.
-                            'border-delta-300 z-1300 m-0 list-none overflow-auto rounded-sm border border-solid bg-white px-0 py-2 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
+                            'border-delta-300 z-1300 m-0 list-none overflow-auto rounded-[4px] border border-solid bg-white px-0 py-2 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
                             // With a group-select header the Figma popover has no vertical padding:
                             // the grey header bar sits flush against the top edge and the last option
                             // against the bottom, so drop both `py-2` paddings.
