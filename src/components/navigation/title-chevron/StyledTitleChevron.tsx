@@ -65,7 +65,7 @@ export const StyledTitleChevron: React.FC<StyledTitleChevronProps> = ({
         <span
             className={cn(
                 'min-w-0 truncate',
-                'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:![overflow-wrap:anywhere]',
+                'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:[overflow-wrap:anywhere]!',
             )}
         >
             {children}

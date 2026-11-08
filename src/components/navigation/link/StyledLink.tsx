@@ -83,7 +83,7 @@ export const StyledLink: React.FC<StyledLinkProps> = ({
             <span
                 className={clsx(
                     style['styled-link'],
-                    'max-xs:hyphens-auto max-xs:![overflow-wrap:anywhere]',
+                    'max-xs:hyphens-auto max-xs:[overflow-wrap:anywhere]!',
                     style['styled-link-disabled'],
                     textSize,
                     className,
@@ -132,7 +132,7 @@ export const StyledLink: React.FC<StyledLinkProps> = ({
                 onClick={handleClick}
                 className={clsx(
                     style['styled-link'],
-                    'max-xs:hyphens-auto max-xs:![overflow-wrap:anywhere]',
+                    'max-xs:hyphens-auto max-xs:[overflow-wrap:anywhere]!',
                     style['styled-link-button'],
                     disabled ? style['styled-link-disabled'] : 'asma-touch-ready',
                     textSize,
@@ -167,7 +167,7 @@ export const StyledLink: React.FC<StyledLinkProps> = ({
             // (tap-flash + double-tap-zoom removal) rather than pressable.
             className={clsx(
                 style['styled-link'],
-                'max-xs:hyphens-auto max-xs:![overflow-wrap:anywhere]',
+                'max-xs:hyphens-auto max-xs:[overflow-wrap:anywhere]!',
                 disabled ? style['styled-link-disabled'] : 'asma-touch-ready',
                 textSize,
                 className,

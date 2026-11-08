@@ -7,10 +7,10 @@ import { CardListItemContext, type CardListItemContextValue } from './cardModel'
 
 /** Loading placeholder in the card's shape; hidden from assistive technology, the list says it is busy (CARD-17). */
 export const CardSkeleton = (): JSX.Element => (
-    <div aria-hidden='true' className='box-border flex w-full max-w-[37.5rem] flex-col gap-3 rounded-xl border border-solid border-delta-300 bg-white px-4 py-3'>
-        <div className='h-4 w-1/3 animate-pulse rounded bg-delta-100 motion-reduce:animate-none' />
-        <div className='h-5 w-4/5 animate-pulse rounded bg-delta-100 motion-reduce:animate-none' />
-        <div className='h-4 w-1/2 animate-pulse rounded bg-delta-100 motion-reduce:animate-none' />
+    <div aria-hidden='true' className='border-delta-300 box-border flex w-full max-w-150 flex-col gap-3 rounded-xl border border-solid bg-white px-4 py-3'>
+        <div className='bg-delta-100 h-4 w-1/3 animate-pulse rounded-sm motion-reduce:animate-none' />
+        <div className='bg-delta-100 h-5 w-4/5 animate-pulse rounded-sm motion-reduce:animate-none' />
+        <div className='bg-delta-100 h-4 w-1/2 animate-pulse rounded-sm motion-reduce:animate-none' />
     </div>
 )
 
@@ -133,14 +133,14 @@ export const CardList = <T,>(props: CardListProps<T>): JSX.Element => {
                 >
                     {loading
                         ? Array.from({ length: props.skeletonCount ?? 3 }, (_, index) => (
-                              <li key={`skeleton-${index}`} className='w-full max-w-[37.5rem]'>
+                              <li key={`skeleton-${index}`} className='w-full max-w-150'>
                                   <CardSkeleton />
                               </li>
                           ))
                         : items.map((item) => {
                               const id = getId(item)
                               return (
-                                  <li key={id} data-card-id={id} className={cn('w-full max-w-[37.5rem]', layout === 'grid' && 'flex')}>
+                                  <li key={id} data-card-id={id} className={cn('w-full max-w-150', layout === 'grid' && 'flex')}>
                                       <CardListItemContext.Provider value={buildItemContext(id, cardHeadingLevel, selection, props.locale)}>
                                           {renderCard(item)}
                                       </CardListItemContext.Provider>

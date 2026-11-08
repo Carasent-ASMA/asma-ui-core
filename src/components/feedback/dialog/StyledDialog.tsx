@@ -470,7 +470,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                 {(!!dialogLabel || !!dialogTitle || showCloseIcon) && (
                     <div
                         className={cn(
-                            'box-border flex w-full min-w-0 max-w-full justify-between px-4 pt-4',
+                            'box-border flex w-full max-w-full min-w-0 justify-between px-4 pt-4',
                             // Narrower than a phone the header wraps in reverse, bottom row first, so the buttons only
                             // take a row of their own (above, right-aligned) when nothing fits beside them: with a
                             // label, the label stays beside them when it fits whole and the title takes a full-width
@@ -480,12 +480,12 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                             'max-xs:flex-wrap-reverse max-xs:items-center max-xs:gap-x-2 max-xs:gap-y-0.5',
                         )}
                     >
-                        <div className='flex min-w-0 flex-1 flex-col justify-start gap-0.5 max-xs:contents'>
+                        <div className='max-xs:contents flex min-w-0 flex-1 flex-col justify-start gap-0.5'>
                             {dialogLabel && (
                                 <div
                                     id={labelId}
                                     className={cn(
-                                        'flex h-8 items-center text-sm/5 font-normal text-delta-600',
+                                        'text-delta-600 flex h-8 items-center text-sm/5 font-normal',
                                         'max-xs:h-auto max-xs:min-h-8 max-xs:min-w-0 max-xs:flex-auto max-xs:hyphens-auto max-xs:[overflow-wrap:anywhere]!',
                                     )}
                                 >
@@ -497,7 +497,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                                 <div
                                     id={titleId}
                                     className={cn(
-                                        'flex text-2xl/8 font-semibold text-delta-800',
+                                        'text-delta-800 flex text-2xl/8 font-semibold',
                                         'max-xs:hyphens-auto',
                                         dialogLabel && 'max-xs:order-first max-xs:basis-full max-xs:[overflow-wrap:anywhere]!',
                                         // Narrower than a phone, without a label: beside the buttons, wrapping there, and
@@ -514,7 +514,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                         {showCloseIcon && (
                             // Narrower than a phone the buttons keep to the top of a wrapped title's row: with the
                             // rows running bottom-up (`wrap-reverse`), the top is `end`.
-                            <div className='flex min-w-0 max-w-full shrink-0 justify-end gap-2 max-xs:ml-auto max-xs:flex-wrap max-xs:gap-y-2 max-xs:self-end'>
+                            <div className='max-xs:ml-auto max-xs:flex-wrap max-xs:gap-y-2 max-xs:self-end flex max-w-full min-w-0 shrink-0 justify-end gap-2'>
                                 {dialogHeaderNode}
                                 <StyledButton
                                     dataTest={`close-button-${dataTest}`}

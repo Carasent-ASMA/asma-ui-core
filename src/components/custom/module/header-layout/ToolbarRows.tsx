@@ -62,7 +62,7 @@ export function SelectionRow({
     bulkActionsPlan: PlannedToolbarActions
 }): JSX.Element {
     return (
-        <div className='flex w-full min-w-0 flex-nowrap items-center justify-between gap-3 max-xs:flex-wrap max-xs:gap-y-2'>
+        <div className='max-xs:flex-wrap max-xs:gap-y-2 flex w-full min-w-0 flex-nowrap items-center justify-between gap-3'>
             <SelectionIndicator
                 selectedCount={selectedCount}
                 onClearSelection={onClearSelection}
@@ -94,7 +94,7 @@ export function SearchSlot({
             className={cn(
                 expanded
                     ? // Utility row only: narrower than a phone the search takes its own line.
-                      'min-w-0 flex-1 max-xs:basis-full'
+                      'max-xs:basis-full min-w-0 flex-1'
                     : 'w-40 shrink-0',
             )}
         >
@@ -150,7 +150,7 @@ export function TitleText({ title, measureRef }: { title: ToolbarSlot; measureRe
             ref={measureRef}
             className={cn(
                 'min-w-0 truncate',
-                'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:![overflow-wrap:anywhere]',
+                'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:[overflow-wrap:anywhere]!',
             )}
         >
             {title}

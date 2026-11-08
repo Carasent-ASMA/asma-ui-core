@@ -87,7 +87,7 @@ export const StyledFormControlLabel = ({
     return (
         <label
             className={cn(
-                'm-0 inline-flex items-center gap-2 align-middle text-delta-800',
+                'text-delta-800 m-0 inline-flex items-center gap-2 align-middle',
                 isDisabled || isReadOnly ? 'cursor-default' : 'cursor-pointer',
                 PLACEMENT_CLASS[labelPlacement],
                 className,

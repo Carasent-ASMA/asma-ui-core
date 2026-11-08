@@ -437,7 +437,7 @@ const SelectionRow = ({ dataTest, count, clearAllLabel, clearAllShown, doneLabel
         {/* Basis 0 and a min-content floor: the row breaks before *Done* only when the group cannot
             shrink any further; otherwise the group takes the room left and wraps inside it. */}
         <div className='flex min-w-min flex-[1_1_0%] flex-wrap items-center gap-x-1'>
-            <span className='text-base text-delta-600' data-testid={`${dataTest}-picker-count`}>
+            <span className='text-delta-600 text-base' data-testid={`${dataTest}-picker-count`}>
                 {count}
             </span>
             {clearAllLabel !== undefined && (

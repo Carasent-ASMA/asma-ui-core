@@ -191,7 +191,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                             <div
                                 className={cn(
                                     'truncate',
-                                    'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:![overflow-wrap:anywhere]',
+                                    'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:[overflow-wrap:anywhere]!',
                                 )}
                             >
                                 {title}
@@ -269,9 +269,9 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                                     isMobile ? 'line-clamp-2 text-xl' : 'line-clamp-1 text-2xl',
                                     'max-xs:line-clamp-none max-xs:hyphens-auto max-xs:whitespace-normal',
                                     // Beside the buttons, wrapping there, and on a row of its own only when its longest
-                                    // word does not fit (`min-content` basis; `break-words`, not `anywhere`, keeps that a
+                                    // word does not fit (`min-content` basis; `wrap-break-word`, not `anywhere`, keeps that a
                                     // whole word), never under 5rem.
-                                    'max-xs:block max-xs:min-w-[min(100%,5rem)] max-xs:grow max-xs:basis-[min-content] max-xs:break-words',
+                                    'max-xs:block max-xs:min-w-[min(100%,5rem)] max-xs:grow max-xs:basis-[min-content] max-xs:wrap-break-word',
                                 )}
                             >
                                 {title}
@@ -279,7 +279,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                         ) : (
                             <div
                                 id={labelId}
-                                className='text-delta-700 text-sm max-xs:min-w-0 max-xs:flex-auto max-xs:hyphens-auto max-xs:[overflow-wrap:anywhere]!'
+                                className='text-delta-700 max-xs:min-w-0 max-xs:flex-auto max-xs:hyphens-auto max-xs:[overflow-wrap:anywhere]! text-sm'
                             >
                                 {label}
                             </div>
@@ -287,7 +287,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
 
                         {/* Narrower than a phone the buttons keep to the top of a wrapped title's row: with the rows
                             running bottom-up (`wrap-reverse`), the top is `end`. */}
-                        <div className='flex items-center gap-x-1 max-xs:ml-auto max-xs:flex-wrap max-xs:justify-end max-xs:gap-y-2 max-xs:self-end'>
+                        <div className='max-xs:ml-auto max-xs:flex-wrap max-xs:justify-end max-xs:gap-y-2 max-xs:self-end flex items-center gap-x-1'>
                             <DialogBusyContext.Provider value={contextValue}>{actionNode}</DialogBusyContext.Provider>
                             {/* Minimize is offered in fullscreen too. Taking it away there left the
                                 header's learned triad a control short, and a dialog the user had sent
@@ -329,7 +329,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                                 isMobile ? 'line-clamp-2 text-xl' : 'line-clamp-1 text-2xl',
                                 // Narrower than a phone: the title shows in full instead of clamping.
                                 'max-xs:line-clamp-none',
-                                'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:![overflow-wrap:anywhere]',
+                                'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:[overflow-wrap:anywhere]!',
                             )}
                         >
                             {title}

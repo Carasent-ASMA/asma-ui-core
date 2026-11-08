@@ -63,26 +63,26 @@ export const StyledReadOnlyText: React.FC<IStyledReadOnlyText> = ({
 }) => (
     <div className={cn('flex min-w-0', horizontal ? 'items-center gap-1' : 'flex-col', className)}>
         {title !== undefined && title !== null && (
-            <div className='flex shrink-0 items-center gap-1 text-delta-800'>
+            <div className='text-delta-800 flex shrink-0 items-center gap-1'>
                 {titleIcon && <span className={ICON_24}>{titleIcon}</span>}
                 <StyledFormLabel title={horizontal ? <>{title}:</> : title} className='pb-0' />
                 {titleInfo && <span className={ICON_20}>{titleInfo}</span>}
             </div>
         )}
         <div className='flex min-w-0 flex-col'>
-            <div className='flex items-center gap-1 text-delta-700'>
+            <div className='text-delta-700 flex items-center gap-1'>
                 {startIcon && <span className={ICON_24}>{startIcon}</span>}
                 <span
                     id={id}
                     data-testid={dataTest}
-                    className={cn('min-w-0 flex-1 break-words text-base', multiline && 'whitespace-pre-wrap')}
+                    className={cn('min-w-0 flex-1 text-base wrap-break-word', multiline && 'whitespace-pre-wrap')}
                 >
                     {isEmpty(value) ? emptyText : value}
                 </span>
                 {endIcon && <span className={ICON_24}>{endIcon}</span>}
             </div>
             {helperText !== undefined && helperText !== null && (
-                <div className='flex items-start gap-1 py-0.5 text-delta-600'>
+                <div className='text-delta-600 flex items-start gap-1 py-0.5'>
                     {helperIcon && <span className={ICON_20}>{helperIcon}</span>}
                     <span className='min-w-0 text-sm'>{helperText}</span>
                 </div>

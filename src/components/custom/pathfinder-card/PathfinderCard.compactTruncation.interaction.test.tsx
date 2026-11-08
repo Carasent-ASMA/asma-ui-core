@@ -20,7 +20,7 @@ const nameItems: PathfinderCardItem[] = [
         id: 'name',
         order: 1,
         render: () => (
-            <span className='relative inline-flex min-w-0 max-w-full items-center gap-1'>
+            <span className='relative inline-flex max-w-full min-w-0 items-center gap-1'>
                 <span data-test='pathfinder-name' className='min-w-0 truncate text-lg font-semibold'>
                     {LONG_NAME}
                 </span>
@@ -119,7 +119,7 @@ describe('PathfinderCard — expanded width', () => {
                 id: 'name',
                 order: 1,
                 render: () => (
-                    <span data-test='pathfinder-name' className='whitespace-normal text-lg font-semibold'>
+                    <span data-test='pathfinder-name' className='text-lg font-semibold whitespace-normal'>
                         {LONG_NAME}
                     </span>
                 ),

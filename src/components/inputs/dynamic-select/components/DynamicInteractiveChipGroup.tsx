@@ -246,7 +246,7 @@ export const DynamicInteractiveChipGroup = forwardRef(
                         id={helperId}
                         role={helperAlertRole}
                         className={cn(
-                            'flex min-h-[24px] items-center gap-1 pt-1 text-sm/5 text-delta-600',
+                            'text-delta-600 flex min-h-[24px] items-center gap-1 pt-1 text-sm/5',
                             error && 'text-error-500',
                         )}
                     >

@@ -259,11 +259,11 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                 <OverlayBackOwnerContext.Provider value={panelRef}>
                 <div className='border-delta-200 flex flex-col gap-y-2 border-b p-4'>
                     {/* Narrower than a phone: the window controls wrap below the title instead of overflowing left. */}
-                    <div className='flex items-center justify-between max-xs:flex-wrap max-xs:gap-y-1'>
+                    <div className='max-xs:flex-wrap max-xs:gap-y-1 flex items-center justify-between'>
                         {!label ? (
                             <div
                                 className={cn(
-                                    'text-2xl font-semibold text-delta-800',
+                                    'text-delta-800 text-2xl font-semibold',
                                     'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:[overflow-wrap:anywhere]!',
                                 )}
                             >
@@ -359,7 +359,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                     {label && (
                         <div
                             className={cn(
-                                'truncate text-2xl font-semibold text-delta-800',
+                                'text-delta-800 truncate text-2xl font-semibold',
                                 'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:[overflow-wrap:anywhere]!',
                             )}
                         >

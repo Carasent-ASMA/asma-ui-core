@@ -27,7 +27,7 @@ export const StyledDialogActions = ({
             {...(rest)}
         >
             {/* Narrower than a phone: the buttons wrap instead of overflowing to the left (`justify-end`). */}
-            <div className={clsx('flex w-full justify-end gap-2 p-4 max-xs:flex-wrap', className)}>{children}</div>
+            <div className={clsx('max-xs:flex-wrap flex w-full justify-end gap-2 p-4', className)}>{children}</div>
         </div>
     )
 }

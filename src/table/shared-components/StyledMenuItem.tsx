@@ -57,10 +57,10 @@ export const StyledMenuItem = ({
                 // Figma "Menus item / Only Label" (wXrXt5uKNNzV2DnQCgyYZH 16045-31269): resting text is
                 // text-icon/body #49525f (delta-700), NOT the inherited near-black; hover fill is delta-50.
                 // h40 = py8 + Body Base lh24.
-                'box-border flex min-h-10 items-center px-3 py-2 text-base text-delta-700 outline-hidden',
+                'text-delta-700 box-border flex min-h-10 items-center px-3 py-2 text-base outline-hidden',
                 // Keyboard focus = the 3px focus-ring bar on the left, as on every other menu item.
                 'focus-visible:shadow-[inset_3px_0_var(--colors-focus-ring)]',
-                disabled ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-delta-50',
+                disabled ? 'cursor-not-allowed' : 'hover:bg-delta-50 cursor-pointer',
                 selected && 'bg-gama-50',
                 classes?.root,
                 className,

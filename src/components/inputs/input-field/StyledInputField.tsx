@@ -513,15 +513,15 @@ export const StyledInputField = ({
 
     const inputClasses = cn(
         styles['Input'],
-        'peer border-0 bg-transparent text-base tracking-[0.00938em] outline-hidden placeholder:text-delta-500',
+        'peer placeholder:text-delta-500 border-0 bg-transparent text-base tracking-[0.00938em] outline-hidden',
         // Figma field text delta/800 #363e4a; a read-only value is Title + data `text-icon/body` delta/700 #49525f.
         readOnlyValue ? 'text-delta-700' : 'text-delta-800',
         isAdornmentList
             ? 'box-border h-8 min-w-[60px] flex-1 p-0 leading-[23px]'
             : multiline
-              ? cn('w-full resize-none p-0 pl-0 pr-0', readOnlyValue ? 'leading-6' : 'leading-[23px]', styles['Input--multiline'])
+              ? cn('w-full resize-none p-0 pr-0 pl-0', readOnlyValue ? 'leading-6' : 'leading-[23px]', styles['Input--multiline'])
               : readOnlyValue
-                ? 'm-0 w-full p-0 text-base leading-6'
+                ? 'm-0 w-full p-0 text-base/6'
                 : cn(
                       'w-full',
                       styles['Input--singleLine'],
@@ -591,7 +591,7 @@ export const StyledInputField = ({
                                 cn(styles['AdornmentList'], userEndAdornment && styles['AdornmentList--endAdornment']),
                             // Read-only surface: fill the whole box (matches the delta-200 border, radius 4).
                             // On the shell (not the input) so it also covers the multiline field's padding.
-                            readOnly && !readOnlyValue && 'rounded-sm bg-delta-50',
+                            readOnly && !readOnlyValue && 'bg-delta-50 rounded-sm',
                             // Room for the lock icon, which sits at the end of the multiline box too.
                             locked && multiline && 'pr-[44px]',
                         )}
@@ -653,7 +653,7 @@ export const StyledInputField = ({
                                 // declares no `:active` to preserve). No hit-area: a 44px overlay on this
                                 // ~22px button sits inside the field and would swallow taps meant to place
                                 // the caret in the text it clears.
-                                className='asma-pressable absolute right-4 z-40 flex items-center justify-center rounded-full border-0 bg-transparent p-[2px] duration-300 hover:bg-gama-100'
+                                className='asma-pressable hover:bg-gama-100 absolute right-4 z-40 flex items-center justify-center rounded-full border-0 bg-transparent p-[2px] duration-300'
                                 onClick={(event) => {
                                     event.stopPropagation()
                                     event.preventDefault()

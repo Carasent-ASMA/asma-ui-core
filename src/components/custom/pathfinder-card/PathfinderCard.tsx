@@ -266,7 +266,7 @@ export function PathfinderCard({
                                     key={item.id}
                                     // ASMA-8427: capped at the card's width, so a value longer than the
                                     // card can wrap or truncate instead of running past its edge.
-                                    className='min-w-0 max-w-full shrink-0 whitespace-nowrap'
+                                    className='max-w-full min-w-0 shrink-0 whitespace-nowrap'
                                 >
                                     <ItemRenderer item={item} compact={compact} />
                                 </div>

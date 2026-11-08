@@ -152,7 +152,7 @@ export const PopoverAnatomy = ({
                 The surface clips that corner to its 8px radius, so the button takes the same radius there,
                 and while focused it rises above the edge layer: otherwise the corner cuts the focus ring
                 and the 1px edge paints over its top and right sides. */}
-            <div className='absolute right-0 top-0 [&:has(:focus-visible)]:z-[1]'>
+            <div className='absolute top-0 right-0 has-focus-visible:z-1'>
                 <StyledButton
                     dataTest={`${dataTest}-close`}
                     variant='textGray'

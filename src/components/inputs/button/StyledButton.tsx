@@ -209,7 +209,7 @@ export const StyledButton = ({
             {children && (
                 <div
                     className={clsx(
-                        'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:![overflow-wrap:anywhere]',
+                        'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:[overflow-wrap:anywhere]!',
                         'max-xs:text-center',
                     )}
                     style={{

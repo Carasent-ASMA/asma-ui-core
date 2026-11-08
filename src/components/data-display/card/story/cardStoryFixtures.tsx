@@ -42,7 +42,7 @@ export const STATUS_AVAILABLE_LATER = { label: 'Available later', squareColor: '
 
 /** When a disabled card opens, in body text colour (Figma "Card date" 7134:153564). */
 export const ScheduledFact = (): JSX.Element => (
-    <p className='m-0 flex flex-wrap gap-x-1 text-sm leading-5 text-delta-700'>
+    <p className='text-delta-700 m-0 flex flex-wrap gap-x-1 text-sm/5'>
         <span>Scheduled:</span>
         <span>19.01.2026 • 14:00</span>
     </p>
@@ -51,30 +51,30 @@ export const ScheduledFact = (): JSX.Element => (
 export const ModuleImage = (): JSX.Element => (
     <div
         aria-hidden='true'
-        className='h-[5.25rem] w-[5.25rem] rounded-md border border-solid border-delta-100 bg-[linear-gradient(135deg,#7da7c4,#c9a27a_55%,#5b6b7a)]'
+        className='border-delta-100 size-21 rounded-md border border-solid bg-[linear-gradient(135deg,#7da7c4,#c9a27a_55%,#5b6b7a)]'
     />
 )
 
 export const ReceivedFact = ({ label = 'Received' }: { label?: string }): JSX.Element => (
-    <p className='m-0 text-sm leading-5 text-delta-600'>{label}: 19.01.2026 • 14:00</p>
+    <p className='text-delta-600 m-0 text-sm/5'>{label}: 19.01.2026 • 14:00</p>
 )
 
 /** Card inside workspace: the sub-goal and its category as one helper line (Figma 4823:147915). */
-export const SubGoalCategory = (): JSX.Element => <p className='m-0 text-sm leading-5 text-delta-600'>Sub-goal • Category</p>
+export const SubGoalCategory = (): JSX.Element => <p className='text-delta-600 m-0 text-sm/5'>Sub-goal • Category</p>
 
 export const EventFacts = (): JSX.Element => (
     <>
         {/* Figma "Card date" (7134:153566): the date and the time wrap as two parts, text-icon/primary in every state. */}
-        <p data-card-event-date='' className='m-0 flex flex-wrap gap-x-1 text-base leading-6 text-gama-500'>
+        <p data-card-event-date='' className='text-gama-500 m-0 flex flex-wrap gap-x-1 text-base/6'>
             <span>September 16, 2026 •</span>
             <span>14:00</span>
         </p>
-        <p className='m-0 flex flex-wrap gap-x-2 text-sm leading-5 text-delta-600'>
+        <p className='text-delta-600 m-0 flex flex-wrap gap-x-2 text-sm/5'>
             <span className='inline-flex items-center gap-1'>
-                <ClockOutlineIcon aria-hidden='true' className='h-4 w-4' /> 30 min
+                <ClockOutlineIcon aria-hidden='true' className='size-4' /> 30 min
             </span>
             <span className='inline-flex items-center gap-1'>
-                <LocationIcon aria-hidden='true' className='h-4 w-4' /> Carasent
+                <LocationIcon aria-hidden='true' className='size-4' /> Carasent
             </span>
         </p>
     </>
@@ -101,7 +101,7 @@ const CTA_BY_TYPE: Record<AdVocaTypeKey, string> = {
 export const ctaContent = (label: string): ReactNode => (
     <>
         {label}
-        <ChevronRightIcon className='h-6 w-6' />
+        <ChevronRightIcon className='size-6' />
     </>
 )
 
@@ -124,11 +124,11 @@ const SharedStatus = ({ canShare }: { canShare: boolean }): JSX.Element => {
     const [isShared, setIsShared] = useState(false)
     const switchId = useId()
 
-    if (!canShare) return <p className='m-0 py-1 text-base leading-6 text-delta-600'>Not shareable</p>
+    if (!canShare) return <p className='text-delta-600 m-0 py-1 text-base/6'>Not shareable</p>
 
     return (
         <CardControl>
-            <label htmlFor={switchId} className='cursor-pointer text-base font-semibold leading-6 text-delta-800'>
+            <label htmlFor={switchId} className='text-delta-800 cursor-pointer text-base/6 font-semibold'>
                 Shared status
             </label>
             <StyledSwitch
@@ -190,10 +190,10 @@ export const WorkspaceCard = ({ canShare = true }: { canShare?: boolean }): JSX.
                 </ViewDetails>
             }
         >
-            <p className='m-0 text-base leading-6 text-delta-800'>
+            <p className='text-delta-800 m-0 text-base/6'>
                 <span className='mr-1 font-semibold'>Status:</span> Awaiting reply
             </p>
-            <p className='m-0 text-base leading-6 text-delta-800'>
+            <p className='text-delta-800 m-0 text-base/6'>
                 <span className='mr-1 font-semibold'>State:</span> Active
             </p>
             <SharedStatus canShare={canShare} />

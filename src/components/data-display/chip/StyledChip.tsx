@@ -260,7 +260,7 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                 <span
                     className={cn(
                         'min-w-0 truncate',
-                        'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:![overflow-wrap:anywhere]',
+                        'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:[overflow-wrap:anywhere]!',
                         // One 24px line + this = the 32/24px chip minus its 1px borders. The fixed-height
                         // chip clipped the same overflow invisibly; `h-auto` would grow it to 34/30px.
                         size === 'small' ? 'max-xs:-my-px' : 'max-xs:py-[3px]',
