@@ -39,6 +39,7 @@ import { normalizeDefaultColumnOrder } from '../custom-features/order-columns/co
 import { RowSelectionTooltipFeature } from 'src/table/custom-features/row-selection-tooltip/RowSelectionTooltipFeature'
 import { getLeafColumnInfos } from '../helpers/columnIds'
 import { resolveColumnSizingDefaults } from '../helpers/columnSizingDefaults'
+import { createStyledDefaultSortingFn, STYLED_DEFAULT_SORTING_FN } from '../helpers/defaultSortingFn'
 import { tableStorage } from '../helpers/tableStorage'
 
 const NO_SORTING: SortingState = []
@@ -132,6 +133,19 @@ export const useStyledTable = <
     const persistedPageSize = usePersistedPageSize(uniqueKey)
     const resolvedPageSize = persistedPageSize ?? pageSize ?? 50
 
+    // The default comparison (ASMA-8597, P2f). It reads the direction of the column it compares from the table that sorts,
+    // through this ref, which is filled right after `useReactTable` below: not the app's optional `tableInstanceRef`, and
+    // not the sorting array of the render that registered the function, which is out of date by the next click.
+    const sortingTableRef = useRef<Table<TData> | undefined>(undefined)
+    const styledDefaultSortingFn = useMemo(() => createStyledDefaultSortingFn<TData>(() => sortingTableRef.current), [])
+    // Under the app's own `defaultColumn`, so a `sortingFn` or `sortUndefined` it sets wins; `sortUndefined: false` lets
+    // `undefined` reach the comparison, which places every kind of empty cell. Memoised so that TanStack's default column
+    // definition, which is derived from it, is not rebuilt on every render.
+    const tableDefaultColumn = useMemo(
+        () => ({ sortingFn: STYLED_DEFAULT_SORTING_FN, sortUndefined: false as const, ...defaultColumn }),
+        [defaultColumn],
+    )
+
     const table = useReactTable({
         _features: [ExpandedRowsFeature, FocusedRowsFeature, OrderColumnsFeature, RowSelectionTooltipFeature],
         columns: sizedColumns,
@@ -165,11 +179,15 @@ export const useStyledTable = <
             rest.getRowId ??
             ((row: TData, _index: number, parent?: Row<TData>) =>
                 parent ? [parent.id, row.id].join('.') : row.id.toString()),
-        defaultColumn,
+        defaultColumn: tableDefaultColumn,
         ...rest,
         // After `...rest`, so the resolved default is what TanStack gets whether or not the app passed the prop (D15).
         enableColumnResizing: canResize,
+        // The same, for the sorting functions: ours is kept beside the app's own, which stay available to its columns.
+        sortingFns: { [STYLED_DEFAULT_SORTING_FN]: styledDefaultSortingFn, ...rest.sortingFns },
     })
+
+    sortingTableRef.current = table
 
     if (tableInstanceRef) {
         tableInstanceRef.current = table
