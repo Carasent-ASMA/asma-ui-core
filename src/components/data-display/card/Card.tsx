@@ -38,7 +38,7 @@ const UnreadMarker = ({ unread, labels, id, dataTest }: UnreadMarkerProps): JSX.
                 {labels.unread}
             </span>
             {isLabelVisible && (
-                <span aria-hidden='true' className='text-gama-600 text-[0.6875rem]/3 font-semibold tracking-[0.034375rem] uppercase'>
+                <span aria-hidden='true' className='text-gama-600 text-[0.6875rem] leading-3 font-semibold tracking-[0.034375rem] uppercase'>
                     {labels.unread}
                 </span>
             )}
@@ -98,7 +98,7 @@ const CardHeaderTypeRow = ({ type, status, overdue, ids, hasTopRow, isDisabled }
                     id={ids.type}
                     className={cn(
                         'inline-flex min-w-0 items-center wrap-anywhere',
-                        type.size === 'body' ? 'gap-1 text-base/6' : 'gap-[3px] text-sm/5',
+                        type.size === 'body' ? 'gap-1 text-base leading-6' : 'gap-[3px] text-sm leading-5',
                         overdue && 'text-warning-800',
                     )}
                     style={{ color: overdue ? undefined : type.color }}
@@ -122,7 +122,7 @@ const CardHeaderTypeRow = ({ type, status, overdue, ids, hasTopRow, isDisabled }
             <span
                 id={ids.status}
                 className={cn(
-                    'ml-auto inline-flex min-w-0 flex-wrap items-center justify-end gap-x-2 text-right text-sm/5 wrap-anywhere',
+                    'ml-auto inline-flex min-w-0 flex-wrap items-center justify-end gap-x-2 text-right text-sm leading-5 wrap-anywhere',
                     isDisabled ? 'text-delta-600' : 'text-delta-700',
                 )}
             >
@@ -206,7 +206,7 @@ const TitleText = ({ title, titleId, titleClamp, titleChevron }: Pick<CardTitleP
  */
 const CardTitle = ({ level, model, open, labelledBy, describedBy, selected, disabled, className, ...text }: CardTitleProps): JSX.Element => {
     const Heading = `h${level}` as const
-    const headingClass = cn('text-delta-800 m-0 min-w-0 text-base/6 font-semibold', className)
+    const headingClass = cn('text-delta-800 m-0 min-w-0 text-base leading-6 font-semibold', className)
 
     if (model === 'static' || !open) {
         return (
@@ -478,7 +478,7 @@ export const Card = (props: CardProps): JSX.Element => {
                                 />
                             </div>
                             {props.subtitle && (
-                                <div className='text-delta-700 text-base/6 wrap-anywhere'>{props.subtitle}</div>
+                                <div className='text-delta-700 text-base leading-6 wrap-anywhere'>{props.subtitle}</div>
                             )}
                         </div>
                         {props.media && <div className='shrink-0'>{props.media}</div>}

@@ -521,7 +521,7 @@ export const StyledInputField = ({
             : multiline
               ? cn('w-full resize-none p-0 pr-0 pl-0', readOnlyValue ? 'leading-6' : 'leading-[23px]', styles['Input--multiline'])
               : readOnlyValue
-                ? 'm-0 w-full p-0 text-base/6'
+                ? 'm-0 w-full p-0 text-base leading-6'
                 : cn(
                       'w-full',
                       styles['Input--singleLine'],

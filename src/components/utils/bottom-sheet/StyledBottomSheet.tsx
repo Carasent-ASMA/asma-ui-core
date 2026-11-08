@@ -353,7 +353,7 @@ export const StyledBottomSheet = ({
                         />
                     </div>
                     {title && (
-                        <div id={titleId} className='text-delta-800 truncate px-4 text-lg/7 font-semibold'>
+                        <div id={titleId} className='text-delta-800 truncate px-4 text-lg leading-7 font-semibold'>
                             {title}
                         </div>
                     )}

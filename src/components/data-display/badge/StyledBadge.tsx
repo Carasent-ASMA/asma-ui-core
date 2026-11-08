@@ -215,7 +215,7 @@ export const StyledBadge = ({
                               ? 'size-[12px] min-w-[12px] rounded-full p-0'
                               : size === 'small'
                                 ? 'h-[16px] w-max min-w-[16px] rounded-[20px] px-[4px] text-[0.75rem]'
-                                : 'h-[20px] min-w-[20px] rounded-[20px] px-[6px] text-sm/5',
+                                : 'h-[20px] min-w-[20px] rounded-[20px] px-[6px] text-sm leading-5',
                         // One digit measures 8.05px, so padding alone leaves the pill 20.05px wide.
                         // Pinning it keeps Figma's exact 20px circle rather than a hair of an oval.
                         !isDot && size === 'medium' && isSingleDigitCount && 'w-[20px]',

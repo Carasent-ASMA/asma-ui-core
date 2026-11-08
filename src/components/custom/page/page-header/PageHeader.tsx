@@ -239,7 +239,7 @@ export function PageHeader({
             className={cn(
                 /* 2-line clamp is visual only — the accessible name stays the full title. */
                 'text-delta-800 m-0 line-clamp-2 min-w-0 font-semibold wrap-break-word outline-hidden',
-                smallType ? 'text-xl/7' : 'text-2xl/8',
+                smallType ? 'text-xl leading-7' : 'text-2xl leading-8',
             )}
         >
             {title}
@@ -269,7 +269,7 @@ export function PageHeader({
                     register={register}
                     overflowMenuLabel={t.more}
                     title={title}
-                    titleClassName={cn('font-semibold', smallType ? 'text-xl/7' : 'text-2xl/8')}
+                    titleClassName={cn('font-semibold', smallType ? 'text-xl leading-7' : 'text-2xl leading-8')}
                 />
 
                 {/* Leading navigation stays through every state (never overflows/hides). */}

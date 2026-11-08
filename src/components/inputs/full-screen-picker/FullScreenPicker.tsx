@@ -135,7 +135,7 @@ const PickerSheet = ({ dataTest, title, closeLabel, search, headerRow, children,
             >
                 <div className='flex items-start gap-2'>
                     {title !== undefined && (
-                        <h2 className='text-delta-800 m-0 min-w-0 flex-1 pt-2 pl-4 text-[20px]/7 font-semibold wrap-break-word'>
+                        <h2 className='text-delta-800 m-0 min-w-0 flex-1 pt-2 pl-4 text-[20px] leading-7 font-semibold wrap-break-word'>
                             {title}
                         </h2>
                     )}

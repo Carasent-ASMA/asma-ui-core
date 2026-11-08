@@ -485,7 +485,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                                 <div
                                     id={labelId}
                                     className={cn(
-                                        'text-delta-600 flex h-8 items-center text-sm/5 font-normal',
+                                        'text-delta-600 flex h-8 items-center text-sm leading-5 font-normal',
                                         'max-xs:h-auto max-xs:min-h-8 max-xs:min-w-0 max-xs:flex-auto max-xs:hyphens-auto max-xs:[overflow-wrap:anywhere]!',
                                     )}
                                 >
@@ -497,7 +497,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                                 <div
                                     id={titleId}
                                     className={cn(
-                                        'text-delta-800 flex text-2xl/8 font-semibold',
+                                        'text-delta-800 flex text-2xl leading-8 font-semibold',
                                         'max-xs:hyphens-auto',
                                         dialogLabel && 'max-xs:order-first max-xs:basis-full max-xs:[overflow-wrap:anywhere]!',
                                         // Narrower than a phone, without a label: beside the buttons, wrapping there, and

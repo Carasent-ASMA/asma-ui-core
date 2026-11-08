@@ -44,7 +44,7 @@ export const CardControl = ({ children, className }: CardControlProps): JSX.Elem
  * spell it out. Sized in rem with no fixed height, so larger text and spacing never clip it (CARD-10, Q10).
  */
 export const CardTag = ({ children }: { children: string }): JSX.Element => (
-    <span className='bg-success-300 inline-flex min-h-4 items-center rounded-[0.1875rem] px-1.5 text-[0.6875rem]/3 font-semibold tracking-[0.034375rem] text-black uppercase'>
+    <span className='bg-success-300 inline-flex min-h-4 items-center rounded-[0.1875rem] px-1.5 text-[0.6875rem] leading-3 font-semibold tracking-[0.034375rem] text-black uppercase'>
         {children}
     </span>
 )
@@ -77,7 +77,7 @@ export const CardCheckboxControl = ({ checkbox, titleText, labels, dataTest }: C
                 onChange={(_event, checked) => checkbox.onChange(checked)}
             />
             {!checkbox.hideLabel && (
-                <label htmlFor={inputId} className='text-delta-700 cursor-pointer pr-2 text-base/6 select-none'>
+                <label htmlFor={inputId} className='text-delta-700 cursor-pointer pr-2 text-base leading-6 select-none'>
                     {labels.select}
                 </label>
             )}

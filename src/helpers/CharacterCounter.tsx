@@ -29,7 +29,7 @@ export const CharacterCounter = ({ id, length, limit, locale = 'en', className }
 
     return (
         <>
-            <span id={id} aria-hidden='true' className={cn('font-roboto text-delta-600 text-sm/5', className)}>
+            <span id={id} aria-hidden='true' className={cn('font-roboto text-delta-600 text-sm leading-5', className)}>
                 {text}
             </span>
             <span aria-live='polite' className='sr-only'>
