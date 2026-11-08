@@ -163,7 +163,13 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     // only while it is pinned (see useDialogHeaderPinning).
     const bodyRef = useRef<HTMLDivElement>(null)
     const headerElementRef = useRef<HTMLDivElement | null>(null)
-    const { headerRef: measureHeaderRef, pinned, hidden: headerHidden, scrollPaddingTop } = useDialogHeaderPinning(bodyRef)
+    const {
+        headerRef: measureHeaderRef,
+        pinned,
+        hidden: headerHidden,
+        scrollPaddingTop,
+        scrollPaddingBottom,
+    } = useDialogHeaderPinning(bodyRef)
     const openerRef = useRef<HTMLElement | null>(null)
     const escapeHandledRef = useRef(false)
     // ASMA-8471: a genuine Escape KEYDOWN just happened, so the keyboard path below (which Floating
@@ -489,7 +495,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                     ref={bodyRef}
                     data-dialog-body=''
                     className='flex min-h-0 w-full min-w-0 flex-auto flex-col overflow-y-auto overflow-x-hidden overscroll-contain'
-                    style={{ scrollPaddingTop }}
+                    style={{ scrollPaddingTop, scrollPaddingBottom }}
                 >
                 {(!!dialogLabel || !!dialogTitle || showCloseIcon || !!titleChildId) && (
                     <div

@@ -100,6 +100,52 @@ describe('Dialog header pinning (ASMA-8737)', () => {
         await expect(header().getBoundingClientRect().right).toBeLessThanOrEqual(body().getBoundingClientRect().right)
     })
 
+    it('reserves the sticky footer height so a tabbed-to field is never covered (PIN-8)', async () => {
+        await page.viewport(390, 660)
+        mount(
+            <StyledDialog open dataTest='pin' dialogTitle='Form' onClose={() => undefined}>
+                <StyledDialogContent>
+                    <div className='flex flex-col gap-2'>
+                        {Array.from({ length: 30 }, (_, index) => (
+                            <input
+                                key={index}
+                                aria-label={`Field ${index + 1}`}
+                                className='shrink-0'
+                                style={{ height: 40 }}
+                            />
+                        ))}
+                    </div>
+                </StyledDialogContent>
+                <StyledDialogActions>
+                    <StyledButton dataTest='save'>Save</StyledButton>
+                </StyledDialogActions>
+            </StyledDialog>,
+        )
+        await waitFor(() => expect(header()).toHaveAttribute('data-header-pinned', 'true'))
+        await nextFrames()
+        const footer = dialog().querySelector<HTMLElement>('[data-testid="styled-dialog-actions"]')!
+
+        // Tab through the form exactly as a keyboard user does; focus scrolling must leave every
+        // field above the sticky footer, not underneath it.
+        const covered: string[] = []
+        for (let index = 0; index < 34; index++) {
+            await userEvent.tab()
+            const active = document.activeElement
+            if (!(active instanceof HTMLInputElement)) continue
+            await nextFrames()
+            const inputRect = active.getBoundingClientRect()
+            const footerRect = footer.getBoundingClientRect()
+            if (inputRect.bottom > footerRect.top + 0.5 && inputRect.top < footerRect.bottom) {
+                covered.push(active.getAttribute('aria-label') ?? 'input')
+            }
+        }
+        await expect(covered).toEqual([])
+        // PIN-8: the footer's measured height is reserved as bottom scroll padding.
+        await expect(getComputedStyle(body()).scrollPaddingBottom).toBe(
+            `${Math.round(footer.getBoundingClientRect().height)}px`,
+        )
+    })
+
     it('re-decides when the viewport changes, keeping the scroll position (REQ-008)', async () => {
         await page.viewport(390, 660)
         mount(<Fixture title={lines(3)} />)
@@ -213,6 +259,96 @@ describe('Dialog header pinning (ASMA-8737)', () => {
                 await nextFrames()
                 await expect(header()).not.toHaveAttribute('inert')
                 await expect(header()).toBeVisible()
+            } finally {
+                restore()
+            }
+        })
+
+        it('keeps a pinned header that holds the focused field, and reacts when focus moves (PIN-7)', async () => {
+            await page.viewport(390, 660)
+            const { viewport, restore } = stubVisualViewport(660)
+            try {
+                mount(
+                    <StyledDialog
+                        open
+                        dataTest='pin'
+                        dialogTitle={lines(2)}
+                        dialogHeaderNode={<input aria-label='Header field' data-testid='header-field' />}
+                        onClose={() => undefined}
+                    >
+                        <StyledDialogContent>
+                            <input aria-label='Content field' data-testid='content-field' />
+                        </StyledDialogContent>
+                    </StyledDialog>,
+                )
+                await waitFor(() => expect(header()).toHaveAttribute('data-header-pinned', 'true'))
+                await nextFrames()
+
+                // Establish that the keyboard signal is live: a content field hides the header.
+                const contentField = dialog().querySelector<HTMLInputElement>('[data-testid="content-field"]')!
+                contentField.focus()
+                viewport.height = 360
+                viewport.dispatchEvent(new Event('resize'))
+                await waitFor(() => expect(header()).toHaveAttribute('inert'))
+                viewport.height = 660
+                viewport.dispatchEvent(new Event('resize'))
+                await waitFor(() => expect(header()).not.toHaveAttribute('inert'))
+
+                // The focused field is inside the header now, so the header is the bar that must stay.
+                const headerField = dialog().querySelector<HTMLInputElement>('[data-testid="header-field"]')!
+                headerField.focus()
+                await expect(document.activeElement).toBe(headerField)
+                await nextFrames()
+                viewport.height = 360
+                viewport.dispatchEvent(new Event('resize'))
+                await nextFrames()
+                await expect(header()).not.toHaveAttribute('inert')
+                await expect(header()).not.toHaveAttribute('aria-hidden')
+                await expect(header()).toBeVisible()
+                await expect(getComputedStyle(header()).position).toBe('sticky')
+                await expect(document.activeElement).toBe(headerField)
+            } finally {
+                restore()
+            }
+        })
+
+        it('keeps a V2 pinned header holding the focused action field (PIN-7)', async () => {
+            await page.viewport(390, 660)
+            const { viewport, restore } = stubVisualViewport(660)
+            try {
+                const { container } = mount(
+                    <MinimizableDialogV2
+                        dataTest='v2'
+                        open
+                        title='Short'
+                        actionNode={<input aria-label='Header field' data-testid='v2-header-field' />}
+                        onClose={() => undefined}
+                    >
+                        <input aria-label='Content field' data-testid='v2-content-field' />
+                    </MinimizableDialogV2>,
+                )
+                await waitFor(() => expect(header(container)).toHaveAttribute('data-header-pinned', 'true'))
+                await nextFrames()
+
+                container.querySelector<HTMLInputElement>('[data-testid="v2-content-field"]')!.focus()
+                viewport.height = 360
+                viewport.dispatchEvent(new Event('resize'))
+                await waitFor(() => expect(header(container)).toHaveAttribute('inert'))
+                viewport.height = 660
+                viewport.dispatchEvent(new Event('resize'))
+                await waitFor(() => expect(header(container)).not.toHaveAttribute('inert'))
+
+                const headerField = container.querySelector<HTMLInputElement>('[data-testid="v2-header-field"]')!
+                headerField.focus()
+                await expect(document.activeElement).toBe(headerField)
+                await nextFrames()
+                viewport.height = 360
+                viewport.dispatchEvent(new Event('resize'))
+                await nextFrames()
+                await expect(header(container)).not.toHaveAttribute('inert')
+                await expect(header(container)).not.toHaveAttribute('aria-hidden')
+                await expect(header(container)).toBeVisible()
+                await expect(document.activeElement).toBe(headerField)
             } finally {
                 restore()
             }
@@ -366,6 +502,39 @@ describe('Minimizable dialog titles (ASMA-8737, REQ-003, 004)', () => {
             </MinimizableDialog>,
         )
         await expectMinimizedTooltip(container)
+    })
+
+    it('scrolls the V2 header away with a direct StyledDialogContent, keeping the footer (PIN-5)', async () => {
+        await page.viewport(390, 340)
+        const { container } = mount(
+            <MinimizableDialogV2 dataTest='v2' open title='Short' onClose={() => undefined}>
+                <StyledDialogContent>
+                    <div style={{ height: 3000 }}>Tall content</div>
+                </StyledDialogContent>
+                <StyledDialogActions>
+                    <StyledButton dataTest='v2-save'>Save</StyledButton>
+                </StyledDialogActions>
+            </MinimizableDialogV2>,
+        )
+        await waitFor(() => expect(header(container)).toHaveAttribute('data-header-pinned', 'false'))
+        await nextFrames()
+        const bodyElement = body(container)
+        const content = container.querySelector<HTMLElement>('[data-test="styled-dialog-content"]')!
+        const footer = container.querySelector<HTMLElement>('[data-testid="styled-dialog-actions"]')!
+
+        // The body is the one scroller: the header really leaves the viewport, and the content does
+        // not shrink into a second scroller.
+        bodyElement.scrollTop = 400
+        await waitFor(() => expect(bodyElement.scrollTop).toBeGreaterThan(0))
+        await expect(content.scrollTop).toBe(0)
+        await expect(header(container).getBoundingClientRect().bottom).toBeLessThanOrEqual(
+            bodyElement.getBoundingClientRect().top,
+        )
+        // The footer stays pinned to the bottom while the body scrolls.
+        await expect(footer.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+            bodyElement.getBoundingClientRect().bottom + 0.5,
+        )
+        await expect(footer.getBoundingClientRect().top).toBeGreaterThanOrEqual(bodyElement.getBoundingClientRect().top)
     })
 
     it('MinimizableDialogV2 pins its header by the same rule', async () => {

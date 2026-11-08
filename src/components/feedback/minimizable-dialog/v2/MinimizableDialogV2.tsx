@@ -62,7 +62,13 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
     // ASMA-8737: header + content scroll together; the header is sticky only while pinned.
     const bodyRef = useRef<HTMLDivElement>(null)
     const headerElementRef = useRef<HTMLDivElement | null>(null)
-    const { headerRef: measureHeaderRef, pinned, hidden: headerHidden, scrollPaddingTop } = useDialogHeaderPinning(bodyRef)
+    const {
+        headerRef: measureHeaderRef,
+        pinned,
+        hidden: headerHidden,
+        scrollPaddingTop,
+        scrollPaddingBottom,
+    } = useDialogHeaderPinning(bodyRef)
 
     const { minimized, setMinimized, fullScreen, setFullScreen } = useControlledProps(props)
     const isFullScreenActive = fullScreen && !minimized
@@ -270,8 +276,17 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                 <div
                     ref={bodyRef}
                     data-dialog-body=''
-                    className={cn(minimized && 'hidden', 'flex min-h-0 flex-grow flex-col overflow-y-auto overscroll-contain')}
-                    style={{ scrollPaddingTop }}
+                    className={cn(
+                        minimized && 'hidden',
+                        'flex min-h-0 flex-grow flex-col overflow-y-auto overscroll-contain',
+                        // ASMA-8737: the body is the one scroller. A direct StyledDialogContent keeps its full
+                        // height instead of shrinking into a second scroller, so an unpinned header really
+                        // scrolls away (the same rule StyledDialog applies).
+                        "[&>[data-test='styled-dialog-content']]:!flex-[1_0_auto]",
+                        // The footer stays pinned while the body scrolls (PIN-5).
+                        "[&>[data-dialog-footer]]:sticky [&>[data-dialog-footer]]:bottom-0 [&>[data-dialog-footer]]:z-[2] [&>[data-dialog-footer]]:bg-white",
+                    )}
+                    style={{ scrollPaddingTop, scrollPaddingBottom }}
                 >
                 <div
                     ref={(node) => {
