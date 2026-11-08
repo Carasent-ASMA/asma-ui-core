@@ -185,7 +185,8 @@ const restoreV3SpaceBetween = {
  * `--tw-skew-*`, which v4 never sets. v4 also writes scales as percentages (`75%`) where v3 wrote
  * numbers (`.75`); they are converted so both copies agree.
  *
- * Remove once no app ships a v3 ui-core copy.
+ * Remove once no app ships a v3 ui-core copy. asma-ui-richeditor bundles its own v3 utilities too, so
+ * it has to migrate as well.
  */
 const V3_TRANSFORM =
     'translate(var(--tw-translate-x, 0), var(--tw-translate-y, 0)) rotate(var(--tw-rotate, 0)) ' +
@@ -205,9 +206,13 @@ const restoreV3TransformUtilities = {
                 } else if (declaration.prop === 'scale' && value === 'var(--tw-scale-x) var(--tw-scale-y)') {
                     declaration.prop = 'transform'
                     declaration.value = V3_TRANSFORM
-                } else if (declaration.prop === 'transform' && value.startsWith('var(--tw-rotate-x,)')) {
-                    // The bare `transform` utility: an identity transform in v3, `none` in v4.
-                    declaration.value = V3_TRANSFORM
+                } else if (declaration.prop === 'transform' && value.includes('var(--tw-rotate-x,)')) {
+                    // `transform`, `transform-cpu` and `transform-gpu`: v4 composes function-valued variables
+                    // that a v3 copy's numeric `--tw-skew-x: 0` makes invalid (computed `none`, which also
+                    // drops a `scale-*` on the same element). v3 wrote the full composite; `-gpu` used translate3d.
+                    declaration.value = value.startsWith('translateZ(0)')
+                        ? V3_TRANSFORM.replace(/^translate\((.+?)\) /, 'translate3d($1, 0) ')
+                        : V3_TRANSFORM
                 } else if (declaration.prop === 'rotate' && /\.-?rotate-/.test(rule.selector)) {
                     rule.append(declaration.clone({ prop: 'transform', value: V3_TRANSFORM }))
                     declaration.prop = '--tw-rotate'
