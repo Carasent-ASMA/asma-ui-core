@@ -12,6 +12,7 @@ import {
 import { CloseIcon } from 'src/components/icons/close-icon/CloseIcon'
 import { IndeterminateIcon } from 'src/components/icons/indeterminate-icon/IndeterminateIcon'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
+import { isKeyboardModality, trackInputModality } from 'src/components/inputs/full-screen-picker/inputModality'
 import { cn } from 'src/helpers/cn'
 import {
     isOverlayBackEnabled,
@@ -24,8 +25,10 @@ import { useDebouncedValue } from 'src/hooks/useDebouncedValue.hook'
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
 import { useShortViewportMediaQuery } from 'src/hooks/useMediaQuery.hook'
 import { registerOpenModalDialog } from 'src/hooks/useTopLayer.hook'
+import type { UiCoreLocale } from 'src/helpers/uiCoreLocale'
 import type { PopoverContentApi, PopoverSlot } from '../popover/PopoverSheet'
 import { formatResultsLabel } from './formatResultsLabel'
+import { SHEET_TEXT } from './sheetCopy'
 import style from './StyledBottomSheet.module.scss'
 import { useDragToDismiss } from './useDragToDismiss.hook'
 
@@ -70,14 +73,22 @@ export interface StyledBottomSheetProps {
      * @figmaProp none — behavioral
      */
     resultCount?: number | null
-    /** @figmaProp none — a11y: accessible name of the close control */
+    /** @figmaProp none — a11y: accessible name of the close control; defaults to "Close" in `locale` */
     closeLabel?: string
+    /** Language of the default result and close labels; defaults to English. */
+    locale?: UiCoreLocale
     /** @figmaProp none — style escape hatch, applied to the sheet container */
     className?: string
     /** Set `false` when a wrapper already owns the Back-close registration. */
     registerBackClose?: boolean
     /** Logical owner supplied by a wrapper that must keep one identity across responsive variants. */
     ownerRef?: RefObject<Element | null>
+    /**
+     * The control that opened the sheet; focus returns to it on close. Without it the sheet returns
+     * focus to whatever was focused on open — in Safari a tap never focuses a button, so that is the
+     * nearest focusable ancestor (a dialog's scrollable content), which then shows a focus ring.
+     */
+    triggerRef?: RefObject<HTMLElement | null>
 }
 
 /**
@@ -106,10 +117,12 @@ export const StyledBottomSheet = ({
     resetAction,
     footerActions,
     resultCount,
-    closeLabel = 'Lukk',
+    locale = 'en',
+    closeLabel = SHEET_TEXT[locale].close,
     className,
     registerBackClose = true,
     ownerRef,
+    triggerRef,
 }: StyledBottomSheetProps): JSX.Element | null => {
     const titleId = useId()
     const dialogRef = useRef<HTMLDialogElement | null>(null)
@@ -170,9 +183,11 @@ export const StyledBottomSheet = ({
     useLayoutEffect(() => {
         const node = dialogRef.current
         if (!open || !node) return
+        trackInputModality()
 
         // Remembered before showModal() moves focus, so it can go back to the trigger on close.
-        returnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
+        const focused = document.activeElement instanceof HTMLElement ? document.activeElement : null
+        returnFocusRef.current = triggerRef?.current ?? focused
         if (!node.open) node.showModal()
         node.focus({ preventScroll: true })
         const frame = requestAnimationFrame(() => {
@@ -188,9 +203,11 @@ export const StyledBottomSheet = ({
             // land on the trigger.
             if (node.open) node.close()
             const target = returnFocusRef.current
-            if (target?.isConnected) target.focus({ preventScroll: true })
+            // After a tap or click the trigger takes focus without a ring: Safari would otherwise paint one,
+            // because a scripted focus inherits the focus-visible state of the sheet it leaves.
+            if (target?.isConnected) target.focus({ preventScroll: true, focusVisible: isKeyboardModality() })
         }
-    }, [open])
+    }, [open, triggerRef])
 
     // A second Android Back force-closes the native dialog while React still wants it open.
     // Ask the registry top to close, then put the dialog back only if this sheet is still open.
@@ -218,7 +235,7 @@ export const StyledBottomSheet = ({
     }, [open])
 
     const displayedCount = useDebouncedValue(resultCount, RESULT_COUNT_DEBOUNCE_MS)
-    const resultsLabel = formatResultsLabel(displayedCount)
+    const resultsLabel = formatResultsLabel(displayedCount, locale)
 
     if (!open) return null
 
@@ -354,6 +371,9 @@ export const StyledBottomSheet = ({
                         className={cn(
                             'border-t-solid border-delta-200 flex shrink-0 items-start border-t bg-white p-1',
                             viewResults ? 'justify-between' : 'justify-end',
+                            // Narrower than a phone: the reset button (second, after view results) wraps
+                            // onto its own line, still on the right, instead of being pushed off screen.
+                            'max-xs:flex-wrap max-xs:gap-y-2 max-xs:[&>:nth-child(2)]:ml-auto',
                             !extraActions && 'pb-[max(0.25rem,env(safe-area-inset-bottom))]',
                         )}
                     >
@@ -368,7 +388,12 @@ export const StyledBottomSheet = ({
                     </div>
                 )}
                 {extraActions && (
-                    <div className='flex shrink-0 flex-col items-end bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]'>
+                    <div
+                        className={cn(
+                            'flex shrink-0 flex-col items-end bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]',
+                            hasFooter && 'max-xs:pt-1',
+                        )}
+                    >
                         {extraActions}
                     </div>
                 )}

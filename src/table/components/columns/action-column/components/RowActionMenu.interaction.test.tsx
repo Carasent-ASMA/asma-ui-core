@@ -164,3 +164,62 @@ describe('RowActionMenu — all actions disabled', () => {
         await waitFor(async () => expect(within(document.body).queryByRole('tooltip')).toBeNull())
     })
 })
+
+describe('RowActionMenu keyboard', () => {
+    afterEach(cleanup)
+
+    const mountMenu = (onEdit = fn()): HTMLButtonElement => {
+        mount(
+            <StyledTable
+                locale='en'
+                columns={columns}
+                data={data}
+                actions={() => [
+                    { label: 'Edit', onClick: onEdit },
+                    { label: 'Delete', onClick: () => undefined },
+                ]}
+            />,
+        )
+        return document.querySelector<HTMLButtonElement>('[data-test="row-actions-button"]')!
+    }
+    const item = (label: string): HTMLElement | undefined =>
+        [...document.querySelectorAll<HTMLElement>('[role="menuitem"]')].find((node) => node.textContent === label)
+
+    it('moves focus onto the first item when Enter opens the menu, and the arrows move on from there', async () => {
+        const trigger = mountMenu()
+        trigger.focus()
+        await userEvent.keyboard('{Enter}')
+
+        await waitFor(() => expect(document.activeElement).toBe(item('Edit')))
+        await userEvent.keyboard('{ArrowDown}')
+        await waitFor(() => expect(document.activeElement).toBe(item('Delete')))
+    })
+
+    it('leaves focus on the ⋮ after a mouse click; an arrow key then moves it into the menu', async () => {
+        const trigger = mountMenu()
+        await userEvent.click(trigger)
+        await waitFor(() => expect(item('Edit')).toBeDefined())
+
+        // No item takes focus, so none shows the keyboard focus bar.
+        await expect(document.activeElement).toBe(trigger)
+
+        await userEvent.keyboard('{ArrowUp}')
+        await waitFor(() => expect(document.activeElement).toBe(item('Delete')))
+        await userEvent.keyboard('{ArrowUp}')
+        await waitFor(() => expect(document.activeElement).toBe(item('Edit')))
+    })
+
+    it('runs the action on Enter and closes the menu, handing focus back to the ⋮', async () => {
+        const onEdit = fn()
+        const trigger = mountMenu(onEdit)
+        trigger.focus()
+        await userEvent.keyboard('{Enter}')
+        await waitFor(() => expect(document.activeElement).toBe(item('Edit')))
+
+        await userEvent.keyboard('{Enter}')
+
+        await waitFor(() => expect(document.querySelector('[role="menu"]')).toBeNull())
+        await expect(onEdit).toHaveBeenCalledTimes(1)
+        await waitFor(() => expect(document.activeElement).toBe(trigger))
+    })
+})

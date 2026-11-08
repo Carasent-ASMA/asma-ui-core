@@ -16,6 +16,9 @@ export const TimePickerInput: React.FC<
         handleBlur?: () => void
         isValidTime: boolean
         isValidEndTime: boolean
+        isMissingTime?: boolean
+        /** Set only while the current entry is one `isTimeDisabled` refuses; carries its reason. */
+        disabledTimeError?: React.ReactNode
         localValue: string
     }
 > = (props) => {
@@ -34,11 +37,16 @@ export const TimePickerInput: React.FC<
         handleBlur,
         isValidTime,
         isValidEndTime,
+        isMissingTime,
+        disabledTimeError,
         localValue,
         title,
-        readOnly,
+        required,
+        readOnly: readOnlyProp,
+        lockedReason,
         inputAriaProps,
     } = props
+    const readOnly = Boolean(readOnlyProp) || Boolean(lockedReason)
 
     const inputRef = useInputMask({
         mask: 'xx:xx',
@@ -46,7 +54,7 @@ export const TimePickerInput: React.FC<
         showMask: false,
     })
 
-    const hasError = !isValidTime || !isValidEndTime || !!error
+    const hasError = !isValidTime || !isValidEndTime || !!isMissingTime || !!error || !!disabledTimeError
     const inputRootRef = useRef<HTMLDivElement | null>(null)
     const titleId = useId()
 
@@ -58,7 +66,7 @@ export const TimePickerInput: React.FC<
     }, [])
 
     return (
-        <div {...timePickerWidthProps(width)}>
+        <div {...timePickerWidthProps(width)} data-helper-room-box=''>
             {title && (
                 <div id={titleId} className={fieldLabelAboveClass({ disabled })}>
                     {title}
@@ -74,25 +82,33 @@ export const TimePickerInput: React.FC<
                 size='small'
                 error={hasError}
                 helperText={
+                    // The consumer's own reason wins: it names the actual rule, where the built-in
+                    // catalogue could only say "invalid time".
+                    disabledTimeError ?? (
                     <HelperText
                         isValidTime={isValidTime}
                         isValidEndTime={isValidEndTime}
-                        error={hasError}
+                        isMissingTime={isMissingTime}
+                        error={!!error}
                         localization={locale}
                         helperText={helperText}
                         messages={defaultTimePickerHelperMessages}
                     />
+                    )
                 }
                 onChange={handleChange}
                 onBlur={handleBlur}
                 slotProps={{
-                    htmlInput: getTitleLabelling({ title, titleId, label, inputAriaProps }),
+                    htmlInput: {
+                        'aria-required': required ? true : undefined,
+                        ...getTitleLabelling({ title, titleId, label, inputAriaProps }),
+                    },
                     input: {
                         ref: inputRootRef,
                         onClick: (e: ReactMouseEvent<HTMLElement>) => {
                             if (!disabled && !readOnly) popupState.open(e)
                         },
-                        endAdornment: (
+                        endAdornment: !lockedReason && (
                             <ClockOutlineIcon
                                 width={24}
                                 height={24}
@@ -117,6 +133,7 @@ export const TimePickerInput: React.FC<
                 sx={typeof width === 'number' ? { maxWidth: width, width, minWidth: width } : undefined}
                 disabled={disabled}
                 readOnly={readOnly}
+                lockedReason={lockedReason}
                 className={inputClassName}
                 label={label}
             />

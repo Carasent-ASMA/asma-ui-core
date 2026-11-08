@@ -2,12 +2,13 @@ import { flexRender, type Header } from '@tanstack/react-table'
 import { useMemo } from 'react'
 import clsx from 'clsx'
 import style from '../StyledTable.module.scss'
-import { DropUpIcon } from 'src/table/shared-components/DropUpIcon'
-import { DropDownIcon } from 'src/table/shared-components/DropDownIcon'
+import { SortIndicator } from './SortIndicator'
 import { ACTIONS_COLUMN_ID, INTERNAL_COLUMN_IDS, SELECT_COLUMN_ID, type StyledTableProps } from 'src/table/types'
 import { getTableHeaderStyle } from 'src/table/helpers/getTableHeaderStyle'
 import { useRootContext } from 'src/table/context/RootContext'
 import { COMPACT_COLUMN_MAX_WIDTH } from 'src/table/helpers/columnSpacing'
+import { hasFixedWidth } from 'src/table/helpers/columnSizingDefaults'
+import { getSortPreview } from 'src/table/helpers/sortPreview'
 
 export function TableHeaderCell<
     TData extends {
@@ -53,6 +54,13 @@ export function TableHeaderCell<
 
     const canSort = header.column.getCanSort()
     const sortedDirection = header.column.getIsSorted()
+    const sorting = header.getContext().table.getState().sorting
+    const sortPreview = getSortPreview({
+        sorted: sortedDirection,
+        firstDirection: header.column.getFirstSortDir(),
+        nextOrder: header.column.getNextSortingOrder(),
+        isLastSortEntry: sorting[sorting.length - 1]?.id === header.column.id,
+    })
     const ariaSort = canSort
         ? sortedDirection === 'asc'
             ? 'ascending'
@@ -60,6 +68,13 @@ export function TableHeaderCell<
               ? 'descending'
               : 'none'
         : undefined
+
+    const showResizeHandle =
+        tableCanResize &&
+        (!enableResizing ? header.id !== lastColumn?.id : true) &&
+        header.column.getCanResize() &&
+        !hasFixedWidth(header.column.columnDef) &&
+        !INTERNAL_COLUMN_IDS.includes(header.column.id)
 
     return (
         <th
@@ -87,10 +102,14 @@ export function TableHeaderCell<
                     'flex items-center justify-start',
                     hideHeader ? style['hide-table-header'] : style['show-table-header'],
                     canSort && style['sortable-column'],
+                    // The handle's 24px zone is reserved on the right, so nothing sits under it.
+                    showResizeHandle && style['has-resize-zone'],
                     header.column.columnDef.className,
                 )}
                 role={canSort ? 'button' : undefined}
-                tabIndex={canSort ? 0 : undefined}
+                // A hidden header keeps its names and `aria-sort` in the accessibility tree, but its sort control is
+                // not a tab stop: there would be nothing to see where the focus is (ASMA-8702).
+                tabIndex={canSort && !hideHeader ? 0 : undefined}
                 onClick={(e) => {
                     const sortingHandler = header.column.getToggleSortingHandler()
                     if (!isResizing && sortingHandler) {
@@ -113,33 +132,31 @@ export function TableHeaderCell<
                 <div className={style['header-content']}>
                     {flexRender(header.column.columnDef.header, header.getContext())}
                 </div>
-                {{
-                    asc: <DropUpIcon className={style['sort-icon']} />,
-                    desc: <DropDownIcon className={style['sort-icon']} />,
-                }[header.column.getIsSorted() as string] ?? null}
-                {tableCanResize &&
-                    (!enableResizing ? header.id !== lastColumn?.id : true) &&
-                    header.column.getCanResize() &&
-                    !INTERNAL_COLUMN_IDS.includes(header.column.id) && (
-                        <div
-                            {...{
-                                onDoubleClick: () => header.column.resetSize(),
-                                onMouseDown: (e) => {
-                                    e.stopPropagation()
-                                    enableResizingFlag()
-                                    header.getResizeHandler()(e)
-                                },
-                                onTouchStart: (e) => {
-                                    e.stopPropagation()
-                                    enableResizingFlag()
-                                    header.getResizeHandler()(e)
-                                },
-                                className: `${style['resizer']} ${
-                                    header.column.getIsResizing() ? style['isResizing'] : ''
-                                }`,
-                            }}
-                        />
-                    )}
+                {canSort && (
+                    <SortIndicator
+                        sorted={sortedDirection}
+                        firstDirection={header.column.getFirstSortDir()}
+                        preview={sortPreview}
+                    />
+                )}
+                {showResizeHandle && (
+                    <div
+                        {...{
+                            onDoubleClick: () => header.column.resetSize(),
+                            onMouseDown: (e) => {
+                                e.stopPropagation()
+                                enableResizingFlag()
+                                header.getResizeHandler()(e)
+                            },
+                            onTouchStart: (e) => {
+                                e.stopPropagation()
+                                enableResizingFlag()
+                                header.getResizeHandler()(e)
+                            },
+                            className: `${style['resizer']} ${header.column.getIsResizing() ? style['isResizing'] : ''}`,
+                        }}
+                    />
+                )}
             </div>
         </th>
     )

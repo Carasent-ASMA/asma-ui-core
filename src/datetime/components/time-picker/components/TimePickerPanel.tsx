@@ -2,11 +2,15 @@ import { TimePickerBody } from './TimePickerBody'
 import { EraserIcon } from 'src/datetime/shared-components/EraserIcon'
 import { CheckIcon } from 'src/datetime/shared-components/CheckIcon'
 import { StyledButton } from 'src/datetime/shared-components/button'
+import type { TimePredicate } from '../helpers/disabledTime'
+import type { ReactNode } from 'react'
 
 export interface TimePickerPanelProps {
     dataTest: string
     value?: Date
     minTime?: Date
+    isTimeDisabled?: TimePredicate
+    disabledTimeReason?: ReactNode
     onSelect: (date: Date | undefined) => void
     handleClear: () => void
     onConfirm: () => void
@@ -20,12 +24,21 @@ export const TimePickerPanel: React.FC<TimePickerPanelProps> = ({
     dataTest,
     value,
     minTime,
+    isTimeDisabled,
+    disabledTimeReason,
     onSelect,
     handleClear,
     onConfirm,
 }) => (
     <>
-        <TimePickerBody dataTest={`${dataTest}-time-picker-body`} value={value} minTime={minTime} onSelect={onSelect} />
+        <TimePickerBody
+            dataTest={`${dataTest}-time-picker-body`}
+            value={value}
+            minTime={minTime}
+            isTimeDisabled={isTimeDisabled}
+            disabledTimeReason={disabledTimeReason}
+            onSelect={onSelect}
+        />
         <div
             style={{
                 display: 'flex',

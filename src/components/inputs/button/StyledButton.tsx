@@ -104,6 +104,8 @@ export type StyledButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & 
  * native button pseudo-states + the `disabled` attribute, not a prop.
  * @remarks for icon button add only startIcon prop
  * @remarks for error button no textGray variant
+ * @remarks `type` defaults to `'button'`, not the native `'submit'`. Pass `type='submit'`
+ * explicitly for the button that submits a form.
  *
  * Custom props:
  * @param variant -  'contained' | 'outlined' | 'text' | 'textGray'
@@ -132,6 +134,11 @@ export const StyledButton = ({
     loadingAnnouncement,
     locale = 'en',
     onClick,
+    // The native default is `submit`, so a bare button placed anywhere inside a <form> fires that
+    // form. Almost every button in the fleet is an action that runs its own onClick, and the ones
+    // that really do submit say so (StyledDialogFooter's primaryAction passes `type: 'submit'`),
+    // so `button` is the safe default and an explicit `type` still wins.
+    type = 'button',
     ...otherProps
 }: StyledButtonProps): JSX.Element => {
     // A running save keeps the dialog around it open (no Esc / backdrop / X dismissal).
@@ -164,6 +171,7 @@ export const StyledButton = ({
     const button = (
         <button
             {...otherProps}
+            type={type}
             disabled={Boolean(disabled) && !blocked}
             aria-disabled={blocked ? true : otherProps['aria-disabled']}
             aria-busy={loading ? true : otherProps['aria-busy']}
@@ -177,6 +185,11 @@ export const StyledButton = ({
                 BtnStyles[variant],
                 BtnStyles[color],
                 BtnStyles[size],
+                // Narrower than a phone: a label that does not fit wraps inside a button capped at its
+                // container; a label that fits keeps the one-line Figma size (the height floor). Only
+                // the label (the one `div` child) gives up width, the icons keep theirs.
+                'max-xs:h-auto max-xs:max-w-full max-xs:py-1 max-xs:[&>:not(div)]:shrink-0',
+                size === 'small' ? 'max-xs:min-h-8' : 'max-xs:min-h-10',
                 className,
             )}
             // A button with a text label must fit its content: as a flex item in a tight row it would
@@ -195,6 +208,10 @@ export const StyledButton = ({
             {hideWhenBusy(startIcon)}
             {children && (
                 <div
+                    className={clsx(
+                        'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:![overflow-wrap:anywhere]',
+                        'max-xs:text-center',
+                    )}
                     style={{
                         opacity: loading ? 0 : undefined,
                         overflow: 'hidden',

@@ -1,6 +1,7 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import type { ReactElement } from 'react'
+import { userEvent } from 'vitest/browser'
 
 /**
  * Minimal mount/unmount harness for the `interaction` project (ASMA-8139).
@@ -101,6 +102,35 @@ export const cleanup = (): void => {
 }
 
 /**
+ * Parks the real pointer away from where tests mount, and resolves once it has moved.
+ *
+ * The pointer is browser state, not page state: it stays wherever the last test left it, and the
+ * next test mounts its fixture **under** it — every harness mounts at the same place, the top-left
+ * of `<body>`. A row that happens to land there is hovered before the test touches anything, and if
+ * that row owns a tooltip, the tooltip opens over its neighbour; `hover()` on the neighbour then
+ * waits out its actionability timeout against an overlay nothing is going to remove.
+ *
+ * That is the shape of the nightly detector's one finding on 2026-10-22 — `StyledMenu … shows the
+ * caller-supplied tooltip only on the row that sets it`, failed 1 run in 5, the hover burning 14.9s
+ * of a 15s budget, in a file whose preceding test hovers row 1 of an identically-placed two-row
+ * list. Call this first in any test that hovers and cares what was hovered before it.
+ *
+ * Not folded into {@link cleanup}: it costs a real round-trip to the browser per call, and the
+ * suite has 665 tests of which a handful hover at all.
+ */
+export const parkPointer = async (): Promise<void> => {
+    const parking = document.createElement('div')
+    // Bottom-right, on top of everything, and 8px so the pointer lands squarely inside it.
+    parking.style.cssText = 'position:fixed;right:0;bottom:0;width:8px;height:8px;z-index:2147483647'
+    document.body.appendChild(parking)
+    try {
+        await userEvent.hover(parking)
+    } finally {
+        parking.remove()
+    }
+}
+
+/**
  * Puts the browser's sequential focus navigation starting point back at the top of the document, so
  * the next test's first real Tab reaches its first control. Without this the point stays wherever the
  * previous test left it — on a node that has since been removed — and in a shuffled run that first Tab
@@ -162,6 +192,19 @@ export const describeFocusIndicator = (before: FocusStyle, after: FocusStyle): s
     if (after.borderColor !== before.borderColor || after.borderWidth !== before.borderWidth)
         return `border ${after.borderWidth} ${after.borderColor}`
     return null
+}
+
+/**
+ * A colour token (e.g. `--colors-error-500`) as the computed `rgb(…)` string, for comparing computed styles.
+ * Call it outside `waitFor`: the probe element it mounts would re-trigger waitFor's MutationObserver.
+ */
+export const resolveTokenColor = (token: string): string => {
+    const probe = document.createElement('span')
+    probe.style.color = `var(${token})`
+    document.body.append(probe)
+    const color = getComputedStyle(probe).color
+    probe.remove()
+    return color
 }
 
 /** Every element in `root` that a Tab press can land on, in document order. */

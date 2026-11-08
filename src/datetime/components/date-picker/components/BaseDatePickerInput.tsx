@@ -4,7 +4,7 @@ import { DatePickerButton } from './DatePickerButton'
 import { getTitleLabelling } from 'src/datetime/helpers/getTitleLabelling'
 import { useDatePickerMask } from '../hooks/useDatePickerMask'
 import { DATE_INPUT_FONT_FAMILY } from 'src/helpers/inputMask'
-import { type AriaAttributes, useEffect, useId, useState } from 'react'
+import { type AriaAttributes, useEffect, useId, useRef, useState } from 'react'
 import { getValue } from '../helpers'
 import { useDatePickerValidation, defaultDatePickerValidationMessages } from '../hooks/useDatePickerValidation'
 import { parse, isValid as isValidDateFns } from 'date-fns'
@@ -15,6 +15,8 @@ export interface IBaseDatePickerInput {
     inputClassName?: string
     disabled: boolean
     readOnly?: boolean
+    lockedReason?: React.ReactNode
+    readOnlyReason?: React.ReactNode
     onClick: (e: React.MouseEvent<HTMLDivElement | HTMLButtonElement>) => void
     selected: Date | undefined
     dateFormat?: string
@@ -33,6 +35,7 @@ export interface IBaseDatePickerInput {
     disallowPast?: boolean
     disallowFuture?: boolean
     hideDefaultHelperText?: boolean
+    reserveHelperText?: boolean
     required?: boolean
     minDate?: Date
     inputAriaProps?: AriaAttributes
@@ -55,24 +58,30 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
         label,
         title,
         inputAriaProps,
-        readOnly,
+        readOnly: readOnlyProp,
+        lockedReason,
+        readOnlyReason,
         disallowPast,
         disallowFuture,
         validateOnCalendarClose,
         onValidatedOnce,
         hideDefaultHelperText,
+        reserveHelperText,
         required,
         minDate,
         width = 's',
         ...rest
     } = props
 
+    const readOnly = Boolean(readOnlyProp) || Boolean(lockedReason) || Boolean(readOnlyReason)
+    const readOnlyValue = !lockedReason && Boolean(readOnlyReason)
     const { validationError, handleValidation, errHelperText, clearValidation } =
         useDatePickerValidation(defaultDatePickerValidationMessages)
     const { maskRef } = useDatePickerMask()
     const titleId = useId()
     const inputId = useId()
     const [value, setValue] = useState(selected ? getValue(selected, dateFormat) : '')
+    const reportedEmptyRef = useRef(false)
 
     // Keep `value` in sync with `selected`/`dateFormat` without an effect — the React-recommended
     // "adjusting state during render" pattern (https://react.dev/learn/you-might-not-need-an-effect
@@ -93,10 +102,11 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
     const hasError = !!(validationError || error)
     const rawText = hasError ? (errorText ?? errHelperText) : helperText ?? effectiveDefaultHelper
 
-
     useEffect(() => {
         if (!selected) {
-            clearValidation()
+            // Our own emptied field coming back as `selected={undefined}` keeps its "Required".
+            if (!reportedEmptyRef.current) clearValidation()
+            reportedEmptyRef.current = false
             return
         }
 
@@ -165,28 +175,29 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
             required,
             minDate,
         })
-        if (isErrorNow) return
-
         const onlyDigits = value.replace(/\D/g, '')
         if (!onlyDigits.length) {
+            reportedEmptyRef.current = !!selected
             onInputChange?.(undefined)
             return
         }
+
+        if (isErrorNow) return
 
         const parsed = parse(value, 'dd/MM/yyyy', new Date())
         onInputChange?.(isValidDateFns(parsed) ? parsed : undefined)
     }
 
     return (
-        <div className='cursor-default' data-field-width={width} style={fieldWidthStyle(width)}>
+        <div className='cursor-default' data-field-width={width} style={fieldWidthStyle(width)} data-helper-room-box=''>
             {/* Title and label sit above the whole row, so the calendar button lines up with the input. */}
             {title && (
-                <div id={titleId} className={fieldLabelAboveClass({ disabled: rest.disabled })}>
+                <div id={titleId} className={fieldLabelAboveClass({ disabled: rest.disabled, flush: readOnlyValue })}>
                     {title}
                 </div>
             )}
             {label && (
-                <div className={fieldLabelAboveClass({ disabled: rest.disabled })}>
+                <div className={fieldLabelAboveClass({ disabled: rest.disabled, flush: readOnlyValue })}>
                     <label htmlFor={inputId}>
                         {label}
                         {required && <span aria-hidden='true'>&nbsp;*</span>}
@@ -194,14 +205,18 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
                 </div>
             )}
 
-            {/* Figma node 38285-181679: the input and the 40px calendar button, 4px apart, fill the step. */}
-            <div className='flex items-start gap-1'>
-                <div className='min-w-0 flex-1'>
+            {/* Figma node 38285-181679: the input and the 40px calendar button, 4px apart, fill the step.
+                Narrower than a phone the input never gets narrower than a whole date, and the calendar button
+                wraps below it when they do not fit side by side. */}
+            <div className='flex items-start gap-1 max-xs:flex-wrap max-xs:gap-y-1'>
+                <div className='min-w-0 flex-1 max-xs:min-w-min'>
                     <div className='relative'>
                         <StyledInputField
                             {...rest}
                             id={inputId}
                             readOnly={readOnly}
+                            lockedReason={lockedReason}
+                            readOnlyReason={readOnlyReason}
                             data-testid={rest.dataTest}
                             autoComplete='off'
                             inputRef={!readOnly ? maskRef : undefined}
@@ -213,7 +228,19 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
                             onBlur={!readOnly ? handleBlur : undefined}
                             // Render the helper/error through the InputField's own helper row (single
                             // source — don't reinvent it); `rawText` is the resolved default/helper/error.
-                            helperText={rawText}
+                            helperText={
+                                rawText == null || rawText === '' ? (
+                                    rawText
+                                ) : (
+                                    <span
+                                        className='block truncate'
+                                        title={typeof rawText === 'string' ? rawText : undefined}
+                                    >
+                                        {rawText}
+                                    </span>
+                                )
+                            }
+                            reserveHelperText={reserveHelperText}
                             slotProps={{
                                 formHelperText: { sx: { marginTop: '4px', marginLeft: 0, marginRight: 0 } },
                                 htmlInput: {
@@ -227,6 +254,9 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
                                         ? {}
                                         : { inputMode: 'numeric' as const, style: { fontFamily: DATE_INPUT_FONT_FAMILY } }),
                                 },
+                                // Narrower than a phone: room for the whole dd/mm/yyyy in the monospace font (`ch`
+                                // is that font's digit), with a smaller inset so it still fits a 160px screen.
+                                input: readOnly ? undefined : { className: 'max-xs:min-w-[calc(10ch+1rem)] max-xs:px-2' },
                             }}
                             onChange={onChange}
                         />

@@ -90,13 +90,56 @@ describe('StyledTimePicker keyboard contract', () => {
         await expect(picked.getMinutes()).toBe(30)
     })
 
-    it('marks an incomplete time invalid instead of committing it (4.1.2)', async () => {
-        const { container } = mount(<TimePickerFixture />)
+    it('shows no error while typing an incomplete time, and marks it invalid on blur (4.1.2, ADR-0017 REQ-001)', async () => {
+        const onSelect = fn()
+        const { container } = mount(<TimePickerFixture onSelect={onSelect} />)
         const input = field(container)
 
         input.focus()
         await userEvent.keyboard('09')
 
+        await waitFor(() => expect(input).toHaveValue('09'))
+        await expect(input).not.toHaveAttribute('aria-invalid')
+        await expect(container).not.toHaveTextContent('Invalid time format')
+
+        input.blur()
+
+        await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
+        await expect(container).toHaveTextContent('Invalid time format')
+        await expect(onSelect).not.toHaveBeenCalled()
+    })
+
+    it('clears the error on the first valid change and never adds one while typing (ADR-0017 REQ-002)', async () => {
+        const { container } = mount(<TimePickerFixture />)
+        const input = field(container)
+
+        input.focus()
+        await userEvent.keyboard('09')
+        input.blur()
+        await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
+
+        input.focus()
+        await userEvent.keyboard('30')
+        await waitFor(() => expect(input).toHaveValue('09:30'))
+        await expect(input).not.toHaveAttribute('aria-invalid')
+
+        await userEvent.keyboard('{Backspace}')
+        await waitFor(() => expect(input).toHaveValue('09:3'))
+        await expect(input).not.toHaveAttribute('aria-invalid')
+
+        input.blur()
+        await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
+    })
+
+    it('does not mark an incomplete time invalid on Enter without a blur', async () => {
+        const { container } = mount(<TimePickerFixture />)
+        const input = field(container)
+
+        input.focus()
+        await userEvent.keyboard('09{Enter}')
+
+        await expect(input).not.toHaveAttribute('aria-invalid')
+        await userEvent.tab()
         await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
     })
 
@@ -289,6 +332,64 @@ describe('StyledTimePicker minTime', () => {
         await expect(input).not.toHaveAttribute('aria-invalid', 'true')
     })
 
+    it('shows a before-start time as an error only after blur', async () => {
+        const { container } = mount(
+            <StyledTimePicker
+                dataTest='end-time'
+                label='End time'
+                notBeforeTime={new Date(2026, 9, 5, 12, 0)}
+                value={new Date(2026, 9, 5, 13, 0)}
+                onSelect={() => undefined}
+            />,
+        )
+        const input = container.querySelector<HTMLInputElement>('input[data-testid="end-time"]')!
+
+        await userEvent.clear(input)
+        await userEvent.keyboard('1100')
+        await waitFor(() => expect(input).toHaveValue('11:00'))
+        await expect(input).not.toHaveAttribute('aria-invalid')
+
+        input.blur()
+
+        await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
+        await expect(container).toHaveTextContent('Must be after start time')
+    })
+
+    it('uncommits a field emptied by typing on blur, without an error', async () => {
+        const onSelect = fn()
+        const { container } = mount(<MinTimeFixture initial={new Date(2026, 9, 5, 13, 0)} onSelect={onSelect} />)
+        const input = minField(container)
+
+        await userEvent.clear(input)
+        await expect(onSelect).not.toHaveBeenCalled()
+
+        input.blur()
+
+        await waitFor(() => expect(onSelect).toHaveBeenCalledWith(undefined))
+        await expect(input).toHaveValue('')
+        await expect(input).not.toHaveAttribute('aria-invalid')
+    })
+
+    it('shows a before-start time picked from the panel as an error at once (a pick is a finished entry)', async () => {
+        const { container } = mount(
+            <StyledTimePicker
+                dataTest='min-time'
+                label='End time'
+                notBeforeTime={new Date(2026, 9, 5, 12, 0)}
+                value={new Date(2026, 9, 5, 13, 0)}
+                onSelect={() => undefined}
+            />,
+        )
+        const input = minField(container)
+        await openMinPanel(container)
+
+        await userEvent.click(cell(0, '11'))
+
+        await waitFor(() => expect(input).toHaveValue('11:00'))
+        await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
+        await expect(container).toHaveTextContent('Must be after start time')
+    })
+
     it('names the field by its title, or by inputAriaProps for a label rendered outside (1.3.1, 4.1.2)', async () => {
         const { container } = mount(
             <>
@@ -305,5 +406,307 @@ describe('StyledTimePicker minTime', () => {
         const named = container.querySelector('input[data-testid="named"]')
         await expect(named).toHaveAccessibleName('End time')
         await expect(named).toHaveAttribute('aria-required', 'true')
+    })
+})
+
+describe('StyledTimePicker required', () => {
+    afterEach(cleanup)
+
+    const RequiredFixture = ({
+        initial,
+        error,
+        helperText,
+        onSelect = () => undefined,
+    }: {
+        initial?: Date
+        error?: boolean
+        helperText?: string
+        onSelect?: (date?: Date) => void
+    }): JSX.Element => {
+        const [value, setValue] = useState<Date | undefined>(initial)
+        return (
+            <>
+                <StyledTimePicker
+                    dataTest='required-time'
+                    label='Start time'
+                    required
+                    error={error}
+                    helperText={helperText}
+                    value={value}
+                    onSelect={(next) => {
+                        setValue(next)
+                        onSelect(next)
+                    }}
+                />
+                <button type='button' data-testid='after'>
+                    After
+                </button>
+            </>
+        )
+    }
+
+    const requiredField = (container: HTMLElement): HTMLInputElement =>
+        container.querySelector<HTMLInputElement>('input[data-testid="required-time"]')!
+
+    it('marks the input aria-required', async () => {
+        const { container } = mount(<RequiredFixture />)
+
+        await expect(requiredField(container)).toHaveAttribute('aria-required', 'true')
+    })
+
+    it('shows Required, not an invalid format, when an empty field is left (3.3.1)', async () => {
+        const { container } = mount(<RequiredFixture />)
+        const input = requiredField(container)
+
+        input.focus()
+        await expect(input).not.toHaveAttribute('aria-invalid')
+        await userEvent.tab()
+
+        await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
+        await expect(container).toHaveTextContent('Required')
+        await expect(container).not.toHaveTextContent('Invalid time format')
+    })
+
+    it('uncommits an emptied field and shows Required on blur', async () => {
+        const onSelect = fn()
+        const { container } = mount(<RequiredFixture initial={new Date(2026, 9, 5, 13, 0)} onSelect={onSelect} />)
+        const input = requiredField(container)
+
+        await userEvent.clear(input)
+        input.blur()
+
+        await waitFor(() => expect(onSelect).toHaveBeenCalledWith(undefined))
+        await expect(input).toHaveAttribute('aria-invalid', 'true')
+        await expect(container).toHaveTextContent('Required')
+    })
+
+    it('drops Required on the first keystroke without showing an invalid format', async () => {
+        const { container } = mount(<RequiredFixture />)
+        const input = requiredField(container)
+
+        input.focus()
+        await userEvent.tab()
+        await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
+
+        input.focus()
+        await userEvent.keyboard('0')
+
+        await waitFor(() => expect(input).not.toHaveAttribute('aria-invalid'))
+        await expect(container).not.toHaveTextContent('Required')
+        await expect(container).not.toHaveTextContent('Invalid time format')
+    })
+
+    it('shows Required after the eraser empties the field', async () => {
+        const { container } = mount(<RequiredFixture initial={new Date(2026, 9, 5, 13, 0)} />)
+
+        await userEvent.click(requiredField(container))
+        await waitFor(() => expect(panel()).not.toBeNull(), { timeout: 600 })
+        await userEvent.click(document.querySelector<HTMLElement>('[data-testid="time-picker-erase-button"]')!)
+
+        await waitFor(() => expect(requiredField(container)).toHaveAttribute('aria-invalid', 'true'))
+        await expect(container).toHaveTextContent('Required')
+    })
+
+    it('waits for the panel: no Required while picking, Required once Tab leaves without a pick', async () => {
+        const { container } = mount(<RequiredFixture />)
+        const input = requiredField(container)
+
+        await userEvent.click(input)
+        await waitFor(() => expect(panel()).not.toBeNull(), { timeout: 600 })
+        await expect(input).not.toHaveAttribute('aria-invalid')
+
+        await userEvent.tab()
+
+        await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
+        await expect(container).toHaveTextContent('Required')
+    })
+
+    it('shows the form error text over its own message (form errors win)', async () => {
+        const { container } = mount(<RequiredFixture error helperText='Start time is required' />)
+        const input = requiredField(container)
+
+        await expect(input).toHaveAttribute('aria-invalid', 'true')
+        await expect(container).toHaveTextContent('Start time is required')
+
+        input.focus()
+        await userEvent.tab()
+
+        await expect(container).toHaveTextContent('Start time is required')
+        await expect(container).not.toHaveTextContent(/Required$/)
+    })
+
+    it('keeps its own before-start message over a form Required for a typed time', async () => {
+        const { container } = mount(
+            <StyledTimePicker
+                dataTest='end-time'
+                label='End time'
+                required
+                error
+                helperText='Required'
+                notBeforeTime={new Date(2026, 9, 5, 12, 0)}
+                value={new Date(2026, 9, 5, 13, 0)}
+                onSelect={() => undefined}
+            />,
+        )
+        const input = container.querySelector<HTMLInputElement>('input[data-testid="end-time"]')!
+
+        await userEvent.clear(input)
+        await userEvent.keyboard('1100')
+        await waitFor(() => expect(input).toHaveValue('11:00'))
+        input.blur()
+
+        await waitFor(() => expect(container).toHaveTextContent('Must be after start time'))
+        await expect(container).not.toHaveTextContent('Required')
+    })
+
+    it('shows no error for an empty optional field', async () => {
+        const { container } = mount(<TimePickerFixture />)
+        const input = field(container)
+
+        input.focus()
+        await userEvent.tab()
+
+        await expect(input).not.toHaveAttribute('aria-invalid')
+        await expect(container).not.toHaveTextContent('Required')
+    })
+})
+
+/**
+ * `isTimeDisabled` (ASMA-8761): an arbitrary, possibly midnight-wrapping band of clock times is
+ * refused — and unlike `minTime`, refused *loudly*, because the rule lives in the consumer and the
+ * field cannot show it. The motivating case is a customer's quiet hours for patient SMS.
+ */
+describe('StyledTimePicker isTimeDisabled', () => {
+    afterEach(cleanup)
+
+    /** 22:00–06:00, the shape that no pair of bounds can express because it wraps midnight. */
+    const quietHours = (time: Date): boolean => {
+        const minutes = time.getHours() * 60 + time.getMinutes()
+        return minutes >= 22 * 60 || minutes < 6 * 60
+    }
+
+    const REASON = 'SMS is not sent between 22:00 and 06:00'
+
+    const QuietFixture = ({
+        initial,
+        predicate = quietHours,
+        onSelect = () => undefined,
+    }: {
+        initial?: Date
+        predicate?: (time: Date) => boolean
+        onSelect?: (date?: Date) => void
+    }): JSX.Element => {
+        const [value, setValue] = useState<Date | undefined>(initial)
+        return (
+            <StyledTimePicker
+                dataTest='quiet-time'
+                label='Send time'
+                value={value}
+                isTimeDisabled={predicate}
+                disabledTimeReason={REASON}
+                onSelect={(next) => {
+                    setValue(next)
+                    onSelect(next)
+                }}
+            />
+        )
+    }
+
+    const quietField = (container: HTMLElement): HTMLInputElement =>
+        container.querySelector<HTMLInputElement>('input[data-testid="quiet-time"]')!
+    const openQuietPanel = async (container: HTMLElement): Promise<void> => {
+        await userEvent.click(quietField(container))
+        await waitFor(() => expect(panel()).not.toBeNull(), { timeout: 600 })
+    }
+    const quietColumns = (): HTMLElement[] => {
+        const body = document.querySelector<HTMLElement>('[data-test="quiet-time-time-picker-body"]')!
+        return Array.from(body.children) as HTMLElement[]
+    }
+    const quietCell = (column: 0 | 1, label: string): HTMLButtonElement =>
+        Array.from(quietColumns()[column]!.querySelectorAll('button')).find((b) => b.textContent === label)!
+
+    it('refuses every hour inside a window that wraps midnight, and no others', async () => {
+        const { container } = mount(<QuietFixture initial={new Date(2026, 9, 5, 12, 0)} />)
+        await openQuietPanel(container)
+
+        // Both sides of midnight, which is the half a `maxTime` could not have described.
+        await expect(quietCell(0, '22')).toHaveAttribute('aria-disabled', 'true')
+        await expect(quietCell(0, '23')).toHaveAttribute('aria-disabled', 'true')
+        await expect(quietCell(0, '00')).toHaveAttribute('aria-disabled', 'true')
+        await expect(quietCell(0, '05')).toHaveAttribute('aria-disabled', 'true')
+        // The boundary is exclusive at the opening: 06:00 is the first hour SMS may go out.
+        await expect(quietCell(0, '06')).not.toHaveAttribute('aria-disabled')
+        await expect(quietCell(0, '21')).not.toHaveAttribute('aria-disabled')
+    })
+
+    it('keeps an hour available when only some of its minutes are refused', async () => {
+        // 06:00–06:30 rejects half of hour 6. Greying the hour would strand the minutes it allows,
+        // which is the same rule `minTime` already follows.
+        const halfHour = (time: Date): boolean => time.getHours() === 6 && time.getMinutes() < 30
+        const { container } = mount(<QuietFixture initial={new Date(2026, 9, 5, 6, 45)} predicate={halfHour} />)
+        await openQuietPanel(container)
+
+        await expect(quietCell(0, '06')).not.toHaveAttribute('aria-disabled')
+        await expect(quietCell(1, '25')).toHaveAttribute('aria-disabled', 'true')
+        await expect(quietCell(1, '30')).not.toHaveAttribute('aria-disabled')
+    })
+
+    it('leaves a refused cell focusable so its reason is reachable without a mouse', async () => {
+        const { container } = mount(<QuietFixture initial={new Date(2026, 9, 5, 12, 0)} />)
+        await openQuietPanel(container)
+        const blocked = quietCell(0, '23')
+
+        // Native `disabled` would be skipped by Tab and silent on pointer events in Chrome and
+        // Safari alike, so neither a keyboard nor a mouse user could ever learn why the cell is out.
+        await expect(blocked).not.toHaveAttribute('disabled')
+        await expect(blocked).toHaveAttribute('aria-disabled', 'true')
+        blocked.focus()
+        await expect(document.activeElement).toBe(blocked)
+    })
+
+    it('shows the reason when a refused cell is hovered', async () => {
+        const { container } = mount(<QuietFixture initial={new Date(2026, 9, 5, 12, 0)} />)
+        await openQuietPanel(container)
+
+        await userEvent.hover(quietCell(0, '23'))
+
+        await waitFor(() => expect(document.body.textContent).toContain(REASON), { timeout: 1500 })
+    })
+
+    it('commits nothing when a refused cell is clicked', async () => {
+        const onSelect = fn()
+        const { container } = mount(<QuietFixture initial={new Date(2026, 9, 5, 12, 0)} onSelect={onSelect} />)
+        await openQuietPanel(container)
+
+        // A raw DOM click, deliberately, rather than `userEvent.click`: the runner's actionability
+        // check treats `aria-disabled` as not-enabled and refuses to click at all — which is itself
+        // the proof that assistive tech and the browser both read the cell as unavailable. What is
+        // left to prove is the handler's own refusal, the thing that holds if a click does land.
+        quietCell(0, '23').dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
+
+        await expect(quietField(container)).toHaveValue('12:00')
+        await expect(onSelect).not.toHaveBeenCalled()
+    })
+
+    it('errors on a typed refused time rather than reverting it the way minTime does', async () => {
+        const onSelect = fn()
+        const { container } = mount(<QuietFixture initial={new Date(2026, 9, 5, 12, 0)} onSelect={onSelect} />)
+        const input = quietField(container)
+
+        await userEvent.clear(input)
+        await userEvent.keyboard('2300')
+        await waitFor(() => expect(input).toHaveValue('23:00'))
+
+        input.blur()
+
+        // The text the author typed stays put — an error that names a value they can no longer see
+        // would be unactionable — and the consumer's own reason is what the field reports.
+        await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
+        await expect(input).toHaveValue('23:00')
+        await expect(container.textContent).toContain(REASON)
+        // Nothing in the blocked window was ever committed upward. Stated as "no call carried 23:00"
+        // rather than a matcher, which both says the actual claim and keeps `any` out of the test.
+        const committed = onSelect.mock.calls.map((call) => call[0] as Date | undefined)
+        await expect(committed.some((picked) => picked instanceof Date && picked.getHours() === 23)).toBe(false)
     })
 })

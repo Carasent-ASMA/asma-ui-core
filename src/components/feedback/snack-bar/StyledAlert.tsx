@@ -127,7 +127,7 @@ export const StyledAlert = ({
             style={resolveSx(sx)}
         >
             {shownIcon && <span className={cn('flex shrink-0 items-center', ICON_CLASS[variant][severity])}>{shownIcon}</span>}
-            <span className='min-w-0 flex-1'>{children}</span>
+            <span className='min-w-0 flex-1 max-xs:hyphens-auto max-xs:![overflow-wrap:anywhere]'>{children}</span>
             {action ??
                 (onClose && (
                     <button

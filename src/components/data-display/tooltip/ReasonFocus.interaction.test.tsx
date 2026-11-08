@@ -8,7 +8,6 @@ import { StyledTab } from '../../navigation/tabs/StyledTab'
 import { StyledButton } from '../../inputs/button/StyledButton'
 import { StyledLink } from '../../navigation/link/StyledLink'
 import { StyledInteractiveChip } from '../interactive-chip/StyledInteractiveChip'
-import { StyledWidget } from '../../custom/widget/widget/StyledWidget'
 
 const reason = 'Locked after signing'
 const fixtures: [string, string, (active: boolean, reason?: string) => ReactElement][] = [
@@ -66,20 +65,10 @@ const fixtures: [string, string, (active: boolean, reason?: string) => ReactElem
             />
         ),
     ],
-    [
-        'widget view more',
-        '[data-testid="view-more"]',
-        (disabled, disabledReason) => (
-            <StyledWidget
-                title='Chats'
-                isLoading={false}
-                isEmpty={false}
-                emptyText='No chats'
-                viewMore={{ viewMoreText: 'View more', viewLessText: 'View less', disabled, disabledReason }}
-            />
-        ),
-    ],
 ]
+
+// Widget View more left this contract in ASMA-8699: a reason replaces the button
+// with read-only text, so the node cannot stay. StyledWidget.test.tsx covers that.
 
 describe('Controls keep their node when the reason changes', () => {
     afterEach(cleanup)

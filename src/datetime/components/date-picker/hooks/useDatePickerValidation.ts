@@ -35,7 +35,7 @@ export const defaultDatePickerValidationMessages: DatePickerValidationMessageCat
         futureNotAllowed: 'Future date is not allowed',
     },
     nb: {
-        required: 'Påkrevd',
+        required: 'Obligatorisk',
         minDate: 'Sluttdato må være etter startdato',
         invalidDay: 'Ugyldig dag',
         invalidMonth: 'Ugyldig måned',

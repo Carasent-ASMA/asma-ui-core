@@ -34,4 +34,49 @@ describe('DynamicInteractiveChipGroup', () => {
         expect(html).toContain('role="alert"')
         expect(html).toContain('Pick one')
     })
+
+    /*
+     * The row used to render unconditionally, so a chip group with nothing to say still parked 28px
+     * of empty space under the chips — visible as a gap between a chip row and whatever followed it.
+     * `disableHelperText` was declared on the public props but only ever read by the autocomplete.
+     */
+    describe('disableHelperText', () => {
+        const helperRow = /role="(alert|status)"/
+
+        it('reserves the helper row by default, so existing layouts are unchanged', () => {
+            const html = renderToStaticMarkup(createElement(DynamicInteractiveChipGroup, baseProps))
+            expect(html).toMatch(helperRow)
+        })
+
+        it('drops the reserved row when asked', () => {
+            const html = renderToStaticMarkup(
+                createElement(DynamicInteractiveChipGroup, { ...baseProps, disableHelperText: true }),
+            )
+            expect(html).not.toMatch(helperRow)
+        })
+
+        it('still shows a real helper message, which grows the layout instead of filling a reservation', () => {
+            const html = renderToStaticMarkup(
+                createElement(DynamicInteractiveChipGroup, {
+                    ...baseProps,
+                    disableHelperText: true,
+                    helperText: 'Applies to the whole schedule',
+                }),
+            )
+            expect(html).toContain('Applies to the whole schedule')
+        })
+
+        it('still shows an error, which must never be swallowed by opting out of the reservation', () => {
+            const html = renderToStaticMarkup(
+                createElement(DynamicInteractiveChipGroup, {
+                    ...baseProps,
+                    disableHelperText: true,
+                    error: true,
+                    helperText: 'Pick one',
+                }),
+            )
+            expect(html).toContain('role="alert"')
+            expect(html).toContain('Pick one')
+        })
+    })
 })

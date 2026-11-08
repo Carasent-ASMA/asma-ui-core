@@ -54,6 +54,7 @@ export const StyledFormControlLabel = ({
 }: FormControlLabelProps): JSX.Element => {
     const controlProps = isValidElement(control) ? (control.props as Record<string, unknown>) : {}
     const isDisabled = disabled ?? (controlProps['disabled'] as boolean | undefined) ?? false
+    const isReadOnly = Boolean(controlProps['readOnly'])
 
     const labelTextId = useId()
     const hasOwnAccessibleName =
@@ -86,8 +87,8 @@ export const StyledFormControlLabel = ({
     return (
         <label
             className={cn(
-                'text-delta-800 m-0 inline-flex items-center gap-2 align-middle',
-                isDisabled ? 'cursor-default' : 'cursor-pointer',
+                'm-0 inline-flex items-center gap-2 align-middle text-delta-800',
+                isDisabled || isReadOnly ? 'cursor-default' : 'cursor-pointer',
                 PLACEMENT_CLASS[labelPlacement],
                 className,
             )}
@@ -97,7 +98,12 @@ export const StyledFormControlLabel = ({
             {label != null && (
                 <span
                     id={shouldLabelControl ? labelTextId : undefined}
-                    className={cn('text-sm/5 tracking-[0.00938em]', isDisabled && 'text-delta-300')}
+                    className={cn(
+                        'text-sm/5 tracking-[0.00938em]',
+                        // Narrower than a phone: a long word breaks instead of pushing past the screen edge.
+                        'max-xs:min-w-0 max-xs:hyphens-auto max-xs:[overflow-wrap:anywhere]!',
+                        isDisabled && 'text-delta-300',
+                    )}
                 >
                     {label}
                 </span>

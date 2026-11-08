@@ -138,15 +138,16 @@
     font-size: 16px !important;
     font-weight: 600 !important;
     line-height: 24px !important;
+    // A <button> otherwise keeps the browser's own box, border style (`outset`), colour and font, and
+    // only looked right inside apps whose Tailwind reset happens to restyle every button. Without that
+    // reset (Storybook) Today's 2px border drew as a two-tone 3D bevel and the numbers went black.
+    box-sizing: border-box !important;
+    border-style: solid !important;
+    color: inherit;
+    font-family: inherit !important;
 
     &:hover {
         background-color: var(--colors-delta-50);
-    }
-
-    &.focus-visible {
-        outline-width: 2px;
-        outline-color: var(--colors-gama-500) !important;
-        z-index: 50;
     }
 }
 
@@ -252,6 +253,49 @@
             background-color: var(--colors-gama-100) !important;
         }
     }
+}
+
+// Keyboard focus = a 3px focus-ring edge, like every other control. Drawn with border colour + inset
+// shadow, as the buttons' `focus-ring` mixin does, not with `outline`: host apps ship global resets such
+// as `@layer base { button { outline-color: transparent !important } }` (adopus-app-directory), and a
+// layered !important beats ours, which left the ring invisible on the page while Storybook showed it.
+// Placed after the state rules so their `border-none` / `shadow-none` cannot hide it.
+.day:focus-visible {
+    outline: none !important;
+    border-color: var(--colors-focus-ring) !important;
+    box-shadow: inset 0 0 0 3px var(--colors-focus-ring) !important;
+
+    @media (forced-colors: active) {
+        forced-color-adjust: none;
+        outline: 3px solid CanvasText !important;
+        outline-offset: -3px !important;
+        box-shadow: none !important;
+    }
+}
+
+// Today already has a 2px border, now in the ring colour; 1px of shadow inside it completes the 3px.
+.day_today:not(.day_range_middle) .day:focus-visible {
+    box-shadow: inset 0 0 0 1px var(--colors-focus-ring) !important;
+}
+
+// On the filled selected day the ring would merge into the fill, so a 2px white gap follows it
+// (the filled-button treatment).
+.day_selected:not(.day_range_middle) .day:focus-visible {
+    box-shadow:
+        inset 0 0 0 3px var(--colors-focus-ring),
+        inset 0 0 0 5px white !important;
+}
+
+.day_today.day_selected:not(.day_range_middle) .day:focus-visible {
+    box-shadow:
+        inset 0 0 0 1px var(--colors-focus-ring),
+        inset 0 0 0 3px white !important;
+}
+
+// The selected cell's own white ring is an outline, painted over the button and so across the focus
+// ring; while the day is focused the shadow above draws that white gap instead.
+.day_selected:has(.day:focus-visible) {
+    outline: none !important;
 }
 
 .day_hidden {

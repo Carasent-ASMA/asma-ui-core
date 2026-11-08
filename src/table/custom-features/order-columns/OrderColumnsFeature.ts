@@ -22,16 +22,16 @@ export const OrderColumnsFeature: TableFeature = {
         }
     },
     createTable: <TData extends RowData>(table: Table<TData>): void => {
-        const defaultColumnOrder = table.getAllLeafColumns().map((col) => col.id)
-
         table.setColumnOrder = (updater: Updater<ColumnOrderState>) => {
             const safeUpdater: Updater<ColumnOrderState> = (old) => functionalUpdate(updater, old)
 
             return table.options.onColumnOrderChange?.(safeUpdater)
         }
 
+        // `[]` means "the definition order of the columns as they are now". A list captured when the table
+        // was created would go stale as soon as `columns` changes (ASMA-8597, trap A).
         table.resetColumnOrder = () => {
-            table.setColumnOrder(defaultColumnOrder)
+            table.setColumnOrder([])
         }
     },
 }

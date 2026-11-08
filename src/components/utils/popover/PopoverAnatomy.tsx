@@ -19,6 +19,14 @@ const CLOSE_COLUMN_WIDTH = 40
  * 40px body padding) needs the full 472px of the frame — with a border only 470px remain and the
  * pair wraps. Figma's stroke takes no width from autolayout, and the inset shadow matches that.
  *
+ * The ring is not on this surface itself: an element's own inset shadow paints beneath its
+ * children, so the Close button's hover fill in the top-right corner covered it. `PopoverAnatomy`
+ * draws it as its last, absolutely positioned layer (`SURFACE_EDGE_CLASSNAME`), above the content.
+ * The surface carries no `position` class: utilities here ship `!important`, so `relative` beat
+ * Floating UI's inline `position: fixed`. Inside a modal `<dialog>` (no top layer to rescue it) the
+ * sheet then rendered off-screen and focusing it scrolled the dialog sideways. The caller's
+ * position (the sheet's inline `fixed`, the Gallery's `relative`) is that layer's containing block.
+ *
  * `box-border` is load-bearing, not noise: this package builds Tailwind with `preflight: false`, so
  * without it `box-sizing` falls back to `content-box` and a 472px max-width renders 474.
  *
@@ -26,7 +34,10 @@ const CLOSE_COLUMN_WIDTH = 40
  * caller, so the Gallery story can render the same surface statically in a grid.
  */
 export const POPOVER_SURFACE_CLASSNAME =
-    'box-border flex flex-col overflow-hidden rounded-lg bg-white text-delta-700 outline-hidden shadow-[inset_0_0_0_1px_var(--colors-delta-300),0px_4px_40px_0px_#22213366]'
+    'box-border flex flex-col overflow-hidden rounded-lg bg-white text-delta-700 outline-hidden shadow-[0px_4px_40px_0px_#22213366]'
+
+const SURFACE_EDGE_CLASSNAME =
+    'pointer-events-none absolute inset-0 rounded-[inherit] shadow-[inset_0_0_0_1px_var(--colors-delta-300)]'
 
 export interface PopoverAnatomyProps {
     dataTest: string
@@ -81,7 +92,8 @@ export const PopoverAnatomy = ({
             keeps exactly Figma's width. See `ClassicScrollbarKeepsDatePickerPairOnOneRow`.
 
             The close control floats over the top of that column instead of occupying a row, but stays
-            LAST in the DOM so `action` still opens on the first body control, not on it. With a title
+            LAST in the DOM — after the footer rows too — so `action` still opens on the first body
+            control, not on it, and Tab walks body, footer, then Close. With a title
             the 40px title row puts the scroll area — and so the bar — below the Close, as Figma draws.
             Without one, a body that scrolls starts 40px down for the same reason: a native bar runs
             the full height of its container, and at the top it would sit under the Close (its up
@@ -107,16 +119,6 @@ export const PopoverAnatomy = ({
                 >
                     {children}
                 </div>
-                <div className='absolute top-0 right-0'>
-                    <StyledButton
-                        dataTest={`${dataTest}-close`}
-                        variant='textGray'
-                        type='button'
-                        aria-label={closeLabel}
-                        onClick={onClose}
-                        startIcon={<CloseIcon width={24} height={24} />}
-                    />
-                </div>
             </div>
             {(viewResultsAction ?? resetAction) && (
                 // Figma draws this row as `justify-between` with "View results (3)" left and the reset
@@ -126,13 +128,42 @@ export const PopoverAnatomy = ({
                     className={cn(
                         'flex shrink-0 items-start p-1',
                         viewResultsAction ? 'justify-between' : 'justify-end',
+                        // Narrower than a phone: the reset button wraps onto its own line, still on the
+                        // right, instead of being pushed off screen.
+                        'max-xs:flex-wrap max-xs:gap-y-2 max-xs:[&>:last-child]:ml-auto',
                     )}
                 >
                     {viewResultsAction}
                     {resetAction}
                 </div>
             )}
-            {footerActions && <div className='flex shrink-0 flex-col items-end p-3'>{footerActions}</div>}
+            {footerActions && (
+                <div
+                    className={cn(
+                        'flex shrink-0 flex-col items-end p-3',
+                        (viewResultsAction ?? resetAction) && 'max-xs:pt-1',
+                    )}
+                >
+                    {footerActions}
+                </div>
+            )}
+            {/* After the footer rows, so Tab reaches it last: body, footer, then Close. Positioned on the
+                surface (its caller's position), whose top-right corner is the content column's.
+                The surface clips that corner to its 8px radius, so the button takes the same radius there,
+                and while focused it rises above the edge layer: otherwise the corner cuts the focus ring
+                and the 1px edge paints over its top and right sides. */}
+            <div className='absolute right-0 top-0 [&:has(:focus-visible)]:z-[1]'>
+                <StyledButton
+                    dataTest={`${dataTest}-close`}
+                    variant='textGray'
+                    type='button'
+                    className='rounded-tr-lg'
+                    aria-label={closeLabel}
+                    onClick={onClose}
+                    startIcon={<CloseIcon width={24} height={24} />}
+                />
+            </div>
+            <span aria-hidden data-test={`${dataTest}-edge`} className={SURFACE_EDGE_CLASSNAME} />
         </>
     )
 }

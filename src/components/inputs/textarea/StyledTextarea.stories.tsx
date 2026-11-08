@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useRef, useState, type CSSProperties } from 'react'
-import { expect } from 'storybook/test'
+import { expect, waitFor } from 'storybook/test'
 import { StyledTextarea } from './StyledTextarea'
 
 const meta = {
@@ -84,6 +84,25 @@ export const Error: Story = {
                 maxLength={maxChars}
             />
         )
+    },
+}
+
+/** ASMA-8561: error + focused = 3px error-500 drawn inside the box, like the input field. */
+export const ErrorFocused: Story = {
+    // axe: color-contrast (error text #e10700 on error bg #f7dede = 3.88, needs 4.5). Same as Error. ASMA-8136 allowlist - see docs/a11y-allowlist.md
+    parameters: { a11y: { test: 'todo' } },
+    args: {
+        value: 'abc',
+        error: true,
+        errorMessage: 'Minimum 5 characters required',
+    },
+    play: async ({ canvas }) => {
+        const textarea = canvas.getByRole('textbox')
+        textarea.focus()
+
+        await expect(textarea).toHaveFocus()
+        // `duration-75` animates the outline, so wait for it to land.
+        await waitFor(() => expect(getComputedStyle(textarea).outlineWidth).toBe('3px'))
     },
 }
 

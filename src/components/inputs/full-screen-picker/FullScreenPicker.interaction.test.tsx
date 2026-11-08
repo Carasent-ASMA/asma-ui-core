@@ -45,7 +45,13 @@ const Fixture = ({ title = 'User role', rows = 40 }: { title?: string; rows?: nu
 const dialog = (): HTMLDialogElement => document.querySelector<HTMLDialogElement>('dialog[data-testid="fsp"]')!
 const rectOf = (selector: string): DOMRect => document.querySelector(selector)!.getBoundingClientRect()
 
-const MediaProbe = (): JSX.Element => <span data-testid='probe'>{String(useFullScreenPickerMediaQuery())}</span>
+/** The visual viewport height after one resize, with the layout viewport it happens in. */
+interface ViewportStep {
+    height: number
+    layout?: [number, number]
+}
+
+const MediaProbe =(): JSX.Element => <span data-testid='probe'>{String(useFullScreenPickerMediaQuery())}</span>
 
 describe('FullScreenPicker (ASMA-8468)', () => {
     afterEach(async () => {
@@ -93,8 +99,16 @@ describe('FullScreenPicker (ASMA-8468)', () => {
         await expect(heading.scrollWidth).toBeLessThanOrEqual(heading.clientWidth)
     })
 
-    it('puts the search under the title in portrait (REQ-004)', async () => {
-        await page.viewport(390, 844)
+    it.each([
+        [390, 844],
+        // An upright phone with its keyboard up: short, but too narrow for the one-row header — moving
+        // the focused search there would drop the keyboard (REQ-007).
+        [390, 400],
+        [390, 480],
+        [479, 400],
+        [320, 256],
+    ])('puts the search under the title at %i × %i (REQ-004)', async (width, height) => {
+        await page.viewport(width, height)
         mount(<Fixture />)
         await waitFor(() => expect(dialog()).not.toBeNull())
         await expect(rectOf('[data-testid="fsp-search"]').top).toBeGreaterThanOrEqual(rectOf('dialog h2').bottom)
@@ -102,8 +116,9 @@ describe('FullScreenPicker (ASMA-8468)', () => {
 
     it.each([
         [844, 390],
-        [320, 256],
-        [390, 480],
+        [568, 320],
+        [480, 320],
+        [1280, 480],
     ])('shares the first row between title, search and close at %i × %i (REQ-007)', async (width, height) => {
         await page.viewport(width, height)
         mount(<Fixture />)
@@ -147,6 +162,46 @@ describe('FullScreenPicker (ASMA-8468)', () => {
             await waitFor(() => expect(dialog()).not.toBeNull())
             const body = document.querySelector<HTMLElement>('[data-testid="fsp-body"]')!
             await expect(body.getBoundingClientRect().bottom).toBeLessThanOrEqual(500)
+        } finally {
+            if (original) Object.defineProperty(window, 'visualViewport', original)
+        }
+    })
+
+    it.each<[string, [number, number], number, ViewportStep[], boolean]>([
+        ['moves focus to the shell when the keyboard is put away without a blur', [390, 844], 500, [{ height: 844 }], true],
+        [
+            'moves focus to the shell when the keyboard closes over several resizes',
+            [390, 844],
+            500,
+            [{ height: 600 }, { height: 700 }, { height: 844 }],
+            true,
+        ],
+        ['keeps focus in the search when only a browser toolbar slides away', [390, 844], 500, [{ height: 556 }], false],
+        // Both sides over 480 px, so the header keeps its layout and the search stays mounted.
+        ['keeps focus in the search when the screen turns upright with the keyboard up', [1000, 600], 250, [{ height: 600, layout: [600, 1000] }], false],
+        ['keeps focus in the search with a hardware keyboard', [390, 844], 844, [{ height: 788 }, { height: 844 }], false],
+    ])('%s (Android Back)', async (_name, [width, height], startHeight, steps, released) => {
+        await page.viewport(width, height)
+        // Desktop Chromium has no on-screen keyboard: stand in a visual viewport the keyboard has
+        // shrunk, then resize it the way Back hides the keyboard and keeps the focus.
+        const viewport = Object.assign(new EventTarget(), { height: startHeight, scale: 1 })
+        const original = Object.getOwnPropertyDescriptor(window, 'visualViewport')
+        Object.defineProperty(window, 'visualViewport', { configurable: true, value: viewport })
+        try {
+            mount(<Fixture />)
+            // `StyledDialog` parks focus on its shell again a frame after opening; the tap on the
+            // search comes later.
+            await waitFor(() => expect(dialog()).not.toBeNull())
+            await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+            const input = dialog().querySelector('input')!
+            input.focus()
+            await expect(document.activeElement).toBe(input)
+            for (const step of steps) {
+                if (step.layout) await page.viewport(...step.layout)
+                viewport.height = step.height
+                viewport.dispatchEvent(new Event('resize'))
+            }
+            await waitFor(() => expect(document.activeElement).toBe(released ? dialog() : input))
         } finally {
             if (original) Object.defineProperty(window, 'visualViewport', original)
         }

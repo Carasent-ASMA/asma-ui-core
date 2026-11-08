@@ -22,6 +22,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
         showMinimizeIcon = true,
         showExpandIcon = true,
         enableFullscreen = true,
+        fullscreenLockedReason,
         title,
         label,
         children,
@@ -55,6 +56,8 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
 
     const { minimized, setMinimized, fullScreen, setFullScreen } = useControlledProps(props)
     const isFullScreenActive = fullScreen && !minimized
+    /** A dialog that only runs fullscreen: the toggle is shown disabled, never taken away. */
+    const isFullscreenLocked = Boolean(fullscreenLockedReason)
 
     // While a button inside runs an action (e.g. Save), closing would hide the running request.
     const { busy, busyReason, contextValue } = useDialogBusyBoundary(busyReasonProp ?? t.waitUntilSaved)
@@ -101,8 +104,8 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
 
     // Toggling makes the panel holding the just-pressed button inert, so focus has to be handed to
     // the panel that became visible or it dies there (WCAG 2.4.3). Aim for the counterpart toggle;
-    // fall back to whatever is reachable, because that toggle is optional — hidden on mobile, in
-    // fullscreen, or by `showMinimizeIcon`/`showExpandIcon`.
+    // fall back to whatever is reachable, because that toggle is optional — hidden on mobile, or by
+    // `showMinimizeIcon`/`showExpandIcon`.
     const toggleMinimized = (): void => {
         const revealed = minimized ? modalRef : minimizedPanelRef
         setMinimized(!minimized)
@@ -178,9 +181,21 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                     className={clsx('flex items-center justify-between', !minimized && 'hidden')}
                     data-testid={dataTest}
                 >
-                    <div className='text-delta-800 max-w-[303px] truncate pr-1 text-lg font-semibold'>
+                    <div
+                        className={cn(
+                            'text-delta-800 max-w-[303px] truncate pr-1 text-lg font-semibold',
+                            'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:[overflow-wrap:anywhere]!',
+                        )}
+                    >
                         <StyledTooltip title={title} placement='top'>
-                            <div className='truncate'>{title}</div>
+                            <div
+                                className={cn(
+                                    'truncate',
+                                    'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:![overflow-wrap:anywhere]',
+                                )}
+                            >
+                                {title}
+                            </div>
                         </StyledTooltip>
                     </div>
                     <div className='flex items-center gap-x-1'>
@@ -204,11 +219,14 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
             {/* Maximized */}
             {isFullScreenActive && (
                 // Mouse-only backdrop convenience; the keyboard-accessible equivalent is the
-                // FullScreenBtn toggle in the header (a real <button> via StyledButton).
+                // FullScreenBtn toggle in the header (a real <button> via StyledButton). It follows
+                // that toggle's state: while fullscreen is locked the toggle is disabled, so the
+                // backdrop must not be a way around it either.
                 // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
                 <div
                     className='fixed inset-0 z-52 bg-[rgb(98,110,126)]/70'
                     onClick={() => {
+                        if (isFullscreenLocked) return
                         setFullScreen(false)
                     }}
                 />
@@ -232,33 +250,61 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
             >
                 <OverlayBackOwnerContext.Provider value={modalRef}>
                 <div className={cn('border-delta-200 flex flex-col border-b px-4', isMobile ? 'py-3' : 'py-4')}>
-                    <div className='flex items-center justify-between'>
+                    {/* Narrower than a phone the row wraps in reverse, so the window buttons only take a row of
+                        their own (above, right-aligned) when nothing fits beside them: the label stays beside
+                        them when it fits whole; without a label the title stays beside them as on wider
+                        screens, wrapping its words there, and moves below only when its longest word does not
+                        fit. DOM order, and so reading and Tab order, stays the same. */}
+                    <div
+                        className={cn(
+                            'flex items-center justify-between',
+                            'max-xs:flex-wrap-reverse max-xs:gap-x-2 max-xs:gap-y-2',
+                        )}
+                    >
                         {!label ? (
                             <div
                                 id={titleId}
                                 className={cn(
                                     'text-delta-800 font-semibold',
                                     isMobile ? 'line-clamp-2 text-xl' : 'line-clamp-1 text-2xl',
+                                    'max-xs:line-clamp-none max-xs:hyphens-auto max-xs:whitespace-normal',
+                                    // Beside the buttons, wrapping there, and on a row of its own only when its longest
+                                    // word does not fit (`min-content` basis; `break-words`, not `anywhere`, keeps that a
+                                    // whole word), never under 5rem.
+                                    'max-xs:block max-xs:min-w-[min(100%,5rem)] max-xs:grow max-xs:basis-[min-content] max-xs:break-words',
                                 )}
                             >
                                 {title}
                             </div>
                         ) : (
-                            <div id={labelId} className='text-delta-700 text-sm'>
+                            <div
+                                id={labelId}
+                                className='text-delta-700 text-sm max-xs:min-w-0 max-xs:flex-auto max-xs:hyphens-auto max-xs:[overflow-wrap:anywhere]!'
+                            >
                                 {label}
                             </div>
                         )}
 
-                        <div className='flex items-center gap-x-1'>
+                        {/* Narrower than a phone the buttons keep to the top of a wrapped title's row: with the rows
+                            running bottom-up (`wrap-reverse`), the top is `end`. */}
+                        <div className='flex items-center gap-x-1 max-xs:ml-auto max-xs:flex-wrap max-xs:justify-end max-xs:gap-y-2 max-xs:self-end'>
                             <DialogBusyContext.Provider value={contextValue}>{actionNode}</DialogBusyContext.Provider>
+                            {/* Minimize is offered in fullscreen too. Taking it away there left the
+                                header's learned triad a control short, and a dialog the user had sent
+                                fullscreen could only be closed, not parked — minimizing simply drops
+                                out of fullscreen into the docked bar, and expanding restores it
+                                (hide-or-disable HOD-4). */}
                             <MinimizeBtn
-                                visibility={showMinimizeIcon && !isMobile && !fullScreen}
+                                visibility={showMinimizeIcon && !isMobile}
                                 type='minimize'
                                 onClick={toggleMinimized}
                                 tooltipTitle={t.minimize}
                             />
                             <FullScreenBtn
-                                showFullScreenIcon={enableFullscreen && !isMobile}
+                                /* A locked dialog keeps the control and explains itself, rather than
+                                   dropping it — see `fullscreenLockedReason`. */
+                                showFullScreenIcon={(enableFullscreen || isFullscreenLocked) && !isMobile}
+                                disabledReason={fullscreenLockedReason}
                                 fullScreen={fullScreen}
                                 onClick={() => {
                                     setFullScreen(!fullScreen)
@@ -281,6 +327,9 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                             className={cn(
                                 'text-delta-800 font-semibold',
                                 isMobile ? 'line-clamp-2 text-xl' : 'line-clamp-1 text-2xl',
+                                // Narrower than a phone: the title shows in full instead of clamping.
+                                'max-xs:line-clamp-none',
+                                'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:![overflow-wrap:anywhere]',
                             )}
                         >
                             {title}

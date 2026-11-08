@@ -83,6 +83,7 @@ export const StyledInteractiveChip = forwardRef<HTMLDivElement, StyledInteractiv
                 dataTest={props.dataTest}
                 checked={checked}
                 size={size}
+                readOnly={props.readOnly}
                 decorative
                 className={cn('pointer-events-none', styles['control'])}
             />

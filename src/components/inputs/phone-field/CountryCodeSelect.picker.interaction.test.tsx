@@ -56,6 +56,38 @@ describe('Country-code picker on the shared full-screen block (ASMA-8468)', () =
         await expect(container.querySelector('[data-testid="phone-country"]')).toHaveAttribute('aria-haspopup', 'dialog')
     })
 
+    it('opens at the chosen country, in the middle of the list (LIST-10, AC 17)', async () => {
+        const many = Array.from({ length: 80 }, (_value, index) => ({
+            iso2: `C${index}`,
+            dialCode: String(100 + index),
+            name: `Country ${String(index).padStart(2, '0')}`,
+        }))
+        const ManyFixture = (): JSX.Element => (
+            <StyledPhoneField
+                dataTest='phone'
+                label='Phone'
+                countries={many}
+                country='C60'
+                value=''
+                onCountryChange={() => undefined}
+                onChange={() => undefined}
+                selectCountryLabel='Select country'
+                searchPlaceholder='Search country'
+            />
+        )
+        await page.viewport(390, 844)
+        const { container } = mount(<ManyFixture />)
+        await userEvent.click(container.querySelector('[data-testid="phone-country"]')!)
+        await waitFor(() => expect(sheet()).not.toBeNull())
+        const middle = (node: Element): number => {
+            const box = node.getBoundingClientRect()
+            return box.top + box.height / 2
+        }
+        const chosen = Array.from(sheet()!.querySelectorAll('[role="option"]')).find((node) => node.textContent?.includes('Country 60'))!
+        const list = sheet()!.querySelector('[role="listbox"]')!
+        await waitFor(() => expect(Math.abs(middle(chosen) - middle(list))).toBeLessThanOrEqual(20))
+    })
+
     it('chooses a country, closes and hands focus back to the trigger', async () => {
         await page.viewport(844, 390)
         const { container } = mount(<Fixture />)

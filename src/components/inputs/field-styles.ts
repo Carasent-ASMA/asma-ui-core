@@ -70,10 +70,12 @@ export type FieldLabelPlacement = 'above' | 'floating'
 /**
  * The label above a field, as `StyledPhoneField` draws it. It wraps and is never truncated (TRUNC-4).
  * Put it on a wrapper around the `<label>`: apps in the shell ship `label { padding: 0 !important }`.
+ * `flush` drops the 4px gap for a read-only value, whose text sits right under its title (Figma Title + data).
  */
-export const fieldLabelAboveClass = ({ disabled }: { disabled?: boolean } = {}): string =>
+export const fieldLabelAboveClass = ({ disabled, flush }: { disabled?: boolean; flush?: boolean } = {}): string =>
     cn(
-        'block pb-1 text-base font-semibold',
+        'block text-base font-semibold',
+        !flush && 'pb-1',
         disabled ? 'text-delta-300' : 'text-delta-800',
     )
 
@@ -93,7 +95,13 @@ interface FieldState {
     borderless?: boolean
 }
 
-/** The border overlay (an absolutely-positioned sibling so width changes never reflow the input). */
+/** Error + focused: the 1px error border plus a 2px inset edge = 3px, layout-neutral like the focus ring. ASMA-8561 */
+const ERROR_FOCUS_SHADOW = 'shadow-[inset_0_0_0_2px_var(--colors-error-500)]'
+
+/**
+ * The border overlay (an absolutely-positioned sibling so width changes never reflow the input).
+ * States: resting 1px delta-500 · focused 3px focus-ring · error 1px error-500 · error + focused 3px error-500.
+ */
 export const outlineClass = ({ focused, error, disabled, readOnly, borderless }: FieldState): string =>
     cn(
         'pointer-events-none absolute inset-0 rounded-sm border border-solid transition-colors',
@@ -104,13 +112,13 @@ export const outlineClass = ({ focused, error, disabled, readOnly, borderless }:
               : readOnly
                 ? 'border-delta-200'
                 : error
-                  ? 'border-error-500'
+                  ? cn('border-error-500', focused && ERROR_FOCUS_SHADOW)
                   : focused
                     ? 'border-focus-ring shadow-[inset_0_0_0_2px_var(--colors-focus-ring)]'
                     : 'border-delta-500 group-hover:border-gama-300 group-hover:border-2', // Figma border/hover #60bdbd
     )
 
-/** MUI-compatible fieldset outline used by text fields with floating labels. */
+/** MUI-compatible fieldset outline used by text fields with floating labels. Same states as `outlineClass`. */
 export const notchedOutlineClass = ({
     focused,
     error,
@@ -127,7 +135,7 @@ export const notchedOutlineClass = ({
             : readOnly
               ? 'border-delta-200'
             : error
-              ? 'border-error-500'
+              ? cn('border-error-500', focused && ERROR_FOCUS_SHADOW)
               : focused
                 ? 'border-focus-ring shadow-[inset_0_0_0_2px_var(--colors-focus-ring)]'
                 : 'border-delta-500 group-hover:border-gama-300 group-hover:border-2', // Figma border/hover #60bdbd

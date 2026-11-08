@@ -71,6 +71,40 @@ describe('StyledInputField helper-slot contract', () => {
         expect(layoutClasses(hint)).toContain('min-h-[24px]')
     })
 
+    describe('ASMA-8777: helper area with a character counter', () => {
+        const render = (props: Record<string, unknown>) =>
+            renderToStaticMarkup(createElement(StyledInputField, { dataTest: 'f', label: 'Name', maxLength: 100, ...props }))
+
+        it.each([
+            ['reserveHelperText', { reserveHelperText: true }],
+            ['a blank helperText', { helperText: ' ' }],
+            ['an empty helperText', { helperText: '' }],
+        ])('puts the counter directly under the input with %s', (_, props) => {
+            const html = render(props)
+            expect(html).not.toContain('-helper-text')
+            expect(html).toContain('0 of 100 characters')
+            expect(html).toMatch(/aria-describedby="[^" ]*-counter"/)
+        })
+
+        it('shows the helper text above the counter', () => {
+            const html = render({ helperText: 'Visible to the client', reserveHelperText: true })
+            expect(html).toContain('-helper-text')
+            expect(html.indexOf('Visible to the client')).toBeLessThan(html.indexOf('0 of 100 characters'))
+        })
+
+        it('shows the error above the counter even with a blank message', () => {
+            const html = render({ error: true, helperText: ' ', reserveHelperText: true })
+            expect(html).toContain('role="alert"')
+            expect(html.indexOf('-helper-text')).toBeLessThan(html.indexOf('0 of 100 characters'))
+        })
+
+        it('still reserves one line when there is no counter', () => {
+            const html = render({ maxLength: undefined, reserveHelperText: true })
+            expect(html).toContain('-helper-text')
+            expect(html).not.toContain('characters')
+        })
+    })
+
     it('default (no reserveHelperText) omits the empty helper slot', () => {
         const html = renderToStaticMarkup(
             createElement(StyledInputField, {

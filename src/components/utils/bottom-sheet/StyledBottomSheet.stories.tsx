@@ -36,6 +36,8 @@ const meta = {
                     '- **`resultCount`** gives the standard *Vis resultater (N)* control: debounced ~500ms,',
                     '  `Ingen treff` at zero (still enabled), `9999+` cap, and an in-sheet live region — the',
                     '  list behind is inert, so its own live region cannot announce.',
+                    "- **`locale`** sets the language of that label and of the close button's name; pass the",
+                    "  app's `i18n.code`. English (*Show results*, *No matches*, *Close*) is the default.",
                     '- The title must name the object: `Handlinger — søknad 4417`, not just `Handlinger`.',
                 ].join('\n'),
             },
@@ -169,6 +171,7 @@ export const PopoverOnMobile: Story = {
                 variant='action'
                 title='Filtrer søknader'
                 resultCount={12}
+                locale='no'
                 renderTrigger={({ ref, triggerProps }) => (
                     <StyledButton
                         dataTest='responsive-filter-trigger'

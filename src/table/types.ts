@@ -32,7 +32,11 @@ import type {
     FocusedRow,
     FocusedRowsInstance,
 } from './custom-features/focus-rows'
-import type { OrderedColumnsOptions, OrderedColumnsTableState } from './custom-features/order-columns'
+import type {
+    ColumnSettingsInstance,
+    OrderedColumnsOptions,
+    OrderedColumnsTableState,
+} from './custom-features/order-columns'
 import type { RowSelectionTooltipOptions, RowSelectionTooltipRow } from './custom-features/row-selection-tooltip'
 
 declare module '@tanstack/react-table' {
@@ -43,7 +47,7 @@ declare module '@tanstack/react-table' {
 
     interface Row<TData extends RowData> extends ExpandedRow, FocusedRow, RowSelectionTooltipRow<TData> {}
 
-    interface Table<TData extends RowData> extends ExpandedRowsInstance, FocusedRowsInstance {
+    interface Table<TData extends RowData> extends ExpandedRowsInstance, FocusedRowsInstance, ColumnSettingsInstance {
         getCoreRowModel: () => RowModel<TData>
     }
 
@@ -65,6 +69,12 @@ declare module '@tanstack/react-table' {
     }
     interface TableMeta<TData extends RowData> {
         locale?: 'no' | 'en' | (TData extends never ? never : never)
+        /**
+         * @internal Set by `StyledTable` from its `hideHeader` prop, so that its own header controls (the sort header,
+         * the pin and the select-all checkbox) can drop their tab stops (ASMA-8702). Apps must not set it: the table
+         * writes it, and a `meta` an app passes replaces the table's. Use the `hideHeader` prop.
+         */
+        hideHeader?: boolean
     }
 
     interface ColumnDefBase<TData extends RowData, TValue = unknown> extends ColumnDefExtensions<TData, TValue> {
@@ -124,6 +134,14 @@ export type StyledTableProps<TData, TCustomData> = {
     customActionsNode?: (row: CellContext<TData, unknown>) => ReactNode
     customSubRowData?: Map<string, TCustomData[]>
     headerPin?: boolean
+    /**
+     * Pins the internal actions column's body cells to the right edge. By default they are pinned
+     * when the column renders actions (`actions` / `customActionsNode`) or the table has fixed-right
+     * columns; a column that only hosts the header pin menu scrolls with the data. The header cell
+     * with the pin menu stays pinned either way. Not supported as `false` together with fixed-right
+     * columns: their body and header offsets would no longer match.
+     */
+    stickyActions?: boolean
     expandArrow?: boolean
     defaultExpanded?: boolean
     loading?: boolean
@@ -140,10 +158,11 @@ export type StyledTableProps<TData, TCustomData> = {
     stickyHeader?: boolean
     getRowClassName?: (row: Row<TData>) => string
     /**
-     * The row the user is working with — e.g. the one whose preview is open beside the table — matched
-     * against `row.id`. Drawn in the Figma table-row **Focused** state (the 3px focus frame keyboard
-     * focus draws; with a ticked row, "Selected + focused"), and it stays drawn after focus moves on,
-     * which `:focus-visible` alone cannot do. Opt-in: tables that do not pass it are unchanged.
+     * The row the user is working with — e.g. the one opened in a side panel or preview — matched
+     * against `row.id`. Drawn in the Figma table-row **Selected** state: the `table/bg-row-selected`
+     * (gama-25) fill with a 2px `border/selected` (gama-400) frame around the whole row, kept on
+     * hover. Keyboard focus on it still shows the 3px Focused frame. Pass the
+     * opened row's id (and `null` when nothing is open). Opt-in: tables that do not pass it are unchanged.
      */
     activeRowId?: string | null
     onRowClick?: (
@@ -152,6 +171,12 @@ export type StyledTableProps<TData, TCustomData> = {
     ) => void
     renderSubRows?: (props: { rows: TCustomData[]; row: TData }) => ReactElement | null
     getRowSelectionIds?: (ids: string[]) => void
+    /**
+     * Hides the header visually. It stays in the accessibility tree (column names and `aria-sort` are still announced)
+     * and its own controls (the sort header, the pin, the select-all checkbox) are not tab stops. **A hidden header must
+     * not contain tab stops of your own** (a button or link in a header cell): they stay tab stops with no visible focus.
+     * Give such a control `tabIndex={-1}`, or do not put one there (ASMA-8702).
+     */
     hideHeader?: boolean
     pageSize?: number
     enableResizing?: boolean
@@ -170,6 +195,59 @@ export type StyledTableProps<TData, TCustomData> = {
      * ensuring that the table state is persisted across sessions for the specific table instance.
      */
     uniqueKey?: string
+    /**
+     * Temporary opt-in (ASMA-8597, owner decision D1, 2026-10-27): save and restore this table's
+     * sorting under `${uniqueKey}:sorting`, and let Reset columns reset it. Needs `uniqueKey`;
+     * ignored without it. Off by default until UX and privacy approve the fleet rollout, which
+     * makes `uniqueKey` alone enough and retires this prop (follow-up ASMA-8698).
+     */
+    persistSorting?: boolean
+    /**
+     * Opt-in (ASMA-8695, D-OPTIN): save and restore this table's column order under `${uniqueKey}:column-order` and its
+     * column visibility under `${uniqueKey}:column-visibility`. Needs a per-user `uniqueKey` (`getTableSettingsKey` of
+     * asma-core-helpers); without one nothing is saved. Off by default: a table that does not set it behaves as before.
+     *
+     * Declare the layout the table opens with in `initialState.columnOrder` and `initialState.columnVisibility`; they are
+     * the defaults, so a column hidden by default is hidden for every user until one shows it. A saved layout beats them
+     * (the saved order and visibility, not `initialState`, decide what a user sees), the column settings dot follows the
+     * defaults (no dot for a column that is hidden by default), a column missing from a saved order appears at its
+     * definition position, and Reset columns also restores the default visibility.
+     *
+     * The table then owns visibility: do not pass `state.columnVisibility` or `onColumnVisibilityChange` (development builds
+     * warn). The old unscoped entries are migrated once, by the first user who opens the table on a browser, and then
+     * deleted (only after the user's own entry is written): `persistColumnOrderKey`'s order, and the visibility entry named by
+     * `legacyColumnVisibilityKey`. A table with this prop and no `uniqueKey` saves nothing and leaves the old entries alone.
+     *
+     * The table also keeps its state in step with its props: a column added later takes its definition position in an order
+     * the user changed, and a changed `initialState` default reaches the user who had not changed that column. A column that
+     * an order does not list, a saved one or `initialState.columnOrder`, appears at its definition position, not at the end
+     * (so a partial `initialState.columnOrder` no longer puts the listed columns first on a table that opts in).
+     */
+    persistColumnLayout?: boolean
+    /**
+     * The key an app used to save its column visibility under before it opted in with `persistColumnLayout`: a raw
+     * `{ [columnId]: boolean }` map of the whole visibility state. It is read once, to carry the user's layout over into the
+     * user's own entry, and deleted once that entry is written (if storage refuses the write the old entry stays, and the
+     * next visit tries again). Reset columns deletes it too. Used only by a table with `persistColumnLayout` **and** a
+     * `uniqueKey`; without a key the table neither reads nor deletes it (ASMA-8695, D-MIGRATE).
+     */
+    legacyColumnVisibilityKey?: string
+    /**
+     * Whether the table's columns can be resized with the pointer. **On by default** (ASMA-8597, UX round 4, D15): every data
+     * column has a handle, except ui-core's own columns (select, expand, actions, drag handle, show full text), a column that
+     * opts out with `enableResizing: false` or has a fixed width (`minSize` equal to `maxSize`), and the last data column,
+     * which keeps filling the remaining width (unless the table sets `enableResizing`). `enableColumnResizing={false}` turns
+     * resizing off for the table.
+     *
+     * Saving the widths is a separate opt-in (D17): widths are read and written under `${uniqueKey}:column-sizing` only when
+     * a table sets `enableColumnResizing` itself, as `true`. A table that gets resizing from the default resizes in memory only.
+     * Give it a per-user `uniqueKey` (`getTableSettingsKey` of asma-core-helpers) and write `enableColumnResizing` to save.
+     *
+     * A column without a `minSize` gets the smaller of 100 px and its default width as its minimum. Every sortable data column
+     * is 20 px wider by default (so its sort triangle fits), and so are its `minSize` and `maxSize` when set; widths a user
+     * saved and the app's `initialState.columnSizing` are applied as given.
+     */
+    enableColumnResizing?: boolean
 } & Omit<
     TTableOptions<TData>,
     'getCoreRowModel' | 'getExpandedRowModel' | 'getFilteredRowModel' | 'getSortedRowModel'

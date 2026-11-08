@@ -1,4 +1,3 @@
-
 const HELPER_ROW_RIGHT_INSET = 14
 
 const NEIGHBOUR_GUTTER = 8
@@ -50,9 +49,36 @@ function clippingAncestorRight(field: HTMLElement): number {
     return Number.POSITIVE_INFINITY
 }
 
+/** A picker marks its root with this attribute: its helper row may use the room around the whole picker. */
+const HELPER_ROOM_BOX_SELECTOR = '[data-helper-room-box]'
+
+interface HelperRoom {
+    container: HTMLElement
+    neighbours: Element[]
+}
+
+/**
+ * A plain field measures against its parent. A marked picker climbs past the wrappers that end where
+ * it ends, to the first ancestor with room to its right, collecting every sibling on the way.
+ */
+export function findHelperRoom(field: HTMLElement): HelperRoom | undefined {
+    const picker = field.closest(HELPER_ROOM_BOX_SELECTOR)
+    let box: Element = picker ?? field
+    const neighbours: Element[] = []
+
+    for (let parent = box.parentElement; parent; box = parent, parent = parent.parentElement) {
+        neighbours.push(...Array.from(parent.children).filter((child) => child !== box))
+        if (!picker || !parent.parentElement || contentRight(parent) > box.getBoundingClientRect().right + 0.5) {
+            return { container: parent, neighbours }
+        }
+    }
+
+    return undefined
+}
+
 export function measureHelperRowMaxWidth(field: HTMLElement, helperRow: HTMLElement): number | undefined {
-    const parent = field.parentElement
-    if (!parent) return undefined
+    const room = findHelperRoom(field)
+    if (!room) return undefined
 
     const fieldBox = field.getBoundingClientRect()
     const helperTop = helperRow.getBoundingClientRect().top
@@ -63,14 +89,13 @@ export function measureHelperRowMaxWidth(field: HTMLElement, helperRow: HTMLElem
         right: fieldBox.right,
     }
 
-    const neighbours = Array.from(parent.children)
-        .filter((child) => child !== field)
-        .map((child) => child.getBoundingClientRect())
-
     const limitRight = Math.min(
-        contentRight(parent),
+        contentRight(room.container),
         clippingAncestorRight(field),
-        blockingLeftEdge(band, neighbours),
+        blockingLeftEdge(
+            band,
+            room.neighbours.map((child) => child.getBoundingClientRect()),
+        ),
     )
 
     return helperRowMaxWidth(fieldBox.left, fieldBox.width, limitRight)

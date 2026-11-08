@@ -9,6 +9,28 @@ import {
 } from '@tanstack/react-table'
 import type { FocusedRowsOptions, FocusedRowsTableState } from './types'
 
+const isSticky = (element: Element): boolean => getComputedStyle(element).position === 'sticky'
+
+/**
+ * Scroll a focused row just far enough to be fully visible (WCAG 2.4.11 Focus Not Obscured), clear of
+ * the sticky header above it and of what sticks to the bottom of the table — the horizontal scrollbar
+ * and the short-table footer, the siblings after the table's block. `scroll-margin` is how
+ * `scrollIntoView` keeps clear of them; `nearest` scrolls only when the row is not already in view and
+ * leaves a horizontally scrolled table where it is.
+ */
+const scrollRowIntoView = (row: HTMLElement): void => {
+    const table = row.closest('table')
+    const head = table?.tHead
+    let bottom = 0
+    for (let element = table?.parentElement?.nextElementSibling; element; element = element.nextElementSibling) {
+        if (isSticky(element)) bottom += element.getBoundingClientRect().height
+    }
+
+    row.style.scrollMarginTop = `${head && isSticky(head) ? head.getBoundingClientRect().height : 0}px`
+    row.style.scrollMarginBottom = `${bottom}px`
+    row.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+}
+
 export const FocusedRowsFeature: TableFeature = {
     getInitialState: (state): FocusedRowsTableState => {
         return {
@@ -83,7 +105,9 @@ export const FocusedRowsFeature: TableFeature = {
             if (newFocused) {
                 const el = document.getElementById(idToFocus)
                 if (el) {
+                    // The browser's own focus scroll ignores the sticky header, so scroll here instead.
                     el.focus({ preventScroll: true })
+                    scrollRowIntoView(el)
                 }
             }
         }

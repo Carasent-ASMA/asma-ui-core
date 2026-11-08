@@ -45,6 +45,24 @@ export interface IMinimizableDialogV2Props {
     handleMinimizedState?: (minimized: boolean) => void
     //
     enableFullscreen?: boolean
+    /**
+     * Why fullscreen cannot be left, for a dialog that only ever runs fullscreen.
+     *
+     * While set, the fullscreen toggle is **shown disabled** with this reason rather than hidden:
+     * the header's minimize / fullscreen / close triad is a place people have learned, so a control
+     * missing from it reads as "this dialog cannot do that" instead of "not here, and here is why"
+     * (hide-or-disable HOD-4, disabled-states DIS-1/2/3). `StyledButton` keeps it focusable with
+     * `aria-disabled` and opens the reason on hover, focus and tap.
+     *
+     * App-owned and localized: shared components render no default reason, so leaving this unset
+     * keeps today's behaviour.
+     */
+    fullscreenLockedReason?: ReactNode
     fullScreenState?: boolean
-    handleFullScreenState?: () => void
+    /**
+     * Called with the state being asked for, mirroring `handleMinimizedState`. A zero-argument
+     * toggle stays valid — TypeScript accepts the narrower signature, and the extra argument is
+     * ignored at runtime — so existing consumers need no change.
+     */
+    handleFullScreenState?: (fullScreen: boolean) => void
 }

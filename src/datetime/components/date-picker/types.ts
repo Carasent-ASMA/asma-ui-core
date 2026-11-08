@@ -7,6 +7,13 @@ export type CalendarProps = React.ComponentProps<typeof DayPicker>
 type CommonDatePickerProps = {
     dateFormat?: string
     readOnly?: boolean
+    /** A locked field (disabled-states DIS-9): read-only with a lock icon; the reason opens on hover, focus and tap. */
+    lockedReason?: React.ReactNode
+    /**
+     * A read-only value the user can change elsewhere (disabled-states DIS-6): the date as text-like,
+     * focusable text with no calendar button; the reason says where it can be changed.
+     */
+    readOnlyReason?: React.ReactNode
     className?: string
     inputClassName?: string
     disabledDays?: Matcher | Matcher[]
@@ -32,6 +39,8 @@ export interface DatePickerSingleFieldProps {
     disallowPast?: boolean
     disallowFuture?: boolean
     hideDefaultHelperText?: boolean
+    /** Keeps the one-line helper row even without a helper or error, so an error never moves the layout. */
+    reserveHelperText?: boolean
     /**
      * Extra ARIA attributes for the text input (e.g. `aria-label`, `aria-required`). Without them the
      * input is named by `title`, which is otherwise plain text above the field.

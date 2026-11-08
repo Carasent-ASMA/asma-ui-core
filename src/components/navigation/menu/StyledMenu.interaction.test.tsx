@@ -2,7 +2,7 @@ import { useState, type ReactNode } from 'react'
 import { afterEach, describe, it } from 'vitest'
 import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
-import { cleanup, describeFocusIndicator, focusStyleOf, mount } from 'src/test-utils/renderInteraction'
+import { cleanup, describeFocusIndicator, focusStyleOf, mount, parkPointer } from 'src/test-utils/renderInteraction'
 import { StyledMenu } from './StyledMenu'
 import { ToolbarActionGroup } from 'src/components/custom/module/header-layout/ToolbarActionGroup'
 import { StyledMenuList } from './StyledMenuList'
@@ -455,6 +455,14 @@ describe('StyledMenu Figma colors', () => {
     })
 
     it('shows the caller-supplied tooltip only on the row that sets it', async () => {
+        /*
+         * The pointer is browser state and the test before this one leaves it on row 1 of a list
+         * with the same geometry, mounted in the same place. Inherited, that hover opens this
+         * list's tooltip over row 0 before the test does anything — and the `hover(rows[0])` below
+         * then waits out its 15s actionability budget against an overlay that will not move. The
+         * nightly detector caught exactly that, 1 run in 5.
+         */
+        await parkPointer()
         const { container } = mount(
             <StyledMenuList>
                 <StyledMenuItem>Free</StyledMenuItem>

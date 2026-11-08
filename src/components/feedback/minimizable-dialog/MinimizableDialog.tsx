@@ -51,6 +51,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     footerInfo,
     locale = 'en',
     enableFullscreen = true,
+    fullscreenLockedReason,
     fullScreenState,
     handleFullScreenState,
 }) => {
@@ -69,6 +70,8 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
 
     const fullScreen = fullScreenState ?? fullscreen
     const isFullScreenActive = fullScreen && !minimized
+    /** A dialog that only runs fullscreen: the toggle is shown disabled, never taken away. */
+    const isFullscreenLocked = Boolean(fullscreenLockedReason)
 
     // Only the fullscreen state shows a page-covering backdrop (below) and is actually modal — the
     // default corner-docked panel is a non-modal floating widget that must NOT trap focus.
@@ -162,8 +165,8 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
 
     // Toggling makes the panel holding the just-pressed button inert, so focus has to be handed to
     // the panel that became visible or it dies there (WCAG 2.4.3). Aim for the counterpart toggle;
-    // fall back to whatever is reachable, because that toggle is optional — hidden on mobile, in
-    // fullscreen, or by `showMinimizeIcon`/`showExpandIcon`.
+    // fall back to whatever is reachable, because that toggle is optional — hidden on mobile, or by
+    // `showMinimizeIcon`/`showExpandIcon`.
     const toggleMinimized = (): void => {
         const revealed = minimized ? panelRef : minimizedPanelRef
         setMinimized(!minimized)
@@ -182,7 +185,12 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
             <div
                 ref={minimizedPanelRef}
                 style={{ zIndex: 51 }}
-                className={cn(styles['dialog'], !minimized && styles['hidden'])}
+                className={cn(
+                    styles['dialog'],
+                    !minimized && styles['hidden'],
+                    // Narrower than a phone: the minimized bar fits the screen (right-4 + a 16px left gap).
+                    minimized && 'max-xs:w-[calc(100vw-32px)]',
+                )}
             >
                 <div
                     className={clsx('flex items-center justify-between', !minimized && 'hidden')}
@@ -240,6 +248,8 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                 aria-label={isFullScreenActive && typeof title === 'string' ? title : undefined}
                 className={cn(
                     'fixed right-4 bottom-4 z-51 rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)] transition-all duration-300',
+                    // Narrower than a phone: the docked panel (shrink-to-fit, pinned right) stays on screen.
+                    'max-xs:max-w-[calc(100vw-32px)]',
                     className && !minimized && !fullScreen ? className : '',
                     minimized && 'size-0! opacity-0 duration-0',
                     isFullScreenActive && 'fixed duration-0',
@@ -248,16 +258,27 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
             >
                 <OverlayBackOwnerContext.Provider value={panelRef}>
                 <div className='border-delta-200 flex flex-col gap-y-2 border-b p-4'>
-                    <div className='flex items-center justify-between'>
+                    {/* Narrower than a phone: the window controls wrap below the title instead of overflowing left. */}
+                    <div className='flex items-center justify-between max-xs:flex-wrap max-xs:gap-y-1'>
                         {!label ? (
-                            <div className='text-delta-800 text-2xl font-semibold'>{title}</div>
+                            <div
+                                className={cn(
+                                    'text-2xl font-semibold text-delta-800',
+                                    'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:[overflow-wrap:anywhere]!',
+                                )}
+                            >
+                                {title}
+                            </div>
                         ) : (
                             <div className='text-delta-700 text-sm'>{label}</div>
                         )}
 
                         <div className='flex items-center gap-x-1'>
                             {actionNode}
-                            {showMinimizeIcon && !fullScreen && (
+                            {/* Offered in fullscreen too: taking it away left the header's learned
+                                triad a control short, and a dialog the user had sent fullscreen could
+                                only be closed, not parked (hide-or-disable HOD-4). */}
+                            {showMinimizeIcon && (
                                 <StyledTooltip title={locale === 'en' ? 'Minimize' : 'Minimer'}>
                                     <div>
                                         <StyledButton
@@ -275,17 +296,24 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                                     </div>
                                 </StyledTooltip>
                             )}
-                            {enableFullscreen && showFullScreenIcon && (
-                                <StyledTooltip title={fullScreenTooltipTitle}>
+                            {/* A locked dialog keeps the control and explains itself, rather than
+                                dropping it — see `fullscreenLockedReason`. */}
+                            {(enableFullscreen || isFullscreenLocked) && showFullScreenIcon && (
+                                <StyledTooltip
+                                    title={fullScreenTooltipTitle}
+                                    open={isFullscreenLocked ? false : undefined}
+                                >
                                     <div>
                                         <StyledButton
                                             dataTest='fullscreen-button'
                                             aria-label={!onFullScreenText ? fullScreenTooltipTitle : undefined}
                                             variant='textGray'
                                             size='small'
+                                            disabled={isFullscreenLocked}
+                                            disabledReason={fullscreenLockedReason}
                                             onClick={() => {
                                                 if (fullScreenState !== undefined && handleFullScreenState) {
-                                                    handleFullScreenState()
+                                                    handleFullScreenState(!fullScreen)
                                                 } else {
                                                     setFullscreen(!fullscreen)
                                                 }
@@ -328,7 +356,16 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                         </div>
                     </div>
 
-                    {label && <div className='text-delta-800 truncate text-2xl font-semibold'>{title}</div>}
+                    {label && (
+                        <div
+                            className={cn(
+                                'truncate text-2xl font-semibold text-delta-800',
+                                'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:[overflow-wrap:anywhere]!',
+                            )}
+                        >
+                            {title}
+                        </div>
+                    )}
                 </div>
 
                 <div className={clsx('flex flex-col', fullScreen && !minimized && 'h-[87dvh]')}>

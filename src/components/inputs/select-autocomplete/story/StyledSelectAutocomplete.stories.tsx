@@ -117,6 +117,38 @@ export const SuppressesBrowserAutofill: Story = {
     },
 }
 
+const ErrorAutocomplete = (args: StyledSelectAutocompleteProps<Film, true, false, false>): JSX.Element => {
+    const [value, setValue] = useState<Film[]>([])
+    return (
+        <StyledSelectAutocomplete
+            {...args}
+            options={top100Films}
+            value={value}
+            onChange={(_, next) => setValue(next)}
+            getOptionLabel={(option) => option?.title || ''}
+            renderInput={(params) => <StyledInputField {...params} dataTest='input' label='Favorites' />}
+        />
+    )
+}
+
+export const Error: Story = {
+    args: { error: true, helperText: 'Error text' },
+    render: (args) => <ErrorAutocomplete {...args} />,
+}
+
+/** ASMA-8561: error + focused = 1px error-500 border + 2px inset error-500 edge (3px, layout-neutral). */
+export const ErrorFocused: Story = {
+    args: { error: true, helperText: 'Error text' },
+    render: (args) => <ErrorAutocomplete {...args} />,
+    play: async ({ canvasElement }) => {
+        const { input } = getAutocomplete(canvasElement)
+        input.focus()
+
+        await expect(input).toHaveFocus()
+        await expect(input).toHaveAttribute('aria-invalid', 'true')
+    },
+}
+
 export const SingleSelectVariant: SingleStory = {
     render: () => {
         const singleSelectOptions = top100Films.slice(0, 3)

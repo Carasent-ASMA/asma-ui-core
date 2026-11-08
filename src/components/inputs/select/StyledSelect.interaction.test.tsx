@@ -3,6 +3,8 @@ import { afterEach, describe, it } from 'vitest'
 import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { requestCloseTopOverlayBack } from 'src/hooks/useBackCloses.hook'
 import { cleanup, describeFocusIndicator, focusStyleOf, mount } from 'src/test-utils/renderInteraction'
+import { StyledFormControl } from 'src/components/miscellaneous/StyledFormControl'
+import { StyledInputLabel } from 'src/components/miscellaneous/StyledInputLabel'
 import { StyledSelect } from './StyledSelect'
 import { StyledSelectItem } from './StyledSelectItem'
 
@@ -390,5 +392,25 @@ describe('StyledSelect popper geometry', () => {
 
         await expect(chevron.getAttribute('class')).toContain('flip-180')
         await expect(chevron.getAttribute('class')).not.toContain('rotate-180')
+    })
+})
+
+describe('StyledSelect floating label with a helper row', () => {
+    afterEach(cleanup)
+
+    it('keeps the resting label centred on the field when an error sits under it', async () => {
+        const { container } = mount(
+            <StyledFormControl size='small' required error>
+                <StyledInputLabel labelPlacement='floating'>Context</StyledInputLabel>
+                <StyledSelect dataTest='context' value='' error helperText='Required' reserveHelperText>
+                    <StyledSelectItem value='a'>Adopus</StyledSelectItem>
+                </StyledSelect>
+            </StyledFormControl>,
+        )
+        const label = container.querySelector('label')!.getBoundingClientRect()
+        const field = container.querySelector<HTMLElement>('[data-testid="context"]')!.getBoundingClientRect()
+
+        await expect(container).toHaveTextContent('Required')
+        await expect(Math.abs(label.top + label.height / 2 - (field.top + field.height / 2))).toBeLessThan(1)
     })
 })

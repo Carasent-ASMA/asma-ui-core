@@ -57,6 +57,7 @@ import {
     ListSettingsLineIcon,
     ListStatusIcon,
     LoadingIcon,
+    LocationFilledIcon,
     LocationIcon,
     LockIcon,
     LoginIcon,
@@ -776,6 +777,12 @@ export const useIconsList = ({
             component: <LocationIcon height={height} width={width} />,
             clipboardText: '<LocationIcon />',
             tags: ['location'],
+        },
+        {
+            name: 'LocationFilledIcon',
+            component: <LocationFilledIcon height={height} width={width} />,
+            clipboardText: '<LocationFilledIcon />',
+            tags: ['location', 'filled'],
         },
         {
             name: 'FormIcon',

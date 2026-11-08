@@ -3,6 +3,10 @@
     --action-cell-shadow: 0 0 transparent;
     --fixed-cell-shadow: 0 0 transparent;
 
+    // Distance of the 4px resize bar from the right edge of its 24px grab zone. UX confirmed the bar stays at the
+    // edge (ASMA-8597, comment 94738), as the Figma "Resize" frame draws it.
+    --resizer-bar-offset: 0px;
+
     &[data-x-overflow='true'] {
         --action-cell-shadow: -15px 0px 15px rgba(0, 0, 0, 0.1);
         --fixed-cell-shadow: 15px 0px 15px rgba(0, 0, 0, 0.1);
@@ -154,14 +158,15 @@
         color: var(--colors-gama-500);
     }
 
-    // Figma _table row DS: 1px table/border-default #d3d8df (delta-200) between rows, drawn inside
-    // the 48px row. A background layer takes no layout space (a border made every row after the
-    // first 49px) and sits over the hover/Checked/Selected `background-color` without replacing it.
-    .t-row + .t-row .t-cell {
+    // Figma _table row DS: a 1px table/border-default #d3d8df (delta-200) line under every row (its
+    // `border-b`), the last row included, drawn inside the 48px row. A background layer takes no
+    // layout space (a border made rows 49px) and sits over the hover/Checked/Selected
+    // `background-color` without replacing it; the Selected/Focused frames paint over it.
+    .t-row .t-cell {
         background-image: linear-gradient(var(--colors-delta-200), var(--colors-delta-200));
         background-repeat: no-repeat;
         background-size: 100% 1px;
-        background-position: top;
+        background-position: bottom;
     }
 
     .t-row {
@@ -249,10 +254,11 @@
                 background-color: var(--colors-gama-25);
             }
 
-            // Figma Selected (45318-213491): table/bg-row-focus white + 2px border/selected
-            // #1ca1a1 (gama-400) frame — distinct from the delta-50 hover and the gama-25 Checked fill.
+            // Figma Row • Selected (Tables page instance 36956-179563): table/bg-row-selected
+            // #f3fafa (gama-25) + 2px border/selected #1ca1a1 (gama-400) frame. (The bare component
+            // symbol 45318-213491 still says bg-row-focus white; the Tables page is the reference.)
             &.single-selection {
-                background-color: white;
+                background-color: var(--colors-gama-25);
                 box-shadow:
                     inset 0 2px 0 0 var(--colors-gama-400),
                     inset 0 -2px 0 0 var(--colors-gama-400);
@@ -372,21 +378,44 @@
     }
 
     .resizer {
+        // Figma "Resize" frame (node 46298:231237; ASMA-8597, AC 17, UX round 3): the grab zone is 24 x 28px with a
+        // 4px radius, centred in the 30px header content, at the column's right edge. The header content reserves its
+        // 24px width (`.has-resize-zone`), so nothing sits under it. The visible bar is the `::after` below.
         position: absolute;
-        top: 0;
-        height: 100%;
+        top: calc((100% - 28px) / 2);
+        height: 28px;
         right: 0;
-        width: 4px;
-        background: var(--colors-delta-300);
+        width: 24px;
+        border-radius: 4px;
         cursor: col-resize;
         user-select: none;
         touch-action: none;
-        border-radius: 5px;
+
+        &::after {
+            // Figma "Handle" (node 46298:231480): 4 x 24px, 4px radius, centred in the zone, at its right edge.
+            content: '';
+            position: absolute;
+            top: calc((100% - 24px) / 2);
+            height: 24px;
+            right: var(--resizer-bar-offset);
+            width: 4px;
+            // With the header hovered the bar is `delta-400` and the zone has no fill (UX, OQ-10; Figma "Unsorted
+            // hovered" 46521:216648 and "Sorted hovered" 46521:216684).
+            background: var(--colors-delta-400);
+            border-radius: 4px;
+        }
     }
 
+    // While the column is being resized the zone and the bar look as they do with the pointer over the zone
+    // (owner, 2026-11-02): a `gama-50` fill and a `gama-400` bar. This rule is deliberately outside the
+    // `(hover: hover)` block below, so a drag looks the same on every device, touch-only ones included.
     .resizer.isResizing {
-        background: var(--colors-gama-500);
         opacity: 1;
+        background: var(--colors-gama-50);
+
+        &::after {
+            background: var(--colors-gama-400);
+        }
     }
 
     @media (hover: hover) {
@@ -396,6 +425,17 @@
 
         *:hover > .resizer {
             opacity: 1;
+        }
+
+        // Figma "Resize hovered" (46521:216701): the pointer over the zone fills it with `gama-50` and colours the bar
+        // `gama-400`. Touch-only devices have no hover: at rest the bar stays grey and always visible, with no fill,
+        // until a drag starts (`.isResizing` above).
+        .resizer:hover {
+            background: var(--colors-gama-50);
+
+            &::after {
+                background: var(--colors-gama-400);
+            }
         }
     }
 
@@ -454,6 +494,13 @@
                 padding-left: 6px;
             }
 
+            // A column with a resize handle keeps its 24px zone free on the right, whatever its padding.
+            > .show-table-header.has-resize-zone,
+            &.data-cell > .show-table-header.has-resize-zone,
+            &.data-cell:last-child > .show-table-header.has-resize-zone {
+                padding-right: 24px;
+            }
+
             &.hide-header {
                 border: none;
             }
@@ -495,9 +542,95 @@
             }
         }
 
-        .sort-icon {
-            flex: 0 0 auto;
-            color: var(--colors-delta-800);
+        // Figma "Header with sorting" (ASMA-8597, AC 15, 16): a 20 x 28px slot right after the label, holding
+        // the Material arrow_drop glyph drawn at 28px (a 11.67 x 5.83px triangle). Nothing is drawn behind the glyph:
+        // UX has no hover square (ASMA-8597, AC 16, comment 94738).
+        //
+        // The slot exists only when it has something to show (UX answered OQ-07, comments 94750 and 94751):
+        // an unsorted header reserves none at rest, and takes the 20px while it is hovered or keyboard-focused.
+        // A sorted header always keeps it. So a truncated unsorted label is 20px shorter while hovered or focused.
+        // Collapsed, the slot clips its 28px glyphs, so it draws nothing, adds no overflow and has no hit area.
+        //
+        // The slot holds two glyphs on top of each other (UX round 3, 2026-11-02). At rest a sorted column shows its
+        // current glyph, in `gama-500` (4.4:1 or more on the header in every theme). While the header is hovered or
+        // keyboard-focused the preview glyph takes over and shows what the header will look like right after the
+        // click: `gama-500` if the click sorts the other way, the grey `delta-600` glyph pointing the way the first
+        // click sorts if the click removes the sort. An unsorted column shows that grey glyph. TableHeaderCell works
+        // out the preview (`getNextSortingOrder()`); CSS only shows it.
+        .sort-indicator {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            place-items: center;
+            flex: 0 0 0;
+            width: 0;
+            height: 28px;
+            overflow: hidden;
+            color: var(--colors-delta-600);
+        }
+
+        .sort-glyph {
+            flex: none;
+            grid-area: 1 / 1;
+            visibility: hidden;
+        }
+
+        .sort-indicator--sorted,
+        .sortable-column:focus-visible .sort-indicator {
+            flex-basis: 20px;
+            width: 20px;
+            overflow: visible;
+        }
+
+        .sort-indicator--sorted {
+            color: var(--colors-gama-500);
+
+            .sort-glyph--current {
+                visibility: visible;
+            }
+        }
+
+        // Keyboard focus shows what hover shows (UX, Q8): the preview. Focus from a click is `:focus` and not
+        // `:focus-visible`, so a header just clicked shows its new rest state once the pointer has left.
+        .sortable-column:focus-visible .sort-indicator {
+            color: var(--colors-delta-600);
+        }
+
+        .sortable-column:focus-visible .sort-indicator--preview-primary {
+            color: var(--colors-gama-500);
+        }
+
+        .sortable-column:focus-visible .sort-glyph--current {
+            visibility: hidden;
+        }
+
+        .sortable-column:focus-visible .sort-glyph--preview {
+            visibility: visible;
+        }
+
+        @media (hover: hover) {
+            .sortable-column:hover .sort-indicator {
+                flex-basis: 20px;
+                width: 20px;
+                overflow: visible;
+                color: var(--colors-delta-600);
+            }
+
+            .sortable-column:hover .sort-indicator--preview-primary {
+                color: var(--colors-gama-500);
+            }
+
+            .sortable-column:hover .sort-glyph--current {
+                visibility: hidden;
+            }
+
+            .sortable-column:hover .sort-glyph--preview {
+                visibility: visible;
+            }
+        }
+
+        // The label keeps its natural width so the glyph follows it, and truncates when the column is narrow.
+        .sortable-column > .header-content {
+            flex: 0 1 auto;
         }
 
         .header-content {
@@ -518,13 +651,11 @@
         }
     }
 
-    // Figma table focus state: a 3px frame surrounds the whole header or row without changing
-    // its layout. `:has()` lets the focusable sortable cell activate the header-wide frame.
-    // `data-active` (the `activeRowId` prop) draws the same frame on the row the user is working
-    // with, so it persists after keyboard focus moves on and also shows after a mouse click.
+    // Figma table Focused state (keyboard focus): a 3px focus-ring frame surrounds the whole header
+    // or row without changing its layout. `:has()` lets the focusable sortable cell activate the
+    // header-wide frame.
     .table-header:has(:focus-visible),
-    .t-row:focus-visible,
-    .t-row[data-active='true'] {
+    .t-row:focus-visible {
         .t-cell {
             box-shadow:
                 inset 0 3px 0 0 var(--colors-focus-ring),
@@ -544,6 +675,39 @@
                     inset -3px 0 0 0 var(--colors-focus-ring),
                     inset 0 3px 0 0 var(--colors-focus-ring),
                     inset 0 -3px 0 0 var(--colors-focus-ring),
+                    var(--table-cell-shadow, 0 0 transparent) !important;
+            }
+        }
+    }
+
+    // Figma Row • Selected (Tables page instance 36956-179563) — the `activeRowId` row, the one the
+    // user is working with (e.g. opened in a side panel): `table/bg-row-selected` #f3fafa (gama-25)
+    // fill + a 2px `border/selected` (gama-400) frame around the whole row, including the sticky
+    // cells. The fill stays on hover so it is never mistaken for the delta-50 hover. (The bare
+    // component symbol 45318-213491 still says bg-row-focus white; the Tables page is the reference.)
+    // Keyboard focus on that row still shows the Focused frame above.
+    .t-row[data-active='true']:not(:focus-visible) {
+        .t-cell {
+            box-shadow:
+                inset 0 2px 0 0 var(--colors-gama-400),
+                inset 0 -2px 0 0 var(--colors-gama-400),
+                var(--table-cell-shadow, 0 0 transparent) !important;
+
+            background-color: var(--colors-gama-25);
+
+            &:first-child {
+                box-shadow:
+                    inset 2px 0 0 0 var(--colors-gama-400),
+                    inset 0 2px 0 0 var(--colors-gama-400),
+                    inset 0 -2px 0 0 var(--colors-gama-400),
+                    var(--table-cell-shadow, 0 0 transparent) !important;
+            }
+
+            &:last-child {
+                box-shadow:
+                    inset -2px 0 0 0 var(--colors-gama-400),
+                    inset 0 2px 0 0 var(--colors-gama-400),
+                    inset 0 -2px 0 0 var(--colors-gama-400),
                     var(--table-cell-shadow, 0 0 transparent) !important;
             }
         }
@@ -620,4 +784,12 @@
     // Figma table Checkbox cell: 8px row edge + a 32px slot centring the 16px box → box at x16.
     // The cell adds its 5px padding, so 11px here.
     padding: 0 0 0 11px;
+
+    // It is the control (role=checkbox), so it shows the hand like every clickable target. The
+    // header sets `cursor: default` and rows without `onRowClick` have no cursor class, so the
+    // select-all box used to show the arrow. A locked row (aria-disabled) keeps its not-allowed
+    // cursor from the span inside.
+    &:not([aria-disabled='true']) {
+        cursor: pointer;
+    }
 }

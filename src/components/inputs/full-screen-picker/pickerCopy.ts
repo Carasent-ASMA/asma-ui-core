@@ -24,7 +24,6 @@ export interface PickerText {
     cleared: string
     /** Announced after `clearAll`. */
     clearedAll: string
-    truncated: (shown: number, total: number) => string
 }
 
 const PICKER_TEXT: Record<UiCoreLocale, PickerText> = {
@@ -39,7 +38,6 @@ const PICKER_TEXT: Record<UiCoreLocale, PickerText> = {
         matchCount: (count) => `${count} treff`,
         cleared: 'Valget er fjernet',
         clearedAll: 'Alle valg er fjernet',
-        truncated: (shown, total) => `Viser ${shown} av ${total}. Søk for å finne flere.`,
     },
     en: {
         close: 'Close',
@@ -52,7 +50,6 @@ const PICKER_TEXT: Record<UiCoreLocale, PickerText> = {
         matchCount: (count) => (count === 1 ? '1 match' : `${count} matches`),
         cleared: 'Selection cleared',
         clearedAll: 'All selections cleared',
-        truncated: (shown, total) => `Showing ${shown} of ${total}. Search to find more.`,
     },
 }
 

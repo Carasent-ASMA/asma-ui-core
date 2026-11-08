@@ -16,7 +16,15 @@ on:
 jobs:
     interaction:
         name: Keyboard & focus contract (vitest, real Chromium)
-        runs-on: ubuntu-latest
+        # Pinned, not `ubuntu-latest`: GitHub rolled `ubuntu-latest` to Ubuntu 26.04 on
+        # 2026-10-22 and `playwright install --with-deps` below fails outright on it —
+        # "Cannot install dependencies for ubuntu26.04-x64 with Playwright 1.60.0" — which
+        # broke every Playwright job on master within the hour. Bumping Playwright instead is
+        # not free here: `scripts/vrt.sh` derives its Docker image tag from the installed
+        # runner version (DEC-VRT-002), so a new browser would re-baseline all 456 VRT
+        # screenshots. Drop the pin once a Playwright release supports 26.04 and the VRT
+        # baselines have been re-captured deliberately.
+        runs-on: ubuntu-24.04
         steps:
             - name: Checkout code
               uses: actions/checkout@v5

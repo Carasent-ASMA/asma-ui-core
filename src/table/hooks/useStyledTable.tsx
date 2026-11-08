@@ -1,14 +1,18 @@
 import {
     useReactTable,
+    type ColumnOrderState,
+    type ColumnSizingState,
     type Row,
+    type SortingState,
     type Table,
+    type VisibilityState,
     getCoreRowModel,
     getExpandedRowModel,
     getFilteredRowModel,
     getSortedRowModel,
     getPaginationRowModel,
 } from '@tanstack/react-table'
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { SELECT_COLUMN_ID, type StyledTableProps } from '../types'
 import { ExpandedRowsFeature } from 'src/table/custom-features/expand-rows'
 import { FocusedRowsFeature } from 'src/table/custom-features/focus-rows/FocusRowsFeature'
@@ -17,10 +21,31 @@ import { usePersistColumnOrder } from '../custom-features/order-columns/usePersi
 import { usePersistedColumnOrder } from 'src/table/custom-features/order-columns/usePersistedColumnOrder'
 
 import { getPersistedPageSizeKey, usePersistedPageSize } from './usePersistedPageSize'
-import { usePersistColumnSizing, usePersistedColumnSizing } from './useColumnSizingPersistence'
+import {
+    columnSizingSignature,
+    getColumnSizingStorageKey,
+    serializeColumnSizing,
+    usePersistedColumnSizing,
+} from './useColumnSizingPersistence'
+import {
+    getSortingStorageKey,
+    readSortingFromStorage,
+    serializeSorting,
+    sortingSignature,
+} from './usePersistedSorting'
+import { usePersistedStateWriter } from './usePersistedStateWriter'
+import { useColumnLayoutReconcile, useColumnLayoutWriter, useSavedColumnLayout } from './useColumnLayoutPersistence'
+import { normalizeDefaultColumnOrder } from '../custom-features/order-columns/columnLayout'
 import { RowSelectionTooltipFeature } from 'src/table/custom-features/row-selection-tooltip/RowSelectionTooltipFeature'
+import { getLeafColumnInfos } from '../helpers/columnIds'
+import { resolveColumnSizingDefaults } from '../helpers/columnSizingDefaults'
+import { tableStorage } from '../helpers/tableStorage'
 
-const DEFAULT_RESIZABLE_COLUMN_MIN_SIZE = 100
+const NO_SORTING: SortingState = []
+const NO_COLUMN_SIZING: ColumnSizingState = {}
+const NO_COLUMN_ORDER: ColumnOrderState = []
+/** What a table opens with when the app declares no visibility: the select column is hidden until the app shows it. */
+const DEFAULT_COLUMN_VISIBILITY: VisibilityState = { [SELECT_COLUMN_ID]: false }
 
 export const useStyledTable = <
     TData extends {
@@ -40,21 +65,78 @@ export const useStyledTable = <
         locale,
         persistColumnOrderKey,
         uniqueKey,
+        // Ours, not TanStack's: they must never reach `useReactTable` through `...rest`.
+        persistSorting,
+        persistColumnLayout,
+        legacyColumnVisibilityKey,
         defaultColumn,
         ...rest
     } = props
 
-    const columnOrder = usePersistedColumnOrder(persistColumnOrderKey)
-    const columnSizingKey = props.enableColumnResizing ? uniqueKey : undefined
-    const persistedColumnSizing = usePersistedColumnSizing(columnSizingKey)
+    // What Reset columns and the storage rule treat as "the default" comes from the props of this render,
+    // never from `table.initialState`, which holds the saved state (ASMA-8597, trap A).
+    const defaultSorting = initialState?.sorting ?? NO_SORTING
+    const defaultColumnSizing = initialState?.columnSizing ?? NO_COLUMN_SIZING
+
+    // Resizing is on in every table unless it passes `enableColumnResizing={false}` (D15). Widths are saved only when the
+    // app wrote the prop as `true` (D17), so a table that gets resizing from the default resizes in memory only.
+    const canResize = props.enableColumnResizing ?? true
+    const savesWidths = props.enableColumnResizing === true
+    // The default widths (D16, DEC-NARROW) are resolved on the definitions, before TanStack sees them.
+    const sizedColumns = useMemo(
+        () => resolveColumnSizingDefaults(columns, { defaultColumn, enableSorting: rest.enableSorting, canResize }),
+        [columns, defaultColumn, rest.enableSorting, canResize],
+    )
+    const leafColumns = getLeafColumnInfos(columns, {
+        defaultColumn,
+        enableSorting: rest.enableSorting,
+        enableMultiSort: rest.enableMultiSort,
+        enableHiding: rest.enableHiding,
+    })
+
+    // Per-user column order and visibility, behind an explicit opt-in (ASMA-8695). A table that does not opt in keeps the
+    // unscoped `persistColumnOrderKey` and the visibility its app owns, exactly as before (REQ-08).
+    const layoutOptedIn = persistColumnLayout === true
+    const definitionIds = leafColumns.map((column) => column.id)
+    // The app's order with the columns it does not name at their definition position (DEC-03), as in a saved order.
+    const defaultColumnOrder = normalizeDefaultColumnOrder(initialState?.columnOrder ?? NO_COLUMN_ORDER, definitionIds)
+    const defaultColumnVisibility = initialState?.columnVisibility ?? DEFAULT_COLUMN_VISIBILITY
+    const savedLayout = useSavedColumnLayout({
+        enabled: layoutOptedIn,
+        uniqueKey,
+        legacyOrderKey: persistColumnOrderKey,
+        legacyVisibilityKey: legacyColumnVisibilityKey,
+        columns: leafColumns,
+        defaultOrder: defaultColumnOrder,
+        defaultVisibility: defaultColumnVisibility,
+    })
+
+    const columnOrder = usePersistedColumnOrder(layoutOptedIn ? undefined : persistColumnOrderKey)
+    const columnSizingKey = savesWidths ? uniqueKey : undefined
+    const columnSizingStorageKey = getColumnSizingStorageKey(columnSizingKey)
+    const persistedColumnSizing = usePersistedColumnSizing(columnSizingKey, defaultColumnSizing)
+    // Sorting is saved only when the table opts in (D1) and has a key to save it under.
+    const sortingStorageKey = persistSorting ? getSortingStorageKey(uniqueKey) : undefined
+    const persistedSorting = useMemo(
+        () =>
+            sortingStorageKey
+                ? readSortingFromStorage(uniqueKey, {
+                      sortableColumns: leafColumns.filter((column) => column.canSort),
+                      maxMultiSortColCount: rest.maxMultiSortColCount,
+                  })
+                : undefined,
+        // Read once per key; the columns of that render are the ones the saved sort is checked against.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [sortingStorageKey],
+    )
     const persistedPageSize = usePersistedPageSize(uniqueKey)
     const resolvedPageSize = persistedPageSize ?? pageSize ?? 50
 
     const table = useReactTable({
         _features: [ExpandedRowsFeature, FocusedRowsFeature, OrderColumnsFeature, RowSelectionTooltipFeature],
-        columns,
+        columns: sizedColumns,
         data,
-        meta: { locale: locale ?? 'en' },
+        meta: { locale: locale ?? 'en', hideHeader: Boolean(rest.hideHeader) },
         initialState: {
             pagination: { pageIndex: 0, pageSize: resolvedPageSize },
             columnVisibility: {
@@ -63,12 +145,15 @@ export const useStyledTable = <
             },
             ...(columnOrder && { columnOrder }),
             ...initialState,
-            ...(persistedColumnSizing && {
-                columnSizing: {
-                    ...initialState?.columnSizing,
-                    ...persistedColumnSizing,
-                },
-            }),
+            // A table that opted in with `persistColumnLayout` also lets a saved order and saved visibility beat the app's
+            // (ASMA-8695, REQ-02); any other table keeps its order of precedence (REQ-08).
+            ...(layoutOptedIn && defaultColumnOrder.length > 0 && { columnOrder: defaultColumnOrder }),
+            ...(savedLayout.order && { columnOrder: savedLayout.order }),
+            ...(savedLayout.visibility && { columnVisibility: savedLayout.visibility }),
+            // Saved values beat the app's own, widths and sorting alike (ASMA-8597, trap B). Sorting is
+            // tested with `!== undefined` so a saved `[]` (sorting turned off) beats a non-empty default.
+            ...(persistedColumnSizing && { columnSizing: persistedColumnSizing }),
+            ...(persistedSorting !== undefined && { sorting: persistedSorting }),
         },
         enableRowSelection,
         getCoreRowModel: getCoreRowModel(),
@@ -80,21 +165,101 @@ export const useStyledTable = <
             rest.getRowId ??
             ((row: TData, _index: number, parent?: Row<TData>) =>
                 parent ? [parent.id, row.id].join('.') : row.id.toString()),
-        defaultColumn: props.enableColumnResizing
-            ? {
-                  minSize: DEFAULT_RESIZABLE_COLUMN_MIN_SIZE,
-                  ...defaultColumn,
-              }
-            : defaultColumn,
+        defaultColumn,
         ...rest,
+        // After `...rest`, so the resolved default is what TanStack gets whether or not the app passed the prop (D15).
+        enableColumnResizing: canResize,
     })
 
     if (tableInstanceRef) {
         tableInstanceRef.current = table
     }
 
-    usePersistColumnOrder(table, persistColumnOrderKey)
-    usePersistColumnSizing(table, columnSizingKey)
+    usePersistColumnOrder(table, layoutOptedIn ? undefined : persistColumnOrderKey)
+
+    // Brings the state in step with new columns and changed defaults before anything is saved (ASMA-8695).
+    const reconcilingLayout = useColumnLayoutReconcile(table, {
+        enabled: layoutOptedIn,
+        definitionIds,
+        defaultOrder: defaultColumnOrder,
+        defaultVisibility: defaultColumnVisibility,
+        controlledVisibility: rest.state?.columnVisibility !== undefined,
+    })
+
+    useColumnLayoutWriter(table, {
+        saved: savedLayout,
+        reconciling: reconcilingLayout,
+        defaultOrder: defaultColumnOrder,
+        defaultVisibility: defaultColumnVisibility,
+        controlledVisibility: rest.state?.columnVisibility !== undefined,
+    })
+
+    const controlsVisibility = rest.state?.columnVisibility !== undefined || rest.onColumnVisibilityChange !== undefined
+
+    useEffect(() => {
+        if (import.meta.env.DEV && layoutOptedIn && controlsVisibility) {
+            console.warn(
+                'StyledTable: `persistColumnLayout` saves and restores the visibility itself, so do not pass `state.columnVisibility` or `onColumnVisibilityChange`; declare the defaults in `initialState.columnVisibility`.',
+            )
+        }
+    }, [layoutOptedIn, controlsVisibility])
+
+    usePersistedStateWriter<SortingState>({
+        storageKey: sortingStorageKey,
+        state: table.getState().sorting,
+        defaultValue: defaultSorting,
+        saved: persistedSorting,
+        // A table that owns `state.sorting` loads the new key's sort through `usePersistedSorting`.
+        controlled: rest.state?.sorting !== undefined,
+        toSignature: sortingSignature,
+        toStorage: serializeSorting,
+        applyState: (sorting) => table.setSorting(sorting),
+    })
+
+    usePersistedStateWriter<ColumnSizingState>({
+        storageKey: columnSizingStorageKey,
+        state: table.getState().columnSizing,
+        defaultValue: defaultColumnSizing,
+        saved: persistedColumnSizing,
+        // Widths are saved when a drag ends, never during it.
+        settled: !table.getState().columnSizingInfo.isResizingColumn,
+        toSignature: columnSizingSignature,
+        toStorage: serializeColumnSizing,
+        applyState: (columnSizing) => table.setColumnSizing(columnSizing),
+    })
+
+    // What the column settings dot compares with: known only where the table saves the layout itself (ASMA-8695, DEC-05).
+    table.columnLayoutDefaults = layoutOptedIn
+        ? { order: defaultColumnOrder, visibility: defaultColumnVisibility }
+        : undefined
+
+    // Reset columns (ASMA-8597, REQ-008): order and widths go back to the defaults of this render, and
+    // sorting does too only on a table that opted in (D1). On a table with `persistColumnLayout` the visibility
+    // goes back too (ASMA-8695, OQ-02); any other table's visibility, pinning, page size, selection and
+    // expansion are left alone. Assigned on every render so it always sees the current defaults.
+    table.resetColumnSettings = () => {
+        table.setColumnOrder(layoutOptedIn ? defaultColumnOrder : [])
+        table.setColumnSizing(defaultColumnSizing)
+
+        if (layoutOptedIn) {
+            table.setColumnVisibility(defaultColumnVisibility)
+        }
+
+        if (sortingStorageKey) {
+            table.setSorting(defaultSorting)
+        }
+
+        // An opted-in table without a per-user key does not own the old keys: it neither migrates nor deletes them.
+        const hasLayoutKeys = layoutOptedIn && savedLayout.orderKey !== undefined
+        const layoutStorageKeys = hasLayoutKeys
+            ? [savedLayout.orderKey, savedLayout.visibilityKey, persistColumnOrderKey, legacyColumnVisibilityKey]
+            : []
+        const unscopedOrderKey = layoutOptedIn ? undefined : persistColumnOrderKey
+
+        for (const storageKey of [sortingStorageKey, columnSizingStorageKey, unscopedOrderKey, ...layoutStorageKeys]) {
+            if (storageKey) tableStorage.remove(storageKey)
+        }
+    }
 
     const storageKey = getPersistedPageSizeKey(uniqueKey)
     const pageSizeState = table.getState().pagination?.pageSize
@@ -120,11 +285,7 @@ export const useStyledTable = <
             hydratedStorageKeyRef.current = storageKey
         }
 
-        try {
-            localStorage.setItem(storageKey, JSON.stringify(pageSizeState))
-        } catch (e) {
-            console.error(e)
-        }
+        tableStorage.set(storageKey, JSON.stringify(pageSizeState))
     }, [pageSizeState, resolvedPageSize, storageKey])
 
     return { table }

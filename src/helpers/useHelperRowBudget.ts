@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type RefObject } from 'react'
 
-import { measureHelperRowMaxWidth } from './helperTextRoom'
+import { findHelperRoom, measureHelperRowMaxWidth } from './helperTextRoom'
 
 export interface HelperRowBudget {
     fieldRef: RefObject<HTMLDivElement>
@@ -23,11 +23,12 @@ export function useHelperRowBudget(enabled: boolean): HelperRowBudget {
     useLayoutEffect(remeasure)
 
     useEffect(() => {
-        const parent = fieldRef.current?.parentElement
-        if (!enabled || !parent || typeof ResizeObserver === 'undefined') return
+        const field = fieldRef.current
+        const container = field ? findHelperRoom(field)?.container : undefined
+        if (!enabled || !container || typeof ResizeObserver === 'undefined') return
 
         const observer = new ResizeObserver(remeasure)
-        observer.observe(parent)
+        observer.observe(container)
         return () => observer.disconnect()
     }, [enabled, remeasure])
 

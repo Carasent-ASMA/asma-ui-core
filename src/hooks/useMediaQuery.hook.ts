@@ -25,8 +25,20 @@ export function makeMediaQueryStore(mediaQuery: string) {
 
 export const useMobileMediaQuery = makeMediaQueryStore('(max-width: 743px)')
 
+/** Narrower than any phone — the same query as the `max-xs:` Tailwind variant (tailwind.config.ts). */
+export const useMaxXsMediaQuery = makeMediaQueryStore('not all and (min-width: 320px)')
+
 /** A phone in landscape: too short for a sheet capped at 90vh to leave a usable body. */
 export const useShortViewportMediaQuery = makeMediaQueryStore('(max-height: 480px)')
+
+/**
+ * The full-screen picker's one-row header (ASMA-8468 REQ-007): a viewport that is short **and** wide
+ * — a phone in landscape. Short alone is not enough: on an upright phone the on-screen keyboard also
+ * brings the viewport under 480 px, and moving the focused search into the first row dropped the
+ * keyboard, which moved the search back. Upright phones are at most about 440 px wide (iPhone Pro
+ * Max); phones held sideways start at 568 px (iPhone SE).
+ */
+export const usePickerOneRowHeaderMediaQuery = makeMediaQueryStore('(max-height: 480px) and (min-width: 480px)')
 
 /**
  * ASMA-8468 REQ-001: a searchable select opens as a full-screen picker below 744 CSS px wide or at

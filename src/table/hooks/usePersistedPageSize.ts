@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { readJson } from '../helpers/tableStorage'
 
 const pageSizeStorageKeySuffix = ':page-size'
 
@@ -14,17 +15,9 @@ export const usePersistedPageSize = (uniqueKey?: string): number| undefined => {
 
         if (!storageKey) return undefined
 
-        try {
-            const raw = localStorage.getItem(storageKey)
+        const parsed = readJson(storageKey)
 
-            if (!raw) return undefined
-
-            const parsed: unknown = JSON.parse(raw)
-
-            return typeof parsed === 'number' && Number.isInteger(parsed) && parsed > 0 ? parsed : undefined
-        } catch {
-            return undefined
-        }
+        return typeof parsed === 'number' && Number.isInteger(parsed) && parsed > 0 ? parsed : undefined
     }, [uniqueKey])
 
     return persistedPageSize

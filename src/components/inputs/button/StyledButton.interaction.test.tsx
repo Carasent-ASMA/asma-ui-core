@@ -1,3 +1,4 @@
+import type { FormEvent } from 'react'
 import { afterEach, describe, it, vi } from 'vitest'
 import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
@@ -273,4 +274,59 @@ describe('StyledButton becoming available', () => {
         await expect(button).toHaveAccessibleDescription('Add a mobile number first')
     })
 
+})
+
+describe('StyledButton form submission (ASMA-8734)', () => {
+    afterEach(cleanup)
+
+    it('does not submit a surrounding form by default', async () => {
+        const onSubmit = vi.fn((e: FormEvent) => e.preventDefault())
+        mount(
+            <form onSubmit={onSubmit}>
+                <StyledButton dataTest='next-month' onClick={() => undefined}>
+                    Next month
+                </StyledButton>
+            </form>,
+        )
+
+        await expect(byTest('next-month')).toHaveAttribute('type', 'button')
+
+        await userEvent.click(byTest('next-month'))
+
+        await expect(onSubmit).not.toHaveBeenCalled()
+    })
+
+    it('still runs its own onClick inside a form', async () => {
+        const onClick = vi.fn()
+        const onSubmit = vi.fn((e: FormEvent) => e.preventDefault())
+        mount(
+            <form onSubmit={onSubmit}>
+                <StyledButton dataTest='action' onClick={onClick}>
+                    Act
+                </StyledButton>
+            </form>,
+        )
+
+        await userEvent.click(byTest('action'))
+
+        await expect(onClick).toHaveBeenCalledTimes(1)
+        await expect(onSubmit).not.toHaveBeenCalled()
+    })
+
+    it('submits when type="submit" is passed explicitly', async () => {
+        const onSubmit = vi.fn((e: FormEvent) => e.preventDefault())
+        mount(
+            <form onSubmit={onSubmit}>
+                <StyledButton dataTest='save' type='submit'>
+                    Save
+                </StyledButton>
+            </form>,
+        )
+
+        await expect(byTest('save')).toHaveAttribute('type', 'submit')
+
+        await userEvent.click(byTest('save'))
+
+        await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1))
+    })
 })

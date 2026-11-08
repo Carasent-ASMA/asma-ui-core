@@ -12,13 +12,15 @@ import { useBackNavigationClose } from 'src/datetime/hooks/useBackNavigationClos
 import { StyledDrawer } from 'src/components/navigation/drawer'
 import type { StyledTimePickerProps } from './types'
 import { isBeforeMinTime } from './helpers/minTime'
+import { isTimeRejected } from './helpers/disabledTime'
 import { timePickerWidthProps } from './helpers/timePickerWidth'
 import { cn } from 'src/helpers/cn'
 
 /**
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#15561-37391
  * Figma has no distinct time-picker-popover component — the trigger is the outlined **Input field**
- * (`field-styles`: 40px, border delta-500 / hover gama-300 / focus gama-400 / error error-500) with
+ * (`field-styles`: 40px, border delta-500 / hover gama-300 / focus 3px `color.focus.ring` / error
+ * error-500 / error + focus 3px error-500) with
  * a trailing **clock icon** (delta-700 like the select/search field icons; delta-300 when disabled).
  * The dropdown follows the **Menus** surface (delta-300 border + Menus shadow `0 2 4 rgba(34,33,51,
  * .15)`): scrollable hour/minute columns of 36px cells — hover delta-50, "now" gama-50 (like the
@@ -27,7 +29,7 @@ import { cn } from 'src/helpers/cn'
  * instead of the popper, matching `StyledDatePicker`. Non-annotated props are behavioral.
  */
 export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
-    const { value, onSelect, notBeforeTime, minTime } = props
+    const { value, onSelect, notBeforeTime, minTime, required, isTimeDisabled, disabledTimeReason } = props
     const popupState = usePopupState({ variant: 'popper', popupId: 'time-picker-popper' })
     const isMobile = useIsMobileView()
     useBackCloses({ active: popupState.isOpen, requestClose: popupState.close })
@@ -54,39 +56,64 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
     const externalValue = value ? format(value, 'HH:mm') : ''
     const [localValue, setLocalValue] = useState(externalValue)
     const [isDirty, setIsDirty] = useState(false)
-    const [isValidTime, setIsValidTime] = useState(true)
+    // ADR-0017 REQ-001/002: the error shows only after blur (or a panel pick) and clears on the first
+    // valid change; typing never introduces one. ASMA-8561
+    const [showError, setShowError] = useState(false)
     const resolvedLocalValue = isDirty ? localValue : externalValue
 
     const checkValidEndTime = (next?: Date) => {
         return !next || !notBeforeTime || !isValid(notBeforeTime) || !isBefore(next, notBeforeTime)
     }
 
+    /**
+     * `isTimeDisabled` behaves like `notBeforeTime`, not like `minTime`: a rejected entry is refused
+     * *loudly*. `minTime` reverts in silence because "nothing before 12:35" is self-evident from the
+     * greyed cells, but a predicate encodes a rule the field cannot show — a consumer's quiet hours,
+     * say — and silently restoring the previous value would read as the entry having been accepted.
+     */
+    const checkNotDisabled = (next?: Date) => !isTimeRejected(next, isTimeDisabled)
+
     const parsedLocalTime = resolvedLocalValue.length === 5 ? getTimeFromValue(resolvedLocalValue, value) : null
-    const isValidEndTime = parsedLocalTime ? checkValidEndTime(parsedLocalTime) : true
+    const isValidTime = !showError || resolvedLocalValue === '' || parsedLocalTime !== null
+    const isValidEndTime = !showError || !parsedLocalTime || checkValidEndTime(parsedLocalTime)
+    const isMissingTime = !!required && showError && resolvedLocalValue === ''
+    // The reason doubles as the message, so the tooltip on a rejected cell and the error under the
+    // field cannot drift apart. Undefined unless *this* entry is the one being refused.
+    const disabledTimeError =
+        showError && isTimeRejected(parsedLocalTime ?? undefined, isTimeDisabled) ? disabledTimeReason : undefined
+
+    /** Complete, parsable and not before `notBeforeTime`; an empty field is valid (required is the form's job). */
+    const isCommittableTime = (text: string): boolean => {
+        if (text === '') return true
+        const parsed = getTimeFromValue(text, value)
+        return parsed !== null && checkValidEndTime(parsed) && checkNotDisabled(parsed)
+    }
 
     const handleChange = (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
         const nextValue = e.target.value
 
         setIsDirty(true)
         setLocalValue(nextValue)
+        if (isMissingTime || isCommittableTime(nextValue)) setShowError(false)
 
-        if (nextValue.length !== 5) {
-            setIsValidTime(false)
-            return
-        }
+        if (nextValue.length !== 5) return
 
         const validTime = getTimeFromValue(nextValue, value)
 
         if (!validTime) {
             onSelect(undefined)
-            setIsValidTime(false)
             return
         }
 
-        setIsValidTime(true)
-
         // Keep the field dirty and the consumer's value untouched; handleBlur reverts it — no error shown.
         if (isBeforeMinTime(validTime, minTime)) return
+
+        if (!checkNotDisabled(validTime)) {
+            // Keep the text the author typed so the error names something they can see, and leave
+            // the consumer's value uncommitted. `handleBlur` raises the error once the entry ends.
+            onSelect(undefined)
+            return
+        }
 
         const isNotBeforeStartTime = checkValidEndTime(validTime)
 
@@ -102,10 +129,18 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
     const handleSelect = (selectedTime: Date | undefined) => {
         // Disabled cells cannot fire, so this only guards a stale panel after `minTime` moved on.
         if (selectedTime && isBeforeMinTime(selectedTime, minTime)) return
+        // Same guard for the predicate: an inert cell refuses its own click, but the rule can change
+        // under an open panel, and a minute pick carries the hour from `value` rather than the cell.
+        if (!checkNotDisabled(selectedTime)) {
+            setShowError(true)
+            return
+        }
 
-        setIsValidTime(true)
+        // A pick is a finished entry (the input may already have blurred), so validate it now.
+        const isNotBeforeStartTime = checkValidEndTime(selectedTime)
+        setShowError(!isNotBeforeStartTime)
 
-        if (checkValidEndTime(selectedTime)) {
+        if (isNotBeforeStartTime) {
             onSelect(selectedTime)
             setLocalValue(selectedTime ? format(selectedTime, 'HH:mm') : '')
             setIsDirty(false)
@@ -118,15 +153,25 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
     }
 
     const handleBlur = () => {
+        // Leaving for the open panel is not a finished entry: a pick or the eraser settles it.
+        if (required && resolvedLocalValue === '' && !popupState.isOpen) {
+            if (isDirty) onSelect(undefined)
+            setShowError(true)
+            return
+        }
+        if (!isDirty) return
         // A typed time before `minTime` is never committed: show the last valid value again.
-        if (isDirty && parsedLocalTime && isBeforeMinTime(parsedLocalTime, minTime)) setIsDirty(false)
+        if (parsedLocalTime && isBeforeMinTime(parsedLocalTime, minTime)) setIsDirty(false)
+        // An emptied field holds no time: uncommit it rather than keep the last value hidden.
+        else if (localValue === '') onSelect(undefined)
+        else if (!isCommittableTime(localValue)) setShowError(true)
     }
 
     const handleClear = () => {
         onSelect(undefined)
         setLocalValue('')
         setIsDirty(false)
-        setIsValidTime(true)
+        setShowError(!!required)
     }
 
     const input = (
@@ -136,12 +181,14 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
             localValue={resolvedLocalValue}
             isValidTime={isValidTime}
             isValidEndTime={isValidEndTime}
+            isMissingTime={isMissingTime}
+            disabledTimeError={disabledTimeError}
             handleChange={handleChange}
             handleBlur={handleBlur}
         />
     )
 
-    if (props.disabled || props.readOnly) return input
+    if (props.disabled || props.readOnly || props.lockedReason) return input
 
     if (isMobile)
         return (
@@ -164,6 +211,8 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
                             dataTest={props.dataTest}
                             value={value}
                             minTime={minTime}
+                            isTimeDisabled={isTimeDisabled}
+                            disabledTimeReason={disabledTimeReason}
                             onSelect={handleSelect}
                             handleClear={handleClear}
                             onConfirm={popupState.close}

@@ -43,7 +43,8 @@ export const useFocusTrap = (active: boolean, containerRef: RefObject<HTMLElemen
                 onEscapeRef.current?.()
                 return
             }
-            if (event.key !== 'Tab') return
+            // A nested layer (a portalled calendar) that already moved focus for this Tab owns it.
+            if (event.key !== 'Tab' || event.defaultPrevented) return
 
             const focusable = tabbableWithin(container)
             if (focusable.length === 0) {

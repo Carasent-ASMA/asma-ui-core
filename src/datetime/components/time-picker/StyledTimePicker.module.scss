@@ -90,7 +90,13 @@
         }
         // Figma Time item State=Disabled (15086-19871): delta-400 text, no fill, not-allowed cursor.
         // Last, so it also overrides the now/selected fills.
-        &:disabled {
+        //
+        // `aria-disabled` is matched alongside the native attribute because a cell refused by
+        // `isTimeDisabled` carries a reason, and a natively disabled button is unfocusable and
+        // silent on pointer events — so it could never show one. Those cells stay focusable and
+        // must still *look* unavailable; keeping both in one rule is what guarantees they do.
+        &:disabled,
+        &[aria-disabled='true'] {
             background-color: #fff;
             color: var(--colors-delta-400);
             cursor: not-allowed;

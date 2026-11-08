@@ -23,7 +23,9 @@ export interface StyledFieldPairProps {
 export const StyledFieldPair = ({ children, legend, className, dataTest }: StyledFieldPairProps): JSX.Element => {
     if (legend == null) {
         return (
-            <div data-testid={dataTest} className={cn(styles['row'], className)}>
+            // Narrower than a phone a field is never wider than the row, so e.g. a 200px date field stays inside a
+            // 160px screen; above that every field keeps its width step.
+            <div data-testid={dataTest} className={cn(styles['row'], 'max-xs:[&>*]:max-w-full', className)}>
                 {children}
             </div>
         )
@@ -32,7 +34,8 @@ export const StyledFieldPair = ({ children, legend, className, dataTest }: Style
     return (
         <fieldset data-testid={dataTest} className={cn(styles['fieldset'], className)}>
             <legend className={cn(styles['legend'], fieldLabelAboveClass())}>{legend}</legend>
-            <div className={styles['row']}>{children}</div>
+            {/* Narrower than a phone a field is never wider than the row (see above). */}
+            <div className={cn(styles['row'], 'max-xs:[&>*]:max-w-full')}>{children}</div>
         </fieldset>
     )
 }

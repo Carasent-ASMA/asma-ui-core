@@ -106,3 +106,43 @@ describe('StyledLink disabledReason', () => {
     })
 
 })
+
+/**
+ * Sizes — Figma "Links/Base link" 16/24 and "Links/Helper link" 14/20 (ASMA-8705). The old `small`
+ * and `xs` stay as deprecated aliases so existing callers keep compiling, rendered at the new sizes.
+ */
+describe('StyledLink size', () => {
+    afterEach(cleanup)
+
+    const fontOf = (testId: string): string => {
+        const element = document.querySelector<HTMLElement>(`[data-testid="${testId}"]`)!
+        const { fontSize, lineHeight } = getComputedStyle(element)
+        return `${fontSize}/${lineHeight}`
+    }
+
+    it('renders Base as 16/24 and Helper as 14/20, the deprecated aliases included', async () => {
+        const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+        mount(
+            <div>
+                <StyledLink dataTest='large' href='#' size='large' contentNode='Base' />
+                <StyledLink dataTest='medium' href='#' size='medium' contentNode='Helper' />
+                <StyledLink dataTest='small' href='#' size='small' contentNode='Old small' />
+                <StyledLink dataTest='small-again' href='#' size='small' contentNode='Old small again' />
+                <StyledLink dataTest='xs' href='#' size='xs' contentNode='Old xs' />
+            </div>,
+        )
+
+        await expect(fontOf('large')).toBe('16px/24px')
+        await expect(fontOf('medium')).toBe('14px/20px')
+        await expect(fontOf('small'), 'small renders as large').toBe('16px/24px')
+        await expect(fontOf('xs'), 'xs renders as medium').toBe('14px/20px')
+
+        // One warning per deprecated value, not one per link.
+        const messages = warn.mock.calls.map(([message]) => String(message)).filter((m) => m.includes('deprecated'))
+        await expect(messages).toEqual([
+            'StyledLink: size="small" is deprecated, use size="large".',
+            'StyledLink: size="xs" is deprecated, use size="medium".',
+        ])
+        warn.mockRestore()
+    })
+})

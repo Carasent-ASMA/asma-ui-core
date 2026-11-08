@@ -70,6 +70,10 @@ export const StyledButton = ({
     endIcon,
     dataTest,
     error,
+    // The native default is `submit`, so a bare button placed anywhere inside a <form> fires that
+    // form. These buttons are actions that run their own onClick, so `button` is the safe default
+    // and an explicit `type` still wins.
+    type = 'button',
     ...otherProps
 }: StyledButtonProps): JSX.Element => {
     const isLarge = size === 'large' || size === 'medium'
@@ -80,6 +84,7 @@ export const StyledButton = ({
     return (
         <button
             {...otherProps}
+            type={type}
             className={clsx(
                 style['asma-core-ui-button'],
                 BtnStyles[variant],

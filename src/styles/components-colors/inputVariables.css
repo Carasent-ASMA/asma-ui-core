@@ -63,8 +63,9 @@
     --input-error-disabled-cursor: default;
     --input-error-outline-width: 1px;
     --input-error-hover-outline-width: 1px;
-    --input-error-active-outline-width: 1px;
-    --input-error-focus-outline-width: 1px;
+    /* Error like the input field (ASMA-8561): 1px at rest and on hover, 3px on press and focus. */
+    --input-error-active-outline-width: 3px;
+    --input-error-focus-outline-width: 3px;
     --input-error-disabled-outline-width: 1px;
     /* input notEditable */
     --colors-input-notEditable-placeholder-color: var(--colors-delta-800);

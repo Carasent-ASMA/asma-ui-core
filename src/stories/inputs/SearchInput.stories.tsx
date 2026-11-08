@@ -106,6 +106,19 @@ export const ErrorState: Story = {
     },
 }
 
+/** ASMA-8561: error + focused = 1px error-500 border + 2px inset error-500 edge (3px, layout-neutral). */
+export const ErrorFocused: Story = {
+    args: { label: 'Search', value: '', error: true, helperText: 'Required field' },
+    render: (args) => <ControlledRender {...args} />,
+    play: async ({ canvas }) => {
+        const input = canvas.getByLabelText(/search/i)
+        input.focus()
+
+        await expect(input).toHaveFocus()
+        await expect(input).toHaveAttribute('aria-invalid', 'true')
+    },
+}
+
 export const Prefilled: Story = {
     args: {
         label: 'Search',
