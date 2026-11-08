@@ -107,7 +107,7 @@ interface PostcssRoot {
  *
  * Remove this shim once the team adopts v4 border behaviour and re-baselines.
  */
-const GENERATED_BORDER_STYLE_PROPERTY = /^border(-(top|right|bottom|left|inline|block)(-(start|end))?)?-style$/
+const GENERATED_BORDER_STYLE_PROPERTY = /^border(?:-(?:top|right|bottom|left|inline|block)(?:-(?:start|end))?)?-style$/
 
 const stripGeneratedBorderStyles = {
     postcssPlugin: 'asma-strip-generated-border-style',
