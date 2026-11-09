@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react'
+
 /**
  * The one dialog header layout (ASMA-8737), shared by `StyledDialog`, `MinimizableDialog` and
  * `MinimizableDialogV2`: the actions row on top, then the title on a row of its own across the full
@@ -21,8 +23,25 @@ export const DIALOG_HEADER_CLASSES = 'box-border w-full min-w-0 max-w-full shrin
  */
 export const dialogContentFlowClasses = (pinned: boolean): string =>
     pinned
-        ? 'flex min-h-0 min-w-0 flex-[1_1_0%] flex-col'
-        : 'flex min-w-0 flex-[1_0_auto] flex-col [&>:only-child]:flex-grow'
+        ? 'isolate flex min-h-0 min-w-0 flex-[1_1_0%] flex-col'
+        : 'isolate flex min-w-0 flex-[1_0_auto] flex-col [&>:only-child]:flex-grow'
+
+/**
+ * The scroller's inline style: scroll padding for focus, plus the same offsets as CSS variables so a
+ * sticky child of the content can sit under a pinned header with `top-[var(--dialog-header-offset,0px)]`
+ * (0 when the header scrolls away or is stepped aside). Always set, so a nested dialog never inherits
+ * its parent's offset.
+ *
+ * The content flow is `isolate`d, so a consumer `z-index` stays below the header (z-2): a sticky bar
+ * or a menu that is not portalled can slide under the header, never over the title.
+ */
+export const dialogScrollerStyle = (scrollPaddingTop: number, scrollPaddingBottom: number): CSSProperties =>
+    ({
+        scrollPaddingTop,
+        scrollPaddingBottom,
+        '--dialog-header-offset': `${scrollPaddingTop}px`,
+        '--dialog-footer-offset': `${scrollPaddingBottom}px`,
+    }) as CSSProperties
 
 /** Label (if any) on the left, the header actions on the right. Wraps rather than overflowing at 320 px. */
 export const DIALOG_HEADER_ACTIONS_ROW_CLASSES =
