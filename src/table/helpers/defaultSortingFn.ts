@@ -40,9 +40,17 @@ export const getSortCollator = (locale?: string): Intl.Collator => {
 /** `YYYY-MM-DD`, optionally followed by a time with an optional fraction and offset. */
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}(?:[T ]\d{2}:\d{2}(?::\d{2}(?:[.,]\d+)?)?(?:Z|[+-]\d{2}(?::?\d{2})?)?)?$/
 
+const DAYS_IN_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+const isLeapYear = (year: number): boolean => (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0
+
+/** Whether the day exists in that month: `Date.parse` accepts 30 February and rolls it over to 2 March, so it cannot say. */
+const isRealCalendarDate = (year: number, month: number, day: number): boolean =>
+    month >= 1 && month <= 12 && day >= 1 && day <= (month === 2 && isLeapYear(year) ? 29 : DAYS_IN_MONTH[month - 1]!)
+
 /** The time an ISO 8601 date string stands for, or `undefined` when the string is not one (or names no real date). */
 const isoTime = (value: string): number | undefined => {
     if (!ISO_DATE.test(value)) return undefined
+    if (!isRealCalendarDate(Number(value.slice(0, 4)), Number(value.slice(5, 7)), Number(value.slice(8, 10)))) return undefined
 
     const time = Date.parse(value.replace(' ', 'T').replace(',', '.'))
 

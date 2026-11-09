@@ -142,6 +142,25 @@ describe('ISO date strings (U-SF04)', () => {
         expect(compare('2026-10-30', '2026-10-30T00:00:01Z')).toBeLessThan(0)
     })
 
+    it('treat an impossible calendar date as text, not as the day it rolls over to (audit round 1, fix 2)', () => {
+        // 30 February would roll over to 2 March (a later day than 1 March); as text it sorts before it.
+        expect(compare('2026-02-30', '2026-03-01')).toBeLessThan(0)
+        // 31 April would roll over to 1 May, which is not the same moment as 1 May 2026.
+        expect(compare('2026-04-31', '2026-05-01')).toBeLessThan(0)
+        expect(compare('2026-02-29', '2026-02-29T00:00:00Z')).not.toBe(0)
+        expect(compare('1900-02-29', '1900-02-29T00:00:00Z')).not.toBe(0)
+        expect(compare('2026-04-31T10:00:00Z', '2026-05-01T10:00:00Z')).toBeLessThan(0)
+        expect(compare('2026-00-10', '2026-00-10T00:00:00Z')).not.toBe(0)
+    })
+
+    it('treat a real calendar date as a time, leap days included', () => {
+        expect(compare('2024-02-29', '2024-02-29T00:00:00Z')).toBe(0)
+        expect(compare('2000-02-29', '2000-02-29T00:00:00Z')).toBe(0)
+        expect(compare('2026-04-30', '2026-04-30T00:00:00Z')).toBe(0)
+        expect(compare('2024-02-29', '2024-03-01')).toBeLessThan(0)
+        expect(compare('2026-12-31T23:59:59Z', '2027-01-01T00:00:00Z')).toBeLessThan(0)
+    })
+
     it('are not compared as text: a string that only looks like a date falls back to text', () => {
         // 13 is not a month: not a date, so these are two names that happen to start with digits.
         expect(compare('2026-13-45', '2026-13-5')).toBeGreaterThan(0)
