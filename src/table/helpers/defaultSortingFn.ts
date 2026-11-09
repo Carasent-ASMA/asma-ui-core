@@ -146,7 +146,9 @@ export const resolveSortUndefinedDefaults = <TColumn extends SortUndefinedColumn
         }
 
         const sortingFn = column.sortingFn ?? appSortingFn
-        const usesStyledDefault = sortingFn === undefined || sortingFn === STYLED_DEFAULT_SORTING_FN
+        // `null` counts as unset, as it does for the table's default column in `useStyledTable`.
+        const usesStyledDefault =
+            sortingFn === undefined || sortingFn === null || sortingFn === STYLED_DEFAULT_SORTING_FN
 
         if (!usesStyledDefault || column.sortUndefined !== undefined || appSetsSortUndefined) return column
 

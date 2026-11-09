@@ -146,13 +146,12 @@ export const useStyledTable = <
     // through this ref, which is filled right after `useReactTable` below: not the app's optional `tableInstanceRef`, and
     // not the sorting array of the render that registered the function, which is out of date by the next click.
     //
-    // Why writing it during render is safe (DeepSeek's audit of #340, round 1): `useReactTable` creates its table in a
-    // `useState` initialiser, so this component instance has one table for its whole life, and TanStack itself updates that
-    // table's options during render. This ref and the memoised comparison below belong to the same component instance, so a
-    // render that React discards (an interrupted concurrent render) discards them with it; a committed table's comparison can
-    // only ever read its own table, never another table's, and never a table that did not commit. The direction is read live
-    // from `table.getState()` each time the comparison runs. Pinned by the two-tables test in
-    // `StyledTable.defaultSort.interaction.test.tsx`.
+    // Why writing it during render is safe (DeepSeek's audit of #340): a `useRef` value lives on the component instance, not
+    // on one render, so a write from a render that React later discards is not undone. It does no harm, because
+    // `useReactTable` creates its table in a `useState` initialiser: the table of this instance never changes, and every
+    // write, a discarded render's included, puts that same table into the ref. TanStack itself updates that table's options
+    // during render. The comparison below reads only this instance's table, and the direction live from `table.getState()`
+    // each time it runs. Pinned by the two-tables test in `StyledTable.defaultSort.interaction.test.tsx`.
     const sortingTableRef = useRef<Table<TData> | undefined>(undefined)
     const styledDefaultSortingFn = useMemo(() => createStyledDefaultSortingFn<TData>(() => sortingTableRef.current), [])
     // The default comparison, unless the app's own `defaultColumn` names one. It carries no `sortUndefined`: TanStack merges

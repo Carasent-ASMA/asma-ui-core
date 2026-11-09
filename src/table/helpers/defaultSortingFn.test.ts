@@ -427,6 +427,24 @@ describe('where sortUndefined: false is set (audit round 1, fix 1)', () => {
         expect(sortUndefinedOf([{ sortingFn: STYLED_DEFAULT_SORTING_FN }], { sortingFn: 'basic' })).toEqual([false])
     })
 
+    it("treats an app defaultColumn.sortingFn of null as unset, the way the table's default column does", () => {
+        expect(sortUndefinedOf([{}], { sortingFn: null })).toEqual([false])
+        expect(sortUndefinedOf([{ sortingFn: null }], { sortingFn: null })).toEqual([false])
+        expect(sortUndefinedOf([{ sortingFn: own }], { sortingFn: null })).toEqual([undefined])
+    })
+
+    it("keeps a column's own sortUndefined when it also has its own sortingFn", () => {
+        expect(sortUndefinedOf([{ sortingFn: own, sortUndefined: 'first' }, { sortingFn: own, sortUndefined: 1 }])).toEqual([
+            'first',
+            1,
+        ])
+    })
+
+    it("leaves every column alone when the app's defaultColumn.sortingFn is 'auto', unless a column names styledDefault", () => {
+        expect(sortUndefinedOf([{}, { sortingFn: own }], { sortingFn: 'auto' })).toEqual([undefined, undefined])
+        expect(sortUndefinedOf([{ sortingFn: STYLED_DEFAULT_SORTING_FN }], { sortingFn: 'auto' })).toEqual([false])
+    })
+
     it('keeps a sortUndefined the column or the app sets', () => {
         expect(sortUndefinedOf([{ sortUndefined: 'first' }, { sortUndefined: 1 }, { sortUndefined: false }])).toEqual([
             'first',
