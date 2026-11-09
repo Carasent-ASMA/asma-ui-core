@@ -207,6 +207,21 @@ export const useStyledTable = <
 
     sortingTableRef.current = table
 
+    // TanStack re-sorts only when the sorting or the rows change, and the text order depends on the locale too. So when the
+    // locale of a table that stays mounted changes, the current sorting is set again as a new array, which has the same
+    // content and a new identity, and the rows sort again in the new language. The first mount has nothing to redo, and an
+    // unsorted table has nothing to sort.
+    const sortLocale = table.options.meta?.locale
+    const previousSortLocaleRef = useRef(sortLocale)
+
+    useEffect(() => {
+        if (previousSortLocaleRef.current === sortLocale) return
+
+        previousSortLocaleRef.current = sortLocale
+
+        if (table.getState().sorting.length > 0) table.setSorting((previous) => [...previous])
+    }, [sortLocale, table])
+
     if (tableInstanceRef) {
         tableInstanceRef.current = table
     }

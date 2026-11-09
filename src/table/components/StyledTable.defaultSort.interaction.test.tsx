@@ -1,6 +1,6 @@
 import type { ColumnDef, SortingFn } from '@tanstack/react-table'
 import { afterEach, beforeEach, describe, it } from 'vitest'
-import { expect, userEvent } from 'src/test-utils/interaction-api'
+import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { ariaSorts, sortButton } from 'src/test-utils/tableFixture'
 import { StyledTable } from './StyledTableIndex'
@@ -64,6 +64,33 @@ describe('StyledTable default sort comparison', () => {
         await userEvent.click(sortButton('Name'))
         // In English, æ is "ae" and ø is an o, so they fall among the other letters.
         await expect(names()).toEqual(['Ærlig', 'anne', 'Åse', 'Øyvind', 'Zara'])
+    })
+
+    it('sorts again when the locale of a mounted table changes (audit round 1, fix 4)', async () => {
+        const sorted = { sorting: [{ id: 'name', desc: false }] }
+        const view = mount(<ItemsTable locale='en' initialState={sorted} />)
+
+        await expect(names()).toEqual(['Ærlig', 'anne', 'Åse', 'Øyvind', 'Zara'])
+
+        view.rerender(<ItemsTable locale='no' initialState={sorted} />)
+
+        await waitFor(() => expect(names()).toEqual(['anne', 'Zara', 'Ærlig', 'Øyvind', 'Åse']))
+        await expect(ariaSorts()['Name']).toBe('ascending')
+
+        // And back, in the descending sort the user picks next.
+        view.rerender(<ItemsTable locale='en' initialState={sorted} />)
+        await waitFor(() => expect(names()).toEqual(['Ærlig', 'anne', 'Åse', 'Øyvind', 'Zara']))
+        await userEvent.click(sortButton('Name'))
+        await expect(names()).toEqual(['Zara', 'Øyvind', 'Åse', 'anne', 'Ærlig'])
+    })
+
+    it('leaves an unsorted table alone when its locale changes', async () => {
+        const view = mount(<ItemsTable locale='en' />)
+
+        view.rerender(<ItemsTable locale='no' />)
+
+        await expect(names()).toEqual(['Åse', 'anne', 'Zara', 'Øyvind', 'Ærlig'])
+        await expect(ariaSorts()['Name']).toBe('none')
     })
 
     it('puts empty cells last in both directions, undefined included (the descending sort used to put it first)', async () => {
