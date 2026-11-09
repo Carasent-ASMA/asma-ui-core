@@ -195,6 +195,45 @@ describe('StyledTable default sort comparison', () => {
         })
     })
 
+    it('two tables on one page, sorted in opposite directions, each keep their own empty cells last (audit round 1, fix 3)', async () => {
+        mount(
+            <>
+                <ItemsTable initialState={{ sorting: [{ id: 'score', desc: false }] }} />
+                <ItemsTable initialState={{ sorting: [{ id: 'score', desc: true }] }} />
+            </>,
+        )
+        const bodyOf = (index: number): string[] =>
+            [...document.querySelectorAll('tbody')[index]!.querySelectorAll<HTMLElement>('tr')].map(
+                (row) => row.querySelector('td')?.textContent ?? '',
+            )
+        const scoreButtonOf = (index: number): HTMLElement =>
+            [...document.querySelectorAll('thead')[index]!.querySelectorAll<HTMLElement>('th')]
+                .find((cell) => cell.textContent?.trim() === 'Score')!
+                .querySelector<HTMLElement>('[role="button"]')!
+        const ascending = ['Zara', 'Ærlig', 'Åse', 'anne', 'Øyvind']
+        const descending = ['Åse', 'Ærlig', 'Zara', 'anne', 'Øyvind']
+        const dataOrder = ['Åse', 'anne', 'Zara', 'Øyvind', 'Ærlig']
+
+        await expect(bodyOf(0)).toEqual(ascending)
+        await expect(bodyOf(1)).toEqual(descending)
+
+        // Toggling the first table (ascending, then off, then descending) leaves the second as it was.
+        await userEvent.click(scoreButtonOf(0))
+        await expect(bodyOf(0)).toEqual(dataOrder)
+        await expect(bodyOf(1)).toEqual(descending)
+        await userEvent.click(scoreButtonOf(0))
+        await expect(bodyOf(0)).toEqual(descending)
+        await expect(bodyOf(1)).toEqual(descending)
+
+        // And the other way round: the second table goes ascending and then off while the first stays descending.
+        await userEvent.click(scoreButtonOf(1))
+        await expect(bodyOf(1)).toEqual(ascending)
+        await expect(bodyOf(0)).toEqual(descending)
+        await userEvent.click(scoreButtonOf(1))
+        await expect(bodyOf(1)).toEqual(dataOrder)
+        await expect(bodyOf(0)).toEqual(descending)
+    })
+
     it("keeps the app's own sortingFns available beside styledDefault (U-SF10)", async () => {
         const reversedName: SortingFn<Item> = (rowA, rowB) => rowB.original.name.localeCompare(rowA.original.name)
         const columns: ColumnDef<Item>[] = [
