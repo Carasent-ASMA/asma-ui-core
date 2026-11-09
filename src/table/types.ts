@@ -131,8 +131,9 @@ export type StyledTableProps<TData, TCustomData> = {
      * **Default sort.** Unless a column sets its own `sortingFn` (or the table's `defaultColumn` does), the column sorts with
      * `sortingFns.styledDefault` (ASMA-8597, P2f): numbers, dates and booleans by value, ISO date strings by time, other
      * text in the table locale, ties in the data order. Empty cells (`undefined`, `null`, `''`, whitespace, `NaN`, an invalid
-     * `Date`) always go last, in both directions. A column's own `sortingFn`, or `sortUndefined`, opts out of this, and so does
-     * `defaultColumn: { sortingFn }`; the table's own `sortingFns` are kept beside `styledDefault`.
+     * `Date`) always go last, in both directions. A column with its own `sortingFn`, or one that `defaultColumn: { sortingFn }`
+     * covers, is not touched: its comparator, and TanStack's handling of `undefined` before it, stay as they were. The table's
+     * own `sortingFns` are kept beside `styledDefault`.
      */
     locale?: 'no' | 'en'
     height?: string | number

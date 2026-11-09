@@ -13,6 +13,7 @@ import {
     createStyledDefaultSortingFn,
     getSortCollator,
     isEmptySortValue,
+    resolveSortUndefinedDefaults,
 } from './defaultSortingFn'
 
 /**
@@ -44,17 +45,20 @@ const buildTable = (
     let table: Table<Row>
     const styledDefault = createStyledDefaultSortingFn<Row>(() => table)
     table = createTable<Row>({
-        columns: columns ?? [
-            { id: 'value', accessorFn: (row) => row.value },
-            { id: 'other', accessorFn: (row) => row.other },
-        ],
+        // The columns the way `useStyledTable` hands them to TanStack: `sortUndefined: false` on those that use the default.
+        columns: resolveSortUndefinedDefaults(
+            columns ?? [
+                { id: 'value', accessorFn: (row) => row.value },
+                { id: 'other', accessorFn: (row) => row.other },
+            ],
+        ),
         data: rows,
         state: {},
         onStateChange: () => undefined,
         renderFallbackValue: null,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
-        defaultColumn: { sortingFn: STYLED_DEFAULT_SORTING_FN, sortUndefined: false },
+        defaultColumn: { sortingFn: STYLED_DEFAULT_SORTING_FN },
         sortingFns: { styledDefault },
         meta: { locale },
     })
@@ -378,5 +382,58 @@ describe('the collator (U-SF11)', () => {
         expect(options.locale).toBe('nb')
         expect(options.numeric).toBe(true)
         expect(options.sensitivity).toBe('base')
+    })
+})
+
+describe('where sortUndefined: false is set (audit round 1, fix 1)', () => {
+    const own = () => 0
+    const sortUndefinedOf = (columns: Parameters<typeof resolveSortUndefinedDefaults>[0], defaultColumn?: Parameters<typeof resolveSortUndefinedDefaults>[1]) =>
+        resolveSortUndefinedDefaults(columns, defaultColumn).map((column) => (column as { sortUndefined?: unknown }).sortUndefined)
+
+    it('sets it on a column that uses the default comparison, and on one that names styledDefault', () => {
+        expect(sortUndefinedOf([{}, { sortingFn: STYLED_DEFAULT_SORTING_FN }])).toEqual([false, false])
+        expect(sortUndefinedOf([{}], { sortingFn: STYLED_DEFAULT_SORTING_FN })).toEqual([false])
+    })
+
+    it('leaves a column with its own sortingFn alone, a function or a name, "auto" included', () => {
+        expect(sortUndefinedOf([{ sortingFn: own }, { sortingFn: 'auto' }, { sortingFn: 'alphanumeric' }])).toEqual([
+            undefined,
+            undefined,
+            undefined,
+        ])
+    })
+
+    it("leaves every column alone when the app's defaultColumn names another sortingFn, unless a column names styledDefault", () => {
+        expect(sortUndefinedOf([{}, { sortingFn: own }], { sortingFn: 'basic' })).toEqual([undefined, undefined])
+        expect(sortUndefinedOf([{ sortingFn: STYLED_DEFAULT_SORTING_FN }], { sortingFn: 'basic' })).toEqual([false])
+    })
+
+    it('keeps a sortUndefined the column or the app sets', () => {
+        expect(sortUndefinedOf([{ sortUndefined: 'first' }, { sortUndefined: 1 }, { sortUndefined: false }])).toEqual([
+            'first',
+            1,
+            false,
+        ])
+        expect(sortUndefinedOf([{}], { sortUndefined: 'last' })).toEqual([undefined])
+    })
+
+    it('walks into group columns and treats their leaves the same way', () => {
+        const [group] = resolveSortUndefinedDefaults([
+            { columns: [{}, { sortingFn: own }, { columns: [{}, { sortUndefined: 'first' }] }] },
+        ])
+        const leaves = (group as { columns: { sortUndefined?: unknown; columns?: { sortUndefined?: unknown }[] }[] }).columns
+
+        expect(leaves[0]!.sortUndefined).toBe(false)
+        expect(leaves[1]!.sortUndefined).toBeUndefined()
+        expect(leaves[2]!.columns!.map((leaf) => leaf.sortUndefined)).toEqual([false, 'first'])
+        expect((group as { sortUndefined?: unknown }).sortUndefined).toBeUndefined()
+    })
+
+    it('does not change the definitions it is given', () => {
+        const column = {}
+        const result = resolveSortUndefinedDefaults([column])
+
+        expect(column).toEqual({})
+        expect(result[0]).not.toBe(column)
     })
 })

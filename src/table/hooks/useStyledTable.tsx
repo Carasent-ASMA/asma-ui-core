@@ -39,7 +39,11 @@ import { normalizeDefaultColumnOrder } from '../custom-features/order-columns/co
 import { RowSelectionTooltipFeature } from 'src/table/custom-features/row-selection-tooltip/RowSelectionTooltipFeature'
 import { getLeafColumnInfos } from '../helpers/columnIds'
 import { resolveColumnSizingDefaults } from '../helpers/columnSizingDefaults'
-import { createStyledDefaultSortingFn, STYLED_DEFAULT_SORTING_FN } from '../helpers/defaultSortingFn'
+import {
+    createStyledDefaultSortingFn,
+    resolveSortUndefinedDefaults,
+    STYLED_DEFAULT_SORTING_FN,
+} from '../helpers/defaultSortingFn'
 import { tableStorage } from '../helpers/tableStorage'
 
 const NO_SORTING: SortingState = []
@@ -83,9 +87,14 @@ export const useStyledTable = <
     // app wrote the prop as `true` (D17), so a table that gets resizing from the default resizes in memory only.
     const canResize = props.enableColumnResizing ?? true
     const savesWidths = props.enableColumnResizing === true
-    // The default widths (D16, DEC-NARROW) are resolved on the definitions, before TanStack sees them.
+    // The default widths (D16, DEC-NARROW) are resolved on the definitions, before TanStack sees them. So is
+    // `sortUndefined: false` (P2f), which only the columns that sort with the default comparison get.
     const sizedColumns = useMemo(
-        () => resolveColumnSizingDefaults(columns, { defaultColumn, enableSorting: rest.enableSorting, canResize }),
+        () =>
+            resolveSortUndefinedDefaults(
+                resolveColumnSizingDefaults(columns, { defaultColumn, enableSorting: rest.enableSorting, canResize }),
+                defaultColumn,
+            ),
         [columns, defaultColumn, rest.enableSorting, canResize],
     )
     const leafColumns = getLeafColumnInfos(columns, {
@@ -138,11 +147,12 @@ export const useStyledTable = <
     // not the sorting array of the render that registered the function, which is out of date by the next click.
     const sortingTableRef = useRef<Table<TData> | undefined>(undefined)
     const styledDefaultSortingFn = useMemo(() => createStyledDefaultSortingFn<TData>(() => sortingTableRef.current), [])
-    // Under the app's own `defaultColumn`, so a `sortingFn` or `sortUndefined` it sets wins; `sortUndefined: false` lets
-    // `undefined` reach the comparison, which places every kind of empty cell. Memoised so that TanStack's default column
-    // definition, which is derived from it, is not rebuilt on every render.
+    // The default comparison, unless the app's own `defaultColumn` names one. It carries no `sortUndefined`: TanStack merges
+    // `defaultColumn` under every column, so that would reach columns with their own `sortingFn` too. The columns that sort
+    // with the default get `sortUndefined: false` on their definitions instead (`resolveSortUndefinedDefaults`). Memoised so
+    // that TanStack's default column definition, which is derived from this, is not rebuilt on every render.
     const tableDefaultColumn = useMemo(
-        () => ({ sortingFn: STYLED_DEFAULT_SORTING_FN, sortUndefined: false as const, ...defaultColumn }),
+        () => ({ ...defaultColumn, sortingFn: defaultColumn?.sortingFn ?? STYLED_DEFAULT_SORTING_FN }),
         [defaultColumn],
     )
 

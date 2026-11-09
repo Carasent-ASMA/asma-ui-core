@@ -108,3 +108,42 @@ export const createStyledDefaultSortingFn =
 
         return compareSortValues(a, b, getSortCollator(table?.options.meta?.locale))
     }
+
+/** The parts of a column definition that decide whether the default comparison applies to it. */
+interface SortUndefinedColumnDef {
+    sortingFn?: unknown
+    sortUndefined?: unknown
+    columns?: readonly SortUndefinedColumnDef[]
+}
+
+/**
+ * Gives `sortUndefined: false` to the leaf columns that sort with `styledDefault`, and to no other (DeepSeek's audit of
+ * #340, round 1). The setting lets `undefined` reach the comparison so that it can put it last. A column with its own
+ * `sortingFn` would then receive `undefined` in its own comparator, which was written for TanStack's handling and may not
+ * expect it, so it keeps TanStack's default.
+ *
+ * A leaf gets it only when it sorts with `styledDefault` (neither it nor the app's `defaultColumn` names another
+ * `sortingFn`) and neither it nor the app's `defaultColumn` sets `sortUndefined`. Group columns are walked into.
+ */
+export const resolveSortUndefinedDefaults = <TColumn extends SortUndefinedColumnDef>(
+    columns: readonly TColumn[],
+    defaultColumn?: SortUndefinedColumnDef,
+): TColumn[] => {
+    const appSortingFn = defaultColumn?.sortingFn
+    const appSetsSortUndefined = defaultColumn?.sortUndefined !== undefined
+
+    const resolve = (column: TColumn): TColumn => {
+        if (column.columns?.length) {
+            return { ...column, columns: column.columns.map((child) => resolve(child as TColumn)) }
+        }
+
+        const sortingFn = column.sortingFn ?? appSortingFn
+        const usesStyledDefault = sortingFn === undefined || sortingFn === STYLED_DEFAULT_SORTING_FN
+
+        if (!usesStyledDefault || column.sortUndefined !== undefined || appSetsSortUndefined) return column
+
+        return { ...column, sortUndefined: false }
+    }
+
+    return columns.map(resolve)
+}
