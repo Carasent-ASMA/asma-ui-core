@@ -3,11 +3,11 @@
 ---
 
 ASMA-8597: every `StyledTable` column now sorts with a default comparison (`sortingFns.styledDefault`) unless the column,
-or the table's `defaultColumn`, names its own `sortingFn`. It sets `sortUndefined: false` in the same place, so empty cells
+or the table's `defaultColumn`, names its own `sortingFn`. Those columns also get `sortUndefined: false`, so empty cells
 reach the comparison. Nothing is stored, and the first-click direction, `sortDescFirst`, the hover preview, `persistSorting`
 and *Reset columns* do not change. A column with its own `sortingFn`, or one that an app's `defaultColumn.sortingFn` covers,
 is not touched: its comparator and TanStack's handling of `undefined` before it stay exactly as they were (`sortUndefined: false`
-is set only on the columns that sort with `styledDefault`, group leaves included). A column's own `sortUndefined` only decides
+is set only on the leaf columns that sort with `styledDefault`, group leaves included). A column's own `sortUndefined` only decides
 where `undefined` goes; `null`, `''`, whitespace, `NaN` and an invalid `Date` still go last through `styledDefault`. The
 app's own `sortingFns` stay available beside `styledDefault`. That is the only opt-out.
 
