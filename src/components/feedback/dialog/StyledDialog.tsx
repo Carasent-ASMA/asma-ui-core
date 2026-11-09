@@ -28,7 +28,12 @@ import style from './StyledDialog.module.scss'
 import type { UiCoreLocale } from 'src/helpers/uiCoreLocale'
 import { StyledDialogTitleContext } from './dialogTitleContext'
 import { useDialogHeaderPinning } from './useDialogHeaderPinning'
-import { DIALOG_HEADER_ACTIONS_ROW_CLASSES, DIALOG_HEADER_CLASSES, DIALOG_TITLE_CLASSES } from './dialogHeaderStyles'
+import {
+    DIALOG_HEADER_ACTIONS_ROW_CLASSES,
+    DIALOG_HEADER_CLASSES,
+    DIALOG_TITLE_CLASSES,
+    dialogContentFlowClasses,
+} from './dialogHeaderStyles'
 
 export type DialogCloseReason = 'escapeKeyDown' | 'backdropClick'
 export type DialogMaxWidth = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
@@ -553,11 +558,13 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                     </div>
                 )}
 
-                <OverlayBackOwnerContext.Provider value={dialogRef}>
-                    <StyledDialogTitleContext.Provider value={titleContext}>
-                        <DialogBusyContext.Provider value={contextValue}>{children}</DialogBusyContext.Provider>
-                    </StyledDialogTitleContext.Provider>
-                </OverlayBackOwnerContext.Provider>
+                <div data-dialog-content-flow='' className={dialogContentFlowClasses(pinned)}>
+                    <OverlayBackOwnerContext.Provider value={dialogRef}>
+                        <StyledDialogTitleContext.Provider value={titleContext}>
+                            <DialogBusyContext.Provider value={contextValue}>{children}</DialogBusyContext.Provider>
+                        </StyledDialogTitleContext.Provider>
+                    </OverlayBackOwnerContext.Provider>
+                </div>
                 </div>
             </div>
         </dialog>

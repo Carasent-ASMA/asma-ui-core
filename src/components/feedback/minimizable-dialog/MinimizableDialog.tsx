@@ -16,6 +16,7 @@ import {
     DIALOG_HEADER_ACTIONS_ROW_CLASSES,
     DIALOG_HEADER_CLASSES,
     DIALOG_TITLE_CLASSES,
+    dialogContentFlowClasses,
 } from 'src/components/feedback/dialog/dialogHeaderStyles'
 import {
     ArrowExpandIcon,
@@ -70,7 +71,13 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     // ASMA-8737: header + content scroll together; the header is sticky only while pinned.
     const bodyRef = useRef<HTMLDivElement>(null)
     const headerElementRef = useRef<HTMLDivElement | null>(null)
-    const { headerRef: measureHeaderRef, pinned, hidden: headerHidden, scrollPaddingTop } = useDialogHeaderPinning(bodyRef)
+    const {
+        headerRef: measureHeaderRef,
+        pinned,
+        hidden: headerHidden,
+        scrollPaddingTop,
+        scrollPaddingBottom,
+    } = useDialogHeaderPinning(bodyRef)
 
     // A running primary action keeps the panel open (Esc / X would hide the running request).
     const busyReason = locale === 'en' ? 'Wait until saved' : 'Vent til lagringen er ferdig'
@@ -290,8 +297,11 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                 <div
                     ref={bodyRef}
                     data-dialog-body=''
-                    className='flex min-h-0 flex-grow flex-col overflow-y-auto overscroll-contain'
-                    style={{ scrollPaddingTop }}
+                    className={cn(
+                        'flex min-h-0 flex-grow flex-col overflow-y-auto overscroll-contain',
+                        '[&_[data-dialog-footer]]:sticky [&_[data-dialog-footer]]:bottom-0 [&_[data-dialog-footer]]:z-[2] [&_[data-dialog-footer]]:bg-white',
+                    )}
+                    style={{ scrollPaddingTop, scrollPaddingBottom }}
                 >
                 <div
                     ref={(node) => {
@@ -404,7 +414,9 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                         {title}
                     </div>
                 </div>
-                <div className='flex-grow'>{typeof children === 'function' ? children({ fullScreen }) : children}</div>
+                <div data-dialog-content-flow='' className={pinned ? 'flex-grow' : dialogContentFlowClasses(pinned)}>
+                    {typeof children === 'function' ? children({ fullScreen }) : children}
+                </div>
                 </div>
 
 

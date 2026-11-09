@@ -28,6 +28,9 @@ const lines = (count: number): ReactNode =>
 const LONG_TITLE =
     'Responsibility group meeting: review of the individual plan, medication changes and home care hours after discharge, with the GP, the home care nurse and the family'
 
+/** Wraps to far more than 25% of a phone screen, like the reported calendar event. */
+const HUGE_TITLE = Array.from({ length: 6 }, () => LONG_TITLE).join(' ')
+
 const Fixture = ({ title, children }: { title: ReactNode; children?: ReactNode }): JSX.Element => (
     <StyledDialog open dataTest='pin' dialogTitle={title} onClose={() => undefined}>
         <StyledDialogContent>
@@ -535,6 +538,138 @@ describe('Minimizable dialog titles (ASMA-8737, REQ-003, 004)', () => {
             bodyElement.getBoundingClientRect().bottom + 0.5,
         )
         await expect(footer.getBoundingClientRect().top).toBeGreaterThanOrEqual(bodyElement.getBoundingClientRect().top)
+    })
+
+    // The calendar event dialog's two content shapes: the read view scrolls itself, the edit form
+    // bounds itself with `h-full` and scrolls an inner area above its footer.
+    const consumerScrollers: [string, () => ReactNode][] = [
+        [
+            'a self-scrolling view',
+            () => (
+                <div data-testid='inner' className='flex flex-col gap-y-4 overflow-auto p-4'>
+                    <div className='shrink-0' style={{ height: 3000 }}>Tall content</div>
+                </div>
+            ),
+        ],
+        [
+            'an h-full form with an inner scroller',
+            () => (
+                <form className='flex h-full flex-col'>
+                    <div data-testid='inner' className='h-full min-w-0 grow overflow-y-auto overflow-x-hidden'>
+                        <div style={{ height: 3000 }}>Tall content</div>
+                    </div>
+                    <StyledDialogActions>
+                        <StyledButton dataTest='form-save'>Save</StyledButton>
+                    </StyledDialogActions>
+                </form>
+            ),
+        ],
+    ]
+    const shells: [string, (content: ReactNode, title?: string) => JSX.Element][] = [
+        [
+            'StyledDialog',
+            (content, title = HUGE_TITLE) => (
+                <StyledDialog open dataTest='pin' dialogTitle={title} dialogLabel='Event' onClose={() => undefined}>
+                    {content}
+                </StyledDialog>
+            ),
+        ],
+        [
+            // Only its fullscreen panel is height-bounded; docked, it has never scrolled.
+            'MinimizableDialog (fullscreen)',
+            (content, title = HUGE_TITLE) => (
+                <MinimizableDialog
+                    dataTest='v1'
+                    open
+                    fullScreenState
+                    handleFullScreenState={() => undefined}
+                    title={title}
+                    label='Event'
+                    onClose={() => undefined}
+                >
+                    {content}
+                </MinimizableDialog>
+            ),
+        ],
+        [
+            'MinimizableDialogV2',
+            (content, title = HUGE_TITLE) => (
+                <MinimizableDialogV2 dataTest='v2' open title={title} label='Event' onClose={() => undefined}>
+                    {content}
+                </MinimizableDialogV2>
+            ),
+        ],
+    ]
+    it.each(shells.flatMap(([shell, render]) => consumerScrollers.map(([shape, content]) => [shell, shape, render, content] as const)))(
+        '%s scrolls an over-25%% header away over %s, not only the content under it',
+        async (_shell, _shape, render, content) => {
+            await page.viewport(402, 842)
+            mount(render(content()))
+            await waitFor(() => expect(header()).toHaveAttribute('data-header-pinned', 'false'))
+            await nextFrames()
+            const bodyElement = body()
+            const inner = document.querySelector<HTMLElement>('[data-testid="inner"]')!
+
+            // The consumer's own scroller takes its full height, so the body is the only scroller.
+            await expect(inner.scrollHeight).toBeLessThanOrEqual(inner.clientHeight + 1)
+            bodyElement.scrollTop = header().getBoundingClientRect().height
+            await waitFor(() => expect(header().getBoundingClientRect().bottom).toBeLessThanOrEqual(
+                bodyElement.getBoundingClientRect().top + 0.5,
+            ))
+            const footer = document.querySelector<HTMLElement>('[data-dialog-footer]')
+            if (footer) {
+                bodyElement.scrollTop = 600
+                await nextFrames()
+                await expect(footer.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+                    bodyElement.getBoundingClientRect().bottom + 0.5,
+                )
+            }
+        },
+    )
+
+    it.each(shells.flatMap(([shell, render]) => consumerScrollers.map(([shape, content]) => [shell, shape, render, content] as const)))(
+        '%s scrolls %s once, never twice, under a pinned header',
+        async (_shell, _shape, render, content) => {
+            await page.viewport(1280, 720)
+            mount(render(content(), 'Short'))
+            await waitFor(() => expect(header()).toHaveAttribute('data-header-pinned', 'true'))
+            await nextFrames()
+            const bodyElement = body()
+            const inner = document.querySelector<HTMLElement>('[data-testid="inner"]')!
+            // One scroller, never two: an `h-full` content resolved against the header too would let the
+            // body scroll by H on top of the consumer's own scroller, sliding it under the pinned header.
+            const bodyScrolls = bodyElement.scrollHeight > bodyElement.clientHeight + 1
+            const innerScrolls = inner.scrollHeight > inner.clientHeight + 1
+            await expect({ bodyScrolls, innerScrolls }).not.toEqual({ bodyScrolls: true, innerScrolls: true })
+            await expect(bodyScrolls || innerScrolls).toBe(true)
+            if (innerScrolls) {
+                await expect(inner.getBoundingClientRect().top).toBeGreaterThanOrEqual(header().getBoundingClientRect().bottom - 0.5)
+            }
+        },
+    )
+
+    it('keeps the V2 footer pinned under a pinned header over a tall StyledDialogContent (PIN-5)', async () => {
+        await page.viewport(390, 844)
+        const { container } = mount(
+            <MinimizableDialogV2 dataTest='v2' open title='Short' onClose={() => undefined}>
+                <StyledDialogContent>
+                    <div style={{ height: 3000 }}>Tall content</div>
+                </StyledDialogContent>
+                <StyledDialogActions>
+                    <StyledButton dataTest='v2-save'>Save</StyledButton>
+                </StyledDialogActions>
+            </MinimizableDialogV2>,
+        )
+        await waitFor(() => expect(header(container)).toHaveAttribute('data-header-pinned', 'true'))
+        await nextFrames()
+        const bodyElement = body(container)
+        const footer = container.querySelector<HTMLElement>('[data-testid="styled-dialog-actions"]')!
+        for (const scrollTop of [0, 1200]) {
+            bodyElement.scrollTop = scrollTop
+            await nextFrames()
+            await expect(footer.getBoundingClientRect().bottom).toBeLessThanOrEqual(bodyElement.getBoundingClientRect().bottom + 0.5)
+            await expect(footer.getBoundingClientRect().top).toBeGreaterThanOrEqual(header(container).getBoundingClientRect().bottom - 0.5)
+        }
     })
 
     it('MinimizableDialogV2 pins its header by the same rule', async () => {

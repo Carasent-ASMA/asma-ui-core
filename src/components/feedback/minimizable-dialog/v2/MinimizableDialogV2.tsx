@@ -20,6 +20,7 @@ import {
     DIALOG_HEADER_ACTIONS_ROW_CLASSES,
     DIALOG_HEADER_CLASSES,
     DIALOG_TITLE_CLASSES,
+    dialogContentFlowClasses,
 } from 'src/components/feedback/dialog/dialogHeaderStyles'
 
 export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) => {
@@ -282,9 +283,9 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                         // ASMA-8737: the body is the one scroller. A direct StyledDialogContent keeps its full
                         // height instead of shrinking into a second scroller, so an unpinned header really
                         // scrolls away (the same rule StyledDialog applies).
-                        "[&>[data-test='styled-dialog-content']]:!flex-[1_0_auto]",
-                        // The footer stays pinned while the body scrolls (PIN-5).
-                        "[&>[data-dialog-footer]]:sticky [&>[data-dialog-footer]]:bottom-0 [&>[data-dialog-footer]]:z-[2] [&>[data-dialog-footer]]:bg-white",
+                        "[&>[data-dialog-content-flow]>[data-test='styled-dialog-content']]:!flex-[1_0_auto]",
+                        // The footer stays pinned while the body scrolls (PIN-5), also inside a consumer form.
+                        '[&_[data-dialog-footer]]:sticky [&_[data-dialog-footer]]:bottom-0 [&_[data-dialog-footer]]:z-[2] [&_[data-dialog-footer]]:bg-white',
                     )}
                     style={{ scrollPaddingTop, scrollPaddingBottom }}
                 >
@@ -353,7 +354,9 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                         {title}
                     </div>
                 </div>
-                <DialogBusyContext.Provider value={contextValue}>{children}</DialogBusyContext.Provider>
+                <div data-dialog-content-flow='' className={dialogContentFlowClasses(pinned)}>
+                    <DialogBusyContext.Provider value={contextValue}>{children}</DialogBusyContext.Provider>
+                </div>
                 </div>
                 </OverlayBackOwnerContext.Provider>
             </div>
