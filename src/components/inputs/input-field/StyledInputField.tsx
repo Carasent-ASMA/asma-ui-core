@@ -322,7 +322,15 @@ export const StyledInputField = ({
             const floorRows = rows ?? minRows
             const minHeight = floorRows ? floorRows * lineHeight + verticalPadding : 0
             const maxHeight = readOnly || !maxRows ? Number.POSITIVE_INFINITY : maxRows * lineHeight + verticalPadding
-            node.style.height = `${Math.min(maxHeight, Math.max(minHeight, node.scrollHeight))}px`
+            let height = Math.min(maxHeight, Math.max(minHeight, node.scrollHeight))
+            node.style.height = `${height}px`
+            // The `auto` collapse above can hide a scroll container's classic scrollbar while measuring, so
+            // the field was measured wider than it now lays out and comes out a line short. Below the cap,
+            // grow again instead of scrolling (MLF-1); growing keeps that scrollbar, so this settles.
+            for (let pass = 0; pass < 2 && height < maxHeight && node.scrollHeight > node.clientHeight + 1; pass++) {
+                height = Math.min(maxHeight, node.scrollHeight)
+                node.style.height = `${height}px`
+            }
         }
 
         // 1px tolerance: scrollHeight is rounded, clientHeight can differ by a sub-pixel.
