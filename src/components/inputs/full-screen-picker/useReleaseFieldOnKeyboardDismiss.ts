@@ -1,19 +1,5 @@
 import { useEffect, type RefObject } from 'react'
-
-/** Shorter than any on-screen keyboard, taller than a browser toolbar sliding in or out. */
-const KEYBOARD_MIN_HEIGHT_PX = 150
-
-/**
- * The on-screen keyboard covers part of the layout viewport. iOS Safari and Android Chrome (no
- * `interactive-widget` in the viewport meta) keep `innerHeight` at the full layout height while the
- * visual viewport shrinks above the keyboard. Measured in screen px (`height × scale`), so a pinch
- * zoom does not read as a keyboard.
- */
-const isKeyboardUp = (viewport: VisualViewport): boolean =>
-    window.innerHeight - viewport.height * viewport.scale >= KEYBOARD_MIN_HEIGHT_PX
-
-const isTextField = (element: Element | null): element is HTMLElement =>
-    element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement || (element instanceof HTMLElement && element.isContentEditable)
+import { isTextField, isVisualViewportShrunkByKeyboard as isKeyboardUp } from 'src/hooks/useOnScreenKeyboard'
 
 /**
  * Moves focus off the sheet's text field once the on-screen keyboard is put away without a blur —

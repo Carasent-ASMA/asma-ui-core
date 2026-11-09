@@ -27,6 +27,13 @@ import { warnUnnamedDialog } from 'src/helpers/warnUnnamedDialog'
 import style from './StyledDialog.module.scss'
 import type { UiCoreLocale } from 'src/helpers/uiCoreLocale'
 import { StyledDialogTitleContext } from './dialogTitleContext'
+import { useDialogHeaderPinning } from './useDialogHeaderPinning'
+import {
+    DIALOG_HEADER_ACTIONS_ROW_CLASSES,
+    DIALOG_HEADER_CLASSES,
+    DIALOG_TITLE_CLASSES,
+    dialogContentFlowClasses,
+} from './dialogHeaderStyles'
 
 export type DialogCloseReason = 'escapeKeyDown' | 'backdropClick'
 export type DialogMaxWidth = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
@@ -41,8 +48,9 @@ interface DialogPaperProps {
 /**
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#15820-18954
  * Figma "Dialog": white paper radius 8 with the Dialogue-popup shadow (#22213366, 0 4 40) over a
- * bg/modal #626e7eb2 overlay. Header = optional label (Helper, delta-600) + title (Page title 24
- * SemiBold, delta-800) + close button. `fullScreen`/mobile drops the radius and fills the viewport.
+ * bg/modal #626e7eb2 overlay. Header = actions row (optional label, Helper delta-600, + close button)
+ * over the full-width title (ASMA-8737: 18/24 Bold, 20/26 Bold below 744 px, delta-800, never
+ * truncated). `fullScreen`/mobile drops the radius and fills the viewport.
  */
 export interface IStyledDialogProps {
     open: boolean
@@ -84,7 +92,7 @@ export interface IStyledDialogProps {
     showCloseIcon?: boolean
     /** @figmaProp header Label (Helper 14, delta-600) */
     dialogLabel?: ReactNode
-    /** @figmaProp header Title (Page title 24 SemiBold, delta-800) */
+    /** @figmaProp header Title (18/24 Bold, 20/26 Bold on mobile, delta-800), on its own full-width row */
     dialogTitle?: ReactNode
     dialogHeaderNode?: ReactNode
     /**
@@ -150,10 +158,23 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     // A title rendered as a child (`<StyledDialogTitle>`) reports its actual id through context,
     // including an explicit id supplied by the consumer.
     const [titleChildId, setTitleChildId] = useState<string>()
-    const titleContext = useMemo(() => ({ titleId, setTitleId: setTitleChildId }), [titleId])
+    // Where a `<StyledDialogTitle>` child renders, so it joins the header's full-width title row.
+    const [titleSlot, setTitleSlot] = useState<HTMLElement | null>(null)
+    const titleContext = useMemo(() => ({ titleId, setTitleId: setTitleChildId, titleSlot }), [titleId, titleSlot])
+    const hasHeaderActions = !!dialogLabel || showCloseIcon || !!dialogHeaderNode
     const labelledBy = dialogTitle ? titleId : (titleChildId ?? (dialogLabel ? labelId : undefined))
     const isMobile = useMobileMediaQuery()
     const dialogRef = useRef<HTMLDialogElement>(null)
+    // ASMA-8737: header + content scroll together in this one region; the header is sticky inside it
+    // only while it is pinned (see useDialogHeaderPinning).
+    const bodyRef = useRef<HTMLDivElement>(null)
+    const {
+        headerRef,
+        pinned,
+        hidden: headerHidden,
+        scrollPaddingTop,
+        scrollPaddingBottom,
+    } = useDialogHeaderPinning(bodyRef)
     const openerRef = useRef<HTMLElement | null>(null)
     const escapeHandledRef = useRef(false)
     // ASMA-8471: a genuine Escape KEYDOWN just happened, so the keyboard path below (which Floating
@@ -467,83 +488,77 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                         : { maxHeight: 'calc(100% - 64px)' }),
                 }}
             >
-                {(!!dialogLabel || !!dialogTitle || showCloseIcon) && (
+                {/* ASMA-8737: one scroller for header + content. `StyledDialogContent` grows in here instead of
+                    scrolling on its own, and the footer sticks to the bottom (StyledDialog.module.scss). */}
+                <div
+                    ref={bodyRef}
+                    data-dialog-body=''
+                    className='flex min-h-0 w-full min-w-0 flex-auto flex-col overflow-y-auto overflow-x-hidden overscroll-contain'
+                    style={{ scrollPaddingTop, scrollPaddingBottom }}
+                >
+                {(hasHeaderActions || !!dialogTitle || !!titleChildId) && (
                     <div
-                        className={cn(
-                            'box-border flex w-full min-w-0 max-w-full justify-between px-4 pt-4',
-                            // Narrower than a phone the header wraps in reverse, bottom row first, so the buttons only
-                            // take a row of their own (above, right-aligned) when nothing fits beside them: with a
-                            // label, the label stays beside them when it fits whole and the title takes a full-width
-                            // row below; without one, the title stays beside them as on wider screens, wrapping its
-                            // words there, and moves below only when its longest word does not fit. The text column
-                            // dissolves into the header (`contents`); DOM order, and so reading and Tab order, stays.
-                            'max-xs:flex-wrap-reverse max-xs:items-center max-xs:gap-x-2 max-xs:gap-y-0.5',
-                        )}
+                        ref={headerRef}
+                        data-dialog-header=''
+                        data-header-pinned={pinned ? 'true' : 'false'}
+                        aria-hidden={headerHidden || undefined}
+                        hidden={headerHidden}
+                        className={cn(DIALOG_HEADER_CLASSES, pinned && 'sticky top-0 z-[2]', headerHidden && 'hidden')}
                     >
-                        <div className='flex min-w-0 flex-1 flex-col justify-start gap-0.5 max-xs:contents'>
-                            {dialogLabel && (
-                                <div
-                                    id={labelId}
-                                    className={cn(
-                                        'flex h-8 items-center text-sm font-normal leading-5 text-delta-600',
-                                        'max-xs:h-auto max-xs:min-h-8 max-xs:min-w-0 max-xs:flex-auto max-xs:hyphens-auto max-xs:![overflow-wrap:anywhere]',
-                                    )}
-                                >
-                                    {dialogLabel}
-                                </div>
-                            )}
-                            {dialogTitle && (
-                                // Figma dialog title = Page title 24/32 SemiBold, text delta-800.
-                                <div
-                                    id={titleId}
-                                    className={cn(
-                                        'flex text-2xl font-semibold leading-8 text-delta-800',
-                                        'max-xs:hyphens-auto',
-                                        dialogLabel && 'max-xs:order-first max-xs:basis-full max-xs:![overflow-wrap:anywhere]',
-                                        // Narrower than a phone, without a label: beside the buttons, wrapping there, and
-                                        // on a row of its own only when its longest word does not fit (`min-content`
-                                        // basis; `break-words`, not `anywhere`, keeps that a whole word), never under 5rem.
-                                        !dialogLabel &&
-                                            'max-xs:block max-xs:min-w-[min(100%,5rem)] max-xs:grow max-xs:basis-[min-content] max-xs:break-words',
-                                    )}
-                                >
-                                    {dialogTitle}
-                                </div>
-                            )}
-                        </div>
-                        {showCloseIcon && (
-                            // Narrower than a phone the buttons keep to the top of a wrapped title's row: with the
-                            // rows running bottom-up (`wrap-reverse`), the top is `end`.
-                            <div className='flex min-w-0 max-w-full shrink-0 justify-end gap-2 max-xs:ml-auto max-xs:flex-wrap max-xs:gap-y-2 max-xs:self-end'>
-                                {dialogHeaderNode}
-                                <StyledButton
-                                    dataTest={`close-button-${dataTest}`}
-                                    aria-label={!onCloseText ? 'Close' : undefined}
-                                    variant='textGray'
-                                    size='small'
-                                    endIcon={<CloseIcon width={20} height={20} />}
-                                    className='max-w-full shrink-0 whitespace-nowrap'
-                                    disabled={busy}
-                                    disabledReason={busyText}
-                                    onClick={(event) => void requestEscapeClose(event)}
-                                    style={{
-                                        color: 'var(--colors-delta-800)',
-                                        paddingRight: '6px',
-                                        paddingLeft: '6px',
-                                    }}
-                                >
-                                    {onCloseText}
-                                </StyledButton>
+                        {hasHeaderActions && (
+                            <div className={DIALOG_HEADER_ACTIONS_ROW_CLASSES}>
+                                {dialogLabel && (
+                                    <div
+                                        id={labelId}
+                                        className='min-w-0 flex-auto hyphens-auto text-sm font-normal leading-5 text-delta-600 [overflow-wrap:anywhere]'
+                                    >
+                                        {dialogLabel}
+                                    </div>
+                                )}
+                                {(showCloseIcon || !!dialogHeaderNode) && (
+                                    <div className='ml-auto flex min-w-0 max-w-full shrink-0 items-center justify-end gap-2 max-xs:flex-wrap max-xs:gap-y-2'>
+                                        {dialogHeaderNode}
+                                        {showCloseIcon && (
+                                        <StyledButton
+                                            dataTest={`close-button-${dataTest}`}
+                                            aria-label={!onCloseText ? 'Close' : undefined}
+                                            variant='textGray'
+                                            size='small'
+                                            endIcon={<CloseIcon width={20} height={20} />}
+                                            className='max-w-full shrink-0 whitespace-nowrap'
+                                            disabled={busy}
+                                            disabledReason={busyText}
+                                            onClick={(event) => void requestEscapeClose(event)}
+                                            style={{
+                                                color: 'var(--colors-delta-800)',
+                                                paddingRight: '6px',
+                                                paddingLeft: '6px',
+                                            }}
+                                        >
+                                            {onCloseText}
+                                        </StyledButton>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         )}
+                        {dialogTitle && (
+                            <div id={titleId} className={DIALOG_TITLE_CLASSES}>
+                                {dialogTitle}
+                            </div>
+                        )}
+                        <div ref={setTitleSlot} className='contents' />
                     </div>
                 )}
 
-                <OverlayBackOwnerContext.Provider value={dialogRef}>
-                    <StyledDialogTitleContext.Provider value={titleContext}>
-                        <DialogBusyContext.Provider value={contextValue}>{children}</DialogBusyContext.Provider>
-                    </StyledDialogTitleContext.Provider>
-                </OverlayBackOwnerContext.Provider>
+                <div data-dialog-content-flow='' className={dialogContentFlowClasses(pinned)}>
+                    <OverlayBackOwnerContext.Provider value={dialogRef}>
+                        <StyledDialogTitleContext.Provider value={titleContext}>
+                            <DialogBusyContext.Provider value={contextValue}>{children}</DialogBusyContext.Provider>
+                        </StyledDialogTitleContext.Provider>
+                    </OverlayBackOwnerContext.Provider>
+                </div>
+                </div>
             </div>
         </dialog>
     )
