@@ -428,7 +428,7 @@ describe('StyledBottomSheet — as the mobile Action popover', () => {
     it('keeps the grabber out of the accessibility tree and the tab order', async () => {
         mount(<FilterFixture />)
         const dialog = await openSheet()
-        const grabber = dialog.querySelector('svg.pointer-events-none')!
+        const grabber = dialog.querySelector('[data-testid="sheet-drag-handle"]')!
 
         await expect(grabber).toHaveAttribute('aria-hidden', 'true')
         await expect(tabbableWithin(dialog)).not.toContain(grabber)
@@ -488,5 +488,92 @@ describe('StyledBottomSheet — landscape phone (1.3.4)', () => {
 
         await waitFor(() => expect(Math.round(container.getBoundingClientRect().height)).toBe(PHONE_LANDSCAPE.height))
         await expect(getComputedStyle(container).borderTopLeftRadius).toBe('0px')
+    })
+})
+
+describe('StyledBottomSheet — heights and the drag handle (Figma DS_draft 7-10991)', () => {
+    beforeEach(async () => {
+        await page.viewport(PHONE.width, PHONE.height)
+    })
+    afterEach(async () => {
+        cleanup()
+        await page.viewport(DESKTOP.width, DESKTOP.height)
+    })
+
+    const HeightFixture = ({ rows, onBack }: { rows: number; onBack?: () => void }): JSX.Element => (
+        <StyledBottomSheet
+            dataTest='hs'
+            open
+            onClose={() => undefined}
+            title='Filter'
+            titleIcon={<svg data-testid='hs-icon' width={20} height={20} />}
+            onBack={onBack}
+            resultCount={3}
+        >
+            {Array.from({ length: rows }, (_, index) => (
+                <div key={index} style={{ height: 48, flexShrink: 0 }}>
+                    Row {index}
+                </div>
+            ))}
+        </StyledBottomSheet>
+    )
+
+    const panel = (): HTMLElement => document.querySelector<HTMLElement>('dialog[data-test="hs"] [data-state]')!
+    const handle = (): HTMLElement => document.querySelector<HTMLElement>('[data-testid="hs-drag-handle"]')!
+
+    it('draws the drag handle as a 32 x 4 bar', async () => {
+        mount(<HeightFixture rows={2} />)
+        await waitFor(() => expect(handle()).not.toBeNull())
+        const bar = handle().matches('button') ? handle().querySelector('span')! : handle()
+        const rect = bar.getBoundingClientRect()
+        await expect([rect.width, rect.height]).toEqual([32, 4])
+    })
+
+    it('is as short as its content and keeps a decorative handle when the content fits half the screen', async () => {
+        mount(<HeightFixture rows={2} />)
+        await waitFor(() => expect(panel()).not.toBeNull())
+        await expect(panel().getBoundingClientRect().height).toBeLessThan(PHONE.height / 2)
+        await expect(handle()).toHaveAttribute('aria-hidden', 'true')
+        await expect(tabbableWithin(document.querySelector('dialog')!)).not.toContain(handle())
+    })
+
+    it('opens at half the screen and toggles to 90vh from the keyboard when the content needs more', async () => {
+        mount(<HeightFixture rows={30} />)
+        await waitFor(() => expect(handle().tagName).toBe('BUTTON'))
+        await expect(panel().getBoundingClientRect().height).toBeLessThanOrEqual(PHONE.height / 2 + 1)
+        await expect(handle()).toHaveAttribute('aria-expanded', 'false')
+
+        await userEvent.keyboard('{Tab}')
+        await expect(document.activeElement).toBe(handle())
+
+        await userEvent.keyboard('{Enter}')
+        await waitFor(() => expect(handle()).toHaveAttribute('aria-expanded', 'true'))
+        await waitFor(() => expect(panel().getBoundingClientRect().height).toBeGreaterThan(PHONE.height / 2 + 1))
+        await expect(panel().getBoundingClientRect().height).toBeLessThanOrEqual(PHONE.height * 0.9 + 1)
+
+        await userEvent.keyboard(' ')
+        await waitFor(() => expect(handle()).toHaveAttribute('aria-expanded', 'false'))
+        await waitFor(() => expect(panel().getBoundingClientRect().height).toBeLessThanOrEqual(PHONE.height / 2 + 1))
+    })
+
+    it('expands when the handle row is dragged up by 48px or more', async () => {
+        mount(<HeightFixture rows={30} />)
+        await waitFor(() => expect(handle().tagName).toBe('BUTTON'))
+        const row = handle().parentElement!
+        const init = { bubbles: true, pointerId: 9, pointerType: 'touch', clientX: 100 }
+        row.dispatchEvent(new PointerEvent('pointerdown', { ...init, clientY: 500 }))
+        row.dispatchEvent(new PointerEvent('pointermove', { ...init, clientY: 440 }))
+        row.dispatchEvent(new PointerEvent('pointerup', { ...init, clientY: 440 }))
+        await waitFor(() => expect(handle()).toHaveAttribute('aria-expanded', 'true'))
+    })
+
+    it('shows the back control and the title icon when given', async () => {
+        const onBack = fn()
+        mount(<HeightFixture rows={2} onBack={onBack} />)
+        await waitFor(() => expect(byTestId('hs-back')).not.toBeNull())
+        await expect(byTestId('hs-back')).toHaveAttribute('aria-label', 'Back')
+        await expect(byTestId('hs-icon')).not.toBeNull()
+        await userEvent.click(byTestId('hs-back'))
+        await expect(onBack).toHaveBeenCalledOnce()
     })
 })
