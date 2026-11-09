@@ -11,7 +11,7 @@
 // so wide content still scrolls sideways and a height the consumer sets still scrolls inside.
 // `!important` and the longer selector beat its own `!important` `flex-auto` utility. Content nested
 // in a consumer wrapper keeps its utilities, so a wrapper that bounds its height works as before.
-.StyledDialog [data-dialog-content-flow] > [data-test='styled-dialog-content'] {
+.StyledDialog [data-dialog-content-flow] > [data-dialog-content] {
     flex: 1 0 auto !important;
 }
 
@@ -30,23 +30,23 @@
 // hidden until interaction — so a horizontal bar never shows even when content overflows.
 // The body keeps no gutter of its own: a reserved gutter there would narrow the header and the
 // footer even when nothing scrolls. The content keeps its gutter, so its width stays as before.
-.StyledDialog [data-test='styled-dialog-content'] {
+.StyledDialog [data-dialog-content] {
     scrollbar-gutter: stable;
 }
 
 .StyledDialog [data-dialog-body]::-webkit-scrollbar,
-.StyledDialog [data-test='styled-dialog-content']::-webkit-scrollbar {
+.StyledDialog [data-dialog-content]::-webkit-scrollbar {
     width: 12px;
     height: 12px;
 }
 
 .StyledDialog [data-dialog-body]::-webkit-scrollbar-track,
-.StyledDialog [data-test='styled-dialog-content']::-webkit-scrollbar-track {
+.StyledDialog [data-dialog-content]::-webkit-scrollbar-track {
     background: rgba(0, 0, 0, 0.08);
 }
 
 .StyledDialog [data-dialog-body]::-webkit-scrollbar-thumb,
-.StyledDialog [data-test='styled-dialog-content']::-webkit-scrollbar-thumb {
+.StyledDialog [data-dialog-content]::-webkit-scrollbar-thumb {
     background-color: rgba(0, 0, 0, 0.45);
     border: 2px solid rgba(255, 255, 255, 0.7);
     border-radius: 6px;

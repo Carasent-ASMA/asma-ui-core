@@ -21,19 +21,19 @@ export interface DialogHeaderPinning {
 }
 
 /**
- * Tracks the document's focused element and re-renders when focus moves.
+ * Tracks the document's focused element while `enabled`, re-rendering when focus moves; `null` otherwise.
  *
  * `useOnScreenKeyboardOpen` only tells us that *some* text field has focus. PIN-7 needs to know
  * *which* bar holds it, and moving from the content to a field inside the header changes that answer
- * without changing whether the keyboard is open. `relatedTarget` is where focus is going: inside
- * `focusout`, `document.activeElement` can still be the element that is losing focus.
+ * without changing whether the keyboard is open. Only listened to while the keyboard is open, so focus
+ * moving elsewhere in the page does not re-render every mounted dialog. `relatedTarget` is where focus is
+ * going: inside `focusout`, `document.activeElement` can still be the element that is losing focus.
  */
-const useFocusedElement = (): Element | null => {
-    const [focusedElement, setFocusedElement] = useState<Element | null>(() =>
-        typeof document === 'undefined' ? null : document.activeElement,
-    )
+const useFocusedElement = (enabled: boolean): Element | null => {
+    const [focusedElement, setFocusedElement] = useState<Element | null | undefined>(undefined)
 
     useLayoutEffect(() => {
+        if (!enabled) return undefined
         const onFocusIn = (event: FocusEvent): void => setFocusedElement(event.target as Element)
         const onFocusOut = (event: FocusEvent): void => setFocusedElement(event.relatedTarget as Element | null)
         document.addEventListener('focusin', onFocusIn)
@@ -41,78 +41,58 @@ const useFocusedElement = (): Element | null => {
         return () => {
             document.removeEventListener('focusin', onFocusIn)
             document.removeEventListener('focusout', onFocusOut)
+            setFocusedElement(undefined)
         }
-    }, [])
+    }, [enabled])
 
-    return focusedElement
+    if (!enabled) return null
+    // Until the first focus event after enabling, the focus is wherever it was when the keyboard opened.
+    return focusedElement === undefined ? document.activeElement : focusedElement
 }
 
 /** A footer only overlays the scroller while it is actually sticky; in flow it already takes its space. */
-const stickyHeight = (element: HTMLElement): number =>
+const stickyFooterHeight = (element: HTMLElement): number =>
     getComputedStyle(element).position === 'sticky' ? Math.round(element.getBoundingClientRect().height) : 0
 
-/** Tracks an element's rendered height with a `ResizeObserver`, synchronously before first paint. */
-const useMeasuredHeight = (element: HTMLElement | null, measureHeight: (element: HTMLElement) => number): number => {
-    const [heightPx, setHeightPx] = useState(0)
+/** A header stepped aside for the keyboard measures 0; keep its last height so the decision and padding hold. */
+const visibleHeaderHeight = (element: HTMLElement): number | null =>
+    element.hidden ? null : Math.round(element.getBoundingClientRect().height)
 
-    useLayoutEffect(() => {
-        if (!element) return undefined
-
-        let rafId = 0
-        const commit = (): void => {
-            const next = measureHeight(element)
-            setHeightPx((prev) => (prev === next ? prev : next))
-        }
-        const measure = (): void => {
-            cancelAnimationFrame(rafId)
-            rafId = requestAnimationFrame(commit)
-        }
-
-        commit()
-
-        if (typeof ResizeObserver === 'undefined') return () => cancelAnimationFrame(rafId)
-
-        const observer = new ResizeObserver(measure)
-        observer.observe(element)
-        return () => {
-            cancelAnimationFrame(rafId)
-            observer.disconnect()
-        }
-    }, [element, measureHeight])
-
-    return element ? heightPx : 0
-}
+/** The footer that belongs to THIS scroller: a nested dialog's footer sits in that dialog's own body. */
+const findOwnFooter = (scroller: HTMLElement): HTMLElement | null =>
+    Array.from(scroller.querySelectorAll<HTMLElement>('[data-dialog-footer]')).find(
+        (footer) => footer.closest('[data-dialog-body]') === scroller,
+    ) ?? null
 
 /**
  * The sticky footer's occupied height, for `scroll-padding-bottom` (PIN-8).
  *
- * The footer must belong to THIS scroller: a nested dialog's footer sits in that dialog's own
- * `[data-dialog-body]`, so `closest()` keeps its height out of the outer body's padding. A wrapper
- * around the footer is fine — the sticky rule itself is descendant-based. `position: sticky` is
- * checked because a footer left in normal flow takes real space at the end of the content and must
- * not be reserved twice.
+ * The footer is consumer-rendered and can mount, unmount or be replaced by descendant state the dialog
+ * never re-renders for, so the scroller's subtree is observed rather than re-scanned on every render. A
+ * wrapper around the footer is fine — the sticky rule itself is descendant-based. `position: sticky` is
+ * checked because a footer left in normal flow takes real space at the end of the content and must not
+ * be reserved twice.
  */
 const useStickyFooterHeight = (scrollerRef: RefObject<HTMLElement>): number => {
-    const [footerElement, setFooterElement] = useState<HTMLElement | null>(null)
+    const { ref: footerRef, heightPx } = useElementHeightPx<HTMLElement>(stickyFooterHeight)
+    const observedRef = useRef<{ scroller: HTMLElement; observer?: MutationObserver } | null>(null)
 
-    // The footer is consumer-rendered, so it can appear, disappear or be replaced on any commit.
-    // A dependency array cannot express that; `setFooterElement` bails out unless the node changed.
+    // The ref object is stable but its node is only known after commit, so (re)attach when it changes.
     useLayoutEffect(() => {
-        const discoverFooter = (): void => {
-            const scroller = scrollerRef.current
-            let next: HTMLElement | null = null
-            if (scroller) {
-                next =
-                    Array.from(scroller.querySelectorAll<HTMLElement>('[data-dialog-footer]')).find(
-                        (footer) => footer.closest('[data-dialog-body]') === scroller,
-                    ) ?? null
-            }
-            setFooterElement((prev) => (prev === next ? prev : next))
-        }
+        const scroller = scrollerRef.current
+        if (observedRef.current?.scroller === scroller) return
+        observedRef.current?.observer?.disconnect()
+        observedRef.current = null
+        if (!scroller) return footerRef(null)
+        const discoverFooter = (): void => footerRef(findOwnFooter(scroller))
         discoverFooter()
+        const observer = typeof MutationObserver === 'undefined' ? undefined : new MutationObserver(discoverFooter)
+        observer?.observe(scroller, { childList: true, subtree: true })
+        observedRef.current = { scroller, observer }
     })
+    useLayoutEffect(() => () => observedRef.current?.observer?.disconnect(), [])
 
-    return useMeasuredHeight(footerElement, stickyHeight)
+    return heightPx
 }
 
 /**
@@ -122,11 +102,12 @@ const useStickyFooterHeight = (scrollerRef: RefObject<HTMLElement>): number => {
  *
  * `H` is measured on the header itself, and pinning changes only its `position`, so the decision
  * cannot feed back into `H`. The visual viewport never enters the decision: the on-screen keyboard
- * only hides a pinned header, it never unpins one. A hidden header measures 0 and so stays pinned
- * until the keyboard goes, which keeps that switch loop-free too.
+ * only hides a pinned header, it never unpins one. A hidden header keeps its last measured height, so
+ * it stays pinned and reserves the same padding the moment the keyboard goes.
  *
  * PIN-7's exception is part of the decision: a header that contains the focused field is the bar the
  * user is typing in, so it stays visible (and in the accessibility tree) while the keyboard is open.
+ * A hidden header also leaves the tab order (`inert`).
  *
  * Hiding or showing the header moves the content by `H`; the focused element is brought back into
  * view afterwards, inside the scroll padding.
@@ -135,9 +116,8 @@ export const useDialogHeaderPinning = (scrollerRef: RefObject<HTMLElement>): Dia
     const isShortScreen = useShortScreenMediaQuery()
     const viewportHeight = useLayoutViewportHeight()
     const keyboardOpen = useOnScreenKeyboardOpen()
-    const { ref: measureHeaderRef, heightPx } = useElementHeightPx<HTMLElement>()
+    const { ref: measureHeaderRef, heightPx } = useElementHeightPx<HTMLElement>(visibleHeaderHeight)
     const [headerElement, setHeaderElement] = useState<HTMLElement | null>(null)
-    const focusedElement = useFocusedElement()
     const footerHeightPx = useStickyFooterHeight(scrollerRef)
 
     const headerRef = useCallback(
@@ -149,8 +129,14 @@ export const useDialogHeaderPinning = (scrollerRef: RefObject<HTMLElement>): Dia
     )
 
     const pinned = !isShortScreen && heightPx <= viewportHeight * PINNED_HEADER_MAX_VIEWPORT_SHARE
+    const focusedElement = useFocusedElement(pinned && keyboardOpen)
     const headerHasFocus = !!headerElement && !!focusedElement && headerElement.contains(focusedElement)
     const hidden = pinned && keyboardOpen && !headerHasFocus
+
+    // React 18 has no boolean `inert` (`inert={false}` still renders an inert element), so it is toggled here.
+    useLayoutEffect(() => {
+        headerElement?.toggleAttribute('inert', hidden)
+    }, [headerElement, hidden])
 
     const wasHiddenRef = useRef(hidden)
     useLayoutEffect(() => {
@@ -158,7 +144,8 @@ export const useDialogHeaderPinning = (scrollerRef: RefObject<HTMLElement>): Dia
         wasHiddenRef.current = hidden
         const scroller = scrollerRef.current
         const focused = document.activeElement
-        if (scroller && focused instanceof HTMLElement && focused !== scroller && scroller.contains(focused)) {
+        // Only this dialog's own field: one in a nested dialog belongs to that dialog's scroller.
+        if (scroller && focused instanceof HTMLElement && focused !== scroller && focused.closest('[data-dialog-body]') === scroller) {
             focused.scrollIntoView({ block: 'nearest' })
         }
     }, [hidden, scrollerRef])

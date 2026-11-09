@@ -161,15 +161,15 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     // Where a `<StyledDialogTitle>` child renders, so it joins the header's full-width title row.
     const [titleSlot, setTitleSlot] = useState<HTMLElement | null>(null)
     const titleContext = useMemo(() => ({ titleId, setTitleId: setTitleChildId, titleSlot }), [titleId, titleSlot])
+    const hasHeaderActions = !!dialogLabel || showCloseIcon || !!dialogHeaderNode
     const labelledBy = dialogTitle ? titleId : (titleChildId ?? (dialogLabel ? labelId : undefined))
     const isMobile = useMobileMediaQuery()
     const dialogRef = useRef<HTMLDialogElement>(null)
     // ASMA-8737: header + content scroll together in this one region; the header is sticky inside it
     // only while it is pinned (see useDialogHeaderPinning).
     const bodyRef = useRef<HTMLDivElement>(null)
-    const headerElementRef = useRef<HTMLDivElement | null>(null)
     const {
-        headerRef: measureHeaderRef,
+        headerRef,
         pinned,
         hidden: headerHidden,
         scrollPaddingTop,
@@ -228,12 +228,6 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
             warnUnnamedDialog(dataTest)
         }
     }, [open, labelledBy, ariaLabel, children, headingLabelId, fallbackHeadingId, dataTest])
-
-    // PIN-7: a header stepped aside for the on-screen keyboard leaves the tab order too. React 18 has
-    // no boolean `inert` (`inert={false}` still renders an inert element), so it is toggled here.
-    useLayoutEffect(() => {
-        headerElementRef.current?.toggleAttribute('inert', headerHidden)
-    })
 
     useEffect(() => {
         if (prevOpenRef.current && !open) {
@@ -502,19 +496,16 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                     className='flex min-h-0 w-full min-w-0 flex-auto flex-col overflow-y-auto overflow-x-hidden overscroll-contain'
                     style={{ scrollPaddingTop, scrollPaddingBottom }}
                 >
-                {(!!dialogLabel || !!dialogTitle || showCloseIcon || !!titleChildId) && (
+                {(hasHeaderActions || !!dialogTitle || !!titleChildId) && (
                     <div
-                        ref={(node) => {
-                            headerElementRef.current = node
-                            measureHeaderRef(node)
-                        }}
+                        ref={headerRef}
                         data-dialog-header=''
                         data-header-pinned={pinned ? 'true' : 'false'}
                         aria-hidden={headerHidden || undefined}
                         hidden={headerHidden}
                         className={cn(DIALOG_HEADER_CLASSES, pinned && 'sticky top-0 z-[2]', headerHidden && 'hidden')}
                     >
-                        {(!!dialogLabel || showCloseIcon) && (
+                        {hasHeaderActions && (
                             <div className={DIALOG_HEADER_ACTIONS_ROW_CLASSES}>
                                 {dialogLabel && (
                                     <div
@@ -524,9 +515,10 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                                         {dialogLabel}
                                     </div>
                                 )}
-                                {showCloseIcon && (
+                                {(showCloseIcon || !!dialogHeaderNode) && (
                                     <div className='ml-auto flex min-w-0 max-w-full shrink-0 items-center justify-end gap-2 max-xs:flex-wrap max-xs:gap-y-2'>
                                         {dialogHeaderNode}
+                                        {showCloseIcon && (
                                         <StyledButton
                                             dataTest={`close-button-${dataTest}`}
                                             aria-label={!onCloseText ? 'Close' : undefined}
@@ -545,6 +537,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                                         >
                                             {onCloseText}
                                         </StyledButton>
+                                        )}
                                     </div>
                                 )}
                             </div>

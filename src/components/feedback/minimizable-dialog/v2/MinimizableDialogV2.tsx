@@ -62,9 +62,8 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
     const labelId = useId()
     // ASMA-8737: header + content scroll together; the header is sticky only while pinned.
     const bodyRef = useRef<HTMLDivElement>(null)
-    const headerElementRef = useRef<HTMLDivElement | null>(null)
     const {
-        headerRef: measureHeaderRef,
+        headerRef,
         pinned,
         hidden: headerHidden,
         scrollPaddingTop,
@@ -93,11 +92,6 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
         modalRef.current?.toggleAttribute('inert', minimized)
         minimizedPanelRef.current?.toggleAttribute('inert', !minimized)
     }, [minimized])
-
-    // PIN-7: a header stepped aside for the on-screen keyboard leaves the tab order too.
-    useLayoutEffect(() => {
-        headerElementRef.current?.toggleAttribute('inert', headerHidden)
-    })
 
     useLayoutEffect(() => {
         const justOpened = open && !wasOpenRef.current
@@ -283,17 +277,14 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                         // ASMA-8737: the body is the one scroller. A direct StyledDialogContent keeps its full
                         // height instead of shrinking into a second scroller, so an unpinned header really
                         // scrolls away (the same rule StyledDialog applies).
-                        "[&>[data-dialog-content-flow]>[data-test='styled-dialog-content']]:!flex-[1_0_auto]",
+                        "[&>[data-dialog-content-flow]>[data-dialog-content]]:!flex-[1_0_auto]",
                         // The footer stays pinned while the body scrolls (PIN-5), also inside a consumer form.
                         '[&_[data-dialog-footer]]:sticky [&_[data-dialog-footer]]:bottom-0 [&_[data-dialog-footer]]:z-[2] [&_[data-dialog-footer]]:bg-white',
                     )}
                     style={{ scrollPaddingTop, scrollPaddingBottom }}
                 >
                 <div
-                    ref={(node) => {
-                        headerElementRef.current = node
-                        measureHeaderRef(node)
-                    }}
+                    ref={headerRef}
                     data-dialog-header=''
                     data-header-pinned={pinned ? 'true' : 'false'}
                     aria-hidden={headerHidden || undefined}

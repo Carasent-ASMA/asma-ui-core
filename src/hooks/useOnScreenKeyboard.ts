@@ -9,13 +9,15 @@ const KEYBOARD_MIN_HEIGHT_PX = 150
  * visual viewport shrinks above the keyboard. Measured in screen px (`height × scale`), so a pinch
  * zoom does not read as a keyboard.
  */
-export const isVisualViewportShrunkByKeyboard = (viewport: VisualViewport | null | undefined = window.visualViewport): boolean =>
-    !!viewport && window.innerHeight - viewport.height * viewport.scale >= KEYBOARD_MIN_HEIGHT_PX
+export const isVisualViewportShrunkByKeyboard = (
+    viewport: VisualViewport | null | undefined = typeof window === 'undefined' ? undefined : window.visualViewport,
+): boolean => !!viewport && window.innerHeight - viewport.height * viewport.scale >= KEYBOARD_MIN_HEIGHT_PX
 
 /** An element that brings up the on-screen keyboard when focused. */
 export const isTextField = (element: Element | null): element is HTMLElement => {
+    if (typeof HTMLElement === 'undefined' || !(element instanceof HTMLElement) || element.inputMode === 'none') return false
     if (element instanceof HTMLTextAreaElement) return true
-    if (element instanceof HTMLElement && element.isContentEditable) return true
+    if (element.isContentEditable) return true
     if (!(element instanceof HTMLInputElement)) return false
     return !['button', 'checkbox', 'color', 'file', 'hidden', 'image', 'radio', 'range', 'reset', 'submit'].includes(element.type)
 }
@@ -25,7 +27,8 @@ export const isTextField = (element: Element | null): element is HTMLElement => 
  * least a keyboard's height. Both are needed: a hardware keyboard never shrinks the viewport, and a
  * shrunk viewport with no text field focused is a browser toolbar or split screen, not a keyboard.
  */
-export const isOnScreenKeyboardOpen = (): boolean => isTextField(document.activeElement) && isVisualViewportShrunkByKeyboard()
+export const isOnScreenKeyboardOpen = (): boolean =>
+    typeof document !== 'undefined' && isTextField(document.activeElement) && isVisualViewportShrunkByKeyboard()
 
 const subscribe = (callback: () => void): (() => void) => {
     const viewport = window.visualViewport

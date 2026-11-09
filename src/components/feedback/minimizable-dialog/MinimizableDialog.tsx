@@ -70,9 +70,8 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     const titleId = useId()
     // ASMA-8737: header + content scroll together; the header is sticky only while pinned.
     const bodyRef = useRef<HTMLDivElement>(null)
-    const headerElementRef = useRef<HTMLDivElement | null>(null)
     const {
-        headerRef: measureHeaderRef,
+        headerRef,
         pinned,
         hidden: headerHidden,
         scrollPaddingTop,
@@ -124,11 +123,6 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
         panelRef.current?.toggleAttribute('inert', minimized)
         minimizedPanelRef.current?.toggleAttribute('inert', !minimized)
     }, [minimized])
-
-    // PIN-7: a header stepped aside for the on-screen keyboard leaves the tab order too.
-    useLayoutEffect(() => {
-        headerElementRef.current?.toggleAttribute('inert', headerHidden)
-    })
 
     if (!open) return null
 
@@ -304,10 +298,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                     style={{ scrollPaddingTop, scrollPaddingBottom }}
                 >
                 <div
-                    ref={(node) => {
-                        headerElementRef.current = node
-                        measureHeaderRef(node)
-                    }}
+                    ref={headerRef}
                     data-dialog-header=''
                     data-header-pinned={pinned ? 'true' : 'false'}
                     aria-hidden={headerHidden || undefined}

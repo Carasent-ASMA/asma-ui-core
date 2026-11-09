@@ -42,6 +42,7 @@ export const StyledDialogContent = ({
             )}
             style={mergedStyle}
             {...(rest)}
+            data-dialog-content=''
         >
             {children}
         </div>

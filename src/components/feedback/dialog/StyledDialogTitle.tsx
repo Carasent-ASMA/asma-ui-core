@@ -33,12 +33,14 @@ export const StyledDialogTitle = ({
     const hasChildren = !!children
     const titleId = id ?? dialogTitleContext?.titleId
 
-    useLayoutEffect(() => {
-        if (!hasChildren || !dialogTitleContext) return
+    const setDialogTitleId = dialogTitleContext?.setTitleId
 
-        dialogTitleContext.setTitleId(titleId)
-        return () => dialogTitleContext.setTitleId(undefined)
-    }, [hasChildren, dialogTitleContext, titleId])
+    useLayoutEffect(() => {
+        if (!hasChildren || !setDialogTitleId) return
+
+        setDialogTitleId(titleId)
+        return () => setDialogTitleId(undefined)
+    }, [hasChildren, setDialogTitleId, titleId])
 
     if (!children) return null
     const mergedStyle: CSSProperties = { ...resolveSx(sx), ...style }

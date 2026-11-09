@@ -1,5 +1,5 @@
 import { afterEach, describe, it } from 'vitest'
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { expect, page, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { StyledDialog } from './StyledDialog'
@@ -28,7 +28,7 @@ const lines = (count: number): ReactNode =>
 const LONG_TITLE =
     'Responsibility group meeting: review of the individual plan, medication changes and home care hours after discharge, with the GP, the home care nurse and the family'
 
-/** Wraps to far more than 25% of a phone screen, like the reported calendar event. */
+/** Wraps to far more than 25% of a phone screen. */
 const HUGE_TITLE = Array.from({ length: 6 }, () => LONG_TITLE).join(' ')
 
 const Fixture = ({ title, children }: { title: ReactNode; children?: ReactNode }): JSX.Element => (
@@ -540,7 +540,7 @@ describe('Minimizable dialog titles (ASMA-8737, REQ-003, 004)', () => {
         await expect(footer.getBoundingClientRect().top).toBeGreaterThanOrEqual(bodyElement.getBoundingClientRect().top)
     })
 
-    // The calendar event dialog's two content shapes: the read view scrolls itself, the edit form
+    // Two common content shapes: the read view scrolls itself, the edit form
     // bounds itself with `h-full` and scrolls an inner area above its footer.
     const consumerScrollers: [string, () => ReactNode][] = [
         [
@@ -695,5 +695,70 @@ describe('Minimizable dialog titles (ASMA-8737, REQ-003, 004)', () => {
         await page.viewport(1280, 720)
         await waitFor(() => expect(header(container)).toHaveAttribute('data-header-pinned', 'true'))
         await expect(getComputedStyle(body(container)).scrollPaddingTop).toBe(`${header(container).getBoundingClientRect().height}px`)
+    })
+
+    it('keeps the one-scroller layout when the consumer sets its own data-test on StyledDialogContent', async () => {
+        await page.viewport(1280, 720)
+        mount(
+            <StyledDialog open dataTest='pin' dialogTitle='Short' onClose={() => undefined}>
+                <StyledDialogContent data-test='consumer-content'>
+                    <div style={{ height: 3000 }}>Tall content</div>
+                </StyledDialogContent>
+            </StyledDialog>,
+        )
+        await waitFor(() => expect(header()).toHaveAttribute('data-header-pinned', 'true'))
+        // The body is the one scroller; the content grows instead of scrolling on its own.
+        const content = dialog().querySelector<HTMLElement>('[data-test="consumer-content"]')!
+        await expect(content.scrollHeight).toBeLessThanOrEqual(content.clientHeight + 1)
+        await expect(body().scrollHeight).toBeGreaterThan(body().clientHeight)
+    })
+
+    it('reserves scroll padding for a footer that content mounts later (PIN-8)', async () => {
+        const LateFooter = (): JSX.Element => {
+            const [shown, setShown] = useState(false)
+            return (
+                <>
+                    <StyledDialogContent>
+                        <button type='button' data-testid='show' onClick={() => setShown(true)}>
+                            Show footer
+                        </button>
+                        <div style={{ height: 3000 }}>Tall content</div>
+                    </StyledDialogContent>
+                    {shown && (
+                        <StyledDialogActions>
+                            <StyledButton dataTest='save'>Save</StyledButton>
+                        </StyledDialogActions>
+                    )}
+                </>
+            )
+        }
+        await page.viewport(1280, 720)
+        mount(
+            <StyledDialog open dataTest='pin' dialogTitle='Form' onClose={() => undefined}>
+                <LateFooter />
+            </StyledDialog>,
+        )
+        await waitFor(() => expect(header()).toHaveAttribute('data-header-pinned', 'true'))
+        await expect(getComputedStyle(body()).scrollPaddingBottom).toBe('0px')
+        await userEvent.click(document.querySelector<HTMLElement>('[data-testid="show"]')!)
+        const footer = await waitFor(() => dialog().querySelector<HTMLElement>('[data-testid="styled-dialog-actions"]')!)
+        await waitFor(() =>
+            expect(getComputedStyle(body()).scrollPaddingBottom).toBe(`${Math.round(footer.getBoundingClientRect().height)}px`),
+        )
+    })
+
+    it('renders dialogHeaderNode when the close icon is hidden', async () => {
+        mount(
+            <StyledDialog
+                open
+                dataTest='pin'
+                dialogTitle='Title'
+                showCloseIcon={false}
+                dialogHeaderNode={<button type='button' data-testid='header-node'>Help</button>}
+                onClose={() => undefined}
+            />,
+        )
+        await waitFor(() => expect(header().querySelector('[data-testid="header-node"]')).not.toBeNull())
+        await expect(dialog().querySelector('[data-testid="close-button-pin"]')).toBeNull()
     })
 })
