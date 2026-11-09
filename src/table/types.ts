@@ -124,6 +124,19 @@ export type RowActionsState =
     | { state: 'enabled' }
 
 export type StyledTableProps<TData, TCustomData> = {
+    /**
+     * The table's language. It sets the labels, and also the text order of the default sort: names compare in this locale,
+     * ignoring case and accents, with digit runs as numbers (`'no'` puts æ, ø and å after z).
+     *
+     * **Default sort.** Unless a column sets its own `sortingFn` (or the table's `defaultColumn` does), the column sorts with
+     * `sortingFns.styledDefault` (ASMA-8597, P2f): numbers, dates and booleans by value, ISO date strings by time, other
+     * text in the table locale, ties in the data order. Empty cells (`undefined`, `null`, `''`, whitespace, `NaN`, an invalid
+     * `Date`) always go last, in both directions. A column with its own `sortingFn`, or one that `defaultColumn: { sortingFn }`
+     * covers, is not touched: its comparator, and TanStack's handling of `undefined` before it, stay as they were. A column's own
+     * `sortUndefined` only decides where `undefined` goes (TanStack handles it before the comparison); `null`, `''`,
+     * whitespace, `NaN` and an invalid `Date` still go last through `styledDefault`. The table's own `sortingFns` are kept
+     * beside `styledDefault`.
+     */
     locale?: 'no' | 'en'
     height?: string | number
     actions?: (row: Row<TData>) => (IAction<TData> | ICustomAction<TData>)[]

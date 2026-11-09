@@ -39,6 +39,11 @@ import { normalizeDefaultColumnOrder } from '../custom-features/order-columns/co
 import { RowSelectionTooltipFeature } from 'src/table/custom-features/row-selection-tooltip/RowSelectionTooltipFeature'
 import { getLeafColumnInfos } from '../helpers/columnIds'
 import { resolveColumnSizingDefaults } from '../helpers/columnSizingDefaults'
+import {
+    createStyledDefaultSortingFn,
+    resolveSortUndefinedDefaults,
+    STYLED_DEFAULT_SORTING_FN,
+} from '../helpers/defaultSortingFn'
 import { tableStorage } from '../helpers/tableStorage'
 
 const NO_SORTING: SortingState = []
@@ -82,9 +87,14 @@ export const useStyledTable = <
     // app wrote the prop as `true` (D17), so a table that gets resizing from the default resizes in memory only.
     const canResize = props.enableColumnResizing ?? true
     const savesWidths = props.enableColumnResizing === true
-    // The default widths (D16, DEC-NARROW) are resolved on the definitions, before TanStack sees them.
+    // The default widths (D16, DEC-NARROW) are resolved on the definitions, before TanStack sees them. So is
+    // `sortUndefined: false` (P2f), which only the columns that sort with the default comparison get.
     const sizedColumns = useMemo(
-        () => resolveColumnSizingDefaults(columns, { defaultColumn, enableSorting: rest.enableSorting, canResize }),
+        () =>
+            resolveSortUndefinedDefaults(
+                resolveColumnSizingDefaults(columns, { defaultColumn, enableSorting: rest.enableSorting, canResize }),
+                defaultColumn,
+            ),
         [columns, defaultColumn, rest.enableSorting, canResize],
     )
     const leafColumns = getLeafColumnInfos(columns, {
@@ -132,6 +142,27 @@ export const useStyledTable = <
     const persistedPageSize = usePersistedPageSize(uniqueKey)
     const resolvedPageSize = persistedPageSize ?? pageSize ?? 50
 
+    // The default comparison (ASMA-8597, P2f). It reads the direction of the column it compares from the table that sorts,
+    // through this ref, which is filled right after `useReactTable` below: not the app's optional `tableInstanceRef`, and
+    // not the sorting array of the render that registered the function, which is out of date by the next click.
+    //
+    // Why writing it during render is safe (DeepSeek's audit of #340): a `useRef` value lives on the component instance, not
+    // on one render, so a write from a render that React later discards is not undone. It does no harm, because
+    // `useReactTable` creates its table in a `useState` initialiser: the table of this instance never changes, and every
+    // write, a discarded render's included, puts that same table into the ref. TanStack itself updates that table's options
+    // during render. The comparison below reads only this instance's table, and the direction live from `table.getState()`
+    // each time it runs. Pinned by the two-tables test in `StyledTable.defaultSort.interaction.test.tsx`.
+    const sortingTableRef = useRef<Table<TData> | undefined>(undefined)
+    const styledDefaultSortingFn = useMemo(() => createStyledDefaultSortingFn<TData>(() => sortingTableRef.current), [])
+    // The default comparison, unless the app's own `defaultColumn` names one. It carries no `sortUndefined`: TanStack merges
+    // `defaultColumn` under every column, so that would reach columns with their own `sortingFn` too. The columns that sort
+    // with the default get `sortUndefined: false` on their definitions instead (`resolveSortUndefinedDefaults`). Memoised so
+    // that TanStack's default column definition, which is derived from this, is not rebuilt on every render.
+    const tableDefaultColumn = useMemo(
+        () => ({ ...defaultColumn, sortingFn: defaultColumn?.sortingFn ?? STYLED_DEFAULT_SORTING_FN }),
+        [defaultColumn],
+    )
+
     const table = useReactTable({
         _features: [ExpandedRowsFeature, FocusedRowsFeature, OrderColumnsFeature, RowSelectionTooltipFeature],
         columns: sizedColumns,
@@ -165,11 +196,30 @@ export const useStyledTable = <
             rest.getRowId ??
             ((row: TData, _index: number, parent?: Row<TData>) =>
                 parent ? [parent.id, row.id].join('.') : row.id.toString()),
-        defaultColumn,
+        defaultColumn: tableDefaultColumn,
         ...rest,
         // After `...rest`, so the resolved default is what TanStack gets whether or not the app passed the prop (D15).
         enableColumnResizing: canResize,
+        // The same, for the sorting functions: ours is kept beside the app's own, which stay available to its columns.
+        sortingFns: { [STYLED_DEFAULT_SORTING_FN]: styledDefaultSortingFn, ...rest.sortingFns },
     })
+
+    sortingTableRef.current = table
+
+    // TanStack re-sorts only when the sorting or the rows change, and the text order depends on the locale too. So when the
+    // locale of a table that stays mounted changes, the current sorting is set again as a new array, which has the same
+    // content and a new identity, and the rows sort again in the new language. The first mount has nothing to redo, and an
+    // unsorted table has nothing to sort.
+    const sortLocale = table.options.meta?.locale
+    const previousSortLocaleRef = useRef(sortLocale)
+
+    useEffect(() => {
+        if (previousSortLocaleRef.current === sortLocale) return
+
+        previousSortLocaleRef.current = sortLocale
+
+        if (table.getState().sorting.length > 0) table.setSorting((previous) => [...previous])
+    }, [sortLocale, table])
 
     if (tableInstanceRef) {
         tableInstanceRef.current = table
