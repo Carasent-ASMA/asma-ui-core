@@ -455,12 +455,20 @@ describe('Minimizable dialog titles (ASMA-8737, REQ-003, 004)', () => {
         await waitFor(() => expect(barTitle.parentElement!.parentElement!.contains(document.activeElement)).toBe(true))
         await userEvent.keyboard('{Shift>}{Tab}{/Shift}')
         await expect(document.activeElement).toBe(barTitle)
-        await waitFor(() => expect(document.querySelector('[role="tooltip"]')).toHaveTextContent(LONG_TITLE))
+        // The tooltip itself opens immediately on focus and after a 500ms hover delay, but the
+        // push and pull_request workflows run this Chromium suite at the same time: on a starved
+        // runner the bubble's render landed past the 1s default and the test failed while green
+        // locally. The longer timeout only costs anything when the runner is that slow.
+        await waitFor(() => expect(document.querySelector('[role="tooltip"]')).toHaveTextContent(LONG_TITLE), {
+            timeout: 5000,
+        })
         barTitle.blur()
         await waitFor(() => expect(document.querySelector('[role="tooltip"]')).toBeNull())
 
         await userEvent.hover(barTitle)
-        await waitFor(() => expect(document.querySelector('[role="tooltip"]')).toHaveTextContent(LONG_TITLE))
+        await waitFor(() => expect(document.querySelector('[role="tooltip"]')).toHaveTextContent(LONG_TITLE), {
+            timeout: 5000,
+        })
     }
 
     it.each<[string, [number, number]]>([
