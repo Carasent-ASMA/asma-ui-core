@@ -149,6 +149,45 @@ describe('Dialog header pinning (ASMA-8737)', () => {
         )
     })
 
+    // A consumer's sticky tab bar (z-10) lives in the same scroller as the header now (as in the calendar event
+    // dialog: plain children, no StyledDialogContent): it must stick UNDER a pinned header, and never paint over
+    // the title, whatever z-index the consumer picked.
+    it.each<[string, [number, number], number, boolean]>([
+        ['pinned header', [390, 660], 3, true],
+        ['header that scrolls away', [390, 660], 6, false],
+    ])('keeps a consumer sticky bar below the title: %s (RISK-001)', async (_name, [width, height], titleLines, pinned) => {
+        await page.viewport(width, height)
+        mount(
+            <MinimizableDialogV2 dataTest='v2' open title={lines(titleLines)} onClose={() => undefined}>
+                <div data-testid='sticky-bar' className='sticky top-[var(--dialog-header-offset,0px)] z-10 bg-white'>
+                    Tabs
+                </div>
+                <div style={{ position: 'relative', zIndex: 50, height: 3000, flexShrink: 0 }}>Tall content</div>
+            </MinimizableDialogV2>,
+        )
+        await waitFor(() => expect(header()).toHaveAttribute('data-header-pinned', String(pinned)))
+        await nextFrames()
+        const bar = document.querySelector<HTMLElement>('[data-testid="sticky-bar"]')!
+
+        await expect(getComputedStyle(body()).getPropertyValue('--dialog-header-offset')).toBe(
+            pinned ? `${header().getBoundingClientRect().height}px` : '0px',
+        )
+
+        body().scrollTop = 200
+        await waitFor(() => expect(body().scrollTop).toBeGreaterThan(0))
+        await nextFrames()
+        const barTop = bar.getBoundingClientRect().top
+        if (pinned) await expect(barTop).toBeGreaterThanOrEqual(header().getBoundingClientRect().bottom - 0.5)
+        else await expect(barTop).toBeGreaterThanOrEqual(body().getBoundingClientRect().top - 0.5)
+
+        // Nothing from the content paints over the pinned title, even a z-50 child.
+        if (pinned) {
+            const title = header().getBoundingClientRect()
+            const hit = document.elementFromPoint(title.left + title.width / 2, title.top + 40)
+            await expect(header().contains(hit)).toBe(true)
+        }
+    })
+
     it('re-decides when the viewport changes, keeping the scroll position (REQ-008)', async () => {
         await page.viewport(390, 660)
         mount(<Fixture title={lines(3)} />)

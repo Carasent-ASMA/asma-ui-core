@@ -21,6 +21,7 @@ import {
     DIALOG_HEADER_CLASSES,
     DIALOG_TITLE_CLASSES,
     dialogContentFlowClasses,
+    dialogScrollerStyle,
 } from 'src/components/feedback/dialog/dialogHeaderStyles'
 
 export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) => {
@@ -281,7 +282,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                         // The footer stays pinned while the body scrolls (PIN-5), also inside a consumer form.
                         '[&_[data-dialog-footer]]:sticky [&_[data-dialog-footer]]:bottom-0 [&_[data-dialog-footer]]:z-[2] [&_[data-dialog-footer]]:bg-white',
                     )}
-                    style={{ scrollPaddingTop, scrollPaddingBottom }}
+                    style={dialogScrollerStyle(scrollPaddingTop, scrollPaddingBottom)}
                 >
                 <div
                     ref={headerRef}

@@ -33,6 +33,7 @@ import {
     DIALOG_HEADER_CLASSES,
     DIALOG_TITLE_CLASSES,
     dialogContentFlowClasses,
+    dialogScrollerStyle,
 } from './dialogHeaderStyles'
 
 export type DialogCloseReason = 'escapeKeyDown' | 'backdropClick'
@@ -494,7 +495,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                     ref={bodyRef}
                     data-dialog-body=''
                     className='flex min-h-0 w-full min-w-0 flex-auto flex-col overflow-y-auto overflow-x-hidden overscroll-contain'
-                    style={{ scrollPaddingTop, scrollPaddingBottom }}
+                    style={dialogScrollerStyle(scrollPaddingTop, scrollPaddingBottom)}
                 >
                 {(hasHeaderActions || !!dialogTitle || !!titleChildId) && (
                     <div

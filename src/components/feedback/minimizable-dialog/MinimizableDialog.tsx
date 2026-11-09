@@ -17,6 +17,7 @@ import {
     DIALOG_HEADER_CLASSES,
     DIALOG_TITLE_CLASSES,
     dialogContentFlowClasses,
+    dialogScrollerStyle,
 } from 'src/components/feedback/dialog/dialogHeaderStyles'
 import {
     ArrowExpandIcon,
@@ -295,7 +296,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                         'flex min-h-0 flex-grow flex-col overflow-y-auto overscroll-contain',
                         '[&_[data-dialog-footer]]:sticky [&_[data-dialog-footer]]:bottom-0 [&_[data-dialog-footer]]:z-[2] [&_[data-dialog-footer]]:bg-white',
                     )}
-                    style={{ scrollPaddingTop, scrollPaddingBottom }}
+                    style={dialogScrollerStyle(scrollPaddingTop, scrollPaddingBottom)}
                 >
                 <div
                     ref={headerRef}
@@ -405,7 +406,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                         {title}
                     </div>
                 </div>
-                <div data-dialog-content-flow='' className={pinned ? 'flex-grow' : dialogContentFlowClasses(pinned)}>
+                <div data-dialog-content-flow='' className={pinned ? 'isolate flex-grow' : dialogContentFlowClasses(pinned)}>
                     {typeof children === 'function' ? children({ fullScreen }) : children}
                 </div>
                 </div>
