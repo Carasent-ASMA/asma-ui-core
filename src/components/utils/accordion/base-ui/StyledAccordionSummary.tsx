@@ -5,6 +5,7 @@ import { ChevronDownIcon } from 'src/components/icons'
 import { useAccordionContext } from './AccordionContext'
 
 export type StyledAccordionSummarySize = 'small' | 'large'
+export type StyledAccordionSummaryChevronAlign = 'edge' | 'title'
 
 /**
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#21228-37809
@@ -18,6 +19,11 @@ export interface StyledAccordionSummaryProps extends Omit<React.ButtonHTMLAttrib
     size?: StyledAccordionSummarySize
     /** @figmaProp Chevron placement — Figma default is left; true = right (MUI parity) */
     expandChevronRight?: boolean
+    /**
+     * Where the right-hand chevron sits: `edge` (default) pushes it to the trigger's trailing edge,
+     * `title` keeps it immediately after the title text. No effect with the left-hand chevron.
+     */
+    chevronAlign?: StyledAccordionSummaryChevronAlign
     sx?: React.CSSProperties
 }
 
@@ -29,6 +35,7 @@ export interface StyledAccordionSummaryProps extends Omit<React.ButtonHTMLAttrib
 export const StyledAccordionSummary = ({
     size = 'large',
     expandChevronRight,
+    chevronAlign = 'edge',
     className,
     headerClassName,
     sx,
@@ -49,7 +56,10 @@ export const StyledAccordionSummary = ({
 
     const chevron = (
         <ChevronDownIcon
-            className={clsx(styles['TriggerIcon'], expandChevronRight && styles['TriggerIconRight'])}
+            className={clsx(
+                styles['TriggerIcon'],
+                expandChevronRight && chevronAlign === 'edge' && styles['TriggerIconRight'],
+            )}
             data-state-icon
         />
     )

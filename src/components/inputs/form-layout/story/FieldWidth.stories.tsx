@@ -89,6 +89,18 @@ export const Pairs: Story = {
     ),
 }
 
+export const UncappedColumn: Story = {
+    name: 'Uncapped column (maxWidth none)',
+    render: () => (
+        <div style={{ width: 1000 }}>
+            <StyledFormColumn maxWidth='none' className='flex flex-col gap-4'>
+                <StyledInputField dataTest='postal-code' label='Postnummer' width='xs' />
+                <StyledInputField dataTest='comment' label='Kommentar' />
+            </StyledFormColumn>
+        </div>
+    ),
+}
+
 export const LabelPlacement: Story = {
     render: () => (
         <StyledFormColumn className='flex flex-col gap-4'>
