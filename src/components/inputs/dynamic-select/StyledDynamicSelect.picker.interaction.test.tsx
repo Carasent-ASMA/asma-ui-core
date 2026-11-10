@@ -210,3 +210,21 @@ describe('StyledDynamicSelect — full-screen picker (ASMA-8468)', () => {
         })
     })
 })
+
+describe('StyledDynamicSelect — multiple autocomplete field height', () => {
+    afterEach(cleanup)
+
+    const shell = (): HTMLElement => byTestId('ds-input-field-adornment-list')!
+
+    it('is 40px high while nothing is selected, as the Figma empty state', async () => {
+        mount(<Fixture multiple />)
+        await waitFor(() => expect(shell()).not.toBeNull())
+        await expect(shell().getBoundingClientRect().height).toBe(40)
+    })
+
+    it('grows to the filled chip row once something is selected', async () => {
+        mount(<Fixture multiple initial={EIGHT.slice(0, 1)} />)
+        await waitFor(() => expect(shell()).not.toBeNull())
+        await expect(shell().getBoundingClientRect().height).toBeGreaterThan(56)
+    })
+})
