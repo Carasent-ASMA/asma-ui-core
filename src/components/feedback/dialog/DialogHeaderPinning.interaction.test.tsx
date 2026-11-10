@@ -760,6 +760,37 @@ describe('Minimizable dialog titles (ASMA-8737, REQ-003, 004)', () => {
         await expect(body().scrollHeight).toBeGreaterThan(body().clientHeight)
     })
 
+    it('resets the header offset when StyledDialogContent is a consumer inner scroller', async () => {
+        await page.viewport(1280, 720)
+        mount(
+            <StyledDialog open dataTest='pin' dialogTitle='Short' onClose={() => undefined}>
+                <div style={{ height: 240, flex: '0 0 240px' }}>
+                    <StyledDialogContent data-test='inner-scroller' style={{ height: '100%' }}>
+                        <div data-testid='inner-sticky' className='sticky top-[var(--dialog-header-offset,0px)]'>
+                            Inner sticky bar
+                        </div>
+                        <div style={{ height: 2000 }}>Tall content</div>
+                    </StyledDialogContent>
+                </div>
+            </StyledDialog>,
+        )
+        await waitFor(() => expect(header()).toHaveAttribute('data-header-pinned', 'true'))
+        const content = dialog().querySelector<HTMLElement>('[data-test="inner-scroller"]')!
+        const sticky = dialog().querySelector<HTMLElement>('[data-testid="inner-sticky"]')!
+
+        await expect(content.scrollHeight).toBeGreaterThan(content.clientHeight)
+        await expect(getComputedStyle(body()).getPropertyValue('--dialog-header-offset')).toBe(
+            `${header().getBoundingClientRect().height}px`,
+        )
+        await expect(getComputedStyle(content).getPropertyValue('--dialog-header-offset')).toBe('0px')
+
+        content.scrollTop = 300
+        await waitFor(() => expect(content.scrollTop).toBeGreaterThan(0))
+        await nextFrames()
+        const contentTop = content.getBoundingClientRect().top + Number.parseFloat(getComputedStyle(content).paddingTop)
+        await expect(sticky.getBoundingClientRect().top).toBeCloseTo(contentTop, 0)
+    })
+
     it('reserves scroll padding for a footer that content mounts later (PIN-8)', async () => {
         const LateFooter = (): JSX.Element => {
             const [shown, setShown] = useState(false)
