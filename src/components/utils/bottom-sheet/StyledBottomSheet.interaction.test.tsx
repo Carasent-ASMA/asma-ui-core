@@ -408,7 +408,7 @@ describe('StyledBottomSheet — as the mobile Action popover', () => {
         mount(<FilterFixture locale='en' />)
         await openSheet()
         const button = byTestId('sheet-view-results')
-        await expect(button).toHaveTextContent('Show results (248)')
+        await expect(button).toHaveTextContent('View results (248)')
         await expect(byTestId('sheet-close')).toHaveAccessibleName('Close')
 
         await userEvent.click(byTestId('empty'))

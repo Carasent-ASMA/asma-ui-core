@@ -22,9 +22,9 @@ describe('formatResultsLabel', () => {
     })
 
     it('reads English by default', () => {
-        expect(formatResultsLabel(248)).toBe('Show results (248)')
+        expect(formatResultsLabel(248)).toBe('View results (248)')
         expect(formatResultsLabel(0)).toBe('No matches')
-        expect(formatResultsLabel(10000)).toBe('Show results (9999+)')
-        expect(formatResultsLabel(null)).toBe('Show results')
+        expect(formatResultsLabel(10000)).toBe('View results (9999+)')
+        expect(formatResultsLabel(null)).toBe('View results')
     })
 })
