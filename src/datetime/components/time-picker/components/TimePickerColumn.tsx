@@ -90,7 +90,19 @@ export const TimePickerColumn: React.FC<TimePickerColumnProps> = ({
                 )
 
                 return isInert ? (
-                    <StyledTooltip key={idx} title={disabledTimeReason}>
+                    /*
+                     * `persistentDescription`: the reason has to be *announced*, not merely
+                     * reachable. Without it `aria-describedby` is attached only once the tooltip
+                     * opens — after the focus event — so a screen reader can compute the cell's
+                     * description before the reason exists and say "23, unavailable" and no more.
+                     * Keeping the text in the DOM and referenced makes the reason part of the cell
+                     * from the first moment focus lands on it.
+                     *
+                     * `arrow`: the tooltip points at the cell it is about. A grid of 36px cells puts
+                     * several within a few pixels of the floating box, and an unanchored tooltip
+                     * leaves which one ambiguous.
+                     */
+                    <StyledTooltip key={idx} title={disabledTimeReason} persistentDescription arrow>
                         {cell}
                     </StyledTooltip>
                 ) : (
