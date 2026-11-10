@@ -50,7 +50,7 @@ interface DialogPaperProps {
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#15820-18954
  * Figma "Dialog": white paper radius 8 with the Dialogue-popup shadow (#22213366, 0 4 40) over a
  * bg/modal #626e7eb2 overlay. Header = actions row (optional label, Helper delta-600, + close button)
- * over the full-width title (ASMA-8737: 18/24 Bold, 20/26 Bold below 744 px, delta-800, never
+ * over the full-width title (ASMA-8737: 24/32 Bold, 20/26 Bold below 744 px, delta-800, never
  * truncated). `fullScreen`/mobile drops the radius and fills the viewport.
  */
 export interface IStyledDialogProps {
@@ -93,7 +93,7 @@ export interface IStyledDialogProps {
     showCloseIcon?: boolean
     /** @figmaProp header Label (Helper 14, delta-600) */
     dialogLabel?: ReactNode
-    /** @figmaProp header Title (18/24 Bold, 20/26 Bold on mobile, delta-800), on its own full-width row */
+    /** @figmaProp header Title (24/32 Bold, 20/26 Bold on mobile, delta-800), on its own full-width row */
     dialogTitle?: ReactNode
     dialogHeaderNode?: ReactNode
     /**
