@@ -10,8 +10,8 @@ export const SHEET_TEXT: Record<UiCoreLocale, { close: string; showResults: stri
     en: { close: 'Close', showResults: 'Show results', noMatches: 'No matches' },
 }
 
-/** Names of the sheet's header controls, worded as `MinimizableDialog`'s expand/minimize and the header's back. */
-export const SHEET_HEADER_TEXT: Record<UiCoreLocale, { expand: string; collapse: string; back: string }> = {
-    no: { expand: 'Utvid', collapse: 'Minimer', back: 'Tilbake' },
-    en: { expand: 'Expand', collapse: 'Minimize', back: 'Back' },
+/** Name of the sheet header's back control. */
+export const SHEET_HEADER_TEXT: Record<UiCoreLocale, { back: string }> = {
+    no: { back: 'Tilbake' },
+    en: { back: 'Back' },
 }

@@ -68,7 +68,7 @@ export const BottomSheetCases = (): JSX.Element => (
                 {actionList()}
             </SheetDemo>
         </Case>
-        <Case label='Taller than half the screen' hint='Opens at half; the drag handle expands it to 90vh. Body scrolls.'>
+        <Case label='Taller than 90vh' hint='Body scrolls internally; header and footer hold.'>
             <SheetDemo
                 dataTest='case-tall'
                 label='Lang liste'

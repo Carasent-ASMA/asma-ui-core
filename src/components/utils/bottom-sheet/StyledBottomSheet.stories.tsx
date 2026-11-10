@@ -26,16 +26,13 @@ const meta = {
                     "`variant='action'` renders it automatically below 744px, so most screens never use it",
                     'directly.',
                     '',
-                    '- Height fits the content, with no minimum, up to **half the screen**. When the content',
-                    '  needs more, the drag handle expands it to **90vh** (drag it up, or `Tab` to it and press',
-                    '  `Space` / `Enter`, which toggle the two heights); the body scrolls, header and footer',
-                    '  hold. At **max-height 480px** (landscape phone) it is a full-screen dialog.',
+                    '- Height fits the content up to **90vh**; the body scrolls, header and footer hold. No',
+                    '  resize detents. At **max-height 480px** (landscape phone) it is a full-screen dialog.',
                     '- Width 100% up to **640px**, top corners **28px**.',
                     '- **Five equivalent dismiss routes**: close button, *Vis resultater*, scrim, `Esc`, drag',
                     '  down past 30%. None commits or discards — filters apply as the user goes.',
-                    '- The drag handle is a 32 × 4 bar; it is a button only when there is a second height.',
-                    '  Optional back control (`onBack`) and title icon (`titleIcon`), as in Figma.',
-                    '- Focus goes to the sheet on open so the title is announced',
+                    '- The drag handle is a decorative 32 × 4 bar. Optional back control (`onBack`) and title',
+                    '  icon (`titleIcon`), as in Figma. Focus goes to the sheet on open so the title is announced',
                     '  first, and back to the trigger on close. `Tab` only — no `role="menu"`, no arrow keys.',
                     '- **`resultCount`** gives the standard *Vis resultater (N)* control: debounced ~500ms,',
                     '  `Ingen treff` at zero (still enabled), `9999+` cap, and an in-sheet live region — the',
@@ -141,7 +138,7 @@ export const ZeroResults: Story = {
     ),
 }
 
-/** Taller than half the screen: it opens at half, the drag handle expands it to 90vh; the body scrolls. */
+/** Taller than 90vh: the body scrolls; the header and footer stay put. */
 export const LongContent: Story = {
     render: () => (
         <Screen>

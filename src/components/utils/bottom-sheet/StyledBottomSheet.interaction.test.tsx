@@ -491,7 +491,7 @@ describe('StyledBottomSheet — landscape phone (1.3.4)', () => {
     })
 })
 
-describe('StyledBottomSheet — heights and the drag handle (Figma DS_draft 7-10991)', () => {
+describe('StyledBottomSheet — height and header (Figma DS_draft 7-10991)', () => {
     beforeEach(async () => {
         await page.viewport(PHONE.width, PHONE.height)
     })
@@ -520,51 +520,31 @@ describe('StyledBottomSheet — heights and the drag handle (Figma DS_draft 7-10
 
     const panel = (): HTMLElement => document.querySelector<HTMLElement>('dialog[data-test="hs"] [data-state]')!
     const handle = (): HTMLElement => document.querySelector<HTMLElement>('[data-testid="hs-drag-handle"]')!
+    const body = (): HTMLElement => panel().querySelector<HTMLElement>('.overflow-y-auto')!
 
     it('draws the drag handle as a 32 x 4 bar', async () => {
         mount(<HeightFixture rows={2} />)
         await waitFor(() => expect(handle()).not.toBeNull())
-        const bar = handle().matches('button') ? handle().querySelector('span')! : handle()
-        const rect = bar.getBoundingClientRect()
+        const rect = handle().getBoundingClientRect()
         await expect([rect.width, rect.height]).toEqual([32, 4])
     })
 
-    it('is as short as its content and keeps a decorative handle when the content fits half the screen', async () => {
+    it('grows with its content up to 90vh before the body scrolls', async () => {
         mount(<HeightFixture rows={2} />)
         await waitFor(() => expect(panel()).not.toBeNull())
         await expect(panel().getBoundingClientRect().height).toBeLessThan(PHONE.height / 2)
-        await expect(handle()).toHaveAttribute('aria-hidden', 'true')
-        await expect(tabbableWithin(document.querySelector('dialog')!)).not.toContain(handle())
-    })
+        cleanup()
 
-    it('opens at half the screen and toggles to 90vh from the keyboard when the content needs more', async () => {
+        mount(<HeightFixture rows={9} />)
+        await waitFor(() => expect(panel()).not.toBeNull())
+        await expect(panel().getBoundingClientRect().height).toBeGreaterThan(PHONE.height / 2)
+        await expect(body().scrollHeight).toBeLessThanOrEqual(body().clientHeight + 1)
+        cleanup()
+
         mount(<HeightFixture rows={30} />)
-        await waitFor(() => expect(handle().tagName).toBe('BUTTON'))
-        await expect(panel().getBoundingClientRect().height).toBeLessThanOrEqual(PHONE.height / 2 + 1)
-        await expect(handle()).toHaveAttribute('aria-expanded', 'false')
-
-        await userEvent.keyboard('{Tab}')
-        await expect(document.activeElement).toBe(handle())
-
-        await userEvent.keyboard('{Enter}')
-        await waitFor(() => expect(handle()).toHaveAttribute('aria-expanded', 'true'))
-        await waitFor(() => expect(panel().getBoundingClientRect().height).toBeGreaterThan(PHONE.height / 2 + 1))
+        await waitFor(() => expect(panel()).not.toBeNull())
         await expect(panel().getBoundingClientRect().height).toBeLessThanOrEqual(PHONE.height * 0.9 + 1)
-
-        await userEvent.keyboard(' ')
-        await waitFor(() => expect(handle()).toHaveAttribute('aria-expanded', 'false'))
-        await waitFor(() => expect(panel().getBoundingClientRect().height).toBeLessThanOrEqual(PHONE.height / 2 + 1))
-    })
-
-    it('expands when the handle row is dragged up by 48px or more', async () => {
-        mount(<HeightFixture rows={30} />)
-        await waitFor(() => expect(handle().tagName).toBe('BUTTON'))
-        const row = handle().parentElement!
-        const init = { bubbles: true, pointerId: 9, pointerType: 'touch', clientX: 100 }
-        row.dispatchEvent(new PointerEvent('pointerdown', { ...init, clientY: 500 }))
-        row.dispatchEvent(new PointerEvent('pointermove', { ...init, clientY: 440 }))
-        row.dispatchEvent(new PointerEvent('pointerup', { ...init, clientY: 440 }))
-        await waitFor(() => expect(handle()).toHaveAttribute('aria-expanded', 'true'))
+        await expect(body().scrollHeight).toBeGreaterThan(body().clientHeight)
     })
 
     it('shows the back control and the title icon when given', async () => {
