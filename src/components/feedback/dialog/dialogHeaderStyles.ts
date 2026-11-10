@@ -24,7 +24,7 @@ export const DIALOG_HEADER_CLASSES = 'box-border w-full min-w-0 max-w-full shrin
 export const dialogContentFlowClasses = (pinned: boolean): string =>
     pinned
         ? 'isolate flex min-h-0 min-w-0 flex-[1_1_0%] flex-col'
-        : 'isolate flex min-w-0 flex-[1_0_auto] flex-col [&>:only-child]:flex-grow'
+        : 'isolate flex min-w-0 flex-[1_0_auto] flex-col [&>:only-child]:grow'
 
 /**
  * The scroller's inline style: scroll padding for focus, plus the same offsets as CSS variables so a
