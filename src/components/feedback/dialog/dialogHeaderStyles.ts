@@ -2,9 +2,10 @@ import type { CSSProperties } from 'react'
 
 /**
  * The one dialog header layout (ASMA-8737), shared by `StyledDialog`, `MinimizableDialog` and
- * `MinimizableDialogV2`: the actions row on top, then the title on a row of its own across the full
- * width. Geometry: 44 px actions row, 28 px vertical padding (16 + 12), title lines of 26 px
- * below 744 px wide and 32 px from there up.
+ * `MinimizableDialogV2`. With a label: the actions row (label + actions) on top, then the title on a
+ * row of its own across the full width. Without a label the title takes the label's place, so title
+ * and actions share one row. Geometry: 44 px actions row, 28 px vertical padding (16 + 12), title
+ * lines of 26 px below 744 px wide and 32 px from there up.
  */
 export const DIALOG_HEADER_CLASSES = 'box-border w-full min-w-0 max-w-full shrink-0 bg-white px-4 pb-3 pt-4'
 
@@ -46,6 +47,20 @@ export const dialogScrollerStyle = (scrollPaddingTop: number, scrollPaddingBotto
 /** Label (if any) on the left, the header actions on the right. Wraps rather than overflowing at 320 px. */
 export const DIALOG_HEADER_ACTIONS_ROW_CLASSES =
     'flex min-h-11 w-full min-w-0 items-center justify-between gap-x-2 max-xs:flex-wrap max-xs:gap-y-1'
+
+/**
+ * The actions row when it also holds the title (no label): top-aligned so the actions stay level with
+ * the first title line however many lines it wraps to, and never wrapped below the title. Pair the
+ * actions group with `min-h-11` so it centres on that first line.
+ */
+export const DIALOG_HEADER_TITLE_ROW_CLASSES =
+    'flex min-h-11 w-full min-w-0 items-start justify-between gap-x-2'
+
+/**
+ * The title's box inside that row: takes the free width and centres its first line on the 44 px row
+ * (9 px around a 26 px line, 6 px around a 32 px line).
+ */
+export const DIALOG_HEADER_ROW_TITLE_BOX_CLASSES = 'min-w-0 flex-auto py-[9px] min-[744px]:py-1.5'
 
 /**
  * Title type: 20/26 Bold below 744 px, 24/32 Bold from 744 px (the desktop size from before

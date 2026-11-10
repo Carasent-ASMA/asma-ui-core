@@ -67,14 +67,15 @@ describe('Dialog header pinning (ASMA-8737)', () => {
         await page.viewport(1280, 720)
     })
 
-    // Header = 44 px actions row + title lines + 28 px padding; 26 px per line below 744 px wide,
-    // 32 px from there up (24 px type). A 6-line desktop title is therefore past 25% of 950 px.
+    // No label, so the title shares the 44 px row with Close: header = 28 px padding + title lines
+    // + 18 px (26 px lines below 744 px wide) or 12 px (32 px lines from there up) around them.
+    // A 7-line desktop title is therefore past 25% of 950 px.
     it.each<[string, [number, number], number, number | null, boolean]>([
-        ['phone portrait, 3 lines: pinned', [390, 660], 3, 150, true],
-        ['phone portrait, 4 lines: scrolls', [390, 660], 4, 176, false],
+        ['phone portrait, 4 lines: pinned', [390, 660], 4, 150, true],
+        ['phone portrait, 5 lines: scrolls', [390, 660], 5, 176, false],
         ['phone landscape: scrolls (short screen)', [844, 340], 1, null, false],
-        ['laptop 1920 × 1080 at 100%, 5 lines: pinned', [1920, 950], 5, 232, true],
-        ['laptop 1920 × 1080 at 100%, 6 lines: scrolls', [1920, 950], 6, 264, false],
+        ['laptop 1920 × 1080 at 100%, 6 lines: pinned', [1920, 950], 6, 232, true],
+        ['laptop 1920 × 1080 at 100%, 7 lines: scrolls', [1920, 950], 7, 264, false],
         ['laptop at 150% scaling and 200% zoom: scrolls (short screen)', [640, 290], 1, null, false],
         ['1280 × 1024 at 400%: scrolls (short screen)', [320, 256], 1, null, false],
     ])('%s', async (_name, [width, height], titleLines, expectedHeight, pinned) => {
@@ -191,7 +192,7 @@ describe('Dialog header pinning (ASMA-8737)', () => {
 
     it('re-decides when the viewport changes, keeping the scroll position (REQ-008)', async () => {
         await page.viewport(390, 660)
-        mount(<Fixture title={lines(3)} />)
+        mount(<Fixture title={lines(4)} />)
         await waitFor(() => expect(header()).toHaveAttribute('data-header-pinned', 'true'))
         body().scrollTop = 300
         await page.viewport(390, 560)
@@ -202,17 +203,58 @@ describe('Dialog header pinning (ASMA-8737)', () => {
         await expect(body().scrollTop).toBe(300)
     })
 
-    it('puts the title on its own full-width row under the actions, at 24/32 Bold on desktop (REQ-001, 002)', async () => {
+    it('sets the title at 24/32 Bold on desktop (REQ-002)', async () => {
         await page.viewport(1280, 720)
         mount(<Fixture title='Edit event' />)
         await waitFor(() => expect(dialog()).not.toBeNull())
         const title = document.getElementById(dialog().getAttribute('aria-labelledby')!)!
-        const close = dialog().querySelector<HTMLElement>('[data-testid="close-button-pin"]')!
-        await expect(title.getBoundingClientRect().top).toBeGreaterThanOrEqual(close.getBoundingClientRect().bottom)
         const style = getComputedStyle(title)
         await expect([style.fontSize, style.lineHeight, style.fontWeight]).toEqual(['24px', '32px', '700'])
         await expect(title.getBoundingClientRect().height).toBe(32)
     })
+
+    // Without a label the title takes the label's place, level with Close; with one it keeps its own row.
+    const headerShells: [string, (label?: string) => JSX.Element, string][] = [
+        [
+            'StyledDialog',
+            (label) => <StyledDialog open dataTest='pin' dialogTitle='Share' dialogLabel={label} onClose={() => undefined} />,
+            'close-button-pin',
+        ],
+        [
+            'MinimizableDialog',
+            (label) => <MinimizableDialog dataTest='v1' open title='Share' label={label} onClose={() => undefined} />,
+            'close-button',
+        ],
+        [
+            'MinimizableDialogV2',
+            (label) => <MinimizableDialogV2 dataTest='v2' open title='Share' label={label} onClose={() => undefined} />,
+            'close-button',
+        ],
+    ]
+    it.each(headerShells.flatMap(([shell, render, closeId]) => [390, 1280].map((width) => [shell, width, render, closeId] as const)))(
+        '%s at %i px: title beside Close without a label, under it with one',
+        async (_shell, width, render, closeId) => {
+            await page.viewport(width, 720)
+            const titleAndClose = (): [DOMRect, DOMRect] => [
+                Array.from(header().querySelectorAll('div'))
+                    .find((element) => element.childElementCount === 0 && element.textContent === 'Share')!
+                    .getBoundingClientRect(),
+                header().querySelector<HTMLElement>(`[data-testid="${closeId}"]`)!.getBoundingClientRect(),
+            ]
+
+            mount(render())
+            await waitFor(() => expect(header()).not.toBeNull())
+            const [title, close] = titleAndClose()
+            await expect(title.right).toBeLessThanOrEqual(close.left)
+            await expect(Math.abs(title.top + title.height / 2 - (close.top + close.height / 2))).toBeLessThanOrEqual(1)
+            cleanup()
+
+            mount(render('Event'))
+            await waitFor(() => expect(header()).not.toBeNull())
+            const [labelledTitle, labelledClose] = titleAndClose()
+            await expect(labelledTitle.top).toBeGreaterThanOrEqual(labelledClose.bottom)
+        },
+    )
 
     it('wraps a long title in full at 20/26 Bold on a phone, never truncated or clamped (REQ-002, 003)', async () => {
         await page.viewport(390, 844)
