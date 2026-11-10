@@ -19,6 +19,8 @@ import { useDialogHeaderPinning } from 'src/components/feedback/dialog/useDialog
 import {
     DIALOG_HEADER_ACTIONS_ROW_CLASSES,
     DIALOG_HEADER_CLASSES,
+    DIALOG_HEADER_ROW_TITLE_BOX_CLASSES,
+    DIALOG_HEADER_TITLE_ROW_CLASSES,
     DIALOG_TITLE_CLASSES,
     dialogContentFlowClasses,
     dialogScrollerStyle,
@@ -186,6 +188,12 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
 
     const nameIds = label ? `${labelId} ${titleId}` : titleId
 
+    const titleNode = (
+        <div id={titleId} className={DIALOG_TITLE_CLASSES}>
+            {title}
+        </div>
+    )
+
     return (
         <>
             {/* Minimized  */}
@@ -298,7 +306,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                         headerHidden && 'hidden',
                     )}
                 >
-                    <div className={DIALOG_HEADER_ACTIONS_ROW_CLASSES}>
+                    <div className={label ? DIALOG_HEADER_ACTIONS_ROW_CLASSES : DIALOG_HEADER_TITLE_ROW_CLASSES}>
                         {label && (
                             <div
                                 id={labelId}
@@ -307,7 +315,8 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                                 {label}
                             </div>
                         )}
-                        <div className='ml-auto flex items-center gap-x-1 max-xs:flex-wrap max-xs:justify-end max-xs:gap-y-2'>
+                        {!label && <div className={DIALOG_HEADER_ROW_TITLE_BOX_CLASSES}>{titleNode}</div>}
+                        <div className='ml-auto flex min-h-11 items-center gap-x-1 max-xs:flex-wrap max-xs:justify-end max-xs:gap-y-2'>
                             <DialogBusyContext.Provider value={contextValue}>{actionNode}</DialogBusyContext.Provider>
                             {/* Minimize is offered in fullscreen too. Taking it away there left the
                                 header's learned triad a control short, and a dialog the user had sent
@@ -341,10 +350,8 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                         </div>
                     </div>
 
-                    {/* Its own full-width row, never truncated or clamped (ASMA-8737). */}
-                    <div id={titleId} className={DIALOG_TITLE_CLASSES}>
-                        {title}
-                    </div>
+                    {/* Its own full-width row under a label, never truncated or clamped (ASMA-8737). */}
+                    {label && titleNode}
                 </div>
                 <div data-dialog-content-flow='' className={dialogContentFlowClasses(pinned)}>
                     <DialogBusyContext.Provider value={contextValue}>{children}</DialogBusyContext.Provider>

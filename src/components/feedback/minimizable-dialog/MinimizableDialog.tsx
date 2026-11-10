@@ -15,6 +15,8 @@ import { useDialogHeaderPinning } from 'src/components/feedback/dialog/useDialog
 import {
     DIALOG_HEADER_ACTIONS_ROW_CLASSES,
     DIALOG_HEADER_CLASSES,
+    DIALOG_HEADER_ROW_TITLE_BOX_CLASSES,
+    DIALOG_HEADER_TITLE_ROW_CLASSES,
     DIALOG_TITLE_CLASSES,
     dialogContentFlowClasses,
     dialogScrollerStyle,
@@ -196,6 +198,12 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
         })
     }
 
+    const titleNode = (
+        <div id={titleId} className={DIALOG_TITLE_CLASSES}>
+            {title}
+        </div>
+    )
+
     return (
         <>
             {isFullScreenActive && <div className='fixed inset-0 z-[51] bg-[rgb(98,110,126)] bg-opacity-70' />}
@@ -311,14 +319,15 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                         headerHidden && 'hidden',
                     )}
                 >
-                    <div className={DIALOG_HEADER_ACTIONS_ROW_CLASSES}>
+                    <div className={label ? DIALOG_HEADER_ACTIONS_ROW_CLASSES : DIALOG_HEADER_TITLE_ROW_CLASSES}>
                         {label && (
                             <div className='min-w-0 flex-auto hyphens-auto text-sm text-delta-700 [overflow-wrap:anywhere]'>
                                 {label}
                             </div>
                         )}
 
-                        <div className='ml-auto flex items-center gap-x-1 max-xs:flex-wrap max-xs:justify-end max-xs:gap-y-1'>
+                        {!label && <div className={DIALOG_HEADER_ROW_TITLE_BOX_CLASSES}>{titleNode}</div>}
+                        <div className='ml-auto flex min-h-11 items-center gap-x-1 max-xs:flex-wrap max-xs:justify-end max-xs:gap-y-1'>
                             {actionNode}
                             {/* Offered in fullscreen too: taking it away left the header's learned
                                 triad a control short, and a dialog the user had sent fullscreen could
@@ -401,10 +410,8 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                         </div>
                     </div>
 
-                    {/* Its own full-width row, never truncated or clamped (ASMA-8737). */}
-                    <div id={titleId} className={DIALOG_TITLE_CLASSES}>
-                        {title}
-                    </div>
+                    {/* Its own full-width row under a label, never truncated or clamped (ASMA-8737). */}
+                    {label && titleNode}
                 </div>
                 <div data-dialog-content-flow='' className={pinned ? 'isolate flex-grow' : dialogContentFlowClasses(pinned)}>
                     {typeof children === 'function' ? children({ fullScreen }) : children}

@@ -31,6 +31,8 @@ import { useDialogHeaderPinning } from './useDialogHeaderPinning'
 import {
     DIALOG_HEADER_ACTIONS_ROW_CLASSES,
     DIALOG_HEADER_CLASSES,
+    DIALOG_HEADER_ROW_TITLE_BOX_CLASSES,
+    DIALOG_HEADER_TITLE_ROW_CLASSES,
     DIALOG_TITLE_CLASSES,
     dialogContentFlowClasses,
     dialogScrollerStyle,
@@ -50,8 +52,9 @@ interface DialogPaperProps {
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#15820-18954
  * Figma "Dialog": white paper radius 8 with the Dialogue-popup shadow (#22213366, 0 4 40) over a
  * bg/modal #626e7eb2 overlay. Header = actions row (optional label, Helper delta-600, + close button)
- * over the full-width title (ASMA-8737: 24/32 Bold, 20/26 Bold below 744 px, delta-800, never
- * truncated). `fullScreen`/mobile drops the radius and fills the viewport.
+ * over the full-width title; without a label the title sits in that row, left of the close button
+ * (ASMA-8737: 24/32 Bold, 20/26 Bold below 744 px, delta-800, never truncated). `fullScreen`/mobile
+ * drops the radius and fills the viewport.
  */
 export interface IStyledDialogProps {
     open: boolean
@@ -163,6 +166,17 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     const [titleSlot, setTitleSlot] = useState<HTMLElement | null>(null)
     const titleContext = useMemo(() => ({ titleId, setTitleId: setTitleChildId, titleSlot }), [titleId, titleSlot])
     const hasHeaderActions = !!dialogLabel || showCloseIcon || !!dialogHeaderNode
+    const titleInActionsRow = hasHeaderActions && !dialogLabel
+    const headerTitle = (
+        <>
+            {dialogTitle && (
+                <div id={titleId} className={DIALOG_TITLE_CLASSES}>
+                    {dialogTitle}
+                </div>
+            )}
+            <div ref={setTitleSlot} className='contents' />
+        </>
+    )
     const labelledBy = dialogTitle ? titleId : (titleChildId ?? (dialogLabel ? labelId : undefined))
     const isMobile = useMobileMediaQuery()
     const dialogRef = useRef<HTMLDialogElement>(null)
@@ -507,7 +521,11 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                         className={cn(DIALOG_HEADER_CLASSES, pinned && 'sticky top-0 z-[2]', headerHidden && 'hidden')}
                     >
                         {hasHeaderActions && (
-                            <div className={DIALOG_HEADER_ACTIONS_ROW_CLASSES}>
+                            <div
+                                className={
+                                    titleInActionsRow ? DIALOG_HEADER_TITLE_ROW_CLASSES : DIALOG_HEADER_ACTIONS_ROW_CLASSES
+                                }
+                            >
                                 {dialogLabel && (
                                     <div
                                         id={labelId}
@@ -516,8 +534,9 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                                         {dialogLabel}
                                     </div>
                                 )}
+                                {titleInActionsRow && <div className={DIALOG_HEADER_ROW_TITLE_BOX_CLASSES}>{headerTitle}</div>}
                                 {(showCloseIcon || !!dialogHeaderNode) && (
-                                    <div className='ml-auto flex min-w-0 max-w-full shrink-0 items-center justify-end gap-2 max-xs:flex-wrap max-xs:gap-y-2'>
+                                    <div className='ml-auto flex min-h-11 min-w-0 max-w-full shrink-0 items-center justify-end gap-2 max-xs:flex-wrap max-xs:gap-y-2'>
                                         {dialogHeaderNode}
                                         {showCloseIcon && (
                                         <StyledButton
@@ -543,12 +562,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                                 )}
                             </div>
                         )}
-                        {dialogTitle && (
-                            <div id={titleId} className={DIALOG_TITLE_CLASSES}>
-                                {dialogTitle}
-                            </div>
-                        )}
-                        <div ref={setTitleSlot} className='contents' />
+                        {!titleInActionsRow && headerTitle}
                     </div>
                 )}
 
