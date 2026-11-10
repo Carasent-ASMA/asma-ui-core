@@ -85,6 +85,7 @@ interface AccordionVariant {
     title: string
     size: 'large' | 'small'
     expandChevronRight?: boolean
+    chevronAlign?: 'edge' | 'title'
     defaultExpanded?: boolean
     disabled?: boolean
 }
@@ -97,6 +98,12 @@ const ACCORDION_VARIANTS: AccordionVariant[] = [
         size: 'large',
         defaultExpanded: true,
         expandChevronRight: true,
+    },
+    {
+        title: 'Default (large) · collapsed · chevron after title',
+        size: 'large',
+        expandChevronRight: true,
+        chevronAlign: 'title',
     },
     { title: 'Default (large) · disabled', size: 'large', disabled: true },
     { title: 'Small · collapsed · chevron left', size: 'small' },
@@ -116,7 +123,11 @@ export const Gallery = {
                         disabled={v.disabled}
                         className='rounded-lg border border-solid border-delta-300'
                     >
-                        <StyledAccordionSummary size={v.size} expandChevronRight={v.expandChevronRight}>
+                        <StyledAccordionSummary
+                            size={v.size}
+                            expandChevronRight={v.expandChevronRight}
+                            chevronAlign={v.chevronAlign}
+                        >
                             <StyledWidgetTitle>Header lorem ipsum</StyledWidgetTitle>
                         </StyledAccordionSummary>
                         <StyledAccordionDetails>

@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, type ComponentProps } from 'react'
 import { afterEach, describe, it } from 'vitest'
-import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
+import { expect, userEvent, waitFor, within } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { tabbableWithin } from 'src/helpers/focusable'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
@@ -131,5 +131,67 @@ describe('StyledAccordion keyboard contract', () => {
         )
 
         await expect(document.activeElement).toBe(elsewhere)
+    })
+})
+
+describe('StyledAccordionSummary chevron alignment', () => {
+    afterEach(cleanup)
+
+    const mountSummary = (
+        summary: Pick<ComponentProps<typeof StyledAccordionSummary>, 'expandChevronRight' | 'chevronAlign'>,
+    ): ReturnType<typeof mount> =>
+        mount(
+            <StyledAccordion>
+                <StyledAccordionSummary {...summary}>
+                    <span data-testid='title'>Accordion title</span>
+                </StyledAccordionSummary>
+                <StyledAccordionDetails>Panel content</StyledAccordionDetails>
+            </StyledAccordion>,
+        )
+
+    it('pins the default right-hand chevron to the trigger edge, 16 px inside', async () => {
+        const { container } = mountSummary({ expandChevronRight: true })
+        const trigger = container.querySelector<HTMLButtonElement>('button[aria-expanded]')!
+        const chevron = trigger.querySelector('svg')!
+
+        const triggerRect = trigger.getBoundingClientRect()
+        const chevronRect = chevron.getBoundingClientRect()
+        await expect(Math.round(chevronRect.right)).toBe(Math.round(triggerRect.right) - 16)
+    })
+
+    it('keeps the chevron 8 px after the title when chevronAlign is title', async () => {
+        const { container } = mountSummary({ expandChevronRight: true, chevronAlign: 'title' })
+        const trigger = container.querySelector<HTMLButtonElement>('button[aria-expanded]')!
+        const title = within(container).getByTestId('title')
+        const chevron = trigger.querySelector('svg')!
+
+        const titleRect = title.getBoundingClientRect()
+        const chevronRect = chevron.getBoundingClientRect()
+        await expect(Math.round(chevronRect.left - titleRect.right)).toBe(8)
+        await expect(Math.round(chevronRect.right)).toBeLessThan(Math.round(trigger.getBoundingClientRect().right) - 16)
+    })
+
+    it('leaves the left-hand chevron first when chevronAlign is title without expandChevronRight', async () => {
+        const { container } = mountSummary({ chevronAlign: 'title' })
+        const trigger = container.querySelector<HTMLButtonElement>('button[aria-expanded]')!
+        const title = within(container).getByTestId('title')
+        const chevron = trigger.querySelector('svg')!
+
+        await expect(trigger.firstElementChild).toBe(chevron)
+        await expect(chevron.getBoundingClientRect().right).toBeLessThan(title.getBoundingClientRect().left)
+    })
+
+    it('exposes exactly one named button and toggles it with Enter and Space', async () => {
+        const { container } = mountSummary({ expandChevronRight: true, chevronAlign: 'title' })
+        const button = within(container).getByRole('button', { name: 'Accordion title' })
+        await expect(within(container).getAllByRole('button')).toHaveLength(1)
+        await expect(button).toHaveAttribute('aria-expanded', 'false')
+
+        button.focus()
+        await userEvent.keyboard('{Enter}')
+        await waitFor(() => expect(button).toHaveAttribute('aria-expanded', 'true'))
+
+        await userEvent.keyboard(' ')
+        await waitFor(() => expect(button).toHaveAttribute('aria-expanded', 'false'))
     })
 })

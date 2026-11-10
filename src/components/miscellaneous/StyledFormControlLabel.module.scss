@@ -1,0 +1,10 @@
+// Same `theme` layer as Card.module.scss: it sits before `base`, so a consumer's `classes.label`
+// utility (later `utilities` layer) wins without `!important`. Literal values match the old
+// `text-sm leading-5 tracking-[0.00938em]` utilities exactly.
+@layer theme {
+    .Label {
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        letter-spacing: 0.00938em;
+    }
+}

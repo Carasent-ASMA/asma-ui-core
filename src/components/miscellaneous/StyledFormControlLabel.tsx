@@ -1,8 +1,13 @@
 import { cloneElement, isValidElement, useId, type ChangeEvent, type ReactElement, type ReactNode } from 'react'
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
+import styles from './StyledFormControlLabel.module.scss'
 
 export type LabelPlacement = 'end' | 'start' | 'top' | 'bottom'
+
+export interface FormControlLabelClasses {
+    label?: string
+}
 
 export interface FormControlLabelProps {
     /** The control element (a checkbox, radio, or switch). Receives `checked`/`onChange`/`disabled`/`name`/`value` unless already set. */
@@ -14,6 +19,7 @@ export interface FormControlLabelProps {
     value?: unknown
     labelPlacement?: LabelPlacement
     className?: string
+    classes?: FormControlLabelClasses
     sx?: unknown
     onChange?: (event: ChangeEvent<HTMLInputElement>, checked: boolean) => void
 }
@@ -49,6 +55,7 @@ export const StyledFormControlLabel = ({
     value,
     labelPlacement = 'end',
     className,
+    classes,
     sx,
     onChange,
 }: FormControlLabelProps): JSX.Element => {
@@ -99,10 +106,11 @@ export const StyledFormControlLabel = ({
                 <span
                     id={shouldLabelControl ? labelTextId : undefined}
                     className={cn(
-                        'text-sm leading-5 tracking-[0.00938em]',
+                        styles['Label'],
                         // Narrower than a phone: a long word breaks instead of pushing past the screen edge.
                         'max-xs:min-w-0 max-xs:hyphens-auto max-xs:![overflow-wrap:anywhere]',
                         isDisabled && 'text-delta-300',
+                        classes?.label,
                     )}
                 >
                     {label}

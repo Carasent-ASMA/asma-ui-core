@@ -218,6 +218,31 @@ describe('field width pattern: form column and pairs (WID-1, WID-9)', () => {
         await expect(column.getBoundingClientRect().left).toBe(container.getBoundingClientRect().left)
     })
 
+    it('uncaps the column with maxWidth without changing the Full field cap', async () => {
+        const { container } = mount(
+            <Container width={1000}>
+                <StyledFormColumn dataTest='column' maxWidth='none'>
+                    <StyledInputField dataTest='name' label='Navn' />
+                </StyledFormColumn>
+            </Container>,
+        )
+
+        await expect(widthOf(within(container).getByTestId('column'))).toBe(1000)
+        await expect(widthOf(root(container, 'full'))).toBe(600)
+    })
+
+    it('accepts an explicit rem maxWidth', async () => {
+        const { container } = mount(
+            <Container width={1000}>
+                <StyledFormColumn dataTest='column' maxWidth='40rem'>
+                    <StyledInputField dataTest='name' label='Navn' />
+                </StyledFormColumn>
+            </Container>,
+        )
+
+        await expect(widthOf(within(container).getByTestId('column'))).toBe(640)
+    })
+
     it('keeps a step field at its width and gives the Full field the rest of the row, 16 px apart', async () => {
         const { container } = mount(
             <StyledFormColumn>
