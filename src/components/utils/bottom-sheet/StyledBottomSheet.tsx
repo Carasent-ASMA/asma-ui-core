@@ -337,7 +337,7 @@ export const StyledBottomSheet = ({
             onCancel={handleCancel}
             className={cn(
                 style['StyledBottomSheet'],
-                'fixed inset-0 m-0 h-full max-h-none w-full max-w-none flex-col items-center justify-end overflow-hidden border-0 bg-transparent p-0 outline-none open:flex',
+                'fixed inset-0 m-0 h-full max-h-none w-full max-w-none flex-col items-center justify-end overflow-visible border-0 bg-transparent p-0 outline-none open:flex',
             )}
         >
             <OverlayBackOwnerContext.Provider value={overlayOwnerRef}>
@@ -481,6 +481,15 @@ export const StyledBottomSheet = ({
                     >
                         {extraActions}
                     </div>
+                )}
+                {/* White to the bottom of the screen, under iOS Safari's floating toolbar. The dialog does not
+                    clip it, so it shows wherever the sheet ends above the screen's edge. */}
+                {!isShortViewport && (
+                    <span
+                        aria-hidden='true'
+                        data-testid={`${dataTest}-skirt`}
+                        className='pointer-events-none absolute inset-x-0 top-full h-[100lvh] bg-white'
+                    />
                 )}
                 <span
                     aria-hidden='true'

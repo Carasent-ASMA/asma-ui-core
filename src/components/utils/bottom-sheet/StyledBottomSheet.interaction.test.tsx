@@ -651,6 +651,15 @@ describe('StyledBottomSheet — heights and the drag handle (Figma DS_draft 7-10
         await expect(getComputedStyle(byTestId('hs-edge')).boxShadow).toContain('inset')
     })
 
+    it('keeps the screen white below the sheet: a white skirt the dialog does not clip', async () => {
+        mount(<HeightFixture rows={2} />)
+        await waitFor(() => expect(panel()).not.toBeNull())
+        const skirt = byTestId('hs-skirt')
+        await expect(Math.round(skirt.getBoundingClientRect().top)).toBe(Math.round(panel().getBoundingClientRect().bottom))
+        await expect(getComputedStyle(skirt).backgroundColor).toBe('rgb(255, 255, 255)')
+        await expect(getComputedStyle(document.querySelector('dialog[data-test="hs"]')!).overflow).toBe('visible')
+    })
+
     it('shows the back control and the title icon when given', async () => {
         const onBack = fn()
         mount(<HeightFixture rows={2} onBack={onBack} />)
