@@ -105,10 +105,12 @@ export interface StyledBottomSheetProps {
  * a modal sheet with a dimmed scrim, top-rounded container, drag handle, header (optional back,
  * close, optional icon + title), a body that scrolls internally and an optional sticky footer.
  *
- * Height fits the content up to 90vh; there are no resize detents. Below 480px of viewport height
- * (a phone in landscape) it becomes a full-screen dialog instead. Five equivalent dismiss routes —
- * close button, "Vis resultater", scrim, Escape, dragging down past 30% — and none of them commits
- * or discards anything: filters apply as the user goes and actions commit on activation.
+ * Height fits the content, with no minimum, up to half the screen. A sheet whose content needs more
+ * can be expanded to 90vh — by dragging the handle up, or by activating it (Tab lands on it, Space /
+ * Enter toggle between the two heights) — and scrolls internally from there. Below 480px of viewport
+ * height (a phone in landscape) it becomes a full-screen dialog instead. Five equivalent dismiss
+ * routes — close button, "Vis resultater", scrim, Escape, dragging down past 30% — and none of them
+ * commits or discards anything: filters apply as the user goes and actions commit on activation.
  *
  * Interaction model is the popover's: `role="dialog"`, `Tab` only, no `role="menu"`, no arrow keys.
  * Focus moves to the sheet on open (so the title is announced first) and back to the trigger on
@@ -144,6 +146,11 @@ export const StyledBottomSheet = ({
     const recentEscapeKeydownRef = useRef(false)
     const [isShown, setIsShown] = useState(false)
     const isShortViewport = useShortViewportMediaQuery()
+    const bodyRef = useRef<HTMLDivElement | null>(null)
+    // Half the screen to start with; the drag handle switches to 90vh when the content needs more.
+    const [expanded, setExpanded] = useState(false)
+    const [overflowsHalf, setOverflowsHalf] = useState(false)
+    const canExpand = !isShortViewport && (expanded || overflowsHalf)
     const headerText = SHEET_HEADER_TEXT[locale]
 
     const onCloseRef = useRef(onClose)
@@ -153,9 +160,27 @@ export const StyledBottomSheet = ({
         openRef.current = open
     }, [onClose, open])
 
-    const { dragHandleProps, dragOffset } = useDragToDismiss(sheetRef, () => {
-        onCloseRef.current('drag')
-    })
+    const { dragHandleProps, dragOffset } = useDragToDismiss(
+        sheetRef,
+        () => {
+            onCloseRef.current('drag')
+        },
+        canExpand ? () => setExpanded(true) : undefined,
+    )
+
+    // At half height the body scrolls once the content needs more room; that is when it can expand.
+    useEffect(() => {
+        const body = bodyRef.current
+        if (!open || expanded || !body) return undefined
+        const measure = (): void => {
+            setOverflowsHalf(body.scrollHeight > body.clientHeight + 1)
+        }
+        measure()
+        const observer = new ResizeObserver(measure)
+        observer.observe(body)
+        for (const child of Array.from(body.children)) observer.observe(child)
+        return () => observer.disconnect()
+    }, [open, expanded])
 
     useBodyScrollLock(open)
     // Wraps Tab inside the sheet — a native modal <dialog> alone lets Tab escape to the browser UI.
@@ -212,6 +237,7 @@ export const StyledBottomSheet = ({
             cancelAnimationFrame(frame)
             unregister()
             setIsShown(false)
+            setExpanded(false)
             // Close first: while the dialog is modal everything outside it is inert, and focus cannot
             // land on the trigger.
             if (node.open) node.close()
@@ -330,7 +356,9 @@ export const StyledBottomSheet = ({
                     // `border-solid` + `box-border` are load-bearing: Tailwind runs with preflight off,
                     // so a bare `border` paints nothing and widths fall back to content-box.
                     'relative box-border flex w-full max-w-[640px] flex-col border border-solid border-delta-300 bg-white text-delta-700 outline-none',
-                    isShortViewport ? 'h-full max-h-none rounded-none' : 'max-h-[90dvh] rounded-t-[28px]',
+                    isShortViewport
+                        ? 'h-full max-h-none rounded-none'
+                        : cn('rounded-t-[28px]', expanded ? 'max-h-[90dvh]' : 'max-h-[50dvh]'),
                     // Utilities ship `!important`, so while dragging the transform classes are dropped
                     // rather than out-ranked by the inline offset.
                     !isDragging && [
@@ -343,7 +371,8 @@ export const StyledBottomSheet = ({
                 {/* `border-b-solid`, not `border-solid`: with preflight off the other three sides would default
                     to a 3px `medium` width and paint a solid border — a visible line under the corners. */}
                 <div className='border-b-solid shrink-0 border-b border-delta-200 pb-2'>
-                    {/* The top 48px is the drag zone (Figma "touch target area"). */}
+                    {/* The top 48px is the drag zone (Figma "touch target area"). The drag handle comes before
+                        the close control in the DOM, so Tab lands on it first (Figma keyboard notes). */}
                     <div {...dragHandleProps} className='relative flex h-12 touch-none items-center gap-2 px-2'>
                         <div className='flex min-w-0 flex-1 items-center'>
                             {onBack && (
@@ -357,12 +386,27 @@ export const StyledBottomSheet = ({
                                 />
                             )}
                         </div>
-                        {/* Drag handle: an affordance for dragging, never a control and never the only exit. */}
-                        <span
-                            aria-hidden='true'
-                            data-testid={`${dataTest}-drag-handle`}
-                            className='pointer-events-none absolute left-1/2 top-1/2 h-1 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full bg-delta-700'
-                        />
+                        {canExpand ? (
+                            <button
+                                type='button'
+                                data-drag-handle
+                                data-testid={`${dataTest}-drag-handle`}
+                                aria-label={expanded ? headerText.collapse : headerText.expand}
+                                aria-expanded={expanded}
+                                onClick={() => {
+                                    setExpanded((current) => !current)
+                                }}
+                                className='absolute left-1/2 top-1/2 flex h-6 w-12 -translate-x-1/2 -translate-y-1/2 cursor-grab items-center justify-center rounded border-0 bg-transparent p-0 outline-none focus-visible:[box-shadow:inset_0_0_0_2px_var(--colors-focus-ring)]'
+                            >
+                                <span aria-hidden='true' className='h-1 w-8 rounded-full bg-delta-700' />
+                            </button>
+                        ) : (
+                            <span
+                                aria-hidden='true'
+                                data-testid={`${dataTest}-drag-handle`}
+                                className='pointer-events-none absolute left-1/2 top-1/2 h-1 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full bg-delta-700'
+                            />
+                        )}
                         <StyledButton
                             dataTest={`${dataTest}-close`}
                             variant='textGray'
@@ -388,6 +432,7 @@ export const StyledBottomSheet = ({
                     )}
                 </div>
                 <div
+                    ref={bodyRef}
                     className={cn(
                         'flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain pl-4 pr-2 pt-2',
                         hasFooter || extraActions ? 'pb-2' : 'pb-[max(0.5rem,env(safe-area-inset-bottom))]',
