@@ -9,3 +9,9 @@ export const SHEET_TEXT: Record<UiCoreLocale, { close: string; viewResults: stri
     no: { close: 'Lukk', viewResults: 'Vis resultater', noMatches: 'Ingen treff' },
     en: { close: 'Close', viewResults: 'View results', noMatches: 'No matches' },
 }
+
+/** Names of the sheet's header controls, worded as `MinimizableDialog`'s expand/minimize and the header's back. */
+export const SHEET_HEADER_TEXT: Record<UiCoreLocale, { expand: string; collapse: string; back: string }> = {
+    no: { expand: 'Utvid', collapse: 'Minimer', back: 'Tilbake' },
+    en: { expand: 'Expand', collapse: 'Minimize', back: 'Back' },
+}
