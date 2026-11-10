@@ -359,7 +359,7 @@ export const StyledBottomSheet = ({
                 className={cn(
                     // `border-solid` + `box-border` are load-bearing: Tailwind runs with preflight off,
                     // so a bare `border` paints nothing and widths fall back to content-box.
-                    'relative box-border flex w-full max-w-[640px] flex-col border border-solid border-delta-300 bg-white text-delta-700 outline-none',
+                    'border-delta-300 text-delta-700 relative box-border flex w-full max-w-[640px] flex-col border border-solid bg-white outline-hidden',
                     isShortViewport
                         ? 'h-full max-h-none rounded-none'
                         : cn('rounded-t-[28px]', expanded ? 'max-h-[90dvh]' : 'max-h-[50dvh]'),
@@ -374,7 +374,7 @@ export const StyledBottomSheet = ({
             >
                 {/* `border-b-solid`, not `border-solid`: with preflight off the other three sides would default
                     to a 3px `medium` width and paint a solid border — a visible line under the corners. */}
-                <div className='border-b-solid shrink-0 border-b border-delta-200 pb-2'>
+                <div className='border-b-solid border-delta-200 shrink-0 border-b pb-2'>
                     {/* The top 48px is the drag zone (Figma "touch target area"). The drag handle comes before
                         the close control in the DOM, so Tab lands on it first (Figma keyboard notes). */}
                     <div {...dragHandleProps} className='relative flex h-12 touch-none items-center gap-2 px-2'>
@@ -400,15 +400,15 @@ export const StyledBottomSheet = ({
                                 onClick={() => {
                                     setExpanded((current) => !current)
                                 }}
-                                className='absolute left-1/2 top-1/2 flex h-6 w-12 -translate-x-1/2 -translate-y-1/2 cursor-grab items-center justify-center rounded border-0 bg-transparent p-0 outline-none focus-visible:[box-shadow:inset_0_0_0_2px_var(--colors-focus-ring)]'
+                                className='absolute top-1/2 left-1/2 flex h-6 w-12 -translate-x-1/2 -translate-y-1/2 cursor-grab items-center justify-center rounded-[4px] border-0 bg-transparent p-0 outline-hidden focus-visible:[box-shadow:inset_0_0_0_2px_var(--colors-focus-ring)]'
                             >
-                                <span aria-hidden='true' className='h-1 w-8 rounded-full bg-delta-700' />
+                                <span aria-hidden='true' className='bg-delta-700 h-1 w-8 rounded-full' />
                             </button>
                         ) : (
                             <span
                                 aria-hidden='true'
                                 data-testid={`${dataTest}-drag-handle`}
-                                className='pointer-events-none absolute left-1/2 top-1/2 h-1 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full bg-delta-700'
+                                className='bg-delta-700 pointer-events-none absolute top-1/2 left-1/2 h-1 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full'
                             />
                         )}
                         <StyledButton
@@ -425,11 +425,11 @@ export const StyledBottomSheet = ({
                     {title && (
                         <div className='flex items-center gap-1 px-4'>
                             {titleIcon && (
-                                <span aria-hidden='true' className='flex size-5 shrink-0 items-center justify-center text-delta-700'>
+                                <span aria-hidden='true' className='text-delta-700 flex size-5 shrink-0 items-center justify-center'>
                                     {titleIcon}
                                 </span>
                             )}
-                            <div id={titleId} className='min-w-0 flex-1 truncate text-lg font-semibold leading-7 text-delta-800'>
+                            <div id={titleId} className='text-delta-800 min-w-0 flex-1 truncate text-lg leading-7 font-semibold'>
                                 {title}
                             </div>
                         </div>

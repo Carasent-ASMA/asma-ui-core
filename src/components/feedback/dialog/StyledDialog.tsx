@@ -494,7 +494,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                 <div
                     ref={bodyRef}
                     data-dialog-body=''
-                    className='flex min-h-0 w-full min-w-0 flex-auto flex-col overflow-y-auto overflow-x-hidden overscroll-contain'
+                    className='flex min-h-0 w-full min-w-0 flex-auto flex-col overflow-x-hidden overflow-y-auto overscroll-contain'
                     style={dialogScrollerStyle(scrollPaddingTop, scrollPaddingBottom)}
                 >
                 {(hasHeaderActions || !!dialogTitle || !!titleChildId) && (
@@ -504,20 +504,20 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                         data-header-pinned={pinned ? 'true' : 'false'}
                         aria-hidden={headerHidden || undefined}
                         hidden={headerHidden}
-                        className={cn(DIALOG_HEADER_CLASSES, pinned && 'sticky top-0 z-[2]', headerHidden && 'hidden')}
+                        className={cn(DIALOG_HEADER_CLASSES, pinned && 'sticky top-0 z-2', headerHidden && 'hidden')}
                     >
                         {hasHeaderActions && (
                             <div className={DIALOG_HEADER_ACTIONS_ROW_CLASSES}>
                                 {dialogLabel && (
                                     <div
                                         id={labelId}
-                                        className='min-w-0 flex-auto hyphens-auto text-sm font-normal leading-5 text-delta-600 [overflow-wrap:anywhere]'
+                                        className='text-delta-600 min-w-0 flex-auto text-sm leading-5 font-normal wrap-anywhere hyphens-auto'
                                     >
                                         {dialogLabel}
                                     </div>
                                 )}
                                 {(showCloseIcon || !!dialogHeaderNode) && (
-                                    <div className='ml-auto flex min-w-0 max-w-full shrink-0 items-center justify-end gap-2 max-xs:flex-wrap max-xs:gap-y-2'>
+                                    <div className='max-xs:flex-wrap max-xs:gap-y-2 ml-auto flex max-w-full min-w-0 shrink-0 items-center justify-end gap-2'>
                                         {dialogHeaderNode}
                                         {showCloseIcon && (
                                         <StyledButton

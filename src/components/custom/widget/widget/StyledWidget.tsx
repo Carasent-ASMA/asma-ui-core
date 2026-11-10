@@ -85,7 +85,7 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
             <div className={cn(style['widget-header-left'], 'flex-wrap gap-y-2')}>
                 {/* The icon keeps its size and a long title wraps beside it (down to its longest word),
                  * instead of the title's `fit-content` squeezing the icon to nothing. */}
-                <div className='flex min-w-0 items-center gap-2.5 max-xs:contents'>
+                <div className='max-xs:contents flex min-w-0 items-center gap-2.5'>
                     {icon && <span className='flex shrink-0'>{icon}</span>}
                     {titleNode ?? <StyledWidgetTitle className='min-w-min'>{title}</StyledWidgetTitle>}
                 </div>
@@ -93,7 +93,7 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
                     className={cn(
                         style['widget-header-right'],
                         // Empty, it would wrap onto a blank row of its own.
-                        'empty:hidden max-xs:flex-wrap max-xs:gap-y-2',
+                        'max-xs:flex-wrap max-xs:gap-y-2 empty:hidden',
                         headerRightClassName,
                     )}
                 >

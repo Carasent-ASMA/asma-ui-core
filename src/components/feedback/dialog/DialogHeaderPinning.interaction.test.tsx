@@ -160,7 +160,7 @@ describe('Dialog header pinning (ASMA-8737)', () => {
         await page.viewport(width, height)
         mount(
             <MinimizableDialogV2 dataTest='v2' open title={lines(titleLines)} onClose={() => undefined}>
-                <div data-testid='sticky-bar' className='sticky top-[var(--dialog-header-offset,0px)] z-10 bg-white'>
+                <div data-testid='sticky-bar' className='sticky top-(--dialog-header-offset,0px) z-10 bg-white'>
                     Tabs
                 </div>
                 <div style={{ position: 'relative', zIndex: 50, height: 3000, flexShrink: 0 }}>Tall content</div>
@@ -603,7 +603,7 @@ describe('Minimizable dialog titles (ASMA-8737, REQ-003, 004)', () => {
             'an h-full form with an inner scroller',
             () => (
                 <form className='flex h-full flex-col'>
-                    <div data-testid='inner' className='h-full min-w-0 grow overflow-y-auto overflow-x-hidden'>
+                    <div data-testid='inner' className='h-full min-w-0 grow overflow-x-hidden overflow-y-auto'>
                         <div style={{ height: 3000 }}>Tall content</div>
                     </div>
                     <StyledDialogActions>
@@ -767,7 +767,7 @@ describe('Minimizable dialog titles (ASMA-8737, REQ-003, 004)', () => {
             <StyledDialog open dataTest='pin' dialogTitle='Short' onClose={() => undefined}>
                 <div style={{ height: 240, flex: '0 0 240px' }}>
                     <StyledDialogContent data-test='inner-scroller' style={{ height: '100%' }}>
-                        <div data-testid='inner-sticky' className='sticky top-[var(--dialog-header-offset,0px)]'>
+                        <div data-testid='inner-sticky' className='sticky top-(--dialog-header-offset,0px)'>
                             Inner sticky bar
                         </div>
                         <div style={{ height: 2000 }}>Tall content</div>
