@@ -612,6 +612,22 @@ describe('StyledBottomSheet — heights and the drag handle (Figma DS_draft 7-10
         await waitFor(() => expect(panel().getBoundingClientRect().height).toBeLessThanOrEqual(PHONE.height * 0.9 + 1))
     })
 
+    it('still expands when the lift reaches the end of content that fits in 90vh', async () => {
+        mount(<HeightFixture rows={7} />)
+        await waitFor(() => expect(handle().tagName).toBe('BUTTON'))
+        const row = handle().parentElement!
+        const init = { bubbles: true, pointerId: 13, pointerType: 'touch', clientX: 100 }
+        row.dispatchEvent(new PointerEvent('pointerdown', { ...init, clientY: 500 }))
+        row.dispatchEvent(new PointerEvent('pointermove', { ...init, clientY: 200 }))
+        const body = panel().querySelector<HTMLElement>('.overflow-y-auto')!
+        await waitFor(() => expect(body.scrollHeight).toBeLessThanOrEqual(body.clientHeight + 1))
+        await waitFor(() => expect(handle().tagName).not.toBe('BUTTON'))
+
+        row.dispatchEvent(new PointerEvent('pointerup', { ...init, clientY: 200 }))
+        await waitFor(() => expect(handle()).toHaveAttribute('aria-expanded', 'true'))
+        await waitFor(() => expect(panel().getBoundingClientRect().height).toBeGreaterThan(PHONE.height / 2 + 1))
+    })
+
     it('settles back when the handle is released before 48px up', async () => {
         mount(<HeightFixture rows={30} />)
         await waitFor(() => expect(handle().tagName).toBe('BUTTON'))
