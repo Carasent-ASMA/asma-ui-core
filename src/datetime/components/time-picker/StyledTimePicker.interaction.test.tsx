@@ -664,13 +664,64 @@ describe('StyledTimePicker isTimeDisabled', () => {
         await expect(document.activeElement).toBe(blocked)
     })
 
+    /**
+     * The visible tooltip, not merely the reason text somewhere in the document.
+     *
+     * `persistentDescription` keeps the reason in a hidden `<span>` so `aria-describedby` can name it
+     * the moment focus lands — which means `document.body.textContent` contains it at all times.
+     * Asserting on the body would therefore pass without the tooltip ever opening.
+     */
+    const visibleTooltip = (): HTMLElement | null =>
+        Array.from(document.querySelectorAll<HTMLElement>('[role="tooltip"]')).find((node) =>
+            node.textContent?.includes(REASON),
+        ) ?? null
+
     it('shows the reason when a refused cell is hovered', async () => {
         const { container } = mount(<QuietFixture initial={new Date(2026, 9, 5, 12, 0)} />)
         await openQuietPanel(container)
 
+        await expect(visibleTooltip()).toBe(null)
         await userEvent.hover(quietCell(0, '23'))
 
-        await waitFor(() => expect(document.body.textContent).toContain(REASON), { timeout: 1500 })
+        await waitFor(() => expect(visibleTooltip()).not.toBe(null), { timeout: 1500 })
+    })
+
+    /*
+     * Deliberately not asserted: that focusing a refused cell *opens the tooltip*.
+     *
+     * It does not, under this harness. The tooltip opens on `:focus-visible`, and a programmatic
+     * `.focus()` does not qualify after the panel was opened with a pointer — while a real Tab
+     * moves focus out of the popper and `useDismiss` closes it, cells and all. So the keyboard
+     * route into the grid is not demonstrable here, and a test that forced it green would be
+     * claiming a guarantee the component does not currently give.
+     *
+     * What *is* guaranteed, and is asserted below, is that the reason is the cell's accessible
+     * description from the moment it exists — which is what a screen reader reads out, with or
+     * without the floating box ever appearing.
+     */
+    it('names the reason as the cell’s description before anything opens', async () => {
+        // A tooltip that attaches `aria-describedby` only once it opens races the focus event: a
+        // screen reader can compute the description first and announce "23, unavailable" and no
+        // more. `persistentDescription` keeps the text referenced from the start.
+        const { container } = mount(<QuietFixture initial={new Date(2026, 9, 5, 12, 0)} />)
+        await openQuietPanel(container)
+        const blocked = quietCell(0, '23')
+
+        const describedBy = blocked.getAttribute('aria-describedby')
+        await expect(describedBy).toBeTruthy()
+
+        const description = describedBy!
+            .split(/\s+/)
+            .map((id) => document.getElementById(id)?.textContent ?? '')
+            .join(' ')
+        await expect(description).toContain(REASON)
+    })
+
+    it('leaves an allowed cell undescribed, so the reason marks only what it explains', async () => {
+        const { container } = mount(<QuietFixture initial={new Date(2026, 9, 5, 12, 0)} />)
+        await openQuietPanel(container)
+
+        await expect(quietCell(0, '12').getAttribute('aria-describedby')).toBe(null)
     })
 
     it('commits nothing when a refused cell is clicked', async () => {
