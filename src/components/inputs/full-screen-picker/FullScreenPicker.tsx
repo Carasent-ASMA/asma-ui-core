@@ -6,7 +6,7 @@ import { usePickerOneRowHeaderMediaQuery } from 'src/hooks/useMediaQuery.hook'
 import { isKeyboardModality, trackInputModality } from './inputModality'
 import { PickerLiveRegion, type PickerAnnouncement } from './PickerLiveRegion'
 import { useReleaseFieldOnKeyboardDismiss } from './useReleaseFieldOnKeyboardDismiss'
-import { useVisualViewportHeight } from './useVisualViewportHeight'
+import { useVisualViewportHeight } from 'src/hooks/useVisualViewportHeight'
 
 export type FullScreenPickerCloseReason = DialogCloseReason | 'closeButton'
 

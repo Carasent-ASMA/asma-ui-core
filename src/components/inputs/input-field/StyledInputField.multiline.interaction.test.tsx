@@ -232,6 +232,47 @@ describe('StyledInputField multiline: re-measures after layout changes', () => {
             vitestExpect(textarea.scrollHeight).toBeLessThanOrEqual(textarea.clientHeight + 1)
         })
     })
+
+    // A classic scrollbar (Windows, or macOS "always show") on a dialog body appears only once the field is
+    // tall enough to make the body scroll, so the field gets narrower exactly when it grows. Measuring
+    // collapses the field to `height: auto`, which hides that scrollbar again: the field was measured too
+    // wide, came out a line short and scrolled inside itself (ASMA-8296, the Ad Voca task description).
+    // Headless Chromium hides scrollbars, so a wrapping flex column stands in for one: once the field is
+    // tall, the spacer wraps into a second column and the field's column gets narrower.
+    const NarrowsWhenTall = ({ controlled, initial }: { controlled: boolean; initial: string }): ReactElement => {
+        const [value, setValue] = useState(initial)
+        const field = { dataTest: 'field', label: 'Description', multiline: true, fullWidth: true }
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', flexWrap: 'wrap', width: 320, height: 160 }}>
+                <div data-testid='column' style={{ flex: 'none' }}>
+                    {controlled ? (
+                        <StyledInputField {...field} value={value} onChange={(event) => setValue(event.target.value)} />
+                    ) : (
+                        <StyledInputField {...field} defaultValue={initial} />
+                    )}
+                </div>
+                <div style={{ flex: 'none', width: 120, height: 40 }} />
+            </div>
+        )
+    }
+
+    it.each([
+        ['uncontrolled', false],
+        ['controlled', true],
+    ])('fits its content when growing narrows its container (%s)', async (_name, controlled) => {
+        const { container } = mount(<NarrowsWhenTall controlled={controlled} initial={'word '.repeat(80)} />)
+        const textarea = container.querySelector<HTMLTextAreaElement>('textarea')!
+        const column = container.querySelector<HTMLElement>('[data-testid="column"]')!
+
+        // Typing re-measures on every keystroke, each time collapsing the field first.
+        await typeAtEnd(textarea, ' and more')
+
+        // The stand-in works: the tall field's column is narrower than the box.
+        await expect(column.getBoundingClientRect().width).toBeLessThan(320)
+        await expect(textarea.scrollHeight).toBeLessThanOrEqual(textarea.clientHeight + 1)
+        await expect(textarea.hasAttribute('data-scrollable')).toBe(false)
+        await expect(overflowY(textarea)).toBe('hidden')
+    })
 })
 
 const nextFrames = (count: number): Promise<void> =>

@@ -247,6 +247,8 @@ export const StyledInputField = ({
     const startAdornment = slotProps?.input?.startAdornment ?? InputProps?.startAdornment
     const hasStartAdornment = Children.count(startAdornment) > 0
     const isAdornmentList = hasStartAdornment && Array.isArray(startAdornment)
+    // A chip list with no chips yet still arrives as an array (e.g. `[null]`), which counts as one child.
+    const isEmptyAdornmentList = isAdornmentList && Children.toArray(startAdornment).length === 0
     const providedEndAdornment = slotProps?.input?.endAdornment ?? InputProps?.endAdornment
     const userEndAdornment = locked ? (
         <>
@@ -322,7 +324,15 @@ export const StyledInputField = ({
             const floorRows = rows ?? minRows
             const minHeight = floorRows ? floorRows * lineHeight + verticalPadding : 0
             const maxHeight = readOnly || !maxRows ? Number.POSITIVE_INFINITY : maxRows * lineHeight + verticalPadding
-            node.style.height = `${Math.min(maxHeight, Math.max(minHeight, node.scrollHeight))}px`
+            let height = Math.min(maxHeight, Math.max(minHeight, node.scrollHeight))
+            node.style.height = `${height}px`
+            // The `auto` collapse above can hide a scroll container's classic scrollbar while measuring, so
+            // the field was measured wider than it now lays out and comes out a line short. Below the cap,
+            // grow again instead of scrolling (MLF-1); growing keeps that scrollbar, so this settles.
+            for (let pass = 0; pass < 2 && height < maxHeight && node.scrollHeight > node.clientHeight + 1; pass++) {
+                height = Math.min(maxHeight, node.scrollHeight)
+                node.style.height = `${height}px`
+            }
         }
 
         // 1px tolerance: scrollHeight is rounded, clientHeight can differ by a sub-pixel.
@@ -588,7 +598,11 @@ export const StyledInputField = ({
                             isSingleLineShell && styles['InputShell'],
                             multiline && !readOnlyValue && 'box-border items-center px-[14px] py-[16.5px]',
                             isAdornmentList &&
-                                cn(styles['AdornmentList'], userEndAdornment && styles['AdornmentList--endAdornment']),
+                                cn(
+                                    styles['AdornmentList'],
+                                    userEndAdornment && styles['AdornmentList--endAdornment'],
+                                    isEmptyAdornmentList && styles['AdornmentList--empty'],
+                                ),
                             // Read-only surface: fill the whole box (matches the delta-200 border, radius 4).
                             // On the shell (not the input) so it also covers the multiline field's padding.
                             readOnly && !readOnlyValue && 'bg-delta-50 rounded-[4px]',

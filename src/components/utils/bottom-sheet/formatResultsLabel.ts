@@ -12,12 +12,12 @@ const MAX_SHOWN_COUNT = 9999
  * - above 9999 → `Vis resultater (9999+)`, so the label keeps a fixed shape and never wraps
  * - otherwise → `Vis resultater (N)`, parenthesised even for 1 to sidestep resultat/resultater
  *
- * English (`locale='en'`) reads `Show results (N)` and `No matches`.
+ * English (`locale='en'`) reads `View results (N)` and `No matches`.
  */
 export const formatResultsLabel = (count: number | null | undefined, locale: UiCoreLocale = 'en'): string => {
     const text = SHEET_TEXT[locale]
-    if (count === null || count === undefined) return text.showResults
+    if (count === null || count === undefined) return text.viewResults
     if (count === 0) return text.noMatches
-    if (count > MAX_SHOWN_COUNT) return `${text.showResults} (${MAX_SHOWN_COUNT}+)`
-    return `${text.showResults} (${count})`
+    if (count > MAX_SHOWN_COUNT) return `${text.viewResults} (${MAX_SHOWN_COUNT}+)`
+    return `${text.viewResults} (${count})`
 }

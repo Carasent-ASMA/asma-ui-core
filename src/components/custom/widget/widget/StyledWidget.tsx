@@ -79,15 +79,21 @@ export const StyledWidget: React.FC<PropsWithChildren<StyledWidgetProps>> = ({
 
     return (
         <div className={`${style['asma-ui-core-styled-widget']} ${isEmpty ? style['empty-state'] : ''}`}>
-            <div className={cn(style['widget-header-left'], 'max-xs:flex-wrap max-xs:gap-y-2')}>
+            {/* When the whole title and `headerRight` don't fit on one row, `headerRight` moves to a row
+             * of its own (right-aligned by its `margin-left: auto`) instead of squeezing the title
+             * (ASMA-8846). Below xs the icon and title wrap as separate items (`contents`). */}
+            <div className={cn(style['widget-header-left'], 'flex-wrap gap-y-2')}>
                 {/* The icon keeps its size and a long title wraps beside it (down to its longest word),
                  * instead of the title's `fit-content` squeezing the icon to nothing. */}
-                {icon && <span className='flex shrink-0'>{icon}</span>}
-                {titleNode ?? <StyledWidgetTitle className='min-w-min'>{title}</StyledWidgetTitle>}
+                <div className='flex min-w-0 items-center gap-2.5 max-xs:contents'>
+                    {icon && <span className='flex shrink-0'>{icon}</span>}
+                    {titleNode ?? <StyledWidgetTitle className='min-w-min'>{title}</StyledWidgetTitle>}
+                </div>
                 <div
                     className={cn(
                         style['widget-header-right'],
-                        'max-xs:flex-wrap max-xs:gap-y-2',
+                        // Empty, it would wrap onto a blank row of its own.
+                        'empty:hidden max-xs:flex-wrap max-xs:gap-y-2',
                         headerRightClassName,
                     )}
                 >

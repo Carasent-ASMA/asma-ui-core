@@ -5,6 +5,7 @@ import {
     FloatingPortal,
     offset,
     shift,
+    size,
     useDismiss,
     useFloating,
     useInteractions,
@@ -62,6 +63,20 @@ export interface StyledPopoverProps {
 const DEFAULT_ANCHOR: PopoverOrigin = { vertical: 'bottom', horizontal: 'left' }
 const DEFAULT_TRANSFORM: PopoverOrigin = { vertical: 'top', horizontal: 'left' }
 
+// The viewport cap is a `max-height`, so it bounds the paper's border box only when the paper is
+// border-box. Preflight is off, so the default paper is content-box: its own vertical padding and
+// borders still add to the rendered height and must come out of the available space.
+const verticalBoxExtras = (element: HTMLElement): number => {
+    const style = getComputedStyle(element)
+    if (style.boxSizing === 'border-box') return 0
+    return (
+        parseFloat(style.paddingTop) +
+        parseFloat(style.paddingBottom) +
+        parseFloat(style.borderTopWidth) +
+        parseFloat(style.borderBottomWidth)
+    )
+}
+
 // Map MUI's anchor/transform origins to a Floating UI placement. The transform origin (the
 // popover's own edge placed at the anchor point) determines the side — inverted, since a popover
 // whose *bottom* meets the anchor sits *above* it — and the anchor's horizontal gives alignment.
@@ -118,6 +133,7 @@ export const StyledPopover = ({
 
     const [hasOpened, setHasOpened] = useState(open)
     const tabbingRef = useRef(false)
+    const [maxHeightPx, setMaxHeightPx] = useState<number>()
     if (open && !hasOpened) setHasOpened(true)
     const shouldMount = open || (keepMounted && hasOpened)
     const anchoredPortalRoot = getOpenModalDialogAncestor(anchorEl)
@@ -132,7 +148,18 @@ export const StyledPopover = ({
         strategy: 'fixed',
         whileElementsMounted: autoUpdate,
         elements: { reference: anchorEl ?? undefined },
-        middleware: [offset(4), flip({ padding: 8 }), shift({ padding: 8 })],
+        middleware: [
+            offset(4),
+            flip({ padding: 8 }),
+            shift({ padding: 8 }),
+            // MUI Popover parity: the paper never outgrows the viewport, it scrolls instead. The
+            // cap is a content-box height, so leave out the paper's own vertical padding/borders.
+            size({
+                padding: 8,
+                apply: ({ availableHeight, elements }) =>
+                    setMaxHeightPx(Math.max(0, availableHeight - verticalBoxExtras(elements.floating))),
+            }),
+        ],
         onOpenChange: (next, event, reason) => {
             if (!next) onClose?.(event ?? {}, reason === 'escape-key' ? 'escapeKeyDown' : 'backdropClick')
         },
@@ -272,7 +299,7 @@ export const StyledPopover = ({
                 {...(usePopoverLayer ? TOP_LAYER_PROPS : {})}
                 style={{
                     ...(usePopoverLayer ? TOP_LAYER_RESET_STYLE : {}),
-                    ...(open ? floatingStyles : {}),
+                    ...(open ? { ...floatingStyles, maxHeight: maxHeightPx } : {}),
                     ...resolveSx(sx),
                     ...resolveSx(slotProps?.paper?.sx),
                     ...slotProps?.paper?.style,

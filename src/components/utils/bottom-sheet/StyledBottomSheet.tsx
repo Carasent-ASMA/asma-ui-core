@@ -10,7 +10,7 @@ import {
 } from 'react'
 
 import { CloseIcon } from 'src/components/icons/close-icon/CloseIcon'
-import { IndeterminateIcon } from 'src/components/icons/indeterminate-icon/IndeterminateIcon'
+import { BackIcon } from 'src/components/icons/back-icon/BackIcon'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { isKeyboardModality, trackInputModality } from 'src/components/inputs/full-screen-picker/inputModality'
 import { cn } from 'src/helpers/cn'
@@ -28,7 +28,7 @@ import { registerOpenModalDialog } from 'src/hooks/useTopLayer.hook'
 import type { UiCoreLocale } from 'src/helpers/uiCoreLocale'
 import type { PopoverContentApi, PopoverSlot } from '../popover/PopoverSheet'
 import { formatResultsLabel } from './formatResultsLabel'
-import { SHEET_TEXT } from './sheetCopy'
+import { SHEET_HEADER_TEXT, SHEET_TEXT } from './sheetCopy'
 import style from './StyledBottomSheet.module.scss'
 import { useDragToDismiss } from './useDragToDismiss.hook'
 
@@ -37,7 +37,7 @@ const RESULT_COUNT_DEBOUNCE_MS = 500
 
 export type BottomSheetCloseReason = 'closeButton' | 'scrim' | 'escape' | 'drag' | 'viewResults' | 'action'
 
-/** @figmaNode 9Q7C7JYPgnUSsrX1L8v40t#5354-169163 (Ad-Voca-concept · "_bottom sheet") */
+/** @figmaNode rIndtQfMCi8wQ46CQ2oqsb#7-10991 (DS_draft · "_bottom sheet", approved) */
 export interface StyledBottomSheetProps {
     /** @figmaProp none — test hook */
     dataTest: string
@@ -55,6 +55,15 @@ export interface StyledBottomSheetProps {
     title?: ReactNode
     /** @figmaProp none — a11y: the dialog's name when there is no `title` */
     ariaLabel?: string
+    /** @figmaProp Icon = ReactNode→true | undefined→false — the 20px icon before the title */
+    titleIcon?: ReactNode
+    /**
+     * Shows the header's back control, e.g. to return from a sub-step to the previous sheet content.
+     * @figmaProp Back = function→true | undefined→false
+     */
+    onBack?: () => void
+    /** @figmaProp none — a11y: accessible name of the back control; defaults to "Back" in `locale` */
+    backLabel?: string
     /** @figmaProp Slot — the scrollable body */
     children: PopoverSlot
     /**
@@ -93,13 +102,15 @@ export interface StyledBottomSheetProps {
 
 /**
  * ASMA Design System **Bottom Sheet** (ASMA-8184) — the mobile (0–743px) form of the Action popover:
- * a modal sheet with a dimmed scrim, top-rounded container, decorative grabber, header (title +
- * close), a body that scrolls internally and an optional sticky footer.
+ * a modal sheet with a dimmed scrim, top-rounded container, drag handle, header (optional back,
+ * close, optional icon + title), a body that scrolls internally and an optional sticky footer.
  *
- * Height fits the content up to 90vh; there are no resize detents. Below 480px of viewport height
- * (a phone in landscape) it becomes a full-screen dialog instead. Five equivalent dismiss routes —
- * close button, "Vis resultater", scrim, Escape, dragging down past 30% — and none of them commits
- * or discards anything: filters apply as the user goes and actions commit on activation.
+ * Height fits the content, with no minimum, up to half the screen. A sheet whose content needs more
+ * can be expanded to 90vh — by dragging the handle up, or by activating it (Tab lands on it, Space /
+ * Enter toggle between the two heights) — and scrolls internally from there. Below 480px of viewport
+ * height (a phone in landscape) it becomes a full-screen dialog instead. Five equivalent dismiss
+ * routes — close button, "Vis resultater", scrim, Escape, dragging down past 30% — and none of them
+ * commits or discards anything: filters apply as the user goes and actions commit on activation.
  *
  * Interaction model is the popover's: `role="dialog"`, `Tab` only, no `role="menu"`, no arrow keys.
  * Focus moves to the sheet on open (so the title is announced first) and back to the trigger on
@@ -112,6 +123,9 @@ export const StyledBottomSheet = ({
     onClose,
     title,
     ariaLabel,
+    titleIcon,
+    onBack,
+    backLabel,
     children,
     viewResultsAction,
     resetAction,
@@ -132,6 +146,12 @@ export const StyledBottomSheet = ({
     const recentEscapeKeydownRef = useRef(false)
     const [isShown, setIsShown] = useState(false)
     const isShortViewport = useShortViewportMediaQuery()
+    const bodyRef = useRef<HTMLDivElement | null>(null)
+    // Half the screen to start with; the drag handle switches to 90vh when the content needs more.
+    const [expanded, setExpanded] = useState(false)
+    const [overflowsHalf, setOverflowsHalf] = useState(false)
+    const canExpand = !isShortViewport && (expanded || overflowsHalf)
+    const headerText = SHEET_HEADER_TEXT[locale]
 
     const onCloseRef = useRef(onClose)
     const openRef = useRef(open)
@@ -140,9 +160,31 @@ export const StyledBottomSheet = ({
         openRef.current = open
     }, [onClose, open])
 
-    const { dragHandleProps, dragOffset } = useDragToDismiss(sheetRef, () => {
-        onCloseRef.current('drag')
-    })
+    const { dragHandleProps, dragOffset } = useDragToDismiss(
+        sheetRef,
+        () => {
+            onCloseRef.current('drag')
+        },
+        canExpand ? () => setExpanded(true) : undefined,
+    )
+
+    // At half height the body scrolls once the content needs more room; that is when it can expand.
+    useEffect(() => {
+        const body = bodyRef.current
+        if (!open || expanded || !body) return undefined
+        const measure = (): void => {
+            const overflows = body.scrollHeight > body.clientHeight + 1
+            // Figma caps only the opening height. Content the user grows from inside the sheet (a field
+            // filling with chips) grows the sheet with it instead of starting to scroll.
+            if (overflows && body.contains(document.activeElement)) setExpanded(true)
+            else setOverflowsHalf(overflows)
+        }
+        measure()
+        const observer = new ResizeObserver(measure)
+        observer.observe(body)
+        for (const child of Array.from(body.children)) observer.observe(child)
+        return () => observer.disconnect()
+    }, [open, expanded])
 
     useBodyScrollLock(open)
     // Wraps Tab inside the sheet — a native modal <dialog> alone lets Tab escape to the browser UI.
@@ -199,6 +241,7 @@ export const StyledBottomSheet = ({
             cancelAnimationFrame(frame)
             unregister()
             setIsShown(false)
+            setExpanded(false)
             // Close first: while the dialog is modal everything outside it is inert, and focus cannot
             // land on the trigger.
             if (node.open) node.close()
@@ -316,8 +359,10 @@ export const StyledBottomSheet = ({
                 className={cn(
                     // `border-solid` + `box-border` are load-bearing: Tailwind runs with preflight off,
                     // so a bare `border` paints nothing and widths fall back to content-box.
-                    'border-delta-300 text-delta-700 relative box-border flex w-full max-w-[640px] flex-col border border-solid bg-white outline-hidden',
-                    isShortViewport ? 'h-full max-h-none rounded-none' : 'max-h-[90dvh] rounded-t-[28px]',
+                    'relative box-border flex w-full max-w-[640px] flex-col border border-solid border-delta-300 bg-white text-delta-700 outline-none',
+                    isShortViewport
+                        ? 'h-full max-h-none rounded-none'
+                        : cn('rounded-t-[28px]', expanded ? 'max-h-[90dvh]' : 'max-h-[50dvh]'),
                     // Utilities ship `!important`, so while dragging the transform classes are dropped
                     // rather than out-ranked by the inline offset.
                     !isDragging && [
@@ -329,10 +374,43 @@ export const StyledBottomSheet = ({
             >
                 {/* `border-b-solid`, not `border-solid`: with preflight off the other three sides would default
                     to a 3px `medium` width and paint a solid border — a visible line under the corners. */}
-                <div className='border-b-solid border-delta-200 shrink-0 border-b pb-2'>
-                    {/* The top 48px is the drag zone (Figma "touch target area"). */}
+                <div className='border-b-solid shrink-0 border-b border-delta-200 pb-2'>
+                    {/* The top 48px is the drag zone (Figma "touch target area"). The drag handle comes before
+                        the close control in the DOM, so Tab lands on it first (Figma keyboard notes). */}
                     <div {...dragHandleProps} className='relative flex h-12 touch-none items-center gap-2 px-2'>
-                        <div className='min-w-0 flex-1' />
+                        <div className='flex min-w-0 flex-1 items-center'>
+                            {onBack && (
+                                <StyledButton
+                                    dataTest={`${dataTest}-back`}
+                                    variant='textGray'
+                                    type='button'
+                                    aria-label={backLabel ?? headerText.back}
+                                    onClick={onBack}
+                                    startIcon={<BackIcon width={24} height={24} />}
+                                />
+                            )}
+                        </div>
+                        {canExpand ? (
+                            <button
+                                type='button'
+                                data-drag-handle
+                                data-testid={`${dataTest}-drag-handle`}
+                                aria-label={expanded ? headerText.collapse : headerText.expand}
+                                aria-expanded={expanded}
+                                onClick={() => {
+                                    setExpanded((current) => !current)
+                                }}
+                                className='absolute left-1/2 top-1/2 flex h-6 w-12 -translate-x-1/2 -translate-y-1/2 cursor-grab items-center justify-center rounded border-0 bg-transparent p-0 outline-none focus-visible:[box-shadow:inset_0_0_0_2px_var(--colors-focus-ring)]'
+                            >
+                                <span aria-hidden='true' className='h-1 w-8 rounded-full bg-delta-700' />
+                            </button>
+                        ) : (
+                            <span
+                                aria-hidden='true'
+                                data-testid={`${dataTest}-drag-handle`}
+                                className='pointer-events-none absolute left-1/2 top-1/2 h-1 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full bg-delta-700'
+                            />
+                        )}
                         <StyledButton
                             dataTest={`${dataTest}-close`}
                             variant='textGray'
@@ -343,22 +421,22 @@ export const StyledBottomSheet = ({
                             }}
                             startIcon={<CloseIcon width={24} height={24} />}
                         />
-                        {/* Grabber: an affordance for dragging, never a control and never the only exit. */}
-                        <IndeterminateIcon
-                            aria-hidden='true'
-                            focusable='false'
-                            width={24}
-                            height={24}
-                            className='text-delta-800 pointer-events-none absolute top-1/2 left-1/2 -translate-1/2'
-                        />
                     </div>
                     {title && (
-                        <div id={titleId} className='text-delta-800 truncate px-4 text-lg leading-7 font-semibold'>
-                            {title}
+                        <div className='flex items-center gap-1 px-4'>
+                            {titleIcon && (
+                                <span aria-hidden='true' className='flex size-5 shrink-0 items-center justify-center text-delta-700'>
+                                    {titleIcon}
+                                </span>
+                            )}
+                            <div id={titleId} className='min-w-0 flex-1 truncate text-lg font-semibold leading-7 text-delta-800'>
+                                {title}
+                            </div>
                         </div>
                     )}
                 </div>
                 <div
+                    ref={bodyRef}
                     className={cn(
                         'flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain pt-2 pr-2 pl-4',
                         hasFooter || extraActions ? 'pb-2' : 'pb-[max(0.5rem,env(safe-area-inset-bottom))]',

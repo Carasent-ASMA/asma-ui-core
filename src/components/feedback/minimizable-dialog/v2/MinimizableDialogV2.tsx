@@ -15,6 +15,14 @@ import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
 import { isOverlayBackNavigationPending, OverlayBackOwnerContext, useBackCloses } from 'src/hooks/useBackCloses.hook'
 import { DialogBusyContext, useDialogBusyBoundary } from 'src/components/feedback/dialog/DialogBusyContext'
+import { useDialogHeaderPinning } from 'src/components/feedback/dialog/useDialogHeaderPinning'
+import {
+    DIALOG_HEADER_ACTIONS_ROW_CLASSES,
+    DIALOG_HEADER_CLASSES,
+    DIALOG_TITLE_CLASSES,
+    dialogContentFlowClasses,
+    dialogScrollerStyle,
+} from 'src/components/feedback/dialog/dialogHeaderStyles'
 
 export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) => {
     const {
@@ -53,6 +61,15 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
     const returnFocusRef = useRef<HTMLElement | null>(null)
     const titleId = useId()
     const labelId = useId()
+    // ASMA-8737: header + content scroll together; the header is sticky only while pinned.
+    const bodyRef = useRef<HTMLDivElement>(null)
+    const {
+        headerRef,
+        pinned,
+        hidden: headerHidden,
+        scrollPaddingTop,
+        scrollPaddingBottom,
+    } = useDialogHeaderPinning(bodyRef)
 
     const { minimized, setMinimized, fullScreen, setFullScreen } = useControlledProps(props)
     const isFullScreenActive = fullScreen && !minimized
@@ -182,17 +199,16 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                     data-testid={dataTest}
                 >
                     <div
-                        className={cn(
-                            'text-delta-800 max-w-[303px] truncate pr-1 text-lg font-semibold',
-                            'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:[overflow-wrap:anywhere]!',
-                        )}
+                        className='min-w-0 max-w-[303px] truncate pr-1 text-lg font-semibold text-delta-800'
                     >
+                        {/* The bar alone stays one line; the full title shows on hover and on keyboard focus. */}
                         <StyledTooltip title={title} placement='top'>
                             <div
-                                className={cn(
-                                    'truncate',
-                                    'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:[overflow-wrap:anywhere]!',
-                                )}
+                                // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- a keyboard user reaches the truncated title's tooltip here
+                                tabIndex={0}
+                                data-testid='minimized-title'
+                                // Inset ring: the bar clips overflow, so an outside outline would be cut off.
+                                className='truncate focus-visible:[outline-offset:-2px]'
                             >
                                 {title}
                             </div>
@@ -249,45 +265,49 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                 )}
             >
                 <OverlayBackOwnerContext.Provider value={modalRef}>
-                <div className={cn('border-delta-200 flex flex-col border-b px-4', isMobile ? 'py-3' : 'py-4')}>
-                    {/* Narrower than a phone the row wraps in reverse, so the window buttons only take a row of
-                        their own (above, right-aligned) when nothing fits beside them: the label stays beside
-                        them when it fits whole; without a label the title stays beside them as on wider
-                        screens, wrapping its words there, and moves below only when its longest word does not
-                        fit. DOM order, and so reading and Tab order, stays the same. */}
-                    <div
-                        className={cn(
-                            'flex items-center justify-between',
-                            'max-xs:flex-wrap-reverse max-xs:gap-x-2 max-xs:gap-y-2',
-                        )}
-                    >
-                        {!label ? (
-                            <div
-                                id={titleId}
-                                className={cn(
-                                    'text-delta-800 font-semibold',
-                                    isMobile ? 'line-clamp-2 text-xl' : 'line-clamp-1 text-2xl',
-                                    'max-xs:line-clamp-none max-xs:hyphens-auto max-xs:whitespace-normal',
-                                    // Beside the buttons, wrapping there, and on a row of its own only when its longest
-                                    // word does not fit (`min-content` basis; `wrap-break-word`, not `anywhere`, keeps that a
-                                    // whole word), never under 5rem.
-                                    'max-xs:block max-xs:min-w-[min(100%,5rem)] max-xs:grow max-xs:basis-[min-content] max-xs:wrap-break-word',
-                                )}
-                            >
-                                {title}
-                            </div>
-                        ) : (
+                {/* `overscroll-contain` stops wheel scroll chaining to the page underneath, both from this body
+                    and from consumer scroll areas nested in it. Discrete mouse-wheel ticks (Windows) chain
+                    as soon as the scroller hits its edge; macOS trackpad gestures latch, which hid this.
+                    ASMA-8737: the header scrolls in here too, and is sticky only while it is pinned. */}
+                <div
+                    ref={bodyRef}
+                    data-dialog-body=''
+                    className={cn(
+                        minimized && 'hidden',
+                        'flex min-h-0 flex-grow flex-col overflow-y-auto overscroll-contain',
+                        // ASMA-8737: the body is the one scroller. A direct StyledDialogContent keeps its full
+                        // height instead of shrinking into a second scroller, so an unpinned header really
+                        // scrolls away (the same rule StyledDialog applies).
+                        "[&>[data-dialog-content-flow]>[data-dialog-content]]:!flex-[1_0_auto]",
+                        // The footer stays pinned while the body scrolls (PIN-5), also inside a consumer form.
+                        '[&_[data-dialog-footer]]:sticky [&_[data-dialog-footer]]:bottom-0 [&_[data-dialog-footer]]:z-[2] [&_[data-dialog-footer]]:bg-white',
+                    )}
+                    style={dialogScrollerStyle(scrollPaddingTop, scrollPaddingBottom)}
+                >
+                <div
+                    ref={headerRef}
+                    data-dialog-header=''
+                    data-header-pinned={pinned ? 'true' : 'false'}
+                    aria-hidden={headerHidden || undefined}
+                    hidden={headerHidden}
+                    className={cn(
+                        DIALOG_HEADER_CLASSES,
+                        // The paper is rounded from 640 px; the white header must not square its corners.
+                        'border-b-[1px] border-delta-200 sm:rounded-t-lg',
+                        pinned && 'sticky top-0 z-[2]',
+                        headerHidden && 'hidden',
+                    )}
+                >
+                    <div className={DIALOG_HEADER_ACTIONS_ROW_CLASSES}>
+                        {label && (
                             <div
                                 id={labelId}
-                                className='text-delta-700 max-xs:min-w-0 max-xs:flex-auto max-xs:hyphens-auto max-xs:[overflow-wrap:anywhere]! text-sm'
+                                className='min-w-0 flex-auto hyphens-auto text-sm text-delta-700 [overflow-wrap:anywhere]'
                             >
                                 {label}
                             </div>
                         )}
-
-                        {/* Narrower than a phone the buttons keep to the top of a wrapped title's row: with the rows
-                            running bottom-up (`wrap-reverse`), the top is `end`. */}
-                        <div className='max-xs:ml-auto max-xs:flex-wrap max-xs:justify-end max-xs:gap-y-2 max-xs:self-end flex items-center gap-x-1'>
+                        <div className='ml-auto flex items-center gap-x-1 max-xs:flex-wrap max-xs:justify-end max-xs:gap-y-2'>
                             <DialogBusyContext.Provider value={contextValue}>{actionNode}</DialogBusyContext.Provider>
                             {/* Minimize is offered in fullscreen too. Taking it away there left the
                                 header's learned triad a control short, and a dialog the user had sent
@@ -321,28 +341,14 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                         </div>
                     </div>
 
-                    {label && (
-                        <div
-                            id={titleId}
-                            className={cn(
-                                'text-delta-800 font-semibold',
-                                isMobile ? 'line-clamp-2 text-xl' : 'line-clamp-1 text-2xl',
-                                // Narrower than a phone: the title shows in full instead of clamping.
-                                'max-xs:line-clamp-none',
-                                'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:[overflow-wrap:anywhere]!',
-                            )}
-                        >
-                            {title}
-                        </div>
-                    )}
+                    {/* Its own full-width row, never truncated or clamped (ASMA-8737). */}
+                    <div id={titleId} className={DIALOG_TITLE_CLASSES}>
+                        {title}
+                    </div>
                 </div>
-                {/* `overscroll-contain` stops wheel scroll chaining to the page underneath, both from this body
-                    and from consumer scroll areas nested in it. Discrete mouse-wheel ticks (Windows) chain
-                    as soon as the scroller hits its edge; macOS trackpad gestures latch, which hid this. */}
-                <div
-                    className={cn(minimized && 'hidden', 'flex grow flex-col overflow-y-auto overscroll-contain')}
-                >
+                <div data-dialog-content-flow='' className={dialogContentFlowClasses(pinned)}>
                     <DialogBusyContext.Provider value={contextValue}>{children}</DialogBusyContext.Provider>
+                </div>
                 </div>
                 </OverlayBackOwnerContext.Provider>
             </div>

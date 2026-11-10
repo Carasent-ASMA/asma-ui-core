@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { afterEach, describe, it } from 'vitest'
 import { page } from 'vitest/browser'
 import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
@@ -621,6 +621,155 @@ describe('PopoverSheet — position stability', () => {
         const panel = await openEdge(container)
         await waitFor(() => expect(panel).toHaveAttribute('data-placement', 'bottom-start'))
         await expectEdge(container, panel, 'left')
+    })
+
+    /** A search field beside the Filter button: the label grows, the field gives way, the button moves. */
+    const RowFixture = ({
+        triggerFirst = false,
+        align,
+        style,
+    }: Pick<PopoverSheetProps, 'align'> & { triggerFirst?: boolean; style?: CSSProperties }): JSX.Element => {
+        const [count, setCount] = useState(0)
+        const field = <input aria-label='Search' style={{ flex: '1 1 auto', minWidth: 0 }} />
+        return (
+            <div style={{ display: 'flex', gap: 8, width: 360, ...style }}>
+                {!triggerFirst && field}
+                <PopoverSheet
+                    dataTest='row-pop'
+                    variant='action'
+                    title='Filter'
+                    align={align}
+                    renderTrigger={({ ref, triggerProps }) => (
+                        <button ref={ref} type='button' style={{ flex: 'none', width: count ? 120 : 96 }} {...triggerProps}>
+                            {count ? `Filter (${count})` : 'Filter'}
+                        </button>
+                    )}
+                >
+                    <button type='button' onClick={() => setCount((current) => current + 1)}>
+                        Pick
+                    </button>
+                    <div style={{ width: 200, height: 48 }}>canvas</div>
+                </PopoverSheet>
+                {triggerFirst && field}
+            </div>
+        )
+    }
+
+    const rowTrigger = (): HTMLButtonElement => document.querySelector<HTMLButtonElement>('[aria-haspopup="dialog"]')!
+
+    const pickAndMeasure = async (panel: HTMLElement): Promise<{ before: DOMRect; after: DOMRect; moved: number }> => {
+        const before = panel.getBoundingClientRect()
+        const triggerBefore = rowTrigger().getBoundingClientRect()
+        await userEvent.click(edgeButton(panel, 'Pick'))
+        await waitFor(() => expect(rowTrigger()).toHaveTextContent('Filter (1)'))
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+        const triggerAfter = rowTrigger().getBoundingClientRect()
+        return {
+            before,
+            after: panel.getBoundingClientRect(),
+            moved: Math.max(
+                Math.abs(triggerAfter.left - triggerBefore.left),
+                Math.abs(triggerAfter.right - triggerBefore.right),
+            ),
+        }
+    }
+
+    it('keeps a left-aligned surface in place when a filter moves the trigger left', async () => {
+        mount(<RowFixture style={{ position: 'fixed', top: 40, left: 16 }} />)
+        await userEvent.click(rowTrigger())
+        await waitFor(() => expect(panelOf('row-pop')).toHaveAttribute('data-placement', 'bottom-start'))
+        const panel = panelOf('row-pop')!
+
+        const { before, after, moved } = await pickAndMeasure(panel)
+        await expect(moved).toBeGreaterThanOrEqual(20)
+        await expect(Math.abs(after.left - before.left)).toBeLessThanOrEqual(1)
+        await expect(Math.abs(after.top - before.top)).toBeLessThanOrEqual(1)
+    })
+
+    it('keeps a right-aligned surface in place when a filter moves the trigger right', async () => {
+        mount(<RowFixture triggerFirst style={{ position: 'fixed', top: 40, right: 16 }} />)
+        await userEvent.click(rowTrigger())
+        await waitFor(() => expect(panelOf('row-pop')).toHaveAttribute('data-placement', 'bottom-end'))
+        const panel = panelOf('row-pop')!
+
+        const { before, after, moved } = await pickAndMeasure(panel)
+        await expect(moved).toBeGreaterThanOrEqual(20)
+        await expect(Math.abs(after.right - before.right)).toBeLessThanOrEqual(1)
+    })
+
+    it('follows a trigger that wraps to another row instead of leaving it behind', async () => {
+        const WrapFixture = (): JSX.Element => {
+            const [wrapped, setWrapped] = useState(false)
+            return (
+                <div style={{ position: 'fixed', top: wrapped ? 100 : 40, right: wrapped ? 420 : 16 }}>
+                    <PopoverSheet
+                        dataTest='wrap-pop'
+                        variant='action'
+                        title='Filter'
+                        renderTrigger={({ ref, triggerProps }) => (
+                            <button ref={ref} type='button' style={{ width: 96 }} {...triggerProps}>
+                                Filter
+                            </button>
+                        )}
+                    >
+                        <button type='button' onClick={() => setWrapped(true)}>
+                            Pick
+                        </button>
+                        <div style={{ width: 200, height: 48 }}>canvas</div>
+                    </PopoverSheet>
+                </div>
+            )
+        }
+
+        mount(<WrapFixture />)
+        await userEvent.click(rowTrigger())
+        await waitFor(() => expect(panelOf('wrap-pop')).toHaveAttribute('data-placement', 'bottom-end'))
+        const panel = panelOf('wrap-pop')!
+
+        await userEvent.click(edgeButton(panel, 'Pick'))
+        await waitFor(() =>
+            expect(Math.abs(panel.getBoundingClientRect().right - rowTrigger().getBoundingClientRect().right)).toBeLessThanOrEqual(1),
+        )
+        await expect(Math.abs(panel.getBoundingClientRect().top - rowTrigger().getBoundingClientRect().bottom)).toBeLessThanOrEqual(16)
+    })
+
+    it('aligns to where the trigger is now on the next open', async () => {
+        mount(<RowFixture style={{ position: 'fixed', top: 40, left: 16 }} />)
+        await userEvent.click(rowTrigger())
+        await waitFor(() => expect(panelOf('row-pop')).not.toBeNull())
+        await pickAndMeasure(panelOf('row-pop')!)
+        await userEvent.keyboard('{Escape}')
+        await waitFor(() => expect(panelOf('row-pop')).toBeNull())
+
+        await userEvent.click(rowTrigger())
+        await waitFor(() => expect(panelOf('row-pop')).not.toBeNull())
+        await waitFor(() =>
+            expect(
+                Math.abs(panelOf('row-pop')!.getBoundingClientRect().left - rowTrigger().getBoundingClientRect().left),
+            ).toBeLessThanOrEqual(1),
+        )
+    })
+
+    it('stays in place and on screen inside a modal dialog when a filter moves the trigger (ASMA-6809)', async () => {
+        mount(
+            <StyledDialog open onClose={() => undefined} dataTest='row-dlg'>
+                <RowFixture align='start' />
+            </StyledDialog>,
+        )
+        await waitFor(() => expect(rowTrigger()).not.toBeNull())
+        await userEvent.click(rowTrigger())
+        await waitFor(() => expect(panelOf('row-pop')).not.toBeNull())
+        const panel = panelOf('row-pop')!
+        await expect(panel.closest('dialog')).not.toBeNull()
+        await waitFor(() =>
+            expect(Math.abs(panel.getBoundingClientRect().left - rowTrigger().getBoundingClientRect().left)).toBeLessThanOrEqual(1),
+        )
+
+        const { before, after, moved } = await pickAndMeasure(panel)
+        await expect(moved).toBeGreaterThanOrEqual(20)
+        await expect(Math.abs(after.left - before.left)).toBeLessThanOrEqual(1)
+        await expect(after.right).toBeLessThanOrEqual(window.innerWidth)
+        await expect(Math.abs(after.top - rowTrigger().getBoundingClientRect().bottom)).toBeLessThanOrEqual(16)
     })
 
     it('lets `align` override the automatic choice', async () => {

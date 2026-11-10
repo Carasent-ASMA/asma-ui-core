@@ -21,7 +21,10 @@ export const StyledDialogContent = ({
     classes: _classes,
     ...rest
 }: DialogContentProps): JSX.Element => {
-    const mergedStyle: CSSProperties = { ...resolveSx(sx), ...style }
+    // Sticky children use the dialog body's header offset only when that body owns their scroll.
+    // This content can instead be a consumer's bounded inner scroller, where the header is outside
+    // the scrolling box and the inherited offset would leave an unreachable blank strip.
+    const mergedStyle = { '--dialog-header-offset': '0px', ...resolveSx(sx), ...style } as CSSProperties
     return (
         <div
             data-test='styled-dialog-content'
@@ -42,6 +45,7 @@ export const StyledDialogContent = ({
             )}
             style={mergedStyle}
             {...(rest)}
+            data-dialog-content=''
         >
             {children}
         </div>

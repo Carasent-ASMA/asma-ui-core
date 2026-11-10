@@ -32,6 +32,13 @@ export const useMaxXsMediaQuery = makeMediaQueryStore('not all and (min-width: 3
 export const useShortViewportMediaQuery = makeMediaQueryStore('(max-height: 480px)')
 
 /**
+ * A short screen for dialogs and pinned bars (pattern PIN-2, ASMA-8737): at most 30em high. Unlike
+ * {@link useShortViewportMediaQuery} (`480px`, kept for the Bottom Sheet), `em` in a media query
+ * follows the user's default text size, so a larger text setting counts as a shorter screen.
+ */
+export const useShortScreenMediaQuery = makeMediaQueryStore('(max-height: 30em)')
+
+/**
  * The full-screen picker's one-row header (ASMA-8468 REQ-007): a viewport that is short **and** wide
  * — a phone in landscape. Short alone is not enough: on an upright phone the on-screen keyboard also
  * brings the viewport under 480 px, and moving the focused search into the first row dropped the
