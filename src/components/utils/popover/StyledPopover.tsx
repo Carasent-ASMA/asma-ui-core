@@ -5,6 +5,7 @@ import {
     FloatingPortal,
     offset,
     shift,
+    size,
     useDismiss,
     useFloating,
     useInteractions,
@@ -118,6 +119,7 @@ export const StyledPopover = ({
 
     const [hasOpened, setHasOpened] = useState(open)
     const tabbingRef = useRef(false)
+    const [maxHeightPx, setMaxHeightPx] = useState<number>()
     if (open && !hasOpened) setHasOpened(true)
     const shouldMount = open || (keepMounted && hasOpened)
     const anchoredPortalRoot = getOpenModalDialogAncestor(anchorEl)
@@ -132,7 +134,13 @@ export const StyledPopover = ({
         strategy: 'fixed',
         whileElementsMounted: autoUpdate,
         elements: { reference: anchorEl ?? undefined },
-        middleware: [offset(4), flip({ padding: 8 }), shift({ padding: 8 })],
+        middleware: [
+            offset(4),
+            flip({ padding: 8 }),
+            shift({ padding: 8 }),
+            // MUI Popover parity: the paper never outgrows the viewport, it scrolls instead.
+            size({ padding: 8, apply: ({ availableHeight }) => setMaxHeightPx(availableHeight) }),
+        ],
         onOpenChange: (next, event, reason) => {
             if (!next) onClose?.(event ?? {}, reason === 'escape-key' ? 'escapeKeyDown' : 'backdropClick')
         },
@@ -272,7 +280,7 @@ export const StyledPopover = ({
                 {...(usePopoverLayer ? TOP_LAYER_PROPS : {})}
                 style={{
                     ...(usePopoverLayer ? TOP_LAYER_RESET_STYLE : {}),
-                    ...(open ? floatingStyles : {}),
+                    ...(open ? { ...floatingStyles, maxHeight: maxHeightPx } : {}),
                     ...resolveSx(sx),
                     ...resolveSx(slotProps?.paper?.sx),
                     ...slotProps?.paper?.style,
