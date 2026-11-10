@@ -579,7 +579,7 @@ describe('StyledBottomSheet — heights and the drag handle (Figma DS_draft 7-10
         await userEvent.click(byTestId('hs-add'))
         await waitFor(() => expect(panel().getBoundingClientRect().height).toBeGreaterThan(PHONE.height / 2 + 1))
         const body = panel().querySelector<HTMLElement>('.overflow-y-auto')!
-        await expect(body.scrollHeight).toBeLessThanOrEqual(body.clientHeight + 1)
+        await waitFor(() => expect(body.scrollHeight).toBeLessThanOrEqual(body.clientHeight + 1))
         await expect(panel().getBoundingClientRect().height).toBeLessThanOrEqual(PHONE.height * 0.9 + 1)
     })
 
@@ -592,6 +592,47 @@ describe('StyledBottomSheet — heights and the drag handle (Figma DS_draft 7-10
         row.dispatchEvent(new PointerEvent('pointermove', { ...init, clientY: 440 }))
         row.dispatchEvent(new PointerEvent('pointerup', { ...init, clientY: 440 }))
         await waitFor(() => expect(handle()).toHaveAttribute('aria-expanded', 'true'))
+    })
+
+    it('follows the finger while the handle is dragged up, then settles at the expanded height', async () => {
+        mount(<HeightFixture rows={30} />)
+        await waitFor(() => expect(handle().tagName).toBe('BUTTON'))
+        const start = panel().getBoundingClientRect().height
+        const row = handle().parentElement!
+        const init = { bubbles: true, pointerId: 11, pointerType: 'touch', clientX: 100 }
+        row.dispatchEvent(new PointerEvent('pointerdown', { ...init, clientY: 500 }))
+        row.dispatchEvent(new PointerEvent('pointermove', { ...init, clientY: 420 }))
+        await waitFor(() => expect(Math.round(panel().getBoundingClientRect().height)).toBe(Math.round(start + 80)))
+        await expect(getComputedStyle(panel()).transitionProperty).not.toContain('max-height')
+
+        row.dispatchEvent(new PointerEvent('pointerup', { ...init, clientY: 420 }))
+        await waitFor(() => expect(handle()).toHaveAttribute('aria-expanded', 'true'))
+        await expect(getComputedStyle(panel()).transitionProperty).toContain('max-height')
+        await waitFor(() => expect(panel().getBoundingClientRect().height).toBeGreaterThan(start + 80))
+        await waitFor(() => expect(panel().getBoundingClientRect().height).toBeLessThanOrEqual(PHONE.height * 0.9 + 1))
+    })
+
+    it('settles back when the handle is released before 48px up', async () => {
+        mount(<HeightFixture rows={30} />)
+        await waitFor(() => expect(handle().tagName).toBe('BUTTON'))
+        const start = panel().getBoundingClientRect().height
+        const row = handle().parentElement!
+        const init = { bubbles: true, pointerId: 12, pointerType: 'touch', clientX: 100 }
+        row.dispatchEvent(new PointerEvent('pointerdown', { ...init, clientY: 500 }))
+        row.dispatchEvent(new PointerEvent('pointermove', { ...init, clientY: 470 }))
+        await waitFor(() => expect(Math.round(panel().getBoundingClientRect().height)).toBe(Math.round(start + 30)))
+        row.dispatchEvent(new PointerEvent('pointerup', { ...init, clientY: 470 }))
+        await expect(handle()).toHaveAttribute('aria-expanded', 'false')
+        await waitFor(() => expect(Math.round(panel().getBoundingClientRect().height)).toBe(Math.round(start)))
+    })
+
+    it('gives its content the full 640px: the 1px edge takes no width', async () => {
+        await page.viewport(743, PHONE.height)
+        mount(<HeightFixture rows={2} />)
+        await waitFor(() => expect(panel()).not.toBeNull())
+        await expect(panel().getBoundingClientRect().width).toBe(640)
+        await expect(handle().parentElement!.getBoundingClientRect().width).toBe(640)
+        await expect(getComputedStyle(byTestId('hs-edge')).boxShadow).toContain('inset')
     })
 
     it('shows the back control and the title icon when given', async () => {

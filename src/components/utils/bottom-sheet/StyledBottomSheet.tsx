@@ -160,7 +160,7 @@ export const StyledBottomSheet = ({
         openRef.current = open
     }, [onClose, open])
 
-    const { dragHandleProps, dragOffset } = useDragToDismiss(
+    const { dragHandleProps, dragOffset, liftedHeight } = useDragToDismiss(
         sheetRef,
         () => {
             onCloseRef.current('drag')
@@ -308,7 +308,8 @@ export const StyledBottomSheet = ({
     const reset = resolve(resetAction)
     const extraActions = resolve(footerActions)
     const hasFooter = Boolean(viewResults ?? reset)
-    const isDragging = dragOffset > 0
+    const isLifting = liftedHeight !== null
+    const isDragging = dragOffset > 0 || isLifting
 
     const handleCancel = (event: SyntheticEvent<HTMLDialogElement>): void => {
         if (event.cancelable) event.preventDefault()
@@ -355,18 +356,24 @@ export const StyledBottomSheet = ({
             <div
                 ref={sheetRef}
                 data-state={isShown ? 'open' : 'closed'}
-                style={isDragging ? { transform: `translateY(${dragOffset}px)` } : undefined}
+                style={
+                    isLifting
+                        ? { maxHeight: `min(${liftedHeight}px, 90dvh)` }
+                        : isDragging
+                          ? { transform: `translateY(${dragOffset}px)` }
+                          : undefined
+                }
                 className={cn(
-                    // `border-solid` + `box-border` are load-bearing: Tailwind runs with preflight off,
-                    // so a bare `border` paints nothing and widths fall back to content-box.
-                    'relative box-border flex w-full max-w-[640px] flex-col border border-solid border-delta-300 bg-white text-delta-700 outline-none',
+                    // `box-border` is load-bearing: Tailwind runs with preflight off, so widths would fall
+                    // back to content-box. The 1px edge is the last child, so it takes no width (Figma).
+                    'relative box-border flex w-full max-w-[640px] flex-col bg-white text-delta-700 outline-none',
                     isShortViewport
                         ? 'h-full max-h-none rounded-none'
-                        : cn('rounded-t-[28px]', expanded ? 'max-h-[90dvh]' : 'max-h-[50dvh]'),
-                    // Utilities ship `!important`, so while dragging the transform classes are dropped
-                    // rather than out-ranked by the inline offset.
+                        : cn('rounded-t-[28px]', !isLifting && (expanded ? 'max-h-[90dvh]' : 'max-h-[50dvh]')),
+                    // Utilities ship `!important`, so while dragging the transform, height and transition
+                    // classes are dropped rather than out-ranked by the inline offset or height.
                     !isDragging && [
-                        'ease-out motion-safe:transition-transform motion-safe:duration-[250ms] motion-reduce:transition-opacity motion-reduce:duration-150',
+                        'ease-out motion-safe:transition-[transform,max-height] motion-safe:duration-[250ms] motion-reduce:transition-opacity motion-reduce:duration-150',
                         isShown ? 'translate-y-0 opacity-100' : 'motion-safe:translate-y-full motion-reduce:opacity-0',
                     ],
                     className,
@@ -475,6 +482,11 @@ export const StyledBottomSheet = ({
                         {extraActions}
                     </div>
                 )}
+                <span
+                    aria-hidden='true'
+                    data-testid={`${dataTest}-edge`}
+                    className='pointer-events-none absolute inset-0 rounded-[inherit] [box-shadow:inset_0_0_0_1px_var(--colors-delta-300)]'
+                />
                 </div>
             </OverlayBackOwnerContext.Provider>
         </dialog>

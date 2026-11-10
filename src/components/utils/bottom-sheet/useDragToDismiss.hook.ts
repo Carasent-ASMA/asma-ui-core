@@ -19,11 +19,14 @@ interface DragToDismiss {
     dragHandleProps: DragHandleProps
     /** How far the sheet is currently dragged down, in px. `0` when at rest. */
     dragOffset: number
+    /** While the handle is dragged up on a sheet that can expand: its height under the finger, in px. */
+    liftedHeight: number | null
 }
 
 /**
- * Drag the sheet down past 30% of its height to dismiss it; release earlier and it snaps back. Drag it
- * up by 48px and `onDragUp` runs, which expands a sheet that has a taller height.
+ * Drag the sheet down past 30% of its height to dismiss it; release earlier and it snaps back. Dragged
+ * up, a sheet that has a taller height follows the finger (`liftedHeight`); released after 48px,
+ * `onDragUp` expands it, earlier it settles back.
  *
  * Deliberately never the only exit or the only way to resize (WCAG 2.5.7): the close button, the scrim
  * and Escape close it, and the drag handle toggles the height as a button. A press that starts on any
@@ -36,6 +39,7 @@ export const useDragToDismiss = (
     onDragUp?: () => void,
 ): DragToDismiss => {
     const [dragOffset, setDragOffset] = useState(0)
+    const [liftedHeight, setLiftedHeight] = useState<number | null>(null)
     const drag = useRef<{ pointerId: number; startY: number; height: number; captured: boolean } | null>(null)
 
     const end = (event: PointerEvent<HTMLElement>, travelled: number): void => {
@@ -46,6 +50,7 @@ export const useDragToDismiss = (
             event.currentTarget.releasePointerCapture(event.pointerId)
         }
         setDragOffset(0)
+        setLiftedHeight(null)
         if (!current.captured) return
         if (travelled > current.height * DISMISS_RATIO) onDismiss()
         else if (travelled < -EXPAND_DISTANCE) onDragUp?.()
@@ -53,6 +58,7 @@ export const useDragToDismiss = (
 
     return {
         dragOffset,
+        liftedHeight,
         dragHandleProps: {
             onPointerDown: (event) => {
                 if (event.pointerType === 'mouse' && event.button !== 0) return
@@ -81,6 +87,7 @@ export const useDragToDismiss = (
                     }
                 }
                 setDragOffset(Math.max(0, travelled))
+                setLiftedHeight(onDragUp && travelled < 0 ? current.height - travelled : null)
             },
             onPointerUp: (event) => {
                 const current = drag.current
