@@ -334,7 +334,7 @@ describe('StyledMenu keyboard contract', () => {
     })
 
     /* FINDING ASMA-8139-F — WCAG 2.4.7 (focus visible). src/components/navigation/menu/StyledMenuItem.tsx.
-     * Same defect as ASMA-8139-B on StyledSelectItem: the row is `outline-none` with no focus rule,
+     * Same defect as ASMA-8139-B on StyledSelectItem: the row is `outline-hidden` with no focus rule,
      * while StyledMenuList's arrow-key handler moves real DOM focus onto it. The `hover:bg-delta-50`
      * rule covers the mouse only, so a keyboard user cannot see which item is focused.
      * RESOLVED by ASMA-8087 KBD-07 as the requested WCAG 2.4.7 exception: a `:focus-visible` left

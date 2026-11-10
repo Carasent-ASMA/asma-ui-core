@@ -51,21 +51,21 @@ export const StyledTitleChevron: React.FC<StyledTitleChevronProps> = ({
         data-testid={dataTest}
         onClick={onClick}
         className={cn(
-            'group flex min-h-11 w-full cursor-pointer items-center rounded border-0 bg-transparent p-0 text-left',
-            'font-semibold text-delta-800 transition-colors duration-300',
+            'group flex min-h-11 w-full cursor-pointer items-center rounded-[4px] border-0 bg-transparent p-0 text-left',
+            'text-delta-800 font-semibold transition-colors duration-300',
             SIZE_TEXT[size],
             'hover:text-gama-500 focus-visible:text-gama-500 active:text-gama-600',
             // ASMA-8220 (TB-14): designed `active:` colour above → touch-ready. Already `min-h-11`
             // (44px), so no `asma-touch-target` — that rule is an override, not a floor.
             'asma-touch-ready',
-            'outline-gama-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
+            'outline-gama-400 focus-visible:outline-2 focus-visible:outline-offset-2',
             className,
         )}
     >
         <span
             className={cn(
                 'min-w-0 truncate',
-                'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:![overflow-wrap:anywhere]',
+                'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:[overflow-wrap:anywhere]!',
             )}
         >
             {children}

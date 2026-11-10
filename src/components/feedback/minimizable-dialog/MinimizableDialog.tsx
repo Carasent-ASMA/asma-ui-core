@@ -198,7 +198,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
 
     return (
         <>
-            {isFullScreenActive && <div className='fixed inset-0 z-[51] bg-[rgb(98,110,126)] bg-opacity-70' />}
+            {isFullScreenActive && <div className='fixed inset-0 z-51 bg-[rgb(98,110,126)]/70' />}
 
             <div
                 ref={minimizedPanelRef}
@@ -221,7 +221,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                             tabIndex={0}
                             data-testid='minimized-title'
                             // Inset ring: the bar clips overflow, so an outside outline would be cut off.
-                            className='min-w-0 truncate text-lg font-semibold text-delta-800 focus-visible:[outline-offset:-2px]'
+                            className='text-delta-800 min-w-0 truncate text-lg font-semibold focus-visible:-outline-offset-2'
                         >
                             {title}
                         </div>
@@ -276,11 +276,11 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                 aria-modal={isFullScreenActive ? true : undefined}
                 aria-labelledby={isFullScreenActive ? titleId : undefined}
                 className={cn(
-                    'fixed bottom-4 right-4 z-[51] rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)] transition-all duration-300',
+                    'fixed right-4 bottom-4 z-51 rounded-lg bg-white shadow-[0_4px_40px_0px_rgba(34,33,51,0.4)] transition-all duration-300',
                     // Narrower than a phone: the docked panel (shrink-to-fit, pinned right) stays on screen.
                     'max-xs:max-w-[calc(100vw-32px)]',
                     className && !minimized && !fullScreen ? className : '',
-                    minimized && '!h-0 !w-0 opacity-0 duration-0',
+                    minimized && 'size-0! opacity-0 duration-0',
                     isFullScreenActive && 'fixed duration-0',
                 )}
                 data-testid={dataTest}
@@ -293,8 +293,8 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                     ref={bodyRef}
                     data-dialog-body=''
                     className={cn(
-                        'flex min-h-0 flex-grow flex-col overflow-y-auto overscroll-contain',
-                        '[&_[data-dialog-footer]]:sticky [&_[data-dialog-footer]]:bottom-0 [&_[data-dialog-footer]]:z-[2] [&_[data-dialog-footer]]:bg-white',
+                        'flex min-h-0 grow flex-col overflow-y-auto overscroll-contain',
+                        '**:data-dialog-footer:sticky **:data-dialog-footer:bottom-0 **:data-dialog-footer:z-2 **:data-dialog-footer:bg-white',
                     )}
                     style={dialogScrollerStyle(scrollPaddingTop, scrollPaddingBottom)}
                 >
@@ -306,19 +306,19 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                     hidden={headerHidden}
                     className={cn(
                         DIALOG_HEADER_CLASSES,
-                        'rounded-t-lg border-b-[1px] border-delta-200',
-                        pinned && 'sticky top-0 z-[2]',
+                        'border-delta-200 rounded-t-lg border-b',
+                        pinned && 'sticky top-0 z-2',
                         headerHidden && 'hidden',
                     )}
                 >
                     <div className={DIALOG_HEADER_ACTIONS_ROW_CLASSES}>
                         {label && (
-                            <div className='min-w-0 flex-auto hyphens-auto text-sm text-delta-700 [overflow-wrap:anywhere]'>
+                            <div className='text-delta-700 min-w-0 flex-auto text-sm wrap-anywhere hyphens-auto'>
                                 {label}
                             </div>
                         )}
 
-                        <div className='ml-auto flex items-center gap-x-1 max-xs:flex-wrap max-xs:justify-end max-xs:gap-y-1'>
+                        <div className='max-xs:flex-wrap max-xs:justify-end max-xs:gap-y-1 ml-auto flex items-center gap-x-1'>
                             {actionNode}
                             {/* Offered in fullscreen too: taking it away left the header's learned
                                 triad a control short, and a dialog the user had sent fullscreen could
@@ -406,7 +406,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                         {title}
                     </div>
                 </div>
-                <div data-dialog-content-flow='' className={pinned ? 'isolate flex-grow' : dialogContentFlowClasses(pinned)}>
+                <div data-dialog-content-flow='' className={pinned ? 'isolate grow' : dialogContentFlowClasses(pinned)}>
                     {typeof children === 'function' ? children({ fullScreen }) : children}
                 </div>
                 </div>
@@ -417,7 +417,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                     footerInfo ? (
                         <div
                             className={cn(
-                                'flex items-center justify-between border-0 border-t-[1px] border-solid border-delta-200 bg-white p-4',
+                                'border-delta-200 flex items-center justify-between border-0 border-t border-solid bg-white p-4',
                                 footerClassName,
                             )}
                         >
@@ -460,7 +460,7 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                             {showButtons ? (
                                 <div
                                     className={cn(
-                                        'flex justify-end gap-x-2 border-t-[1px] border-delta-200 p-4',
+                                        'border-delta-200 flex justify-end gap-x-2 border-t p-4',
                                         btnContainerClassName,
                                     )}
                                 >

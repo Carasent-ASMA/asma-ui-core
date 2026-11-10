@@ -626,7 +626,7 @@ describe('MinimizableDialogV2 header controls stay in place', () => {
                 <p>Content</p>
             </MinimizableDialogV2>,
         )
-        const backdrop = container.querySelector<HTMLElement>('div[class*="bg-opacity-70"]')!
+        const backdrop = container.querySelector<HTMLElement>('div[class*="bg-[rgb(98,110,126)]/70"]')!
 
         // Dispatched rather than driven: the panel sits above the backdrop, so a real pointer
         // cannot reach it. The handler under test is the same one either way.

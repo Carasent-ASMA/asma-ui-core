@@ -19,7 +19,7 @@ export const StyledIcons: FC<{ height?: number; width?: number }> = ({ height = 
                 label='Filter icons'
                 onChange={(e) => setFilterText(e.target.value)}
             />
-            <div className='mt-2 flex h-full w-full flex-wrap items-center gap-5 bg-gray-100 p-5'>
+            <div className='mt-2 flex size-full flex-wrap items-center gap-5 bg-gray-100 p-5'>
                 <Toaster />
 
                 {icons.map((icon) => (

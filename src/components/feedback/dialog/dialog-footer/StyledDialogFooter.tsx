@@ -266,7 +266,7 @@ export function StyledDialogFooter({
                  * `self-stretch` overrides that for this item only. Deliberately not `w-full`: with
                  * the footer's own `p-4`, a 100% width overflows the parent wherever box-sizing is
                  * content-box — which also perturbs the width the action planner measures. */
-                'flex items-center justify-end self-stretch border-0 border-t border-solid border-delta-200 bg-white',
+                'border-delta-200 flex items-center justify-end self-stretch border-0 border-t border-solid bg-white',
                 // Narrower than a phone: the left cluster and each right-hand button wrap one by one instead
                 // of pushing the secondary button off the left edge (`justify-end` + nowrap) — the right
                 // cluster dissolves into this row (`contents`), so e.g. Delete stays beside Cancel when they
@@ -276,13 +276,13 @@ export function StyledDialogFooter({
                 rounded && 'rounded-b-lg',
                 /* Pinned to the bottom of the scroll container. The ASMA design system separates a
                  * fixed footer with the top border alone — no drop shadow. */
-                fixed && 'sticky bottom-0 z-[1]',
+                fixed && 'sticky bottom-0 z-1',
                 className,
             )}
         >
             {/* Narrower than a phone: the left cluster may shrink to the line, so a leading checkbox label
              * wraps instead of being pushed off the left edge. */}
-            <div className='flex shrink-0 flex-nowrap items-center gap-2 max-xs:mr-auto max-xs:min-w-0 max-xs:shrink'>
+            <div className='max-xs:mr-auto max-xs:min-w-0 max-xs:shrink flex shrink-0 flex-nowrap items-center gap-2'>
                 {leadingSlot ?? (
                     <>
                         {plan.inlineActions.map(({ action, showLabel }) => (

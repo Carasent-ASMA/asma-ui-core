@@ -59,9 +59,10 @@ export default defineConfig(
             // `border-y-solid` stay unlisted until something needs them. ASMA-8210 adds the `asma-*`
             // touch-readiness utilities to the same `@layer utilities` block, invisible to this rule
             // for the same reason.
-            'better-tailwindcss/no-unregistered-classes': [
+            'better-tailwindcss/no-unknown-classes': [
                 'error',
                 {
+                    entryPoint: 'src/styles/index.css',
                     ignore: [
                         'border-l-solid',
                         'border-b-solid',
@@ -74,6 +75,12 @@ export default defineConfig(
                     ],
                 },
             ],
+
+            // Keep utility pairs such as `text-sm leading-5` as written. Production matches utilities by
+            // class name: consumer CSS targets them (asma-app-editor's version-history header uses
+            // `.text-2xl.leading-8`), and the chat app's layered `!important` `.text-*` rules apply to
+            // the pair but not to the collapsed `text-sm/5`, so collapsing changes what users see.
+            'better-tailwindcss/enforce-canonical-classes': ['error', { collapse: false }],
 
             // NOTE: enable this when we have none of the other tailwind related errors
             'better-tailwindcss/enforce-consistent-line-wrapping': ['off', { printWidth: 100 }],

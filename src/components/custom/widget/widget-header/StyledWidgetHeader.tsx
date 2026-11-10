@@ -23,7 +23,7 @@ export const StyledWidgetHeader: React.FC<{
                 // The actions wrap below the title once both no longer fit on one line.
                 'flex-wrap gap-y-2',
                 containerClassname,
-                !hasTitle && actions && '!block',
+                !hasTitle && actions && 'block!',
             )}
         >
             {hasTitle && <StyledWidgetTitle>{title}</StyledWidgetTitle>}

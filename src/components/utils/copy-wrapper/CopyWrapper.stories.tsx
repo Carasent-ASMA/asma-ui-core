@@ -20,7 +20,7 @@ function processMessageInfo(messageInfo: string | ReactNode, options?: MessagePr
         variant: 'info',
         message: messageInfo,
         autoHideDuration: 6000,
-        className: 'bg-gama-700 text-white !min-w-[100px] !max-w-[400px] rounded-md p-4 flex items-center',
+        className: 'bg-gama-700 text-white min-w-[100px]! max-w-[400px]! rounded-md p-4 flex items-center',
         anchorOrigin: {
             vertical: 'bottom',
             horizontal: 'center',

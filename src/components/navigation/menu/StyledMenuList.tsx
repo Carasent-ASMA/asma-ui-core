@@ -155,7 +155,7 @@ export const StyledMenuList = ({
         id,
         className: cn(
             styles['list'],
-            'm-0 list-none outline-none',
+            'm-0 list-none outline-hidden',
             !hasCustomPadding && 'px-0',
             !hasCustomPadding && (disablePadding ? 'py-0' : 'py-2'),
             className,

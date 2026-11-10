@@ -48,7 +48,7 @@ export function ToolbarMeasurementStrip({
         <div
             aria-hidden
             {...INERT_PROPS}
-            className='pointer-events-none invisible absolute left-0 top-0 h-0 overflow-hidden'
+            className='pointer-events-none invisible absolute top-0 left-0 h-0 overflow-hidden'
         >
             <div className='flex h-0 flex-nowrap items-center overflow-hidden'>
                 {title != null && (

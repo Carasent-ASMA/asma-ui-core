@@ -9,18 +9,32 @@ const boxShadow = twConfigs.boxShadow,
     width = twConfigs.width,
     maxWidth = twConfigs.maxWidth
 
+/* The published CSS reaches every app on the page as unlayered `!important` rules, so the package
+ * build (`pnpm build`) leaves out classes that only stories and tests use. A story's `grid-cols-1`
+ * beat the apps' layered `tablet:grid-cols-*` and stacked workspace columns (ASMA-8701).
+ * Storybook, VRT and the vitest projects still scan everything. */
+const STORY_AND_TEST_SOURCES = [
+    '!src/**/*.stories.{js,jsx,ts,tsx}',
+    '!src/**/story/**',
+    '!src/**/stories/**',
+    '!src/**/*.test.{js,jsx,ts,tsx}',
+    '!src/test-utils/**',
+]
+const isLibraryBuild = process.env['ASMA_UI_CORE_LIBRARY_BUILD'] === '1'
+
 export default {
-    mode: 'jit',
+    // mode: 'jit',
     important: true,
     future: {
-        // `hover:` / `group-hover:` only where a real pointer hovers (`(hover: hover) and (pointer:
-        // fine)`), as Tailwind 4 does by default. On a touch screen the browser keeps an emulated
-        // pointer at the last tap: when a picker or menu closed on a tap, the element underneath
-        // took the hover style and kept it (ASMA-8468).
+        // `hover:` / `group-hover:` / `peer-hover:` only where a real pointer hovers (`(hover: hover)
+        // and (pointer: fine)`). On a touch screen the browser keeps an emulated pointer at the last
+        // tap: when a picker or menu closed on a tap, the element underneath took the hover style and
+        // kept it (ASMA-8468). v4 IGNORES `future`, so the behaviour is redefined with
+        // `@custom-variant hover` in `src/styles/index.css`; both stay until the team decides.
         hoverOnlyWhenSupported: true,
     },
     blocklist: ['rotate-180'],
-    content: ['src/**/*.{js,jsx,ts,tsx}'],
+    content: ['src/**/*.{js,jsx,ts,tsx}', ...(isLibraryBuild ? STORY_AND_TEST_SOURCES : [])],
     theme: {
         fontFamily,
         extend: {
@@ -33,11 +47,9 @@ export default {
         },
     },
     darkMode: 'media',
-    corePlugins: {
-        preflight: false,
-    },
+    // Preflight and the scrollbar plugin live in `src/styles/index.css` (`@plugin
+    // 'tailwind-scrollbar'`); v4 does not read them from here.
     plugins: [
-        require('tailwind-scrollbar'),
         /* `max-xs:` — below xs (320px), narrower than any phone, e.g. a 320px window at 200% zoom
          * (WCAG 1.4.10, ASMA-8630).
          * - Strictly below 320px: `max-[320px]:` would also match 320px.

@@ -55,17 +55,17 @@
     }
 
     &.medium {
-        @apply h-[38px];
+        height: 38px;
         padding-left: 4px;
         padding-right: 4px;
     }
     &.small {
-        @apply h-[32px];
+        height: 32px;
         padding-left: 4px;
         padding-right: 4px;
     }
     &.large {
-        @apply h-[40px];
+        height: 40px;
         padding-left: 8px;
         padding-right: 8px;
     }

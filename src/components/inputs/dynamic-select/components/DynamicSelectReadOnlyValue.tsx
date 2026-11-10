@@ -56,7 +56,7 @@ export const DynamicSelectReadOnlyValue = <TOption extends DynamicSelectOption>(
             <DynamicSelectTitle title={title} titleSize={titleSize} />
             <div
                 data-testid={`${dataTest}-read-only-value`}
-                className='text-base/6 text-delta-700'
+                className='text-delta-700 text-base/6'
             >
                 {selected === null ? '-' : renderLabel ? renderLabel(selected) : getOptionLabel(selected)}
             </div>

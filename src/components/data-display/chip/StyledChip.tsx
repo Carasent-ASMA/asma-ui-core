@@ -214,7 +214,7 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                 onMouseUp={disabled || readOnly ? undefined : onMouseUp}
                 className={cn(
                     // Figma _BASE_Tag (node 14312-26020): label Body Base 16px/lh24, text-icon/body #49525f (delta-700), border/outline #bdc4cf (delta-300), radius 25, gap 4.
-                    'box-border inline-flex items-center gap-1 rounded-[25px] border border-solid border-delta-300 bg-white text-base text-delta-700',
+                    'border-delta-300 text-delta-700 box-border inline-flex items-center gap-1 rounded-[25px] border border-solid bg-white text-base',
                     !consumerSetsWidth && 'w-fit',
                     !consumerSetsMaxWidth && 'max-w-full',
                     size === 'small' ? 'h-6' : 'h-8',
@@ -229,7 +229,7 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                     disabled && (focusableDisabled ? 'cursor-not-allowed' : 'pointer-events-none'),
                     interactive &&
                         cn(
-                            'cursor-pointer outline-none',
+                            'cursor-pointer outline-hidden',
                             // ASMA-8220 (TB-14): touch-ready, not pressable — the `active:` colours
                             // below are the designed pressed state, so no opacity layer over them.
                             // No `asma-touch-target`: the fixed h-6/h-8 heights are the Figma chip.
@@ -250,7 +250,7 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                     <span
                         className={cn(
                             'flex shrink-0 items-center justify-center',
-                            size === 'small' ? 'h-[18px] w-[18px]' : 'h-6 w-6',
+                            size === 'small' ? 'size-[18px]' : 'size-6',
                             avatar ? classes?.avatar : classes?.icon,
                         )}
                     >
@@ -260,7 +260,7 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                 <span
                     className={cn(
                         'min-w-0 truncate',
-                        'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:![overflow-wrap:anywhere]',
+                        'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:[overflow-wrap:anywhere]!',
                         // One 24px line + this = the 32/24px chip minus its 1px borders. The fixed-height
                         // chip clipped the same overflow invisibly; `h-auto` would grow it to 34/30px.
                         size === 'small' ? 'max-xs:-my-px' : 'max-xs:py-[3px]',
@@ -283,8 +283,8 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                         className={cn(
                             // Its focus indication is intentionally painted by the parent (via
                             // `:has(button:focus-visible)`), matching the Figma state without a second button ring.
-                            'flex shrink-0 items-center justify-center rounded-full border border-solid border-delta-100 bg-delta-50 p-0 text-delta-700 [outline:none]',
-                            size === 'small' ? 'h-[18px] w-[18px]' : 'h-5 w-5',
+                            'border-delta-100 bg-delta-50 text-delta-700 flex shrink-0 items-center justify-center rounded-full border border-solid p-0 [outline:none]',
+                            size === 'small' ? 'size-[18px]' : 'size-5',
                             classes?.deleteIcon,
                         )}
                     >

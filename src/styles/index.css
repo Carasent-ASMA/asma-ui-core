@@ -1,14 +1,230 @@
-@import 'color-variables/rootVariables.css';
-@import 'components-colors/inputVariables.css';
-@import 'color-variables/defaultTokens.css';
-@import 'color-variables/fretexTokens.css';
-@import 'color-variables/jadeTokens.css';
-@import 'typographyTokens.css';
-@import 'fieldWidthTokens.css';
+@layer theme, base, components, utilities;
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Unlayered, as in v3: a consumer's layered token override must not start beating these. */
+@import './color-variables/rootVariables.css';
+@import './components-colors/inputVariables.css';
+@import './color-variables/defaultTokens.css';
+@import './color-variables/fretexTokens.css';
+@import './color-variables/jadeTokens.css';
+@import './typographyTokens.css';
+@import './fieldWidthTokens.css';
+
+/*
+ * Theme and utilities only — no preflight. v3 ran with `corePlugins.preflight: false`, which v4
+ * ignores, and `@import 'tailwindcss'` would ship the full reset to every app that loads
+ * `dist/style.css` (the shell leaves it out the same way).
+ *
+ * Utilities stay UNLAYERED, as v3 emitted them. They carry `!important` (`important: true`), and an
+ * important declaration inside a cascade layer beats every unlayered one, so a layered import would
+ * silently break consumer overrides such as Ad Voca's safe-area `dialog:modal` padding over `.p-0`.
+ *
+ * `source(none)` turns off automatic detection: the config's `content` is the only source, so
+ * README/docs examples are not compiled in, and the package build can leave out story- and
+ * test-only classes (see `tailwind.config.ts`, ASMA-8701).
+ */
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' source(none);
+
+@plugin 'tailwind-scrollbar';
+
+@config '../../tailwind.config.ts';
+
+/*
+ * v3 values for the theme keys whose v4 defaults differ. `inline` writes the literal into each
+ * utility, so another app's theme variable cannot change it, and a v3 copy of the same class on
+ * the page draws the same thing.
+ *
+ * - Colours: v4 redrew the default palette in oklch (`bg-red-700` on the error snackbar,
+ *   `text-gray-300` on disabled helper text).
+ * - `rounded-sm` and `shadow-sm` keep their v3 sizes (2px, the small shadow). v4 shifted both
+ *   scales one step and the upgrade codemod renamed classes to follow, but production matches by
+ *   name: the chat app ships layered `!important` `.rounded-sm` / `.shadow-sm` that win over every
+ *   app's copy, so a renamed `rounded-xs` would have dropped the phone-field flag from the 4px it
+ *   shows today to 2px. Class names stay as on master, and the old `rounded` uses are written
+ *   `rounded-[4px]` because v4 reads `rounded-sm` as the 2px step.
+ */
+@theme inline {
+    --color-red-700: #b91c1c;
+    --color-gray-300: #d1d5db;
+    --color-gray-600: #4b5563;
+    --radius-sm: 0.125rem;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+/*
+ * ASMA-8468: v3 compiled `future.hoverOnlyWhenSupported: true` (see `tailwind.config.ts`) into
+ * `@media (hover: hover) and (pointer: fine)`. On a touch screen the browser keeps an emulated
+ * pointer at the last tap: when a picker or menu closed on a tap, the element underneath took the
+ * hover style and kept it. v4 ignores `future` and ships only `@media (hover: hover)`, so the
+ * variant is redefined here — and with it `group-hover:` / `peer-hover:`, which compound on it.
+ * Keep both until the team decides otherwise.
+ */
+@custom-variant hover {
+    @media (hover: hover) and (pointer: fine) {
+        &:hover {
+            @slot;
+        }
+    }
+}
+
+@utility flip-180 {
+    transform: rotate(180deg);
+}
+
+@utility border-solid {
+    border-style: solid;
+}
+
+@utility border-r-solid {
+    border-right-style: solid;
+}
+
+@utility border-l-solid {
+    border-left-style: solid;
+}
+
+@utility border-b-solid {
+    border-bottom-style: solid;
+}
+
+@utility border-t-solid {
+    border-top-style: solid;
+}
+
+@utility border-y-solid {
+    border-top-style: solid;
+    border-bottom-style: solid;
+}
+
+@utility absolute-center {
+    @apply absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2;
+}
+
+@utility noselect {
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Old versions of Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+}
+
+@utility allselect {
+    -webkit-touch-callout: all; /* iOS Safari */
+    -webkit-user-select: all; /* Safari */
+    -khtml-user-select: all; /* Konqueror HTML */
+    -moz-user-select: all; /* Old versions of Firefox */
+    -ms-user-select: all; /* Internet Explorer/Edge */
+    user-select: all; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+}
+
+@utility overflow-wrap-anywhere {
+    word-break: break-word !important; /* Chrome, Safari */
+    overflow-wrap: anywhere !important; /* Firefox */
+}
+
+@utility overflow-scroll {
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    /*  @font-face {
+        font-family: 'Roboto';
+        src: url('./fonts/roboto/Roboto-Regular.ttf') format('truetype');
+        font-weight: 400;
+        font-style: normal;
+    }
+
+   
+    @font-face {
+        font-family: 'Roboto';
+        src: url('./fonts/roboto/Roboto-Bold.ttf') format('truetype');
+        font-weight: 700;
+        font-style: normal;
+    }
+
+    
+    @font-face {
+        font-family: 'Roboto';
+        src: url('./fonts/roboto/Roboto-BoldItalic.ttf') format('truetype');
+        font-weight: 700;
+        font-style: italic;
+    }
+
+   
+    @font-face {
+        font-family: 'Roboto';
+        src: url('./fonts/roboto/Roboto-Black.ttf') format('truetype');
+        font-weight: 900;
+        font-style: normal;
+    }
+
+    
+    @font-face {
+        font-family: 'Roboto';
+        src: url('./fonts/roboto/Roboto-BlackItalic.ttf') format('truetype');
+        font-weight: 900;
+        font-style: italic;
+    }
+
+   
+    @font-face {
+        font-family: 'Roboto';
+        src: url('./fonts/roboto/Roboto-Light.ttf') format('truetype');
+        font-weight: 300;
+        font-style: normal;
+    }
+
+   
+    @font-face {
+        font-family: 'Roboto';
+        src: url('./fonts/roboto/Roboto-LightItalic.ttf') format('truetype');
+        font-weight: 300;
+        font-style: italic;
+    }
+
+    
+    @font-face {
+        font-family: 'Roboto';
+        src: url('./fonts/roboto/Roboto-Medium.ttf') format('truetype');
+        font-weight: 500;
+        font-style: normal;
+    }
+
+    
+    @font-face {
+        font-family: 'Roboto';
+        src: url('./fonts/roboto/Roboto-MediumItalic.ttf') format('truetype');
+        font-weight: 500;
+        font-style: italic;
+    }
+
+   
+    @font-face {
+        font-family: 'Roboto';
+        src: url('./fonts/roboto/Roboto-Thin.ttf') format('truetype');
+        font-weight: 100;
+        font-style: normal;
+    }
+
+   
+    @font-face {
+        font-family: 'Roboto';
+        src: url('./fonts/roboto/Roboto-ThinItalic.ttf') format('truetype');
+        font-weight: 100;
+        font-style: italic;
+    }
+
+   
+    @font-face {
+        font-family: 'Roboto';
+        src: url('./fonts/roboto/Roboto-Italic.ttf') format('truetype');
+        font-weight: 400;
+        font-style: italic;
+    } */
+}
 
 @layer base {
     /*
@@ -149,163 +365,4 @@
     .asma-touch-target {
         min-height: var(--asma-touch-target-size, 44px) !important;
     }
-}
-
-@layer utilities {
-    .flip-180 {
-        transform: rotate(180deg);
-    }
-
-    .border-solid {
-        border-style: solid;
-    }
-
-    .border-r-solid {
-        border-right-style: solid;
-    }
-
-    .border-l-solid {
-        border-left-style: solid;
-    }
-
-    .border-b-solid {
-        border-bottom-style: solid;
-    }
-
-    .border-t-solid {
-        border-top-style: solid;
-    }
-
-    .border-y-solid {
-        border-top-style: solid;
-        border-bottom-style: solid;
-    }
-
-    .absolute-center {
-        @apply absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2;
-    }
-
-    .noselect {
-        -webkit-touch-callout: none; /* iOS Safari */
-        -webkit-user-select: none; /* Safari */
-        -khtml-user-select: none; /* Konqueror HTML */
-        -moz-user-select: none; /* Old versions of Firefox */
-        -ms-user-select: none; /* Internet Explorer/Edge */
-        user-select: none; /* Non-prefixed version, currently
-                                  supported by Chrome, Edge, Opera and Firefox */
-    }
-
-    .allselect {
-        -webkit-touch-callout: all; /* iOS Safari */
-        -webkit-user-select: all; /* Safari */
-        -khtml-user-select: all; /* Konqueror HTML */
-        -moz-user-select: all; /* Old versions of Firefox */
-        -ms-user-select: all; /* Internet Explorer/Edge */
-        user-select: all; /* Non-prefixed version, currently
-                                  supported by Chrome, Edge, Opera and Firefox */
-    }
-
-    .overflow-wrap-anywhere {
-        word-break: break-word !important; /* Chrome, Safari */
-        overflow-wrap: anywhere !important; /* Firefox */
-    }
-
-    .overflow-scroll::-webkit-scrollbar {
-        display: none;
-    }
-
-    /*  @font-face {
-        font-family: 'Roboto';
-        src: url('./fonts/roboto/Roboto-Regular.ttf') format('truetype');
-        font-weight: 400;
-        font-style: normal;
-    }
-
-   
-    @font-face {
-        font-family: 'Roboto';
-        src: url('./fonts/roboto/Roboto-Bold.ttf') format('truetype');
-        font-weight: 700;
-        font-style: normal;
-    }
-
-    
-    @font-face {
-        font-family: 'Roboto';
-        src: url('./fonts/roboto/Roboto-BoldItalic.ttf') format('truetype');
-        font-weight: 700;
-        font-style: italic;
-    }
-
-   
-    @font-face {
-        font-family: 'Roboto';
-        src: url('./fonts/roboto/Roboto-Black.ttf') format('truetype');
-        font-weight: 900;
-        font-style: normal;
-    }
-
-    
-    @font-face {
-        font-family: 'Roboto';
-        src: url('./fonts/roboto/Roboto-BlackItalic.ttf') format('truetype');
-        font-weight: 900;
-        font-style: italic;
-    }
-
-   
-    @font-face {
-        font-family: 'Roboto';
-        src: url('./fonts/roboto/Roboto-Light.ttf') format('truetype');
-        font-weight: 300;
-        font-style: normal;
-    }
-
-   
-    @font-face {
-        font-family: 'Roboto';
-        src: url('./fonts/roboto/Roboto-LightItalic.ttf') format('truetype');
-        font-weight: 300;
-        font-style: italic;
-    }
-
-    
-    @font-face {
-        font-family: 'Roboto';
-        src: url('./fonts/roboto/Roboto-Medium.ttf') format('truetype');
-        font-weight: 500;
-        font-style: normal;
-    }
-
-    
-    @font-face {
-        font-family: 'Roboto';
-        src: url('./fonts/roboto/Roboto-MediumItalic.ttf') format('truetype');
-        font-weight: 500;
-        font-style: italic;
-    }
-
-   
-    @font-face {
-        font-family: 'Roboto';
-        src: url('./fonts/roboto/Roboto-Thin.ttf') format('truetype');
-        font-weight: 100;
-        font-style: normal;
-    }
-
-   
-    @font-face {
-        font-family: 'Roboto';
-        src: url('./fonts/roboto/Roboto-ThinItalic.ttf') format('truetype');
-        font-weight: 100;
-        font-style: italic;
-    }
-
-   
-    @font-face {
-        font-family: 'Roboto';
-        src: url('./fonts/roboto/Roboto-Italic.ttf') format('truetype');
-        font-weight: 400;
-        font-style: italic;
-    } */
 }

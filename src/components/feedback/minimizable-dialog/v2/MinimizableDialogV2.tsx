@@ -199,7 +199,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                     data-testid={dataTest}
                 >
                     <div
-                        className='min-w-0 max-w-[303px] truncate pr-1 text-lg font-semibold text-delta-800'
+                        className='text-delta-800 max-w-[303px] min-w-0 truncate pr-1 text-lg font-semibold'
                     >
                         {/* The bar alone stays one line; the full title shows on hover and on keyboard focus. */}
                         <StyledTooltip title={title} placement='top'>
@@ -208,7 +208,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                                 tabIndex={0}
                                 data-testid='minimized-title'
                                 // Inset ring: the bar clips overflow, so an outside outline would be cut off.
-                                className='truncate focus-visible:[outline-offset:-2px]'
+                                className='truncate focus-visible:-outline-offset-2'
                             >
                                 {title}
                             </div>
@@ -240,7 +240,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                 // backdrop must not be a way around it either.
                 // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
                 <div
-                    className='fixed inset-0 z-[52] bg-[rgb(98,110,126)] bg-opacity-70'
+                    className='fixed inset-0 z-52 bg-[rgb(98,110,126)]/70'
                     onClick={() => {
                         if (isFullscreenLocked) return
                         setFullScreen(false)
@@ -261,7 +261,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                     minimized && styles['hidden'],
                     !fullScreen && classNameOverrides.maximized,
                     fullScreen && classNameOverrides.fullscreen,
-                    isFullScreenActive && 'fixed z-[53] duration-0',
+                    isFullScreenActive && 'fixed z-53 duration-0',
                 )}
             >
                 <OverlayBackOwnerContext.Provider value={modalRef}>
@@ -274,13 +274,13 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                     data-dialog-body=''
                     className={cn(
                         minimized && 'hidden',
-                        'flex min-h-0 flex-grow flex-col overflow-y-auto overscroll-contain',
+                        'flex min-h-0 grow flex-col overflow-y-auto overscroll-contain',
                         // ASMA-8737: the body is the one scroller. A direct StyledDialogContent keeps its full
                         // height instead of shrinking into a second scroller, so an unpinned header really
                         // scrolls away (the same rule StyledDialog applies).
-                        "[&>[data-dialog-content-flow]>[data-dialog-content]]:!flex-[1_0_auto]",
+                        "[&>[data-dialog-content-flow]>[data-dialog-content]]:flex-[1_0_auto]!",
                         // The footer stays pinned while the body scrolls (PIN-5), also inside a consumer form.
-                        '[&_[data-dialog-footer]]:sticky [&_[data-dialog-footer]]:bottom-0 [&_[data-dialog-footer]]:z-[2] [&_[data-dialog-footer]]:bg-white',
+                        '**:data-dialog-footer:sticky **:data-dialog-footer:bottom-0 **:data-dialog-footer:z-2 **:data-dialog-footer:bg-white',
                     )}
                     style={dialogScrollerStyle(scrollPaddingTop, scrollPaddingBottom)}
                 >
@@ -293,8 +293,8 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                     className={cn(
                         DIALOG_HEADER_CLASSES,
                         // The paper is rounded from 640 px; the white header must not square its corners.
-                        'border-b-[1px] border-delta-200 sm:rounded-t-lg',
-                        pinned && 'sticky top-0 z-[2]',
+                        'border-delta-200 border-b sm:rounded-t-lg',
+                        pinned && 'sticky top-0 z-2',
                         headerHidden && 'hidden',
                     )}
                 >
@@ -302,12 +302,12 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                         {label && (
                             <div
                                 id={labelId}
-                                className='min-w-0 flex-auto hyphens-auto text-sm text-delta-700 [overflow-wrap:anywhere]'
+                                className='text-delta-700 min-w-0 flex-auto text-sm wrap-anywhere hyphens-auto'
                             >
                                 {label}
                             </div>
                         )}
-                        <div className='ml-auto flex items-center gap-x-1 max-xs:flex-wrap max-xs:justify-end max-xs:gap-y-2'>
+                        <div className='max-xs:flex-wrap max-xs:justify-end max-xs:gap-y-2 ml-auto flex items-center gap-x-1'>
                             <DialogBusyContext.Provider value={contextValue}>{actionNode}</DialogBusyContext.Provider>
                             {/* Minimize is offered in fullscreen too. Taking it away there left the
                                 header's learned triad a control short, and a dialog the user had sent

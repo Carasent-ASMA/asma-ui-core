@@ -94,7 +94,7 @@ export const StyledFormControlLabel = ({
     return (
         <label
             className={cn(
-                'm-0 inline-flex items-center gap-2 align-middle text-delta-800',
+                'text-delta-800 m-0 inline-flex items-center gap-2 align-middle',
                 isDisabled || isReadOnly ? 'cursor-default' : 'cursor-pointer',
                 PLACEMENT_CLASS[labelPlacement],
                 className,
@@ -108,7 +108,7 @@ export const StyledFormControlLabel = ({
                     className={cn(
                         styles['Label'],
                         // Narrower than a phone: a long word breaks instead of pushing past the screen edge.
-                        'max-xs:min-w-0 max-xs:hyphens-auto max-xs:![overflow-wrap:anywhere]',
+                        'max-xs:min-w-0 max-xs:hyphens-auto max-xs:[overflow-wrap:anywhere]!',
                         isDisabled && 'text-delta-300',
                         classes?.label,
                     )}

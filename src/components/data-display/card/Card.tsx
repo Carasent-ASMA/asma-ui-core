@@ -38,7 +38,7 @@ const UnreadMarker = ({ unread, labels, id, dataTest }: UnreadMarkerProps): JSX.
                 {labels.unread}
             </span>
             {isLabelVisible && (
-                <span aria-hidden='true' className='text-[0.6875rem] font-semibold uppercase leading-3 tracking-[0.034375rem] text-gama-600'>
+                <span aria-hidden='true' className='text-gama-600 text-[0.6875rem] leading-3 font-semibold tracking-[0.034375rem] uppercase'>
                     {labels.unread}
                 </span>
             )}
@@ -63,7 +63,7 @@ const CardHeaderTopRow = ({ checkbox, unread, tags, menu, titleText, labels, unr
     // A checkbox or ⋮ brings its own 40 × 40 hit area; the unread marker and tags alone get the
     // body's inset instead (Figma "Top": 12 px start, 8 px top, 4 px bottom).
     return (
-        <div className={cn('flex flex-wrap items-center gap-2', !checkbox && 'pl-3', !checkbox && !menu && 'pb-1 pt-2')}>
+        <div className={cn('flex flex-wrap items-center gap-2', !checkbox && 'pl-3', !checkbox && !menu && 'pt-2 pb-1')}>
             {checkbox && <CardCheckboxControl checkbox={checkbox} titleText={titleText} labels={labels} dataTest={dataTest} />}
             {unread && <UnreadMarker unread={unread} labels={labels} id={unreadId} dataTest={dataTest} />}
             {Boolean(tags?.length) && (
@@ -97,7 +97,7 @@ const CardHeaderTypeRow = ({ type, status, overdue, ids, hasTopRow, isDisabled }
                 <span
                     id={ids.type}
                     className={cn(
-                        'inline-flex min-w-0 items-center [overflow-wrap:anywhere]',
+                        'inline-flex min-w-0 items-center wrap-anywhere',
                         type.size === 'body' ? 'gap-1 text-base leading-6' : 'gap-[3px] text-sm leading-5',
                         overdue && 'text-warning-800',
                     )}
@@ -108,7 +108,7 @@ const CardHeaderTypeRow = ({ type, status, overdue, ids, hasTopRow, isDisabled }
                             aria-hidden='true'
                             className={cn(
                                 'inline-flex items-center justify-center',
-                                type.size === 'body' ? 'h-5 w-5 [&>svg]:h-5 [&>svg]:w-5' : 'h-4 w-4 [&>svg]:h-4 [&>svg]:w-4',
+                                type.size === 'body' ? 'size-5 [&>svg]:size-5' : 'size-4 [&>svg]:size-4',
                             )}
                         >
                             {type.icon}
@@ -122,20 +122,20 @@ const CardHeaderTypeRow = ({ type, status, overdue, ids, hasTopRow, isDisabled }
             <span
                 id={ids.status}
                 className={cn(
-                    'ml-auto inline-flex min-w-0 flex-wrap items-center justify-end gap-x-2 text-right text-sm leading-5 [overflow-wrap:anywhere]',
+                    'ml-auto inline-flex min-w-0 flex-wrap items-center justify-end gap-x-2 text-right text-sm leading-5 wrap-anywhere',
                     isDisabled ? 'text-delta-600' : 'text-delta-700',
                 )}
             >
                 {status && (
                     <span className='inline-flex min-w-0 items-center gap-2'>
                         {status.label}
-                        {status.squareColor && <span aria-hidden='true' className='h-3 w-3 shrink-0 rounded-sm' style={{ backgroundColor: status.squareColor }} />}
+                        {status.squareColor && <span aria-hidden='true' className='size-3 shrink-0 rounded-sm' style={{ backgroundColor: status.squareColor }} />}
                     </span>
                 )}
                 {overdue && (
-                    <span className='inline-flex min-w-0 items-center gap-2 text-warning-700'>
+                    <span className='text-warning-700 inline-flex min-w-0 items-center gap-2'>
                         {overdue.label}
-                        <WarningAmberOutlineIcon aria-hidden='true' className='h-5 w-5 shrink-0' />
+                        <WarningAmberOutlineIcon aria-hidden='true' className='size-5 shrink-0' />
                     </span>
                 )}
             </span>
@@ -169,9 +169,9 @@ const CLAMP_CLASS = { 1: 'min-w-0 truncate', 2: 'line-clamp-2 [overflow-wrap:any
  * Under a clamp it moves beside the clamped text, so the cut never hides it.
  */
 const TitleChevron = (): JSX.Element => (
-    <span aria-hidden='true' data-card-chevron='' className='inline-block whitespace-nowrap align-top'>
+    <span aria-hidden='true' data-card-chevron='' className='inline-block align-top whitespace-nowrap'>
         {'⁠'}
-        <ChevronRightIcon className='-my-px inline-block h-6 w-6 align-top' />
+        <ChevronRightIcon className='-my-px inline-block size-6 align-top' />
     </span>
 )
 
@@ -189,7 +189,7 @@ const TitleText = ({ title, titleId, titleClamp, titleChevron }: Pick<CardTitleP
 
     return (
         <>
-            <span id={titleId} className='[overflow-wrap:anywhere]'>
+            <span id={titleId} className='wrap-anywhere'>
                 {title}
             </span>
             {titleChevron && <TitleChevron />}
@@ -206,7 +206,7 @@ const TitleText = ({ title, titleId, titleClamp, titleChevron }: Pick<CardTitleP
  */
 const CardTitle = ({ level, model, open, labelledBy, describedBy, selected, disabled, className, ...text }: CardTitleProps): JSX.Element => {
     const Heading = `h${level}` as const
-    const headingClass = cn('m-0 min-w-0 text-base font-semibold leading-6 text-delta-800', className)
+    const headingClass = cn('text-delta-800 m-0 min-w-0 text-base leading-6 font-semibold', className)
 
     if (model === 'static' || !open) {
         return (
@@ -291,7 +291,7 @@ const OpenCue = ({ ctaContent, ctaId, selected, overdue, labels }: Omit<CardFoot
         // same accepted Q14 risk as the CTA on hover and selected (user decision, 2026-11-02).
         return (
             <span aria-hidden='true' data-card-viewing-now='' className={cn(CUE_CLASS, 'gap-1 pr-3', overdue ? 'text-warning-800' : 'text-gama-500')}>
-                <VisibilityOutlineIcon className='h-6 w-6' />
+                <VisibilityOutlineIcon className='size-6' />
                 {labels.viewingNow}
             </span>
         )
@@ -478,7 +478,7 @@ export const Card = (props: CardProps): JSX.Element => {
                                 />
                             </div>
                             {props.subtitle && (
-                                <div className='text-base leading-6 text-delta-700 [overflow-wrap:anywhere]'>{props.subtitle}</div>
+                                <div className='text-delta-700 text-base leading-6 wrap-anywhere'>{props.subtitle}</div>
                             )}
                         </div>
                         {props.media && <div className='shrink-0'>{props.media}</div>}
