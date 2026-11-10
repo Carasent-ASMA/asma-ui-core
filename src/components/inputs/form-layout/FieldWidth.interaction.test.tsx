@@ -243,6 +243,21 @@ describe('field width pattern: form column and pairs (WID-1, WID-9)', () => {
         await expect(widthOf(within(container).getByTestId('column'))).toBe(640)
     })
 
+    it('keeps a nested default column at 600 px inside an uncapped column', async () => {
+        const { container } = mount(
+            <Container width={1000}>
+                <StyledFormColumn dataTest='outer' maxWidth='none'>
+                    <StyledFormColumn dataTest='inner'>
+                        <StyledInputField dataTest='name' label='Navn' />
+                    </StyledFormColumn>
+                </StyledFormColumn>
+            </Container>,
+        )
+
+        await expect(widthOf(within(container).getByTestId('outer'))).toBe(1000)
+        await expect(widthOf(within(container).getByTestId('inner'))).toBe(600)
+    })
+
     it('keeps a step field at its width and gives the Full field the rest of the row, 16 px apart', async () => {
         const { container } = mount(
             <StyledFormColumn>
