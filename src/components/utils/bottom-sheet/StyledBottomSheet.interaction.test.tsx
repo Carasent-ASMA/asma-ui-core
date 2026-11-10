@@ -556,6 +556,33 @@ describe('StyledBottomSheet — heights and the drag handle (Figma DS_draft 7-10
         await waitFor(() => expect(panel().getBoundingClientRect().height).toBeLessThanOrEqual(PHONE.height / 2 + 1))
     })
 
+    it('grows with content the user adds from inside the sheet instead of scrolling at half height', async () => {
+        const GrowingFixture = (): JSX.Element => {
+            const [rows, setRows] = useState(2)
+            return (
+                <StyledBottomSheet dataTest='hs' open onClose={() => undefined} title='Filter' resultCount={3}>
+                    <button type='button' data-testid='hs-add' onClick={() => setRows(7)}>
+                        Add
+                    </button>
+                    {Array.from({ length: rows }, (_, index) => (
+                        <div key={index} style={{ height: 48, flexShrink: 0 }}>
+                            Row {index}
+                        </div>
+                    ))}
+                </StyledBottomSheet>
+            )
+        }
+        mount(<GrowingFixture />)
+        await waitFor(() => expect(byTestId('hs-add')).not.toBeNull())
+        await expect(panel().getBoundingClientRect().height).toBeLessThan(PHONE.height / 2)
+
+        await userEvent.click(byTestId('hs-add'))
+        await waitFor(() => expect(panel().getBoundingClientRect().height).toBeGreaterThan(PHONE.height / 2 + 1))
+        const body = panel().querySelector<HTMLElement>('.overflow-y-auto')!
+        await expect(body.scrollHeight).toBeLessThanOrEqual(body.clientHeight + 1)
+        await expect(panel().getBoundingClientRect().height).toBeLessThanOrEqual(PHONE.height * 0.9 + 1)
+    })
+
     it('expands when the handle row is dragged up by 48px or more', async () => {
         mount(<HeightFixture rows={30} />)
         await waitFor(() => expect(handle().tagName).toBe('BUTTON'))

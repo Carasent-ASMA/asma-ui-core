@@ -173,7 +173,11 @@ export const StyledBottomSheet = ({
         const body = bodyRef.current
         if (!open || expanded || !body) return undefined
         const measure = (): void => {
-            setOverflowsHalf(body.scrollHeight > body.clientHeight + 1)
+            const overflows = body.scrollHeight > body.clientHeight + 1
+            // Figma caps only the opening height. Content the user grows from inside the sheet (a field
+            // filling with chips) grows the sheet with it instead of starting to scroll.
+            if (overflows && body.contains(document.activeElement)) setExpanded(true)
+            else setOverflowsHalf(overflows)
         }
         measure()
         const observer = new ResizeObserver(measure)
