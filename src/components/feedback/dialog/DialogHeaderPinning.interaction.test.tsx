@@ -67,13 +67,14 @@ describe('Dialog header pinning (ASMA-8737)', () => {
         await page.viewport(1280, 720)
     })
 
-    // The examples table of ASMA-8737: header = 44 px actions row + title lines + 28 px padding; 26 px
-    // per line below 744 px wide, 24 px from there up.
+    // Header = 44 px actions row + title lines + 28 px padding; 26 px per line below 744 px wide,
+    // 32 px from there up (24 px type). A 6-line desktop title is therefore past 25% of 950 px.
     it.each<[string, [number, number], number, number | null, boolean]>([
         ['phone portrait, 3 lines: pinned', [390, 660], 3, 150, true],
         ['phone portrait, 4 lines: scrolls', [390, 660], 4, 176, false],
         ['phone landscape: scrolls (short screen)', [844, 340], 1, null, false],
-        ['laptop 1920 × 1080 at 100%, 6 lines: pinned', [1920, 950], 6, 216, true],
+        ['laptop 1920 × 1080 at 100%, 5 lines: pinned', [1920, 950], 5, 232, true],
+        ['laptop 1920 × 1080 at 100%, 6 lines: scrolls', [1920, 950], 6, 264, false],
         ['laptop at 150% scaling and 200% zoom: scrolls (short screen)', [640, 290], 1, null, false],
         ['1280 × 1024 at 400%: scrolls (short screen)', [320, 256], 1, null, false],
     ])('%s', async (_name, [width, height], titleLines, expectedHeight, pinned) => {
@@ -201,7 +202,7 @@ describe('Dialog header pinning (ASMA-8737)', () => {
         await expect(body().scrollTop).toBe(300)
     })
 
-    it('puts the title on its own full-width row under the actions, at 18/24 Bold on desktop (REQ-001, 002)', async () => {
+    it('puts the title on its own full-width row under the actions, at 24/32 Bold on desktop (REQ-001, 002)', async () => {
         await page.viewport(1280, 720)
         mount(<Fixture title='Edit event' />)
         await waitFor(() => expect(dialog()).not.toBeNull())
@@ -209,8 +210,8 @@ describe('Dialog header pinning (ASMA-8737)', () => {
         const close = dialog().querySelector<HTMLElement>('[data-testid="close-button-pin"]')!
         await expect(title.getBoundingClientRect().top).toBeGreaterThanOrEqual(close.getBoundingClientRect().bottom)
         const style = getComputedStyle(title)
-        await expect([style.fontSize, style.lineHeight, style.fontWeight]).toEqual(['18px', '24px', '700'])
-        await expect(title.getBoundingClientRect().height).toBe(24)
+        await expect([style.fontSize, style.lineHeight, style.fontWeight]).toEqual(['24px', '32px', '700'])
+        await expect(title.getBoundingClientRect().height).toBe(32)
     })
 
     it('wraps a long title in full at 20/26 Bold on a phone, never truncated or clamped (REQ-002, 003)', async () => {
