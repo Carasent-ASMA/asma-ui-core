@@ -327,7 +327,7 @@ describe('StyledPopover keyboard contract', () => {
     })
 })
 
-const TallPopoverFixture = ({ rows }: { rows: number }): JSX.Element => {
+const TallPopoverFixture = ({ rows, paperPadding }: { rows: number; paperPadding?: number }): JSX.Element => {
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
     const [open, setOpen] = useState(false)
 
@@ -336,7 +336,13 @@ const TallPopoverFixture = ({ rows }: { rows: number }): JSX.Element => {
             <button ref={setAnchorEl} type='button' data-testid='tall-trigger' onClick={() => setOpen(true)}>
                 Open
             </button>
-            <StyledPopover open={open} anchorEl={anchorEl} onClose={() => setOpen(false)} id='tall-popover'>
+            <StyledPopover
+                open={open}
+                anchorEl={anchorEl}
+                onClose={() => setOpen(false)}
+                id='tall-popover'
+                slotProps={{ paper: { style: { padding: paperPadding } } }}
+            >
                 {Array.from({ length: rows }, (_, index) => (
                     <label key={index} className='block h-10'>
                         <input type='checkbox' data-testid={`row-${index}`} /> Row {index}
@@ -347,8 +353,8 @@ const TallPopoverFixture = ({ rows }: { rows: number }): JSX.Element => {
     )
 }
 
-const openTallPopover = async (rows: number): Promise<HTMLElement> => {
-    const { container } = mount(<TallPopoverFixture rows={rows} />)
+const openTallPopover = async (rows: number, paperPadding?: number): Promise<HTMLElement> => {
+    const { container } = mount(<TallPopoverFixture rows={rows} paperPadding={paperPadding} />)
     await userEvent.click(container.querySelector<HTMLButtonElement>('[data-testid="tall-trigger"]')!)
     return waitFor(async () => {
         const paper = document.getElementById('tall-popover')
@@ -371,6 +377,13 @@ describe('StyledPopover height', () => {
         await waitFor(() => expect(last.getBoundingClientRect().bottom).toBeLessThanOrEqual(window.innerHeight))
         await userEvent.keyboard(' ')
         await expect(last.checked).toBe(true)
+    })
+
+    it('keeps a padded paper inside the viewport too', async () => {
+        const paper = await openTallPopover(40, 16)
+
+        await expect(getComputedStyle(paper).boxSizing).toBe('content-box')
+        await expect(paper.getBoundingClientRect().bottom).toBeLessThanOrEqual(window.innerHeight)
     })
 
     it('keeps short content at its natural height, without a scrollbar', async () => {
