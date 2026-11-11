@@ -692,6 +692,43 @@ describe('StyledBottomSheet — heights and the drag handle (Figma DS_draft 7-10
         await waitFor(() => expect(panel().getBoundingClientRect().height).toBeGreaterThan(PHONE.height / 2 + 1))
     })
 
+    it('returns from the expanded height to half when dragged down, and closes only below half', async () => {
+        mount(<HeightFixture rows={30} />)
+        await waitFor(() => expect(handle().tagName).toBe('BUTTON'))
+        const half = panel().getBoundingClientRect().height
+        await userEvent.click(handle())
+        await waitFor(() => expect(panel().getBoundingClientRect().height).toBeGreaterThan(half + 100))
+        await new Promise((resolve) => setTimeout(resolve, 300))
+        const row = handle().parentElement!
+        const init = { bubbles: true, pointerId: 14, pointerType: 'touch', clientX: 100 }
+        const slowDrag = async (from: number, to: number): Promise<void> => {
+            row.dispatchEvent(new PointerEvent('pointerdown', { ...init, clientY: from }))
+            row.dispatchEvent(new PointerEvent('pointermove', { ...init, clientY: to }))
+            await new Promise((resolve) => setTimeout(resolve, 150))
+            row.dispatchEvent(new PointerEvent('pointerup', { ...init, clientY: to }))
+        }
+
+        await slowDrag(100, 200)
+        await waitFor(() => expect(handle()).toHaveAttribute('aria-expanded', 'false'))
+        await waitFor(() => expect(Math.round(panel().getBoundingClientRect().height)).toBe(Math.round(half)))
+        await expect(document.querySelector('dialog[data-test="hs"]')).not.toBeNull()
+    })
+
+    it('collapses an expanded sheet on a quick fling down instead of closing it', async () => {
+        mount(<HeightFixture rows={30} />)
+        await waitFor(() => expect(handle().tagName).toBe('BUTTON'))
+        await userEvent.click(handle())
+        await waitFor(() => expect(handle()).toHaveAttribute('aria-expanded', 'true'))
+        await new Promise((resolve) => setTimeout(resolve, 300))
+        const row = handle().parentElement!
+        const init = { bubbles: true, pointerId: 15, pointerType: 'touch', clientX: 100 }
+        row.dispatchEvent(new PointerEvent('pointerdown', { ...init, clientY: 100 }))
+        row.dispatchEvent(new PointerEvent('pointermove', { ...init, clientY: 140 }))
+        row.dispatchEvent(new PointerEvent('pointerup', { ...init, clientY: 140 }))
+        await waitFor(() => expect(handle()).toHaveAttribute('aria-expanded', 'false'))
+        await expect(document.querySelector('dialog[data-test="hs"]')).not.toBeNull()
+    })
+
     it('settles back when the handle is released before 48px up', async () => {
         mount(<HeightFixture rows={30} />)
         await waitFor(() => expect(handle().tagName).toBe('BUTTON'))

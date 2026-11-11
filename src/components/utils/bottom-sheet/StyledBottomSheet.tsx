@@ -186,6 +186,7 @@ export const StyledBottomSheet = ({
             onCloseRef.current('drag')
         },
         canExpand && !expanded ? () => setExpanded(true) : undefined,
+        expanded && !isShortViewport ? () => setExpanded(false) : undefined,
         bodyElement,
     )
 
@@ -193,11 +194,15 @@ export const StyledBottomSheet = ({
     useEffect(() => {
         const body = bodyRef.current
         if (!open || expanded || !body) return undefined
+        let contentHeight = body.scrollHeight
         const measure = (): void => {
             const overflows = body.scrollHeight > body.clientHeight + 1
+            const grew = body.scrollHeight > contentHeight + 1
+            contentHeight = body.scrollHeight
             // Figma caps only the opening height. Content the user grows from inside the sheet (a field
-            // filling with chips) grows the sheet with it instead of starting to scroll.
-            if (overflows && body.contains(document.activeElement)) setExpanded(true)
+            // filling with chips) grows the sheet with it instead of starting to scroll. Only growth
+            // counts: not the opening, and not a collapse the user just asked for.
+            if (overflows && grew && body.contains(document.activeElement)) setExpanded(true)
             else setOverflowsHalf(overflows)
         }
         measure()

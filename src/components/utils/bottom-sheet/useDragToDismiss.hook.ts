@@ -35,6 +35,8 @@ interface Gesture {
     captured: boolean
     /** Frozen at the start: the sheet's measurement may withdraw `onDragUp` mid-gesture. */
     onDragUp: (() => void) | undefined
+    /** Frozen at the start: set while the sheet is expanded, so a drag down returns it to half. */
+    onCollapse: (() => void) | undefined
     samples: { y: number; t: number }[]
 }
 
@@ -42,6 +44,8 @@ interface Gesture {
  * Drag the sheet down past 30% of its height, or fling it down, to dismiss it; release earlier and it
  * settles back. Dragged up, a sheet that could expand when the gesture started follows the finger
  * (`liftedHeight`); released after 48px or flung up, `onDragUp` expands it, otherwise it settles back.
+ * The way back is a drag too: an expanded sheet (`onCollapse`) dragged down 48px or flung down returns
+ * to half height, and only a drag that leaves less than 70% of that half on screen dismisses it.
  *
  * The drag starts on the handle row (any pointer) or, on touch, anywhere in the `body` while
  * the body is scrolled to its top and the finger moves down, or while the sheet can still expand and the
@@ -56,16 +60,17 @@ export const useDragToDismiss = (
     sheetRef: RefObject<HTMLElement | null>,
     onDismiss: () => void,
     onDragUp?: () => void,
+    onCollapse?: () => void,
     body?: HTMLElement | null,
 ): DragToDismiss => {
     const [dragOffset, setDragOffset] = useState(0)
     const [dragRatio, setDragRatio] = useState(0)
     const [liftedHeight, setLiftedHeight] = useState<number | null>(null)
     const handleDrag = useRef<(Gesture & { pointerId: number }) | null>(null)
-    const latest = useRef({ onDismiss, onDragUp })
+    const latest = useRef({ onDismiss, onDragUp, onCollapse })
     useEffect(() => {
-        latest.current = { onDismiss, onDragUp }
-    }, [onDismiss, onDragUp])
+        latest.current = { onDismiss, onDragUp, onCollapse }
+    }, [onDismiss, onDragUp, onCollapse])
 
     const begin = (y: number): Gesture | null => {
         const sheet = sheetRef.current
@@ -76,6 +81,7 @@ export const useDragToDismiss = (
             height: sheet.getBoundingClientRect().height,
             captured: false,
             onDragUp: latest.current.onDragUp,
+            onCollapse: latest.current.onCollapse,
             samples: [{ y, t }],
         }
     }
@@ -102,6 +108,15 @@ export const useDragToDismiss = (
         const first = gesture.samples[0]
         const elapsed = first ? performance.now() - first.t : 0
         const velocity = first && elapsed > 0 ? (y - first.y) / elapsed : 0
+        if (gesture.onCollapse && travelled > 0) {
+            const halfHeight = window.innerHeight / 2
+            if (velocity >= 0 && gesture.height - travelled < halfHeight * (1 - DISMISS_RATIO)) {
+                latest.current.onDismiss()
+            } else if (velocity > FLING_VELOCITY || (velocity >= 0 && travelled > EXPAND_DISTANCE)) {
+                gesture.onCollapse()
+            }
+            return
+        }
         if (velocity > FLING_VELOCITY || (velocity >= 0 && travelled > gesture.height * DISMISS_RATIO)) {
             latest.current.onDismiss()
         } else if (velocity < -FLING_VELOCITY || travelled < -EXPAND_DISTANCE) {
