@@ -714,6 +714,22 @@ describe('StyledBottomSheet — heights and the drag handle (Figma DS_draft 7-10
         await expect(document.querySelector('dialog[data-test="hs"]')).not.toBeNull()
     })
 
+    it('keeps focus on the handle when a sheet whose content fits 90vh is collapsed from the keyboard', async () => {
+        mount(<HeightFixture rows={7} />)
+        await waitFor(() => expect(handle().tagName).toBe('BUTTON'))
+        await userEvent.keyboard('{Tab}')
+        const button = handle()
+        await expect(document.activeElement).toBe(button)
+        await userEvent.keyboard('{Enter}')
+        await waitFor(() => expect(button).toHaveAttribute('aria-expanded', 'true'))
+        await new Promise((resolve) => setTimeout(resolve, 300))
+        await userEvent.keyboard(' ')
+        await waitFor(() => expect(button).toHaveAttribute('aria-expanded', 'false'))
+        await new Promise((resolve) => setTimeout(resolve, 400))
+        await expect(button.isConnected).toBe(true)
+        await expect(document.activeElement).toBe(button)
+    })
+
     it('collapses an expanded sheet on a quick fling down instead of closing it', async () => {
         mount(<HeightFixture rows={30} />)
         await waitFor(() => expect(handle().tagName).toBe('BUTTON'))

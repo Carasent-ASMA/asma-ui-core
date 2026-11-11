@@ -39,6 +39,8 @@ const RESULT_COUNT_DEBOUNCE_MS = 500
 const ENTER_MOTION = 'duration-[250ms] ease-[cubic-bezier(0.05,0.7,0.1,1)]'
 const EXIT_MOTION = 'duration-[200ms] ease-[cubic-bezier(0.3,0,0.8,0.15)]'
 const EXIT_MS = 200
+/** Grace over the 250ms `max-height` transition, if a collapse sends no `transitionend` (reduced motion). */
+const COLLAPSE_SETTLE_FALLBACK_MS = 300
 
 export type BottomSheetCloseReason = 'closeButton' | 'scrim' | 'escape' | 'drag' | 'viewResults' | 'action'
 
@@ -170,7 +172,14 @@ export const StyledBottomSheet = ({
     // Half the screen to start with; the drag handle switches to 90vh when the content needs more.
     const [expanded, setExpanded] = useState(false)
     const [overflowsHalf, setOverflowsHalf] = useState(false)
-    const canExpand = !isShortViewport && (expanded || overflowsHalf)
+    // While the sheet animates back from 90vh its body is still tall enough for the content, so a measure
+    // then would call it "fitting" and unmount the focused handle. Expandability holds until it settles.
+    const [isCollapsing, setIsCollapsing] = useState(false)
+    const canExpand = !isShortViewport && (expanded || overflowsHalf || isCollapsing)
+    const collapse = useCallback(() => {
+        setIsCollapsing(true)
+        setExpanded(false)
+    }, [])
     const headerText = SHEET_HEADER_TEXT[locale]
 
     const onCloseRef = useRef(onClose)
@@ -186,14 +195,14 @@ export const StyledBottomSheet = ({
             onCloseRef.current('drag')
         },
         canExpand && !expanded ? () => setExpanded(true) : undefined,
-        expanded && !isShortViewport ? () => setExpanded(false) : undefined,
+        expanded && !isShortViewport ? collapse : undefined,
         bodyElement,
     )
 
     // At half height the body scrolls once the content needs more room; that is when it can expand.
     useEffect(() => {
         const body = bodyRef.current
-        if (!open || expanded || !body) return undefined
+        if (!open || expanded || isCollapsing || !body) return undefined
         let contentHeight = body.scrollHeight
         const measure = (): void => {
             const overflows = body.scrollHeight > body.clientHeight + 1
@@ -210,7 +219,25 @@ export const StyledBottomSheet = ({
         observer.observe(body)
         for (const child of Array.from(body.children)) observer.observe(child)
         return () => observer.disconnect()
-    }, [open, expanded])
+    }, [open, expanded, isCollapsing])
+
+    // Re-measure only once the collapse has reached half height: the height the user sees.
+    useEffect(() => {
+        const sheet = sheetRef.current
+        if (!isCollapsing || !sheet) return undefined
+        const settle = (): void => {
+            setIsCollapsing(false)
+        }
+        const onTransitionEnd = (event: TransitionEvent): void => {
+            if (event.target === sheet && event.propertyName === 'max-height') settle()
+        }
+        const fallback = window.setTimeout(settle, COLLAPSE_SETTLE_FALLBACK_MS)
+        sheet.addEventListener('transitionend', onTransitionEnd)
+        return () => {
+            window.clearTimeout(fallback)
+            sheet.removeEventListener('transitionend', onTransitionEnd)
+        }
+    }, [isCollapsing])
 
     useBodyScrollLock(open)
     // Wraps Tab inside the sheet — a native modal <dialog> alone lets Tab escape to the browser UI.
@@ -271,6 +298,7 @@ export const StyledBottomSheet = ({
             const finish = (): void => {
                 setIsMounted(false)
                 setExpanded(false)
+                setIsCollapsing(false)
                 // Close first: while the dialog is modal everything outside it is inert, and focus cannot
                 // land on the trigger.
                 if (node.open) node.close()
@@ -447,7 +475,8 @@ export const StyledBottomSheet = ({
                                 aria-label={expanded ? headerText.collapse : headerText.expand}
                                 aria-expanded={expanded}
                                 onClick={() => {
-                                    setExpanded((current) => !current)
+                                    if (expanded) collapse()
+                                    else setExpanded(true)
                                 }}
                                 className='absolute left-1/2 top-1/2 flex h-6 w-12 -translate-x-1/2 -translate-y-1/2 cursor-grab items-center justify-center rounded border-0 bg-transparent p-0 outline-none focus-visible:[box-shadow:inset_0_0_0_2px_var(--colors-focus-ring)]'
                             >
