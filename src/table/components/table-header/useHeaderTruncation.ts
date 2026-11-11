@@ -41,8 +41,11 @@ export const isHeaderLabelTruncated = (row: HTMLElement, label: HTMLElement): bo
  * between them see every change that can alter the answer:
  * - a `ResizeObserver` on the row and the label sees a resize of the column, the sort slot opening and a text that
  *   changes the width of a label that is as wide as its text (a sortable header's), and gives the first answer;
- * - a `MutationObserver` on the label's content sees the text change. A header that cannot sort fills its column, so a
- *   new text at the same column width changes only the label's `scrollWidth`, which no resize observation reports.
+ * - a `MutationObserver` on the label's content sees the text, the children and the `style` and `class` of anything in it
+ *   change. A header that cannot sort fills its column, so a new text, or a `style` or `class` that widens it, at the same
+ *   column width changes only the label's `scrollWidth`, which no resize observation reports. Only those two attributes
+ *   are watched, and nothing this hook, the tooltip or the header does sets one inside the label, so measuring never
+ *   causes the next measuring (a test counts the callbacks).
  * Nothing is measured while `enabled` is false.
  */
 export const useHeaderTruncation = (
@@ -62,7 +65,13 @@ export const useHeaderTruncation = (
         resizeObserver.observe(row)
         resizeObserver.observe(label)
         const mutationObserver = new MutationObserver(measure)
-        mutationObserver.observe(label, { characterData: true, childList: true, subtree: true })
+        mutationObserver.observe(label, {
+            attributeFilter: ['style', 'class'],
+            attributes: true,
+            characterData: true,
+            childList: true,
+            subtree: true,
+        })
 
         return () => {
             resizeObserver.disconnect()

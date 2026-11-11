@@ -128,6 +128,35 @@ const parkPointer = async (): Promise<void> => {
     parking.remove()
 }
 
+/**
+ * Counts the `MutationObserver` callbacks that report a change inside a header label (its `.header-content` box and
+ * everything in it), whoever observes. Installed before the table is mounted, because the header creates its observer when
+ * it mounts. Call `stop()` to put the real class back.
+ */
+const countLabelMutations = (): { calls: () => number; stop: () => void } => {
+    const Original = window.MutationObserver
+    let calls = 0
+
+    class Counting extends Original {
+        constructor(callback: MutationCallback) {
+            super((records, observer) => {
+                const insideLabel = records.some((record) => {
+                    const node = record.target.nodeType === Node.TEXT_NODE ? record.target.parentElement : (record.target as Element)
+
+                    return node?.closest('[class*="header-content"]') != null
+                })
+
+                if (insideLabel) calls += 1
+                callback(records, observer)
+            })
+        }
+    }
+
+    window.MutationObserver = Counting
+
+    return { calls: () => calls, stop: () => void (window.MutationObserver = Original) }
+}
+
 /** Whether the label shows an ellipsis right now: what the user sees, read from the layout. */
 const isCutShort = (label: string): boolean => {
     const element = labelOf(headerCell(label))
@@ -396,6 +425,126 @@ describe('The tooltip follows a resize', () => {
         await waitForTooltip()
 
         await expect(tooltip()!.textContent).toBe('Owner, in full')
+    })
+
+    it('a stylesheet rule added from outside the header, which widens a sortable label, gives it a tooltip: only its own size tells the header', async () => {
+        // Nothing inside the label changes (no text, no child, no `style` or `class`) and neither does the column, as when a theme,
+        // a media query or a late web font changes the text's width. A sortable label is as wide as its text, so its box moves.
+        await mountTable({ columns: columnsOf(sizeWithRoom(60)) })
+        await expect(isCutShort(LABEL)).toBe(false)
+        const sheet = document.createElement('style')
+        sheet.id = 'header-tooltip-outside-rule'
+
+        try {
+            sheet.textContent = '[class*="header-content"] { letter-spacing: 8px !important; }'
+            document.head.appendChild(sheet)
+            await settle(250)
+            await expect(isCutShort(LABEL)).toBe(true)
+
+            await userEvent.hover(sortButton(LABEL))
+            await waitForTooltip()
+
+            await expect(tooltip()!.textContent).toBe(LABEL)
+        } finally {
+            sheet.remove()
+        }
+    })
+
+    describe('a header that cannot sort, whose label only restyles', () => {
+        // The label fills the column, so a descendant's `style` or `class` that makes its text wider leaves the label's box
+        // exactly where it was and changes only its `scrollWidth`: no resize observation sees it, and neither the text nor the
+        // children change. The header is the same component on both renders (a new function would be remounted, which the
+        // label's children would report), so what changes is one attribute. It is the letter spacing that changes, not the
+        // font size: a larger font also makes the line taller, which resizes the label's box and the observer would see that.
+        let letterSpacing = 0
+        let className = ''
+        const STYLE_ID = 'header-tooltip-restyle'
+        const StyledOwner = (): JSX.Element => <span style={{ letterSpacing }}>Forecast owner</span>
+        const ClassedOwner = (): JSX.Element => <span className={className}>Forecast owner</span>
+        const plainOwner = (header: () => JSX.Element): ColumnDef<Person>[] => [
+            { id: 'plain', header, pinnedHeaderText: 'Forecast owner, in full', size: 200, enableSorting: false },
+            { accessorKey: 'role', header: 'Role', size: 160 },
+        ]
+        const enter = (): void => {
+            const row = rowOf(document.querySelector<HTMLElement>('thead th')!)
+
+            row.dispatchEvent(new MouseEvent('mouseenter', { bubbles: false, view: window }))
+            row.dispatchEvent(new MouseEvent('mouseover', { bubbles: true, view: window }))
+        }
+        const isClipped = (): boolean => {
+            const label = document.querySelector<HTMLElement>('thead th [class*="header-content"]')!
+
+            return label.scrollWidth > label.clientWidth
+        }
+
+        beforeEach(() => {
+            letterSpacing = 0
+            className = ''
+            const sheet = document.createElement('style')
+
+            sheet.id = STYLE_ID
+            sheet.textContent = '.restyled-wide { letter-spacing: 8px; }'
+            document.head.appendChild(sheet)
+        })
+        afterEach(() => document.getElementById(STYLE_ID)?.remove())
+
+        it('a style change that makes the text wider than the column gives the header a tooltip', async () => {
+            const view = await mountTable({ columns: plainOwner(StyledOwner) })
+            await expect(isClipped()).toBe(false)
+            enter()
+            await expectNoTooltip()
+
+            letterSpacing = 8
+            view.rerender(table({ columns: plainOwner(StyledOwner) }))
+            await settle(200)
+            await expect(isClipped()).toBe(true)
+            enter()
+            await waitForTooltip()
+
+            await expect(tooltip()!.textContent).toBe('Forecast owner, in full')
+        })
+
+        it('a style change that makes the text fit takes the tooltip away', async () => {
+            letterSpacing = 8
+            const view = await mountTable({ columns: plainOwner(StyledOwner) })
+            await expect(isClipped()).toBe(true)
+
+            letterSpacing = 0
+            view.rerender(table({ columns: plainOwner(StyledOwner) }))
+            await settle(200)
+            await expect(isClipped()).toBe(false)
+            enter()
+
+            await expectNoTooltip()
+        })
+
+        it('a class change that makes the text wider than the column gives the header a tooltip', async () => {
+            const view = await mountTable({ columns: plainOwner(ClassedOwner) })
+            await expect(isClipped()).toBe(false)
+
+            className = 'restyled-wide'
+            view.rerender(table({ columns: plainOwner(ClassedOwner) }))
+            await settle(200)
+            await expect(isClipped()).toBe(true)
+            enter()
+            await waitForTooltip()
+
+            await expect(tooltip()!.textContent).toBe('Forecast owner, in full')
+        })
+
+        it('a class change that makes the text fit takes the tooltip away', async () => {
+            className = 'restyled-wide'
+            const view = await mountTable({ columns: plainOwner(ClassedOwner) })
+            await expect(isClipped()).toBe(true)
+
+            className = ''
+            view.rerender(table({ columns: plainOwner(ClassedOwner) }))
+            await settle(200)
+            await expect(isClipped()).toBe(false)
+            enter()
+
+            await expectNoTooltip()
+        })
     })
 
     it('the tooltip leaves the resize zone alone: none opens over it, and an open one closes when the pointer moves onto it', async () => {
@@ -690,5 +839,73 @@ describe('Escape inside a dialog', () => {
         await userEvent.keyboard('{Escape}')
 
         await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
+    })
+})
+
+describe('The observers do not loop', () => {
+    // The `MutationObserver` watches the label's `style`, `class`, text and children. What the hook, the tooltip and the header
+    // do when the tooltip arms, opens and closes must never change any of those inside the label, or measuring would cause the
+    // next measuring. Counted: the callbacks that report a change inside the label.
+    let counter: ReturnType<typeof countLabelMutations>
+
+    beforeEach(() => {
+        counter = countLabelMutations()
+    })
+    afterEach(() => counter.stop())
+
+    it('arming, opening, closing, sorting and re-rendering a truncated header changes nothing inside its label', async () => {
+        const columns = columnsOf(sizeWithRoom(-40))
+        const view = await mountTable({ columns })
+
+        await userEvent.hover(sortButton(LABEL))
+        await waitForTooltip()
+        await userEvent.keyboard('{Escape}')
+        await waitFor(() => expect(tooltip()).toBeNull())
+        await parkPointer()
+        await userEvent.hover(sortButton(LABEL))
+        await waitForTooltip()
+        await userEvent.click(sortButton(LABEL))
+        await userEvent.keyboard('{Escape}')
+        await parkPointer()
+        for (let render = 0; render < 3; render += 1) {
+            view.rerender(table({ columns }))
+            view.rerender(table({ columns: columnsOf(sizeWithRoom(-40)) }))
+        }
+        await settle(500)
+
+        await expect(counter.calls()).toBe(0)
+    })
+
+    it('a restyle of the label is reported a bounded number of times, and the count does not grow while the tooltip opens and closes', async () => {
+        let letterSpacing = 0
+        const Owner = (): JSX.Element => <span style={{ letterSpacing }}>Forecast owner</span>
+        const owner = (): ColumnDef<Person>[] => [
+            { id: 'plain', header: Owner, pinnedHeaderText: 'Forecast owner, in full', size: 200, enableSorting: false },
+            { accessorKey: 'role', header: 'Role', size: 160 },
+        ]
+        const view = await mountTable({ columns: owner() })
+        await expect(counter.calls()).toBe(0)
+
+        letterSpacing = 8
+        view.rerender(table({ columns: owner() }))
+        await settle(300)
+        // The change itself is seen, once or twice, and the tooltip it armed is ready.
+        const afterRestyle = counter.calls()
+        await expect(afterRestyle).toBeGreaterThanOrEqual(1)
+        await expect(afterRestyle).toBeLessThanOrEqual(3)
+
+        const row = rowOf(document.querySelector<HTMLElement>('thead th')!)
+        for (let round = 0; round < 3; round += 1) {
+            row.dispatchEvent(new MouseEvent('mouseenter', { bubbles: false, view: window }))
+            await waitForTooltip()
+            await userEvent.keyboard('{Escape}')
+            await waitFor(() => expect(tooltip()).toBeNull())
+        }
+        await settle(500)
+
+        // Opening and closing the tooltip changed nothing in the label, so the count is where it was and stays there.
+        await expect(counter.calls()).toBe(afterRestyle)
+        await settle(500)
+        await expect(counter.calls()).toBe(afterRestyle)
     })
 })
