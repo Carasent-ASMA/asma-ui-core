@@ -1,4 +1,5 @@
 import {
+    useCallback,
     useEffect,
     useId,
     useLayoutEffect,
@@ -34,6 +35,12 @@ import { useDragToDismiss } from './useDragToDismiss.hook'
 
 /** Spec: the label and its announcement settle ~500ms after the count stops changing. */
 const RESULT_COUNT_DEBOUNCE_MS = 500
+/** Material 3 motion: in on emphasized-decelerate, out on emphasized-accelerate. Kept to the spec's 250ms. */
+const ENTER_MOTION = 'duration-[250ms] ease-[cubic-bezier(0.05,0.7,0.1,1)]'
+const EXIT_MOTION = 'duration-[200ms] ease-[cubic-bezier(0.3,0,0.8,0.15)]'
+const EXIT_MS = 200
+/** Grace over the 250ms `max-height` transition, if a collapse sends no `transitionend` (reduced motion). */
+const COLLAPSE_SETTLE_FALLBACK_MS = 300
 
 export type BottomSheetCloseReason = 'closeButton' | 'scrim' | 'escape' | 'drag' | 'viewResults' | 'action'
 
@@ -109,8 +116,14 @@ export interface StyledBottomSheetProps {
  * can be expanded to 90vh — by dragging the handle up, or by activating it (Tab lands on it, Space /
  * Enter toggle between the two heights) — and scrolls internally from there. Below 480px of viewport
  * height (a phone in landscape) it becomes a full-screen dialog instead. Five equivalent dismiss
- * routes — close button, "Vis resultater", scrim, Escape, dragging down past 30% — and none of them
- * commits or discards anything: filters apply as the user goes and actions commit on activation.
+ * routes — close button, "Vis resultater", scrim, Escape, dragging down past 30% or flinging down — and
+ * none of them commits or discards anything: filters apply as the user goes and actions commit on
+ * activation.
+ *
+ * Motion follows Material 3: the sheet tracks the finger (on the handle, or on the body while it is
+ * scrolled to the top or can still expand), the scrim fades with a downward drag, a release settles on
+ * emphasized-decelerate, and closing slides the sheet out on emphasized-accelerate before the dialog
+ * closes. `prefers-reduced-motion` keeps all of it instant.
  *
  * Interaction model is the popover's: `role="dialog"`, `Tab` only, no `role="menu"`, no arrow keys.
  * Focus moves to the sheet on open (so the title is announced first) and back to the trigger on
@@ -145,12 +158,28 @@ export const StyledBottomSheet = ({
     const overlayOwnerRef = ownerRef ?? dialogRef
     const recentEscapeKeydownRef = useRef(false)
     const [isShown, setIsShown] = useState(false)
+    // Stays true after `open` turns false, until the sheet has slid out.
+    const [isMounted, setIsMounted] = useState(open)
+    if (open && !isMounted) setIsMounted(true)
+    const exitTimerRef = useRef<number | undefined>(undefined)
     const isShortViewport = useShortViewportMediaQuery()
     const bodyRef = useRef<HTMLDivElement | null>(null)
+    const [bodyElement, setBodyElement] = useState<HTMLDivElement | null>(null)
+    const setBodyRef = useCallback((node: HTMLDivElement | null) => {
+        bodyRef.current = node
+        setBodyElement(node)
+    }, [])
     // Half the screen to start with; the drag handle switches to 90vh when the content needs more.
     const [expanded, setExpanded] = useState(false)
     const [overflowsHalf, setOverflowsHalf] = useState(false)
-    const canExpand = !isShortViewport && (expanded || overflowsHalf)
+    // While the sheet animates back from 90vh its body is still tall enough for the content, so a measure
+    // then would call it "fitting" and unmount the focused handle. Expandability holds until it settles.
+    const [isCollapsing, setIsCollapsing] = useState(false)
+    const canExpand = !isShortViewport && (expanded || overflowsHalf || isCollapsing)
+    const collapse = useCallback(() => {
+        setIsCollapsing(true)
+        setExpanded(false)
+    }, [])
     const headerText = SHEET_HEADER_TEXT[locale]
 
     const onCloseRef = useRef(onClose)
@@ -160,23 +189,29 @@ export const StyledBottomSheet = ({
         openRef.current = open
     }, [onClose, open])
 
-    const { dragHandleProps, dragOffset } = useDragToDismiss(
+    const { dragHandleProps, dragOffset, dragRatio, liftedHeight } = useDragToDismiss(
         sheetRef,
         () => {
             onCloseRef.current('drag')
         },
-        canExpand ? () => setExpanded(true) : undefined,
+        canExpand && !expanded ? () => setExpanded(true) : undefined,
+        expanded && !isShortViewport ? collapse : undefined,
+        bodyElement,
     )
 
     // At half height the body scrolls once the content needs more room; that is when it can expand.
     useEffect(() => {
         const body = bodyRef.current
-        if (!open || expanded || !body) return undefined
+        if (!open || expanded || isCollapsing || !body) return undefined
+        let contentHeight = body.scrollHeight
         const measure = (): void => {
             const overflows = body.scrollHeight > body.clientHeight + 1
+            const grew = body.scrollHeight > contentHeight + 1
+            contentHeight = body.scrollHeight
             // Figma caps only the opening height. Content the user grows from inside the sheet (a field
-            // filling with chips) grows the sheet with it instead of starting to scroll.
-            if (overflows && body.contains(document.activeElement)) setExpanded(true)
+            // filling with chips) grows the sheet with it instead of starting to scroll. Only growth
+            // counts: not the opening, and not a collapse the user just asked for.
+            if (overflows && grew && body.contains(document.activeElement)) setExpanded(true)
             else setOverflowsHalf(overflows)
         }
         measure()
@@ -184,7 +219,25 @@ export const StyledBottomSheet = ({
         observer.observe(body)
         for (const child of Array.from(body.children)) observer.observe(child)
         return () => observer.disconnect()
-    }, [open, expanded])
+    }, [open, expanded, isCollapsing])
+
+    // Re-measure only once the collapse has reached half height: the height the user sees.
+    useEffect(() => {
+        const sheet = sheetRef.current
+        if (!isCollapsing || !sheet) return undefined
+        const settle = (): void => {
+            setIsCollapsing(false)
+        }
+        const onTransitionEnd = (event: TransitionEvent): void => {
+            if (event.target === sheet && event.propertyName === 'max-height') settle()
+        }
+        const fallback = window.setTimeout(settle, COLLAPSE_SETTLE_FALLBACK_MS)
+        sheet.addEventListener('transitionend', onTransitionEnd)
+        return () => {
+            window.clearTimeout(fallback)
+            sheet.removeEventListener('transitionend', onTransitionEnd)
+        }
+    }, [isCollapsing])
 
     useBodyScrollLock(open)
     // Wraps Tab inside the sheet — a native modal <dialog> alone lets Tab escape to the browser UI.
@@ -229,6 +282,7 @@ export const StyledBottomSheet = ({
 
         // Remembered before showModal() moves focus, so it can go back to the trigger on close.
         const focused = document.activeElement instanceof HTMLElement ? document.activeElement : null
+        window.clearTimeout(exitTimerRef.current)
         returnFocusRef.current = triggerRef?.current ?? focused
         if (!node.open) node.showModal()
         node.focus({ preventScroll: true })
@@ -241,14 +295,24 @@ export const StyledBottomSheet = ({
             cancelAnimationFrame(frame)
             unregister()
             setIsShown(false)
-            setExpanded(false)
-            // Close first: while the dialog is modal everything outside it is inert, and focus cannot
-            // land on the trigger.
-            if (node.open) node.close()
-            const target = returnFocusRef.current
-            // After a tap or click the trigger takes focus without a ring: Safari would otherwise paint one,
-            // because a scripted focus inherits the focus-visible state of the sheet it leaves.
-            if (target?.isConnected) target.focus({ preventScroll: true, focusVisible: isKeyboardModality() })
+            const finish = (): void => {
+                setIsMounted(false)
+                setExpanded(false)
+                setIsCollapsing(false)
+                // Close first: while the dialog is modal everything outside it is inert, and focus cannot
+                // land on the trigger.
+                if (node.open) node.close()
+                const target = returnFocusRef.current
+                // After a tap or click the trigger takes focus without a ring: Safari would otherwise paint
+                // one, because a scripted focus inherits the focus-visible state of the sheet it leaves.
+                if (target?.isConnected) target.focus({ preventScroll: true, focusVisible: isKeyboardModality() })
+            }
+            // Slide out before the dialog closes, as it slid in.
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                finish()
+                return
+            }
+            exitTimerRef.current = window.setTimeout(finish, EXIT_MS)
         }
     }, [open, triggerRef])
 
@@ -280,7 +344,7 @@ export const StyledBottomSheet = ({
     const displayedCount = useDebouncedValue(resultCount, RESULT_COUNT_DEBOUNCE_MS)
     const resultsLabel = formatResultsLabel(displayedCount, locale)
 
-    if (!open) return null
+    if (!isMounted) return null
 
     const api: PopoverContentApi = {
         close: () => {
@@ -308,7 +372,8 @@ export const StyledBottomSheet = ({
     const reset = resolve(resetAction)
     const extraActions = resolve(footerActions)
     const hasFooter = Boolean(viewResults ?? reset)
-    const isDragging = dragOffset > 0
+    const isLifting = liftedHeight !== null
+    const isDragging = dragOffset > 0 || isLifting
 
     const handleCancel = (event: SyntheticEvent<HTMLDialogElement>): void => {
         if (event.cancelable) event.preventDefault()
@@ -336,7 +401,7 @@ export const StyledBottomSheet = ({
             onCancel={handleCancel}
             className={cn(
                 style['StyledBottomSheet'],
-                'fixed inset-0 m-0 h-full max-h-none w-full max-w-none flex-col items-center justify-end overflow-hidden border-0 bg-transparent p-0 outline-none open:flex',
+                'fixed inset-0 m-0 h-full max-h-none w-full max-w-none flex-col items-center justify-end overflow-visible border-0 bg-transparent p-0 outline-none open:flex',
             )}
         >
             <OverlayBackOwnerContext.Provider value={overlayOwnerRef}>
@@ -347,26 +412,38 @@ export const StyledBottomSheet = ({
                 onClick={() => {
                     onClose('scrim')
                 }}
+                style={dragRatio > 0 ? { opacity: 1 - dragRatio } : undefined}
                 className={cn(
-                    'absolute inset-0 bg-[#626e7eb2] transition-opacity duration-[250ms] ease-out motion-reduce:duration-150',
-                    isShown ? 'opacity-100' : 'opacity-0',
+                    'absolute inset-0 bg-[#626e7eb2]',
+                    // While dragged down it fades with the sheet (inline opacity), with no transition to lag.
+                    dragRatio === 0 && [
+                        'transition-opacity motion-reduce:duration-150',
+                        isShown ? ['opacity-100', ENTER_MOTION] : ['opacity-0', EXIT_MOTION],
+                    ],
                 )}
             />
             <div
                 ref={sheetRef}
                 data-state={isShown ? 'open' : 'closed'}
-                style={isDragging ? { transform: `translateY(${dragOffset}px)` } : undefined}
+                style={
+                    isLifting
+                        ? { maxHeight: `min(${liftedHeight}px, 90dvh)` }
+                        : isDragging
+                          ? { transform: `translateY(${dragOffset}px)` }
+                          : undefined
+                }
                 className={cn(
-                    // `border-solid` + `box-border` are load-bearing: Tailwind runs with preflight off,
-                    // so a bare `border` paints nothing and widths fall back to content-box.
-                    'relative box-border flex w-full max-w-[640px] flex-col border border-solid border-delta-300 bg-white text-delta-700 outline-none',
+                    // `box-border` is load-bearing: Tailwind runs with preflight off, so widths would fall
+                    // back to content-box. The 1px edge is the last child, so it takes no width (Figma).
+                    'relative box-border flex w-full max-w-[640px] flex-col bg-white text-delta-700 outline-none',
                     isShortViewport
                         ? 'h-full max-h-none rounded-none'
-                        : cn('rounded-t-[28px]', expanded ? 'max-h-[90dvh]' : 'max-h-[50dvh]'),
-                    // Utilities ship `!important`, so while dragging the transform classes are dropped
-                    // rather than out-ranked by the inline offset.
+                        : cn('rounded-t-[28px]', !isLifting && (expanded ? 'max-h-[90dvh]' : 'max-h-[50dvh]')),
+                    // Utilities ship `!important`, so while dragging the transform, height and transition
+                    // classes are dropped rather than out-ranked by the inline offset or height.
                     !isDragging && [
-                        'ease-out motion-safe:transition-transform motion-safe:duration-[250ms] motion-reduce:transition-opacity motion-reduce:duration-150',
+                        'motion-safe:transition-[transform,max-height] motion-reduce:transition-opacity motion-reduce:duration-150',
+                        isShown ? ENTER_MOTION : EXIT_MOTION,
                         isShown ? 'translate-y-0 opacity-100' : 'motion-safe:translate-y-full motion-reduce:opacity-0',
                     ],
                     className,
@@ -398,7 +475,8 @@ export const StyledBottomSheet = ({
                                 aria-label={expanded ? headerText.collapse : headerText.expand}
                                 aria-expanded={expanded}
                                 onClick={() => {
-                                    setExpanded((current) => !current)
+                                    if (expanded) collapse()
+                                    else setExpanded(true)
                                 }}
                                 className='absolute left-1/2 top-1/2 flex h-6 w-12 -translate-x-1/2 -translate-y-1/2 cursor-grab items-center justify-center rounded border-0 bg-transparent p-0 outline-none focus-visible:[box-shadow:inset_0_0_0_2px_var(--colors-focus-ring)]'
                             >
@@ -436,7 +514,7 @@ export const StyledBottomSheet = ({
                     )}
                 </div>
                 <div
-                    ref={bodyRef}
+                    ref={setBodyRef}
                     className={cn(
                         'flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain pl-4 pr-2 pt-2',
                         hasFooter || extraActions ? 'pb-2' : 'pb-[max(0.5rem,env(safe-area-inset-bottom))]',
@@ -475,6 +553,20 @@ export const StyledBottomSheet = ({
                         {extraActions}
                     </div>
                 )}
+                {/* White to the bottom of the screen, under iOS Safari's floating toolbar. The dialog does not
+                    clip it, so it shows wherever the sheet ends above the screen's edge. */}
+                {!isShortViewport && (
+                    <span
+                        aria-hidden='true'
+                        data-testid={`${dataTest}-skirt`}
+                        className='pointer-events-none absolute inset-x-0 top-full h-[100lvh] bg-white'
+                    />
+                )}
+                <span
+                    aria-hidden='true'
+                    data-testid={`${dataTest}-edge`}
+                    className='pointer-events-none absolute inset-0 rounded-[inherit] [box-shadow:inset_0_0_0_1px_var(--colors-delta-300)]'
+                />
                 </div>
             </OverlayBackOwnerContext.Provider>
         </dialog>
