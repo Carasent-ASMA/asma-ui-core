@@ -1,6 +1,7 @@
 import type { ColumnDef } from '@tanstack/react-table'
 import { afterEach, beforeAll, beforeEach, describe, it } from 'vitest'
-import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
+import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
+import { StyledDialog } from 'src/components/feedback/dialog/StyledDialog'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { headerCell, people, sortButton, type Person } from 'src/test-utils/tableFixture'
 import { StyledTable } from './StyledTableIndex'
@@ -296,6 +297,107 @@ describe('The tooltip follows a resize', () => {
         await expectNoTooltip()
     })
 
+    describe('a header that cannot sort, whose label changes at the same column width', () => {
+        // Its label box fills the column (`flex: 1 1 auto`), so a new text changes only its scrollWidth: no resize is seen.
+        const plainColumns = (header: string): ColumnDef<Person>[] => [
+            { id: 'plain', header, size: 140, enableSorting: false },
+            { accessorKey: 'role', header: 'Role', size: 160 },
+        ]
+        const hoverPlain = async (): Promise<void> => {
+            await parkPointer()
+            await userEvent.hover(labelOf(document.querySelector<HTMLElement>('thead th')!))
+        }
+        // For markup Playwright cannot build a hover locator for (an element swapped in for the text): the events a pointer
+        // sends on entering the header.
+        const enterPlain = (): void => {
+            const row = rowOf(document.querySelector<HTMLElement>('thead th')!)
+
+            row.dispatchEvent(new MouseEvent('mouseenter', { bubbles: false, view: window }))
+            row.dispatchEvent(new MouseEvent('mouseover', { bubbles: true, view: window }))
+        }
+
+        it('fitting to truncated: the new text gets a tooltip', async () => {
+            const view = await mountTable({ columns: plainColumns('Owner') })
+            await hoverPlain()
+            await expectNoTooltip()
+
+            view.rerender(table({ columns: plainColumns(LABEL) }))
+            await settle(200)
+            await expect(document.querySelector<HTMLElement>('thead th [class*="header-content"]')!.scrollWidth).toBeGreaterThan(
+                document.querySelector<HTMLElement>('thead th [class*="header-content"]')!.clientWidth,
+            )
+            await hoverPlain()
+            await waitForTooltip()
+
+            await expect(tooltip()!.textContent).toBe(LABEL)
+        })
+
+        it('a function header that swaps its element for a longer one at the same width gets a tooltip', async () => {
+            // The text node is not edited but replaced with another element, so it is the label's children that change.
+            const swapped = (long: boolean): ColumnDef<Person>[] => [
+                {
+                    id: 'plain',
+                    header: () => (long ? <div>{LABEL}</div> : <span>Owner</span>),
+                    size: 140,
+                    enableSorting: false,
+                    pinnedHeaderText: 'Owner, in full',
+                },
+                { accessorKey: 'role', header: 'Role', size: 160 },
+            ]
+            const view = await mountTable({ columns: swapped(false) })
+            enterPlain()
+            await expectNoTooltip()
+
+            view.rerender(table({ columns: swapped(true) }))
+            await settle(200)
+            enterPlain()
+            await waitForTooltip()
+
+            await expect(tooltip()!.textContent).toBe('Owner, in full')
+        })
+
+        it('truncated to fitting: the tooltip is gone', async () => {
+            const view = await mountTable({ columns: plainColumns(LABEL) })
+            await hoverPlain()
+            await waitForTooltip()
+            await parkPointer()
+            await waitFor(() => expect(tooltip()).toBeNull())
+
+            view.rerender(table({ columns: plainColumns('Owner') }))
+            await settle(200)
+            await hoverPlain()
+
+            await expectNoTooltip()
+        })
+    })
+
+    it('a label that grows with no change to its text or its column gets a tooltip: only its own size tells the header', async () => {
+        // A sortable header's label is as wide as its text. The header is the same component on both renders (a new function
+        // would be remounted, which the label's children would report), and only a style changes: the column's width, the
+        // text and the label's children are all as they were, so the label's own box is all that changes.
+        let fontSize = 12
+        const OwnerHeader = (): JSX.Element => <span style={{ fontSize }}>Owner</span>
+        const sized = (): ColumnDef<Person>[] => [
+            { accessorKey: 'name', header: OwnerHeader, pinnedHeaderText: 'Owner, in full', size: 100 },
+            { accessorKey: 'role', header: 'Role', size: 160 },
+        ]
+        const view = await mountTable({ columns: sized() })
+        const button = (): HTMLElement => document.querySelector<HTMLElement>('thead th [role="button"]')!
+        await userEvent.hover(button())
+        await expectNoTooltip()
+        await parkPointer()
+
+        fontSize = 30
+        view.rerender(table({ columns: sized() }))
+        await settle(200)
+        const label = document.querySelector<HTMLElement>('thead th [class*="header-content"]')!
+        await expect(label.scrollWidth).toBeGreaterThan(label.clientWidth)
+        await userEvent.hover(button())
+        await waitForTooltip()
+
+        await expect(tooltip()!.textContent).toBe('Owner, in full')
+    })
+
     it('the tooltip leaves the resize zone alone: none opens over it, and an open one closes when the pointer moves onto it', async () => {
         await mountTable({ columns: columnsOf(sizeWithRoom(-40)) })
         const button = sortButton(LABEL)
@@ -522,5 +624,71 @@ describe('Which text the tooltip shows', () => {
         row.dispatchEvent(new MouseEvent('mouseover', { bubbles: true, view: window }))
 
         await expectNoTooltip()
+    })
+})
+
+describe('Escape inside a dialog', () => {
+    // The dialog closes on an Escape that no layer inside it claimed. The tooltip is such a layer (Floating UI's dismissal),
+    // so the first Escape closes only the tooltip, and a second one, with no tooltip left, closes the dialog.
+    const inDialog = (onClose: () => void): JSX.Element => (
+        <StyledDialog dataTest='table-dialog' dialogTitle='Forecasts' open onClose={onClose}>
+            {table({ columns: columnsOf(sizeWithRoom(-40)) })}
+        </StyledDialog>
+    )
+    const dialogIsOpen = (): boolean => document.querySelector('dialog')?.hasAttribute('open') ?? false
+
+    /** Tabs from the dialog's first control to the truncated header, with real key presses (keyboard focus is `:focus-visible`). */
+    const tabToHeader = async (): Promise<void> => {
+        for (let presses = 0; presses < 8 && document.activeElement !== sortButton(LABEL); presses += 1) await userEvent.tab()
+        await expect(document.activeElement).toBe(sortButton(LABEL))
+    }
+
+    it('Escape closes the tooltip a keyboard user opened: the dialog stays open and the header keeps its focus', async () => {
+        const onClose = fn()
+        mount(inDialog(onClose))
+        await settle(300)
+        await tabToHeader()
+        await waitForTooltip()
+
+        await userEvent.keyboard('{Escape}')
+
+        await waitFor(() => expect(tooltip()).toBeNull())
+        await expect(dialogIsOpen()).toBe(true)
+        await expect(onClose).not.toHaveBeenCalled()
+        await expect(document.activeElement).toBe(sortButton(LABEL))
+    })
+
+    it('Escape closes the tooltip a pointer opened, and a second Escape then closes the dialog', async () => {
+        const onClose = fn()
+        mount(inDialog(onClose))
+        await settle(300)
+        await userEvent.hover(sortButton(LABEL))
+        await waitForTooltip()
+
+        await userEvent.keyboard('{Escape}')
+
+        await waitFor(() => expect(tooltip()).toBeNull())
+        await expect(dialogIsOpen()).toBe(true)
+        await expect(onClose).not.toHaveBeenCalled()
+
+        await userEvent.keyboard('{Escape}')
+
+        await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
+    })
+
+    it('a dialog with no tooltip open still closes on the first Escape', async () => {
+        const onClose = fn()
+        mount(
+            <StyledDialog dataTest='table-dialog' dialogTitle='Forecasts' open onClose={onClose}>
+                {table()}
+            </StyledDialog>,
+        )
+        await settle(300)
+        await userEvent.hover(sortButton(LABEL))
+        await expectNoTooltip()
+
+        await userEvent.keyboard('{Escape}')
+
+        await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
     })
 })

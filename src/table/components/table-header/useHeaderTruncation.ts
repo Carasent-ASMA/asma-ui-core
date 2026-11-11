@@ -37,8 +37,12 @@ export const isHeaderLabelTruncated = (row: HTMLElement, label: HTMLElement): bo
  * Tells a header cell whether its label is truncated, and keeps telling it as the column is resized, the label
  * changes or the sort slot opens (ASMA-8597, a tooltip for the truncated header text).
  *
- * `rowRef` goes on the header's content row (the sortable element) and `labelRef` on the label's box. Observing both
- * means a resize of the column and a change of the label are both seen: the initial observation gives the first answer.
+ * `rowRef` goes on the header's content row (the sortable element) and `labelRef` on the label's box. Two observers
+ * between them see every change that can alter the answer:
+ * - a `ResizeObserver` on the row and the label sees a resize of the column, the sort slot opening and a text that
+ *   changes the width of a label that is as wide as its text (a sortable header's), and gives the first answer;
+ * - a `MutationObserver` on the label's content sees the text change. A header that cannot sort fills its column, so a
+ *   new text at the same column width changes only the label's `scrollWidth`, which no resize observation reports.
  * Nothing is measured while `enabled` is false.
  */
 export const useHeaderTruncation = (
@@ -53,11 +57,17 @@ export const useHeaderTruncation = (
         const label = labelRef.current
         if (!enabled || !row || !label || typeof ResizeObserver === 'undefined') return undefined
 
-        const observer = new ResizeObserver(() => setTruncated(isHeaderLabelTruncated(row, label)))
-        observer.observe(row)
-        observer.observe(label)
+        const measure = (): void => setTruncated(isHeaderLabelTruncated(row, label))
+        const resizeObserver = new ResizeObserver(measure)
+        resizeObserver.observe(row)
+        resizeObserver.observe(label)
+        const mutationObserver = new MutationObserver(measure)
+        mutationObserver.observe(label, { characterData: true, childList: true, subtree: true })
 
-        return () => observer.disconnect()
+        return () => {
+            resizeObserver.disconnect()
+            mutationObserver.disconnect()
+        }
     }, [enabled])
 
     return { rowRef, labelRef, truncated: enabled && truncated }
