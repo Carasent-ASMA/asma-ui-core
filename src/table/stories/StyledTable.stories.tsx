@@ -992,3 +992,48 @@ export const TriangleFitsSlot: Story = {
         }
     },
 }
+
+const tooltipColumns: ColumnDef<TableRow>[] = [
+    { accessorKey: 'name', header: 'Quarterly revenue forecast owner', size: 110 },
+    { accessorKey: 'role', header: 'Role', size: 160 },
+    { accessorKey: 'updatedBy', header: 'Updated by', size: 160 },
+    { id: 'plain', header: 'A label that cannot sort and is cut short', size: 130, enableSorting: false },
+]
+
+/**
+ * ASMA-8597 (Ana Rozimova, Jira comment 95216; the owner, 2026-11-11): a header label cut short by its column is shown in
+ * full in the table's tooltip, on hover and on keyboard focus of a sortable header; a label that fits has none. It is visual
+ * only (the header's accessible name already holds the text, so the sort button gets no `aria-describedby`), Escape closes it
+ * and the pointer can move onto it. The text is `pinnedHeaderText` or a string header, the text the column settings use.
+ * The play function hovers the first header, so the accessibility run and the baseline see the tooltip open; the keyboard
+ * focus look is captured by `visual-tests/interaction-states.ts`.
+ */
+export const TruncatedHeaderTooltip: Story = {
+    loaders: [
+        () => {
+            localStorage.clear()
+            return {}
+        },
+    ],
+    render: () => (
+        <div className='w-[680px] pt-16'>
+            <StyledTable columns={tooltipColumns} data={indicatorRows} hideFooter locale='en' />
+        </div>
+    ),
+    play: async ({ canvasElement }) => {
+        const header = headerOf(canvasElement, 'Quarterly revenue forecast owner')
+        const sortButton = header.querySelector<HTMLElement>('[role="button"]')!
+        const label = header.querySelector<HTMLElement>('[class*="header-content"]')!
+
+        // The first label is cut short by its column; "Role" fits, and the label that cannot sort is cut short too.
+        await waitFor(() => expect(label.scrollWidth).toBeGreaterThan(label.clientWidth))
+        await expect(sortButton).not.toHaveAttribute('aria-describedby')
+        // The table needs a frame to find that out: hover once it has.
+        await new Promise((resolve) => setTimeout(resolve, 250))
+        await userEvent.hover(sortButton)
+        await waitFor(() => expect(canvasElement.ownerDocument.querySelector('[role="tooltip"]')).not.toBeNull(), { timeout: 3000 })
+
+        await expect(canvasElement.ownerDocument.querySelector('[role="tooltip"]')).toHaveTextContent('Quarterly revenue forecast owner')
+        await expect(sortButton).not.toHaveAttribute('aria-describedby')
+    },
+}
