@@ -1,4 +1,5 @@
 import {
+    useCallback,
     useEffect,
     useId,
     useLayoutEffect,
@@ -34,6 +35,10 @@ import { useDragToDismiss } from './useDragToDismiss.hook'
 
 /** Spec: the label and its announcement settle ~500ms after the count stops changing. */
 const RESULT_COUNT_DEBOUNCE_MS = 500
+/** Material 3 motion: in on emphasized-decelerate, out on emphasized-accelerate. Kept to the spec's 250ms. */
+const ENTER_MOTION = 'duration-[250ms] ease-[cubic-bezier(0.05,0.7,0.1,1)]'
+const EXIT_MOTION = 'duration-[200ms] ease-[cubic-bezier(0.3,0,0.8,0.15)]'
+const EXIT_MS = 200
 
 export type BottomSheetCloseReason = 'closeButton' | 'scrim' | 'escape' | 'drag' | 'viewResults' | 'action'
 
@@ -109,8 +114,14 @@ export interface StyledBottomSheetProps {
  * can be expanded to 90vh — by dragging the handle up, or by activating it (Tab lands on it, Space /
  * Enter toggle between the two heights) — and scrolls internally from there. Below 480px of viewport
  * height (a phone in landscape) it becomes a full-screen dialog instead. Five equivalent dismiss
- * routes — close button, "Vis resultater", scrim, Escape, dragging down past 30% — and none of them
- * commits or discards anything: filters apply as the user goes and actions commit on activation.
+ * routes — close button, "Vis resultater", scrim, Escape, dragging down past 30% or flinging down — and
+ * none of them commits or discards anything: filters apply as the user goes and actions commit on
+ * activation.
+ *
+ * Motion follows Material 3: the sheet tracks the finger (on the handle, or on the body while it is
+ * scrolled to the top or can still expand), the scrim fades with a downward drag, a release settles on
+ * emphasized-decelerate, and closing slides the sheet out on emphasized-accelerate before the dialog
+ * closes. `prefers-reduced-motion` keeps all of it instant.
  *
  * Interaction model is the popover's: `role="dialog"`, `Tab` only, no `role="menu"`, no arrow keys.
  * Focus moves to the sheet on open (so the title is announced first) and back to the trigger on
@@ -145,8 +156,17 @@ export const StyledBottomSheet = ({
     const overlayOwnerRef = ownerRef ?? dialogRef
     const recentEscapeKeydownRef = useRef(false)
     const [isShown, setIsShown] = useState(false)
+    // Stays true after `open` turns false, until the sheet has slid out.
+    const [isMounted, setIsMounted] = useState(open)
+    if (open && !isMounted) setIsMounted(true)
+    const exitTimerRef = useRef<number | undefined>(undefined)
     const isShortViewport = useShortViewportMediaQuery()
     const bodyRef = useRef<HTMLDivElement | null>(null)
+    const [bodyElement, setBodyElement] = useState<HTMLDivElement | null>(null)
+    const setBodyRef = useCallback((node: HTMLDivElement | null) => {
+        bodyRef.current = node
+        setBodyElement(node)
+    }, [])
     // Half the screen to start with; the drag handle switches to 90vh when the content needs more.
     const [expanded, setExpanded] = useState(false)
     const [overflowsHalf, setOverflowsHalf] = useState(false)
@@ -160,12 +180,13 @@ export const StyledBottomSheet = ({
         openRef.current = open
     }, [onClose, open])
 
-    const { dragHandleProps, dragOffset, liftedHeight } = useDragToDismiss(
+    const { dragHandleProps, dragOffset, dragRatio, liftedHeight } = useDragToDismiss(
         sheetRef,
         () => {
             onCloseRef.current('drag')
         },
-        canExpand ? () => setExpanded(true) : undefined,
+        canExpand && !expanded ? () => setExpanded(true) : undefined,
+        bodyElement,
     )
 
     // At half height the body scrolls once the content needs more room; that is when it can expand.
@@ -229,6 +250,7 @@ export const StyledBottomSheet = ({
 
         // Remembered before showModal() moves focus, so it can go back to the trigger on close.
         const focused = document.activeElement instanceof HTMLElement ? document.activeElement : null
+        window.clearTimeout(exitTimerRef.current)
         returnFocusRef.current = triggerRef?.current ?? focused
         if (!node.open) node.showModal()
         node.focus({ preventScroll: true })
@@ -241,14 +263,23 @@ export const StyledBottomSheet = ({
             cancelAnimationFrame(frame)
             unregister()
             setIsShown(false)
-            setExpanded(false)
-            // Close first: while the dialog is modal everything outside it is inert, and focus cannot
-            // land on the trigger.
-            if (node.open) node.close()
-            const target = returnFocusRef.current
-            // After a tap or click the trigger takes focus without a ring: Safari would otherwise paint one,
-            // because a scripted focus inherits the focus-visible state of the sheet it leaves.
-            if (target?.isConnected) target.focus({ preventScroll: true, focusVisible: isKeyboardModality() })
+            const finish = (): void => {
+                setIsMounted(false)
+                setExpanded(false)
+                // Close first: while the dialog is modal everything outside it is inert, and focus cannot
+                // land on the trigger.
+                if (node.open) node.close()
+                const target = returnFocusRef.current
+                // After a tap or click the trigger takes focus without a ring: Safari would otherwise paint
+                // one, because a scripted focus inherits the focus-visible state of the sheet it leaves.
+                if (target?.isConnected) target.focus({ preventScroll: true, focusVisible: isKeyboardModality() })
+            }
+            // Slide out before the dialog closes, as it slid in.
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                finish()
+                return
+            }
+            exitTimerRef.current = window.setTimeout(finish, EXIT_MS)
         }
     }, [open, triggerRef])
 
@@ -280,7 +311,7 @@ export const StyledBottomSheet = ({
     const displayedCount = useDebouncedValue(resultCount, RESULT_COUNT_DEBOUNCE_MS)
     const resultsLabel = formatResultsLabel(displayedCount, locale)
 
-    if (!open) return null
+    if (!isMounted) return null
 
     const api: PopoverContentApi = {
         close: () => {
@@ -348,9 +379,14 @@ export const StyledBottomSheet = ({
                 onClick={() => {
                     onClose('scrim')
                 }}
+                style={dragRatio > 0 ? { opacity: 1 - dragRatio } : undefined}
                 className={cn(
-                    'absolute inset-0 bg-[#626e7eb2] transition-opacity duration-[250ms] ease-out motion-reduce:duration-150',
-                    isShown ? 'opacity-100' : 'opacity-0',
+                    'absolute inset-0 bg-[#626e7eb2]',
+                    // While dragged down it fades with the sheet (inline opacity), with no transition to lag.
+                    dragRatio === 0 && [
+                        'transition-opacity motion-reduce:duration-150',
+                        isShown ? ['opacity-100', ENTER_MOTION] : ['opacity-0', EXIT_MOTION],
+                    ],
                 )}
             />
             <div
@@ -373,7 +409,8 @@ export const StyledBottomSheet = ({
                     // Utilities ship `!important`, so while dragging the transform, height and transition
                     // classes are dropped rather than out-ranked by the inline offset or height.
                     !isDragging && [
-                        'ease-out motion-safe:transition-[transform,max-height] motion-safe:duration-[250ms] motion-reduce:transition-opacity motion-reduce:duration-150',
+                        'motion-safe:transition-[transform,max-height] motion-reduce:transition-opacity motion-reduce:duration-150',
+                        isShown ? ENTER_MOTION : EXIT_MOTION,
                         isShown ? 'translate-y-0 opacity-100' : 'motion-safe:translate-y-full motion-reduce:opacity-0',
                     ],
                     className,
@@ -443,7 +480,7 @@ export const StyledBottomSheet = ({
                     )}
                 </div>
                 <div
-                    ref={bodyRef}
+                    ref={setBodyRef}
                     className={cn(
                         'flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain pl-4 pr-2 pt-2',
                         hasFooter || extraActions ? 'pb-2' : 'pb-[max(0.5rem,env(safe-area-inset-bottom))]',

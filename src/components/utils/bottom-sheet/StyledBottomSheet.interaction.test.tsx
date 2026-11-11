@@ -444,10 +444,12 @@ describe('StyledBottomSheet — drag to dismiss (2.5.7)', () => {
         await page.viewport(DESKTOP.width, DESKTOP.height)
     })
 
-    const drag = (handle: Element, fromY: number, toY: number): void => {
+    /** A slow drag: the finger rests before it lifts, so the release is no fling. */
+    const drag = async (handle: Element, fromY: number, toY: number): Promise<void> => {
         const init = { bubbles: true, pointerId: 7, pointerType: 'touch', clientX: 100 }
         handle.dispatchEvent(new PointerEvent('pointerdown', { ...init, clientY: fromY }))
         handle.dispatchEvent(new PointerEvent('pointermove', { ...init, clientY: toY }))
+        await new Promise((resolve) => setTimeout(resolve, 150))
         handle.dispatchEvent(new PointerEvent('pointerup', { ...init, clientY: toY }))
     }
 
@@ -458,7 +460,67 @@ describe('StyledBottomSheet — drag to dismiss (2.5.7)', () => {
         const dialog = await openSheet()
         const sheetHeight = dialog.querySelector('[data-state]')!.getBoundingClientRect().height
 
-        drag(handleOf(dialog), 100, 100 + sheetHeight * 0.4)
+        await drag(handleOf(dialog), 100, 100 + sheetHeight * 0.4)
+        await waitFor(() => expect(sheet()).toBeNull())
+    })
+
+    it('dismisses on a quick fling down, however short', async () => {
+        mount(<FilterFixture />)
+        const dialog = await openSheet()
+        const init = { bubbles: true, pointerId: 8, pointerType: 'touch', clientX: 100 }
+        const handle = handleOf(dialog)
+        handle.dispatchEvent(new PointerEvent('pointerdown', { ...init, clientY: 100 }))
+        handle.dispatchEvent(new PointerEvent('pointermove', { ...init, clientY: 130 }))
+        handle.dispatchEvent(new PointerEvent('pointerup', { ...init, clientY: 130 }))
+        await waitFor(() => expect(sheet()).toBeNull())
+    })
+
+    it('fades the scrim with the sheet while it is dragged down', async () => {
+        mount(<FilterFixture />)
+        const dialog = await openSheet()
+        const sheetHeight = dialog.querySelector('[data-state]')!.getBoundingClientRect().height
+        const init = { bubbles: true, pointerId: 9, pointerType: 'touch', clientX: 100 }
+        const handle = handleOf(dialog)
+        handle.dispatchEvent(new PointerEvent('pointerdown', { ...init, clientY: 100 }))
+        handle.dispatchEvent(new PointerEvent('pointermove', { ...init, clientY: 100 + sheetHeight / 2 }))
+        const scrim = dialog.querySelector<HTMLElement>('[data-testid$="-scrim"]')!
+        await waitFor(() => expect(Number(getComputedStyle(scrim).opacity)).toBeCloseTo(0.5, 1))
+        handle.dispatchEvent(new PointerEvent('pointercancel', { ...init, clientY: 100 + sheetHeight / 2 }))
+    })
+
+    it('slides out before the dialog closes', async () => {
+        mount(<FilterFixture />)
+        const dialog = await openSheet()
+        await userEvent.click(byTestId('sheet-close'))
+        await expect(dialog.open).toBe(true)
+        await expect(dialog.querySelector('[data-state]')).toHaveAttribute('data-state', 'closed')
+        await waitFor(() => expect(sheet()).toBeNull())
+    })
+
+    it('follows a touch that pulls the body down from its top, and dismisses past 30%', async () => {
+        mount(<FilterFixture />)
+        const dialog = await openSheet()
+        const sheetHeight = dialog.querySelector('[data-state]')!.getBoundingClientRect().height
+        const body = dialog.querySelector<HTMLElement>('.overflow-y-auto')!
+        const touch = (type: string, y: number): void => {
+            const point = new Touch({ identifier: 1, target: body, clientX: 100, clientY: y })
+            body.dispatchEvent(
+                new TouchEvent(type, {
+                    bubbles: true,
+                    cancelable: true,
+                    touches: type === 'touchend' ? [] : [point],
+                    changedTouches: [point],
+                }),
+            )
+        }
+        touch('touchstart', 300)
+        touch('touchmove', 310)
+        touch('touchmove', 310 + sheetHeight * 0.4)
+        await waitFor(() =>
+            expect(getComputedStyle(dialog.querySelector('[data-state]')!).transform).not.toBe('none'),
+        )
+        await new Promise((resolve) => setTimeout(resolve, 150))
+        touch('touchend', 310 + sheetHeight * 0.4)
         await waitFor(() => expect(sheet()).toBeNull())
     })
 
@@ -467,8 +529,10 @@ describe('StyledBottomSheet — drag to dismiss (2.5.7)', () => {
         const dialog = await openSheet()
         const sheetHeight = dialog.querySelector('[data-state]')!.getBoundingClientRect().height
 
-        drag(handleOf(dialog), 100, 100 + sheetHeight * 0.1)
+        await drag(handleOf(dialog), 100, 100 + sheetHeight * 0.1)
+        await new Promise((resolve) => setTimeout(resolve, 400))
         await expect(sheet()).not.toBeNull()
+        await expect(sheet()!.querySelector('[data-state]')).toHaveAttribute('data-state', 'open')
     })
 })
 
@@ -637,6 +701,7 @@ describe('StyledBottomSheet — heights and the drag handle (Figma DS_draft 7-10
         row.dispatchEvent(new PointerEvent('pointerdown', { ...init, clientY: 500 }))
         row.dispatchEvent(new PointerEvent('pointermove', { ...init, clientY: 470 }))
         await waitFor(() => expect(Math.round(panel().getBoundingClientRect().height)).toBe(Math.round(start + 30)))
+        await new Promise((resolve) => setTimeout(resolve, 150))
         row.dispatchEvent(new PointerEvent('pointerup', { ...init, clientY: 470 }))
         await expect(handle()).toHaveAttribute('aria-expanded', 'false')
         await waitFor(() => expect(Math.round(panel().getBoundingClientRect().height)).toBe(Math.round(start)))
