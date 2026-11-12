@@ -1,4 +1,6 @@
 .table-action-item {
+    // The row was a button, which sizes its border box; as a div it must say so, or its padding is added to 100% and 40px.
+    box-sizing: border-box;
     height: 40px;
     padding-left: 8px;
     padding-right: 8px;
@@ -19,6 +21,20 @@
 
 .drag-item {
     height: 40px;
+}
+
+// The checkbox is the only control of a row, so its target is 24 x 24px (WCAG 2.5.8), centred on the 16px box. With the 4px
+// either side it takes the room the 16px box and its 8px either side took, so the row looks as it did.
+.drag-item .column-checkbox {
+    width: 24px;
+    height: 24px;
+}
+
+// The drag icon's tooltip needs a box of its own to sit on (an SVG takes no ref), the icon's own box.
+.drag-slot {
+    display: flex;
+    // First in the row on screen, though the checkbox is first in the DOM (see `HeaderActionMenu`).
+    order: -1;
 }
 
 .drag-icon {

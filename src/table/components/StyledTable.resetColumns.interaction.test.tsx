@@ -123,6 +123,17 @@ const popoverButton = (label: string): HTMLElement => {
 
     return button
 }
+/** A column's checkbox in the open popover: the one control that shows or hides it (its row is not a button). */
+const columnCheckbox = (label: string): HTMLElement => {
+    const row = [...document.querySelectorAll<HTMLElement>('[class*="table-action-item"]')].find((candidate) =>
+        candidate.textContent?.includes(label),
+    )
+    const box = row?.querySelector<HTMLElement>('label')
+
+    if (!box) throw new Error(`No checkbox for "${label}"`)
+
+    return box
+}
 const isShown = (text: string): boolean =>
     [...document.querySelectorAll('*')].some(
         (element) =>
@@ -149,7 +160,7 @@ describe('Reset columns', () => {
         const { table } = mountHarness()
 
         await openPopover()
-        await userEvent.click(popoverButton('Role'))
+        await userEvent.click(columnCheckbox('Role'))
         await waitFor(() => expect(headerLabels()).not.toContain('Role'))
 
         await act(() => table().setColumnOrder(['age', 'name', 'role', 'notes']))
@@ -298,7 +309,7 @@ describe('Reset columns', () => {
         await waitFor(() => expect(stored(PAGE_SIZE_KEY)).toBe(10))
 
         await openPopover()
-        await userEvent.click(popoverButton('Role'))
+        await userEvent.click(columnCheckbox('Role'))
         await userEvent.click(popoverButton('Reset columns'))
 
         await waitFor(() => expect(isShown('Columns reset')).toBe(true))
@@ -376,10 +387,10 @@ describe('Column settings pin dot (AC 18)', () => {
         await expect(dot()).toBeNull()
 
         await openPopover()
-        await userEvent.click(popoverButton('Role'))
+        await userEvent.click(columnCheckbox('Role'))
         await waitFor(() => expect(dot()).not.toBeNull())
 
-        await userEvent.click(popoverButton('Role'))
+        await userEvent.click(columnCheckbox('Role'))
         await waitFor(() => expect(dot()).toBeNull())
 
         await act(() => table().setColumnOrder(['role', 'name', 'age', 'notes']))
@@ -398,7 +409,7 @@ describe('Column settings pin dot (AC 18)', () => {
         const { table } = mountHarness()
 
         await openPopover()
-        await userEvent.click(popoverButton('Role'))
+        await userEvent.click(columnCheckbox('Role'))
         await act(() => table().setColumnOrder(['age', 'name', 'role', 'notes']))
         await waitFor(() => expect(dot()).not.toBeNull())
 
@@ -410,7 +421,7 @@ describe('Column settings pin dot (AC 18)', () => {
         await expect(dot()).not.toBeNull()
         await expect(pin()).toHaveAccessibleName('Column settings, changed')
 
-        await userEvent.click(popoverButton('Role'))
+        await userEvent.click(columnCheckbox('Role'))
         await waitFor(() => expect(dot()).toBeNull())
         await expect(pin()).toHaveAccessibleName('Column settings')
     })
@@ -501,10 +512,10 @@ describe('Column settings pin dot (AC 18)', () => {
 
         // A hidden column.
         await openPopover()
-        await userEvent.click(popoverButton('Role'))
+        await userEvent.click(columnCheckbox('Role'))
         await waitFor(() => expect(pin()).toHaveAccessibleName('Column settings, changed'))
         await expect(dot()).not.toBeNull()
-        await userEvent.click(popoverButton('Role'))
+        await userEvent.click(columnCheckbox('Role'))
         await waitFor(() => expect(pin()).toHaveAccessibleName('Column settings'))
         await expect(dot()).toBeNull()
 

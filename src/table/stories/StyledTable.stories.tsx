@@ -1037,3 +1037,44 @@ export const TruncatedHeaderTooltip: Story = {
         await expect(sortButton).not.toHaveAttribute('aria-describedby')
     },
 }
+
+const columnSettingsColumns: ColumnDef<TableRow>[] = [
+    { accessorKey: 'name', header: 'Workspace name', size: 200, fixedLeft: true },
+    { accessorKey: 'role', header: 'Role', size: 140 },
+    { accessorKey: 'description', header: 'Description', size: 160, enableHiding: false },
+    { accessorKey: 'updatedBy', header: 'Updated by', size: 140 },
+]
+
+/**
+ * ASMA-8597 (the owner, 2026-11-12): the column settings menu (the pin) shows or hides a column from its checkbox and from
+ * nothing else. The row, the name and the drag icon do not toggle it, and a press on the icon that never became a drag does
+ * not either; dragging the icon still reorders. Each checkbox is named by its column and has a target of at least 24 x 24px.
+ * "Workspace name" is fixed (it cannot be reordered) and "Description" cannot be hidden, so their tooltips and read-only state
+ * show too. The play function opens the menu, so the accessibility run (axe, via addon-a11y) sees it open.
+ */
+export const ColumnSettingsMenu: Story = {
+    loaders: [
+        () => {
+            localStorage.clear()
+            return {}
+        },
+    ],
+    render: () => (
+        <div className='w-[760px] pb-[320px]'>
+            <StyledTable columns={columnSettingsColumns} data={indicatorRows} hideFooter locale='en' />
+        </div>
+    ),
+    play: async ({ canvasElement }) => {
+        const pin = canvasElement.querySelector<HTMLElement>('button[aria-haspopup="true"]')!
+        await userEvent.click(pin)
+        await waitFor(() => expect(pin).toHaveAttribute('aria-expanded', 'true'))
+
+        const checkbox = (column: string): HTMLInputElement =>
+            canvasElement.ownerDocument.querySelector<HTMLInputElement>(`[data-test="${column}-column-visibility-checkbox"] input`)!
+        await waitFor(() => expect(checkbox('role')).not.toBeNull())
+        await expect(checkbox('role')).toHaveAccessibleName('Role')
+        await expect(checkbox('updatedBy')).toHaveAccessibleName('Updated by')
+        await expect(checkbox('description')).toHaveAttribute('aria-readonly', 'true')
+        await expect(canvasElement.ownerDocument.querySelectorAll('[class*="table-action-item"]')).toHaveLength(4)
+    },
+}
