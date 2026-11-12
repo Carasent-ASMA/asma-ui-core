@@ -181,6 +181,53 @@ describe('Sort indicator (AC 15)', () => {
         await expect(Math.abs(slot.left - label.right)).toBeLessThanOrEqual(0.5)
     })
 
+    it('ST-10 (Figma, 20 x 28): the slot is 20 x 28px and the drawn triangle is 11.67 x 5.83px, placed as Figma places it, in every state', async () => {
+        mountHeader()
+        // Figma "Header with sorting" (plan 2.4.4, measured 2026-10-27): the `Sorting` slot is 20 x 28px, directly after
+        // the label. Its `arrow-drop_down` instance is 28 x 28px at x = -4, and the inner vector is 11.67 x 5.83px at
+        // (8.17, 11.67) in the instance, so the triangle lies at (4.17, 11.67) in the slot, and its middle is the slot's
+        // middle across. `arrow_drop_up` is the same shape turned over about the middle line of the slot, so it lies at
+        // (4.17, 10.5).
+        const slotMeasures = async (label: string, direction: 'asc' | 'desc'): Promise<void> => {
+            const slot = rect(indicator(label))
+            const glyph = shownGlyph(label)
+            const box = rect(glyph)
+            const triangle = rect(glyph.querySelector('path')!)
+
+            await expect(pathOf(glyph), `${label}: glyph direction`).toBe(direction === 'asc' ? ASC_PATH : DESC_PATH)
+            await expect(slot.width, `${label}: slot width`).toBe(20)
+            await expect(slot.height, `${label}: slot height`).toBe(28)
+            await expect(box.width, `${label}: glyph width`).toBe(28)
+            await expect(box.height, `${label}: glyph height`).toBe(28)
+            await expect(box.left - slot.left, `${label}: glyph x in the slot`).toBeCloseTo(-4, 1)
+            await expect(triangle.width, `${label}: triangle width`).toBeCloseTo(11.67, 1)
+            await expect(triangle.height, `${label}: triangle height`).toBeCloseTo(5.83, 1)
+            await expect(triangle.left - slot.left, `${label}: triangle x in the slot`).toBeCloseTo(4.17, 1)
+            await expect(triangle.top - slot.top, `${label}: triangle y in the slot`).toBeCloseTo(direction === 'desc' ? 11.67 : 10.5, 1)
+            // Centred on the slot across, and the two directions mirror each other about its middle line (14px).
+            await expect(triangle.left - slot.left + triangle.width / 2, `${label}: triangle centre`).toBeCloseTo(10, 1)
+        }
+
+        // Hovering an unsorted text column previews the first click: ascending.
+        await userEvent.hover(sortButton('Name'))
+        await slotMeasures('Name', 'asc')
+        // A sorted column at rest shows its own direction, ascending and then descending.
+        await userEvent.click(sortButton('Name'))
+        await userEvent.unhover(sortButton('Name'))
+        await slotMeasures('Name', 'asc')
+        await userEvent.click(sortButton('Name'))
+        await userEvent.unhover(sortButton('Name'))
+        await slotMeasures('Name', 'desc')
+        // Keyboard focus shows what hover shows.
+        await userEvent.keyboard('{Tab}')
+        await slotMeasures('Role', 'asc')
+
+        // The two directions are mirror images about the slot's middle line.
+        const triangleTop = (label: string): number => rect(shownGlyph(label).querySelector('path')!).top - rect(indicator(label)).top
+        await expect(triangleTop('Name') + rect(shownGlyph('Name').querySelector('path')!).height / 2).toBeCloseTo(14 + 0.58, 1)
+        await expect(triangleTop('Role') + rect(shownGlyph('Role').querySelector('path')!).height / 2).toBeCloseTo(14 - 0.58, 1)
+    })
+
     it('ST-10: a sorted column shows the glyph in gama-500 at rest, ascending or descending; the slot is decorative (A-03)', async () => {
         mountHeader()
 

@@ -21,6 +21,7 @@ import { restrictToParentElement, restrictToVerticalAxis } from '@dnd-kit/modifi
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { DotsHorizontalIcon } from 'src/table/shared-components/DotsHorizontalIcon'
 import { cn } from 'src/table/helpers/cn'
+import { headerLabelText } from 'src/table/helpers/headerLabel'
 import { StyledTooltip } from 'src/table/shared-components/tooltip'
 import { useTranslations } from 'src/table/hooks/useTranslations'
 import { StyledButton } from 'src/table/shared-components/button'
@@ -209,10 +210,7 @@ export function HeaderActionMenu<TData>({
                                                     />
                                                 </span>
                                                 <span className='font-roboto text-base text-delta-700'>
-                                                    {column.columnDef.pinnedHeaderText ??
-                                                        (typeof column.columnDef.header === 'string'
-                                                            ? column.columnDef.header
-                                                            : column.id)}
+                                                    {headerLabelText(column.columnDef) ?? column.id}
                                                 </span>
                                             </button>
                                         </StyledTooltip>

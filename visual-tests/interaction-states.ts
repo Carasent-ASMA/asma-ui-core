@@ -295,12 +295,29 @@ export const INTERACTION_CAPTURES: InteractionCapture[] = [
             await page.getByRole('button', { name: 'Unsorted', exact: true }).focus()
         },
     },
+    // ASMA-8597 (Ana Rozimova, Jira comment 95216): a header label cut short by its column shows its full text in the table's
+    // tooltip. Keyboard focus shows it at once, beside the header-wide focus frame; the story's own baseline has it hovered.
+    {
+        storyId: 'data-display-styledtable--truncated-header-tooltip',
+        screenshot: 'data-display-styledtable--truncated-header-tooltip--focus--open.png',
+        act: async (page) => {
+            await page.mouse.move(1, 1)
+            // A key press first, so the programmatic focus is keyboard focus (:focus-visible).
+            await page.keyboard.press('Shift')
+            await page.getByRole('button', { name: 'Quarterly revenue forecast owner', exact: true }).focus()
+            await page.getByRole('tooltip').waitFor({ state: 'visible' })
+        },
+    },
     // ASMA-8597 resize zone (AC 17): hovering a column shows its 4px x 24px bar at the right edge of the 24 x 28px zone;
     // with the pointer over the zone it is filled gama-50 and the bar is gama-400 (UX round 3, 2026-11-02).
     {
         storyId: 'data-display-styledtable--resize-handle',
         screenshot: 'data-display-styledtable--resize-handle--hover--open.png',
         act: async (page) => {
+            // The narrow column's label is cut short, so a half second of hover would open its header tooltip (ASMA-8597).
+            // This capture is about the resize bar, and it must not depend on how fast the screenshot is taken: the tooltip
+            // has its own capture (`truncated-header-tooltip`).
+            await page.addStyleTag({ content: '[role="tooltip"] { display: none !important; }' })
             await page.getByRole('button', { name: 'Narrow column', exact: true }).hover()
         },
     },

@@ -1,5 +1,5 @@
 import { flexRender, type Header } from '@tanstack/react-table'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import clsx from 'clsx'
 import style from '../StyledTable.module.scss'
 import { SortIndicator } from './SortIndicator'
@@ -9,6 +9,9 @@ import { useRootContext } from 'src/table/context/RootContext'
 import { COMPACT_COLUMN_MAX_WIDTH } from 'src/table/helpers/columnSpacing'
 import { hasFixedWidth } from 'src/table/helpers/columnSizingDefaults'
 import { getSortPreview } from 'src/table/helpers/sortPreview'
+import { headerLabelText } from 'src/table/helpers/headerLabel'
+import { StyledTooltip } from 'src/table/shared-components/tooltip'
+import { useHeaderTruncation } from './useHeaderTruncation'
 
 export function TableHeaderCell<
     TData extends {
@@ -76,6 +79,83 @@ export function TableHeaderCell<
         !hasFixedWidth(header.column.columnDef) &&
         !INTERNAL_COLUMN_IDS.includes(header.column.id)
 
+    // A label cut short by its column is shown in full in a tooltip (ASMA-8597, UX: Ana Rozimova). The text is the one the
+    // column settings list the column by; with none known (a function header with no `pinnedHeaderText`) there is no tooltip.
+    // It is visual only: the header's accessible name already holds the full text, so the tooltip does not describe the
+    // sort button. It stays out of the way of a resize (the zone and the drag), and a hidden header has nothing to show.
+    const labelText = headerLabelText(header.column.columnDef)
+    const { rowRef, labelRef, truncated } = useHeaderTruncation(!hideHeader && Boolean(labelText?.trim()))
+    // A pointer on the resize zone is about to resize, not read the label, so the tooltip leaves it be.
+    const [overResizeZone, setOverResizeZone] = useState(false)
+    const tooltipTitle = truncated && !header.column.getIsResizing() && !overResizeZone ? labelText : ''
+
+    const content = (
+        <div
+            ref={rowRef}
+            className={clsx(
+                'flex items-center justify-start',
+                hideHeader ? style['hide-table-header'] : style['show-table-header'],
+                canSort && style['sortable-column'],
+                // The handle's 24px zone is reserved on the right, so nothing sits under it.
+                showResizeHandle && style['has-resize-zone'],
+                header.column.columnDef.className,
+            )}
+            role={canSort ? 'button' : undefined}
+            // A hidden header keeps its names and `aria-sort` in the accessibility tree, but its sort control is
+            // not a tab stop: there would be nothing to see where the focus is (ASMA-8702).
+            tabIndex={canSort && !hideHeader ? 0 : undefined}
+            onClick={(e) => {
+                const sortingHandler = header.column.getToggleSortingHandler()
+                if (!isResizing && sortingHandler) {
+                    sortingHandler(e)
+                }
+                disableResizingFlag()
+            }}
+            onKeyDown={
+                canSort
+                    ? (e) => {
+                          if (e.key !== 'Enter' && e.key !== ' ') return
+                          e.preventDefault()
+                          const sortingHandler = header.column.getToggleSortingHandler()
+                          if (!isResizing && sortingHandler) sortingHandler(e)
+                          disableResizingFlag()
+                      }
+                    : undefined
+            }
+        >
+            <div ref={labelRef} className={style['header-content']}>
+                {flexRender(header.column.columnDef.header, header.getContext())}
+            </div>
+            {canSort && (
+                <SortIndicator
+                    sorted={sortedDirection}
+                    firstDirection={header.column.getFirstSortDir()}
+                    preview={sortPreview}
+                />
+            )}
+            {showResizeHandle && (
+                <div
+                    {...{
+                        onMouseEnter: () => setOverResizeZone(true),
+                        onMouseLeave: () => setOverResizeZone(false),
+                        onDoubleClick: () => header.column.resetSize(),
+                        onMouseDown: (e) => {
+                            e.stopPropagation()
+                            enableResizingFlag()
+                            header.getResizeHandler()(e)
+                        },
+                        onTouchStart: (e) => {
+                            e.stopPropagation()
+                            enableResizingFlag()
+                            header.getResizeHandler()(e)
+                        },
+                        className: `${style['resizer']} ${header.column.getIsResizing() ? style['isResizing'] : ''}`,
+                    }}
+                />
+            )}
+        </div>
+    )
+
     return (
         <th
             key={header.id}
@@ -97,67 +177,9 @@ export function TableHeaderCell<
                 ...(isFixedRight && { right }),
             }}
         >
-            <div
-                className={clsx(
-                    'flex items-center justify-start',
-                    hideHeader ? style['hide-table-header'] : style['show-table-header'],
-                    canSort && style['sortable-column'],
-                    // The handle's 24px zone is reserved on the right, so nothing sits under it.
-                    showResizeHandle && style['has-resize-zone'],
-                    header.column.columnDef.className,
-                )}
-                role={canSort ? 'button' : undefined}
-                // A hidden header keeps its names and `aria-sort` in the accessibility tree, but its sort control is
-                // not a tab stop: there would be nothing to see where the focus is (ASMA-8702).
-                tabIndex={canSort && !hideHeader ? 0 : undefined}
-                onClick={(e) => {
-                    const sortingHandler = header.column.getToggleSortingHandler()
-                    if (!isResizing && sortingHandler) {
-                        sortingHandler(e)
-                    }
-                    disableResizingFlag()
-                }}
-                onKeyDown={
-                    canSort
-                        ? (e) => {
-                              if (e.key !== 'Enter' && e.key !== ' ') return
-                              e.preventDefault()
-                              const sortingHandler = header.column.getToggleSortingHandler()
-                              if (!isResizing && sortingHandler) sortingHandler(e)
-                              disableResizingFlag()
-                          }
-                        : undefined
-                }
-            >
-                <div className={style['header-content']}>
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                </div>
-                {canSort && (
-                    <SortIndicator
-                        sorted={sortedDirection}
-                        firstDirection={header.column.getFirstSortDir()}
-                        preview={sortPreview}
-                    />
-                )}
-                {showResizeHandle && (
-                    <div
-                        {...{
-                            onDoubleClick: () => header.column.resetSize(),
-                            onMouseDown: (e) => {
-                                e.stopPropagation()
-                                enableResizingFlag()
-                                header.getResizeHandler()(e)
-                            },
-                            onTouchStart: (e) => {
-                                e.stopPropagation()
-                                enableResizingFlag()
-                                header.getResizeHandler()(e)
-                            },
-                            className: `${style['resizer']} ${header.column.getIsResizing() ? style['isResizing'] : ''}`,
-                        }}
-                    />
-                )}
-            </div>
+            <StyledTooltip title={tooltipTitle} describesTrigger={false}>
+                {content}
+            </StyledTooltip>
         </th>
     )
 }
