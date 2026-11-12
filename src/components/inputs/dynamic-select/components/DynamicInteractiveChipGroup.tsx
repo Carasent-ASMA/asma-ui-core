@@ -42,17 +42,24 @@ export const DynamicInteractiveChipGroup = forwardRef(
          * The same slot rule every other input in this library follows, through the same helper:
          * `disableHelperText` stops reserving the row, and a real message or an error still renders
          * it — growing the layout at that moment rather than parking 28px under a control that has
-         * nothing to say. Without the prop the row is reserved exactly as before, so no existing
-         * consumer's spacing moves.
+         * nothing to say.
          *
          * This also replaces the component's own `warnMissingErrorMessage` + `useHelperAlertRole`
          * pair, which was the hook's body written out by hand.
+         *
+         * **`readOnly` is the fifth argument** (ASMA-8853). It was omitted, so the hook's own
+         * read-only rule never fired and a read-only multi-select reserved an empty row —
+         * `min-h-[24px]` plus `pt-1`, about 28px of nothing under the chips — which a saved-filter
+         * panel stacking several of them accumulated visibly. Nothing can be typed into a read-only
+         * field, so there is no validation message coming to reserve room for; `StyledInputField`,
+         * `StyledSelect` and `StyledRadioGroup` have always passed it.
          */
         const { show: showHelper, role: helperAlertRole } = useHelperSlot(
             'DynamicInteractiveChipGroup',
             error,
             helperText,
             !disableHelperText,
+            readOnly,
         )
         const { containerRef, wrapDisabled } = useWrap({ dependencyList: [options, options.length] })
 

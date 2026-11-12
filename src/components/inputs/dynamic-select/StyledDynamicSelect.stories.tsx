@@ -661,6 +661,39 @@ export const MultiplePrimitiveOptions: Story = {
 }
 
 /**
+ * **Read-only multiple select reserves no helper row** (ASMA-8853).
+ *
+ * The chips are the last thing in the block. The helper slot used to render here with nothing in it —
+ * `min-h-[24px]` plus `pt-1`, about 28px of dead space — because `DynamicInteractiveChipGroup` never
+ * passed `readOnly` to `useHelperSlot`, so the hook's own read-only rule could not fire. A panel
+ * stacking several read-only multi-selects (a saved filter, say) accumulated the gap visibly.
+ *
+ * The field is followed by a marker so the VRT baseline shows the gap, not just the chips: anything
+ * that re-reserves the row pushes the marker down and the snapshot moves. No story covered this
+ * combination before, which is why the regression reached an app unseen.
+ */
+export const ReadOnlyMultipleReservesNoHelperRow: Story = {
+    render: () => (
+        <div className='flex w-[420px] flex-col'>
+            <StyledDynamicSelect<Option>
+                dataTest='ro-multi'
+                title='Pathway category'
+                options={MODE_OPTIONS}
+                value={[MODE_OPTIONS[0]!, MODE_OPTIONS[1]!]}
+                onChange={() => undefined}
+                labelKey='name'
+                valueKey='id'
+                multiple
+                readOnly
+            />
+            <div data-testid='next-field' className='bg-delta-100 text-sm/5 text-delta-700'>
+                Next field starts here
+            </div>
+        </div>
+    ),
+}
+
+/**
  * Read-only single select with an autocomplete-sized list (>5 options) must never be openable. Since
  * read-only single selects render as plain text (no input at all), that holds by construction: there is
  * no textbox to click and no listbox to open — just the title and `-` for the empty value. Name kept so
