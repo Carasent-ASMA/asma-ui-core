@@ -69,6 +69,17 @@ const popoverButton = (label: string): HTMLElement => {
 
     return button
 }
+/** A column's checkbox in the open popover: the one control that shows or hides it (its row is not a button). */
+const columnCheckbox = (label: string): HTMLElement => {
+    const row = [...document.querySelectorAll<HTMLElement>('[class*="table-action-item"]')].find((candidate) =>
+        candidate.textContent?.includes(label),
+    )
+    const box = row?.querySelector<HTMLElement>('label')
+
+    if (!box) throw new Error(`No checkbox for "${label}"`)
+
+    return box
+}
 const settle = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 40))
 const act = async (change: () => void): Promise<void> => {
     // Table-instance calls run outside React's event system: let React flush them.
@@ -82,7 +93,7 @@ const openPopover = async (): Promise<void> => {
 /** Hides or shows a column in the real popover, then closes it. */
 const toggleInPopover = async (label: string): Promise<void> => {
     await openPopover()
-    await userEvent.click(popoverButton(label))
+    await userEvent.click(columnCheckbox(label))
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(pin().getAttribute('aria-expanded')).toBe('false'))
     await settle()

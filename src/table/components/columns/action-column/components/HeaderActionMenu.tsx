@@ -1,3 +1,4 @@
+import { useId, type MouseEvent } from 'react'
 import { StyledPopover as Popover } from 'src/components/utils/popover'
 import type { HeaderContext } from '@tanstack/react-table'
 import { useToggleMenuVisibility } from 'src/table/hooks/useToggleMenuVisibility.hook'
@@ -56,6 +57,16 @@ function SortableColumnItem({
     )
 }
 
+/**
+ * A column's row is not a control: only its checkbox shows or hides the column (the drag icon only reorders it). A press on
+ * the row itself or on the name would still move the focus to the page, out of the menu, so it is kept where it was. The
+ * checkbox and the drag icon take the focus as usual.
+ */
+const keepFocusOnRowPress = (event: MouseEvent<HTMLElement>): void => {
+    if ((event.target as Element).closest('label, [role="button"]')) return
+    event.preventDefault()
+}
+
 export function HeaderActionMenu<TData>({
     headerData,
     locale,
@@ -64,6 +75,7 @@ export function HeaderActionMenu<TData>({
     locale?: 'en' | 'no'
 }): JSX.Element {
     const { anchorEl, open, handleClose, handleOpen } = useToggleMenuVisibility()
+    const menuId = useId()
 
     // The dot marks a column layout the user has changed: a hidden column, or a moved one (ASMA-8597, Q9, Q10).
     const showsChangedLayout = hasChangedColumnLayout(headerData.table)
@@ -154,7 +166,7 @@ export function HeaderActionMenu<TData>({
                     sensors={sensors}
                 >
                     <SortableContext items={filteredList.map((c) => c.id)} strategy={verticalListSortingStrategy}>
-                        {filteredList.map((column) => {
+                        {filteredList.map((column, index) => {
                             const dragDisabled = !!column.columnDef.fixedLeft || !!column.columnDef.fixedRight
                             const hidingDisabled = column.columnDef.enableHiding === false
 
@@ -167,18 +179,44 @@ export function HeaderActionMenu<TData>({
                                 tooltipTitle = t.column_hidden
                             }
 
+                            const columnLabel =
+                                column.columnDef.pinnedHeaderText ??
+                                (typeof column.columnDef.header === 'string' ? column.columnDef.header : column.id)
+                            const labelId = `${menuId}-column-${index}-name`
+
                             return (
                                 <SortableColumnItem key={column.id} id={column.id} disabled={dragDisabled}>
                                     {({ listeners, attributes }) => (
                                         <StyledTooltip title={tooltipTitle} arrow>
-                                            <button
-                                                type='button'
-                                                onClick={() => {
-                                                    if (hidingDisabled) return
-                                                    column.toggleVisibility(!column.getIsVisible())
-                                                }}
+                                            {/* `presentation`: the row has no semantics of its own, and its mouse handler only keeps the focus where it was. */}
+                                            <div
+                                                role='presentation'
                                                 className={headerStyles['table-action-item']}
+                                                onMouseDown={keepFocusOnRowPress}
                                             >
+                                                {/* The checkbox comes first in the DOM, so the first tabbable control of the row is the one
+                                                    the tooltip's reason is about (the tooltip describes that control); the drag icon is
+                                                    still drawn first (`order`). Tab goes checkbox, then drag icon, as it always went
+                                                    toggle, then drag icon. */}
+                                                <span className='px-1'>
+                                                    <StyledCheckbox
+                                                        readOnly={hidingDisabled}
+                                                        dataTest={`${column.id}-column-visibility-checkbox`}
+                                                        size='small'
+                                                        disableRipple
+                                                        checked={column.getIsVisible()}
+                                                        hideWrapper
+                                                        // The only control that shows or hides the column: a 24 x 24px target, named
+                                                        // by the column's text.
+                                                        className={headerStyles['column-checkbox']}
+                                                        aria-labelledby={labelId}
+                                                        aria-readonly={hidingDisabled || undefined}
+                                                        onChange={(_event, checked) => {
+                                                            if (hidingDisabled) return
+                                                            column.toggleVisibility(checked)
+                                                        }}
+                                                    />
+                                                </span>
                                                 <DotsHorizontalIcon
                                                     width={20}
                                                     height={20}
@@ -197,24 +235,10 @@ export function HeaderActionMenu<TData>({
                                                             : headerStyles['drag-icon--enabled'],
                                                     )}
                                                 />
-                                                <span className='px-2'>
-                                                    <StyledCheckbox
-                                                        readOnly={hidingDisabled}
-                                                        dataTest={`${column.id}-column-visibility-checkbox`}
-                                                        size='small'
-                                                        disableRipple
-                                                        checked={column.getIsVisible()}
-                                                        hideWrapper
-                                                        className='pointer-events-none'
-                                                    />
+                                                <span id={labelId} className='font-roboto text-base text-delta-700'>
+                                                    {columnLabel}
                                                 </span>
-                                                <span className='font-roboto text-base text-delta-700'>
-                                                    {column.columnDef.pinnedHeaderText ??
-                                                        (typeof column.columnDef.header === 'string'
-                                                            ? column.columnDef.header
-                                                            : column.id)}
-                                                </span>
-                                            </button>
+                                            </div>
                                         </StyledTooltip>
                                     )}
                                 </SortableColumnItem>
