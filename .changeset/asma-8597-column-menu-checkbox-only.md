@@ -11,7 +11,11 @@ markup and the checkbox is its one control.
   pin's dot). Space on the focused checkbox toggles; Enter on it does not, as on any checkbox.
 - The checkbox is named by its column (`aria-labelledby`: it used to have no name of its own, and its row button was called
   "Check iconRole") and its target is 24 x 24px, centred on the same 16px box, so the row looks as it did. A column that cannot
-  be hidden has a read-only checkbox. The tooltip's reason for a fixed or unhideable column still describes the control it is
-  about: the checkbox.
+  be hidden has a read-only checkbox.
+- Each reason is now told by the control it is about, on hover and on keyboard focus, and a screen reader hears it on that
+  control: the drag icon of a fixed column says it cannot be moved, the checkbox of a column that cannot be hidden says it
+  cannot be hidden ("This column can’t be hidden." / "Denne kolonnen kan ikke skjules.", and it says "fixed" only for a column
+  that is). The row's one tooltip, which described whichever control came first and called every unhideable column fixed, and
+  its combined "reordered or hidden" text are gone, so the name no longer shows a reason.
 - A click on the row or the name leaves the focus where it was; the checkbox and the drag icon take it as usual. The checkbox is
   first in the tab order of its row, then the drag icon, as the toggle always was; the row itself is no longer a tab stop.

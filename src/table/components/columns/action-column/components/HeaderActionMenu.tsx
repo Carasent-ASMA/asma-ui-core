@@ -171,14 +171,12 @@ export function HeaderActionMenu<TData>({
                             const dragDisabled = !!column.columnDef.fixedLeft || !!column.columnDef.fixedRight
                             const hidingDisabled = column.columnDef.enableHiding === false
 
-                            let tooltipTitle: JSX.Element | string | null = null
-                            if (dragDisabled && hidingDisabled) {
-                                tooltipTitle = t.column_reorder_and_hidden
-                            } else if (dragDisabled) {
-                                tooltipTitle = t.column_reorder
-                            } else if (hidingDisabled) {
-                                tooltipTitle = t.column_hidden
-                            }
+                            // Each reason is about one control, so each control carries its own (the tooltip describes the
+                            // control it wraps): the drag icon why the column cannot be moved, the checkbox why it cannot be
+                            // hidden. Only a fixed column is called fixed.
+                            const reorderReason = dragDisabled ? t.column_reorder : null
+                            let hideReason: string | null = null
+                            if (hidingDisabled) hideReason = dragDisabled ? t.column_hidden : t.column_unhideable
 
                             const columnLabel = headerLabelText(column.columnDef) ?? column.id
                             const labelId = `${menuId}-column-${index}-name`
@@ -186,17 +184,15 @@ export function HeaderActionMenu<TData>({
                             return (
                                 <SortableColumnItem key={column.id} id={column.id} disabled={dragDisabled}>
                                     {({ listeners, attributes }) => (
-                                        <StyledTooltip title={tooltipTitle} arrow>
-                                            {/* `presentation`: the row has no semantics of its own, and its mouse handler only keeps the focus where it was. */}
-                                            <div
-                                                role='presentation'
-                                                className={headerStyles['table-action-item']}
-                                                onMouseDown={keepFocusOnRowPress}
-                                            >
-                                                {/* The checkbox comes first in the DOM, so the first tabbable control of the row is the one
-                                                    the tooltip's reason is about (the tooltip describes that control); the drag icon is
-                                                    still drawn first (`order`). Tab goes checkbox, then drag icon, as it always went
-                                                    toggle, then drag icon. */}
+                                        // `presentation`: the row has no semantics of its own, and its mouse handler only keeps the focus where it was.
+                                        <div
+                                            role='presentation'
+                                            className={headerStyles['table-action-item']}
+                                            onMouseDown={keepFocusOnRowPress}
+                                        >
+                                            {/* The checkbox comes first in the DOM, then the drag icon, which is drawn first (`order`):
+                                                Tab goes checkbox, then drag icon, as it always went toggle, then drag icon. */}
+                                            <StyledTooltip title={hideReason} arrow>
                                                 <span className='px-1'>
                                                     <StyledCheckbox
                                                         readOnly={hidingDisabled}
@@ -216,29 +212,33 @@ export function HeaderActionMenu<TData>({
                                                         }}
                                                     />
                                                 </span>
-                                                <DotsHorizontalIcon
-                                                    width={20}
-                                                    height={20}
-                                                    {...attributes}
-                                                    {...listeners}
-                                                    style={{
-                                                        touchAction: 'none',
-                                                        WebkitUserSelect: 'none',
-                                                        userSelect: 'none',
-                                                        WebkitTouchCallout: 'none',
-                                                    }}
-                                                    className={cn(
-                                                        headerStyles['drag-icon'],
-                                                        dragDisabled
-                                                            ? headerStyles['drag-icon--disabled']
-                                                            : headerStyles['drag-icon--enabled'],
-                                                    )}
-                                                />
-                                                <span id={labelId} className='font-roboto text-base text-delta-700'>
-                                                    {columnLabel}
+                                            </StyledTooltip>
+                                            <StyledTooltip title={reorderReason} arrow>
+                                                <span className={headerStyles['drag-slot']}>
+                                                    <DotsHorizontalIcon
+                                                        width={20}
+                                                        height={20}
+                                                        {...attributes}
+                                                        {...listeners}
+                                                        style={{
+                                                            touchAction: 'none',
+                                                            WebkitUserSelect: 'none',
+                                                            userSelect: 'none',
+                                                            WebkitTouchCallout: 'none',
+                                                        }}
+                                                        className={cn(
+                                                            headerStyles['drag-icon'],
+                                                            dragDisabled
+                                                                ? headerStyles['drag-icon--disabled']
+                                                                : headerStyles['drag-icon--enabled'],
+                                                        )}
+                                                    />
                                                 </span>
-                                            </div>
-                                        </StyledTooltip>
+                                            </StyledTooltip>
+                                            <span id={labelId} className='font-roboto text-base text-delta-700'>
+                                                {columnLabel}
+                                            </span>
+                                        </div>
                                     )}
                                 </SortableColumnItem>
                             )

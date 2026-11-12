@@ -4,7 +4,8 @@ const translations = {
     en: {
         column_reorder: 'This column is fixed and can’t be reordered.',
         column_hidden: 'This column is fixed and can’t be hidden.',
-        column_reorder_and_hidden: 'This column is fixed and can’t be reordered or hidden.',
+        // A column that is not fixed but cannot be hidden is not called fixed (ASMA-8597).
+        column_unhideable: 'This column can’t be hidden.',
         reset_columns: 'Reset columns',
         columns_reset: 'Columns reset',
         column_settings: 'Column settings',
@@ -15,7 +16,7 @@ const translations = {
     no: {
         column_reorder: 'Denne kolonnen er fast og kan ikke flyttes.',
         column_hidden: 'Denne kolonnen er fast og kan ikke skjules.',
-        column_reorder_and_hidden: 'Denne kolonnen er fast og kan ikke flyttes eller skjules.',
+        column_unhideable: 'Denne kolonnen kan ikke skjules.',
         reset_columns: 'Tilbakestill kolonner',
         columns_reset: 'Kolonnene er tilbakestilt',
         column_settings: 'Kolonneinnstillinger',

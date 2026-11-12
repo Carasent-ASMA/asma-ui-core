@@ -30,11 +30,16 @@
     height: 24px;
 }
 
+// The drag icon's tooltip needs a box of its own to sit on (an SVG takes no ref), the icon's own box.
+.drag-slot {
+    display: flex;
+    // First in the row on screen, though the checkbox is first in the DOM (see `HeaderActionMenu`).
+    order: -1;
+}
+
 .drag-icon {
     width: 20px;
     height: 20px;
-    // First in the row on screen, though the checkbox is first in the DOM (see `HeaderActionMenu`).
-    order: -1;
 }
 
 .drag-icon--disabled {

@@ -31,10 +31,18 @@ const RESTRICTED: ColumnDef<Person>[] = [
     { id: 'notes', header: 'Notes', size: 120 },
 ]
 
+/** Name is fixed (it cannot be reordered); Age cannot be hidden; Notes is both; Role is neither. */
+const REASONS: ColumnDef<Person>[] = [
+    { accessorKey: 'name', header: 'Name', size: 160, fixedLeft: true },
+    { accessorKey: 'role', header: 'Role', size: 160 },
+    { accessorKey: 'age', header: 'Age', size: 120, enableHiding: false },
+    { id: 'notes', header: 'Notes', size: 120, fixedRight: true, enableHiding: false },
+]
+
 const settle = (milliseconds = 60): Promise<void> => new Promise((resolve) => setTimeout(resolve, milliseconds))
 
-const mountTable = async (columns: ColumnDef<Person>[] = PLAIN): Promise<void> => {
-    mount(<StyledTable<Person> columns={columns} data={people} hideFooter locale='en' />)
+const mountTable = async (columns: ColumnDef<Person>[] = PLAIN, locale: 'en' | 'no' = 'en'): Promise<void> => {
+    mount(<StyledTable<Person> columns={columns} data={people} hideFooter locale={locale} />)
     await settle(150)
 }
 
@@ -121,6 +129,33 @@ const parkPointer = async (): Promise<void> => {
     await userEvent.hover(parking)
     parking.remove()
 }
+
+const tooltipText = (): string | null => document.querySelector('[role="tooltip"]')?.textContent ?? null
+const waitForTooltip = (): Promise<void> =>
+    waitFor(() => expect(document.querySelector('[role="tooltip"]')).not.toBeNull(), { timeout: 3000 })
+/** The tooltip opens after 500ms: when nothing should open, wait past that. */
+const expectNoTooltip = async (): Promise<void> => {
+    await settle(900)
+    await expect(document.querySelector('[role="tooltip"]')).toBeNull()
+}
+const closeTooltip = async (): Promise<void> => {
+    await parkPointer()
+    await waitFor(() => expect(document.querySelector('[role="tooltip"]')).toBeNull(), { timeout: 3000 })
+}
+/**
+ * The reason a tooltip gives a control: the text of the open tooltip its `aria-describedby` points at, '' when it points at
+ * none. (The drag icon is described by dnd-kit's own instructions too, which are not a reason.)
+ */
+const descriptionOf = (control: Element): string =>
+    (control.getAttribute('aria-describedby') ?? '')
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((id) => document.getElementById(id))
+        .filter((described) => described?.getAttribute('role') === 'tooltip')
+        .map((described) => described?.textContent ?? '')
+        .join(' ')
+/** A read-only checkbox takes no pointer events, so the hover is forced onto where its box is. */
+const hoverBox = (label: string): Promise<void> => userEvent.hover(boxOf(label), { force: true })
 
 beforeEach(async () => {
     localStorage.clear()
@@ -295,18 +330,137 @@ describe('A column that cannot be hidden', () => {
         await expect(shown()).toEqual(['Name', 'Role', 'Age', 'Notes'])
         await expect(inputOf('Age').checked).toBe(true)
     })
+})
 
-    it('has the reason from its tooltip as a description of its checkbox, and of nothing else', async () => {
-        await mountTable(RESTRICTED)
+/** The reasons, as the column settings tell them in each language. */
+const REASON_TEXTS = {
+    en: {
+        reorder: 'This column is fixed and can’t be reordered.',
+        hidden: 'This column is fixed and can’t be hidden.',
+        unhideable: 'This column can’t be hidden.',
+    },
+    no: {
+        reorder: 'Denne kolonnen er fast og kan ikke flyttes.',
+        hidden: 'Denne kolonnen er fast og kan ikke skjules.',
+        unhideable: 'Denne kolonnen kan ikke skjules.',
+    },
+} as const
+
+describe.each(['en', 'no'] as const)('The reason a control cannot be used is told by that control (%s)', (locale) => {
+    const text = REASON_TEXTS[locale]
+
+    it('a fixed column: its drag icon says why it cannot be moved, and its checkbox says nothing', async () => {
+        await mountTable(REASONS, locale)
         await openMenu()
 
-        await userEvent.hover(nameOf('Age'))
-        await waitFor(() => expect(document.querySelector('[role="tooltip"]')).not.toBeNull(), { timeout: 3000 })
-        const tooltip = document.querySelector<HTMLElement>('[role="tooltip"]')!
+        await userEvent.hover(handleOf('Name'))
+        await waitForTooltip()
+        await expect(tooltipText()).toBe(text.reorder)
+        await expect(descriptionOf(handleOf('Name'))).toBe(text.reorder)
+        await expect(descriptionOf(inputOf('Name'))).toBe('')
 
-        await expect(tooltip.textContent).toContain('can’t be hidden')
-        await expect(inputOf('Age').getAttribute('aria-describedby')).toContain(tooltip.id)
-        await expect(handleOf('Age').getAttribute('aria-describedby') ?? '').not.toContain(tooltip.id)
+        await closeTooltip()
+        await hoverBox('Name')
+        await expectNoTooltip()
+        await expect(descriptionOf(inputOf('Name'))).toBe('')
+    })
+
+    it('a column that cannot be hidden but is not fixed: its checkbox says so without calling it fixed, its drag icon says nothing', async () => {
+        await mountTable(REASONS, locale)
+        await openMenu()
+
+        await hoverBox('Age')
+        await waitForTooltip()
+        await expect(tooltipText()).toBe(text.unhideable)
+        await expect(descriptionOf(inputOf('Age'))).toBe(text.unhideable)
+        await expect(descriptionOf(handleOf('Age'))).toBe('')
+
+        await closeTooltip()
+        await userEvent.hover(handleOf('Age'))
+        await expectNoTooltip()
+        await expect(descriptionOf(handleOf('Age'))).toBe('')
+    })
+
+    it('a fixed column that cannot be hidden: each control says its own reason', async () => {
+        await mountTable(REASONS, locale)
+        await openMenu()
+
+        await hoverBox('Notes')
+        await waitForTooltip()
+        await expect(tooltipText()).toBe(text.hidden)
+        await expect(descriptionOf(inputOf('Notes'))).toBe(text.hidden)
+        await expect(descriptionOf(handleOf('Notes'))).toBe('')
+
+        await closeTooltip()
+        await userEvent.hover(handleOf('Notes'))
+        await waitForTooltip()
+        await expect(tooltipText()).toBe(text.reorder)
+        await expect(descriptionOf(handleOf('Notes'))).toBe(text.reorder)
+        await expect(descriptionOf(inputOf('Notes'))).toBe('')
+    })
+})
+
+describe('The reason a control cannot be used, by keyboard and for a column with none', () => {
+    it('the focus on the drag icon of a fixed column opens its reason, and the checkbox of that column has none', async () => {
+        await mountTable(REASONS)
+        await openMenu()
+
+        await tabTo(inputOf('Name'))
+        await expectNoTooltip()
+        await userEvent.tab()
+        await expect(document.activeElement).toBe(handleOf('Name'))
+        await waitForTooltip()
+        await expect(descriptionOf(handleOf('Name'))).toBe(REASON_TEXTS.en.reorder)
+        await expect(descriptionOf(inputOf('Name'))).toBe('')
+    })
+
+    it('the focus on the checkbox of a column that cannot be hidden opens its reason, and the drag icon after it has none', async () => {
+        await mountTable(REASONS)
+        await openMenu()
+
+        await tabTo(inputOf('Age'))
+        await waitForTooltip()
+        await expect(descriptionOf(inputOf('Age'))).toBe(REASON_TEXTS.en.unhideable)
+
+        await userEvent.tab()
+        await expect(document.activeElement).toBe(handleOf('Age'))
+        await expectNoTooltip()
+        await expect(descriptionOf(handleOf('Age'))).toBe('')
+    })
+
+    it('the reason shows right by its control, above it or, with no room, below it', async () => {
+        await mountTable(REASONS)
+        await openMenu()
+
+        const gapTo = (control: Element): number => {
+            const tooltip = rect(document.querySelector('[role="tooltip"]')!)
+            const target = rect(control)
+
+            return Math.min(Math.abs(tooltip.bottom - target.top), Math.abs(tooltip.top - target.bottom))
+        }
+
+        await userEvent.hover(handleOf('Notes'))
+        await waitForTooltip()
+        await settle(150)
+        await expect(gapTo(handleOf('Notes'))).toBeLessThanOrEqual(24)
+
+        await closeTooltip()
+        await hoverBox('Age')
+        await waitForTooltip()
+        await settle(150)
+        await expect(gapTo(boxOf('Age'))).toBeLessThanOrEqual(24)
+    })
+
+    it('a column with no restriction shows no tooltip on either control', async () => {
+        await mountTable(REASONS)
+        await openMenu()
+
+        await userEvent.hover(boxOf('Role'))
+        await expectNoTooltip()
+        await userEvent.hover(handleOf('Role'))
+        await expectNoTooltip()
+        await expect(descriptionOf(inputOf('Role'))).toBe('')
+        await expect(descriptionOf(handleOf('Role'))).toBe('')
     })
 })
 
