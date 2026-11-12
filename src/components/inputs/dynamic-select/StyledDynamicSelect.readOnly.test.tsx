@@ -4,8 +4,9 @@ import { StyledDynamicSelect } from './StyledDynamicSelect'
 
 /**
  * Read-only rule: a **single** select shows its selected label as plain text — no chip, no input,
- * no helper/error row — whatever the option count. A **multiple** select is out of scope and keeps
- * its read-only chips.
+ * no helper/error row — whatever the option count. A **multiple** select keeps its read-only chips,
+ * and since ASMA-8853 it drops the helper row too: nothing can be typed into a read-only field, so
+ * there is no validation message coming to reserve room for.
  */
 
 const FEW = ['After', 'Before', 'Same day']
@@ -224,5 +225,67 @@ describe('StyledDynamicSelect — rule does not apply', () => {
         expect(html).not.toContain('ro-read-only')
         expect(html).toContain('data-testid="ic-Alpha"')
         expect(html).toContain('data-testid="ic-Golf"')
+    })
+
+    /*
+     * ASMA-8853. `useHelperSlot` has always known the rule — `readOnly !== true && (...)` — but the
+     * chip group called it with four arguments and never passed the fifth, so the row rendered with
+     * nothing in it: `min-h-[24px]` plus `pt-1`, about 28px of dead space under the chips. A saved
+     * filter stacking several read-only multi-selects accumulated the gap visibly.
+     */
+    it('reserves no helper row when read-only, at either option count', () => {
+        for (const options of [FEW, MANY]) {
+            const html = renderToStaticMarkup(
+                <StyledDynamicSelect
+                    dataTest='ro'
+                    options={options}
+                    value={[options[0]!]}
+                    onChange={noop}
+                    multiple
+                    readOnly
+                />,
+            )
+
+            expect(html).not.toContain('min-h-[24px]')
+        }
+    })
+
+    it('still reserves the helper row when it is editable, so nothing shifts on focus', () => {
+        // The guard is read-only, not multiple: an editable multi-select keeps the reserved space
+        // so that a validation message appearing does not move the fields beneath it.
+        const html = renderToStaticMarkup(
+            <StyledDynamicSelect dataTest='rw' options={FEW} value={[]} onChange={noop} multiple />,
+        )
+
+        expect(html).toContain('min-h-[24px]')
+    })
+
+    it('shows no helper row even when a message is set, matching the other read-only inputs', () => {
+        /*
+         * `useHelperSlot`'s rule is unconditional on read-only — `readOnly !== true && (...)` — so a
+         * message set on a read-only field is suppressed along with the reserved space. That is the
+         * library's existing behaviour, shared by `StyledInputField`, `StyledSelect` and
+         * `StyledRadioGroup`; this component was simply the one not asking for it.
+         *
+         * Checked against the workspace before changing it: no consumer sets `helperText` or `error`
+         * on a read-only *multiple* select. The one call site that combines read-only with a helper
+         * (`asma-app-calendar`'s `OfferSelect`) is `multiple={false}`, so it takes the single-select
+         * path and is untouched.
+         */
+        const html = renderToStaticMarkup(
+            <StyledDynamicSelect
+                dataTest='ro'
+                options={FEW}
+                value={['After']}
+                onChange={noop}
+                multiple
+                readOnly
+                error
+                helperText='Something is wrong'
+            />,
+        )
+
+        expect(html).not.toContain('Something is wrong')
+        expect(html).not.toContain('min-h-[24px]')
     })
 })
