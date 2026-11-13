@@ -89,8 +89,14 @@ export const StyledTabs: FC<StyledTabsProps> = ({
                 disabled: node.disabled || node.getAttribute('aria-disabled') === 'true',
             })
         if (scroller) {
-            const { scrollLeft, scrollWidth, clientWidth } = scroller
-            setOverflow({ left: scrollLeft > 1, right: scrollLeft + clientWidth < scrollWidth - 1 })
+            const { scrollLeft, clientWidth } = scroller
+            // Not `scrollWidth`: it includes the underline, which still spans the old tab while it
+            // animates after a relabel, and no resize follows to clear the stale overflow.
+            const tabsRight = Math.max(
+                0,
+                ...Array.from(nodesRef.current.values(), (tab) => tab.offsetLeft + tab.offsetWidth),
+            )
+            setOverflow({ left: scrollLeft > 1, right: scrollLeft + clientWidth < tabsRight - 1 })
         }
     }, [value])
 
