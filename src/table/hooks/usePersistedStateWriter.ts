@@ -29,16 +29,13 @@ interface PersistedStateWriterOptions<T> {
  *   entry is never touched, so the old value can't be copied over the new key.
  * - When the key goes away (`undefined`), the table goes back to the app's defaults and writes nothing, so
  *   one user's values are not left on screen for whoever is shown next.
- *
- * It costs a table that does not save the setting nothing per render (ASMA-8698): the value's signature is computed only
- * while there is a key (the render that loses the key reads it in the layout effect), and the default's only when a write
- * or a reset needs it.
  */
 export const usePersistedStateWriter = <T>(options: PersistedStateWriterOptions<T>): void => {
     const { storageKey, state, defaultValue, saved, settled = true, controlled = false } = options
     const { toSignature, toStorage, applyState } = options
 
-    const signature = storageKey !== undefined ? toSignature(state) : ''
+    const signature = toSignature(state)
+    const defaultSignature = toSignature(defaultValue)
 
     const hydratedKeyRef = useRef(storageKey)
     const lastSeenRef = useRef(signature)
@@ -53,8 +50,7 @@ export const usePersistedStateWriter = <T>(options: PersistedStateWriterOptions<
         lastSeenRef.current = signature
 
         if (!storageKey) {
-            // The key went away: this render's state is what the table still shows.
-            if (!controlled && toSignature(state) !== toSignature(defaultValue)) {
+            if (!controlled && signature !== defaultSignature) {
                 applyState(defaultValue)
             }
             return
@@ -95,7 +91,7 @@ export const usePersistedStateWriter = <T>(options: PersistedStateWriterOptions<
 
         lastSeenRef.current = signature
 
-        if (signature === toSignature(defaultValue)) {
+        if (signature === defaultSignature) {
             tableStorage.remove(storageKey)
         } else {
             tableStorage.set(storageKey, toStorage(state))

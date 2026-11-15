@@ -9,34 +9,6 @@ const NO_SORTING: SortingState = []
 export const getSortingStorageKey = (uniqueKey?: string): string | undefined =>
     uniqueKey ? `${uniqueKey}${SORTING_KEY_SUFFIX}` : undefined
 
-/** What decides whether `StyledTable` saves a table's sorting: the props that matter, read from the table's own. */
-export interface SortingPersistenceInput {
-    uniqueKey?: string
-    /** The `persistSorting` prop as the app wrote it; `undefined` when it did not. */
-    persistSorting?: boolean
-    /**
-     * The app owns the sorting state: it passes `state.sorting`, or `onSortingChange`. TanStack hands every change to that
-     * handler instead of updating the table's own state, so a handler alone is as much the app's state as `state.sorting`.
-     */
-    controlled: boolean
-}
-
-/**
- * Whether `StyledTable` reads and writes the sorting under `${uniqueKey}:sorting` (ASMA-8698, DEC-8698-OPTOUT).
- *
- * - No `uniqueKey`: never.
- * - `persistSorting={false}`: never, the opt-out for tables whose order is the user's own (drag and drop).
- * - `persistSorting={true}`: yes, even when the app owns the sorting state. That is how such an app lets `StyledTable` be the
- *   only writer of the sort it reads back with `usePersistedSorting`.
- * - Not written: yes, unless the app owns the sorting state. A saved sort could not be applied to a state the table does not
- *   own, and an app that persists its own sort would have two writers fighting over it.
- */
-export const savesSorting = ({ uniqueKey, persistSorting, controlled }: SortingPersistenceInput): boolean => {
-    if (!uniqueKey || persistSorting === false) return false
-
-    return persistSorting === true || !controlled
-}
-
 /** What a saved sort is checked against: the columns that can sort, and the multi-sort rules. */
 export interface SortingRules {
     sortableColumns: readonly { id: string; canMultiSort: boolean }[]
@@ -118,7 +90,7 @@ const rulesFromOptions = ({
 })
 
 /**
- * Reads the sorting `StyledTable` saved for `uniqueKey`, checked against the columns
+ * Reads the sorting `StyledTable` saved for `uniqueKey` (with `persistSorting`), checked against the columns
  * the caller can sort by. Synchronous and pure, so a table that owns its sorting state (for example because
  * the server sorts) can use the saved sort for its first request. Returns `undefined` when nothing valid is
  * saved, and `[]` when the user turned sorting off.
@@ -131,8 +103,8 @@ export const readPersistedSorting = (
 /**
  * Sorting state for a table that owns `state.sorting`: the saved sort on the first render (before the first
  * request), `defaultSorting` when nothing valid is saved, and the new key's sort after `uniqueKey` changes.
- * It never writes: `StyledTable` is the only writer, and it saves a sort the app owns only with `persistSorting` written
- * on the table (see `savesSorting`). It takes the same default from `initialState.sorting`, which Reset columns restores.
+ * It never writes: `StyledTable` with `persistSorting` is the only writer, and it takes the same default
+ * from `initialState.sorting`, which Reset columns restores.
  *
  * ```tsx
  * const { sorting, onSortingChange } = usePersistedSorting({ uniqueKey, defaultSorting, sortableColumnIds })
