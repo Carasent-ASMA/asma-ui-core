@@ -532,3 +532,112 @@ describe('StyledTable sorting persistence: controlled sorting (usePersistedSorti
         await expect(stored(SORT_KEY)).toEqual({ v: 1, sorting: [{ id: 'name', desc: true }] })
     })
 })
+
+/**
+ * persistSorting is an opt-in again (ASMA-8698 revert of #357; ASMA-8597, D1): a table with only a `uniqueKey` saves its widths
+ * and page size, and its sorting only when it writes `persistSorting`. Every table above passes `persistSorting`, so none of
+ * them would notice if a `uniqueKey` alone started saving the sort.
+ */
+describe('StyledTable sorting persistence is an opt-in (D1)', () => {
+    beforeEach(() => localStorage.clear())
+    afterEach(() => {
+        cleanup()
+        vi.restoreAllMocks()
+    })
+
+    /** A table with a `uniqueKey` and nothing else: `persistSorting` is left out. */
+    const OnlyKeyTable = (props: Props): JSX.Element => (
+        <StyledTable<Person> columns={personColumns} data={people} hideFooter locale='en' uniqueKey={KEY} {...props} />
+    )
+    const tableRef = (): { ref: { current: Table<Person> | null }; table: () => Table<Person> } => {
+        let instance: Table<Person> | null = null
+        const ref = {
+            get current() {
+                return instance
+            },
+            set current(value: Table<Person> | null) {
+                instance = value
+            },
+        }
+
+        return { ref, table: () => instance! }
+    }
+
+    it('O-01: a table with only a uniqueKey neither reads nor writes :sorting, and a saved entry is ignored and left as it was', async () => {
+        const entry = saved([{ id: 'role', desc: true }])
+
+        localStorage.setItem(SORT_KEY, entry)
+
+        const getItem = vi.spyOn(Storage.prototype, 'getItem')
+        const setItem = vi.spyOn(Storage.prototype, 'setItem')
+        const removeItem = vi.spyOn(Storage.prototype, 'removeItem')
+
+        mount(<OnlyKeyTable initialState={{ sorting: [{ id: 'name', desc: false }] }} />)
+
+        // The saved entry is not applied: the app's default shows.
+        await expect(ariaSorts()['Name']).toBe('ascending')
+        await expect(ariaSorts()['Role']).toBe('none')
+
+        await userEvent.click(sortButton('Age'))
+        await expect(ariaSorts()['Age']).toBe('descending')
+
+        for (const spy of [getItem, setItem, removeItem]) {
+            await expect(callsFor(spy.mock.calls, SORT_KEY)).toHaveLength(0)
+        }
+        // Read after the spy check, so this test's own read is not counted.
+        await expect(localStorage.getItem(SORT_KEY)).toBe(entry)
+    })
+
+    it('O-02: it does not restore its sort after a remount, and saves no entry', async () => {
+        const first = mount(<OnlyKeyTable />)
+
+        await userEvent.click(sortButton('Role'))
+        await expect(ariaSorts()['Role']).toBe('ascending')
+        first.unmount()
+
+        mount(<OnlyKeyTable />)
+
+        await expect(ariaSorts()['Role']).toBe('none')
+        await expect(localStorage.getItem(SORT_KEY)).toBeNull()
+    })
+
+    it('O-03: with persistSorting the same table saves and restores it', async () => {
+        const first = mount(<OnlyKeyTable persistSorting />)
+
+        await userEvent.click(sortButton('Role'))
+        await expect(stored(SORT_KEY)).toEqual({ v: 1, sorting: [{ id: 'role', desc: false }] })
+        first.unmount()
+
+        mount(<OnlyKeyTable persistSorting />)
+
+        await expect(ariaSorts()['Role']).toBe('ascending')
+    })
+
+    it('O-04: Reset columns leaves the sorting of a table without persistSorting alone, and resets it with', async () => {
+        const without = tableRef()
+        const first = mount(<OnlyKeyTable initialState={{ sorting: [{ id: 'name', desc: false }] }} tableInstanceRef={without.ref} />)
+
+        await userEvent.click(sortButton('Age'))
+        without.table().resetColumnSettings()
+        await new Promise((resolve) => setTimeout(resolve, 60))
+
+        await expect(ariaSorts()['Age']).toBe('descending')
+        first.unmount()
+
+        const withSaving = tableRef()
+
+        mount(
+            <OnlyKeyTable
+                persistSorting
+                initialState={{ sorting: [{ id: 'name', desc: false }] }}
+                tableInstanceRef={withSaving.ref}
+            />,
+        )
+        await userEvent.click(sortButton('Age'))
+        withSaving.table().resetColumnSettings()
+        await new Promise((resolve) => setTimeout(resolve, 60))
+
+        await expect(ariaSorts()['Name']).toBe('ascending')
+        await expect(localStorage.getItem(SORT_KEY)).toBeNull()
+    })
+})
