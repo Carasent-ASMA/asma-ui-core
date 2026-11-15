@@ -15,14 +15,17 @@ import {
     type Person,
 } from 'src/test-utils/tableFixture'
 import { usePersistedStateWriter } from '../hooks/usePersistedStateWriter'
+import { usePersistedSorting } from '../hooks/usePersistedSorting'
 import { StyledTable } from './StyledTableIndex'
 import type { StyledTableProps } from '../types'
 
 /**
  * Every table with a `uniqueKey` saves and restores each user's sorting (ASMA-8698; DEC-8698-OPTOUT). `persistSorting={false}`
- * is the opt-out, `persistSorting` / `={true}` is the default spelled out, and an app that owns the sorting (`state.sorting`,
- * or `manualSorting` where the server sorts) is not saved by default: the saved sort could not be applied to what the table
- * does not own, and two writers would fight over it. Real Chromium, real `localStorage`: what a user sees after a reload.
+ * is the opt-out, `persistSorting` / `={true}` is the default spelled out, and an app that owns the sorting state (it passes
+ * `state.sorting`, or `onSortingChange`, which TanStack calls instead of updating the table's own state) is not saved by
+ * default: the saved sort could not be applied to a state the table does not own, and two writers would fight over it.
+ * `manualSorting` is not a signal of its own: the table still owns its state there (D-16). Real Chromium, real
+ * `localStorage`: what a user sees after a reload.
  *
  * None of these tables writes `persistSorting` unless the test is about it, so each one is the default.
  */
@@ -312,19 +315,25 @@ describe('When the app owns the sorting, StyledTable does not also save it by de
         await expect(callsFor(spies.get.mock.calls, /:sorting$/)).toHaveLength(0)
     })
 
-    it('D-15: onSortingChange alone is the app\'s state too: TanStack hands every change to it, so nothing is saved by default', async () => {
+    it('D-15: onSortingChange alone is the app\'s state too: TanStack hands every change to it, so the table\'s own sort never moves and nothing is saved', async () => {
         const entry = saved([{ id: 'role', desc: true }])
 
         localStorage.setItem(SORT_KEY, entry)
 
         const spies = storageSpies()
         const onSortingChange = vi.fn()
+        const { ref, table } = tableRef()
 
-        mount(<DefaultTable onSortingChange={onSortingChange} />)
+        mount(<DefaultTable onSortingChange={onSortingChange} tableInstanceRef={ref} />)
         await userEvent.click(sortButton('Age'))
+        await settle()
 
+        // The click went to the app's handler, and only there.
         await expect(onSortingChange).toHaveBeenCalled()
-        // The saved entry is not applied to a state the app owns, and the click is the handler's.
+        // The table's own sorting state and every arrow are unchanged: no saved sort applied, and no click applied either.
+        await expect(table().getState().sorting).toEqual([])
+        await expect(Object.values(ariaSorts()).filter((sort) => sort !== 'none')).toEqual([])
+        await expect(ariaSorts()['Age']).toBe('none')
         await expect(ariaSorts()['Role']).toBe('none')
         for (const spy of [spies.get, spies.set, spies.remove]) {
             await expect(callsFor(spy.mock.calls, SORT_KEY)).toHaveLength(0)
@@ -528,6 +537,33 @@ describe('What saving costs (ASMA-8698)', () => {
         await expect(parse).not.toHaveBeenCalled()
     })
 
+    it('D-27b: the exception: a table the app owns that reads the saved sort itself reads the entry twice per mount, the hook\'s and the table\'s, and nothing after', async () => {
+        localStorage.setItem(SORT_KEY, saved([{ id: 'role', desc: false }]))
+
+        const spies = storageSpies()
+        const AppOwned = (): JSX.Element => {
+            const { sorting, onSortingChange } = usePersistedSorting({
+                uniqueKey: KEY,
+                defaultSorting: [{ id: 'name', desc: false }],
+                sortableColumnIds: ['name', 'role', 'age'],
+            })
+
+            return <DefaultTable persistSorting state={{ sorting }} onSortingChange={onSortingChange} />
+        }
+        const view = mount(<AppOwned />)
+
+        await settle()
+        // The restored sort is what shows, from the first render.
+        await expect(ariaSorts()['Role']).toBe('ascending')
+        await expect(callsFor(spies.get.mock.calls, SORT_KEY)).toHaveLength(2)
+
+        view.rerender(<AppOwned />)
+        view.rerender(<AppOwned />)
+        await settle()
+
+        await expect(callsFor(spies.get.mock.calls, SORT_KEY)).toHaveLength(2)
+    })
+
     it('D-28: a sort click writes the sorting once, and nothing else', async () => {
         mount(<DefaultTable {...resizing} />)
         await settle()
@@ -609,6 +645,33 @@ describe('What saving costs (ASMA-8698)', () => {
         await settle()
 
         await expect(again.table().getState().pagination.pageSize).toBe(25)
+    })
+
+    it('D-31b: loading another key\'s page size writes nothing, and the page size is saved under the new key only when it changes there', async () => {
+        localStorage.setItem('first:page-size', '25')
+        localStorage.setItem('second:page-size', '10')
+
+        const first = tableRef()
+        const spies = storageSpies()
+        const view = mount(<DefaultTable uniqueKey='first' tableInstanceRef={first.ref} />)
+
+        await settle()
+        await expect(first.table().getState().pagination.pageSize).toBe(25)
+
+        view.rerender(<DefaultTable uniqueKey='second' tableInstanceRef={first.ref} />)
+        await settle()
+
+        await expect(first.table().getState().pagination.pageSize).toBe(10)
+        // Loading wrote nothing, under either key.
+        await expect(callsFor(spies.set.mock.calls, /:page-size$/)).toHaveLength(0)
+        await expect(localStorage.getItem('first:page-size')).toBe('25')
+        await expect(localStorage.getItem('second:page-size')).toBe('10')
+
+        first.table().setPageSize(50)
+        await settle()
+
+        await expect(callsFor(spies.set.mock.calls, /:page-size$/)).toEqual([['second:page-size', '50']])
+        await expect(localStorage.getItem('first:page-size')).toBe('25')
     })
 
     it('D-32: a table with no key serialises nothing per render, through re-renders and a sort', async () => {

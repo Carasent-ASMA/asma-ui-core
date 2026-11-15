@@ -284,13 +284,32 @@ export const useSavedColumnLayout = (options: SavedColumnLayoutOptions): SavedCo
     return deriveSavedColumnLayout(raw, options.columns, options.defaultVisibility)
 }
 
-interface ColumnLayoutInputs {
-    /** What the table state was last brought in line with. */
-    signature: string
+export interface ColumnLayoutInputs {
+    /**
+     * What the table state was last brought in line with, as one string. `undefined` in a commit made while the layout was not
+     * saved: nothing is reconciled then, so none is built (ASMA-8698); it is worked out from the inputs below if it is needed.
+     */
+    signature: string | undefined
     definitionIds: readonly string[]
     defaultOrder: ColumnOrderState
     defaultVisibility: VisibilityState
 }
+
+const layoutInputsSignature = ({
+    definitionIds,
+    defaultOrder,
+    defaultVisibility,
+}: Omit<ColumnLayoutInputs, 'signature'>): string =>
+    JSON.stringify([definitionIds, defaultOrder, Object.entries(defaultVisibility).sort()])
+
+/**
+ * Whether the inputs the state was last brought in line with differ from this render's. A commit made while the layout was not
+ * saved has no signature, so its is worked out from the inputs it recorded: a table that is opted in later, with other columns
+ * or other defaults than it had, is reconciled exactly as one that was opted in all along.
+ */
+export const columnLayoutInputsChanged = (before: ColumnLayoutInputs | undefined, current: ColumnLayoutInputs): boolean =>
+    before !== undefined &&
+    (before.signature ?? layoutInputsSignature(before)) !== (current.signature ?? layoutInputsSignature(current))
 
 /** The inputs each table's state was last brought in line with, by table instance. */
 const reconciledInputs = new WeakMap<object, ColumnLayoutInputs>()
@@ -322,24 +341,23 @@ export const useColumnLayoutReconcile = <TData>(
     },
 ): boolean => {
     const { enabled, definitionIds, defaultOrder, defaultVisibility, controlledVisibility } = options
-    // A table that does not save its layout has nothing to reconcile and builds no signature (ASMA-8698): `''` stands for that.
+    // A table that does not save its layout has nothing to reconcile and builds no signature (ASMA-8698).
     const current: ColumnLayoutInputs = {
-        signature: enabled ? JSON.stringify([definitionIds, defaultOrder, Object.entries(defaultVisibility).sort()]) : '',
+        signature: enabled ? layoutInputsSignature({ definitionIds, defaultOrder, defaultVisibility }) : undefined,
         definitionIds,
         defaultOrder,
         defaultVisibility,
     }
     // The inputs of the last commit, kept outside React state: reading them in render is how the writers learn that this
     // render's state is not in step yet, and an update of React state would only repeat the render that finds out.
-    const seen = reconciledInputs.get(table) ?? current
-    const pending = enabled && seen.signature !== '' && seen.signature !== current.signature
+    const pending = enabled && columnLayoutInputsChanged(reconciledInputs.get(table), current)
 
     useLayoutEffect(() => {
         const before = reconciledInputs.get(table)
 
         reconciledInputs.set(table, current)
 
-        if (!enabled || !before || before.signature === '' || before.signature === current.signature) return
+        if (!enabled || !before || !columnLayoutInputsChanged(before, current)) return
 
         const order = table.getState().columnOrder
         const wasOnDefault =
