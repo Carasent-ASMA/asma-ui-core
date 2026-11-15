@@ -6,9 +6,11 @@ ASMA-8698: every `StyledTable` with a `uniqueKey` now remembers each user's sort
 widths. The user's last sort comes back when they leave a table and return (another tab, another widget, a reload), and
 **Reset columns** puts the app's `initialState.sorting` back and removes the saved entry. It no longer needs `persistSorting`.
 
-**Publish only when every app is ready.** A table now saves its sort under its `uniqueKey` unless it opts out, so before an app
-bumps to this version its keys must contain no patient, questionnaire or record id (they would store one user's sort per
-patient), and every table whose order is the user's own, such as drag and drop rows, must say `persistSorting={false}`.
+**This is the second release, and goes out last.** 3.138.0 carried it ahead of the plan and was reverted in 3.138.1. The order: the migration helper
+(`migrateLegacyTableSettings`) is released first; each app's PR bumps to it, takes every patient, questionnaire or record id out of its table keys (a table
+saves its sort under its `uniqueKey`, so an id there would store one user's sort per patient) and puts `persistSorting={false}` on every drag-and-drop table;
+every one of those PRs is merged and a preflight over the apps passes; the docs for `uniqueKey` and `persistSorting` are merged; then this version is
+released; then the apps bump to it.
 
 - `persistSorting={false}` is the opt-out: nothing about sorting is read or written, a saved entry is ignored and left as it
   was, and Reset columns leaves the sorting alone. `persistSorting` and `persistSorting={true}` are accepted and mean the
@@ -26,3 +28,5 @@ patient), and every table whose order is the user's own, such as drag and drop r
   serialised on every render: for a table with no key, the ten `JSON.stringify` calls per render are gone, and a table that
   saves widths and sorting does two. Reads stay once per mount and key, and saving adds no render. Page size, widths, order and
   visibility behave as before.
+- The layout reconcile stays correct for a table that is opted in at run time: a `persistColumnLayout` change from `false` to `true` on a mounted table is
+  reconciled as it always was (`columnLayoutInputsChanged`), though a table that does not save its layout builds no signature on any render.
