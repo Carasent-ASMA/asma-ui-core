@@ -30,7 +30,6 @@ import {
 import {
     getSortingStorageKey,
     readSortingFromStorage,
-    savesSorting,
     serializeSorting,
     sortingSignature,
 } from './usePersistedSorting'
@@ -126,12 +125,8 @@ export const useStyledTable = <
     const columnSizingKey = savesWidths ? uniqueKey : undefined
     const columnSizingStorageKey = getColumnSizingStorageKey(columnSizingKey)
     const persistedColumnSizing = usePersistedColumnSizing(columnSizingKey, defaultColumnSizing)
-    // Sorting is saved whenever the table has a key to save it under (ASMA-8698), unless it opts out with `persistSorting={false}`
-    // or the app owns the state: `state.sorting`, or an `onSortingChange` that TanStack calls instead of updating it (`savesSorting`).
-    const controlledSorting = rest.state?.sorting !== undefined || rest.onSortingChange !== undefined
-    const sortingStorageKey = savesSorting({ uniqueKey, persistSorting, controlled: controlledSorting })
-        ? getSortingStorageKey(uniqueKey)
-        : undefined
+    // Sorting is saved only when the table opts in (D1) and has a key to save it under.
+    const sortingStorageKey = persistSorting ? getSortingStorageKey(uniqueKey) : undefined
     const persistedSorting = useMemo(
         () =>
             sortingStorageKey
@@ -265,7 +260,7 @@ export const useStyledTable = <
         defaultValue: defaultSorting,
         saved: persistedSorting,
         // A table that owns `state.sorting` loads the new key's sort through `usePersistedSorting`.
-        controlled: controlledSorting,
+        controlled: rest.state?.sorting !== undefined,
         toSignature: sortingSignature,
         toStorage: serializeSorting,
         applyState: (sorting) => table.setSorting(sorting),
@@ -289,7 +284,7 @@ export const useStyledTable = <
         : undefined
 
     // Reset columns (ASMA-8597, REQ-008): order and widths go back to the defaults of this render, and
-    // sorting does too on a table that saves it (ASMA-8698). On a table with `persistColumnLayout` the visibility
+    // sorting does too only on a table that opted in (D1). On a table with `persistColumnLayout` the visibility
     // goes back too (ASMA-8695, OQ-02); any other table's visibility, pinning, page size, selection and
     // expansion are left alone. Assigned on every render so it always sees the current defaults.
     table.resetColumnSettings = () => {
@@ -319,8 +314,6 @@ export const useStyledTable = <
     const storageKey = getPersistedPageSizeKey(uniqueKey)
     const pageSizeState = table.getState().pagination?.pageSize
     const hydratedStorageKeyRef = useRef<string | undefined>(undefined)
-    /** The page size the table had when it was last loaded from, or saved to, the current key. */
-    const lastPageSizeRef = useRef<number | undefined>(undefined)
 
     useEffect(() => {
         hydratedStorageKeyRef.current = undefined
@@ -339,17 +332,9 @@ export const useStyledTable = <
         if (hydratedStorageKeyRef.current !== storageKey) {
             if (pageSizeState !== resolvedPageSize) return
 
-            // Loaded: the saved size, or the table's own when none is saved. Mounting and loading a key write nothing; only
-            // a change after that does (ASMA-8698).
             hydratedStorageKeyRef.current = storageKey
-            lastPageSizeRef.current = pageSizeState
-
-            return
         }
 
-        if (pageSizeState === lastPageSizeRef.current) return
-
-        lastPageSizeRef.current = pageSizeState
         tableStorage.set(storageKey, JSON.stringify(pageSizeState))
     }, [pageSizeState, resolvedPageSize, storageKey])
 

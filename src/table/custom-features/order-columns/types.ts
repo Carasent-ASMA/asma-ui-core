@@ -25,7 +25,7 @@ export interface ColumnLayoutDefaults {
 export interface ColumnSettingsInstance {
     /**
      * Reset columns (ASMA-8597): puts the column order and the widths back to the table's defaults, and the
-     * sorting too when the table saves it (a `uniqueKey`, unless `persistSorting={false}` or the app owns the sorting). It removes the saved entries of what it resets. On a table
+     * sorting too when the table has `persistSorting`. It removes the saved entries of what it resets. On a table
      * with `persistColumnLayout` (ASMA-8695, OQ-02) it also puts the visibility back to the default, unhiding what
      * the user hid and hiding what is hidden by default; any other table never touches visibility. Set by
      * `StyledTable`, which knows the defaults.

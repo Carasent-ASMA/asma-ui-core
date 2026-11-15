@@ -209,21 +209,10 @@ export type StyledTableProps<TData, TCustomData> = {
      */
     uniqueKey?: string
     /**
-     * Whether the table saves and restores its sorting under `${uniqueKey}:sorting`, and lets Reset columns reset it
-     * (ASMA-8698). It does by default: a table with a `uniqueKey` remembers each user's sort, like their column widths. Without
-     * `uniqueKey` nothing is saved.
-     *
-     * - `false` is the opt-out, for a table whose order is the user's own (drag and drop rows) or that must always open as the
-     *   app declares it. Nothing is read or written for sorting then.
-     * - Leaving it out, or `true`, saves a sort that `StyledTable` owns. `true` is the default spelled out: nothing changes
-     *   for a table that has it (it will not be removed before the next major version).
-     * - A table whose app owns the sorting state (`state.sorting`, or `onSortingChange`, which TanStack calls instead of
-     *   updating the table's own state) is **not** saved by default: the saved sort could not be applied to a state the table
-     *   does not own, and an app with its own persistence would have two writers. Such a table that wants it saved writes
-     *   `persistSorting` (`true`), makes `StyledTable` the only writer, and reads the sort back with `usePersistedSorting`.
-     *
-     * A saved sort of a column that is gone or cannot sort is ignored, and so is storage that is corrupt, full or blocked: the
-     * table opens with its `initialState.sorting`, which Reset columns also returns to.
+     * Temporary opt-in (ASMA-8597, owner decision D1, 2026-10-27): save and restore this table's
+     * sorting under `${uniqueKey}:sorting`, and let Reset columns reset it. Needs `uniqueKey`;
+     * ignored without it. Off by default until UX and privacy approve the fleet rollout, which
+     * makes `uniqueKey` alone enough and retires this prop (follow-up ASMA-8698).
      */
     persistSorting?: boolean
     /**
