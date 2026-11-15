@@ -3,6 +3,8 @@ import type { LeafColumnInfo } from '../helpers/columnIds'
 import {
     getColumnOrderStorageKey,
     getColumnVisibilityStorageKey,
+    isColumnOrderEntry,
+    isColumnVisibilityEntry,
     sanitizeColumnOrder,
     sanitizeColumnVisibility,
 } from './useColumnLayoutPersistence'
@@ -59,3 +61,43 @@ describe('the saved column layout entries (ASMA-8695, DEC-02)', () => {
         expect(sanitizeColumnVisibility(raw, [column('a')])).toBeUndefined()
     })
 })
+
+describe('a well-formed entry is not the same as a usable one (ASMA-8698, m2)', () => {
+    it('G-01: the shape of an order entry is the right version and a list, however little is in it', () => {
+        for (const raw of [
+            { v: 1, order: [] },
+            { v: 1, order: ['a'] },
+            { v: 1, order: [1, null] },
+        ]) {
+            expect(isColumnOrderEntry(raw), JSON.stringify(raw)).toBe(true)
+        }
+    })
+
+    it('G-02: anything else is not an order entry', () => {
+        for (const raw of [null, undefined, [], 'text', 42, {}, { v: 1 }, { v: 2, order: [] }, { v: 1, order: 'a' }, { order: [] }, ['a', 'b']]) {
+            expect(isColumnOrderEntry(raw), JSON.stringify(raw)).toBe(false)
+        }
+    })
+
+    it('G-03: the shape of a visibility entry is the right version and a map, however little is in it', () => {
+        for (const raw of [
+            { v: 1, visibility: {} },
+            { v: 1, visibility: { a: false } },
+            { v: 1, visibility: { a: 'hidden' } },
+        ]) {
+            expect(isColumnVisibilityEntry(raw), JSON.stringify(raw)).toBe(true)
+        }
+    })
+
+    it('G-04: anything else is not a visibility entry', () => {
+        for (const raw of [null, undefined, [], 'text', {}, { v: 1 }, { v: 2, visibility: {} }, { v: 1, visibility: [] }, { v: 1, visibility: null }, { a: true }]) {
+            expect(isColumnVisibilityEntry(raw), JSON.stringify(raw)).toBe(false)
+        }
+    })
+
+    it('G-05: the sanitizers still say there is nothing usable in an empty entry, which is what the guards are for', () => {
+        expect(sanitizeColumnOrder({ v: 1, order: [] })).toBeUndefined()
+        expect(sanitizeColumnVisibility({ v: 1, visibility: {} }, [])).toBeUndefined()
+    })
+})
+

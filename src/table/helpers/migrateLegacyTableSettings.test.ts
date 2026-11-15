@@ -569,6 +569,38 @@ describe('migrateLegacyTableSettings: keys the app named itself (rawEntries)', (
         expect(data.has(FROM)).toBe(false)
     })
 
+    it('R-08b / MUT-R10, MUT-R11: a table key that begins with a raw target, and the entries of an old raw key, are never reached by a matcher', () => {
+        // The table's own key begins with the raw target: `SubRowsColumnOrder` and `SubRowsColumnOrder_u1_ctx`.
+        const TABLE_KEY = `${TO}_u1_ctx`
+
+        data.set(FROM, 'this record')
+        data.set(TABLE_KEY, 'something the app keeps under the table key itself')
+        data.set(`${TABLE_KEY}:sorting`, 'the table\'s sort')
+        data.set(`${FROM}:sorting`, 'a table-settings entry of the old raw key')
+        data.set(`${FROM}:page-size`, '50')
+        data.set(`${TO}-row2`, 'another record')
+        const asked: string[] = []
+
+        migrateLegacyTableSettings({
+            newKey: TABLE_KEY,
+            rawEntries: [{ from: FROM, to: TO }],
+            matchRawKey: (stored) => {
+                asked.push(stored)
+
+                return true
+            },
+        })
+
+        // The matcher said yes to everything it was asked, and was asked only about the other record.
+        expect(asked).toEqual([`${TO}-row2`])
+        expect(data.get(TABLE_KEY)).toBe('something the app keeps under the table key itself')
+        expect(data.get(`${TABLE_KEY}:sorting`)).toBe('the table\'s sort')
+        expect(data.get(`${FROM}:sorting`)).toBe('a table-settings entry of the old raw key')
+        expect(data.get(`${FROM}:page-size`)).toBe('50')
+        expect(data.has(`${TO}-row2`)).toBe(false)
+        expect(data.get(TO)).toBe('this record')
+    })
+
     it('R-09: a matcher that throws is ignored: the pairs are still migrated', () => {
         data.set(FROM, 'this record')
         data.set(`${TO}-row2`, 'another record')

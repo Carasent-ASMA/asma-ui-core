@@ -46,7 +46,8 @@ export interface LegacyTableSettings {
     /**
      * More old raw keys to remove without copying them: another record's of the same table. It is asked about a stored key only
      * if the key starts with the `to` of a pair, so it can never reach a key that does not begin with the name the table's
-     * settings now have; and never about a `to`, a `from`, or a table-settings entry (`newKey` or a `to`, plus a suffix). Asked
+     * settings now have; and never about a `to`, a `from`, `newKey` itself, or a table-settings entry (`newKey`, a `to` or a
+     * `from`, plus a suffix). Asked
      * only when `rawEntries` names a current scope. Match exactly, and anchor both ends: a name that merely starts the same is
      * another table's. A matcher that throws is ignored.
      */
@@ -133,10 +134,13 @@ const migrateRawEntries = ({ newKey, rawEntries, matchRawKey }: LegacyTableSetti
 
     const targets = [...new Set(pairs.map(({ to }) => to))]
     const sources = new Set(pairs.map(({ from }) => from))
+    // Never removable by a matcher, whatever it says: a target, an old key (they are handled by name), the table's own key (a table
+    // key can begin with a raw target: `GroupTable` and `GroupTable_<user>…`), and the table-settings entries of any of them.
     const isProtected = (stored: string): boolean =>
         targets.includes(stored) ||
         sources.has(stored) ||
-        [newKey, ...targets].some(
+        stored === newKey ||
+        [newKey, ...targets, ...sources].some(
             (base) => !!base && TABLE_SETTINGS_SUFFIXES.some((suffix) => stored === `${base}${suffix}`),
         )
     const matched = new Map<string, string[]>()

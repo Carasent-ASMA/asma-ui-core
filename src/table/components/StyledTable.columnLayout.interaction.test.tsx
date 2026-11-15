@@ -516,6 +516,63 @@ describe('StyledTable per-user column layout', () => {
             await expect(localStorage.getItem(VISIBILITY_KEY)).toBe(OWN_VISIBILITY)
         })
 
+        it('U-08: an EMPTY but well-formed order entry of the user\'s still confirms it: the old order key is removed, and the defaults show', async () => {
+            const own = JSON.stringify({ v: 1, order: [] })
+
+            localStorage.setItem(ORDER_KEY, own)
+            localStorage.setItem(LEGACY_ORDER_KEY, JSON.stringify(OTHER_ORDER))
+
+            mount(<LayoutTable {...legacy} />)
+            await settle()
+
+            // The user's entry has nothing in it, so nothing is applied, and the old order is not taken over either.
+            await expect(headerLabels()).toEqual(['Name', 'Role', 'Age', 'Notes'])
+            await expect(localStorage.getItem(LEGACY_ORDER_KEY)).toBeNull()
+            await expect(localStorage.getItem(ORDER_KEY)).toBe(own)
+        })
+
+        it('U-08: an EMPTY but well-formed visibility entry of the user\'s still confirms it: the old visibility map is removed', async () => {
+            const own = JSON.stringify({ v: 1, visibility: {} })
+
+            localStorage.setItem(VISIBILITY_KEY, own)
+            localStorage.setItem(LEGACY_VISIBILITY_KEY, JSON.stringify({ name: false }))
+
+            mount(<LayoutTable {...legacy} />)
+            await settle()
+
+            await expect(headerLabels()).toEqual(['Name', 'Role', 'Age', 'Notes'])
+            await expect(localStorage.getItem(LEGACY_VISIBILITY_KEY)).toBeNull()
+            await expect(localStorage.getItem(VISIBILITY_KEY)).toBe(own)
+        })
+
+        it('U-08: an entry that is the default (the definition order, nothing hidden) confirms the user\'s layout too', async () => {
+            localStorage.setItem(ORDER_KEY, JSON.stringify({ v: 1, order: DEFINITION_ORDER }))
+            localStorage.setItem(VISIBILITY_KEY, JSON.stringify({ v: 1, visibility: { age: true } }))
+            localStorage.setItem(LEGACY_ORDER_KEY, JSON.stringify(OTHER_ORDER))
+            localStorage.setItem(LEGACY_VISIBILITY_KEY, JSON.stringify({ name: false }))
+
+            mount(<LayoutTable {...legacy} />)
+            await settle()
+
+            await expect(headerLabels()).toEqual(['Name', 'Role', 'Age', 'Notes'])
+            await expect(localStorage.getItem(LEGACY_ORDER_KEY)).toBeNull()
+            await expect(localStorage.getItem(LEGACY_VISIBILITY_KEY)).toBeNull()
+        })
+
+        it('U-08: a well-formed entry with nothing usable in it (ids that are not names, values that are not booleans) still confirms the layout', async () => {
+            localStorage.setItem(ORDER_KEY, JSON.stringify({ v: 1, order: [1, null] }))
+            localStorage.setItem(VISIBILITY_KEY, JSON.stringify({ v: 1, visibility: { age: 'hidden' } }))
+            localStorage.setItem(LEGACY_ORDER_KEY, JSON.stringify(OTHER_ORDER))
+            localStorage.setItem(LEGACY_VISIBILITY_KEY, JSON.stringify({ name: false }))
+
+            mount(<LayoutTable {...legacy} />)
+            await settle()
+
+            await expect(headerLabels()).toEqual(['Name', 'Role', 'Age', 'Notes'])
+            await expect(localStorage.getItem(LEGACY_ORDER_KEY)).toBeNull()
+            await expect(localStorage.getItem(LEGACY_VISIBILITY_KEY)).toBeNull()
+        })
+
         it('U-08: an entry of the user\'s that is not valid confirms nothing: the old key stays, and the defaults apply', async () => {
             localStorage.setItem(ORDER_KEY, JSON.stringify({ v: 1, order: 'not a list' }))
             localStorage.setItem(VISIBILITY_KEY, JSON.stringify({ v: 2, visibility: { age: false } }))
