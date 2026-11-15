@@ -291,8 +291,9 @@ export const useColumnLayoutReconcile = <TData>(
     },
 ): boolean => {
     const { enabled, definitionIds, defaultOrder, defaultVisibility, controlledVisibility } = options
+    // A table that does not save its layout has nothing to reconcile and builds no signature (ASMA-8698): `''` stands for that.
     const current: ColumnLayoutInputs = {
-        signature: JSON.stringify([definitionIds, defaultOrder, Object.entries(defaultVisibility).sort()]),
+        signature: enabled ? JSON.stringify([definitionIds, defaultOrder, Object.entries(defaultVisibility).sort()]) : '',
         definitionIds,
         defaultOrder,
         defaultVisibility,
@@ -300,14 +301,14 @@ export const useColumnLayoutReconcile = <TData>(
     // The inputs of the last commit, kept outside React state: reading them in render is how the writers learn that this
     // render's state is not in step yet, and an update of React state would only repeat the render that finds out.
     const seen = reconciledInputs.get(table) ?? current
-    const pending = enabled && seen.signature !== current.signature
+    const pending = enabled && seen.signature !== '' && seen.signature !== current.signature
 
     useLayoutEffect(() => {
         const before = reconciledInputs.get(table)
 
         reconciledInputs.set(table, current)
 
-        if (!enabled || !before || before.signature === current.signature) return
+        if (!enabled || !before || before.signature === '' || before.signature === current.signature) return
 
         const order = table.getState().columnOrder
         const wasOnDefault =
@@ -346,8 +347,6 @@ interface ColumnLayoutWriterOptions {
 /** Saves the table's order and visibility under the keys of `saved`, by the storage rule of `usePersistedStateWriter`. */
 export const useColumnLayoutWriter = <TData>(table: Table<TData>, options: ColumnLayoutWriterOptions): void => {
     const { saved, reconciling, defaultOrder, defaultVisibility, controlledVisibility } = options
-    // Read live: the columns may change while the table stays mounted, so a list taken once would go stale (ASMA-8597, trap A).
-    const definitionIds = getDefinitionColumnOrder(table)
 
     usePersistedStateWriter<ColumnOrderState>({
         storageKey: saved.orderKey,
@@ -356,7 +355,9 @@ export const useColumnLayoutWriter = <TData>(table: Table<TData>, options: Colum
         saved: saved.order,
         settled: !reconciling,
         // `[]` and the definition order are the same layout, so moving a column back removes the entry.
-        toSignature: (order) => JSON.stringify(effectiveColumnOrder(order, definitionIds)),
+        // Read live, and only when the order is saved: the columns may change while the table stays mounted, so a list taken
+        // once would go stale (ASMA-8597, trap A), and a table that saves no order walks no columns per render (ASMA-8698).
+        toSignature: (order) => JSON.stringify(effectiveColumnOrder(order, getDefinitionColumnOrder(table))),
         toStorage: (order) => JSON.stringify({ v: FORMAT_VERSION, order: uniqueStrings(order) }),
         applyState: (order) => table.setColumnOrder(order),
     })

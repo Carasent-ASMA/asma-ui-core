@@ -6,12 +6,12 @@ import { isDefaultColumnOrder } from './columnLayout'
 /**
  * Saves the column order under `key` when it changes. An order that is `[]` or that matches the live
  * definition order removes the entry instead (ASMA-8597, REQ-004), so a table the user has put back to its
- * defaults stores nothing. Mounting never writes.
+ * defaults stores nothing. Mounting never writes. A table with no key does no work per render (ASMA-8698), and whether the
+ * order is the default is worked out only when it is about to be saved.
  */
 export function usePersistColumnOrder<TData = unknown>(table: Table<TData>, key?: string | null): void {
     const order = table.getState().columnOrder
-    const signature = JSON.stringify(order ?? [])
-    const isDefault = !order?.length || isDefaultColumnOrder(table)
+    const signature = key ? JSON.stringify(order ?? []) : ''
 
     const keyRef = useRef(key)
     const lastSeenRef = useRef(signature)
@@ -28,12 +28,12 @@ export function usePersistColumnOrder<TData = unknown>(table: Table<TData>, key?
 
         lastSeenRef.current = signature
 
-        if (isDefault) {
+        if (!order?.length || isDefaultColumnOrder(table)) {
             tableStorage.remove(key)
         } else {
             tableStorage.set(key, signature)
         }
-        // `order` is covered by `signature`, and `isDefault` is computed from the same render.
+        // `order` is covered by `signature`.
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [signature, key])
 }
