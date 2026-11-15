@@ -3,8 +3,9 @@
 ---
 
 ASMA-8698: `migrateLegacyTableSettings` and `useLegacyTableSettingsMigration`, for an app that changes a table's saved-settings
-key (for example to take a patient or record id out of it) and must not lose what its users already saved. **This changes no sorting
-behaviour**: an app can take this version at once.
+key (for example to take a patient or record id out of it) and must not lose what its users already saved. **This change itself alters no
+sorting behaviour, but 3.138.0 already saves each user's sort by default under the table's `uniqueKey`, so any version from this one on carries that
+too**: migrate a table's keys with this helper, and put `persistSorting={false}` on drag-and-drop tables, before the app bumps to 3.138.0 or later.
 
 The app builds the keys, as it already does for the table's `uniqueKey`, and passes them:
 
