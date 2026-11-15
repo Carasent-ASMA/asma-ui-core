@@ -167,6 +167,27 @@ describe('StyledTabs keyboard contract', () => {
         await expect(indicator, 'focused tab paints no perceivable focus indicator').not.toBeNull()
     })
 
+    it('drops the scroll button when shorter labels fit a content-sized tab bar (ASMA-8879)', async () => {
+        const RelabelFixture = ({ labels }: { labels: [string, string] }): JSX.Element => (
+            <div className='w-max max-w-full'>
+                <StyledTabs value='two' variant='scrollable'>
+                    <StyledTab value='one' label={labels[0]} />
+                    <StyledTab value='two' label={labels[1]} />
+                </StyledTabs>
+            </div>
+        )
+        const waitForUnderline = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 400))
+        const { container, rerender } = mount(<RelabelFixture labels={['Oversikt', 'Timer registrerte (lang)']} />)
+        await waitForUnderline()
+        await expect(container.querySelector('[aria-label="scroll tabs right"]')).toBeNull()
+
+        // The underline still spans the old, wider tab while it animates; that is not tab overflow.
+        rerender(<RelabelFixture labels={['Overview', 'Time registered']} />)
+        await expect(container.querySelector('[aria-label="scroll tabs right"]')).toBeNull()
+        await waitForUnderline()
+        await expect(container.querySelector('[aria-label="scroll tabs right"]')).toBeNull()
+    })
+
     it.each(['default', 'small'] as const)('renders 3px active and hover indicators without changing the %s tab geometry', async size => {
         const { container } = mount(
             <StyledTabs value='one' size={size}>
