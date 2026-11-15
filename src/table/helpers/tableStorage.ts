@@ -29,6 +29,16 @@ export const tableStorage = {
             // Blocked storage: nothing to remove.
         }
     },
+    /** A snapshot of every key in storage, safe to remove from while walking it. Empty when storage is blocked. */
+    keys(): string[] {
+        try {
+            return Array.from({ length: localStorage.length }, (_, index) => localStorage.key(index)).filter(
+                (key): key is string => key !== null,
+            )
+        } catch {
+            return []
+        }
+    },
 }
 
 /** Parses a saved value; anything that is not valid JSON counts as nothing saved. */

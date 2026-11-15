@@ -422,12 +422,16 @@ describe('StyledTable per-user column layout', () => {
             // A second mount by the same user reads only the new entries.
             view.unmount()
             const getItem = vi.spyOn(Storage.prototype, 'getItem')
+            const removeItem = vi.spyOn(Storage.prototype, 'removeItem')
             mount(<LayoutTable {...props} />)
             await settle()
 
             await expect(headerLabels()).toEqual(['Role', 'Name', 'Notes'])
-            await expect(callsFor(getItem.mock.calls, LEGACY_ORDER_KEY)).toEqual([])
-            await expect(callsFor(getItem.mock.calls, LEGACY_VISIBILITY_KEY)).toEqual([])
+            // The user's entries are valid, so the table looks once for a leftover old key (U-08, m2): it finds none, and
+            // removes and writes nothing. It never reads the old entries' values again.
+            await expect(callsFor(getItem.mock.calls, LEGACY_ORDER_KEY).length).toBeLessThanOrEqual(1)
+            await expect(callsFor(getItem.mock.calls, LEGACY_VISIBILITY_KEY).length).toBeLessThanOrEqual(1)
+            await expect(callsFor(removeItem.mock.calls, /^(?:NetworkColumnOrder|networkVisibilityColumns)$/)).toEqual([])
 
             // Another user on the same browser starts from the defaults.
             cleanup()
@@ -464,19 +468,127 @@ describe('StyledTable per-user column layout', () => {
             await expect(localStorage.getItem(VISIBILITY_KEY)).toBeNull()
         })
 
-        it('L-11: when the user already has an entry, the old key is not read', async () => {
+        it('L-11: when the user already has an entry, the old key is never applied (and is removed, U-08)', async () => {
             localStorage.setItem(ORDER_KEY, JSON.stringify({ v: 1, order: DEFINITION_ORDER.toReversed() }))
             localStorage.setItem(VISIBILITY_KEY, JSON.stringify({ v: 1, visibility: { notes: false } }))
             localStorage.setItem(LEGACY_ORDER_KEY, JSON.stringify(MOVED_ORDER))
             localStorage.setItem(LEGACY_VISIBILITY_KEY, JSON.stringify({ age: false }))
-            const getItem = vi.spyOn(Storage.prototype, 'getItem')
 
             mount(<LayoutTable legacyColumnVisibilityKey={LEGACY_VISIBILITY_KEY} persistColumnOrderKey={LEGACY_ORDER_KEY} />)
             await settle()
 
+            // The user's own layout, not the old one, which would have moved Role first and hidden Age.
             await expect(headerLabels()).toEqual(['Age', 'Role', 'Name'])
-            await expect(callsFor(getItem.mock.calls, LEGACY_ORDER_KEY)).toEqual([])
-            await expect(callsFor(getItem.mock.calls, LEGACY_VISIBILITY_KEY)).toEqual([])
+            await expect(localStorage.getItem(LEGACY_ORDER_KEY)).toBeNull()
+            await expect(localStorage.getItem(LEGACY_VISIBILITY_KEY)).toBeNull()
+        })
+    })
+
+    describe('an old key that is still there once the user has their own entry (U-08, m2)', () => {
+        const legacy = { legacyColumnVisibilityKey: LEGACY_VISIBILITY_KEY, persistColumnOrderKey: LEGACY_ORDER_KEY }
+        const OTHER_ORDER = ['age', 'notes', 'name', 'role', 'actions']
+        const OWN_VISIBILITY = JSON.stringify({ v: 1, visibility: { age: false } })
+
+        it('U-08: the old order is removed when the user\'s order entry exists, and that entry is left as it was', async () => {
+            const own = JSON.stringify({ v: 1, order: MOVED_ORDER })
+
+            localStorage.setItem(ORDER_KEY, own)
+            localStorage.setItem(LEGACY_ORDER_KEY, JSON.stringify(OTHER_ORDER))
+
+            mount(<LayoutTable {...legacy} />)
+            await settle()
+
+            // The user's own order is what shows, not the old one; the old key is gone.
+            await expect(headerLabels()).toEqual(['Role', 'Name', 'Age', 'Notes'])
+            await expect(localStorage.getItem(LEGACY_ORDER_KEY)).toBeNull()
+            await expect(localStorage.getItem(ORDER_KEY)).toBe(own)
+        })
+
+        it('U-08: the old visibility map is removed when the user\'s visibility entry exists, and that entry is left as it was', async () => {
+            localStorage.setItem(VISIBILITY_KEY, OWN_VISIBILITY)
+            localStorage.setItem(LEGACY_VISIBILITY_KEY, JSON.stringify({ name: false, role: true, age: true, notes: true }))
+
+            mount(<LayoutTable {...legacy} />)
+            await settle()
+
+            await expect(headerLabels()).toEqual(['Name', 'Role', 'Notes'])
+            await expect(localStorage.getItem(LEGACY_VISIBILITY_KEY)).toBeNull()
+            await expect(localStorage.getItem(VISIBILITY_KEY)).toBe(OWN_VISIBILITY)
+        })
+
+        it('U-08: an entry of the user\'s that is not valid confirms nothing: the old key stays, and the defaults apply', async () => {
+            localStorage.setItem(ORDER_KEY, JSON.stringify({ v: 1, order: 'not a list' }))
+            localStorage.setItem(VISIBILITY_KEY, JSON.stringify({ v: 2, visibility: { age: false } }))
+            localStorage.setItem(LEGACY_ORDER_KEY, JSON.stringify(OTHER_ORDER))
+            localStorage.setItem(LEGACY_VISIBILITY_KEY, JSON.stringify({ name: false }))
+
+            mount(<LayoutTable {...legacy} />)
+            await settle()
+
+            await expect(headerLabels()).toEqual(['Name', 'Role', 'Age', 'Notes'])
+            await expect(localStorage.getItem(LEGACY_ORDER_KEY)).toBe(JSON.stringify(OTHER_ORDER))
+            await expect(localStorage.getItem(LEGACY_VISIBILITY_KEY)).toBe(JSON.stringify({ name: false }))
+        })
+
+        it('U-08: it removes only the two old keys the table was given', async () => {
+            localStorage.setItem(ORDER_KEY, JSON.stringify({ v: 1, order: MOVED_ORDER }))
+            localStorage.setItem(VISIBILITY_KEY, OWN_VISIBILITY)
+            localStorage.setItem(LEGACY_ORDER_KEY, JSON.stringify(OTHER_ORDER))
+            localStorage.setItem(`${LEGACY_ORDER_KEY}-2`, JSON.stringify(OTHER_ORDER))
+            localStorage.setItem(LEGACY_VISIBILITY_KEY, JSON.stringify({ name: false }))
+            localStorage.setItem('unrelatedVisibilityColumns', JSON.stringify({ name: false }))
+
+            mount(<LayoutTable {...legacy} />)
+            await settle()
+
+            await expect(localStorage.getItem(`${LEGACY_ORDER_KEY}-2`)).not.toBeNull()
+            await expect(localStorage.getItem('unrelatedVisibilityColumns')).not.toBeNull()
+            await expect(localStorage.getItem(OTHER_ORDER_KEY)).toBeNull()
+        })
+
+        it('U-08: nothing old to remove: nothing is removed or written on mount', async () => {
+            localStorage.setItem(ORDER_KEY, JSON.stringify({ v: 1, order: MOVED_ORDER }))
+            localStorage.setItem(VISIBILITY_KEY, OWN_VISIBILITY)
+            const removeItem = vi.spyOn(Storage.prototype, 'removeItem')
+            const setItem = vi.spyOn(Storage.prototype, 'setItem')
+
+            mount(<LayoutTable {...legacy} />)
+            await settle()
+
+            // The layout and old keys are untouched. (A table with a key may write its page size; that is not this.)
+            const layoutKeys = /column-(?:order|visibility)$|^(?:NetworkColumnOrder|networkVisibilityColumns)$/
+
+            await expect(callsFor(removeItem.mock.calls, layoutKeys)).toEqual([])
+            await expect(callsFor(setItem.mock.calls, layoutKeys)).toEqual([])
+        })
+
+        it('U-08: storage that refuses the removal leaves the table working, silently', async () => {
+            const own = JSON.stringify({ v: 1, order: MOVED_ORDER })
+
+            localStorage.setItem(ORDER_KEY, own)
+            localStorage.setItem(LEGACY_ORDER_KEY, JSON.stringify(OTHER_ORDER))
+            vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {
+                throw new DOMException('blocked', 'SecurityError')
+            })
+            const output = ['error', 'warn'].map((method) => vi.spyOn(console, method as 'error'))
+
+            mount(<LayoutTable {...legacy} />)
+            await settle()
+
+            await expect(headerLabels()).toEqual(['Role', 'Name', 'Age', 'Notes'])
+            await expect(localStorage.getItem(LEGACY_ORDER_KEY)).not.toBeNull()
+            for (const spy of output) await expect(spy).not.toHaveBeenCalled()
+        })
+
+        it('U-08: an opted-in table with no uniqueKey removes nothing, as before', async () => {
+            localStorage.setItem(LEGACY_ORDER_KEY, JSON.stringify(OTHER_ORDER))
+            localStorage.setItem(LEGACY_VISIBILITY_KEY, JSON.stringify({ name: false }))
+
+            mount(<LayoutTable {...legacy} uniqueKey={undefined} />)
+            await settle()
+
+            await expect(localStorage.getItem(LEGACY_ORDER_KEY)).not.toBeNull()
+            await expect(localStorage.getItem(LEGACY_VISIBILITY_KEY)).not.toBeNull()
         })
     })
 
@@ -754,12 +866,15 @@ describe('StyledTable per-user column layout', () => {
             localStorage.setItem(LEGACY_VISIBILITY_KEY, JSON.stringify({ age: false }))
             const legacy = { legacyColumnVisibilityKey: LEGACY_VISIBILITY_KEY, persistColumnOrderKey: LEGACY_ORDER_KEY }
 
-            // The user already has entries, so the old keys were not migrated and are still there.
+            // The user already has entries, so the table removes the old keys at once (U-08, m2). A leftover that turns up after
+            // that, written by another tab or an old version of the app, is the one Reset columns still has to delete.
             localStorage.setItem(ORDER_KEY, JSON.stringify({ v: 1, order: DEFINITION_ORDER }))
             localStorage.setItem(VISIBILITY_KEY, JSON.stringify({ v: 1, visibility: { notes: false } }))
             const withKeys = mount(<LayoutTable {...legacy} />)
             await settle()
-            await expect(localStorage.getItem(LEGACY_ORDER_KEY)).not.toBeNull()
+            await expect(localStorage.getItem(LEGACY_ORDER_KEY)).toBeNull()
+            localStorage.setItem(LEGACY_ORDER_KEY, JSON.stringify(MOVED_ORDER))
+            localStorage.setItem(LEGACY_VISIBILITY_KEY, JSON.stringify({ age: false }))
 
             await openPopover()
             await userEvent.click(popoverButton('Reset columns'))

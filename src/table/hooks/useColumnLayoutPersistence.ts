@@ -124,7 +124,10 @@ interface SavedColumnLayoutOptions {
     defaultVisibility: VisibilityState
 }
 
-/** One old entry to migrate: it is deleted only once the new entry that replaces it is written, or when nothing replaces it. */
+/**
+ * One old entry to migrate: it is deleted only once the new entry that replaces it is written, or when nothing replaces it, or
+ * when the user's own valid entry already stands in for it (ASMA-8698, m2).
+ */
 interface MigrationItem {
     legacyKey: string
     /** The entry that takes over the old layout; absent when the old value is invalid or equals the default. */
@@ -163,6 +166,12 @@ const readSavedColumnLayout = (options: SavedColumnLayoutOptions): RawSavedColum
     if (orderKey) {
         if (tableStorage.get(orderKey) !== null) {
             order = sanitizeColumnOrder(readJson(orderKey))
+
+            // The user's own entry is there and valid, so a legacy order still lying about is of no further use: it is removed
+            // (ASMA-8698, m2). Nothing replaces it, and an invalid entry confirms nothing, so then it stays.
+            if (order !== undefined && legacyOrderKey && tableStorage.get(legacyOrderKey) !== null) {
+                migration.push({ legacyKey: legacyOrderKey })
+            }
         } else if (legacyOrderKey && tableStorage.get(legacyOrderKey) !== null) {
             // The first user who opens the table on this browser takes over the old, shared order (D-MIGRATE). The old entry
             // is deleted once the new one is written, or at once when there is nothing to write (an invalid value, or one
@@ -185,6 +194,11 @@ const readSavedColumnLayout = (options: SavedColumnLayoutOptions): RawSavedColum
     if (visibilityKey) {
         if (tableStorage.get(visibilityKey) !== null) {
             visibility = sanitizeColumnVisibility(readJson(visibilityKey), columns)
+
+            // As for the order: the user's own entry is valid, so a legacy visibility map still there is removed (m2).
+            if (visibility !== undefined && legacyVisibilityKey && tableStorage.get(legacyVisibilityKey) !== null) {
+                migration.push({ legacyKey: legacyVisibilityKey })
+            }
         } else if (legacyVisibilityKey && tableStorage.get(legacyVisibilityKey) !== null) {
             visibility = parseLegacyVisibility(readJson(legacyVisibilityKey), columns, defaultVisibility)
 
