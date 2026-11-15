@@ -42,13 +42,25 @@ const uniqueStrings = (values: readonly unknown[]): string[] => [
 ]
 
 /**
+ * Whether a parsed `:column-order` value has the shape of an entry, **even one with nothing in it** (`{"v":1,"order":[]}`): the
+ * right version and a list. That tells a well-formed entry (which confirms the user's own layout, empty or equal to the default
+ * included) from a malformed one (which confirms nothing), where `sanitizeColumnOrder` answers `undefined` for both.
+ */
+export const isColumnOrderEntry = (raw: unknown): raw is { v: number; order: unknown[] } =>
+    isRecord(raw) && raw['v'] === FORMAT_VERSION && Array.isArray(raw['order'])
+
+/** The same for a parsed `:column-visibility` value: the right version and a map (`{"v":1,"visibility":{}}` is well formed). */
+export const isColumnVisibilityEntry = (raw: unknown): raw is { v: number; visibility: Record<string, unknown> } =>
+    isRecord(raw) && raw['v'] === FORMAT_VERSION && isRecord(raw['visibility'])
+
+/**
  * Checks a parsed `:column-order` value. Ids that no column has are kept: an order saved for columns that are not there at
  * the moment survives, and TanStack ignores them (ASMA-8597, DEC-W). `undefined` means nothing usable is saved.
  */
 export const sanitizeColumnOrder = (raw: unknown): string[] | undefined => {
-    if (!isRecord(raw) || raw['v'] !== FORMAT_VERSION || !Array.isArray(raw['order'])) return undefined
+    if (!isColumnOrderEntry(raw)) return undefined
 
-    const order = uniqueStrings(raw['order'])
+    const order = uniqueStrings(raw.order)
 
     return order.length > 0 ? order : undefined
 }
@@ -70,10 +82,10 @@ export const sanitizeColumnVisibility = (
     raw: unknown,
     columns: readonly LeafColumnInfo[],
 ): Record<string, boolean> | undefined => {
-    if (!isRecord(raw) || raw['v'] !== FORMAT_VERSION || !isRecord(raw['visibility'])) return undefined
+    if (!isColumnVisibilityEntry(raw)) return undefined
 
     const visibility = Object.fromEntries(
-        Object.entries(raw['visibility']).filter(
+        Object.entries(raw.visibility).filter(
             (entry): entry is [string, boolean] => typeof entry[1] === 'boolean' && keepsVisibilityOf(entry[0], columns),
         ),
     )
@@ -124,7 +136,10 @@ interface SavedColumnLayoutOptions {
     defaultVisibility: VisibilityState
 }
 
-/** One old entry to migrate: it is deleted only once the new entry that replaces it is written, or when nothing replaces it. */
+/**
+ * One old entry to migrate: it is deleted only once the new entry that replaces it is written, or when nothing replaces it, or
+ * when the user's own valid entry already stands in for it (ASMA-8698, m2).
+ */
 interface MigrationItem {
     legacyKey: string
     /** The entry that takes over the old layout; absent when the old value is invalid or equals the default. */
@@ -162,7 +177,15 @@ const readSavedColumnLayout = (options: SavedColumnLayoutOptions): RawSavedColum
 
     if (orderKey) {
         if (tableStorage.get(orderKey) !== null) {
-            order = sanitizeColumnOrder(readJson(orderKey))
+            const entry = readJson(orderKey)
+
+            order = sanitizeColumnOrder(entry)
+
+            // The user's own entry is there and well formed, even if it is empty or equal to the default, so a legacy order still
+            // lying about is of no further use: it is removed (ASMA-8698, m2). A malformed entry confirms nothing, so then it stays.
+            if (isColumnOrderEntry(entry) && legacyOrderKey && tableStorage.get(legacyOrderKey) !== null) {
+                migration.push({ legacyKey: legacyOrderKey })
+            }
         } else if (legacyOrderKey && tableStorage.get(legacyOrderKey) !== null) {
             // The first user who opens the table on this browser takes over the old, shared order (D-MIGRATE). The old entry
             // is deleted once the new one is written, or at once when there is nothing to write (an invalid value, or one
@@ -184,7 +207,15 @@ const readSavedColumnLayout = (options: SavedColumnLayoutOptions): RawSavedColum
 
     if (visibilityKey) {
         if (tableStorage.get(visibilityKey) !== null) {
-            visibility = sanitizeColumnVisibility(readJson(visibilityKey), columns)
+            const entry = readJson(visibilityKey)
+
+            visibility = sanitizeColumnVisibility(entry, columns)
+
+            // As for the order: the user's own entry is well formed, even if it is empty, so a legacy visibility map still there
+            // is removed (m2).
+            if (isColumnVisibilityEntry(entry) && legacyVisibilityKey && tableStorage.get(legacyVisibilityKey) !== null) {
+                migration.push({ legacyKey: legacyVisibilityKey })
+            }
         } else if (legacyVisibilityKey && tableStorage.get(legacyVisibilityKey) !== null) {
             visibility = parseLegacyVisibility(readJson(legacyVisibilityKey), columns, defaultVisibility)
 
