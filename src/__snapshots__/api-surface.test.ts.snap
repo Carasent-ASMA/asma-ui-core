@@ -62,6 +62,7 @@ exports[`asma-ui-core public API surface > keeps every runtime export of the pac
   "ConversionPathIcon",
   "CopyButton",
   "CopyWrapper",
+  "DEFAULT_TABLE_PAGE_SIZE",
   "DND_HANDLE_COLUMN_ID",
   "DashboardViewIcon",
   "DashboardViewOutlineIcon",
