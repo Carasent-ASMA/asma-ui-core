@@ -711,3 +711,85 @@ describe('migrateLegacyTableSettings: keys the app named itself (rawEntries)', (
         expect(calls.remove).not.toHaveBeenCalled()
     })
 })
+
+describe('migrateLegacyTableSettings: it returns the number of entries it copied (a revision for the app)', () => {
+    const TO = 'SubRowsColumnOrder'
+    const FROM = `${TO}-row1`
+
+    it('C-01: every entry copied is counted, and a second call copies nothing', () => {
+        seed(OLD)
+
+        expect(migrateLegacyTableSettings({ newKey: NEW, oldKeys: [OLD] })).toBe(TABLE_SETTINGS_SUFFIXES.length)
+        expect(migrateLegacyTableSettings({ newKey: NEW, oldKeys: [OLD] })).toBe(0)
+    })
+
+    it('C-02: nothing to copy, no scope and no new key are 0', () => {
+        expect(migrateLegacyTableSettings({ newKey: NEW, oldKeys: [OLD] })).toBe(0)
+        expect(migrateLegacyTableSettings({ newKey: NEW, oldKeys: undefined })).toBe(0)
+        expect(migrateLegacyTableSettings({ newKey: undefined, oldKeys: [OLD] })).toBe(0)
+        expect(migrateLegacyTableSettings({ newKey: NEW, rawEntries: [] })).toBe(0)
+    })
+
+    it('C-03: an entry the new key already has is removed from the old key but not counted: only copies are', () => {
+        seed(OLD)
+        data.set(`${NEW}:sorting`, 'the user chose this')
+        data.set(`${NEW}:page-size`, '25')
+
+        expect(migrateLegacyTableSettings({ newKey: NEW, oldKeys: [OLD] })).toBe(TABLE_SETTINGS_SUFFIXES.length - 2)
+        expect(entriesOf(OLD)).toEqual([])
+    })
+
+    it('C-04: an entry that is only removed (the new key had them all) is 0', () => {
+        seed(OLD)
+        seed(NEW)
+
+        expect(migrateLegacyTableSettings({ newKey: NEW, oldKeys: [OLD] })).toBe(0)
+        expect(entriesOf(OLD)).toEqual([])
+    })
+
+    it('C-05: a copy that storage refused is not counted, and the others are', () => {
+        seed(OLD)
+
+        const realSet = localStorage.setItem.bind(localStorage)
+
+        vi.spyOn(localStorage, 'setItem').mockImplementation((key: string, value: string) => {
+            if (key.endsWith(':page-size')) throw new DOMException('full', 'QuotaExceededError')
+
+            realSet(key, value)
+        })
+
+        expect(migrateLegacyTableSettings({ newKey: NEW, oldKeys: [OLD] })).toBe(TABLE_SETTINGS_SUFFIXES.length - 1)
+    })
+
+    it('C-06: raw pairs are counted, with the entries of newKey, and a pair whose target exists is not', () => {
+        seed(OLD, [':sorting', ':page-size'])
+        data.set(FROM, 'this record')
+        data.set('VisibilityColumns-r1', 'visibility')
+        data.set('VisibilityColumns', 'the user\'s own')
+
+        expect(
+            migrateLegacyTableSettings({
+                newKey: NEW,
+                oldKeys: [OLD],
+                rawEntries: [
+                    { from: FROM, to: TO },
+                    { from: 'VisibilityColumns-r1', to: 'VisibilityColumns' },
+                ],
+            }),
+        ).toBe(2 + 1)
+    })
+
+    it('C-07: a matcher\'s removals are not copies', () => {
+        seed(OTHER_PATIENT)
+
+        expect(
+            migrateLegacyTableSettings({
+                newKey: NEW,
+                oldKeys: [OLD],
+                matchOldKey: (oldKey) => /^Docs_c1_u1_ctx_[^_:]+$/.test(oldKey),
+            }),
+        ).toBe(0)
+        expect(entriesOf(OTHER_PATIENT)).toEqual([])
+    })
+})
+

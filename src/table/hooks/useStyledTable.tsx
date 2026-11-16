@@ -314,6 +314,8 @@ export const useStyledTable = <
     const storageKey = getPersistedPageSizeKey(uniqueKey)
     const pageSizeState = table.getState().pagination?.pageSize
     const hydratedStorageKeyRef = useRef<string | undefined>(undefined)
+    /** The page size the table had when it was last loaded from, or saved to, the current key. */
+    const lastPageSizeRef = useRef<number | undefined>(undefined)
 
     useEffect(() => {
         hydratedStorageKeyRef.current = undefined
@@ -332,9 +334,18 @@ export const useStyledTable = <
         if (hydratedStorageKeyRef.current !== storageKey) {
             if (pageSizeState !== resolvedPageSize) return
 
+            // Loaded: the saved size, or the table's own when none is saved. Mounting and loading a key write nothing; only a
+            // change after that does (ASMA-8698). A table opened before its old entries were migrated would otherwise save the
+            // default under the new key, and the migration, which never overwrites, would keep that and drop the user's size.
             hydratedStorageKeyRef.current = storageKey
+            lastPageSizeRef.current = pageSizeState
+
+            return
         }
 
+        if (pageSizeState === lastPageSizeRef.current) return
+
+        lastPageSizeRef.current = pageSizeState
         tableStorage.set(storageKey, JSON.stringify(pageSizeState))
     }, [pageSizeState, resolvedPageSize, storageKey])
 

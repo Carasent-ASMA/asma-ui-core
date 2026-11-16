@@ -71,8 +71,13 @@ export const legacyTableSettingsScope = ({ newKey, oldKeys, rawEntries }: Legacy
     return entries || raw ? `${entries}\u0002${raw}` : ''
 }
 
+/** What a migration did: how many entries it copied. Kept outside the functions, so a copy is counted even if a later step throws. */
+interface MigrationCount {
+    copied: number
+}
+
 /** The suffixed entries: `${oldKey}${suffix}` to `${newKey}${suffix}`. */
-const migrateSettingsEntries = ({ newKey: key, oldKeys, matchOldKey }: LegacyTableSettings): void => {
+const migrateSettingsEntries = ({ newKey: key, oldKeys, matchOldKey }: LegacyTableSettings, count: MigrationCount): void => {
     const sources = asList(oldKeys).filter((oldKey) => oldKey !== key)
 
     // No current scope to name: copy nothing, remove nothing.
@@ -116,9 +121,13 @@ const migrateSettingsEntries = ({ newKey: key, oldKeys, matchOldKey }: LegacyTab
 
         if (present.length === 0 && others.length === 0) continue
 
-        if (value !== null && tableStorage.get(`${key}${suffix}`) === null && !tableStorage.set(`${key}${suffix}`, value)) {
-            // Full or blocked storage: the copy failed, so the old entries are all the user has. Leave them.
-            continue
+        if (value !== null && tableStorage.get(`${key}${suffix}`) === null) {
+            if (!tableStorage.set(`${key}${suffix}`, value)) {
+                // Full or blocked storage: the copy failed, so the old entries are all the user has. Leave them.
+                continue
+            }
+
+            count.copied += 1
         }
 
         for (const stored of [...present, ...others]) tableStorage.remove(stored)
@@ -126,7 +135,7 @@ const migrateSettingsEntries = ({ newKey: key, oldKeys, matchOldKey }: LegacyTab
 }
 
 /** The entries under keys the app named itself: each `from` to its `to`. */
-const migrateRawEntries = ({ newKey, rawEntries, matchRawKey }: LegacyTableSettings): void => {
+const migrateRawEntries = ({ newKey, rawEntries, matchRawKey }: LegacyTableSettings, count: MigrationCount): void => {
     const pairs = asPairs(rawEntries)
 
     // No current scope to name: copy nothing, remove nothing.
@@ -180,7 +189,11 @@ const migrateRawEntries = ({ newKey, rawEntries, matchRawKey }: LegacyTableSetti
 
         if (present.length === 0 && others.length === 0) continue
 
-        if (value !== null && tableStorage.get(to) === null && !tableStorage.set(to, value)) continue
+        if (value !== null && tableStorage.get(to) === null) {
+            if (!tableStorage.set(to, value)) continue
+
+            count.copied += 1
+        }
 
         for (const stored of [...present, ...others]) tableStorage.remove(stored)
     }
@@ -202,15 +215,23 @@ const migrateRawEntries = ({ newKey, rawEntries, matchRawKey }: LegacyTableSetti
  * new key) and writes nothing. With no current scope named (`oldKeys` empty, `rawEntries` empty) nothing is copied and nothing
  * is removed, whatever a matcher would match. It never throws.
  *
+ * **Returns the number of entries it copied** (`0` when it copied nothing: no scope, nothing to migrate, entries the new key already
+ * had that were only removed, or a copy that storage refused). That is how an app learns that a table which is already showing has
+ * new entries to read: see the `revision` {@link useLegacyTableSettingsMigration} returns.
+ *
  * Key generation stays in the app: it builds `newKey`, `oldKeys` and the raw pairs with the same helpers that build the table's
  * keys. Run it before the table first reads its storage; {@link useLegacyTableSettingsMigration} does that.
  */
-export const migrateLegacyTableSettings = (settings: LegacyTableSettings): void => {
+export const migrateLegacyTableSettings = (settings: LegacyTableSettings): number => {
+    const count: MigrationCount = { copied: 0 }
+
     for (const migrate of [migrateSettingsEntries, migrateRawEntries]) {
         try {
-            migrate(settings)
+            migrate(settings, count)
         } catch {
             // Storage that throws: stop this part. What was copied stays, and nothing else is removed.
         }
     }
+
+    return count.copied
 }
