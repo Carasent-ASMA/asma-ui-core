@@ -30,6 +30,7 @@ $field-height: 40px;
     padding: 0 14px;
     font-size: 16px;
     line-height: 24px;
+    text-overflow: ellipsis;
     appearance: none;
 
     &[data-start-adornment='true'] {
