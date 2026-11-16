@@ -14,6 +14,7 @@ import {
     type Person,
 } from 'src/test-utils/tableFixture'
 import { StyledTable } from '../components/StyledTableIndex'
+import { DEFAULT_TABLE_PAGE_SIZE } from './usePersistedPageSize'
 import type { LegacyTableSettings } from '../helpers/migrateLegacyTableSettings'
 import { useLegacyTableSettingsMigration } from './useLegacyTableSettingsMigration'
 
@@ -289,16 +290,19 @@ const dragColumn = async (label: string, delta: number): Promise<void> => {
  */
 const DeferredPage = ({
     applyRevision = true,
+    defaultPageSize,
     patientId,
     tableInstanceRef,
 }: {
     applyRevision?: boolean
+    defaultPageSize?: number
     patientId?: string
     tableInstanceRef?: { current: Table<Person> | null }
 }): JSX.Element => {
     const revision = useLegacyTableSettingsMigration({
         newKey: NEW,
         oldKeys: patientId ? [`Docs_c1_u1_ctx_${patientId}`] : undefined,
+        defaultPageSize,
     })
 
     return (
@@ -574,6 +578,115 @@ describe('The revision the hook returns: it goes up when a migration copied some
 
         await expect(seenFirst.at(-1)).toBe(1)
         await expect(seenSecond.at(-1)).toBe(0)
+    })
+})
+
+describe('R1 is forward-only: a browser that ran 3.138.2 or 3.139.0 already holds the library\'s default page size (ASMA-8698)', () => {
+    /** Those versions wrote the page size when the table mounted, so the new key already holds the default 50. */
+    const seedLibraryDefault = (): void => {
+        localStorage.setItem(`${NEW}:page-size`, String(DEFAULT_TABLE_PAGE_SIZE))
+        localStorage.setItem(`${OLD}:page-size`, '100')
+    }
+
+    it('FWD-01: with defaultPageSize the patient\'s old size replaces the library\'s default, and the table, through the revision, shows it', async () => {
+        seedLibraryDefault()
+
+        const { ref, table } = tableRef()
+        const view = mount(<DeferredPage defaultPageSize={DEFAULT_TABLE_PAGE_SIZE} tableInstanceRef={ref} />)
+
+        await settle()
+        await expect(table().getState().pagination.pageSize).toBe(DEFAULT_TABLE_PAGE_SIZE)
+
+        view.rerender(<DeferredPage defaultPageSize={DEFAULT_TABLE_PAGE_SIZE} patientId='p1' tableInstanceRef={ref} />)
+        await settle()
+
+        await expect(localStorage.getItem(`${NEW}:page-size`)).toBe('100')
+        await expect(localStorage.getItem(`${OLD}:page-size`)).toBeNull()
+        await expect(table().getState().pagination.pageSize).toBe(100)
+    })
+
+    it('FWD-02: without the option the library\'s default stays and the patient\'s size is lost (what the option repairs)', async () => {
+        seedLibraryDefault()
+
+        const { ref, table } = tableRef()
+        const view = mount(<DeferredPage tableInstanceRef={ref} />)
+
+        await settle()
+        view.rerender(<DeferredPage patientId='p1' tableInstanceRef={ref} />)
+        await settle()
+
+        await expect(localStorage.getItem(`${NEW}:page-size`)).toBe('50')
+        await expect(localStorage.getItem(`${OLD}:page-size`)).toBeNull()
+        await expect(table().getState().pagination.pageSize).toBe(DEFAULT_TABLE_PAGE_SIZE)
+    })
+
+    it('FWD-03: a size the user chose under the new key is kept, even with the option', async () => {
+        localStorage.setItem(`${NEW}:page-size`, '25')
+        localStorage.setItem(`${OLD}:page-size`, '100')
+
+        const { ref, table } = tableRef()
+        const view = mount(<DeferredPage defaultPageSize={DEFAULT_TABLE_PAGE_SIZE} tableInstanceRef={ref} />)
+
+        await settle()
+        view.rerender(<DeferredPage defaultPageSize={DEFAULT_TABLE_PAGE_SIZE} patientId='p1' tableInstanceRef={ref} />)
+        await settle()
+
+        await expect(localStorage.getItem(`${NEW}:page-size`)).toBe('25')
+        await expect(table().getState().pagination.pageSize).toBe(25)
+    })
+
+    it('FWD-04: replacing the default is a copy: the revision goes up', async () => {
+        const table = `Rev_fwd_${String(Date.now())}`
+        const seen: number[] = []
+
+        localStorage.setItem(`${table}:page-size`, '50')
+        localStorage.setItem(`${table}_p1:page-size`, '100')
+
+        const view = mount(<RevisionProbe settings={{ newKey: table, oldKeys: [`${table}_p1`], defaultPageSize: 50 }} onRevision={(r) => seen.push(r)} />)
+
+        await expect(seen.at(-1)).toBe(1)
+        await expect(localStorage.getItem(`${table}:page-size`)).toBe('100')
+        view.unmount()
+    })
+
+    it('FWD-05: a new defaultPageSize for the same keys is a new scope: the migration runs again', async () => {
+        const table = `Rev_scope_${String(Date.now())}`
+        const seen: number[] = []
+        const probe = (defaultPageSize: number): JSX.Element => (
+            <RevisionProbe settings={{ newKey: table, oldKeys: [`${table}_p1`], defaultPageSize }} onRevision={(r) => seen.push(r)} />
+        )
+
+        localStorage.setItem(`${table}:page-size`, '50')
+        localStorage.setItem(`${table}_p1:page-size`, '100')
+
+        // The default is 25, so the 50 is the user's: kept, the old one removed, nothing copied.
+        const view = mount(probe(25))
+
+        await expect(seen.at(-1)).toBe(0)
+        await expect(localStorage.getItem(`${table}:page-size`)).toBe('50')
+
+        // The old key holds a size again, and the table's default is now 50: the same keys, a new scope, so it runs again.
+        localStorage.setItem(`${table}_p1:page-size`, '100')
+        view.rerender(probe(50))
+
+        await expect(seen.at(-1)).toBe(1)
+        await expect(localStorage.getItem(`${table}:page-size`)).toBe('100')
+    })
+
+    it('FWD-06: DEFAULT_TABLE_PAGE_SIZE is the page size a table opens with, and a pageSize prop overrides it', async () => {
+        const first = tableRef()
+        const view = mount(<StyledTable<Person> columns={personColumns} data={people} hideFooter locale='en' tableInstanceRef={first.ref} uniqueKey='default-size-table' />)
+
+        await settle()
+        await expect(DEFAULT_TABLE_PAGE_SIZE).toBe(50)
+        await expect(first.table().getState().pagination.pageSize).toBe(DEFAULT_TABLE_PAGE_SIZE)
+        view.unmount()
+
+        const second = tableRef()
+
+        mount(<StyledTable<Person> columns={personColumns} data={people} hideFooter locale='en' pageSize={20} tableInstanceRef={second.ref} uniqueKey='default-size-table-2' />)
+        await settle()
+        await expect(second.table().getState().pagination.pageSize).toBe(20)
     })
 })
 

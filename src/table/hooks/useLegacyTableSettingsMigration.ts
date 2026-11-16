@@ -51,6 +51,23 @@ const tableOf = ({ newKey, rawEntries }: LegacyTableSettings): string =>
  *
  * The number is per table (its `newKey`, or the first `to` of a raw pair when there is no `newKey`) and counts for the page's life,
  * so only a change of it means anything; do not compare it with a fixed number.
+ *
+ * **Several mounted instances that share one `newKey`** (the tables of sub-rows, each opened from its own row) **share the revision**:
+ * a copy made for one raises it for all, so the others remount too, on their next render. That is harmless, and cheap, since a
+ * remount only reads their storage again. **To combine the revision with a key the table already has**, put both in it:
+ *
+ * ```tsx
+ * <StyledTable key={`${tab}-${revision}`} uniqueKey={tableKey} … />
+ * ```
+ *
+ * **The page size.** A `StyledTable` saves its page size when it **changes** after mounting, never when it mounts. That includes a change
+ * the app makes itself with `table.setPageSize()` after mount, which is saved as if the user had made it. 3.138.2 and 3.139.0 saved it
+ * on mount, so a browser that ran them may already hold the table's default under the new key; pass `defaultPageSize` (the table's
+ * `pageSize` prop, or `DEFAULT_TABLE_PAGE_SIZE` when it sets none) and the migration lets the old size replace that default, and counts it
+ * as a copy, so the revision goes up and the table reads it. A new page size that is not the default is the user's and is kept.
+ *
+ * **What an app has to do:** its migration wrapper must **return** the revision, the table must use it in its `key`, and the app passes
+ * `defaultPageSize`.
  */
 export const useLegacyTableSettingsMigration = (migration: LegacyTableSettings): number => {
     const scope = legacyTableSettingsScope(migration)

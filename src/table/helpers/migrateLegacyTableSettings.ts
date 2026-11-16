@@ -1,3 +1,4 @@
+import { parseSavedPageSize } from '../hooks/usePersistedPageSize'
 import { tableStorage } from './tableStorage'
 
 /**
@@ -44,6 +45,18 @@ export interface LegacyTableSettings {
      */
     rawEntries?: readonly LegacyRawEntry[]
     /**
+     * The page size this table opens with when the user has saved none: its `pageSize` prop, or `DEFAULT_TABLE_PAGE_SIZE` when it sets
+     * none. It repairs what 3.138.2 and 3.139.0 wrote: a `StyledTable` with a `uniqueKey` saved its page size **when it mounted**, so a table
+     * that opened before its migration (no patient selected yet) already holds the default under the new key, a value the user never chose.
+     * The migration copies only what the new key lacks, so it would keep that default and delete the old size. With this option, **when the
+     * new key's `:page-size` equals it and the old entry holds a different valid page size, the old entry wins**: it is copied over the
+     * new one (and counted as a copy, so the revision goes up), then the old is removed as usual. A new entry that differs from the default
+     * is a choice the user made and is kept, and so is a new entry when the old one is not a valid page size. A user who had deliberately
+     * chosen the default itself under the new key cannot be told from the library's write, and gets the old size. Without this option
+     * nothing changes. It applies to `:page-size` only, and not to raw pairs.
+     */
+    defaultPageSize?: number
+    /**
      * More old raw keys to remove without copying them: another record's of the same table. It is asked about a stored key only
      * if the key starts with the `to` of a pair, so it can never reach a key that does not begin with the name the table's
      * settings now have; and never about a `to`, a `from`, `newKey` itself, or a table-settings entry (`newKey`, a `to` or a
@@ -61,9 +74,10 @@ const asPairs = (rawEntries: LegacyTableSettings['rawEntries']): LegacyRawEntry[
     (rawEntries ?? []).filter(({ from, to }) => !!from && !!to && from !== to)
 
 /** The scope of a migration as one string, `''` when the app names none: what the hook runs again for. */
-export const legacyTableSettingsScope = ({ newKey, oldKeys, rawEntries }: LegacyTableSettings): string => {
+export const legacyTableSettingsScope = ({ newKey, oldKeys, rawEntries, defaultPageSize }: LegacyTableSettings): string => {
     const sources = asList(oldKeys)
-    const entries = newKey && sources.length > 0 ? [newKey, ...sources].join('\u0000') : ''
+    const entries =
+        newKey && sources.length > 0 ? `${[newKey, ...sources].join('\u0000')}\u0003${String(defaultPageSize ?? '')}` : ''
     const raw = asPairs(rawEntries)
         .map(({ from, to }) => `${from}\u0000${to}`)
         .join('\u0001')
@@ -76,8 +90,23 @@ interface MigrationCount {
     copied: number
 }
 
+/**
+ * Whether the page size under the new key is the library's own default, written when a table mounted before its migration, and the
+ * old entry holds a different valid page size: then the old one is the user's and replaces it (see `defaultPageSize`).
+ */
+const replacesLibraryDefault = (existing: string, old: string, defaultPageSize: number | undefined): boolean => {
+    if (defaultPageSize === undefined || !Number.isInteger(defaultPageSize) || defaultPageSize <= 0) return false
+
+    const previous = parseSavedPageSize(old)
+
+    return parseSavedPageSize(existing) === defaultPageSize && previous !== undefined && previous !== defaultPageSize
+}
+
 /** The suffixed entries: `${oldKey}${suffix}` to `${newKey}${suffix}`. */
-const migrateSettingsEntries = ({ newKey: key, oldKeys, matchOldKey }: LegacyTableSettings, count: MigrationCount): void => {
+const migrateSettingsEntries = (
+    { newKey: key, oldKeys, matchOldKey, defaultPageSize }: LegacyTableSettings,
+    count: MigrationCount,
+): void => {
     const sources = asList(oldKeys).filter((oldKey) => oldKey !== key)
 
     // No current scope to name: copy nothing, remove nothing.
@@ -121,13 +150,20 @@ const migrateSettingsEntries = ({ newKey: key, oldKeys, matchOldKey }: LegacyTab
 
         if (present.length === 0 && others.length === 0) continue
 
-        if (value !== null && tableStorage.get(`${key}${suffix}`) === null) {
-            if (!tableStorage.set(`${key}${suffix}`, value)) {
-                // Full or blocked storage: the copy failed, so the old entries are all the user has. Leave them.
-                continue
-            }
+        if (value !== null) {
+            const existing = tableStorage.get(`${key}${suffix}`)
 
-            count.copied += 1
+            if (
+                existing === null ||
+                (suffix === ':page-size' && replacesLibraryDefault(existing, value, defaultPageSize))
+            ) {
+                if (!tableStorage.set(`${key}${suffix}`, value)) {
+                    // Full or blocked storage: the copy failed, so the old entries are all the user has. Leave them.
+                    continue
+                }
+
+                count.copied += 1
+            }
         }
 
         for (const stored of [...present, ...others]) tableStorage.remove(stored)
@@ -205,8 +241,9 @@ const migrateRawEntries = ({ newKey, rawEntries, matchRawKey }: LegacyTableSetti
  * visibility. For each of the five entries `StyledTable` saves under `newKey` (`TABLE_SETTINGS_SUFFIXES`), and for each
  * old → new pair of `rawEntries` (the keys the app named itself):
  *
- * 1. the entry of the first old key that has one is **copied** to the new key, but only if the new key has no entry of its own:
- *    what the user saved under the new key is never overwritten;
+ * 1. the entry of the first old key that has one is **copied** to the new key, but only if the new key has no entry of its own
+ *    (one exception, the page size under `defaultPageSize`: see that option): what the user saved under the new key is never
+ *    overwritten;
  * 2. then the old entries are **removed**: those of every old key named, and those the matchers accept.
  *
  * Nothing is removed before its copy is written: when storage is full or blocked the old entries stay, and the next call tries

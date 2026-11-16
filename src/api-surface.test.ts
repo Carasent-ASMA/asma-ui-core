@@ -13,4 +13,13 @@ describe('asma-ui-core public API surface', () => {
     it('keeps every runtime export of the package barrel stable', () => {
         expect(Object.keys(coreApi).sort()).toMatchSnapshot()
     })
+
+    /**
+     * ASMA-8698: the page size a table opens with when it is given none, for an app that passes it as `defaultPageSize` to the
+     * migration (a table that sets its own `pageSize` passes that one).
+     */
+    it('exports the default page size, from the package entry', () => {
+        expect(coreApi.DEFAULT_TABLE_PAGE_SIZE).toBe(50)
+    })
 })
+

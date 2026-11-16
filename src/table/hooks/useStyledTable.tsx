@@ -20,7 +20,7 @@ import { OrderColumnsFeature } from 'src/table/custom-features/order-columns/Ord
 import { usePersistColumnOrder } from '../custom-features/order-columns/usePersistColumnOrder'
 import { usePersistedColumnOrder } from 'src/table/custom-features/order-columns/usePersistedColumnOrder'
 
-import { getPersistedPageSizeKey, usePersistedPageSize } from './usePersistedPageSize'
+import { DEFAULT_TABLE_PAGE_SIZE, getPersistedPageSizeKey, usePersistedPageSize } from './usePersistedPageSize'
 import {
     columnSizingSignature,
     getColumnSizingStorageKey,
@@ -140,7 +140,7 @@ export const useStyledTable = <
         [sortingStorageKey],
     )
     const persistedPageSize = usePersistedPageSize(uniqueKey)
-    const resolvedPageSize = persistedPageSize ?? pageSize ?? 50
+    const resolvedPageSize = persistedPageSize ?? pageSize ?? DEFAULT_TABLE_PAGE_SIZE
 
     // The default comparison (ASMA-8597, P2f). It reads the direction of the column it compares from the table that sorts,
     // through this ref, which is filled right after `useReactTable` below: not the app's optional `tableInstanceRef`, and
