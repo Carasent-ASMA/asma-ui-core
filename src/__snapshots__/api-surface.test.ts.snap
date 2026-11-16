@@ -279,6 +279,7 @@ exports[`asma-ui-core public API surface > keeps every runtime export of the pac
   "StylusNoteLargeIcon",
   "SyncIcon",
   "SyncSavedLocallyIcon",
+  "TABLE_SETTINGS_SUFFIXES",
   "TextBoxCheckOutlineIcon",
   "TimelapseOutlineIcon",
   "TimerIcon",

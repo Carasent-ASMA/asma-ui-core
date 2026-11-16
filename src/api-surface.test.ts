@@ -13,4 +13,12 @@ describe('asma-ui-core public API surface', () => {
     it('keeps every runtime export of the package barrel stable', () => {
         expect(Object.keys(coreApi).sort()).toMatchSnapshot()
     })
+
+    /**
+     * ASMA-8698: the entries a table saves under its `uniqueKey`, for an app that has to clean up or inventory them itself (a
+     * delete-only cleanup, a test) without keeping its own copy of the list. `migrateLegacyTableSettings` copies exactly these.
+     */
+    it('exports the suffixes of the entries a table saves, from the package entry', () => {
+        expect(coreApi.TABLE_SETTINGS_SUFFIXES).toEqual([':sorting', ':column-sizing', ':page-size', ':column-order', ':column-visibility'])
+    })
 })

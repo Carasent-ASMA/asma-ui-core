@@ -9,6 +9,7 @@ export {
 
 export {
     migrateLegacyTableSettings,
+    TABLE_SETTINGS_SUFFIXES,
     type LegacyRawEntry,
     type LegacyTableSettings,
 } from './helpers/migrateLegacyTableSettings'
