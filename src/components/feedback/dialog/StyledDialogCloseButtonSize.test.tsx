@@ -38,3 +38,35 @@ describe('StyledDialog closeButtonSize', () => {
         expect(closeButton().style.paddingLeft).toBe('')
     })
 })
+
+describe('StyledDialog hideCloseLabelOnMobile', () => {
+    const setMobile = (mobile: boolean) => {
+        window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+            matches: mobile,
+            media: query,
+            addEventListener: vi.fn(),
+            removeEventListener: vi.fn(),
+        }))
+    }
+
+    it('shows only the icon on a phone and keeps the label as the accessible name', () => {
+        setMobile(true)
+        render(<StyledDialog open dataTest='dlg' onCloseText='Lukk' dialogTitle='Title' hideCloseLabelOnMobile />)
+        expect(closeButton().textContent).toBe('')
+        expect(closeButton().getAttribute('aria-label')).toBe('Lukk')
+        expect(closeButton().querySelector('svg')).not.toBeNull()
+    })
+
+    it('keeps the label on a wider screen', () => {
+        setMobile(false)
+        render(<StyledDialog open dataTest='dlg' onCloseText='Lukk' dialogTitle='Title' hideCloseLabelOnMobile />)
+        expect(closeButton().textContent).toContain('Lukk')
+        expect(closeButton().getAttribute('aria-label')).toBeNull()
+    })
+
+    it('keeps the label on a phone unless the dialog asks for the icon only', () => {
+        setMobile(true)
+        render(<StyledDialog open dataTest='dlg' onCloseText='Lukk' dialogTitle='Title' />)
+        expect(closeButton().textContent).toContain('Lukk')
+    })
+})

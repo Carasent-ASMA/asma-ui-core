@@ -96,6 +96,8 @@ export interface IStyledDialogProps {
     showCloseIcon?: boolean
     /** Close button size: `small` 32px (default) or `medium` 40px with a 16px label and 24px icon. */
     closeButtonSize?: 'small' | 'medium'
+    /** On a phone, Close shows only its icon; the `onCloseText` label stays its accessible name. */
+    hideCloseLabelOnMobile?: boolean
     /** @figmaProp header Label (Helper 14, delta-600) */
     dialogLabel?: ReactNode
     /** @figmaProp header Title (24/32 Bold, 20/26 Bold on mobile, delta-800), on its own full-width row */
@@ -153,6 +155,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     onCloseText,
     showCloseIcon = true,
     closeButtonSize = 'small',
+    hideCloseLabelOnMobile = false,
     dialogLabel,
     dialogTitle,
     dialogHeaderNode,
@@ -221,6 +224,9 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     const prevOpenRef = useRef(open)
     const isFullScreen = fullScreen ?? isMobile
     const closeIconSize = closeButtonSize === 'medium' ? 24 : 20
+    const closeIconOnly = hideCloseLabelOnMobile && isMobile
+    const closeIcon = <CloseIcon width={closeIconSize} height={closeIconSize} />
+    const closeLabel = typeof onCloseText === 'string' ? onCloseText : 'Close'
     // While a button inside runs an action, no dismissal goes through (see DialogBusyContext).
     const { busy, busyReason: busyText, contextValue } = useDialogBusyBoundary(busyReason, locale)
     const fallbackHeadingId = useId()
@@ -545,20 +551,22 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                                         {showCloseIcon && (
                                         <StyledButton
                                             dataTest={`close-button-${dataTest}`}
-                                            aria-label={!onCloseText ? 'Close' : undefined}
+                                            aria-label={closeIconOnly || !onCloseText ? closeLabel : undefined}
                                             variant='textGray'
                                             size={closeButtonSize}
-                                            endIcon={<CloseIcon width={closeIconSize} height={closeIconSize} />}
+                                            startIcon={closeIconOnly ? closeIcon : undefined}
+                                            endIcon={closeIconOnly ? undefined : closeIcon}
                                             className='max-w-full shrink-0 whitespace-nowrap'
                                             disabled={busy}
                                             disabledReason={busyText}
                                             onClick={(event) => void requestEscapeClose(event)}
                                             style={{
                                                 color: 'var(--colors-delta-800)',
-                                                ...(closeButtonSize === 'small' && { paddingRight: '6px', paddingLeft: '6px' }),
+                                                ...(closeButtonSize === 'small' &&
+                                                    !closeIconOnly && { paddingRight: '6px', paddingLeft: '6px' }),
                                             }}
                                         >
-                                            {onCloseText}
+                                            {closeIconOnly ? undefined : onCloseText}
                                         </StyledButton>
                                         )}
                                     </div>
