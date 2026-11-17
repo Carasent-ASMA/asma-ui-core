@@ -67,15 +67,15 @@ describe('Dialog header pinning (ASMA-8737)', () => {
         await page.viewport(1280, 720)
     })
 
-    // No label, so the title shares the 44 px row with Close: header = 28 px padding + title lines
-    // + 18 px (26 px lines below 744 px wide) or 12 px (32 px lines from there up) around them.
+    // No label, so the title shares the 32 px row with Close: header = 24 px padding + 4 px + 28 px
+    // lines below 744 px wide, or 32 px padding + 32 px lines from there up.
     // A 7-line desktop title is therefore past 25% of 950 px.
     it.each<[string, [number, number], number, number | null, boolean]>([
-        ['phone portrait, 4 lines: pinned', [390, 660], 4, 150, true],
-        ['phone portrait, 5 lines: scrolls', [390, 660], 5, 176, false],
+        ['phone portrait, 4 lines: pinned', [390, 660], 4, 140, true],
+        ['phone portrait, 5 lines: scrolls', [390, 660], 5, 168, false],
         ['phone landscape: scrolls (short screen)', [844, 340], 1, null, false],
-        ['laptop 1920 × 1080 at 100%, 6 lines: pinned', [1920, 950], 6, 232, true],
-        ['laptop 1920 × 1080 at 100%, 7 lines: scrolls', [1920, 950], 7, 264, false],
+        ['laptop 1920 × 1080 at 100%, 6 lines: pinned', [1920, 950], 6, 224, true],
+        ['laptop 1920 × 1080 at 100%, 7 lines: scrolls', [1920, 950], 7, 256, false],
         ['laptop at 150% scaling and 200% zoom: scrolls (short screen)', [640, 290], 1, null, false],
         ['1280 × 1024 at 400%: scrolls (short screen)', [320, 256], 1, null, false],
     ])('%s', async (_name, [width, height], titleLines, expectedHeight, pinned) => {
@@ -195,7 +195,7 @@ describe('Dialog header pinning (ASMA-8737)', () => {
         mount(<Fixture title={lines(4)} />)
         await waitFor(() => expect(header()).toHaveAttribute('data-header-pinned', 'true'))
         body().scrollTop = 300
-        await page.viewport(390, 560)
+        await page.viewport(390, 540)
         await waitFor(() => expect(header()).toHaveAttribute('data-header-pinned', 'false'))
         await expect(body().scrollTop).toBe(300)
         await page.viewport(390, 660)
@@ -203,14 +203,30 @@ describe('Dialog header pinning (ASMA-8737)', () => {
         await expect(body().scrollTop).toBe(300)
     })
 
-    it('sets the title at 24/32 Bold on desktop (REQ-002)', async () => {
+    it('sets the title at 24/32 SemiBold on desktop (Figma Page title)', async () => {
         await page.viewport(1280, 720)
         mount(<Fixture title='Edit event' />)
         await waitFor(() => expect(dialog()).not.toBeNull())
         const title = document.getElementById(dialog().getAttribute('aria-labelledby')!)!
         const style = getComputedStyle(title)
-        await expect([style.fontSize, style.lineHeight, style.fontWeight]).toEqual(['24px', '32px', '700'])
+        await expect([style.fontSize, style.lineHeight, style.fontWeight]).toEqual(['24px', '32px', '600'])
         await expect(title.getBoundingClientRect().height).toBe(32)
+    })
+
+    // Figma `_dialog header` (DS_draft 332:64021): 32 px actions row; 96 px one-line header from 744 px
+    // (16 + 32 + 32 + 16) and 88 px below it (12 + 32 + 4 + 28 + 12).
+    it.each([
+        [1280, 96, 16],
+        [390, 88, 12],
+    ])('matches the Figma header geometry at %i px', async (width, headerHeight, paddingTop) => {
+        await page.viewport(width, 844)
+        mount(<StyledDialog open dataTest='pin' dialogTitle='Share' dialogLabel='Event' onClose={() => undefined} />)
+        await waitFor(() => expect(header()).not.toBeNull())
+        const headerBox = header().getBoundingClientRect()
+        const close = header().querySelector<HTMLElement>('[data-testid="close-button-pin"]')!.getBoundingClientRect()
+        await expect(Math.round(headerBox.height)).toBe(headerHeight)
+        await expect(Math.round(close.height)).toBe(32)
+        await expect(Math.round(close.top - headerBox.top)).toBe(paddingTop)
     })
 
     // Without a label the title takes the label's place, level with Close; with one it keeps its own row.
@@ -256,17 +272,17 @@ describe('Dialog header pinning (ASMA-8737)', () => {
         },
     )
 
-    it('wraps a long title in full at 20/26 Bold on a phone, never truncated or clamped (REQ-002, 003)', async () => {
+    it('wraps a long title in full at 20/28 SemiBold on a phone, never truncated or clamped (REQ-003)', async () => {
         await page.viewport(390, 844)
         mount(<Fixture title={LONG_TITLE} />)
         await waitFor(() => expect(dialog()).not.toBeNull())
         const title = document.getElementById(dialog().getAttribute('aria-labelledby')!)!
         const style = getComputedStyle(title)
-        await expect([style.fontSize, style.lineHeight, style.fontWeight]).toEqual(['20px', '26px', '700'])
+        await expect([style.fontSize, style.lineHeight, style.fontWeight]).toEqual(['20px', '28px', '600'])
         await expect(style.textOverflow).not.toBe('ellipsis')
         await expect(style.webkitLineClamp).toBe('none')
         await expect(title.scrollHeight).toBe(title.clientHeight)
-        await expect(title.getBoundingClientRect().height).toBeGreaterThan(26 * 3)
+        await expect(title.getBoundingClientRect().height).toBeGreaterThan(28 * 3)
     })
 
     it('moves a <StyledDialogTitle> child into the header title row', async () => {

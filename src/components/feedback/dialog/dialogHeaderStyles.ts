@@ -4,10 +4,12 @@ import type { CSSProperties } from 'react'
  * The one dialog header layout (ASMA-8737), shared by `StyledDialog`, `MinimizableDialog` and
  * `MinimizableDialogV2`. With a label: the actions row (label + actions) on top, then the title on a
  * row of its own across the full width. Without a label the title takes the label's place, so title
- * and actions share one row. Geometry: 44 px actions row, 28 px vertical padding (16 + 12), title
- * lines of 26 px below 744 px wide and 32 px from there up.
+ * and actions share one row. Geometry from Figma `_dialog header` (DS_draft 332:64021): a 32 px actions
+ * row, then the title. Below 744 px: 12 px vertical padding, 4 px between the rows, 28 px title lines
+ * (88 px for one line). From 744 px: 16 px padding, no gap, 32 px title lines (96 px for one line).
  */
-export const DIALOG_HEADER_CLASSES = 'box-border w-full min-w-0 max-w-full shrink-0 bg-white px-4 pb-3 pt-4'
+export const DIALOG_HEADER_CLASSES =
+    'box-border flex w-full min-w-0 max-w-full shrink-0 flex-col gap-1 bg-white px-4 py-3 min-[744px]:gap-0 min-[744px]:py-4'
 
 /**
  * Wraps the consumer content in the dialog body.
@@ -44,28 +46,33 @@ export const dialogScrollerStyle = (scrollPaddingTop: number, scrollPaddingBotto
         '--dialog-footer-offset': `${scrollPaddingBottom}px`,
     }) as CSSProperties
 
-/** Label (if any) on the left, the header actions on the right. Wraps rather than overflowing at 320 px. */
+/**
+ * Label (if any) on the left, the header actions on the right, 16 px apart on a 32 px row (the height
+ * of the small header buttons). Wraps rather than overflowing at 320 px.
+ */
 export const DIALOG_HEADER_ACTIONS_ROW_CLASSES =
-    'flex min-h-11 w-full min-w-0 items-center justify-between gap-x-2 max-xs:flex-wrap max-xs:gap-y-1'
+    'flex min-h-8 w-full min-w-0 items-center justify-between gap-x-4 max-xs:flex-wrap max-xs:gap-y-1'
 
 /**
  * The actions row when it also holds the title (no label): top-aligned so the actions stay level with
  * the first title line however many lines it wraps to, and never wrapped below the title. Pair the
- * actions group with `min-h-11` so it centres on that first line.
+ * actions group with `min-h-8` so it centres on that first line.
  */
-export const DIALOG_HEADER_TITLE_ROW_CLASSES =
-    'flex min-h-11 w-full min-w-0 items-start justify-between gap-x-2'
+export const DIALOG_HEADER_TITLE_ROW_CLASSES = 'flex min-h-8 w-full min-w-0 items-start justify-between gap-x-4'
 
 /**
- * The title's box inside that row: takes the free width and centres its first line on the 44 px row
- * (9 px around a 26 px line, 6 px around a 32 px line).
+ * The title's box inside that row: takes the free width and centres its first line on the 32 px row
+ * (2 px around a 28 px line, none around a 32 px line).
  */
-export const DIALOG_HEADER_ROW_TITLE_BOX_CLASSES = 'min-w-0 flex-auto py-[9px] min-[744px]:py-1.5'
+export const DIALOG_HEADER_ROW_TITLE_BOX_CLASSES = 'min-w-0 flex-auto py-0.5 min-[744px]:py-0'
+
+/** The header buttons group: 8 px between the 32 px buttons, on the 32 px actions row. */
+export const DIALOG_HEADER_BUTTONS_CLASSES = 'ml-auto flex min-h-8 items-center gap-2'
 
 /**
- * Title type: 20/26 Bold below 744 px, 24/32 Bold from 744 px (the desktop size from before
- * ASMA-8737). Never truncated or clamped: it wraps to as many lines as it needs, breaking an
- * over-long word rather than scrolling sideways (WCAG 1.4.10).
+ * Title type from Figma: Mobile/Page title 20/28 SemiBold below 744 px, Page title 24/32 SemiBold from
+ * 744 px. Never truncated or clamped: it wraps to as many lines as it needs, breaking an over-long word
+ * rather than scrolling sideways (WCAG 1.4.10).
  */
 export const DIALOG_TITLE_CLASSES =
-    'my-0 block min-w-0 whitespace-normal text-[20px] font-bold leading-[26px] text-delta-800 [overflow-wrap:anywhere] hyphens-auto min-[744px]:text-2xl min-[744px]:leading-8'
+    'my-0 block min-w-0 whitespace-normal text-xl font-semibold leading-7 text-delta-800 [overflow-wrap:anywhere] hyphens-auto min-[744px]:text-2xl min-[744px]:leading-8'

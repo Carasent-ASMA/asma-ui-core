@@ -30,6 +30,7 @@ import { StyledDialogTitleContext } from './dialogTitleContext'
 import { useDialogHeaderPinning } from './useDialogHeaderPinning'
 import {
     DIALOG_HEADER_ACTIONS_ROW_CLASSES,
+    DIALOG_HEADER_BUTTONS_CLASSES,
     DIALOG_HEADER_CLASSES,
     DIALOG_HEADER_ROW_TITLE_BOX_CLASSES,
     DIALOG_HEADER_TITLE_ROW_CLASSES,
@@ -53,7 +54,7 @@ interface DialogPaperProps {
  * Figma "Dialog": white paper radius 8 with the Dialogue-popup shadow (#22213366, 0 4 40) over a
  * bg/modal #626e7eb2 overlay. Header = actions row (optional label, Helper delta-600, + close button)
  * over the full-width title; without a label the title sits in that row, left of the close button
- * (ASMA-8737: 24/32 Bold, 20/26 Bold below 744 px, delta-800, never truncated). `fullScreen`/mobile
+ * (ASMA-8737: 24/32 SemiBold, 20/28 SemiBold below 744 px, delta-800, never truncated). `fullScreen`/mobile
  * drops the radius and fills the viewport.
  */
 export interface IStyledDialogProps {
@@ -100,7 +101,7 @@ export interface IStyledDialogProps {
     hideCloseLabelOnMobile?: boolean
     /** @figmaProp header Label (Helper 14, delta-600) */
     dialogLabel?: ReactNode
-    /** @figmaProp header Title (24/32 Bold, 20/26 Bold on mobile, delta-800), on its own full-width row */
+    /** @figmaProp header Title (24/32 SemiBold, 20/28 SemiBold on mobile, delta-800), on its own full-width row */
     dialogTitle?: ReactNode
     dialogHeaderNode?: ReactNode
     /**
@@ -539,14 +540,19 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                                 {dialogLabel && (
                                     <div
                                         id={labelId}
-                                        className='min-w-0 flex-auto hyphens-auto text-sm font-normal leading-5 text-delta-600 [overflow-wrap:anywhere]'
+                                        className='min-w-0 flex-auto hyphens-auto text-sm font-normal leading-5 text-delta-700 [overflow-wrap:anywhere]'
                                     >
                                         {dialogLabel}
                                     </div>
                                 )}
                                 {titleInActionsRow && <div className={DIALOG_HEADER_ROW_TITLE_BOX_CLASSES}>{headerTitle}</div>}
                                 {(showCloseIcon || !!dialogHeaderNode) && (
-                                    <div className='ml-auto flex min-h-11 min-w-0 max-w-full shrink-0 items-center justify-end gap-2 max-xs:flex-wrap max-xs:gap-y-2'>
+                                    <div
+                                        className={cn(
+                                            DIALOG_HEADER_BUTTONS_CLASSES,
+                                            'min-w-0 max-w-full shrink-0 justify-end max-xs:flex-wrap max-xs:gap-y-2',
+                                        )}
+                                    >
                                         {dialogHeaderNode}
                                         {showCloseIcon && (
                                         <StyledButton

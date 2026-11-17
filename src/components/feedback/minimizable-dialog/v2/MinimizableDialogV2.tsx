@@ -18,6 +18,7 @@ import { DialogBusyContext, useDialogBusyBoundary } from 'src/components/feedbac
 import { useDialogHeaderPinning } from 'src/components/feedback/dialog/useDialogHeaderPinning'
 import {
     DIALOG_HEADER_ACTIONS_ROW_CLASSES,
+    DIALOG_HEADER_BUTTONS_CLASSES,
     DIALOG_HEADER_CLASSES,
     DIALOG_HEADER_ROW_TITLE_BOX_CLASSES,
     DIALOG_HEADER_TITLE_ROW_CLASSES,
@@ -316,7 +317,12 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                             </div>
                         )}
                         {!label && <div className={DIALOG_HEADER_ROW_TITLE_BOX_CLASSES}>{titleNode}</div>}
-                        <div className='ml-auto flex min-h-11 items-center gap-x-1 max-xs:flex-wrap max-xs:justify-end max-xs:gap-y-2'>
+                        <div
+                            className={cn(
+                                DIALOG_HEADER_BUTTONS_CLASSES,
+                                'max-xs:flex-wrap max-xs:justify-end max-xs:gap-y-2',
+                            )}
+                        >
                             <DialogBusyContext.Provider value={contextValue}>{actionNode}</DialogBusyContext.Provider>
                             {/* Minimize is offered in fullscreen too. Taking it away there left the
                                 header's learned triad a control short, and a dialog the user had sent
