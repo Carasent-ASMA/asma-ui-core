@@ -75,6 +75,9 @@ export const DIALOG_HEADER_TITLE_ROW_CLASSES = 'flex min-h-8 w-full min-w-0 item
  */
 export const DIALOG_HEADER_ROW_TITLE_BOX_CLASSES = 'min-w-0 flex-auto max-dialog:py-0.5'
 
+/** The same box beside a 40 px (medium) Close: 6 px around a 28 px line, 4 px around a 32 px line. */
+export const DIALOG_HEADER_ROW_TITLE_BOX_MEDIUM_CLASSES = 'min-w-0 flex-auto max-dialog:py-1.5 dialog:py-1'
+
 /** The header buttons group: 8 px between the 32 px buttons, on the 32 px actions row. */
 export const DIALOG_HEADER_BUTTONS_CLASSES = 'ml-auto flex min-h-8 items-center gap-2'
 

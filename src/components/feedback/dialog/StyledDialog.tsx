@@ -34,6 +34,7 @@ import {
     DIALOG_HEADER_CLASSES,
     DIALOG_HEADER_LABEL_CLASSES,
     DIALOG_HEADER_ROW_TITLE_BOX_CLASSES,
+    DIALOG_HEADER_ROW_TITLE_BOX_MEDIUM_CLASSES,
     DIALOG_HEADER_TITLE_ROW_CLASSES,
     DIALOG_TITLE_CLASSES,
     dialogContentFlowClasses,
@@ -543,7 +544,17 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                                         {dialogLabel}
                                     </div>
                                 )}
-                                {titleInActionsRow && <div className={DIALOG_HEADER_ROW_TITLE_BOX_CLASSES}>{headerTitle}</div>}
+                                {titleInActionsRow && (
+                                    <div
+                                        className={
+                                            closeButtonSize === 'medium' && showCloseIcon
+                                                ? DIALOG_HEADER_ROW_TITLE_BOX_MEDIUM_CLASSES
+                                                : DIALOG_HEADER_ROW_TITLE_BOX_CLASSES
+                                        }
+                                    >
+                                        {headerTitle}
+                                    </div>
+                                )}
                                 {(showCloseIcon || !!dialogHeaderNode) && (
                                     <div
                                         className={cn(
