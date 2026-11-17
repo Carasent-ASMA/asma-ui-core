@@ -37,6 +37,16 @@ describe('StyledDialog closeButtonSize', () => {
         expect(closeIconWidth()).toBe('24')
         expect(closeButton().style.paddingLeft).toBe('')
     })
+
+    it('centres the title on the 40px Close, as Figma does, and keeps the 32px row for the small one', () => {
+        const titleBox = () => screen.getByText('Title').parentElement!
+        const { rerender } = render(<StyledDialog open dataTest='dlg' dialogTitle='Title' closeButtonSize='medium' />)
+        expect(titleBox().className).toContain('max-dialog:py-1.5')
+        expect(titleBox().className).toContain('dialog:py-1')
+        rerender(<StyledDialog open dataTest='dlg' dialogTitle='Title' />)
+        expect(titleBox().className).toContain('max-dialog:py-0.5')
+        expect(titleBox().className).not.toContain('dialog:py-1')
+    })
 })
 
 describe('StyledDialog hideCloseLabelOnMobile', () => {
