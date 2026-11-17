@@ -225,7 +225,11 @@ export const useStyledTable = <
         tableInstanceRef.current = table
     }
 
-    usePersistColumnOrder(table, layoutOptedIn ? undefined : persistColumnOrderKey)
+    usePersistColumnOrder(table, layoutOptedIn ? undefined : persistColumnOrderKey, {
+        saved: columnOrder,
+        defaultOrder: initialState?.columnOrder,
+        controlled: rest.state?.columnOrder !== undefined,
+    })
 
     // Brings the state in step with new columns and changed defaults before anything is saved (ASMA-8695).
     const reconcilingLayout = useColumnLayoutReconcile(table, {
