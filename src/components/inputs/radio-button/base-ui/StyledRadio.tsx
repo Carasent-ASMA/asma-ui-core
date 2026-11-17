@@ -38,6 +38,13 @@ export type StyledRadioProps = {
 } & Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'className' | 'size' | 'checked' | 'onChange' | 'type'>
 // @figmaProp disabled → State="Disabled" (from InputHTMLAttributes; the group can also set it)
 
+// Ring and dot are two circles of one SVG: as two boxes, Chrome on Windows rasterised them apart and
+// the dot sat off-centre (ASMA-8970).
+const RADIO_CIRCLE = {
+    medium: { size: 20, stroke: 2, dot: 5 },
+    small: { size: 16, stroke: 1.5, dot: 4 },
+} as const
+
 /**
  * Native `<input type="radio">` (replaces `@base-ui/react`). Uses the surrounding
  * `StyledRadioGroup` context for name/selection when present, else the standalone `checked` prop.
@@ -62,6 +69,7 @@ export const StyledRadio = forwardRef<HTMLInputElement, StyledRadioProps>(
             readOnly && styles['ReadOnly'],
         )
         const radioClasses = cn(styles['Radio'], size === 'small' && styles['size-small'])
+        const circle = RADIO_CIRCLE[size]
 
         const rippleRef = useRef<HTMLSpanElement>(null)
         const handlePointerDown = useCallback((e: React.PointerEvent) => {
@@ -90,9 +98,21 @@ export const StyledRadio = forwardRef<HTMLInputElement, StyledRadioProps>(
         const visual = (
             <>
                 <span className={styles['RadioRippleContainer']} ref={rippleRef} />
-                <span className={radioClasses}>
-                    <span className={styles['Indicator']} />
-                </span>
+                <svg
+                    className={radioClasses}
+                    viewBox={`0 0 ${circle.size} ${circle.size}`}
+                    aria-hidden='true'
+                    focusable='false'
+                >
+                    <circle
+                        className={styles['Ring']}
+                        cx={circle.size / 2}
+                        cy={circle.size / 2}
+                        r={(circle.size - circle.stroke) / 2}
+                        strokeWidth={circle.stroke}
+                    />
+                    <circle className={styles['Indicator']} cx={circle.size / 2} cy={circle.size / 2} r={circle.dot} />
+                </svg>
             </>
         )
 
