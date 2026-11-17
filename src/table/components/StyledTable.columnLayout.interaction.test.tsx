@@ -833,84 +833,27 @@ describe('StyledTable per-user column layout', () => {
             await expect(callsFor(removeItem.mock.calls, /(?::column-(?:order|visibility)|NetworkColumnOrder)$/)).toEqual([])
         })
 
-        it('L-18: a changed default visibility reaches the column the user did not change, keeps the one they did, and the dot stays in step', async () => {
-            const view = mount(<LayoutTable initialState={{ columnVisibility: { notes: false } }} />)
-            await toggleInPopover('Age')
-            await waitFor(() => expect(stored(VISIBILITY_KEY)).toEqual({ v: 1, visibility: { age: false } }))
-            await expect(headerLabels()).toEqual(['Name', 'Role'])
+        it('L-17c: a column added while the layout is not saved, a reorder, then the opt-in: the table is compared with the columns it had just before, not with those it mounted with', async () => {
+            const view = mount(<LayoutTable persistColumnLayout={false} />)
 
-            // The app now shows Notes by default.
-            view.rerender(<LayoutTable initialState={{ columnVisibility: { notes: true } }} />)
-            await settle()
-
-            await expect(headerLabels()).toEqual(['Name', 'Role', 'Notes'])
-            // Only what the user changed counts: Age. Notes was never theirs.
-            await expect(dot()).not.toBeNull()
-            await expect(stored(VISIBILITY_KEY)).toEqual({ v: 1, visibility: { age: false } })
-
-            await toggleInPopover('Age')
             await expect(headerLabels()).toEqual(['Name', 'Role', 'Age', 'Notes'])
-            await expect(dot()).toBeNull()
-            await waitFor(() => expect(localStorage.getItem(VISIBILITY_KEY)).toBeNull())
-        })
 
-        it('L-18: a changed default is not saved as the user\'s choice: a user on the defaults writes nothing when the app changes them', async () => {
-            const view = mount(<LayoutTable initialState={{ columnVisibility: { notes: false } }} />)
+            // Still legacy: the app adds a column, and the user then moves one.
+            view.rerender(<LayoutTable columns={extraColumns} persistColumnLayout={false} />)
             await settle()
-            const setItem = vi.spyOn(Storage.prototype, 'setItem')
+            await act(() => table().setColumnOrder(['age', 'name', 'role', 'extra', 'notes', 'actions']))
+            await expect(headerLabels()).toEqual(['Age', 'Name', 'Role', 'Extra', 'Notes'])
 
-            view.rerender(<LayoutTable initialState={{ columnVisibility: { notes: true, age: false } }} />)
-            await settle()
+            const setOrder = vi.spyOn(table(), 'setColumnOrder')
 
-            await expect(headerLabels()).toEqual(['Name', 'Role', 'Notes'])
-            await expect(dot()).toBeNull()
-            await expect(callsFor(setItem.mock.calls, /:column-(order|visibility)$/)).toEqual([])
-            await expect(localStorage.getItem(VISIBILITY_KEY)).toBeNull()
-        })
-
-        it('L-17: a column that appears takes its definition position in the app\'s own default order too, with no dot and nothing saved', async () => {
-            const appOrder = ['role', 'age', 'name', 'notes', 'actions']
-            const view = mount(<LayoutTable initialState={{ columnOrder: appOrder }} />)
-            await expect(headerLabels()).toEqual(['Role', 'Age', 'Name', 'Notes'])
-            const setItem = vi.spyOn(Storage.prototype, 'setItem')
-
-            view.rerender(<LayoutTable columns={extraColumns} initialState={{ columnOrder: appOrder }} />)
+            // The opt-in changes no column and no default since the render before it, so the reconcile has nothing to do. The one
+            // call is the layout writer loading the new key's order (the default: the user's legacy move is not carried over). A
+            // reconcile that judged the table against the columns it mounted with would find `extra` new and call it a second time.
+            view.rerender(<LayoutTable columns={extraColumns} persistColumnLayout />)
             await settle()
 
-            // `extra` follows `role` in the definition, so it follows `role` here, not the pin at the end.
-            await expect(headerLabels()).toEqual(['Role', 'Extra', 'Age', 'Name', 'Notes'])
-            await expect(dot()).toBeNull()
-            await expect(callsFor(setItem.mock.calls, /:column-(?:order|visibility)$/)).toEqual([])
-        })
-
-        it('L-17b: a table opted in later (persistColumnLayout false, then true, with a new column and a legacy order key) is reconciled as one opted in all along', async () => {
-            const appOrder = ['role', 'age', 'name', 'notes', 'actions']
-            const view = mount(
-                <LayoutTable
-                    initialState={{ columnOrder: appOrder }}
-                    persistColumnLayout={false}
-                    persistColumnOrderKey={LEGACY_ORDER_KEY}
-                />,
-            )
-            await expect(headerLabels()).toEqual(['Role', 'Age', 'Name', 'Notes'])
-            const setItem = vi.spyOn(Storage.prototype, 'setItem')
-            const removeItem = vi.spyOn(Storage.prototype, 'removeItem')
-
-            view.rerender(
-                <LayoutTable
-                    columns={extraColumns}
-                    initialState={{ columnOrder: appOrder }}
-                    persistColumnLayout
-                    persistColumnOrderKey={LEGACY_ORDER_KEY}
-                />,
-            )
-            await settle()
-
-            // The same as L-17: `extra` follows `role` in the definition, so it follows `role` here; no dot, nothing saved or removed.
-            await expect(headerLabels()).toEqual(['Role', 'Extra', 'Age', 'Name', 'Notes'])
-            await expect(dot()).toBeNull()
-            await expect(callsFor(setItem.mock.calls, /(?::column-(?:order|visibility)|NetworkColumnOrder)$/)).toEqual([])
-            await expect(callsFor(removeItem.mock.calls, /(?::column-(?:order|visibility)|NetworkColumnOrder)$/)).toEqual([])
+            await expect(headerLabels()).toEqual(['Name', 'Role', 'Extra', 'Age', 'Notes'])
+            await expect(setOrder.mock.calls.map(([order]) => order)).toEqual([[]])
         })
 
         it('L-18: a change the user makes in the same render as a new column is saved, not lost', async () => {

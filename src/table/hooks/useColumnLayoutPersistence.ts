@@ -352,6 +352,8 @@ export const useColumnLayoutReconcile = <TData>(
     // render's state is not in step yet, and an update of React state would only repeat the render that finds out.
     const pending = enabled && columnLayoutInputsChanged(reconciledInputs.get(table), current)
 
+    // On every commit, enabled or not: a column or a default that changes while the layout is not saved is what a table opted in
+    // later is compared with. Recording is an assignment, and the comparison below runs only for a table that saves its layout.
     useLayoutEffect(() => {
         const before = reconciledInputs.get(table)
 
@@ -376,9 +378,7 @@ export const useColumnLayoutReconcile = <TData>(
 
             if (!sameVisibility(nextVisibility, visibility)) table.setColumnVisibility(nextVisibility)
         }
-        // Only a change of the inputs reconciles; the closure is that render's.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [table, enabled, current.signature])
+    })
 
     return pending
 }

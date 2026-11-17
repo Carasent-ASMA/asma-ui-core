@@ -408,6 +408,19 @@ describe('StyledTable tab switch on one mounted table (ASMA-8698)', () => {
         await waitFor(() => expect(ariaSorts()).toMatchObject({ Role: 'ascending', Name: 'none' }))
     })
 
+    it('T-14: a key that goes away on an order that is already the default applies nothing (a keyless render has no signature to compare with)', async () => {
+        const { table, switchTo } = mountTabs({ initial: TAB_C })
+
+        await expect(headerLabels()).toEqual(DEFINITION_ORDER)
+        const setOrder = vi.spyOn(table(), 'setColumnOrder')
+
+        switchTo(NO_KEYS)
+        await settle()
+
+        await expect(setOrder).not.toHaveBeenCalled()
+        await expect(headerLabels()).toEqual(DEFINITION_ORDER)
+    })
+
     it('T-11: a controlled order is not set by a key change, and nothing is written', async () => {
         seedTabs()
         const writes = { current: [] as unknown[][] }

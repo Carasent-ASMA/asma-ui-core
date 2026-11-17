@@ -30,4 +30,3 @@ describe('asma-ui-core public API surface', () => {
         expect(coreApi.DEFAULT_TABLE_PAGE_SIZE).toBe(50)
     })
 })
-

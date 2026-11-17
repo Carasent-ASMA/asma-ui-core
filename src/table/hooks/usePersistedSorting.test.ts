@@ -272,19 +272,27 @@ describe('savesSorting (ASMA-8698)', () => {
         expect(savesSorting(input({ persistSorting: true, controlled: true }))).toBe(true)
     })
 
-    it('S-07: every combination, as one table (key x prop x controlled)', () => {
-        const expected = (key: boolean, prop: boolean | undefined, controlled: boolean): boolean =>
-            key && prop !== false && (prop === true || !controlled)
+    it('S-07: the whole table, one case per row (key, persistSorting, controlled)', () => {
+        const cases: [key: boolean, persistSorting: boolean | undefined, controlled: boolean, saves: boolean][] = [
+            [true, undefined, false, true],
+            [true, true, false, true],
+            [true, false, false, false],
+            [true, undefined, true, false],
+            [true, true, true, true],
+            [true, false, true, false],
+            [false, undefined, false, false],
+            [false, true, false, false],
+            [false, false, false, false],
+            [false, undefined, true, false],
+            [false, true, true, false],
+            [false, false, true, false],
+        ]
 
-        for (const key of [true, false]) {
-            for (const prop of [undefined, true, false]) {
-                for (const controlled of [false, true]) {
-                    expect(
-                        savesSorting(input({ uniqueKey: key ? KEY : undefined, persistSorting: prop, controlled })),
-                        `key ${key}, prop ${String(prop)}, controlled ${controlled}`,
-                    ).toBe(expected(key, prop, controlled))
-                }
-            }
+        for (const [key, persistSorting, controlled, saves] of cases) {
+            expect(
+                savesSorting(input({ uniqueKey: key ? KEY : undefined, persistSorting, controlled })),
+                `key ${key}, persistSorting ${String(persistSorting)}, controlled ${controlled}`,
+            ).toBe(saves)
         }
     })
 })
