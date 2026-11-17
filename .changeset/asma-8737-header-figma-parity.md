@@ -13,3 +13,5 @@ ASMA-8737: dialog header matches the Figma `_dialog header` (DS_draft `332:64021
 - The label is Helper 14/20 `delta-700` on one line with an ellipsis, in all three shells.
 - Every header has the 1 px `border/separator` (#d3d8df) line, drawn inside the header height as in
   Figma; the minimizable dialogs' CSS border used to add 1 px (97 px headers).
+- Mobile and desktop header values are scoped to their own width ranges, so a micro-app's own
+  `.py-3` / `.text-xl` utilities can no longer shrink the desktop header to the mobile size.
