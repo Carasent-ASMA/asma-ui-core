@@ -120,8 +120,9 @@ export function HeaderActionMenu<TData>({
                 aria-label={showsChangedLayout ? t.column_settings_changed : t.column_settings}
                 aria-haspopup='true'
                 aria-expanded={open}
-                // Not a tab stop in a hidden header (`hideHeader`), where nothing shows where the focus is.
-                tabIndex={headerData.table.options.meta?.hideHeader ? -1 : undefined}
+                // A header control (ASMA-8875): never a tab stop; the header row is, and the arrow keys reach it.
+                tabIndex={-1}
+                data-table-control=''
                 className={styles['actions-header']}
                 onClick={handleOpen}
             >

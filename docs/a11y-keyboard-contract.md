@@ -136,10 +136,12 @@ Tab walked the table row by row, so leaving a long table took one Tab per row. T
 roving tab stop and move with ArrowUp/ArrowDown; the WAI-ARIA Grid pattern makes Tab an exit from the
 composite. Tab on a row now moves to the first focusable element after the table, and Shift+Tab goes back
 (to the last header control since ASMA-8702, see N below; without one, to the last focusable element before
-the table). Covered by `TableRow.keyboard.interaction.test.tsx`.
+the table). Covered by `TableRow.keyboard.interaction.test.tsx` (since ASMA-8875 by K-03 / K-11 and K-04 / K-11 in
+`TableHeader.keyboard.interaction.test.tsx`).
 
 **N (ASMA-8702, 2026-11) — WCAG 2.1.1 / 2.4.3, `table/components/table-header/TableHeader.tsx`, `TableRow.tsx`,
-`helpers/headerControls.ts`.**
+`helpers/headerControls.ts`.** *Its header Tab walk and its `hideHeader` consumer contract are superseded by O
+(ASMA-8875): the header is now one tab stop, walked with the arrow keys. Kept below as history.*
 The header row was the table's one tab stop (`<tr tabindex="0">`), and the sort buttons and the column settings
 pin came after it in the DOM, so no Tab or Shift+Tab sequence reached them (found while testing ASMA-8597). The
 header row is no longer a tab stop. Tab moves through the sortable headers and then the pin, in visual order
@@ -173,7 +175,8 @@ before the rows in the DOM, but the rows' own controls come after them:
 - "Header control" means a control Tab would stop on now: a tab index of 0 or more, rendered, not `hidden`,
   `visibility: hidden` or inside an `inert` or `hidden` ancestor. A button with `tabindex="-1"` is not one.
 
-**What is unchanged, and not new in ASMA-8702 (ASMA-8087's body model; the same on master `7fe83452`).**
+**What is unchanged, and not new in ASMA-8702 (ASMA-8087's body model; the same on master `7fe83452`).** *Superseded by O
+(ASMA-8875): the rows' controls are no longer tab stops, and K-20 and K-21 now pin the new model.*
 Shift+Tab from after a table enters at the active row only when the rows hold no tabbable controls of their own.
 With a control in each row (a button, a checkbox), the browser's previous stop is the **last row's control**; Shift+Tab
 then walks back through the rows' controls to the active row, and from the row to the last header control, so there is
@@ -186,8 +189,7 @@ control stays reachable and nothing traps the focus, only the way back is longer
 
 Wide tables get one tab stop per sortable column. Centre headers are column-virtualised, but Tab still reaches
 every one in order: focusing a header scrolls it into view, which renders the next ones. Covered by
-`TableHeader.keyboard.interaction.test.tsx` (K-01 to K-10, K-13 to K-22), `TableRow.keyboard.interaction.test.tsx`
-(K-11), and `StyledTable.header.interaction.test.tsx` (ST-11c, K-12), `StyledTable.resetColumns.interaction.test.tsx`
+`TableHeader.keyboard.interaction.test.tsx` (K-01 to K-10, K-13 to K-22; K-11 too since ASMA-8875), and `StyledTable.header.interaction.test.tsx` (ST-11c, K-12), `StyledTable.resetColumns.interaction.test.tsx`
 (K-07). The Storybook stories `Table/Keyboard reach` (`KeyboardReach`, `HiddenHeader`, `RowControls`) let a person try the
 whole round trip with the keyboard.
 
@@ -195,6 +197,137 @@ The arrow keys also left the focused row off screen (WCAG 2.4.11): `FocusRowsFea
 `preventScroll: true` and never scrolled. It now scrolls the row just into view (`block: 'nearest'`),
 with a `scroll-margin` that clears the sticky header and the sticky horizontal scrollbar/footer, so a
 row is not left under the header on the way up. Covered by `TableRow.scrollIntoView.interaction.test.tsx`.
+
+**O (ASMA-8875, 2026-11) — WCAG 2.1.1 / 2.4.3 / 2.4.7 / 2.4.11 / 4.1.2, `table/helpers/tableKeyboard.ts`,
+`tableControls.ts`, `tableTabStops.ts`, `columnReveal.ts`, `rowActionsMenu.ts`, `scrollFocusIntoView.ts`,
+`table/hooks/useTableTabStops.ts`, `TableRow.tsx`. Supersedes N's header Tab walk and ASMA-8087's "row controls are browser
+tab stops" (K-20, K-21).**
+Tab from a body row jumped to after the table, past every control in the row (the select checkbox, the expand chevron,
+the ⋮ menu), and Left/Right did nothing; the header was the opposite, one tab stop per sortable column. One rule now holds
+for the whole table: **Tab enters and leaves, the arrow keys move inside** (the WAI-ARIA Grid pattern; the table keeps
+native table semantics, there is no `role="grid"`).
+
+- **Two tab stops.** The header row and the body's active row. Every control in the header and in the body rows' own
+  cells, built in or a consumer's, is `tabindex="-1"` and marked
+  `data-table-control`. `useTableTabStops` keeps this with one MutationObserver on the `<table>`; the built-in controls
+  render that state themselves, so the first paint has no extra stops. A control someone made `tabIndex={-1}` without the
+  marker (the locked select checkbox) is not a control: the arrow keys pass it.
+- **The rows the keys move through** are, in visual (DOM) order, the table's own rows (`TableRow`, marked
+  `data-table-row`) and the rows of a StyledTable nested in a sub-row (`renderSubRows`), recursively. TanStack sub-rows
+  (`getSubRows`) are ordinary rows. The order is the DOM's, so a `hideFooter` table with more rows than the page size is
+  walked to its last row. The keys do not use the row API: `row.focusNextRow` and `row.focusPrevRow` keep their meaning (next or previous from the table's focused row).
+- **One owner.** The outermost StyledTable handles every navigation key (React's `onKeyDown` on its `<table>`, which runs
+  after the controls' own handlers, so `defaultPrevented` still means "the control took it") and owns both tab stops. A
+  StyledTable nested in a sub-row gives up its own: its rows join the outermost body's single stop, and its header has none.
+  Nesting is decided once, from the DOM, in `useTableTabStops`: only the owner gets the `onKeyDown` and `onContextMenu`
+  handlers (React context would not do: a table in a dialog opened from a cell is a React descendant, yet owns itself).
+  A nested `TableRow` still renders its own `tabIndex` from its own state; the outermost table corrects it in the same
+  task, before paint, with idempotent writes, so the observer settles (a test records no `tabindex` write once it has).
+  `TableRow` keeps only Enter and Space on the row itself: Enter is its own table's `onRowClick`, Space selects or expands
+  it.
+- **Body row.** Right Arrow from the row goes to its first control, then to the next one (no wrap); Left Arrow goes back,
+  and from the first control to the row. Up/Down move to the next/previous row from the row or any control in it, Home/End
+  to the first/last row; through nested rows alike. Enter on a row opens it; on a control it activates the control. **Space on a row** (AC 4, as the user defined it, 2026-11-16): with a select column it
+  ticks or unticks the row's checkbox (a locked row: nothing); with none, it expands or collapses the row, as its chevron
+  does; otherwise it does nothing and leaves the key to the browser. Space on a
+  control is the control's, once: it toggles the focused checkbox or chevron. The arrow keys never expand or collapse a
+  row (AC 5, amended: Space on a row with no checkbox does). A click on a select checkbox focuses it, as a click on the ⋮
+  does (the browser's own mousedown focus, so no focus frame), so Space then toggles it back. Tab leaves the outermost table from any row or control; Shift+Tab goes to
+  the outermost header row, or out backwards when the header has no stop. A focus by the mouse, nested or not, moves the body's
+  stop to that row.
+- **Wide tables.** Above 20 centre columns they are virtualised, and only a window of them is in the DOM. Left/Right, in a
+  row or the header, still go to the next control in visual order (fixed-left, centre 0…N-1, fixed-right and actions):
+  when it sits beyond columns not rendered yet, the table scrolls the nearest of them in (the virtualizer's
+  `scrollToIndex`), waits for it to render, and looks again, until it finds a control or none is left in that direction.
+  The key is prevented at once and the reveal is asynchronous; a newer key press or a focus elsewhere stops it, and it
+  is capped at the number of columns. If the origin unmounted and nothing was found, the focus goes back to the origin's
+  column. The header's Home and End count the unrendered columns too. Cells carry `data-column-index` (centre) or
+  `data-column-side` (fixed-right and actions); the virtualizer is registered per `<table>`.
+- **The context-menu key, or Shift+F10,** on a row or a control in it opens that row's ⋮ menu with the focus on its first
+  item (a click with no pointer press count, as Enter on the ⋮ makes). Two paths lead there, alone or both: the keydown,
+  and the `contextmenu` event a keyboard starts — Windows sends it on the Menu key's keyup and for Shift+F10, whatever the
+  keydown did. "A keyboard started it" is a `PointerEvent` with an empty `pointerType` (Chromium 125+), else a `MouseEvent`
+  without the right button; a mouse right-click is never taken. The action is idempotent (an open menu is left as it is),
+  so one press opens one menu, and the keyboard's `contextmenu` inside the open ⋮ menu is prevented too, so no browser
+  menu opens over ours. A disabled ⋮ only takes the focus and shows its reason; a row without a ⋮ leaves the key and the
+  event to the browser. **Proved in this test browser (Chromium, macOS) for the keys and for a simulated Windows
+  `contextmenu`; not run on Windows.**
+- **Keys left to a control.** Arrow keys, Home and End stay with a focused control that uses them: a text-like input, a
+  textarea, a select, contenteditable, a combobox, slider, spinbutton, listbox, tablist, menu or grid, and a popup button
+  whose popup is open (`aria-haspopup` with `aria-expanded="true"`, the open ⋮, whose ArrowDown moves into its menu). A
+  disclosure's `aria-expanded` alone (the expanded chevron) does not count: the arrows move on from it. A closed
+  select-only combobox (a button with `role="combobox"`, StyledSelect) keeps Up/Down/Home/End, which open it, but not
+  Left/Right, which it has no use for: they move along the row, as from any control in a cell. A
+  key a control already handled (`defaultPrevented`), or one from a portalled menu (React bubbles it to the table, the DOM
+  does not), is left alone.
+- **Header (AC 9): it works like a row** (the user's decision, 2026-11-16). The header row itself is its one tab stop; its
+  controls never are, and nothing remembers which one was used last. Right from the header row goes to its first control,
+  then on (no wrap); Left goes back, and from the first control to the header row; Left on the row does nothing. Home/End
+  jump to the first/last control. Up and Down do nothing: the header is not linked to the body. Tab from the header row or
+  any header control enters the body on the active row (with no rows, out of the table forwards); Shift+Tab from either
+  leaves the table backwards, explicitly (the browser's own Shift+Tab from a control would land on the header row). Enter
+  and Space still sort, select all, or open the pin; on the header row they do nothing. The header and the body rows share
+  one Left/Right path, the wide-table reveal included. A hidden header (`hideHeader`), or one with no control, has no tab
+  stop at all, a consumer's control in it included: this replaces N's rule that the consumer gives such a control
+  `tabIndex={-1}`. The internal `meta.hideHeader` is gone; nothing needs it.
+- **A dialog or popover inside a row or the header ends the table** (`dialog`, `[role="dialog"]`,
+  `[role="alertdialog"]`, `[popover]`). `StyledDialog` is a native `<dialog>` rendered in place, so a cell that opens one
+  puts it inside the row's DOM: its controls are not the row's (they keep their own tab stops), its keys are not the
+  table's (Tab and the arrows stay the dialog's), and a StyledTable in it owns its own two tab stops. A whole table inside
+  a dialog is not affected: that dialog is not inside it.
+- **The ⋮** is reached with the arrow keys in its row. An `aria-disabled` ⋮ stays focusable and gives its reason
+  (DIS-2, DIS-3, unchanged). Tab in its open menu leaves the table, as Tab from the row does. The reason opens when the ⋮
+  takes the keyboard focus (the arrows, Shift+F10, the context-menu key) and stays while it has the focus (WCAG 1.4.13);
+  Escape closes it with the focus kept on the ⋮, and moving the focus on closes it. It used to close at once: moving to the
+  ⋮ scrolled the table a pixel sideways (its fixed-right cell sticks at `right: -1px`), and the reason closes on a scroll;
+  a control in a fixed cell no longer scrolls the table sideways (below). A select checkbox's tooltip (`getRowSelectionTooltip`) wraps the checkbox itself, the
+  element that takes the focus, so it opens on keyboard focus too (a locked checkbox is not focusable: its reason is
+  on hover).
+- **Focus visible and not obscured (2.4.7, 2.4.11; AC 11).** One rule for the whole table (the user's feedback,
+  2026-11-16): every focus indicator is **3px wide**, and a border of the framed element is part of those 3px on its side —
+  it takes the focus colour and 2px go inside — so nothing grey shows next to the focus. No indicator shifts the layout.
+  - A focused row frames its own cells: a body row, nested or not, and the header row alike, all four sides on a row of one
+    cell. The header cells' 1px top and bottom borders become part of the frame; a body row's line is a background layer
+    inside the cell, which the frame covers.
+  - A header control (a sort header, the pin, a consumer's control) frames its header cell 3px on every side, the same
+    way, with no ring of its own and no header-wide frame (the user's decision, 2026-11-16, dropped the frame `:has()`
+    drew around the whole header). A sort header keeps its sort-preview glyph; the pin keeps its changed-layout dot.
+  - The expand chevron frames its body cell 3px on every side. The `:has()` that does it follows the cell's own content,
+    so a chevron in a table nested in a sub-row frames its own cell, never the sub-row's.
+  - The select checkboxes (body and header select-all) show the base-ui checkbox's frame around their 16px box: a 3px
+    ring, 26px outer, with a 2px white gap (Figma Focused 11460-105640). Base-ui and the table share it
+    (`styles/_checkbox-focus.scss`); base-ui's compiled CSS is byte-identical.
+  - The ⋮ keeps its own ring (the `focus-ring('inset')` mixin: its 1px border recoloured, 2px inside).
+  - Forced colours: the row and cell frames become a 3px `CanvasText` outline inside; the checkbox frame takes
+    `CanvasText` and `Canvas`, as base-ui does.
+
+  A row or control reached with the keys is scrolled just clear of the sticky header, the sticky horizontal scrollbar
+  and footer, and the fixed-left and fixed-right columns. A control scrolls its *cell* into view, not itself: a cell
+  clips what overflows it, and scrolling the control scrolled the cell's own content (the select checkbox moved 4px
+  left and stayed there). A control in a fixed (sticky) cell scrolls its *row* instead: the cell is always in view
+  sideways, and scrolling it moved the table a pixel for the ⋮; a row, as wide as the table, never scrolls sideways under
+  `nearest`. The bottom margin used to look only at the table's own wrapper, which has no sticky sibling, so it was
+  always 0.
+
+Known gaps. While a reveal scrolls a wide table, the focused control may leave the DOM before the next control renders;
+the focus then rests on the page for those frames, and a key pressed in that moment does not reach the table. A StyledTable
+nested in a sub-row with a *visible* header: its header controls are not reached by the keys, and a consumer's control in
+its header (in a hidden one too) keeps its own tab stop; its built-in ones render `tabIndex={-1}` (no app does this: all
+hide the nested header, with no controls of their own in it). A consumer's own plain `<table>` in a sub-row is not
+walked. A text field in a row keeps every arrow key, so Tab, not an arrow, leaves it.
+
+Covered by `StyledTable.gridKeyboard.interaction.test.tsx` (AC 1 to AC 11, named by number),
+`StyledTable.focusLook.interaction.test.tsx` (the AC 11 focus look: 3px per side, no grey border, the checkbox frame,
+no layout shift, forced colours),
+`StyledTable.subRows.keyboard.interaction.test.tsx` (nested tables in sub-rows, one tab stop, settling, DOM order,
+`getSubRows`), `StyledTable.rowSpace.interaction.test.tsx` (Space on a row, a click on a checkbox),
+`StyledTable.focusTooltip.interaction.test.tsx` (the reasons on keyboard focus, no sideways scroll for a fixed cell),
+`StyledTable.wideKeyboard.interaction.test.tsx` (wide tables), `StyledTable.rowActionsKey.interaction.test.tsx` (the
+context-menu key), the rewritten K-01 to K-22 in `TableHeader.keyboard.interaction.test.tsx` (K-11 with K-03 and K-04),
+ST-10, ST-11a and ST-11c / K-12 in `StyledTable.header.interaction.test.tsx`,
+K-07 in `StyledTable.resetColumns.interaction.test.tsx`, and `RowActionMenu.interaction.test.tsx`. The Storybook stories
+`Table/Keyboard reach` (`KeyboardReach`, `HiddenHeader`, `RowControls`, `SubRows`, `WideTable`, `RowMenus`) let a person
+try it.
 
 H was retired as a false escalation: the popup indicator is intentionally out of the tab order; the focused combobox opens the list with Enter, ArrowDown or ArrowUp.
 

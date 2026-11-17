@@ -711,3 +711,208 @@ describe('migrateLegacyTableSettings: keys the app named itself (rawEntries)', (
         expect(calls.remove).not.toHaveBeenCalled()
     })
 })
+
+describe('migrateLegacyTableSettings: it returns the number of entries it copied (a revision for the app)', () => {
+    const TO = 'SubRowsColumnOrder'
+    const FROM = `${TO}-row1`
+
+    it('C-01: every entry copied is counted, and a second call copies nothing', () => {
+        seed(OLD)
+
+        expect(migrateLegacyTableSettings({ newKey: NEW, oldKeys: [OLD] })).toBe(TABLE_SETTINGS_SUFFIXES.length)
+        expect(migrateLegacyTableSettings({ newKey: NEW, oldKeys: [OLD] })).toBe(0)
+    })
+
+    it('C-02: nothing to copy, no scope and no new key are 0', () => {
+        expect(migrateLegacyTableSettings({ newKey: NEW, oldKeys: [OLD] })).toBe(0)
+        expect(migrateLegacyTableSettings({ newKey: NEW, oldKeys: undefined })).toBe(0)
+        expect(migrateLegacyTableSettings({ newKey: undefined, oldKeys: [OLD] })).toBe(0)
+        expect(migrateLegacyTableSettings({ newKey: NEW, rawEntries: [] })).toBe(0)
+    })
+
+    it('C-03: an entry the new key already has is removed from the old key but not counted: only copies are', () => {
+        seed(OLD)
+        data.set(`${NEW}:sorting`, 'the user chose this')
+        data.set(`${NEW}:page-size`, '25')
+
+        expect(migrateLegacyTableSettings({ newKey: NEW, oldKeys: [OLD] })).toBe(TABLE_SETTINGS_SUFFIXES.length - 2)
+        expect(entriesOf(OLD)).toEqual([])
+    })
+
+    it('C-04: an entry that is only removed (the new key had them all) is 0', () => {
+        seed(OLD)
+        seed(NEW)
+
+        expect(migrateLegacyTableSettings({ newKey: NEW, oldKeys: [OLD] })).toBe(0)
+        expect(entriesOf(OLD)).toEqual([])
+    })
+
+    it('C-05: a copy that storage refused is not counted, and the others are', () => {
+        seed(OLD)
+
+        const realSet = localStorage.setItem.bind(localStorage)
+
+        vi.spyOn(localStorage, 'setItem').mockImplementation((key: string, value: string) => {
+            if (key.endsWith(':page-size')) throw new DOMException('full', 'QuotaExceededError')
+
+            realSet(key, value)
+        })
+
+        expect(migrateLegacyTableSettings({ newKey: NEW, oldKeys: [OLD] })).toBe(TABLE_SETTINGS_SUFFIXES.length - 1)
+    })
+
+    it('C-06: raw pairs are counted, with the entries of newKey, and a pair whose target exists is not', () => {
+        seed(OLD, [':sorting', ':page-size'])
+        data.set(FROM, 'this record')
+        data.set('VisibilityColumns-r1', 'visibility')
+        data.set('VisibilityColumns', 'the user\'s own')
+
+        expect(
+            migrateLegacyTableSettings({
+                newKey: NEW,
+                oldKeys: [OLD],
+                rawEntries: [
+                    { from: FROM, to: TO },
+                    { from: 'VisibilityColumns-r1', to: 'VisibilityColumns' },
+                ],
+            }),
+        ).toBe(2 + 1)
+    })
+
+    it('C-07: a matcher\'s removals are not copies', () => {
+        seed(OTHER_PATIENT)
+
+        expect(
+            migrateLegacyTableSettings({
+                newKey: NEW,
+                oldKeys: [OLD],
+                matchOldKey: (oldKey) => /^Docs_c1_u1_ctx_[^_:]+$/.test(oldKey),
+            }),
+        ).toBe(0)
+        expect(entriesOf(OTHER_PATIENT)).toEqual([])
+    })
+})
+
+describe('migrateLegacyTableSettings: defaultPageSize repairs a default the library wrote on mount (3.138.2, 3.139.0)', () => {
+    /** A browser that ran 3.138.2 or 3.139.0 already holds the table's default under the new key; the old key holds the user's size. */
+    const setPageSizes = (current: string | undefined, old: string | undefined): void => {
+        if (current !== undefined) data.set(`${NEW}:page-size`, current)
+        if (old !== undefined) data.set(`${OLD}:page-size`, old)
+    }
+    const migrate = (defaultPageSize: number | undefined): number =>
+        migrateLegacyTableSettings({ newKey: NEW, oldKeys: [OLD], defaultPageSize })
+
+    it('D-01 / DPS1, DPS2: a new page size equal to the default and an old one that differs: the old one wins, is counted as a copy, and is removed', () => {
+        setPageSizes('50', '100')
+
+        expect(migrate(50)).toBe(1)
+        expect(data.get(`${NEW}:page-size`)).toBe('100')
+        expect(data.has(`${OLD}:page-size`)).toBe(false)
+    })
+
+    it('D-02: a new page size that is not the default is the user\'s: it is kept, nothing is counted, the old one is removed', () => {
+        setPageSizes('25', '100')
+
+        expect(migrate(50)).toBe(0)
+        expect(data.get(`${NEW}:page-size`)).toBe('25')
+        expect(data.has(`${OLD}:page-size`)).toBe(false)
+    })
+
+    it('D-03: without defaultPageSize nothing changes: the new entry is kept, whatever it is', () => {
+        setPageSizes('50', '100')
+
+        expect(migrate(undefined)).toBe(0)
+        expect(data.get(`${NEW}:page-size`)).toBe('50')
+        expect(data.has(`${OLD}:page-size`)).toBe(false)
+    })
+
+    it('D-04: with no new entry it is copied as always, and counted, with or without the option', () => {
+        setPageSizes(undefined, '100')
+
+        expect(migrate(50)).toBe(1)
+        expect(data.get(`${NEW}:page-size`)).toBe('100')
+    })
+
+    it('D-05 / DPS4: an old page size equal to the default replaces nothing: it is removed and not counted', () => {
+        setPageSizes('50', '50')
+
+        expect(migrate(50)).toBe(0)
+        expect(data.get(`${NEW}:page-size`)).toBe('50')
+        expect(data.has(`${OLD}:page-size`)).toBe(false)
+    })
+
+    it('D-06 / DPS3: an old entry that is not a page size never replaces the default', () => {
+        for (const old of ['abc', '0', '-5', '1.5', '', '{}', 'null', '"100"']) {
+            data.clear()
+            setPageSizes('50', old)
+
+            expect(migrate(50), old).toBe(0)
+            expect(data.get(`${NEW}:page-size`), old).toBe('50')
+        }
+    })
+
+    it('D-07: a defaultPageSize that is not a page size is ignored', () => {
+        for (const bad of [Number.NaN, 0, -1, 25.5, Number.POSITIVE_INFINITY]) {
+            data.clear()
+            setPageSizes('50', '100')
+
+            expect(migrateLegacyTableSettings({ newKey: NEW, oldKeys: [OLD], defaultPageSize: bad }), String(bad)).toBe(0)
+            expect(data.get(`${NEW}:page-size`), String(bad)).toBe('50')
+        }
+    })
+
+    it('D-08 / DPS6: it applies to the page size only: another entry the new key has is never overwritten, even a number that equals the default', () => {
+        for (const suffix of [':sorting', ':column-sizing', ':column-order', ':column-visibility']) data.set(`${NEW}${suffix}`, '50')
+        for (const suffix of [':sorting', ':column-sizing', ':column-order', ':column-visibility']) data.set(`${OLD}${suffix}`, '100')
+
+        expect(migrate(50)).toBe(0)
+        for (const suffix of [':sorting', ':column-sizing', ':column-order', ':column-visibility']) {
+            expect(data.get(`${NEW}${suffix}`), suffix).toBe('50')
+        }
+    })
+
+    it('D-09: storage that refuses the replacement keeps the library default and the old entry, counts nothing, and the next call finishes the job', () => {
+        setPageSizes('50', '100')
+
+        const set = vi.spyOn(localStorage, 'setItem').mockImplementation(() => {
+            throw new DOMException('full', 'QuotaExceededError')
+        })
+
+        expect(migrate(50)).toBe(0)
+        expect(data.get(`${NEW}:page-size`)).toBe('50')
+        expect(data.get(`${OLD}:page-size`)).toBe('100')
+
+        set.mockRestore()
+
+        expect(migrate(50)).toBe(1)
+        expect(data.get(`${NEW}:page-size`)).toBe('100')
+        expect(data.has(`${OLD}:page-size`)).toBe(false)
+    })
+
+    it('D-10: with several old keys the first that holds a page size is the one that replaces the default', () => {
+        data.set(`${NEW}:page-size`, '50')
+        data.set('Docs_c1_u1_ctx_a:page-size', '100')
+        data.set('Docs_c1_u1_ctx_b:page-size', '10')
+
+        expect(migrateLegacyTableSettings({ newKey: NEW, oldKeys: ['Docs_c1_u1_ctx_a', 'Docs_c1_u1_ctx_b'], defaultPageSize: 50 })).toBe(1)
+        expect(data.get(`${NEW}:page-size`)).toBe('100')
+        expect(data.has('Docs_c1_u1_ctx_b:page-size')).toBe(false)
+    })
+
+    it('D-11: a new entry that is not a page size is not the default: it is kept', () => {
+        setPageSizes('abc', '100')
+
+        expect(migrate(50)).toBe(0)
+        expect(data.get(`${NEW}:page-size`)).toBe('abc')
+    })
+
+    it('D-12: the other entries are copied as always alongside, and counted with the replaced page size', () => {
+        setPageSizes('50', '100')
+        data.set(`${OLD}:column-sizing`, JSON.stringify({ name: 321 }))
+
+        expect(migrate(50)).toBe(2)
+        expect(data.get(`${NEW}:column-sizing`)).toBe(JSON.stringify({ name: 321 }))
+        expect(data.get(`${NEW}:page-size`)).toBe('100')
+    })
+})
+

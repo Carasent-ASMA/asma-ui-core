@@ -623,9 +623,12 @@ export const LockedRows: Story = {
             getComputedStyle(box('free')).borderColor,
         )
 
-        // Free to pick: untouched by any of this.
+        // Free to pick: untouched by any of this. A control of its row, reached with the arrow keys (ASMA-8875); the
+        // locked ones are not controls at all.
         await expect(control('free')).toHaveAttribute('aria-disabled', 'false')
-        await expect(control('free')).toHaveAttribute('tabindex', '0')
+        await expect(control('free')).toHaveAttribute('tabindex', '-1')
+        await expect(control('free')).toHaveAttribute('data-table-control')
+        await expect(control('attached')).not.toHaveAttribute('data-table-control')
     },
 }
 

@@ -20,7 +20,7 @@ import { OrderColumnsFeature } from 'src/table/custom-features/order-columns/Ord
 import { usePersistColumnOrder } from '../custom-features/order-columns/usePersistColumnOrder'
 import { usePersistedColumnOrder } from 'src/table/custom-features/order-columns/usePersistedColumnOrder'
 
-import { getPersistedPageSizeKey, usePersistedPageSize } from './usePersistedPageSize'
+import { DEFAULT_TABLE_PAGE_SIZE, getPersistedPageSizeKey, usePersistedPageSize } from './usePersistedPageSize'
 import {
     columnSizingSignature,
     getColumnSizingStorageKey,
@@ -145,7 +145,7 @@ export const useStyledTable = <
         [sortingStorageKey],
     )
     const persistedPageSize = usePersistedPageSize(uniqueKey)
-    const resolvedPageSize = persistedPageSize ?? pageSize ?? 50
+    const resolvedPageSize = persistedPageSize ?? pageSize ?? DEFAULT_TABLE_PAGE_SIZE
 
     // The default comparison (ASMA-8597, P2f). It reads the direction of the column it compares from the table that sorts,
     // through this ref, which is filled right after `useReactTable` below: not the app's optional `tableInstanceRef`, and
@@ -172,7 +172,7 @@ export const useStyledTable = <
         _features: [ExpandedRowsFeature, FocusedRowsFeature, OrderColumnsFeature, RowSelectionTooltipFeature],
         columns: sizedColumns,
         data,
-        meta: { locale: locale ?? 'en', hideHeader: Boolean(rest.hideHeader) },
+        meta: { locale: locale ?? 'en' },
         initialState: {
             pagination: { pageIndex: 0, pageSize: resolvedPageSize },
             columnVisibility: {
@@ -230,7 +230,11 @@ export const useStyledTable = <
         tableInstanceRef.current = table
     }
 
-    usePersistColumnOrder(table, layoutOptedIn ? undefined : persistColumnOrderKey)
+    usePersistColumnOrder(table, layoutOptedIn ? undefined : persistColumnOrderKey, {
+        saved: columnOrder,
+        defaultOrder: initialState?.columnOrder,
+        controlled: rest.state?.columnOrder !== undefined,
+    })
 
     // Brings the state in step with new columns and changed defaults before anything is saved (ASMA-8695).
     const reconcilingLayout = useColumnLayoutReconcile(table, {
@@ -339,8 +343,9 @@ export const useStyledTable = <
         if (hydratedStorageKeyRef.current !== storageKey) {
             if (pageSizeState !== resolvedPageSize) return
 
-            // Loaded: the saved size, or the table's own when none is saved. Mounting and loading a key write nothing; only
-            // a change after that does (ASMA-8698).
+            // Loaded: the saved size, or the table's own when none is saved. Mounting and loading a key write nothing; only a
+            // change after that does (ASMA-8698). A table opened before its old entries were migrated would otherwise save the
+            // default under the new key, and the migration, which never overwrites, would keep that and drop the user's size.
             hydratedStorageKeyRef.current = storageKey
             lastPageSizeRef.current = pageSizeState
 

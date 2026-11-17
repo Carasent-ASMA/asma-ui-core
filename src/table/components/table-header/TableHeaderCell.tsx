@@ -25,6 +25,7 @@ export function TableHeaderCell<
     left,
     right,
     tableWidth,
+    columnIndex,
 }: {
     styledTableProps: StyledTableProps<TData, TCustomData>
     header: Header<TData, unknown>
@@ -32,6 +33,8 @@ export function TableHeaderCell<
     left: number
     right?: number
     tableWidth: number | null
+    /** A centre header's index among the centre columns (ASMA-8875: the keys reveal the ones not rendered). */
+    columnIndex?: number
 }): JSX.Element {
     const { hideHeader = false, enableResizing = false, actions, customActionsNode } = styledTableProps
     const { isResizing, enableResizingFlag, disableResizingFlag } = useRootContext()
@@ -101,9 +104,11 @@ export function TableHeaderCell<
                 header.column.columnDef.className,
             )}
             role={canSort ? 'button' : undefined}
-            // A hidden header keeps its names and `aria-sort` in the accessibility tree, but its sort control is
-            // not a tab stop: there would be nothing to see where the focus is (ASMA-8702).
-            tabIndex={canSort && !hideHeader ? 0 : undefined}
+            // A header control (ASMA-8875): never a tab stop; the header row is (`useTableTabStops`), and the arrow keys
+            // reach it. A hidden header has no stop at all, yet keeps its names and `aria-sort` in the accessibility tree
+            // (ASMA-8702).
+            tabIndex={canSort ? -1 : undefined}
+            data-table-control={canSort ? '' : undefined}
             onClick={(e) => {
                 const sortingHandler = header.column.getToggleSortingHandler()
                 if (!isResizing && sortingHandler) {
@@ -161,6 +166,8 @@ export function TableHeaderCell<
             key={header.id}
             colSpan={header.colSpan}
             aria-sort={ariaSort}
+            data-column-index={columnIndex}
+            data-column-side={isFixedRight || isActionsColumn ? 'right' : undefined}
             className={clsx(
                 style['t-cell'],
                 !INTERNAL_COLUMN_IDS.includes(header.column.id) && header.column.getSize() > COMPACT_COLUMN_MAX_WIDTH && style['data-cell'],

@@ -30,8 +30,11 @@ import { StyledDialogTitleContext } from './dialogTitleContext'
 import { useDialogHeaderPinning } from './useDialogHeaderPinning'
 import {
     DIALOG_HEADER_ACTIONS_ROW_CLASSES,
+    DIALOG_HEADER_BUTTONS_CLASSES,
     DIALOG_HEADER_CLASSES,
+    DIALOG_HEADER_LABEL_CLASSES,
     DIALOG_HEADER_ROW_TITLE_BOX_CLASSES,
+    DIALOG_HEADER_ROW_TITLE_BOX_MEDIUM_CLASSES,
     DIALOG_HEADER_TITLE_ROW_CLASSES,
     DIALOG_TITLE_CLASSES,
     dialogContentFlowClasses,
@@ -51,9 +54,9 @@ interface DialogPaperProps {
 /**
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#15820-18954
  * Figma "Dialog": white paper radius 8 with the Dialogue-popup shadow (#22213366, 0 4 40) over a
- * bg/modal #626e7eb2 overlay. Header = actions row (optional label, Helper delta-600, + close button)
+ * bg/modal #626e7eb2 overlay. Header = actions row (optional label, Helper delta-700, one line, + close button)
  * over the full-width title; without a label the title sits in that row, left of the close button
- * (ASMA-8737: 24/32 Bold, 20/26 Bold below 744 px, delta-800, never truncated). `fullScreen`/mobile
+ * (ASMA-8737: 24/32 SemiBold, 20/28 SemiBold below 744 px, delta-800, never truncated). `fullScreen`/mobile
  * drops the radius and fills the viewport.
  */
 export interface IStyledDialogProps {
@@ -94,9 +97,13 @@ export interface IStyledDialogProps {
     onCloseText?: ReactNode
     /** @figmaProp none — behavioral */
     showCloseIcon?: boolean
-    /** @figmaProp header Label (Helper 14, delta-600) */
+    /** Close button size: `small` 32px (default) or `medium` 40px with a 16px label and 24px icon. */
+    closeButtonSize?: 'small' | 'medium'
+    /** On a phone, Close shows only its icon; the `onCloseText` label stays its accessible name. */
+    hideCloseLabelOnMobile?: boolean
+    /** @figmaProp header Label (Helper 14/20, delta-700, one line with an ellipsis) */
     dialogLabel?: ReactNode
-    /** @figmaProp header Title (24/32 Bold, 20/26 Bold on mobile, delta-800), on its own full-width row */
+    /** @figmaProp header Title (24/32 SemiBold, 20/28 SemiBold on mobile, delta-800), on its own full-width row */
     dialogTitle?: ReactNode
     dialogHeaderNode?: ReactNode
     /**
@@ -150,6 +157,8 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     locale = 'en',
     onCloseText,
     showCloseIcon = true,
+    closeButtonSize = 'small',
+    hideCloseLabelOnMobile = false,
     dialogLabel,
     dialogTitle,
     dialogHeaderNode,
@@ -217,6 +226,10 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     }, [open])
     const prevOpenRef = useRef(open)
     const isFullScreen = fullScreen ?? isMobile
+    const closeIconSize = closeButtonSize === 'medium' ? 24 : 20
+    const closeIconOnly = hideCloseLabelOnMobile && isMobile
+    const closeIcon = <CloseIcon width={closeIconSize} height={closeIconSize} />
+    const closeLabel = typeof onCloseText === 'string' ? onCloseText : 'Close'
     // While a button inside runs an action, no dismissal goes through (see DialogBusyContext).
     const { busy, busyReason: busyText, contextValue } = useDialogBusyBoundary(busyReason, locale)
     const fallbackHeadingId = useId()
@@ -527,35 +540,48 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                                 }
                             >
                                 {dialogLabel && (
-                                    <div
-                                        id={labelId}
-                                        className='min-w-0 flex-auto hyphens-auto text-sm font-normal leading-5 text-delta-600 [overflow-wrap:anywhere]'
-                                    >
+                                    <div id={labelId} className={DIALOG_HEADER_LABEL_CLASSES}>
                                         {dialogLabel}
                                     </div>
                                 )}
-                                {titleInActionsRow && <div className={DIALOG_HEADER_ROW_TITLE_BOX_CLASSES}>{headerTitle}</div>}
+                                {titleInActionsRow && (
+                                    <div
+                                        className={
+                                            closeButtonSize === 'medium' && showCloseIcon
+                                                ? DIALOG_HEADER_ROW_TITLE_BOX_MEDIUM_CLASSES
+                                                : DIALOG_HEADER_ROW_TITLE_BOX_CLASSES
+                                        }
+                                    >
+                                        {headerTitle}
+                                    </div>
+                                )}
                                 {(showCloseIcon || !!dialogHeaderNode) && (
-                                    <div className='ml-auto flex min-h-11 min-w-0 max-w-full shrink-0 items-center justify-end gap-2 max-xs:flex-wrap max-xs:gap-y-2'>
+                                    <div
+                                        className={cn(
+                                            DIALOG_HEADER_BUTTONS_CLASSES,
+                                            'min-w-0 max-w-full shrink-0 justify-end max-xs:flex-wrap max-xs:gap-y-2',
+                                        )}
+                                    >
                                         {dialogHeaderNode}
                                         {showCloseIcon && (
                                         <StyledButton
                                             dataTest={`close-button-${dataTest}`}
-                                            aria-label={!onCloseText ? 'Close' : undefined}
+                                            aria-label={closeIconOnly || !onCloseText ? closeLabel : undefined}
                                             variant='textGray'
-                                            size='small'
-                                            endIcon={<CloseIcon width={20} height={20} />}
+                                            size={closeButtonSize}
+                                            startIcon={closeIconOnly ? closeIcon : undefined}
+                                            endIcon={closeIconOnly ? undefined : closeIcon}
                                             className='max-w-full shrink-0 whitespace-nowrap'
                                             disabled={busy}
                                             disabledReason={busyText}
                                             onClick={(event) => void requestEscapeClose(event)}
                                             style={{
                                                 color: 'var(--colors-delta-800)',
-                                                paddingRight: '6px',
-                                                paddingLeft: '6px',
+                                                ...(closeButtonSize === 'small' &&
+                                                    !closeIconOnly && { paddingRight: '6px', paddingLeft: '6px' }),
                                             }}
                                         >
-                                            {onCloseText}
+                                            {closeIconOnly ? undefined : onCloseText}
                                         </StyledButton>
                                         )}
                                     </div>

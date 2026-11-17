@@ -1,4 +1,5 @@
 @use 'sass:map';
+@use '../../styles/checkbox-focus';
 
 // Figma Checkbox (11360-32062) has one size: a 16x16 box (radius 2) centred in a 40px target, so
 // the 40px hover circle is concentric with it. Both `size` values render that one size.
@@ -255,4 +256,22 @@ $checkbox-sizes: (
 
 .CheckboxWrapper.ReadOnly .Checkbox {
     --cb-indicator-color: var(--colors-delta-600);
+}
+
+// The table's select checkboxes (body row and header select-all) are decorative boxes inside a `role="checkbox"` cell
+// control, which owns the focus. Its keyboard focus shows the base-ui checkbox's frame around the box (Figma Focused
+// 11460-105640, ASMA-8875 AC 11): no frame on the cell, no ring on the control.
+[role='checkbox']:focus-visible .CheckboxWrapper {
+    @include checkbox-focus.frame-vars;
+    @include checkbox-focus.frame;
+
+    .Checkbox {
+        z-index: 2;
+    }
+}
+
+@media (forced-colors: active) {
+    [role='checkbox']:focus-visible .CheckboxWrapper {
+        @include checkbox-focus.frame-forced-colors;
+    }
 }
