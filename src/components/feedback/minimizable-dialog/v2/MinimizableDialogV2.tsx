@@ -18,7 +18,9 @@ import { DialogBusyContext, useDialogBusyBoundary } from 'src/components/feedbac
 import { useDialogHeaderPinning } from 'src/components/feedback/dialog/useDialogHeaderPinning'
 import {
     DIALOG_HEADER_ACTIONS_ROW_CLASSES,
+    DIALOG_HEADER_BUTTONS_CLASSES,
     DIALOG_HEADER_CLASSES,
+    DIALOG_HEADER_LABEL_CLASSES,
     DIALOG_HEADER_ROW_TITLE_BOX_CLASSES,
     DIALOG_HEADER_TITLE_ROW_CLASSES,
     DIALOG_TITLE_CLASSES,
@@ -301,22 +303,24 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                     className={cn(
                         DIALOG_HEADER_CLASSES,
                         // The paper is rounded from 640 px; the white header must not square its corners.
-                        'border-b-[1px] border-delta-200 sm:rounded-t-lg',
+                        'sm:rounded-t-lg',
                         pinned && 'sticky top-0 z-[2]',
                         headerHidden && 'hidden',
                     )}
                 >
                     <div className={label ? DIALOG_HEADER_ACTIONS_ROW_CLASSES : DIALOG_HEADER_TITLE_ROW_CLASSES}>
                         {label && (
-                            <div
-                                id={labelId}
-                                className='min-w-0 flex-auto hyphens-auto text-sm text-delta-700 [overflow-wrap:anywhere]'
-                            >
+                            <div id={labelId} className={DIALOG_HEADER_LABEL_CLASSES}>
                                 {label}
                             </div>
                         )}
                         {!label && <div className={DIALOG_HEADER_ROW_TITLE_BOX_CLASSES}>{titleNode}</div>}
-                        <div className='ml-auto flex min-h-11 items-center gap-x-1 max-xs:flex-wrap max-xs:justify-end max-xs:gap-y-2'>
+                        <div
+                            className={cn(
+                                DIALOG_HEADER_BUTTONS_CLASSES,
+                                'max-xs:flex-wrap max-xs:justify-end max-xs:gap-y-2',
+                            )}
+                        >
                             <DialogBusyContext.Provider value={contextValue}>{actionNode}</DialogBusyContext.Provider>
                             {/* Minimize is offered in fullscreen too. Taking it away there left the
                                 header's learned triad a control short, and a dialog the user had sent
