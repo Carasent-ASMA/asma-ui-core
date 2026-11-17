@@ -16,6 +16,7 @@ import {
     DIALOG_HEADER_ACTIONS_ROW_CLASSES,
     DIALOG_HEADER_BUTTONS_CLASSES,
     DIALOG_HEADER_CLASSES,
+    DIALOG_HEADER_LABEL_CLASSES,
     DIALOG_HEADER_ROW_TITLE_BOX_CLASSES,
     DIALOG_HEADER_TITLE_ROW_CLASSES,
     DIALOG_TITLE_CLASSES,
@@ -315,16 +316,14 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                     hidden={headerHidden}
                     className={cn(
                         DIALOG_HEADER_CLASSES,
-                        'rounded-t-lg border-b-[1px] border-delta-200',
+                        'rounded-t-lg',
                         pinned && 'sticky top-0 z-[2]',
                         headerHidden && 'hidden',
                     )}
                 >
                     <div className={label ? DIALOG_HEADER_ACTIONS_ROW_CLASSES : DIALOG_HEADER_TITLE_ROW_CLASSES}>
                         {label && (
-                            <div className='min-w-0 flex-auto hyphens-auto text-sm text-delta-700 [overflow-wrap:anywhere]'>
-                                {label}
-                            </div>
+                            <div className={DIALOG_HEADER_LABEL_CLASSES}>{label}</div>
                         )}
 
                         {!label && <div className={DIALOG_HEADER_ROW_TITLE_BOX_CLASSES}>{titleNode}</div>}

@@ -7,9 +7,14 @@ import type { CSSProperties } from 'react'
  * and actions share one row. Geometry from Figma `_dialog header` (DS_draft 332:64021): a 32 px actions
  * row, then the title. Below 744 px: 12 px vertical padding, 4 px between the rows, 28 px title lines
  * (88 px for one line). From 744 px: 16 px padding, no gap, 32 px title lines (96 px for one line).
+ * The `border/separator` line is an inset shadow, not a border: Figma draws the stroke inside those
+ * heights, a CSS border would add 1 px.
  */
 export const DIALOG_HEADER_CLASSES =
-    'box-border flex w-full min-w-0 max-w-full shrink-0 flex-col gap-1 bg-white px-4 py-3 min-[744px]:gap-0 min-[744px]:py-4'
+    'box-border flex w-full min-w-0 max-w-full shrink-0 flex-col gap-1 bg-white px-4 py-3 shadow-[inset_0_-1px_0_#d3d8df] min-[744px]:gap-0 min-[744px]:py-4'
+
+/** Figma Helper 14/20 `text-icon/body`, one line with an ellipsis. */
+export const DIALOG_HEADER_LABEL_CLASSES = 'min-w-0 flex-auto truncate text-sm font-normal leading-5 text-delta-700'
 
 /**
  * Wraps the consumer content in the dialog body.

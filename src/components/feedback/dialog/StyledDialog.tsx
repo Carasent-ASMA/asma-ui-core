@@ -32,6 +32,7 @@ import {
     DIALOG_HEADER_ACTIONS_ROW_CLASSES,
     DIALOG_HEADER_BUTTONS_CLASSES,
     DIALOG_HEADER_CLASSES,
+    DIALOG_HEADER_LABEL_CLASSES,
     DIALOG_HEADER_ROW_TITLE_BOX_CLASSES,
     DIALOG_HEADER_TITLE_ROW_CLASSES,
     DIALOG_TITLE_CLASSES,
@@ -52,7 +53,7 @@ interface DialogPaperProps {
 /**
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#15820-18954
  * Figma "Dialog": white paper radius 8 with the Dialogue-popup shadow (#22213366, 0 4 40) over a
- * bg/modal #626e7eb2 overlay. Header = actions row (optional label, Helper delta-600, + close button)
+ * bg/modal #626e7eb2 overlay. Header = actions row (optional label, Helper delta-700, one line, + close button)
  * over the full-width title; without a label the title sits in that row, left of the close button
  * (ASMA-8737: 24/32 SemiBold, 20/28 SemiBold below 744 px, delta-800, never truncated). `fullScreen`/mobile
  * drops the radius and fills the viewport.
@@ -99,7 +100,7 @@ export interface IStyledDialogProps {
     closeButtonSize?: 'small' | 'medium'
     /** On a phone, Close shows only its icon; the `onCloseText` label stays its accessible name. */
     hideCloseLabelOnMobile?: boolean
-    /** @figmaProp header Label (Helper 14, delta-600) */
+    /** @figmaProp header Label (Helper 14/20, delta-700, one line with an ellipsis) */
     dialogLabel?: ReactNode
     /** @figmaProp header Title (24/32 SemiBold, 20/28 SemiBold on mobile, delta-800), on its own full-width row */
     dialogTitle?: ReactNode
@@ -538,10 +539,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                                 }
                             >
                                 {dialogLabel && (
-                                    <div
-                                        id={labelId}
-                                        className='min-w-0 flex-auto hyphens-auto text-sm font-normal leading-5 text-delta-700 [overflow-wrap:anywhere]'
-                                    >
+                                    <div id={labelId} className={DIALOG_HEADER_LABEL_CLASSES}>
                                         {dialogLabel}
                                     </div>
                                 )}

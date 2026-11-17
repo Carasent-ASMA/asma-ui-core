@@ -20,6 +20,7 @@ import {
     DIALOG_HEADER_ACTIONS_ROW_CLASSES,
     DIALOG_HEADER_BUTTONS_CLASSES,
     DIALOG_HEADER_CLASSES,
+    DIALOG_HEADER_LABEL_CLASSES,
     DIALOG_HEADER_ROW_TITLE_BOX_CLASSES,
     DIALOG_HEADER_TITLE_ROW_CLASSES,
     DIALOG_TITLE_CLASSES,
@@ -302,17 +303,14 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
                     className={cn(
                         DIALOG_HEADER_CLASSES,
                         // The paper is rounded from 640 px; the white header must not square its corners.
-                        'border-b-[1px] border-delta-200 sm:rounded-t-lg',
+                        'sm:rounded-t-lg',
                         pinned && 'sticky top-0 z-[2]',
                         headerHidden && 'hidden',
                     )}
                 >
                     <div className={label ? DIALOG_HEADER_ACTIONS_ROW_CLASSES : DIALOG_HEADER_TITLE_ROW_CLASSES}>
                         {label && (
-                            <div
-                                id={labelId}
-                                className='min-w-0 flex-auto hyphens-auto text-sm text-delta-700 [overflow-wrap:anywhere]'
-                            >
+                            <div id={labelId} className={DIALOG_HEADER_LABEL_CLASSES}>
                                 {label}
                             </div>
                         )}

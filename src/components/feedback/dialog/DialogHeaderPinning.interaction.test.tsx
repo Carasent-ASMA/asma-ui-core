@@ -213,22 +213,6 @@ describe('Dialog header pinning (ASMA-8737)', () => {
         await expect(title.getBoundingClientRect().height).toBe(32)
     })
 
-    // Figma `_dialog header` (DS_draft 332:64021): 32 px actions row; 96 px one-line header from 744 px
-    // (16 + 32 + 32 + 16) and 88 px below it (12 + 32 + 4 + 28 + 12).
-    it.each([
-        [1280, 96, 16],
-        [390, 88, 12],
-    ])('matches the Figma header geometry at %i px', async (width, headerHeight, paddingTop) => {
-        await page.viewport(width, 844)
-        mount(<StyledDialog open dataTest='pin' dialogTitle='Share' dialogLabel='Event' onClose={() => undefined} />)
-        await waitFor(() => expect(header()).not.toBeNull())
-        const headerBox = header().getBoundingClientRect()
-        const close = header().querySelector<HTMLElement>('[data-testid="close-button-pin"]')!.getBoundingClientRect()
-        await expect(Math.round(headerBox.height)).toBe(headerHeight)
-        await expect(Math.round(close.height)).toBe(32)
-        await expect(Math.round(close.top - headerBox.top)).toBe(paddingTop)
-    })
-
     // Without a label the title takes the label's place, level with Close; with one it keeps its own row.
     const headerShells: [string, (label?: string) => JSX.Element, string][] = [
         [
@@ -247,6 +231,33 @@ describe('Dialog header pinning (ASMA-8737)', () => {
             'close-button',
         ],
     ]
+
+    // Figma `_dialog header` (DS_draft 332:64021): 32 px actions row; 96 px one-line header from 744 px
+    // (16 + 32 + 32 + 16) and 88 px below it (12 + 32 + 4 + 28 + 12), the separator drawn inside.
+    it.each(
+        headerShells.flatMap(([shell, render, closeId]) =>
+            (
+                [
+                    [1280, 96, 16],
+                    [390, 88, 12],
+                ] as const
+            ).map(([width, height, padding]) => [shell, width, height, padding, render, closeId] as const),
+        ),
+    )('%s at %i px matches the Figma header geometry', async (_shell, width, height, padding, render, closeId) => {
+        await page.viewport(width, 844)
+        mount(render('Event'))
+        await waitFor(() => expect(header()).not.toBeNull())
+        const box = header().getBoundingClientRect()
+        const close = header().querySelector<HTMLElement>(`[data-testid="${closeId}"]`)!.getBoundingClientRect()
+        const label = [...header().querySelectorAll<HTMLElement>('div')].findLast((node) => node.textContent === 'Event')!
+        await expect(Math.round(box.height)).toBe(height)
+        await expect(Math.round(close.height)).toBe(32)
+        await expect(Math.round(close.top - box.top)).toBe(padding)
+        await expect(Math.round(label.getBoundingClientRect().top - box.top)).toBe(padding + 6)
+        await expect(getComputedStyle(label).whiteSpace).toBe('nowrap')
+        await expect(getComputedStyle(header()).boxShadow).toContain('rgb(211, 216, 223) 0px -1px 0px 0px inset')
+    })
+
     it.each(headerShells.flatMap(([shell, render, closeId]) => [390, 1280].map((width) => [shell, width, render, closeId] as const)))(
         '%s at %i px: title beside Close without a label, under it with one',
         async (_shell, width, render, closeId) => {
