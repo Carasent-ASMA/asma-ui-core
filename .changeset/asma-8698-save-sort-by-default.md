@@ -23,11 +23,9 @@ released; then the apps bump to it.
 - A saved sort of a column that is gone or cannot sort is ignored, and the declared default applies; a saved sort for some
   columns keeps the ones that still sort. Corrupt, full or blocked storage is ignored silently. The default comparison
   (empty cells last) sorts a restored sort like any other.
-- **Less work and no write on mount.** A table with a `uniqueKey` no longer writes its page size when it mounts (it did, with
-  the default, on every mount); the page size is saved when the user changes it. A setting that is not saved is no longer
-  serialised on every render: for a table with no key, the ten `JSON.stringify` calls per render are gone, and a table that
-  saves widths and sorting does two. Reads stay once per mount and key, and saving adds no render. Page size, widths, order and
-  visibility behave as before.
+- **Less work per render.** A setting that is not saved is no longer serialised on every render: for a table with no key, the ten `JSON.stringify` calls per render are
+  gone, and a table that saves widths and sorting does two. Reads stay once per mount and key, saving adds no render, and nothing is written on mount (the page size
+  has been saved on change only since 3.140.0). Page size, widths, order and visibility behave as before.
 - The layout reconcile stays correct for a table that is opted in at run time: a `persistColumnLayout` change from `false` to `true` on a mounted table is
   reconciled as it always was (`columnLayoutInputsChanged`), though a table that does not save its layout builds no signature on any render.
 - `TABLE_SETTINGS_SUFFIXES`, the suffixes of the five entries a table saves under its `uniqueKey` (`:sorting`, `:column-sizing`, `:page-size`, `:column-order`,

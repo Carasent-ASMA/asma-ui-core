@@ -90,7 +90,6 @@ const TabbedTable = ({
                 hideFooter
                 initialState={tab.initialState}
                 locale='en'
-                persistSorting
                 tableInstanceRef={tableRef}
                 uniqueKey={tab.uniqueKey}
                 persistColumnOrderKey={tab.orderKey}
@@ -367,7 +366,7 @@ describe('StyledTable tab switch on one mounted table (ASMA-8698)', () => {
         await expect(switched.sorts['Name']).toBe('descending')
     })
 
-    it('T-10: a table that opts out of saving the sort keeps its in-memory sort across a key switch (documents today)', async () => {
+    it('T-10: a table that opts out of saving the sort with persistSorting={false} keeps its in-memory sort across a key switch (documents today)', async () => {
         seedTabs()
         const { switchTo } = mountTabs({ persistSorting: false, initialState: { sorting: DEFAULT_SORT } })
 
@@ -379,8 +378,34 @@ describe('StyledTable tab switch on one mounted table (ASMA-8698)', () => {
         await waitFor(() => expect(headerLabels()).toEqual(['Age', 'Name', 'Role', 'Notes']))
         await settle()
 
-        // Saved sorting is ignored without `persistSorting` (D1), and nothing resets the in-memory one: the app must.
+        // Saved sorting is ignored with `persistSorting={false}`, and nothing resets the in-memory one: the app must.
         await expect(ariaSorts()).toMatchObject({ Age: 'descending', Role: 'none' })
+    })
+
+    it('T-13: with no persistSorting prop (saved by default) each key keeps its own sort: a click is saved under the current key only', async () => {
+        seedTabs()
+        const { switchTo } = mountTabs()
+
+        await expect(ariaSorts()['Name']).toBe('ascending')
+        await userEvent.click(sortButton('Role'))
+        await waitFor(() => expect(stored('tab-a:sorting')).toEqual({ v: 1, sorting: [{ id: 'role', desc: false }] }))
+        await expect(stored('tab-b:sorting')).toEqual({ v: 1, sorting: SORT_B })
+
+        switchTo(TAB_B)
+        await waitFor(() => expect(ariaSorts()).toMatchObject({ Age: 'descending', Role: 'none' }))
+
+        await userEvent.click(sortButton('Name'))
+        await waitFor(() => expect(stored('tab-b:sorting')).toEqual({ v: 1, sorting: [{ id: 'name', desc: false }] }))
+        await expect(stored('tab-a:sorting')).toEqual({ v: 1, sorting: [{ id: 'role', desc: false }] })
+
+        // A tab with nothing saved opens unsorted, and the switch writes nothing under its key.
+        switchTo(TAB_C)
+        await waitFor(() => expect(ariaSorts()).toMatchObject({ Name: 'none', Role: 'none', Age: 'none' }))
+        await settle()
+        await expect(localStorage.getItem('tab-c:sorting')).toBeNull()
+
+        switchTo(TAB_A)
+        await waitFor(() => expect(ariaSorts()).toMatchObject({ Role: 'ascending', Name: 'none' }))
     })
 
     it('T-11: a controlled order is not set by a key change, and nothing is written', async () => {
