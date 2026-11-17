@@ -10,13 +10,12 @@ import type { CSSProperties } from 'react'
  * The `border/separator` line is an inset shadow, not a border: Figma draws the stroke inside those
  * heights, a CSS border would add 1 px.
  *
- * Every responsive value here is scoped to its own range (`max-[743.98px]:` / `min-[744px]:`, no
- * overlap at 744 px), never a bare mobile utility overridden from 744 px: each micro-app ships its own
- * `.py-3` / `.text-xl` / `.leading-7`, and a copy loaded after ui-core's stylesheet would beat the
- * `min-[744px]:` rule.
+ * Phone and desktop values use the `max-dialog` / `dialog` variants (the 744 px split, defined once in
+ * the Tailwind config), never a bare mobile utility overridden from 744 px: each micro-app ships its
+ * own `.py-3` / `.text-xl` / `.leading-7`, and a copy loaded after ui-core's stylesheet would beat it.
  */
 export const DIALOG_HEADER_CLASSES =
-    'box-border flex w-full min-w-0 max-w-full shrink-0 flex-col bg-white px-4 shadow-[inset_0_-1px_0_#d3d8df] max-[743.98px]:gap-1 max-[743.98px]:py-3 min-[744px]:py-4'
+    'box-border flex w-full min-w-0 max-w-full shrink-0 flex-col bg-white px-4 shadow-[inset_0_-1px_0_var(--colors-gray-200)] max-dialog:gap-1 max-dialog:py-3 dialog:py-4'
 
 /** Figma Helper 14/20 `text-icon/body`, one line with an ellipsis. */
 export const DIALOG_HEADER_LABEL_CLASSES = 'min-w-0 flex-auto truncate text-sm font-normal leading-5 text-delta-700'
@@ -74,7 +73,7 @@ export const DIALOG_HEADER_TITLE_ROW_CLASSES = 'flex min-h-8 w-full min-w-0 item
  * The title's box inside that row: takes the free width and centres its first line on the 32 px row
  * (2 px around a 28 px line, none around a 32 px line).
  */
-export const DIALOG_HEADER_ROW_TITLE_BOX_CLASSES = 'min-w-0 flex-auto max-[743.98px]:py-0.5'
+export const DIALOG_HEADER_ROW_TITLE_BOX_CLASSES = 'min-w-0 flex-auto max-dialog:py-0.5'
 
 /** The header buttons group: 8 px between the 32 px buttons, on the 32 px actions row. */
 export const DIALOG_HEADER_BUTTONS_CLASSES = 'ml-auto flex min-h-8 items-center gap-2'
@@ -85,4 +84,4 @@ export const DIALOG_HEADER_BUTTONS_CLASSES = 'ml-auto flex min-h-8 items-center 
  * rather than scrolling sideways (WCAG 1.4.10).
  */
 export const DIALOG_TITLE_CLASSES =
-    'my-0 block min-w-0 whitespace-normal font-semibold text-delta-800 [overflow-wrap:anywhere] hyphens-auto max-[743.98px]:text-xl max-[743.98px]:leading-7 min-[744px]:text-2xl min-[744px]:leading-8'
+    'my-0 block min-w-0 whitespace-normal font-semibold text-delta-800 [overflow-wrap:anywhere] hyphens-auto max-dialog:text-xl max-dialog:leading-7 dialog:text-2xl dialog:leading-8'
