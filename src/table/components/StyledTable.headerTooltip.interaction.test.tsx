@@ -590,7 +590,8 @@ describe('Keyboard focus', () => {
     it('focusing a truncated sortable header with the keyboard shows the tooltip, with no delay', async () => {
         await mountTable({ columns: columnsOf(sizeWithRoom(-40)) })
 
-        await userEvent.tab()
+        // Tab reaches the header row, Right Arrow its first control (ASMA-8875).
+        await userEvent.keyboard('{Tab}{ArrowRight}')
         await expect(document.activeElement).toBe(sortButton(LABEL))
 
         await waitFor(() => expect(tooltip()).not.toBeNull(), { timeout: 400 })
@@ -600,7 +601,8 @@ describe('Keyboard focus', () => {
     it('focusing a header whose label fits shows no tooltip', async () => {
         await mountTable()
 
-        await userEvent.tab()
+        // Tab reaches the header row, Right Arrow its first control (ASMA-8875).
+        await userEvent.keyboard('{Tab}{ArrowRight}')
         await expect(document.activeElement).toBe(sortButton(LABEL))
 
         await expectNoTooltip()
@@ -609,7 +611,7 @@ describe('Keyboard focus', () => {
     it('a label that is cut short only once the slot opens gets its tooltip on keyboard focus too', async () => {
         await mountTable({ columns: columnsOf(sizeWithRoom(8)) })
 
-        await userEvent.tab()
+        await userEvent.keyboard('{Tab}{ArrowRight}')
         await expect(isCutShort(LABEL)).toBe(true)
 
         await waitFor(() => expect(tooltip()).not.toBeNull(), { timeout: 400 })
@@ -639,7 +641,7 @@ describe('The tooltip is dismissible, hoverable and persistent (WCAG 1.4.13)', (
 
     it('Escape closes the one a keyboard user opened, and the header keeps its focus', async () => {
         await mountTable({ columns: columnsOf(sizeWithRoom(-40)) })
-        await userEvent.tab()
+        await userEvent.keyboard('{Tab}{ArrowRight}')
         await waitForTooltip()
 
         await userEvent.keyboard('{Escape}')
@@ -786,9 +788,13 @@ describe('Escape inside a dialog', () => {
     )
     const dialogIsOpen = (): boolean => document.querySelector('dialog')?.hasAttribute('open') ?? false
 
-    /** Tabs from the dialog's first control to the truncated header, with real key presses (keyboard focus is `:focus-visible`). */
+    /**
+     * Tabs from the dialog's first control to the header row, then Right Arrow to the truncated header, with real key presses
+     * (keyboard focus is `:focus-visible`).
+     */
     const tabToHeader = async (): Promise<void> => {
-        for (let presses = 0; presses < 8 && document.activeElement !== sortButton(LABEL); presses += 1) await userEvent.tab()
+        for (let presses = 0; presses < 8 && !document.activeElement?.matches('thead > tr'); presses += 1) await userEvent.tab()
+        await userEvent.keyboard('{ArrowRight}')
         await expect(document.activeElement).toBe(sortButton(LABEL))
     }
 

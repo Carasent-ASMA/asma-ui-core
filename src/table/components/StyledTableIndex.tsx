@@ -21,6 +21,9 @@ import { useElementHeightPx } from 'src/hooks/useElementHeightPx'
 
 import style from './StyledTable.module.scss'
 import { useColumnVirtualizer } from 'src/table/hooks/useColumnVirtualizer'
+import { useTableTabStops } from 'src/table/hooks/useTableTabStops'
+import { handleTableKeyDown } from 'src/table/helpers/tableKeyboard'
+import { handleTableContextMenu } from 'src/table/helpers/rowActionsMenu'
 
 interface RowWithId {
     id: string | number
@@ -185,7 +188,9 @@ export const StyledTable = <TData extends RowWithId, TCustomData = Record<string
     )
     const scrollRef = canShowStickyFooter ? wrapperRef : tableScrollRef
 
-    const { columnWindow } = useColumnVirtualizer({ table, scrollRef, isMobileView })
+    const { columnWindow, columnVirtualizer } = useColumnVirtualizer({ table, scrollRef, isMobileView })
+    // Two tab stops for the whole table, the header's and the active row; the arrow keys reach the rest (ASMA-8875).
+    const [tableTabStopsRef, isKeyboardOwner] = useTableTabStops(columnVirtualizer)
 
     useLayoutEffect(() => {
         const wrapper = wrapperRef.current
@@ -217,7 +222,18 @@ export const StyledTable = <TData extends RowWithId, TCustomData = Record<string
 
     const TableMarkup = (
         <div className={style['table-content']}>
-            <table className={style['styled-table']} style={{ width: table.getTotalSize(), minWidth: '100%' }}>
+            {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- the table hosts the keyboard of the
+                composite (WAI-ARIA Grid, ASMA-8875): its rows and controls are what takes the focus, and their keys bubble
+                here, after the controls' own handlers. The context-menu key's `contextmenu` opens the focused row's ⋮. */}
+            <table
+                ref={tableTabStopsRef}
+                data-styled-table=''
+                className={style['styled-table']}
+                style={{ width: table.getTotalSize(), minWidth: '100%' }}
+                // Only the outermost table takes the keys: a nested one leaves them to it (`useTableTabStops`).
+                onKeyDown={isKeyboardOwner ? handleTableKeyDown : undefined}
+                onContextMenu={isKeyboardOwner ? handleTableContextMenu : undefined}
+            >
                 <TableHeader
                     table={table}
                     styledTableProps={options}

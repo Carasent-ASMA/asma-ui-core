@@ -1,4 +1,5 @@
 @use 'sass:map';
+@use '../../../../styles/checkbox-focus';
 
 // Figma Checkbox (component set 11360-32062) has ONE size: a 40px target holding a 20px icon frame
 // whose visible box is 16x16 (radius 2) at a 2px inset — so the box sits 12px from every edge of
@@ -40,10 +41,7 @@ $checkbox-sizes: (
     background: transparent;
     border: none;
     // Figma Focused (11460-105640): 3px ring, 26px outer, 2px white gap (20px) around the 16px box.
-    --cb-frame-size: 26px;
-    --cb-focus-gap-size: 20px;
-    --cb-frame-color: var(--colors-focus-ring);
-    --cb-frame-radius: 4px;
+    @include checkbox-focus.frame-vars;
 
     &.size-small {
         @include checkbox-dimensions(small);
@@ -101,32 +99,7 @@ $checkbox-sizes: (
     &.Error,
     &:has(input:focus-visible),
     &:has(input[data-focus-visible]) {
-        &::before,
-        &::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-        }
-
-        &::before {
-            width: var(--cb-frame-size);
-            height: var(--cb-frame-size);
-            // Above the opaque hover circle (z-index 0), so a hovered focused/error checkbox keeps its frame.
-            z-index: 1;
-            border-radius: var(--cb-frame-radius);
-            background: var(--cb-frame-color);
-        }
-
-        &::after {
-            width: var(--cb-focus-gap-size);
-            height: var(--cb-focus-gap-size);
-            z-index: 1;
-            border-radius: 1px;
-            background: white;
-        }
+        @include checkbox-focus.frame;
 
         .Checkbox {
             z-index: 2;
@@ -146,15 +119,7 @@ $checkbox-sizes: (
     .CheckboxWrapper.Error,
     .CheckboxWrapper:has(input:focus-visible),
     .CheckboxWrapper:has(input[data-focus-visible]) {
-        forced-color-adjust: none;
-
-        &::before {
-            background: CanvasText;
-        }
-
-        &::after {
-            background: Canvas;
-        }
+        @include checkbox-focus.frame-forced-colors;
     }
 }
 

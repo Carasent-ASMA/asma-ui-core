@@ -1,5 +1,6 @@
 import { useLayoutEffect } from 'react'
 import type { ColumnDef } from '@tanstack/react-table'
+import { expect, userEvent } from './interaction-api'
 
 /** Small table used by the ASMA-8597 persistence tests: three sortable columns and one that cannot sort. */
 export interface Person {
@@ -101,3 +102,37 @@ export const FirstCommit = ({ onCommit }: { onCommit: () => void }): null => {
 /** Calls of a `Storage` method spy whose key matches. */
 export const callsFor = (calls: unknown[][], keyPattern: string | RegExp): unknown[][] =>
     calls.filter(([key]) => (typeof keyPattern === 'string' ? key === keyPattern : keyPattern.test(String(key))))
+
+/*
+ * The keyboard tests of ASMA-8875 (StyledTable as a WAI-ARIA Grid) share these. Each test file names the focus in its own
+ * words (`focusName`), so `press` takes that namer.
+ */
+
+/** A body row by its id: `TableRow` gives every row its row id. */
+export const row = (id: string): HTMLTableRowElement => document.getElementById(id) as HTMLTableRowElement
+
+/** A button by its text (`undefined` at run time when there is none, e.g. in a column not rendered yet). */
+export const button = (name: string): HTMLButtonElement =>
+    [...document.querySelectorAll('button')].find((candidate) => candidate.textContent === name)!
+
+/** An item of the open menu by its text. */
+export const menuItem = (label: string): HTMLElement | undefined =>
+    [...document.querySelectorAll<HTMLElement>('[role="menuitem"]')].find((item) => item.textContent === label)
+
+/** A row's ⋮ (`RowActionMenu`). */
+export const rowActionsTrigger = (id: string): HTMLElement =>
+    row(id).querySelector<HTMLElement>('[data-row-actions-trigger]')!
+
+/** Presses keys (an empty string presses none) and says where the focus is, in the caller's words. */
+export const press = async (keys: string, focusName: () => string): Promise<string> => {
+    if (keys) await userEvent.keyboard(keys)
+
+    return focusName()
+}
+
+/** Tab from the button "Before" into the body, through the header's one stop: the focus ends on the first row, `r-1`. */
+export const enterBody = async (): Promise<void> => {
+    button('Before').focus()
+    await userEvent.keyboard('{Tab}{Tab}')
+    await expect(document.activeElement).toBe(row('r-1'))
+}

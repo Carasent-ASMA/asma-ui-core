@@ -513,8 +513,9 @@ cell, so the fix needs a visual check that added content does not affect layout.
 
 **Still open.** Out of ASMA-8143's scope (cheap markup rules only), so the entries stand. The approach
 above still looks right - `actionColumn.tsx` already does exactly this with `ActionsEmptyHeader` - and it
-would also want the `expand`, `dnd-handle` and `show-full-text` utility columns, which render
-`header: () => null`. It needs the VRT check the note calls for, which is why it was not folded in here.
+would also want the `dnd-handle` and `show-full-text` utility columns, which render `header: () => null`. It
+needs the VRT check the note calls for, which is why it was not folded in here. The `expand` column has had its
+visually-hidden name ("Expand" / "Utvid", `ExpandEmptyHeader`) since ASMA-8875, VRT-checked.
 
 ### `duplicate-id-active` (1 story, `StyledTable > Footer Row Count Boundary`)
 

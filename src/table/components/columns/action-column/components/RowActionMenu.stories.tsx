@@ -34,9 +34,10 @@ const onEdit = fn()
 const reason = 'Imported from Ad Curis – change it there'
 
 /**
- * All of a row's actions disabled: the ⋮ stays in the Tab order with `aria-disabled` (ASMA
- * disabled-states DIS-2, DIS-3). Its reason opens on hover, keyboard focus and tap, is the trigger's
- * accessible description, and closes on Escape and blur; pressing the trigger only shows the reason.
+ * All of a row's actions disabled: the ⋮ stays focusable with `aria-disabled` (ASMA disabled-states
+ * DIS-2, DIS-3); in a table the arrow keys reach it in its row (ASMA-8875). Its reason opens on hover,
+ * keyboard focus and tap, is the trigger's accessible description, and closes on Escape and blur;
+ * pressing the trigger only shows the reason.
  */
 export const DisabledWithReason: Story = {
     args: {
@@ -51,7 +52,9 @@ export const DisabledWithReason: Story = {
         await expect(trigger).toHaveAttribute('aria-disabled', 'true')
         await expect(trigger).not.toBeDisabled()
 
-        await userEvent.tab()
+        // Shown alone here, outside a table: the play focuses the ⋮ as Right Arrow in its row would. It is not a tab
+        // stop (ASMA-8875); `RowActionMenu.interaction.test.tsx` reaches it with the real key in a table.
+        trigger.focus()
         await expect(trigger).toHaveFocus()
         await waitFor(async () => expect(body.getByRole('tooltip')).toHaveTextContent(reason))
         await expect(trigger).toHaveAccessibleDescription(reason)
