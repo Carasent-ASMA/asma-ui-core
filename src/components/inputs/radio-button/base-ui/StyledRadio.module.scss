@@ -19,16 +19,6 @@
     }
 }
 
-@mixin indicator-size($size) {
-    @if $size == 'small' {
-        width: 8px;
-        height: 8px;
-    } @else {
-        width: 10px;
-        height: 10px;
-    }
-}
-
 .RadioWrapper {
     display: flex;
     align-items: center;
@@ -127,47 +117,42 @@
 
 .Radio {
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: block;
+    flex-shrink: 0;
+    overflow: visible;
     border-radius: 50%;
-    border: 2px solid var(--colors-delta-500);
-    background-color: transparent;
-    padding: 0;
-    box-sizing: border-box;
-    transition: border-color 0.3s;
     @include radio-size(medium);
 
     &.size-small {
         @include radio-size(small);
-        border-width: 1.5px;
     }
+}
+
+.Ring {
+    fill: none;
+    stroke: var(--colors-delta-500);
+    transition: stroke 0.3s;
 
     [data-checked] & {
-        border-color: var(--colors-gama-500);
+        stroke: var(--colors-gama-500);
     }
     [data-disabled][data-unchecked] &,
     [data-disabled][data-checked] & {
-        border-color: var(--colors-delta-300);
+        stroke: var(--colors-delta-300);
     }
 }
 
 .Indicator {
-    @include indicator-size(medium);
-    border-radius: 50%;
+    fill: var(--colors-gama-500);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.5s;
 
-    .size-small & {
-        @include indicator-size(small);
-    }
     [data-checked] & {
-        background-color: var(--colors-gama-500);
         opacity: 1;
     }
     [data-disabled][data-checked] & {
-        background-color: var(--colors-delta-300);
+        fill: var(--colors-delta-300);
         opacity: 0.6;
     }
 }
@@ -199,14 +184,14 @@
 .RadioWrapper.ReadOnly {
     cursor: default;
 
-    &[data-unchecked] .Radio {
-        border-color: var(--colors-delta-300);
+    &[data-unchecked] .Ring {
+        stroke: var(--colors-delta-300);
     }
-    &[data-checked] .Radio {
-        border-color: var(--colors-delta-500);
+    &[data-checked] .Ring {
+        stroke: var(--colors-delta-500);
     }
     &[data-checked] .Indicator {
-        background-color: var(--colors-delta-500);
+        fill: var(--colors-delta-500);
     }
 
     &.RadioHover:hover .RadioRippleContainer::after {

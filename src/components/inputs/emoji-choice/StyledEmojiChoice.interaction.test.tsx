@@ -74,7 +74,7 @@ describe('StyledEmojiChoice radio list', () => {
     it('selects an option from a click anywhere on its card', async () => {
         const onChange = fn()
         const { container } = mount(<Fixture onChange={onChange} />)
-        const emoji = cards(container)[0]!.querySelector('[aria-hidden="true"]:not([data-checked]):not([data-unchecked])')!
+        const emoji = cards(container)[0]!.querySelector('[aria-hidden="true"]:not([data-checked]):not([data-unchecked]):not(svg)')!
 
         await userEvent.click(container.querySelector('label:nth-of-type(2) span span:last-child')!)
         await expect(radios(container)[1]).toBeChecked()
@@ -106,7 +106,7 @@ describe('StyledEmojiChoice radio list', () => {
     it('draws the Figma card: 88px emoji in a 100px slot, 16/24 text, at least 44px tall', async () => {
         const { container } = mount(<Fixture />)
         const card = cards(container)[2]!
-        const slot = card.querySelector<HTMLElement>('[aria-hidden="true"]:not([data-checked]):not([data-unchecked])')!.parentElement!
+        const slot = card.querySelector<HTMLElement>('[aria-hidden="true"]:not([data-checked]):not([data-unchecked]):not(svg)')!.parentElement!
         const text = [...card.querySelectorAll<HTMLElement>('span')].find((span) => span.textContent === 'I managed on my own')!
 
         await expect(slot.getBoundingClientRect().width).toBe(100)
@@ -122,7 +122,7 @@ describe('StyledEmojiChoice radio list', () => {
 
     it('keeps the radio and the emoji in the same place in every card, whatever the text length', async () => {
         const { container } = mount(<Fixture />)
-        const slots = cards(container).map((card) => card.querySelector('[aria-hidden="true"]:not([data-checked]):not([data-unchecked])')!.parentElement!)
+        const slots = cards(container).map((card) => card.querySelector('[aria-hidden="true"]:not([data-checked]):not([data-unchecked]):not(svg)')!.parentElement!)
         const lefts = slots.map((slot) => slot.getBoundingClientRect().left - slot.closest('label')!.getBoundingClientRect().left)
 
         await expect(new Set(lefts).size).toBe(1)
@@ -177,7 +177,7 @@ describe('StyledEmojiChoice radio list', () => {
         const [plain, withEmoji] = cards(container)
         const text = [...plain!.querySelectorAll<HTMLElement>('span')].findLast((span) => span.textContent === 'Without an emoji')!
 
-        await expect(plain!.querySelectorAll('[aria-hidden="true"]:not([data-checked]):not([data-unchecked])')).toHaveLength(0)
+        await expect(plain!.querySelectorAll('[aria-hidden="true"]:not([data-checked]):not([data-unchecked]):not(svg)')).toHaveLength(0)
         // The text block follows the 40px radio right after the 8px padding, inside the 1px border.
         await expect(text.getBoundingClientRect().left - plain!.getBoundingClientRect().left).toBe(49)
         await expect(plain!.getBoundingClientRect().height).toBe(withEmoji!.getBoundingClientRect().height)
@@ -197,7 +197,7 @@ describe('StyledEmojiChoice radio list', () => {
         const { container } = mount(<Fixture width={128} />)
         const card = cards(container)[0]!
         const text = [...card.querySelectorAll<HTMLElement>('span')].find((span) => span.textContent?.startsWith('I needed a lot'))!
-        const slot = card.querySelector('[aria-hidden="true"]:not([data-checked]):not([data-unchecked])')!.parentElement!
+        const slot = card.querySelector('[aria-hidden="true"]:not([data-checked]):not([data-unchecked]):not(svg)')!.parentElement!
 
         await expect(text.getBoundingClientRect().top).toBeGreaterThanOrEqual(slot.getBoundingClientRect().bottom)
         await expect(card.scrollWidth).toBeLessThanOrEqual(card.clientWidth)
