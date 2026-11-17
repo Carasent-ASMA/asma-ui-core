@@ -14,4 +14,7 @@ Dropping the per-tab React `key` in an app:
 
 - Pass the per-tab `uniqueKey` and `persistColumnOrderKey`, and no `key`.
 - A table with `persistSorting` takes the new key's saved sort, or `initialState.sorting`. A table without it keeps its in-memory sort across a key change, so the app must reset the sort itself when the tab changes.
-- Keep the `columns` and `initialState` the new tab needs in the same render as the new keys.
+- Column visibility is app state on the legacy path (no `persistColumnLayout`), and ui-core does not switch it. An app hook that reads once at mount, or that writes on a key change, hands the old tab's hidden columns to the new tab and saves them under its key. Make the app's visibility hook key-aware (load the new key's value or the default on a key change, write nothing on the switch), or move the table to `persistColumnLayout`, which saves and loads visibility itself.
+- Other per-tab state is not ui-core's either: selection, expanded rows, the page index and the scroll position stay across a switch. The page size effect resets `pageIndex` only when the size changes, so with `autoResetPageIndex={false}` a tab opens on the previous tab's page. Reset what should start clean in the tab handler.
+- A controlled `state.columnOrder` is not switched by a key change (it only blocks the write): the app switches it itself.
+- Change `columns` and `initialState` in the same render as the new keys.

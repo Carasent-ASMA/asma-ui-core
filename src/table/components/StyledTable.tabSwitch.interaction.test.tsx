@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react'
-import type { SortingState, Table } from '@tanstack/react-table'
+import type { ColumnDef, SortingState, Table } from '@tanstack/react-table'
 import { afterEach, beforeEach, describe, it, vi } from 'vitest'
 import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
@@ -18,9 +18,14 @@ const DEFINITION_ORDER = ['Name', 'Role', 'Age', 'Notes']
 /** The default width of the fixture's sortable 160 px columns: the declared 160 plus 20 px (ASMA-8597, D16). */
 const SORTABLE_160 = 180
 
+type Props = Partial<Omit<StyledTableProps<Person, Record<string, unknown>>, 'footer' | 'hideFooter'>>
+
 interface Tab {
     uniqueKey?: string
     orderKey?: string
+    /** What the tab brings with its keys, in the same render: its own columns and defaults. */
+    columns?: ColumnDef<Person>[]
+    initialState?: Props['initialState']
 }
 
 const TAB_A: Tab = { uniqueKey: 'tab-a', orderKey: 'tab-a-order' }
@@ -33,8 +38,6 @@ const ORDER_B = ['age', 'name', 'role', 'notes']
 const SORT_A: SortingState = [{ id: 'name', desc: false }]
 const SORT_B: SortingState = [{ id: 'age', desc: true }]
 const DEFAULT_SORT: SortingState = [{ id: 'role', desc: false }]
-
-type Props = Partial<Omit<StyledTableProps<Person, Record<string, unknown>>, 'footer' | 'hideFooter'>>
 
 const seed = (tab: Tab, saved: { order?: string[]; sorting?: SortingState; widths?: Record<string, number>; pageSize?: number }): void => {
     if (saved.order) localStorage.setItem(tab.orderKey!, JSON.stringify(saved.order))
@@ -81,10 +84,11 @@ const TabbedTable = ({
     return (
         <>
             <StyledTable<Person>
-                columns={personColumns}
+                columns={tab.columns ?? personColumns}
                 data={people}
                 enableColumnResizing
                 hideFooter
+                initialState={tab.initialState}
                 locale='en'
                 persistSorting
                 tableInstanceRef={tableRef}
@@ -286,6 +290,11 @@ describe('StyledTable tab switch on one mounted table (ASMA-8698)', () => {
         await expect(writes.calls()).toEqual([])
     })
 
+    // A timing guard, not the guarantee. The guarantee is structural: the order loads in a layout effect, and React flushes a
+    // state update from a layout effect before the browser paints. A plain effect is only visible as a flash when React yields
+    // between the commit and its passive effects, so this test makes the commit longer than a time slice (12 ms) and samples
+    // from a microtask. It is a stress check: it depends on the scheduler, and may stop detecting a plain effect on a future
+    // React. If it does, the structural argument above is what to re-check, not this test's timing.
     it('T-08: the old order is never what a commit with the new key shows (loaded in a layout effect, no flash)', async () => {
         seedTabs()
         const frames: Frame[] = []
@@ -304,7 +313,7 @@ describe('StyledTable tab switch on one mounted table (ASMA-8698)', () => {
         switchTo(TAB_B)
         await waitFor(() => expect(headerLabels()).toEqual(['Age', 'Name', 'Role', 'Notes']))
 
-                const forB = frames.filter((frame) => frame.tab === TAB_B)
+        const forB = frames.filter((frame) => frame.tab === TAB_B)
 
         await expect(forB.length).toBeGreaterThan(0)
         for (const frame of forB) await expect(frame.headers).toEqual(['Age', 'Name', 'Role', 'Notes'])
@@ -326,6 +335,36 @@ describe('StyledTable tab switch on one mounted table (ASMA-8698)', () => {
 
         await expect(headerLabels()).toEqual(switched)
         await expect(switched).toEqual(['Notes', 'Age', 'Role', 'Name'])
+    })
+
+    it('T-12: a tab with other columns and defaults, switched in the same render as its keys, shows what a fresh mount of it shows', async () => {
+        const extra: ColumnDef<Person> = { id: 'extra', header: 'Extra', size: 120 }
+        // Saved under the tab's key: an id that is no column now ('gone') next to one only this tab has ('extra').
+        const tabWithExtraColumn: Tab = {
+            ...TAB_B,
+            columns: [...personColumns, extra],
+            initialState: { sorting: [{ id: 'age', desc: false }] },
+        }
+        seed(TAB_A, { order: ORDER_A })
+        seed(TAB_B, { order: ['extra', 'gone', 'age'], sorting: [{ id: 'name', desc: true }] })
+        const { switchTo, view } = mountTabs()
+        const writes = watchStorage()
+
+        await expect(headerLabels()).toEqual(['Role', 'Name', 'Age', 'Notes'])
+        switchTo(tabWithExtraColumn)
+
+        await waitFor(() => expect(headerLabels()).toContain('Extra'))
+        await settle()
+        const switched = { headers: headerLabels(), sorts: ariaSorts() }
+
+        await expect(writes.calls()).toEqual([])
+
+        view.unmount()
+        mountTabs({ initial: tabWithExtraColumn })
+
+        await expect({ headers: headerLabels(), sorts: ariaSorts() }).toEqual(switched)
+        await expect(switched.headers[0]).toBe('Extra')
+        await expect(switched.sorts['Name']).toBe('descending')
     })
 
     it('T-10: a table that opts out of saving the sort keeps its in-memory sort across a key switch (documents today)', async () => {
