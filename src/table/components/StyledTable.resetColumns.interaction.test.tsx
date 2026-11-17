@@ -96,18 +96,12 @@ const widthOf = (label: string): number => Number.parseFloat(headerCell(label).s
 const stored = (key: string): unknown => JSON.parse(localStorage.getItem(key) ?? 'null')
 const pin = (): HTMLElement => document.querySelector<HTMLElement>('button[aria-haspopup="true"]')!
 /**
- * Reaches the pin by real Tab presses from the button before the table (ASMA-8702, K-07). Nothing puts the focus on a
- * header or the pin: the header row is no longer a tab stop, so the sort headers and then the pin come in visual order,
- * and none of the stops is in the body.
+ * Reaches the pin by real key presses from the button before the table (ASMA-8702, K-07): Tab to the header's one stop,
+ * then End, the last header control (ASMA-8875). Nothing puts the focus on a header or the pin.
  */
 const tabToPin = async (): Promise<void> => {
     ;[...document.querySelectorAll('button')].find((candidate) => candidate.textContent === 'Remount table')!.focus()
-
-    for (let presses = 0; presses < 12 && document.activeElement !== pin(); presses += 1) {
-        await userEvent.keyboard('{Tab}')
-        await expect(document.activeElement?.closest('tbody')).toBeNull()
-    }
-
+    await userEvent.keyboard('{Tab}{End}')
     await expect(document.activeElement).toBe(pin())
 }
 const dot = (): HTMLElement | null => document.querySelector<HTMLElement>('[data-testid="column-settings-dot"]')
@@ -318,7 +312,7 @@ describe('Reset columns', () => {
         await expect(table().getColumn('role')!.getIsVisible()).toBe(false)
     })
 
-    it('A-02 / K-07: Tab from before the table reaches the pin (ASMA-8702), Enter opens it, Tab walks the panel to Reset columns without jumping to a body row, and Enter runs it', async () => {
+    it('A-02 / K-07: the keys from before the table reach the pin (ASMA-8702, ASMA-8875), Enter opens it, Tab walks the panel to Reset columns without jumping to a body row, and Enter runs it', async () => {
         const { table } = mountHarness()
 
         await act(() => table().setColumnSizing({ name: 260 }))
@@ -348,7 +342,7 @@ describe('Reset columns', () => {
         await expect(document.activeElement).not.toBe(document.body)
     })
 
-    it('A-02 / K-07: Tab from before the table reaches the pin, Space runs Reset columns too, and Shift+Tab goes back through the panel', async () => {
+    it('A-02 / K-07: the keys from before the table reach the pin, Space runs Reset columns too, and Shift+Tab goes back through the panel', async () => {
         const { table } = mountHarness()
 
         await act(() => table().setColumnSizing({ name: 260 }))

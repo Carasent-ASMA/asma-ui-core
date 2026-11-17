@@ -11,6 +11,11 @@ export interface FocusedRow {
     isFocused: () => boolean
     focusNextRow: () => boolean
     focusPrevRow: () => boolean
+    /**
+     * Makes this row the roving tab stop without moving the focus: a control in it took the focus (ASMA-8875), so Tab
+     * comes back to this row.
+     */
+    takeTabStop: () => void
 }
 
 export interface FocusedRowsOptions {

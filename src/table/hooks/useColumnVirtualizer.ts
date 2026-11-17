@@ -1,5 +1,5 @@
 import type { Table } from '@tanstack/react-table'
-import { useVirtualizer } from '@tanstack/react-virtual'
+import { useVirtualizer, type Virtualizer } from '@tanstack/react-virtual'
 import type { MutableRefObject } from 'react'
 import { ACTIONS_COLUMN_ID } from 'src'
 
@@ -19,7 +19,7 @@ export function useColumnVirtualizer<TData extends { id: string | number }>({
     table: Table<TData>
     scrollRef?: MutableRefObject<HTMLDivElement | null>
     isMobileView: boolean
-}): { columnWindow: { indexes: number[]; paddingLeft: number; paddingRight: number; }; } {
+}): { columnWindow: ColumnWindow; columnVirtualizer: Virtualizer<HTMLDivElement, HTMLTableCellElement> } {
     const centerColumns = table
         .getVisibleLeafColumns()
         .filter((column) => !column.columnDef.fixedLeft && !column.columnDef.fixedRight && column.id !== ACTIONS_COLUMN_ID)
@@ -39,6 +39,8 @@ export function useColumnVirtualizer<TData extends { id: string | number }>({
                 paddingLeft: 0,
                 paddingRight: 0,
             },
+            // The keys scroll a column not rendered yet in with it (ASMA-8875, `columnReveal.ts`).
+            columnVirtualizer,
         }
     }
 
@@ -53,5 +55,6 @@ export function useColumnVirtualizer<TData extends { id: string | number }>({
                 ? Math.max(0, totalSize - (virtualColumns[virtualColumns.length - 1]?.end ?? 0))
                 : 0,
         },
+        columnVirtualizer,
     }
 }

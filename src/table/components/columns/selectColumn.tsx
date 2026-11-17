@@ -44,13 +44,15 @@ export function selectColumn<TData>(isFixed: boolean, rowHeight?: number, locale
             return (
                 <div
                     role='checkbox'
-                    // Not a tab stop in a hidden header (`hideHeader`), where nothing shows where the focus is.
-                    tabIndex={table.options.meta?.hideHeader ? -1 : 0}
+                    // A header control (ASMA-8875): never a tab stop; the header row is, and the arrow keys reach it.
+                    tabIndex={-1}
+                    data-table-control=''
                     aria-label={labels.selectAll}
                     aria-checked={table.getIsSomeRowsSelected() ? 'mixed' : table.getIsAllRowsSelected()}
                     className={style['select-control']}
                     onClick={() => table.toggleAllRowsSelected()}
-                    onMouseDown={stopMouseEvent}
+                    // Not prevented: the browser's mouse focus shows no `:focus-visible`, and Space then toggles it back.
+                    onMouseDown={(event) => event.stopPropagation()}
                     onMouseUp={stopMouseEvent}
                     onKeyDown={(event) => handleToggleKeyDown(event, () => table.toggleAllRowsSelected())}
                 >
@@ -92,27 +94,37 @@ export function selectColumn<TData>(isFixed: boolean, rowHeight?: number, locale
             const disabled = locked && !checked
             const readOnly = locked && checked
 
+            // The tooltip wraps the checkbox itself, the element that takes the focus, so its text (the reason a row is
+            // locked, or a hint) opens on keyboard focus as on hover (ASMA-8875). A locked row's checkbox is not
+            // focusable: its reason opens on hover.
             return (
-                <div
-                    role='checkbox'
-                    tabIndex={locked ? -1 : 0}
-                    aria-label={labels.selectRow(cell.row.index + 1)}
-                    aria-checked={cell.row.getIsSelected()}
-                    aria-disabled={locked}
-                    style={{ height: rowHeight ?? 'auto' }}
-                    className={style['select-control']}
-                    onClick={() => {
-                        if (locked) return
-                        cell.row.toggleSelected()
-                    }}
-                    onMouseDown={stopMouseEvent}
-                    onMouseUp={stopMouseEvent}
-                    onKeyDown={(event) => {
-                        if (locked) return
-                        handleToggleKeyDown(event, () => cell.row.toggleSelected())
-                    }}
-                >
-                    <StyledTooltip arrow placement='top-start' title={cell.row.getRowSelectionTooltip()}>
+                <StyledTooltip arrow placement='top-start' title={cell.row.getRowSelectionTooltip()}>
+                    <div
+                        role='checkbox'
+                        // Reached with the arrow keys in its row, not with Tab (ASMA-8875). A locked row's checkbox is
+                        // not a control at all: no marker, so the arrows pass it.
+                        tabIndex={-1}
+                        data-table-control={locked ? undefined : ''}
+                        aria-label={labels.selectRow(cell.row.index + 1)}
+                        aria-checked={cell.row.getIsSelected()}
+                        aria-disabled={locked}
+                        style={{ height: rowHeight ?? 'auto' }}
+                        className={style['select-control']}
+                        onClick={() => {
+                            if (locked) return
+                            cell.row.toggleSelected()
+                        }}
+                        // Not prevented (a locked one takes no focus): the browser's mouse focus shows no `:focus-visible`.
+                        onMouseDown={(event) => {
+                            if (locked) event.preventDefault()
+                            event.stopPropagation()
+                        }}
+                        onMouseUp={stopMouseEvent}
+                        onKeyDown={(event) => {
+                            if (locked) return
+                            handleToggleKeyDown(event, () => cell.row.toggleSelected())
+                        }}
+                    >
                         <span className={locked ? style['cursor-not-allowed'] : undefined}>
                             {/* `decorative` — see the header checkbox above. */}
                             <StyledCheckbox
@@ -127,8 +139,8 @@ export function selectColumn<TData>(isFixed: boolean, rowHeight?: number, locale
                                 className='pointer-events-none'
                             />
                         </span>
-                    </StyledTooltip>
-                </div>
+                    </div>
+                </StyledTooltip>
             )
         },
         fixedLeft: isFixed,

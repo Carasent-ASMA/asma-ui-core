@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState, type KeyboardEvent, type MouseEvent, type RefObject } from 'react'
-import { getActiveBodyRow } from 'src/table/helpers/headerControls'
+import { getActiveBodyRow } from 'src/table/helpers/tableTabStops'
 
 interface ToggleMenuVisibility {
     open: boolean
@@ -23,8 +23,8 @@ interface KeyboardSelectMenuOptions {
 
 /**
  * Shift+Tab from a control after the table, such as the footer's row count, goes back into the table at its roving
- * tab stop: the active body row. The header row used to be that stop; it is not one any more (ASMA-8702), and the
- * rows' own controls would otherwise be the browser's previous stop.
+ * tab stop: the active body row. The header row used to be that stop; it is not one any more (ASMA-8702). The rows'
+ * own controls are not tab stops either since ASMA-8875, so this only keeps the entry on the row the user left.
  */
 const focusClosestTableRows = (trigger: HTMLElement | null): boolean => {
     let container = trigger?.parentElement
