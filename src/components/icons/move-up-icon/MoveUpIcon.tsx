@@ -1,6 +1,6 @@
-import type { SVGProps } from 'react'
+import { getSvgIconA11yProps, type SvgIconProps } from '../svgIconA11y'
 
-export const MoveUpIcon = (props: SVGProps<SVGSVGElement>): JSX.Element => {
+export const MoveUpIcon = ({ title, ...props }: SvgIconProps): JSX.Element => {
     return (
         <svg
             xmlns='http://www.w3.org/2000/svg'
@@ -8,9 +8,10 @@ export const MoveUpIcon = (props: SVGProps<SVGSVGElement>): JSX.Element => {
             height='24'
             viewBox='0 -960 960 960'
             fill='currentColor'
+            {...getSvgIconA11yProps(title, props)}
             {...props}
         >
-            <title>MoveUpIcon</title>
+            {title ? <title>{title}</title> : null}
 
             <path d='M320-160q-117 0-198.5-81.5T40-440q0-107 70.5-186.5T287-718l-63-66 56-56 160 160-160 160-56-57 59-59q-71 14-117 69t-46 127q0 83 58.5 141.5T320-240h120v80H320Zm200-360v-280h360v280H520Zm0 360v-280h360v280H520Zm80-80h200v-120H600v120Z' />
         </svg>

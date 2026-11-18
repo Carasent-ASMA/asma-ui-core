@@ -1,4 +1,4 @@
-import type { SVGProps } from 'react'
+import { getSvgIconA11yProps, type SvgIconProps } from '../svgIconA11y'
 
 /**
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#33057-232886 (Design-System · "call")
@@ -7,10 +7,18 @@ import type { SVGProps } from 'react'
  * (12.5% inset), so it is placed on the shared 24×24 grid via `translate(3 3) scale(1.2)` —
  * 15 × 1.2 = 18 units of glyph with a 3-unit inset, preserving the designed proportions.
  */
-export function CallIcon(props: SVGProps<SVGSVGElement>): JSX.Element {
+export function CallIcon({ title, ...props }: SvgIconProps): JSX.Element {
     return (
-        <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' {...props}>
-            <title>CallIcon</title>
+        <svg
+            xmlns='http://www.w3.org/2000/svg'
+            width='24'
+            height='24'
+            viewBox='0 0 24 24'
+            fill='none'
+            {...getSvgIconA11yProps(title, props)}
+            {...props}
+        >
+            {title ? <title>{title}</title> : null}
 
             <g transform='translate(3 3) scale(1.2)'>
                 <path
