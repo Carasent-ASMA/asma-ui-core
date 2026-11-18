@@ -20,6 +20,7 @@ export * from './components/feedback/filtered-empty-state'
 export * from './components/feedback/loading/StyledLoading'
 export * from './components/feedback/alert'
 export * from './components/feedback/snack-bar'
+export * from './components/feedback/unsaved-changes-dialog'
 // inputs
 export * from './components/inputs/button'
 export * from './components/inputs/checkbox'
