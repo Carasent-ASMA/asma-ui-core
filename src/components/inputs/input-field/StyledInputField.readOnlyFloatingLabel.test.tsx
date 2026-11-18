@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { StyledInputField } from './StyledInputField'
 
-const GRADIENT = 'bg-[linear-gradient(to_bottom,transparent_50%,var(--colors-delta-50)_50%)]'
+const GRADIENT = 'bg-[linear-gradient(to_bottom,transparent_50%,var(--colors-delta-10)_50%)]'
 
 const render = (readOnly: boolean) =>
     renderToStaticMarkup(

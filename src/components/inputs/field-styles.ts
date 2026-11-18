@@ -143,9 +143,9 @@ export const notchedOutlineClass = ({
 
 /**
  * The background of whatever sits on the top border of a read-only field (the notch, the shrunk label): clear above the
- * border, the field's `delta-50` fill below it, as Figma draws it. A white box there shows as a patch on the fill.
+ * border, the field's `delta-10` fill below it, as Figma draws it. A white box there shows as a patch on the fill.
  */
-const READ_ONLY_NOTCH_FILL = 'bg-[linear-gradient(to_bottom,transparent_50%,var(--colors-delta-50)_50%)]'
+const READ_ONLY_NOTCH_FILL = 'bg-[linear-gradient(to_bottom,transparent_50%,var(--colors-delta-10)_50%)]'
 
 export const notchedLegendClass = (shrink: boolean, readOnly = false): string =>
     cn(

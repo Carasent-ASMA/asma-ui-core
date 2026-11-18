@@ -541,7 +541,7 @@ export const StyledInputField = ({
                   ),
         'disabled:text-delta-300',
         // Read-only fill lives on the shell (below) so it covers the whole box incl. the multiline
-        // padding; keep the field itself transparent to avoid a `bg-transparent`/`bg-delta-50` clash
+        // padding; keep the field itself transparent to avoid a `bg-transparent`/`bg-delta-10` clash
         // (cn here is plain clsx, no tailwind-merge, so a competing bg is order-dependent/flaky).
         readOnly && !readOnlyValue && 'text-delta-800',
         (locked || readOnlyValue) && 'cursor-default',
@@ -603,9 +603,9 @@ export const StyledInputField = ({
                                     userEndAdornment && styles['AdornmentList--endAdornment'],
                                     isEmptyAdornmentList && styles['AdornmentList--empty'],
                                 ),
-                            // Read-only surface: fill the whole box (matches the delta-200 border, radius 4).
+                            // Read-only surface, Figma Input field State=Read only: delta/10 fill, delta-200 border, radius 4.
                             // On the shell (not the input) so it also covers the multiline field's padding.
-                            readOnly && !readOnlyValue && 'rounded bg-delta-50',
+                            readOnly && !readOnlyValue && 'rounded bg-delta-10',
                             // Room for the lock icon, which sits at the end of the multiline box too.
                             locked && multiline && 'pr-[44px]',
                         )}
