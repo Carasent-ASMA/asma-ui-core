@@ -39,12 +39,14 @@ describe('StyledDynamicSelect — read-only single select', () => {
         expect(html).not.toContain('MuiChip')
     })
 
-    it('shows "-" when nothing is selected, at either option count', () => {
+    it('shows an em dash, read as "Not provided", when nothing is selected, at either option count', () => {
         for (const options of [FEW, MANY]) {
             const html = renderToStaticMarkup(
                 <StyledDynamicSelect dataTest='ro' options={options} value={null} onChange={noop} readOnly />,
             )
-            expect(readOnlyValue(html)).toBe('-')
+            expect(readOnlyValue(html)).toBe(
+                '<span aria-hidden="true">—</span><span class="sr-only">Not provided</span>',
+            )
         }
     })
 
@@ -208,6 +210,14 @@ describe('StyledDynamicSelect — rule does not apply', () => {
         expect(html).not.toContain('ro-read-only')
         expect(html).toContain('data-testid="ic-After"')
         expect(html).toContain('data-testid="ic-Before"')
+    })
+
+    it('shows an em dash, read in the locale, for a read-only multiple select with nothing selected', () => {
+        const html = renderToStaticMarkup(
+            <StyledDynamicSelect dataTest='ro' options={FEW} value={[]} onChange={noop} multiple readOnly locale='no' />,
+        )
+
+        expect(html).toContain('<span aria-hidden="true">—</span><span class="sr-only">Ikke oppgitt</span>')
     })
 
     it('keeps read-only multiple select as chips with 6+ options', () => {

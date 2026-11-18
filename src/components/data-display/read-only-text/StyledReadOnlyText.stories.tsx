@@ -8,7 +8,7 @@ export default {
         docs: {
             description: {
                 component:
-                    'Figma: Title + data (40253:187979) — title Body Base Semibold 16/24 delta-800, value Body 16/24 delta-700 right under it (or after "Title:" when horizontal), helper 14/20 delta-600; icons 4px from the text; an empty value shows "-".',
+                    'Figma: Title + data (40253:187979) — title Body Base Semibold 16/24 delta-800, value Body 16/24 delta-700 right under it (or after "Title:" when horizontal), helper 14/20 delta-600; icons 4px from the text; an empty value shows an em dash, read as "Not provided".',
             },
         },
     },

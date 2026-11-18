@@ -34,7 +34,7 @@ interface DynamicSelectCommonProps<TOption extends DynamicSelectOption> {
     options: TOption[]
     /**
      * @figmaProp State = true→"Read-only" (non-interactive). Single: the selected label as plain text
-     * (`-` when empty), no chip, input or helper row, at any option count. Multiple: the selected
+     * (an em dash when empty), no chip, input or helper row, at any option count. Multiple: the selected
      * values as plain chips.
      */
     readOnly?: boolean
