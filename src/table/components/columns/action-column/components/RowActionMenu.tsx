@@ -4,10 +4,10 @@ import { StyledPopover as Popover } from 'src/components/utils/popover'
 import { StyledMenuList as MenuList } from 'src/components/navigation/menu'
 import { DotsVerticalIcon } from 'src/table/shared-components/DotsVerticalIcon'
 
-import { StyledMenuItem } from 'src/table/shared-components/StyledMenuItem'
+import { StyledMenuItem } from 'src/components/navigation/menu/StyledMenuItem'
 import { isCustomAction, type IAction, type ICustomAction, type RowActionsState } from 'src/table/types'
 import React, { useId, useMemo, useState, type KeyboardEvent, type MouseEvent } from 'react'
-import { StyledButton } from 'src/table/shared-components/button'
+import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { StyledTooltip } from 'src/table/shared-components/tooltip'
 import { CircleWarningOutlineIcon } from 'src/table/shared-components/CircleWarningOutlineIcon'
 import { focusOutsideTable } from 'src/table/helpers/tableTabStops'
@@ -73,6 +73,8 @@ export function RowActionMenu<TData>({
     const button = (
         <StyledButton
             dataTest='row-actions-button'
+            // Editor and qnreditor Playwright specs (`testIdAttribute: 'data-test'`) still query the legacy hook.
+            data-test='row-actions-button'
             aria-label={rowActionsLabel}
             aria-haspopup='true'
             aria-expanded={open}

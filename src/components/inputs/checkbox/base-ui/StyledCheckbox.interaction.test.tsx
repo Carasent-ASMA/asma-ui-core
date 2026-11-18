@@ -3,31 +3,26 @@ import { afterEach, describe, it } from 'vitest'
 import { expect, userEvent } from 'src/test-utils/interaction-api'
 import { cleanup, isEntirelyObscured, mount } from 'src/test-utils/renderInteraction'
 import { StyledFormControlLabel } from 'src/components/miscellaneous/StyledFormControlLabel'
-import { StyledCheckbox as TableStyledCheckbox } from 'src/table/shared-components/StyledCheckbox'
 import { StyledCheckbox } from './StyledCheckbox'
 
-const CheckboxFixture = ({ table = false }: { table?: boolean }): JSX.Element => {
+const CheckboxFixture = (): JSX.Element => {
     const [checked, setChecked] = useState(false)
-    const Checkbox = table ? TableStyledCheckbox : StyledCheckbox
     return (
         <>
             <StyledFormControlLabel
                 label='Receive updates'
-                control={<Checkbox dataTest='checkbox' checked={checked} onChange={(_, next) => setChecked(next)} />}
+                control={<StyledCheckbox dataTest='checkbox' checked={checked} onChange={(_, next) => setChecked(next)} />}
             />
-            <StyledFormControlLabel label='Unavailable' control={<Checkbox dataTest='disabled-checkbox' disabled />} />
+            <StyledFormControlLabel label='Unavailable' control={<StyledCheckbox dataTest='disabled-checkbox' disabled />} />
         </>
     )
 }
 
-describe.each([
-    ['input', false],
-    ['table', true],
-] as const)('%s StyledCheckbox keyboard contract', (_copy, table) => {
+describe('StyledCheckbox keyboard contract', () => {
     afterEach(cleanup)
 
     it('is named by its visible label, reached by Tab, and toggled by Space (2.1.1, 4.1.2)', async () => {
-        const { container } = mount(<CheckboxFixture table={table} />)
+        const { container } = mount(<CheckboxFixture />)
         const checkbox = container.querySelector<HTMLInputElement>('input:not([disabled])')!
 
         await expect(checkbox).toHaveAccessibleName('Receive updates')
@@ -38,7 +33,7 @@ describe.each([
     })
 
     it('skips disabled controls in the Tab order (2.1.1)', async () => {
-        const { container } = mount(<CheckboxFixture table={table} />)
+        const { container } = mount(<CheckboxFixture />)
         const enabled = container.querySelector<HTMLInputElement>('input:not([disabled])')!
 
         await userEvent.tab()
@@ -55,14 +50,11 @@ describe.each([
  * Asserted through `elementFromPoint` (a paint-order question), not a z-index read, so it fails if
  * the halo is ever layered back on top of the box — the bug this pinned.
  */
-describe.each([
-    ['input', false],
-    ['table', true],
-] as const)('%s StyledCheckbox hover', (_copy, table) => {
+describe('StyledCheckbox hover', () => {
     afterEach(cleanup)
 
     it('keeps the box visible above the hover halo (ASMA-8338)', async () => {
-        const { container } = mount(<CheckboxFixture table={table} />)
+        const { container } = mount(<CheckboxFixture />)
         const input = container.querySelector<HTMLInputElement>('input:not([disabled])')!
         const wrapper = input.closest('label')!
         // The visual box is the wrapper's last element child in both copies: `<input>`, then the
@@ -85,14 +77,11 @@ describe.each([
  * inside the halo but outside the 16px box: the topmost element there must be the ripple itself, not
  * the element that owns the halo pseudo-element.
  */
-describe.each([
-    ['input', false],
-    ['table', true],
-] as const)('%s StyledCheckbox press ripple', (_copy, table) => {
+describe('StyledCheckbox press ripple', () => {
     afterEach(cleanup)
 
     it('paints the press ripple above the hover halo (ASMA-8338)', async () => {
-        const { container } = mount(<CheckboxFixture table={table} />)
+        const { container } = mount(<CheckboxFixture />)
         const input = container.querySelector<HTMLInputElement>('input:not([disabled])')!
         const wrapper = input.closest('label')!
 
@@ -113,31 +102,27 @@ describe.each([
     })
 })
 
-describe.each([
-    ['input', false],
-    ['table', true],
-] as const)('%s StyledCheckbox read-only state (Figma State=Read only)', (_copy, table) => {
+describe('StyledCheckbox read-only state (Figma State=Read only)', () => {
     afterEach(cleanup)
 
     const indicatorColor = (container: HTMLElement, dataTest: string): string => {
-        const wrapper = container.querySelector<HTMLElement>(`[data-testid="${dataTest}"], [data-test="${dataTest}"]`)!
+        const wrapper = container.querySelector<HTMLElement>(`[data-testid="${dataTest}"]`)!
         const indicator = wrapper.querySelector<HTMLElement>('[class*="Indicator"]')!
         return getComputedStyle(indicator).color
     }
 
     it('keeps an unchecked box empty and marks a checked one', async () => {
-        const Checkbox = table ? TableStyledCheckbox : StyledCheckbox
         const { container } = mount(
             <>
-                <Checkbox dataTest='unchecked' readOnly checked={false} />
-                <Checkbox dataTest='checked' readOnly checked />
+                <StyledCheckbox dataTest='unchecked' readOnly checked={false} />
+                <StyledCheckbox dataTest='checked' readOnly checked />
             </>,
         )
 
         const box = (dataTest: string): CSSStyleDeclaration =>
             getComputedStyle(
                 container
-                    .querySelector(`[data-testid="${dataTest}"], [data-test="${dataTest}"]`)!
+                    .querySelector(`[data-testid="${dataTest}"]`)!
                     .querySelector<HTMLElement>('[class*="Checkbox_"], [class*="_Checkbox_"]')!,
             )
 

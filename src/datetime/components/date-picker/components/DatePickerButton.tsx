@@ -1,6 +1,6 @@
 import React from 'react'
 import { cn } from 'src/datetime/helpers/cn'
-import { StyledButton } from 'src/datetime/shared-components/button'
+import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { OutlineCalendarMonth } from 'src/datetime/shared-components/OutlineCalendarMonth'
 
 interface DatePickerButtonProps {

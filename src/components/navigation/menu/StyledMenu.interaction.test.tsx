@@ -8,8 +8,6 @@ import { ToolbarActionGroup } from 'src/components/custom/module/header-layout/T
 import { StyledMenuList } from './StyledMenuList'
 import { StyledMenuItem } from './StyledMenuItem'
 import { StyledCheckbox } from 'src/components/inputs/checkbox'
-// The table ships its own menu item; separators must reach it too.
-import { StyledMenuItem as TableMenuItem } from 'src/table/shared-components/StyledMenuItem'
 
 /**
  * Keyboard & focus contract — StyledMenu / StyledMenuList / StyledMenuItem (ASMA-8139).
@@ -396,10 +394,10 @@ describe('StyledMenu row structure', () => {
         const { container } = mount(
             <StyledMenuList>
                 <span>
-                    <TableMenuItem>View details</TableMenuItem>
+                    <StyledMenuItem>View details</StyledMenuItem>
                 </span>
                 <span>
-                    <TableMenuItem>Remove</TableMenuItem>
+                    <StyledMenuItem>Remove</StyledMenuItem>
                 </span>
             </StyledMenuList>,
         )
@@ -559,7 +557,6 @@ describe('StyledMenu scrolling', () => {
 
     it.each([
         { name: 'navigation', Item: StyledMenuItem },
-        { name: 'table', Item: TableMenuItem },
     ])('caps 12 $name rows at 7.5 and scrolls keyboard focus', async ({ Item }) => {
         const { container } = mount(
             <ScrollMenu>
@@ -600,10 +597,10 @@ describe('StyledMenu scrolling', () => {
         const content = (count: number): JSX.Element => (
             <ScrollMenu>
                 <span hidden>
-                    <TableMenuItem>Hidden action</TableMenuItem>
+                    <StyledMenuItem>Hidden action</StyledMenuItem>
                 </span>
                 {Array.from({ length: count }, (_, index) => (
-                    <TableMenuItem key={index}>
+                    <StyledMenuItem key={index}>
                         <span>
                             Action {index + 1}
                             {index === 7 && (
@@ -613,7 +610,7 @@ describe('StyledMenu scrolling', () => {
                                 </>
                             )}
                         </span>
-                    </TableMenuItem>
+                    </StyledMenuItem>
                 ))}
             </ScrollMenu>
         )

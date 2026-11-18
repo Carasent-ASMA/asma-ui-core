@@ -63,7 +63,7 @@ const triggerOf = (rowId: string): HTMLElement => {
 
 /** The painted box inside the checkbox — the element the state classes colour. */
 const boxOf = (rowId: string): HTMLElement => {
-    const box = selectCellOf(rowId).querySelector<HTMLElement>('[data-test="cell-select"] > span:last-of-type')
+    const box = selectCellOf(rowId).querySelector<HTMLElement>('[data-testid="cell-select"] > span:last-of-type')
     if (!box) throw new Error(`no checkbox box on row ${rowId}`)
     return box
 }

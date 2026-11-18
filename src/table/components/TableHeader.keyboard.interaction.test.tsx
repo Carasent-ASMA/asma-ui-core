@@ -553,7 +553,7 @@ describe('StyledTable header and the footer (K-14)', () => {
         })
         row('r-2').focus()
 
-        const rows = document.querySelector<HTMLElement>('[data-test="table-rows-count-button"]')
+        const rows = document.querySelector<HTMLElement>('[data-testid="table-rows-count-button"]')
 
         await expect(rows).not.toBeNull()
         rows!.focus()

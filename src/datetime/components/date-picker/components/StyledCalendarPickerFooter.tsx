@@ -4,7 +4,7 @@ import type { Dispatch, SetStateAction } from 'react'
 
 import { ChevronLeftIcon } from 'src/datetime/shared-components/ChevronLeftIcon'
 import { ChevronRightIcon } from 'src/datetime/shared-components/ChevronRightIcon'
-import { StyledButton } from 'src/datetime/shared-components/button'
+import { StyledButton } from 'src/components/inputs/button/StyledButton'
 
 export const StyledCalendarPickerFooter: React.FC<{
     onClose: ((event: object, reason: 'backdropClick' | 'escapeKeyDown') => void) | undefined

@@ -4,7 +4,7 @@ import { StyledMenuList as MenuList } from 'src/components/navigation/menu'
 import { useMemo, useCallback, useId } from 'react'
 import { useKeyboardSelectMenu } from 'src/table/hooks/useToggleMenuVisibility.hook'
 import { ChevronDownIcon } from 'src/table/shared-components/ChevronDownIcon'
-import { StyledButton } from 'src/table/shared-components/button'
+import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { StyledSelectItem } from 'src/components/inputs/select'
 
 const rowCountOptions = [5, 10, 20, 50, 100]
