@@ -3,7 +3,7 @@ import { StyledMenu } from 'src/components/navigation/menu'
 import type { Row } from '@tanstack/react-table'
 import { useToggleMenuVisibility } from 'src/table/hooks/useToggleMenuVisibility.hook'
 import { ChevronRightIcon } from 'src/table/shared-components/ChevronRightIcon'
-import { StyledMenuItem } from 'src/table/shared-components/StyledMenuItem'
+import { StyledMenuItem } from 'src/components/navigation/menu/StyledMenuItem'
 
 const preventEventPropagation = (e: React.MouseEvent): void => {
     e.preventDefault()

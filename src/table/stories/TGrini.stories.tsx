@@ -5,7 +5,7 @@ import { useFetchTemplates } from './service/useFetchTemplates'
 import { useColumns } from './components/styled-flex-table/useColumns'
 import type { ITemplate } from './service/types'
 import { generateActions } from './components/styled-flex-table/generateActions'
-import { StyledButton } from 'src/table/shared-components/button'
+import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import type { Table } from '@tanstack/react-table'
 
 const meta: Meta = {

@@ -1,7 +1,5 @@
-// Scoped to the list, but matched on the attribute rather than on a row class: the navigation
-// item and the table's own row-action item (src/table/shared-components/StyledMenuItem.tsx) are
-// separate components with separate class lists, and both need the line. StyledMenuList marks the
-// rows that get one.
+// Scoped to the list, but matched on the attribute rather than on a row class: StyledMenuList marks
+// the rows that get one, whatever item component renders them.
 .list {
     :global([data-menu-separator]) {
         position: relative;

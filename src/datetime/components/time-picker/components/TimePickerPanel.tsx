@@ -1,7 +1,7 @@
 import { TimePickerBody } from './TimePickerBody'
 import { EraserIcon } from 'src/datetime/shared-components/EraserIcon'
 import { CheckIcon } from 'src/datetime/shared-components/CheckIcon'
-import { StyledButton } from 'src/datetime/shared-components/button'
+import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import type { TimePredicate } from '../helpers/disabledTime'
 import type { ReactNode } from 'react'
 
@@ -51,7 +51,6 @@ export const TimePickerPanel: React.FC<TimePickerPanelProps> = ({
                 accessible name (axe `button-name`, ASMA-8143). */}
             <StyledButton
                 dataTest='time-picker-erase-button'
-                data-testid='time-picker-erase-button'
                 aria-label='Clear time'
                 variant='text'
                 onClick={handleClear}
@@ -63,7 +62,6 @@ export const TimePickerPanel: React.FC<TimePickerPanelProps> = ({
             </StyledButton>
             <StyledButton
                 dataTest='time-picker-confirm-button'
-                data-testid='time-picker-confirm-button'
                 aria-label='Confirm time'
                 variant='contained'
                 size='small'

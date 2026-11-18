@@ -3,15 +3,14 @@ import { afterEach, describe, it } from 'vitest'
 import { expect, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { StyledTable } from 'src/table/components/StyledTableIndex'
-import { StyledCheckbox as InputStyledCheckbox } from 'src/components/inputs/checkbox/base-ui/StyledCheckbox'
-import { StyledCheckbox } from './StyledCheckbox'
+import { StyledCheckbox } from 'src/components/inputs/checkbox/base-ui/StyledCheckbox'
 
 /**
- * ASMA-8338: both checkboxes lift layers above the opaque hover halo (the table copy's box and
- * ripple at `z-index: 1`; the input copy's focus/error frame at 1 and box at 2). Those layers must
- * stay inside the checkbox: the sticky (frozen) cells sit at `z-index: 1` in the table's stacking
- * context, so an uncontained layer in a later column would paint over a frozen column when it
- * scrolls underneath it. The input copy is rendered in its Error state, where its layers are lifted.
+ * ASMA-8338: the checkbox lifts layers above the opaque hover halo (box and ripple at `z-index: 1`;
+ * the focus/error frame at 1 and box at 2). Those layers must stay inside the checkbox: the sticky
+ * (frozen) cells sit at `z-index: 1` in the table's stacking context, so an uncontained layer in a
+ * later column would paint over a frozen column when it scrolls underneath it. The Error state is
+ * rendered too, where its layers are lifted.
  *
  * Asserted through `elementFromPoint` in a real browser (a paint-order question).
  */
@@ -37,8 +36,8 @@ const columnsWith = (checkbox: JSX.Element): ColumnDef<Row>[] => [
 ]
 
 describe.each([
-    ['table', <StyledCheckbox key='table' dataTest='scrolling-checkbox' />],
-    ['input (error)', <InputStyledCheckbox key='input' dataTest='scrolling-checkbox' error />],
+    ['default', <StyledCheckbox key='default' dataTest='scrolling-checkbox' />],
+    ['error', <StyledCheckbox key='error' dataTest='scrolling-checkbox' error />],
 ] as const)('%s StyledCheckbox stacking', (_copy, checkbox) => {
     afterEach(cleanup)
 
@@ -51,7 +50,7 @@ describe.each([
 
         const box = await waitFor(() => {
             const found = document.querySelector<HTMLElement>(
-                '[data-test="scrolling-checkbox"] [class*="_Checkbox_"], [data-testid="scrolling-checkbox"] [class*="_Checkbox_"]',
+                '[data-testid="scrolling-checkbox"] [class*="_Checkbox_"]',
             )
             if (!found) throw new Error('checkbox not rendered')
             return found

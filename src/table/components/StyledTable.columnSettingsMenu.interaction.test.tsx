@@ -513,8 +513,8 @@ describe('Accessibility of the rows', () => {
         const row = rect(rowOf('Role'))
         const box = rect(boxOf('Role').lastElementChild!)
 
-        // The width is the Reset columns action's, not the row's: it is not a whole number, and a row is not wider than it.
-        await expect(Math.abs(row.width - 132.2)).toBeLessThan(1)
+        // The core Reset columns button adds 8px of side padding in ASMA-8137; it sets the menu width.
+        await expect(Math.abs(row.width - 140.2)).toBeLessThan(1)
         await expect(row.height).toBe(40)
         await expect(rect(handleOf('Role')).left - row.left).toBeCloseTo(8, 0)
         await expect(box.width).toBe(16)

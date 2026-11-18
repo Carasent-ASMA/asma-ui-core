@@ -1,6 +1,6 @@
 import { Children, isValidElement, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react'
 import { cn } from 'src/helpers/cn'
-import { StyledTooltip } from 'src/components/data-display/tooltip'
+import { StyledTooltip, type TooltipProps } from 'src/components/data-display/tooltip'
 import { StyledCheckbox } from 'src/components/inputs/checkbox'
 import { resolveSx } from 'src/helpers/sx'
 
@@ -38,7 +38,10 @@ export interface StyledMenuItemProps {
     /** @figmaProp content — Type (Only Label / Icon / Checkbox / Check mark) via composition */
     children?: ReactNode
     onClick?: (event: MouseEvent<HTMLLIElement>) => void
-    /** Forwarded to the `<li>` — e.g. `stopPropagation` so a menu-item mousedown doesn't dismiss the menu. */
+    /**
+     * Forwarded to the `<li>`, also when disabled — e.g. `stopPropagation` so a menu-item mousedown doesn't
+     * dismiss the menu.
+     */
     onMouseDown?: (event: MouseEvent<HTMLLIElement>) => void
     onMouseUp?: (event: MouseEvent<HTMLLIElement>) => void
     /** @figmaProp State = true→"Disabled" */
@@ -48,6 +51,8 @@ export interface StyledMenuItemProps {
      * arrow-key navigation and shows the reason on hover, focus and tap (disabled-states DIS-1…DIS-3).
      */
     disabledReason?: ReactNode
+    /** Side the disabled reason opens on. */
+    reasonPlacement?: TooltipProps['placement']
     /** @figmaProp none — behavioral. The item's action is running; pair it with `disabled` and a reason. */
     'aria-busy'?: boolean
     /** @figmaProp State = true→"Selected" */
@@ -79,6 +84,7 @@ export const StyledMenuItem = ({
     onMouseUp,
     disabled,
     disabledReason,
+    reasonPlacement = 'left',
     'aria-busy': ariaBusy,
     selected,
     dense,
@@ -95,7 +101,8 @@ export const StyledMenuItem = ({
         if (disabled) return
         if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault()
-            onClick?.(event as unknown as MouseEvent<HTMLLIElement>)
+            // Bubble the same click as a pointer activation so containing menus can dismiss.
+            event.currentTarget.click()
         }
     }
 
@@ -110,9 +117,9 @@ export const StyledMenuItem = ({
             tabIndex={-1}
             data-test={dataTest}
             data-testid={dataTestId}
-            onClick={disabled ? undefined : onClick}
-            onMouseDown={disabled ? undefined : onMouseDown}
-            onMouseUp={disabled ? undefined : onMouseUp}
+            onClick={disabled ? (event) => event.stopPropagation() : onClick}
+            onMouseDown={onMouseDown}
+            onMouseUp={onMouseUp}
             onKeyDown={handleKeyDown}
             className={cn(
                 // Figma Menus item (node 16073-21583): h40, py8, label Body Base 16px.
@@ -155,7 +162,7 @@ export const StyledMenuItem = ({
             title={title}
             open={title ? undefined : false}
             arrow={!reasoned}
-            placement={reasoned ? 'left' : 'top'}
+            placement={reasoned ? reasonPlacement : 'top'}
             openOnTap={reasoned}
             persistentDescription={reasoned}
         >

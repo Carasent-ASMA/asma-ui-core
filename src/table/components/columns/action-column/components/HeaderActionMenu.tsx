@@ -3,7 +3,7 @@ import { StyledPopover as Popover } from 'src/components/utils/popover'
 import type { HeaderContext } from '@tanstack/react-table'
 import { useToggleMenuVisibility } from 'src/table/hooks/useToggleMenuVisibility.hook'
 import { PinIcon } from 'src/table/shared-components/PinIcon'
-import { StyledCheckbox } from 'src/table/shared-components/StyledCheckbox'
+import { StyledCheckbox } from 'src/components/inputs/checkbox/base-ui/StyledCheckbox'
 import { INTERNAL_COLUMN_IDS } from 'src/table/types'
 import { CSS } from '@dnd-kit/utilities'
 
@@ -25,7 +25,7 @@ import { cn } from 'src/table/helpers/cn'
 import { headerLabelText } from 'src/table/helpers/headerLabel'
 import { StyledTooltip } from 'src/table/shared-components/tooltip'
 import { useTranslations } from 'src/table/hooks/useTranslations'
-import { StyledButton } from 'src/table/shared-components/button'
+import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { compact } from 'src/helpers/arrays'
 import type { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities'
 import { message } from 'src/components/feedback/snack-bar'
@@ -207,6 +207,10 @@ export function HeaderActionMenu<TData>({
                                                         className={headerStyles['column-checkbox']}
                                                         aria-labelledby={labelId}
                                                         aria-readonly={hidingDisabled || undefined}
+                                                        // Keep the table's native checkbox keyboard contract: Space toggles, Enter does not.
+                                                        onKeyDown={(event) => {
+                                                            if (event.key === 'Enter') event.preventDefault()
+                                                        }}
                                                         onChange={(_event, checked) => {
                                                             if (hidingDisabled) return
                                                             column.toggleVisibility(checked)
@@ -249,6 +253,8 @@ export function HeaderActionMenu<TData>({
                 <div className='pb-2 pl-2'>
                     <StyledButton
                         dataTest='reset-order-button'
+                        // CRM column-reset tests still query the legacy `data-test` hook.
+                        data-test='reset-order-button'
                         variant='text'
                         className='h-10'
                         onClick={() => {

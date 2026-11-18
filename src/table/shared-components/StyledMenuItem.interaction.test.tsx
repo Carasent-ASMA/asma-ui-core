@@ -1,7 +1,7 @@
 import { afterEach, describe, it } from 'vitest'
 import { expect } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
-import { StyledMenuItem } from './StyledMenuItem'
+import { StyledMenuItem } from 'src/components/navigation/menu/StyledMenuItem'
 import { StyledMenuItem as CheckMenuItem } from './menu-item'
 
 /** ASMA-7539 — Figma "Menus item" is 40px tall; table row-action menus rendered 44px. */
