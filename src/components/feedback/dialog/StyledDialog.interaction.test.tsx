@@ -1,4 +1,4 @@
-import { StrictMode, useState } from 'react'
+import { StrictMode, useRef, useState } from 'react'
 import { afterEach, beforeEach, describe, it, vi } from 'vitest'
 import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
@@ -833,5 +833,41 @@ describe('StyledDialog native Back (ASMA-8471)', () => {
         await expect(onClose).not.toHaveBeenCalled()
 
         unregisterTop()
+    })
+})
+
+describe('StyledDialog initialFocusRef (ASMA-8895)', () => {
+    afterEach(() => cleanup())
+
+    it('starts focus on the given element, not on the dialog, and keeps it after the next frame', async () => {
+        const Fixture = (): JSX.Element => {
+            const safeRef = useRef<HTMLButtonElement>(null)
+            return (
+                <StyledDialog open dataTest='confirm' dialogTitle='Delete?' onClose={() => undefined} initialFocusRef={safeRef}>
+                    <StyledButton dataTest='danger' error>
+                        Delete
+                    </StyledButton>
+                    <StyledButton dataTest='safe' variant='outlined' refLink={safeRef}>
+                        Cancel
+                    </StyledButton>
+                </StyledDialog>
+            )
+        }
+        const { container } = mount(<Fixture />)
+        const safe = container.querySelector<HTMLButtonElement>('[data-testid="safe"]')!
+        await expect(safe).toHaveFocus()
+        await new Promise(requestAnimationFrame)
+        await new Promise(requestAnimationFrame)
+        await expect(safe).toHaveFocus()
+    })
+
+    it('without it the dialog itself takes focus, as before', async () => {
+        const { container } = mount(
+            <StyledDialog open dataTest='plain' dialogTitle='Plain' onClose={() => undefined}>
+                <StyledButton dataTest='first'>First</StyledButton>
+            </StyledDialog>,
+        )
+        await new Promise(requestAnimationFrame)
+        await expect(container.querySelector('dialog')).toHaveFocus()
     })
 })
