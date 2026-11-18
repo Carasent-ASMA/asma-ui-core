@@ -700,7 +700,7 @@ export const StyledInputField = ({
                                     locked && LOCKED_FOCUS_RING,
                                 )}
                             >
-                                <legend className={notchedLegendClass(shrink)}>
+                                <legend className={notchedLegendClass(shrink, readOnly)}>
                                     <span className='inline-block px-[5px]'>
                                         {label}
                                         {required && ' *'}

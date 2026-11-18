@@ -141,10 +141,17 @@ export const notchedOutlineClass = ({
                 : 'border-delta-500 group-hover:border-2 group-hover:border-gama-300', // Figma border/hover #60bdbd
     )
 
-export const notchedLegendClass = (shrink: boolean): string =>
+/**
+ * The background of whatever sits on the top border of a read-only field (the notch, the shrunk label): clear above the
+ * border, the field's `delta-50` fill below it, as Figma draws it. A white box there shows as a patch on the fill.
+ */
+const READ_ONLY_NOTCH_FILL = 'bg-[linear-gradient(to_bottom,transparent_50%,var(--colors-delta-50)_50%)]'
+
+export const notchedLegendClass = (shrink: boolean, readOnly = false): string =>
     cn(
         // The legend's opaque box masks the inset focus shadow in exactly the same gap as its native border.
-        'block h-[11px] overflow-hidden bg-white p-0 text-xs leading-[23px] text-transparent transition-[max-width] duration-150',
+        'block h-[11px] overflow-hidden p-0 text-xs leading-[23px] text-transparent transition-[max-width] duration-150',
+        readOnly ? READ_ONLY_NOTCH_FILL : 'bg-white',
         shrink ? 'max-w-full' : 'max-w-[0.01px]',
     )
 
@@ -176,7 +183,7 @@ export const floatingLabelClass = ({
                     ? 'text-delta-800'
                     : 'text-delta-500',
         shrink
-            ? 'bg-white px-1 text-xs leading-[16px] tracking-[0.24px]' // Figma Small 12/16, ls 0.24px
+            ? cn(readOnly ? READ_ONLY_NOTCH_FILL : 'bg-white', 'px-1 text-xs leading-[16px] tracking-[0.24px]') // Figma Small 12/16, ls 0.24px
             // Resting label doubles as the placeholder → must match the input text (Figma Body Base 16,
             // `text-base`) at every `size`; a smaller size only changes height/padding, not text size.
             : 'text-base leading-[23px] tracking-[0.00938em]',
