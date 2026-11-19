@@ -122,6 +122,22 @@ const CARD_CAPTURES: InteractionCapture[] = [
  * Open-state captures — complements `stories.spec.ts` (default/closed glance only).
  * Golden baselines remain v3.34.0; run `pnpm vrt:accept` after intentional visual changes.
  */
+/**
+ * ASMA-8895: the unsaved-changes dialog on a phone. The story capture runs at 1280 × 720, where the buttons
+ * stay on one row, so the small-screen layout (100vw − 32 px, buttons stacked full width in code order,
+ * 24 / 8 px apart) needs its own capture at the Figma mobile width: 320 px, a 288 px dialog.
+ */
+const UNSAVED_CHANGES_PHONE_CAPTURES: InteractionCapture[] = (
+    ['without-save', 'without-save-norwegian', 'with-save', 'with-save-norwegian'] as const
+).map((story) => ({
+    storyId: `feedback-unsavedchangesdialog--${story}`,
+    screenshot: `feedback-unsavedchangesdialog--${story}--phone--open.png`,
+    act: async (page) => {
+        await page.setViewportSize({ width: 320, height: 640 })
+        await page.locator('[data-testid="unsaved-changes-dialog-buttons"][data-stacked="true"]').waitFor()
+    },
+}))
+
 export const INTERACTION_CAPTURES: InteractionCapture[] = [
     {
         storyId: 'datetime-datepicker--date-picker',
@@ -379,4 +395,5 @@ export const INTERACTION_CAPTURES: InteractionCapture[] = [
         },
     },
     ...CARD_CAPTURES,
+    ...UNSAVED_CHANGES_PHONE_CAPTURES,
 ]

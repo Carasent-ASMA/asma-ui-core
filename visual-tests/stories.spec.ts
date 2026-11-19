@@ -63,6 +63,13 @@ const SKIP = new Map<string, string>([
         'accessibility-developer-checklist--pointer-cancellation',
         'long interactive play (5 pointer-cancellation sequences) races the screenshot; end state is focus/hover-dependent since the autocomplete clear button became focus-conditional (#188)',
     ],
+    ...(['without-save-mobile', 'with-save-mobile', 'with-save-mobile-norwegian'] as const).map(
+        (story) =>
+            [
+                `feedback-unsavedchangesdialog--${story}`,
+                'viewport-only Storybook story: VRT renders at 1280 × 720, so its baseline duplicated the desktop one; the phone layout is the `--phone--open` capture in interaction-states.ts (ASMA-8895)',
+            ] as const,
+    ),
     ...DYNAMIC_TOOLBAR_STORIES.map(
         (id) => [id, 'ResizeObserver/measurement layout oscillates by ~0.2–3k px between identical captures'] as const,
     ),
