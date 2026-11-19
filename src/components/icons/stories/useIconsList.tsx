@@ -36,6 +36,7 @@ import {
     DvrIcon,
     EarthIcon,
     EditSquareIcon,
+    EditSquareSharpIcon,
     EmptyPageIcon,
     ErrorOutlineIcon,
     FastCheckOutlineIcon,
@@ -729,6 +730,12 @@ export const useIconsList = ({
             component: <EditSquareIcon height={height} width={width} />,
             clipboardText: '<EditSquareIcon />',
             tags: ['edit square'],
+        },
+        {
+            name: 'EditSquareSharpIcon',
+            component: <EditSquareSharpIcon height={height} width={width} />,
+            clipboardText: '<EditSquareSharpIcon />',
+            tags: ['edit square', 'sharp', 'keep editing'],
         },
         {
             name: 'PlusIcon',
