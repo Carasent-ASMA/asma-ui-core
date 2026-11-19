@@ -134,6 +134,13 @@ const MAX_WIDTH_PX: Record<Exclude<DialogMaxWidth, false>, number> = {
     xl: 1536,
 }
 
+/** Where focus starts in an open dialog: the consumer's `initialFocusRef` inside it, else the dialog itself. */
+const focusDialogStart = (node: HTMLDialogElement, initialFocusRef?: RefObject<HTMLElement | null>): void => {
+    const target = initialFocusRef?.current
+    const focusTarget = target && node.contains(target) ? target : node
+    focusTarget.focus({ preventScroll: true })
+}
+
 /**
  * Modal dialog built on the native `<dialog>` element (replaces MUI `Dialog`) — backdrop, focus
  * trap and ESC handling come from `showModal()` for free. The `<dialog>` element is the "paper",
@@ -281,15 +288,10 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
             // showModal() focuses the first focusable element (the header close button) — move focus
             // back to the shell, which has tabIndex={-1} + outline-none, so no :focus ring paints.
             // A consumer's `initialFocusRef` takes it instead (the safe button of a confirmation).
-            const focusStart = (): void => {
-                const target = initialFocusRef?.current
-                const focusTarget = target && node.contains(target) ? target : node
-                focusTarget.focus({ preventScroll: true })
-            }
-            focusStart()
+            focusDialogStart(node, initialFocusRef)
             // Some engines defer showModal()'s first-focusable step until after this turn; re-assert
             // focus next frame so it wins. Guard `node.open` in case the dialog closed in between.
-            requestAnimationFrame(() => node.open && focusStart())
+            requestAnimationFrame(() => node.open && focusDialogStart(node, initialFocusRef))
         }
 
         // showModal() put this dialog in the browser top layer, above every z-index in the page.
@@ -400,7 +402,9 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                 attemptPending = false
                 if (openRef.current && node.isConnected && !node.open) {
                     node.showModal()
-                    node.focus({ preventScroll: true })
+                    // The same start as on open: a re-shown confirmation must not leave the next Tab on
+                    // its destructive first button (ASMA-8895 review F3).
+                    focusDialogStart(node, initialFocusRef)
                 }
             })
         }
@@ -415,6 +419,8 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
         }
         node.addEventListener('close', handleNativeClose)
         return () => node.removeEventListener('close', handleNativeClose)
+        // `initialFocusRef` is read when the dialog is re-shown; a new ref object must not re-run this.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open])
 
     // Escape is heard on `window`, deliberately last in the event path. Every dismissible layer this

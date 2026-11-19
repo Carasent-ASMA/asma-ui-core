@@ -766,6 +766,35 @@ describe('StyledDialog native Back (ASMA-8471)', () => {
         await waitFor(() => expect(dialog.matches(':modal')).toBe(true))
     })
 
+    it('a forced native close re-shows the dialog with focus back on its initialFocusRef (ASMA-8895 F3)', async () => {
+        const Fixture = (): JSX.Element => {
+            const safeRef = useRef<HTMLButtonElement>(null)
+            return (
+                <StyledDialog dataTest='reshow-focus' dialogTitle='Delete?' open disableEscapeKeyDown initialFocusRef={safeRef}>
+                    <StyledButton dataTest='reshow-danger' error>
+                        Delete
+                    </StyledButton>
+                    <StyledButton dataTest='reshow-safe' variant='outlined' refLink={safeRef}>
+                        Keep editing
+                    </StyledButton>
+                </StyledDialog>
+            )
+        }
+        mount(<Fixture />)
+        const dialog = await waitFor(() => {
+            const node = dialogByTest('reshow-focus')
+            if (!node) throw new Error('dialog not mounted yet')
+            return node
+        })
+        const safe = dialog.querySelector<HTMLButtonElement>('[data-testid="reshow-safe"]')!
+        await waitFor(() => expect(safe).toHaveFocus())
+
+        // Second Back with no tap in between: the close watcher forces the dialog shut, and it is re-shown.
+        dialog.close()
+        await waitFor(() => expect(dialog.matches(':modal')).toBe(true))
+        await waitFor(() => expect(safe).toHaveFocus())
+    })
+
     it('the host kill switch prevents native Back from invoking the close path', async () => {
         window.__ASMA__SHELL__!.overlayBack!.enabled = false
         const onClose = fn()
