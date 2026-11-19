@@ -7,6 +7,7 @@ import { useWrap } from '../helpers/useWrap'
 import { DynamicSelectTitle } from './DynamicSelectTitle'
 import { forwardRef, useEffect, useId } from 'react'
 import { CloseIcon } from 'src/components/icons'
+import { StyledEmptyValue } from 'src/components/data-display/empty-value/StyledEmptyValue'
 
 export const DynamicInteractiveChipGroup = forwardRef(
     <TOption extends DynamicSelectOption>(
@@ -227,7 +228,9 @@ export const DynamicInteractiveChipGroup = forwardRef(
                             )
                         })
                     ) : (
-                        <span>-</span>
+                        <span>
+                            <StyledEmptyValue locale={locale} />
+                        </span>
                     )}
                 </div>
                 {!required && hasValue && !readOnly && !disabled && (

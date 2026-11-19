@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react'
 import { cn } from 'src/helpers/cn'
+import type { UiCoreLocale } from 'src/helpers/uiCoreLocale'
+import { StyledEmptyValue } from '../empty-value/StyledEmptyValue'
 import { StyledFormLabel } from '../form-label/components/StyledFormLabel'
 
 export interface IStyledReadOnlyText {
@@ -7,8 +9,10 @@ export interface IStyledReadOnlyText {
     title?: ReactNode
     /** The value. An empty value (undefined, null, '' or only spaces) shows `emptyText`. */
     value?: ReactNode
-    /** Shown for an empty value. Defaults to '-'. */
+    /** Shown for an empty value. Defaults to `StyledEmptyValue`: an em dash, read as "Not provided" / "Ikke oppgitt". */
     emptyText?: ReactNode
+    /** The language of the default `emptyText`. */
+    locale?: UiCoreLocale
     /** Keeps the line breaks of a multi-line value. */
     multiline?: boolean
     /** "Title: value" on one line instead of the value under the title. */
@@ -43,12 +47,13 @@ const isEmpty = (value: ReactNode): boolean =>
  * `text-icon/title-label` (delta-800) with the value right under it, or after "Title:" when
  * `horizontal`; the value is Body 16/24 in `text-icon/body` (delta-700) and the helper text is Helper
  * 14/20 in `text-icon/helper` (delta-600). Icons sit 4px from the text. No field, fill, border,
- * padding or reserved helper row. An empty value shows '-'.
+ * padding or reserved helper row. An empty value shows an em dash (`StyledEmptyValue`).
  */
 export const StyledReadOnlyText: React.FC<IStyledReadOnlyText> = ({
     title,
     value,
-    emptyText = '-',
+    locale,
+    emptyText = <StyledEmptyValue locale={locale} />,
     multiline,
     horizontal,
     titleIcon,

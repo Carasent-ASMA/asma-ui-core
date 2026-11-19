@@ -1,10 +1,11 @@
 import type { DynamicSelectOption, StyledDynamicSelectProps } from '../types'
 import { fieldWidthStyle } from 'src/components/inputs/field-styles'
+import { StyledEmptyValue } from 'src/components/data-display/empty-value/StyledEmptyValue'
 import { DynamicSelectTitle } from './DynamicSelectTitle'
 
 type DynamicSelectReadOnlyValueProps<TOption extends DynamicSelectOption> = Pick<
     StyledDynamicSelectProps<TOption>,
-    'dataTest' | 'options' | 'title' | 'titleSize' | 'width' | 'valueKey' | 'labelKey' | 'renderLabel'
+    'dataTest' | 'options' | 'title' | 'titleSize' | 'width' | 'valueKey' | 'labelKey' | 'renderLabel' | 'locale'
 > & {
     value: TOption | null
 }
@@ -15,7 +16,7 @@ type DynamicSelectReadOnlyValueProps<TOption extends DynamicSelectOption> = Pick
  * count, so the ≤5 chip variant and the 6+ autocomplete variant read the same.
  *
  * Text = Body Base 16/24 `text-icon/body` (delta-700) at every `size`: `size` scales chips and
- * buttons, and read-only draws neither. No value → `-`, the same placeholder the chip variant shows.
+ * buttons, and read-only draws neither. No value → an em dash (`StyledEmptyValue`), as the chip variant shows.
  * Multiple selects never reach this component.
  */
 export const DynamicSelectReadOnlyValue = <TOption extends DynamicSelectOption>({
@@ -28,6 +29,7 @@ export const DynamicSelectReadOnlyValue = <TOption extends DynamicSelectOption>(
     valueKey = 'value' as DynamicSelectReadOnlyValueProps<TOption>['valueKey'],
     labelKey = 'label' as DynamicSelectReadOnlyValueProps<TOption>['labelKey'],
     renderLabel,
+    locale,
 }: DynamicSelectReadOnlyValueProps<TOption>): JSX.Element => {
     const getOptionValue = (option: TOption | null) => {
         if (typeof option === 'object') return option?.[valueKey as keyof TOption]
@@ -58,7 +60,9 @@ export const DynamicSelectReadOnlyValue = <TOption extends DynamicSelectOption>(
                 data-testid={`${dataTest}-read-only-value`}
                 className='text-base/6 text-delta-700'
             >
-                {selected === null ? '-' : renderLabel ? renderLabel(selected) : getOptionLabel(selected)}
+                {selected === null ? (
+                    <StyledEmptyValue locale={locale} />
+                ) : renderLabel ? renderLabel(selected) : getOptionLabel(selected)}
             </div>
         </div>
     )

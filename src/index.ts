@@ -12,6 +12,7 @@ export * from './components/icons'
 export * from './components/data-display/typography'
 export * from './components/data-display/form-label'
 export * from './components/data-display/read-only-text'
+export * from './components/data-display/empty-value'
 export * from './components/data-display/ai-disclosure'
 // feedback
 export * from './components/feedback/dialog'

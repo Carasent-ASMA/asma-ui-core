@@ -14,12 +14,23 @@ describe('StyledReadOnlyText', () => {
         await expect(container.querySelector('input, textarea')).toBeNull()
     })
 
-    it('shows "-" for an empty value', async () => {
+    it('shows an em dash, read as "Not provided", for an empty value', async () => {
         for (const value of [undefined, null, '', '   ']) {
             const { container } = mount(<StyledReadOnlyText title='Description' value={value} dataTest='description' />)
-            await expect(container.querySelector('[data-testid="description"]')).toHaveTextContent('-')
+            const shown = container.querySelector('[data-testid="description"]')!
+            await expect(shown).toHaveTextContent('—Not provided')
+            await expect(shown.querySelector('[aria-hidden="true"]')).toHaveTextContent('—')
             cleanup()
         }
+    })
+
+    it('reads the empty value in the given locale, and shows emptyText when given', async () => {
+        const { container } = mount(<StyledReadOnlyText locale='no' title='Description' dataTest='no' />)
+        await expect(container.querySelector('[data-testid="no"]')).toHaveTextContent('—Ikke oppgitt')
+        cleanup()
+
+        const custom = mount(<StyledReadOnlyText emptyText='None' title='Description' dataTest='custom' />)
+        await expect(custom.container.querySelector('[data-testid="custom"]')).toHaveTextContent('None')
     })
 
     it('keeps 0 as a value', async () => {
