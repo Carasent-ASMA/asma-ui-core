@@ -6,8 +6,23 @@ import { StyledTable } from './StyledTableIndex'
 
 /**
  * ASMA-8137: the table renders core's button, checkbox and menu item, which emit `data-testid`. Apps whose
- * `testIdAttribute` is `data-test` (editor, qnreditor, crm) still query these hooks, so the table keeps them.
+ * `testIdAttribute` is `data-test` still query these hooks, so the table keeps them.
+ *
+ * Complete consumer audit (2026-11-19), with file:line evidence: visual-tests/ASMA-8137.md.
+ * Searched tests, e2e, Playwright configs and component code in editor (including its qnreditor
+ * checkout), qnreditor, storage, crm, directory, calendar, chat, artifact, notification, shell and
+ * advoca. Also verified the storage/CRM worktree specs cited by the original migration.
+ * - cell-select: editor/qnreditor QuestionnaireTemplatePickerDialog.focus.test.tsx:168; storage
+ *   PathwayDocumentPickerIndex.focus.test.tsx:151.
+ * - expand-text-button: those picker specs (:125 / :163), plus editor/qnreditor
+ *   ModuleTemplatePickerDialog.focus.test.tsx:162.
+ * - row-actions-button: editor/qnreditor tests/pathways-template-lifecycle.spec.ts:34.
+ * - reset-order-button: CRM OrganizationsTable.sorting.test.tsx:186.
+ * No consumer queries select-all, pagination, column-settings/visibility, or datetime's migrated
+ * button hooks. CRM's `close-button` is its own DeleteDialog button, not the calendar caption.
+ * Keep this verified list explicit; add aliases and evidence here if another consumer is found.
  */
+const verifiedLegacyHooks = ['cell-select', 'expand-text-button', 'row-actions-button', 'reset-order-button'] as const
 
 const data = [
     { id: 'r-1', name: 'First' },
@@ -38,14 +53,16 @@ describe('StyledTable legacy data-test hooks (ASMA-8137)', () => {
             />,
         )
 
-        for (const hook of ['cell-select', 'expand-text-button', 'row-actions-button']) {
-            const element = await waitForElement(`[data-testid="${hook}"]`)
-            await expect(element, hook).toHaveAttribute('data-test', hook)
-        }
-
         await userEvent.click(await waitForElement('thead button[aria-haspopup="true"]'))
-        const reset = await waitForElement('[data-testid="reset-order-button"]')
-        await expect(reset).toHaveAttribute('data-test', 'reset-order-button')
+        await waitForElement('[data-testid="reset-order-button"]')
+
+        for (const hook of verifiedLegacyHooks) {
+            // Check every row, and that the legacy selector resolves to the same root elements:
+            // a checkbox alias on its hidden input would not preserve the consumer contract.
+            const elements = [...document.querySelectorAll(`[data-testid="${hook}"]`)]
+            await expect(elements, hook).toHaveLength(hook === 'reset-order-button' ? 1 : data.length)
+            await expect([...document.querySelectorAll(`[data-test="${hook}"]`)], hook).toEqual(elements)
+        }
     })
 })
 
