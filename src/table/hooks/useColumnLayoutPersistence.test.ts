@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import type { LeafColumnInfo } from '../helpers/columnIds'
 import {
+    columnLayoutInputsChanged,
     getColumnOrderStorageKey,
     getColumnVisibilityStorageKey,
     isColumnOrderEntry,
     isColumnVisibilityEntry,
     sanitizeColumnOrder,
     sanitizeColumnVisibility,
+    type ColumnLayoutInputs,
 } from './useColumnLayoutPersistence'
 
 const column = (id: string, canHide = true): LeafColumnInfo => ({ id, canSort: true, canMultiSort: true, canHide })
@@ -98,6 +100,51 @@ describe('a well-formed entry is not the same as a usable one (ASMA-8698, m2)', 
     it('G-05: the sanitizers still say there is nothing usable in an empty entry, which is what the guards are for', () => {
         expect(sanitizeColumnOrder({ v: 1, order: [] })).toBeUndefined()
         expect(sanitizeColumnVisibility({ v: 1, visibility: {} }, [])).toBeUndefined()
+    })
+})
+
+describe('when the inputs of the column layout have changed (ASMA-8695 audit, ASMA-8698)', () => {
+    const inputs = (overrides: Partial<ColumnLayoutInputs> = {}): ColumnLayoutInputs => ({
+        signature: undefined,
+        definitionIds: ['a', 'b', 'c'],
+        defaultOrder: [],
+        defaultVisibility: { c: false },
+        ...overrides,
+    })
+    const SAVED = JSON.stringify([['a', 'b', 'c'], [], [['c', false]]])
+
+    it('R-01: nothing to compare with, nothing has changed', () => {
+        expect(columnLayoutInputsChanged(undefined, inputs({ signature: SAVED }))).toBe(false)
+    })
+
+    it('R-02: the same inputs have not changed, whether or not the last commit recorded its signature', () => {
+        expect(columnLayoutInputsChanged(inputs({ signature: SAVED }), inputs({ signature: SAVED }))).toBe(false)
+        expect(columnLayoutInputsChanged(inputs({ signature: undefined }), inputs({ signature: SAVED }))).toBe(false)
+        expect(columnLayoutInputsChanged(inputs({ signature: SAVED }), inputs({ signature: undefined }))).toBe(false)
+    })
+
+    it('R-03: a new column, a new default order and a new default visibility each count as a change', () => {
+        const before = inputs({ signature: SAVED })
+
+        expect(columnLayoutInputsChanged(before, inputs({ definitionIds: ['a', 'b', 'x', 'c'] }))).toBe(true)
+        expect(columnLayoutInputsChanged(before, inputs({ defaultOrder: ['c', 'a', 'b'] }))).toBe(true)
+        expect(columnLayoutInputsChanged(before, inputs({ defaultVisibility: { a: false } }))).toBe(true)
+    })
+
+    it('R-04: a table opted in later, with other columns than it had, is reconciled as one opted in all along', () => {
+        // The last commit was made while the layout was not saved, so it recorded no signature, only its inputs.
+        const whileNotSaved = inputs({ signature: undefined })
+
+        expect(columnLayoutInputsChanged(whileNotSaved, inputs({ definitionIds: ['a', 'b', 'x', 'c'] }))).toBe(true)
+        expect(columnLayoutInputsChanged(whileNotSaved, inputs({ defaultVisibility: { b: false } }))).toBe(true)
+        expect(columnLayoutInputsChanged(whileNotSaved, inputs({ defaultOrder: ['b', 'a', 'c'] }))).toBe(true)
+    })
+
+    it('R-05: the order the default visibility is listed in does not matter', () => {
+        const a = inputs({ defaultVisibility: { b: false, c: false } })
+        const b = inputs({ defaultVisibility: { c: false, b: false } })
+
+        expect(columnLayoutInputsChanged(a, b)).toBe(false)
     })
 })
 

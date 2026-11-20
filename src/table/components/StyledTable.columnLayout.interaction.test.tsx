@@ -801,6 +801,61 @@ describe('StyledTable per-user column layout', () => {
             await expect(callsFor(setItem.mock.calls, /:column-(?:order|visibility)$/)).toEqual([])
         })
 
+        it('L-17b: a table opted in later (persistColumnLayout false, then true, with a new column, new default visibility and a legacy order key) is reconciled as one opted in all along', async () => {
+            const appOrder = ['role', 'age', 'name', 'notes', 'actions']
+            const view = mount(
+                <LayoutTable
+                    initialState={{ columnOrder: appOrder, columnVisibility: { notes: false } }}
+                    persistColumnLayout={false}
+                    persistColumnOrderKey={LEGACY_ORDER_KEY}
+                />,
+            )
+            await expect(headerLabels()).toEqual(['Role', 'Age', 'Name'])
+            const setItem = vi.spyOn(Storage.prototype, 'setItem')
+            const removeItem = vi.spyOn(Storage.prototype, 'removeItem')
+
+            view.rerender(
+                <LayoutTable
+                    columns={extraColumns}
+                    initialState={{ columnOrder: appOrder, columnVisibility: { notes: true, age: false } }}
+                    persistColumnLayout
+                    persistColumnOrderKey={LEGACY_ORDER_KEY}
+                />,
+            )
+            await settle()
+
+            // The new defaults reach the user, who had changed nothing, and `extra` takes its definition position after `role`. No dot,
+            // nothing saved or removed, and the legacy order key going away does not disturb it. (On this path the layout writers load the
+            // new keys' defaults themselves, so this does not need the reconcile; `columnLayoutInputsChanged` is pinned by R-01 to R-05.)
+            await expect(headerLabels()).toEqual(['Role', 'Extra', 'Name', 'Notes'])
+            await expect(dot()).toBeNull()
+            await expect(callsFor(setItem.mock.calls, /(?::column-(?:order|visibility)|NetworkColumnOrder)$/)).toEqual([])
+            await expect(callsFor(removeItem.mock.calls, /(?::column-(?:order|visibility)|NetworkColumnOrder)$/)).toEqual([])
+        })
+
+        it('L-17c: a column added while the layout is not saved, a reorder, then the opt-in: the table is compared with the columns it had just before, not with those it mounted with', async () => {
+            const view = mount(<LayoutTable persistColumnLayout={false} />)
+
+            await expect(headerLabels()).toEqual(['Name', 'Role', 'Age', 'Notes'])
+
+            // Still legacy: the app adds a column, and the user then moves one.
+            view.rerender(<LayoutTable columns={extraColumns} persistColumnLayout={false} />)
+            await settle()
+            await act(() => table().setColumnOrder(['age', 'name', 'role', 'extra', 'notes', 'actions']))
+            await expect(headerLabels()).toEqual(['Age', 'Name', 'Role', 'Extra', 'Notes'])
+
+            const setOrder = vi.spyOn(table(), 'setColumnOrder')
+
+            // The opt-in changes no column and no default since the render before it, so the reconcile has nothing to do. The one
+            // call is the layout writer loading the new key's order (the default: the user's legacy move is not carried over). A
+            // reconcile that judged the table against the columns it mounted with would find `extra` new and call it a second time.
+            view.rerender(<LayoutTable columns={extraColumns} persistColumnLayout />)
+            await settle()
+
+            await expect(headerLabels()).toEqual(['Name', 'Role', 'Extra', 'Age', 'Notes'])
+            await expect(setOrder.mock.calls.map(([order]) => order)).toEqual([[]])
+        })
+
         it('L-18: a change the user makes in the same render as a new column is saved, not lost', async () => {
             const Both = (): JSX.Element => {
                 const [withExtra, setWithExtra] = useState(false)

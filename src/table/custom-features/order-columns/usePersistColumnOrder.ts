@@ -17,7 +17,8 @@ const NO_ORDER: ColumnOrderState = []
 /**
  * Saves the column order under `key` when it changes. An order that is `[]` or that matches the live
  * definition order removes the entry instead (ASMA-8597, REQ-004), so a table the user has put back to its
- * defaults stores nothing. Mounting never writes.
+ * defaults stores nothing. Mounting never writes. A table with no key does no work per render (ASMA-8698), and whether the
+ * order is the default is worked out only when it is about to be saved.
  *
  * When `key` changes on a table that stays mounted (one table, a key per tab), the new key's order is loaded into the
  * table in a layout effect, so the old order is never painted under the new key (ASMA-8698). It is the order a fresh
@@ -32,8 +33,7 @@ export function usePersistColumnOrder<TData = unknown>(
 ): void {
     const { saved, defaultOrder, controlled = false } = load
     const order = table.getState().columnOrder
-    const signature = JSON.stringify(order ?? [])
-    const isDefault = !order?.length || isDefaultColumnOrder(table)
+    const signature = key ? JSON.stringify(order ?? []) : ''
 
     const keyRef = useRef(key)
     const lastSeenRef = useRef(signature)
@@ -52,7 +52,8 @@ export function usePersistColumnOrder<TData = unknown>(
 
         if (key) blockRef.current = { stale: signature, loaded }
 
-        if (!controlled && loaded !== signature) table.setColumnOrder(target)
+        // `signature` is empty while there is no key, so the current order is worked out here, once per key change.
+        if (!controlled && loaded !== JSON.stringify(order ?? [])) table.setColumnOrder(target)
         // Only a key change reloads; the closure is that render's, so it holds the new key's values.
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [key])
@@ -80,12 +81,12 @@ export function usePersistColumnOrder<TData = unknown>(
 
         lastSeenRef.current = signature
 
-        if (isDefault) {
+        if (!order?.length || isDefaultColumnOrder(table)) {
             tableStorage.remove(key)
         } else {
             tableStorage.set(key, signature)
         }
-        // `order` is covered by `signature`, and `isDefault` is computed from the same render.
+        // `order` is covered by `signature`.
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [signature, key])
 }
