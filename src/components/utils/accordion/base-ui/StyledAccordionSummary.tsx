@@ -82,6 +82,8 @@ export const StyledAccordionSummary = ({
                 className={clsx(styles['Trigger'], 'asma-pressable', className)}
                 style={styleVars}
                 data-panel-open={open ? '' : undefined}
+                // ASMA-8600: StyledAccordionDetails `toolbarHeader` reads the summary size from here.
+                data-size={size}
             >
                 {/* Figma places the chevron LEFT of the title (default); `expandChevronRight` opts into right. */}
                 {expandChevronRight ? (

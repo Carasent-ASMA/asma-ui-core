@@ -148,9 +148,11 @@ export const Gallery = {
 // ─── Toolbar header (ASMA-8600) ─────────────────────────────────────────────
 // An accordion whose header is a DynamicToolbar (filter + search) directly above a table. Figma wants
 // 16px from the controls to the table header. `toolbarHeader` on StyledAccordionDetails makes the
-// content's padding-top follow the toolbar's layout: inline (container >= 744px) 0, because the 72px
-// summary row already leaves 16px under the 40px controls; compact/stacked 16, because the controls
-// are the toolbar's last row. Without the prop the content keeps its default padding (8px top).
+// content's padding-top follow the header: inline (container >= 744px) 0 for the large 72px summary
+// (it already leaves 16px under the 40px controls) and 12px for the small 48px one (4px + 12);
+// compact/stacked/selection-split 16, because the controls are the toolbar's last row. With helper text
+// (inline) the helper row sits under the controls, so the table is 16px under the helper text instead.
+// Without the prop the content keeps its default padding (8px top).
 // VRT: skipped like every DynamicToolbar story (ResizeObserver width planning oscillates), see
 // visual-tests/stories.spec.ts; the gap is asserted in StyledAccordion.toolbarHeader.interaction.test.tsx.
 
@@ -171,15 +173,27 @@ const TOOLBAR_COLUMNS: ColumnDef<ToolbarRow>[] = [
     { accessorKey: 'status', header: 'Status', size: 160 },
 ]
 
-const ToolbarHeaderDemo = ({ width }: { width: number }): JSX.Element => {
+const ToolbarHeaderDemo = ({
+    width,
+    size = 'large',
+    helperText,
+}: {
+    width: number
+    size?: 'large' | 'small'
+    helperText?: string
+}): JSX.Element => {
     const [search, setSearch] = useState('')
 
     return (
         <div style={{ width }}>
             <StyledAccordion defaultExpanded className='rounded-lg border border-solid border-delta-300'>
                 <DynamicToolbar
+                    helperText={helperText}
                     title={
-                        <StyledAccordionSummary sx={{ '--trigger-padding-x': '0px' } as React.CSSProperties}>
+                        <StyledAccordionSummary
+                            size={size}
+                            sx={{ '--trigger-padding-x': '0px' } as React.CSSProperties}
+                        >
                             Consents
                         </StyledAccordionSummary>
                     }
@@ -213,4 +227,14 @@ export const ToolbarHeaderWide = {
 /** Compact toolbar (container < 744px): content padding-top 16px, 16px from the controls to the table. */
 export const ToolbarHeaderNarrow = {
     render: (): JSX.Element => <ToolbarHeaderDemo width={480} />,
+}
+
+/** Small (48px) summary, inline toolbar: content padding-top 12px, 16px from the controls to the table. */
+export const ToolbarHeaderSmall = {
+    render: (): JSX.Element => <ToolbarHeaderDemo width={900} size='small' />,
+}
+
+/** Inline toolbar with helper text: the helper row is below the controls, the table is 16px under it. */
+export const ToolbarHeaderHelperText = {
+    render: (): JSX.Element => <ToolbarHeaderDemo width={900} helperText='Helper text under the title' />,
 }

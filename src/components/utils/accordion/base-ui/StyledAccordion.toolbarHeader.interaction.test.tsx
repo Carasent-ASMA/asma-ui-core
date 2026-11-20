@@ -260,3 +260,157 @@ describe('StyledAccordionDetails toolbarHeader by layout value (ASMA-8600)', () 
         }
     })
 })
+
+/**
+ * Review-desk F2: the padding has to follow the header, not only the layout. In the inline toolbar the
+ * 40px controls are centred in the summary row, so the summary leaves (height - 40) / 2 under them:
+ * 72px -> 16, 48px -> 4. Helper text is a further row below the controls (4px gap + a 20px line).
+ *
+ * Every supported variant is mounted with the real `DynamicToolbar` and measured. The target is 16px
+ * from the lowest control to the table. Two cases measure something else, on purpose, and say so:
+ *
+ * - helper text (inline; in the other layouts it is above the controls, which stay last): the controls are no longer the last thing in the header and the helper row sits
+ *   between them and the table, so 16px under the controls is unreachable (a negative margin would put the
+ *   table over the helper text). The table is 16px under the helper text instead.
+ * - stacked: the toolbar's own row is 44.4px tall with after-search actions (the actions wrapper) and the
+ *   search/filter sit 2.2px above its bottom, before any content padding. That is DynamicToolbar's
+ *   alignment, not the content's: the content adds exactly 16.
+ */
+
+type Layout = 'inline' | 'compact' | 'stacked' | 'selection-split'
+
+interface Variant {
+    name: string
+    size: 'large' | 'small'
+    helper: boolean
+    layout: Layout
+    /** Container width that makes the toolbar plan `layout`. */
+    width: number
+    /** Padding-top the content must have with `toolbarHeader`. */
+    paddingTop: string
+}
+
+const actions = (count: number): { id: string; label: string; onClick: () => void; priority: number }[] =>
+    Array.from({ length: count }, (_, index) => ({
+        id: `a${index}`,
+        label: `Action number ${index}`,
+        onClick: () => undefined,
+        priority: 50,
+    }))
+
+const VARIANTS: Variant[] = [
+    { name: 'large inline', size: 'large', helper: false, layout: 'inline', width: 1000, paddingTop: '0px' },
+    { name: 'small inline', size: 'small', helper: false, layout: 'inline', width: 1000, paddingTop: '12px' },
+    { name: 'large inline + helper', size: 'large', helper: true, layout: 'inline', width: 1000, paddingTop: '16px' },
+    { name: 'small inline + helper', size: 'small', helper: true, layout: 'inline', width: 1000, paddingTop: '16px' },
+    { name: 'large compact', size: 'large', helper: false, layout: 'compact', width: 500, paddingTop: '16px' },
+    { name: 'small compact', size: 'small', helper: false, layout: 'compact', width: 500, paddingTop: '16px' },
+    { name: 'large compact + helper', size: 'large', helper: true, layout: 'compact', width: 500, paddingTop: '16px' },
+    { name: 'large stacked', size: 'large', helper: false, layout: 'stacked', width: 760, paddingTop: '16px' },
+    { name: 'small stacked', size: 'small', helper: false, layout: 'stacked', width: 760, paddingTop: '16px' },
+    {
+        name: 'large selection-split',
+        size: 'large',
+        helper: false,
+        layout: 'selection-split',
+        width: 760,
+        paddingTop: '16px',
+    },
+    {
+        name: 'small selection-split',
+        size: 'small',
+        helper: false,
+        layout: 'selection-split',
+        width: 760,
+        paddingTop: '16px',
+    },
+]
+
+const variantAccordion = (variant: Variant, toolbarHeader: boolean): ReactElement => (
+    <div style={{ width: variant.width }}>
+        <StyledAccordion defaultExpanded>
+            <DynamicToolbar
+                dataTest='toolbar'
+                className='px-4'
+                helperText={variant.helper ? 'Helper text' : undefined}
+                selectedCount={variant.layout === 'selection-split' ? 3 : 0}
+                onClearSelection={() => undefined}
+                bulkActions={variant.layout === 'selection-split' ? actions(4) : []}
+                afterSearchActions={variant.layout === 'stacked' ? actions(6) : []}
+                title={
+                    <StyledAccordionSummary
+                        size={variant.size}
+                        sx={{ '--trigger-padding-x': '0px' } as React.CSSProperties}
+                    >
+                        Consents
+                    </StyledAccordionSummary>
+                }
+                filter={<StyledFilterButton dataTest='filter' filterIsActive={false} size='medium' label='Filter' />}
+                search={
+                    <StyledSearchField
+                        dataTest='search'
+                        label='Search'
+                        value=''
+                        onChange={() => undefined}
+                        onClear={() => undefined}
+                    />
+                }
+            />
+            <StyledAccordionDetails className='flex flex-col' toolbarHeader={toolbarHeader} data-testid='details'>
+                {tableOf()}
+            </StyledAccordionDetails>
+        </StyledAccordion>
+    </div>
+)
+
+const mountVariant = async (variant: Variant, toolbarHeader: boolean): Promise<void> => {
+    mount(variantAccordion(variant, toolbarHeader))
+    await waitFor(() => expect(q('[data-testid="toolbar"]')).toHaveAttribute('data-layout', variant.layout))
+    await new Promise((resolve) => setTimeout(resolve, 200))
+    await waitFor(() => expect(q('[data-testid="toolbar"]')).toHaveAttribute('data-layout', variant.layout))
+}
+
+/** The lowest real control of the toolbar (not the hidden measuring strip, which sits above the viewport). */
+const controlsBottom = (): number =>
+    Math.max(
+        ...[
+            ...document.querySelectorAll<HTMLElement>(
+                '[data-testid="toolbar"] button:not([aria-expanded]), [data-testid="search"]',
+            ),
+        ].map((control) => control.getBoundingClientRect().bottom),
+    )
+
+const tableTop = (): number => q('table').getBoundingClientRect().top
+
+const helperBottom = (): number =>
+    [...document.querySelectorAll<HTMLElement>('[data-testid="toolbar"] div')]
+        .find((el) => el.textContent === 'Helper text' && el.children.length === 0)!
+        .getBoundingClientRect().bottom
+
+describe('StyledAccordionDetails toolbarHeader by header variant (ASMA-8600 F2)', () => {
+    afterEach(cleanup)
+
+    it.each(VARIANTS)('$name: content padding-top $paddingTop and the table 16px below', async (variant) => {
+        await mountVariant(variant, true)
+
+        await expect(getComputedStyle(content()).paddingTop).toBe(variant.paddingTop)
+
+        if (variant.helper && variant.layout === 'inline') {
+            // The helper row is between the controls and the table: 16px under the helper text.
+            await expect(Math.abs(tableTop() - helperBottom() - TARGET_GAP)).toBeLessThanOrEqual(1)
+            await expect(tableTop() - controlsBottom()).toBeGreaterThan(TARGET_GAP)
+        } else if (variant.layout === 'stacked') {
+            // 16 from the content, plus the 2.2px the toolbar's own row leaves under the search and filter.
+            await expect(tableTop() - controlsBottom()).toBeGreaterThanOrEqual(TARGET_GAP)
+            await expect(tableTop() - controlsBottom()).toBeLessThanOrEqual(TARGET_GAP + 3)
+        } else {
+            await expect(Math.abs(tableTop() - controlsBottom() - TARGET_GAP)).toBeLessThanOrEqual(1)
+        }
+    })
+
+    it.each(VARIANTS)('$name: without the prop the padding is the old 8px 16px 16px', async (variant) => {
+        await mountVariant(variant, false)
+
+        await expect(padding(content())).toBe('8px 16px 16px 16px')
+    })
+})

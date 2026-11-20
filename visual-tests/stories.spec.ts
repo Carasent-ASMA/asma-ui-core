@@ -43,6 +43,8 @@ const DYNAMIC_TOOLBAR_STORIES = [
     // ASMA-8600: accordion header toolbar stories embed a DynamicToolbar, same oscillation.
     'utils-accordion-baseui--toolbar-header-wide',
     'utils-accordion-baseui--toolbar-header-narrow',
+    'utils-accordion-baseui--toolbar-header-small',
+    'utils-accordion-baseui--toolbar-header-helper-text',
 ] as const
 
 const SKIP = new Map<string, string>([
