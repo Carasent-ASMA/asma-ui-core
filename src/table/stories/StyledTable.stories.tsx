@@ -153,7 +153,7 @@ export const SizingPersistenceAndControlAlignment: Story = {
 
         const checkboxes = Array.from(canvasElement.querySelectorAll<HTMLElement>('[role="checkbox"]'))
         const checkboxGlyphs = Array.from(
-            canvasElement.querySelectorAll<HTMLElement>('[data-test="cell-select-all"], [data-test="cell-select"]'),
+            canvasElement.querySelectorAll<HTMLElement>('[data-testid="cell-select-all"], [data-testid="cell-select"]'),
         )
 
         // Regression: in the shell every micro-app injects its own purged Tailwind sheet, and a
@@ -174,7 +174,7 @@ export const SizingPersistenceAndControlAlignment: Story = {
             hostileAppSheet.remove()
         }
 
-        const rowCheckboxBox = checkboxes[1]?.querySelector<HTMLElement>('[data-test="cell-select"] > span:last-child')
+        const rowCheckboxBox = checkboxes[1]?.querySelector<HTMLElement>('[data-testid="cell-select"] > span:last-child')
         await expect(rowCheckboxBox).not.toBeNull()
         const initialCheckboxBounds = rowCheckboxBox!.getBoundingClientRect()
 
@@ -196,10 +196,10 @@ export const SizingPersistenceAndControlAlignment: Story = {
             await expect(height, `collapsed row ${index} height`).toBeLessThanOrEqual(49)
         }
         const shortRow = bodyRows[1]!
-        const shortRowArrow = shortRow.querySelector<HTMLElement>('[data-test="expand-text-button"]')
+        const shortRowArrow = shortRow.querySelector<HTMLElement>('[data-testid="expand-text-button"]')
         await expect(shortRowArrow).not.toBeNull()
         const shortRowArrowIcon = shortRowArrow!.querySelector<SVGElement>('svg')!
-        const shortRowCheckbox = shortRow.querySelector<HTMLElement>('[data-test="cell-select"]')!
+        const shortRowCheckbox = shortRow.querySelector<HTMLElement>('[data-testid="cell-select"]')!
         const beforeToggle = {
             rowRect: shortRow.getBoundingClientRect(),
             arrowCenter: (() => {
@@ -228,7 +228,7 @@ export const SizingPersistenceAndControlAlignment: Story = {
 
         await userEvent.click(shortRowArrow!)
 
-        const expandButton = canvasElement.querySelector<HTMLElement>('[data-test="expand-text-button"]')
+        const expandButton = canvasElement.querySelector<HTMLElement>('[data-testid="expand-text-button"]')
         await expect(expandButton).not.toBeNull()
         const initialExpandBounds = expandButton!.getBoundingClientRect()
         const firstRow = expandButton!.closest('tr')!
@@ -237,7 +237,7 @@ export const SizingPersistenceAndControlAlignment: Story = {
             return {
                 rowHeight: firstRow.getBoundingClientRect().height,
                 checkboxCenterY: (() => {
-                    const glyph = firstRow.querySelector<HTMLElement>('[data-test="cell-select"]')!
+                    const glyph = firstRow.querySelector<HTMLElement>('[data-testid="cell-select"]')!
                     const bounds = glyph.getBoundingClientRect()
                     return bounds.top + bounds.height / 2
                 })(),
@@ -268,7 +268,7 @@ export const SizingPersistenceAndControlAlignment: Story = {
 
         await userEvent.click(expandButton!)
 
-        const expandedButton = canvasElement.querySelector<HTMLElement>('[data-test="expand-text-button"]')
+        const expandedButton = canvasElement.querySelector<HTMLElement>('[data-testid="expand-text-button"]')
         await expect(expandedButton).not.toBeNull()
         const expandedBounds = expandedButton!.getBoundingClientRect()
         const expandedIcon = expandedButton!.querySelector<SVGElement>('svg')
@@ -310,7 +310,7 @@ export const SizingPersistenceAndControlAlignment: Story = {
         await expect(expandedBounds.width).toBe(initialExpandBounds.width)
         await expect(expandedBounds.height).toBe(initialExpandBounds.height)
         const expandedCheckboxBox = canvasElement.querySelector<HTMLElement>(
-            '[role="checkbox"] [data-test="cell-select"] > span:last-child',
+            '[role="checkbox"] [data-testid="cell-select"] > span:last-child',
         )
         await expect(expandedCheckboxBox).not.toBeNull()
         const expandedCheckboxBounds = expandedCheckboxBox!.getBoundingClientRect()
@@ -453,7 +453,7 @@ export const FooterRowCountBoundary: Story = {
 
         // Under the threshold: the custom footer renders, pagination controls stay hidden.
         await expect(section('footer-boundary-4').querySelector('[data-test="custom-footer"]')).not.toBeNull()
-        await expect(section('footer-boundary-4').querySelector('[data-test="table-rows-count-button"]')).toBeNull()
+        await expect(section('footer-boundary-4').querySelector('[data-testid="table-rows-count-button"]')).toBeNull()
         for (const row of section('footer-boundary-4').querySelectorAll('tbody tr')) {
             const height = row.getBoundingClientRect().height
             await expect(height).toBeGreaterThanOrEqual(48)
@@ -464,7 +464,7 @@ export const FooterRowCountBoundary: Story = {
         for (const rowCount of [5, 6]) {
             const boundarySection = section(`footer-boundary-${rowCount}`)
             await expect(boundarySection.querySelector('[data-test="custom-footer"]')).not.toBeNull()
-            await expect(boundarySection.querySelector('[data-test="table-rows-count-button"]')).not.toBeNull()
+            await expect(boundarySection.querySelector('[data-testid="table-rows-count-button"]')).not.toBeNull()
         }
 
         // Under the threshold without a custom footer: no footer element renders at all.
@@ -611,7 +611,7 @@ export const LockedRows: Story = {
         const control = (rowId: string) =>
             canvasElement.querySelector<HTMLElement>(`tr[id="${rowId}"] [role="checkbox"]`)!
         const box = (rowId: string) =>
-            control(rowId).querySelector<HTMLElement>('[data-test="cell-select"] > span:last-of-type')!
+            control(rowId).querySelector<HTMLElement>('[data-testid="cell-select"] > span:last-of-type')!
 
         // Ticked + locked: read-only, so the box keeps its white fill rather than the disabled grey.
         await expect(control('attached')).toHaveAttribute('aria-checked', 'true')
@@ -1073,7 +1073,7 @@ export const ColumnSettingsMenu: Story = {
         await waitFor(() => expect(pin).toHaveAttribute('aria-expanded', 'true'))
 
         const checkbox = (column: string): HTMLInputElement =>
-            canvasElement.ownerDocument.querySelector<HTMLInputElement>(`[data-test="${column}-column-visibility-checkbox"] input`)!
+            canvasElement.ownerDocument.querySelector<HTMLInputElement>(`[data-testid="${column}-column-visibility-checkbox"] input`)!
         await waitFor(() => expect(checkbox('role')).not.toBeNull())
         await expect(checkbox('role')).toHaveAccessibleName('Role')
         await expect(checkbox('updatedBy')).toHaveAccessibleName('Updated by')

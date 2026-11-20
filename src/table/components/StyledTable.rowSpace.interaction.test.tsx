@@ -169,7 +169,7 @@ describe('ASMA-8875: a click on a select checkbox focuses it', () => {
         mountTable(withSelect)
 
         const cell = checkbox('r-2').closest('td')!
-        const box = (): DOMRect => cell.querySelector('[data-test="cell-select"]')!.getBoundingClientRect()
+        const box = (): DOMRect => cell.querySelector('[data-testid="cell-select"]')!.getBoundingClientRect()
         const rest = box()
 
         // A key press first: a focus from script after it would show the focus frame; the click's must not.

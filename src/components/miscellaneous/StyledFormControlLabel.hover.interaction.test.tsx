@@ -4,7 +4,6 @@ import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { StyledCheckbox } from 'src/components/inputs/checkbox/base-ui/StyledCheckbox'
 import { StyledRadio } from 'src/components/inputs/radio-button/base-ui/StyledRadio'
 import { StyledRadioGroup } from 'src/components/inputs/radio-button/base-ui/StyledRadioGroup'
-import { StyledCheckbox as TableStyledCheckbox } from 'src/table/shared-components/StyledCheckbox'
 import { StyledFormControlLabel } from './StyledFormControlLabel'
 
 /**
@@ -77,7 +76,6 @@ describe('a long wrapping label does not squeeze the control', () => {
 
     it.each([
         ['checkbox', <StyledCheckbox key='c' dataTest='long' />],
-        ['table checkbox', <TableStyledCheckbox key='t' dataTest='long' />],
         ['radio', <StyledRadio key='r' dataTest='long' value='a' />],
     ] as const)('%s keeps its 40x40 target', async (_kind, control) => {
         mount(

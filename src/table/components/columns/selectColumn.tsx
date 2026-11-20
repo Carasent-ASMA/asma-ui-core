@@ -2,7 +2,8 @@ import type { CellContext, ColumnDef, HeaderContext } from '@tanstack/react-tabl
 import type { KeyboardEvent, MouseEvent } from 'react'
 import { SELECT_COLUMN_ID } from '../../types'
 import style from '../StyledTable.module.scss'
-import { StyledCheckbox } from 'src/table/shared-components/StyledCheckbox'
+import { cn } from 'src/table/helpers/cn'
+import { StyledCheckbox } from 'src/components/inputs/checkbox/base-ui/StyledCheckbox'
 import { StyledTooltip } from 'src/table/shared-components/tooltip'
 
 const stopMouseEvent = (event: MouseEvent<HTMLElement>) => {
@@ -67,7 +68,8 @@ export function selectColumn<TData>(isFixed: boolean, rowHeight?: number, locale
                         decorative
                         checked={table.getIsAllRowsSelected()}
                         indeterminate={table.getIsSomeRowsSelected()}
-                        className='pointer-events-none'
+                        className={cn('pointer-events-none', style['select-checkbox'])}
+                        checkboxClassName={style['select-checkbox-box']}
                         // DO NOT REMOVE needed for layout consistency
                         hideWrapper
                     />
@@ -130,13 +132,16 @@ export function selectColumn<TData>(isFixed: boolean, rowHeight?: number, locale
                             <StyledCheckbox
                                 size='small'
                                 dataTest='cell-select'
+                                // Editor and qnreditor picker tests still query the legacy `data-test` hook.
+                                data-test='cell-select'
                                 decorative
                                 checked={checked}
                                 // DO NOT REMOVE needed for layout consistency
                                 hideWrapper
                                 disabled={disabled}
                                 readOnly={readOnly}
-                                className='pointer-events-none'
+                                className={cn('pointer-events-none', style['select-checkbox'])}
+                                checkboxClassName={style['select-checkbox-box']}
                             />
                         </span>
                     </div>

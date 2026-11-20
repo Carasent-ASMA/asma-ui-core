@@ -4,7 +4,6 @@ import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { StyledMenuList } from './StyledMenuList'
 import { StyledMenuItem } from './StyledMenuItem'
-import { StyledMenuItem as TableMenuItem } from 'src/table/shared-components/StyledMenuItem'
 import { StyledMenuItem as TableCheckMenuItem } from 'src/table/shared-components/menu-item'
 import { StyledSelect } from 'src/components/inputs/select/StyledSelect'
 import { StyledSelectItem } from 'src/components/inputs/select/StyledSelectItem'
@@ -91,18 +90,6 @@ describe('Menu rows match the Figma Menus item (40px, 8px top/bottom)', () => {
             <StyledMenuList>
                 {LABELS.slice(0, 4).map((label) => (
                     <StyledMenuItem key={label}>{label}</StyledMenuItem>
-                ))}
-            </StyledMenuList>,
-        )
-        await waitFor(() => expect(menuItems()).toHaveLength(4))
-        await expectFigmaRows(menuItems())
-    })
-
-    it('table row-action StyledMenuItem', async () => {
-        mount(
-            <StyledMenuList>
-                {LABELS.slice(0, 4).map((label) => (
-                    <TableMenuItem key={label}>{label}</TableMenuItem>
                 ))}
             </StyledMenuList>,
         )
@@ -202,7 +189,7 @@ describe('Menu popovers pad their list 8px top and bottom', () => {
                 actions={() => LABELS.slice(0, 3).map((label) => ({ label, onClick: () => undefined }))}
             />,
         )
-        document.querySelector<HTMLButtonElement>('[data-test="row-actions-button"]')!.click()
+        document.querySelector<HTMLButtonElement>('[data-testid="row-actions-button"]')!.click()
         await expectListPadding()
     })
 })

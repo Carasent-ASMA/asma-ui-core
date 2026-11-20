@@ -175,7 +175,7 @@ export const COMPONENT_PAIRS: readonly ContrastPair[] = [
         foreground: '--colors-delta-800',
         background: APP_SURFACE,
         requirement: 'text',
-        usedBy: 'src/table/shared-components/StyledMenuItem.tsx',
+        usedBy: 'src/table/components/columns/dndHandleColumn.tsx',
     },
     {
         id: 'tooltip/label',

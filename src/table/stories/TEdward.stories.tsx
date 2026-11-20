@@ -2,9 +2,9 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import type { Meta } from '@storybook/react-vite'
 import { StyledTable } from 'src/table/components/StyledTableIndex'
 import type { ColumnDef, Row } from '@tanstack/react-table'
-import { StyledButton } from 'src/table/shared-components/button'
+import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { type Table } from '@tanstack/react-table'
-import { StyledCheckbox } from 'src/table/shared-components/StyledCheckbox'
+import { StyledCheckbox } from 'src/components/inputs/checkbox/base-ui/StyledCheckbox'
 
 const meta: Meta = {
     title: 'Table/TEdward',
@@ -153,7 +153,7 @@ const useColumns = () => {
                             {id === 'col1' && (
                                 // if you want Checkbox to be visible -> Use <p> instead of <div>
                                 <div className='mt-1'>
-                                    <StyledCheckbox dataTest='test' disabled={true} />
+                                    <StyledCheckbox dataTest='test' aria-label={`Select row ${info.row.index + 1}`} disabled={true} />
                                 </div>
                             )}
                         </div>
