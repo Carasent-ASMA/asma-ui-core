@@ -17,7 +17,9 @@ checkbox, so a mixed option list keeps one icon column and one label indent; the
 40px circle concentric with the target.
 
 `StyledChip` / `StyledInteractiveChip` keep their control (and delete affordance) on the first
-line when the label wraps below 320px. One-line chips are unchanged. No new chip prop is needed:
-the existing `label: ReactNode` already covers richer content, and a chip-level helper line would
-change the compact tag's height and selection semantics. Apps can drop the
-`relative! -top-2!` / `gap-0!` option-label workarounds in favour of `helperText`.
+line whenever the label wraps, including a consumer-forced wrap at desktop widths; one-line chips
+are unchanged. No new chip prop is needed: the existing `label: ReactNode` already covers richer
+content, and a chip-level helper line would change the compact tag's height and selection
+semantics. Apps can drop the `relative! -top-2!` / `gap-0!` workarounds: use `helperText` for
+`StyledFormControlLabel`, and keep the chip's existing `label`/`classes.label` wrapping — the
+control now follows the first line in both components.

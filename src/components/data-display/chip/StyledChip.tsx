@@ -1,5 +1,8 @@
 import {
     forwardRef,
+    useLayoutEffect,
+    useRef,
+    useState,
     type CSSProperties,
     type KeyboardEvent,
     type MouseEvent,
@@ -172,6 +175,49 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
             paddingLeft: padding.left,
         }
 
+        const labelRef = useRef<HTMLSpanElement>(null)
+        const [labelWraps, setLabelWraps] = useState(false)
+
+        // ASMA-9001: first-line alignment is a property of an actually wrapping label, not of the
+        // viewport. A one-line chip keeps the original `items-center` row and padding exactly (a
+        // ReactNode label's first line is not always 24px, so an unconditional switch shifted the
+        // existing state-table chips by 2px). Count the rendered line boxes and switch only when
+        // there is more than one; the classes below then apply at any width.
+        useLayoutEffect(() => {
+            const labelElement = labelRef.current
+            if (!labelElement) return undefined
+
+            const measure = (): void => {
+                const range = document.createRange()
+                range.selectNodeContents(labelElement)
+                const rects = Array.from(range.getClientRects()).filter(
+                    (rect) => rect.width > 0 || rect.height > 0,
+                )
+                // Inline fragments on one visual line (e.g. "First Name • 12612") vertically
+                // overlap; separate line boxes do not.
+                const lines: { top: number; bottom: number }[] = []
+                for (const rect of rects) {
+                    const line = lines.find(
+                        (candidate) => rect.top < candidate.bottom - 1 && rect.bottom > candidate.top + 1,
+                    )
+                    if (line) {
+                        line.top = Math.min(line.top, rect.top)
+                        line.bottom = Math.max(line.bottom, rect.bottom)
+                    } else {
+                        lines.push({ top: rect.top, bottom: rect.bottom })
+                    }
+                }
+                const next = lines.length > 1
+                setLabelWraps((previous) => (previous === next ? previous : next))
+            }
+
+            measure()
+            if (typeof ResizeObserver === 'undefined') return undefined
+            const observer = new ResizeObserver(measure)
+            observer.observe(labelElement)
+            return () => observer.disconnect()
+        }, [])
+
         const handleDelete = (event: MouseEvent<HTMLButtonElement>): void => {
             event.stopPropagation()
             onDelete?.(event)
@@ -214,17 +260,18 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                 onMouseUp={disabled || readOnly ? undefined : onMouseUp}
                 className={cn(
                     // Figma _BASE_Tag (node 14312-26020): label Body Base 16px/lh24, text-icon/body #49525f (delta-700), border/outline #bdc4cf (delta-300), radius 25, gap 4.
-                    // ASMA-9001: below 320px the chip becomes `h-auto` and a long label wraps. Only
-                    // then does the cross axis switch to `items-start` (plus the first-line margins
-                    // on the slots) so the control and delete button stay on the first line. Above
-                    // 320px the old `items-center` row is preserved pixel for pixel.
-                    'box-border inline-flex items-center gap-1 rounded-[25px] border border-solid border-delta-300 bg-white text-base text-delta-700',
-                    'max-xs:items-start',
+                    // ASMA-9001: first-line alignment applies when the label actually wraps, at any
+                    // width. Keeping the one-line row centered is what preserves every existing
+                    // pixel, including ReactNode labels whose first line is not 24px. A wrapped
+                    // label switches to `items-start`, drops the vertical padding (which only
+                    // centered the one-line row) and puts the slots on the first line below.
+                    'box-border inline-flex gap-1 rounded-[25px] border border-solid border-delta-300 bg-white text-base text-delta-700',
+                    labelWraps ? 'items-start py-0' : 'items-center',
                     !consumerSetsWidth && 'w-fit',
                     !consumerSetsMaxWidth && 'max-w-full',
                     size === 'small' ? 'h-6' : 'h-8',
-                    // Narrower than a phone: a label that does not fit wraps and the chip grows. The vertical
-                    // padding moves onto the label (below), so a one-line chip keeps the Figma height.
+                    // A label that does not fit below 320px lets the chip grow. `max-xs:py-0`
+                    // keeps a one-line narrow chip at its old 24/32px height.
                     'max-xs:h-auto max-xs:py-0',
                     size === 'small' ? 'max-xs:min-h-6' : 'max-xs:min-h-8',
                     readOnly && 'pointer-events-none',
@@ -256,9 +303,9 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                         className={cn(
                             'flex shrink-0 items-center justify-center',
                             size === 'small' ? 'h-[18px] w-[18px]' : 'h-6 w-6',
-                            // Wrapping mode: centre the 18px slot (small) / 24px slot (medium) on
+                            // Wrapped label: centre the 18px slot (small) / 24px slot (medium) on
                             // the first 24px label line (1px border + 2px / 3px).
-                            size === 'small' ? 'max-xs:mt-0.5' : 'max-xs:mt-[3px]',
+                            labelWraps && (size === 'small' ? 'mt-0.5' : 'mt-[3px]'),
                             avatar ? classes?.avatar : classes?.icon,
                         )}
                     >
@@ -266,14 +313,14 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                     </span>
                 )}
                 <span
+                    ref={labelRef}
                     className={cn(
                         'min-w-0 truncate',
                         'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:![overflow-wrap:anywhere]',
-                        // One 24px line + this = the 32/24px chip minus its 1px borders. The fixed-height
-                        // chip clipped the same overflow invisibly; `h-auto` would grow it to 34/30px.
-                        // These are the wrapping-mode values: small centres its line on the chip with
-                        // a -1px pair of margins; medium reserves 3px above and below the line.
-                        size === 'small' ? 'max-xs:-my-px' : 'max-xs:py-[3px]',
+                        // Wrapped label: small centres its 24px line with a -1px pair of margins;
+                        // medium reserves 3px above and below. A consumer can force a wrap at any
+                        // width; a one-line chip keeps the original centered row and padding.
+                        labelWraps && (size === 'small' ? '-my-px' : 'py-[3px]'),
                         classes?.label,
                     )}
                 >
@@ -295,9 +342,9 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                             // `:has(button:focus-visible)`), matching the Figma state without a second button ring.
                             'flex shrink-0 items-center justify-center rounded-full border border-solid border-delta-100 bg-delta-50 p-0 text-delta-700 [outline:none]',
                             size === 'small' ? 'h-[18px] w-[18px]' : 'h-5 w-5',
-                            // Wrapping mode: first-line alignment, same rule as the start slot
+                            // Wrapped label: first-line alignment, same rule as the start slot
                             // (18px centre = 1px border + 2px; 20px centre = 1px border + 5px).
-                            size === 'small' ? 'max-xs:mt-0.5' : 'max-xs:mt-[5px]',
+                            labelWraps && (size === 'small' ? 'mt-0.5' : 'mt-[5px]'),
                             classes?.deleteIcon,
                         )}
                     >

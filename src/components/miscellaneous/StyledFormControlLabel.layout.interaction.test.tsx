@@ -72,6 +72,23 @@ describe('StyledFormControlLabel aligns the control with the first label line (A
         ).toBe(false)
     })
 
+    it('keeps a vertical placement centred with no first-line margin', async () => {
+        const { container } = mount(
+            <StyledFormControlLabel
+                labelPlacement='top'
+                label='Receive updates'
+                helperText='We only send messages about your appointments.'
+                control={<StyledCheckbox dataTest='control' />}
+            />,
+        )
+        const root = container.querySelector('label')!
+        const label = within(container).getByText('Receive updates')
+
+        await expect(getComputedStyle(root).alignItems).toBe('center')
+        await expect(getComputedStyle(label).marginBlockStart).toBe('0px')
+        await expect(getComputedStyle(label).marginTop).toBe('0px')
+    })
+
     it('puts the helper on the label text indent, directly under the label', async () => {
         const { container } = mount(
             <div style={{ width: 260 }}>

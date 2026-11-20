@@ -32,6 +32,13 @@ export default meta
 
 type Story = StoryObj<StoryArgs>
 
+const LONG_WRAPPING_LABEL =
+    'Show/hide transition: ~300–400 ms slide and fade, matching the recommended duration for a partially persistent header.'
+
+// Mirrors the ASMA-8787 chips-view consumer override: let the label block-wrap at desktop width.
+const DESKTOP_WRAP_LABEL_CLASSES = 'block whitespace-normal break-words overflow-visible'
+const DESKTOP_WRAP_CHIP_CLASSES = 'h-full min-h-[32px] w-[200px]'
+
 function SingleChipDemo({
     label = 'Chip',
     type = 'checkbox',
@@ -347,14 +354,50 @@ export const NarrowWrappedLabels: Story = {
             <StyledInteractiveChip
                 dataTest='wrapped-checkbox'
                 type='checkbox'
-                label='Show/hide transition: ~300–400 ms slide and fade, matching the recommended duration for a partially persistent header.'
+                label={LONG_WRAPPING_LABEL}
                 onClick={() => undefined}
             />
             <StyledInteractiveChip
                 dataTest='wrapped-radio'
                 type='radio'
-                label='Show/hide transition: ~300–400 ms slide and fade, matching the recommended duration for a partially persistent header.'
+                label={LONG_WRAPPING_LABEL}
                 onClick={() => undefined}
+            />
+        </div>
+    ),
+}
+
+/**
+ * ASMA-9001. A consumer can force the label to wrap above 320px with `classes.label` and an
+ * auto-height chip. The control stays on the first line of the wrapped label; a one-line chip is
+ * unaffected.
+ */
+export const DesktopWrappedLabel: Story = {
+    render: () => (
+        <div style={{ width: 200 }}>
+            <StyledInteractiveChip
+                dataTest='desktop-wrapped-checkbox'
+                type='checkbox'
+                label={LONG_WRAPPING_LABEL}
+                className={DESKTOP_WRAP_CHIP_CLASSES}
+                classes={{ label: DESKTOP_WRAP_LABEL_CLASSES }}
+                onClick={() => undefined}
+            />
+        </div>
+    ),
+}
+
+/** ASMA-9001. Same desktop-wrapped chip with the delete affordance, which must stay on the first line too. */
+export const DesktopWrappedLabelWithDelete: Story = {
+    render: () => (
+        <div style={{ width: 200 }}>
+            <StyledInteractiveChip
+                dataTest='desktop-wrapped-checkbox-delete'
+                type='checkbox'
+                label={LONG_WRAPPING_LABEL}
+                className={DESKTOP_WRAP_CHIP_CLASSES}
+                classes={{ label: DESKTOP_WRAP_LABEL_CLASSES }}
+                onDelete={() => undefined}
             />
         </div>
     ),

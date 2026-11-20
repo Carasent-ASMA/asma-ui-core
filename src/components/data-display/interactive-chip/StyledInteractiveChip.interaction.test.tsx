@@ -9,6 +9,10 @@ import { StyledInteractiveChip } from './StyledInteractiveChip'
 const LONG_LABEL =
     'Show/hide transition: ~300–400 ms slide and fade, matching the recommended duration for a partially persistent header.'
 
+/** Mirrors the ASMA-8787 chips-view consumer override: let the label block-wrap inside a fixed width. */
+const DESKTOP_WRAP_LABEL_CLASSES = 'block whitespace-normal break-words overflow-visible'
+const DESKTOP_WRAP_CHIP_CLASSES = 'h-full min-h-[32px] w-[200px]'
+
 const linesOf = (element: Element): DOMRect[] => {
     const range = document.createRange()
     range.selectNodeContents(element)
@@ -131,6 +135,70 @@ describe('StyledInteractiveChip first-line alignment (ASMA-9001)', () => {
             <StyledInteractiveChip dataTest='chip' type='checkbox' label='Receive updates' onClick={() => undefined} />,
         )
         const chip = container.querySelector<HTMLElement>('[data-testid="chip"]')!
+        const slot = chip.firstElementChild as HTMLElement
+        const label = chip.children[1] as HTMLElement
+        const [line] = linesOf(label)
+
+        await expect(Math.abs(boxCentre(slot) - centre(line!)) <= 0.5).toBe(true)
+    })
+
+    it('keeps a consumer-wrapped chip on the first line at desktop width', async () => {
+        const { container } = mount(
+            <div style={{ width: 200 }}>
+                <StyledInteractiveChip
+                    dataTest='chip'
+                    type='checkbox'
+                    label={LONG_LABEL}
+                    className={DESKTOP_WRAP_CHIP_CLASSES}
+                    classes={{ label: DESKTOP_WRAP_LABEL_CLASSES }}
+                    onClick={() => undefined}
+                />
+            </div>,
+        )
+        const chip = container.querySelector<HTMLElement>('[data-testid="chip"]')!
+        const slot = chip.firstElementChild as HTMLElement
+        const label = chip.children[1] as HTMLElement
+        const lines = linesOf(label)
+
+        await expect(lines.length, 'the label wrapped onto several lines').toBeGreaterThan(1)
+        await expect(getComputedStyle(chip).alignItems, 'the wrapped chip uses first-line alignment').toBe('flex-start')
+        await expect(
+            Math.abs(boxCentre(slot) - centre(lines[0]!)) <= 1,
+            'control centre within 1px of the first line centre',
+        ).toBe(true)
+        await expect(
+            Math.abs(boxCentre(slot) - boxCentre(chip)) > 1,
+            'control is not centred on the whole wrapped block',
+        ).toBe(true)
+    })
+
+    it('keeps the delete affordance on the first line of a consumer-wrapped chip at desktop width', async () => {
+        const { container } = mount(
+            <div style={{ width: 200 }}>
+                <StyledInteractiveChip
+                    dataTest='chip'
+                    type='checkbox'
+                    label={LONG_LABEL}
+                    className={DESKTOP_WRAP_CHIP_CLASSES}
+                    classes={{ label: DESKTOP_WRAP_LABEL_CLASSES }}
+                    onDelete={() => undefined}
+                />
+            </div>,
+        )
+        const chip = container.querySelector<HTMLElement>('[data-testid="chip"]')!
+        const label = chip.children[1] as HTMLElement
+        const remove = chip.querySelector<HTMLElement>('[data-testid="chip-delete"]')!
+        const [firstLine] = linesOf(label)
+
+        await expect(linesOf(label).length, 'the label wrapped onto several lines').toBeGreaterThan(1)
+        await expect(Math.abs(boxCentre(remove) - centre(firstLine!)) <= 1, 'delete on the first line').toBe(true)
+    })
+
+    it('keeps a one-line small StyledChip centred at desktop width', async () => {
+        const { container } = mount(
+            <StyledChip dataTest='small-chip' size='small' label='Short label' avatar={<span aria-hidden='true'>•</span>} />,
+        )
+        const chip = container.querySelector<HTMLElement>('[data-testid="small-chip"]')!
         const slot = chip.firstElementChild as HTMLElement
         const label = chip.children[1] as HTMLElement
         const [line] = linesOf(label)
