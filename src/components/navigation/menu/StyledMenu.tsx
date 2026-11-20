@@ -2,6 +2,7 @@ import type { CSSProperties, MouseEvent, ReactNode } from 'react'
 import { cn } from 'src/helpers/cn'
 import { StyledPopover, type PopoverCloseReason, type PopoverOrigin } from '../../utils/popover'
 import { StyledMenuList } from './StyledMenuList'
+import { MENU_ITEM_SELECTOR } from './menuItemSelector'
 import styles from './StyledMenu.module.scss'
 export type MenuCloseReason = PopoverCloseReason | 'tabKeyDown'
 
@@ -87,7 +88,7 @@ export const StyledMenu = ({
             // StyledPopover's close restores focus to the trigger first, so Tab continues from the
             // trigger to the next control instead of from a node that is being unmounted.
             onKeyDown={(event) => {
-                if (event.key === 'Tab' && (event.target as HTMLElement).getAttribute('role') === 'menuitem')
+                if (event.key === 'Tab' && (event.target as HTMLElement).matches(MENU_ITEM_SELECTOR))
                     onClose?.(event, 'tabKeyDown')
             }}
         >
