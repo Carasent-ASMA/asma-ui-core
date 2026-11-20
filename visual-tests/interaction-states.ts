@@ -394,6 +394,16 @@ export const INTERACTION_CAPTURES: InteractionCapture[] = [
             await page.mouse.move(1, 1)
         },
     },
+    // ASMA-9001: a chip label wraps only below 320px, so the first-line control placement needs a
+    // narrow capture rather than the 1280px still.
+    {
+        storyId: 'datadisplay-interactivechip--narrow-wrapped-labels',
+        screenshot: 'datadisplay-interactivechip--narrow-wrapped-labels--narrow--open.png',
+        act: async (page) => {
+            await page.setViewportSize({ width: 300, height: 500 })
+            await page.mouse.move(1, 1)
+        },
+    },
     ...CARD_CAPTURES,
     ...UNSAVED_CHANGES_PHONE_CAPTURES,
 ]

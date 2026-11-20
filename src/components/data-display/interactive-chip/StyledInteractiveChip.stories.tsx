@@ -336,6 +336,30 @@ export const Radio_WithReactNodeLabel: Story = {
     },
 }
 
+/**
+ * ASMA-9001. A chip narrower than its label wraps below 320px; the control stays on the first line
+ * of the wrapped label instead of drifting to the chip's vertical centre. Captured at 300px by the
+ * `--narrow--open` interaction baseline.
+ */
+export const NarrowWrappedLabels: Story = {
+    render: () => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: 260 }}>
+            <StyledInteractiveChip
+                dataTest='wrapped-checkbox'
+                type='checkbox'
+                label='Show/hide transition: ~300–400 ms slide and fade, matching the recommended duration for a partially persistent header.'
+                onClick={() => undefined}
+            />
+            <StyledInteractiveChip
+                dataTest='wrapped-radio'
+                type='radio'
+                label='Show/hide transition: ~300–400 ms slide and fade, matching the recommended duration for a partially persistent header.'
+                onClick={() => undefined}
+            />
+        </div>
+    ),
+}
+
 /** Disabled with a reason (disabled-states DIS-1…DIS-4): focusable, `aria-disabled`, reason on hover, focus and tap. */
 export const Checkbox_DisabledWithReason: Story = {
     render: () => (
