@@ -25,7 +25,7 @@ import { forwardRef } from 'react'
  *
  * **Rendering strategy:**
  * - `readOnly` + single (not `multiple`) → plain text (`DynamicSelectReadOnlyValue`), whatever the
- *   option count: the title, then the selected label (or `-`). No chip, no input, no helper row.
+ *   option count: the title, then the selected label (or an em dash). No chip, no input, no helper row.
  *   `readOnly` + `multiple` is unaffected and follows the rules below.
  * - `1–5 options` → renders as an interactive chip group (`DynamicInteractiveChipGroup`).
  *   Chips behave as radio buttons (single) or checkboxes (multiple).

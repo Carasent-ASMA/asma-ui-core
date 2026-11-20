@@ -711,7 +711,7 @@ export const ReadOnlyAutocompleteDoesNotOpen: Story = {
         await expect(inSelect.queryByRole('textbox')).not.toBeInTheDocument()
 
         const value = select.querySelector<HTMLElement>('[data-testid$="-read-only-value"]')!
-        await expect(value).toHaveTextContent('-')
+        await expect(value).toHaveTextContent('—Not provided')
 
         await userEvent.click(value)
         await expect(canvas.queryByRole('listbox')).not.toBeInTheDocument()

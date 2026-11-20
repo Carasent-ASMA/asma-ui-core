@@ -98,3 +98,43 @@
         padding-right: 0;
     }
 }
+
+// ASMA-8600: opt-in `toolbarHeader` on StyledAccordionDetails. LITERAL declarations on purpose: ui-core
+// builds Tailwind with `important: true`, so a utility (or `@apply`) here could not be overridden by
+// a consumer. Figma wants 16px between the toolbar controls and the table header.
+//
+// Compact / stacked / selection-split toolbar: the controls are the last row, so the 16px comes from
+// the content.
+.Content[data-toolbar-header] {
+    padding-top: 1rem;
+}
+
+// Inline toolbar: one row, the summary row is `--trigger-height` tall and the 40px controls are centred
+// in it, so the summary already leaves (height - 40) / 2 under them: 72px -> 16 (padding 0), 48px -> 4
+// (padding 12). The content adds 16 - that.
+//
+// Each rule is scoped to THIS accordion: the toolbar must sit in the root's own header (a direct child,
+// or inside a non-panel direct child) and the rule reaches only this root's own panel
+// (`> .Panel > .Content`), so a nested accordion inside the content neither flips the parent nor is
+// flipped by it. `:where()` keeps the specificity at (0,2,0), the same as the rule above, so these win
+// by source order and a consumer important utility still wins.
+$header-inline: "> [data-layout='inline'], > :not(.Panel) [data-layout='inline']";
+$header-inline-small: "> [data-layout='inline'] .Trigger[data-size='small'], > :not(.Panel) [data-layout='inline'] .Trigger[data-size='small']";
+$header-inline-helper: "> [data-layout='inline'][data-has-helper='true'], > :not(.Panel) [data-layout='inline'][data-has-helper='true']";
+
+// Large summary (72px): 16 + 0.
+:where(.AccordionRoot:has(#{$header-inline}) > .Panel) > .Content[data-toolbar-header] {
+    padding-top: 0;
+}
+
+// Small summary (48px): 4 + 12.
+:where(.AccordionRoot:has(#{$header-inline-small}) > .Panel) > .Content[data-toolbar-header] {
+    padding-top: 0.75rem;
+}
+
+// Helper text: it is a row BELOW the controls (4px gap + a 20px line), so the controls are no longer the
+// last thing in the header and 16px under them cannot be reached without the table overlapping the
+// helper text. The table sits 16px under the helper text instead (the last row of the header).
+:where(.AccordionRoot:has(#{$header-inline-helper}) > .Panel) > .Content[data-toolbar-header] {
+    padding-top: 1rem;
+}

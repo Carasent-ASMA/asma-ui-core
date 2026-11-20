@@ -8,6 +8,7 @@ import {
     type CSSProperties,
     type HTMLAttributes,
     type ReactNode,
+    type RefObject,
     type SyntheticEvent,
 } from 'react'
 import { StyledButton } from '../../inputs/button/StyledButton'
@@ -116,6 +117,12 @@ export interface IStyledDialogProps {
      * test hook, not text.
      */
     ariaLabel?: string
+    /**
+     * @figmaProp none — accessibility
+     * Where focus starts when the dialog opens. Without it the dialog itself takes focus. A
+     * confirmation passes its safe button, so Enter never runs the destructive action (ASMA-8895).
+     */
+    initialFocusRef?: RefObject<HTMLElement | null>
 }
 
 // MUI Dialog maxWidth → px (v5 breakpoints; xs special-cased to 444 like MUI).
@@ -125,6 +132,13 @@ const MAX_WIDTH_PX: Record<Exclude<DialogMaxWidth, false>, number> = {
     md: 900,
     lg: 1200,
     xl: 1536,
+}
+
+/** Where focus starts in an open dialog: the consumer's `initialFocusRef` inside it, else the dialog itself. */
+const focusDialogStart = (node: HTMLDialogElement, initialFocusRef?: RefObject<HTMLElement | null>): void => {
+    const target = initialFocusRef?.current
+    const focusTarget = target && node.contains(target) ? target : node
+    focusTarget.focus({ preventScroll: true })
 }
 
 /**
@@ -163,6 +177,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     dialogTitle,
     dialogHeaderNode,
     ariaLabel,
+    initialFocusRef,
 }) => {
     // WCAG 4.1.2: named by what the user sees — the `dialogTitle`, else a `<StyledDialogTitle>` child,
     // else the label line; else `ariaLabel`; else the first heading in the content (effect below).
@@ -272,10 +287,11 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
             node.showModal()
             // showModal() focuses the first focusable element (the header close button) — move focus
             // back to the shell, which has tabIndex={-1} + outline-none, so no :focus ring paints.
-            node.focus({ preventScroll: true })
+            // A consumer's `initialFocusRef` takes it instead (the safe button of a confirmation).
+            focusDialogStart(node, initialFocusRef)
             // Some engines defer showModal()'s first-focusable step until after this turn; re-assert
             // focus next frame so it wins. Guard `node.open` in case the dialog closed in between.
-            requestAnimationFrame(() => node.open && node.focus({ preventScroll: true }))
+            requestAnimationFrame(() => node.open && focusDialogStart(node, initialFocusRef))
         }
 
         // showModal() put this dialog in the browser top layer, above every z-index in the page.
@@ -286,6 +302,9 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
             unregister()
             if (openerRef.current?.isConnected) openerRef.current.focus({ preventScroll: true })
         }
+        // `initialFocusRef` is read only when the dialog opens. A new ref object must not re-run this
+        // effect: its clean-up returns focus to the opener while the dialog is still open.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open])
 
     useEffect(() => {
@@ -383,7 +402,9 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                 attemptPending = false
                 if (openRef.current && node.isConnected && !node.open) {
                     node.showModal()
-                    node.focus({ preventScroll: true })
+                    // The same start as on open: a re-shown confirmation must not leave the next Tab on
+                    // its destructive first button (ASMA-8895 review F3).
+                    focusDialogStart(node, initialFocusRef)
                 }
             })
         }
@@ -398,6 +419,8 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
         }
         node.addEventListener('close', handleNativeClose)
         return () => node.removeEventListener('close', handleNativeClose)
+        // `initialFocusRef` is read when the dialog is re-shown; a new ref object must not re-run this.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open])
 
     // Escape is heard on `window`, deliberately last in the event path. Every dismissible layer this
