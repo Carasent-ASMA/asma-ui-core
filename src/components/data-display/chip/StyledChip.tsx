@@ -214,7 +214,12 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                 onMouseUp={disabled || readOnly ? undefined : onMouseUp}
                 className={cn(
                     // Figma _BASE_Tag (node 14312-26020): label Body Base 16px/lh24, text-icon/body #49525f (delta-700), border/outline #bdc4cf (delta-300), radius 25, gap 4.
+                    // ASMA-9001: below 320px the chip becomes `h-auto` and a long label wraps. Only
+                    // then does the cross axis switch to `items-start` (plus the first-line margins
+                    // on the slots) so the control and delete button stay on the first line. Above
+                    // 320px the old `items-center` row is preserved pixel for pixel.
                     'box-border inline-flex items-center gap-1 rounded-[25px] border border-solid border-delta-300 bg-white text-base text-delta-700',
+                    'max-xs:items-start',
                     !consumerSetsWidth && 'w-fit',
                     !consumerSetsMaxWidth && 'max-w-full',
                     size === 'small' ? 'h-6' : 'h-8',
@@ -251,6 +256,9 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                         className={cn(
                             'flex shrink-0 items-center justify-center',
                             size === 'small' ? 'h-[18px] w-[18px]' : 'h-6 w-6',
+                            // Wrapping mode: centre the 18px slot (small) / 24px slot (medium) on
+                            // the first 24px label line (1px border + 2px / 3px).
+                            size === 'small' ? 'max-xs:mt-0.5' : 'max-xs:mt-[3px]',
                             avatar ? classes?.avatar : classes?.icon,
                         )}
                     >
@@ -263,6 +271,8 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                         'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:![overflow-wrap:anywhere]',
                         // One 24px line + this = the 32/24px chip minus its 1px borders. The fixed-height
                         // chip clipped the same overflow invisibly; `h-auto` would grow it to 34/30px.
+                        // These are the wrapping-mode values: small centres its line on the chip with
+                        // a -1px pair of margins; medium reserves 3px above and below the line.
                         size === 'small' ? 'max-xs:-my-px' : 'max-xs:py-[3px]',
                         classes?.label,
                     )}
@@ -285,6 +295,9 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                             // `:has(button:focus-visible)`), matching the Figma state without a second button ring.
                             'flex shrink-0 items-center justify-center rounded-full border border-solid border-delta-100 bg-delta-50 p-0 text-delta-700 [outline:none]',
                             size === 'small' ? 'h-[18px] w-[18px]' : 'h-5 w-5',
+                            // Wrapping mode: first-line alignment, same rule as the start slot
+                            // (18px centre = 1px border + 2px; 20px centre = 1px border + 5px).
+                            size === 'small' ? 'max-xs:mt-0.5' : 'max-xs:mt-[5px]',
                             classes?.deleteIcon,
                         )}
                     >

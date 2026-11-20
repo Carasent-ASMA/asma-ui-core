@@ -1,10 +1,34 @@
 // Same `theme` layer as Card.module.scss: it sits before `base`, so a consumer's `classes.label`
-// utility (later `utilities` layer) wins without `!important`. Literal values match the old
-// `text-sm leading-5 tracking-[0.00938em]` utilities exactly.
+// or `classes.helperText` utility (later `utilities` layer) wins without `!important`. Literal
+// values match the old `text-sm leading-5 tracking-[0.00938em]` utilities exactly.
 @layer theme {
     .Label {
         font-size: 0.875rem;
         line-height: 1.25rem;
         letter-spacing: 0.00938em;
+    }
+
+    // ASMA-9001. The control target's centre is placed on the first line's centre, not on the
+    // centre of the whole wrapped label. `--asma-form-control-label-control-height` is measured by
+    // the component (40px radio/checkbox, 34px switch, …); `1lh` is this span's own line box, so a
+    // consumer `leading-*` in `classes.label` keeps the alignment correct. On a one-line label the
+    // result is the same vertical position the old `items-center` row produced.
+    .FirstLineLabel {
+        margin-block-start: calc(
+            (var(--asma-form-control-label-control-height, 2.5rem) - 1lh) / 2
+        );
+    }
+
+    // Design System "Small 12/16 delta-600": the smaller secondary style for the optional
+    // helper/description line under the option name.
+    .HelperText {
+        color: var(--colors-delta-600);
+        font-size: 0.75rem;
+        letter-spacing: 0.24px;
+        line-height: 1rem;
+    }
+
+    .HelperTextDisabled {
+        color: var(--colors-delta-300);
     }
 }

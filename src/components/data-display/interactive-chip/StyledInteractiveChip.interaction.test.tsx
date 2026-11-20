@@ -1,8 +1,24 @@
 import { useState } from 'react'
 import { afterEach, describe, it } from 'vitest'
+import { page } from 'vitest/browser'
 import { expect, fn, userEvent } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
+import { StyledChip } from 'src/components/data-display/chip/StyledChip'
 import { StyledInteractiveChip } from './StyledInteractiveChip'
+
+const LONG_LABEL =
+    'Show/hide transition: ~300–400 ms slide and fade, matching the recommended duration for a partially persistent header.'
+
+const linesOf = (element: Element): DOMRect[] => {
+    const range = document.createRange()
+    range.selectNodeContents(element)
+    return Array.from(range.getClientRects()).filter((rect) => rect.width > 0)
+}
+const centre = (rect: DOMRect): number => rect.top + rect.height / 2
+const boxCentre = (element: Element): number => {
+    const rect = element.getBoundingClientRect()
+    return rect.top + rect.height / 2
+}
 
 const CheckboxChipFixture = (): JSX.Element => {
     const [checked, setChecked] = useState(false)
@@ -95,6 +111,87 @@ describe('StyledInteractiveChip — selection does not shift the layout', () => 
 
         await userEvent.click(chips()[2]!)
         await expect(boxes()).toEqual(before)
+    })
+})
+
+/**
+ * ASMA-9001. A narrow chip grows to several lines; the control (and the delete affordance) must stay
+ * on the first line instead of drifting to the vertical centre of the grown chip. A one-line chip is
+ * unchanged: the same offsets reproduce the old `items-center` positions.
+ */
+describe('StyledInteractiveChip first-line alignment (ASMA-9001)', () => {
+    afterEach(async () => {
+        // The desktop viewport every other test in this project assumes (vite.config.ts).
+        await page.viewport(1280, 720)
+        cleanup()
+    })
+
+    it('keeps a one-line control centred', async () => {
+        const { container } = mount(
+            <StyledInteractiveChip dataTest='chip' type='checkbox' label='Receive updates' onClick={() => undefined} />,
+        )
+        const chip = container.querySelector<HTMLElement>('[data-testid="chip"]')!
+        const slot = chip.firstElementChild as HTMLElement
+        const label = chip.children[1] as HTMLElement
+        const [line] = linesOf(label)
+
+        await expect(Math.abs(boxCentre(slot) - centre(line!)) <= 0.5).toBe(true)
+    })
+
+    it.each(['checkbox', 'radio'] as const)('%s: keeps the control on the first line when the label wraps', async (type) => {
+        await page.viewport(300, 400)
+        const { container } = mount(
+            <div style={{ width: 260 }}>
+                <StyledInteractiveChip dataTest='chip' type={type} label={LONG_LABEL} onClick={() => undefined} />
+            </div>,
+        )
+        const chip = container.querySelector<HTMLElement>('[data-testid="chip"]')!
+        const slot = chip.firstElementChild as HTMLElement
+        const label = chip.children[1] as HTMLElement
+        const lines = linesOf(label)
+
+        await expect(lines.length, 'the label wrapped onto more than one line').toBeGreaterThan(1)
+        await expect(Math.abs(boxCentre(slot) - centre(lines[0]!)) <= 0.5, 'control on the first line').toBe(true)
+        await expect(
+            Math.abs(boxCentre(slot) - centre(lines[lines.length - 1]!)) > 1,
+            'control is not centred on the whole wrapped label',
+        ).toBe(true)
+    })
+
+    it('small StyledChip keeps its start slot on the first line when the label wraps', async () => {
+        await page.viewport(300, 400)
+        const { container } = mount(
+            <div style={{ width: 260 }}>
+                <StyledChip
+                    dataTest='small-chip'
+                    size='small'
+                    label={LONG_LABEL}
+                    avatar={<span aria-hidden='true'>•</span>}
+                />
+            </div>,
+        )
+        const chip = container.querySelector<HTMLElement>('[data-testid="small-chip"]')!
+        const slot = chip.firstElementChild as HTMLElement
+        const label = chip.children[1] as HTMLElement
+        const lines = linesOf(label)
+
+        await expect(lines.length, 'the label wrapped onto more than one line').toBeGreaterThan(1)
+        await expect(Math.abs(boxCentre(slot) - centre(lines[0]!)) <= 0.5, 'start slot on the first line').toBe(true)
+    })
+
+    it('keeps the delete affordance on the first line when the label wraps', async () => {
+        await page.viewport(300, 400)
+        const { container } = mount(
+            <div style={{ width: 260 }}>
+                <StyledInteractiveChip dataTest='chip' type='checkbox' label={LONG_LABEL} onDelete={() => undefined} />
+            </div>,
+        )
+        const chip = container.querySelector<HTMLElement>('[data-testid="chip"]')!
+        const label = chip.children[1] as HTMLElement
+        const remove = chip.querySelector<HTMLElement>('[data-testid="chip-delete"]')!
+        const [firstLine] = linesOf(label)
+
+        await expect(Math.abs(boxCentre(remove) - centre(firstLine!)) <= 0.5, 'delete on the first line').toBe(true)
     })
 })
 
