@@ -53,7 +53,7 @@ export interface StyledMenuItemProps {
     /** @figmaProp State = true→"Selected" */
     selected?: boolean
     /**
-     * @figmaProp none — semantic. WAI-ARIA menu item kind. Use `menuitemradio` for one-of-many
+     * @figmaProp none — semantic. WAI-ARIA menu item role. Use `menuitemradio` for one-of-many
      * (e.g. a language picker) and `menuitemcheckbox` for on/off items, with `aria-checked`.
      */
     role?: 'menuitem' | 'menuitemradio' | 'menuitemcheckbox'
