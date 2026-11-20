@@ -3,6 +3,7 @@ import { cdp } from 'vitest/browser'
 import { expect, userEvent } from 'src/test-utils/interaction-api'
 import { cleanup, mount, resolveTokenColor } from 'src/test-utils/renderInteraction'
 import { StyledInteractiveChip } from 'src/components/data-display/interactive-chip/StyledInteractiveChip'
+import { StyledCheckbox } from 'src/components/inputs/checkbox/base-ui/StyledCheckbox'
 import { StyledEmojiChoice } from 'src/components/inputs/emoji-choice/StyledEmojiChoice'
 import { StyledFormControlLabel } from 'src/components/miscellaneous/StyledFormControlLabel'
 import { StyledRadio, type StyledRadioProps } from './StyledRadio'
@@ -89,6 +90,44 @@ describe('StyledRadio draws the ring and the dot as one SVG (ASMA-8970)', () => 
         await expect(wrapper.querySelector('input')).toBeNull()
         await expect(wrapper).toHaveAttribute('aria-hidden', 'true')
         await expect(num(dot, 'cx')).toBe(num(ring, 'cx'))
+    })
+})
+
+/**
+ * ASMA-9001. The small radio wrapper was 38x38 while the small checkbox was 40x40, so a mixed
+ * option list had two icon columns and two label indents. Both sizes now share the 40px target; the
+ * hover halo uses the same size and stays a circle concentric with it, so it is not clipped or oval.
+ */
+describe('small option controls share one wrapper geometry (ASMA-9001)', () => {
+    afterEach(cleanup)
+
+    const boxOf = (element: Element): { width: number; height: number } => {
+        const { width, height } = element.getBoundingClientRect()
+        return { width, height }
+    }
+
+    it('radio and checkbox are both a 40x40 target at size="small"', async () => {
+        const { container } = mount(
+            <>
+                <StyledRadio dataTest='small-radio' size='small' value='a' />
+                <StyledCheckbox dataTest='small-checkbox' size='small' />
+            </>,
+        )
+
+        await expect(boxOf(container.querySelector('[data-testid="small-radio"]')!)).toEqual({ width: 40, height: 40 })
+        await expect(boxOf(container.querySelector('[data-testid="small-checkbox"]')!)).toEqual({ width: 40, height: 40 })
+    })
+
+    it('keeps the small radio hover halo a 40px circle concentric with the target', async () => {
+        const { container } = mount(<StyledRadio dataTest='small-radio' size='small' value='a' />)
+        const ripple = container.querySelector('[class*="RadioRippleContainer"]')!
+        const halo = getComputedStyle(ripple, '::after')
+
+        await expect({ width: halo.width, height: halo.height }).toEqual({ width: '40px', height: '40px' })
+        await expect(halo.borderRadius).toBe('50%')
+        // 50% of the 40px wrapper: the disc's centre sits on the wrapper's centre (it is then
+        // pulled back by `translate(-50%, -50%)`), so it cannot be clipped or sit off-centre.
+        await expect({ left: halo.left, top: halo.top }).toEqual({ left: '20px', top: '20px' })
     })
 })
 

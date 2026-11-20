@@ -1,12 +1,12 @@
 // Figma Radio (node 15385-19720 / _BASE_Radiobutton): circle 20px inside a 40px touch/hover target.
-@mixin radio-wrapper-size($size) {
-    @if $size == 'small' {
-        width: 38px;
-        height: 38px;
-    } @else {
-        width: 40px;
-        height: 40px;
-    }
+// ASMA-9001: `small` keeps its 16px circle but uses the same 40px wrapper as the checkbox, so a
+// mixed radio/checkbox list has one icon column and one label indent. The hover halo uses this
+// mixin too, so it stays a 40px circle concentric with the target.
+$radio-wrapper-size: 40px;
+
+@mixin radio-wrapper-size {
+    width: $radio-wrapper-size;
+    height: $radio-wrapper-size;
 }
 
 @mixin radio-size($size) {
@@ -29,11 +29,8 @@
     cursor: pointer;
     background: transparent;
     border: none;
-    @include radio-wrapper-size(medium);
+    @include radio-wrapper-size;
 
-    &.size-small {
-        @include radio-wrapper-size(small);
-    }
     &[data-disabled] {
         cursor: default;
         pointer-events: none;
@@ -97,10 +94,7 @@
         transition: opacity 0.2s, transform 0.2s;
         transform: translate(-50%, -50%) scale(0.7);
         position: absolute;
-        @include radio-wrapper-size(medium);
-    }
-    &.size-small .RadioRippleContainer::after {
-        @include radio-wrapper-size(small);
+        @include radio-wrapper-size;
     }
     // Figma Radio+Label Hovered: hovering the option text (any enclosing <label>) shows the circle
     // too; never on a disabled or read-only radio.
