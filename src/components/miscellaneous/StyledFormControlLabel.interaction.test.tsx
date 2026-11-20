@@ -82,7 +82,8 @@ describe('StyledFormControlLabel label typography', () => {
                 <StyledFormControlLabel label='' control={<StyledCheckbox dataTest='updates' />} />,
             )
             const root = container.firstElementChild as HTMLElement
-            const label = root.lastElementChild as HTMLElement
+            // The label text sits in the text column (control, then column; label, then helper).
+            const label = (root.lastElementChild as HTMLElement).firstElementChild as HTMLElement
             const control = within(container).getByRole('checkbox')
 
             await expect(label.tagName).toBe('SPAN')
