@@ -654,3 +654,95 @@ describe('StyledMenu scrolling', () => {
         await expect(menu()!.scrollHeight).toBe(menu()!.clientHeight)
     })
 })
+
+/* ASMA-8963 — WCAG 4.1.2. A language picker must say which language is selected: WAI-ARIA
+ * `menuitemradio` with `aria-checked`. The radio items must keep the plain items' keyboard contract.
+ * @see https://www.w3.org/WAI/ARIA/apg/patterns/menubar/ */
+describe('StyledMenu radio items', () => {
+    afterEach(cleanup)
+
+    const LanguageFixture = ({
+        onClose,
+        footer,
+    }: {
+        onClose?: (reason?: string) => void
+        footer?: ReactNode
+    }): JSX.Element => {
+        const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+        return (
+            <div>
+                <StyledButton dataTest='menu-trigger' onClick={(event) => setAnchorEl(event.currentTarget)}>
+                    Language
+                </StyledButton>
+                <StyledMenu
+                    open={!!anchorEl}
+                    anchorEl={anchorEl}
+                    onClose={(_event, reason) => {
+                        onClose?.(reason)
+                        setAnchorEl(null)
+                    }}
+                >
+                    <StyledMenuItem role='menuitemradio' aria-checked>
+                        Norsk
+                    </StyledMenuItem>
+                    <StyledMenuItem role='menuitemradio' aria-checked={false}>
+                        English
+                    </StyledMenuItem>
+                    <StyledMenuItem role='menuitemradio'>Svenska</StyledMenuItem>
+                    {footer}
+                </StyledMenu>
+                <button type='button' data-testid='after'>
+                    After
+                </button>
+            </div>
+        )
+    }
+
+    const radios = (): HTMLElement[] =>
+        Array.from(document.querySelectorAll<HTMLElement>('[role="menuitemradio"]'))
+
+    it('exposes menuitemradio with aria-checked (4.1.2)', async () => {
+        const { container } = mount(<LanguageFixture />)
+        await openMenu(container)
+
+        await expect(radios()).toHaveLength(3)
+        await expect(radios().map((item) => item.getAttribute('aria-checked'))).toEqual(['true', 'false', 'false'])
+        // A plain item stays a plain item.
+        const { container: plain } = mount(<StyledMenuItem aria-checked>Plain</StyledMenuItem>)
+        await expect(plain.querySelector('[role="menuitem"]')).not.toHaveAttribute('aria-checked')
+    })
+
+    it('focuses and arrows through radio items like plain items (2.1.1)', async () => {
+        const { container } = mount(<LanguageFixture />)
+        await openMenu(container)
+        await waitFor(() => expect(document.activeElement).toBe(radios()[0]))
+
+        await userEvent.keyboard('{ArrowDown}')
+        await expect(document.activeElement).toBe(radios()[1])
+        await userEvent.keyboard('{ArrowDown}')
+        await expect(document.activeElement).toBe(radios()[2])
+        await userEvent.keyboard('{ArrowDown}')
+        await expect(document.activeElement).toBe(radios()[0])
+        await userEvent.keyboard('{ArrowUp}')
+        await expect(document.activeElement).toBe(radios()[2])
+    })
+
+    // With another control in the panel the focused item is no longer its last Tab stop, so only the
+    // menu's own "Tab on a menu item closes" rule ends it (the popover's edge rule does not fire).
+    it('closes on Tab from a radio item (2.1.2)', async () => {
+        const onClose = fn()
+        const footer = (
+            <button type='button' data-testid='manage'>
+                Manage
+            </button>
+        )
+        const { container } = mount(<LanguageFixture onClose={onClose} footer={footer} />)
+        await openMenu(container)
+        await waitFor(() => expect(document.activeElement).toBe(radios()[0]))
+
+        await userEvent.tab()
+
+        await waitFor(() => expect(menu()).toBeNull())
+        await expect(onClose).toHaveBeenCalledWith('tabKeyDown')
+    })
+})

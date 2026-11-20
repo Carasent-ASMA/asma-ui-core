@@ -10,6 +10,7 @@ import {
 import styles from './StyledMenu.module.scss'
 import { cn } from 'src/helpers/cn'
 import { consumerOverrides } from 'src/helpers/classOverride'
+import { MENU_ITEM_SELECTOR } from './menuItemSelector'
 
 export interface StyledMenuListProps {
     children?: ReactNode
@@ -25,7 +26,6 @@ export interface StyledMenuListProps {
 }
 
 const LIST_SELECTOR = '[role="menu"], [role="listbox"]'
-const ITEM_SELECTOR = '[role="menuitem"]'
 
 // Inspect rendered structure, not React children: fragments and tooltip/component wrappers are
 // transparent, while custom content, explicit dividers and nested lists break a run of rows.
@@ -37,8 +37,8 @@ const rowSequence = (parent: HTMLElement): (HTMLElement | null)[] =>
         if (!(node instanceof HTMLElement)) return node.textContent?.trim() ? [null] : []
         if (node.hidden) return []
         if (node.matches(LIST_SELECTOR)) return [null]
-        if (node.matches(ITEM_SELECTOR)) return [node]
-        if (node.querySelector(ITEM_SELECTOR)) return rowSequence(node)
+        if (node.matches(MENU_ITEM_SELECTOR)) return [node]
+        if (node.querySelector(MENU_ITEM_SELECTOR)) return rowSequence(node)
         return [null]
     })
 
@@ -48,7 +48,7 @@ const rowSequence = (parent: HTMLElement): (HTMLElement | null)[] =>
  * it. `StyledMenuItem` keeps a disabled item inert, so landing on it runs nothing.
  */
 const focusableItems = (list: HTMLUListElement | null): HTMLElement[] =>
-    list ? Array.from(list.querySelectorAll<HTMLElement>('[role="menuitem"]')) : []
+    list ? Array.from(list.querySelectorAll<HTMLElement>(MENU_ITEM_SELECTOR)) : []
 
 const enabledItems = (list: HTMLUListElement | null): HTMLElement[] =>
     focusableItems(list).filter((item) => item.getAttribute('aria-disabled') !== 'true')
@@ -74,8 +74,8 @@ const syncRovingTabStop = (list: HTMLUListElement, focused?: HTMLElement): void 
 
 /**
  * Keyboard-navigable `role="menu"` list (replaces MUI `MenuList`). Arrow-key / Home / End roving
- * focus over every `[role="menuitem"]` child, disabled ones included; opening focuses the first
- * enabled item. TASK-303.
+ * focus over every `menuitem` / `menuitemradio` / `menuitemcheckbox` child, disabled ones included;
+ * opening focuses the first enabled item. TASK-303.
  */
 export const StyledMenuList = ({
     children,
@@ -101,7 +101,7 @@ export const StyledMenuList = ({
         if (!list) return
         const syncRows = (): void => {
             const sequence = rowSequence(list)
-            Array.from(list.querySelectorAll<HTMLElement>(ITEM_SELECTOR))
+            Array.from(list.querySelectorAll<HTMLElement>(MENU_ITEM_SELECTOR))
                 .filter((row) => row.closest(LIST_SELECTOR) === list)
                 .forEach((row) => row.removeAttribute('data-menu-separator'))
             // Every row except the last visible one in its run gets the line.

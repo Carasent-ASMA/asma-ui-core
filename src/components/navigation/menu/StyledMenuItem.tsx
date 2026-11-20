@@ -52,6 +52,13 @@ export interface StyledMenuItemProps {
     'aria-busy'?: boolean
     /** @figmaProp State = true→"Selected" */
     selected?: boolean
+    /**
+     * @figmaProp none — semantic. WAI-ARIA menu item kind. Use `menuitemradio` for one-of-many
+     * (e.g. a language picker) and `menuitemcheckbox` for on/off items, with `aria-checked`.
+     */
+    role?: 'menuitem' | 'menuitemradio' | 'menuitemcheckbox'
+    /** @figmaProp none — semantic. Checked state; rendered only for `menuitemradio` / `menuitemcheckbox`. */
+    'aria-checked'?: boolean
     /** Compact vertical padding (MUI `MenuItem` `dense` parity, DEC-003). */
     dense?: boolean
     /**
@@ -81,6 +88,8 @@ export const StyledMenuItem = ({
     disabledReason,
     'aria-busy': ariaBusy,
     selected,
+    role = 'menuitem',
+    'aria-checked': ariaChecked,
     dense,
     tooltip,
     className,
@@ -102,8 +111,13 @@ export const StyledMenuItem = ({
     const reasoned = Boolean(disabled) && Boolean(disabledReason)
 
     const row = (
+        // False positive: the rule only reads a literal `role`, and every value this prop accepts
+        // (menuitem / menuitemradio / menuitemcheckbox) is an interactive role.
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
         <li
-            role='menuitem'
+            role={role}
+            // Required by the radio/checkbox roles, so an omitted value reads as unchecked.
+            aria-checked={role === 'menuitem' ? undefined : (ariaChecked ?? false)}
             aria-disabled={disabled ? true : undefined}
             aria-busy={ariaBusy ? true : undefined}
             data-has-reason={reasoned ? '' : undefined}
