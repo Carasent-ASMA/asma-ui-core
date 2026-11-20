@@ -6,6 +6,21 @@ import { useAccordionContext } from './AccordionContext'
 
 type StyledAccordionDetailsProps = React.HTMLAttributes<HTMLDivElement> & {
     contentClassName?: string
+    /**
+     * Opt in when the accordion header holds a `DynamicToolbar` (filter + search) directly above a
+     * table in this panel, so the gap between the toolbar controls and the table header is the
+     * Figma 16 px instead of 24 px. Sets `data-toolbar-header` on the content element; the
+     * padding-top then follows the toolbar's layout (`data-layout`, see `StyledAccordion.module.scss`):
+     *
+     * - `inline` toolbar: `0`. The 72 px summary row already leaves 16 px under the 40 px controls.
+     * - any other layout (`compact`, `stacked`, `selection-split`): `1rem`. The controls are the last
+     *   row of the toolbar, so the whole 16 px has to come from the content.
+     *
+     * Default `false`: the content keeps its `padding: 0.5rem 1rem 1rem 1rem`, unchanged. A consumer
+     * `contentClassName` with an important padding utility (e.g. `pt-0!`) still wins. Use it only for
+     * a toolbar that is a direct child of the accordion root (the panel's sibling).
+     */
+    toolbarHeader?: boolean
 }
 
 /**
@@ -18,6 +33,7 @@ export const StyledAccordionDetails = ({
     children,
     className,
     contentClassName,
+    toolbarHeader = false,
     ...props
 }: StyledAccordionDetailsProps): JSX.Element => {
     const { open, panelId, triggerId } = useAccordionContext()
@@ -53,7 +69,11 @@ export const StyledAccordionDetails = ({
             className={clsx(styles['Panel'], className)}
             style={{ '--accordion-panel-height': open ? `${height}px` : '0px' } as React.CSSProperties}
         >
-            <div ref={contentRef} className={clsx(styles['Content'], contentClassName)}>
+            <div
+                ref={contentRef}
+                className={clsx(styles['Content'], contentClassName)}
+                data-toolbar-header={toolbarHeader ? '' : undefined}
+            >
                 {children}
             </div>
         </div>

@@ -40,6 +40,11 @@ const DYNAMIC_TOOLBAR_STORIES = [
     'modules-dynamictoolbar--normal-actions-hidden-in-selection',
     'modules-dynamictoolbar--disabled-actions',
     'modules-dynamictoolbar--long-selection-label',
+    // ASMA-8600: accordion header toolbar stories embed a DynamicToolbar, same oscillation.
+    'utils-accordion-baseui--toolbar-header-wide',
+    'utils-accordion-baseui--toolbar-header-narrow',
+    'utils-accordion-baseui--toolbar-header-small',
+    'utils-accordion-baseui--toolbar-header-helper-text',
 ] as const
 
 const SKIP = new Map<string, string>([
