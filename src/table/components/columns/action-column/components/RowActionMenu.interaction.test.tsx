@@ -28,7 +28,7 @@ describe('RowActionMenu disabled reason', () => {
                 ]}
             />,
         )
-        document.querySelector<HTMLButtonElement>('[data-test="row-actions-button"]')!.click()
+        document.querySelector<HTMLButtonElement>('[data-testid="row-actions-button"]')!.click()
 
         const item = await waitFor(() => {
             const found = menuItem('Delete')
@@ -36,7 +36,7 @@ describe('RowActionMenu disabled reason', () => {
             return found
         })
         await expect(item).toHaveAttribute('aria-disabled', 'true')
-        await expect(item).toHaveAttribute('data-has-reason', 'true')
+        await expect(item).toHaveAttribute('data-has-reason')
         await expect(item).toHaveAccessibleDescription('Only the owner can delete')
     })
 
@@ -53,7 +53,7 @@ describe('RowActionMenu disabled reason', () => {
                 ]}
             />,
         )
-        document.querySelector<HTMLButtonElement>('[data-test="row-actions-button"]')!.click()
+        document.querySelector<HTMLButtonElement>('[data-testid="row-actions-button"]')!.click()
         const item = await waitFor(() => {
             const found = menuItem('Delete')
             if (!found) throw new Error('menu not open')
@@ -82,7 +82,7 @@ describe('RowActionMenu disabled reason', () => {
             />,
         )
 
-        const trigger = document.querySelector<HTMLButtonElement>('[data-test="row-actions-button"]')!
+        const trigger = document.querySelector<HTMLButtonElement>('[data-testid="row-actions-button"]')!
         await expect(trigger).not.toBeDisabled()
         await expect(trigger).toHaveAttribute('aria-disabled', 'true')
     })

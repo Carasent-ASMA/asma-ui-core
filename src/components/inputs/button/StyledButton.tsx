@@ -22,8 +22,13 @@ interface commonProps {
     startIcon?: ReactNode
     /** @figmaProp none — behavioral (renders inside the button; Figma "Icon right" 24/20px slot) */
     endIcon?: ReactNode
-    /** @figmaProp none — test hook */
+    /** @figmaProp none — test hook, rendered as `data-testid` */
     dataTest: string
+    /**
+     * @figmaProp none — legacy test hook rendered as-is on the `<button>`, for apps whose `testIdAttribute`
+     * is `data-test` (editor, qnreditor, storage, crm). New tests should query `data-testid` via `dataTest`.
+     */
+    'data-test'?: string
     /**
      * @figmaProp none — behavioral. Why the action is unavailable. Together with `disabled` the
      * button stays focusable (`aria-disabled` instead of the native attribute), ignores activation
@@ -114,7 +119,7 @@ export type StyledButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & 
  * @param endIcon - ReactNode
  * @param error -  boolean
  * @param refLink -  ref to component
- * @param dataTest -  data-test tag
+ * @param dataTest -  rendered as `data-testid`
  */
 export const StyledButton = ({
     variant = 'contained',

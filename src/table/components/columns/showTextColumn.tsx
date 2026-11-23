@@ -1,5 +1,5 @@
 import { ChevronDownIcon } from 'src/table/shared-components/ChevronDownIcon'
-import { StyledButton } from 'src/table/shared-components/button'
+import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { SHOW_FULL_TEXT_ID, type CellContext, type ColumnDef } from 'src/table/types'
 
 export function generateShowFullTextColumn<TData>(
@@ -38,6 +38,8 @@ function ShowFullTextCell<TData>({
         <div className='flex w-full items-center justify-center' style={{ height: rowHeight ?? 'auto' }}>
             <StyledButton
                 dataTest='expand-text-button'
+                // Consumer picker tests (editor, qnreditor, storage) still query the legacy `data-test` hook.
+                data-test='expand-text-button'
                 // Icon-only: without this the button has no accessible name at all
                 // (axe `button-name`, ASMA-8143).
                 aria-label={

@@ -12,6 +12,11 @@ import { cn } from 'src/helpers/cn'
 type StyledCheckboxProps = {
     /** @figmaProp none — test hook */
     dataTest: string
+    /**
+     * @figmaProp none — legacy test hook on the root (next to `data-testid` from `dataTest`), for apps whose
+     * `testIdAttribute` is `data-test` (editor, qnreditor, storage, crm). New tests should query `data-testid`.
+     */
+    'data-test'?: string
     /** @figmaProp none — kept for API compatibility; Figma has one size, so both render the 16px box in a 40px target */
     size?: 'small' | 'medium'
     /** @figmaProp Type = true→"Checked" | false→"Unchecked" */
@@ -92,6 +97,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
     onClick,
     onKeyDown,
     decorative,
+    'data-test': legacyDataTest,
     ...props
 }): JSX.Element => {
     const isHideWrapper = !!hideWrapper
@@ -178,7 +184,13 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
 
     if (decorative) {
         return (
-            <span aria-hidden='true' className={wrapperClasses} data-testid={dataTest} {...stateAttrs}>
+            <span
+                aria-hidden='true'
+                className={wrapperClasses}
+                data-testid={dataTest}
+                data-test={legacyDataTest}
+                {...stateAttrs}
+            >
                 {visual}
             </span>
         )
@@ -194,6 +206,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
         <label
             className={wrapperClasses}
             data-testid={dataTest}
+            data-test={legacyDataTest}
             onPointerDown={handlePointerDown}
             onClick={onClick as React.MouseEventHandler<HTMLLabelElement> | undefined}
             {...stateAttrs}

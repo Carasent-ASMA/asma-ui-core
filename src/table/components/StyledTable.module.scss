@@ -1,3 +1,5 @@
+@use '../../styles/checkbox-focus';
+
 $focus-ring: var(--colors-focus-ring);
 $focus-left: inset 3px 0 0 0 $focus-ring;
 $focus-right: inset -3px 0 0 0 $focus-ring;
@@ -683,7 +685,7 @@ $focus-right: inset -3px 0 0 0 $focus-ring;
     // (`data-table-row`) and the header row alike (ASMA-8875). A focused control draws the same
     // frame on its cell instead: a header control (sort header, pin, a consumer's) on its header cell, the expand chevron
     // on its body cell (it fills it and has no border). The select checkboxes show the base-ui checkbox frame around their
-    // box instead (`shared-components/StyledCheckbox.module.scss`). The `:has()` paths are the cell's own content, so a
+    // box instead (`.select-checkbox` below). The `:has()` paths are the cell's own content, so a
     // control in a table nested in a sub-row never frames the sub-row's cell.
     tr[data-table-row]:focus-visible,
     .table-header > tr:focus-visible {
@@ -852,4 +854,21 @@ $focus-right: inset -3px 0 0 0 $focus-ring;
 .select-control:focus-visible,
 .expand-control:focus-visible {
     outline: none;
+}
+
+// The select checkboxes are decorative boxes inside the `role="checkbox"` control, which owns the focus. Its keyboard focus
+// shows the base-ui checkbox's frame around the box (Figma Focused 11460-105640, ASMA-8875 AC 11).
+.select-control:focus-visible .select-checkbox {
+    @include checkbox-focus.frame-vars;
+    @include checkbox-focus.frame;
+}
+
+.select-control:focus-visible .select-checkbox-box {
+    z-index: 2;
+}
+
+@media (forced-colors: active) {
+    .select-control:focus-visible .select-checkbox {
+        @include checkbox-focus.frame-forced-colors;
+    }
 }

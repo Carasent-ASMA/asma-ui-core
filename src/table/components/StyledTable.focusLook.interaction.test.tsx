@@ -163,7 +163,7 @@ describe('ASMA-8875 AC 11: every focus indicator is 3px, a cell border part of i
         mountTable()
         button('Before').focus()
 
-        const wrapper = document.querySelector<HTMLElement>(`[data-test="${dataTest}"]`)!
+        const wrapper = document.querySelector<HTMLElement>(`[data-testid="${dataTest}"]`)!
         const box = wrapper.firstElementChild as HTMLElement
         const cell = wrapper.closest<HTMLElement>('td, th')!
         const at = (): { x: number; y: number } => ({ x: box.getBoundingClientRect().x, y: box.getBoundingClientRect().y })
@@ -247,7 +247,7 @@ describe('ASMA-8875 AC 11: every focus indicator is 3px, a cell border part of i
             document.body.append(probe)
             const canvasText = getComputedStyle(probe).color
             probe.remove()
-            await expect(getComputedStyle(document.querySelector('[data-test="cell-select-all"]')!, '::before').backgroundColor).toBe(canvasText)
+            await expect(getComputedStyle(document.querySelector('[data-testid="cell-select-all"]')!, '::before').backgroundColor).toBe(canvasText)
         } finally {
             await session.send('Emulation.setEmulatedMedia', { features: [] })
         }
