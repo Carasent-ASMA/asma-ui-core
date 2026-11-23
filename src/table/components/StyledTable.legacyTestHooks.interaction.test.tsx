@@ -18,16 +18,23 @@ import { StyledTable } from './StyledTableIndex'
  *   ModuleTemplatePickerDialog.focus.test.tsx:162.
  * - row-actions-button: editor/qnreditor tests/pathways-template-lifecycle.spec.ts:34.
  * - reset-order-button: CRM OrganizationsTable.sorting.test.tsx:186.
- * No consumer queries select-all, pagination, column-settings/visibility, or datetime's migrated
+ * - table-rows-count-button: CRM DetailsIndex.keepMounted.test.tsx:382 (found 2026-11-23 running the
+ *   CRM suite against this branch; the file is newer than the audit).
+ * No consumer queries select-all, page buttons, column-settings/visibility, or datetime's migrated
  * button hooks. CRM's `close-button` is its own DeleteDialog button, not the calendar caption.
  * Keep this verified list explicit; add aliases and evidence here if another consumer is found.
  */
-const verifiedLegacyHooks = ['cell-select', 'expand-text-button', 'row-actions-button', 'reset-order-button'] as const
+const verifiedLegacyHooks = [
+    'cell-select',
+    'expand-text-button',
+    'row-actions-button',
+    'reset-order-button',
+    'table-rows-count-button',
+] as const
+const singleHooks: readonly string[] = ['reset-order-button', 'table-rows-count-button']
 
-const data = [
-    { id: 'r-1', name: 'First' },
-    { id: 'r-2', name: 'Second' },
-]
+// Five rows: the footer, and with it the rows-count button, shows from five rows on.
+const data = ['First', 'Second', 'Third', 'Fourth', 'Fifth'].map((name, index) => ({ id: `r-${index + 1}`, name }))
 const columns: ColumnDef<(typeof data)[number]>[] = [{ accessorKey: 'name', header: 'Name' }]
 
 const waitForElement = (selector: string): Promise<HTMLElement> =>
@@ -60,7 +67,7 @@ describe('StyledTable legacy data-test hooks (ASMA-8137)', () => {
             // Check every row, and that the legacy selector resolves to the same root elements:
             // a checkbox alias on its hidden input would not preserve the consumer contract.
             const elements = [...document.querySelectorAll(`[data-testid="${hook}"]`)]
-            await expect(elements, hook).toHaveLength(hook === 'reset-order-button' ? 1 : data.length)
+            await expect(elements, hook).toHaveLength(singleHooks.includes(hook) ? 1 : data.length)
             await expect([...document.querySelectorAll(`[data-test="${hook}"]`)], hook).toEqual(elements)
         }
     })

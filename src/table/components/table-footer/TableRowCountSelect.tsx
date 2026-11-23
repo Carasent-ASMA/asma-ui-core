@@ -52,6 +52,8 @@ export function TableRowCountSelect<TData>({
         <>
             <StyledButton
                 dataTest={'table-rows-count-button'}
+                // CRM page-size tests still query the legacy `data-test` hook.
+                data-test='table-rows-count-button'
                 variant={'outlined'}
                 size={'large'}
                 refLink={triggerRef}
