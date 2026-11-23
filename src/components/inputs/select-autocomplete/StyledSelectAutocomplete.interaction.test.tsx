@@ -19,13 +19,16 @@ const OPTIONS = ['Alpha', 'Bravo', 'Charlie', 'Delta']
 
 const AutocompleteFixture = ({
     onChange = () => undefined,
+    locale,
 }: {
     onChange?: (value: unknown) => void
+    locale?: 'no' | 'en'
 }): JSX.Element => {
     const [value, setValue] = useState<string | null>(null)
     return (
         <StyledSelectAutocomplete<string, false, false, false>
             dataTest='ac'
+            locale={locale}
             options={OPTIONS}
             value={value}
             onChange={(_event, next) => {
@@ -239,6 +242,36 @@ describe('StyledSelectAutocomplete keyboard contract', () => {
         await expect(popup).toHaveAccessibleName('Toggle options')
         await expect(popup).toHaveAttribute('tabindex', '-1')
         await expect(popup).toHaveAttribute('aria-expanded', 'false')
+    })
+
+    it('names the clear and popup buttons in Norwegian when the locale is no (4.1.2)', async () => {
+        const onChange = fn()
+        mount(<AutocompleteFixture locale='no' onChange={onChange} />)
+        input().focus()
+        await userEvent.keyboard('{ArrowDown}{ArrowDown}{Enter}')
+        await waitFor(() => expect(onChange).toHaveBeenCalled())
+
+        await expect(document.querySelector('[data-testid="ac-clear"]')).toHaveAccessibleName('Fjern valget')
+        await expect(document.querySelector('[data-testid="ac-popup-indicator"]')).toHaveAccessibleName(
+            'Vis eller skjul valg',
+        )
+    })
+
+    it('names the clear button for all choices in Norwegian on a multiple field (4.1.2)', async () => {
+        mount(
+            <StyledSelectAutocomplete<string, true, false, false>
+                dataTest='ac'
+                locale='no'
+                multiple
+                options={OPTIONS}
+                value={['Alpha']}
+                renderInput={(params) => <StyledInputField {...params} dataTest='ac-input' label='Team' />}
+            />,
+        )
+        // The clear button stays hidden, and so unnamed, until the field holds focus.
+        input().focus()
+
+        await expect(document.querySelector('[data-testid="ac-clear"]')).toHaveAccessibleName('Fjern alle valg')
     })
 
     it('keeps selected-tag delete buttons out of the combobox tab order (2.1.1)', async () => {

@@ -198,7 +198,7 @@ export interface StyledSelectAutocompleteProps<
     pickerTitle?: ReactNode
     /** Overrides for any picker string (*Ferdig*, *Fjern valget*, counts, …). */
     pickerText?: Partial<PickerText>
-    /** Language of the default picker copy. Defaults to English, like the rest of ui-core. */
+    /** Language of the default picker copy and of the clear and popup buttons' names. Defaults to English, like the rest of ui-core. */
     locale?: 'no' | 'en'
     /**
      * Keep the attached list on every viewport. By default the list opens as a full-screen picker
@@ -532,7 +532,7 @@ export function StyledSelectAutocomplete<
                 <button
                     type='button'
                     tabIndex={-1}
-                    aria-label='Clear'
+                    aria-label={locale === 'no' ? (isMultiple ? 'Fjern alle valg' : 'Fjern valget') : 'Clear'}
                     data-testid={`${dataTest}-clear`}
                     className='invisible flex min-h-6 min-w-6 cursor-pointer items-center justify-center rounded-full border-0 bg-delta-50 group-focus-within:visible'
                     onMouseDown={(event) => event.preventDefault()}
@@ -545,7 +545,7 @@ export function StyledSelectAutocomplete<
                 <button
                     type='button'
                     tabIndex={-1}
-                    aria-label='Toggle options'
+                    aria-label={locale === 'no' ? 'Vis eller skjul valg' : 'Toggle options'}
                     aria-expanded={open}
                     data-testid={`${dataTest}-popup-indicator`}
                     className='flex cursor-pointer items-center border-0 bg-transparent'
