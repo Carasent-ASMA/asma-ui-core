@@ -76,7 +76,12 @@ export interface StyledMenuItemProps {
     className?: string
     classes?: { root?: string; selected?: string }
     sx?: unknown
+    /**
+     * @figmaProp none — legacy test hook on the `<li>`, for apps whose `testIdAttribute` is `data-test`
+     * (editor, qnreditor, storage, crm). New tests should query `data-testid`.
+     */
     'data-test'?: string
+    /** @figmaProp none — test hook on the `<li>`. */
     'data-testid'?: string
 }
 

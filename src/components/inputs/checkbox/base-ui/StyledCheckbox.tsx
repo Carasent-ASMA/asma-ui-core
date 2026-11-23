@@ -12,7 +12,10 @@ import { cn } from 'src/helpers/cn'
 type StyledCheckboxProps = {
     /** @figmaProp none — test hook */
     dataTest: string
-    /** @figmaProp none — legacy test hook on the root, for apps whose `testIdAttribute` is `data-test` */
+    /**
+     * @figmaProp none — legacy test hook on the root (next to `data-testid` from `dataTest`), for apps whose
+     * `testIdAttribute` is `data-test` (editor, qnreditor, storage, crm). New tests should query `data-testid`.
+     */
     'data-test'?: string
     /** @figmaProp none — kept for API compatibility; Figma has one size, so both render the 16px box in a 40px target */
     size?: 'small' | 'medium'
