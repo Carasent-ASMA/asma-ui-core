@@ -1,4 +1,12 @@
 name: 'Visual Regression'
+# DELIBERATELY STILL x64 — DO NOT CHANGE `runs-on` TO ARM (ASMA-9012).
+#
+# This suite drives a real Chromium and asserts on rendered output. Font rasterisation and
+# metrics can differ between runner architectures, so moving it to ARM risks invalidating
+# every stored baseline and producing failures that look like product regressions.
+#
+# The rest of the fleet moved to ARM for the 16.7% rate difference. This job is excluded on
+# purpose: it runs rarely, so the saving is negligible against that risk.
 
 # `pull_request` makes the check report on the PR itself so it can be enforced as a required status
 # check on master (a red VRT blocks the merge) — that half of the original rationale is unchanged.
