@@ -16,9 +16,13 @@ consumer `classes.label` typography overrides. The small radio wrapper is now 40
 checkbox, so a mixed option list keeps one icon column and one label indent; the hover halo stays a
 40px circle concentric with the target.
 
-`StyledChip` / `StyledInteractiveChip` keep their control (and delete affordance) on the first
-line whenever the label wraps, including a consumer-forced wrap at desktop widths; one-line chips
-are unchanged. No new chip prop is needed: the existing `label: ReactNode` already covers richer
+`StyledChip` / `StyledInteractiveChip` keep their control on the first line whenever the label
+wraps, including a consumer-forced wrap at desktop widths; one-line chips are unchanged. The delete
+affordance's first-line alignment is proven on the non-interactive `StyledChip`; the
+interactive-chip-with-delete combination is a pre-existing nested-interactive limitation, out of
+scope for ASMA-9001.
+
+No new chip prop is needed: the existing `label: ReactNode` already covers richer
 content, and a chip-level helper line would change the compact tag's height and selection
 semantics. Apps can drop the `relative! -top-2!` / `gap-0!` workarounds: use `helperText` for
 `StyledFormControlLabel`, and keep the chip's existing `label`/`classes.label` wrapping — the

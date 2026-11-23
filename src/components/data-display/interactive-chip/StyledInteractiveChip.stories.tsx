@@ -387,22 +387,6 @@ export const DesktopWrappedLabel: Story = {
     ),
 }
 
-/** ASMA-9001. Same desktop-wrapped chip with the delete affordance, which must stay on the first line too. */
-export const DesktopWrappedLabelWithDelete: Story = {
-    render: () => (
-        <div style={{ width: 200 }}>
-            <StyledInteractiveChip
-                dataTest='desktop-wrapped-checkbox-delete'
-                type='checkbox'
-                label={LONG_WRAPPING_LABEL}
-                className={DESKTOP_WRAP_CHIP_CLASSES}
-                classes={{ label: DESKTOP_WRAP_LABEL_CLASSES }}
-                onDelete={() => undefined}
-            />
-        </div>
-    ),
-}
-
 /** Disabled with a reason (disabled-states DIS-1…DIS-4): focusable, `aria-disabled`, reason on hover, focus and tap. */
 export const Checkbox_DisabledWithReason: Story = {
     render: () => (

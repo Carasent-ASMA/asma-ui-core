@@ -172,12 +172,11 @@ describe('StyledInteractiveChip first-line alignment (ASMA-9001)', () => {
         ).toBe(true)
     })
 
-    it('keeps the delete affordance on the first line of a consumer-wrapped chip at desktop width', async () => {
+    it('keeps the delete affordance on the first line of a consumer-wrapped plain chip at desktop width', async () => {
         const { container } = mount(
             <div style={{ width: 200 }}>
-                <StyledInteractiveChip
+                <StyledChip
                     dataTest='chip'
-                    type='checkbox'
                     label={LONG_LABEL}
                     className={DESKTOP_WRAP_CHIP_CLASSES}
                     classes={{ label: DESKTOP_WRAP_LABEL_CLASSES }}
@@ -186,8 +185,9 @@ describe('StyledInteractiveChip first-line alignment (ASMA-9001)', () => {
             </div>,
         )
         const chip = container.querySelector<HTMLElement>('[data-testid="chip"]')!
-        const label = chip.children[1] as HTMLElement
         const remove = chip.querySelector<HTMLElement>('[data-testid="chip-delete"]')!
+        // No start slot on a plain chip: the label is the sibling immediately before the delete button.
+        const label = remove.previousElementSibling as HTMLElement
         const [firstLine] = linesOf(label)
 
         await expect(linesOf(label).length, 'the label wrapped onto several lines').toBeGreaterThan(1)
@@ -247,16 +247,16 @@ describe('StyledInteractiveChip first-line alignment (ASMA-9001)', () => {
         await expect(Math.abs(boxCentre(slot) - centre(lines[0]!)) <= 0.5, 'start slot on the first line').toBe(true)
     })
 
-    it('keeps the delete affordance on the first line when the label wraps', async () => {
+    it('keeps the plain-chip delete affordance on the first line when the label wraps', async () => {
         await page.viewport(300, 400)
         const { container } = mount(
             <div style={{ width: 260 }}>
-                <StyledInteractiveChip dataTest='chip' type='checkbox' label={LONG_LABEL} onDelete={() => undefined} />
+                <StyledChip dataTest='chip' size='small' label={LONG_LABEL} onDelete={() => undefined} />
             </div>,
         )
         const chip = container.querySelector<HTMLElement>('[data-testid="chip"]')!
-        const label = chip.children[1] as HTMLElement
         const remove = chip.querySelector<HTMLElement>('[data-testid="chip-delete"]')!
+        const label = remove.previousElementSibling as HTMLElement
         const [firstLine] = linesOf(label)
 
         await expect(Math.abs(boxCentre(remove) - centre(firstLine!)) <= 0.5, 'delete on the first line').toBe(true)

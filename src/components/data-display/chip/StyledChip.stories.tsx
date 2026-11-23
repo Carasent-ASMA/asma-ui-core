@@ -31,6 +31,13 @@ const meta: Meta = {
 
 export default meta
 
+const LONG_WRAPPING_LABEL =
+    'Show/hide transition: ~300–400 ms slide and fade, matching the recommended duration for a partially persistent header.'
+
+// Mirrors the ASMA-8787 chips-view consumer override: let the label block-wrap at desktop width.
+const DESKTOP_WRAP_LABEL_CLASSES = 'block whitespace-normal break-words overflow-visible'
+const DESKTOP_WRAP_CHIP_CLASSES = 'h-full min-h-[32px] w-[200px]'
+
 const COLUMN_NAMES = ['Enabled', 'Hovered', 'Focused', 'Read only']
 const ROW_NAMES = ['Standard', 'User tag', 'Group tag', 'Checkbox', 'Radio']
 
@@ -265,6 +272,26 @@ export const Chip = () => {
 
 // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
 Chip.parameters = { a11y: { test: 'todo' } }
+
+/**
+ * ASMA-9001. The delete affordance's first-line alignment is proven on the non-interactive chip,
+ * whose plain root may legally contain a focusable `<button>`; an interactive chip root
+ * (`role="checkbox"`) may not (nested-interactive). A consumer-forced label wrap at desktop width
+ * keeps the delete button on the first line.
+ */
+export const DesktopWrappedLabelWithDelete: StoryObj = {
+    render: () => (
+        <div style={{ width: 200 }}>
+            <StyledChip
+                dataTest='desktop-wrapped-chip-delete'
+                label={LONG_WRAPPING_LABEL}
+                className={DESKTOP_WRAP_CHIP_CLASSES}
+                classes={{ label: DESKTOP_WRAP_LABEL_CLASSES }}
+                onDelete={fn()}
+            />
+        </div>
+    ),
+}
 
 export const FigmaPaddingMedium: StoryObj = {
     // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
