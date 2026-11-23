@@ -54,6 +54,40 @@ const openPanel = async (container: HTMLElement): Promise<void> => {
     await waitFor(() => expect(panel()).not.toBeNull(), { timeout: 600 })
 }
 
+/** `onBlur` (ASMA-8073): presentation wiring only, so a consumer (react-hook-form) can validate on
+ * blur (ADR-0017 REQ-001) — no validation rule lives in the picker itself. */
+describe('StyledTimePicker onBlur', () => {
+    afterEach(cleanup)
+
+    it('fires once when focus leaves the input', async () => {
+        const onBlur = fn()
+        const { container } = mount(
+            <>
+                <StyledTimePicker dataTest='blur-time' label='Start time' onSelect={() => undefined} onBlur={onBlur} />
+                <button type='button' data-testid='after'>
+                    After
+                </button>
+            </>,
+        )
+        const input = container.querySelector<HTMLInputElement>('input[data-testid="blur-time"]')!
+
+        input.focus()
+        await userEvent.tab()
+
+        await expect(onBlur).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not fire when focus moves from the input into the open panel', async () => {
+        const onBlur = fn()
+        const { container } = mount(
+            <StyledTimePicker dataTest='start-time' label='Start time' onSelect={() => undefined} onBlur={onBlur} />,
+        )
+        await openPanel(container)
+
+        await expect(onBlur).not.toHaveBeenCalled()
+    })
+})
+
 describe('StyledTimePicker keyboard contract', () => {
     afterEach(cleanup)
 
