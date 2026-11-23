@@ -50,3 +50,20 @@ describe('StyledChip disabledReason', () => {
         await expect(onClick).not.toHaveBeenCalled()
     })
 })
+
+describe('StyledChip without Range.getClientRects (ASMA-9001, jsdom in app unit tests)', () => {
+    const original = Range.prototype.getClientRects
+
+    afterEach(() => {
+        Range.prototype.getClientRects = original
+        cleanup()
+    })
+
+    it('renders a one-line chip instead of throwing', async () => {
+        // @ts-expect-error simulate a DOM without layout
+        Range.prototype.getClientRects = undefined
+        mount(<StyledChip dataTest='filter' label='Open' />)
+
+        await expect(chip()).toHaveTextContent('Open')
+    })
+})

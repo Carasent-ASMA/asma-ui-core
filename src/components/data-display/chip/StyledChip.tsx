@@ -189,6 +189,8 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
 
             const measure = (): void => {
                 const range = document.createRange()
+                // Layout-less DOMs (jsdom in app unit tests) have no Range.getClientRects: keep the one-line layout.
+                if (typeof range.getClientRects !== 'function') return
                 range.selectNodeContents(labelElement)
                 const rects = Array.from(range.getClientRects()).filter(
                     (rect) => rect.width > 0 || rect.height > 0,
