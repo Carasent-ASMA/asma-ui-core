@@ -552,6 +552,23 @@ describe('Minimizable dialog titles (ASMA-8737, REQ-003, 004)', () => {
         await expect(title.getBoundingClientRect().height).toBeGreaterThan(30)
     }
 
+    /**
+     * The tooltip this trigger owns, resolved through `aria-describedby` instead of taking the
+     * first `[role="tooltip"]` in the document. The minimized bar carries Expand and Close
+     * tooltips beside the title, so "the first tooltip in the DOM" is not necessarily this one:
+     * while a neighbour's bubble is still mounted the old query read ITS text and the assertion
+     * failed until that bubble unmounted. `StyledTooltip` adds the attribute only while the
+     * tooltip is open and removes it on close, so this is also the honest way to assert closure.
+     */
+    const ownTooltip = (trigger: HTMLElement): HTMLElement | null => {
+        const ids = trigger.getAttribute('aria-describedby')?.split(/\s+/) ?? []
+        for (const id of ids) {
+            const node = document.getElementById(id)
+            if (node?.getAttribute('role') === 'tooltip') return node
+        }
+        return null
+    }
+
     const expectMinimizedTooltip = async (container: HTMLElement): Promise<void> => {
         const minimize = container.querySelectorAll<HTMLElement>('[data-testid="minimize-button"], [data-testid="toggle-minimize-btn"]')
         await userEvent.click(minimize[minimize.length - 1]!)
@@ -564,18 +581,18 @@ describe('Minimizable dialog titles (ASMA-8737, REQ-003, 004)', () => {
         await waitFor(() => expect(barTitle.parentElement!.parentElement!.contains(document.activeElement)).toBe(true))
         await userEvent.keyboard('{Shift>}{Tab}{/Shift}')
         await expect(document.activeElement).toBe(barTitle)
-        // The tooltip itself opens immediately on focus and after a 500ms hover delay, but the
-        // push and pull_request workflows run this Chromium suite at the same time: on a starved
-        // runner the bubble's render landed past the 1s default and the test failed while green
-        // locally. The longer timeout only costs anything when the runner is that slow.
-        await waitFor(() => expect(document.querySelector('[role="tooltip"]')).toHaveTextContent(LONG_TITLE), {
+        // The tooltip opens immediately on focus and after a 500ms hover delay. The generous
+        // timeout stays for a slow runner, but the query is what made this flaky: it used to take
+        // the first `[role="tooltip"]` in the document, which on this bar can be the neighbouring
+        // Expand or Close bubble. `ownTooltip` asks the trigger which tooltip is its own.
+        await waitFor(() => expect(ownTooltip(barTitle)).toHaveTextContent(LONG_TITLE), {
             timeout: 5000,
         })
         barTitle.blur()
-        await waitFor(() => expect(document.querySelector('[role="tooltip"]')).toBeNull())
+        await waitFor(() => expect(ownTooltip(barTitle)).toBeNull())
 
         await userEvent.hover(barTitle)
-        await waitFor(() => expect(document.querySelector('[role="tooltip"]')).toHaveTextContent(LONG_TITLE), {
+        await waitFor(() => expect(ownTooltip(barTitle)).toHaveTextContent(LONG_TITLE), {
             timeout: 5000,
         })
     }
