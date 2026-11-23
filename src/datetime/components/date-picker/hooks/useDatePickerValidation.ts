@@ -24,7 +24,7 @@ export interface DatePickerValidationMessageCatalog {
 export const defaultDatePickerValidationMessages: DatePickerValidationMessageCatalog = {
     en: {
         required: 'Required',
-        minDate: 'Select a date after the start date.',
+        minDate: 'Select a date on or after the start date.',
         invalidDay: 'Enter a valid day.',
         invalidMonth: 'Enter a valid month.',
         invalidYear: 'Enter a year between 1900 and 2100.',
@@ -36,7 +36,7 @@ export const defaultDatePickerValidationMessages: DatePickerValidationMessageCat
     },
     nb: {
         required: 'Obligatorisk',
-        minDate: 'Velg en dato etter startdatoen.',
+        minDate: 'Velg en dato på eller etter startdatoen.',
         invalidDay: 'Skriv inn en gyldig dag.',
         invalidMonth: 'Skriv inn en gyldig måned.',
         invalidYear: 'Skriv inn et år mellom 1900 og 2100.',
@@ -66,7 +66,7 @@ export const mergeDatePickerMessages = (overrides?: DatePickerMessages): DatePic
 
 type MessageKey = keyof DatePickerValidationMessages
 
-const formatRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/
+const formatRegex = /^(\d{2})[./](\d{2})[./](\d{4})$/
 
 interface DatePickerValidation {
     validationError: boolean
@@ -125,7 +125,7 @@ export const useDatePickerValidation = (
                 return false
             }
 
-            //1. check for format DD/MM/YYYY
+            //1. check for format DD.MM.YYYY
             const m = formatRegex.exec(value)
             if (!m) {
                 return fail('invalidFormat')
@@ -157,13 +157,13 @@ export const useDatePickerValidation = (
                 return fail('invalidDate')
             }
 
-            const canonical = `${m[1]}/${m[2]}/${m[3]}`
-            const parsed = parse(canonical, 'dd/MM/yyyy', new Date())
+            const canonical = `${m[1]}.${m[2]}.${m[3]}`
+            const parsed = parse(canonical, 'dd.MM.yyyy', new Date())
             if (!isValidDateFns(parsed)) {
                 return fail('invalidDate')
             }
 
-            if (minDate && startOfDay(parsed) <= startOfDay(minDate)) {
+            if (minDate && startOfDay(parsed) < startOfDay(minDate)) {
                 return fail('minDate')
             }
 

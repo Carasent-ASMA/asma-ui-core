@@ -352,7 +352,7 @@ describe('StyledTimePicker minTime', () => {
         input.blur()
 
         await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
-        await expect(container).toHaveTextContent('Select a time after start time.')
+        await expect(container).toHaveTextContent('Select a time at or after the start time.')
     })
 
     it('uncommits a field emptied by typing on blur, without an error', async () => {
@@ -387,7 +387,7 @@ describe('StyledTimePicker minTime', () => {
 
         await waitFor(() => expect(input).toHaveValue('11:00'))
         await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
-        await expect(container).toHaveTextContent('Select a time after start time.')
+        await expect(container).toHaveTextContent('Select a time at or after the start time.')
     })
 
     it('names the field by its title, or by inputAriaProps for a label rendered outside (1.3.1, 4.1.2)', async () => {
@@ -555,7 +555,7 @@ describe('StyledTimePicker required', () => {
         await waitFor(() => expect(input).toHaveValue('11:00'))
         input.blur()
 
-        await waitFor(() => expect(container).toHaveTextContent('Select a time after start time.'))
+        await waitFor(() => expect(container).toHaveTextContent('Select a time at or after the start time.'))
         await expect(container).not.toHaveTextContent('Required')
     })
 
@@ -804,6 +804,6 @@ describe('StyledTimePicker messages', () => {
         await waitFor(() => expect(input).toHaveValue('11:00'))
         input.blur()
 
-        await waitFor(() => expect(container).toHaveTextContent('Select a time after start time.'))
+        await waitFor(() => expect(container).toHaveTextContent('Select a time at or after the start time.'))
     })
 })

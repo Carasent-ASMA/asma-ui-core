@@ -102,7 +102,7 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
         setValue(selected ? getValue(selected, dateFormat) : '')
     }
 
-    const defaultHelper = locale?.code?.startsWith('nb') ? 'DD/MM/ÅÅÅÅ' : 'DD/MM/YYYY'
+    const defaultHelper = locale?.code?.startsWith('nb') ? 'DD.MM.ÅÅÅÅ' : 'DD.MM.YYYY'
     const effectiveDefaultHelper = hideDefaultHelperText ? undefined : defaultHelper
 
     const hasError = !!(validationError || error)
@@ -190,7 +190,7 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
 
         if (isErrorNow) return
 
-        const parsed = parse(value, 'dd/MM/yyyy', new Date())
+        const parsed = parse(value, 'dd.MM.yyyy', new Date())
         onInputChange?.(isValidDateFns(parsed) ? parsed : undefined)
     }
 
@@ -226,7 +226,7 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
                             data-testid={rest.dataTest}
                             autoComplete='off'
                             inputRef={!readOnly ? maskRef : undefined}
-                            placeholder={!readOnly && !hasDigits ? '  /  /    ' : undefined}
+                            placeholder={!readOnly && !hasDigits ? '  .  .    ' : undefined}
                             size='small'
                             value={readOnly ? value.replaceAll('/', '.') : value}
                             className={inputClassName}
@@ -252,7 +252,7 @@ export const BaseDatePickerInput: React.FC<IBaseDatePickerInput> = (props) => {
                                 htmlInput: {
                                     'aria-required': required ? true : undefined,
                                     ...getTitleLabelling({ title, titleId, label, inputAriaProps }),
-                                    // The editable field renders the space-scaffold mask ('  /  /    '),
+                                    // The editable field renders the space-scaffold mask ('  .  .    '),
                                     // so it MUST use a monospace font — see DATE_INPUT_FONT_FAMILY. With a
                                     // proportional font (Roboto) the day/year space slots collapse to
                                     // hairlines and the mask visibly loses its spaces (regression).

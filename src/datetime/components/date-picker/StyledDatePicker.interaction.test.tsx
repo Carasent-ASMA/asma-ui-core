@@ -84,13 +84,13 @@ describe('StyledDatePicker keyboard contract', () => {
 
         input.focus()
         await userEvent.keyboard('15062024')
-        await waitFor(() => expect(input).toHaveValue('15/06/2024'))
+        await waitFor(() => expect(input).toHaveValue('15.06.2024'))
 
         await userEvent.tab()
 
         // The typed value must survive blur + re-render (the mask writes imperatively, so a
         // desynced React value tracker silently clears it — the ASMA-7773 class of bug).
-        await waitFor(() => expect(input).toHaveValue('15/06/2024'))
+        await waitFor(() => expect(input).toHaveValue('15.06.2024'))
         await waitFor(() => expect(onPick).toHaveBeenCalled())
         const parsed = onPick.mock.calls.at(-1)?.[0] as Date
         await expect(parsed.getFullYear()).toBe(2024)
@@ -116,7 +116,7 @@ describe('StyledDatePicker keyboard contract', () => {
 
         input.focus()
         await userEvent.keyboard('15062024')
-        await waitFor(() => expect(input).toHaveValue('15/06/2024'))
+        await waitFor(() => expect(input).toHaveValue('15.06.2024'))
         await userEvent.tab()
         await waitFor(() => expect(onPick).toHaveBeenCalled())
 
