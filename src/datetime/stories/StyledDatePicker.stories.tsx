@@ -58,10 +58,10 @@ export const KeyboardEntry: StoryObj<typeof StyledDatePicker> = {
         const input = canvas.getByTestId('kbd-date')
         await userEvent.click(input)
         await userEvent.type(input, '15062024')
-        await expect(input).toHaveValue('15/06/2024')
+        await expect(input).toHaveValue('15.06.2024')
         // Blur — the typed date must persist (not clear).
         await userEvent.tab()
-        await expect(input).toHaveValue('15/06/2024')
+        await expect(input).toHaveValue('15.06.2024')
     },
 }
 
