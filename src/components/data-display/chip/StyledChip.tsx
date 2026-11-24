@@ -13,6 +13,7 @@ import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip
 import { CloseIcon } from 'src/components/icons'
 import { consumerOverrides } from 'src/helpers/classOverride'
 import { cn } from 'src/helpers/cn'
+import { pressedStateHandlers } from 'src/helpers/pressedState'
 import { resolveSx } from 'src/helpers/sx'
 
 import { getChipPadding } from './chipPadding'
@@ -223,15 +224,24 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
             onDelete?.(event)
         }
 
+        const pressed = pressedStateHandlers({ enabled: interactive, keyboard: true })
+
         // A `clickable`/`onClick` chip gets `role='button' tabIndex=0` below — a <div> doesn't natively
         // fire click on Enter/Space the way a real <button> does, so without this the chip would be a
-        // tab stop that does nothing on keyboard activation.
-        const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>): void => {
-            if (!interactive) return
-            if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault()
+        // tab stop that does nothing on keyboard activation. Like a native button, Enter activates on
+        // keydown and Space on keyup, once per press; the delete button's keys are its own.
+        const handleKeyDown = (event: KeyboardEvent<HTMLElement>): void => {
+            pressed.onKeyDown?.(event)
+            if (!interactive || event.target !== event.currentTarget) return
+            if (event.key === 'Enter' || event.key === ' ') event.preventDefault()
+            if (event.key === 'Enter') onClick?.(event as unknown as MouseEvent<HTMLElement>)
+        }
+
+        // Reads `data-pressed="key"` (a Space press begun here) before the pressed-state keyup clears it.
+        const handleKeyUp = (event: KeyboardEvent<HTMLElement>): void => {
+            if (interactive && event.key === ' ' && event.currentTarget.getAttribute('data-pressed') === 'key')
                 onClick?.(event as unknown as MouseEvent<HTMLElement>)
-            }
+            pressed.onKeyUp?.(event)
         }
 
         // MUI Chip shrink-wraps by default; `max-w-full` caps truncation in constrained rows. `cn` is
@@ -255,7 +265,9 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                 aria-readonly={roleOverride ? ariaReadonly : undefined}
                 tabIndex={getChipTabIndex({ readOnly, disabled, interactive, focusableDisabled, tabIndex })}
                 onClick={disabled || readOnly ? undefined : onClick}
-                onKeyDown={disabled || readOnly ? undefined : handleKeyDown}
+                {...pressed}
+                onKeyDown={handleKeyDown}
+                onKeyUp={handleKeyUp}
                 onMouseDown={disabled || readOnly ? undefined : onMouseDown}
                 onMouseUp={disabled || readOnly ? undefined : onMouseUp}
                 className={cn(
@@ -278,15 +290,16 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                     // A focusable disabled chip keeps its pointer events so the not-allowed cursor shows;
                     // activation is already blocked because the handlers are removed while disabled.
                     disabled && 'opacity-[0.38]',
-                    disabled && (focusableDisabled ? 'cursor-not-allowed' : 'pointer-events-none'),
+                    // A focusable disabled chip takes taps (its reason opens), so it gets the touch fixes: no grey flash.
+                    disabled && (focusableDisabled ? 'asma-touch-ready cursor-not-allowed' : 'pointer-events-none'),
                     interactive &&
                         cn(
                             'cursor-pointer outline-none',
-                            // ASMA-8220 (TB-14): touch-ready, not pressable — the `active:` colours
-                            // below are the designed pressed state, so no opacity layer over them.
-                            // No `asma-touch-target`: the fixed h-6/h-8 heights are the Figma chip.
+                            // ASMA-8220 touch fixes; no `asma-touch-target`: the h-6/h-8 heights are the Figma chip.
                             'asma-touch-ready',
-                            'active:!border-gama-400 active:bg-gama-25 active:shadow-[0_0_0_2px_var(--colors-gama-400)]',
+                            // ASMA-9003 pressed look; the booster beats the hover and selected-radio fills.
+                            // @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
+                            'data-[pressed]:text-gama-700 data-[pressed]:[--control-pressed-accent:var(--colors-gama-700)] data-[press-released]:transition-colors data-[press-released]:duration-150 data-[press-released]:ease-[ease-out] forced-colors:data-[pressed]:![outline-offset:-2px] forced-colors:data-[pressed]:![outline:2px_solid_Highlight] [&[data-chip][role][data-pressed]]:bg-gama-200',
                         ),
                     // Figma Hovered (every Type, e.g. 18832-25540): fill bg/hover-default #f0f2f4
                     // (delta-50); the border stays border/outline (delta-300). A deletable chip is

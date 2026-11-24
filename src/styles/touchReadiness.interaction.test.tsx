@@ -4,7 +4,8 @@ import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { StyledMenuItem } from 'src/components/navigation/menu/StyledMenuItem'
 import { StyledTab } from 'src/components/navigation/tabs/StyledTab'
 import { StyledTabs } from 'src/components/navigation/tabs/StyledTabs'
-import { cleanup, mount } from 'src/test-utils/renderInteraction'
+import { cleanup, mount, resolveTokenColor } from 'src/test-utils/renderInteraction'
+import { fillOf, holdPressed } from 'src/test-utils/pressedInteraction'
 import { page } from 'src/test-utils/interaction-api'
 
 /**
@@ -80,18 +81,52 @@ describe('touch-readiness primitives', () => {
     })
 
     it('suppresses the tap flash and the double-tap-zoom delay on a pressable control', async () => {
-        const { container } = mount(<StyledMenuItem>Item</StyledMenuItem>)
-        const item = container.querySelector('li')!
+        // The primitive on its own: ASMA-9003 moved the menu item and the tab — its old probes — to
+        // `.asma-touch-ready`; the accordion trigger, field buttons and Pathfinder card still use it.
+        const { container } = mount(
+            <button type='button' className='asma-pressable'>
+                probe
+            </button>,
+        )
+        const probe = container.querySelector('button')!
 
-        await expect(item.classList.contains('asma-pressable')).toBe(true)
-        await expect(item.classList.contains('asma-touch-target')).toBe(true)
-
-        const style = getComputedStyle(item)
+        const style = getComputedStyle(probe)
         await expect(style.touchAction).toBe('manipulation')
         await expect(alphaOf(style.getPropertyValue('-webkit-tap-highlight-color'))).toBe(0)
         // Resting opacity is untouched — the pressed feedback lives entirely under `:active`, which
         // is why no VRT baseline moves.
         await expect(style.opacity).toBe('1')
+    })
+
+    it('gives the menu item and the tab the touch fixes without the opacity fade (ASMA-9003)', async () => {
+        const { container } = mount(
+            <>
+                <StyledTabs value={0}>
+                    <StyledTab label='Tab' />
+                </StyledTabs>
+                <StyledMenuItem>Item</StyledMenuItem>
+            </>,
+        )
+        const tab = container.querySelector('[role="tab"]')!
+        const item = container.querySelector('li')!
+
+        await expect(item.classList.contains('asma-touch-target')).toBe(true)
+        for (const control of [tab, item]) {
+            // Never pressable: its 0.7 opacity would wash out the Figma pressed fill both now paint.
+            await expect(control.classList.contains('asma-touch-ready')).toBe(true)
+            await expect(control.classList.contains('asma-pressable')).toBe(false)
+
+            const style = getComputedStyle(control)
+            await expect(style.touchAction).toBe('manipulation')
+            await expect(alphaOf(style.getPropertyValue('-webkit-tap-highlight-color'))).toBe(0)
+            await expect(style.opacity).toBe('1')
+
+            // Pressed: the Figma fill at full opacity, never a fade.
+            await holdPressed(control, async () => {
+                await expect(getComputedStyle(control).opacity).toBe('1')
+                await expect(fillOf(control)).toBe(resolveTokenColor('--colors-gama-200'))
+            })
+        }
     })
 
     it('keeps the 44px row growth on phones only, so tablet and desktop are unchanged', async () => {
@@ -108,9 +143,9 @@ describe('touch-readiness primitives', () => {
         // 390x700 puts the tester iframe under the 743px gate — the cascade CI otherwise never
         // sees (interaction and VRT both run at 1280x720). Guards ASMA-8210 review B1: the
         // touch-target utility is a later-source override, not a floor, so a mis-scoped opt-in
-        // would silently SHRINK a tab's effective 48x90 minimum to 44px. Both tab variants rest
-        // at 48px — the small variant's `min-h-10` loses to the base `min-h-12` by emitted
-        // order (pre-existing quirk, `cn` is plain clsx) — so NEITHER may carry the override.
+        // would silently change a tab's designed minimum. The tabs keep the Figma Tab heights — 48px
+        // default, 40px small (ASMA-9003 dropped the old min-h stacking quirk) — so NEITHER may carry
+        // the override.
         await page.viewport(390, 700)
         try {
             await expect(window.matchMedia('(max-width: 743px)').matches).toBe(true)
@@ -128,11 +163,15 @@ describe('touch-readiness primitives', () => {
             const tabs = Array.from(container.querySelectorAll('[role="tab"]'))
             await expect(tabs.length).toBe(2)
 
-            // Tabs carry no touch-target class: the effective 48px/90px minimums survive on
-            // both variants, and neither shrinks.
-            for (const tab of tabs) {
+            // Tabs carry no touch-target class: the Figma 48px / 40px heights and the 90px minimum
+            // width survive on a phone, neither grown nor shrunk.
+            for (const [tab, height] of [
+                [tabs[0]!, '48px'],
+                [tabs[1]!, '40px'],
+            ] as const) {
                 const tabStyle = getComputedStyle(tab)
-                await expect(tabStyle.minHeight).toBe('48px')
+                await expect(tabStyle.minHeight).toBe(height)
+                await expect(tab.getBoundingClientRect().height).toBe(Number.parseFloat(height))
                 await expect(tabStyle.minWidth).toBe('90px')
                 await expect(tab.classList.contains('asma-touch-target')).toBe(false)
             }

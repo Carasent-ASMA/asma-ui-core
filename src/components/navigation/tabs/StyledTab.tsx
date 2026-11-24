@@ -1,6 +1,7 @@
 import { useCallback, type FC, type ReactNode } from 'react'
 import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip'
 import { cn } from 'src/helpers/cn'
+import { pressedStateHandlers } from 'src/helpers/pressedState'
 import { resolveSx } from 'src/helpers/sx'
 import { useTabsContext, type TabValue } from './TabsContext'
 
@@ -8,7 +9,7 @@ import { useTabsContext, type TabValue } from './TabsContext'
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#15981-35855
  * Figma "Tab" / `_BASE_Tab`. Figma **Active** (on/off) ← whether this tab is the selected one in the
  * surrounding `StyledTabs`; **State** (Enabled/Hovered/Focused/Disabled) ← native hover/focus +
- * `disabled`. **Size** (Medium/Small) comes from `StyledTabs.size`. Active label + 2px underline =
+ * `disabled`. **Size** (Medium/Small) comes from `StyledTabs.size`. Active label + 3px underline =
  * `gama-500` #168181 (text-icon/primary).
  */
 export interface StyledTabProps {
@@ -88,32 +89,17 @@ export const StyledTab: FC<StyledTabProps> = ({
                     : undefined
             }
             onClick={(e) => !disabled && ctx?.onSelect(e, effectiveValue)}
+            {...pressedStateHandlers({ enabled: !disabled, keyboard: true })}
             className={cn(
-                // Figma Tab (node 15981-35855): Medium h48/px16/py12, Small h40/px12/py8, gap 8,
-                // label Medium 18px/lh28 (Section title) or Small 16px/lh24 (Body Base Semibold).
-                'inline-flex min-h-12 min-w-[90px] shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-t-lg border-0 bg-transparent px-4 py-3 tracking-normal outline-none transition-colors',
+                // Figma Tab set 15981:32783: Medium h48 (28px line centred: py10) px16 18px, Small h40 py8 px12
+                // 16px, gap 8; the label is SemiBold in every state and size.
+                'inline-flex min-w-[90px] shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-t-lg border-0 bg-transparent tracking-normal outline-none transition-colors',
+                ctx?.size === 'small' ? 'min-h-10 px-3 py-2' : 'min-h-12 px-4 py-2.5',
                 !hasTextSize && (ctx?.size === 'small' ? 'text-base' : 'text-lg'),
-                // Weight (Figma): Small tabs use "Body Base Semibold" in every state, so they are
-                // always SemiBold. Medium/default tabs use "Section title" — SemiBold when
-                // active/disabled, but a resting inactive tab is Medium and thickens to SemiBold on
-                // hover/focus.
-                !hasFontWeight &&
-                    (ctx?.size === 'small' || selected || disabled
-                        ? 'font-semibold'
-                        : 'font-medium hover:font-semibold focus-visible:font-semibold'),
+                !hasFontWeight && 'font-semibold',
                 !hasTextTransform && 'normal-case',
-                ctx?.size === 'small' && 'min-h-10 px-3 py-2',
-                // ASMA-8210: tabs had hover and focus treatments but no pressed state — pressable
-                // adds that with zero dimension impact. Deliberately NO `asma-touch-target`: that
-                // class is a later-source min-height OVERRIDE, not a floor (see index.css), and
-                // BOTH tab variants already rest at an effective 48px×90px minimum — the small
-                // variant's `min-h-10` loses to the base `min-h-12` because Tailwind emits
-                // `.min-h-12` later and `cn` (plain clsx) keeps both classes. Applying the
-                // override to either variant would SHRINK 48px to 44px on phones (review B1).
-                // The min-h-10/min-h-12 stacking quirk itself is pre-existing (small tabs render
-                // 48px, not the Figma 40px) and is left for the ASMA-8220 sweep — resolving it
-                // moves VRT baselines.
-                'asma-pressable',
+                // No `asma-touch-target`: that min-height override would change the Figma 40/48px heights.
+                'asma-touch-ready',
                 // Label colour — single source so precedence is exact: disabled → selected → inactive.
                 // Disabled = text-icon/disabled #bdc4cf (delta-300); active = gama-500; inactive = delta-600.
                 disabled ? 'text-delta-300' : selected ? 'text-gama-500' : 'text-delta-600',
@@ -122,7 +108,11 @@ export const StyledTab: FC<StyledTabProps> = ({
                 // (follows the rounded top) with no layout shift.
                 'focus-visible:shadow-[inset_0_0_0_3px_var(--colors-focus-ring)]',
                 // Figma Hover (not selected) = 3px delta-300 bottom underline.
-                !disabled && !selected && 'hover:shadow-[inset_0_-3px_0_0_var(--colors-delta-300)]',
+                !disabled && !selected && '[&:not([data-pressed])]:hover:shadow-[inset_0_-3px_0_0_var(--colors-delta-300)]',
+                // ASMA-9003 Figma Tab State=Pressed: the 1px separator line, not the hover underline, under the fill.
+                // @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
+                !disabled &&
+                    'data-[pressed]:bg-gama-200 data-[pressed]:bg-[linear-gradient(to_top,var(--colors-delta-200)_1px,transparent_1px)] data-[pressed]:text-gama-700 data-[pressed]:transition-none data-[press-released]:duration-150 data-[press-released]:ease-[ease-out] forced-colors:data-[pressed]:![outline-offset:-2px] forced-colors:data-[pressed]:![outline:2px_solid_Highlight]',
                 className,
             )}
             style={{ fontFamily: 'Roboto, Helvetica, Arial, sans-serif', ...resolveSx(sx) }}

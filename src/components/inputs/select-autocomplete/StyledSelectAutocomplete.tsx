@@ -27,6 +27,7 @@ import { CheckIcon, ChevronDownIcon, CloseIcon, PlusIconCircle } from 'src/compo
 import { StyledCheckbox } from 'src/components/inputs/checkbox/base-ui/StyledCheckbox'
 import { fieldWidthStyle, type FieldWidth } from 'src/components/inputs/field-styles'
 import { cn } from 'src/helpers/cn'
+import { pressedStateHandlers } from 'src/helpers/pressedState'
 import { useBackCloses } from 'src/hooks/useBackCloses.hook'
 import {
     getOpenModalDialogAncestor,
@@ -619,19 +620,26 @@ export function StyledSelectAutocomplete<
     // Custom `renderOption` callers spread `{...props}` onto their `<li>` and expect flex, cursor,
     // hover, and selected backgrounds from that — not only from `defaultRenderOption`.
     const optionRowClassName = cn(
-        // ASMA-8220 (TB-14): hover/selected only, no `:active` → pressable. It rides the shared row
-        // class, so custom `renderOption` callers spreading `{...props}` inherit it too. No
+        // ASMA-8220 (TB-14) touch fixes. They ride the shared row class, so custom `renderOption`
+        // callers spreading `{...props}` inherit them too. No
         // `asma-touch-target`: the rows already declare their min-height, and the mobile override would
         // also grow `aria-disabled` rows, which are not pressable at all.
-        'asma-pressable',
-        // Figma Menus item: Body Base 16/lh24, text delta-800.
-        'relative box-border flex cursor-pointer items-center gap-x-3 px-3 py-2 text-base text-delta-800',
+        'asma-touch-ready',
+        // Figma Menus item (Autocomplete section 20474:27966): Body Base 16/lh24 in text-icon/body (delta-700), a 1px
+        // border/separator between rows; Check mark rows 8px / gap 4, Checkbox rows a 12px box inset / gap 12.
+        // A custom `renderOption` keeps its own spacing.
+        'group/option relative box-border flex cursor-pointer items-center py-2 text-base text-delta-700 [&:not(:last-child)]:shadow-[inset_0_-1px_0_0_var(--colors-delta-200)]',
+        renderOption ? 'gap-x-3 px-3' : isMultiple ? 'gap-x-3 pl-3 pr-4' : 'gap-x-1 pl-2 pr-4',
         // Row density: 'compact' = 40px (Figma Menus item); 'regular' = roomier 48px. min-height only,
         // so a wrapped 2-line label still grows the row past this.
         rowSize === 'regular' ? 'min-h-12' : 'min-h-10',
-        'aria-selected:bg-gama-50 hover:bg-delta-50',
-        // Disabled options never take the gama highlight (hover or keyboard) and read as muted.
-        'aria-disabled:cursor-default aria-disabled:!bg-transparent aria-disabled:text-delta-300',
+        // Figma Menus item: hover bg/hover-default; selected bg/selected, hovered bg/hover-selected.
+        'aria-selected:bg-gama-25 hover:bg-delta-50 aria-selected:hover:bg-gama-50',
+        // Disabled options never take a highlight (hover, selected or keyboard) and read as muted.
+        'aria-disabled:cursor-default aria-disabled:!bg-transparent aria-disabled:text-delta-300 aria-disabled:hover:!bg-transparent',
+        // ASMA-9003: the menu item's pressed look; the booster beats `aria-selected:hover:`.
+        // @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
+        'data-[pressed]:text-gama-700 data-[pressed]:[--control-pressed-accent:var(--colors-gama-700)] data-[press-released]:transition-colors data-[press-released]:duration-150 data-[press-released]:ease-[ease-out] forced-colors:data-[pressed]:![outline-offset:-2px] forced-colors:data-[pressed]:![outline:2px_solid_Highlight] [&[data-pressed][role][aria-selected]]:bg-gama-200',
     )
 
     const defaultRenderOption = (props: OptionLiProps, option: T, state: AutocompleteRenderOptionState): ReactNode => {
@@ -662,10 +670,16 @@ export function StyledSelectAutocomplete<
                         decorative
                     />
                 ) : (
-                    // `flex` in the picker: an inline 20 px icon sits on the text baseline and grows the
-                    // selected row to 43 px, off Figma's 40 (the attached list still has that 2.5 px).
-                    <span className={cn('w-5', state.inPicker && 'flex')}>
-                        {state.selected && <CheckIcon width={20} height={20} className='text-gama-500' />}
+                    // `flex`: an inline 20 px icon sits on the text baseline and grows the selected row to 43 px,
+                    // off Figma's 40.
+                    <span className='flex w-5'>
+                        {state.selected && (
+                            <CheckIcon
+                                width={20}
+                                height={20}
+                                className='text-gama-500 group-data-[pressed]/option:text-gama-700 group-data-[press-released]/option:transition-colors group-data-[press-released]/option:duration-150 group-data-[press-released]/option:ease-[ease-out]'
+                            />
+                        )}
                     </span>
                 )}
                 {/* Long labels wrap to a second line and only then ellipsise (ASMA-7847): one
@@ -688,6 +702,7 @@ export function StyledSelectAutocomplete<
                 },
                 // Hover is a grey mouse state; the left focus border is reserved for keyboard navigation.
                 onMouseMove: () => setActiveIndex(null),
+                ...pressedStateHandlers({ enabled: !optionDisabled }),
             }),
             key: getOptionKey ? String(getOptionKey(option)) : `${getLabel(option)}-${index}`,
             ref: (node: HTMLLIElement | null) => {
@@ -809,6 +824,7 @@ export function StyledSelectAutocomplete<
                                     onMouseDown={(event) => event.preventDefault()}
                                     onClick={toggleSelectAll}
                                     onMouseMove={() => setActiveIndex(null)}
+                                    {...pressedStateHandlers({ enabled: true })}
                                     // Styled as the list's table header (Figma Reports table-header row):
                                     // a `--table-bg-header` (#F9FAFB = colors-gray-10) bar, fixed 32px
                                     // tall, carrying its own checkbox column and a Semibold uppercase
@@ -817,7 +833,8 @@ export function StyledSelectAutocomplete<
                                     // checkboxes line up in a single column. It stays clickable to toggle
                                     // select-all, so hover deepens the grey rather than turning the header
                                     // green like a selected option.
-                                    className='relative box-border flex h-8 cursor-pointer items-center gap-x-3 bg-[var(--colors-gray-10)] px-3 text-xs font-semibold uppercase tracking-[0.2px] text-delta-600 hover:bg-delta-50'
+                                    // ASMA-9003: pressed like the option rows (optionRowClassName).
+                                    className='asma-touch-ready relative box-border flex h-8 cursor-pointer items-center gap-x-3 bg-[var(--colors-gray-10)] px-3 text-xs font-semibold uppercase tracking-[0.2px] text-delta-600 data-[pressed]:text-gama-700 data-[pressed]:[--control-pressed-accent:var(--colors-gama-700)] data-[press-released]:transition-colors data-[press-released]:duration-150 data-[press-released]:ease-[ease-out] hover:bg-delta-50 forced-colors:data-[pressed]:![outline-offset:-2px] forced-colors:data-[pressed]:![outline:2px_solid_Highlight] [&[data-pressed][role]]:bg-gama-200'
                                 >
                                     {activeIndex === -1 && (
                                         <span

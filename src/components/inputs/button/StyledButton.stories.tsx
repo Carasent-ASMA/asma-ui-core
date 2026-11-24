@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
 import { ChevronDownIcon, FilterIcon } from 'src/components/icons'
 import { expect } from 'storybook/test'
+import { MarkPressed } from 'src/test-utils/MarkPressed'
 import { StyledButton, type StyledButtonProps } from './StyledButton'
 
 const meta: Meta<typeof StyledButton> = {
@@ -306,18 +307,19 @@ export const FocusVisible: Story = {
 /**
  * Full Figma variant matrix (node 13431-18852) rendered as a table:
  * rows = Figma **Type** (+ **Danger**), columns = Figma **State**, one table per **Size**.
- * Interaction states (Hovered/Focused/Pressed) are forced statically via
- * `storybook-addon-pseudo-states` element classes (`pseudo-hover` / `pseudo-focus` / `pseudo-active`);
- * Disabled uses the native `disabled` attribute. `textWhite` is excluded — it has no Figma counterpart.
+ * Hovered/Focused are forced with `storybook-addon-pseudo-states` classes (`pseudo-hover` / `pseudo-focus`);
+ * Pressed sets `data-pressed` (as a real press does, ASMA-9003); Disabled uses the native `disabled` attribute. `textWhite` is excluded — it has no Figma counterpart.
  */
 export const Gallery: Story = {
+    // Pressed cells: momentary 3.83:1 (theme contrast gate, docs/a11y-contrast.md), not axe's 4.5:1 (4.34:1 default).
+    parameters: { a11y: { context: { include: ['body'], exclude: ['[data-pressed]'] } } },
     render: () => {
         // Figma "State" property -> how we force it statically
         const STATES = [
             { key: 'enabled', label: 'Enabled', className: '', disabled: false },
             { key: 'hovered', label: 'Hovered', className: 'pseudo-hover', disabled: false },
+            { key: 'pressed', label: 'Pressed', className: '', disabled: false },
             { key: 'focused', label: 'Focused', className: 'pseudo-focus', disabled: false },
-            { key: 'pressed', label: 'Pressed', className: 'pseudo-active', disabled: false },
             { key: 'disabled', label: 'Disabled', className: '', disabled: true },
         ] as const
 
@@ -374,7 +376,13 @@ export const Gallery: Story = {
                                             } as StyledButtonProps
                                             return (
                                                 <td key={s.key} style={cellStyle}>
-                                                    <StyledButton {...props} />
+                                                    {s.key === 'pressed' ? (
+                                                        <MarkPressed selector='button'>
+                                                            <StyledButton {...props} />
+                                                        </MarkPressed>
+                                                    ) : (
+                                                        <StyledButton {...props} />
+                                                    )}
                                                 </td>
                                             )
                                         })}

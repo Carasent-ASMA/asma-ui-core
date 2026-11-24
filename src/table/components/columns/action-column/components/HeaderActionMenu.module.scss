@@ -1,5 +1,5 @@
 .table-action-item {
-    // The row was a button, which sizes its border box; as a div it must say so, or its padding is added to 100% and 40px.
+    // The row was a button, which sizes its border box; as a label it must say so, or its padding is added to 100% and 40px.
     box-sizing: border-box;
     height: 40px;
     padding-left: 8px;
@@ -13,9 +13,30 @@
     &:hover {
         background-color: var(--colors-gray-50);
     }
+}
 
-    &:active {
-        background-color: var(--colors-gray-50);
+// ASMA-9003 Figma Pressed state (47847:229830): a pressed row turns gama-200 at once, its name and box gama-700
+// (`!important` beats the name's utility); on release they ease back over 150ms. Hover keeps master's timing.
+// @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
+.table-action-item[data-pressed] {
+    --control-pressed-accent: var(--colors-gama-700);
+    background-color: var(--colors-gama-200);
+
+    > span[id] {
+        color: var(--colors-gama-700) !important;
+    }
+
+    @media (forced-colors: active) {
+        outline: 2px solid Highlight;
+        outline-offset: -2px;
+    }
+}
+
+.table-action-item[data-press-released] {
+    transition: background-color 150ms ease-out;
+
+    > span[id] {
+        transition: color 150ms ease-out;
     }
 }
 
@@ -23,8 +44,8 @@
     height: 40px;
 }
 
-// The checkbox is the only control of a row, so its target is 24 x 24px (WCAG 2.5.8), centred on the 16px box. With the 4px
-// either side it takes the room the 16px box and its 8px either side took, so the row looks as it did.
+// The box keeps a 24 x 24px slot centred on the 16px box: with the 4px either side it takes the room the 16px box and its
+// 8px either side took, so the row looks as it did. The whole row is the target.
 .drag-item .column-checkbox {
     width: 24px;
     height: 24px;

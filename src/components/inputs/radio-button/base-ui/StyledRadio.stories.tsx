@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { expect } from 'storybook/test'
 import { StyledRadio, type StyledRadioProps } from './StyledRadio'
 import { StyledRadioGroup, type StyledRadioGroupProps } from './StyledRadioGroup'
+import { MarkPressed } from 'src/test-utils/MarkPressed'
 
 const meta = {
     title: 'base-ui/Styled Radio',
@@ -153,8 +154,9 @@ export const Interactive: Story = {
 
 /**
  * Full Figma variant table (node 15385-19720): rows = State, columns = Selected (Off/On).
- * Hover forced via `pseudo-hover`; Focused forced via the `data-focus-visible` attribute (mirrors the
- * checkbox). Read-only is omitted — the radio has no `readOnly` prop.
+ * Hover forced via `pseudo-hover`; Pressed (ASMA-9003, Figma Pressed state 47847:229830) sets the
+ * `data-pressed` a real press sets on the hovered radio; Focused forced via the `data-focus-visible`
+ * attribute (mirrors the checkbox).
  */
 export const Gallery: Story = {
     render: () => {
@@ -168,9 +170,10 @@ export const Gallery: Story = {
             whiteSpace: 'nowrap',
         }
         const td: React.CSSProperties = { padding: 16, border: '1px solid #bdc4cf', textAlign: 'center' }
-        const STATES: { label: string; props: Partial<StyledRadioProps> }[] = [
+        const STATES: { label: string; props: Partial<StyledRadioProps>; pressed?: boolean }[] = [
             { label: 'Enabled', props: {} },
             { label: 'Hovered', props: { className: 'pseudo-hover' } },
+            { label: 'Pressed', props: { className: 'pseudo-hover' }, pressed: true },
             { label: 'Focused', props: { 'data-focus-visible': '' } as Partial<StyledRadioProps> },
             { label: 'Error', props: { error: true } },
             { label: 'Disabled', props: { disabled: true } },
@@ -200,13 +203,15 @@ export const Gallery: Story = {
                             </th>
                             {COLS.map((c) => (
                                 <td key={c.key} style={td}>
-                                    <StyledRadio
-                                        dataTest={`gallery-${s.label}-${c.key}`}
-                                        aria-label={`${s.label} ${c.label}`}
-                                        checked={c.checked}
-                                        onChange={() => undefined}
-                                        {...s.props}
-                                    />
+                                    <MarkPressed selector={s.pressed ? '[class*="RadioWrapper"]' : ':not(*)'}>
+                                        <StyledRadio
+                                            dataTest={`gallery-${s.label}-${c.key}`}
+                                            aria-label={`${s.label} ${c.label}`}
+                                            checked={c.checked}
+                                            onChange={() => undefined}
+                                            {...s.props}
+                                        />
+                                    </MarkPressed>
                                 </td>
                             ))}
                         </tr>

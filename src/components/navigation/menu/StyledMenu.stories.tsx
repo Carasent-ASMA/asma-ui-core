@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { MarkPressed } from 'src/test-utils/MarkPressed'
 import { expect, fn, userEvent, within } from 'storybook/test'
 import { StyledMenu, type MenuProps } from './StyledMenu'
 import { useState, type FC } from 'react'
@@ -38,20 +39,26 @@ export const Menu: Story = {
 }
 
 /**
- * Menu item state gallery (Figma Menus node 16073-21583): Enabled / Hovered (forced) / Selected /
- * Disabled, with the separator between every row. Hover is CSS-driven, forced via `pseudo-hover`.
+ * Menu item state gallery (Figma Menus node 16073-21583): Enabled / Hovered (forced) / Pressed / Selected /
+ * Disabled, with the separator between every row. Hover is CSS-driven, forced via `pseudo-hover`; Pressed
+ * (ASMA-9003, Figma Pressed state 47847:229830) sets the `data-pressed` a real press sets.
  * The second list shows a caller-supplied tooltip. A checked disabled checkbox with no tooltip
  * uses the default "Allerede lagt til" / "Already added".
  */
 export const Gallery: Story = {
+    // The pressed row is held to the momentary 3.83:1 (theme contrast gate), not axe's 4.5:1.
+    parameters: { a11y: { context: { include: ['body'], exclude: ['[data-pressed]'] } } },
     render: () => (
         <div className='flex items-start gap-8' style={{ width: 520 }}>
-            <StyledMenuList className='w-60'>
-                <StyledMenuItem>Enabled</StyledMenuItem>
-                <StyledMenuItem className='pseudo-hover'>Hovered</StyledMenuItem>
-                <StyledMenuItem selected>Selected</StyledMenuItem>
-                <StyledMenuItem disabled>Disabled</StyledMenuItem>
-            </StyledMenuList>
+            <MarkPressed selector='[role="menuitem"]:nth-child(3)'>
+                <StyledMenuList className='w-60'>
+                    <StyledMenuItem>Enabled</StyledMenuItem>
+                    <StyledMenuItem className='pseudo-hover'>Hovered</StyledMenuItem>
+                    <StyledMenuItem className='pseudo-hover'>Pressed</StyledMenuItem>
+                    <StyledMenuItem selected>Selected</StyledMenuItem>
+                    <StyledMenuItem disabled>Disabled</StyledMenuItem>
+                </StyledMenuList>
+            </MarkPressed>
             <StyledMenuList className='w-60'>
                 <StyledMenuItem>Free option</StyledMenuItem>
                 <StyledMenuItem selected tooltip='Already in use'>

@@ -12,15 +12,13 @@ import { StyledFormControlLabel } from './StyledFormControlLabel'
  * 40px control itself. A disabled control never shows it.
  */
 
-const haloOpacity = (control: Element): string => {
-    const container = control.querySelector('[class*="RippleContainer"]')!
-    return getComputedStyle(container, '::after').opacity
-}
+const haloOpacity = (control: Element): string =>
+    getComputedStyle(control.querySelector('[class*="CheckboxCircle"], [class*="RadioCircle"]')!).opacity
 
 const hoverText = async (text: string): Promise<void> => {
     const node = [...document.querySelectorAll('label span, label')].find((el) => el.textContent === text)!
     await userEvent.hover(node)
-    // The circle fades in over 200 ms.
+    // The circle fades and grows in over 0.2s (master).
     await new Promise((resolve) => setTimeout(resolve, 300))
 }
 

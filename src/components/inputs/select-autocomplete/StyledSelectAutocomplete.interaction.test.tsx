@@ -3,7 +3,8 @@ import { afterEach, describe, it } from 'vitest'
 import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { StyledInputField } from 'src/components/inputs/input-field'
 import { requestCloseTopOverlayBack } from 'src/hooks/useBackCloses.hook'
-import { cleanup, mount } from 'src/test-utils/renderInteraction'
+import { cleanup, mount, resolveTokenColor } from 'src/test-utils/renderInteraction'
+import { fillOf, holdPressed, mouse } from 'src/test-utils/pressedInteraction'
 import { StyledSelectAutocomplete } from './StyledSelectAutocomplete'
 
 /**
@@ -472,5 +473,154 @@ describe('StyledSelectAutocomplete disabled options', () => {
 
         await userEvent.keyboard('{ArrowDown}')
         await expect(activeOption()).toHaveTextContent('Charlie')
+    })
+})
+
+/* ASMA-9003: the option rows show the menu item's Figma pressed look. The rows prevent the mousedown
+ * default to keep focus on the input; Chromium still sets `:active` (Firefox does not). */
+describe('StyledSelectAutocomplete pressed option rows (ASMA-9003)', () => {
+    afterEach(cleanup)
+
+    it('fills a pressed row gama-200 over the selected fill, and never a keyboard-active or disabled row', async () => {
+        mount(
+            <StyledSelectAutocomplete<string, false, false, false>
+                dataTest='ac'
+                options={OPTIONS}
+                value='Charlie'
+                getOptionDisabled={(option) => option === 'Bravo'}
+                onChange={fn()}
+                renderInput={(params) => <StyledInputField {...params} dataTest='ac-input' label='Team' />}
+            />,
+        )
+        const gama200 = resolveTokenColor('--colors-gama-200')
+        const gama700 = resolveTokenColor('--colors-gama-700')
+
+        input().focus()
+        await userEvent.keyboard('{ArrowDown}')
+        await waitFor(() => expect(listbox()).not.toBeNull())
+        const [alpha, bravo, charlie] = optionRows()
+
+        // The arrow keys move `aria-activedescendant`: no pressed look on the active row.
+        await waitFor(() => expect(activeOption()).not.toBeNull())
+        await expect(fillOf(activeOption()!)).not.toBe(gama200)
+        await expect(fillOf(alpha!)).not.toBe(gama200)
+
+        // A disabled row shows no pressed look (and pressing it chooses nothing). Not compared with its
+        // resting fill: the pointer also hovers it, and the hover fill is out of ASMA-9003's scope.
+        const restingColor = getComputedStyle(bravo!).color
+        await holdPressed(bravo!, async () => {
+            const style = getComputedStyle(bravo!)
+            await expect(fillOf(bravo!)).not.toBe(gama200)
+            await expect(style.color).toBe(restingColor)
+            await expect(style.getPropertyValue('--control-pressed-accent')).toBe('')
+        })
+
+        // Last, because releasing on it chooses it: the selected row — check mark kept, darkened.
+        await expect(charlie).toHaveAttribute('aria-selected', 'true')
+        await holdPressed(charlie!, async () => {
+            const style = getComputedStyle(charlie!)
+            await expect(fillOf(charlie!)).toBe(gama200)
+            await expect(style.color).toBe(gama700)
+            await expect(style.opacity).toBe('1')
+            await expect(getComputedStyle(charlie!.querySelector('svg')!).color).toBe(gama700)
+            // A multi-select row's decorative checkbox reads this.
+            await expect(style.getPropertyValue('--control-pressed-accent').trim()).toBe(
+                getComputedStyle(document.documentElement).getPropertyValue('--colors-gama-700').trim(),
+            )
+        })
+    })
+})
+
+/* The rows prevent the mousedown default (focus stays on the input), which keeps Firefox from setting
+ * `:active`, so they also hold the press as `data-pressed` from pointer events — and drop it the moment
+ * the pointer leaves the row (pattern: cancel on pointer-out). */
+describe('StyledSelectAutocomplete option rows held by the pointer (ASMA-9003)', () => {
+    afterEach(cleanup)
+
+    const openList = async (): Promise<void> => {
+        input().focus()
+        await userEvent.keyboard('{ArrowDown}')
+        await waitFor(() => expect(listbox()).not.toBeNull())
+    }
+
+    it('marks a pressed row and cancels it when the pointer is dragged off; a disabled row never', async () => {
+        const onChange = fn()
+        mount(
+            <StyledSelectAutocomplete<string, false, false, false>
+                dataTest='ac'
+                options={OPTIONS}
+                value='Charlie'
+                getOptionDisabled={(option) => option === 'Bravo'}
+                onChange={onChange}
+                renderInput={(params) => <StyledInputField {...params} dataTest='ac-input' label='Team' />}
+            />,
+        )
+        await openList()
+        const [, bravo, charlie] = optionRows()
+        const gama200 = resolveTokenColor('--colors-gama-200')
+
+        const disabledAt = bravo!.getBoundingClientRect()
+        await mouse('mousePressed', { x: disabledAt.left + 20, y: disabledAt.top + disabledAt.height / 2 })
+        await expect(bravo).not.toHaveAttribute('data-pressed')
+        await expect(fillOf(bravo!)).not.toBe(gama200)
+        await mouse('mouseReleased', { x: disabledAt.left + 20, y: disabledAt.top + disabledAt.height / 2 })
+
+        const box = charlie!.getBoundingClientRect()
+        const x = box.left + 20
+        const y = box.top + box.height / 2
+        const away = { x: box.right + 300, y: box.bottom + 300 }
+        await mouse('mousePressed', { x, y })
+        try {
+            await expect(charlie).toHaveAttribute('data-pressed')
+            await expect(fillOf(charlie!)).toBe(gama200)
+            await expect(getComputedStyle(charlie!.querySelector('svg')!).color).toBe(
+                resolveTokenColor('--colors-gama-700'),
+            )
+
+            await mouse('mouseMoved', away, { held: true })
+            await expect(charlie).not.toHaveAttribute('data-pressed')
+            await waitFor(() => expect(fillOf(charlie!)).not.toBe(gama200))
+        } finally {
+            await mouse('mouseReleased', away)
+        }
+        await expect(onChange).not.toHaveBeenCalled()
+    })
+
+    it('paints the pressed look from `data-pressed` alone (as Firefox shows it), also on a custom row', async () => {
+        mount(
+            <StyledSelectAutocomplete<string, false, false, false>
+                dataTest='ac'
+                options={OPTIONS}
+                value='Alpha'
+                onChange={fn()}
+                // A caller row that spreads the props it is given, as `renderOption` callers do.
+                renderOption={({ key, ...props }, option) => (
+                    <li key={key} {...props}>
+                        {option}
+                    </li>
+                )}
+                renderInput={(params) => <StyledInputField {...params} dataTest='ac-input' label='Team' />}
+            />,
+        )
+        await openList()
+        const [alpha, bravo] = optionRows()
+
+        // A real press marks the custom row through the spread props.
+        const box = bravo!.getBoundingClientRect()
+        await mouse('mousePressed', { x: box.left + 20, y: box.top + box.height / 2 })
+        try {
+            await expect(bravo).toHaveAttribute('data-pressed')
+        } finally {
+            await mouse('mouseMoved', { x: box.right + 300, y: box.bottom + 300 }, { held: true })
+            await mouse('mouseReleased', { x: box.right + 300, y: box.bottom + 300 })
+        }
+
+        // The attribute alone — no `:active` — paints the look, over the selected fill.
+        alpha!.setAttribute('data-pressed', '')
+        await expect(fillOf(alpha!)).toBe(resolveTokenColor('--colors-gama-200'))
+        await expect(getComputedStyle(alpha!).color).toBe(resolveTokenColor('--colors-gama-700'))
+        await expect(getComputedStyle(alpha!).getPropertyValue('--control-pressed-accent').trim()).toBe(
+            getComputedStyle(document.documentElement).getPropertyValue('--colors-gama-700').trim(),
+        )
     })
 })

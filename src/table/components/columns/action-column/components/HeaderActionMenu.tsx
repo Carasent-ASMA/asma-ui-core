@@ -1,4 +1,4 @@
-import { useId, type MouseEvent } from 'react'
+import { useId, type MouseEvent, type PointerEvent, type SyntheticEvent } from 'react'
 import { StyledPopover as Popover } from 'src/components/utils/popover'
 import type { HeaderContext } from '@tanstack/react-table'
 import { useToggleMenuVisibility } from 'src/table/hooks/useToggleMenuVisibility.hook'
@@ -31,6 +31,7 @@ import type { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities'
 import { message } from 'src/components/feedback/snack-bar'
 import { StyledBadge } from 'src/components/data-display/badge'
 import { hasChangedColumnLayout } from 'src/table/custom-features/order-columns/columnLayout'
+import { pressedStateHandlers } from 'src/helpers/pressedState'
 
 function SortableColumnItem({
     id,
@@ -58,14 +59,35 @@ function SortableColumnItem({
     )
 }
 
+const startsOnDragIcon = (event: SyntheticEvent): boolean => (event.target as Element).closest('[role="button"]') !== null
+
 /**
- * A column's row is not a control: only its checkbox shows or hides the column (the drag icon only reorders it). A press on
- * the row itself or on the name would still move the focus to the page, out of the menu, so it is kept where it was. The
- * checkbox and the drag icon take the focus as usual.
+ * A column's row is the label of its one checkbox, as Figma's checkbox Menus item (ASMA-9003): a press anywhere on it, the
+ * name included, presses the row and shows or hides the column; the drag icon only reorders it. A press on the row does
+ * not move the focus itself (it would leave the menu): the label hands it to the checkbox. The drag icon takes it as usual.
  */
 const keepFocusOnRowPress = (event: MouseEvent<HTMLElement>): void => {
-    if ((event.target as Element).closest('label, [role="button"]')) return
-    event.preventDefault()
+    if (!startsOnDragIcon(event)) event.preventDefault()
+}
+
+/**
+ * A press that begins on the drag icon only reorders: the mouse click that ends it (on the icon, or wherever a drag is
+ * released on the row) must not activate the row's label. After a drag dnd-kit stops that click's propagation at the
+ * document but leaves its default, so only a window capture listener sees it in time. It goes at the next press; a
+ * keyboard click (Space on the checkbox, `detail` 0) always goes through.
+ */
+const keepDragPressOffLabel = (event: PointerEvent<HTMLElement>): void => {
+    const view = event.currentTarget.ownerDocument.defaultView
+    if (!view || !startsOnDragIcon(event)) return
+    const row = event.currentTarget
+    const blockActivation = (click: globalThis.MouseEvent): void => {
+        if (click.detail > 0 && row.contains(click.target as Node)) click.preventDefault()
+    }
+    view.addEventListener('click', blockActivation, { capture: true })
+    view.addEventListener('pointerdown', () => view.removeEventListener('click', blockActivation, { capture: true }), {
+        capture: true,
+        once: true,
+    })
 }
 
 export function HeaderActionMenu<TData>({
@@ -185,36 +207,47 @@ export function HeaderActionMenu<TData>({
                             return (
                                 <SortableColumnItem key={column.id} id={column.id} disabled={dragDisabled}>
                                     {({ listeners, attributes }) => (
-                                        // `presentation`: the row has no semantics of its own, and its mouse handler only keeps the focus where it was.
-                                        <div
-                                            role='presentation'
-                                            className={headerStyles['table-action-item']}
+                                        // The row is the label of the column's checkbox: a press anywhere on it presses the row (Space on
+                                        // the checkbox too) and toggles the column. The box is drawn by a decorative checkbox. Lint false
+                                        // positive: the native <label>-wraps-<input> pattern; the input is the keyboard-operable control,
+                                        // and the handlers only keep the focus in the menu and hold the pressed look.
+                                        // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
+                                        <label
+                                            data-testid={`${column.id}-column-visibility-checkbox`}
+                                            className={cn(
+                                                headerStyles['table-action-item'],
+                                                hidingDisabled ? 'cursor-default' : 'cursor-pointer',
+                                            )}
+                                            onPointerDownCapture={keepDragPressOffLabel}
                                             onMouseDown={keepFocusOnRowPress}
+                                            {...pressedStateHandlers({ enabled: !hidingDisabled, keyboard: true })}
                                         >
                                             {/* The checkbox comes first in the DOM, then the drag icon, which is drawn first (`order`):
                                                 Tab goes checkbox, then drag icon, as it always went toggle, then drag icon. */}
                                             <StyledTooltip title={hideReason} arrow>
+                                                {/* The tooltip describes the first focusable inside: the checkbox's input. */}
                                                 <span className='px-1'>
-                                                    <StyledCheckbox
+                                                    <input
+                                                        type='checkbox'
+                                                        className='sr-only'
+                                                        checked={column.getIsVisible()}
                                                         readOnly={hidingDisabled}
-                                                        dataTest={`${column.id}-column-visibility-checkbox`}
+                                                        aria-readonly={hidingDisabled || undefined}
+                                                        aria-labelledby={labelId}
+                                                        onChange={(event) => {
+                                                            if (hidingDisabled) return
+                                                            column.toggleVisibility(event.target.checked)
+                                                        }}
+                                                    />
+                                                    <StyledCheckbox
+                                                        decorative
+                                                        readOnly={hidingDisabled}
+                                                        dataTest={`${column.id}-column-visibility-box`}
                                                         size='small'
                                                         disableRipple
                                                         checked={column.getIsVisible()}
                                                         hideWrapper
-                                                        // The only control that shows or hides the column: a 24 x 24px target, named
-                                                        // by the column's text.
                                                         className={headerStyles['column-checkbox']}
-                                                        aria-labelledby={labelId}
-                                                        aria-readonly={hidingDisabled || undefined}
-                                                        // Keep the table's native checkbox keyboard contract: Space toggles, Enter does not.
-                                                        onKeyDown={(event) => {
-                                                            if (event.key === 'Enter') event.preventDefault()
-                                                        }}
-                                                        onChange={(_event, checked) => {
-                                                            if (hidingDisabled) return
-                                                            column.toggleVisibility(checked)
-                                                        }}
                                                     />
                                                 </span>
                                             </StyledTooltip>
@@ -243,7 +276,7 @@ export function HeaderActionMenu<TData>({
                                             <span id={labelId} className='font-roboto text-base text-delta-700'>
                                                 {columnLabel}
                                             </span>
-                                        </div>
+                                        </label>
                                     )}
                                 </SortableColumnItem>
                             )

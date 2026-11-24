@@ -5,17 +5,25 @@ import style from '../StyledTable.module.scss'
 import { cn } from 'src/table/helpers/cn'
 import { StyledCheckbox } from 'src/components/inputs/checkbox/base-ui/StyledCheckbox'
 import { StyledTooltip } from 'src/table/shared-components/tooltip'
+import { composeHandlers, pressedStateHandlers } from 'src/helpers/pressedState'
 
 const stopMouseEvent = (event: MouseEvent<HTMLElement>) => {
     event.preventDefault()
     event.stopPropagation()
 }
 
+// Like a native control: Enter toggles on keydown, Space once on keyup, never on key repeat (ASMA-9003).
 const handleToggleKeyDown = (event: KeyboardEvent<HTMLElement>, onToggle: () => void) => {
     if (event.key !== 'Enter' && event.key !== ' ') return
 
     event.preventDefault()
     event.stopPropagation()
+    if (event.key === 'Enter') onToggle()
+}
+
+// Runs before the pressed-state keyup clears `data-pressed="key"` (a Space press begun on this cell).
+const handleToggleKeyUp = (event: KeyboardEvent<HTMLElement>, onToggle: () => void) => {
+    if (event.key !== ' ' || event.currentTarget.getAttribute('data-pressed') !== 'key') return
     onToggle()
 }
 
@@ -42,6 +50,7 @@ export function selectColumn<TData>(isFixed: boolean, rowHeight?: number, locale
         maxSize: 38,
         size: 38,
         header: ({ table }: HeaderContext<TData, unknown>) => {
+            const selectAllPressed = pressedStateHandlers({ enabled: true, keyboard: true })
             return (
                 <div
                     role='checkbox'
@@ -50,12 +59,19 @@ export function selectColumn<TData>(isFixed: boolean, rowHeight?: number, locale
                     data-table-control=''
                     aria-label={labels.selectAll}
                     aria-checked={table.getIsSomeRowsSelected() ? 'mixed' : table.getIsAllRowsSelected()}
-                    className={style['select-control']}
+                    className={cn('asma-touch-ready', style['select-control'])}
                     onClick={() => table.toggleAllRowsSelected()}
                     // Not prevented: the browser's mouse focus shows no `:focus-visible`, and Space then toggles it back.
                     onMouseDown={(event) => event.stopPropagation()}
                     onMouseUp={stopMouseEvent}
-                    onKeyDown={(event) => handleToggleKeyDown(event, () => table.toggleAllRowsSelected())}
+                    {...selectAllPressed}
+                    onKeyDown={composeHandlers(selectAllPressed.onKeyDown, (event) =>
+                        handleToggleKeyDown(event, () => table.toggleAllRowsSelected()),
+                    )}
+                    onKeyUp={composeHandlers(
+                        (event) => handleToggleKeyUp(event, () => table.toggleAllRowsSelected()),
+                        selectAllPressed.onKeyUp,
+                    )}
                 >
                     {/* `decorative`: the wrapping div is the real control (it owns role, focus,
                         click and keyboard). A nested real <input type="checkbox"> is an axe
@@ -95,6 +111,7 @@ export function selectColumn<TData>(isFixed: boolean, rowHeight?: number, locale
              */
             const disabled = locked && !checked
             const readOnly = locked && checked
+            const rowPressed = pressedStateHandlers({ enabled: !locked, keyboard: true })
 
             // The tooltip wraps the checkbox itself, the element that takes the focus, so its text (the reason a row is
             // locked, or a hint) opens on keyboard focus as on hover (ASMA-8875). A locked row's checkbox is not
@@ -111,7 +128,7 @@ export function selectColumn<TData>(isFixed: boolean, rowHeight?: number, locale
                         aria-checked={cell.row.getIsSelected()}
                         aria-disabled={locked}
                         style={{ height: rowHeight ?? 'auto' }}
-                        className={style['select-control']}
+                        className={cn('asma-touch-ready', style['select-control'])}
                         onClick={() => {
                             if (locked) return
                             cell.row.toggleSelected()
@@ -122,10 +139,15 @@ export function selectColumn<TData>(isFixed: boolean, rowHeight?: number, locale
                             event.stopPropagation()
                         }}
                         onMouseUp={stopMouseEvent}
-                        onKeyDown={(event) => {
+                        {...rowPressed}
+                        onKeyDown={composeHandlers(rowPressed.onKeyDown, (event) => {
                             if (locked) return
                             handleToggleKeyDown(event, () => cell.row.toggleSelected())
-                        }}
+                        })}
+                        onKeyUp={composeHandlers((event) => {
+                            if (locked) return
+                            handleToggleKeyUp(event, () => cell.row.toggleSelected())
+                        }, rowPressed.onKeyUp)}
                     >
                         <span className={locked ? style['cursor-not-allowed'] : undefined}>
                             {/* `decorative` — see the header checkbox above. */}

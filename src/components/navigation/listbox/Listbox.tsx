@@ -15,6 +15,7 @@ import {
 } from 'react'
 import { cn } from 'src/helpers/cn'
 import { tabbableWithin } from 'src/helpers/focusable'
+import { pressedStateHandlers } from 'src/helpers/pressedState'
 
 /**
  * @figmaNode none — **headless behaviour primitive**, no Design-System visuals. It renders bare
@@ -248,9 +249,15 @@ function ListboxOption<T>({
             aria-disabled={disabled}
             data-index={optionIndex}
             tabIndex={-1}
-            // ASMA-8220 (TB-14): see ListboxButton. `aria-disabled` renders as "true" only when
-            // disabled, so the pressed-opacity rule already skips disabled options.
-            className={cn('asma-pressable', className)}
+            // ASMA-8220 touch fixes; ASMA-9003: the menu item's pressed look, beating a consumer's hover/selected fill.
+            // @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
+            className={cn(
+                'asma-touch-ready',
+                !disabled &&
+                    'data-[pressed]:text-gama-700 data-[pressed]:[--control-pressed-accent:var(--colors-gama-700)] data-[press-released]:transition-colors data-[press-released]:duration-150 data-[press-released]:ease-[ease-out] forced-colors:data-[pressed]:![outline-offset:-2px] forced-colors:data-[pressed]:![outline:2px_solid_Highlight] [&[data-pressed][role][aria-selected]]:bg-gama-200',
+                className,
+            )}
+            {...pressedStateHandlers({ enabled: !disabled })}
             onMouseDown={(event) => {
                 // Clicking the row must not pull DOM focus off the trigger, which drives this row
                 // through `aria-activedescendant`. A focusable control inside the row is the

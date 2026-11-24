@@ -2,7 +2,15 @@ import { useState, type ReactNode } from 'react'
 import { afterEach, describe, it } from 'vitest'
 import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
-import { cleanup, describeFocusIndicator, focusStyleOf, mount, parkPointer } from 'src/test-utils/renderInteraction'
+import {
+    cleanup,
+    describeFocusIndicator,
+    focusStyleOf,
+    mount,
+    parkPointer,
+    resolveTokenColor,
+} from 'src/test-utils/renderInteraction'
+import { fillOf, holdPressed, key, transitionOf } from 'src/test-utils/pressedInteraction'
 import { StyledMenu } from './StyledMenu'
 import { ToolbarActionGroup } from 'src/components/custom/module/header-layout/ToolbarActionGroup'
 import { StyledMenuList } from './StyledMenuList'
@@ -431,9 +439,13 @@ describe('StyledMenu row structure', () => {
 describe('StyledMenu Figma colors', () => {
     afterEach(cleanup)
 
-    // Separator is pinned to gray-200 rather than delta-200 because fretex remaps delta-200.
-    // Asserted in both themes for exactly that reason.
-    it.each(['greenish', 'fretex'])('uses the Figma separator and hover gray in the %s theme', async (theme) => {
+    // Separator, hover, selected rest and selected hover per theme. The separator is pinned to gray-200 rather
+    // than delta-200 because fretex remaps delta-200, so fretex keeps the default separator and hover gray
+    // (Figma Fretex differs; its delta steps are outside ASMA-9003). Selected was gama-50 at rest before ASMA-9003.
+    it.each([
+        ['greenish', 'rgb(211, 216, 223)', 'rgb(240, 242, 244)', 'rgb(243, 250, 250)', 'rgb(232, 246, 246)'],
+        ['fretex', 'rgb(211, 216, 223)', 'rgb(240, 242, 244)', 'rgb(247, 249, 248)', 'rgb(239, 244, 242)'],
+    ])('uses the Figma separator, hover and selected fills in the %s theme', async (theme, separator, hover, selected, hoverSelected) => {
         const { container } = mount(
             <div data-theme={theme}>
                 <StyledMenuList>
@@ -443,13 +455,14 @@ describe('StyledMenu Figma colors', () => {
             </div>,
         )
         const rows = container.querySelectorAll<HTMLElement>('li')
-        await waitFor(() => expect(getComputedStyle(rows[0]!, '::after').backgroundColor).toBe('rgb(211, 216, 223)'))
+        await waitFor(() => expect(getComputedStyle(rows[0]!, '::after').backgroundColor).toBe(separator))
+        // Hover and selection keep master's timing (none): each fill is there at once (ASMA-9003 round 5).
         await userEvent.hover(rows[0]!)
-        await expect(getComputedStyle(rows[0]!).backgroundColor).toBe('rgb(240, 242, 244)')
-        // Figma bg/hover-selected equals the resting selected fill: a selected row does not change.
-        const selectedResting = getComputedStyle(rows[1]!).backgroundColor
+        await expect(transitionOf(rows[0]!).duration).toBe('0s')
+        await expect(getComputedStyle(rows[0]!).backgroundColor).toBe(hover)
+        await expect(getComputedStyle(rows[1]!).backgroundColor).toBe(selected)
         await userEvent.hover(rows[1]!)
-        await expect(getComputedStyle(rows[1]!).backgroundColor).toBe(selectedResting)
+        await expect(getComputedStyle(rows[1]!).backgroundColor).toBe(hoverSelected)
     })
 
     it('shows the caller-supplied tooltip only on the row that sets it', async () => {
@@ -741,5 +754,111 @@ describe('StyledMenu radio items', () => {
 
         await waitFor(() => expect(menu()).toBeNull())
         await expect(onClose).toHaveBeenCalledWith('tabKeyDown')
+    })
+})
+
+describe('StyledMenuItem pressed state (ASMA-9003)', () => {
+    afterEach(cleanup)
+
+    it('activates once per Enter or Space press, never on key repeat (round 5 item 2)', async () => {
+        const onClick = fn()
+        const { container } = mount(
+            <StyledMenuList>
+                <StyledMenuItem role='menuitemcheckbox' aria-checked={false} onClick={onClick}>
+                    Toggle
+                </StyledMenuItem>
+            </StyledMenuList>,
+        )
+        container.querySelector<HTMLElement>('[role="menuitemcheckbox"]')!.focus()
+        for (const name of [' ', 'Enter'] as const) {
+            await key('keyDown', name)
+            await key('keyDown', name, { repeat: true })
+            await key('keyDown', name, { repeat: true })
+            await key('keyUp', name)
+        }
+        await expect(onClick).toHaveBeenCalledTimes(2)
+    })
+
+    it('fills a pressed row gama-200 inside its own box, over the selected fill, with no bleed', async () => {
+        const { container } = mount(
+            <StyledMenuList>
+                <StyledMenuItem>Above</StyledMenuItem>
+                <StyledMenuItem selected>Selected</StyledMenuItem>
+                <StyledMenuItem>
+                    <StyledCheckbox dataTest='row-checkbox' checked hideWrapper decorative />
+                    With checkbox
+                </StyledMenuItem>
+                <StyledMenuItem>Below</StyledMenuItem>
+            </StyledMenuList>,
+        )
+        const [above, selected, withCheckbox, below] = Array.from(container.querySelectorAll<HTMLElement>('li'))
+        // A pointer left over a row by an earlier test would make that row's resting fill a hover fade.
+        await parkPointer()
+        await waitFor(() => expect(getComputedStyle(above!).backgroundColor).toBe('rgba(0, 0, 0, 0)'))
+        const gama200 = resolveTokenColor('--colors-gama-200')
+        const gama700 = resolveTokenColor('--colors-gama-700')
+        const restingRect = selected!.getBoundingClientRect()
+        const restingOutline = getComputedStyle(selected!).outline
+        const neighbours = [above!, withCheckbox!].map((row) => getComputedStyle(row).backgroundColor)
+
+        // Master's timing at rest (none), instant in, and a 150 ms ease-out back only while marked released.
+        await expect(transitionOf(selected!).duration).toBe('0s')
+
+        await holdPressed(selected!, async () => {
+            const style = getComputedStyle(selected!)
+            await expect(transitionOf(selected!).duration).toBe('0s')
+            // The pressed fill wins over the selected gama-25 fill; the label darkens; no fade.
+            await expect(fillOf(selected!)).toBe(gama200)
+            await expect(style.color).toBe(gama700)
+            await expect(style.opacity).toBe('1')
+            // Colour only, inside the row: same box, no outline or shadow reaching the flush neighbours.
+            await expect(selected!.getBoundingClientRect().toJSON()).toEqual(restingRect.toJSON())
+            await expect(style.outline).toBe(restingOutline)
+            await expect(style.boxShadow).toBe('none')
+            const neighboursPressed = [above!, withCheckbox!].map((row) => getComputedStyle(row).backgroundColor)
+            await expect(neighboursPressed).toEqual(neighbours)
+        })
+        await expect(selected).toHaveAttribute('data-press-released')
+        await expect(transitionOf(selected!)).toMatchObject({ duration: '0.15s', timing: 'ease-out' })
+
+        // A row checkbox reads the accent its pressed row sets (StyledCheckbox).
+        await holdPressed(withCheckbox!, async () => {
+            await expect(getComputedStyle(withCheckbox!).getPropertyValue('--control-pressed-accent').trim()).toBe(
+                getComputedStyle(document.documentElement).getPropertyValue('--colors-gama-700').trim(),
+            )
+            await expect(fillOf(below!)).not.toBe(gama200)
+        })
+    })
+
+    it('shows no pressed look on a disabled row', async () => {
+        const { container } = mount(
+            <StyledMenuList>
+                <StyledMenuItem disabled>Disabled</StyledMenuItem>
+            </StyledMenuList>,
+        )
+        const row = container.querySelector<HTMLElement>('li')!
+        const resting = getComputedStyle(row)
+        const before = { backgroundColor: resting.backgroundColor, color: resting.color }
+
+        await holdPressed(row, async () => {
+            const style = getComputedStyle(row)
+            await expect({ backgroundColor: fillOf(row), color: style.color }).toEqual(before)
+            await expect(style.getPropertyValue('--control-pressed-accent')).toBe('')
+        })
+    })
+
+    it('shows no pressed look when the arrow keys move focus (2.1.1)', async () => {
+        const { container } = mount(
+            <StyledMenuList>
+                <StyledMenuItem>One</StyledMenuItem>
+                <StyledMenuItem>Two</StyledMenuItem>
+            </StyledMenuList>,
+        )
+        const [one, two] = Array.from(container.querySelectorAll<HTMLElement>('li'))
+        one!.focus()
+
+        await userEvent.keyboard('{ArrowDown}')
+        await expect(document.activeElement).toBe(two)
+        await expect(fillOf(two!)).not.toBe(resolveTokenColor('--colors-gama-200'))
     })
 })

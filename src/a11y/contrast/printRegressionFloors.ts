@@ -87,13 +87,14 @@ for (const key of Object.keys(BUTTON_FINDINGS)) {
     const names = buttonTokenNames(type as ButtonType, color as 'common' | 'error', state as ButtonState)
 
     for (const theme of themes) {
-        record(
-            key,
-            theme,
+        const ratio =
             aspect === 'text'
                 ? ratioFor(theme, names.text, names.background)
-                : boundaryRatioFor(theme, names.border, names.background),
-        )
+                : aspect === 'focus-ring'
+                  ? ratioFor(theme, '--colors-focus-ring', names.background)
+                  : boundaryRatioFor(theme, names.border, names.background)
+
+        record(key, theme, ratio)
     }
 }
 

@@ -144,7 +144,8 @@ export const Interactive: Story = {
 /**
  * Full Figma variant table (node 9197-92635): rows = State, columns = Selected (Off/On).
  * Hover/Focus are CSS-driven, so `storybook-addon-pseudo-states` forces them via `pseudo-hover` /
- * `pseudo-focus-visible` element classes.
+ * `pseudo-focus-visible` element classes; Pressed (ASMA-9003, Figma Pressed state 47847:229830) sets the
+ * `data-pressed` a real press sets, on a hovered switch.
  */
 export const Gallery: Story = {
     render: () => {
@@ -157,10 +158,12 @@ export const Gallery: Story = {
             background: '#f0f2f4',
             whiteSpace: 'nowrap',
         }
-        const td: React.CSSProperties = { padding: 16, border: '1px solid #bdc4cf', textAlign: 'center' }
+        // 8px sides: the Figma 54×32 switch box still fits a 320px viewport (SC 1.4.10 reflow sweep).
+        const td: React.CSSProperties = { padding: '16px 8px', border: '1px solid #bdc4cf', textAlign: 'center' }
         const STATES: { label: string; props: Partial<SwitchProps> }[] = [
             { label: 'Enabled', props: {} },
             { label: 'Hovered', props: { className: 'pseudo-hover' } },
+            { label: 'Pressed', props: { className: 'pseudo-hover', 'data-pressed': '' } as Partial<SwitchProps> },
             { label: 'Focused', props: { className: 'pseudo-focus-visible' } },
             { label: 'Error', props: { error: true } },
             { label: 'Disabled', props: { disabled: true } },

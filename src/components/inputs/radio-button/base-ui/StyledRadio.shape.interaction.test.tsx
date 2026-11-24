@@ -2,6 +2,7 @@ import { afterEach, describe, it } from 'vitest'
 import { cdp } from 'vitest/browser'
 import { expect, userEvent } from 'src/test-utils/interaction-api'
 import { cleanup, mount, resolveTokenColor } from 'src/test-utils/renderInteraction'
+import { systemColor } from 'src/test-utils/pressedInteraction'
 import { StyledInteractiveChip } from 'src/components/data-display/interactive-chip/StyledInteractiveChip'
 import { StyledCheckbox } from 'src/components/inputs/checkbox/base-ui/StyledCheckbox'
 import { StyledEmojiChoice } from 'src/components/inputs/emoji-choice/StyledEmojiChoice'
@@ -15,8 +16,9 @@ import { StyledRadioGroup } from './StyledRadioGroup'
  * circles of one SVG around one centre, so no rasteriser can move one against the other.
  */
 
+// Figma Radiobutton (12955:10636): a 16px ring, 1.5px stroke, 8px dot, whatever the target size (ASMA-9003).
 const SIZES = {
-    medium: { size: 20, stroke: 2, dot: 5 },
+    medium: { size: 16, stroke: 1.5, dot: 4 },
     small: { size: 16, stroke: 1.5, dot: 4 },
 } as const
 
@@ -120,14 +122,16 @@ describe('small option controls share one wrapper geometry (ASMA-9001)', () => {
 
     it('keeps the small radio hover halo a 40px circle concentric with the target', async () => {
         const { container } = mount(<StyledRadio dataTest='small-radio' size='small' value='a' />)
-        const ripple = container.querySelector('[class*="RadioRippleContainer"]')!
-        const halo = getComputedStyle(ripple, '::after')
+        // ASMA-9003: the halo is the `.RadioCircle` span filling the wrapper (`inset: 0`), no longer a
+        // ripple container's `::after`. As on master it rests at 70% and hover grows it to full size, about its centre.
+        const wrapper = container.querySelector<HTMLElement>('[data-testid="small-radio"]')!
+        const halo = container.querySelector<HTMLElement>('[class*="RadioCircle"]')!
+        const centreOf = (box: DOMRect): { x: number; y: number } => ({ x: box.left + box.width / 2, y: box.top + box.height / 2 })
 
-        await expect({ width: halo.width, height: halo.height }).toEqual({ width: '40px', height: '40px' })
-        await expect(halo.borderRadius).toBe('50%')
-        // 50% of the 40px wrapper: the disc's centre sits on the wrapper's centre (it is then
-        // pulled back by `translate(-50%, -50%)`), so it cannot be clipped or sit off-centre.
-        await expect({ left: halo.left, top: halo.top }).toEqual({ left: '20px', top: '20px' })
+        await expect({ width: halo.offsetWidth, height: halo.offsetHeight }).toEqual({ width: 40, height: 40 })
+        await expect(getComputedStyle(halo).borderRadius).toBe('50%')
+        // Centred on the 40px wrapper, so the disc is concentric with the target at any scale and cannot be clipped.
+        await expect(centreOf(halo.getBoundingClientRect())).toEqual(centreOf(wrapper.getBoundingClientRect()))
     })
 })
 
@@ -198,15 +202,6 @@ describe('StyledRadio focus and error rings stay on the circle', () => {
         await expect(getComputedStyle(radioSvgIn(container)).boxShadow).toContain(errorColor)
     })
 })
-
-const systemColor = (name: string): string => {
-    const probe = document.createElement('span')
-    probe.style.color = name
-    document.body.append(probe)
-    const color = getComputedStyle(probe).color
-    probe.remove()
-    return color
-}
 
 describe('StyledRadio in forced colours', () => {
     afterEach(async () => {

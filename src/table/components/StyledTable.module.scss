@@ -872,3 +872,15 @@ $focus-right: inset -3px 0 0 0 $focus-ring;
         @include checkbox-focus.frame-forced-colors;
     }
 }
+
+// ASMA-9003 Figma Pressed state (47847:229830): a pressed select cell turns its box gama-800; forced colours: a
+// Highlight outline. After the focus rules, so it beats their `outline: none` on a cell held by Space.
+// @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
+.select-control[data-pressed] {
+    --control-pressed-accent: var(--colors-gama-800);
+
+    @media (forced-colors: active) {
+        outline: 2px solid Highlight;
+        outline-offset: -2px;
+    }
+}

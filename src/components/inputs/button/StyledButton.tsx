@@ -8,6 +8,7 @@ import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip
 import { LoadingIcon } from 'src/components/icons'
 import { useReportDialogBusy } from 'src/components/feedback/dialog/DialogBusyContext'
 import type { UiCoreLocale } from 'src/helpers/uiCoreLocale'
+import { withPressedState } from 'src/helpers/pressedState'
 
 const IN_PROGRESS = { en: 'In progress', no: 'Pågår' } as const
 
@@ -106,7 +107,7 @@ export type StyledButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & 
  * @remarks Figma "Button" component. Figma property → React prop mapping is annotated
  * per-prop with `@figmaProp` (Type→variant, Size→size, Danger→error). The Figma "State"
  * property (Enabled/Hovered/Focused/Pressed/Disabled) is derived at runtime from the
- * native button pseudo-states + the `disabled` attribute, not a prop.
+ * native pseudo-states, `data-pressed` (pressed-state helper) and `disabled`, not a prop.
  * @remarks for icon button add only startIcon prop
  * @remarks for error button no textGray variant
  * @remarks `type` defaults to `'button'`, not the native `'submit'`. Pass `type='submit'`
@@ -176,15 +177,20 @@ export const StyledButton = ({
     const button = (
         <button
             {...otherProps}
+            // `data-pressed` (ASMA-9003): never disabled, aria-disabled or busy; textWhite's dark-surface press is not designed yet.
+            // @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
+            {...withPressedState(otherProps, {
+                enabled:
+                    !disabled && !blocked && String(otherProps['aria-disabled']) !== 'true' && variant !== 'textWhite',
+                keyboard: true,
+            })}
             type={type}
             disabled={Boolean(disabled) && !blocked}
             aria-disabled={blocked ? true : otherProps['aria-disabled']}
             aria-busy={loading ? true : otherProps['aria-busy']}
             onClick={handleClick}
             className={clsx(
-                // ASMA-8210: touch readiness only. The button already owns a designed `:active`
-                // (see StyledButton.module.scss), so it must not also take `.asma-pressable`'s
-                // fallback opacity — that would dim the designed pressed colours on top of them.
+                // ASMA-8210: touch readiness only; the pressed colours come from `data-pressed`, no opacity fade.
                 'asma-touch-ready',
                 style['asma-ui-core-button'],
                 BtnStyles[variant],

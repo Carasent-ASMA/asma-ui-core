@@ -10,9 +10,13 @@ import {
     BUTTON_TYPES,
     BUTTON_TYPES_WITHOUT_KNOWN_SURFACE,
     BUTTON_TYPES_WITH_BOUNDARY,
+    BUTTON_TYPES_WITH_INSET_FOCUS_RING,
     COMPONENT_PAIRS,
+    MOMENTARY_BUTTON_STATES,
     REGRESSION_FLOORS,
+    REQUIREMENT_CRITERION,
     REQUIREMENT_RATIO,
+    buttonRequirement,
     buttonTokenNames,
     type ContrastPair,
 } from './contrastPairs'
@@ -26,6 +30,8 @@ import { compositeOver, contrastRatio, parseCssColor, type Rgba } from './wcagCo
  * SC 1.4.11 at all — `color-contrast-enhanced` is AAA and disabled by default, and nothing is
  * tagged for non-text contrast. This suite closes both gaps by resolving the tokens straight out
  * of the theme CSS and computing the ratios, so every theme and both criteria are covered.
+ *
+ * Pressed (`active`) pairs are held to the momentary levels (85 %, ASMA-9003), every other pair to the full one.
  *
  * Quarantined rows (`finding` set) are measured failures against master. They retain regression floors rather than being
  * fixed: a token value is a visual and potentially breaking change to a brand theme and belongs to
@@ -90,6 +96,17 @@ describe('theme colour contrast (WCAG 2.2 AA)', () => {
         expect(THEMES).toEqual(['default', 'fretex', 'greenish'])
     })
 
+    it('sets the momentary levels at 85 % of the WCAG minimum, rounded up', () => {
+        for (const [momentary, full] of [
+            [REQUIREMENT_RATIO.momentaryText, REQUIREMENT_RATIO.text],
+            [REQUIREMENT_RATIO.momentaryNonText, REQUIREMENT_RATIO.nonText],
+        ] as const) {
+            expect(momentary).toBeGreaterThanOrEqual(full * 0.85 - 1e-9)
+            expect(momentary).toBeLessThan(full * 0.85 + 0.01)
+        }
+        expect(MOMENTARY_BUTTON_STATES).toEqual(['active'])
+    })
+
     describe.each(THEMES)('theme "%s"', (theme) => {
         /**
          * Registers a pair as either a live SC assertion or a quarantined one.
@@ -142,7 +159,7 @@ describe('theme colour contrast (WCAG 2.2 AA)', () => {
         describe('component pairs', () => {
             for (const pair of COMPONENT_PAIRS) {
                 const required = REQUIREMENT_RATIO[pair.requirement]
-                const criterion = pair.requirement === 'nonText' ? 'SC 1.4.11' : 'SC 1.4.3'
+                const criterion = REQUIREMENT_CRITERION[pair.requirement]
 
                 register(
                     pair.finding,
@@ -170,13 +187,27 @@ describe('theme colour contrast (WCAG 2.2 AA)', () => {
                             continue
                         }
 
+                        const textLevel = buttonRequirement(state, 'text')
+                        const edgeLevel = buttonRequirement(state, 'boundary')
+
                         register(
                             BUTTON_FINDINGS[`${combination}/text`],
                             `${combination}/text`,
-                            `${combination} label meets SC 1.4.3 4.5:1`,
+                            `${combination} label meets ${REQUIREMENT_CRITERION[textLevel]} ${REQUIREMENT_RATIO[textLevel]}:1`,
                             () => measure(theme, names.text, names.background),
-                            REQUIREMENT_RATIO.text,
+                            REQUIREMENT_RATIO[textLevel],
                         )
+
+                        if (state === 'active' && BUTTON_TYPES_WITH_INSET_FOCUS_RING.includes(type)) {
+                            // Space held on a focused button: the inset ring sits on the pressed fill.
+                            register(
+                                BUTTON_FINDINGS[`${combination}/focus-ring`],
+                                `${combination}/focus-ring`,
+                                `${combination} focus ring on the pressed fill meets ${REQUIREMENT_CRITERION[edgeLevel]} ${REQUIREMENT_RATIO[edgeLevel]}:1`,
+                                () => measure(theme, '--colors-focus-ring', names.background),
+                                REQUIREMENT_RATIO[edgeLevel],
+                            )
+                        }
 
                         if (!BUTTON_TYPES_WITH_BOUNDARY.includes(type)) {
                             continue
@@ -185,7 +216,7 @@ describe('theme colour contrast (WCAG 2.2 AA)', () => {
                         register(
                             BUTTON_FINDINGS[`${combination}/boundary`],
                             `${combination}/boundary`,
-                            `${combination} boundary meets SC 1.4.11 3:1`,
+                            `${combination} boundary meets ${REQUIREMENT_CRITERION[edgeLevel]} ${REQUIREMENT_RATIO[edgeLevel]}:1`,
                             () => {
                                 // The visible edge is the border when it is not transparent,
                                 // otherwise the fill. Either way it is measured against the surface.
@@ -197,7 +228,7 @@ describe('theme colour contrast (WCAG 2.2 AA)', () => {
 
                                 return contrastRatio(boundary, surfaceColor)
                             },
-                            REQUIREMENT_RATIO.nonText,
+                            REQUIREMENT_RATIO[edgeLevel],
                         )
                     }
                 }

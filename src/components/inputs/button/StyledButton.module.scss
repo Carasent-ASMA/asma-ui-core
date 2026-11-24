@@ -1,4 +1,5 @@
 @use '../../../styles/focus';
+@use 'pressed';
 
 @mixin button($type, $color) {
     border-color: transparent;
@@ -19,13 +20,6 @@
         color: var(--colors-button-#{$type}-#{$color}-text-color) #{!important};
         background-color: var(--colors-button-#{$type}-#{$color}-bg-color) #{!important};
         border-color: var(--colors-button-#{$type}-#{$color}-border-color) #{!important};
-
-        &:active {
-            color: var(--colors-button-#{$type}-#{$color}-active-text-color) #{!important};
-            background-color: var(--colors-button-#{$type}-#{$color}-active-bg-color) #{!important};
-            border-color: var(--colors-button-#{$type}-#{$color}-active-border-color) #{!important};
-            outline: none #{!important};
-        }
 
         &:hover {
             color: var(--colors-button-#{$type}-#{$color}-hover-text-color) #{!important};
@@ -48,12 +42,17 @@
             background-color: var(--colors-button-#{$type}-#{$color}-focused-bg-color) #{!important};
         }
 
+        // textWhite (dark surfaces) has no pressed look yet.
+        @if $type != 'textWhite' {
+            @include pressed.pressed($type, $color);
+        }
+
         &[aria-busy='true'] {
             cursor: progress #{!important};
         }
 
         // `aria-disabled` keeps the button focusable (disabled-states DIS-3); the higher specificity
-        // also beats `:hover` / `:active`, so it has no hover or pressed look (DIS-4, DIS-5).
+        // also beats `:hover`, so it has no hover look (DIS-4, DIS-5). The pressed rules exclude it.
         &:disabled,
         &[aria-disabled='true']:not([aria-busy='true']) {
             cursor: not-allowed #{!important};
