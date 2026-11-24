@@ -329,6 +329,50 @@ K-07 in `StyledTable.resetColumns.interaction.test.tsx`, and `RowActionMenu.inte
 `Table/Keyboard reach` (`KeyboardReach`, `HiddenHeader`, `RowControls`, `SubRows`, `WideTable`, `RowMenus`) let a person
 try it.
 
+**P (ASMA-8875, UX comment 95823, 2026-11) — WCAG 2.1.1 / 2.4.3 / 2.4.7 / 4.1.2 / 4.1.3, the column settings menu:
+`table/components/columns/action-column/components/HeaderActionMenu.tsx`, `ColumnSettingsMenu.tsx`,
+`ColumnSettingsItem.tsx`, `columnMenuKeyboard.ts`; `utils/popover/StyledPopover.tsx` (`disableEscapeKeyDown`).**
+Columns in the pin's menu could be reordered only with a mouse: dnd-kit had no keyboard sensor, and the drag icon (an
+`<svg role="button" tabindex="0">`) sat inside the row's `<label>`, a control nested in a control. The menu now follows the
+table's rule, arrows move inside and Tab enters and leaves:
+
+- **Structure.** The list is a `role="menu"` named "Column settings". Each column is an `<li role="none">` holding two
+  controls side by side, neither inside the other: its row, the column's checkbox (`role="menuitemcheckbox"`,
+  `aria-checked`, `aria-readonly` when it cannot be hidden; its box is drawn only), and its handle, a `<button
+  role="menuitem">` named "Reorder <column>" (a `menu` may own only menu items). Both carry `aria-posinset` /
+  `aria-setsize`. The handle is drawn where the icon always was, over the row's first 28px, now a 24 x 24px target.
+- **Keys.** One roving Tab stop in the list: the row or handle the focus was last on (the first row at first); Tab goes on
+  to Reset columns. Up/Down go row to row (wrapping) and Home/End to the first/last row, always to the row, from the row
+  or its handle; Right goes from a row to its handle, Left back. Space or Enter on a row shows or hides the column (Space
+  on release, as a native checkbox, so the pressed look holds while it is down). Enter or Space on the pin opens the menu
+  with the focus on its first row; a click leaves it on the pin.
+- **Lifting.** Space or Enter on a handle lifts the column (dnd-kit's `KeyboardSensor` with `sortableKeyboardCoordinates`);
+  Up/Down then move it, Space, Enter or Tab drops it and moves the focus to its row, Escape puts it back with the menu left
+  open. A fixed column's handle stays focusable (it tells its reason) but lifts nothing, and no column lands on a fixed
+  one: it is neither draggable nor droppable (`disabled: { draggable, droppable }`; a plain `disabled: true` left it
+  droppable, so the keyboard moved a lifted column over it before the drop refused it), and one collision rule serves the
+  pointer and the keyboard. While a column is lifted the popover leaves Escape alone
+  (`disableEscapeKeyDown`): Floating UI's dismiss stops the Escape it handles from propagating, so dnd-kit, listening on
+  the document, never heard it.
+- **Indicators.** The menu items' 3px inset focus bar on a row while the keyboard focus is on the row or its handle, and
+  on the row while it is lifted (UX comment 95823: which row you are on). The handle adds Figma's Quaternary icon button
+  Focused ring, a 3px inside stroke with radius 4 (its old rule set a colour only, so it showed none). A column
+  lifted from the keyboard is raised with the Menus shadow, with a 3px gama-500 line on its leading edge for where it will
+  land. Figma draws no drag state, so a mouse drag shows neither: it looks as it always did.
+- **Telling.** A polite `role="status"` region in the menu announces picked up, position n of m, dropped and cancelled, in
+  the table's language; dnd-kit's own (assertive, English) region is silenced and its instructions, which describe each
+  movable handle, are translated. The footer, pinned under the list (the list scrolls, capped at seven rows), shows the
+  keys while the keyboard is on a handle: "Space to reorder", then "↑↓ move · Space drop · Esc cancel" (visual only).
+
+Known gaps. Keyboard lifting satisfies 2.1.1, not 2.5.7: a pointer user who cannot drag still has no single-pointer way
+to reorder (Move up / Move down, ASMA-8145). Moving a column past a fixed one that is not at an end of the list is not
+refused, by the pointer or the keyboard (fixed columns stand at the ends).
+
+Covered by `StyledTable.columnSettingsKeyboard.interaction.test.tsx` (the keys, lifting, dropping, cancelling, fixed
+columns, the indicators, the announcements in both languages, the hint, the pinned footer) and
+`StyledTable.columnSettingsMenu.interaction.test.tsx` (structure, names, targets, the pointer). The Storybook story
+`Data display/StyledTable` → `ColumnSettingsKeyboardReorder` opens the menu from the keyboard and leaves a column lifted.
+
 H was retired as a false escalation: the popup indicator is intentionally out of the tab order; the focused combobox opens the list with Enter, ArrowDown or ArrowUp.
 
 The detailed passages below are retained investigation history. Their former “not fixed” notes are superseded by the resolved table above.

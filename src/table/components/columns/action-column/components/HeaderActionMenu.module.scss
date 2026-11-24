@@ -1,24 +1,90 @@
+// The column settings menu (ASMA-8875, UX comment 95823): the list scrolls, and the footer (Reset columns and the key
+// hint) stays pinned under it. The paper is a flex column with no overflow of its own (`HeaderActionMenu`).
+.column-menu {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.column-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    min-height: 0;
+    // Seven 40px rows, then the list scrolls (the cap the paper had, now on the list alone).
+    max-height: calc(7 * 40px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    outline: none;
+}
+
+// As the Reset columns wrapper always was: 8px left and below, none right (the button's own padding sets the menu width).
+.column-menu-footer {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0 0 8px 8px;
+}
+
+// The keys, shown only while the keyboard focus is on a handle (`:focus-visible`, so a mouse user never sees it). It
+// takes the menu's width without widening it (`contain: inline-size`), and wraps.
+.reorder-hint {
+    display: none;
+    align-self: stretch;
+    box-sizing: border-box;
+    padding-right: 8px;
+    contain: inline-size;
+    font-family: Roboto, Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    line-height: 16px;
+    color: var(--colors-delta-600);
+}
+
+// Not on a fixed column's handle: it lifts nothing (its tooltip says why).
+.column-menu:has([data-column-part='handle']:not([aria-disabled='true']):focus-visible) .reorder-hint {
+    display: block;
+}
+
 .table-action-item {
-    // The row was a button, which sizes its border box; as a label it must say so, or its padding is added to 100% and 40px.
+    // The row was a button, which sizes its border box; as a div it must say so, or its padding is added to 100% and 40px.
     box-sizing: border-box;
     height: 40px;
-    padding-left: 8px;
+    // The handle sits over the row's first 28px (`.drag-handle`), where the icon always was: 8px, then the 20px icon.
+    padding-left: 28px;
     padding-right: 8px;
     padding-top: 1px;
     padding-bottom: 1px;
     display: flex;
     align-items: center;
     width: 100%;
+    outline: none;
+}
 
-    &:hover {
-        background-color: var(--colors-gray-50);
+// The handle is drawn over the row, so hovering it still hovers the row.
+.drag-item:hover > .table-action-item {
+    background-color: var(--colors-gray-50);
+}
+
+// Which row you are on (UX comment 95823): the menu items' 3px inset focus bar (`StyledMenuItem`), while the keyboard
+// focus is on the row or on its handle (the handle adds its own ring), and on the row while it is lifted.
+.drag-item:has(:focus-visible) > .table-action-item {
+    box-shadow: inset 3px 0 var(--colors-focus-ring);
+
+    // Forced colours drop the shadow: a focused row is outlined instead (the handle has an outline of its own).
+    @media (forced-colors: active) {
+        &:focus-visible {
+            outline: 2px solid Highlight;
+            outline-offset: -2px;
+        }
     }
 }
 
 // ASMA-9003 Figma Pressed state (47847:229830): a pressed row turns gama-200 at once, its name and box gama-700
-// (`!important` beats the name's utility); on release they ease back over 150ms. Hover keeps master's timing.
+// (`!important` beats the name's utility); on release they ease back over 150ms. Hover keeps master's timing. Scoped by
+// `.drag-item >` to outrank the hover rule above, as it did when both were plain `.table-action-item` rules.
 // @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
-.table-action-item[data-pressed] {
+.drag-item > .table-action-item[data-pressed] {
     --control-pressed-accent: var(--colors-gama-700);
     background-color: var(--colors-gama-200);
 
@@ -41,7 +107,43 @@
 }
 
 .drag-item {
+    position: relative;
     height: 40px;
+}
+
+// A column lifted from the keyboard (UX comment 95823): raised over the rows it passes with the Menus shadow, so it is
+// plain that Up and Down now move it rather than the focus. Figma draws no drag state, so a mouse drag
+// (`data-lifted="pointer"`) looks as it always did.
+.drag-item[data-lifted='keyboard'] {
+    z-index: 1;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(34, 33, 51, 0.15);
+}
+
+// Where a column lifted from the keyboard will land: a 3px line in the focus ring's colour on its leading edge, drawn over
+// the row (no border, so nothing nudges). At the ends it is the top edge of the first row or the bottom edge of the last.
+// Never on a mouse drag (`data-drop-edge` is set for a keyboard lift only).
+.drag-item[data-drop-edge]::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background-color: var(--colors-gama-500);
+    pointer-events: none;
+
+    @media (forced-colors: active) {
+        forced-color-adjust: none;
+        background-color: Highlight;
+    }
+}
+
+.drag-item[data-drop-edge='before']::after {
+    top: 0;
+}
+
+.drag-item[data-drop-edge='after']::after {
+    bottom: 0;
 }
 
 // The box keeps a 24 x 24px slot centred on the 16px box: with the 4px either side it takes the room the 16px box and its
@@ -51,29 +153,58 @@
     height: 24px;
 }
 
-// The drag icon's tooltip needs a box of its own to sit on (an SVG takes no ref), the icon's own box.
-.drag-slot {
+// The handle, a button of its own (ASMA-8875): a 24 x 24px target (WCAG 2.5.8) around the 20px icon, which stays 8px
+// from the row's left edge and centred on its height.
+.drag-handle {
+    position: absolute;
+    top: 8px;
+    left: 6px;
+    width: 24px;
+    height: 24px;
     display: flex;
-    // First in the row on screen, though the checkbox is first in the DOM (see `HeaderActionMenu`).
-    order: -1;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    line-height: 0;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+
+    // Figma: the handle is a Quaternary icon button (Columns settings 46281:231121), and its Focused state is a 3px
+    // border/focus stroke inside, radius 4 (Button 14747:17804). It never showed one: its old rule set a colour only.
+    border-radius: 4px;
+
+    &:focus-visible {
+        outline: none;
+        box-shadow: inset 0 0 0 3px var(--colors-focus-ring);
+
+        @media (forced-colors: active) {
+            outline: 3px solid CanvasText;
+            outline-offset: -3px;
+            box-shadow: none;
+        }
+    }
 }
 
 .drag-icon {
+    display: block;
     width: 20px;
     height: 20px;
 }
 
-.drag-icon--disabled {
+.drag-handle--disabled {
     color: var(--colors-delta-300);
     cursor: not-allowed;
 }
 
-.drag-icon--enabled {
+.drag-handle--enabled {
     color: var(--colors-delta-700);
     cursor: grab;
-    &:focus-visible {
-        outline-color: var(--colors-gama-500);
-    }
+
     &:active {
         cursor: grabbing;
     }

@@ -1055,11 +1055,12 @@ const columnSettingsColumns: ColumnDef<TableRow>[] = [
 ]
 
 /**
- * ASMA-8597 (the owner, 2026-11-12): the column settings menu (the pin) shows or hides a column from its checkbox and from
- * nothing else. The row, the name and the drag icon do not toggle it, and a press on the icon that never became a drag does
- * not either; dragging the icon still reorders. Each checkbox is named by its column and has a target of at least 24 x 24px.
- * "Workspace name" is fixed (it cannot be reordered) and "Description" cannot be hidden, so their tooltips and read-only state
- * show too. The play function opens the menu, so the accessibility run (axe, via addon-a11y) sees it open.
+ * The column settings menu (the pin). Each column is a row, the column's checkbox (`menuitemcheckbox`, ASMA-9003: a press
+ * anywhere on it shows or hides the column), with its drag handle, a button of its own, beside it (ASMA-8875). The handle
+ * reorders by dragging (ASMA-8597) and from the keyboard: Right from a row reaches its handle, Space lifts the column, Up and
+ * Down move it, Space drops it, Escape puts it back. "Workspace name" is fixed (it cannot be reordered) and "Description"
+ * cannot be hidden, so their tooltips and read-only state show too. The play function opens the menu, so the accessibility
+ * run (axe, via addon-a11y) sees it open.
  */
 export const ColumnSettingsMenu: Story = {
     loaders: [
@@ -1078,12 +1079,64 @@ export const ColumnSettingsMenu: Story = {
         await userEvent.click(pin)
         await waitFor(() => expect(pin).toHaveAttribute('aria-expanded', 'true'))
 
-        const checkbox = (column: string): HTMLInputElement =>
-            canvasElement.ownerDocument.querySelector<HTMLInputElement>(`[data-testid="${column}-column-visibility-checkbox"] input`)!
+        // The row is the column's checkbox.
+        const checkbox = (column: string): HTMLElement =>
+            canvasElement.ownerDocument.querySelector<HTMLElement>(`[data-testid="${column}-column-visibility-checkbox"]`)!
         await waitFor(() => expect(checkbox('role')).not.toBeNull())
+        await expect(checkbox('role')).toHaveAttribute('role', 'menuitemcheckbox')
         await expect(checkbox('role')).toHaveAccessibleName('Role')
         await expect(checkbox('updatedBy')).toHaveAccessibleName('Updated by')
         await expect(checkbox('description')).toHaveAttribute('aria-readonly', 'true')
+        await expect(checkbox('role').closest('li')!.querySelector('button')).toHaveAccessibleName('Reorder Role')
         await expect(canvasElement.ownerDocument.querySelectorAll('[class*="table-action-item"]')).toHaveLength(4)
+    },
+}
+
+const keyboardReorderColumns: ColumnDef<TableRow>[] = [
+    { accessorKey: 'name', header: 'Workspace name', size: 200, fixedLeft: true },
+    { accessorKey: 'role', header: 'Role', size: 140 },
+    { accessorKey: 'description', header: 'Description', size: 160, enableHiding: false },
+    { accessorKey: 'updatedDate', header: 'Updated date', size: 140 },
+    { accessorKey: 'updatedBy', header: 'Updated by', size: 140 },
+    { accessorKey: 'added', header: 'Added', size: 120 },
+    { accessorKey: 'offers', header: 'Offers', size: 120 },
+    { id: 'notes', header: 'Notes', size: 120 },
+    { id: 'owner', header: 'Owner', size: 120 },
+]
+
+/**
+ * ASMA-8875 (UX comment 95823): reordering columns from the keyboard. The play function opens the menu from the keyboard
+ * (Enter on the pin: the first row takes the focus), steps to "Role" with Down, to its handle with Right, lifts it with
+ * Space and moves it down once, and leaves it lifted: the focus bar on its row, the raised row, the 3px line where it will
+ * land, and the footer hint with the keys. Space drops it (the focus goes to its row), Escape puts it back. Nine columns,
+ * so the list scrolls and the footer (Reset columns, the hint) stays pinned under it.
+ */
+export const ColumnSettingsKeyboardReorder: Story = {
+    loaders: [
+        () => {
+            localStorage.clear()
+            return {}
+        },
+    ],
+    render: () => (
+        <div className='w-[760px] pb-[420px]'>
+            <StyledTable columns={keyboardReorderColumns} data={indicatorRows} hideFooter locale='en' />
+        </div>
+    ),
+    play: async ({ canvasElement }) => {
+        const pin = canvasElement.querySelector<HTMLElement>('button[aria-haspopup="true"]')!
+        pin.focus()
+        await userEvent.keyboard('{Enter}')
+        await waitFor(() => expect(pin).toHaveAttribute('aria-expanded', 'true'))
+        const row = (column: string): HTMLElement =>
+            canvasElement.ownerDocument.querySelector<HTMLElement>(`[data-testid="${column}-column-visibility-checkbox"]`)!
+        await waitFor(() => expect(canvasElement.ownerDocument.activeElement).toBe(row('name')))
+
+        await userEvent.keyboard('{ArrowDown}{ArrowRight}')
+        await expect(canvasElement.ownerDocument.activeElement).toHaveAccessibleName('Reorder Role')
+        await userEvent.keyboard(' ')
+        await new Promise((resolve) => setTimeout(resolve, 120))
+        await userEvent.keyboard('{ArrowDown}')
+        await waitFor(() => expect(row('role').closest('li')).toHaveAttribute('data-drop-edge', 'after'))
     },
 }

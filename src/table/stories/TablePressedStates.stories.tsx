@@ -104,9 +104,10 @@ const VISIBILITY_ROWS = [
 ] as const
 
 /**
- * The column-visibility row of the column settings menu (`HeaderActionMenu`), drawn with its own module classes: the real
- * row only exists inside the open popover. The row is the label of its checkbox (Figma's checkbox Menus item). Pressed
- * (the row `data-pressed`): row gama-200, name and box gama-700.
+ * The column-visibility row of the column settings menu (`ColumnSettingsItem`), drawn with its own module classes: the
+ * real row only exists inside the open popover. The row is the column's checkbox (`menuitemcheckbox`, Figma's checkbox
+ * Menus item) and the drag handle a button beside it (ASMA-8875). Hover is the item's (`.drag-item`), so hovering the
+ * handle hovers the row. Pressed (the row `data-pressed`): row gama-200, name and box gama-700.
  */
 export const ColumnVisibilityRow: Story = {
     // axe skips only the forced Pressed rows: their gama-700 name on gama-200 is held to the pattern's momentary 3.83:1
@@ -117,21 +118,24 @@ export const ColumnVisibilityRow: Story = {
             {COLUMNS.map((column) => (
                 <div key={column.label} data-state={column.label} className='flex flex-col gap-1'>
                     <span className='font-semibold'>{column.label}</span>
-                    <MarkPressed selector={column.pressed ? 'label' : ':not(*)'}>
-                        <div className='w-56 rounded border border-solid border-delta-200 bg-white py-2'>
+                    <MarkPressed selector={column.pressed ? '[role="menuitemcheckbox"]' : ':not(*)'}>
+                        <ul
+                            role='menu'
+                            aria-label={`Column settings, ${column.label}`}
+                            className='m-0 w-56 list-none rounded border border-solid border-delta-200 bg-white px-0 py-2'
+                        >
                             {VISIBILITY_ROWS.map((row) => {
                                 const labelId = `visibility-${column.label}-${row.checked ? 'shown' : 'hidden'}`
                                 return (
-                                    <div key={row.label} className={headerStyles['drag-item']}>
-                                        <label className={cn(headerStyles['table-action-item'], 'cursor-pointer', column.pseudo)}>
+                                    <li key={row.label} role='none' className={cn(headerStyles['drag-item'], column.pseudo)}>
+                                        <div
+                                            role='menuitemcheckbox'
+                                            aria-checked={row.checked}
+                                            aria-labelledby={labelId}
+                                            tabIndex={-1}
+                                            className={cn(headerStyles['table-action-item'], 'cursor-pointer')}
+                                        >
                                             <span className='px-1'>
-                                                <input
-                                                    type='checkbox'
-                                                    className='sr-only'
-                                                    checked={row.checked}
-                                                    aria-labelledby={labelId}
-                                                    onChange={() => undefined}
-                                                />
                                                 <StyledCheckbox
                                                     decorative
                                                     dataTest={labelId}
@@ -142,21 +146,28 @@ export const ColumnVisibilityRow: Story = {
                                                     className={headerStyles['column-checkbox']}
                                                 />
                                             </span>
-                                            <span className={headerStyles['drag-slot']}>
-                                                <DotsHorizontalIcon
-                                                    width={20}
-                                                    height={20}
-                                                    className={cn(headerStyles['drag-icon'], headerStyles['drag-icon--enabled'])}
-                                                />
-                                            </span>
                                             <span id={labelId} className='font-roboto text-base text-delta-700'>
                                                 {row.label}
                                             </span>
-                                        </label>
-                                    </div>
+                                        </div>
+                                        <button
+                                            type='button'
+                                            role='menuitem'
+                                            tabIndex={-1}
+                                            aria-label={`Reorder ${row.label}`}
+                                            className={cn(headerStyles['drag-handle'], headerStyles['drag-handle--enabled'])}
+                                        >
+                                            <DotsHorizontalIcon
+                                                width={20}
+                                                height={20}
+                                                aria-hidden='true'
+                                                className={headerStyles['drag-icon']}
+                                            />
+                                        </button>
+                                    </li>
                                 )
                             })}
-                        </div>
+                        </ul>
                     </MarkPressed>
                 </div>
             ))}

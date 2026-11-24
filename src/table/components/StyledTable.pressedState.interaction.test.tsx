@@ -299,8 +299,8 @@ describe('column settings row pressed state (ASMA-9003)', () => {
                 await mouse('mouseReleased', at)
             }
             // The release toggles the column: put it back for the next part.
-            await waitFor(() => expect(row.querySelector('input')!.checked).toBe(false))
-            row.querySelector('input')!.click()
+            await waitFor(() => expect(row.getAttribute('aria-checked')).toBe('false'))
+            row.click()
         }
     })
 
@@ -323,11 +323,10 @@ describe('column settings row pressed state (ASMA-9003)', () => {
         await expect(transitionOf(row.querySelector('span[id]')!).duration, 'name at rest: as master').toBe('0s')
     })
 
-    it('shows the pressed row while Space is held on its checkbox, and toggles once on release', async () => {
+    it('shows the pressed row while Space is held on it (the row is the checkbox), and toggles once on release', async () => {
         await openSettings()
         const row = rowOf('Name')
-        const input = row.querySelector<HTMLInputElement>('input')!
-        input.focus()
+        row.focus()
         try {
             await space('keyDown')
             await space('keyDown', { repeat: true })
@@ -337,15 +336,15 @@ describe('column settings row pressed state (ASMA-9003)', () => {
             await space('keyUp')
         }
         await expect(row).toHaveAttribute('data-press-released', '')
-        await expect(input.checked).toBe(false)
+        await expect(row.getAttribute('aria-checked')).toBe('false')
     })
 
-    it('shows nothing when the drag icon is pressed, or anywhere on a column that cannot be hidden', async () => {
+    it('shows nothing when the drag handle (a button beside the row) is pressed, or anywhere on a column that cannot be hidden', async () => {
         await openSettings()
         const name = rowOf('Name')
         const role = rowOf('Role')
         for (const [label, row, at] of [
-            ['Name, drag icon', name, centreOf(name.querySelector('svg[role="button"]')!)],
+            ['Name, drag handle', name, centreOf(name.closest('li')!.querySelector('button')!)],
             ...partsOf(role).map(([part, at]) => [`Role, ${part}`, role, at] as const),
         ] as const) {
             const rest = rowLook(row)
@@ -359,7 +358,7 @@ describe('column settings row pressed state (ASMA-9003)', () => {
                 await mouse('mouseReleased', at)
             }
         }
-        await expect(name.querySelector('input')!.checked).toBe(true)
-        await expect(role.querySelector('input')!.checked).toBe(true)
+        await expect(name.getAttribute('aria-checked')).toBe('true')
+        await expect(role.getAttribute('aria-checked')).toBe('true')
     })
 })
