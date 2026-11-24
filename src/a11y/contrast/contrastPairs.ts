@@ -189,6 +189,13 @@ export const COMPONENT_PAIRS: readonly ContrastPair[] = [
         usedBy: 'src/components/navigation/link/StyledLink.module.scss',
     },
     {
+        id: 'empty-page/text',
+        foreground: '--colors-delta-600',
+        background: APP_SURFACE,
+        requirement: 'text',
+        usedBy: 'src/components/feedback/empty-page/StyledEmptyPage.tsx',
+    },
+    {
         id: 'table/cell-text',
         foreground: '--colors-delta-800',
         background: APP_SURFACE,
