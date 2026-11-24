@@ -1,4 +1,4 @@
-import { afterEach, describe, it } from 'vitest'
+import { afterEach, beforeEach, describe, it } from 'vitest'
 import { expect, fn, userEvent, within } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { StyledCheckbox } from 'src/components/inputs/checkbox/base-ui/StyledCheckbox'
@@ -225,5 +225,82 @@ describe('StyledFormControlLabel aligns the control with the first label line (A
         await expect(leftOf(radioRow!)).toBe(leftOf(checkboxRow!))
         await expect((radioRow!.firstElementChild as HTMLElement).getBoundingClientRect().width).toBe(40)
         await expect((checkboxRow!.firstElementChild as HTMLElement).getBoundingClientRect().width).toBe(40)
+    })
+})
+
+/**
+ * ASMA-9043. The offset lives in `@layer theme` so a consumer's `classes.label` utility still wins.
+ * That is deliberately the earliest layer, which means an ordinary declaration there loses to
+ * every later layer — and to anything unlayered. Two consumer resets therefore used to zero it:
+ * Tailwind v4's preflight (`@layer base { *, ::after, ::before { margin: 0; padding: 0 } }`) and the
+ * unlayered `* { box-sizing: border-box; margin: 0; padding: 0 }` that richeditor's `tiptap.css`
+ * brings in. The editor ships both, so the control sat a whole half-line above the label.
+ *
+ * The rules below reproduce exactly those two resets around the mount; the component's own
+ * declaration has to outrank them (important, still in `theme`, so it also beats later layers).
+ */
+const CONSUMER_RESETS = [
+    `@layer theme, base, components, utilities;
+     @layer base { *, ::after, ::before { margin: 0; padding: 0 } }`,
+    `* { box-sizing: border-box; margin: 0; padding: 0 }`,
+]
+
+const injectConsumerResets = (): (() => void) => {
+    const styles = CONSUMER_RESETS.map((css) => {
+        const style = document.createElement('style')
+        style.textContent = css
+        document.head.appendChild(style)
+        return style
+    })
+
+    return () => styles.forEach((style) => style.remove())
+}
+
+describe('StyledFormControlLabel first-line offset beats consumer resets (ASMA-9043)', () => {
+    let removeConsumerResets: () => void
+
+    beforeEach(() => {
+        removeConsumerResets = injectConsumerResets()
+    })
+
+    afterEach(() => {
+        cleanup()
+        removeConsumerResets()
+    })
+
+    it.each([
+        ['checkbox', <StyledCheckbox key='c' dataTest='control' />],
+        ['radio', <StyledRadio key='r' dataTest='control' value='a' />],
+        ['switch', <StyledSwitch key='s' dataTest='control' />],
+    ] as const)('%s: the control stays on the first line', async (_kind, control) => {
+        const { container } = mount(<StyledFormControlLabel label='Receive updates' control={control} />)
+        const label = within(container).getByText('Receive updates')
+        const [firstLine] = lineRects(label)
+        const offset = Math.abs(boxCentre(controlHost(container)) - lineCentre(firstLine!))
+        const margin = getComputedStyle(label).marginBlockStart
+
+        await expect(firstLine, 'the label rendered a line').toBeDefined()
+        await expect(margin, 'the consumer resets did not zero the first-line offset').not.toBe('0px')
+        await expect(
+            offset,
+            `control centre minus first-line centre was ${offset}px (margin-block-start ${margin})`,
+        ).toBeLessThanOrEqual(0.5)
+    })
+
+    it('a wrapped checkbox label keeps the control on the first line', async () => {
+        const { container } = mount(
+            <div style={{ width: 220 }}>
+                <StyledFormControlLabel label={LONG_LABEL} control={<StyledCheckbox dataTest='control' />} />
+            </div>,
+        )
+        const label = within(container).getByText(LONG_LABEL)
+        const lines = lineRects(label)
+        const offset = Math.abs(boxCentre(controlHost(container)) - lineCentre(lines[0]!))
+
+        await expect(lines.length, 'the label wrapped onto more than one line').toBeGreaterThan(1)
+        await expect(
+            offset,
+            `control centre minus first-line centre was ${offset}px (margin-block-start ${getComputedStyle(label).marginBlockStart})`,
+        ).toBeLessThanOrEqual(0.5)
     })
 })

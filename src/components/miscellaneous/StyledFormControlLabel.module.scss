@@ -1,6 +1,13 @@
 // Same `theme` layer as Card.module.scss: it sits before `base`, so a consumer's `classes.label`
 // or `classes.helperText` utility (later `utilities` layer) wins without `!important`. Figma's
 // Checkbox+Label / Radiobutton / Switch label is Body Base 16/24.
+//
+// The one exception is the first-line offset below, which has to carry `!important` (ASMA-9043).
+// `theme` is the earliest layer, so a normal declaration there loses to every later layer — the
+// editor's Tailwind preflight resets `* { margin: 0 }` in `base` — and to anything unlayered, like
+// the `* { box-sizing: border-box; margin: 0; padding: 0 }` richeditor's `tiptap.css` adds. For
+// important declarations the order flips (the earlier layer wins, and layered beats unlayered),
+// so priority here is what keeps the offset alive without moving the rule out of `theme`.
 @layer theme {
     .Label {
         font-size: 1rem;
@@ -20,10 +27,14 @@
     // the component (40px radio/checkbox, 34px switch, …); `1lh` is this span's own line box, so a
     // consumer `leading-*` in `classes.label` keeps the alignment correct. On a one-line label the
     // result is the same vertical position the old `items-center` row produced.
+    //
+    // ASMA-9043. `!important` for the reasons in the header: consumer resets in `base` and any
+    // unlayered reset outrank a normal declaration in this, the earliest, layer. Priority does not
+    // break consumer typography — `leading-*` only changes the `1lh` the calc reads.
     .FirstLineLabel {
         margin-block-start: calc(
             (var(--asma-form-control-label-control-height, 2.5rem) - 1lh) / 2
-        );
+        ) !important;
     }
 
     // Design System "Small 12/16 delta-600": the smaller secondary style for the optional
