@@ -72,6 +72,28 @@ describe('StyledFormControlLabel aligns the control with the first label line (A
         ).toBe(false)
     })
 
+    it.each([
+        ['checkbox', <StyledCheckbox key='c' dataTest='control' />],
+        ['radio', <StyledRadio key='r' dataTest='control' value='a' size='small' />],
+        ['switch', <StyledSwitch key='s' dataTest='control' />],
+    ] as const)("%s: stays centred under an app page's margin resets", async (_kind, control) => {
+        // An app page resets margins twice: Tailwind v4 preflight in `@layer base` (declared after
+        // `theme`) and richeditor's unlayered `* { margin: 0 }` that chat ships. Neither may drop the
+        // first-line margin (CRM "Type*" radios sat 8px above their circles).
+        const resets = document.createElement('style')
+        resets.textContent = '@layer base { *, ::before, ::after { margin: 0; } } * { margin: 0; }'
+        document.head.append(resets)
+        try {
+            const { container } = mount(<StyledFormControlLabel label='Receive updates' control={control} />)
+            const [firstLine] = lineRects(within(container).getByText('Receive updates'))
+
+            await expect(firstLine, 'the label rendered a line').toBeDefined()
+            await expect(near(boxCentre(controlHost(container)), lineCentre(firstLine!))).toBe(true)
+        } finally {
+            resets.remove()
+        }
+    })
+
     it('keeps a vertical placement centred with no first-line margin', async () => {
         const { container } = mount(
             <StyledFormControlLabel

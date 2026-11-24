@@ -15,17 +15,6 @@
         color: var(--colors-delta-800);
     }
 
-    // ASMA-9001. The control target's centre is placed on the first line's centre, not on the
-    // centre of the whole wrapped label. `--asma-form-control-label-control-height` is measured by
-    // the component (40px radio/checkbox, 34px switch, …); `1lh` is this span's own line box, so a
-    // consumer `leading-*` in `classes.label` keeps the alignment correct. On a one-line label the
-    // result is the same vertical position the old `items-center` row produced.
-    .FirstLineLabel {
-        margin-block-start: calc(
-            (var(--asma-form-control-label-control-height, 2.5rem) - 1lh) / 2
-        );
-    }
-
     // Design System "Small 12/16 delta-600": the smaller secondary style for the optional
     // helper/description line under the option name.
     .HelperText {
@@ -38,4 +27,17 @@
     .HelperTextDisabled {
         color: var(--colors-delta-300);
     }
+}
+
+// ASMA-9001. The control target's centre is placed on the first line's centre, not on the
+// centre of the whole wrapped label. `--asma-form-control-label-control-height` is measured by
+// the component (40px radio/checkbox, 34px switch, …); `1lh` is this span's own line box, so a
+// consumer `leading-*` in `classes.label` keeps the alignment correct. On a one-line label the
+// result is the same vertical position the old `items-center` row produced.
+// Unlayered on purpose: in an app the margin must survive the margin resets on the page — Tailwind
+// v4 preflight `* { margin: 0 }` sits in the `base` layer, which is declared after `theme` and so
+// beats it, and richeditor's tiptap.css ships an unlayered `* { margin: 0 }` (via chat). An
+// unlayered class beats both (layer order, then specificity); in Storybook nothing resets it.
+.FirstLineLabel {
+    margin-block-start: calc((var(--asma-form-control-label-control-height, 2.5rem) - 1lh) / 2);
 }
