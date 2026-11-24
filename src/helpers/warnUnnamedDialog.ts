@@ -3,7 +3,7 @@
  * content has no accessible name (WCAG 4.1.2, axe `aria-dialog-name`). Silent in production.
  */
 export function warnUnnamedDialog(dataTest: string | undefined): void {
-    if (typeof process !== 'undefined' && process.env?.['NODE_ENV'] === 'production') return
+    if (!import.meta.env.DEV) return
     console.warn(
         `[asma-ui-core/StyledDialog] "${dataTest ?? 'dialog'}" has no accessible name — pass dialogTitle, dialogLabel or ariaLabel, or render a heading in its content`,
     )
