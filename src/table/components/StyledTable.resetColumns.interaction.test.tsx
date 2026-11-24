@@ -312,13 +312,15 @@ describe('Reset columns', () => {
         await expect(table().getColumn('role')!.getIsVisible()).toBe(false)
     })
 
-    it('A-02 / K-07: the keys from before the table reach the pin (ASMA-8702, ASMA-8875), Enter opens it, Tab walks the panel to Reset columns without jumping to a body row, and Enter runs it', async () => {
+    it('A-02 / K-07: the keys from before the table reach the pin (ASMA-8702, ASMA-8875), Enter opens it on its first row, one Tab reaches Reset columns without jumping to a body row, and Enter runs it', async () => {
         const { table } = mountHarness()
 
         await act(() => table().setColumnSizing({ name: 260 }))
         await tabToPin()
         await userEvent.keyboard('{Enter}')
         await waitFor(() => expect(pin().getAttribute('aria-expanded')).toBe('true'))
+        // Opened from the keyboard, the menu takes the focus on its first row (ASMA-8875, UX comment 95823).
+        await waitFor(() => expect(document.activeElement?.getAttribute('role')).toBe('menuitemcheckbox'))
 
         const reset = popoverButton('Reset columns')
         const visited: Element[] = []
@@ -329,9 +331,10 @@ describe('Reset columns', () => {
         }
 
         await expect(document.activeElement).toBe(reset)
-        // Every column's row control was passed on the way, in order, inside the panel (not the table rows).
+        // The column list is one Tab stop (its arrow keys walk the rows), so Tab goes straight on to Reset columns, inside
+        // the panel (not the table rows).
         await expect(visited.some((element) => element.closest('tbody') !== null)).toBe(false)
-        await expect(visited.length).toBeGreaterThanOrEqual(4)
+        await expect(visited).toEqual([reset])
 
         await userEvent.keyboard('{Enter}')
 
