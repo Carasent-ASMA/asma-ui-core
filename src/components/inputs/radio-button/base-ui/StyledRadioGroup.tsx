@@ -60,9 +60,9 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
         }
 
         const contextValue = useMemo(
-            () => ({ name: groupName, value: selected, disabled, onSelect }),
+            () => ({ name: groupName, value: selected, disabled, readOnly, onSelect }),
             // eslint-disable-next-line react-hooks/exhaustive-deps
-            [groupName, selected, disabled],
+            [groupName, selected, disabled, readOnly],
         )
 
         const message = error ? (errorText ?? helperText) : helperText
@@ -85,7 +85,7 @@ export const StyledRadioGroup = forwardRef<HTMLDivElement, StyledRadioGroupProps
                 aria-describedby={showHelperSlot ? helperId : undefined}
                 aria-invalid={error}
                 aria-readonly={readOnly ? true : undefined}
-                // readOnly: keep the normal (non-disabled) look but block interaction — selection can't
+                // readOnly: the radios take Figma's read-only look and block interaction — selection can't
                 // change (onSelect early-returns) and clicks/focus are inert.
                 className={cn(
                     'flex items-start',

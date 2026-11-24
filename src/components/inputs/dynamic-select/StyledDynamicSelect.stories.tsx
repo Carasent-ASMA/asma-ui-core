@@ -828,8 +828,11 @@ export const FocusDemo: Story = {
     },
     play: async ({ canvas }) => {
         // const canvas = within(canvasElement)
-        await userEvent.click(canvas.getByTestId('focus-select-btn'))
+        const button = canvas.getByTestId('focus-select-btn')
+        await userEvent.click(button)
         await expect(canvas.getByRole('combobox')).toHaveFocus()
+        // Let the button's 150 ms release ease finish, so axe reads its resting colours (ASMA-9003).
+        await Promise.all(button.getAnimations().map((animation) => animation.finished))
     },
 }
 

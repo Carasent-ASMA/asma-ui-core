@@ -4,7 +4,7 @@ import { StyledRadio } from 'src/components/inputs/radio-button/base-ui/StyledRa
 import { StyledFormControlLabel } from '../StyledFormControlLabel'
 
 /**
- * `StyledFormControlLabel` renders its label text at 14 px / 20 px. `classes.label` appends a
+ * `StyledFormControlLabel` renders its label text at 16 px / 24 px (Figma Body Base). `classes.label` appends a
  * consumer class to that span, so a caller can override the type without replacing the control
  * wiring or the disabled colour.
  *
@@ -26,7 +26,7 @@ export const LabelClasses: Story = {
     name: 'Label classes',
     render: () => (
         <div className='flex flex-col gap-4'>
-            <StyledFormControlLabel label='Default label (14 px)' control={<StyledCheckbox dataTest='default' />} />
+            <StyledFormControlLabel label='Default label (16 px)' control={<StyledCheckbox dataTest='default' />} />
             <StyledFormControlLabel
                 label='Consumer label override (16 px, semibold)'
                 classes={{ label: 'text-[16px] font-semibold leading-6' }}

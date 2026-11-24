@@ -76,14 +76,81 @@ agree.
 
 | | |
 | --- | --- |
-| Assertions passing | 329 |
-| — of which quarantined, held to a regression floor | 90 |
-| Skipped (no computable ratio — F-15 only) | 4 |
-| Distinct findings | 15 |
+| Assertions passing | 525 |
+| — of which quarantined, held to a regression floor | 87 |
+| — of which held to the momentary level (pressed, see below) | 195 |
+| Skipped (no computable ratio — F-15 only) | 0 |
+| Distinct findings quarantined | 15 |
 | Themes covered | 3 (`default`, `fretex`, `greenish`) |
+
+Counted on 2026-11-24 (ASMA-9003).
 
 Regenerate the floors after any token change:
 `npx vitest --project=unit --run src/a11y`
+
+## Momentary states (pressed)
+
+The pressed-state pattern lets a pressed look sit up to 15 % below the WCAG minimum, because it lasts
+only while the pointer or Space key is down: at least **3.83:1** for text (85 % of 4.5:1, SC 1.4.3)
+and **2.55:1** for icons, box edges, tracks, borders and the focus ring (85 % of 3:1, SC 1.4.11).
+This is an accepted risk (Eugen, 2026-11-20), not a WCAG level: WCAG 2.2 AA has no such allowance,
+so an audit can still report these pairs. Source: `_docs/ux/patterns/pattern-pressed-state.md`,
+*Accessibility*.
+
+The gate holds these pairs to the momentary levels (`momentaryText`, `momentaryNonText` in
+`REQUIREMENT_RATIO`):
+
+- the `active` rows of the button token matrix (`MOMENTARY_BUTTON_STATES`): label, boundary, and for
+  `outlined` / `text` / `textGray` the focus ring on the pressed fill, which shows while Space is held
+  on a focused button (pattern Q9);
+- the pressed looks of the checkbox, radio, switch, chip, tab, option rows and time picker cells (`pressedPairs.ts`).
+
+`hover` and `focused` keep the full levels in this gate (ASMA-9003 scope), although the pattern
+allows hover the same 15 %. Every other state keeps the full minimum.
+
+Measured with ASMA-9003's Figma pressed colours (`gama-200` light fill, `gama-800` dark fill,
+`gama-700` label and icons, `error-800` danger fill):
+
+| Pair | default | fretex | greenish |
+| --- | --- | --- | --- |
+| Pressed label `gama-700` on `gama-200` (outlined, text, textGray, chip, tab, options, time cells) | 4.34 | 6.00 | 5.37 |
+| Danger pressed label `beta-700` on `beta-100` | 6.56 | 6.56 | 6.56 |
+| White label on `gama-800` / `error-800` (contained, selected time cell) | 11.08 / 10.46 | 11.44 / 10.46 | 12.01 / 10.46 |
+| Box edge, fill, ring and dot `gama-800` on `gama-200` | 6.39 | 8.15 | 6.91 |
+| Focus ring on `gama-200` (buttons, chips, tabs with Space held) / on `beta-100` | 2.66 / 3.61 | 3.34 / 3.68 | 2.69 / 3.66 |
+| Tab indicator `gama-500` on `gama-200` | 2.66 | 3.34 | 2.69 |
+| Switch track `gama-800` on white | 11.08 | 11.44 | 12.01 |
+| Outlined pressed border `gama-300` on white (F-13, quarantined) | **2.33** | **1.81** | **2.20** |
+
+Every pressed pair passes except three edges Figma keeps while pressed, which stay quarantined: the
+outlined button's `gama-300` border (F-13), the chip's `delta-300` border against the page (F-11) and
+the selected radio chip's `gama-400` edge on the pressed fill (F-17). The default theme's pressed label
+(4.34) is below 4.5:1 and within the accepted 15 % (pattern Q6).
+
+## Palette and token changes (ASMA-9003)
+
+Figma's *Pressed state* sheet (47847:229830) and the Button set (13431:18852) are the colour source.
+Only the palette steps and button tokens the pressed looks themselves use were changed, to equal Figma in
+all three themes (Figma Blue = `default`, Fretex = `fretex`, Green = `greenish`). What moved, and what it
+moves beyond the pressed looks:
+
+| Change | Themes | Reaches beyond the pressed looks |
+| --- | --- | --- |
+| `jade-700` `#0b4040` → `#0d4f4f`, `jade-800` `#083030` → `#0a3d3d` (Figma Green `gama/700`, `gama/800`) | greenish | every `gama-700`/`gama-800` and `theta-700`/`theta-800` user, e.g. the info snackbar (white on `theta-700`: 11.52 → 9.33) and app Tailwind `*-gama-700/800`. `jade-700` now equals `jade-900` (`#0d4f4f`) |
+| fretex `gama-800` → `green-800` `#353b38` (was `green-700` `#474f4b`) | fretex | every fretex `gama-800` user |
+| new `--colors-error-800` `#820c0c` | all | contained danger pressed fill only |
+| button `*-active-*` tokens = the Figma pressed look | all | pressed buttons only |
+
+Not changed, though Figma differs (rest, hover and disabled colours are outside ASMA-9003; the fretex
+`delta-*` steps and the button hover tokens were aligned during the task and reverted on 2026-11-24):
+fretex `delta-50` (`#f0f2f4` vs `#f5f5f5`), `delta-200` (`#b4b4b4` vs `#d2d2d2`), `delta-400` (`#686868` vs
+`#959595`) and `delta-600` (`#4c4c4c` vs `#575757`); the outlined button hover fill (`gama-100` vs Figma
+`gama/50`, default and fretex); the danger outlined/text hover (`beta-600` on `beta-100` vs Figma
+`alerts/error-500` on `alerts/error-50`); `gama-900` (default `#005a83`
+vs `#002638`, fretex `#474f4b` vs `#242826`, greenish `#0d4f4f` vs `#072c2c`), fretex `delta-100`
+(`#f5f5f5` vs `#e8e8e8`), `error-300` (`#f6b9b9` vs `#f8c9c9`), and `warning-10` (`#fefcf1`, no token).
+The danger pressed fill uses `beta-100`, which has the same `#f7dede` as Figma's `alerts/error-200`;
+no `error-200` token was added.
 
 ---
 
@@ -145,7 +212,7 @@ Note the same component's `filled` **error** variant passes at 6.81 and every `s
 | --- | --- | --- |
 | default | `#ffffff` on `#006696` | 6.28 ✅ |
 | fretex | `#7a899e` on `#ffffff` | **3.55** |
-| greenish | `#ffffff` on `#0b4040` | 11.52 ✅ |
+| greenish | `#ffffff` on `#0d4f4f` | 9.33 ✅ |
 
 `fretexTokens.css` sets `--colors-theta-400`, `-500`, `-600`, `-700`, `-800` and `--colors-theta-hover`
 all to `#ffffff` — a five-rung ramp flattened to a single value. The component assumes theta-700 is a
@@ -235,25 +302,35 @@ default `#bdc4cf` **1.75** · fretex `#b4b4b4` **2.07** · greenish `#bdc4cf` **
 
 Matches ASMA-8136's independent measurement of `--colors-delta-300` at 1.75:1.
 
-### F-12 — button label on its own hover/active tint is under 4.5:1
+Pressed (`chip/border-pressed`, ASMA-9003): Figma keeps the `delta-300` edge on the `gama-200`
+pressed fill, so the same ratios stay under even the momentary 2.55:1. The fill and the `gama-700`
+label still mark the pressed chip.
 
-`--colors-button-{outlined,text,textGray}-common-{hover,active,focused}-text-color` on the matching
+### F-12 — button label on its own hover/focused tint is under 4.5:1
+
+`--colors-button-{outlined,text,textGray}-common-{hover,focused}-text-color` on the matching
 `-bg-color`. Consumer: `src/components/inputs/button/StyledButton.module.scss`.
-**SC 1.4.3, needs 4.5:1.** Nine combinations × three themes; every one lands between **3.55** and
+**SC 1.4.3, needs 4.5:1.** Six combinations × three themes; every one lands between **3.55** and
 **4.23**.
+
+The `active` (pressed) rows left F-12 with ASMA-9003: the Figma pressed label is `gama-700` on
+`gama-200`, 4.34 / 6.00 / 5.37, which clears the momentary 3.83:1 (see *Momentary states*).
 
 The pattern is the same each time: `gama-500` on a `gama-50` or `gama-100` tint. The base state
 passes (4.61 / 4.70 / 4.67 on white) and the tint is what pushes it under — so the label goes from
 just-compliant to non-compliant precisely when the user interacts with it.
 
-Worst cases: `outlined/common/hover` default `#007cb5` on `#cce6f1` = **3.55**;
-`text/common/active` greenish `#168181` on `#c5e7e7` = **3.55**.
+Worst case: `outlined/common/hover` default `#007cb5` on `#cce6f1` = **3.55**.
 
 ### F-13 — outlined button hover/active border is under 3:1
 
 `--colors-button-outlined-common-{hover,active}-border-color` (`--colors-gama-300`) against the page
 surface. **SC 1.4.11, needs 3:1.** default `#66b3d6` **2.33** · fretex `#adc6bc` **1.81** · greenish
 `#60bdbd` **2.20**. Same `gama-300` root cause as F-08.
+
+While pressed (`active`) the row is held to the momentary 2.55:1 (ASMA-9003) and still fails it in
+every theme: Figma's pressed look keeps the `gama-300` border, so it stays quarantined at the same
+floors. The pressed fill `gama-200` and the `gama-700` label still mark the control while pressed.
 
 ### F-15 — the error-button focus border points at a token no theme defines
 
@@ -353,6 +430,18 @@ Every sibling declaration uses a *dark* error colour for this text
 (`outlined-error-active-text-color` is `beta-700`, `-hover-` is `beta-600`); only the `focused`
 variant is `#ffffff`. Reads as a copy-paste slip from the `contained` block, where white is correct.
 
+### F-17 — selected radio chip edge on its pressed fill
+
+`--colors-gama-400` on `--colors-gama-200` (`chip/radio-border-pressed`). Consumer:
+`src/components/data-display/interactive-chip/StyledInteractiveChip.tsx` (the selected radio chip's
+2px `gama-400` edge) with the `gama-200` pressed fill from `StyledChip.tsx`. **SC 1.4.11, momentary
+2.55:1** (ASMA-9003). default `#4da6cf` on `#99cce4` **1.57** · fretex `#9cb2a9` on `#ceddd7`
+**1.59** · greenish `#1ca1a1` on `#8ed0d0` **1.81**.
+
+Figma's *Pressed state* sheet keeps the edge colour while the chip is pressed, and Figma is the colour
+source, so the pair is quarantined at these floors. The edge still contrasts with the page outside it
+(the selected state's own pair), and the `gama-700` label and dot mark the press.
+
 ---
 
 ## Exemptions — pairs deliberately not asserted
@@ -387,10 +476,12 @@ borderless text button is not required to also carry a 3:1 edge.
 
 ### Button hover/active background tints as a boundary
 
-Only the **base** and **focused** boundaries are asserted for `contained` and `outlined`. A
-hover/active background tint is decorative reinforcement of a state that is already conveyed by the
-cursor and by the label, not the sole indicator, so 1.4.11's state-indicator clause is satisfied
-without it. The *label* over those tints is still asserted — that is F-12.
+The `contained` and `outlined` boundary is the border (or the fill when the border is transparent)
+against the page, in every state; `active` is held to the momentary level. The hover/active
+background tint itself is not asserted as a boundary against the page: it is decorative
+reinforcement of a state that is already conveyed by the cursor and by the label, not the sole
+indicator, so 1.4.11's state-indicator clause is satisfied without it. The *label* over those tints
+is still asserted — that is F-12 for hover and focused, and the momentary level for pressed.
 
 ### Alert container borders
 

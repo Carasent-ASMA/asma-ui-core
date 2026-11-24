@@ -117,12 +117,12 @@ const popoverButton = (label: string): HTMLElement => {
 
     return button
 }
-/** A column's checkbox in the open popover: the one control that shows or hides it (its row is not a button). */
+/** A column's checkbox in the open popover: the box that shows or hides it (its whole row is its label). */
 const columnCheckbox = (label: string): HTMLElement => {
     const row = [...document.querySelectorAll<HTMLElement>('[class*="table-action-item"]')].find((candidate) =>
         candidate.textContent?.includes(label),
     )
-    const box = row?.querySelector<HTMLElement>('label')
+    const box = row?.querySelector<HTMLElement>('[data-control="checkbox"]')
 
     if (!box) throw new Error(`No checkbox for "${label}"`)
 

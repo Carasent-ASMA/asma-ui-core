@@ -13,7 +13,8 @@ import { StyledSelectAutocomplete } from 'src/components/inputs/select-autocompl
 import { StyledSelectItem } from 'src/components/inputs/select/StyledSelectItem'
 import { StyledSwitch } from 'src/components/inputs/switch/base-ui/StyledSwitch'
 import { StyledTitleChevron } from 'src/components/navigation/title-chevron/StyledTitleChevron'
-import { cleanup, mount } from 'src/test-utils/renderInteraction'
+import { cleanup, mount, resolveTokenColor } from 'src/test-utils/renderInteraction'
+import { fillOf, holdPressed } from 'src/test-utils/pressedInteraction'
 
 /**
  * ASMA-8220 (TB-14) — the touch-hardening sweep that applies the ASMA-8210 (TB-02) primitives to
@@ -49,6 +50,26 @@ const expectTouchOptIn = async (element: Element, expected: 'asma-touch-ready' |
     await expect(style.opacity).toBe('1')
 }
 
+/** Holds the mouse button down on the element's centre and returns its look while pressed. */
+const pressedStyleOf = async (element: Element): Promise<{ opacity: string; backgroundColor: string }> => {
+    let look = { opacity: '', backgroundColor: '' }
+    await holdPressed(element, () => {
+        look = { opacity: getComputedStyle(element).opacity, backgroundColor: fillOf(element) }
+        return Promise.resolve()
+    })
+    return look
+}
+
+/**
+ * ASMA-9003: a row that took `asma-touch-ready` instead of `asma-pressable` shows the Figma pressed fill
+ * (gama-200) and never the 0.7 opacity fade the pattern rejects.
+ */
+const expectFigmaPressedRow = async (row: Element): Promise<void> => {
+    const pressed = await pressedStyleOf(row)
+    await expect(pressed.opacity).toBe('1')
+    await expect(pressed.backgroundColor).toBe(resolveTokenColor('--colors-gama-200'))
+}
+
 describe('ASMA-8220 touch hardening', () => {
     afterEach(cleanup)
 
@@ -62,6 +83,10 @@ describe('ASMA-8220 touch hardening', () => {
                     Title
                 </StyledTitleChevron>
                 <StyledSelect dataTest='select' />
+                {/* ASMA-9003 moved the select option row from pressable to its Figma pressed look. */}
+                <ul>
+                    <StyledSelectItem>Option</StyledSelectItem>
+                </ul>
             </>,
         )
 
@@ -71,6 +96,7 @@ describe('ASMA-8220 touch hardening', () => {
             '[role="switch"]',
             '[data-testid="chevron"]',
             '[data-testid="select"]',
+            '[role="option"]',
         ]) {
             const element = container.querySelector(selector)
             await expect(element, selector).not.toBe(null)
@@ -78,12 +104,34 @@ describe('ASMA-8220 touch hardening', () => {
         }
     })
 
-    it('takes pressable on controls that had no pressed state at all', async () => {
+    it('paints the Figma pressed row on a select option, selected or not, and nothing when disabled', async () => {
+        const { container } = mount(
+            <ul>
+                <StyledSelectItem>Plain</StyledSelectItem>
+                <StyledSelectItem selected>Selected</StyledSelectItem>
+                <StyledSelectItem disabled>Disabled</StyledSelectItem>
+            </ul>,
+        )
+        const [plain, selected, disabled] = Array.from(container.querySelectorAll('[role="option"]'))
+
+        await expectFigmaPressedRow(plain!)
+        // The pressed fill wins over the selected gama-25 fill, and the check icon darkens with the label.
+        const check = selected!.querySelector('svg')!
+        await holdPressed(selected!, async () => {
+            await expect(fillOf(selected!)).toBe(resolveTokenColor('--colors-gama-200'))
+            await expect(getComputedStyle(selected!).color).toBe(resolveTokenColor('--colors-gama-700'))
+            await expect(getComputedStyle(check).color).toBe(resolveTokenColor('--colors-gama-700'))
+        })
+
+        const resting = getComputedStyle(disabled!).backgroundColor
+        const pressedDisabled = await pressedStyleOf(disabled!)
+        await expect(pressedDisabled.backgroundColor).toBe(resting)
+        await expect(pressedDisabled.opacity).toBe('1')
+    })
+
+    it('keeps pressable on the out-of-scope controls that have no pressed look of their own yet', async () => {
         const { container } = mount(
             <>
-                <ul>
-                    <StyledSelectItem>Option</StyledSelectItem>
-                </ul>
                 <StyledAccordion defaultExpanded={false}>
                     <StyledAccordionSummary data-testid='accordion'>Summary</StyledAccordionSummary>
                 </StyledAccordion>
@@ -105,7 +153,6 @@ describe('ASMA-8220 touch hardening', () => {
         )
 
         for (const selector of [
-            '[role="option"]',
             '[data-testid="accordion"]',
             '[data-testid="styled-search-clear-icon"]',
             // StyledInputField's own clear button — the search field's is a separate element.
@@ -118,26 +165,40 @@ describe('ASMA-8220 touch hardening', () => {
         }
     })
 
-    it('takes pressable on the headless Listbox, whose sizing stays the consumer’s', async () => {
+    it('keeps pressable on the headless Listbox trigger and paints the Figma pressed row on its options', async () => {
         const { container } = mount(
             <Listbox value='a' onChange={fn()}>
                 <Listbox.Button>Open</Listbox.Button>
                 <Listbox.Options>
                     <Listbox.Option value='a'>{() => 'A'}</Listbox.Option>
+                    <Listbox.Option value='b'>{() => 'B'}</Listbox.Option>
+                    <Listbox.Option value='c' disabled>
+                        {() => 'C'}
+                    </Listbox.Option>
                 </Listbox.Options>
             </Listbox>,
         )
 
+        // The trigger paints nothing itself, so it keeps the opacity fade (out of ASMA-9003's scope).
         const button = container.querySelector('button')!
         await expectTouchOptIn(button, 'asma-pressable')
 
         // `.Options` renders nothing while closed, so the option only exists after a real click.
         await userEvent.click(button)
         await waitFor(() => expect(container.querySelector('[role="option"]')).not.toBe(null))
-        await expectTouchOptIn(container.querySelector('[role="option"]')!, 'asma-pressable')
+        const [selected, plain, disabled] = Array.from(container.querySelectorAll('[role="option"]'))
+        await expectTouchOptIn(plain!, 'asma-touch-ready')
+
+        // A disabled option shows no pressed look at all (and pressing it leaves the list open).
+        await expectTouchOptIn(disabled!, 'asma-touch-ready')
+        const resting = getComputedStyle(disabled!).backgroundColor
+        await expect((await pressedStyleOf(disabled!)).backgroundColor).toBe(resting)
+
+        // Last: releasing on an enabled option chooses it and closes the list.
+        await expectFigmaPressedRow(selected!)
     })
 
-    it('takes pressable on the autocomplete option rows, which live in a portal', async () => {
+    it('paints the Figma pressed row on the autocomplete options, which live in a portal', async () => {
         mount(
             <StyledSelectAutocomplete<string, false, false, false>
                 dataTest='ac'
@@ -156,7 +217,9 @@ describe('ASMA-8220 touch hardening', () => {
 
         // The class rides `optionRowClassName`, which is also what a custom `renderOption` spreading
         // `{...props}` receives — so this covers the consumer-rendered rows too.
-        await expectTouchOptIn(document.querySelector('li[role="option"]')!, 'asma-pressable')
+        const row = document.querySelector('li[role="option"]')!
+        await expectTouchOptIn(row, 'asma-touch-ready')
+        await expectFigmaPressedRow(row)
     })
 
     it('gives the switch a 44px pointer target without redrawing its 38x22 track', async () => {

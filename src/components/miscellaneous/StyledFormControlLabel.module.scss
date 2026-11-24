@@ -1,11 +1,18 @@
 // Same `theme` layer as Card.module.scss: it sits before `base`, so a consumer's `classes.label`
-// or `classes.helperText` utility (later `utilities` layer) wins without `!important`. Literal
-// values match the old `text-sm leading-5 tracking-[0.00938em]` utilities exactly.
+// or `classes.helperText` utility (later `utilities` layer) wins without `!important`. Figma's
+// Checkbox+Label / Radiobutton / Switch label is Body Base 16/24.
 @layer theme {
     .Label {
+        font-size: 1rem;
+        line-height: 1.5rem;
+        letter-spacing: 0;
+    }
+
+    // Only Figma Checkbox+Label's left label (28877:144952) is 14/20 delta-800; the checkbox marks itself.
+    .Start:has([data-control='checkbox']) .Label {
         font-size: 0.875rem;
         line-height: 1.25rem;
-        letter-spacing: 0.00938em;
+        color: var(--colors-delta-800);
     }
 
     // ASMA-9001. The control target's centre is placed on the first line's centre, not on the

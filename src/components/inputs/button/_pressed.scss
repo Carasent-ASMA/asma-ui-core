@@ -1,0 +1,34 @@
+// Figma pressed look of both buttons, from `data-pressed` only; never disabled, aria-disabled or busy.
+// @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
+$pressed: '[data-pressed]:not(:disabled):not([aria-disabled="true"]):not([aria-busy="true"])';
+
+@mixin pressed($type, $color) {
+    // Released: the pressed colours ease back over 150 ms (beats `:focus-visible`'s `none` by order); hover and
+    // focus keep the master timing.
+    &[data-press-released] {
+        transition: color 150ms ease-out, background-color 150ms ease-out, border-color 150ms ease-out #{!important};
+    }
+
+    &#{$pressed} {
+        transition: none #{!important};
+        color: var(--colors-button-#{$type}-#{$color}-active-text-color) #{!important};
+        background-color: var(--colors-button-#{$type}-#{$color}-active-bg-color) #{!important};
+        border-color: var(--colors-button-#{$type}-#{$color}-active-border-color) #{!important};
+    }
+
+    // Space held: the focus ring's edge stays over the pressed border.
+    &#{$pressed}:focus-visible {
+        border-color: var(--colors-focus-ring) #{!important};
+    }
+
+    // Forced colours drop the fill: the press fills Highlight with a HighlightText label (`none`: no backplate).
+    @media (forced-colors: active) {
+        &#{$pressed},
+        &#{$pressed}:focus-visible {
+            forced-color-adjust: none;
+            color: HighlightText #{!important};
+            background-color: Highlight #{!important};
+            border-color: Highlight #{!important};
+        }
+    }
+}

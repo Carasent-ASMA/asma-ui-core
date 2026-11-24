@@ -461,7 +461,8 @@ describe('StyledEmojiChoice read-only', () => {
         await expect(document.activeElement).toBe(toggle)
         await userEvent.keyboard('{Enter}')
         await expect(toggle).toHaveAttribute('aria-expanded', 'true')
-        await expect(getComputedStyle(toggle).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+        // A focused button's colours ease out over 150 ms (ASMA-9003), so read the settled fill.
+        await waitFor(() => expect(getComputedStyle(toggle).backgroundColor).toBe('rgba(0, 0, 0, 0)'))
         await userEvent.keyboard(' ')
         await expect(toggle).toHaveAttribute('aria-expanded', 'false')
     })

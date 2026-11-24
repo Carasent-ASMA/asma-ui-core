@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { afterEach, describe, it } from 'vitest'
 import { page } from 'vitest/browser'
 import { expect, fn, userEvent } from 'src/test-utils/interaction-api'
-import { cleanup, mount } from 'src/test-utils/renderInteraction'
+import { cleanup, mount, resolveTokenColor } from 'src/test-utils/renderInteraction'
+import { fillOf, holdPressed, space } from 'src/test-utils/pressedInteraction'
 import { StyledChip } from 'src/components/data-display/chip/StyledChip'
 import { StyledInteractiveChip } from './StyledInteractiveChip'
 
@@ -263,3 +264,78 @@ describe('StyledInteractiveChip first-line alignment (ASMA-9001)', () => {
     })
 })
 
+/*
+ * ASMA-9003 — Figma Pressed state sheet, "Quick filter": a pressed checkbox/radio chip fills gama-200 and its
+ * own control turns gama-700 (text-icon/pressed), the selection kept. Real Chromium, trusted input via CDP.
+ */
+/** A part of the decorative control, by its CSS-module class name (`Checkbox`, `Ring`, `Indicator`). */
+const part = (chip: Element, name: string): Element =>
+    Array.from(chip.querySelectorAll('*')).find((node) =>
+        Array.from(node.classList).some((token) => new RegExp(`(^|_)${name}(_|$)`).test(token)),
+    )!
+
+describe('StyledInteractiveChip pressed state (ASMA-9003)', () => {
+    afterEach(cleanup)
+
+    it.each([
+        ['checked', true],
+        ['unchecked', false],
+    ] as const)('turns a pressed %s checkbox chip gama-200 and its box gama-700', async (_state, checked) => {
+        const { container } = mount(
+            <StyledInteractiveChip
+                dataTest='quick-filter'
+                label='Quick filter'
+                type='checkbox'
+                checked={checked}
+                onClick={fn()}
+            />,
+        )
+        const chip = container.querySelector<HTMLElement>('[role="checkbox"]')!
+        const box = part(chip, 'Checkbox')
+        const gama700 = resolveTokenColor('--colors-gama-700')
+
+        await holdPressed(chip, async () => {
+            await expect(fillOf(chip)).toBe(resolveTokenColor('--colors-gama-200'))
+            await expect(getComputedStyle(chip).color).toBe(gama700)
+            // The box's own computed colour: its fill when checked, its edge when not (Figma Bg / outline).
+            const boxStyle = getComputedStyle(box)
+            await expect(checked ? boxStyle.backgroundColor : boxStyle.borderTopColor).toBe(gama700)
+            await expect(chip).toHaveAttribute('aria-checked', String(checked))
+        })
+    })
+
+    it('fills a selected radio chip gama-200 over its gama-25 fill, keeps its gama-400 border, ring and dot gama-700', async () => {
+        const { container } = mount(
+            <StyledInteractiveChip dataTest='radio-chip' label='Active' type='radio' checked onClick={fn()} />,
+        )
+        const chip = container.querySelector<HTMLElement>('[role="radio"]')!
+        const restingBorder = getComputedStyle(chip).borderColor
+        await expect(restingBorder).toBe(resolveTokenColor('--colors-gama-400'))
+        const gama700 = resolveTokenColor('--colors-gama-700')
+
+        await holdPressed(chip, async () => {
+            await expect(fillOf(chip)).toBe(resolveTokenColor('--colors-gama-200'))
+            await expect(getComputedStyle(chip).borderColor).toBe(restingBorder)
+            await expect(getComputedStyle(part(chip, 'Ring')).stroke).toBe(gama700)
+            await expect(getComputedStyle(part(chip, 'Indicator')).fill).toBe(gama700)
+            await expect(chip).toHaveAttribute('aria-checked', 'true')
+        })
+    })
+
+    it('shows the pressed fill on a selected radio chip while Space is held', async () => {
+        const { container } = mount(
+            <StyledInteractiveChip dataTest='radio-chip' label='Active' type='radio' checked onClick={fn()} />,
+        )
+        const chip = container.querySelector<HTMLElement>('[role="radio"]')!
+        await userEvent.tab()
+        await expect(document.activeElement).toBe(chip)
+
+        await space('keyDown')
+        try {
+            await expect(fillOf(chip)).toBe(resolveTokenColor('--colors-gama-200'))
+            await expect(getComputedStyle(chip).borderColor).toBe(resolveTokenColor('--colors-gama-400'))
+        } finally {
+            await space('keyUp')
+        }
+    })
+})

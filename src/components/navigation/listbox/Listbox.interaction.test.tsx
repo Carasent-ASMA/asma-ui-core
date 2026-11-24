@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { afterEach, describe, it } from 'vitest'
 import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
-import { cleanup, mount } from 'src/test-utils/renderInteraction'
+import { cleanup, mount, resolveTokenColor } from 'src/test-utils/renderInteraction'
+import { fillOf, holdPressed, mouse } from 'src/test-utils/pressedInteraction'
 import { Listbox } from './Listbox'
 
 const ListboxFixture = (): JSX.Element => {
@@ -279,6 +280,135 @@ describe('Listbox keyboard contract', () => {
             const activeRect = active.getBoundingClientRect()
             await expect(activeRect.top).toBeGreaterThanOrEqual(listRect.top - 1)
             await expect(activeRect.bottom).toBeLessThanOrEqual(listRect.bottom + 1)
+        })
+    })
+})
+
+/* ASMA-9003: options show the menu item's Figma pressed look; the trigger keeps its opacity fade. */
+describe('Listbox pressed options (ASMA-9003)', () => {
+    afterEach(cleanup)
+
+    it('fills a pressed option gama-200, and never a keyboard-active or disabled one', async () => {
+        const { container } = mount(<ListboxFixture />)
+        const trigger = container.querySelector<HTMLButtonElement>('[data-testid="trigger"]')!
+        const gama200 = resolveTokenColor('--colors-gama-200')
+        trigger.focus()
+
+        await userEvent.keyboard('{ArrowDown}')
+        await waitFor(() => expect(document.querySelector('[role="listbox"]')).not.toBeNull())
+        const [alpha, bravo] = Array.from(document.querySelectorAll<HTMLElement>('[role="option"]'))
+        const active = document.getElementById(trigger.getAttribute('aria-activedescendant')!)!
+        await expect(fillOf(active)).not.toBe(gama200)
+
+        const resting = fillOf(bravo!)
+        await holdPressed(bravo!, async () => {
+            await expect(fillOf(bravo!)).toBe(resting)
+        })
+
+        // Last, because releasing on it chooses it and closes the list.
+        await holdPressed(alpha!, async () => {
+            await expect(fillOf(alpha!)).toBe(gama200)
+            await expect(getComputedStyle(alpha!).color).toBe(resolveTokenColor('--colors-gama-700'))
+            await expect(alpha).toHaveAttribute('aria-selected', 'true')
+        })
+    })
+})
+
+/* The option prevents the mousedown default (focus stays on the trigger), which keeps Firefox from
+ * setting `:active`, so it also holds the press as `data-pressed` from pointer events — and drops it the
+ * moment the pointer leaves the row (pattern: cancel on pointer-out). */
+describe('Listbox options held by the pointer (ASMA-9003)', () => {
+    afterEach(cleanup)
+
+    it('marks a pressed option and cancels it when the pointer is dragged off; a disabled one never', async () => {
+        const { container } = mount(<ListboxFixture />)
+        const trigger = container.querySelector<HTMLButtonElement>('[data-testid="trigger"]')!
+        const gama200 = resolveTokenColor('--colors-gama-200')
+        trigger.focus()
+        await userEvent.keyboard('{ArrowDown}')
+        await waitFor(() => expect(document.querySelector('[role="listbox"]')).not.toBeNull())
+        const [, bravo, charlie] = Array.from(document.querySelectorAll<HTMLElement>('[role="option"]'))
+
+        // The attribute alone — no `:active` — paints the look, as Firefox shows it.
+        charlie!.setAttribute('data-pressed', '')
+        await expect(fillOf(charlie!)).toBe(gama200)
+        await expect(getComputedStyle(charlie!).color).toBe(resolveTokenColor('--colors-gama-700'))
+        charlie!.removeAttribute('data-pressed')
+
+        const disabledAt = bravo!.getBoundingClientRect()
+        await mouse('mousePressed', { x: disabledAt.left + 10, y: disabledAt.top + disabledAt.height / 2 })
+        await expect(bravo).not.toHaveAttribute('data-pressed')
+        await mouse('mouseReleased', { x: disabledAt.left + 10, y: disabledAt.top + disabledAt.height / 2 })
+
+        const box = charlie!.getBoundingClientRect()
+        const away = { x: box.right + 300, y: box.bottom + 300 }
+        await mouse('mousePressed', { x: box.left + 10, y: box.top + box.height / 2 })
+        try {
+            await expect(charlie).toHaveAttribute('data-pressed')
+            await expect(fillOf(charlie!)).toBe(gama200)
+
+            await mouse('mouseMoved', away, { held: true })
+            await expect(charlie).not.toHaveAttribute('data-pressed')
+            await waitFor(() => expect(fillOf(charlie!)).not.toBe(gama200))
+        } finally {
+            await mouse('mouseReleased', away)
+        }
+        // Released outside: nothing chosen.
+        await expect(trigger).toHaveTextContent('alpha')
+    })
+})
+
+/* CARD-15: a row presses as a whole from its body, never while a control inside it is pressed — e.g. the
+ * search field the directory sidebar renders inside an option (review 4). */
+describe('Listbox option with a control inside (ASMA-9003)', () => {
+    afterEach(cleanup)
+
+    it('does not press the option from its inner field, and does from the row itself', async () => {
+        const { container } = mount(
+            <Listbox value='a' onChange={fn()}>
+                <Listbox.Button data-testid='trigger'>Open</Listbox.Button>
+                <Listbox.Options>
+                    <Listbox.Option value='a'>
+                        {() => (
+                            <span style={{ display: 'flex', gap: 16, padding: 8 }}>
+                                <span>Search</span>
+                                <input aria-label='Search people' data-testid='inner' style={{ width: 120 }} />
+                            </span>
+                        )}
+                    </Listbox.Option>
+                    <Listbox.Option value='b'>{() => 'Bravo'}</Listbox.Option>
+                </Listbox.Options>
+            </Listbox>,
+        )
+        container.querySelector<HTMLButtonElement>('[data-testid="trigger"]')!.click()
+        await waitFor(() => expect(document.querySelector('[role="option"]')).not.toBeNull())
+        const option = document.querySelector<HTMLElement>('[role="option"]')!
+        const inner = document.querySelector<HTMLElement>('[data-testid="inner"]')!
+        const gama200 = resolveTokenColor('--colors-gama-200')
+
+        // Each press ends on the other option: the click lands on the list, so nothing is chosen and the
+        // list stays open (a release outside it would close it).
+        const other = document.querySelectorAll<HTMLElement>('[role="option"]')[1]!
+        const pressThenLeave = async (target: Element, whilePressed: () => Promise<void>): Promise<void> => {
+            const otherBox = other.getBoundingClientRect()
+            const away = { x: otherBox.left + 10, y: otherBox.top + otherBox.height / 2 }
+            await mouse('mouseMoved', target)
+            await mouse('mousePressed', target)
+            try {
+                await whilePressed()
+            } finally {
+                await mouse('mouseMoved', away, { held: true })
+                await mouse('mouseReleased', away)
+            }
+        }
+
+        await pressThenLeave(inner, async () => {
+            await expect(option).not.toHaveAttribute('data-pressed')
+            await expect(fillOf(option)).not.toBe(gama200)
+        })
+        await pressThenLeave(option.querySelector('span > span')!, async () => {
+            await expect(option).toHaveAttribute('data-pressed')
+            await expect(fillOf(option)).toBe(gama200)
         })
     })
 })

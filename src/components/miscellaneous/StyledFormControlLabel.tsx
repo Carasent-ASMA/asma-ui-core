@@ -10,6 +10,7 @@ import {
 } from 'react'
 import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
+import { pressedStateHandlers } from 'src/helpers/pressedState'
 import styles from './StyledFormControlLabel.module.scss'
 
 export type LabelPlacement = 'end' | 'start' | 'top' | 'bottom'
@@ -157,12 +158,16 @@ export const StyledFormControlLabel = ({
     return (
         <label
             ref={rootRef}
+            // ASMA-9003: pressing the option text presses the control (`label[data-pressed] …` in its styles).
+            {...pressedStateHandlers({ enabled: !isDisabled && !isReadOnly })}
             className={cn(
-                'm-0 inline-flex gap-2 align-middle text-delta-800',
+                // Figma Checkbox+Label / Radiobutton / Switch: the label follows the control's target, in text-icon/body.
+                'asma-touch-ready m-0 inline-flex align-middle text-delta-700',
                 // First-line alignment needs the text column to start at the row's top; the label's
                 // own first-line margin (below) centres that line on the control. Vertical
                 // placements keep the old centred cross-axis alignment.
-                isHorizontal ? 'items-start' : 'items-center',
+                isHorizontal ? 'items-start' : 'items-center gap-2',
+                labelPlacement === 'start' && styles['Start'],
                 isDisabled || isReadOnly ? 'cursor-default' : 'cursor-pointer',
                 PLACEMENT_CLASS[labelPlacement],
                 className,

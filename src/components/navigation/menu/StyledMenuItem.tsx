@@ -2,6 +2,7 @@ import { Children, isValidElement, type KeyboardEvent, type MouseEvent, type Rea
 import { cn } from 'src/helpers/cn'
 import { StyledTooltip, type TooltipProps } from 'src/components/data-display/tooltip'
 import { StyledCheckbox } from 'src/components/inputs/checkbox'
+import { pressedStateHandlers } from 'src/helpers/pressedState'
 import { resolveSx } from 'src/helpers/sx'
 
 // Same wording as the app catalogs (`already_added`). Norwegian is the product default (`<html lang="no">`);
@@ -111,12 +112,13 @@ export const StyledMenuItem = ({
     // Accepted for parity (consumed by Select, not needed for menu rendering).
     value: _value,
 }: StyledMenuItemProps): JSX.Element => {
+    // Enter and Space activate once per press: a held key's auto-repeat does not toggle a checkbox/radio item again.
     const handleKeyDown = (event: KeyboardEvent<HTMLLIElement>): void => {
         if (disabled) return
         if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault()
             // Bubble the same click as a pointer activation so containing menus can dismiss.
-            event.currentTarget.click()
+            if (!event.repeat) event.currentTarget.click()
         }
     }
 
@@ -140,28 +142,30 @@ export const StyledMenuItem = ({
             onMouseDown={onMouseDown}
             onMouseUp={onMouseUp}
             onKeyDown={handleKeyDown}
+            {...pressedStateHandlers({ enabled: !disabled && !ariaBusy })}
             className={cn(
                 // Figma Menus item (node 16073-21583): h40, py8, label Body Base 16px.
                 'box-border flex items-center px-4 text-base outline-none focus-visible:shadow-[inset_3px_0_var(--colors-focus-ring)]',
                 dense ? 'min-h-8 py-1' : 'min-h-10 py-2',
-                // ASMA-8210: the item had no pressed state at all, and at 40px (32px dense) both
-                // variants sit under the 44px touch height — safe for the touch-target override,
-                // which only ever raises them (it sets min-height only; the item declares no
-                // min-width). Menu rows sit flush against each other, so an overlaid hit area
-                // would steal the neighbour's presses — grow instead, and only on a phone, which
-                // leaves tablet and desktop byte-identical.
-                'asma-pressable asma-touch-target',
+                // ASMA-8210: rows under the 44px touch height grow on phones (min-height only); flush rows
+                // cannot take an overlaid hit area, which would steal the neighbour's presses.
+                'asma-touch-ready asma-touch-target',
                 // Figma Disabled menu item = muted text-icon/disabled (delta-300); enabled = text-icon/body (delta-700).
                 // The `aria-disabled:` variant (specificity 0,2,0) keeps the grey winning over any
                 // text-* colour a consumer passes via `className` (all utilities are `!important`,
                 // so plain classes resolve by stylesheet order, not by the `!` prefix).
-                // Figma bg/hover-default #f0f2f4 = delta-50 in every theme. A selected row keeps its
-                // fill on hover (the node's bg/hover-selected equals the resting selected colour),
-                // so the hover utility is simply absent there rather than out-ranked.
+                // Figma Menus item: hover bg/hover-default (delta-50); selected bg/selected (gama-25),
+                // hovered bg/hover-selected (gama-50).
                 disabled
                     ? 'cursor-not-allowed text-delta-300 aria-disabled:text-delta-300'
-                    : cn('cursor-pointer text-delta-700', !selected && 'hover:bg-delta-50'),
-                selected && cn('bg-gama-50', classes?.selected),
+                    : cn(
+                          'cursor-pointer text-delta-700',
+                          selected ? 'hover:bg-gama-50' : 'hover:bg-delta-50',
+                          // ASMA-9003 pressed look; `[role]` lifts the fill over the hover fills.
+                          // @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
+                          'data-[pressed]:text-gama-700 data-[pressed]:[--control-pressed-accent:var(--colors-gama-700)] data-[press-released]:transition-colors data-[press-released]:duration-150 data-[press-released]:ease-[ease-out] forced-colors:data-[pressed]:![outline-offset:-2px] forced-colors:data-[pressed]:![outline:2px_solid_Highlight] [&[data-pressed][role]]:bg-gama-200',
+                      ),
+                selected && cn('bg-gama-25', classes?.selected),
                 classes?.root,
                 className,
             )}

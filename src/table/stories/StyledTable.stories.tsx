@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { MarkPressed } from 'src/test-utils/MarkPressed'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { ColumnDef, Table } from '@tanstack/react-table'
 import { expect, userEvent, waitFor } from 'storybook/test'
@@ -642,10 +643,12 @@ interface RowStateProps {
 
 const CHECKED = { columnVisibility: { select: true }, rowSelection: { '2': true } }
 
-/** The six Figma `_table row DS` states, in the order and with the names of the Figma Tables page. */
+/** The six Figma `_table row DS` states, in the order and with the names of the Figma Tables page, plus the pressed select box. */
 const ROW_STATES: { label: string; key: string; props: RowStateProps }[] = [
     { label: 'Row • Default enabled', key: 'default', props: {} },
     { label: 'Row • Hovered', key: 'hovered', props: {} },
+    // ASMA-9003 (Figma Pressed state 47847:229830): the hovered row's select box pressed — gama-800 edge.
+    { label: 'Row • Checkbox pressed', key: 'pressed', props: {} },
     { label: 'Row • Selected', key: 'selected', props: { activeRowId: '2' } },
     { label: 'Row • Focused', key: 'focused', props: {} },
     { label: 'Row • Checked', key: 'checked', props: { initialState: CHECKED } },
@@ -660,6 +663,7 @@ const ROW_STATES: { label: string; key: string; props: RowStateProps }[] = [
  * | --- | --- | --- |
  * | Row • Default enabled | — | white, 1px `table/border-default` (delta-200) line under the row |
  * | Row • Hovered | pointer over the row | `table/bg-row-hover` (delta-50) |
+ * | Row • Checkbox pressed | pointer pressing the select box (ASMA-9003) | hovered row; box edge (or fill when ticked) gama-800 |
  * | Row • Selected | `activeRowId` — the row opened in a side panel / preview | `table/bg-row-selected` (gama-25) + 2px `border/selected` (gama-400) frame, kept on hover |
  * | Row • Focused | keyboard focus | white + 3px `table/border-focus` (gama-500) frame |
  * | Row • Checked | ticked in the select column | `table/bg-row-selected` (gama-25) |
@@ -674,25 +678,27 @@ export const RowStates: Story = {
         // axe: empty-table-header (table header cell has no text). ASMA-8136 allowlist - see docs/a11y-allowlist.md
         a11y: { test: 'todo' },
         pseudo: {
-            hover: ['[data-test="row-state-hovered"] tbody tr'],
+            hover: ['[data-test="row-state-hovered"] tbody tr', '[data-test="row-state-pressed"] tbody tr'],
             focusVisible: ['[data-test="row-state-focused"] tbody tr', '[data-test="row-state-checked-focused"] tbody tr'],
         },
     },
     render: () => (
-        // Two columns, so all six states fit one 1280x720 VRT frame.
+        // Two columns, so all seven states fit one 1280x720 VRT frame.
         <div className='grid w-[1240px] grid-cols-2 gap-x-8 gap-y-5'>
             {ROW_STATES.map(({ label, key, props }) => (
                 <div key={key} data-test={`row-state-${key}`} className='flex flex-col gap-1'>
                     <span className='text-sm font-semibold text-delta-800'>{label}</span>
-                    <StyledTable
-                        columns={consumerColumns.slice(0, 3)}
-                        data={rowStateData}
-                        enableRowSelection
-                        hideFooter
-                        initialState={{ columnVisibility: { select: true } }}
-                        uniqueKey={`row-state-${key}`}
-                        {...props}
-                    />
+                    <MarkPressed selector={key === 'pressed' ? 'tbody [role="checkbox"]' : ':not(*)'}>
+                        <StyledTable
+                            columns={consumerColumns.slice(0, 3)}
+                            data={rowStateData}
+                            enableRowSelection
+                            hideFooter
+                            initialState={{ columnVisibility: { select: true } }}
+                            uniqueKey={`row-state-${key}`}
+                            {...props}
+                        />
+                    </MarkPressed>
                 </div>
             ))}
         </div>

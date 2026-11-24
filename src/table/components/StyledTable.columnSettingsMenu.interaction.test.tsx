@@ -1,16 +1,16 @@
 import type { ColumnDef } from '@tanstack/react-table'
 import { afterEach, beforeEach, describe, it } from 'vitest'
-import { cdp } from 'vitest/browser'
 import { expect, userEvent, waitFor } from 'src/test-utils/interaction-api'
-import { cleanup, mount } from 'src/test-utils/renderInteraction'
+import { cleanup, mount, resolveTokenColor } from 'src/test-utils/renderInteraction'
+import { centreOf, mouse, settle } from 'src/test-utils/pressedInteraction'
 import { people, type Person } from 'src/test-utils/tableFixture'
 import { StyledTable } from './StyledTableIndex'
 
 /**
- * The column settings menu (the pin) shows or hides a column from its checkbox and from nothing else (ASMA-8597; the
- * owner, 2026-11-12: "it works exclusively with the checkbox, turning it on and off"). A click on the row, on the name or on
- * the drag icon, and a press and release on the drag icon that never became a drag, used to hide the column too, because the
- * whole row was a button that toggled it. Reordering by dragging the icon is as it was.
+ * The column settings menu (the pin) shows or hides a column from anywhere on its row, as Figma's checkbox Menus item: the
+ * row is the label of the column's one checkbox (ASMA-9003 round 5, which widens ASMA-8597's checkbox-only target to the
+ * whole row). The drag icon stays a control of its own: a click on it, and a press and release on it that never became a
+ * drag, leave the column as it is (ASMA-8597). Reordering by dragging the icon is as it was.
  *
  * Asserted in a real browser. The drags use the trusted mouse events a user's mouse makes (the Chrome DevTools protocol), so
  * dnd-kit's `PointerSensor` (8px activation distance) really activates or really does not.
@@ -38,8 +38,6 @@ const REASONS: ColumnDef<Person>[] = [
     { accessorKey: 'age', header: 'Age', size: 120, enableHiding: false },
     { id: 'notes', header: 'Notes', size: 120, fixedRight: true, enableHiding: false },
 ]
-
-const settle = (milliseconds = 60): Promise<void> => new Promise((resolve) => setTimeout(resolve, milliseconds))
 
 const mountTable = async (columns: ColumnDef<Person>[] = PLAIN, locale: 'en' | 'no' = 'en'): Promise<void> => {
     mount(<StyledTable<Person> columns={columns} data={people} hideFooter locale={locale} />)
@@ -71,43 +69,27 @@ const rowOf = (label: string): HTMLElement => {
 const nameOf = (label: string): HTMLElement => [...rowOf(label).querySelectorAll<HTMLElement>('span')].at(-1)!
 const handleOf = (label: string): SVGElement => rowOf(label).querySelector<SVGElement>('svg[role="button"]')!
 const inputOf = (label: string): HTMLInputElement => rowOf(label).querySelector<HTMLInputElement>('input[type="checkbox"]')!
-/** What a user clicks: the checkbox's own box, the label around its input. */
-const boxOf = (label: string): HTMLElement => inputOf(label).closest('label')!
+/** The checkbox's box, drawn in the row (a decorative box: the row's input is the checkbox). */
+const boxOf = (label: string): HTMLElement => rowOf(label).querySelector<HTMLElement>('[data-control="checkbox"]')!
 const rect = (element: Element): DOMRect => element.getBoundingClientRect()
-
-/** The trusted mouse. `x` and `y` are viewport coordinates. */
-const mouse = async (type: 'mousePressed' | 'mouseMoved' | 'mouseReleased', x: number, y: number): Promise<void> => {
-    await cdp().send('Input.dispatchMouseEvent', {
-        type,
-        x,
-        y,
-        button: type === 'mouseMoved' ? 'none' : 'left',
-        buttons: type === 'mouseReleased' ? 0 : 1,
-        clickCount: 1,
-    })
-}
-const centre = (element: Element): { x: number; y: number } => ({
-    x: rect(element).left + rect(element).width / 2,
-    y: rect(element).top + rect(element).height / 2,
-})
 
 /** Presses the icon, moves `distance` px straight down in small steps, and releases. */
 const pressAndMove = async (label: string, distance: number): Promise<void> => {
-    const { x, y } = centre(handleOf(label))
+    const { x, y } = centreOf(handleOf(label))
 
-    await mouse('mouseMoved', x, y)
-    await mouse('mousePressed', x, y)
+    await mouse('mouseMoved', { x, y })
+    await mouse('mousePressed', { x, y })
     for (let step = 1; step <= 6; step += 1) {
-        await mouse('mouseMoved', x, y + (distance * step) / 6)
+        await mouse('mouseMoved', { x, y: y + (distance * step) / 6 }, { held: true })
         await settle(16)
     }
-    await mouse('mouseReleased', x, y + distance)
+    await mouse('mouseReleased', { x, y: y + distance })
     await settle(250)
 }
 
 /** Drags the icon of one row down to the row of another. */
 const dragRow = async (from: string, to: string): Promise<void> => {
-    const distance = centre(handleOf(to)).y - centre(handleOf(from)).y
+    const distance = centreOf(handleOf(to)).y - centreOf(handleOf(from)).y
 
     await pressAndMove(from, distance + (distance > 0 ? 6 : -6))
 }
@@ -154,7 +136,7 @@ const descriptionOf = (control: Element): string =>
         .filter((described) => described?.getAttribute('role') === 'tooltip')
         .map((described) => described?.textContent ?? '')
         .join(' ')
-/** A read-only checkbox takes no pointer events, so the hover is forced onto where its box is. */
+/** A read-only box takes no pointer events, so the hover is forced onto where it is. */
 const hoverBox = (label: string): Promise<void> => userEvent.hover(boxOf(label), { force: true })
 
 beforeEach(async () => {
@@ -163,25 +145,28 @@ beforeEach(async () => {
 })
 afterEach(cleanup)
 
-describe('A column is shown or hidden only from its checkbox', () => {
-    it('a click on the empty part of the row leaves the column as it is', async () => {
+describe('A column is shown or hidden from anywhere on its row, but never from its drag icon', () => {
+    it('a click on the empty part of the row hides the column, and a second click shows it', async () => {
         await mountTable()
         await openMenu()
+        const emptyPart = { position: { x: rect(rowOf('Role')).width - 20, y: 20 } }
 
-        await userEvent.click(rowOf('Role'), { position: { x: rect(rowOf('Role')).width - 20, y: 20 } })
-        await settle()
+        await userEvent.click(rowOf('Role'), emptyPart)
+        await waitFor(() => expect(shown()).toEqual(['Name', 'Age', 'Notes']))
+        await expect(inputOf('Role').checked).toBe(false)
 
-        await expect(shown()).toEqual(['Name', 'Role', 'Age', 'Notes'])
+        await userEvent.click(rowOf('Role'), emptyPart)
+        await waitFor(() => expect(shown()).toEqual(['Name', 'Role', 'Age', 'Notes']))
+        await expect(inputOf('Role').checked).toBe(true)
     })
 
-    it('a click on the name leaves the column as it is', async () => {
+    it('a click on the name hides the column', async () => {
         await mountTable()
         await openMenu()
 
         await userEvent.click(nameOf('Role'))
-        await settle()
 
-        await expect(shown()).toEqual(['Name', 'Role', 'Age', 'Notes'])
+        await waitFor(() => expect(shown()).toEqual(['Name', 'Age', 'Notes']))
     })
 
     it('a click on the move icon leaves the column as it is', async () => {
@@ -189,7 +174,7 @@ describe('A column is shown or hidden only from its checkbox', () => {
         await openMenu()
 
         await userEvent.click(handleOf('Role'))
-        await settle()
+        await settle(60)
 
         await expect(shown()).toEqual(['Name', 'Role', 'Age', 'Notes'])
     })
@@ -212,7 +197,7 @@ describe('A column is shown or hidden only from its checkbox', () => {
         await expect(shown()).toEqual(['Name', 'Role', 'Age', 'Notes'])
     })
 
-    it('the checkbox hides the column when clicked, and shows it when clicked again', async () => {
+    it('a click on the box hides the column, and a second click shows it', async () => {
         await mountTable()
         await openMenu()
 
@@ -231,7 +216,7 @@ describe('A column is shown or hidden only from its checkbox', () => {
         await tabTo(inputOf('Role'))
 
         await userEvent.keyboard('{Enter}')
-        await settle()
+        await settle(60)
         await expect(shown()).toEqual(['Name', 'Role', 'Age', 'Notes'])
 
         await userEvent.keyboard(' ')
@@ -269,22 +254,22 @@ describe('Reordering by the move icon is as it was', () => {
     it('a drag starts after 8px of movement and not before (the PointerSensor activation distance)', async () => {
         await mountTable()
         await openMenu()
-        const { x, y } = centre(handleOf('Role'))
+        const { x, y } = centreOf(handleOf('Role'))
         // dnd-kit marks the icon `aria-pressed` while it is being dragged.
         const dragging = (): boolean => handleOf('Role').getAttribute('aria-pressed') === 'true'
 
-        await mouse('mouseMoved', x, y)
-        await mouse('mousePressed', x, y)
-        await mouse('mouseMoved', x, y + 4)
-        await mouse('mouseMoved', x, y + 7)
+        await mouse('mouseMoved', { x, y })
+        await mouse('mousePressed', { x, y })
+        await mouse('mouseMoved', { x, y: y + 4 }, { held: true })
+        await mouse('mouseMoved', { x, y: y + 7 }, { held: true })
         await settle(80)
         await expect(dragging()).toBe(false)
 
-        await mouse('mouseMoved', x, y + 12)
+        await mouse('mouseMoved', { x, y: y + 12 }, { held: true })
         await settle(80)
         await expect(dragging()).toBe(true)
 
-        await mouse('mouseReleased', x, y + 12)
+        await mouse('mouseReleased', { x, y: y + 12 })
         await settle(250)
         await expect(dragging()).toBe(false)
         await expect(shown()).toEqual(['Name', 'Role', 'Age', 'Notes'])
@@ -296,7 +281,7 @@ describe('Reordering by the move icon is as it was', () => {
         await expect(handleOf('Name').getAttribute('aria-disabled')).toBe('true')
 
         await dragRow('Name', 'Notes')
-        await settle()
+        await settle(60)
 
         await expect(shown()).toEqual(['Name', 'Role', 'Age', 'Notes'])
     })
@@ -306,26 +291,26 @@ describe('Reordering by the move icon is as it was', () => {
         await openMenu()
 
         await dragRow('Role', 'Name')
-        await settle()
+        await settle(60)
 
         await expect(shown()).toEqual(['Name', 'Role', 'Age', 'Notes'])
     })
 })
 
 describe('A column that cannot be hidden', () => {
-    it('keeps its column when its checkbox is clicked, and says so (aria-readonly)', async () => {
+    it('keeps its column when its row, its name or its box is clicked, and says so (aria-readonly)', async () => {
         await mountTable(RESTRICTED)
         await openMenu()
         await expect(inputOf('Age').getAttribute('aria-readonly')).toBe('true')
-        // It looks and behaves read only: no pointer events and the default cursor, where an editable one takes them.
-        await expect(getComputedStyle(boxOf('Age')).pointerEvents).toBe('none')
-        await expect(getComputedStyle(boxOf('Age')).cursor).toBe('default')
-        await expect(getComputedStyle(boxOf('Role')).pointerEvents).not.toBe('none')
-        await expect(getComputedStyle(boxOf('Role')).cursor).toBe('pointer')
+        // It looks read only: the default cursor on the row, where an editable row shows the pointer.
+        await expect(getComputedStyle(rowOf('Age')).cursor).toBe('default')
+        await expect(getComputedStyle(rowOf('Role')).cursor).toBe('pointer')
 
-        // A read-only checkbox takes no pointer events, so the click is forced to land where the box is.
+        await userEvent.click(rowOf('Age'), { position: { x: rect(rowOf('Age')).width - 20, y: 20 } })
+        await userEvent.click(nameOf('Age'))
+        // A read-only box takes no pointer events, so the click is forced to land where the box is.
         await userEvent.click(boxOf('Age'), { force: true })
-        await settle()
+        await settle(60)
 
         await expect(shown()).toEqual(['Name', 'Role', 'Age', 'Notes'])
         await expect(inputOf('Age').checked).toBe(true)
@@ -475,32 +460,33 @@ describe('Accessibility of the rows', () => {
         }
     })
 
-    it('the rows are not buttons, and no label wraps a row: only Reset columns is a button in the menu', async () => {
+    it('each row is the label of its one checkbox, with no label inside; only Reset columns is a button in the menu', async () => {
         await mountTable()
         await openMenu()
 
         // Every `<button>` on the page but the pin in the header: the table has no other, so these are the menu's.
         const buttons = [...document.querySelectorAll<HTMLElement>('button')].filter((button) => button.closest('thead') === null)
 
-        await expect(rowOf('Role').tagName).toBe('DIV')
         await expect(buttons.map((button) => button.textContent?.trim())).toEqual(['Reset columns'])
         for (const label of ['Name', 'Role', 'Age', 'Notes']) {
-            const wrapper = inputOf(label).closest('label')!
+            const row = rowOf(label)
 
-            // The label around the checkbox holds the checkbox and its box, and not the name, the icon or the row.
-            await expect(wrapper.contains(nameOf(label))).toBe(false)
-            await expect(wrapper.contains(handleOf(label))).toBe(false)
-            await expect(wrapper.contains(rowOf(label))).toBe(false)
+            await expect(row.tagName, label).toBe('LABEL')
+            await expect((row as HTMLLabelElement).control, label).toBe(inputOf(label))
+            await expect(row.querySelectorAll('input'), label).toHaveLength(1)
+            await expect(row.querySelector('label'), label).toBeNull()
+            // The box is drawn only: the input is the one control a screen reader meets.
+            await expect(boxOf(label).getAttribute('aria-hidden'), label).toBe('true')
         }
     })
 
-    it('every checkbox has a target of at least 24 x 24px (WCAG 2.5.8)', async () => {
+    it('the target of every checkbox, its whole row, is at least 24 x 24px (WCAG 2.5.8)', async () => {
         await mountTable(RESTRICTED)
         await openMenu()
 
         for (const label of ['Name', 'Role', 'Age', 'Notes']) {
-            await expect(rect(boxOf(label)).width, `${label}: width`).toBeGreaterThanOrEqual(24)
-            await expect(rect(boxOf(label)).height, `${label}: height`).toBeGreaterThanOrEqual(24)
+            await expect(rect(rowOf(label)).width, `${label}: width`).toBeGreaterThanOrEqual(24)
+            await expect(rect(rowOf(label)).height, `${label}: height`).toBe(40)
         }
     })
 
@@ -522,23 +508,37 @@ describe('Accessibility of the rows', () => {
         await expect(box.left - row.left).toBeCloseTo(36, 0)
         await expect(box.top - row.top).toBeCloseTo(12, 0)
         await expect(rect(nameOf('Role')).left - row.left).toBeCloseTo(60, 0)
-        // The row fits its place: it does not stick out of the menu (a div sized by its content box would, by its padding).
+        // The row fits its place: it does not stick out of the menu (a row sized by its content box would, by its padding).
         await expect(rowOf('Role').scrollWidth).toBeLessThanOrEqual(rowOf('Role').clientWidth)
         await expect(row.right).toBeLessThanOrEqual(rect(rowOf('Role').parentElement!).right + 0.5)
     })
 })
 
 describe('Focus and the keyboard', () => {
-    it('a click on the row or the name does not take the focus from where it was', async () => {
+    it('a click on the row or the name gives the checkbox of that row the focus, and Space then works', async () => {
         await mountTable()
         await openMenu()
         await tabTo(inputOf('Age'))
 
         await userEvent.click(rowOf('Role'), { position: { x: rect(rowOf('Role')).width - 20, y: 20 } })
-        await expect(document.activeElement).toBe(inputOf('Age'))
+        await expect(document.activeElement).toBe(inputOf('Role'))
+        await waitFor(() => expect(shown()).toEqual(['Name', 'Age', 'Notes']))
+
+        await userEvent.keyboard(' ')
+        await waitFor(() => expect(shown()).toEqual(['Name', 'Role', 'Age', 'Notes']))
 
         await userEvent.click(nameOf('Notes'))
-        await expect(document.activeElement).toBe(inputOf('Age'))
+        await expect(document.activeElement).toBe(inputOf('Notes'))
+    })
+
+    it('the keyboard focus on a checkbox shows the base-ui checkbox frame around its box, and none at rest', async () => {
+        await mountTable()
+        await openMenu()
+        const focusRing = resolveTokenColor('--colors-focus-ring')
+
+        await expect(getComputedStyle(boxOf('Role'), '::before').content, 'no frame at rest').toBe('none')
+        await tabTo(inputOf('Role'))
+        await expect(getComputedStyle(boxOf('Role'), '::before').backgroundColor).toBe(focusRing)
     })
 
     it('a click on the move icon gives it the focus, as it does the checkbox, and changes nothing else', async () => {
@@ -552,7 +552,7 @@ describe('Focus and the keyboard', () => {
         await expect(shown()).toEqual(['Name', 'Role', 'Age', 'Notes'])
     })
 
-    it('a click on the checkbox gives it the focus, and Space then works', async () => {
+    it('a click on the box gives the checkbox the focus, and Space then works', async () => {
         await mountTable()
         await openMenu()
 

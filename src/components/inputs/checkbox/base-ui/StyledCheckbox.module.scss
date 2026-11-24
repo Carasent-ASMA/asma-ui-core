@@ -1,5 +1,6 @@
 @use 'sass:map';
 @use '../../../../styles/checkbox-focus';
+@use '../../../../styles/pressed-circle';
 
 // Figma Checkbox (component set 11360-32062) has ONE size: a 40px target holding a 20px icon frame
 // whose visible box is 16x16 (radius 2) at a 2px inset — so the box sits 12px from every edge of
@@ -56,21 +57,16 @@ $checkbox-sizes: (
         pointer-events: none;
     }
 
-    &:is([data-checked], [data-indeterminate]) .Checkbox {
-        background-color: var(--colors-gama-500);
-        border: none;
-        --cb-border-w: 0px;
-    }
-
-    &.Indeterminate .Checkbox {
-        background-color: var(--colors-gama-500);
-        border: none;
+    // `--control-pressed-accent` (never declared at rest) comes from a pressed checkbox or parent.
+    &:is([data-checked], [data-indeterminate], .Indeterminate) .Checkbox {
+        background-color: var(--control-pressed-accent, var(--colors-gama-500));
+        border: 0 solid transparent;
         --cb-border-w: 0px;
     }
 
     &[data-unchecked] .Checkbox {
         background-color: transparent;
-        border: var(--cb-border-w) solid var(--colors-delta-500);
+        border: var(--cb-border-w) solid var(--control-pressed-accent, var(--colors-delta-500));
     }
 
     &[data-disabled][data-unchecked] .Checkbox {
@@ -78,15 +74,9 @@ $checkbox-sizes: (
         border: var(--cb-border-w) solid var(--colors-delta-200);
     }
 
-    &[data-disabled]:is([data-checked], [data-indeterminate]) .Checkbox {
+    &[data-disabled]:is([data-checked], [data-indeterminate], .Indeterminate) .Checkbox {
         background-color: var(--colors-delta-200);
-        border: none;
-        --cb-border-w: 0px;
-    }
-
-    &[data-disabled].Indeterminate .Checkbox {
-        background-color: var(--colors-delta-200);
-        border: none;
+        border: 0 solid transparent;
         --cb-border-w: 0px;
     }
 
@@ -96,9 +86,11 @@ $checkbox-sizes: (
         outline: none;
     }
 
+    // A decorative box drawn right after a row's own checkbox input shows that input's focus (the column-visibility row).
     &.Error,
     &:has(input:focus-visible),
-    &:has(input[data-focus-visible]) {
+    &:has(input[data-focus-visible]),
+    input[type='checkbox']:focus-visible + & {
         @include checkbox-focus.frame;
 
         .Checkbox {
@@ -118,7 +110,8 @@ $checkbox-sizes: (
 @media (forced-colors: active) {
     .CheckboxWrapper.Error,
     .CheckboxWrapper:has(input:focus-visible),
-    .CheckboxWrapper:has(input[data-focus-visible]) {
+    .CheckboxWrapper:has(input[data-focus-visible]),
+    input[type='checkbox']:focus-visible + .CheckboxWrapper {
         @include checkbox-focus.frame-forced-colors;
     }
 }
@@ -151,73 +144,26 @@ $checkbox-sizes: (
     overflow: visible;
 }
 
-%ripple-base {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
+// The 40px hover (Figma 15424-87984) and pressed circle.
+.CheckboxCircle {
+    @include pressed-circle.circle;
 }
 
-.CheckboxRippleContainer {
-    @extend %ripple-base;
-    overflow: hidden;
-    border-radius: 50%;
+// Figma Checkbox+Label Hovered: hovering the option text shows the circle too.
+.CheckboxHover:hover .CheckboxCircle,
+label:hover .CheckboxHover .CheckboxCircle,
+.CheckboxHover[data-hovered] .CheckboxCircle,
+.CheckboxHover:has(input[data-hovered]) .CheckboxCircle {
+    @include pressed-circle.hovered;
 }
 
-.CheckboxRipple {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background-color: var(--colors-gama-500);
-    border-radius: 50%;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    opacity: 0.25;
-    animation: ripple 400ms ease-out forwards;
-    // Above the opaque hover halo (.CheckboxRippleContainer::after, z-index 0, painted last inside
-    // this container), so the press ripple stays visible.
-    z-index: 1;
-}
-
-@keyframes ripple {
-    to {
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 0.025;
-    }
-}
-
-.CheckboxHover {
-    .CheckboxRippleContainer::after {
-        content: '';
-        @extend %ripple-base;
-        // Figma Hovered (node 15424-87984): a solid bg/hover-default (#f0f2f4 = delta-50) circle
-        // filling the 40px touch target, the same for every type and theme.
-        width: 40px;
-        height: 40px;
-        background: var(--colors-delta-50);
-        border-radius: 50%;
-        top: 50%;
-        left: 50%;
-        opacity: 0;
-        transition: opacity 0.2s, transform 0.2s;
-        transform: translate(-50%, -50%) scale(0.7);
-    }
-
-    // Figma Checkbox+Label Hovered: hovering the option text shows the circle too, not only the 40px
-    // control — any enclosing <label> (StyledFormControlLabel, or a consumer's label around the
-    // checkbox and its text) counts. `CheckboxHover` is only present when enabled and editable.
-    &:hover .CheckboxRippleContainer::after,
-    label:hover & .CheckboxRippleContainer::after,
-    &[data-hovered] .CheckboxRippleContainer::after,
-    &:has(input[data-hovered]) .CheckboxRippleContainer::after {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-    }
-
-}
+// Figma Pressed state (47847:229830): circle gama-200, box gama-800; the box eases back over 150ms only after a press
+// (at rest it has no transition, as on master). @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
+@include pressed-circle.pressed(
+    '.CheckboxCircle',
+    '.Checkbox',
+    (background-color 150ms ease-out, border-color 150ms ease-out)
+);
 
 .Checkbox {
     position: relative;

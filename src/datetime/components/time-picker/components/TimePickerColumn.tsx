@@ -5,6 +5,7 @@ import styles from '../StyledTimePicker.module.scss'
 import { clampToMinTime, isHourDisabled, isMinuteDisabled } from '../helpers/minTime'
 import { isHourRejected, isMinuteRejected } from '../helpers/disabledTime'
 import { StyledTooltip } from 'src/components/data-display/tooltip'
+import { pressedStateHandlers } from 'src/helpers/pressedState'
 export type TimePickerColumnProps = Omit<
     StyledTimePickerProps,
     'placeholder' | 'disabled' | 'inputClassName' | 'dataTest'
@@ -73,8 +74,10 @@ export const TimePickerColumn: React.FC<TimePickerColumnProps> = ({
                         // Stable hook for the scroll-into-view effect in TimePickerBody — CSS-module
                         // class names are hashed at build time, so they can't be queried literally.
                         data-cell={isSelected ? 'selected' : isNow ? 'now' : undefined}
+                        // ASMA-9003: `data-pressed` while pressed (pointer or a held Space); never an unavailable cell.
+                        {...pressedStateHandlers({ enabled: !isDisabled && !isInert, keyboard: true })}
                         className={clsx(
-                            'border-0',
+                            'asma-touch-ready border-0',
                             styles['styled-time-picker-root_cell'],
                             isNow && styles['styled-time-picker-root_cell__cell-now'],
                             isSelected && styles['styled-time-picker-root_cell__cell-selected'],

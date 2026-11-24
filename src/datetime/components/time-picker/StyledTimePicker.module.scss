@@ -26,6 +26,28 @@
         &[aria-disabled='true'] {
             @apply bg-white text-delta-400 hover:bg-white cursor-not-allowed;
         }
+        // ASMA-9003: Figma's Time item has no Pressed variant, so a cell takes the design system's pressed
+        // tokens: bg/pressed-white gama-200 + text-icon/pressed gama-700, and on the selected (primary) cell
+        // bg/pressed-primary gama-800 with its white label. Instant in, 150 ms ease-out on release only.
+        // @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
+        &[data-press-released] {
+            transition:
+                background-color 150ms ease-out,
+                color 150ms ease-out #{!important};
+        }
+        &[data-pressed]:not(:disabled):not([aria-disabled='true']) {
+            transition: none #{!important};
+            background-color: var(--colors-gama-200) #{!important};
+            color: var(--colors-gama-700) #{!important};
+            &.styled-time-picker-root_cell__cell-selected {
+                background-color: var(--colors-gama-800) #{!important};
+                color: #fff #{!important};
+            }
+            @media (forced-colors: active) {
+                outline: 2px solid Highlight #{!important};
+                outline-offset: -2px #{!important};
+            }
+        }
     }
 }
 
