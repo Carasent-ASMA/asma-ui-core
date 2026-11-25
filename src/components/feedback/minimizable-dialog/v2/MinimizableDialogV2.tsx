@@ -6,6 +6,7 @@ import { MinimizeBtn } from '../components/MinimizeBtn'
 import { cn } from 'src/helpers/cn'
 import { StyledTooltip } from 'src/components/data-display/tooltip'
 import { FullScreenBtn } from '../components/FullscreenBtn'
+import { useReserveDockedPanelSpace } from '../useReserveDockedPanelSpace'
 import styles from './MinimizableDialogV2.module.scss'
 import type { IMinimizableDialogV2Props } from './types'
 import { useTranslations } from './useTranslations'
@@ -162,6 +163,9 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
         return handleClose()
     }
     useBackCloses({ active: open && !minimized, requestClose: requestBackClose, ownerRef: modalRef })
+
+    // Docked, the panel is non-modal: the page beside it must stay usable, not sit under it.
+    useReserveDockedPanelSpace(modalRef, open && !minimized && !fullScreen)
 
     const fullScreenDialogStyle: React.CSSProperties | undefined = isFullScreenActive
         ? isMobile
