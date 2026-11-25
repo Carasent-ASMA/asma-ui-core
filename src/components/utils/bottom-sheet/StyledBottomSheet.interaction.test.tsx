@@ -104,6 +104,52 @@ describe('StyledBottomSheet — as the mobile Action popover', () => {
         await expect(trigger().getAttribute('aria-controls')).toBe(dialog.id)
     })
 
+    it('registers the sheet root as the Back entry owner on mobile', async () => {
+        mount(<FilterFixture />)
+        const dialog = await openSheet()
+
+        const entries = window.__asmaOverlayBackRegistry__?.entries ?? []
+        await expect(entries).toHaveLength(1)
+        const owner = entries[0]!.ownerRef?.current ?? entries[0]!.owner
+        await expect(owner?.isConnected).toBe(true)
+        await expect(owner).toBe(dialog)
+    })
+
+    it('lets a tap reach the page while the sheet slides out', async () => {
+        mount(
+            <>
+                <button type='button' data-testid='under' style={{ position: 'fixed', top: 0, right: 0, width: 80, height: 40 }} />
+                <FilterFixture />
+            </>,
+        )
+        await openSheet()
+
+        byTestId('sheet-close').click()
+
+        // Still mid-exit: the dialog is open, yet it neither blocks the page nor leaves it inert.
+        await expect(sheet()?.open).toBe(true)
+        const under = byTestId('under')
+        const { left, top } = under.getBoundingClientRect()
+        await expect(document.elementFromPoint(left + 5, top + 5)).toBe(under)
+        await waitFor(() => expect(sheet()).toBeNull())
+        await waitFor(() => expect(document.activeElement).toBe(trigger()))
+    })
+
+    it.each([
+        ['the host kill switch is off', () => (window.__ASMA__SHELL__!.overlayBack!.enabled = false)],
+        ['the host adapter is absent', () => (window.__ASMA__SHELL__ = undefined)],
+    ])('opens and stays open when %s', async (_name, disableBack) => {
+        disableBack()
+        mount(<FilterFixture />)
+        const dialog = await openSheet()
+
+        await new Promise((resolve) => setTimeout(resolve, 600))
+
+        await expect(sheet()).toBe(dialog)
+        await expect(dialog.open).toBe(true)
+        await expect(trigger()).toHaveAttribute('aria-expanded', 'true')
+    })
+
     it('keeps an info popover anchored on mobile — no sheet', async () => {
         mount(<FilterFixture variant='info' />)
         await userEvent.click(trigger())
