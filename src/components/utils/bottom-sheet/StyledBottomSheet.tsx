@@ -5,6 +5,7 @@ import {
     useLayoutEffect,
     useRef,
     useState,
+    type MutableRefObject,
     type ReactNode,
     type RefObject,
     type SyntheticEvent,
@@ -156,6 +157,14 @@ export const StyledBottomSheet = ({
     const sheetRef = useRef<HTMLDivElement | null>(null)
     const returnFocusRef = useRef<HTMLElement | null>(null)
     const overlayOwnerRef = ownerRef ?? dialogRef
+    // A wrapper's `ownerRef` has no element of its own in sheet mode, so the sheet's root fills it.
+    const setDialogRef = useCallback(
+        (node: HTMLDialogElement | null) => {
+            dialogRef.current = node
+            if (ownerRef) (ownerRef as MutableRefObject<Element | null>).current = node
+        },
+        [ownerRef],
+    )
     const recentEscapeKeydownRef = useRef(false)
     const [isShown, setIsShown] = useState(false)
     // Stays true after `open` turns false, until the sheet has slid out.
@@ -284,7 +293,11 @@ export const StyledBottomSheet = ({
         const focused = document.activeElement instanceof HTMLElement ? document.activeElement : null
         window.clearTimeout(exitTimerRef.current)
         returnFocusRef.current = triggerRef?.current ?? focused
-        if (!node.open) node.showModal()
+        // An exit started `show()` (non-modal); a reopen inside it needs the modal back.
+        if (!node.matches(':modal')) {
+            if (node.open) node.close()
+            node.showModal()
+        }
         node.focus({ preventScroll: true })
         const frame = requestAnimationFrame(() => {
             setIsShown(true)
@@ -312,6 +325,12 @@ export const StyledBottomSheet = ({
                 finish()
                 return
             }
+            // The slide-out leaves the dialog in the top layer, which makes the page inert and swallows
+            // taps for EXIT_MS. Drop the modality now (`pointer-events-none` on the dialog covers the rest).
+            if (node.open) {
+                node.close()
+                node.show()
+            }
             exitTimerRef.current = window.setTimeout(finish, EXIT_MS)
         }
     }, [open, triggerRef])
@@ -332,7 +351,8 @@ export const StyledBottomSheet = ({
             })
         }
         const handleNativeClose = (): void => {
-            if (attemptPending) return
+            // Open again: the exit/reopen modality swap closed it on purpose.
+            if (attemptPending || node.open) return
             attemptPending = true
             if (isOverlayBackEnabled()) void requestCloseTopOverlayBack()
             scheduleReshow()
@@ -390,7 +410,7 @@ export const StyledBottomSheet = ({
 
     return (
         <dialog
-            ref={dialogRef}
+            ref={setDialogRef}
             id={id}
             tabIndex={-1}
             aria-modal='true'
@@ -402,6 +422,8 @@ export const StyledBottomSheet = ({
             className={cn(
                 style['StyledBottomSheet'],
                 'fixed inset-0 m-0 h-full max-h-none w-full max-w-none flex-col items-center justify-end overflow-visible border-0 bg-transparent p-0 outline-none open:flex',
+                // Sliding out: taps reach the page underneath. Out of the top layer it needs a z-index to stay on top.
+                !open && 'pointer-events-none z-[9999]',
             )}
         >
             <OverlayBackOwnerContext.Provider value={overlayOwnerRef}>
