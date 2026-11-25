@@ -5,12 +5,12 @@ import {
     useLayoutEffect,
     useRef,
     useState,
-    type MutableRefObject,
     type ReactNode,
     type RefObject,
     type SyntheticEvent,
 } from 'react'
 
+import { useMergeRefs } from '@floating-ui/react'
 import { CloseIcon } from 'src/components/icons/close-icon/CloseIcon'
 import { BackIcon } from 'src/components/icons/back-icon/BackIcon'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
@@ -158,13 +158,7 @@ export const StyledBottomSheet = ({
     const returnFocusRef = useRef<HTMLElement | null>(null)
     const overlayOwnerRef = ownerRef ?? dialogRef
     // A wrapper's `ownerRef` has no element of its own in sheet mode, so the sheet's root fills it.
-    const setDialogRef = useCallback(
-        (node: HTMLDialogElement | null) => {
-            dialogRef.current = node
-            if (ownerRef) (ownerRef as MutableRefObject<Element | null>).current = node
-        },
-        [ownerRef],
-    )
+    const setDialogRef = useMergeRefs<Element>([dialogRef, ownerRef])
     const recentEscapeKeydownRef = useRef(false)
     const [isShown, setIsShown] = useState(false)
     // Stays true after `open` turns false, until the sheet has slid out.
