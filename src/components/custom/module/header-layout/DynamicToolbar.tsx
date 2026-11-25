@@ -1,5 +1,4 @@
-import { useCallback, useMemo, useState, type CSSProperties, type ReactElement, type ReactNode } from 'react'
-import { createPortal } from 'react-dom'
+import { useCallback, useMemo, type CSSProperties, type ReactElement, type ReactNode } from 'react'
 import { cn } from 'src/helpers/cn'
 import { useElementWidthPx } from 'src/hooks/useElementWidthPx'
 import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
@@ -37,7 +36,6 @@ import {
     TitleBlock,
     TitleText,
     UtilityCluster,
-    type MeasureRef,
     type ToolbarSlot,
 } from './ToolbarRows'
 import { useToolbarTranslations, type ToolbarLocale } from './useTranslations'
@@ -90,39 +88,6 @@ function getResponsiveMaxVisibleBulkActions(containerWidth: number, maxAllowed: 
 
     return Math.min(config?.maxVisible ?? 0, maxAllowed)
 }
-
-const createFilterHost = (): HTMLSpanElement => {
-    const host = document.createElement('span')
-    host.className = 'inline-flex shrink-0 items-center'
-    return host
-}
-
-/**
- * Where the current layout shows the filter. Moving the host detaches it for a moment, which drops
- * focus from inside it (an open filter panel's field), so focus is put back where it was.
- */
-function FilterSlotAnchor({ host, measureRef }: { host: HTMLElement; measureRef: MeasureRef }): ReactElement {
-    const adopt = useCallback(
-        (anchor: HTMLSpanElement | null) => {
-            measureRef(anchor)
-            if (!anchor) {
-                // Still attached here: React detaches refs before it removes the old anchor.
-                const focused = document.activeElement
-                if (focused instanceof HTMLElement && host.contains(focused)) focusInFilterHost.set(host, focused)
-                return
-            }
-            if (host.parentNode !== anchor) anchor.appendChild(host)
-            const focused = focusInFilterHost.get(host)
-            focusInFilterHost.delete(host)
-            if (focused?.isConnected && document.activeElement !== focused) focused.focus({ preventScroll: true })
-        },
-        [host, measureRef],
-    )
-
-    return <span ref={adopt} className='inline-flex shrink-0 items-center' />
-}
-
-const focusInFilterHost = new WeakMap<HTMLElement, HTMLElement>()
 
 const EMPTY_ACTIONS_PLAN: PlannedToolbarActions = {
     inlineActions: [],
@@ -337,16 +302,13 @@ export function DynamicToolbar(props: DynamicToolbarProps): ReactElement {
         return [...byId.values()]
     }, [pageActions, bulkActions])
 
-    // Each layout places the filter elsewhere in the tree, so rendered in place it would remount, and
-    // lose its state (an open filter panel or popover), every time the toolbar width crosses a layout.
-    // It renders once into this node instead, which whichever layout is current adopts.
-    const [filterHost] = useState(createFilterHost)
-
     const titleMeasureRef = register(KEY_TITLE, 'scroll')
     const searchMeasureRef = register(KEY_SEARCH)
 
     const filterSlot = filter != null ? (
-        <FilterSlotAnchor host={filterHost} measureRef={register(filterKey(filterIconOnly))} />
+        <span ref={register(filterKey(filterIconOnly))} className='inline-flex shrink-0 items-center'>
+            {filter}
+        </span>
     ) : undefined
 
     const measurementStrip = (
@@ -389,7 +351,6 @@ export function DynamicToolbar(props: DynamicToolbarProps): ReactElement {
                 style={style}
             >
                 {measurementStrip}
-                {filter != null && createPortal(filter, filterHost)}
                 {content}
             </div>
         </DynamicToolbarLayoutContext.Provider>
