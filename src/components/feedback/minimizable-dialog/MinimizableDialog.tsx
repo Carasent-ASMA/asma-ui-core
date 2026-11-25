@@ -7,6 +7,7 @@ import styles from './MinimizableDialog.module.scss'
 import { StyledMenu, StyledMenuItem } from 'src/components/navigation/menu'
 import { useToggleMenuVisibility } from 'src/hooks/useToggleMenuVisibility.hook'
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
+import { useEscapeWithin } from 'src/hooks/useEscapeWithin.hook'
 import { isOverlayBackNavigationPending, OverlayBackOwnerContext, useBackCloses } from 'src/hooks/useBackCloses.hook'
 import { StyledTooltip } from 'src/components/data-display/tooltip'
 import type { IMinimizableDialogProps } from './types'
@@ -98,11 +99,13 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     // Only the fullscreen state shows a page-covering backdrop (below) and is actually modal — the
     // default corner-docked panel is a non-modal floating widget that must NOT trap focus.
     useFocusTrap(open && isFullScreenActive, panelRef, closeWhenIdle)
+    // Docked: Escape closes it only while focus is inside, and only if no popup in it claimed the key.
+    useEscapeWithin(open && !minimized && !isFullScreenActive, panelRef, closeWhenIdle)
 
     // ASMA-8471 / REQ-002: Back closes this panel whenever it is showing — docked as well as
     // fullscreen — through `closeWhenIdle`, the very callback ✕ uses (BACK-3), which already no-ops
     // while the primary action is busy. Docked is deliberately included even though it is non-modal
-    // and Escape is left alone there: to a phone user the docked panel is still "the thing that is
+    // and keeps focus untrapped: to a phone user the docked panel is still "the thing that is
     // open", and the CRM organization panel never closing on Back was the headline defect.
     // `minimized` is the one state that does NOT register — a collapsed title bar is not an overlay
     // to dismiss, and Back must reach whatever is behind it instead.
