@@ -377,6 +377,40 @@ describe('overlay-back registry', () => {
             unregister()
         })
 
+        it('does not hand a pending route on when the new top re-registers in the same tick (ASMA-8470)', async () => {
+            const continuePendingNavigation = vi.fn()
+            installFakeShell({ v: 1, pendingNavigation: true, continuePendingNavigation })
+            // The pending push asked the dirty editor to close; it answered by opening a confirmation.
+            const unregisterEditor = registerOverlayBackCloser(() => new Promise<void>(() => undefined))
+            void requestCloseTopOverlayBack()
+            // The confirmation mounts under StrictMode: setup, cleanup, setup.
+            registerOverlayBackCloser(vi.fn())()
+            const unregisterConfirm = registerOverlayBackCloser(vi.fn())
+            await Promise.resolve()
+            await Promise.resolve()
+
+            // Handing the route on would close the confirmation the user has not answered yet.
+            expect(continuePendingNavigation).not.toHaveBeenCalled()
+            unregisterConfirm()
+            unregisterEditor()
+        })
+
+        it('does not hand a pending route on when a layer below the top unregisters (ASMA-8470)', async () => {
+            const continuePendingNavigation = vi.fn()
+            installFakeShell({ v: 1, pendingNavigation: true, continuePendingNavigation })
+            const unregisterLower = registerOverlayBackCloser(vi.fn())
+            const unregisterTop = registerOverlayBackCloser(() => new Promise<void>(() => undefined))
+            void requestCloseTopOverlayBack()
+
+            unregisterLower()
+            await Promise.resolve()
+            await Promise.resolve()
+
+            // The adapter would ask the latched top, get `false`, and fail the route open mid-close.
+            expect(continuePendingNavigation).not.toHaveBeenCalled()
+            unregisterTop()
+        })
+
         it('StrictMode cleanup/setup defers the release by a microtask, and re-registration cancels it (no transient drain)', async () => {
             const { registerSpy, unregisterSpy } = installFakeShell({ v: 1, enabled: false })
             const requestClose = vi.fn()
