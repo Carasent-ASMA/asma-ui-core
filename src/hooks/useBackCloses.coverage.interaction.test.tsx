@@ -41,7 +41,7 @@ describe('overlay back coverage', () => {
         await expect(lowerClose).not.toHaveBeenCalled()
     })
 
-    it('a reducer with no coverage check of its own still skips a covered docked panel', async () => {
+    it('a reducer with no coverage check of its own still skips a covered fullscreen panel', async () => {
         window.__ASMA__SHELL__ = {
             overlayBack: { v: 1, enabled: true, register: () => () => undefined },
         }
@@ -52,7 +52,7 @@ describe('overlay back coverage', () => {
                 <StyledDialog dataTest='modal' dialogTitle='Modal' open onClose={modalClose}>
                     Modal content
                 </StyledDialog>
-                <MinimizableDialog dataTest='panel' title='Editor' open onClose={panelClose} />
+                <MinimizableDialog dataTest='panel' title='Editor' open fullScreenState onClose={panelClose} />
             </>,
         )
         await waitFor(() => expect(getOverlayBackStackSize()).toBe(2))

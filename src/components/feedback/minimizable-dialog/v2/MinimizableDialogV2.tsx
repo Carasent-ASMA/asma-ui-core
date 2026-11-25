@@ -13,7 +13,7 @@ import { useControlledProps } from './useControlledProps'
 import { fullScreenFieldWidthVars } from 'src/components/inputs/field-styles'
 import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
-import { isOverlayBackNavigationPending, OverlayBackOwnerContext, useBackCloses } from 'src/hooks/useBackCloses.hook'
+import { OverlayBackOwnerContext, useBackCloses } from 'src/hooks/useBackCloses.hook'
 import { DialogBusyContext, useDialogBusyBoundary } from 'src/components/feedback/dialog/DialogBusyContext'
 import { useDialogHeaderPinning } from 'src/components/feedback/dialog/useDialogHeaderPinning'
 import {
@@ -142,26 +142,14 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
     // default corner-docked panel is a non-modal floating widget that must NOT trap focus.
     useFocusTrap(open && isFullScreenActive, modalRef, handleClose)
 
-    // ASMA-8471 / REQ-002: Back closes this panel whenever it is showing — docked as well as
-    // fullscreen — through `handleClose`, the very callback ✕ uses (BACK-3), which already no-ops
-    // while busy. Docked is deliberately included even though it is non-modal and Escape is left
-    // alone there: to a phone user the docked panel is still "the thing that is open", and the CRM
-    // organization panel never closing on Back was the headline defect. `minimized` is the one state
-    // that does NOT register — a collapsed title bar is not an overlay to dismiss, and Back must
-    // reach whatever is behind it instead.
-    // Ordering (RISK-010) is not decided here: this panel is a plain z-indexed <div>, and the
-    // registry skips any entry covered by an open native modal <dialog>, so a `StyledDialog` on top
-    // keeps the Back press however late this panel mounted. `modalRef` is what makes that work.
-    //
-    // The one case Back and a route change part ways: while DOCKED this panel is a shell-level
-    // widget that deliberately outlives navigation, so it refuses the adapter's close-before-push
-    // (`pendingNavigation`) and lets the route change run around it. Fullscreen is a real modal
-    // layer, so there it closes first like anything else.
-    const requestBackClose = (): false | void => {
-        if (!isFullScreenActive && isOverlayBackNavigationPending()) return false
-        return handleClose()
-    }
-    useBackCloses({ active: open && !minimized, requestClose: requestBackClose, ownerRef: modalRef })
+    // Back closes this panel only while it covers the page: in fullscreen, or windowed on a phone,
+    // where it fills the screen and cannot be minimized. It closes through `handleClose`, the same
+    // callback as ✕ (BACK-3). Windowed on a wider screen, or minimized, it is part of the page, so
+    // Back navigates as usual (BACK-1, PAGE-4, ASMA-8471 AC9). The registry skips an entry covered
+    // by an open native modal <dialog>, so a `StyledDialog` on top keeps the Back press however
+    // late this panel mounted (`modalRef`).
+    const coversPage = isFullScreenActive || (isMobile && !minimized)
+    useBackCloses({ active: open && coversPage, requestClose: handleClose, ownerRef: modalRef })
 
     const fullScreenDialogStyle: React.CSSProperties | undefined = isFullScreenActive
         ? isMobile

@@ -113,7 +113,7 @@ function isOwnedBy(child: OverlayBackEntry, parent: OverlayBackEntry): boolean {
  * z-index in the page AND marks everything outside its own subtree `inert` (see `useTopLayer.hook`).
  * An overlay whose owner element sits outside that dialog is therefore neither visible as the top
  * layer nor clickable — so it must not become the Back target merely by having registered later. The
- * clearest case is a docked `MinimizableDialog`, a plain `<div>`, opened while a `StyledDialog` is
+ * clearest case is a fullscreen `MinimizableDialog`, a plain `<div>`, opened while a `StyledDialog` is
  * already up.
  *
  * - `StyledDialog`'s own entry owns the `<dialog>` itself, so `contains` holds and it stays eligible.
@@ -353,19 +353,6 @@ export function getOverlayBackStackSize(): number {
 /** `true` when a live `asma-core-helpers` history adapter (PAT-002) has published `overlayBack.v === 1`. */
 export function hasOverlayBackAdapter(): boolean {
     return getSharedWindow()?.__ASMA__SHELL__?.overlayBack?.v === 1
-}
-
-/**
- * `true` while the history adapter is holding a route change, waiting for the top overlay to close
- * before it navigates (design-plan rule 1 — `push` is deferred, not cancelled).
- *
- * A surface that is *meant* to outlive navigation — the shell-level docked minimizable panels — tells
- * the adapter so by returning `false` from its closer in this window. The adapter reads that as
- * fail-open: it strips the guard, runs the navigation, and leaves the surface open. Anything that
- * should close on navigation simply ignores this and closes as usual.
- */
-export function isOverlayBackNavigationPending(): boolean {
-    return getSharedWindow()?.__ASMA__SHELL__?.overlayBack?.pendingNavigation === true
 }
 
 /** The host kill switch: off means no history adapter, so pickers fall back to their legacy history path. */
