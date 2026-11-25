@@ -29,12 +29,13 @@ export const useReserveDockedPanelSpace = (panelRef: RefObject<HTMLElement | nul
         panel.setAttribute(DOCKED_PANEL_ATTRIBUTE, '')
         syncReservedSpace()
         // The panel resizes with its content or a dialog stack, and the viewport can drop below the limit.
-        const observer = new ResizeObserver(syncReservedSpace)
-        observer.observe(panel)
+        // jsdom (consumers' unit tests) has no ResizeObserver: the first measurement stands.
+        const observer = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(syncReservedSpace)
+        observer?.observe(panel)
         window.addEventListener('resize', syncReservedSpace)
 
         return () => {
-            observer.disconnect()
+            observer?.disconnect()
             window.removeEventListener('resize', syncReservedSpace)
             panel.removeAttribute(DOCKED_PANEL_ATTRIBUTE)
             syncReservedSpace()
