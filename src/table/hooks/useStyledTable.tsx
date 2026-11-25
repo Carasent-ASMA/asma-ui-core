@@ -46,6 +46,7 @@ import {
     STYLED_DEFAULT_SORTING_FN,
 } from '../helpers/defaultSortingFn'
 import { tableStorage } from '../helpers/tableStorage'
+import { usePageUrlParam, usePendingPageFromUrl } from './usePageUrlParam'
 
 const NO_SORTING: SortingState = []
 const NO_COLUMN_SIZING: ColumnSizingState = {}
@@ -76,6 +77,7 @@ export const useStyledTable = <
         persistColumnLayout,
         legacyColumnVisibilityKey,
         defaultColumn,
+        pageUrlParam,
         ...rest
     } = props
 
@@ -168,6 +170,10 @@ export const useStyledTable = <
         [defaultColumn],
     )
 
+    // A table whose app owns the pagination state keeps the page where the app keeps it.
+    const pageParam = rest.state?.pagination === undefined && !rest.onPaginationChange ? pageUrlParam : undefined
+    const [pendingPage, setPendingPage] = usePendingPageFromUrl(pageParam)
+
     const table = useReactTable({
         _features: [ExpandedRowsFeature, FocusedRowsFeature, OrderColumnsFeature, RowSelectionTooltipFeature],
         columns: sizedColumns,
@@ -207,9 +213,20 @@ export const useStyledTable = <
         enableColumnResizing: canResize,
         // The same, for the sorting functions: ours is kept beside the app's own, which stay available to its columns.
         sortingFns: { [STYLED_DEFAULT_SORTING_FN]: styledDefaultSortingFn, ...rest.sortingFns },
+        // The rows that load after mount must not reset the page the URL names before it is restored. Always passed:
+        // TanStack merges each render's options into the last ones, so a `false` left out would stay.
+        autoResetPageIndex: pendingPage ? false : rest.autoResetPageIndex,
     })
 
     sortingTableRef.current = table
+
+    usePageUrlParam({
+        table,
+        param: pageParam,
+        loading: !!rest.loading,
+        pending: pendingPage,
+        setPending: setPendingPage,
+    })
 
     // TanStack re-sorts only when the sorting or the rows change, and the text order depends on the locale too. So when the
     // locale of a table that stays mounted changes, the current sorting is set again as a new array, which has the same
