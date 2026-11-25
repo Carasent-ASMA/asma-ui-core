@@ -57,6 +57,25 @@ describe('MinimizableDialog keyboard contract', () => {
         await expect(onClose).toHaveBeenCalledTimes(1)
     })
 
+    it('closes the docked panel on Escape pressed inside it, but not while the primary action runs (ASMA-8470)', async () => {
+        const onClose = fn()
+        const Fixture = ({ loading }: { loading: boolean }): JSX.Element => (
+            <MinimizableDialog dataTest='dialog' open title='Editor' onClose={onClose} primaryButtonLoading={loading}>
+                <input aria-label='Title' />
+            </MinimizableDialog>
+        )
+        const { container, rerender } = mount(<Fixture loading />)
+        container.querySelector<HTMLInputElement>('input[aria-label="Title"]')!.focus()
+
+        await userEvent.keyboard('{Escape}')
+        await expect(onClose).not.toHaveBeenCalled()
+
+        rerender(<Fixture loading={false} />)
+        container.querySelector<HTMLInputElement>('input[aria-label="Title"]')!.focus()
+        await userEvent.keyboard('{Escape}')
+        await expect(onClose).toHaveBeenCalledTimes(1)
+    })
+
     it('traps focus only while fullscreen (2.1.2, 2.4.3)', async () => {
         const { container } = mount(
             <>

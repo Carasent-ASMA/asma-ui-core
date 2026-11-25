@@ -6,6 +6,7 @@ import { MinimizableDialogV2 } from './MinimizableDialogV2'
 import { StyledDialog } from 'src/components/feedback/dialog/StyledDialog'
 import { requestCloseTopOverlayBack } from 'src/hooks/useBackCloses.hook'
 import { useReportDialogBusy } from 'src/components/feedback/dialog/DialogBusyContext'
+import { StyledMenu, StyledMenuItem } from 'src/components/navigation/menu'
 
 describe('MinimizableDialogV2 keyboard contract', () => {
     afterEach(cleanup)
@@ -251,10 +252,9 @@ describe('MinimizableDialogV2 keyboard contract', () => {
         await waitFor(() => expect(document.activeElement).toBe(opener))
     })
 
-    it('announces the docked panel as a named non-modal dialog, which Escape does not close (4.1.2)', async () => {
-        const onClose = fn()
+    it('announces the docked panel as a named non-modal dialog (4.1.2)', async () => {
         const { container } = mount(
-            <MinimizableDialogV2 dataTest='dialog-v2' open label='Task' title={<h2>Weekly report</h2>} onClose={onClose}>
+            <MinimizableDialogV2 dataTest='dialog-v2' open label='Task' title={<h2>Weekly report</h2>} onClose={fn()}>
                 <button type='button'>Content action</button>
             </MinimizableDialogV2>,
         )
@@ -264,13 +264,92 @@ describe('MinimizableDialogV2 keyboard contract', () => {
         await expect(dialog).toHaveAccessibleName('Task Weekly report')
         await expect(dialog).not.toHaveAttribute('aria-modal')
         await expect(dialog.contains(document.activeElement)).toBe(true)
+    })
 
-        // Docked is non-modal: nothing is trapped and Close is reachable, so Escape is left to whatever
-        // popup inside the panel may be open instead of closing the whole panel.
-        Array.from(dialog.querySelectorAll<HTMLButtonElement>('button'))
-            .find((b) => b.textContent === 'Content action')!
-            .focus()
+    it('closes the docked panel on Escape pressed inside it, through the ✕ path (ASMA-8470)', async () => {
+        const onClose = fn()
+        const { container } = mount(
+            <MinimizableDialogV2 dataTest='dialog-v2' open title='New package' onClose={onClose}>
+                <input aria-label='Title' />
+            </MinimizableDialogV2>,
+        )
+        container.querySelector<HTMLInputElement>('input[aria-label="Title"]')!.focus()
+
         await userEvent.keyboard('{Escape}')
+
+        await expect(onClose).toHaveBeenCalledTimes(1)
+    })
+
+    it('leaves the docked panel open on Escape pressed outside it — it is non-modal', async () => {
+        const onClose = fn()
+        const { container } = mount(
+            <>
+                <button type='button' data-testid='page-control'>
+                    Page control
+                </button>
+                <MinimizableDialogV2 dataTest='dialog-v2' open title='New package' onClose={onClose}>
+                    <button type='button'>Content action</button>
+                </MinimizableDialogV2>
+            </>,
+        )
+        container.querySelector<HTMLButtonElement>('[data-testid="page-control"]')!.focus()
+
+        await userEvent.keyboard('{Escape}')
+
+        await expect(onClose).not.toHaveBeenCalled()
+    })
+
+    it('lets a menu inside the docked panel take Escape first; the next Escape closes the panel', async () => {
+        const onClose = fn()
+        const Fixture = (): JSX.Element => {
+            const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+            return (
+                <MinimizableDialogV2 dataTest='dialog-v2' open title='New package' onClose={onClose}>
+                    <button type='button' data-testid='menu-trigger' onClick={(e) => setAnchorEl(e.currentTarget)}>
+                        Actions
+                    </button>
+                    <StyledMenu open={!!anchorEl} anchorEl={anchorEl} onClose={() => setAnchorEl(null)}>
+                        <StyledMenuItem onClick={() => setAnchorEl(null)}>Rename</StyledMenuItem>
+                    </StyledMenu>
+                </MinimizableDialogV2>
+            )
+        }
+        const { container } = mount(<Fixture />)
+        const menu = (): Element | null => document.querySelector('[role="menu"]')
+        await userEvent.click(container.querySelector<HTMLButtonElement>('[data-testid="menu-trigger"]')!)
+        await waitFor(() => expect(menu()).not.toBeNull())
+
+        await userEvent.keyboard('{Escape}')
+        await waitFor(() => expect(menu()).toBeNull())
+        await expect(onClose).not.toHaveBeenCalled()
+
+        await userEvent.keyboard('{Escape}')
+        await expect(onClose).toHaveBeenCalledTimes(1)
+    })
+
+    it('leaves the docked panel open when Escape closes a dialog opened from inside it', async () => {
+        const onClose = fn()
+        const Fixture = (): JSX.Element => {
+            const [confirmOpen, setConfirmOpen] = useState(true)
+            return (
+                <MinimizableDialogV2 dataTest='dialog-v2' open title='New package' onClose={onClose}>
+                    <StyledDialog
+                        dataTest='confirm'
+                        open={confirmOpen}
+                        onClose={() => setConfirmOpen(false)}
+                        dialogTitle='Discard?'
+                    >
+                        <button type='button'>Keep editing</button>
+                    </StyledDialog>
+                </MinimizableDialogV2>
+            )
+        }
+        mount(<Fixture />)
+        await waitFor(() => expect(document.querySelector('dialog[open]')).not.toBeNull())
+
+        await userEvent.keyboard('{Escape}')
+
+        await waitFor(() => expect(document.querySelector('dialog[open]')).toBeNull())
         await expect(onClose).not.toHaveBeenCalled()
     })
 })

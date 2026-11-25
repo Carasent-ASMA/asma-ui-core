@@ -13,6 +13,7 @@ import { useControlledProps } from './useControlledProps'
 import { fullScreenFieldWidthVars } from 'src/components/inputs/field-styles'
 import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
+import { useEscapeWithin } from 'src/hooks/useEscapeWithin.hook'
 import { isOverlayBackNavigationPending, OverlayBackOwnerContext, useBackCloses } from 'src/hooks/useBackCloses.hook'
 import { DialogBusyContext, useDialogBusyBoundary } from 'src/components/feedback/dialog/DialogBusyContext'
 import { useDialogHeaderPinning } from 'src/components/feedback/dialog/useDialogHeaderPinning'
@@ -141,11 +142,13 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
     // Only the fullscreen state shows a page-covering backdrop (below) and is actually modal — the
     // default corner-docked panel is a non-modal floating widget that must NOT trap focus.
     useFocusTrap(open && isFullScreenActive, modalRef, handleClose)
+    // Docked: Escape closes it only while focus is inside, and only if no popup in it claimed the key.
+    useEscapeWithin(open && !minimized && !isFullScreenActive, modalRef, handleClose)
 
     // ASMA-8471 / REQ-002: Back closes this panel whenever it is showing — docked as well as
     // fullscreen — through `handleClose`, the very callback ✕ uses (BACK-3), which already no-ops
-    // while busy. Docked is deliberately included even though it is non-modal and Escape is left
-    // alone there: to a phone user the docked panel is still "the thing that is open", and the CRM
+    // while busy. Docked is deliberately included even though it is non-modal and keeps focus
+    // untrapped: to a phone user the docked panel is still "the thing that is open", and the CRM
     // organization panel never closing on Back was the headline defect. `minimized` is the one state
     // that does NOT register — a collapsed title bar is not an overlay to dismiss, and Back must
     // reach whatever is behind it instead.
