@@ -185,6 +185,16 @@ export type StyledTableProps<TData, TCustomData> = {
      */
     hideHeader?: boolean
     pageSize?: number
+    /**
+     * Opt-in (ASMA-8470): keep the page in this URL search parameter (`page` for a list page), so Back, Forward, a reload
+     * and a link open the page the user was on. The first page leaves the parameter out. Paging replaces the current history
+     * entry and never adds one, so one Back still leaves the list. The page goes back to the first, and the parameter with
+     * it, whenever the table resets its page: rows that change (a filter or a search), a sort, a new page size.
+     *
+     * Give each table on a screen its own name, and leave it out for a table in a dialog or a table repeated per group. It
+     * does nothing on a table whose app owns the pagination (`state.pagination` or `onPaginationChange`).
+     */
+    pageUrlParam?: string
     enableResizing?: boolean
     enableDnd?: boolean
     customDndColumnProps?: ColumnDef<TData, unknown>

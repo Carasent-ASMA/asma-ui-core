@@ -15,5 +15,6 @@ export {
 } from './helpers/migrateLegacyTableSettings'
 export { useLegacyTableSettingsMigration } from './hooks/useLegacyTableSettingsMigration'
 export { DEFAULT_TABLE_PAGE_SIZE } from './hooks/usePersistedPageSize'
+export { readPageIndexFromUrl, useControlledPageUrlParam } from './hooks/usePageUrlParam'
 
 export { createColumnHelper, type Table, type Row, type ColumnDef, type CellContext } from '@tanstack/react-table'
