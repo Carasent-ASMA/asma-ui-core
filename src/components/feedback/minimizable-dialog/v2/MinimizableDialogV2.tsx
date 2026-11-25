@@ -11,7 +11,10 @@ import type { IMinimizableDialogV2Props } from './types'
 import { useTranslations } from './useTranslations'
 import { useControlledProps } from './useControlledProps'
 import { fullScreenFieldWidthVars } from 'src/components/inputs/field-styles'
-import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
+import { makeMediaQueryStore, useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
+
+/** Below the `min-width: 640px` breakpoint in `MinimizableDialogV2.module.scss`, where the windowed panel fills the screen. */
+const useWindowedFillsScreenMediaQuery = makeMediaQueryStore('(max-width: 639px)')
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
 import { OverlayBackOwnerContext, useBackCloses } from 'src/hooks/useBackCloses.hook'
 import { DialogBusyContext, useDialogBusyBoundary } from 'src/components/feedback/dialog/DialogBusyContext'
@@ -54,6 +57,7 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
     } = props
 
     const isMobile = useMobileMediaQuery()
+    const windowedFillsScreen = useWindowedFillsScreenMediaQuery()
 
     const t = useTranslations(locale)
 
@@ -142,13 +146,13 @@ export const MinimizableDialogV2: React.FC<IMinimizableDialogV2Props> = (props) 
     // default corner-docked panel is a non-modal floating widget that must NOT trap focus.
     useFocusTrap(open && isFullScreenActive, modalRef, handleClose)
 
-    // Back closes this panel only while it covers the page: in fullscreen, or windowed on a phone,
-    // where it fills the screen and cannot be minimized. It closes through `handleClose`, the same
-    // callback as ✕ (BACK-3). Windowed on a wider screen, or minimized, it is part of the page, so
-    // Back navigates as usual (BACK-1, PAGE-4, ASMA-8471 AC9). The registry skips an entry covered
-    // by an open native modal <dialog>, so a `StyledDialog` on top keeps the Back press however
-    // late this panel mounted (`modalRef`).
-    const coversPage = isFullScreenActive || (isMobile && !minimized)
+    // Back closes this panel only while it covers the page: in fullscreen, or windowed below 640 px,
+    // where the stylesheet makes it fill the screen. It closes through `handleClose`, the same
+    // callback as ✕ (BACK-3). Windowed from 640 px it is a floating panel, and minimized it is a bar:
+    // both are part of the page, so Back navigates as usual (BACK-1, PAGE-4, ASMA-8471 AC9). The
+    // registry skips an entry covered by an open native modal <dialog>, so a `StyledDialog` on top
+    // keeps the Back press however late this panel mounted (`modalRef`).
+    const coversPage = isFullScreenActive || (windowedFillsScreen && !minimized)
     useBackCloses({ active: open && coversPage, requestClose: handleClose, ownerRef: modalRef })
 
     const fullScreenDialogStyle: React.CSSProperties | undefined = isFullScreenActive

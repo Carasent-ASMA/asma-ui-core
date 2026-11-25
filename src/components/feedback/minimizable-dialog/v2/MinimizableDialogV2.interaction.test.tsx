@@ -319,8 +319,8 @@ describe('MinimizableDialogV2 native Back (ASMA-8471)', () => {
         await expect(onClose).not.toHaveBeenCalled()
     })
 
-    it('closes through handleClose while windowed on a phone, where it covers the page', async () => {
-        await page.viewport(390, 844)
+    it.each([390, 639])('closes through handleClose while windowed at %i px, where it fills the screen', async (width) => {
+        await page.viewport(width, 844)
         try {
             const onClose = fn()
             mount(
@@ -334,6 +334,25 @@ describe('MinimizableDialogV2 native Back (ASMA-8471)', () => {
             await expect(onClose).toHaveBeenCalledTimes(1)
         } finally {
             // The desktop viewport every other test in this project assumes (vite.config.ts).
+            await page.viewport(1280, 720)
+        }
+    })
+
+    it.each([640, 743, 744])('ignores Back while windowed at %i px, where it floats over the page', async (width) => {
+        await page.viewport(width, 844)
+        try {
+            const onClose = fn()
+            mount(
+                <MinimizableDialogV2 dataTest='dialog-v2' open title='Editor' onClose={onClose}>
+                    <p>Content</p>
+                </MinimizableDialogV2>,
+            )
+            await waitFor(() => expect(document.querySelector('[role="dialog"]')).not.toBeNull())
+
+            await expect(backRegistryEntries()).toHaveLength(0)
+            void requestCloseTopOverlayBack()
+            await expect(onClose).not.toHaveBeenCalled()
+        } finally {
             await page.viewport(1280, 720)
         }
     })
