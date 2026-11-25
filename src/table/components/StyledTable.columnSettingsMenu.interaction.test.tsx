@@ -195,12 +195,11 @@ describe('Reordering by dragging the handle is as it was', () => {
         await settle(80)
         await expect(isLifted('Role')).toBe(true)
         await expect(itemOf('Role').getAttribute('data-lifted')).toBe('pointer')
-        // Figma draws no drag state: the raised look and the landing line are the keyboard's only (ASMA-8875).
+        // Figma draws no drag state: the raised look is the keyboard's only, and no line marks a landing (ASMA-8875).
         await expect(getComputedStyle(itemOf('Role')).boxShadow).toBe('none')
 
         await mouse('mouseMoved', { x, y: y + 52 }, { held: true })
         await settle(120)
-        await expect(itemOf('Role').hasAttribute('data-drop-edge')).toBe(false)
         await expect(getComputedStyle(itemOf('Role'), '::after').content).toBe('none')
         await mouse('mouseMoved', { x, y: y + 12 }, { held: true })
         await settle(120)

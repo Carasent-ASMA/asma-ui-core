@@ -11,9 +11,6 @@ import styles from './HeaderActionMenu.module.scss'
 /** Rows where Space went down: Space acts on its release, as on a native checkbox, while the pressed look holds (ASMA-9003). */
 const rowsWithSpaceDown = new WeakSet<Element>()
 
-/** Where a lifted column will land, drawn on its leading edge: above it moving up, below it moving down. */
-export type DropEdge = 'before' | 'after'
-
 export interface ColumnSettingsItemProps {
     id: string
     label: string
@@ -31,9 +28,8 @@ export interface ColumnSettingsItemProps {
     reorderLabel: string
     /** Which of the column's two stops is the menu's one Tab stop, if either (roving tabindex). */
     tabStop: ColumnItemPart | null
-    /** This column is lifted from the keyboard: only then is it raised and its landing line drawn (a mouse drag looks as it always did). */
+    /** This column is lifted from the keyboard: only then is it raised (a mouse drag looks as it always did). */
     liftedByKeyboard: boolean
-    dropEdge: DropEdge | null
     onToggle: () => void
     onFocusPart: (id: string, part: ColumnItemPart) => void
 }
@@ -64,7 +60,6 @@ export function ColumnSettingsItem({
     reorderLabel,
     tabStop,
     liftedByKeyboard,
-    dropEdge,
     onToggle,
     onFocusPart,
 }: ColumnSettingsItemProps): JSX.Element {
@@ -106,7 +101,6 @@ export function ColumnSettingsItem({
             role='none'
             data-column-id={id}
             data-lifted={isDragging ? (liftedByKeyboard ? 'keyboard' : 'pointer') : undefined}
-            data-drop-edge={isDragging && liftedByKeyboard && dropEdge ? dropEdge : undefined}
             style={{ transform: CSS.Transform.toString(transform), transition }}
             className={styles['drag-item']}
         >

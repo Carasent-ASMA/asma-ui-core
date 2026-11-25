@@ -1107,8 +1107,8 @@ const keyboardReorderColumns: ColumnDef<TableRow>[] = [
 /**
  * ASMA-8875 (UX comment 95823): reordering columns from the keyboard. The play function opens the menu from the keyboard
  * (Enter on the pin: the first row takes the focus), steps to "Role" with Down, to its handle with Right, lifts it with
- * Space and moves it down once, and leaves it lifted: the focus bar on its row, the raised row, the 3px line where it will
- * land, and the footer hint with the keys. Space drops it (the focus goes to its row), Escape puts it back. Nine columns,
+ * Space and moves it down once, and leaves it lifted: the focus bar on its row, the raised row standing where it will land,
+ * and the footer hint with the keys. Space drops it (the focus goes to its row), Escape puts it back. Nine columns,
  * so the list scrolls and the footer (Reset columns, the hint) stays pinned under it.
  */
 export const ColumnSettingsKeyboardReorder: Story = {
@@ -1137,6 +1137,9 @@ export const ColumnSettingsKeyboardReorder: Story = {
         await userEvent.keyboard(' ')
         await new Promise((resolve) => setTimeout(resolve, 120))
         await userEvent.keyboard('{ArrowDown}')
-        await waitFor(() => expect(row('role').closest('li')).toHaveAttribute('data-drop-edge', 'after'))
+        await waitFor(() => expect(row('role').closest('li')).toHaveAttribute('data-lifted', 'keyboard'))
+        await waitFor(() =>
+            expect(canvasElement.ownerDocument.querySelector('[role="menu"] ~ [role="status"]')).toHaveTextContent('Position 3 of 9.'),
+        )
     },
 }
