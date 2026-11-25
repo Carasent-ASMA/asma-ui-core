@@ -368,7 +368,7 @@ export function isOverlayBackNavigationPending(): boolean {
     return getSharedWindow()?.__ASMA__SHELL__?.overlayBack?.pendingNavigation === true
 }
 
-/** Native close-watcher events are part of the feature and must respect the host kill switch. */
+/** The host kill switch: off means no history adapter, so pickers fall back to their legacy history path. */
 export function isOverlayBackEnabled(): boolean {
     const overlayBack = getSharedWindow()?.__ASMA__SHELL__?.overlayBack
     return overlayBack?.v === 1 && overlayBack.enabled === true
