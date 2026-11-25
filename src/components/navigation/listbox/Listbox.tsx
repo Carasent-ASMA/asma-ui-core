@@ -16,6 +16,7 @@ import {
 import { cn } from 'src/helpers/cn'
 import { tabbableWithin } from 'src/helpers/focusable'
 import { pressedStateHandlers } from 'src/helpers/pressedState'
+import { useBackCloses } from 'src/hooks/useBackCloses.hook'
 
 /**
  * @figmaNode none — **headless behaviour primitive**, no Design-System visuals. It renders bare
@@ -74,20 +75,26 @@ function ListboxRoot<T>({
         setActiveIndex(null)
     }, [])
 
+    // Focus goes back to the trigger, or it would drop to <body> as the panel unmounts (2.4.3).
+    const dismiss = useCallback((): void => {
+        const root = rootRef.current
+        if (root?.contains(document.activeElement)) root.querySelector<HTMLElement>('[role="combobox"]')?.focus()
+        close()
+    }, [close])
+
     // Escape is heard on the document rather than on the trigger, because focus is not necessarily
     // there: an option may hold a focusable control, and Escape has to dismiss from inside it too.
-    // Focus then goes back to the trigger, or it would drop to <body> as the panel unmounts (2.4.3).
     useEffect(() => {
         if (!open) return
         const closeOnEscape = (event: KeyboardEvent): void => {
-            if (event.key !== 'Escape') return
-            const root = rootRef.current
-            if (root?.contains(document.activeElement)) root.querySelector<HTMLElement>('[role="combobox"]')?.focus()
-            close()
+            if (event.key === 'Escape') dismiss()
         }
         document.addEventListener('keydown', closeOnEscape)
         return () => document.removeEventListener('keydown', closeOnEscape)
-    }, [open, close])
+    }, [open, dismiss])
+
+    // Native Back closes the open list the way Escape does (BACK-1, BACK-3).
+    useBackCloses({ active: open, requestClose: dismiss, ownerRef: rootRef })
 
     const contextValue = useMemo<ListboxContextValue>(
         () => ({

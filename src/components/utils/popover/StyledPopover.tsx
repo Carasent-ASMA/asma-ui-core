@@ -185,9 +185,11 @@ export const StyledPopover = ({
     })
     const { getFloatingProps } = useInteractions([dismiss])
 
+    // Back is Escape (BACK-3): while Escape is disabled, Back refuses too, instead of closing.
     useBackCloses({
         active: open && registerBackClose,
-        requestClose: (event) => (onClose ? onClose(event ?? new Event('overlayBack'), 'escapeKeyDown') : false),
+        requestClose: (event) =>
+            onClose && !disableEscapeKeyDown ? onClose(event ?? new Event('overlayBack'), 'escapeKeyDown') : false,
         ownerRef: refs.floating,
     })
 

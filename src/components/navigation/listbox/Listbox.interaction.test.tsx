@@ -3,6 +3,7 @@ import { afterEach, describe, it } from 'vitest'
 import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount, resolveTokenColor } from 'src/test-utils/renderInteraction'
 import { fillOf, holdPressed, mouse } from 'src/test-utils/pressedInteraction'
+import { getOverlayBackStackSize, requestCloseTopOverlayBack } from 'src/hooks/useBackCloses.hook'
 import { Listbox } from './Listbox'
 
 const ListboxFixture = (): JSX.Element => {
@@ -227,6 +228,33 @@ describe('Listbox keyboard contract', () => {
         await waitFor(() => expect(document.querySelector('[role="listbox"]')).toBeNull())
         // Closing must not strand focus on <body> — the panel the user was in has just unmounted.
         await expect(document.activeElement).toBe(trigger)
+    })
+
+    it('closes on native Back like Escape, keeping the value and returning focus (BACK-1, BACK-3)', async () => {
+        const onChange = fn()
+        const { container } = mount(
+            <Listbox value='alpha' onChange={onChange}>
+                <Listbox.Button data-testid='trigger'>alpha</Listbox.Button>
+                <Listbox.Options>
+                    <Listbox.Option disabled value='search'>
+                        <input data-testid='search' placeholder='search' />
+                    </Listbox.Option>
+                    <Listbox.Option value='alpha'>Alpha</Listbox.Option>
+                </Listbox.Options>
+            </Listbox>,
+        )
+        const trigger = container.querySelector<HTMLButtonElement>('[data-testid="trigger"]')!
+        trigger.focus()
+        await userEvent.keyboard('{ArrowDown}')
+        await waitFor(() => expect(document.querySelector('[role="listbox"]')).not.toBeNull())
+        document.querySelector<HTMLInputElement>('[data-testid="search"]')!.focus()
+
+        void requestCloseTopOverlayBack()
+
+        await waitFor(() => expect(document.querySelector('[role="listbox"]')).toBeNull())
+        await expect(document.activeElement).toBe(trigger)
+        await expect(onChange).not.toHaveBeenCalled()
+        await expect(getOverlayBackStackSize()).toBe(0)
     })
 
     it('leaves no dangling aria-activedescendant when nothing is selectable (4.1.2)', async () => {
