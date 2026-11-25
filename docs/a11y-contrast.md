@@ -77,13 +77,14 @@ agree.
 | | |
 | --- | --- |
 | Assertions passing | 525 |
-| — of which quarantined, held to a regression floor | 87 |
-| — of which held to the momentary level (pressed, see below) | 195 |
+| — of which quarantined, held to a regression floor | 84 |
+| — of which held to the momentary level (pressed, see below) | 192 |
 | Skipped (no computable ratio — F-15 only) | 0 |
-| Distinct findings quarantined | 15 |
+| Distinct findings quarantined | 14 |
 | Themes covered | 3 (`default`, `fretex`, `greenish`) |
 
-Counted on 2026-11-24 (ASMA-9003).
+Counted on 2026-11-24 (ASMA-9003); updated 2026-11-25 for ASMA-8963 (+3, `empty-page/text`) and ASMA-9053
+(−3, F-17 resolved).
 
 Regenerate the floors after any token change:
 `npx vitest --project=unit --run src/a11y`
@@ -122,10 +123,10 @@ Measured with ASMA-9003's Figma pressed colours (`gama-200` light fill, `gama-80
 | Switch track `gama-800` on white | 11.08 | 11.44 | 12.01 |
 | Outlined pressed border `gama-300` on white (F-13, quarantined) | **2.33** | **1.81** | **2.20** |
 
-Every pressed pair passes except three edges Figma keeps while pressed, which stay quarantined: the
-outlined button's `gama-300` border (F-13), the chip's `delta-300` border against the page (F-11) and
-the selected radio chip's `gama-400` edge on the pressed fill (F-17). The default theme's pressed label
-(4.34) is below 4.5:1 and within the accepted 15 % (pattern Q6).
+Every pressed pair passes except two edges Figma keeps while pressed, which stay quarantined: the
+outlined button's `gama-300` border (F-13) and the chip's `delta-300` border against the page (F-11),
+selected radio chips included. The default theme's pressed label (4.34) is below 4.5:1 and within the
+accepted 15 % (pattern Q6).
 
 ## Palette and token changes (ASMA-9003)
 
@@ -430,17 +431,12 @@ Every sibling declaration uses a *dark* error colour for this text
 (`outlined-error-active-text-color` is `beta-700`, `-hover-` is `beta-600`); only the `focused`
 variant is `#ffffff`. Reads as a copy-paste slip from the `contained` block, where white is correct.
 
-### F-17 — selected radio chip edge on its pressed fill
+### F-17 — selected radio chip edge on its pressed fill (resolved, ASMA-9053)
 
-`--colors-gama-400` on `--colors-gama-200` (`chip/radio-border-pressed`). Consumer:
-`src/components/data-display/interactive-chip/StyledInteractiveChip.tsx` (the selected radio chip's
-2px `gama-400` edge) with the `gama-200` pressed fill from `StyledChip.tsx`. **SC 1.4.11, momentary
-2.55:1** (ASMA-9003). default `#4da6cf` on `#99cce4` **1.57** · fretex `#9cb2a9` on `#ceddd7`
-**1.59** · greenish `#1ca1a1` on `#8ed0d0` **1.81**.
-
-Figma's *Pressed state* sheet keeps the edge colour while the chip is pressed, and Figma is the colour
-source, so the pair is quarantined at these floors. The edge still contrasts with the page outside it
-(the selected state's own pair), and the `gama-700` label and dot mark the press.
+Was `--colors-gama-400` on `--colors-gama-200` (`chip/radio-border-pressed`, 1.57–1.81, ASMA-9003).
+ASMA-9053 removed the selected radio chip's `gama-400` edge: Figma Tag Chip Type=Radio, Selected=on
+(18869-29122) keeps `border/outline` 1px, so a selected radio chip now has the `delta-300` edge of every
+other chip, measured by `chip/border-pressed` (F-11). The pair and its floors are gone; the ID is not reused.
 
 ---
 

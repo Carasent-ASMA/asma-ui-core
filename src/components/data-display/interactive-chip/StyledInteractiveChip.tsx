@@ -12,9 +12,9 @@ import styles from './StyledInteractiveChip.module.scss'
  * (18832-25900 / selected 18869-29122). It is a `StyledChip` (h32, radius25, border delta-300, label
  * Body Base 16 delta-700; hover fill delta-50, focus gama-400 — all inherited) whose start slot
  * is a native checkbox/radio. Figma **State** (Enabled/Hovered/Focused/Read-only/Disabled) ← native
- * + `readOnly`/`disabled`; **Selected** ← `checked`. A selected **radio** additionally gets the teal
- * chip border/fill (gama-400 / gama-50); a selected **checkbox** only checks its box (matching Figma).
- * Non-annotated props are behavioral / forwarded to `StyledChip`.
+ * + `readOnly`/`disabled`; **Selected** ← `checked`. Selection only changes the control: in every
+ * Selected=on variant the chip keeps `border/outline` 1px and its white fill, for radio and checkbox
+ * alike (ASMA-9053). Non-annotated props are behavioral / forwarded to `StyledChip`.
  */
 export interface StyledInteractiveChipProps extends ComponentProps<typeof StyledChip> {
     /** @figmaProp Type = "Checkbox" | "Radio" (the start-slot control) */
@@ -33,20 +33,6 @@ export interface StyledInteractiveChipProps extends ComponentProps<typeof Styled
     disabledReason?: ReactNode
 }
 
-// Figma Tag Chip Radio Selected (18869-29122) = 2px gama-400 border + gama-25 fill (same when
-// hovered). Tailwind runs in `important: true` mode, so the base `border-delta-300`/`bg-white`
-// utilities — and, on hover, `hover:bg-delta-50` — are `!important` and beat any inline style.
-// That's why the old inline `sx` treatment was silently dead (only its box-shadow survived). We win
-// deterministically with arbitrary-variant classes carrying (0,3,0) specificity via the chip's
-// always-present `data-testid`+`role` (radio), outranking the base/hover/focus/active utilities.
-//
-// The 2px is a 1px border plus a 1px inset shadow in the same colour, not `border-2`: a thicker border
-// widened the selected chip by 2px and pushed every chip after it in the row sideways on each pick.
-// The shadow paints inside the border without taking space. The focus ring is an `::after` overlay
-// (StyledChip.module.scss), so it doesn't compete for `box-shadow`.
-const SELECTED_RADIO_CLASS =
-    '[&[data-testid][role]]:border-gama-400 [&[data-testid][role]]:shadow-[inset_0_0_0_1px_var(--colors-gama-400)] [&[data-testid][role]]:bg-gama-25'
-
 // Figma _BASE_Tag Checkbox/Radio (nodes 18832-25686 / 18832-25900): the chip is `padding-left: 0`
 // but the control is a 40px-wide box whose centring leaves ~10px between the chip border and the
 // box/circle. Our control slot is compact (24px), which left almost no inset — so we add an explicit
@@ -62,7 +48,6 @@ export const StyledInteractiveChip = forwardRef<HTMLDivElement, StyledInteractiv
     ({ type = 'checkbox', checked, size = 'small', ariaLabel, ...props }, ref) => {
         const isCheckbox = type === 'checkbox'
         const accessibleName = ariaLabel ?? (typeof props.label === 'string' ? props.label : undefined)
-        const isSelectedRadio = !props.readOnly && !isCheckbox && Boolean(checked)
 
         // Pure state indicator: the chip (`clickable`, below) owns the click — `pointer-events-none`
         // already confirmed nothing here is meant to be independently operable. `decorative` renders
@@ -106,7 +91,6 @@ export const StyledInteractiveChip = forwardRef<HTMLDivElement, StyledInteractiv
                 clickable
                 tabIndex={0}
                 {...props}
-                className={cn(isSelectedRadio && SELECTED_RADIO_CLASS, props.className)}
                 sx={{
                     ...CONTROL_CHIP_STYLE,
                     ...(props.sx as object),

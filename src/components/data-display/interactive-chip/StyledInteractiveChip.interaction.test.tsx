@@ -108,8 +108,8 @@ describe('StyledInteractiveChip — selection does not shift the layout', () => 
             })
 
         const before = boxes()
-        // The selected radio's 2px ring used to be a 2px border: the chip grew 2px each way and pushed
-        // its neighbours along the row on every pick.
+        // A selected radio once got a 2px border that grew the chip and pushed its neighbours along the
+        // row on every pick; selection now leaves the chip's outline alone (ASMA-9053).
         await userEvent.click(chips()[0]!)
         await expect(chips()[0]).toHaveAttribute('aria-checked', 'true')
         await expect(boxes()).toEqual(before)
@@ -304,13 +304,13 @@ describe('StyledInteractiveChip pressed state (ASMA-9003)', () => {
         })
     })
 
-    it('fills a selected radio chip gama-200 over its gama-25 fill, keeps its gama-400 border, ring and dot gama-700', async () => {
+    it('fills a pressed selected radio chip gama-200, keeps its delta-300 border, ring and dot gama-700', async () => {
         const { container } = mount(
             <StyledInteractiveChip dataTest='radio-chip' label='Active' type='radio' checked onClick={fn()} />,
         )
         const chip = container.querySelector<HTMLElement>('[role="radio"]')!
         const restingBorder = getComputedStyle(chip).borderColor
-        await expect(restingBorder).toBe(resolveTokenColor('--colors-gama-400'))
+        await expect(restingBorder).toBe(resolveTokenColor('--colors-delta-300'))
         const gama700 = resolveTokenColor('--colors-gama-700')
 
         await holdPressed(chip, async () => {
@@ -333,9 +333,71 @@ describe('StyledInteractiveChip pressed state (ASMA-9003)', () => {
         await space('keyDown')
         try {
             await expect(fillOf(chip)).toBe(resolveTokenColor('--colors-gama-200'))
-            await expect(getComputedStyle(chip).borderColor).toBe(resolveTokenColor('--colors-gama-400'))
+            await expect(getComputedStyle(chip).borderColor).toBe(resolveTokenColor('--colors-delta-300'))
         } finally {
             await space('keyUp')
         }
+    })
+})
+
+/*
+ * ASMA-9053 — Figma Tag Chip Type=Radio, Selected=on (18869-29122) keeps `border/outline` 1px and the white
+ * fill of Selected=off. Selection shows on the radio inside the chip only, never on the chip's outline.
+ */
+describe('StyledInteractiveChip selected radio keeps the chip outline (ASMA-9053)', () => {
+    afterEach(cleanup)
+
+    const outlineOf = (chip: Element): Record<string, string> => {
+        const style = getComputedStyle(chip)
+        return {
+            borderColor: style.borderColor,
+            borderWidth: style.borderWidth,
+            boxShadow: style.boxShadow,
+            backgroundColor: style.backgroundColor,
+        }
+    }
+
+    const mountPair = (): { selected: HTMLElement; unselected: HTMLElement } => {
+        const { container } = mount(
+            <div style={{ display: 'flex', gap: 8 }}>
+                <StyledInteractiveChip dataTest='selected' label='Before' type='radio' checked onClick={fn()} />
+                <StyledInteractiveChip dataTest='unselected' label='After' type='radio' checked={false} onClick={fn()} />
+            </div>,
+        )
+        return {
+            selected: container.querySelector<HTMLElement>('[data-testid="selected"][role="radio"]')!,
+            unselected: container.querySelector<HTMLElement>('[data-testid="unselected"][role="radio"]')!,
+        }
+    }
+
+    it('rests a selected radio chip on the same delta-300 1px border and white fill as an unselected one', async () => {
+        const { selected, unselected } = mountPair()
+
+        await expect(selected).toHaveAttribute('aria-checked', 'true')
+        await expect(outlineOf(selected)).toEqual(outlineOf(unselected))
+        await expect(getComputedStyle(selected).borderColor).toBe(resolveTokenColor('--colors-delta-300'))
+        await expect(getComputedStyle(selected).borderWidth).toBe('1px')
+        await expect(fillOf(selected)).toBe('rgb(255, 255, 255)')
+    })
+
+    it('hovers a selected radio chip exactly like an unselected one', async () => {
+        const { selected, unselected } = mountPair()
+
+        await userEvent.hover(unselected)
+        const hoveredUnselected = outlineOf(unselected)
+        await userEvent.hover(selected)
+
+        await expect(outlineOf(selected)).toEqual(hoveredUnselected)
+        await expect(fillOf(selected)).toBe(resolveTokenColor('--colors-delta-50'))
+    })
+
+    it('marks the selection with the radio inside the chip', async () => {
+        const { selected, unselected } = mountPair()
+        const controlOf = (chip: HTMLElement): Element =>
+            part(chip, 'Indicator').closest('[data-checked], [data-unchecked]')!
+
+        await expect(controlOf(selected)).toHaveAttribute('data-checked')
+        await expect(controlOf(unselected)).toHaveAttribute('data-unchecked')
+        await expect(getComputedStyle(part(selected, 'Indicator')).fill).toBe(resolveTokenColor('--colors-gama-500'))
     })
 })

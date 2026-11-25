@@ -114,7 +114,8 @@ export const PRESSED_PAIRS: readonly ContrastPair[] = [
     ]),
     // The selected tab's gama-500 bar stays over the gama-200 fill.
     ...measured('--colors-gama-500', LIGHT_FILL, 'momentaryNonText', [['tab/indicator-pressed', TABS]]),
-    // Figma keeps the chip edges while pressed; both fail and stay quarantined (Figma is the colour source).
+    // Figma keeps the chip edge while pressed, selected radio chips included (ASMA-9053); it fails and
+    // stays quarantined (Figma is the colour source).
     {
         id: 'chip/border-pressed',
         foreground: '--colors-delta-300',
@@ -122,13 +123,5 @@ export const PRESSED_PAIRS: readonly ContrastPair[] = [
         requirement: 'momentaryNonText',
         usedBy: CHIP,
         finding: 'F-11',
-    },
-    {
-        id: 'chip/radio-border-pressed',
-        foreground: '--colors-gama-400',
-        background: LIGHT_FILL,
-        requirement: 'momentaryNonText',
-        usedBy: INTERACTIVE_CHIP,
-        finding: 'F-17',
     },
 ]
