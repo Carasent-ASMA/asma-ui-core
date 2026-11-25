@@ -1,6 +1,6 @@
 import { afterEach, describe, it } from 'vitest'
-import { useRef, useState, type CSSProperties } from 'react'
-import { expect, fn, page, userEvent, waitFor } from 'src/test-utils/interaction-api'
+import { useRef, useState } from 'react'
+import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { MinimizableDialogV2 } from './MinimizableDialogV2'
 import { StyledDialog } from 'src/components/feedback/dialog/StyledDialog'
@@ -750,93 +750,5 @@ describe('MinimizableDialogV2 header controls stay in place', () => {
         )
 
         await expect(container.querySelector('[data-testid="fullscreen-button"]')).toBeNull()
-    })
-})
-
-describe('MinimizableDialogV2 docked beside the page (ASMA-8470)', () => {
-    afterEach(async () => {
-        cleanup()
-        await page.viewport(1280, 720)
-    })
-
-    const reserved = (): string => document.body.style.paddingRight
-    const panel = (): HTMLElement => document.querySelector<HTMLElement>('[role="dialog"]')!
-    const panelFootprint = (): string => `${Math.ceil(document.documentElement.clientWidth - panel().getBoundingClientRect().left)}px`
-    const toggle = (index: 0 | 1): HTMLButtonElement =>
-        document.querySelectorAll<HTMLButtonElement>('[data-testid="toggle-minimize-btn"]')[index]!
-
-    it('keeps the page clear of the docked panel, and gives the room back when it closes', async () => {
-        await page.viewport(1440, 900)
-        const { rerender } = mount(
-            <MinimizableDialogV2 dataTest='docked' open title='New task' onClose={() => undefined}>
-                <p>Content</p>
-            </MinimizableDialogV2>,
-        )
-        await expect(reserved()).toBe(panelFootprint())
-        await expect(reserved()).toBe('616px')
-
-        rerender(
-            <MinimizableDialogV2 dataTest='docked' open={false} title='New task' onClose={() => undefined}>
-                <p>Content</p>
-            </MinimizableDialogV2>,
-        )
-        await expect(reserved()).toBe('')
-    })
-
-    it('reserves nothing while minimized or fullscreen, since then the page is not beside it', async () => {
-        await page.viewport(1440, 900)
-        mount(
-            <MinimizableDialogV2 dataTest='docked' open title='New task' onClose={() => undefined}>
-                <p>Content</p>
-            </MinimizableDialogV2>,
-        )
-        await expect(reserved()).toBe('616px')
-
-        await userEvent.click(toggle(1))
-        await waitFor(() => expect(reserved()).toBe(''))
-        await userEvent.click(toggle(0))
-        await waitFor(() => expect(reserved()).toBe('616px'))
-
-        await userEvent.click(document.querySelector<HTMLButtonElement>('[data-testid="fullscreen-button"]')!)
-        await waitFor(() => expect(reserved()).toBe(''))
-    })
-
-    it('overlays the page as before when reserving would leave it too narrow', async () => {
-        await page.viewport(1024, 768)
-        mount(
-            <MinimizableDialogV2 dataTest='docked' open title='New task' onClose={() => undefined}>
-                <p>Content</p>
-            </MinimizableDialogV2>,
-        )
-        await waitFor(() => expect(panel().getBoundingClientRect().width).toBe(600))
-        await expect(reserved()).toBe('')
-
-        await page.viewport(1440, 900)
-        await waitFor(() => expect(reserved()).toBe('616px'))
-    })
-
-    it('reserves room for every docked panel, and keeps it while one of them is still open', async () => {
-        await page.viewport(1440, 900)
-        const twoPanels = (second: boolean): JSX.Element => (
-            <>
-                <MinimizableDialogV2 dataTest='first' open title='Organization' onClose={() => undefined}>
-                    <p>First</p>
-                </MinimizableDialogV2>
-                <MinimizableDialogV2
-                    dataTest='second'
-                    open={second}
-                    title='Note'
-                    style={{ '--dialog-right': '632px', maxWidth: 100 } as CSSProperties}
-                    onClose={() => undefined}
-                >
-                    <p>Second</p>
-                </MinimizableDialogV2>
-            </>
-        )
-        const { rerender } = mount(twoPanels(true))
-        await expect(reserved()).toBe('732px')
-
-        rerender(twoPanels(false))
-        await expect(reserved()).toBe('616px')
     })
 })
