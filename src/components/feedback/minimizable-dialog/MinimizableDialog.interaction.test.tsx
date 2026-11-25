@@ -57,25 +57,6 @@ describe('MinimizableDialog keyboard contract', () => {
         await expect(onClose).toHaveBeenCalledTimes(1)
     })
 
-    it('closes the docked panel on Escape pressed inside it, but not while the primary action runs (ASMA-8470)', async () => {
-        const onClose = fn()
-        const Fixture = ({ loading }: { loading: boolean }): JSX.Element => (
-            <MinimizableDialog dataTest='dialog' open title='Editor' onClose={onClose} primaryButtonLoading={loading}>
-                <input aria-label='Title' />
-            </MinimizableDialog>
-        )
-        const { container, rerender } = mount(<Fixture loading />)
-        container.querySelector<HTMLInputElement>('input[aria-label="Title"]')!.focus()
-
-        await userEvent.keyboard('{Escape}')
-        await expect(onClose).not.toHaveBeenCalled()
-
-        rerender(<Fixture loading={false} />)
-        container.querySelector<HTMLInputElement>('input[aria-label="Title"]')!.focus()
-        await userEvent.keyboard('{Escape}')
-        await expect(onClose).toHaveBeenCalledTimes(1)
-    })
-
     it('traps focus only while fullscreen (2.1.2, 2.4.3)', async () => {
         const { container } = mount(
             <>
@@ -662,32 +643,5 @@ describe('MinimizableDialog header controls stay in place', () => {
 
         // The argument is the state being requested, not a bare toggle ping.
         await expect(handleFullScreenState).toHaveBeenCalledWith(true)
-    })
-
-    it('keeps the confirm an edited fullscreen panel opens on Escape open, and lets Escape dismiss it (ASMA-8470)', async () => {
-        const Fixture = (): JSX.Element => {
-            const [confirmOpen, setConfirmOpen] = useState(false)
-            return (
-                <>
-                    <MinimizableDialog dataTest='dialog' open fullScreenState title='Editor' onClose={() => setConfirmOpen(true)}>
-                        <input aria-label='Title' />
-                    </MinimizableDialog>
-                    <StyledDialog dataTest='confirm' open={confirmOpen} dialogTitle='Delete changes?' onClose={() => setConfirmOpen(false)}>
-                        <button type='button'>Discard</button>
-                    </StyledDialog>
-                </>
-            )
-        }
-        const { container } = mount(<Fixture />)
-        const confirm = (): HTMLDialogElement | null => container.querySelector<HTMLDialogElement>('dialog[data-testid="confirm"]')
-        await waitFor(() => expect(document.activeElement).toBe(container.querySelector('[role="dialog"]')))
-        container.querySelector<HTMLInputElement>('input[aria-label="Title"]')!.focus()
-
-        await userEvent.keyboard('{Escape}')
-        await new Promise((resolve) => setTimeout(resolve, 150))
-        await expect(confirm()?.open).toBe(true)
-
-        await userEvent.keyboard('{Escape}')
-        await waitFor(() => expect(confirm()).toBeNull())
     })
 })

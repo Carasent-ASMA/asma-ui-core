@@ -1,13 +1,6 @@
 import { useEffect, useRef, type RefObject } from 'react'
 import { tabbableWithin } from 'src/helpers/focusable'
 
-/** An Escape from a dialog stacked on the panel (a confirm modal) belongs to that dialog's own
- *  listener; handling it here would close the panel again and, once prevented, keep the dialog open. */
-const isOwnedByNestedDialog = (target: EventTarget | null, container: HTMLElement): boolean => {
-    const dialog = target instanceof Element ? target.closest('dialog, [role="dialog"], [role="alertdialog"]') : null
-    return dialog !== null && dialog !== container && !dialog.contains(container)
-}
-
 /**
  * Manual Tab-cycling focus trap for a modal-like panel that (unlike `StyledDialog`) can't use the
  * native `<dialog>` `showModal()` trap — e.g. a panel that's only modal in ONE of its states
@@ -47,13 +40,7 @@ export const useFocusTrap = (active: boolean, containerRef: RefObject<HTMLElemen
 
         const handleKeyDown = (event: KeyboardEvent): void => {
             if (event.key === 'Escape') {
-                // Without `onEscape` the key is not ours: the host's own window listener claims it.
-                const handleEscape = onEscapeRef.current
-                if (!handleEscape || event.defaultPrevented || isOwnedByNestedDialog(event.target, container)) return
-                // The default action of a keydown that opens a modal `<dialog>` is to close it, so an
-                // unclaimed Escape would dismiss the confirm `onEscape` just opened (~20ms flash).
-                event.preventDefault()
-                handleEscape()
+                onEscapeRef.current?.()
                 return
             }
             // A nested layer (a portalled calendar) that already moved focus for this Tab owns it.
