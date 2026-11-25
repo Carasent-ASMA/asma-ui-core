@@ -1,6 +1,7 @@
 import type { AriaAttributes, ReactNode } from 'react'
 import type { FieldWidth } from 'src/components/inputs/field-styles'
 import type { TimePredicate } from './helpers/disabledTime'
+import type { TimePickerHelperMessages } from './components/HelperText'
 
 /** 
     * @param notBeforeTime - Start time of the range. Selected time must be after this value.
@@ -58,6 +59,15 @@ export interface StyledTimePickerProps {
      * label rendered outside the picker. Without them the input is named by `title` or `label`.
      */
     inputAriaProps?: AriaAttributes
+    /** Per-key `{ en, no }` overrides of the built-in messages, merged over the defaults. */
+    messages?: Partial<TimePickerHelperMessages>
+    /**
+     * Fires once the time input loses focus for good — e.g. so a form library can validate on blur
+     * (ADR-0017 REQ-001). Not fired when focus merely moves from the input into the picker's own
+     * popup/panel, since that is not a finished interaction; the eventual Tab-away or click-outside
+     * that really leaves the field calls it. Purely presentational — carries no validation rule.
+     */
+    onBlur?: () => void
 }
 
 export type IPopupStateType = JSX.Element

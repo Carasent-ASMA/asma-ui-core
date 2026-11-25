@@ -23,7 +23,7 @@ export interface MaskedResult {
 }
 
 /** Date picker mask — shared by `useDatePickerMask` and display formatting. */
-export const DATE_INPUT_MASK: InputMaskSpec = { mask: '  /  /    ', maskChar: ' ', showMask: true }
+export const DATE_INPUT_MASK: InputMaskSpec = { mask: '  .  .    ', maskChar: ' ', showMask: true }
 
 /**
  * Font family the editable date input MUST render in. `DATE_INPUT_MASK` is a *space scaffold*

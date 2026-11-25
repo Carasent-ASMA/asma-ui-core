@@ -9,8 +9,11 @@ export interface TimePickerHelperMessages {
 }
 
 export const defaultTimePickerHelperMessages: Required<TimePickerHelperMessages> = {
-    invalid: { en: 'Invalid time format', no: 'Ugyldig tidsformat' },
-    afterStartTime: { en: 'Must be after start time', no: 'Må være etter starttid' },
+    invalid: { en: 'Enter a valid time in HH:mm format.', no: 'Skriv inn et gyldig klokkeslett i formatet TT:mm.' },
+    afterStartTime: {
+        en: 'Select a time at or after the start time.',
+        no: 'Velg et klokkeslett på eller etter starttidspunktet.',
+    },
     required: { en: 'Required', no: 'Obligatorisk' },
 }
 

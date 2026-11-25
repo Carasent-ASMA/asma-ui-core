@@ -54,6 +54,40 @@ const openPanel = async (container: HTMLElement): Promise<void> => {
     await waitFor(() => expect(panel()).not.toBeNull(), { timeout: 600 })
 }
 
+/** `onBlur` (ASMA-8073): presentation wiring only, so a consumer (react-hook-form) can validate on
+ * blur (ADR-0017 REQ-001) — no validation rule lives in the picker itself. */
+describe('StyledTimePicker onBlur', () => {
+    afterEach(cleanup)
+
+    it('fires once when focus leaves the input', async () => {
+        const onBlur = fn()
+        const { container } = mount(
+            <>
+                <StyledTimePicker dataTest='blur-time' label='Start time' onSelect={() => undefined} onBlur={onBlur} />
+                <button type='button' data-testid='after'>
+                    After
+                </button>
+            </>,
+        )
+        const input = container.querySelector<HTMLInputElement>('input[data-testid="blur-time"]')!
+
+        input.focus()
+        await userEvent.tab()
+
+        await expect(onBlur).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not fire when focus moves from the input into the open panel', async () => {
+        const onBlur = fn()
+        const { container } = mount(
+            <StyledTimePicker dataTest='start-time' label='Start time' onSelect={() => undefined} onBlur={onBlur} />,
+        )
+        await openPanel(container)
+
+        await expect(onBlur).not.toHaveBeenCalled()
+    })
+})
+
 describe('StyledTimePicker keyboard contract', () => {
     afterEach(cleanup)
 
@@ -100,12 +134,12 @@ describe('StyledTimePicker keyboard contract', () => {
 
         await waitFor(() => expect(input).toHaveValue('09'))
         await expect(input).not.toHaveAttribute('aria-invalid')
-        await expect(container).not.toHaveTextContent('Invalid time format')
+        await expect(container).not.toHaveTextContent('Enter a valid time in HH:mm format.')
 
         input.blur()
 
         await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
-        await expect(container).toHaveTextContent('Invalid time format')
+        await expect(container).toHaveTextContent('Enter a valid time in HH:mm format.')
         await expect(onSelect).not.toHaveBeenCalled()
     })
 
@@ -352,7 +386,7 @@ describe('StyledTimePicker minTime', () => {
         input.blur()
 
         await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
-        await expect(container).toHaveTextContent('Must be after start time')
+        await expect(container).toHaveTextContent('Select a time at or after the start time.')
     })
 
     it('uncommits a field emptied by typing on blur, without an error', async () => {
@@ -387,7 +421,7 @@ describe('StyledTimePicker minTime', () => {
 
         await waitFor(() => expect(input).toHaveValue('11:00'))
         await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
-        await expect(container).toHaveTextContent('Must be after start time')
+        await expect(container).toHaveTextContent('Select a time at or after the start time.')
     })
 
     it('names the field by its title, or by inputAriaProps for a label rendered outside (1.3.1, 4.1.2)', async () => {
@@ -464,7 +498,7 @@ describe('StyledTimePicker required', () => {
 
         await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
         await expect(container).toHaveTextContent('Required')
-        await expect(container).not.toHaveTextContent('Invalid time format')
+        await expect(container).not.toHaveTextContent('Enter a valid time in HH:mm format.')
     })
 
     it('uncommits an emptied field and shows Required on blur', async () => {
@@ -493,7 +527,7 @@ describe('StyledTimePicker required', () => {
 
         await waitFor(() => expect(input).not.toHaveAttribute('aria-invalid'))
         await expect(container).not.toHaveTextContent('Required')
-        await expect(container).not.toHaveTextContent('Invalid time format')
+        await expect(container).not.toHaveTextContent('Enter a valid time in HH:mm format.')
     })
 
     it('shows Required after the eraser empties the field', async () => {
@@ -555,7 +589,7 @@ describe('StyledTimePicker required', () => {
         await waitFor(() => expect(input).toHaveValue('11:00'))
         input.blur()
 
-        await waitFor(() => expect(container).toHaveTextContent('Must be after start time'))
+        await waitFor(() => expect(container).toHaveTextContent('Select a time at or after the start time.'))
         await expect(container).not.toHaveTextContent('Required')
     })
 
@@ -759,5 +793,51 @@ describe('StyledTimePicker isTimeDisabled', () => {
         // rather than a matcher, which both says the actual claim and keeps `any` out of the test.
         const committed = onSelect.mock.calls.map((call) => call[0] as Date | undefined)
         await expect(committed.some((picked) => picked instanceof Date && picked.getHours() === 23)).toBe(false)
+    })
+})
+
+describe('StyledTimePicker messages', () => {
+    afterEach(cleanup)
+
+    const invalidOverride = { invalid: { en: 'Use the catalog time.', no: 'Bruk katalogtiden.' } }
+
+    it('shows a per-key override in the picker language', async () => {
+        const { container } = mount(
+            <StyledTimePicker
+                dataTest='msg-time'
+                label='Time'
+                locale='no'
+                messages={invalidOverride}
+                onSelect={() => undefined}
+            />,
+        )
+        const input = container.querySelector<HTMLInputElement>('input[data-testid="msg-time"]')!
+
+        input.focus()
+        await userEvent.keyboard('09')
+        input.blur()
+
+        await waitFor(() => expect(container).toHaveTextContent('Bruk katalogtiden.'))
+    })
+
+    it('keeps the default for every key that is not overridden', async () => {
+        const { container } = mount(
+            <StyledTimePicker
+                dataTest='msg-end'
+                label='End time'
+                notBeforeTime={new Date(2026, 9, 5, 12, 0)}
+                value={new Date(2026, 9, 5, 13, 0)}
+                messages={invalidOverride}
+                onSelect={() => undefined}
+            />,
+        )
+        const input = container.querySelector<HTMLInputElement>('input[data-testid="msg-end"]')!
+
+        await userEvent.clear(input)
+        await userEvent.keyboard('1100')
+        await waitFor(() => expect(input).toHaveValue('11:00'))
+        input.blur()
+
+        await waitFor(() => expect(container).toHaveTextContent('Select a time at or after the start time.'))
     })
 })

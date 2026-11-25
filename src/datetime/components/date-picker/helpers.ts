@@ -2,8 +2,8 @@ import { format, startOfToday } from 'date-fns'
 import type { Dispatch, SetStateAction } from 'react'
 import type { Matcher } from 'react-day-picker'
 
-export const getValue = (date?: Date, _dateFormat = 'dd/MM/yyyy'): string => {
-    return date ? format(date, 'dd/MM/yyyy') : ''
+export const getValue = (date?: Date, _dateFormat = 'dd.MM.yyyy'): string => {
+    return date ? format(date, 'dd.MM.yyyy') : ''
 }
 
 export const setPickerPosition = (

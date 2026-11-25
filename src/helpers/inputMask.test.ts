@@ -35,7 +35,7 @@ describe('date input mask ↔ font coupling (regression guard)', () => {
     it('keeps the date mask a space scaffold', () => {
         // The scaffold spaces ARE the empty day/month/year slots — the mask must contain them.
         expect(DATE_INPUT_MASK.maskChar).toBe(' ')
-        expect(DATE_INPUT_MASK.mask).toBe('  /  /    ')
+        expect(DATE_INPUT_MASK.mask).toBe('  .  .    ')
         expect([...DATE_INPUT_MASK.mask].filter((c) => c === ' ')).toHaveLength(8)
     })
 
