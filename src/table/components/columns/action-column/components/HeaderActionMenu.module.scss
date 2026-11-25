@@ -120,32 +120,6 @@
     box-shadow: 0 2px 4px rgba(34, 33, 51, 0.15);
 }
 
-// Where a column lifted from the keyboard will land: a 3px line in the focus ring's colour on its leading edge, drawn over
-// the row (no border, so nothing nudges). At the ends it is the top edge of the first row or the bottom edge of the last.
-// Never on a mouse drag (`data-drop-edge` is set for a keyboard lift only).
-.drag-item[data-drop-edge]::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background-color: var(--colors-gama-500);
-    pointer-events: none;
-
-    @media (forced-colors: active) {
-        forced-color-adjust: none;
-        background-color: Highlight;
-    }
-}
-
-.drag-item[data-drop-edge='before']::after {
-    top: 0;
-}
-
-.drag-item[data-drop-edge='after']::after {
-    bottom: 0;
-}
-
 // The box keeps a 24 x 24px slot centred on the 16px box: with the 4px either side it takes the room the 16px box and its
 // 8px either side took, so the row looks as it did. The whole row is the target.
 .drag-item .column-checkbox {

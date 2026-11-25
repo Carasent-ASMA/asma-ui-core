@@ -23,7 +23,7 @@ import { compact } from 'src/helpers/arrays'
 import { headerLabelText } from 'src/table/helpers/headerLabel'
 import { useTranslations } from 'src/table/hooks/useTranslations'
 import { INTERNAL_COLUMN_IDS } from 'src/table/types'
-import { ColumnSettingsItem, type DropEdge } from './ColumnSettingsItem'
+import { ColumnSettingsItem } from './ColumnSettingsItem'
 import { columnStop, moveFocusInColumnMenu, type ColumnItemPart } from './columnMenuKeyboard'
 import styles from './HeaderActionMenu.module.scss'
 
@@ -36,10 +36,9 @@ interface ColumnSettingsMenuProps<TData> {
     onReorderingChange: (reordering: boolean) => void
 }
 
-/** A column being moved, by the pointer or the keyboard, and the column it is over. */
+/** A column being moved, by the pointer or the keyboard. */
 interface ColumnMove {
     activeId: string
-    overId: string | null
     byKeyboard: boolean
 }
 
@@ -59,9 +58,9 @@ const SILENT: Announcements = {
  * - Space or Enter on a handle lifts the column (dnd-kit's `KeyboardSensor`); Up and Down then move it, Space or Enter
  *   drops it and gives its row the focus, Escape puts it back. Fixed columns neither move nor take a moved column: the
  *   same collision rule serves the pointer and the keyboard.
- * - A column lifted from the keyboard is raised (shadow), and a 3px line on its leading edge marks where it will land;
- *   a mouse drag looks as it always did (Figma draws no drag state). The focus bar stays on the row while the keyboard
- *   is on its handle and while it is lifted; the handle adds its own ring.
+ * - A column lifted from the keyboard is raised (shadow); a mouse drag looks as it always did (Figma draws no drag
+ *   state). No line marks where it will land: the lifted row itself stands there. The focus bar stays on the row while
+ *   the keyboard is on its handle and while it is lifted; the handle adds its own ring.
  * - Each step is announced in a polite live region; the footer shows the keys while the keyboard is on a handle.
  */
 export function ColumnSettingsMenu<TData>({
@@ -125,14 +124,13 @@ export function ColumnSettingsMenu<TData>({
     const handleDragStart = ({ active, activatorEvent }: DragStartEvent): void => {
         const id = String(active.id)
         lastOverId.current = id
-        setMove({ activeId: id, overId: id, byKeyboard: isKeyboardEvent(activatorEvent) })
+        setMove({ activeId: id, byKeyboard: isKeyboardEvent(activatorEvent) })
         setAnnouncement(t.column_picked_up(labelOf(id), positionOf(id), total))
         onReorderingChange(true)
     }
 
     const handleDragOver = ({ over }: DragOverEvent): void => {
         const overId = over ? String(over.id) : null
-        setMove((current) => current && { ...current, overId })
         if (overId === null || overId === lastOverId.current) return
         lastOverId.current = overId
         setAnnouncement(t.column_moved(positionOf(overId), total))
@@ -166,11 +164,6 @@ export function ColumnSettingsMenu<TData>({
             return
         }
         moveFocusInColumnMenu(event)
-    }
-
-    const dropEdgeOf = (id: string): DropEdge | null => {
-        if (move?.activeId !== id || !move.byKeyboard || !move.overId || move.overId === id) return null
-        return ids.indexOf(move.overId) > ids.indexOf(id) ? 'after' : 'before'
     }
 
     return (
@@ -223,7 +216,6 @@ export function ColumnSettingsMenu<TData>({
                                     reorderLabel={t.reorder_column(labelOf(column.id))}
                                     tabStop={stop?.id === column.id ? stop.part : null}
                                     liftedByKeyboard={move?.byKeyboard === true && move.activeId === column.id}
-                                    dropEdge={dropEdgeOf(column.id)}
                                     onToggle={() => column.toggleVisibility(!column.getIsVisible())}
                                     onFocusPart={(id, part) => setTabStop({ id, part })}
                                 />

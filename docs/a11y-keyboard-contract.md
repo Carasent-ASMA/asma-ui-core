@@ -357,8 +357,9 @@ table's rule, arrows move inside and Tab enters and leaves:
 - **Indicators.** The menu items' 3px inset focus bar on a row while the keyboard focus is on the row or its handle, and
   on the row while it is lifted (UX comment 95823: which row you are on). The handle adds Figma's Quaternary icon button
   Focused ring, a 3px inside stroke with radius 4 (its old rule set a colour only, so it showed none). A column
-  lifted from the keyboard is raised with the Menus shadow, with a 3px gama-500 line on its leading edge for where it will
-  land. Figma draws no drag state, so a mouse drag shows neither: it looks as it always did.
+  lifted from the keyboard is raised with the Menus shadow; no separator line marks where it will land (removed at the
+  user's request, 2026-11-25: the lifted row itself stands there). Figma draws no drag state, so a mouse drag is not
+  raised either: it looks as it always did.
 - **Telling.** A polite `role="status"` region in the menu announces picked up, position n of m, dropped and cancelled, in
   the table's language; dnd-kit's own (assertive, English) region is silenced and its instructions, which describe each
   movable handle, are translated. The footer, pinned under the list (the list scrolls, capped at seven rows), shows the

@@ -163,7 +163,6 @@ describe('Lifting, moving and dropping a column from its handle', () => {
         await expect(announcement()).toBe('Position 3 of 4.')
         // Up and Down move the column now, not the focus.
         await expect(document.activeElement).toBe(handleOf('Role'))
-        await expect(itemOf('Role').getAttribute('data-drop-edge')).toBe('after')
 
         await press(' ')
         await settle(150)
@@ -182,7 +181,7 @@ describe('Lifting, moving and dropping a column from its handle', () => {
 
         await press('{Enter}')
         await press('{ArrowUp}')
-        await expect(itemOf('Notes').getAttribute('data-drop-edge')).toBe('before')
+        await expect(announcement()).toBe('Position 3 of 4.')
         await press('{ArrowUp}')
         await press('{Enter}')
 
@@ -229,23 +228,17 @@ describe('Lifting, moving and dropping a column from its handle', () => {
         await expect(document.activeElement).toBe(rowOf('Role'))
     })
 
-    it('the lifted row is raised and marked: a 3px line in the focus ring’s colour on its leading edge, and the focus bar stays', async () => {
+    it('the lifted row is raised, with no line where it will land (it stands there itself), and the focus bar stays', async () => {
         await mountTable()
         await openMenu()
         await arrowTo('Role')
         await press('{ArrowRight}')
         await press(' ')
-
-        // Not yet moved: no line, for there is nowhere new to land.
-        await expect(itemOf('Role').hasAttribute('data-drop-edge')).toBe(false)
         await press('{ArrowDown}')
 
-        const line = getComputedStyle(itemOf('Role'), '::after')
-        await expect({ height: line.height, colour: line.backgroundColor, bottom: line.bottom }).toEqual({
-            height: '3px',
-            colour: resolveTokenColor('--colors-gama-500'),
-            bottom: '0px',
-        })
+        // No separator: the lifted row itself shows where the column will land.
+        await expect(getComputedStyle(itemOf('Role'), '::after').content).toBe('none')
+        await expect(getComputedStyle(itemOf('Role'), '::before').content).toBe('none')
         await expect(itemOf('Role').getAttribute('data-lifted')).toBe('keyboard')
         await expect(getComputedStyle(itemOf('Role')).boxShadow).not.toBe('none')
         // Which row you are on stays marked while it is lifted; the handle, which has the focus, keeps its ring.
@@ -294,7 +287,6 @@ describe('Lifting, moving and dropping a column from its handle', () => {
         await press('{ArrowDown}{ArrowRight}')
         await press(' ')
         await press('{ArrowUp}')
-        await expect(itemOf('Role').hasAttribute('data-drop-edge')).toBe(false)
         await press(' ')
         await settle(150)
 
