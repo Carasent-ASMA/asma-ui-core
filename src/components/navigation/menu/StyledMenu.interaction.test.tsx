@@ -798,7 +798,10 @@ describe('StyledMenuItem pressed state (ASMA-9003)', () => {
         const gama200 = resolveTokenColor('--colors-gama-200')
         const gama700 = resolveTokenColor('--colors-gama-700')
         const restingRect = selected!.getBoundingClientRect()
-        const restingOutline = getComputedStyle(selected!).outline
+        // v4 `outline-hidden` keeps `outline-style: none` and lets the colour follow `currentColor` (v3's `outline-none` was a
+        // fixed transparent outline), so compare what can paint, not the colour of an outline that is not drawn.
+        const paintedOutline = (s: CSSStyleDeclaration): string => `${s.outlineStyle} ${s.outlineWidth} ${s.outlineOffset}`
+        const restingOutline = paintedOutline(getComputedStyle(selected!))
         const neighbours = [above!, withCheckbox!].map((row) => getComputedStyle(row).backgroundColor)
 
         // Master's timing at rest (none), instant in, and a 150 ms ease-out back only while marked released.
@@ -813,7 +816,7 @@ describe('StyledMenuItem pressed state (ASMA-9003)', () => {
             await expect(style.opacity).toBe('1')
             // Colour only, inside the row: same box, no outline or shadow reaching the flush neighbours.
             await expect(selected!.getBoundingClientRect().toJSON()).toEqual(restingRect.toJSON())
-            await expect(style.outline).toBe(restingOutline)
+            await expect(paintedOutline(style)).toBe(restingOutline)
             await expect(style.boxShadow).toBe('none')
             const neighboursPressed = [above!, withCheckbox!].map((row) => getComputedStyle(row).backgroundColor)
             await expect(neighboursPressed).toEqual(neighbours)
