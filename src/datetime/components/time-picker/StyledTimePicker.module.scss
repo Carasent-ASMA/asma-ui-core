@@ -68,15 +68,20 @@
         align-items: center;
         place-content: center;
 
-        &:hover {
-            background-color: var(--colors-delta-50);
+        // Hover gated like v3's `hoverOnlyWhenSupported` (ASMA-8468): no sticky hover fill after a tap.
+        @media (hover: hover) and (pointer: fine) {
+            &:hover {
+                background-color: var(--colors-delta-50);
+            }
         }
 
         &.styled-time-picker-root_cell__cell-now {
             background-color: var(--colors-gama-50);
 
-            &:hover {
-                background-color: var(--colors-gama-50);
+            @media (hover: hover) and (pointer: fine) {
+                &:hover {
+                    background-color: var(--colors-gama-50);
+                }
             }
         }
 
@@ -84,8 +89,10 @@
             background-color: var(--colors-gama-500);
             color: #fff;
 
-            &:hover {
-                background-color: var(--colors-gama-600);
+            @media (hover: hover) and (pointer: fine) {
+                &:hover {
+                    background-color: var(--colors-gama-600);
+                }
             }
         }
         // Figma Time item State=Disabled (15086-19871): delta-400 text, no fill, not-allowed cursor.
@@ -101,8 +108,10 @@
             color: var(--colors-delta-400);
             cursor: not-allowed;
 
-            &:hover {
-                background-color: #fff;
+            @media (hover: hover) and (pointer: fine) {
+                &:hover {
+                    background-color: #fff;
+                }
             }
         }
         // ASMA-9003: Figma's Time item has no Pressed variant, so a cell takes the design system's pressed

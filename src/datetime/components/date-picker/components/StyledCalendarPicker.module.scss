@@ -217,8 +217,11 @@
         outline-offset: 2px !important;
         box-shadow: none !important;
 
-        &:hover {
-            background-color: var(--colors-gama-100) !important;
+        // Hover gated like v3's `hoverOnlyWhenSupported` (ASMA-8468): no sticky hover fill after a tap.
+        @media (hover: hover) and (pointer: fine) {
+            &:hover {
+                background-color: var(--colors-gama-100) !important;
+            }
         }
     }
 }
@@ -249,8 +252,11 @@
         outline-offset: 2px !important;
         box-shadow: none !important;
 
-        &:hover {
-            background-color: var(--colors-gama-100) !important;
+        // Hover gated like v3's `hoverOnlyWhenSupported` (ASMA-8468): no sticky hover fill after a tap.
+        @media (hover: hover) and (pointer: fine) {
+            &:hover {
+                background-color: var(--colors-gama-100) !important;
+            }
         }
     }
 }
