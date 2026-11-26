@@ -340,7 +340,9 @@ export function StyledSelectAutocomplete<
         // getLabel is stable enough for this memo; options/inputValue are the real inputs.
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [options, inputValue, filterOptions, value])
-    const visibleOptions = useMemo(() => filtered.slice(0, 100), [filtered])
+    // LIST-4: every option, with no row limit, as in the phone picker. A cut at 100 rows hid the rest from
+    // scrolling and the keyboard, with nothing to say so (ASMA-9087).
+    const visibleOptions = filtered
     const enabledOptionIndexes = visibleOptions.flatMap((option, index) =>
         !isOptionDisabled(option) ? [index] : [],
     )
