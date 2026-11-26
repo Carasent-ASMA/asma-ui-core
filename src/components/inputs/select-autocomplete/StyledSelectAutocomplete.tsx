@@ -14,6 +14,7 @@ import {
 import {
     startTransition,
     useEffect,
+    useLayoutEffect,
     useMemo,
     useRef,
     useState,
@@ -220,7 +221,8 @@ const isOptionObjectDisabled = <T,>(option: T): boolean =>
 /**
  * Rows the attached list draws with a keystroke. Every option is listed (long-lists pattern LIST-4): the rows
  * past these follow once the query has stayed still for DRAW_REST_AFTER_MS, in a transition that the next
- * keystroke interrupts, so typing stays quick in a list of thousands. Until ASMA-9087 the list stopped at
+ * keystroke interrupts, so typing stays quick in a list of thousands. They come at once for a cursor past the
+ * first rows and for a list that opens at a choice further down (LIST-10). Until ASMA-9087 the list stopped at
  * FIRST_ROWS and hid every later option.
  */
 const FIRST_ROWS = 100
@@ -294,8 +296,10 @@ export function StyledSelectAutocomplete<
 
     const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
     const open = controlledOpen ?? uncontrolledOpen
-    // The query whose rows past FIRST_ROWS are drawn; a new query or a closed list starts from the first rows.
-    const [allRowsQuery, setAllRowsQuery] = useState<string | null>(null)
+    // Whether the attached list draws only its first FIRST_ROWS rows: a new query and a closed list start there.
+    const [firstRowsOnly, setFirstRowsOnly] = useState(true)
+    // LIST-10: the list opens at the first chosen option. Once the user types or chooses, it stays where it is.
+    const [scrollToChoice, setScrollToChoice] = useState(true)
     const setOpen = (next: boolean): void => {
         // Read-only / disabled fields are display-only: no path (click, keyboard, icon, typing) may
         // open the popup. Closing is always allowed. Gating here is the single root cause — the input's
@@ -308,7 +312,7 @@ export function StyledSelectAutocomplete<
         if (next) onOpen?.()
         else {
             setActiveIndex(null)
-            setAllRowsQuery(null)
+            setFirstRowsOnly(true)
             onClose?.()
         }
     }
@@ -316,6 +320,12 @@ export function StyledSelectAutocomplete<
     const [uncontrolledInput, setUncontrolledInput] = useState('')
     const inputValue = controlledInput ?? uncontrolledInput
     const setInputValue = (event: SyntheticEvent | null, next: string, reason: AutocompleteInputChangeReason): void => {
+        // A typed, cleared or emptied query starts from the first rows again. The label the list writes after a
+        // choice keeps the rows it has, and the cursor with them.
+        if (next !== inputValue && (reason !== 'reset' || next === '')) {
+            setFirstRowsOnly(true)
+            setScrollToChoice(false)
+        }
         if (controlledInput === undefined) setUncontrolledInput(next)
         onInputChange?.(event, next, reason)
     }
@@ -357,16 +367,16 @@ export function StyledSelectAutocomplete<
     // LIST-4: every option is listed, as in the phone picker. The first FIRST_ROWS rows come with the keystroke
     // and the rest once the query stays still (ASMA-9087). The cursor and every index below count over all the
     // options.
-    const allRowsDrawn = filtered.length <= FIRST_ROWS || allRowsQuery === inputValue
+    const allRowsDrawn = !firstRowsOnly || filtered.length <= FIRST_ROWS
     const visibleOptions = useMemo(
         () => (allRowsDrawn ? filtered : filtered.slice(0, FIRST_ROWS)),
         [allRowsDrawn, filtered],
     )
     useEffect(() => {
-        if (!open || allRowsDrawn) return
-        const timer = setTimeout(() => startTransition(() => setAllRowsQuery(inputValue)), DRAW_REST_AFTER_MS)
+        if (!open || isPicker || allRowsDrawn) return
+        const timer = setTimeout(() => startTransition(() => setFirstRowsOnly(false)), DRAW_REST_AFTER_MS)
         return () => clearTimeout(timer)
-    }, [allRowsDrawn, inputValue, open])
+    }, [allRowsDrawn, inputValue, isPicker, open])
     const enabledOptionIndexes = filtered.flatMap((option, index) => (!isOptionDisabled(option) ? [index] : []))
     const enabledActiveIndexes =
         allowSelectAll && isMultiple ? [-1, ...enabledOptionIndexes] : enabledOptionIndexes
@@ -378,18 +388,28 @@ export function StyledSelectAutocomplete<
     const selectedOptionIndex = filtered.findIndex(isSelected)
     // A cursor past the drawn rows draws the rest first, so its row and `aria-activedescendant` exist.
     const moveCursorTo = (index: number | null): void => {
-        if (index !== null && index >= visibleOptions.length) flushSync(() => setAllRowsQuery(inputValue))
+        if (index !== null && index >= visibleOptions.length) flushSync(() => setFirstRowsOnly(false))
         setActiveIndex(index)
     }
 
+    // Each opening starts at the choice (LIST-10). A choice past the first rows draws every row before the first
+    // paint, so the list opens there rather than jumping to it once the rest are drawn.
+    useLayoutEffect(() => {
+        if (!open) return
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setScrollToChoice(true)
+        if (!isPicker && selectedOptionIndex >= FIRST_ROWS) setFirstRowsOnly(false)
+        // Only on opening: the choice of that moment decides where the list opens.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open])
+
     useEffect(() => {
         if (!open) return
-        const index = activeIndex ?? selectedOptionIndex
+        const index = activeIndex ?? (scrollToChoice ? selectedOptionIndex : -1)
         if (index < 0) return
         const id = requestAnimationFrame(() => listRef.current[index]?.scrollIntoView({ block: 'nearest' }))
         return () => cancelAnimationFrame(id)
-        // The chosen option can sit past the first rows; scroll to it once the rest are drawn.
-    }, [activeIndex, open, popperMaxHeight, selectedOptionIndex, visibleOptions.length])
+    }, [activeIndex, open, popperMaxHeight, scrollToChoice, selectedOptionIndex])
 
     const { refs, floatingStyles, context } = useFloating({
         open,
@@ -439,6 +459,7 @@ export function StyledSelectAutocomplete<
     }
 
     const emitChange = (event: SyntheticEvent, option: T, close = !isMultiple || !disableCloseOnSelect): void => {
+        setScrollToChoice(false)
         if (isMultiple) {
             const exists = selectedArray.some((v) => isEqual(option, v))
             const next = exists ? selectedArray.filter((v) => !isEqual(option, v)) : [...selectedArray, option]
@@ -458,6 +479,7 @@ export function StyledSelectAutocomplete<
     }
 
     const clearValue = (event: SyntheticEvent): void => {
+        setScrollToChoice(false)
         onChange?.(event, (isMultiple ? [] : null) as never, 'clear', undefined)
         setInputValue(event, '', 'clear')
     }
@@ -480,6 +502,7 @@ export function StyledSelectAutocomplete<
     }
 
     const toggleSelectAll = (event: SyntheticEvent): void => {
+        setScrollToChoice(false)
         const allSelected = options.length > 0 && selectedArray.length === options.length
         onChange?.(event, (allSelected ? [] : options) as never, allSelected ? 'clear' : 'selectOption', undefined)
     }

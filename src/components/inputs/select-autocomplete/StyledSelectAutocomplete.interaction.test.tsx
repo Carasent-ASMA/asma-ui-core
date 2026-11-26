@@ -484,6 +484,71 @@ describe('StyledSelectAutocomplete long lists (LIST-4)', () => {
         await userEvent.keyboard('{Enter}')
         await expect(onChange).toHaveBeenCalledWith('Option 150')
     })
+
+    const MultiFixture = ({ initialValue }: { initialValue: string[] }): JSX.Element => {
+        const [value, setValue] = useState<string[]>(initialValue)
+        return (
+            <StyledSelectAutocomplete<string, true, false, false>
+                dataTest='ac'
+                multiple
+                disableCloseOnSelect
+                options={MANY}
+                value={value}
+                onChange={(_event, next) => setValue(next)}
+                renderInput={(params) => <StyledInputField {...params} dataTest='ac-input' label='Team' />}
+            />
+        )
+    }
+    const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms))
+
+    it('opens at a chosen option past the first 100 rows at once, without a later jump (LIST-10)', async () => {
+        mount(<AutocompleteFixture options={MANY} initialValue='Option 140' />)
+
+        await userEvent.click(input())
+        await waitFor(() => expect(listbox()).not.toBeNull())
+
+        await expect(optionRows()).toHaveLength(MANY.length)
+        await waitFor(() => expect(listbox()!.scrollTop).toBeGreaterThan(0))
+        const opened = listbox()!.scrollTop
+        await sleep(400)
+        await expect(listbox()!.scrollTop).toBe(opened)
+    })
+
+    it('stays where it is when the first ticked option is unticked', async () => {
+        mount(<MultiFixture initialValue={['Option 005', 'Option 120']} />)
+        await userEvent.click(input())
+        await waitFor(() => expect(optionRows()).toHaveLength(MANY.length))
+        listbox()!.scrollTop = 0
+
+        await userEvent.click(optionRows().find((row) => row.textContent === 'Option 005')!)
+        await sleep(300)
+
+        await expect(listbox()!.scrollTop).toBe(0)
+    })
+
+    it('draws the first 100 rows again when a query goes back to an earlier one', async () => {
+        mount(<AutocompleteFixture options={MANY} />)
+        await userEvent.click(input())
+        await waitFor(() => expect(optionRows()).toHaveLength(MANY.length))
+
+        await userEvent.keyboard('x')
+        await userEvent.keyboard('{Backspace}')
+
+        await expect(optionRows()).toHaveLength(100)
+        await waitFor(() => expect(optionRows()).toHaveLength(MANY.length))
+    })
+
+    it('keeps the cursor on the option Space chose past the first 100 rows', async () => {
+        mount(<AutocompleteFixture options={MANY} />)
+        input().focus()
+        await userEvent.keyboard('{ArrowDown}')
+        await waitFor(() => expect(listbox()).not.toBeNull())
+        await userEvent.keyboard('{End}')
+
+        await userEvent.keyboard(' ')
+
+        await expect(activeOption()).toHaveTextContent('Option 150')
+    })
 })
 
 /* Disabled options stay on the virtual cursor's path (WAI-ARIA APG listbox; disabled-states DIS-3), so
