@@ -1,0 +1,54 @@
+// Figma Checkbox Focused (11460-105640): a 3px ring, 26px outer, and a 2px white gap (20px) around the 16px box, drawn as
+// the checkbox wrapper's `::before` (the ring) and `::after` (the gap), centred on it. The caller lifts the box above them
+// (`z-index: 2`). Shared by the base-ui checkbox and the table's select checkboxes (ASMA-8875), so both look the same.
+
+/// The frame's measures, as custom properties a state may override (the base-ui Error frame does).
+@mixin frame-vars {
+    --cb-frame-size: 26px;
+    --cb-focus-gap-size: 20px;
+    --cb-frame-color: var(--colors-focus-ring);
+    --cb-frame-radius: 4px;
+}
+
+/// The ring and the gap, on the wrapper's pseudo-elements.
+@mixin frame {
+    &::before,
+    &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+    }
+
+    &::before {
+        width: var(--cb-frame-size);
+        height: var(--cb-frame-size);
+        // Above the opaque hover circle (z-index 0), so a hovered focused/error checkbox keeps its frame.
+        z-index: 1;
+        border-radius: var(--cb-frame-radius);
+        background: var(--cb-frame-color);
+    }
+
+    &::after {
+        width: var(--cb-focus-gap-size);
+        height: var(--cb-focus-gap-size);
+        z-index: 1;
+        border-radius: 1px;
+        background: white;
+    }
+}
+
+/// Windows high contrast: the ring in the system's text colour, the gap in its background colour.
+@mixin frame-forced-colors {
+    forced-color-adjust: none;
+
+    &::before {
+        background: CanvasText;
+    }
+
+    &::after {
+        background: Canvas;
+    }
+}

@@ -1,4 +1,4 @@
-import { StrictMode, useState } from 'react'
+import { StrictMode, useRef, useState } from 'react'
 import { afterEach, beforeEach, describe, it, vi } from 'vitest'
 import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
@@ -766,7 +766,36 @@ describe('StyledDialog native Back (ASMA-8471)', () => {
         await waitFor(() => expect(dialog.matches(':modal')).toBe(true))
     })
 
-    it('the host kill switch prevents native Back from invoking the close path', async () => {
+    it('a forced native close re-shows the dialog with focus back on its initialFocusRef (ASMA-8895 F3)', async () => {
+        const Fixture = (): JSX.Element => {
+            const safeRef = useRef<HTMLButtonElement>(null)
+            return (
+                <StyledDialog dataTest='reshow-focus' dialogTitle='Delete?' open disableEscapeKeyDown initialFocusRef={safeRef}>
+                    <StyledButton dataTest='reshow-danger' error>
+                        Delete
+                    </StyledButton>
+                    <StyledButton dataTest='reshow-safe' variant='outlined' refLink={safeRef}>
+                        Keep editing
+                    </StyledButton>
+                </StyledDialog>
+            )
+        }
+        mount(<Fixture />)
+        const dialog = await waitFor(() => {
+            const node = dialogByTest('reshow-focus')
+            if (!node) throw new Error('dialog not mounted yet')
+            return node
+        })
+        const safe = dialog.querySelector<HTMLButtonElement>('[data-testid="reshow-safe"]')!
+        await waitFor(() => expect(safe).toHaveFocus())
+
+        // Second Back with no tap in between: the close watcher forces the dialog shut, and it is re-shown.
+        dialog.close()
+        await waitFor(() => expect(dialog.matches(':modal')).toBe(true))
+        await waitFor(() => expect(safe).toHaveFocus())
+    })
+
+    it('with the host kill switch off, native Back still closes the dialog through its close path', async () => {
         window.__ASMA__SHELL__!.overlayBack!.enabled = false
         const onClose = fn()
         mount(<StyledDialog dataTest='disabled-back' dialogTitle='Disabled' open onClose={onClose} />)
@@ -780,8 +809,23 @@ describe('StyledDialog native Back (ASMA-8471)', () => {
         dialog.dispatchEvent(cancelEvent)
 
         await expect(cancelEvent.defaultPrevented).toBe(true)
-        await expect(onClose).not.toHaveBeenCalled()
-        await expect(dialog.matches(':modal')).toBe(true)
+        await waitFor(() => expect(onClose).toHaveBeenCalledOnce())
+    })
+
+    it('with the host kill switch off, a forced native close asks the dialog to close instead of only re-showing it', async () => {
+        window.__ASMA__SHELL__!.overlayBack!.enabled = false
+        const onClose = fn()
+        mount(<StyledDialog dataTest='disabled-forced' dialogTitle='Disabled' open onClose={onClose} />)
+        const dialog = await waitFor(() => {
+            const node = dialogByTest('disabled-forced')
+            if (!node) throw new Error('dialog not mounted yet')
+            return node
+        })
+        await waitFor(() => expect(dialog.matches(':modal')).toBe(true))
+
+        dialog.close()
+
+        await waitFor(() => expect(onClose).toHaveBeenCalledOnce())
     })
 
     it('a forced native close re-shows the dialog while an async close is still pending', async () => {
@@ -833,5 +877,41 @@ describe('StyledDialog native Back (ASMA-8471)', () => {
         await expect(onClose).not.toHaveBeenCalled()
 
         unregisterTop()
+    })
+})
+
+describe('StyledDialog initialFocusRef (ASMA-8895)', () => {
+    afterEach(() => cleanup())
+
+    it('starts focus on the given element, not on the dialog, and keeps it after the next frame', async () => {
+        const Fixture = (): JSX.Element => {
+            const safeRef = useRef<HTMLButtonElement>(null)
+            return (
+                <StyledDialog open dataTest='confirm' dialogTitle='Delete?' onClose={() => undefined} initialFocusRef={safeRef}>
+                    <StyledButton dataTest='danger' error>
+                        Delete
+                    </StyledButton>
+                    <StyledButton dataTest='safe' variant='outlined' refLink={safeRef}>
+                        Cancel
+                    </StyledButton>
+                </StyledDialog>
+            )
+        }
+        const { container } = mount(<Fixture />)
+        const safe = container.querySelector<HTMLButtonElement>('[data-testid="safe"]')!
+        await expect(safe).toHaveFocus()
+        await new Promise(requestAnimationFrame)
+        await new Promise(requestAnimationFrame)
+        await expect(safe).toHaveFocus()
+    })
+
+    it('without it the dialog itself takes focus, as before', async () => {
+        const { container } = mount(
+            <StyledDialog open dataTest='plain' dialogTitle='Plain' onClose={() => undefined}>
+                <StyledButton dataTest='first'>First</StyledButton>
+            </StyledDialog>,
+        )
+        await new Promise(requestAnimationFrame)
+        await expect(container.querySelector('dialog')).toHaveFocus()
     })
 })

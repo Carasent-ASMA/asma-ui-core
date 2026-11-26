@@ -1,7 +1,14 @@
 import { useState } from 'react'
 import { afterEach, describe, it } from 'vitest'
 import { expect, userEvent, waitFor, within } from 'src/test-utils/interaction-api'
-import { cleanup, describeFocusIndicator, focusStyleOf, mount } from 'src/test-utils/renderInteraction'
+import {
+    cleanup,
+    describeFocusIndicator,
+    focusStyleOf,
+    mount,
+    resolveTokenColor,
+} from 'src/test-utils/renderInteraction'
+import { holdPressed, mouse, space, transitionOf } from 'src/test-utils/pressedInteraction'
 import { StyledTab } from './StyledTab'
 import { StyledTabs } from './StyledTabs'
 
@@ -167,6 +174,27 @@ describe('StyledTabs keyboard contract', () => {
         await expect(indicator, 'focused tab paints no perceivable focus indicator').not.toBeNull()
     })
 
+    it('drops the scroll button when shorter labels fit a content-sized tab bar (ASMA-8879)', async () => {
+        const RelabelFixture = ({ labels }: { labels: [string, string] }): JSX.Element => (
+            <div className='w-max max-w-full'>
+                <StyledTabs value='two' variant='scrollable'>
+                    <StyledTab value='one' label={labels[0]} />
+                    <StyledTab value='two' label={labels[1]} />
+                </StyledTabs>
+            </div>
+        )
+        const waitForUnderline = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 400))
+        const { container, rerender } = mount(<RelabelFixture labels={['Oversikt', 'Timer registrerte (lang)']} />)
+        await waitForUnderline()
+        await expect(container.querySelector('[aria-label="scroll tabs right"]')).toBeNull()
+
+        // The underline still spans the old, wider tab while it animates; that is not tab overflow.
+        rerender(<RelabelFixture labels={['Overview', 'Time registered']} />)
+        await expect(container.querySelector('[aria-label="scroll tabs right"]')).toBeNull()
+        await waitForUnderline()
+        await expect(container.querySelector('[aria-label="scroll tabs right"]')).toBeNull()
+    })
+
     it.each(['default', 'small'] as const)('renders 3px active and hover indicators without changing the %s tab geometry', async size => {
         const { container } = mount(
             <StyledTabs value='one' size={size}>
@@ -185,5 +213,100 @@ describe('StyledTabs keyboard contract', () => {
         await userEvent.hover(tabs[1]!)
         await expect(getComputedStyle(tabs[1]!).boxShadow).toContain('0px -3px 0px 0px')
         await expect(tabs[1]!.getBoundingClientRect().height).toBe(tabHeight)
+    })
+})
+
+/** A held Space key, which Chromium marks `:active` on a focused native button. */
+const holdSpace = async (whileHeld: () => Promise<void>): Promise<void> => {
+    await space('keyDown')
+    try {
+        await whileHeld()
+    } finally {
+        await space('keyUp')
+    }
+}
+
+describe('StyledTab pressed state (ASMA-9003)', () => {
+    afterEach(cleanup)
+
+    it('fills a pressed inactive tab gama-200 and shows the 1px separator, not the hover underline', async () => {
+        const { container } = mount(<TabsFixture />)
+        const [, two] = tabsOf(container)
+        const restingRect = two!.getBoundingClientRect()
+
+        // Rest and hover keep master's `transition-colors` (150 ms, Tailwind's default curve).
+        const masterTiming = { duration: '0.15s', timing: 'cubic-bezier(0.4, 0, 0.2, 1)' }
+        await expect(transitionOf(two!)).toMatchObject(masterTiming)
+        await mouse('mouseMoved', two!)
+        await expect(transitionOf(two!)).toMatchObject(masterTiming)
+
+        await holdPressed(two!, async () => {
+            const style = getComputedStyle(two!)
+            // Instant in.
+            await expect(style.transitionProperty).toBe('none')
+            await expect(style.backgroundColor).toBe(resolveTokenColor('--colors-gama-200'))
+            await expect(style.color).toBe(resolveTokenColor('--colors-gama-700'))
+            await expect(style.opacity).toBe('1')
+            // The tablist's 1px separator, drawn as a background line under the fill (no box-shadow, so the
+            // focus ring never competes) — the 3px hover underline does not show.
+            await expect(style.backgroundImage).toBe(
+                `linear-gradient(to top, ${resolveTokenColor('--colors-delta-200')} 1px, rgba(0, 0, 0, 0) 1px)`,
+            )
+            await expect(style.boxShadow).not.toContain('-3px')
+            // Colour only: no size change.
+            await expect(two!.getBoundingClientRect().toJSON()).toEqual(restingRect.toJSON())
+        })
+        // Released: the pressed colours ease back over 150 ms ease-out while the release marker stays.
+        await expect(two).toHaveAttribute('data-press-released')
+        await expect(transitionOf(two!)).toMatchObject({ duration: '0.15s', timing: 'ease-out' })
+        await mouse('mouseMoved', { x: 1, y: 1 })
+        await expect(two).not.toHaveAttribute('data-press-released')
+        await expect(transitionOf(two!)).toMatchObject(masterTiming)
+    })
+
+    it('keeps the selected indicator bar visible on a pressed selected tab (criterion 5)', async () => {
+        const { container } = mount(<TabsFixture />)
+        const [one] = tabsOf(container)
+        const bar = container.querySelector<HTMLElement>('[role="tablist"] > span[aria-hidden]')!
+
+        await holdPressed(one!, async () => {
+            await expect(getComputedStyle(one!).backgroundColor).toBe(resolveTokenColor('--colors-gama-200'))
+            // The bar is painted over the tab's fill: it is what a point on it hits.
+            const barBox = bar.getBoundingClientRect()
+            await expect(barBox.height).toBe(3)
+            await expect(document.elementFromPoint(barBox.left + barBox.width / 2, barBox.top + 1)).toBe(bar)
+            await expect(getComputedStyle(bar).backgroundColor).toBe(resolveTokenColor('--colors-gama-500'))
+        })
+    })
+
+    it('shows the pressed fill while Space is held and keeps the focus ring on top (2.4.7)', async () => {
+        const { container } = mount(<TabsFixture />)
+        const [one] = tabsOf(container)
+        await userEvent.tab()
+        await expect(document.activeElement).toBe(one)
+        const ring = getComputedStyle(one!).boxShadow
+
+        await holdSpace(async () => {
+            await expect(getComputedStyle(one!).backgroundColor).toBe(resolveTokenColor('--colors-gama-200'))
+            await expect(getComputedStyle(one!).boxShadow).toBe(ring)
+        })
+    })
+
+    it('shows no pressed look when the arrow keys move focus, nor on a disabled tab', async () => {
+        const { container } = mount(<TabsFixture />)
+        const [one, two, three] = tabsOf(container)
+        const gama200 = resolveTokenColor('--colors-gama-200')
+        one!.focus()
+
+        await userEvent.keyboard('{ArrowRight}')
+        await expect(document.activeElement).toBe(two)
+        await expect(getComputedStyle(two!).backgroundColor).not.toBe(gama200)
+
+        const resting = getComputedStyle(three!)
+        const before = { backgroundColor: resting.backgroundColor, color: resting.color }
+        await holdPressed(three!, async () => {
+            const style = getComputedStyle(three!)
+            await expect({ backgroundColor: style.backgroundColor, color: style.color }).toEqual(before)
+        })
     })
 })

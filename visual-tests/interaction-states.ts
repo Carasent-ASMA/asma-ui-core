@@ -122,6 +122,22 @@ const CARD_CAPTURES: InteractionCapture[] = [
  * Open-state captures — complements `stories.spec.ts` (default/closed glance only).
  * Golden baselines remain v3.34.0; run `pnpm vrt:accept` after intentional visual changes.
  */
+/**
+ * ASMA-8895: the unsaved-changes dialog on a phone. The story capture runs at 1280 × 720, where the buttons
+ * stay on one row, so the small-screen layout (100vw − 32 px, buttons stacked full width in code order,
+ * 24 / 8 px apart) needs its own capture at the Figma mobile width: 320 px, a 288 px dialog.
+ */
+const UNSAVED_CHANGES_PHONE_CAPTURES: InteractionCapture[] = (
+    ['without-save', 'without-save-norwegian', 'with-save', 'with-save-norwegian'] as const
+).map((story) => ({
+    storyId: `feedback-unsavedchangesdialog--${story}`,
+    screenshot: `feedback-unsavedchangesdialog--${story}--phone--open.png`,
+    act: async (page) => {
+        await page.setViewportSize({ width: 320, height: 640 })
+        await page.locator('[data-testid="unsaved-changes-dialog-buttons"][data-stacked="true"]').waitFor()
+    },
+}))
+
 export const INTERACTION_CAPTURES: InteractionCapture[] = [
     {
         storyId: 'datetime-datepicker--date-picker',
@@ -295,12 +311,29 @@ export const INTERACTION_CAPTURES: InteractionCapture[] = [
             await page.getByRole('button', { name: 'Unsorted', exact: true }).focus()
         },
     },
+    // ASMA-8597 (Ana Rozimova, Jira comment 95216): a header label cut short by its column shows its full text in the table's
+    // tooltip. Keyboard focus shows it at once, beside the header-wide focus frame; the story's own baseline has it hovered.
+    {
+        storyId: 'data-display-styledtable--truncated-header-tooltip',
+        screenshot: 'data-display-styledtable--truncated-header-tooltip--focus--open.png',
+        act: async (page) => {
+            await page.mouse.move(1, 1)
+            // A key press first, so the programmatic focus is keyboard focus (:focus-visible).
+            await page.keyboard.press('Shift')
+            await page.getByRole('button', { name: 'Quarterly revenue forecast owner', exact: true }).focus()
+            await page.getByRole('tooltip').waitFor({ state: 'visible' })
+        },
+    },
     // ASMA-8597 resize zone (AC 17): hovering a column shows its 4px x 24px bar at the right edge of the 24 x 28px zone;
     // with the pointer over the zone it is filled gama-50 and the bar is gama-400 (UX round 3, 2026-11-02).
     {
         storyId: 'data-display-styledtable--resize-handle',
         screenshot: 'data-display-styledtable--resize-handle--hover--open.png',
         act: async (page) => {
+            // The narrow column's label is cut short, so a half second of hover would open its header tooltip (ASMA-8597).
+            // This capture is about the resize bar, and it must not depend on how fast the screenshot is taken: the tooltip
+            // has its own capture (`truncated-header-tooltip`).
+            await page.addStyleTag({ content: '[role="tooltip"] { display: none !important; }' })
             await page.getByRole('button', { name: 'Narrow column', exact: true }).hover()
         },
     },
@@ -361,5 +394,16 @@ export const INTERACTION_CAPTURES: InteractionCapture[] = [
             await page.mouse.move(1, 1)
         },
     },
+    // ASMA-9001: a chip label wraps only below 320px, so the first-line control placement needs a
+    // narrow capture rather than the 1280px still.
+    {
+        storyId: 'datadisplay-interactivechip--narrow-wrapped-labels',
+        screenshot: 'datadisplay-interactivechip--narrow-wrapped-labels--narrow--open.png',
+        act: async (page) => {
+            await page.setViewportSize({ width: 300, height: 500 })
+            await page.mouse.move(1, 1)
+        },
+    },
     ...CARD_CAPTURES,
+    ...UNSAVED_CHANGES_PHONE_CAPTURES,
 ]

@@ -20,7 +20,7 @@ import { OrderColumnsFeature } from 'src/table/custom-features/order-columns/Ord
 import { usePersistColumnOrder } from '../custom-features/order-columns/usePersistColumnOrder'
 import { usePersistedColumnOrder } from 'src/table/custom-features/order-columns/usePersistedColumnOrder'
 
-import { getPersistedPageSizeKey, usePersistedPageSize } from './usePersistedPageSize'
+import { DEFAULT_TABLE_PAGE_SIZE, getPersistedPageSizeKey, usePersistedPageSize } from './usePersistedPageSize'
 import {
     columnSizingSignature,
     getColumnSizingStorageKey,
@@ -30,6 +30,7 @@ import {
 import {
     getSortingStorageKey,
     readSortingFromStorage,
+    savesSorting,
     serializeSorting,
     sortingSignature,
 } from './usePersistedSorting'
@@ -125,8 +126,12 @@ export const useStyledTable = <
     const columnSizingKey = savesWidths ? uniqueKey : undefined
     const columnSizingStorageKey = getColumnSizingStorageKey(columnSizingKey)
     const persistedColumnSizing = usePersistedColumnSizing(columnSizingKey, defaultColumnSizing)
-    // Sorting is saved only when the table opts in (D1) and has a key to save it under.
-    const sortingStorageKey = persistSorting ? getSortingStorageKey(uniqueKey) : undefined
+    // Sorting is saved whenever the table has a key to save it under (ASMA-8698), unless it opts out with `persistSorting={false}`
+    // or the app owns the state: `state.sorting`, or an `onSortingChange` that TanStack calls instead of updating it (`savesSorting`).
+    const controlledSorting = rest.state?.sorting !== undefined || rest.onSortingChange !== undefined
+    const sortingStorageKey = savesSorting({ uniqueKey, persistSorting, controlled: controlledSorting })
+        ? getSortingStorageKey(uniqueKey)
+        : undefined
     const persistedSorting = useMemo(
         () =>
             sortingStorageKey
@@ -140,7 +145,7 @@ export const useStyledTable = <
         [sortingStorageKey],
     )
     const persistedPageSize = usePersistedPageSize(uniqueKey)
-    const resolvedPageSize = persistedPageSize ?? pageSize ?? 50
+    const resolvedPageSize = persistedPageSize ?? pageSize ?? DEFAULT_TABLE_PAGE_SIZE
 
     // The default comparison (ASMA-8597, P2f). It reads the direction of the column it compares from the table that sorts,
     // through this ref, which is filled right after `useReactTable` below: not the app's optional `tableInstanceRef`, and
@@ -167,7 +172,7 @@ export const useStyledTable = <
         _features: [ExpandedRowsFeature, FocusedRowsFeature, OrderColumnsFeature, RowSelectionTooltipFeature],
         columns: sizedColumns,
         data,
-        meta: { locale: locale ?? 'en', hideHeader: Boolean(rest.hideHeader) },
+        meta: { locale: locale ?? 'en' },
         initialState: {
             pagination: { pageIndex: 0, pageSize: resolvedPageSize },
             columnVisibility: {
@@ -225,7 +230,11 @@ export const useStyledTable = <
         tableInstanceRef.current = table
     }
 
-    usePersistColumnOrder(table, layoutOptedIn ? undefined : persistColumnOrderKey)
+    usePersistColumnOrder(table, layoutOptedIn ? undefined : persistColumnOrderKey, {
+        saved: columnOrder,
+        defaultOrder: initialState?.columnOrder,
+        controlled: rest.state?.columnOrder !== undefined,
+    })
 
     // Brings the state in step with new columns and changed defaults before anything is saved (ASMA-8695).
     const reconcilingLayout = useColumnLayoutReconcile(table, {
@@ -260,7 +269,7 @@ export const useStyledTable = <
         defaultValue: defaultSorting,
         saved: persistedSorting,
         // A table that owns `state.sorting` loads the new key's sort through `usePersistedSorting`.
-        controlled: rest.state?.sorting !== undefined,
+        controlled: controlledSorting,
         toSignature: sortingSignature,
         toStorage: serializeSorting,
         applyState: (sorting) => table.setSorting(sorting),
@@ -284,7 +293,7 @@ export const useStyledTable = <
         : undefined
 
     // Reset columns (ASMA-8597, REQ-008): order and widths go back to the defaults of this render, and
-    // sorting does too only on a table that opted in (D1). On a table with `persistColumnLayout` the visibility
+    // sorting does too on a table that saves it (ASMA-8698). On a table with `persistColumnLayout` the visibility
     // goes back too (ASMA-8695, OQ-02); any other table's visibility, pinning, page size, selection and
     // expansion are left alone. Assigned on every render so it always sees the current defaults.
     table.resetColumnSettings = () => {
@@ -314,6 +323,8 @@ export const useStyledTable = <
     const storageKey = getPersistedPageSizeKey(uniqueKey)
     const pageSizeState = table.getState().pagination?.pageSize
     const hydratedStorageKeyRef = useRef<string | undefined>(undefined)
+    /** The page size the table had when it was last loaded from, or saved to, the current key. */
+    const lastPageSizeRef = useRef<number | undefined>(undefined)
 
     useEffect(() => {
         hydratedStorageKeyRef.current = undefined
@@ -332,9 +343,18 @@ export const useStyledTable = <
         if (hydratedStorageKeyRef.current !== storageKey) {
             if (pageSizeState !== resolvedPageSize) return
 
+            // Loaded: the saved size, or the table's own when none is saved. Mounting and loading a key write nothing; only a
+            // change after that does (ASMA-8698). A table opened before its old entries were migrated would otherwise save the
+            // default under the new key, and the migration, which never overwrites, would keep that and drop the user's size.
             hydratedStorageKeyRef.current = storageKey
+            lastPageSizeRef.current = pageSizeState
+
+            return
         }
 
+        if (pageSizeState === lastPageSizeRef.current) return
+
+        lastPageSizeRef.current = pageSizeState
         tableStorage.set(storageKey, JSON.stringify(pageSizeState))
     }, [pageSizeState, resolvedPageSize, storageKey])
 

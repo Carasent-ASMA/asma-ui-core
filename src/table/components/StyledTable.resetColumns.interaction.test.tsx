@@ -96,18 +96,12 @@ const widthOf = (label: string): number => Number.parseFloat(headerCell(label).s
 const stored = (key: string): unknown => JSON.parse(localStorage.getItem(key) ?? 'null')
 const pin = (): HTMLElement => document.querySelector<HTMLElement>('button[aria-haspopup="true"]')!
 /**
- * Reaches the pin by real Tab presses from the button before the table (ASMA-8702, K-07). Nothing puts the focus on a
- * header or the pin: the header row is no longer a tab stop, so the sort headers and then the pin come in visual order,
- * and none of the stops is in the body.
+ * Reaches the pin by real key presses from the button before the table (ASMA-8702, K-07): Tab to the header's one stop,
+ * then End, the last header control (ASMA-8875). Nothing puts the focus on a header or the pin.
  */
 const tabToPin = async (): Promise<void> => {
     ;[...document.querySelectorAll('button')].find((candidate) => candidate.textContent === 'Remount table')!.focus()
-
-    for (let presses = 0; presses < 12 && document.activeElement !== pin(); presses += 1) {
-        await userEvent.keyboard('{Tab}')
-        await expect(document.activeElement?.closest('tbody')).toBeNull()
-    }
-
+    await userEvent.keyboard('{Tab}{End}')
     await expect(document.activeElement).toBe(pin())
 }
 const dot = (): HTMLElement | null => document.querySelector<HTMLElement>('[data-testid="column-settings-dot"]')
@@ -122,6 +116,17 @@ const popoverButton = (label: string): HTMLElement => {
     if (!button) throw new Error(`No button "${label}"`)
 
     return button
+}
+/** A column's checkbox in the open popover: the box that shows or hides it (its whole row is its label). */
+const columnCheckbox = (label: string): HTMLElement => {
+    const row = [...document.querySelectorAll<HTMLElement>('[class*="table-action-item"]')].find((candidate) =>
+        candidate.textContent?.includes(label),
+    )
+    const box = row?.querySelector<HTMLElement>('[data-control="checkbox"]')
+
+    if (!box) throw new Error(`No checkbox for "${label}"`)
+
+    return box
 }
 const isShown = (text: string): boolean =>
     [...document.querySelectorAll('*')].some(
@@ -149,7 +154,7 @@ describe('Reset columns', () => {
         const { table } = mountHarness()
 
         await openPopover()
-        await userEvent.click(popoverButton('Role'))
+        await userEvent.click(columnCheckbox('Role'))
         await waitFor(() => expect(headerLabels()).not.toContain('Role'))
 
         await act(() => table().setColumnOrder(['age', 'name', 'role', 'notes']))
@@ -298,7 +303,7 @@ describe('Reset columns', () => {
         await waitFor(() => expect(stored(PAGE_SIZE_KEY)).toBe(10))
 
         await openPopover()
-        await userEvent.click(popoverButton('Role'))
+        await userEvent.click(columnCheckbox('Role'))
         await userEvent.click(popoverButton('Reset columns'))
 
         await waitFor(() => expect(isShown('Columns reset')).toBe(true))
@@ -307,13 +312,15 @@ describe('Reset columns', () => {
         await expect(table().getColumn('role')!.getIsVisible()).toBe(false)
     })
 
-    it('A-02 / K-07: Tab from before the table reaches the pin (ASMA-8702), Enter opens it, Tab walks the panel to Reset columns without jumping to a body row, and Enter runs it', async () => {
+    it('A-02 / K-07: the keys from before the table reach the pin (ASMA-8702, ASMA-8875), Enter opens it on its first row, one Tab reaches Reset columns without jumping to a body row, and Enter runs it', async () => {
         const { table } = mountHarness()
 
         await act(() => table().setColumnSizing({ name: 260 }))
         await tabToPin()
         await userEvent.keyboard('{Enter}')
         await waitFor(() => expect(pin().getAttribute('aria-expanded')).toBe('true'))
+        // Opened from the keyboard, the menu takes the focus on its first row (ASMA-8875, UX comment 95823).
+        await waitFor(() => expect(document.activeElement?.getAttribute('role')).toBe('menuitemcheckbox'))
 
         const reset = popoverButton('Reset columns')
         const visited: Element[] = []
@@ -324,9 +331,10 @@ describe('Reset columns', () => {
         }
 
         await expect(document.activeElement).toBe(reset)
-        // Every column's row control was passed on the way, in order, inside the panel (not the table rows).
+        // The column list is one Tab stop (its arrow keys walk the rows), so Tab goes straight on to Reset columns, inside
+        // the panel (not the table rows).
         await expect(visited.some((element) => element.closest('tbody') !== null)).toBe(false)
-        await expect(visited.length).toBeGreaterThanOrEqual(4)
+        await expect(visited).toEqual([reset])
 
         await userEvent.keyboard('{Enter}')
 
@@ -337,7 +345,7 @@ describe('Reset columns', () => {
         await expect(document.activeElement).not.toBe(document.body)
     })
 
-    it('A-02 / K-07: Tab from before the table reaches the pin, Space runs Reset columns too, and Shift+Tab goes back through the panel', async () => {
+    it('A-02 / K-07: the keys from before the table reach the pin, Space runs Reset columns too, and Shift+Tab goes back through the panel', async () => {
         const { table } = mountHarness()
 
         await act(() => table().setColumnSizing({ name: 260 }))
@@ -376,10 +384,10 @@ describe('Column settings pin dot (AC 18)', () => {
         await expect(dot()).toBeNull()
 
         await openPopover()
-        await userEvent.click(popoverButton('Role'))
+        await userEvent.click(columnCheckbox('Role'))
         await waitFor(() => expect(dot()).not.toBeNull())
 
-        await userEvent.click(popoverButton('Role'))
+        await userEvent.click(columnCheckbox('Role'))
         await waitFor(() => expect(dot()).toBeNull())
 
         await act(() => table().setColumnOrder(['role', 'name', 'age', 'notes']))
@@ -398,7 +406,7 @@ describe('Column settings pin dot (AC 18)', () => {
         const { table } = mountHarness()
 
         await openPopover()
-        await userEvent.click(popoverButton('Role'))
+        await userEvent.click(columnCheckbox('Role'))
         await act(() => table().setColumnOrder(['age', 'name', 'role', 'notes']))
         await waitFor(() => expect(dot()).not.toBeNull())
 
@@ -410,7 +418,7 @@ describe('Column settings pin dot (AC 18)', () => {
         await expect(dot()).not.toBeNull()
         await expect(pin()).toHaveAccessibleName('Column settings, changed')
 
-        await userEvent.click(popoverButton('Role'))
+        await userEvent.click(columnCheckbox('Role'))
         await waitFor(() => expect(dot()).toBeNull())
         await expect(pin()).toHaveAccessibleName('Column settings')
     })
@@ -501,10 +509,10 @@ describe('Column settings pin dot (AC 18)', () => {
 
         // A hidden column.
         await openPopover()
-        await userEvent.click(popoverButton('Role'))
+        await userEvent.click(columnCheckbox('Role'))
         await waitFor(() => expect(pin()).toHaveAccessibleName('Column settings, changed'))
         await expect(dot()).not.toBeNull()
-        await userEvent.click(popoverButton('Role'))
+        await userEvent.click(columnCheckbox('Role'))
         await waitFor(() => expect(pin()).toHaveAccessibleName('Column settings'))
         await expect(dot()).toBeNull()
 

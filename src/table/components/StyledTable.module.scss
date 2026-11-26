@@ -1,3 +1,32 @@
+@use '../../styles/checkbox-focus';
+
+$focus-ring: var(--colors-focus-ring);
+$focus-left: inset 3px 0 0 0 $focus-ring;
+$focus-right: inset -3px 0 0 0 $focus-ring;
+
+/// The table's one focus look (ASMA-8875 AC 11): 3px of the focus colour on every framed side, inside the cell, with no
+/// layout shift. A side where the cell has a border (the header cells' 1px top and bottom) counts it: the border takes the
+/// focus colour and 2px go inside, so nothing grey shows next to the focus. Body cells have no border; their row line is a
+/// background layer, which the inset frame paints over. The fixed columns' shadow (`--table-cell-shadow`) stays composed.
+/// The top and bottom are always framed; the left and right where a rule sets `--focus-left` and `--focus-right` (a row's
+/// first and last cell, both on a lone cell and on a control's cell).
+@mixin cell-focus-frame($bordered: false) {
+    $edge: 3px;
+
+    @if $bordered {
+        $edge: 2px;
+        border-top-color: $focus-ring;
+        border-bottom-color: $focus-ring;
+    }
+
+    box-shadow:
+        inset 0 $edge 0 0 $focus-ring,
+        inset 0 (-$edge) 0 0 $focus-ring,
+        var(--focus-left, 0 0 transparent),
+        var(--focus-right, 0 0 transparent),
+        var(--table-cell-shadow, 0 0 transparent) !important;
+}
+
 .asma-ui-table-styled-table {
     // A transparent shadow remains valid when composed with the focused row's shadow layers.
     --action-cell-shadow: 0 0 transparent;
@@ -191,10 +220,6 @@
                     background-color: var(--colors-delta-50);
                 }
             }
-        }
-
-        &:focus-visible {
-            outline: none;
         }
 
         .t-cell {
@@ -648,35 +673,67 @@
                 text-overflow: ellipsis;
                 white-space: nowrap;
             }
+
+            // The select-all checkbox has no label to truncate, and its focus frame (26px around the 16px box, ASMA-8875)
+            // reaches past it: neither it nor this wrapper clips it.
+            &:has(> .select-control),
+            > .select-control {
+                overflow: visible;
+            }
         }
     }
 
-    // Figma table Focused state (keyboard focus): a 3px focus-ring frame surrounds the whole header
-    // or row without changing its layout. `:has()` lets the focusable sortable cell activate the
-    // header-wide frame.
-    .table-header:has(:focus-visible),
-    .t-row:focus-visible {
-        .t-cell {
-            box-shadow:
-                inset 0 3px 0 0 var(--colors-focus-ring),
-                inset 0 -3px 0 0 var(--colors-focus-ring),
-                var(--table-cell-shadow, 0 0 transparent) !important;
+    // Figma table Focused state (keyboard focus): a 3px frame surrounds the focused row, on its own cells — a `TableRow`
+    // (`data-table-row`) and the header row alike (ASMA-8875). A focused control draws the same
+    // frame on its cell instead: a header control (sort header, pin, a consumer's) on its header cell, the expand chevron
+    // on its body cell (it fills it and has no border). The select checkboxes show the base-ui checkbox frame around their
+    // box instead (`.select-checkbox` below). The `:has()` paths are the cell's own content, so a
+    // control in a table nested in a sub-row never frames the sub-row's cell.
+    tr[data-table-row]:focus-visible,
+    .table-header > tr:focus-visible {
+        outline: none;
+    }
 
-            &:first-child {
-                box-shadow:
-                    inset 3px 0 0 0 var(--colors-focus-ring),
-                    inset 0 3px 0 0 var(--colors-focus-ring),
-                    inset 0 -3px 0 0 var(--colors-focus-ring),
-                    var(--table-cell-shadow, 0 0 transparent) !important;
-            }
+    tr[data-table-row]:focus-visible > td {
+        @include cell-focus-frame;
+    }
 
-            &:last-child {
-                box-shadow:
-                    inset -3px 0 0 0 var(--colors-focus-ring),
-                    inset 0 3px 0 0 var(--colors-focus-ring),
-                    inset 0 -3px 0 0 var(--colors-focus-ring),
-                    var(--table-cell-shadow, 0 0 transparent) !important;
-            }
+    .table-header > tr:focus-visible > th {
+        @include cell-focus-frame($bordered: true);
+    }
+
+    // A row's first and last cell close its frame; a lone cell is both.
+    tr[data-table-row]:focus-visible > td,
+    .table-header > tr:focus-visible > th {
+        &:first-child {
+            --focus-left: #{$focus-left};
+        }
+        &:last-child {
+            --focus-right: #{$focus-right};
+        }
+    }
+
+    .table-header > tr > th:has([data-table-control]:not(.select-control):focus-visible) {
+        @include cell-focus-frame($bordered: true);
+        --focus-left: #{$focus-left};
+        --focus-right: #{$focus-right};
+    }
+
+    // `.t-row > .t-cell` outranks the active row's frame, which stays on a row whose control has the focus.
+    .t-row > .t-cell:has(> div > span > .expand-control:focus-visible) {
+        @include cell-focus-frame;
+        --focus-left: #{$focus-left};
+        --focus-right: #{$focus-right};
+    }
+
+    // Windows high contrast drops box-shadows: a 3px outline in the system's text colour, inside, as `focus-ring` does.
+    @media (forced-colors: active) {
+        tr[data-table-row]:focus-visible,
+        .table-header > tr:focus-visible,
+        .table-header > tr > th:has([data-table-control]:not(.select-control):focus-visible),
+        .t-row > .t-cell:has(> div > span > .expand-control:focus-visible) {
+            outline: 3px solid CanvasText;
+            outline-offset: -3px;
         }
     }
 
@@ -713,7 +770,7 @@
         }
     }
 
-    .table-header tr:focus-visible,
+    // The focused sortable header shows the frame on its header cell (above) and its sort-preview glyph, no ring of its own.
     .table-header .sortable-column:focus-visible {
         outline: none;
     }
@@ -791,5 +848,41 @@
     // cursor from the span inside.
     &:not([aria-disabled='true']) {
         cursor: pointer;
+    }
+}
+
+// The select checkbox and the row's expand chevron (`expandColumn.tsx`) have no ring of their own (ASMA-8875 AC 11): the
+// checkbox shows the base-ui checkbox frame around its box, the chevron the frame on its cell.
+.select-control:focus-visible,
+.expand-control:focus-visible {
+    outline: none;
+}
+
+// The select checkboxes are decorative boxes inside the `role="checkbox"` control, which owns the focus. Its keyboard focus
+// shows the base-ui checkbox's frame around the box (Figma Focused 11460-105640, ASMA-8875 AC 11).
+.select-control:focus-visible .select-checkbox {
+    @include checkbox-focus.frame-vars;
+    @include checkbox-focus.frame;
+}
+
+.select-control:focus-visible .select-checkbox-box {
+    z-index: 2;
+}
+
+@media (forced-colors: active) {
+    .select-control:focus-visible .select-checkbox {
+        @include checkbox-focus.frame-forced-colors;
+    }
+}
+
+// ASMA-9003 Figma Pressed state (47847:229830): a pressed select cell turns its box gama-800; forced colours: a
+// Highlight outline. After the focus rules, so it beats their `outline: none` on a cell held by Space.
+// @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
+.select-control[data-pressed] {
+    --control-pressed-accent: var(--colors-gama-800);
+
+    @media (forced-colors: active) {
+        outline: 2px solid Highlight;
+        outline-offset: -2px;
     }
 }

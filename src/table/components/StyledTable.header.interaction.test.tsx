@@ -107,9 +107,16 @@ const expectNoSquare = async (label: string): Promise<void> => {
 
         await expect(now.background).toBe(rest.background)
         await expect(now.image).toBe(rest.image)
-        // While a control in the header has keyboard focus, the header row draws its own focus frame on every cell
-        // (ASMA-8087): existing styling, so only a cell's shadow is excused then, and only by that frame.
-        const hasFocusFrame = element === cell && cell.closest('thead')!.matches(':has(:focus-visible)')
+        // The focus look of a header control is the 3px frame on its own header cell (ASMA-8875 AC 11): excused on the cell
+        // of the focused header only, and only as that frame (2px inside its recoloured top and bottom borders, 3px at the
+        // sides). Every other cell, and the sort control itself, keeps its shadow at rest.
+        const ring = resolveColor('var(--colors-focus-ring)')
+        const hasFocusFrame =
+            element === cell &&
+            cell.querySelector(':focus-visible') !== null &&
+            now.shadow.startsWith(
+                `${ring} 0px 2px 0px 0px inset, ${ring} 0px -2px 0px 0px inset, ${ring} 3px 0px 0px 0px inset, ${ring} -3px 0px 0px 0px inset`,
+            )
 
         if (!hasFocusFrame) await expect(now.shadow).toBe(rest.shadow)
     }
@@ -179,6 +186,53 @@ describe('Sort indicator (AC 15)', () => {
         }
         // No gap between the label and the slot.
         await expect(Math.abs(slot.left - label.right)).toBeLessThanOrEqual(0.5)
+    })
+
+    it('ST-10 (Figma, 20 x 28): the slot is 20 x 28px and the drawn triangle is 11.67 x 5.83px, placed as Figma places it, in every state', async () => {
+        mountHeader()
+        // Figma "Header with sorting" (plan 2.4.4, measured 2026-10-27): the `Sorting` slot is 20 x 28px, directly after
+        // the label. Its `arrow-drop_down` instance is 28 x 28px at x = -4, and the inner vector is 11.67 x 5.83px at
+        // (8.17, 11.67) in the instance, so the triangle lies at (4.17, 11.67) in the slot, and its middle is the slot's
+        // middle across. `arrow_drop_up` is the same shape turned over about the middle line of the slot, so it lies at
+        // (4.17, 10.5).
+        const slotMeasures = async (label: string, direction: 'asc' | 'desc'): Promise<void> => {
+            const slot = rect(indicator(label))
+            const glyph = shownGlyph(label)
+            const box = rect(glyph)
+            const triangle = rect(glyph.querySelector('path')!)
+
+            await expect(pathOf(glyph), `${label}: glyph direction`).toBe(direction === 'asc' ? ASC_PATH : DESC_PATH)
+            await expect(slot.width, `${label}: slot width`).toBe(20)
+            await expect(slot.height, `${label}: slot height`).toBe(28)
+            await expect(box.width, `${label}: glyph width`).toBe(28)
+            await expect(box.height, `${label}: glyph height`).toBe(28)
+            await expect(box.left - slot.left, `${label}: glyph x in the slot`).toBeCloseTo(-4, 1)
+            await expect(triangle.width, `${label}: triangle width`).toBeCloseTo(11.67, 1)
+            await expect(triangle.height, `${label}: triangle height`).toBeCloseTo(5.83, 1)
+            await expect(triangle.left - slot.left, `${label}: triangle x in the slot`).toBeCloseTo(4.17, 1)
+            await expect(triangle.top - slot.top, `${label}: triangle y in the slot`).toBeCloseTo(direction === 'desc' ? 11.67 : 10.5, 1)
+            // Centred on the slot across, and the two directions mirror each other about its middle line (14px).
+            await expect(triangle.left - slot.left + triangle.width / 2, `${label}: triangle centre`).toBeCloseTo(10, 1)
+        }
+
+        // Hovering an unsorted text column previews the first click: ascending.
+        await userEvent.hover(sortButton('Name'))
+        await slotMeasures('Name', 'asc')
+        // A sorted column at rest shows its own direction, ascending and then descending.
+        await userEvent.click(sortButton('Name'))
+        await userEvent.unhover(sortButton('Name'))
+        await slotMeasures('Name', 'asc')
+        await userEvent.click(sortButton('Name'))
+        await userEvent.unhover(sortButton('Name'))
+        await slotMeasures('Name', 'desc')
+        // Keyboard focus shows what hover shows (the arrow keys move between the headers, ASMA-8875).
+        await userEvent.keyboard('{ArrowRight}')
+        await slotMeasures('Role', 'asc')
+
+        // The two directions are mirror images about the slot's middle line.
+        const triangleTop = (label: string): number => rect(shownGlyph(label).querySelector('path')!).top - rect(indicator(label)).top
+        await expect(triangleTop('Name') + rect(shownGlyph('Name').querySelector('path')!).height / 2).toBeCloseTo(14 + 0.58, 1)
+        await expect(triangleTop('Role') + rect(shownGlyph('Role').querySelector('path')!).height / 2).toBeCloseTo(14 - 0.58, 1)
     })
 
     it('ST-10: a sorted column shows the glyph in gama-500 at rest, ascending or descending; the slot is decorative (A-03)', async () => {
@@ -372,18 +426,20 @@ describe('Hover and focus (AC 16)', () => {
         await expect(ariaSorts()['Name']).toBe('ascending')
     })
 
-    it('ST-11a: Shift+Tab from the body lands on the pin, then reaches a sortable header with the focus look, Tab moves to the next header control, Enter sorts, leaving clears the look', async () => {
+    it('ST-11a: Shift+Tab from the body lands on the header row, the arrows reach a sortable header with the focus look, Enter sorts, leaving clears the look', async () => {
         mountHeader()
         const pin = document.querySelector<HTMLElement>('button[aria-haspopup="true"]')!
 
-        // The only programmatic step puts the focus on the active body row. The pin is reached by a real Shift+Tab
-        // (ASMA-8702), so the focus counts as keyboard focus (`:focus-visible`).
+        // The only programmatic step puts the focus on the active body row. The header row is reached by a real Shift+Tab
+        // and the pin by End (ASMA-8875), so the focus counts as keyboard focus (`:focus-visible`).
         document.querySelector<HTMLElement>('tbody tr[tabindex="0"]')!.focus()
         await userEvent.keyboard('{Shift>}{Tab}{/Shift}')
+        await expect(document.activeElement).toBe(document.querySelector('thead tr'))
+        await userEvent.keyboard('{End}')
         await expect(document.activeElement).toBe(pin)
 
-        // Shift+Tab: the sortable header before the pin, with the hover look: the grey triangle, no square.
-        await userEvent.keyboard('{Shift>}{Tab}{/Shift}')
+        // Left Arrow: the sortable header before the pin, with the hover look: the grey triangle, no square.
+        await userEvent.keyboard('{ArrowLeft}')
         await expect(document.activeElement).toBe(sortButton('Age'))
         await expect(sortButton('Age').matches(':focus-visible')).toBe(true)
         await expectShown('Age', 'preview')
@@ -398,8 +454,8 @@ describe('Hover and focus (AC 16)', () => {
         await expect(pathOf(previewGlyph('Age'))).toBe(ASC_PATH)
         await expect(getComputedStyle(indicator('Age')).color).toBe(resolveColor('var(--colors-gama-500)'))
 
-        // Shift+Tab goes on to the previous header control; Tab comes back to the next one, never down to the rows.
-        await userEvent.keyboard('{Shift>}{Tab}{/Shift}')
+        // Left Arrow goes on to the previous header control; Right Arrow comes back to the next one, never down to the rows.
+        await userEvent.keyboard('{ArrowLeft}')
         await expect(document.activeElement).toBe(sortButton('Role'))
         await expectShown('Role', 'preview')
         await expect(getComputedStyle(indicator('Role')).color).toBe(resolveColor('var(--colors-delta-600)'))
@@ -410,9 +466,9 @@ describe('Hover and focus (AC 16)', () => {
         await expect(getComputedStyle(indicator('Age')).color).toBe(resolveColor('var(--colors-gama-500)'))
         await expectNoSquare('Age')
 
-        await userEvent.keyboard('{Tab}')
+        await userEvent.keyboard('{ArrowRight}')
         await expect(document.activeElement).toBe(sortButton('Age'))
-        await userEvent.keyboard('{Tab}')
+        await userEvent.keyboard('{ArrowRight}')
         await expect(document.activeElement).toBe(pin)
         await expect(document.activeElement?.closest('tbody')).toBeNull()
 
@@ -421,16 +477,17 @@ describe('Hover and focus (AC 16)', () => {
         await expectNoSquare('Role')
         await expectShown('Age', 'current')
 
-        // Space sorts too, on a header reached by Shift+Tab from the pin.
-        await userEvent.keyboard('{Shift>}{Tab}{Tab}{/Shift}')
+        // Space sorts too, on a header reached by Left Arrow from the pin.
+        await userEvent.keyboard('{ArrowLeft}{ArrowLeft}')
         await expect(document.activeElement).toBe(sortButton('Role'))
         await userEvent.keyboard('{ }')
         await expect(ariaSorts()['Role']).toBe('ascending')
     })
 
     // K-12 (ASMA-8702). It was an `it.todo` (ST-11c): a keyboard user could not ENTER the header controls from outside
-    // the header, because the header row was the one tab stop and the controls came after it in the DOM.
-    it('ST-11c / K-12: the header controls are reachable by sequential keyboard navigation (WCAG 2.1.1): Tab from before the table walks the sort headers and the pin, and Enter sorts', async () => {
+    // the header, because the header row was the one tab stop and the controls came after it in the DOM. Since
+    // ASMA-8875 Tab reaches the header row, the header's one stop, and the arrow keys walk its controls.
+    it('ST-11c / K-12: the header controls are reachable from the keyboard (WCAG 2.1.1): Tab from before the table reaches the header row, the arrows walk the sort headers and the pin, and Enter sorts', async () => {
         mount(
             <div>
                 <button type='button'>Before</button>
@@ -442,16 +499,16 @@ describe('Hover and focus (AC 16)', () => {
 
         document.querySelector<HTMLElement>('button')!.focus()
 
-        // Name, Role and Age sort; Notes does not; then the pin. No `.focus()` on a header or the pin.
-        for (let presses = 0; presses < 4; presses += 1) {
-            await userEvent.keyboard('{Tab}')
+        // The header row, then Name, Role and Age, which sort (Notes does not), then the pin. No `.focus()` on a header.
+        for (let presses = 0; presses < 5; presses += 1) {
+            await userEvent.keyboard(presses === 0 ? '{Tab}' : '{ArrowRight}')
             stops.push(document.activeElement)
         }
 
-        await expect(stops).toEqual([sortButton('Name'), sortButton('Role'), sortButton('Age'), pin])
+        await expect(stops).toEqual([document.querySelector('thead tr'), sortButton('Name'), sortButton('Role'), sortButton('Age'), pin])
         await expect(stops.some((stop) => stop?.closest('tbody'))).toBe(false)
 
-        await userEvent.keyboard('{Shift>}{Tab}{/Shift}')
+        await userEvent.keyboard('{ArrowLeft}')
         await expect(document.activeElement).toBe(sortButton('Age'))
         await userEvent.keyboard('{Enter}')
         await expect(ariaSorts()['Age']).toBe('descending')

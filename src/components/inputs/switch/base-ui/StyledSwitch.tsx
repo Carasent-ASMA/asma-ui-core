@@ -1,6 +1,7 @@
 import React, { forwardRef, useState, type ButtonHTMLAttributes } from 'react'
 import styles from './StyledSwitch.module.scss'
 import { cn } from 'src/helpers/cn'
+import { withPressedState } from 'src/helpers/pressedState'
 import { getSvgIconStyle } from 'src/components/icons/iconStyle'
 import type { IIcon } from 'src/components/icons'
 
@@ -9,6 +10,7 @@ import type { IIcon } from 'src/components/icons'
  * Figma "Switch" / `_BASE_Switch` (track 38×22, knob 18, touch 54×32). Figma **Selected** (true/false)
  * ← `checked`/`defaultChecked`; Figma **State** (Enabled/Hovered/Focused/Error/Disabled/Read-only)
  * ← native hover/focus + `error`/`disabled`/`readOnly`. On = `gama-500` #168181, Off = `delta-400` #a2acbb.
+ * Pressed (47847:229830): track `gama-800`, knob icon `gama-700`. @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
  */
 type StyledSwitchProps = {
     /** @figmaProp Selected = true→"true" | false→"false" (controlled) */
@@ -108,7 +110,7 @@ export const StyledSwitch = forwardRef<HTMLButtonElement, StyledSwitchProps>(
                 // ASMA-8220 (TB-14): the track is drawn 38x22 but Figma specs a 54x32 touch area, so
                 // `.asma-hit-area` reaches 44px without redrawing it (`.switch` is already
                 // `position: relative` and spends only `::before` on its focus ring). Touch-ready
-                // rather than pressable — `.switch:active` already dims the knob icon.
+                // rather than pressable — `[data-pressed]` draws its Figma pressed look.
                 className={cn(styles['switch'], 'asma-touch-ready asma-hit-area', className)}
                 onClick={handleToggle}
                 disabled={disabled}
@@ -120,6 +122,8 @@ export const StyledSwitch = forwardRef<HTMLButtonElement, StyledSwitchProps>(
                 data-disabled={disabled ? '' : undefined}
                 data-readonly={readOnly ? '' : undefined}
                 data-error={error ? '' : undefined}
+                // `data-pressed` while pressed, chained after any consumer handler.
+                {...withPressedState(rest, { enabled: !disabled && !readOnly, keyboard: true })}
             >
                 <span className={styles['thumb']}>
                     <span className={styles['icon']}>

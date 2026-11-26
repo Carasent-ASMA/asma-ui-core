@@ -7,14 +7,18 @@ import styles from './MinimizableDialog.module.scss'
 import { StyledMenu, StyledMenuItem } from 'src/components/navigation/menu'
 import { useToggleMenuVisibility } from 'src/hooks/useToggleMenuVisibility.hook'
 import { useFocusTrap } from 'src/hooks/useFocusTrap.hook'
-import { isOverlayBackNavigationPending, OverlayBackOwnerContext, useBackCloses } from 'src/hooks/useBackCloses.hook'
+import { OverlayBackOwnerContext, useBackCloses } from 'src/hooks/useBackCloses.hook'
 import { StyledTooltip } from 'src/components/data-display/tooltip'
 import type { IMinimizableDialogProps } from './types'
 import { fullScreenFieldWidthVars } from 'src/components/inputs/field-styles'
 import { useDialogHeaderPinning } from 'src/components/feedback/dialog/useDialogHeaderPinning'
 import {
     DIALOG_HEADER_ACTIONS_ROW_CLASSES,
+    DIALOG_HEADER_BUTTONS_CLASSES,
     DIALOG_HEADER_CLASSES,
+    DIALOG_HEADER_LABEL_CLASSES,
+    DIALOG_HEADER_ROW_TITLE_BOX_CLASSES,
+    DIALOG_HEADER_TITLE_ROW_CLASSES,
     DIALOG_TITLE_CLASSES,
     dialogContentFlowClasses,
     dialogScrollerStyle,
@@ -95,26 +99,11 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
     // default corner-docked panel is a non-modal floating widget that must NOT trap focus.
     useFocusTrap(open && isFullScreenActive, panelRef, closeWhenIdle)
 
-    // ASMA-8471 / REQ-002: Back closes this panel whenever it is showing — docked as well as
-    // fullscreen — through `closeWhenIdle`, the very callback ✕ uses (BACK-3), which already no-ops
-    // while the primary action is busy. Docked is deliberately included even though it is non-modal
-    // and Escape is left alone there: to a phone user the docked panel is still "the thing that is
-    // open", and the CRM organization panel never closing on Back was the headline defect.
-    // `minimized` is the one state that does NOT register — a collapsed title bar is not an overlay
-    // to dismiss, and Back must reach whatever is behind it instead.
-    // Ordering (RISK-010) is not decided here: this panel is a plain z-indexed <div>, and the
-    // registry skips any entry covered by an open native modal <dialog>, so a `StyledDialog` on top
-    // keeps the Back press however late this panel mounted. `panelRef` is what makes that work.
-    //
-    // The one case Back and a route change part ways: while DOCKED this panel is a shell-level
-    // widget that deliberately outlives navigation, so it refuses the adapter's close-before-push
-    // (`pendingNavigation`) and lets the route change run around it. Fullscreen is a real modal
-    // layer, so there it closes first like anything else.
-    const requestBackClose = (): false | void => {
-        if (!isFullScreenActive && isOverlayBackNavigationPending()) return false
-        return closeWhenIdle()
-    }
-    useBackCloses({ active: open && !minimized, requestClose: requestBackClose, ownerRef: panelRef })
+    // Back closes this panel only in fullscreen, through `closeWhenIdle`, the same callback as ✕
+    // (BACK-3). Windowed or minimized it is part of the page, so Back navigates as usual (BACK-1,
+    // PAGE-4, ASMA-8471 AC9). The registry skips an entry covered by an open native modal <dialog>,
+    // so a `StyledDialog` on top keeps the Back press however late this panel mounted (`panelRef`).
+    useBackCloses({ active: open && isFullScreenActive, requestClose: closeWhenIdle, ownerRef: panelRef })
 
     // Both panels stay mounted — the `hidden` class is only `h-0 w-0`, so the hidden one's controls
     // would still be tabbable. `inert` is what actually removes it from the tab order, and it is set
@@ -195,6 +184,12 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
             ;(counterpart ?? firstTabbable(panel))?.focus({ preventScroll: true })
         })
     }
+
+    const titleNode = (
+        <div id={titleId} className={DIALOG_TITLE_CLASSES}>
+            {title}
+        </div>
+    )
 
     return (
         <>
@@ -306,19 +301,23 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                     hidden={headerHidden}
                     className={cn(
                         DIALOG_HEADER_CLASSES,
-                        'border-delta-200 rounded-t-lg border-b',
+                        'rounded-t-lg',
                         pinned && 'sticky top-0 z-2',
                         headerHidden && 'hidden',
                     )}
                 >
-                    <div className={DIALOG_HEADER_ACTIONS_ROW_CLASSES}>
+                    <div className={label ? DIALOG_HEADER_ACTIONS_ROW_CLASSES : DIALOG_HEADER_TITLE_ROW_CLASSES}>
                         {label && (
-                            <div className='text-delta-700 min-w-0 flex-auto text-sm wrap-anywhere hyphens-auto'>
-                                {label}
-                            </div>
+                            <div className={DIALOG_HEADER_LABEL_CLASSES}>{label}</div>
                         )}
 
-                        <div className='max-xs:flex-wrap max-xs:justify-end max-xs:gap-y-1 ml-auto flex items-center gap-x-1'>
+                        {!label && <div className={DIALOG_HEADER_ROW_TITLE_BOX_CLASSES}>{titleNode}</div>}
+                        <div
+                            className={cn(
+                                DIALOG_HEADER_BUTTONS_CLASSES,
+                                'max-xs:flex-wrap max-xs:justify-end max-xs:gap-y-1',
+                            )}
+                        >
                             {actionNode}
                             {/* Offered in fullscreen too: taking it away left the header's learned
                                 triad a control short, and a dialog the user had sent fullscreen could
@@ -401,10 +400,8 @@ export const MinimizableDialog: React.FC<IMinimizableDialogProps> = ({
                         </div>
                     </div>
 
-                    {/* Its own full-width row, never truncated or clamped (ASMA-8737). */}
-                    <div id={titleId} className={DIALOG_TITLE_CLASSES}>
-                        {title}
-                    </div>
+                    {/* Its own full-width row under a label, never truncated or clamped (ASMA-8737). */}
+                    {label && titleNode}
                 </div>
                 <div data-dialog-content-flow='' className={pinned ? 'isolate grow' : dialogContentFlowClasses(pinned)}>
                     {typeof children === 'function' ? children({ fullScreen }) : children}

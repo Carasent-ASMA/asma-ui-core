@@ -69,12 +69,6 @@ declare module '@tanstack/react-table' {
     }
     interface TableMeta<TData extends RowData> {
         locale?: 'no' | 'en' | (TData extends never ? never : never)
-        /**
-         * @internal Set by `StyledTable` from its `hideHeader` prop, so that its own header controls (the sort header,
-         * the pin and the select-all checkbox) can drop their tab stops (ASMA-8702). Apps must not set it: the table
-         * writes it, and a `meta` an app passes replaces the table's. Use the `hideHeader` prop.
-         */
-        hideHeader?: boolean
     }
 
     interface ColumnDefBase<TData extends RowData, TValue = unknown> extends ColumnDefExtensions<TData, TValue> {
@@ -186,9 +180,8 @@ export type StyledTableProps<TData, TCustomData> = {
     getRowSelectionIds?: (ids: string[]) => void
     /**
      * Hides the header visually. It stays in the accessibility tree (column names and `aria-sort` are still announced)
-     * and its own controls (the sort header, the pin, the select-all checkbox) are not tab stops. **A hidden header must
-     * not contain tab stops of your own** (a button or link in a header cell): they stay tab stops with no visible focus.
-     * Give such a control `tabIndex={-1}`, or do not put one there (ASMA-8702).
+     * and has no tab stop at all: the table takes every control in it out of the Tab sequence, its own (the sort header,
+     * the pin, the select-all checkbox) and yours (a button or link in a header cell) alike (ASMA-8702, ASMA-8875).
      */
     hideHeader?: boolean
     pageSize?: number
@@ -209,10 +202,21 @@ export type StyledTableProps<TData, TCustomData> = {
      */
     uniqueKey?: string
     /**
-     * Temporary opt-in (ASMA-8597, owner decision D1, 2026-10-27): save and restore this table's
-     * sorting under `${uniqueKey}:sorting`, and let Reset columns reset it. Needs `uniqueKey`;
-     * ignored without it. Off by default until UX and privacy approve the fleet rollout, which
-     * makes `uniqueKey` alone enough and retires this prop (follow-up ASMA-8698).
+     * Whether the table saves and restores its sorting under `${uniqueKey}:sorting`, and lets Reset columns reset it
+     * (ASMA-8698). It does by default: a table with a `uniqueKey` remembers each user's sort, like their column widths. Without
+     * `uniqueKey` nothing is saved.
+     *
+     * - `false` is the opt-out, for a table whose order is the user's own (drag and drop rows) or that must always open as the
+     *   app declares it. Nothing is read or written for sorting then.
+     * - Leaving it out, or `true`, saves a sort that `StyledTable` owns. `true` is the default spelled out: nothing changes
+     *   for a table that has it (it will not be removed before the next major version).
+     * - A table whose app owns the sorting state (`state.sorting`, or `onSortingChange`, which TanStack calls instead of
+     *   updating the table's own state) is **not** saved by default: the saved sort could not be applied to a state the table
+     *   does not own, and an app with its own persistence would have two writers. Such a table that wants it saved writes
+     *   `persistSorting` (`true`), makes `StyledTable` the only writer, and reads the sort back with `usePersistedSorting`.
+     *
+     * A saved sort of a column that is gone or cannot sort is ignored, and so is storage that is corrupt, full or blocked: the
+     * table opens with its `initialState.sorting`, which Reset columns also returns to.
      */
     persistSorting?: boolean
     /**

@@ -4,12 +4,14 @@ import { StyledPopover as Popover } from 'src/components/utils/popover'
 import { StyledMenuList as MenuList } from 'src/components/navigation/menu'
 import { DotsVerticalIcon } from 'src/table/shared-components/DotsVerticalIcon'
 
-import { StyledMenuItem } from 'src/table/shared-components/StyledMenuItem'
+import { StyledMenuItem } from 'src/components/navigation/menu/StyledMenuItem'
 import { isCustomAction, type IAction, type ICustomAction, type RowActionsState } from 'src/table/types'
-import React, { useId, useMemo, useState } from 'react'
-import { StyledButton } from 'src/table/shared-components/button'
+import React, { useId, useMemo, useState, type KeyboardEvent, type MouseEvent } from 'react'
+import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { StyledTooltip } from 'src/table/shared-components/tooltip'
 import { CircleWarningOutlineIcon } from 'src/table/shared-components/CircleWarningOutlineIcon'
+import { focusOutsideTable } from 'src/table/helpers/tableTabStops'
+import { isKeyboardContextMenu } from 'src/table/helpers/rowActionsMenu'
 
 export function RowActionMenu<TData>({
     tableData,
@@ -35,6 +37,29 @@ export function RowActionMenu<TData>({
         return allActions.every((a) => ('component' in a ? false : a.hide))
     }, [allActions])
 
+    /**
+     * Tab in the open menu leaves the row the way Tab from the row does: out of the table (ASMA-8875). The popover would
+     * work its way out from the ⋮'s place in the Tab sequence, and the ⋮ has none: it is reached with the arrow keys.
+     * Shift+Tab is the popover's, back to the ⋮.
+     */
+    const leaveMenuOnTab = (event: KeyboardEvent<HTMLElement>): void => {
+        const trigger = anchorEl
+        if (event.key !== 'Tab' || event.shiftKey || event.defaultPrevented || !(trigger instanceof HTMLElement)) return
+        event.preventDefault()
+        if (!focusOutsideTable(trigger, 'next')) trigger.focus()
+        handleClose()
+    }
+
+    /**
+     * The keyboard's `contextmenu` inside this ⋮'s open menu (Windows sends it on the Menu key's keyup, after the keydown
+     * opened the menu and moved the focus into it): no browser menu over ours. The menu is portalled, so React brings
+     * the event here and the DOM does not; the table handles the one on the row (`rowActionsMenu.ts`).
+     */
+    const keepKeyboardContextMenuInMenu = (event: MouseEvent<HTMLElement>): void => {
+        if (event.currentTarget.contains(event.target as Node) || !isKeyboardContextMenu(event.nativeEvent)) return
+        event.preventDefault()
+    }
+
     const hasVisibleActions = allActions.length > 0 && !allHidden
     const showNoActions = state.state === 'enabled' && !hasVisibleActions
 
@@ -48,13 +73,19 @@ export function RowActionMenu<TData>({
     const button = (
         <StyledButton
             dataTest='row-actions-button'
+            // Editor and qnreditor Playwright specs (`testIdAttribute: 'data-test'`) still query the legacy hook.
+            data-test='row-actions-button'
             aria-label={rowActionsLabel}
             aria-haspopup='true'
             aria-expanded={open}
             variant='text'
             size='small'
-            /* `aria-disabled`, not native `disabled`: the ⋮ stays in the Tab order so keyboard users
-             * reach it and its reason (disabled-states DIS-2, DIS-3). A press only shows the reason. */
+            // Reached with the arrow keys in its row, not with Tab; the context-menu key opens it (ASMA-8875).
+            tabIndex={-1}
+            data-table-control=''
+            data-row-actions-trigger=''
+            /* `aria-disabled`, not native `disabled`: the ⋮ stays focusable, so keyboard users reach it
+             * (ArrowRight in its row) and its reason (disabled-states DIS-2, DIS-3). A press only shows the reason. */
             aria-disabled={disabled || undefined}
             onClick={(e) => {
                 e.stopPropagation()
@@ -95,7 +126,9 @@ export function RowActionMenu<TData>({
     )
 
     return (
-        <div className='flex w-[40px] items-center justify-center'>
+        // Not a control: it only keeps the keyboard's `contextmenu` from this ⋮'s portalled menu from opening the
+        // browser's menu over it.
+        <div className='flex w-[40px] items-center justify-center' onContextMenu={keepKeyboardContextMenuInMenu}>
             <div className='flex items-center justify-center'>
                 {state.state === 'disabled' ? (
                     <StyledTooltip
@@ -156,6 +189,7 @@ export function RowActionMenu<TData>({
                                    onto the first item, so the arrow keys work at once. */
                                 // eslint-disable-next-line jsx-a11y/no-autofocus
                                 autoFocus={openedByKeyboard}
+                                onKeyDown={leaveMenuOnTab}
                             >
                                 {allActions.map((action, index) => {
                                     if (isCustomAction(action)) {

@@ -1,5 +1,6 @@
 import type { KeyboardEvent, MouseEvent, ReactNode } from 'react'
 import { cn } from 'src/table/helpers/cn'
+import { pressedStateHandlers } from 'src/helpers/pressedState'
 import { CheckIcon } from '../CheckIcon'
 
 export interface MenuItemProps {
@@ -19,6 +20,8 @@ export const StyledMenuItem = ({ children, selected, disabled, className, onClic
         if (disabled) return
         if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault()
+            // Once per press: a held key's auto-repeat activates nothing.
+            if (event.repeat) return
             onClick?.(event as unknown as MouseEvent<HTMLLIElement>)
         }
     }
@@ -30,20 +33,35 @@ export const StyledMenuItem = ({ children, selected, disabled, className, onClic
             tabIndex={-1}
             onClick={disabled ? undefined : onClick}
             onKeyDown={handleKeyDown}
+            {...pressedStateHandlers({ enabled: !disabled })}
             className={cn(
+                // Figma Menus item, Type=Check mark (16048:31636): 40px row, 8px padding, 4px gap, 20px check.
                 'text-delta-700 flex items-center gap-x-1 p-2 text-base outline-hidden',
-                disabled ? 'cursor-not-allowed' : 'hover:bg-delta-50 cursor-pointer',
-                selected && 'bg-gama-50 hover:bg-gama-50',
+                'asma-touch-ready',
+                // Figma Disabled: text-icon/disabled. Pressed state (47847-229830): at once in, 150ms ease-out back only after a
+                // press; hover and selection keep master's timing (none). @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
+                disabled
+                    ? 'aria-disabled:text-delta-300 cursor-not-allowed'
+                    : 'group/item data-[pressed]:text-gama-700 hover:bg-delta-50 [&[role][data-pressed]]:bg-gama-200 cursor-pointer data-press-released:transition-colors data-press-released:duration-150 data-press-released:ease-[ease-out] data-pressed:[--control-pressed-accent:var(--colors-gama-700)] forced-colors:data-pressed:[outline:2px_solid_Highlight]! forced-colors:data-pressed:-outline-offset-2!',
+                // Figma Selected=on: bg/selected (gama-25), hover bg/hover-selected (gama-50).
+                selected && 'bg-gama-25 hover:bg-gama-50',
                 className,
             )}
         >
             <CheckIcon
-                width={24}
-                height={24}
+                width={20}
+                height={20}
                 color={selected ? 'var(--colors-gama-500)' : 'transparent'}
-                style={{ transition: 'color 0.2s ease' }}
+                // Master's `color 0.2s ease`. A selected row's check follows the pressed label (any CSS rule beats the `color`
+                // attribute): at once in, 150ms ease-out back.
+                className={cn(
+                    '[transition:color_0.2s_ease]',
+                    selected &&
+                        !disabled &&
+                        'group-data-[pressed]/item:text-gama-700 group-data-press-released/item:[transition:color_150ms_ease-out] group-data-pressed/item:transition-none',
+                )}
             />
-            {children}
+            <span className='pr-2'>{children}</span>
         </li>
     )
 }

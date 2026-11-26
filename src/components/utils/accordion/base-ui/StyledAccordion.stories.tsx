@@ -2,6 +2,11 @@ import type { Meta } from '@storybook/react-vite'
 import { useState } from 'react'
 import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { StyledWidgetTitle } from 'src/components/custom/widget/widget-title/StyledWidgetTitle'
+import { DynamicToolbar } from 'src/components/custom/module/header-layout/DynamicToolbar'
+import { StyledSearchField } from 'src/components/inputs/search-field'
+import { StyledFilterButton } from 'src/components/utils/filter-menu/StyledFilterButton'
+import { StyledTable } from 'src/table/components/StyledTableIndex'
+import type { ColumnDef } from '@tanstack/react-table'
 import { StyledAccordion } from './StyledAccordion'
 import { StyledAccordionDetails } from './StyledAccordionDetails'
 import { StyledAccordionSummary } from './StyledAccordionSummary'
@@ -85,6 +90,7 @@ interface AccordionVariant {
     title: string
     size: 'large' | 'small'
     expandChevronRight?: boolean
+    chevronAlign?: 'edge' | 'title'
     defaultExpanded?: boolean
     disabled?: boolean
 }
@@ -97,6 +103,12 @@ const ACCORDION_VARIANTS: AccordionVariant[] = [
         size: 'large',
         defaultExpanded: true,
         expandChevronRight: true,
+    },
+    {
+        title: 'Default (large) · collapsed · chevron after title',
+        size: 'large',
+        expandChevronRight: true,
+        chevronAlign: 'title',
     },
     { title: 'Default (large) · disabled', size: 'large', disabled: true },
     { title: 'Small · collapsed · chevron left', size: 'small' },
@@ -116,7 +128,11 @@ export const Gallery = {
                         disabled={v.disabled}
                         className='rounded-lg border border-solid border-delta-300'
                     >
-                        <StyledAccordionSummary size={v.size} expandChevronRight={v.expandChevronRight}>
+                        <StyledAccordionSummary
+                            size={v.size}
+                            expandChevronRight={v.expandChevronRight}
+                            chevronAlign={v.chevronAlign}
+                        >
                             <StyledWidgetTitle>Header lorem ipsum</StyledWidgetTitle>
                         </StyledAccordionSummary>
                         <StyledAccordionDetails>
@@ -127,4 +143,98 @@ export const Gallery = {
             ))}
         </div>
     ),
+}
+
+// ─── Toolbar header (ASMA-8600) ─────────────────────────────────────────────
+// An accordion whose header is a DynamicToolbar (filter + search) directly above a table. Figma wants
+// 16px from the controls to the table header. `toolbarHeader` on StyledAccordionDetails makes the
+// content's padding-top follow the header: inline (container >= 744px) 0 for the large 72px summary
+// (it already leaves 16px under the 40px controls) and 12px for the small 48px one (4px + 12);
+// compact/stacked/selection-split 16, because the controls are the toolbar's last row. With helper text
+// (inline) the helper row sits under the controls, so the table is 16px under the helper text instead.
+// Without the prop the content keeps its default padding (8px top).
+// VRT: skipped like every DynamicToolbar story (ResizeObserver width planning oscillates), see
+// visual-tests/stories.spec.ts; the gap is asserted in StyledAccordion.toolbarHeader.interaction.test.tsx.
+
+interface ToolbarRow {
+    id: string
+    name: string
+    status: string
+}
+
+const TOOLBAR_ROWS: ToolbarRow[] = [
+    { id: '1', name: 'Participant consent', status: 'Accepted' },
+    { id: '2', name: 'Data processing', status: 'Pending' },
+    { id: '3', name: 'Marketing', status: 'Rejected' },
+]
+
+const TOOLBAR_COLUMNS: ColumnDef<ToolbarRow>[] = [
+    { accessorKey: 'name', header: 'Name', size: 200 },
+    { accessorKey: 'status', header: 'Status', size: 160 },
+]
+
+const ToolbarHeaderDemo = ({
+    width,
+    size = 'large',
+    helperText,
+}: {
+    width: number
+    size?: 'large' | 'small'
+    helperText?: string
+}): JSX.Element => {
+    const [search, setSearch] = useState('')
+
+    return (
+        <div style={{ width }}>
+            <StyledAccordion defaultExpanded className='rounded-lg border border-solid border-delta-300'>
+                <DynamicToolbar
+                    helperText={helperText}
+                    title={
+                        <StyledAccordionSummary
+                            size={size}
+                            sx={{ '--trigger-padding-x': '0px' } as React.CSSProperties}
+                        >
+                            Consents
+                        </StyledAccordionSummary>
+                    }
+                    className='px-4'
+                    filter={
+                        <StyledFilterButton dataTest='filter' filterIsActive={false} size='medium' label='Filter' />
+                    }
+                    search={
+                        <StyledSearchField
+                            dataTest='search'
+                            label='Search'
+                            value={search}
+                            onChange={(event) => setSearch(event.target.value)}
+                            onClear={() => setSearch('')}
+                        />
+                    }
+                />
+                <StyledAccordionDetails toolbarHeader className='flex flex-col'>
+                    <StyledTable<ToolbarRow> columns={TOOLBAR_COLUMNS} data={TOOLBAR_ROWS} hideFooter locale='en' />
+                </StyledAccordionDetails>
+            </StyledAccordion>
+        </div>
+    )
+}
+
+/** Inline toolbar (container >= 744px): content padding-top 0, 16px from the controls to the table. */
+export const ToolbarHeaderWide = {
+    render: (): JSX.Element => <ToolbarHeaderDemo width={900} />,
+}
+
+/** Compact toolbar (container < 744px): content padding-top 16px, 16px from the controls to the table. */
+export const ToolbarHeaderNarrow = {
+    render: (): JSX.Element => <ToolbarHeaderDemo width={480} />,
+}
+
+/** Small (48px) summary, inline toolbar: content padding-top 12px, 16px from the controls to the table. */
+export const ToolbarHeaderSmall = {
+    render: (): JSX.Element => <ToolbarHeaderDemo width={900} size='small' />,
+}
+
+/** Inline toolbar with helper text: the helper row is below the controls, the table is 16px under it. */
+export const ToolbarHeaderHelperText = {
+    render: (): JSX.Element => <ToolbarHeaderDemo width={900} helperText='Helper text under the title' />,
 }

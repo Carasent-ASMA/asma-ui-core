@@ -75,8 +75,8 @@
     --colors-jade-400: #1ca1a1;
     --colors-jade-500: #168181;
     --colors-jade-600: #116161;
-    --colors-jade-700: #0b4040;
-    --colors-jade-800: #083030;
+    --colors-jade-700: #0d4f4f;
+    --colors-jade-800: #0a3d3d;
     --colors-jade-900: #0d4f4f;
     --colors-yellow-400: #efcc1d;
     --colors-yellow-500: #ffd815;
@@ -113,6 +113,7 @@
     --colors-error-500: #e10700;
     --colors-error-600: #b6120d;
     --colors-error-700: #9d0f0f;
+    --colors-error-800: #820c0c;
 
     --colors-info-50: #f0faff;
     --colors-info-300: #bae8fd;

@@ -58,6 +58,12 @@ export interface StyledPopoverProps {
     keepMounted?: boolean
     /** Set `false` when a wrapper already owns the Back-close registration. */
     registerBackClose?: boolean
+    /**
+     * MUI `disableEscapeKeyDown` parity: Escape neither closes the popover nor is stopped by it, so a widget inside that
+     * owns Escape for the moment hears it. The column settings menu sets it while a column is lifted, when Escape
+     * cancels the move (ASMA-8875).
+     */
+    disableEscapeKeyDown?: boolean
 }
 
 const DEFAULT_ANCHOR: PopoverOrigin = { vertical: 'bottom', horizontal: 'left' }
@@ -125,6 +131,7 @@ export const StyledPopover = ({
     keepMounted = false,
     tabIntoContent = true,
     registerBackClose = true,
+    disableEscapeKeyDown = false,
 }: StyledPopoverProps): JSX.Element | null => {
     const placement = useMemo(
         () => toPlacement(anchorOrigin, transformOrigin),
@@ -173,13 +180,16 @@ export const StyledPopover = ({
             if (anchorEl instanceof Element && target instanceof Node && anchorEl.contains(target)) return false
             return true
         },
-        escapeKey: true,
+        // Floating UI stops an Escape it handles from propagating, so a disabled Escape is not handled at all.
+        escapeKey: !disableEscapeKeyDown,
     })
     const { getFloatingProps } = useInteractions([dismiss])
 
+    // Back is Escape (BACK-3): while Escape is disabled, Back refuses too, instead of closing.
     useBackCloses({
         active: open && registerBackClose,
-        requestClose: (event) => (onClose ? onClose(event ?? new Event('overlayBack'), 'escapeKeyDown') : false),
+        requestClose: (event) =>
+            onClose && !disableEscapeKeyDown ? onClose(event ?? new Event('overlayBack'), 'escapeKeyDown') : false,
         ownerRef: refs.floating,
     })
 

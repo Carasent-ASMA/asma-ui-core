@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 
 import type { Participant } from '../../helpers/makeData'
 import type { ColumnDef } from '@tanstack/react-table'
-import { StyledCheckbox } from 'src/table/shared-components/StyledCheckbox'
+import { StyledCheckbox } from 'src/components/inputs/checkbox/base-ui/StyledCheckbox'
 import { CheckIcon } from 'src/table/shared-components/CheckIcon'
 
 export const useTableSubRowsColumns = (): { columns: ColumnDef<Participant, Participant>[] } => {
@@ -28,9 +28,13 @@ export const useTableSubRowsColumns = (): { columns: ColumnDef<Participant, Part
                         <StyledCheckbox
                             size='small'
                             dataTest='cell-select'
+                            aria-label={`Select row ${cell.row.index + 1}`}
                             checked={cell.row.getIsSelected()}
                             disabled={!cell.row.getCanSelect()}
                             onClick={(e) => e.stopPropagation()}
+                            onKeyDown={(event) => {
+                                if (event.key === 'Enter') event.preventDefault()
+                            }}
                             onChange={cell.row.getToggleSelectedHandler()}
                         />
                     )

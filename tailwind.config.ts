@@ -60,6 +60,11 @@ export default {
                 'max-xs',
                 "@layer theme { @media not all and (min-width: 320px) { &:not(:is(td, th, [role='cell'], [role='gridcell'], [role='columnheader'], [role='rowheader']) *) } }",
             )
+            /* Dialog header switches at 744px (Figma), not Tailwind's `md` (768). Each side is its
+             * own variant, so a micro-app's later `.py-3` cannot shrink the desktop header.
+             * 743.98, not 744: `(width<=744px)` would also match the desktop query. */
+            addVariant('max-dialog', '@media (width<=743.98px)')
+            addVariant('dialog', '@media (width>=744px)')
         }),
     ],
 } satisfies Config

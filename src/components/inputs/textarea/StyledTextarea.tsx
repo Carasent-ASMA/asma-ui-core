@@ -1,6 +1,7 @@
 import React, { useEffect, useId, useRef, type ChangeEvent, type MutableRefObject, type ReactNode } from 'react'
 import { useHelperSlot } from 'src/helpers/useHelperSlot'
 import { CharacterCounter } from 'src/helpers/CharacterCounter'
+import { resizeWithoutScrollJump } from 'src/helpers/resizeWithoutScrollJump'
 import type { UiCoreLocale } from 'src/helpers/uiCoreLocale'
 import { fieldWidthStyle, type FieldWidth } from '../field-styles'
 import styles from './StyledTextarea.module.scss'
@@ -142,11 +143,14 @@ export const StyledTextarea: React.FC<StyledTextAreaProps> = ({
         // [minRows, maxRows]. `scrollHeight` already includes BOTH paddings — the box is `border-box`,
         // so `rows*rowHeight + paddingTop + paddingBottom` is the exact height (no extra bottom gap,
         // and short text keeps the minRows height instead of collapsing/resizing on the first line).
-        textArea.style.height = 'auto'
-        const contentHeight = textArea.scrollHeight - paddingTop - paddingBottom
-        const contentRows = Math.max(1, Math.ceil(contentHeight / rowHeight))
-        const rows = Math.min(Math.max(contentRows, minRows), maxRows)
-        textArea.style.height = `${rows * rowHeight + paddingTop + paddingBottom}px`
+        // The container keeps its height during the collapse, so the page does not scroll (ASMA-9033).
+        resizeWithoutScrollJump(textArea, () => {
+            textArea.style.height = 'auto'
+            const contentHeight = textArea.scrollHeight - paddingTop - paddingBottom
+            const contentRows = Math.max(1, Math.ceil(contentHeight / rowHeight))
+            const rows = Math.min(Math.max(contentRows, minRows), maxRows)
+            textArea.style.height = `${rows * rowHeight + paddingTop + paddingBottom}px`
+        })
     }, [textAreaRef, value, minRows, maxRows, counterEnabled])
 
     if (maxRows < minRows) {

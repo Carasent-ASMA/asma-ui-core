@@ -93,6 +93,13 @@ export interface TooltipProps {
     persistentDescription?: boolean
     /** Share the persistent description with every focusable item in a composite control. */
     persistentDescriptionId?: string
+    /**
+     * Whether the trigger gets `aria-describedby` pointing at the tooltip while it is open. It does by default.
+     * Pass `false` for a tooltip that only repeats text the trigger's accessible name already holds, such as a truncated
+     * label shown in full (a table header): the tooltip is then visual only, and a screen reader does not hear the text
+     * twice. It ignores `persistentDescription`, which exists to describe the trigger.
+     */
+    describesTrigger?: boolean
     offsetDistance?: number
     className?: string
     slotProps?: TooltipSlotProps
@@ -180,6 +187,7 @@ const TooltipWithFloating = ({
     openOnTap,
     persistentDescription: requestedPersistentDescription,
     persistentDescriptionId,
+    describesTrigger = true,
     offsetDistance,
     className,
     slotProps,
@@ -188,7 +196,7 @@ const TooltipWithFloating = ({
     const isControlled = controlledOpen !== undefined
     const hasTitle = Boolean(title) || title === 0
     const open = hasTitle && (controlledOpen ?? uncontrolledOpen)
-    const persistentDescription = hasTitle && requestedPersistentDescription
+    const persistentDescription = hasTitle && describesTrigger && requestedPersistentDescription
     const arrowRef = useRef<SVGSVGElement>(null)
 
     const setOpen = (next: boolean): void => {
@@ -258,7 +266,7 @@ const TooltipWithFloating = ({
     const generatedDescriptionId = useId()
     const descriptionId = persistentDescriptionId ?? generatedDescriptionId
     const describedById = persistentDescription ? descriptionId : floatingId
-    const describes = Boolean(persistentDescription) || open
+    const describes = describesTrigger && (Boolean(persistentDescription) || open)
 
     // APG puts `aria-describedby` on the *trigger*, but by house rule the child handed in is a
     // wrapper span, not the control a screen reader lands on — so the id goes on the control inside

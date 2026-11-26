@@ -64,6 +64,37 @@ describe('StyledPopover keyboard contract', () => {
         await waitFor(() => expect(document.querySelector('[data-testid="popover-action"]')).toBeNull())
     })
 
+    it('Back refuses while Escape is disabled, as Escape does (BACK-3)', async () => {
+        const onClose = fn()
+        const anchor = document.createElement('button')
+        document.body.appendChild(anchor)
+        try {
+            const { rerender } = mount(
+                <StyledPopover open anchorEl={anchor} onClose={onClose} disableEscapeKeyDown>
+                    <button type='button' data-testid='popover-action'>
+                        Popover action
+                    </button>
+                </StyledPopover>,
+            )
+            await waitFor(() => expect(document.querySelector('[data-testid="popover-action"]')).not.toBeNull())
+
+            await expect(requestCloseTopOverlayBack()).toBe(false)
+            await expect(onClose).not.toHaveBeenCalled()
+
+            rerender(
+                <StyledPopover open anchorEl={anchor} onClose={onClose}>
+                    <button type='button' data-testid='popover-action'>
+                        Popover action
+                    </button>
+                </StyledPopover>,
+            )
+            void requestCloseTopOverlayBack()
+            await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
+        } finally {
+            anchor.remove()
+        }
+    })
+
     it('closes on Tab and preserves normal forward focus movement', async () => {
         const { container } = mount(<PopoverFixture />)
         const trigger = container.querySelector<HTMLButtonElement>('[data-testid="trigger"]')!

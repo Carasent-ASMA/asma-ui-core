@@ -113,7 +113,7 @@ function isOwnedBy(child: OverlayBackEntry, parent: OverlayBackEntry): boolean {
  * z-index in the page AND marks everything outside its own subtree `inert` (see `useTopLayer.hook`).
  * An overlay whose owner element sits outside that dialog is therefore neither visible as the top
  * layer nor clickable — so it must not become the Back target merely by having registered later. The
- * clearest case is a docked `MinimizableDialog`, a plain `<div>`, opened while a `StyledDialog` is
+ * clearest case is a fullscreen `MinimizableDialog`, a plain `<div>`, opened while a `StyledDialog` is
  * already up.
  *
  * - `StyledDialog`'s own entry owns the `<dialog>` itself, so `contains` holds and it stays eligible.
@@ -259,15 +259,21 @@ export function registerOverlayBackCloser(
     return () => {
         if (unregistered) return
         unregistered = true
+        const wasTop = findTopEntry(registry.entries) === entry
         const index = registry.entries.indexOf(entry)
         if (index !== -1) registry.entries.splice(index, 1)
         if (registry.entries.length === 0) {
             releaseAdapterIfStillEmpty(registry)
             return
         }
+        // Only the layer the pending route asked to close hands it on, and not when it re-registers
+        // in the same tick (StrictMode, an `active` toggle): that would close the next layer — an
+        // unanswered confirmation — or fail the route open past a top whose async close still runs.
+        if (!wasTop) return
+        const sizeAfterClose = registry.entries.length
         queueMicrotask(() => {
             const overlayBack = getSharedWindow()?.__ASMA__SHELL__?.overlayBack
-            if (registry.entries.length > 0 && overlayBack?.pendingNavigation) {
+            if (registry.entries.length === sizeAfterClose && overlayBack?.pendingNavigation) {
                 overlayBack.continuePendingNavigation?.()
             }
         })
@@ -287,11 +293,23 @@ export function registerOverlayBackCloser(
  */
 export const OverlayBackOwnerContext = createContext<RefObject<Element | null> | undefined>(undefined)
 
+/** The effective top: mount order, corrected for nesting and for entries a native modal covers. */
+function findTopEntry(entries: OverlayBackEntry[]): OverlayBackEntry | undefined {
+    return entries.reduce<OverlayBackEntry | undefined>((selected, candidate) => {
+        if (isCoveredByOpenModalDialog(candidate)) return selected
+        if (!selected || isOwnedBy(candidate, selected)) return candidate
+        if (isOwnedBy(selected, candidate)) return selected
+        return candidate
+    }, undefined)
+}
+
 /**
  * Act on the topmost registered overlay, honouring the close contract's latch: a top entry whose
  * previous `requestClose` returned a Promise that hasn't settled yet is skipped entirely (one
  * documented dead press), never passed through to the next entry down — BACK-2 is "one press closes
- * one layer", not "closes the nearest dismissible one".
+ * one layer", not "closes the nearest dismissible one". Known limitation, by design: there is no
+ * timeout, so a Promise that never settles keeps Back dead on that surface, and holds a route change
+ * the history adapter deferred behind it, until the surface unmounts.
  *
  * `StyledDialog`'s native `cancel`/`close` arbitration calls this directly, and it is exactly what the
  * one closer registered with the history adapter (`asma-core-helpers`, a separate package) delegates
@@ -299,12 +317,7 @@ export const OverlayBackOwnerContext = createContext<RefObject<Element | null> |
  */
 export function requestCloseTopOverlayBack(event?: Event): false | void | Promise<unknown> {
     const { entries } = getOverlayBackRegistry()
-    const top = entries.reduce<OverlayBackEntry | undefined>((selected, candidate) => {
-        if (isCoveredByOpenModalDialog(candidate)) return selected
-        if (!selected || isOwnedBy(candidate, selected)) return candidate
-        if (isOwnedBy(selected, candidate)) return selected
-        return candidate
-    }, undefined)
+    const top = findTopEntry(entries)
     // A non-empty stack with nothing eligible means every entry is covered by a modal `<dialog>`
     // that did not register for Back — only reachable from a bundle too old to have this code. The
     // press is deliberately a no-op (closing a covered entry would close the WRONG layer and discard
@@ -342,20 +355,7 @@ export function hasOverlayBackAdapter(): boolean {
     return getSharedWindow()?.__ASMA__SHELL__?.overlayBack?.v === 1
 }
 
-/**
- * `true` while the history adapter is holding a route change, waiting for the top overlay to close
- * before it navigates (design-plan rule 1 — `push` is deferred, not cancelled).
- *
- * A surface that is *meant* to outlive navigation — the shell-level docked minimizable panels — tells
- * the adapter so by returning `false` from its closer in this window. The adapter reads that as
- * fail-open: it strips the guard, runs the navigation, and leaves the surface open. Anything that
- * should close on navigation simply ignores this and closes as usual.
- */
-export function isOverlayBackNavigationPending(): boolean {
-    return getSharedWindow()?.__ASMA__SHELL__?.overlayBack?.pendingNavigation === true
-}
-
-/** Native close-watcher events are part of the feature and must respect the host kill switch. */
+/** The host kill switch: off means no history adapter, so pickers fall back to their legacy history path. */
 export function isOverlayBackEnabled(): boolean {
     const overlayBack = getSharedWindow()?.__ASMA__SHELL__?.overlayBack
     return overlayBack?.v === 1 && overlayBack.enabled === true

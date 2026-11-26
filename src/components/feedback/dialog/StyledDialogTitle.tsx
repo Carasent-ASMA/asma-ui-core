@@ -16,9 +16,9 @@ interface DialogTitleProps extends HTMLAttributes<HTMLHeadingElement> {
  * Adopts the id its enclosing `StyledDialog` offers, so the dialog is named by this visible title
  * rather than by its test hook (WCAG 4.1.2). An explicit `id` from the caller always wins.
  *
- * Inside a `StyledDialog` it renders into the header's title row (ASMA-8737): under the header
- * actions, full width, never truncated, pinned or scrolling with the header. Elsewhere it renders in
- * place with the same type.
+ * Inside a `StyledDialog` it renders into the header's title slot (ASMA-8737): beside the header
+ * actions when the dialog has no label, under them when it has one; never truncated, pinned or
+ * scrolling with the header. Elsewhere it renders in place with the same type.
  */
 export const StyledDialogTitle = ({
     children,

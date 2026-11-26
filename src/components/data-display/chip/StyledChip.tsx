@@ -1,5 +1,8 @@
 import {
     forwardRef,
+    useLayoutEffect,
+    useRef,
+    useState,
     type CSSProperties,
     type KeyboardEvent,
     type MouseEvent,
@@ -10,6 +13,7 @@ import { StyledTooltip } from 'src/components/data-display/tooltip/StyledTooltip
 import { CloseIcon } from 'src/components/icons'
 import { consumerOverrides } from 'src/helpers/classOverride'
 import { cn } from 'src/helpers/cn'
+import { pressedStateHandlers } from 'src/helpers/pressedState'
 import { resolveSx } from 'src/helpers/sx'
 
 import { getChipPadding } from './chipPadding'
@@ -172,20 +176,72 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
             paddingLeft: padding.left,
         }
 
+        const labelRef = useRef<HTMLSpanElement>(null)
+        const [labelWraps, setLabelWraps] = useState(false)
+
+        // ASMA-9001: first-line alignment is a property of an actually wrapping label, not of the
+        // viewport. A one-line chip keeps the original `items-center` row and padding exactly (a
+        // ReactNode label's first line is not always 24px, so an unconditional switch shifted the
+        // existing state-table chips by 2px). Count the rendered line boxes and switch only when
+        // there is more than one; the classes below then apply at any width.
+        useLayoutEffect(() => {
+            const labelElement = labelRef.current
+            if (!labelElement) return undefined
+
+            const measure = (): void => {
+                const range = document.createRange()
+                range.selectNodeContents(labelElement)
+                const rects = Array.from(range.getClientRects()).filter(
+                    (rect) => rect.width > 0 || rect.height > 0,
+                )
+                // Inline fragments on one visual line (e.g. "First Name • 12612") vertically
+                // overlap; separate line boxes do not.
+                const lines: { top: number; bottom: number }[] = []
+                for (const rect of rects) {
+                    const line = lines.find(
+                        (candidate) => rect.top < candidate.bottom - 1 && rect.bottom > candidate.top + 1,
+                    )
+                    if (line) {
+                        line.top = Math.min(line.top, rect.top)
+                        line.bottom = Math.max(line.bottom, rect.bottom)
+                    } else {
+                        lines.push({ top: rect.top, bottom: rect.bottom })
+                    }
+                }
+                const next = lines.length > 1
+                setLabelWraps((previous) => (previous === next ? previous : next))
+            }
+
+            measure()
+            if (typeof ResizeObserver === 'undefined') return undefined
+            const observer = new ResizeObserver(measure)
+            observer.observe(labelElement)
+            return () => observer.disconnect()
+        }, [])
+
         const handleDelete = (event: MouseEvent<HTMLButtonElement>): void => {
             event.stopPropagation()
             onDelete?.(event)
         }
 
+        const pressed = pressedStateHandlers({ enabled: interactive, keyboard: true })
+
         // A `clickable`/`onClick` chip gets `role='button' tabIndex=0` below — a <div> doesn't natively
         // fire click on Enter/Space the way a real <button> does, so without this the chip would be a
-        // tab stop that does nothing on keyboard activation.
-        const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>): void => {
-            if (!interactive) return
-            if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault()
+        // tab stop that does nothing on keyboard activation. Like a native button, Enter activates on
+        // keydown and Space on keyup, once per press; the delete button's keys are its own.
+        const handleKeyDown = (event: KeyboardEvent<HTMLElement>): void => {
+            pressed.onKeyDown?.(event)
+            if (!interactive || event.target !== event.currentTarget) return
+            if (event.key === 'Enter' || event.key === ' ') event.preventDefault()
+            if (event.key === 'Enter') onClick?.(event as unknown as MouseEvent<HTMLElement>)
+        }
+
+        // Reads `data-pressed="key"` (a Space press begun here) before the pressed-state keyup clears it.
+        const handleKeyUp = (event: KeyboardEvent<HTMLElement>): void => {
+            if (interactive && event.key === ' ' && event.currentTarget.getAttribute('data-pressed') === 'key')
                 onClick?.(event as unknown as MouseEvent<HTMLElement>)
-            }
+            pressed.onKeyUp?.(event)
         }
 
         // MUI Chip shrink-wraps by default; `max-w-full` caps truncation in constrained rows. `cn` is
@@ -209,32 +265,41 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                 aria-readonly={roleOverride ? ariaReadonly : undefined}
                 tabIndex={getChipTabIndex({ readOnly, disabled, interactive, focusableDisabled, tabIndex })}
                 onClick={disabled || readOnly ? undefined : onClick}
-                onKeyDown={disabled || readOnly ? undefined : handleKeyDown}
+                {...pressed}
+                onKeyDown={handleKeyDown}
+                onKeyUp={handleKeyUp}
                 onMouseDown={disabled || readOnly ? undefined : onMouseDown}
                 onMouseUp={disabled || readOnly ? undefined : onMouseUp}
                 className={cn(
                     // Figma _BASE_Tag (node 14312-26020): label Body Base 16px/lh24, text-icon/body #49525f (delta-700), border/outline #bdc4cf (delta-300), radius 25, gap 4.
-                    'border-delta-300 text-delta-700 box-border inline-flex items-center gap-1 rounded-[25px] border border-solid bg-white text-base',
+                    // ASMA-9001: first-line alignment applies when the label actually wraps, at any
+                    // width. Keeping the one-line row centered is what preserves every existing
+                    // pixel, including ReactNode labels whose first line is not 24px. A wrapped
+                    // label switches to `items-start`, drops the vertical padding (which only
+                    // centered the one-line row) and puts the slots on the first line below.
+                    'border-delta-300 text-delta-700 box-border inline-flex gap-1 rounded-[25px] border border-solid bg-white text-base',
+                    labelWraps ? 'items-start py-0' : 'items-center',
                     !consumerSetsWidth && 'w-fit',
                     !consumerSetsMaxWidth && 'max-w-full',
                     size === 'small' ? 'h-6' : 'h-8',
-                    // Narrower than a phone: a label that does not fit wraps and the chip grows. The vertical
-                    // padding moves onto the label (below), so a one-line chip keeps the Figma height.
+                    // A label that does not fit below 320px lets the chip grow. `max-xs:py-0`
+                    // keeps a one-line narrow chip at its old 24/32px height.
                     'max-xs:h-auto max-xs:py-0',
                     size === 'small' ? 'max-xs:min-h-6' : 'max-xs:min-h-8',
                     readOnly && 'pointer-events-none',
                     // A focusable disabled chip keeps its pointer events so the not-allowed cursor shows;
                     // activation is already blocked because the handlers are removed while disabled.
                     disabled && 'opacity-[0.38]',
-                    disabled && (focusableDisabled ? 'cursor-not-allowed' : 'pointer-events-none'),
+                    // A focusable disabled chip takes taps (its reason opens), so it gets the touch fixes: no grey flash.
+                    disabled && (focusableDisabled ? 'asma-touch-ready cursor-not-allowed' : 'pointer-events-none'),
                     interactive &&
                         cn(
                             'cursor-pointer outline-hidden',
-                            // ASMA-8220 (TB-14): touch-ready, not pressable — the `active:` colours
-                            // below are the designed pressed state, so no opacity layer over them.
-                            // No `asma-touch-target`: the fixed h-6/h-8 heights are the Figma chip.
+                            // ASMA-8220 touch fixes; no `asma-touch-target`: the h-6/h-8 heights are the Figma chip.
                             'asma-touch-ready',
-                            'active:!border-gama-400 active:bg-gama-25 active:shadow-[0_0_0_2px_var(--colors-gama-400)]',
+                            // ASMA-9003 pressed look; the booster beats the hover and selected-radio fills.
+                            // @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
+                            'data-[pressed]:text-gama-700 [&[data-chip][role][data-pressed]]:bg-gama-200 data-press-released:transition-colors data-press-released:duration-150 data-press-released:ease-[ease-out] data-pressed:[--control-pressed-accent:var(--colors-gama-700)] forced-colors:data-pressed:[outline:2px_solid_Highlight]! forced-colors:data-pressed:-outline-offset-2!',
                         ),
                     // Figma Hovered (every Type, e.g. 18832-25540): fill bg/hover-default #f0f2f4
                     // (delta-50); the border stays border/outline (delta-300). A deletable chip is
@@ -250,7 +315,10 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                     <span
                         className={cn(
                             'flex shrink-0 items-center justify-center',
-                            size === 'small' ? 'size-[18px]' : 'size-6',
+                            size === 'small' ? 'h-[18px] w-[18px]' : 'h-6 w-6',
+                            // Wrapped label: centre the 18px slot (small) / 24px slot (medium) on
+                            // the first 24px label line (1px border + 2px / 3px).
+                            labelWraps && (size === 'small' ? 'mt-0.5' : 'mt-[3px]'),
                             avatar ? classes?.avatar : classes?.icon,
                         )}
                     >
@@ -258,12 +326,14 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                     </span>
                 )}
                 <span
+                    ref={labelRef}
                     className={cn(
                         'min-w-0 truncate',
                         'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:[overflow-wrap:anywhere]!',
-                        // One 24px line + this = the 32/24px chip minus its 1px borders. The fixed-height
-                        // chip clipped the same overflow invisibly; `h-auto` would grow it to 34/30px.
-                        size === 'small' ? 'max-xs:-my-px' : 'max-xs:py-[3px]',
+                        // Wrapped label: small centres its 24px line with a -1px pair of margins;
+                        // medium reserves 3px above and below. A consumer can force a wrap at any
+                        // width; a one-line chip keeps the original centered row and padding.
+                        labelWraps && (size === 'small' ? '-my-px' : 'py-[3px]'),
                         classes?.label,
                     )}
                 >
@@ -284,7 +354,10 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                             // Its focus indication is intentionally painted by the parent (via
                             // `:has(button:focus-visible)`), matching the Figma state without a second button ring.
                             'border-delta-100 bg-delta-50 text-delta-700 flex shrink-0 items-center justify-center rounded-full border border-solid p-0 [outline:none]',
-                            size === 'small' ? 'size-[18px]' : 'size-5',
+                            size === 'small' ? 'h-[18px] w-[18px]' : 'h-5 w-5',
+                            // Wrapped label: first-line alignment, same rule as the start slot
+                            // (18px centre = 1px border + 2px; 20px centre = 1px border + 5px).
+                            labelWraps && (size === 'small' ? 'mt-0.5' : 'mt-[5px]'),
                             classes?.deleteIcon,
                         )}
                     >

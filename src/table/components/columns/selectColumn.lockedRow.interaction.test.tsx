@@ -63,7 +63,7 @@ const triggerOf = (rowId: string): HTMLElement => {
 
 /** The painted box inside the checkbox — the element the state classes colour. */
 const boxOf = (rowId: string): HTMLElement => {
-    const box = selectCellOf(rowId).querySelector<HTMLElement>('[data-test="cell-select"] > span:last-of-type')
+    const box = selectCellOf(rowId).querySelector<HTMLElement>('[data-testid="cell-select"] > span:last-of-type')
     if (!box) throw new Error(`no checkbox box on row ${rowId}`)
     return box
 }
@@ -88,11 +88,12 @@ describe('StyledTable select column — a row that cannot be selected', () => {
         await expect(locked).not.toBe(selectable)
     })
 
-    it('leaves a selectable row alone', async () => {
+    it('leaves a selectable row alone: a control, reached with the arrow keys in its row (ASMA-8875)', async () => {
         renderTable()
 
         await expect(selectCellOf('free')).toHaveAttribute('aria-disabled', 'false')
-        await expect(selectCellOf('free')).toHaveAttribute('tabindex', '0')
+        await expect(selectCellOf('free')).toHaveAttribute('tabindex', '-1')
+        await expect(selectCellOf('free')).toHaveAttribute('data-table-control')
     })
 
     /*
@@ -106,6 +107,8 @@ describe('StyledTable select column — a row that cannot be selected', () => {
         await expect(selectCellOf('attached')).toHaveAttribute('aria-checked', 'true')
         await expect(selectCellOf('attached')).toHaveAttribute('aria-disabled', 'true')
         await expect(selectCellOf('attached')).toHaveAttribute('tabindex', '-1')
+        // Not a control either: the arrow keys pass it (ASMA-8875).
+        await expect(selectCellOf('attached')).not.toHaveAttribute('data-table-control')
     })
 
     it('shows the caller\'s reason on hover, from `getRowSelectionTooltip`', async () => {

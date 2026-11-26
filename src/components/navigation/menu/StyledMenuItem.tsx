@@ -1,7 +1,8 @@
 import { Children, isValidElement, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react'
 import { cn } from 'src/helpers/cn'
-import { StyledTooltip } from 'src/components/data-display/tooltip'
+import { StyledTooltip, type TooltipProps } from 'src/components/data-display/tooltip'
 import { StyledCheckbox } from 'src/components/inputs/checkbox'
+import { pressedStateHandlers } from 'src/helpers/pressedState'
 import { resolveSx } from 'src/helpers/sx'
 
 // Same wording as the app catalogs (`already_added`). Norwegian is the product default (`<html lang="no">`);
@@ -38,7 +39,10 @@ export interface StyledMenuItemProps {
     /** @figmaProp content — Type (Only Label / Icon / Checkbox / Check mark) via composition */
     children?: ReactNode
     onClick?: (event: MouseEvent<HTMLLIElement>) => void
-    /** Forwarded to the `<li>` — e.g. `stopPropagation` so a menu-item mousedown doesn't dismiss the menu. */
+    /**
+     * Forwarded to the `<li>`, also when disabled — e.g. `stopPropagation` so a menu-item mousedown doesn't
+     * dismiss the menu.
+     */
     onMouseDown?: (event: MouseEvent<HTMLLIElement>) => void
     onMouseUp?: (event: MouseEvent<HTMLLIElement>) => void
     /** @figmaProp State = true→"Disabled" */
@@ -48,10 +52,19 @@ export interface StyledMenuItemProps {
      * arrow-key navigation and shows the reason on hover, focus and tap (disabled-states DIS-1…DIS-3).
      */
     disabledReason?: ReactNode
+    /** Side the disabled reason opens on. */
+    reasonPlacement?: TooltipProps['placement']
     /** @figmaProp none — behavioral. The item's action is running; pair it with `disabled` and a reason. */
     'aria-busy'?: boolean
     /** @figmaProp State = true→"Selected" */
     selected?: boolean
+    /**
+     * @figmaProp none — semantic. WAI-ARIA menu item role. Use `menuitemradio` for one-of-many
+     * (e.g. a language picker) and `menuitemcheckbox` for on/off items, with `aria-checked`.
+     */
+    role?: 'menuitem' | 'menuitemradio' | 'menuitemcheckbox'
+    /** @figmaProp none — semantic. Checked state; rendered only for `menuitemradio` / `menuitemcheckbox`. */
+    'aria-checked'?: boolean
     /** Compact vertical padding (MUI `MenuItem` `dense` parity, DEC-003). */
     dense?: boolean
     /**
@@ -64,7 +77,12 @@ export interface StyledMenuItemProps {
     className?: string
     classes?: { root?: string; selected?: string }
     sx?: unknown
+    /**
+     * @figmaProp none — legacy test hook on the `<li>`, for apps whose `testIdAttribute` is `data-test`
+     * (editor, qnreditor, storage, crm). New tests should query `data-testid`.
+     */
     'data-test'?: string
+    /** @figmaProp none — test hook on the `<li>`. */
     'data-testid'?: string
 }
 
@@ -79,8 +97,11 @@ export const StyledMenuItem = ({
     onMouseUp,
     disabled,
     disabledReason,
+    reasonPlacement = 'left',
     'aria-busy': ariaBusy,
     selected,
+    role = 'menuitem',
+    'aria-checked': ariaChecked,
     dense,
     tooltip,
     className,
@@ -91,51 +112,60 @@ export const StyledMenuItem = ({
     // Accepted for parity (consumed by Select, not needed for menu rendering).
     value: _value,
 }: StyledMenuItemProps): JSX.Element => {
+    // Enter and Space activate once per press: a held key's auto-repeat does not toggle a checkbox/radio item again.
     const handleKeyDown = (event: KeyboardEvent<HTMLLIElement>): void => {
         if (disabled) return
         if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault()
-            onClick?.(event as unknown as MouseEvent<HTMLLIElement>)
+            // Bubble the same click as a pointer activation so containing menus can dismiss.
+            if (!event.repeat) event.currentTarget.click()
         }
     }
 
     const reasoned = Boolean(disabled) && Boolean(disabledReason)
 
     const row = (
+        // False positive: the rule only reads a literal `role`, and every value this prop accepts
+        // (menuitem / menuitemradio / menuitemcheckbox) is an interactive role.
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
         <li
-            role='menuitem'
+            role={role}
+            // Required by the radio/checkbox roles, so an omitted value reads as unchecked.
+            aria-checked={role === 'menuitem' ? undefined : (ariaChecked ?? false)}
             aria-disabled={disabled ? true : undefined}
             aria-busy={ariaBusy ? true : undefined}
             data-has-reason={reasoned ? '' : undefined}
             tabIndex={-1}
             data-test={dataTest}
             data-testid={dataTestId}
-            onClick={disabled ? undefined : onClick}
-            onMouseDown={disabled ? undefined : onMouseDown}
-            onMouseUp={disabled ? undefined : onMouseUp}
+            onClick={disabled ? (event) => event.stopPropagation() : onClick}
+            onMouseDown={onMouseDown}
+            onMouseUp={onMouseUp}
             onKeyDown={handleKeyDown}
+            {...pressedStateHandlers({ enabled: !disabled && !ariaBusy })}
             className={cn(
                 // Figma Menus item (node 16073-21583): h40, py8, label Body Base 16px.
                 'box-border flex items-center px-4 text-base outline-hidden focus-visible:shadow-[inset_3px_0_var(--colors-focus-ring)]',
                 dense ? 'min-h-8 py-1' : 'min-h-10 py-2',
-                // ASMA-8210: the item had no pressed state at all, and at 40px (32px dense) both
-                // variants sit under the 44px touch height — safe for the touch-target override,
-                // which only ever raises them (it sets min-height only; the item declares no
-                // min-width). Menu rows sit flush against each other, so an overlaid hit area
-                // would steal the neighbour's presses — grow instead, and only on a phone, which
-                // leaves tablet and desktop byte-identical.
-                'asma-pressable asma-touch-target',
+                // ASMA-8210: rows under the 44px touch height grow on phones (min-height only); flush rows
+                // cannot take an overlaid hit area, which would steal the neighbour's presses.
+                'asma-touch-ready asma-touch-target',
                 // Figma Disabled menu item = muted text-icon/disabled (delta-300); enabled = text-icon/body (delta-700).
                 // The `aria-disabled:` variant (specificity 0,2,0) keeps the grey winning over any
                 // text-* colour a consumer passes via `className` (all utilities are `!important`,
                 // so plain classes resolve by stylesheet order, not by the `!` prefix).
-                // Figma bg/hover-default #f0f2f4 = delta-50 in every theme. A selected row keeps its
-                // fill on hover (the node's bg/hover-selected equals the resting selected colour),
-                // so the hover utility is simply absent there rather than out-ranked.
+                // Figma Menus item: hover bg/hover-default (delta-50); selected bg/selected (gama-25),
+                // hovered bg/hover-selected (gama-50).
                 disabled
                     ? 'text-delta-300 aria-disabled:text-delta-300 cursor-not-allowed'
-                    : cn('text-delta-700 cursor-pointer', !selected && 'hover:bg-delta-50'),
-                selected && cn('bg-gama-50', classes?.selected),
+                    : cn(
+                          'text-delta-700 cursor-pointer',
+                          selected ? 'hover:bg-gama-50' : 'hover:bg-delta-50',
+                          // ASMA-9003 pressed look; `[role]` lifts the fill over the hover fills.
+                          // @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
+                          'data-[pressed]:text-gama-700 [&[data-pressed][role]]:bg-gama-200 data-press-released:transition-colors data-press-released:duration-150 data-press-released:ease-[ease-out] data-pressed:[--control-pressed-accent:var(--colors-gama-700)] forced-colors:data-pressed:[outline:2px_solid_Highlight]! forced-colors:data-pressed:-outline-offset-2!',
+                      ),
+                selected && cn('bg-gama-25', classes?.selected),
                 classes?.root,
                 className,
             )}
@@ -155,7 +185,7 @@ export const StyledMenuItem = ({
             title={title}
             open={title ? undefined : false}
             arrow={!reasoned}
-            placement={reasoned ? 'left' : 'top'}
+            placement={reasoned ? reasonPlacement : 'top'}
             openOnTap={reasoned}
             persistentDescription={reasoned}
         >

@@ -13,6 +13,8 @@
  * @see docs/a11y-allowlist.md — the axe (SC 1.4.3 only) story baseline this cross-references
  */
 
+import { PRESSED_PAIRS } from './pressedPairs'
+
 /**
  * The surface the library composites onto when a token is `transparent`, and the surface an
  * unparented control is assumed to sit on. The library ships no page-background token; every
@@ -27,9 +29,24 @@ export const REQUIREMENT_RATIO = {
     largeText: 3,
     /** SC 1.4.11, UI component boundaries, state indicators and focus rings. */
     nonText: 3,
+    /**
+     * Pressed (momentary) states: 85 % of 4.5:1 and of 3:1 — an accepted risk, not a WCAG level.
+     * @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md:121 — "Contrast while hovered or pressed"
+     */
+    momentaryText: 3.83,
+    momentaryNonText: 2.55,
 } as const
 
 export type ContrastRequirement = keyof typeof REQUIREMENT_RATIO
+
+/** The success criterion each requirement level is measured against, for test titles and docs. */
+export const REQUIREMENT_CRITERION: Readonly<Record<ContrastRequirement, string>> = {
+    text: 'SC 1.4.3',
+    largeText: 'SC 1.4.3',
+    nonText: 'SC 1.4.11',
+    momentaryText: 'SC 1.4.3 (momentary, 85 %)',
+    momentaryNonText: 'SC 1.4.11 (momentary, 85 %)',
+}
 
 export interface ContrastPair {
     /** Stable id. Quarantined rows use it to join to `docs/a11y-contrast.md`. */
@@ -45,7 +62,8 @@ export interface ContrastPair {
 }
 
 /**
- * Hand-curated pairs. The button token family is generated instead — see `buildButtonPairs`.
+ * Hand-curated pairs, ending with the pressed looks from `pressedPairs.ts`. The button token family
+ * is generated instead — see the button token matrix in `themeContrast.test.ts`.
  */
 export const COMPONENT_PAIRS: readonly ContrastPair[] = [
     // ---------------------------------------------------------------- text (SC 1.4.3)
@@ -171,11 +189,18 @@ export const COMPONENT_PAIRS: readonly ContrastPair[] = [
         usedBy: 'src/components/navigation/link/StyledLink.module.scss',
     },
     {
+        id: 'empty-page/text',
+        foreground: '--colors-delta-600',
+        background: APP_SURFACE,
+        requirement: 'text',
+        usedBy: 'src/components/feedback/empty-page/StyledEmptyPage.tsx',
+    },
+    {
         id: 'table/cell-text',
         foreground: '--colors-delta-800',
         background: APP_SURFACE,
         requirement: 'text',
-        usedBy: 'src/table/shared-components/StyledMenuItem.tsx',
+        usedBy: 'src/table/components/columns/dndHandleColumn.tsx',
     },
     {
         id: 'tooltip/label',
@@ -549,6 +574,8 @@ export const COMPONENT_PAIRS: readonly ContrastPair[] = [
         requirement: 'text',
         usedBy: 'src/components/data-display/card/Card.tsx',
     },
+    // ------------------------------------------- pressed (ASMA-9003, momentary levels)
+    ...PRESSED_PAIRS,
 ]
 
 /**
@@ -568,6 +595,23 @@ export const BUTTON_STATES = ['base', 'hover', 'active', 'focused'] as const
 
 export type ButtonType = (typeof BUTTON_TYPES)[number]
 export type ButtonState = (typeof BUTTON_STATES)[number]
+
+/** `active` is the pressed look, held to the momentary levels; `hover` and `focused` keep the full ones. */
+export const MOMENTARY_BUTTON_STATES: readonly ButtonState[] = ['active']
+
+/** The requirement level a generated button pair is held to in a given state. */
+export const buttonRequirement = (state: ButtonState, aspect: 'text' | 'boundary'): ContrastRequirement => {
+    const momentary = MOMENTARY_BUTTON_STATES.includes(state)
+
+    if (aspect === 'text') {
+        return momentary ? 'momentaryText' : 'text'
+    }
+
+    return momentary ? 'momentaryNonText' : 'nonText'
+}
+
+/** Inset focus ring (`_focus.scss`): with Space held it sits on the pressed fill. `contained` keeps a white gap. */
+export const BUTTON_TYPES_WITH_INSET_FOCUS_RING: readonly ButtonType[] = ['outlined', 'text', 'textGray']
 
 export interface ButtonTokenNames {
     readonly text: string
@@ -600,24 +644,21 @@ export const BUTTON_TYPES_WITHOUT_KNOWN_SURFACE: readonly ButtonType[] = ['textW
  * Button pairs that fail against master, keyed `{type}/{color}/{state}/{aspect}`.
  *
  * `text-on-tinted-hover` (F-12): outlined/text/textGray put gama-500 on a gama-50 or gama-100 tint
- * at hover and active, which drops the label under 4.5:1 in every theme.
+ * at hover and focused, which drops the label under 4.5:1 in every theme (pressed passes, see docs).
  * `boundary-focus` (F-07): the focus border is gama-400 everywhere, which is under 3:1 on white in
  * default and fretex.
  * `boundary-outlined-hover` (F-13): outlined's hover/active border is gama-300, under 3:1 in all
- * three themes.
+ * three themes — and under the momentary 2.55:1 while pressed, so `active` stays quarantined.
  * `outlined/error/focused/text` (F-16): white label on a beta-100 tint, 1.27:1 in every theme.
  * Error/focused boundaries now resolve after ASMA-8133. Default and greenish pass at 8.37:1;
  * fretex still uses gama-400 at 2.24:1, so these rows remain under F-07.
  */
 export const BUTTON_FINDINGS: Readonly<Record<string, string>> = {
     'outlined/common/hover/text': 'F-12',
-    'outlined/common/active/text': 'F-12',
     'outlined/common/focused/text': 'F-12',
     'text/common/hover/text': 'F-12',
-    'text/common/active/text': 'F-12',
     'text/common/focused/text': 'F-12',
     'textGray/common/hover/text': 'F-12',
-    'textGray/common/active/text': 'F-12',
     'textGray/common/focused/text': 'F-12',
     'contained/common/focused/boundary': 'F-07',
     'outlined/common/focused/boundary': 'F-07',
@@ -649,7 +690,8 @@ export const BUTTON_FINDINGS: Readonly<Record<string, string>> = {
 export const REGRESSION_FLOORS: Readonly<Record<string, Readonly<Record<string, number | null>>>> = {
     'input/placeholder': { default: 3.55, fretex: 5.57, greenish: 3.55 },
     'input/error-value': { default: 3.88, fretex: 3.88, greenish: 3.88 },
-    'snackbar/info-message': { default: 6.28, fretex: 3.55, greenish: 11.52 },
+    // greenish 11.52 -> 9.33: jade-700 aligned to Figma (ASMA-9003); still above 4.5:1.
+    'snackbar/info-message': { default: 6.28, fretex: 3.55, greenish: 9.33 },
     'alert/filled-success-text': { default: 1.95, fretex: 1.95, greenish: 1.95 },
     'alert/filled-info-text': { default: 3.18, fretex: 3.18, greenish: 3.18 },
     'alert/filled-warning-text': { default: 1.61, fretex: 1.61, greenish: 1.61 },
@@ -659,16 +701,14 @@ export const REGRESSION_FLOORS: Readonly<Record<string, Readonly<Record<string, 
     'switch/focus-ring': { default: 2.73, fretex: 2.24, greenish: 3.15 },
     'switch/track-read-only': { default: 1.68, fretex: 1.98, greenish: 1.68 },
     'chip/border-enabled': { default: 1.75, fretex: 2.07, greenish: 1.75 },
+    'chip/border-pressed': { default: 1.75, fretex: 2.07, greenish: 1.75 },
     'chip/focus-ring': { default: 2.73, fretex: 2.24, greenish: 3.15 },
     'link/focus-ring': { default: 2.73, fretex: 2.24, greenish: 3.15 },
     'outlined/common/hover/text': { default: 3.55, fretex: 3.83, greenish: 4.21 },
-    'outlined/common/active/text': { default: 4.04, fretex: 4.23, greenish: 3.55 },
     'outlined/common/focused/text': { default: 4.04, fretex: 4.23, greenish: 4.21 },
     'text/common/hover/text': { default: 4.04, fretex: 4.23, greenish: 4.21 },
-    'text/common/active/text': { default: 3.55, fretex: 3.83, greenish: 3.55 },
     'text/common/focused/text': { default: 4.04, fretex: 4.23, greenish: 4.21 },
     'textGray/common/hover/text': { default: 4.04, fretex: 4.23, greenish: 4.21 },
-    'textGray/common/active/text': { default: 3.55, fretex: 3.83, greenish: 3.55 },
     'textGray/common/focused/text': { default: 4.04, fretex: 4.23, greenish: 4.21 },
     'contained/common/focused/boundary': { default: 2.73, fretex: 2.24, greenish: 3.15 },
     'outlined/common/focused/boundary': { default: 2.73, fretex: 2.24, greenish: 3.15 },

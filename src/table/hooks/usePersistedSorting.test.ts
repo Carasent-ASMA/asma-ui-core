@@ -5,7 +5,9 @@ import {
     readPersistedSorting,
     readSortingFromStorage,
     sanitizeSorting,
+    savesSorting,
     serializeSorting,
+    type SortingPersistenceInput,
     type SortingRules,
 } from './usePersistedSorting'
 
@@ -229,5 +231,68 @@ describe('readPersistedSorting (ASMA-8597)', () => {
         storage.data.set('table-b:sorting', serializeSorting([{ id: 'name', desc: true }]))
 
         expect(readPersistedSorting('table-a', { sortableColumnIds: ids })).toBeUndefined()
+    })
+})
+
+describe('savesSorting (ASMA-8698)', () => {
+    const KEY = 'table'
+    const input = (overrides: Partial<SortingPersistenceInput> = {}): SortingPersistenceInput => ({
+        uniqueKey: KEY,
+        persistSorting: undefined,
+        controlled: false,
+        ...overrides,
+    })
+
+    it('S-01: a table with only a uniqueKey saves its sorting', () => {
+        expect(savesSorting(input())).toBe(true)
+    })
+
+    it('S-02: persistSorting={true} is the default spelled out: the same answer', () => {
+        expect(savesSorting(input({ persistSorting: true }))).toBe(savesSorting(input()))
+    })
+
+    it('S-03: persistSorting={false} is the opt-out, controlled or not', () => {
+        for (const controlled of [false, true]) {
+            expect(savesSorting(input({ persistSorting: false, controlled })), String(controlled)).toBe(false)
+        }
+    })
+
+    it('S-04: without a uniqueKey nothing is saved, even with persistSorting', () => {
+        for (const persistSorting of [undefined, true, false]) {
+            expect(savesSorting(input({ uniqueKey: undefined, persistSorting })), String(persistSorting)).toBe(false)
+            expect(savesSorting(input({ uniqueKey: '', persistSorting })), String(persistSorting)).toBe(false)
+        }
+    })
+
+    it('S-05: an app that owns the sorting state is not saved by default', () => {
+        expect(savesSorting(input({ controlled: true }))).toBe(false)
+    })
+
+    it('S-06: persistSorting={true} lets StyledTable be the writer of a sort the app owns', () => {
+        expect(savesSorting(input({ persistSorting: true, controlled: true }))).toBe(true)
+    })
+
+    it('S-07: the whole table, one case per row (key, persistSorting, controlled)', () => {
+        const cases: [key: boolean, persistSorting: boolean | undefined, controlled: boolean, saves: boolean][] = [
+            [true, undefined, false, true],
+            [true, true, false, true],
+            [true, false, false, false],
+            [true, undefined, true, false],
+            [true, true, true, true],
+            [true, false, true, false],
+            [false, undefined, false, false],
+            [false, true, false, false],
+            [false, false, false, false],
+            [false, undefined, true, false],
+            [false, true, true, false],
+            [false, false, true, false],
+        ]
+
+        for (const [key, persistSorting, controlled, saves] of cases) {
+            expect(
+                savesSorting(input({ uniqueKey: key ? KEY : undefined, persistSorting, controlled })),
+                `key ${key}, persistSorting ${String(persistSorting)}, controlled ${controlled}`,
+            ).toBe(saves)
+        }
     })
 })

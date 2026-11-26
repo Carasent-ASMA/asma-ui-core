@@ -325,7 +325,7 @@ export const IncompleteTimeOnBlur: StoryObj<typeof StyledTimePicker> = {
         await expect(input).not.toHaveAttribute('aria-invalid')
 
         input.blur()
-        await expect(await canvas.findByText('Invalid time format')).toBeInTheDocument()
+        await expect(await canvas.findByText('Enter a valid time in HH:mm format.')).toBeInTheDocument()
         await expect(input).toHaveAttribute('aria-invalid', 'true')
     },
 }

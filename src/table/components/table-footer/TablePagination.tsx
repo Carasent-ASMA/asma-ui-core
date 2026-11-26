@@ -7,7 +7,7 @@ import { StyledMenuList as MenuList } from 'src/components/navigation/menu'
 import { ChevronDownIcon } from 'src/table/shared-components/ChevronDownIcon'
 import { ChevronRightIcon } from 'src/table/shared-components/ChevronRightIcon'
 import { ChevronLeftIcon } from 'src/table/shared-components/ChevronLeftIcon'
-import { StyledButton } from 'src/table/shared-components/button'
+import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { StyledTooltip } from 'src/table/shared-components/tooltip'
 import { StyledSelectItem } from 'src/components/inputs/select'
 

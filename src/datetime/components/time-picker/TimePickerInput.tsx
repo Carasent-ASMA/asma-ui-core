@@ -45,6 +45,7 @@ export const TimePickerInput: React.FC<
         readOnly: readOnlyProp,
         lockedReason,
         inputAriaProps,
+        messages,
     } = props
     const readOnly = Boolean(readOnlyProp) || Boolean(lockedReason)
 
@@ -92,7 +93,7 @@ export const TimePickerInput: React.FC<
                         error={!!error}
                         localization={locale}
                         helperText={helperText}
-                        messages={defaultTimePickerHelperMessages}
+                        messages={{ ...defaultTimePickerHelperMessages, ...messages }}
                     />
                     )
                 }

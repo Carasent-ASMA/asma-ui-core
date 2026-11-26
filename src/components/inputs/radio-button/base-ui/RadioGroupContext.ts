@@ -6,6 +6,8 @@ export interface RadioGroupContextValue {
     name: string
     value?: RadioValue
     disabled?: boolean
+    /** A read-only group: its radios look read-only and show no pressed look (DIS-10). */
+    readOnly?: boolean
     onSelect: (value: RadioValue) => void
 }
 

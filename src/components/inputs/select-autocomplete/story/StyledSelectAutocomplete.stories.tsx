@@ -3,6 +3,7 @@ import type { StoryObj, Meta } from '@storybook/react-vite'
 import { StyledSelectAutocomplete, type StyledSelectAutocompleteProps } from '../StyledSelectAutocomplete'
 import { ControlledAutocomplete, top100Films, type Film } from './components/StyledSelectAutocompleteExample'
 import {
+    useEffect,
     useMemo,
     useState,
     type AriaRole,
@@ -737,4 +738,69 @@ export const Gallery: Story = {
             </div>
         )
     },
+}
+
+const PRESSED_SINGLE = ['Option name', 'Hovered', 'Pressed', 'Selected and pressed']
+const PRESSED_MULTIPLE = ['Option name', 'Hovered', 'Pressed', 'Selected', 'Selected and pressed']
+
+/** Forces each open row into the state its label names: `pseudo-hover`, or the `data-pressed` a real press sets. */
+const useMarkedOptionRows = (expected: number): void =>
+    useEffect(() => {
+        let frame = 0
+        const mark = (): void => {
+            const rows = Array.from(document.querySelectorAll<HTMLElement>('[role="listbox"] [role="option"]'))
+            if (rows.length < expected) {
+                frame = requestAnimationFrame(mark)
+                return
+            }
+            for (const row of rows) {
+                const label = row.textContent ?? ''
+                if (/Hovered|ressed/.test(label)) row.classList.add('pseudo-hover')
+                if (/ressed/.test(label)) row.setAttribute('data-pressed', '')
+            }
+        }
+        mark()
+        return () => cancelAnimationFrame(frame)
+    }, [expected])
+
+const PressedOptionRowsExample: FC = () => {
+    useMarkedOptionRows(PRESSED_SINGLE.length + PRESSED_MULTIPLE.length)
+    return (
+        <div className='flex min-h-[340px] items-start gap-10'>
+            <div className='w-60'>
+                <StyledSelectAutocomplete<string, false, false, false>
+                    dataTest='pressed-single'
+                    open
+                    options={PRESSED_SINGLE}
+                    value='Selected and pressed'
+                    onChange={() => undefined}
+                    renderInput={namedInput('Single select')}
+                />
+            </div>
+            <div className='w-60'>
+                <StyledSelectAutocomplete<string, true, false, false>
+                    dataTest='pressed-multiple'
+                    open
+                    multiple
+                    options={PRESSED_MULTIPLE}
+                    value={['Selected', 'Selected and pressed']}
+                    onChange={() => undefined}
+                    renderInput={namedInput('Multiple select')}
+                />
+            </div>
+        </div>
+    )
+}
+
+/**
+ * ASMA-9003 — the option rows of an open single (check mark) and multiple (checkbox) autocomplete, each row in
+ * the state its label names: hover forced with `pseudo-hover`, pressed with the `data-pressed` attribute a real
+ * press sets. Same look as the menu item: gama-200 overlay, gama-700 label, check and checkbox; selected rows
+ * rest on bg/selected (gama-25).
+ */
+export const PressedOptionRows: Story = {
+    // The pressed cells show a momentary state, whose contrast is checked at the accepted momentary level
+    // (pattern-pressed-state.md, Accessibility; src/a11y/contrast) — axe holds them to the 4.5:1 rest level.
+    parameters: { a11y: { context: { include: ['body'], exclude: ['[data-pressed]'] } } },
+    render: () => <PressedOptionRowsExample />,
 }

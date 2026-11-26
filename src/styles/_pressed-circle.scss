@@ -1,0 +1,65 @@
+// ASMA-9003: the 40px hover and pressed circle of the base-ui checkbox, the table checkbox and the radio.
+// @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
+
+/// The circle at rest, timed as on master: Figma Hovered bg/hover-default (delta-50), hidden at 70%; each control's hover
+/// rule shows it with `hovered` (opacity and scale over 0.2s).
+@mixin circle {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: 50%;
+    background: var(--colors-delta-50);
+    opacity: 0;
+    transform: scale(0.7);
+    transition:
+        opacity 0.2s,
+        transform 0.2s;
+}
+
+/// The hovered circle, as on master: shown at full size.
+@mixin hovered {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/// Figma Pressed state (47847:229830): while the control (`.Pressable`) or its label is `[data-pressed]`, `$circle` turns
+/// gama-200 (a Highlight ring in forced colours) and the accent gama-800, at once. `$instant` parts take no transition into
+/// pressed, also under a pressed parent (a chip, a row). After the press (`[data-press-released]`, set by the helper) the
+/// circle fades back over 150ms at full size and `$instant` parts ease back with `$release`; once the marker goes, master's
+/// hover timing applies again.
+@mixin pressed($circle, $instant, $release) {
+    .Pressable[data-press-released],
+    label[data-press-released] .Pressable {
+        #{$circle} {
+            transform: scale(1);
+            transition:
+                opacity 150ms ease-out,
+                background-color 150ms ease-out;
+        }
+    }
+
+    [data-press-released] #{$instant} {
+        transition: $release;
+    }
+
+    .Pressable[data-pressed],
+    label[data-pressed] .Pressable {
+        --control-pressed-accent: var(--colors-gama-800);
+
+        #{$circle} {
+            opacity: 1;
+            background: var(--colors-gama-200);
+            transform: scale(1);
+            transition: none;
+
+            @media (forced-colors: active) {
+                outline: 2px solid Highlight;
+                outline-offset: -2px;
+            }
+        }
+    }
+
+    [data-pressed] #{$instant} {
+        transition: none;
+    }
+}

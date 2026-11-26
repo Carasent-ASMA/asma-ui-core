@@ -1,4 +1,5 @@
 import { type ReactNode, useState } from 'react'
+import { MarkPressed } from 'src/test-utils/MarkPressed'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import { StyledInteractiveChip } from './StyledInteractiveChip'
@@ -31,6 +32,17 @@ const meta = {
 export default meta
 
 type Story = StoryObj<StoryArgs>
+
+/** Lets the chip's 150 ms pressed ease-out (ASMA-9003) finish, so the a11y check reads its resting colours. */
+const settled = (element: Element): Promise<unknown> =>
+    Promise.all(element.getAnimations().map((animation) => animation.finished))
+
+const LONG_WRAPPING_LABEL =
+    'Show/hide transition: ~300–400 ms slide and fade, matching the recommended duration for a partially persistent header.'
+
+// Mirrors the ASMA-8787 chips-view consumer override: let the label block-wrap at desktop width.
+const DESKTOP_WRAP_LABEL_CLASSES = 'block whitespace-normal break-words overflow-visible'
+const DESKTOP_WRAP_CHIP_CLASSES = 'h-full min-h-[32px] w-[200px]'
 
 function SingleChipDemo({
     label = 'Chip',
@@ -134,6 +146,7 @@ export const Checkbox_Default: Story = {
         const chip = canvas.getByRole('checkbox', { name: 'Checkbox Chip' })
 
         await userEvent.click(chip)
+        await settled(chip)
 
         expect(chip).toBeChecked()
     },
@@ -228,6 +241,7 @@ export const Checkbox_WithReactNodeLabel: Story = {
         const chip = canvas.getByRole('checkbox', { name: 'Complex label chip' })
 
         await userEvent.click(chip)
+        await settled(chip)
 
         expect(chip).toBeChecked()
     },
@@ -239,6 +253,7 @@ export const Checkbox_Multiple: Story = {
         const canvas = within(canvasElement)
 
         await userEvent.click(canvas.getByRole('checkbox', { name: 'Paused' }))
+        await settled(canvas.getByRole('checkbox', { name: 'Paused' }))
 
         expect(canvas.getByRole('checkbox', { name: 'Paused' })).toBeChecked()
         expect(canvas.getByRole('checkbox', { name: 'Active' })).not.toBeChecked()
@@ -258,6 +273,7 @@ export const Radio_Default: Story = {
         const chip = canvas.getByRole('radio', { name: 'Default radio' })
 
         await userEvent.click(chip)
+        await settled(chip)
 
         expect(chip).toBeChecked()
     },
@@ -306,6 +322,7 @@ export const Radio_Multiple: Story = {
         const canvas = within(canvasElement)
 
         await userEvent.click(canvas.getByRole('radio', { name: 'Paused' }))
+        await settled(canvas.getByRole('radio', { name: 'Paused' }))
 
         expect(canvas.getByRole('radio', { name: 'Paused' })).toBeChecked()
         expect(canvas.getByRole('radio', { name: 'Active' })).not.toBeChecked()
@@ -331,9 +348,54 @@ export const Radio_WithReactNodeLabel: Story = {
         const chip = canvas.getByRole('radio', { name: 'Complex radio chip' })
 
         await userEvent.click(chip)
+        await settled(chip)
 
         expect(chip).toBeChecked()
     },
+}
+
+/**
+ * ASMA-9001. A chip narrower than its label wraps below 320px; the control stays on the first line
+ * of the wrapped label instead of drifting to the chip's vertical centre. Captured at 300px by the
+ * `--narrow--open` interaction baseline.
+ */
+export const NarrowWrappedLabels: Story = {
+    render: () => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: 260 }}>
+            <StyledInteractiveChip
+                dataTest='wrapped-checkbox'
+                type='checkbox'
+                label={LONG_WRAPPING_LABEL}
+                onClick={() => undefined}
+            />
+            <StyledInteractiveChip
+                dataTest='wrapped-radio'
+                type='radio'
+                label={LONG_WRAPPING_LABEL}
+                onClick={() => undefined}
+            />
+        </div>
+    ),
+}
+
+/**
+ * ASMA-9001. A consumer can force the label to wrap above 320px with `classes.label` and an
+ * auto-height chip. The control stays on the first line of the wrapped label; a one-line chip is
+ * unaffected.
+ */
+export const DesktopWrappedLabel: Story = {
+    render: () => (
+        <div style={{ width: 200 }}>
+            <StyledInteractiveChip
+                dataTest='desktop-wrapped-checkbox'
+                type='checkbox'
+                label={LONG_WRAPPING_LABEL}
+                className={DESKTOP_WRAP_CHIP_CLASSES}
+                classes={{ label: DESKTOP_WRAP_LABEL_CLASSES }}
+                onClick={() => undefined}
+            />
+        </div>
+    ),
 }
 
 /** Disabled with a reason (disabled-states DIS-1…DIS-4): focusable, `aria-disabled`, reason on hover, focus and tap. */
@@ -353,4 +415,53 @@ export const Checkbox_DisabledWithReason: Story = {
         await expect(chip).toHaveAttribute('aria-disabled', 'true')
         await expect(chip).toHaveAccessibleDescription('Add a mobile number first')
     },
+}
+
+/**
+ * ASMA-9003 — Figma *Pressed state* sheet (node 47847-229830), "Quick filter" chips, plus the radio chip:
+ * Enabled | Hovered | Pressed. Hover is forced with `pseudo-hover`; Pressed carries the `data-pressed`
+ * attribute a real press sets (and hover, as a held mouse does). Pressed = gama-200 fill, gama-700 label and
+ * control, the border kept, no ring.
+ */
+export const PressedStates: Story = {
+    // The pressed cells show a momentary state, whose contrast is checked at the accepted momentary level
+    // (pattern-pressed-state.md, Accessibility; src/a11y/contrast) — axe holds them to the 4.5:1 rest level.
+    parameters: { a11y: { context: { include: ['body'], exclude: ['[data-pressed]'] } } },
+    render: () => (
+        <div className='grid grid-cols-[repeat(3,max-content)] items-center gap-x-10 gap-y-4 text-sm text-delta-700'>
+            {['Enabled', 'Hovered', 'Pressed'].map((heading) => (
+                <span key={heading} className='font-semibold'>
+                    {heading}
+                </span>
+            ))}
+            {(
+                [
+                    ['checkbox', false],
+                    ['checkbox', true],
+                    ['radio', false],
+                    ['radio', true],
+                ] as const
+            ).map(([type, checked]) =>
+                (['enabled', 'hovered', 'pressed'] as const).map((state) => {
+                    const chip = (
+                        <StyledInteractiveChip
+                            key={`${type}-${String(checked)}-${state}`}
+                            dataTest={`quick-filter-${type}-${checked ? 'on' : 'off'}-${state}`}
+                            label='Quick filter'
+                            type={type}
+                            size='medium'
+                            checked={checked}
+                            className={state === 'enabled' ? undefined : 'pseudo-hover'}
+                            onClick={() => undefined}
+                        />
+                    )
+                    return state === 'pressed' ? (
+                        <MarkPressed selector={'[data-chip]'} key={`${type}-${String(checked)}-${state}`}>{chip}</MarkPressed>
+                    ) : (
+                        chip
+                    )
+                }),
+            )}
+        </div>
+    ),
 }

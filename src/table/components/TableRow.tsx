@@ -7,30 +7,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useRootContext } from 'src/table/context/RootContext'
 import type { ColumnWindow } from 'src/table/hooks/useColumnVirtualizer'
-import { compact } from 'src/helpers/arrays'
 import { COMPACT_COLUMN_MAX_WIDTH } from 'src/table/helpers/columnSpacing'
-import { getLastHeaderControl } from 'src/table/helpers/headerControls'
-
-/**
- * Focus the first tabbable element after the table (`'next'`) or the last one before it (`'prev'`).
- * The rows are a single tab stop, so Tab must jump over the controls inside every row.
- */
-const focusOutsideTable = (currentRow: HTMLTableRowElement, direction: 'next' | 'prev'): boolean => {
-    const table = currentRow.closest('table')
-    if (!table) return false
-
-    const position = direction === 'next' ? Node.DOCUMENT_POSITION_FOLLOWING : Node.DOCUMENT_POSITION_PRECEDING
-    const candidates = Array.from(
-        document.querySelectorAll<HTMLElement>(
-            'a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])',
-        ),
-    ).filter((element) => !table.contains(element) && Boolean(table.compareDocumentPosition(element) & position))
-
-    const target = direction === 'next' ? candidates[0] : candidates.at(-1)
-    if (!target) return false
-    target.focus()
-    return document.activeElement === target
-}
 
 export function TableRow<TData extends { id: string | number }, TCustomData = Record<string, unknown>>({
     styledTableProps,
@@ -147,39 +124,33 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
         onMouseUpAction(e)
     }
 
-    const onKeyDownCapture = (e: React.KeyboardEvent<HTMLTableRowElement>): void => {
-        if (e.target !== e.currentTarget) return
+    /**
+     * Space on the row itself (ASMA-8875 AC 4, as the user reads it): with a select column, it toggles the row's selection
+     * (a locked row: nothing); without one, it expands or collapses the row as its chevron does. `false` when it did nothing.
+     */
+    const onSpace = (): boolean => {
+        if (row.getVisibleCells().some((cell) => cell.column.id === SELECT_COLUMN_ID)) {
+            if (!row.getCanSelect()) return false
+            row.toggleSelected()
 
-        switch (e.key) {
-            case 'Tab': {
-                // The rows are one tab stop (roving tabindex, WAI-ARIA grid): the arrow keys move between
-                // rows, Tab leaves them — back to the last header control (the pin, or the last sortable header),
-                // or out of the table. The header controls come before the rows in the DOM, but the rows' own
-                // controls come after them, so the browser's Shift+Tab would not land on the header (ASMA-8702).
-                if (e.shiftKey) {
-                    const lastHeaderControl = getLastHeaderControl(e.currentTarget.closest('table'))
+            return true
+        }
+        if (!row.getCanExpand()) return false
+        row.getToggleExpandedHandler()()
 
-                    if (lastHeaderControl) {
-                        e.preventDefault()
-                        lastHeaderControl.focus()
-                    } else if (focusOutsideTable(e.currentTarget, 'prev')) {
-                        e.preventDefault()
-                    }
-                } else if (focusOutsideTable(e.currentTarget, 'next')) {
-                    e.preventDefault()
-                }
-                break
-            }
-            case 'ArrowDown':
-                if (row.focusNextRow()) e.preventDefault()
-                break
-            case 'ArrowUp':
-                if (row.focusPrevRow()) e.preventDefault()
-                break
-            case 'Enter':
-                e.preventDefault()
-                onMouseUpAction(e)
-                break
+        return true
+    }
+
+    // Enter on the row itself opens it: its own table's `onRowClick` (ASMA-8875 AC 3), nested or not; Space selects or
+    // expands it. Every other key is the outermost table's (`tableKeyboard.ts`), which hears it after this. Enter and Space
+    // on a control are the control's.
+    const onKeyDown = (e: React.KeyboardEvent<HTMLTableRowElement>): void => {
+        if (e.target !== e.currentTarget || e.defaultPrevented) return
+        if (e.key === 'Enter') {
+            e.preventDefault()
+            onMouseUpAction(e)
+        } else if (e.key === ' ' && onSpace()) {
+            e.preventDefault()
         }
     }
 
@@ -245,10 +216,14 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
     const singleSelection = row.getIsSelected() && spaceForCheckmark
     const hasRowClickHandler = onRowClick instanceof Function
 
-    const centerCellsToRender = indexes.length > 0 ? compact(indexes.map((index) => centerCells[index])) : centerCells
+    // With each centre cell, its index among the centre columns: the keys reveal the ones not rendered (ASMA-8875).
+    const centerCellsToRender = (indexes.length > 0 ? indexes : centerCells.map((_, index) => index)).flatMap((index) => {
+        const cell = centerCells[index]
+        return cell ? [{ cell, index }] : []
+    })
 
     const renderCell = useCallback(
-        (cell: (typeof positionedCells)[number], renderIndex: number) => {
+        (cell: (typeof positionedCells)[number], renderIndex: number, columnIndex?: number) => {
             const isActionsCell = cell.column.id === ACTIONS_COLUMN_ID
             const isFixedLeft = cell.column.columnDef.fixedLeft
             const isFixedRight = Boolean(cell.column.columnDef.fixedRight)
@@ -293,6 +268,8 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
                         isExpandedRow && style['expanded_row'],
                         Boolean(singleSelection) && style['single-selection'],
                     )}
+                    data-column-index={columnIndex}
+                    data-column-side={isFixedRight || isActionsCell ? 'right' : undefined}
                     style={{
                         left: isFixedLeft ? cell.left : undefined,
                         right: isFixedRight
@@ -364,8 +341,18 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
                     ...(enableDnd && dndStyle),
                 }}
                 ref={setRowRef}
+                // This table's own row (`TABLE_ROW_ATTRIBUTE`): its controls are reached with the arrow keys. The focused-row
+                // marker is the table's React state, which the tab stop falls back to (`FOCUSED_ROW_ATTRIBUTE`).
+                data-table-row=''
+                data-focused-row={row.isFocused() ? '' : undefined}
                 onFocus={(event) => {
-                    if (event.target === event.currentTarget && !row.isFocused()) row.onChangeFocused(true)
+                    if (event.target === event.currentTarget) {
+                        if (!row.isFocused()) row.onChangeFocused(true)
+                    } else if (event.currentTarget.contains(event.target)) {
+                        // A control in the row took the focus (an arrow key or the mouse): the row becomes the tab stop
+                        // Tab comes back to. A portalled menu's focus bubbles here through React, but is not in the row.
+                        row.takeTabStop()
+                    }
                 }}
                 onMouseUp={onMouseUp}
                 onMouseDown={(e) => {
@@ -373,7 +360,7 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
                         e.preventDefault()
                     }
                 }}
-                onKeyDownCapture={onKeyDownCapture}
+                onKeyDown={onKeyDown}
             >
                 {leftCells.map((cell, idx) => renderCell(cell, idx))}
 
@@ -391,7 +378,9 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
                     />
                 )}
 
-                {centerCellsToRender.map((cell, idx) => renderCell(cell, leftCells.length + idx))}
+                {centerCellsToRender.map(({ cell, index: columnIndex }, idx) =>
+                    renderCell(cell, leftCells.length + idx, columnIndex),
+                )}
 
                 {paddingRight > 0 && (
                     <td

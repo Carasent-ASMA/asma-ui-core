@@ -7,6 +7,7 @@ import { useWrap } from '../helpers/useWrap'
 import { DynamicSelectTitle } from './DynamicSelectTitle'
 import { forwardRef, useEffect, useId } from 'react'
 import { CloseIcon } from 'src/components/icons'
+import { StyledEmptyValue } from 'src/components/data-display/empty-value/StyledEmptyValue'
 
 export const DynamicInteractiveChipGroup = forwardRef(
     <TOption extends DynamicSelectOption>(
@@ -38,21 +39,29 @@ export const DynamicInteractiveChipGroup = forwardRef(
             clearSelectionLabel,
         } = props
         const helperId = useId()
+        const titleId = useId()
         /*
          * The same slot rule every other input in this library follows, through the same helper:
          * `disableHelperText` stops reserving the row, and a real message or an error still renders
          * it — growing the layout at that moment rather than parking 28px under a control that has
-         * nothing to say. Without the prop the row is reserved exactly as before, so no existing
-         * consumer's spacing moves.
+         * nothing to say.
          *
          * This also replaces the component's own `warnMissingErrorMessage` + `useHelperAlertRole`
          * pair, which was the hook's body written out by hand.
+         *
+         * **`readOnly` is the fifth argument** (ASMA-8853). It was omitted, so the hook's own
+         * read-only rule never fired and a read-only multi-select reserved an empty row —
+         * `min-h-[24px]` plus `pt-1`, about 28px of nothing under the chips — which a saved-filter
+         * panel stacking several of them accumulated visibly. Nothing can be typed into a read-only
+         * field, so there is no validation message coming to reserve room for; `StyledInputField`,
+         * `StyledSelect` and `StyledRadioGroup` have always passed it.
          */
         const { show: showHelper, role: helperAlertRole } = useHelperSlot(
             'DynamicInteractiveChipGroup',
             error,
             helperText,
             !disableHelperText,
+            readOnly,
         )
         const { containerRef, wrapDisabled } = useWrap({ dependencyList: [options, options.length] })
 
@@ -128,13 +137,19 @@ export const DynamicInteractiveChipGroup = forwardRef(
         })
 
         return (
+            // ARIA 1.1 and axe keep aria-invalid global; REQ-005 puts the chip group's validity on the group.
+            // eslint-disable-next-line jsx-a11y/role-supports-aria-props
             <div
                 data-testid={`${dataTest}-dynamic-radio-group`}
+                role='group'
+                aria-labelledby={title ? titleId : undefined}
+                aria-invalid={error ? true : undefined}
+                aria-describedby={showHelper ? helperId : undefined}
                 className='relative flex flex-col gap-y-1'
                 data-field-width={width}
                 style={fieldWidthStyle(width)}
             >
-                <DynamicSelectTitle title={title} titleSize={titleSize} />
+                <DynamicSelectTitle id={titleId} title={title} titleSize={titleSize} />
                 {/* HACK for calculating overflow layout */}
                 <div
                     aria-hidden
@@ -220,7 +235,9 @@ export const DynamicInteractiveChipGroup = forwardRef(
                             )
                         })
                     ) : (
-                        <span>-</span>
+                        <span>
+                            <StyledEmptyValue locale={locale} />
+                        </span>
                     )}
                 </div>
                 {!required && hasValue && !readOnly && !disabled && (

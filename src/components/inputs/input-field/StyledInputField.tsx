@@ -23,6 +23,7 @@ import { CharacterCounter } from 'src/helpers/CharacterCounter'
 import { HelperRow } from 'src/helpers/HelperRow'
 import type { UiCoreLocale } from 'src/helpers/uiCoreLocale'
 import { resolveSx } from 'src/helpers/sx'
+import { resizeWithoutScrollJump } from 'src/helpers/resizeWithoutScrollJump'
 import { useHelperRowBudget } from 'src/helpers/useHelperRowBudget'
 import { useHelperSlot } from 'src/helpers/useHelperSlot'
 import {
@@ -312,27 +313,39 @@ export const StyledInputField = ({
         if (rows != null && !readOnly) {
             node.style.height = ''
         } else {
-            node.style.height = 'auto'
-            // Not laid out (display:none ancestor, hidden tab): scrollHeight is 0 and we'd collapse to 0px.
-            if (node.scrollHeight === 0) {
-                node.style.height = ''
-                return
-            }
-            const computed = getComputedStyle(node)
-            const lineHeight = Number.parseFloat(computed.lineHeight) || 24
-            const verticalPadding = Number.parseFloat(computed.paddingTop) + Number.parseFloat(computed.paddingBottom)
-            const floorRows = rows ?? minRows
-            const minHeight = floorRows ? floorRows * lineHeight + verticalPadding : 0
-            const maxHeight = readOnly || !maxRows ? Number.POSITIVE_INFINITY : maxRows * lineHeight + verticalPadding
-            let height = Math.min(maxHeight, Math.max(minHeight, node.scrollHeight))
-            node.style.height = `${height}px`
-            // The `auto` collapse above can hide a scroll container's classic scrollbar while measuring, so
-            // the field was measured wider than it now lays out and comes out a line short. Below the cap,
-            // grow again instead of scrolling (MLF-1); growing keeps that scrollbar, so this settles.
-            for (let pass = 0; pass < 2 && height < maxHeight && node.scrollHeight > node.clientHeight + 1; pass++) {
-                height = Math.min(maxHeight, node.scrollHeight)
+            // The shell keeps its height while the field collapses to measure, so the page does not
+            // shrink and the scroll position does not move (ASMA-9033).
+            const laidOut = resizeWithoutScrollJump(node, () => {
+                node.style.height = 'auto'
+                // Not laid out (display:none ancestor, hidden tab): scrollHeight is 0 and we'd collapse to 0px.
+                if (node.scrollHeight === 0) {
+                    node.style.height = ''
+                    return false
+                }
+                const computed = getComputedStyle(node)
+                const lineHeight = Number.parseFloat(computed.lineHeight) || 24
+                const verticalPadding =
+                    Number.parseFloat(computed.paddingTop) + Number.parseFloat(computed.paddingBottom)
+                const floorRows = rows ?? minRows
+                const minHeight = floorRows ? floorRows * lineHeight + verticalPadding : 0
+                const maxHeight =
+                    readOnly || !maxRows ? Number.POSITIVE_INFINITY : maxRows * lineHeight + verticalPadding
+                let height = Math.min(maxHeight, Math.max(minHeight, node.scrollHeight))
                 node.style.height = `${height}px`
-            }
+                // Growing can make a scroll container show a classic scrollbar, so the field was measured wider
+                // than it now lays out and comes out a line short. Below the cap, grow again instead of
+                // scrolling (MLF-1); growing keeps that scrollbar, so this settles.
+                for (
+                    let pass = 0;
+                    pass < 2 && height < maxHeight && node.scrollHeight > node.clientHeight + 1;
+                    pass++
+                ) {
+                    height = Math.min(maxHeight, node.scrollHeight)
+                    node.style.height = `${height}px`
+                }
+                return true
+            })
+            if (!laidOut) return
         }
 
         // 1px tolerance: scrollHeight is rounded, clientHeight can differ by a sub-pixel.
@@ -527,7 +540,7 @@ export const StyledInputField = ({
         // Figma field text delta/800 #363e4a; a read-only value is Title + data `text-icon/body` delta/700 #49525f.
         readOnlyValue ? 'text-delta-700' : 'text-delta-800',
         isAdornmentList
-            ? 'box-border h-8 min-w-[60px] flex-1 p-0 leading-[23px]'
+            ? 'box-border h-8 min-w-[60px] flex-1 py-0 pr-0 pl-0 leading-[23px]'
             : multiline
               ? cn('w-full resize-none p-0 pr-0 pl-0', readOnlyValue ? 'leading-6' : 'leading-[23px]', styles['Input--multiline'])
               : readOnlyValue

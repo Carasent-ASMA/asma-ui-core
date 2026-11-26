@@ -1,6 +1,16 @@
-import { type CellContext } from '@tanstack/react-table'
+import { type CellContext, type HeaderContext } from '@tanstack/react-table'
+import clsx from 'clsx'
 import { EXPAND_COLUMN_ID, type ColumnDef } from '../../types'
 import { ChevronDownIcon } from 'src/table/shared-components/ChevronDownIcon'
+import style from '../StyledTable.module.scss'
+
+/**
+ * Visually blank, but the header cell names the column for a screen reader's table navigation (axe
+ * `empty-table-header`), as `ActionsEmptyHeader` does. Module-level, so rebuilt columns do not remount it.
+ */
+function ExpandEmptyHeader<TData>(ctx: HeaderContext<TData, unknown>): JSX.Element {
+    return <span className='sr-only'>{ctx.table.options.meta?.locale === 'no' ? 'Utvid' : 'Expand'}</span>
+}
 
 export function generateExpandColumn<TData>(
     isFixed: boolean,
@@ -14,7 +24,7 @@ export function generateExpandColumn<TData>(
         size: 50,
         enableHiding: false,
         enableSorting: false,
-        header: () => null,
+        header: ExpandEmptyHeader,
         cell: ({ cell }: CellContext<TData, unknown>) => {
             const isExpanded = cell.row.getIsExpanded()
             const canExpand = cell.row.getCanExpand()
@@ -33,7 +43,13 @@ export function generateExpandColumn<TData>(
                               : `Expand row ${cell.row.index + 1}`
                     }
                     aria-expanded={isExpanded}
-                    className='flex w-full items-center justify-center border-0 bg-transparent p-0 outline-hidden focus:outline-hidden'
+                    // Reached with the arrow keys in its row, not with Tab; Enter and Space toggle it (ASMA-8875).
+                    tabIndex={-1}
+                    data-table-control=''
+                    className={clsx(
+                        'flex w-full items-center justify-center border-0 bg-transparent p-0 outline-hidden',
+                        style['expand-control'],
+                    )}
                     onClick={() => cell.row.getToggleExpandedHandler()()}
                     style={{ height: rowHeight ?? 'auto' }}
                 >

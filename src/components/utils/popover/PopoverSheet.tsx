@@ -247,7 +247,7 @@ export const PopoverSheet = ({
     // Tracked as state as well as a ref: `FloatingPortal` creates its portal node in an effect, so
     // on the commit that opens the surface the panel is not in the DOM yet and a ref read from an
     // effect body is still null. State makes the focus effects below re-run once it exists.
-    const panelRef = useRef<HTMLDivElement | null>(null)
+    const panelRef = useRef<HTMLElement | null>(null)
     const [panelNode, setPanelNode] = useState<HTMLDivElement | null>(null)
     const setPanel = useCallback((node: HTMLDivElement | null) => {
         panelRef.current = node

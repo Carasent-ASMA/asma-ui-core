@@ -15,6 +15,8 @@ import {
 } from 'react'
 import { cn } from 'src/helpers/cn'
 import { tabbableWithin } from 'src/helpers/focusable'
+import { pressedStateHandlers } from 'src/helpers/pressedState'
+import { useBackCloses } from 'src/hooks/useBackCloses.hook'
 
 /**
  * @figmaNode none — **headless behaviour primitive**, no Design-System visuals. It renders bare
@@ -73,20 +75,26 @@ function ListboxRoot<T>({
         setActiveIndex(null)
     }, [])
 
+    // Focus goes back to the trigger, or it would drop to <body> as the panel unmounts (2.4.3).
+    const dismiss = useCallback((): void => {
+        const root = rootRef.current
+        if (root?.contains(document.activeElement)) root.querySelector<HTMLElement>('[role="combobox"]')?.focus()
+        close()
+    }, [close])
+
     // Escape is heard on the document rather than on the trigger, because focus is not necessarily
     // there: an option may hold a focusable control, and Escape has to dismiss from inside it too.
-    // Focus then goes back to the trigger, or it would drop to <body> as the panel unmounts (2.4.3).
     useEffect(() => {
         if (!open) return
         const closeOnEscape = (event: KeyboardEvent): void => {
-            if (event.key !== 'Escape') return
-            const root = rootRef.current
-            if (root?.contains(document.activeElement)) root.querySelector<HTMLElement>('[role="combobox"]')?.focus()
-            close()
+            if (event.key === 'Escape') dismiss()
         }
         document.addEventListener('keydown', closeOnEscape)
         return () => document.removeEventListener('keydown', closeOnEscape)
-    }, [open, close])
+    }, [open, dismiss])
+
+    // Native Back closes the open list the way Escape does (BACK-1, BACK-3).
+    useBackCloses({ active: open, requestClose: dismiss, ownerRef: rootRef })
 
     const contextValue = useMemo<ListboxContextValue>(
         () => ({
@@ -248,9 +256,15 @@ function ListboxOption<T>({
             aria-disabled={disabled}
             data-index={optionIndex}
             tabIndex={-1}
-            // ASMA-8220 (TB-14): see ListboxButton. `aria-disabled` renders as "true" only when
-            // disabled, so the pressed-opacity rule already skips disabled options.
-            className={cn('asma-pressable', className)}
+            // ASMA-8220 touch fixes; ASMA-9003: the menu item's pressed look, beating a consumer's hover/selected fill.
+            // @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
+            className={cn(
+                'asma-touch-ready',
+                !disabled &&
+                    'data-[pressed]:text-gama-700 [&[data-pressed][role][aria-selected]]:bg-gama-200 data-press-released:transition-colors data-press-released:duration-150 data-press-released:ease-[ease-out] data-pressed:[--control-pressed-accent:var(--colors-gama-700)] forced-colors:data-pressed:[outline:2px_solid_Highlight]! forced-colors:data-pressed:-outline-offset-2!',
+                className,
+            )}
+            {...pressedStateHandlers({ enabled: !disabled })}
             onMouseDown={(event) => {
                 // Clicking the row must not pull DOM focus off the trigger, which drives this row
                 // through `aria-activedescendant`. A focusable control inside the row is the

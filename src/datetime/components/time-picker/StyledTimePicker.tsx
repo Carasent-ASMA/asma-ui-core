@@ -29,7 +29,7 @@ import { cn } from 'src/helpers/cn'
  * instead of the popper, matching `StyledDatePicker`. Non-annotated props are behavioral.
  */
 export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
-    const { value, onSelect, notBeforeTime, minTime, required, isTimeDisabled, disabledTimeReason } = props
+    const { value, onSelect, notBeforeTime, minTime, required, isTimeDisabled, disabledTimeReason, onBlur } = props
     const popupState = usePopupState({ variant: 'popper', popupId: 'time-picker-popper' })
     const isMobile = useIsMobileView()
     useBackCloses({ active: popupState.isOpen, requestClose: popupState.close })
@@ -153,6 +153,10 @@ export const StyledTimePicker: React.FC<StyledTimePickerProps> = (props) => {
     }
 
     const handleBlur = () => {
+        // The consumer only hears about a blur that actually leaves the field — not one caused by
+        // focus landing on the picker's own popup/panel, which `popupState.isOpen` still reports as
+        // open at this point (it is closed by the pick/Tab handling, not by this blur).
+        if (!popupState.isOpen) onBlur?.()
         // Leaving for the open panel is not a finished entry: a pick or the eraser settles it.
         if (required && resolvedLocalValue === '' && !popupState.isOpen) {
             if (isDirty) onSelect(undefined)

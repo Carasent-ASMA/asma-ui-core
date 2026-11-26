@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { MarkPressed } from 'src/test-utils/MarkPressed'
 import { expect, waitFor } from 'storybook/test'
 import type { ComponentProps, ReactNode } from 'react'
 import { useState } from 'react'
@@ -29,6 +30,8 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Tabs: Story = {
+    // Pressed cells: momentary 3.83:1 (theme contrast gate, ASMA-9003), not axe's 4.5:1 (4.34:1 default).
+    parameters: { a11y: { context: { include: ['body'], exclude: ['[data-pressed]'] } } },
     render: () => <TabsExample />,
 }
 
@@ -66,7 +69,7 @@ export const Scrollable: Story = {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const TAB_COLUMN_NAMES = ['Enabled', 'Hovered', 'Focused', 'Disabled'] as const
+const TAB_COLUMN_NAMES = ['Enabled', 'Hovered', 'Pressed', 'Focused', 'Disabled'] as const
 const TAB_ROW_NAMES = ['Not active', 'Active'] as const
 // Let the component apply the Figma label size (Medium 18px / Small 16px SemiBold); only keep casing.
 const TAB_BASE_CLASS = 'capitalize'
@@ -82,6 +85,8 @@ type TabsStateTableProps = {
 const COLUMN_TAB_PROPS: Record<TabColumnName, Partial<ComponentProps<typeof StyledTab>>> = {
     Enabled: {},
     Hovered: { className: 'pseudo-hover' },
+    // ASMA-9003 (Figma Pressed state 47847:229830): a hovered tab with the `data-pressed` a real press sets.
+    Pressed: { className: 'pseudo-hover' },
     Focused: { className: 'pseudo-focus-visible' },
     Disabled: { disabled: true },
 }
@@ -179,17 +184,19 @@ const TabsStateTable = ({ title, tabSize }: TabsStateTableProps) => {
                                     className='box-border border border-solid border-delta-200'
                                 >
                                     <div className='flex items-center justify-center'>
-                                        <StyledTabs
-                                            className='max-w-fit'
-                                            value={isActiveRow ? 0 : false}
-                                            size={tabSize}
-                                        >
-                                            <StyledTab
-                                                label='Tab label'
-                                                {...COLUMN_TAB_PROPS[columnName]}
-                                                className={`capitalize ${COLUMN_TAB_PROPS[columnName].className ?? ''}`}
-                                            />
-                                        </StyledTabs>
+                                        <MarkPressed selector={columnName === 'Pressed' ? '[role="tab"]' : ':not(*)'}>
+                                            <StyledTabs
+                                                className='max-w-fit'
+                                                value={isActiveRow ? 0 : false}
+                                                size={tabSize}
+                                            >
+                                                <StyledTab
+                                                    label='Tab label'
+                                                    {...COLUMN_TAB_PROPS[columnName]}
+                                                    className={`capitalize ${COLUMN_TAB_PROPS[columnName].className ?? ''}`}
+                                                />
+                                            </StyledTabs>
+                                        </MarkPressed>
                                     </div>
                                 </td>
                             ))}

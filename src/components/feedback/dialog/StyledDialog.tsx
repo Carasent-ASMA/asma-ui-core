@@ -8,6 +8,7 @@ import {
     type CSSProperties,
     type HTMLAttributes,
     type ReactNode,
+    type RefObject,
     type SyntheticEvent,
 } from 'react'
 import { StyledButton } from '../../inputs/button/StyledButton'
@@ -16,12 +17,7 @@ import { cn } from 'src/helpers/cn'
 import { resolveSx } from 'src/helpers/sx'
 import { useMobileMediaQuery } from 'src/hooks/useMediaQuery.hook'
 import { registerOpenModalDialog } from 'src/hooks/useTopLayer.hook'
-import {
-    isOverlayBackEnabled,
-    OverlayBackOwnerContext,
-    requestCloseTopOverlayBack,
-    useBackCloses,
-} from 'src/hooks/useBackCloses.hook'
+import { OverlayBackOwnerContext, requestCloseTopOverlayBack, useBackCloses } from 'src/hooks/useBackCloses.hook'
 import { DialogBusyContext, useDialogBusyBoundary } from './DialogBusyContext'
 import { warnUnnamedDialog } from 'src/helpers/warnUnnamedDialog'
 import style from './StyledDialog.module.scss'
@@ -30,7 +26,12 @@ import { StyledDialogTitleContext } from './dialogTitleContext'
 import { useDialogHeaderPinning } from './useDialogHeaderPinning'
 import {
     DIALOG_HEADER_ACTIONS_ROW_CLASSES,
+    DIALOG_HEADER_BUTTONS_CLASSES,
     DIALOG_HEADER_CLASSES,
+    DIALOG_HEADER_LABEL_CLASSES,
+    DIALOG_HEADER_ROW_TITLE_BOX_CLASSES,
+    DIALOG_HEADER_ROW_TITLE_BOX_MEDIUM_CLASSES,
+    DIALOG_HEADER_TITLE_ROW_CLASSES,
     DIALOG_TITLE_CLASSES,
     dialogContentFlowClasses,
     dialogScrollerStyle,
@@ -49,9 +50,10 @@ interface DialogPaperProps {
 /**
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#15820-18954
  * Figma "Dialog": white paper radius 8 with the Dialogue-popup shadow (#22213366, 0 4 40) over a
- * bg/modal #626e7eb2 overlay. Header = actions row (optional label, Helper delta-600, + close button)
- * over the full-width title (ASMA-8737: 24/32 Bold, 20/26 Bold below 744 px, delta-800, never
- * truncated). `fullScreen`/mobile drops the radius and fills the viewport.
+ * bg/modal #626e7eb2 overlay. Header = actions row (optional label, Helper delta-700, one line, + close button)
+ * over the full-width title; without a label the title sits in that row, left of the close button
+ * (ASMA-8737: 24/32 SemiBold, 20/28 SemiBold below 744 px, delta-800, never truncated). `fullScreen`/mobile
+ * drops the radius and fills the viewport.
  */
 export interface IStyledDialogProps {
     open: boolean
@@ -91,9 +93,13 @@ export interface IStyledDialogProps {
     onCloseText?: ReactNode
     /** @figmaProp none — behavioral */
     showCloseIcon?: boolean
-    /** @figmaProp header Label (Helper 14, delta-600) */
+    /** Close button size: `small` 32px (default) or `medium` 40px with a 16px label and 24px icon. */
+    closeButtonSize?: 'small' | 'medium'
+    /** On a phone, Close shows only its icon; the `onCloseText` label stays its accessible name. */
+    hideCloseLabelOnMobile?: boolean
+    /** @figmaProp header Label (Helper 14/20, delta-700, one line with an ellipsis) */
     dialogLabel?: ReactNode
-    /** @figmaProp header Title (24/32 Bold, 20/26 Bold on mobile, delta-800), on its own full-width row */
+    /** @figmaProp header Title (24/32 SemiBold, 20/28 SemiBold on mobile, delta-800), on its own full-width row */
     dialogTitle?: ReactNode
     dialogHeaderNode?: ReactNode
     /**
@@ -106,6 +112,12 @@ export interface IStyledDialogProps {
      * test hook, not text.
      */
     ariaLabel?: string
+    /**
+     * @figmaProp none — accessibility
+     * Where focus starts when the dialog opens. Without it the dialog itself takes focus. A
+     * confirmation passes its safe button, so Enter never runs the destructive action (ASMA-8895).
+     */
+    initialFocusRef?: RefObject<HTMLElement | null>
 }
 
 // MUI Dialog maxWidth → px (v5 breakpoints; xs special-cased to 444 like MUI).
@@ -115,6 +127,13 @@ const MAX_WIDTH_PX: Record<Exclude<DialogMaxWidth, false>, number> = {
     md: 900,
     lg: 1200,
     xl: 1536,
+}
+
+/** Where focus starts in an open dialog: the consumer's `initialFocusRef` inside it, else the dialog itself. */
+const focusDialogStart = (node: HTMLDialogElement, initialFocusRef?: RefObject<HTMLElement | null>): void => {
+    const target = initialFocusRef?.current
+    const focusTarget = target && node.contains(target) ? target : node
+    focusTarget.focus({ preventScroll: true })
 }
 
 /**
@@ -147,10 +166,13 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     locale = 'en',
     onCloseText,
     showCloseIcon = true,
+    closeButtonSize = 'small',
+    hideCloseLabelOnMobile = false,
     dialogLabel,
     dialogTitle,
     dialogHeaderNode,
     ariaLabel,
+    initialFocusRef,
 }) => {
     // WCAG 4.1.2: named by what the user sees — the `dialogTitle`, else a `<StyledDialogTitle>` child,
     // else the label line; else `ariaLabel`; else the first heading in the content (effect below).
@@ -163,6 +185,17 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     const [titleSlot, setTitleSlot] = useState<HTMLElement | null>(null)
     const titleContext = useMemo(() => ({ titleId, setTitleId: setTitleChildId, titleSlot }), [titleId, titleSlot])
     const hasHeaderActions = !!dialogLabel || showCloseIcon || !!dialogHeaderNode
+    const titleInActionsRow = hasHeaderActions && !dialogLabel
+    const headerTitle = (
+        <>
+            {dialogTitle && (
+                <div id={titleId} className={DIALOG_TITLE_CLASSES}>
+                    {dialogTitle}
+                </div>
+            )}
+            <div ref={setTitleSlot} className='contents' />
+        </>
+    )
     const labelledBy = dialogTitle ? titleId : (titleChildId ?? (dialogLabel ? labelId : undefined))
     const isMobile = useMobileMediaQuery()
     const dialogRef = useRef<HTMLDialogElement>(null)
@@ -203,6 +236,10 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     }, [open])
     const prevOpenRef = useRef(open)
     const isFullScreen = fullScreen ?? isMobile
+    const closeIconSize = closeButtonSize === 'medium' ? 24 : 20
+    const closeIconOnly = hideCloseLabelOnMobile && isMobile
+    const closeIcon = <CloseIcon width={closeIconSize} height={closeIconSize} />
+    const closeLabel = typeof onCloseText === 'string' ? onCloseText : 'Close'
     // While a button inside runs an action, no dismissal goes through (see DialogBusyContext).
     const { busy, busyReason: busyText, contextValue } = useDialogBusyBoundary(busyReason, locale)
     const fallbackHeadingId = useId()
@@ -245,10 +282,11 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
             node.showModal()
             // showModal() focuses the first focusable element (the header close button) — move focus
             // back to the shell, which has tabIndex={-1} + outline-hidden, so no :focus ring paints.
-            node.focus({ preventScroll: true })
+            // A consumer's `initialFocusRef` takes it instead (the safe button of a confirmation).
+            focusDialogStart(node, initialFocusRef)
             // Some engines defer showModal()'s first-focusable step until after this turn; re-assert
             // focus next frame so it wins. Guard `node.open` in case the dialog closed in between.
-            requestAnimationFrame(() => node.open && node.focus({ preventScroll: true }))
+            requestAnimationFrame(() => node.open && focusDialogStart(node, initialFocusRef))
         }
 
         // showModal() put this dialog in the browser top layer, above every z-index in the page.
@@ -259,6 +297,9 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
             unregister()
             if (openerRef.current?.isConnected) openerRef.current.focus({ preventScroll: true })
         }
+        // `initialFocusRef` is read only when the dialog opens. A new ref object must not re-run this
+        // effect: its clean-up returns focus to the opener while the dialog is still open.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open])
 
     useEffect(() => {
@@ -330,11 +371,11 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
     // fires `cancel` here directly — no `popstate`, no history adapter involved, no keydown at all.
     // `requestClose` goes through the registry TOP (`requestCloseTopOverlayBack`), not this dialog's
     // own `requestBackClose`, so a dialog that isn't actually topmost never closes out from under one
-    // that is.
+    // that is. Not gated on the host kill switch: this path never touches history, and with it gated
+    // a flag-off Android Back could never dismiss a dialog (swallowed, then forced shut and re-shown).
     const handleCancel = (event: React.SyntheticEvent<HTMLDialogElement>): void => {
         if (event.cancelable) event.preventDefault()
         if (recentEscapeKeydownRef.current) return
-        if (!isOverlayBackEnabled()) return
         void requestCloseTopOverlayBack()
     }
 
@@ -356,7 +397,9 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                 attemptPending = false
                 if (openRef.current && node.isConnected && !node.open) {
                     node.showModal()
-                    node.focus({ preventScroll: true })
+                    // The same start as on open: a re-shown confirmation must not leave the next Tab on
+                    // its destructive first button (ASMA-8895 review F3).
+                    focusDialogStart(node, initialFocusRef)
                 }
             })
         }
@@ -366,11 +409,13 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
             // A close already in flight must not be started again. Either way the native dialog is
             // already shut, so put it back on the next frame while React still has it open. Waiting
             // for the close Promise would leave a closed dialog on screen for the whole save.
-            if (isOverlayBackEnabled() && !closePendingRef.current) void requestCloseTopOverlayBack()
+            if (!closePendingRef.current) void requestCloseTopOverlayBack()
             scheduleReshow()
         }
         node.addEventListener('close', handleNativeClose)
         return () => node.removeEventListener('close', handleNativeClose)
+        // `initialFocusRef` is read when the dialog is re-shown; a new ref object must not re-run this.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open])
 
     // Escape is heard on `window`, deliberately last in the event path. Every dismissible layer this
@@ -433,7 +478,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
             }}
             className={cn(
                 style['StyledDialog'],
-                'fixed inset-0 m-0 size-full max-h-none max-w-none items-center justify-center overflow-hidden border-0 bg-transparent p-0 outline-hidden open:flex',
+                'fixed inset-0 m-0 h-full max-h-none w-full max-w-none items-center justify-center overflow-hidden border-0 bg-transparent p-0 outline-hidden open:flex',
                 scroll === 'body' && 'overflow-y-auto',
                 className,
                 classes?.root,
@@ -507,48 +552,61 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                         className={cn(DIALOG_HEADER_CLASSES, pinned && 'sticky top-0 z-2', headerHidden && 'hidden')}
                     >
                         {hasHeaderActions && (
-                            <div className={DIALOG_HEADER_ACTIONS_ROW_CLASSES}>
+                            <div
+                                className={
+                                    titleInActionsRow ? DIALOG_HEADER_TITLE_ROW_CLASSES : DIALOG_HEADER_ACTIONS_ROW_CLASSES
+                                }
+                            >
                                 {dialogLabel && (
-                                    <div
-                                        id={labelId}
-                                        className='text-delta-600 min-w-0 flex-auto text-sm leading-5 font-normal wrap-anywhere hyphens-auto'
-                                    >
+                                    <div id={labelId} className={DIALOG_HEADER_LABEL_CLASSES}>
                                         {dialogLabel}
                                     </div>
                                 )}
+                                {titleInActionsRow && (
+                                    <div
+                                        className={
+                                            closeButtonSize === 'medium' && showCloseIcon
+                                                ? DIALOG_HEADER_ROW_TITLE_BOX_MEDIUM_CLASSES
+                                                : DIALOG_HEADER_ROW_TITLE_BOX_CLASSES
+                                        }
+                                    >
+                                        {headerTitle}
+                                    </div>
+                                )}
                                 {(showCloseIcon || !!dialogHeaderNode) && (
-                                    <div className='max-xs:flex-wrap max-xs:gap-y-2 ml-auto flex max-w-full min-w-0 shrink-0 items-center justify-end gap-2'>
+                                    <div
+                                        className={cn(
+                                            DIALOG_HEADER_BUTTONS_CLASSES,
+                                            'max-xs:flex-wrap max-xs:gap-y-2 max-w-full min-w-0 shrink-0 justify-end',
+                                        )}
+                                    >
                                         {dialogHeaderNode}
                                         {showCloseIcon && (
                                         <StyledButton
                                             dataTest={`close-button-${dataTest}`}
-                                            aria-label={!onCloseText ? 'Close' : undefined}
+                                            aria-label={closeIconOnly || !onCloseText ? closeLabel : undefined}
                                             variant='textGray'
-                                            size='small'
-                                            endIcon={<CloseIcon width={20} height={20} />}
+                                            size={closeButtonSize}
+                                            startIcon={closeIconOnly ? closeIcon : undefined}
+                                            endIcon={closeIconOnly ? undefined : closeIcon}
                                             className='max-w-full shrink-0 whitespace-nowrap'
                                             disabled={busy}
                                             disabledReason={busyText}
                                             onClick={(event) => void requestEscapeClose(event)}
                                             style={{
                                                 color: 'var(--colors-delta-800)',
-                                                paddingRight: '6px',
-                                                paddingLeft: '6px',
+                                                ...(closeButtonSize === 'small' &&
+                                                    !closeIconOnly && { paddingRight: '6px', paddingLeft: '6px' }),
                                             }}
                                         >
-                                            {onCloseText}
+                                            {closeIconOnly ? undefined : onCloseText}
                                         </StyledButton>
                                         )}
                                     </div>
                                 )}
                             </div>
                         )}
-                        {dialogTitle && (
-                            <div id={titleId} className={DIALOG_TITLE_CLASSES}>
-                                {dialogTitle}
-                            </div>
-                        )}
-                        <div ref={setTitleSlot} className='contents' />
+                        {!titleInActionsRow && headerTitle}
                     </div>
                 )}
 

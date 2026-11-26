@@ -3,7 +3,8 @@ import { afterEach, describe, it } from 'vitest'
 import { expect, fn, userEvent, waitFor } from 'src/test-utils/interaction-api'
 import { StyledInputField } from 'src/components/inputs/input-field'
 import { requestCloseTopOverlayBack } from 'src/hooks/useBackCloses.hook'
-import { cleanup, mount } from 'src/test-utils/renderInteraction'
+import { cleanup, mount, resolveTokenColor } from 'src/test-utils/renderInteraction'
+import { fillOf, holdPressed, mouse } from 'src/test-utils/pressedInteraction'
 import { StyledSelectAutocomplete } from './StyledSelectAutocomplete'
 
 /**
@@ -19,14 +20,21 @@ const OPTIONS = ['Alpha', 'Bravo', 'Charlie', 'Delta']
 
 const AutocompleteFixture = ({
     onChange = () => undefined,
+    locale,
+    options = OPTIONS,
+    initialValue = null,
 }: {
     onChange?: (value: unknown) => void
+    locale?: 'no' | 'en'
+    options?: string[]
+    initialValue?: string | null
 }): JSX.Element => {
-    const [value, setValue] = useState<string | null>(null)
+    const [value, setValue] = useState<string | null>(initialValue)
     return (
         <StyledSelectAutocomplete<string, false, false, false>
             dataTest='ac'
-            options={OPTIONS}
+            locale={locale}
+            options={options}
             value={value}
             onChange={(_event, next) => {
                 setValue(next)
@@ -241,6 +249,36 @@ describe('StyledSelectAutocomplete keyboard contract', () => {
         await expect(popup).toHaveAttribute('aria-expanded', 'false')
     })
 
+    it('names the clear and popup buttons in Norwegian when the locale is no (4.1.2)', async () => {
+        const onChange = fn()
+        mount(<AutocompleteFixture locale='no' onChange={onChange} />)
+        input().focus()
+        await userEvent.keyboard('{ArrowDown}{ArrowDown}{Enter}')
+        await waitFor(() => expect(onChange).toHaveBeenCalled())
+
+        await expect(document.querySelector('[data-testid="ac-clear"]')).toHaveAccessibleName('Fjern valget')
+        await expect(document.querySelector('[data-testid="ac-popup-indicator"]')).toHaveAccessibleName(
+            'Vis eller skjul valg',
+        )
+    })
+
+    it('names the clear button for all choices in Norwegian on a multiple field (4.1.2)', async () => {
+        mount(
+            <StyledSelectAutocomplete<string, true, false, false>
+                dataTest='ac'
+                locale='no'
+                multiple
+                options={OPTIONS}
+                value={['Alpha']}
+                renderInput={(params) => <StyledInputField {...params} dataTest='ac-input' label='Team' />}
+            />,
+        )
+        // The clear button stays hidden, and so unnamed, until the field holds focus.
+        input().focus()
+
+        await expect(document.querySelector('[data-testid="ac-clear"]')).toHaveAccessibleName('Fjern alle valg')
+    })
+
     it('keeps selected-tag delete buttons out of the combobox tab order (2.1.1)', async () => {
         mount(
             <>
@@ -405,6 +443,114 @@ describe('StyledSelectAutocomplete keyboard contract', () => {
     })
 })
 
+/* Every option is listed, as on phones (long-lists pattern LIST-4). A list cut at 100 rows hid every
+ * option after the hundredth from scrolling and the keyboard, with nothing to say so (ASMA-9087). The
+ * first 100 rows come at once and the rest right after, so typing stays quick in a long list. */
+describe('StyledSelectAutocomplete long lists (LIST-4)', () => {
+    afterEach(cleanup)
+
+    const MANY = Array.from({ length: 150 }, (_, index) => `Option ${String(index + 1).padStart(3, '0')}`)
+
+    it('lists every option, with no row limit', async () => {
+        mount(<AutocompleteFixture options={MANY} />)
+        input().focus()
+
+        await userEvent.keyboard('{ArrowDown}')
+
+        await waitFor(() => expect(listbox()).not.toBeNull())
+        await waitFor(() => expect(optionRows()).toHaveLength(MANY.length))
+    })
+
+    it('opens at the chosen option past the first 100 rows', async () => {
+        mount(<AutocompleteFixture options={MANY} initialValue='Option 140' />)
+        input().focus()
+
+        await userEvent.keyboard('{ArrowDown}')
+
+        await waitFor(() => expect(listbox()).not.toBeNull())
+        await expect(activeOption()).toHaveTextContent('Option 140')
+    })
+
+    it('reaches and chooses the last option with End and Enter', async () => {
+        const onChange = fn()
+        mount(<AutocompleteFixture options={MANY} onChange={onChange} />)
+        input().focus()
+
+        await userEvent.keyboard('{ArrowDown}')
+        await waitFor(() => expect(listbox()).not.toBeNull())
+        await userEvent.keyboard('{End}')
+
+        await expect(activeOption()).toHaveTextContent('Option 150')
+        await userEvent.keyboard('{Enter}')
+        await expect(onChange).toHaveBeenCalledWith('Option 150')
+    })
+
+    const MultiFixture = ({ initialValue }: { initialValue: string[] }): JSX.Element => {
+        const [value, setValue] = useState<string[]>(initialValue)
+        return (
+            <StyledSelectAutocomplete<string, true, false, false>
+                dataTest='ac'
+                multiple
+                disableCloseOnSelect
+                options={MANY}
+                value={value}
+                onChange={(_event, next) => setValue(next)}
+                renderInput={(params) => <StyledInputField {...params} dataTest='ac-input' label='Team' />}
+            />
+        )
+    }
+    const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms))
+
+    it('opens at a chosen option past the first 100 rows at once, without a later jump (LIST-10)', async () => {
+        mount(<AutocompleteFixture options={MANY} initialValue='Option 140' />)
+
+        await userEvent.click(input())
+        await waitFor(() => expect(listbox()).not.toBeNull())
+
+        await expect(optionRows()).toHaveLength(MANY.length)
+        await waitFor(() => expect(listbox()!.scrollTop).toBeGreaterThan(0))
+        const opened = listbox()!.scrollTop
+        await sleep(400)
+        await expect(listbox()!.scrollTop).toBe(opened)
+    })
+
+    it('stays where it is when the first ticked option is unticked', async () => {
+        mount(<MultiFixture initialValue={['Option 005', 'Option 120']} />)
+        await userEvent.click(input())
+        await waitFor(() => expect(optionRows()).toHaveLength(MANY.length))
+        listbox()!.scrollTop = 0
+
+        await userEvent.click(optionRows().find((row) => row.textContent === 'Option 005')!)
+        await sleep(300)
+
+        await expect(listbox()!.scrollTop).toBe(0)
+    })
+
+    it('draws the first 100 rows again when a query goes back to an earlier one', async () => {
+        mount(<AutocompleteFixture options={MANY} />)
+        await userEvent.click(input())
+        await waitFor(() => expect(optionRows()).toHaveLength(MANY.length))
+
+        await userEvent.keyboard('x')
+        await userEvent.keyboard('{Backspace}')
+
+        await expect(optionRows()).toHaveLength(100)
+        await waitFor(() => expect(optionRows()).toHaveLength(MANY.length))
+    })
+
+    it('keeps the cursor on the option Space chose past the first 100 rows', async () => {
+        mount(<AutocompleteFixture options={MANY} />)
+        input().focus()
+        await userEvent.keyboard('{ArrowDown}')
+        await waitFor(() => expect(listbox()).not.toBeNull())
+        await userEvent.keyboard('{End}')
+
+        await userEvent.keyboard(' ')
+
+        await expect(activeOption()).toHaveTextContent('Option 150')
+    })
+})
+
 /* Disabled options stay on the virtual cursor's path (WAI-ARIA APG listbox; disabled-states DIS-3), so
  * keyboard and screen-reader users find an option that cannot be chosen; choosing it is still refused. */
 describe('StyledSelectAutocomplete disabled options', () => {
@@ -439,5 +585,154 @@ describe('StyledSelectAutocomplete disabled options', () => {
 
         await userEvent.keyboard('{ArrowDown}')
         await expect(activeOption()).toHaveTextContent('Charlie')
+    })
+})
+
+/* ASMA-9003: the option rows show the menu item's Figma pressed look. The rows prevent the mousedown
+ * default to keep focus on the input; Chromium still sets `:active` (Firefox does not). */
+describe('StyledSelectAutocomplete pressed option rows (ASMA-9003)', () => {
+    afterEach(cleanup)
+
+    it('fills a pressed row gama-200 over the selected fill, and never a keyboard-active or disabled row', async () => {
+        mount(
+            <StyledSelectAutocomplete<string, false, false, false>
+                dataTest='ac'
+                options={OPTIONS}
+                value='Charlie'
+                getOptionDisabled={(option) => option === 'Bravo'}
+                onChange={fn()}
+                renderInput={(params) => <StyledInputField {...params} dataTest='ac-input' label='Team' />}
+            />,
+        )
+        const gama200 = resolveTokenColor('--colors-gama-200')
+        const gama700 = resolveTokenColor('--colors-gama-700')
+
+        input().focus()
+        await userEvent.keyboard('{ArrowDown}')
+        await waitFor(() => expect(listbox()).not.toBeNull())
+        const [alpha, bravo, charlie] = optionRows()
+
+        // The arrow keys move `aria-activedescendant`: no pressed look on the active row.
+        await waitFor(() => expect(activeOption()).not.toBeNull())
+        await expect(fillOf(activeOption()!)).not.toBe(gama200)
+        await expect(fillOf(alpha!)).not.toBe(gama200)
+
+        // A disabled row shows no pressed look (and pressing it chooses nothing). Not compared with its
+        // resting fill: the pointer also hovers it, and the hover fill is out of ASMA-9003's scope.
+        const restingColor = getComputedStyle(bravo!).color
+        await holdPressed(bravo!, async () => {
+            const style = getComputedStyle(bravo!)
+            await expect(fillOf(bravo!)).not.toBe(gama200)
+            await expect(style.color).toBe(restingColor)
+            await expect(style.getPropertyValue('--control-pressed-accent')).toBe('')
+        })
+
+        // Last, because releasing on it chooses it: the selected row — check mark kept, darkened.
+        await expect(charlie).toHaveAttribute('aria-selected', 'true')
+        await holdPressed(charlie!, async () => {
+            const style = getComputedStyle(charlie!)
+            await expect(fillOf(charlie!)).toBe(gama200)
+            await expect(style.color).toBe(gama700)
+            await expect(style.opacity).toBe('1')
+            await expect(getComputedStyle(charlie!.querySelector('svg')!).color).toBe(gama700)
+            // A multi-select row's decorative checkbox reads this.
+            await expect(style.getPropertyValue('--control-pressed-accent').trim()).toBe(
+                getComputedStyle(document.documentElement).getPropertyValue('--colors-gama-700').trim(),
+            )
+        })
+    })
+})
+
+/* The rows prevent the mousedown default (focus stays on the input), which keeps Firefox from setting
+ * `:active`, so they also hold the press as `data-pressed` from pointer events — and drop it the moment
+ * the pointer leaves the row (pattern: cancel on pointer-out). */
+describe('StyledSelectAutocomplete option rows held by the pointer (ASMA-9003)', () => {
+    afterEach(cleanup)
+
+    const openList = async (): Promise<void> => {
+        input().focus()
+        await userEvent.keyboard('{ArrowDown}')
+        await waitFor(() => expect(listbox()).not.toBeNull())
+    }
+
+    it('marks a pressed row and cancels it when the pointer is dragged off; a disabled row never', async () => {
+        const onChange = fn()
+        mount(
+            <StyledSelectAutocomplete<string, false, false, false>
+                dataTest='ac'
+                options={OPTIONS}
+                value='Charlie'
+                getOptionDisabled={(option) => option === 'Bravo'}
+                onChange={onChange}
+                renderInput={(params) => <StyledInputField {...params} dataTest='ac-input' label='Team' />}
+            />,
+        )
+        await openList()
+        const [, bravo, charlie] = optionRows()
+        const gama200 = resolveTokenColor('--colors-gama-200')
+
+        const disabledAt = bravo!.getBoundingClientRect()
+        await mouse('mousePressed', { x: disabledAt.left + 20, y: disabledAt.top + disabledAt.height / 2 })
+        await expect(bravo).not.toHaveAttribute('data-pressed')
+        await expect(fillOf(bravo!)).not.toBe(gama200)
+        await mouse('mouseReleased', { x: disabledAt.left + 20, y: disabledAt.top + disabledAt.height / 2 })
+
+        const box = charlie!.getBoundingClientRect()
+        const x = box.left + 20
+        const y = box.top + box.height / 2
+        const away = { x: box.right + 300, y: box.bottom + 300 }
+        await mouse('mousePressed', { x, y })
+        try {
+            await expect(charlie).toHaveAttribute('data-pressed')
+            await expect(fillOf(charlie!)).toBe(gama200)
+            await expect(getComputedStyle(charlie!.querySelector('svg')!).color).toBe(
+                resolveTokenColor('--colors-gama-700'),
+            )
+
+            await mouse('mouseMoved', away, { held: true })
+            await expect(charlie).not.toHaveAttribute('data-pressed')
+            await waitFor(() => expect(fillOf(charlie!)).not.toBe(gama200))
+        } finally {
+            await mouse('mouseReleased', away)
+        }
+        await expect(onChange).not.toHaveBeenCalled()
+    })
+
+    it('paints the pressed look from `data-pressed` alone (as Firefox shows it), also on a custom row', async () => {
+        mount(
+            <StyledSelectAutocomplete<string, false, false, false>
+                dataTest='ac'
+                options={OPTIONS}
+                value='Alpha'
+                onChange={fn()}
+                // A caller row that spreads the props it is given, as `renderOption` callers do.
+                renderOption={({ key, ...props }, option) => (
+                    <li key={key} {...props}>
+                        {option}
+                    </li>
+                )}
+                renderInput={(params) => <StyledInputField {...params} dataTest='ac-input' label='Team' />}
+            />,
+        )
+        await openList()
+        const [alpha, bravo] = optionRows()
+
+        // A real press marks the custom row through the spread props.
+        const box = bravo!.getBoundingClientRect()
+        await mouse('mousePressed', { x: box.left + 20, y: box.top + box.height / 2 })
+        try {
+            await expect(bravo).toHaveAttribute('data-pressed')
+        } finally {
+            await mouse('mouseMoved', { x: box.right + 300, y: box.bottom + 300 }, { held: true })
+            await mouse('mouseReleased', { x: box.right + 300, y: box.bottom + 300 })
+        }
+
+        // The attribute alone — no `:active` — paints the look, over the selected fill.
+        alpha!.setAttribute('data-pressed', '')
+        await expect(fillOf(alpha!)).toBe(resolveTokenColor('--colors-gama-200'))
+        await expect(getComputedStyle(alpha!).color).toBe(resolveTokenColor('--colors-gama-700'))
+        await expect(getComputedStyle(alpha!).getPropertyValue('--control-pressed-accent').trim()).toBe(
+            getComputedStyle(document.documentElement).getPropertyValue('--colors-gama-700').trim(),
+        )
     })
 })

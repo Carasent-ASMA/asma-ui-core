@@ -3,19 +3,22 @@ import { afterEach, describe, it } from 'vitest'
 import { cdp } from 'vitest/browser'
 import { expect, userEvent } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
-import { ariaSorts } from 'src/test-utils/tableFixture'
+import { ariaSorts, button, row } from 'src/test-utils/tableFixture'
 import { StyledTable } from './StyledTableIndex'
 import type { StyledTableProps } from '../types'
 
 /**
- * Keyboard reach of the table header (ASMA-8702, option A of the plan, EXE-01; keeps ASMA-8087's body model).
+ * Keyboard reach of the table header. ASMA-8702 made the header controls reachable (K-01 to K-22); ASMA-8875 replaced its
+ * Tab walk with the WAI-ARIA Grid rule for the whole table: Tab enters and leaves, the arrow keys move inside.
  *
- * The header row is not a tab stop. Tab walks the sortable headers and the column settings pin in visual order. Tab on
- * the LAST header control goes to the body's active row (the row the user left), and Shift+Tab from the body goes to
- * the last header control. The body stays one roving tab stop (arrows, Enter, Tab leaves forwards), which
- * `TableRow.keyboard.interaction.test.tsx` covers (K-11). Every key here is a real press from `userEvent.keyboard`.
+ * The header works like a body row (the user's decision, 2026-11-16): the header row itself is its ONE tab stop. Right
+ * from the row walks the sortable headers and the column settings pin in visual order, Left from the first comes back to
+ * the row, Home/End jump, Up/Down do nothing. Tab from the row or any header control goes to the body's active row (the row
+ * the user left), Shift+Tab leaves the table backwards, and Shift+Tab from the body comes back to the header row. The
+ * rows' own controls are not tab stops either (K-20, K-21). Every key here is a real press from `userEvent.keyboard`.
  * `.focus()` is used only to start a test on `Before`, `After`, the footer's row count or a body row, places a key
- * reaches; no test puts the focus on a header or the pin that way.
+ * reaches; no test puts the focus on a header or the pin that way. The acceptance criteria themselves are pinned in
+ * `StyledTable.gridKeyboard.interaction.test.tsx`.
  */
 
 interface Row {
@@ -47,20 +50,18 @@ const mountBetweenButtons = (props: TableProps = {}): void => {
     )
 }
 
-const row = (id: string): HTMLElement => document.getElementById(id)!
-const button = (name: string): HTMLButtonElement =>
-    [...document.querySelectorAll('button')].find((candidate) => candidate.textContent === name)!
 const sortControl = (label: string): HTMLElement =>
     [...document.querySelectorAll<HTMLElement>('thead [role="button"]')].find((control) => control.textContent === label)!
 const pin = (): HTMLElement => document.querySelector<HTMLElement>('thead button[aria-haspopup="true"]')!
 const headerRow = (): HTMLTableRowElement => document.querySelector<HTMLTableRowElement>('thead tr')!
 
-/** Where the focus is, as a name: a sort header by label, the pin, a body row by id, or a button by its text. */
+/** Where the focus is, as a name: the header row, a sort header by label, the pin, a body row by id, or a button. */
 const focusName = (): string => {
     const active = document.activeElement as HTMLElement | null
 
     if (!active) return 'nothing'
     if (active.closest('thead')) {
+        if (active.tagName === 'TR') return 'header row'
         if (active.getAttribute('role') === 'button') return `header ${active.textContent}`
 
         return active.getAttribute('role') === 'checkbox' ? 'select all' : 'pin'
@@ -110,15 +111,22 @@ const tab = async (shift = false): Promise<string> => {
     return focusName()
 }
 
+const arrow = async (key: 'Right' | 'Left' | 'Home' | 'End'): Promise<string> => {
+    await userEvent.keyboard(key === 'Home' || key === 'End' ? `{${key}}` : `{Arrow${key}}`)
+
+    return focusName()
+}
+
 describe('StyledTable header keyboard reach (K-01 to K-05)', () => {
     afterEach(cleanup)
 
-    it('K-01: Tab from the element before the table reaches the first header control; the header row is not a tab stop', async () => {
+    it("K-01: Tab from the element before the table reaches the header row, the header's one tab stop; its controls are not stops", async () => {
         mountBetweenButtons()
         button('Before').focus()
 
-        await expect(headerRow().tabIndex).toBe(-1)
-        await expect(await tab()).toBe('header Name')
+        await expect(await tab()).toBe('header row')
+        await expect(headerRow().tabIndex).toBe(0)
+        await expect([...document.querySelectorAll<HTMLElement>('thead [data-table-control]')].map((control) => control.tabIndex)).toEqual([-1, -1, -1])
     })
 
     it('K-01: a fixed-left header comes first, wherever it sits in the column list', async () => {
@@ -130,101 +138,94 @@ describe('StyledTable header keyboard reach (K-01 to K-05)', () => {
         })
         button('Before').focus()
 
-        await expect(await tab()).toBe('header Name')
-        await expect(await tab()).toBe('header Role')
+        await expect(await tab()).toBe('header row')
+        await expect(await arrow('Right')).toBe('header Name')
+        await expect(await arrow('Right')).toBe('header Role')
     })
 
-    it('K-02: Tab walks every sortable header in visual order, then the pin, and never enters the body early', async () => {
+    it('K-02: Right from the header row walks every sortable header in visual order, then the pin (no wrap); Left goes back to the row', async () => {
         mountBetweenButtons()
         button('Before').focus()
 
-        const stops = [await tab(), await tab(), await tab()]
+        const stops = [await tab(), await arrow('Right'), await arrow('Right'), await arrow('Right'), await arrow('Right')]
 
-        await expect(stops).toEqual(['header Name', 'header Role', 'pin'])
-        await expect(document.activeElement).toBe(pin())
+        await expect(stops).toEqual(['header row', 'header Name', 'header Role', 'pin', 'pin'])
         await expect(document.activeElement?.closest('tbody')).toBeNull()
+        // One tab stop in the header at any time: the row, wherever the focus is in it.
+        await expect([...document.querySelectorAll<HTMLElement>('thead [tabindex="0"]')]).toEqual([headerRow()])
+        await expect([await arrow('Left'), await arrow('Left'), await arrow('Left'), await arrow('Left')]).toEqual([
+            'header Role',
+            'header Name',
+            'header row',
+            'header row',
+        ])
     })
 
-    it('K-03: Tab from the last header control enters the body at the row the user left, not at row 1', async () => {
+    it('K-02: Up and Down on the header row or a header control do nothing: the header is not linked to the body', async () => {
+        mountBetweenButtons()
+        button('Before').focus()
+
+        await expect(await tab()).toBe('header row')
+        await userEvent.keyboard('{ArrowDown}{ArrowUp}')
+        await expect(focusName()).toBe('header row')
+        await expect(await arrow('Right')).toBe('header Name')
+        await userEvent.keyboard('{ArrowDown}{ArrowUp}')
+        await expect(focusName()).toBe('header Name')
+    })
+
+    it('K-03 / K-11: Tab from any header control enters the body at the row the user left, not at row 1', async () => {
         mountBetweenButtons()
 
         // Nothing worked with yet: the first row holds the tab stop.
         button('Before').focus()
-        await tab()
-        await tab()
-        await expect(await tab()).toBe('pin')
+        await expect(await tab()).toBe('header row')
         await expect(await tab()).toBe('row r-1')
 
-        // The user moves to row 3, goes back to the header, and Tab returns to row 3.
+        // The user moves to row 3, goes back to the header, and Tab returns to row 3, from the header row or the pin.
         await userEvent.keyboard('{ArrowDown}{ArrowDown}')
         await expect(focusName()).toBe('row r-3')
-        await expect(await tab(true)).toBe('pin')
+        await expect(await tab(true)).toBe('header row')
+        await expect(await tab()).toBe('row r-3')
+        await expect(await tab(true)).toBe('header row')
+        await expect(await arrow('End')).toBe('pin')
         await expect(await tab()).toBe('row r-3')
     })
 
-    it('K-03: with a tabbable control in every row, Tab from the pin still enters at the row the user left, not at a control in an earlier row', async () => {
-        // A button in each row's first cell: those come after the header in the DOM, and the one in row 1 before row 3.
-        mountBetweenButtons({
-            columns: [
-                {
-                    accessorKey: 'name',
-                    header: 'Name',
-                    cell: ({ row: tableRow }) => <button type='button'>{`Open ${tableRow.id}`}</button>,
-                },
-                { accessorKey: 'role', header: 'Role' },
-            ],
-        })
-        row('r-1').focus()
-        await userEvent.keyboard('{ArrowDown}{ArrowDown}')
-        await expect(focusName()).toBe('row r-3')
-
-        // Back to the header, through the pin and the sortable headers.
-        await expect(await tab(true)).toBe('pin')
-        await expect(await tab(true)).toBe('header Role')
-        await expect(await tab(true)).toBe('header Name')
-
-        // And forwards again: the same stops, then the row the user left. The browser's own next stop after the pin
-        // would be row 1's button.
-        await expect(await tab()).toBe('header Role')
-        await expect(await tab()).toBe('pin')
-        await expect(await tab()).toBe('row r-3')
-    })
-
-    it('K-04: Shift+Tab from the active body row goes to the last header control, not to the first or out of the table', async () => {
+    it('K-04 / K-11: Shift+Tab from the active body row goes to the header row, whatever header control was used last', async () => {
         mountBetweenButtons()
         row('r-2').focus()
 
-        await expect(await tab(true)).toBe('pin')
-        await expect(await tab(true)).toBe('header Role')
-        await expect(await tab(true)).toBe('header Name')
-    })
-
-    it('K-04: without the pin, the last header control is the last sortable header', async () => {
-        mountBetweenButtons({ headerPin: false })
-        row('r-2').focus()
-
-        await expect(await tab(true)).toBe('header Role')
-        // Back down, onto the row the user left.
+        await expect(await tab(true)).toBe('header row')
+        await expect(await arrow('End')).toBe('pin')
         await expect(await tab()).toBe('row r-2')
+        await expect(await tab(true)).toBe('header row')
     })
 
-    it('K-05: Shift+Tab from the first header control leaves the table backwards: no trap', async () => {
+    it('K-05: Shift+Tab from the header row, or from any header control, leaves the table backwards: no trap', async () => {
         mountBetweenButtons()
         button('Before').focus()
-        await expect(await tab()).toBe('header Name')
+        await expect(await tab()).toBe('header row')
 
         await expect(await tab(true)).toBe('Before')
         await expect(document.activeElement?.closest('table')).toBeNull()
+
+        await expect(await tab()).toBe('header row')
+        await expect(await arrow('Right')).toBe('header Name')
+        await expect(await arrow('Right')).toBe('header Role')
+        await expect(await tab(true)).toBe('Before')
     })
 })
 
 describe('StyledTable header controls work from the keyboard (K-06, K-13)', () => {
     afterEach(cleanup)
 
-    it('K-06: Enter and Space on a header reached by Tab sort it, and aria-sort follows', async () => {
+    it('K-06 / AC 9: Enter and Space on a header sort it, and aria-sort follows; on the header row they do nothing', async () => {
         mountBetweenButtons()
         button('Before').focus()
-        await tab()
+        await expect(await tab()).toBe('header row')
+        await userEvent.keyboard('{Enter}')
+        await expect(ariaSorts()['Name']).toBe('none')
+        await expect(await arrow('Right')).toBe('header Name')
 
         await userEvent.keyboard('{Enter}')
         await expect(ariaSorts()['Name']).toBe('ascending')
@@ -234,12 +235,11 @@ describe('StyledTable header controls work from the keyboard (K-06, K-13)', () =
         await expect(focusName()).toBe('header Name')
     })
 
-    it('K-13: a Tab on the last header control that something already handled (defaultPrevented) is left alone', async () => {
+    it('K-13: a Tab on a header control that something already handled (defaultPrevented) is left alone', async () => {
         mountBetweenButtons()
         button('Before').focus()
         await tab()
-        await tab()
-        await expect(await tab()).toBe('pin')
+        await expect(await arrow('End')).toBe('pin')
 
         // An earlier handler (what the column settings popover does) takes the Tab and moves focus on purpose.
         const takeTab = (event: KeyboardEvent): void => {
@@ -258,13 +258,15 @@ describe('StyledTable header controls work from the keyboard (K-06, K-13)', () =
         await expect(document.activeElement).toBe(button('After'))
     })
 
-    it('Tab on a header control that is not the last one is left to the browser: the next header control, not the rows', async () => {
+    it('Tab from the header row, or from any header control, goes to the rows: the header is one stop (ASMA-8875)', async () => {
         mountBetweenButtons()
         button('Before').focus()
-        await expect(await tab()).toBe('header Name')
+        await expect(await tab()).toBe('header row')
+        await expect(await tab()).toBe('row r-1')
 
-        await expect(await tab()).toBe('header Role')
-        await expect(document.activeElement?.closest('tbody')).toBeNull()
+        await expect(await tab(true)).toBe('header row')
+        await expect(await arrow('Right')).toBe('header Name')
+        await expect(await tab()).toBe('row r-1')
     })
 })
 
@@ -336,41 +338,22 @@ describe('StyledTable with no header controls (K-08, K-09)', () => {
         await expect(names).toContain('role')
     })
 
-    it("K-09: a consumer's own control in a hidden header is not where Shift+Tab from the body sends the focus", async () => {
+    // The contract of `hideHeader` (ASMA-8702, changed by ASMA-8875): a hidden header has no tab stop at all. ASMA-8702
+    // left a consumer's control in a hidden header cell a tab stop (the consumer had to give it `tabIndex={-1}`); the table
+    // now takes every control in the header out of the Tab sequence itself, the consumer's included. `inert` is still not
+    // the answer (it would take the column names out of the accessibility tree).
+    it("K-09 (the hideHeader contract): a consumer's control in a hidden header is not a tab stop either; Tab skips the header", async () => {
         mountBetweenButtons({
             hideHeader: true,
             columns: [{ accessorKey: 'name', header: () => <button type='button'>Menu</button>, enableSorting: false }],
             headerPin: false,
         })
-        row('r-2').focus()
-
-        await expect(await tab(true)).toBe('Before')
-    })
-
-    // The contract of `hideHeader` (ASMA-8702, DeepSeek's audit): the table drops the tab stops of its OWN header
-    // controls, and sends no focus to a consumer's. A control the consumer puts in a hidden header cell is still a tab
-    // stop the browser reaches, with no visible focus. The rule: a hidden header must not contain consumer tab stops, or
-    // the consumer gives them `tabIndex={-1}`. This test names the rule and pins both halves; `inert` is not the answer
-    // (it would take the column names out of the accessibility tree).
-    it("K-09 (the hideHeader contract): a consumer's tab stop in a hidden header IS reached by Tab; with tabIndex={-1} it is skipped", async () => {
-        const menu = (tabIndex?: number): ColumnDef<Row>[] => [
-            { accessorKey: 'name', header: () => <button type='button' tabIndex={tabIndex}>Menu</button>, enableSorting: false },
-        ]
-
-        // The consumer's button, as it is: a tab stop in the hidden header. Tab stops on it, invisibly, before the rows.
-        mountBetweenButtons({ hideHeader: true, columns: menu(), headerPin: false })
         button('Before').focus()
-        await userEvent.keyboard('{Tab}')
-        await expect(document.activeElement, 'a consumer tab stop in a hidden header is reached').toBe(button('Menu'))
-        await expect(await tab()).toBe('row r-1')
 
-        // The rule's fix: tabIndex={-1}, and the keyboard skips the hidden header entirely.
-        cleanup()
-        mountBetweenButtons({ hideHeader: true, columns: menu(-1), headerPin: false })
-        button('Before').focus()
         await expect(await tab()).toBe('row r-1')
         // The control is still in the accessibility tree and the DOM, only not a stop.
         await expect(button('Menu').tabIndex).toBe(-1)
+        await expect(await tab(true)).toBe('Before')
     })
 
     it('a visible header is not marked hidden', async () => {
@@ -387,24 +370,25 @@ describe('StyledTable header controls: the cases around the plan (K-15 to K-19)'
         mountBetweenButtons({ columns: [{ accessorKey: 'name', header: 'Name', enableSorting: false }] })
         button('Before').focus()
 
-        await expect(await tab()).toBe('pin')
+        await expect(await tab()).toBe('header row')
+        await expect(await arrow('Right')).toBe('pin')
         await expect(await tab()).toBe('row r-1')
-        await expect(await tab(true)).toBe('pin')
+        await expect(await tab(true)).toBe('header row')
         await expect(await tab(true)).toBe('Before')
     })
 
-    it('K-16: with no rows, Tab on the last header control is not trapped: it leaves the table', async () => {
+    it('K-16: with no rows, Tab from the header row or a header control is not trapped: it leaves the table forwards', async () => {
         mountBetweenButtons({ data: [] })
         button('Before').focus()
 
-        await expect(await tab()).toBe('header Name')
-        await expect(await tab()).toBe('header Role')
-        await expect(await tab()).toBe('pin')
+        await expect(await tab()).toBe('header row')
+        // No active row to enter, so the Tab leaves the table forwards.
+        await expect(await tab()).toBe('After')
 
-        // No active row to enter, so the Tab is left to the browser, and the focus moves on.
+        await expect(await tab(true)).toBe('header row')
+        await expect(await arrow('End')).toBe('pin')
         await userEvent.keyboard('{Tab}')
         await expect(document.activeElement).not.toBe(pin())
-        await expect(document.activeElement?.closest('thead')).toBeNull()
         await expect(document.activeElement?.closest('table')).toBeNull()
     })
 
@@ -419,17 +403,19 @@ describe('StyledTable header controls: the cases around the plan (K-15 to K-19)'
         button('Before').focus()
 
         // The column list says Role first; the visual and DOM order puts it after the centre headers, then the pin.
-        await expect(await tab()).toBe('header Name')
-        await expect(await tab()).toBe('header Extra')
-        await expect(await tab()).toBe('header Role')
-        await expect(await tab()).toBe('pin')
+        await expect(await tab()).toBe('header row')
+        await expect(await arrow('Right')).toBe('header Name')
+        await expect(await arrow('Right')).toBe('header Extra')
+        await expect(await arrow('Right')).toBe('header Role')
+        await expect(await arrow('Right')).toBe('pin')
         await expect(await tab()).toBe('row r-1')
 
         cleanup()
         mountBetweenButtons({ columns: fixedRightColumns, headerPin: false })
         row('r-2').focus()
 
-        await expect(await tab(true)).toBe('header Role')
+        await expect(await tab(true)).toBe('header row')
+        await expect(await arrow('End')).toBe('header Role')
         await expect(await tab()).toBe('row r-2')
     })
 
@@ -437,23 +423,22 @@ describe('StyledTable header controls: the cases around the plan (K-15 to K-19)'
         mountBetweenButtons({ enableRowSelection: true, initialState: { columnVisibility: { select: true } } })
         button('Before').focus()
 
-        await expect(await tab()).toBe('select all')
-        await expect(await tab()).toBe('header Name')
-        await expect(await tab()).toBe('header Role')
-        await expect(await tab()).toBe('pin')
+        await expect(await tab()).toBe('header row')
+        await expect(await arrow('Right')).toBe('select all')
+        await expect(await arrow('Right')).toBe('header Name')
+        await expect(await arrow('Right')).toBe('header Role')
+        await expect(await arrow('Right')).toBe('pin')
         // Each row has a checkbox of its own, after the header and before the later rows; Tab lands on the active row.
         await expect(await tab()).toBe('row r-1')
 
-        // Back to the select-all checkbox, and Space selects every row.
-        await expect(await tab(true)).toBe('pin')
-        await expect(await tab(true)).toBe('header Role')
-        await expect(await tab(true)).toBe('header Name')
-        await expect(await tab(true)).toBe('select all')
+        // Back to the header row, then to the select-all checkbox, and Space selects every row.
+        await expect(await tab(true)).toBe('header row')
+        await expect(await arrow('Home')).toBe('select all')
         await userEvent.keyboard('{ }')
         await expect(document.activeElement?.getAttribute('aria-checked')).toBe('true')
     })
 
-    it('K-19: a header control that Tab would skip (tabindex -1, hidden, display: none, visibility: hidden) is not a header control, and is never where the focus is sent', async () => {
+    it('K-19: a header element the keyboard cannot land on (tabindex -1, hidden, display: none, visibility: hidden) is not a header control, and is never where the focus is sent', async () => {
         mountBetweenButtons({
             columns: [
                 { accessorKey: 'name', header: 'Name' },
@@ -482,23 +467,27 @@ describe('StyledTable header controls: the cases around the plan (K-15 to K-19)'
             headerPin: false,
         })
 
-        // Forwards: the browser skips them, and the last header control is Role.
+        // The arrows skip them, and the last header control is Role.
         button('Before').focus()
-        await expect(await tab()).toBe('header Name')
-        await expect(await tab()).toBe('header Role')
+        await expect(await tab()).toBe('header row')
+        await expect(await arrow('Right')).toBe('header Name')
+        await expect(await arrow('Right')).toBe('header Role')
+        await expect(await arrow('Right')).toBe('header Role')
+        await expect(await arrow('End')).toBe('header Role')
         await expect(await tab()).toBe('row r-1')
 
-        // Backwards from the body: Role, not one of the three that Tab cannot stop on.
-        await expect(await tab(true)).toBe('header Role')
+        // Backwards from the body: the header row, the one stop; none of the four the keyboard cannot land on is one.
+        await expect(await tab(true)).toBe('header row')
+        await expect([...document.querySelectorAll<HTMLElement>('thead [tabindex="0"]')]).toEqual([headerRow()])
     })
 })
 
-describe('StyledTable body model, as ASMA-8087 built it: what the controls inside the rows do (K-20, K-21)', () => {
+describe('StyledTable body model since ASMA-8875: the controls inside the rows are not tab stops (K-20, K-21)', () => {
     afterEach(cleanup)
 
-    // The same on master `7fe83452` (checked there with a probe), apart from the header row now being the pin and the
-    // sortable headers: Shift+Tab from after a table whose rows hold controls lands on the LAST row's control, because
-    // the rows' own controls are tab stops that come after the active row in the DOM. It is not the active row.
+    // ASMA-8087's body model left the rows' own controls as browser tab stops, so Shift+Tab from after the table landed on
+    // the LAST row's control and walked back one control per press (K-20, K-21 as ASMA-8702 pinned them). ASMA-8875
+    // supersedes it: the controls are reached with the arrow keys, and the table has two tab stops.
     const rowControlColumns: ColumnDef<Row>[] = [
         {
             accessorKey: 'name',
@@ -508,7 +497,7 @@ describe('StyledTable body model, as ASMA-8087 built it: what the controls insid
         { accessorKey: 'role', header: 'Role' },
     ]
 
-    it('K-20: Shift+Tab from after a table with a control in every row walks back through the rows\' controls to the active row, then the last header control, and out: no trap', async () => {
+    it("K-20: Shift+Tab from after a table with a control in every row enters at the active row, then the header, then out: one press each", async () => {
         mountBetweenButtons({ columns: rowControlColumns })
         row('r-1').focus()
         await userEvent.keyboard('{ArrowDown}')
@@ -517,33 +506,30 @@ describe('StyledTable body model, as ASMA-8087 built it: what the controls insid
 
         const stops: string[] = []
 
-        for (let presses = 0; presses < 12 && stops.at(-1) !== 'Before'; presses += 1) {
+        for (let presses = 0; presses < 6 && stops.at(-1) !== 'Before'; presses += 1) {
             stops.push(await tab(true))
         }
 
-        // Last row's control first (not the active row), back to the active row, then the header, then out.
-        await expect(stops).toEqual(['cell Open r-3', 'cell Open r-2', 'row r-2', 'pin', 'header Role', 'header Name', 'Before'])
+        await expect(stops).toEqual(['row r-2', 'header row', 'Before'])
     })
 
-    it('K-21: a focused control inside a row does not move the roving tab stop, and Shift+Tab on it goes to the previous control, not the header', async () => {
+    it("K-21: a control focused inside a row moves the roving tab stop to its row, and Shift+Tab on it goes to the header", async () => {
         mountBetweenButtons({ columns: rowControlColumns })
         row('r-1').focus()
-        await userEvent.keyboard('{ArrowDown}')
-        button('After').focus()
+        await userEvent.keyboard('{ArrowDown}{ArrowDown}{ArrowRight}')
 
-        await expect(await tab(true)).toBe('cell Open r-3')
-        // The row the user worked with still holds the tab stop; the row of the focused control does not.
-        await expect(row('r-2').tabIndex).toBe(0)
-        await expect(row('r-3').tabIndex).toBe(-1)
-        // Row handlers act only on the row itself, so Shift+Tab here is the browser's: the previous control.
-        await expect(await tab(true)).toBe('cell Open r-2')
+        await expect(focusName()).toBe('cell Open r-3')
+        await expect(row('r-3').tabIndex).toBe(0)
+        await expect(row('r-1').tabIndex).toBe(-1)
+        await expect(await tab(true)).toBe('header row')
+        await expect(await tab()).toBe('row r-3')
     })
 })
 
 describe('StyledTable header and the footer (K-14)', () => {
     afterEach(cleanup)
 
-    it("K-14: Shift+Tab from the footer's row count goes back into the table at the active row, and Shift+Tab from there to the header", async () => {
+    it("K-14: Shift+Tab from the footer's row count goes back into the table at the active row, and Shift+Tab from there to the header row", async () => {
         // The footer shows its row count once the table has enough rows.
         const manyRows: Row[] = Array.from({ length: 30 }, (_, index) => ({
             id: `r-${String(index + 1)}`,
@@ -567,12 +553,12 @@ describe('StyledTable header and the footer (K-14)', () => {
         })
         row('r-2').focus()
 
-        const rows = document.querySelector<HTMLElement>('[data-test="table-rows-count-button"]')
+        const rows = document.querySelector<HTMLElement>('[data-testid="table-rows-count-button"]')
 
         await expect(rows).not.toBeNull()
         rows!.focus()
         await expect(await tab(true)).toBe('row r-2')
-        await expect(await tab(true)).toBe('pin')
+        await expect(await tab(true)).toBe('header row')
     })
 })
 
@@ -594,7 +580,7 @@ describe('StyledTable header reach in a wide, column-virtualised table (K-10)', 
     /** The pace of a person: the scroll that the focus caused re-renders the window before the next press. */
     const settle = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 150))
 
-    it('K-10: Tab reaches a centre header that starts off-screen, in order; it scrolls into view and keeps its focus', async () => {
+    it('K-10: the arrow keys reach a centre header that starts off-screen, in order; it scrolls into view and keeps its focus', async () => {
         mount(
             <div data-test='wide' style={{ width: WIDTH }}>
                 <button type='button'>Before</button>
@@ -608,20 +594,23 @@ describe('StyledTable header reach in a wide, column-virtualised table (K-10)', 
         await expect(renderedHeaders()).not.toContain(`C${String(WIDE)}`)
 
         button('Before').focus()
+        await expect(await tab()).toBe('header row')
 
         const seen: string[] = []
         let firstOffScreen: string | undefined
+        // The right edge of what the user can see: the window, less the pinned column of the pin (sticky right).
+        const clearRight = (): number => pin().closest('th')!.getBoundingClientRect().left
 
         for (let presses = 0; presses < 14; presses += 1) {
             const next = `C${String(presses + 1)}`
             const target = sortControl(next)
 
-            // The first header that starts to the right of the 640px window.
-            if (!firstOffScreen && target && target.getBoundingClientRect().left >= wide().getBoundingClientRect().right) {
+            // The first header that is not wholly in the clear part of the 640px window: past it, or under the pin.
+            if (!firstOffScreen && target && target.getBoundingClientRect().right > clearRight() + 1) {
                 firstOffScreen = next
             }
 
-            seen.push(await tab())
+            seen.push(await arrow('Right'))
             await settle()
 
             const view = wide().getBoundingClientRect()
@@ -632,9 +621,9 @@ describe('StyledTable header reach in a wide, column-virtualised table (K-10)', 
             await expect(box.left < view.right && box.right > view.left, `${next} is in view`).toBe(true)
 
             if (next === firstOffScreen) {
-                // The one that started off-screen is now wholly in view.
+                // The one that started off-screen is now wholly in view, clear of the pinned column (AC 11).
                 await expect(box.left).toBeGreaterThanOrEqual(view.left)
-                await expect(box.right).toBeLessThanOrEqual(view.right)
+                await expect(box.right).toBeLessThanOrEqual(clearRight() + 1)
             }
         }
 
@@ -643,31 +632,6 @@ describe('StyledTable header reach in a wide, column-virtualised table (K-10)', 
         await expect(firstOffScreen, 'a header started off-screen').toBeDefined()
     })
 
-    it('K-10: Shift+Tab from the pin walks back to the earlier centre headers, in order', async () => {
-        mount(
-            <div data-test='wide' style={{ width: WIDTH }}>
-                <button type='button'>Before</button>
-                <StyledTable<Row> locale='en' columns={wideColumns} data={data} hideFooter />
-            </div>,
-        )
-        row('r-1').focus()
-
-        // Body to the pin first, then back through the headers, with the scroll catching up each time.
-        await expect(await tab(true)).toBe('pin')
-        await settle()
-
-        const back: string[] = []
-
-        for (let presses = 0; presses < 3; presses += 1) {
-            back.push(await tab(true))
-            await settle()
-        }
-
-        // The last centre headers sit before the pin in the DOM only once the window has scrolled to them, so the
-        // focus ends on a centre header that is rendered and in view; none of the stops is the body or the page.
-        await expect(back.every((name) => name.startsWith('header C'))).toBe(true)
-        await expect(document.activeElement?.isConnected).toBe(true)
-    })
 })
 
 describe('StyledTable header with column resizing on (K-22)', () => {
@@ -685,7 +649,7 @@ describe('StyledTable header with column resizing on (K-22)', () => {
     it.each([
         ['by default', {}],
         ['with enableColumnResizing', { enableColumnResizing: true }],
-    ] as const)('K-22: a resize handle is not a tab stop, %s: Tab and Shift+Tab walk the headers and the pin, never a handle', async (_label, props) => {
+    ] as const)('K-22: a resize handle is not a tab stop or a header control, %s: the keys walk the headers and the pin, never a handle', async (_label, props) => {
         mountBetweenButtons({ columns: threeColumns, ...props })
         button('Before').focus()
 
@@ -696,13 +660,16 @@ describe('StyledTable header with column resizing on (K-22)', () => {
             await expect(handle.hasAttribute('tabindex')).toBe(false)
         }
 
-        await expect(await tab()).toBe('header Name')
-        await expect(await tab()).toBe('header Role')
-        await expect(await tab()).toBe('pin')
+        await expect(await tab()).toBe('header row')
+        await expect(await arrow('Right')).toBe('header Name')
+        await expect(await arrow('Right')).toBe('header Role')
+        await expect(await arrow('Right')).toBe('pin')
         await expect(await tab()).toBe('row r-1')
-        await expect(await tab(true)).toBe('pin')
-        await expect(await tab(true)).toBe('header Role')
-        await expect(await tab(true)).toBe('header Name')
+        await expect(await tab(true)).toBe('header row')
+        await expect(await arrow('End')).toBe('pin')
+        await expect(await arrow('Left')).toBe('header Role')
+        await expect(await arrow('Left')).toBe('header Name')
+        await expect(await arrow('Left')).toBe('header row')
         await expect(await tab(true)).toBe('Before')
     })
 

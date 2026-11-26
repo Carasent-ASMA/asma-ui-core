@@ -1,32 +1,13 @@
-// Figma Radio (node 15385-19720 / _BASE_Radiobutton): circle 20px inside a 40px touch/hover target.
-@mixin radio-wrapper-size($size) {
-    @if $size == 'small' {
-        width: 38px;
-        height: 38px;
-    } @else {
-        width: 40px;
-        height: 40px;
-    }
-}
+@use '../../../../styles/pressed-circle';
 
-@mixin radio-size($size) {
-    @if $size == 'small' {
-        width: 16px;
-        height: 16px;
-    } @else {
-        width: 20px;
-        height: 20px;
-    }
-}
+// Figma Radio (node 15385-19720 / _BASE_Radiobutton): a 16px ring inside a 40px touch/hover target.
+// ASMA-9001: `small` uses the same 40px wrapper as the checkbox, so a mixed radio/checkbox list has
+// one icon column and one label indent; the hover/pressed circle fills it.
+$radio-wrapper-size: 40px;
 
-@mixin indicator-size($size) {
-    @if $size == 'small' {
-        width: 8px;
-        height: 8px;
-    } @else {
-        width: 10px;
-        height: 10px;
-    }
+@mixin radio-wrapper-size {
+    width: $radio-wrapper-size;
+    height: $radio-wrapper-size;
 }
 
 .RadioWrapper {
@@ -39,11 +20,8 @@
     cursor: pointer;
     background: transparent;
     border: none;
-    @include radio-wrapper-size(medium);
+    @include radio-wrapper-size;
 
-    &.size-small {
-        @include radio-wrapper-size(small);
-    }
     &[data-disabled] {
         cursor: default;
         pointer-events: none;
@@ -56,120 +34,71 @@
 
 }
 
-%ripple-base {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
+// The 40px hover (Figma 18095-26694) and pressed circle.
+.RadioCircle {
+    @include pressed-circle.circle;
 }
 
-.RadioRippleContainer {
-    @extend %ripple-base;
-    overflow: hidden;
-    border-radius: 50%;
+// Figma Radio+Label Hovered: hovering the option text shows the circle too.
+.RadioHover:hover .RadioCircle,
+label:hover .RadioHover:not([data-disabled]):not(.ReadOnly) .RadioCircle {
+    @include pressed-circle.hovered;
 }
 
-.RadioRipple {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background-color: var(--colors-gama-500);
-    border-radius: 50%;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    opacity: 0.25;
-    animation: ripple 400ms ease-out forwards;
-    // Above the opaque hover halo (.RadioRippleContainer::after, z-index 0, painted last inside
-    // this container), so the press ripple stays visible.
-    z-index: 1;
-}
-
-@keyframes ripple {
-    to {
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 0.025;
-    }
-}
-
-.RadioHover {
-    .RadioRippleContainer::after {
-        content: '';
-        // Figma Hovered (node 18095-26694): a solid bg/hover-default (#f0f2f4 = delta-50) circle
-        // filling the 40px touch target.
-        background: var(--colors-delta-50);
-        border-radius: 50%;
-        top: 50%;
-        left: 50%;
-        opacity: 0;
-        transition: opacity 0.2s, transform 0.2s;
-        transform: translate(-50%, -50%) scale(0.7);
-        position: absolute;
-        @include radio-wrapper-size(medium);
-    }
-    &.size-small .RadioRippleContainer::after {
-        @include radio-wrapper-size(small);
-    }
-    // Figma Radio+Label Hovered: hovering the option text (any enclosing <label>) shows the circle
-    // too; never on a disabled or read-only radio.
-    &:hover .RadioRippleContainer::after,
-    label:hover &:not([data-disabled]):not(.ReadOnly) .RadioRippleContainer::after {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-    }
-}
-
-[data-disabled].RadioHover:hover .RadioRippleContainer::after {
+[data-disabled].RadioHover:hover .RadioCircle {
     opacity: 0;
 }
 
+// Figma Pressed state (47847:229830): circle gama-200, ring and dot gama-800; the ring eases back over 150ms only after a
+// press (at rest it keeps master's 0.3s). @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
+@include pressed-circle.pressed('.RadioCircle', '.Ring', stroke 150ms ease-out);
+
 .Radio {
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: block;
+    flex-shrink: 0;
+    overflow: visible;
     border-radius: 50%;
-    border: 2px solid var(--colors-delta-500);
-    background-color: transparent;
-    padding: 0;
-    box-sizing: border-box;
-    transition: border-color 0.3s;
-    @include radio-size(medium);
+    // Figma Radiobutton: a 16px ring for every size; the focus and error rings frame it.
+    width: 16px;
+    height: 16px;
+}
 
-    &.size-small {
-        @include radio-size(small);
-        border-width: 1.5px;
-    }
+// `--control-pressed-accent` (never declared at rest) comes from a pressed radio or parent.
+.Ring {
+    fill: none;
+    stroke: var(--control-pressed-accent, var(--colors-delta-500));
+    transition: stroke 0.3s;
 
     [data-checked] & {
-        border-color: var(--colors-gama-500);
+        stroke: var(--control-pressed-accent, var(--colors-gama-500));
     }
     [data-disabled][data-unchecked] &,
     [data-disabled][data-checked] & {
-        border-color: var(--colors-delta-300);
+        stroke: var(--colors-delta-300);
     }
 }
 
 .Indicator {
-    @include indicator-size(medium);
-    border-radius: 50%;
+    fill: var(--control-pressed-accent, var(--colors-gama-500));
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.5s;
 
-    .size-small & {
-        @include indicator-size(small);
-    }
     [data-checked] & {
-        background-color: var(--colors-gama-500);
         opacity: 1;
     }
     [data-disabled][data-checked] & {
-        background-color: var(--colors-delta-300);
+        fill: var(--colors-delta-300);
         opacity: 0.6;
     }
+}
+
+// After a press the dot's pressed fill eases back over 150ms; it keeps master's 0.5s selection fade-in.
+[data-press-released] .Indicator {
+    transition:
+        opacity 0.5s,
+        fill 150ms ease-out;
 }
 
 .RadioWrapper:not(.Error):has(input:focus-visible) .Radio,
@@ -199,17 +128,17 @@
 .RadioWrapper.ReadOnly {
     cursor: default;
 
-    &[data-unchecked] .Radio {
-        border-color: var(--colors-delta-300);
+    &[data-unchecked] .Ring {
+        stroke: var(--colors-delta-300);
     }
-    &[data-checked] .Radio {
-        border-color: var(--colors-delta-500);
+    &[data-checked] .Ring {
+        stroke: var(--colors-delta-500);
     }
     &[data-checked] .Indicator {
-        background-color: var(--colors-delta-500);
+        fill: var(--colors-delta-500);
     }
 
-    &.RadioHover:hover .RadioRippleContainer::after {
+    &.RadioHover:hover .RadioCircle {
         opacity: 0;
     }
 }

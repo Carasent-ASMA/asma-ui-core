@@ -12,7 +12,9 @@ import {
     useRole,
 } from '@floating-ui/react'
 import {
+    startTransition,
     useEffect,
+    useLayoutEffect,
     useMemo,
     useRef,
     useState,
@@ -22,11 +24,13 @@ import {
     type ReactNode,
     type SyntheticEvent,
 } from 'react'
+import { flushSync } from 'react-dom'
 import { StyledChip } from 'src/components/data-display/chip'
 import { CheckIcon, ChevronDownIcon, CloseIcon, PlusIconCircle } from 'src/components/icons'
 import { StyledCheckbox } from 'src/components/inputs/checkbox/base-ui/StyledCheckbox'
 import { fieldWidthStyle, type FieldWidth } from 'src/components/inputs/field-styles'
 import { cn } from 'src/helpers/cn'
+import { pressedStateHandlers } from 'src/helpers/pressedState'
 import { useBackCloses } from 'src/hooks/useBackCloses.hook'
 import {
     getOpenModalDialogAncestor,
@@ -198,7 +202,7 @@ export interface StyledSelectAutocompleteProps<
     pickerTitle?: ReactNode
     /** Overrides for any picker string (*Ferdig*, *Fjern valget*, counts, …). */
     pickerText?: Partial<PickerText>
-    /** Language of the default picker copy. Defaults to English, like the rest of ui-core. */
+    /** Language of the default picker copy and of the clear and popup buttons' names. Defaults to English, like the rest of ui-core. */
     locale?: 'no' | 'en'
     /**
      * Keep the attached list on every viewport. By default the list opens as a full-screen picker
@@ -213,6 +217,16 @@ const objectLabel = <T,>(option: T): string => {
 }
 const isOptionObjectDisabled = <T,>(option: T): boolean =>
     typeof option === 'object' && option !== null && 'disabled' in option && Boolean((option as { disabled?: unknown }).disabled)
+
+/**
+ * Rows the attached list draws with a keystroke. Every option is listed (long-lists pattern LIST-4): the rows
+ * past these follow once the query has stayed still for DRAW_REST_AFTER_MS, in a transition that the next
+ * keystroke interrupts, so typing stays quick in a list of thousands. They come at once for a cursor past the
+ * first rows and for a list that opens at a choice further down (LIST-10). Until ASMA-9087 the list stopped at
+ * FIRST_ROWS and hid every later option.
+ */
+const FIRST_ROWS = 100
+const DRAW_REST_AFTER_MS = 150
 
 /**
  * single + multiple selection (with tag chips + optional select-all), type-ahead filtering,
@@ -282,6 +296,10 @@ export function StyledSelectAutocomplete<
 
     const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
     const open = controlledOpen ?? uncontrolledOpen
+    // Whether the attached list draws only its first FIRST_ROWS rows: a new query and a closed list start there.
+    const [firstRowsOnly, setFirstRowsOnly] = useState(true)
+    // LIST-10: the list opens at the first chosen option. Once the user types or chooses, it stays where it is.
+    const [scrollToChoice, setScrollToChoice] = useState(true)
     const setOpen = (next: boolean): void => {
         // Read-only / disabled fields are display-only: no path (click, keyboard, icon, typing) may
         // open the popup. Closing is always allowed. Gating here is the single root cause — the input's
@@ -294,6 +312,7 @@ export function StyledSelectAutocomplete<
         if (next) onOpen?.()
         else {
             setActiveIndex(null)
+            setFirstRowsOnly(true)
             onClose?.()
         }
     }
@@ -301,6 +320,12 @@ export function StyledSelectAutocomplete<
     const [uncontrolledInput, setUncontrolledInput] = useState('')
     const inputValue = controlledInput ?? uncontrolledInput
     const setInputValue = (event: SyntheticEvent | null, next: string, reason: AutocompleteInputChangeReason): void => {
+        // A typed, cleared or emptied query starts from the first rows again. The label the list writes after a
+        // choice keeps the rows it has, and the cursor with them.
+        if (next !== inputValue && (reason !== 'reset' || next === '')) {
+            setFirstRowsOnly(true)
+            setScrollToChoice(false)
+        }
         if (controlledInput === undefined) setUncontrolledInput(next)
         onInputChange?.(event, next, reason)
     }
@@ -339,26 +364,52 @@ export function StyledSelectAutocomplete<
         // getLabel is stable enough for this memo; options/inputValue are the real inputs.
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [options, inputValue, filterOptions, value])
-    const visibleOptions = useMemo(() => filtered.slice(0, 100), [filtered])
-    const enabledOptionIndexes = visibleOptions.flatMap((option, index) =>
-        !isOptionDisabled(option) ? [index] : [],
+    // LIST-4: every option is listed, as in the phone picker. The first FIRST_ROWS rows come with the keystroke
+    // and the rest once the query stays still (ASMA-9087). The cursor and every index below count over all the
+    // options.
+    const allRowsDrawn = !firstRowsOnly || filtered.length <= FIRST_ROWS
+    const visibleOptions = useMemo(
+        () => (allRowsDrawn ? filtered : filtered.slice(0, FIRST_ROWS)),
+        [allRowsDrawn, filtered],
     )
+    useEffect(() => {
+        if (!open || isPicker || allRowsDrawn) return
+        const timer = setTimeout(() => startTransition(() => setFirstRowsOnly(false)), DRAW_REST_AFTER_MS)
+        return () => clearTimeout(timer)
+    }, [allRowsDrawn, inputValue, isPicker, open])
+    const enabledOptionIndexes = filtered.flatMap((option, index) => (!isOptionDisabled(option) ? [index] : []))
     const enabledActiveIndexes =
         allowSelectAll && isMultiple ? [-1, ...enabledOptionIndexes] : enabledOptionIndexes
     // Arrow keys, Home and End visit disabled options too (WAI-ARIA APG listbox; disabled-states
     // DIS-3), so a keyboard or screen-reader user finds an option that cannot be chosen, and why.
     // Enter and Space still refuse it; opening still lands on the selected or first enabled option.
-    const navigableOptionIndexes = visibleOptions.map((_option, index) => index)
+    const navigableOptionIndexes = filtered.map((_option, index) => index)
     const activeIndexes = allowSelectAll && isMultiple ? [-1, ...navigableOptionIndexes] : navigableOptionIndexes
-    const selectedOptionIndex = visibleOptions.findIndex(isSelected)
+    const selectedOptionIndex = filtered.findIndex(isSelected)
+    // A cursor past the drawn rows draws the rest first, so its row and `aria-activedescendant` exist.
+    const moveCursorTo = (index: number | null): void => {
+        if (index !== null && index >= visibleOptions.length) flushSync(() => setFirstRowsOnly(false))
+        setActiveIndex(index)
+    }
+
+    // Each opening starts at the choice (LIST-10). A choice past the first rows draws every row before the first
+    // paint, so the list opens there rather than jumping to it once the rest are drawn.
+    useLayoutEffect(() => {
+        if (!open) return
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setScrollToChoice(true)
+        if (!isPicker && selectedOptionIndex >= FIRST_ROWS) setFirstRowsOnly(false)
+        // Only on opening: the choice of that moment decides where the list opens.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open])
 
     useEffect(() => {
         if (!open) return
-        const index = activeIndex ?? selectedOptionIndex
+        const index = activeIndex ?? (scrollToChoice ? selectedOptionIndex : -1)
         if (index < 0) return
         const id = requestAnimationFrame(() => listRef.current[index]?.scrollIntoView({ block: 'nearest' }))
         return () => cancelAnimationFrame(id)
-    }, [activeIndex, open, popperMaxHeight, selectedOptionIndex])
+    }, [activeIndex, open, popperMaxHeight, scrollToChoice, selectedOptionIndex])
 
     const { refs, floatingStyles, context } = useFloating({
         open,
@@ -404,10 +455,11 @@ export function StyledSelectAutocomplete<
 
     const moveActiveOption = (direction: -1 | 1): void => {
         if (activeIndexes.length === 0) return
-        setActiveIndex((index) => nextActiveIndex(activeIndexes, index, selectedOptionIndex, direction))
+        moveCursorTo(nextActiveIndex(activeIndexes, activeIndex, selectedOptionIndex, direction))
     }
 
     const emitChange = (event: SyntheticEvent, option: T, close = !isMultiple || !disableCloseOnSelect): void => {
+        setScrollToChoice(false)
         if (isMultiple) {
             const exists = selectedArray.some((v) => isEqual(option, v))
             const next = exists ? selectedArray.filter((v) => !isEqual(option, v)) : [...selectedArray, option]
@@ -427,6 +479,7 @@ export function StyledSelectAutocomplete<
     }
 
     const clearValue = (event: SyntheticEvent): void => {
+        setScrollToChoice(false)
         onChange?.(event, (isMultiple ? [] : null) as never, 'clear', undefined)
         setInputValue(event, '', 'clear')
     }
@@ -449,6 +502,7 @@ export function StyledSelectAutocomplete<
     }
 
     const toggleSelectAll = (event: SyntheticEvent): void => {
+        setScrollToChoice(false)
         const allSelected = options.length > 0 && selectedArray.length === options.length
         onChange?.(event, (allSelected ? [] : options) as never, allSelected ? 'clear' : 'selectOption', undefined)
     }
@@ -471,14 +525,14 @@ export function StyledSelectAutocomplete<
         } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
             event.preventDefault()
             if (!open) {
-                setActiveIndex(getInitialActiveIndex(event.key === 'ArrowDown' ? 1 : -1))
+                moveCursorTo(getInitialActiveIndex(event.key === 'ArrowDown' ? 1 : -1))
                 setOpen(true)
                 return
             }
             moveActiveOption(event.key === 'ArrowDown' ? 1 : -1)
         } else if (event.key === 'Home' || event.key === 'End') {
             event.preventDefault()
-            setActiveIndex(activeIndexes[event.key === 'Home' ? 0 : activeIndexes.length - 1] ?? null)
+            moveCursorTo(activeIndexes[event.key === 'Home' ? 0 : activeIndexes.length - 1] ?? null)
         } else if (event.key === ' ' && activeIndex === -1) {
             event.preventDefault()
             toggleSelectAll(event)
@@ -532,7 +586,7 @@ export function StyledSelectAutocomplete<
                 <button
                     type='button'
                     tabIndex={-1}
-                    aria-label='Clear'
+                    aria-label={locale === 'no' ? (isMultiple ? 'Fjern alle valg' : 'Fjern valget') : 'Clear'}
                     data-testid={`${dataTest}-clear`}
                     className='bg-delta-50 invisible flex min-h-6 min-w-6 cursor-pointer items-center justify-center rounded-full border-0 group-focus-within:visible'
                     onMouseDown={(event) => event.preventDefault()}
@@ -545,7 +599,7 @@ export function StyledSelectAutocomplete<
                 <button
                     type='button'
                     tabIndex={-1}
-                    aria-label='Toggle options'
+                    aria-label={locale === 'no' ? 'Vis eller skjul valg' : 'Toggle options'}
                     aria-expanded={open}
                     data-testid={`${dataTest}-popup-indicator`}
                     className='flex cursor-pointer items-center border-0 bg-transparent'
@@ -619,19 +673,26 @@ export function StyledSelectAutocomplete<
     // Custom `renderOption` callers spread `{...props}` onto their `<li>` and expect flex, cursor,
     // hover, and selected backgrounds from that — not only from `defaultRenderOption`.
     const optionRowClassName = cn(
-        // ASMA-8220 (TB-14): hover/selected only, no `:active` → pressable. It rides the shared row
-        // class, so custom `renderOption` callers spreading `{...props}` inherit it too. No
+        // ASMA-8220 (TB-14) touch fixes. They ride the shared row class, so custom `renderOption`
+        // callers spreading `{...props}` inherit them too. No
         // `asma-touch-target`: the rows already declare their min-height, and the mobile override would
         // also grow `aria-disabled` rows, which are not pressable at all.
-        'asma-pressable',
-        // Figma Menus item: Body Base 16/lh24, text delta-800.
-        'text-delta-800 relative box-border flex cursor-pointer items-center gap-x-3 px-3 py-2 text-base',
+        'asma-touch-ready',
+        // Figma Menus item (Autocomplete section 20474:27966): Body Base 16/lh24 in text-icon/body (delta-700), a 1px
+        // border/separator between rows; Check mark rows 8px / gap 4, Checkbox rows a 12px box inset / gap 12.
+        // A custom `renderOption` keeps its own spacing.
+        'group/option text-delta-700 relative box-border flex cursor-pointer items-center py-2 text-base not-last:shadow-[inset_0_-1px_0_0_var(--colors-delta-200)]',
+        renderOption ? 'gap-x-3 px-3' : isMultiple ? 'gap-x-3 pr-4 pl-3' : 'gap-x-1 pr-4 pl-2',
         // Row density: 'compact' = 40px (Figma Menus item); 'regular' = roomier 48px. min-height only,
         // so a wrapped 2-line label still grows the row past this.
         rowSize === 'regular' ? 'min-h-12' : 'min-h-10',
-        'aria-selected:bg-gama-50 hover:bg-delta-50',
-        // Disabled options never take the gama highlight (hover or keyboard) and read as muted.
-        'aria-disabled:text-delta-300 aria-disabled:cursor-default aria-disabled:bg-transparent!',
+        // Figma Menus item: hover bg/hover-default; selected bg/selected, hovered bg/hover-selected.
+        'aria-selected:bg-gama-25 hover:bg-delta-50 aria-selected:hover:bg-gama-50',
+        // Disabled options never take a highlight (hover, selected or keyboard) and read as muted.
+        'aria-disabled:text-delta-300 aria-disabled:cursor-default aria-disabled:bg-transparent! aria-disabled:hover:bg-transparent!',
+        // ASMA-9003: the menu item's pressed look; the booster beats `aria-selected:hover:`.
+        // @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
+        'data-[pressed]:text-gama-700 [&[data-pressed][role][aria-selected]]:bg-gama-200 data-press-released:transition-colors data-press-released:duration-150 data-press-released:ease-[ease-out] data-pressed:[--control-pressed-accent:var(--colors-gama-700)] forced-colors:data-pressed:[outline:2px_solid_Highlight]! forced-colors:data-pressed:-outline-offset-2!',
     )
 
     const defaultRenderOption = (props: OptionLiProps, option: T, state: AutocompleteRenderOptionState): ReactNode => {
@@ -662,10 +723,16 @@ export function StyledSelectAutocomplete<
                         decorative
                     />
                 ) : (
-                    // `flex` in the picker: an inline 20 px icon sits on the text baseline and grows the
-                    // selected row to 43 px, off Figma's 40 (the attached list still has that 2.5 px).
-                    <span className={cn('w-5', state.inPicker && 'flex')}>
-                        {state.selected && <CheckIcon width={20} height={20} className='text-gama-500' />}
+                    // `flex`: an inline 20 px icon sits on the text baseline and grows the selected row to 43 px,
+                    // off Figma's 40.
+                    <span className='flex w-5'>
+                        {state.selected && (
+                            <CheckIcon
+                                width={20}
+                                height={20}
+                                className='text-gama-500 group-data-[pressed]/option:text-gama-700 group-data-press-released/option:transition-colors group-data-press-released/option:duration-150 group-data-press-released/option:ease-[ease-out]'
+                            />
+                        )}
                     </span>
                 )}
                 {/* Long labels wrap to a second line and only then ellipsise (ASMA-7847): one
@@ -688,6 +755,7 @@ export function StyledSelectAutocomplete<
                 },
                 // Hover is a grey mouse state; the left focus border is reserved for keyboard navigation.
                 onMouseMove: () => setActiveIndex(null),
+                ...pressedStateHandlers({ enabled: !optionDisabled }),
             }),
             key: getOptionKey ? String(getOptionKey(option)) : `${getLabel(option)}-${index}`,
             ref: (node: HTMLLIElement | null) => {
@@ -809,6 +877,7 @@ export function StyledSelectAutocomplete<
                                     onMouseDown={(event) => event.preventDefault()}
                                     onClick={toggleSelectAll}
                                     onMouseMove={() => setActiveIndex(null)}
+                                    {...pressedStateHandlers({ enabled: true })}
                                     // Styled as the list's table header (Figma Reports table-header row):
                                     // a `--table-bg-header` (#F9FAFB = colors-gray-10) bar, fixed 32px
                                     // tall, carrying its own checkbox column and a Semibold uppercase
@@ -817,7 +886,8 @@ export function StyledSelectAutocomplete<
                                     // checkboxes line up in a single column. It stays clickable to toggle
                                     // select-all, so hover deepens the grey rather than turning the header
                                     // green like a selected option.
-                                    className='text-delta-600 hover:bg-delta-50 relative box-border flex h-8 cursor-pointer items-center gap-x-3 bg-(--colors-gray-10) px-3 text-xs font-semibold tracking-[0.2px] uppercase'
+                                    // ASMA-9003: pressed like the option rows (optionRowClassName).
+                                    className='asma-touch-ready text-delta-600 data-[pressed]:text-gama-700 [&[data-pressed][role]]:bg-gama-200 hover:bg-delta-50 relative box-border flex h-8 cursor-pointer items-center gap-x-3 bg-(--colors-gray-10) px-3 text-xs font-semibold tracking-[0.2px] uppercase data-press-released:transition-colors data-press-released:duration-150 data-press-released:ease-[ease-out] data-pressed:[--control-pressed-accent:var(--colors-gama-700)] forced-colors:data-pressed:[outline:2px_solid_Highlight]! forced-colors:data-pressed:-outline-offset-2!'
                                 >
                                     {activeIndex === -1 && (
                                         <span

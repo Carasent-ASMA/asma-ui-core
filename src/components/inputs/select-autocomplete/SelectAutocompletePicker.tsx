@@ -7,6 +7,7 @@ import { useAnnouncer } from 'src/components/inputs/full-screen-picker/PickerLiv
 import type { PickerText } from 'src/components/inputs/full-screen-picker/pickerCopy'
 import { StyledSearchField } from 'src/components/inputs/search-field/StyledSearchField'
 import { cn } from 'src/helpers/cn'
+import { pressedStateHandlers } from 'src/helpers/pressedState'
 import { nextActiveIndex } from './listboxCursor'
 import type { AutocompleteRenderOptionState, OptionLiProps } from './StyledSelectAutocomplete'
 
@@ -253,6 +254,7 @@ export function SelectAutocompletePicker<T>({
             onMouseDown: (event) => event.preventDefault(),
             onClick: (event) => choose(event, option),
             onMouseMove: () => setActiveIndex(null),
+            ...pressedStateHandlers({ enabled: !disabled }),
         }
         return renderOptionRow(props, option, { selected, index, inputValue: query, inPicker: true })
     }
@@ -361,8 +363,9 @@ export function SelectAutocompletePicker<T>({
                     activeIndexes.length > 0 && 'outline-hidden',
                     // Figma picker rows (set on the list, so custom `renderOption` rows follow too; the
                     // *No matches* / loading row keeps its own look): label `text-icon/body` (delta-700),
-                    // 16 px after the label (row `pr-8` + label `pr-8`).
-                    '[&>li[role=option]]:text-delta-700 [&>li[role=option]]:pr-4',
+                    // 16 px after the label (row `pr-8` + label `pr-8`). A pressed row keeps its own
+                    // gama-700 label (ASMA-9003), which this stronger selector would otherwise beat.
+                    '[&>li[role=option]:not([data-pressed])]:text-delta-700 [&>li[role=option]]:pr-4',
                     // Several choices: a ticked row stays white, the checkbox carries the state.
                     // One choice: `pl-8 gap-4` around the 20 px check; selected row on `bg/selected`
                     // (#f3fafa = gama-25), also while hovered.
@@ -382,6 +385,7 @@ export function SelectAutocompletePicker<T>({
                         data-active={activeIndex === -1 ? '' : undefined}
                         tabIndex={-1}
                         onMouseDown={(event) => event.preventDefault()}
+                        {...pressedStateHandlers({ enabled: true })}
                         onClick={toggleAll}
                         className={optionRowClassName}
                     >

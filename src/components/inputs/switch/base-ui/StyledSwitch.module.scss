@@ -15,7 +15,8 @@
     border-radius: 9999px;
     border: none;
     padding: var(--switch-pad);
-    margin: 6px;
+    // Figma _BASE_Switch: a 54×32 box around the 38×22 track; the label follows it directly.
+    margin: 5px 8px;
 
     cursor: pointer;
     transition: background-color 0.3s;
@@ -37,8 +38,23 @@
         }
     }
 
-    &:not([data-disabled]):not([data-readonly]):active .iconContent {
-        opacity: 0.9;
+    // After a press the track eases back over 150ms (at rest it keeps master's 0.3s).
+    &[data-press-released],
+    label[data-press-released] & {
+        transition: background-color 150ms ease-out;
+    }
+
+    // Figma Pressed state (47847:229830): track gama-800 off and on, instant in; as specific as hover, so it wins.
+    // @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
+    &:is([data-checked], [data-unchecked])[data-pressed]:not([data-disabled]):not([data-readonly]),
+    label[data-pressed] &:is([data-checked], [data-unchecked]):not([data-disabled]):not([data-readonly]) {
+        background-color: var(--colors-gama-800);
+        transition: none;
+
+        @media (forced-colors: active) {
+            outline: 2px solid Highlight;
+            outline-offset: -2px;
+        }
     }
 
     // Figma Disabled (nodes 9197-93212/93217): track uses explicit tokens (not an opacity fade) —
@@ -105,6 +121,11 @@
     // align-self: center;
     justify-content: center;
 
+    // Figma Knob (9197:93222): delta-10 while off, white while on and read-only.
+    .switch[data-unchecked]:not([data-readonly]) & {
+        background-color: var(--colors-delta-10);
+    }
+
     .switch[data-checked] & {
         transform: translateX(calc(var(--switch-w) - var(--switch-h)));
     }
@@ -142,19 +163,37 @@
         color: var(--colors-delta-400);
     }
 
-    .switch[data-checked]:hover:not([data-disabled]) & {
+    .switch[data-checked]:hover:not([data-disabled]):not([data-readonly]) & {
         color: var(--colors-gama-600);
     }
 
-    .switch[data-unchecked]:hover:not([data-disabled]) & {
+    .switch[data-unchecked]:hover:not([data-disabled]):not([data-readonly]) & {
         color: var(--colors-delta-500);
     }
 
-    // Figma Read-only (nodes 41325-201583/201587): the knob dash/check is delta-500 grey in BOTH
-    // selected states — not gama-500 (on) / delta-400 (off). Higher specificity wins over the
-    // checked/unchecked rules above.
+    .switch[data-press-released] &,
+    label[data-press-released] .switch & {
+        transition: color 150ms ease-out;
+    }
+
+    // Pressed: the dash/check turns text-icon/pressed (gama-700).
+    .switch:is([data-checked], [data-unchecked])[data-pressed]:not([data-disabled]):not([data-readonly]) &,
+    label[data-pressed] .switch:is([data-checked], [data-unchecked]):not([data-disabled]):not([data-readonly]) & {
+        color: var(--colors-gama-700);
+        transition: none;
+    }
+
+    // Figma Disabled: delta-300 off, gama-300 on; Read-only: text-icon/helper (delta-600).
+    .switch[data-disabled][data-unchecked] & {
+        color: var(--colors-delta-300);
+    }
+
+    .switch[data-disabled][data-checked] & {
+        color: var(--colors-gama-300);
+    }
+
     .switch[data-readonly][data-checked] &,
     .switch[data-readonly][data-unchecked] & {
-        color: var(--colors-delta-500);
+        color: var(--colors-delta-600);
     }
 }

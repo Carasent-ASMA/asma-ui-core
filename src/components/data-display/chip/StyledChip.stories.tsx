@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { MarkPressed } from 'src/test-utils/MarkPressed'
 import { fn } from 'storybook/test'
 import { expect } from 'storybook/test'
 
@@ -31,7 +32,14 @@ const meta: Meta = {
 
 export default meta
 
-const COLUMN_NAMES = ['Enabled', 'Hovered', 'Focused', 'Read only']
+const LONG_WRAPPING_LABEL =
+    'Show/hide transition: ~300–400 ms slide and fade, matching the recommended duration for a partially persistent header.'
+
+// Mirrors the ASMA-8787 chips-view consumer override: let the label block-wrap at desktop width.
+const DESKTOP_WRAP_LABEL_CLASSES = 'block whitespace-normal break-words overflow-visible'
+const DESKTOP_WRAP_CHIP_CLASSES = 'h-full min-h-[32px] w-[200px]'
+
+const COLUMN_NAMES = ['Enabled', 'Hovered', 'Pressed', 'Focused', 'Read only']
 const ROW_NAMES = ['Standard', 'User tag', 'Group tag', 'Checkbox', 'Radio']
 
 type ChipStateProps = Partial<React.ComponentProps<typeof StyledChip>> & {
@@ -42,6 +50,9 @@ type ChipStateProps = Partial<React.ComponentProps<typeof StyledChip>> & {
 
 const COLUMN_CHIP_PROPS: Record<string, ChipStateProps> = {
     Hovered: { 'data-hovered': '' },
+    // ASMA-9003 (Figma Pressed state 47847:229830): a hovered, clickable chip with the `data-pressed` a real press
+    // sets — a tag presses when it is clickable (`onClick`), its Clear button stays its own control.
+    Pressed: { 'data-hovered': '', onClick: fn() },
     Focused: { 'data-focus': '' },
     'Read only': {
         readOnly: true,
@@ -158,6 +169,9 @@ const CELL_CHIPS_CONFIG: Record<string, RowConfig> = {
             Hovered: {
                 chips: [{ checked: false }, { checked: true }],
             },
+            Pressed: {
+                chips: [{ checked: false }, { checked: true }],
+            },
             Focused: {
                 chips: [{ checked: false }, { checked: true }],
             },
@@ -175,6 +189,9 @@ const CELL_CHIPS_CONFIG: Record<string, RowConfig> = {
                 chips: [{ checked: false }, { checked: true }],
             },
             Hovered: {
+                chips: [{ checked: false }, { checked: true }],
+            },
+            Pressed: {
                 chips: [{ checked: false }, { checked: true }],
             },
             Focused: {
@@ -226,29 +243,31 @@ const ChipStateTable = () => {
                                     key={`${rowName}-${columnName}`}
                                     className='box-border border border-solid border-delta-200'
                                 >
-                                    <div
-                                        className={`flex items-center justify-center ${isInteractiveRow ? 'flex-col gap-6' : 'gap-2'}`}
-                                    >
-                                        {chipsToRender.map((chipVariant, index) =>
-                                            isInteractiveRow ? (
-                                                <StyledInteractiveChip
-                                                    key={index}
-                                                    dataTest={`chip-table-${rowName}-${columnName}-${index}`}
-                                                    {...rowConfig}
-                                                    {...COLUMN_CHIP_PROPS[columnName]}
-                                                    {...chipVariant}
-                                                />
-                                            ) : (
-                                                <StyledChip
-                                                    key={index}
-                                                    dataTest={`chip-table-${rowName}-${columnName}-${index}`}
-                                                    {...rowConfig}
-                                                    {...COLUMN_CHIP_PROPS[columnName]}
-                                                    {...chipVariant}
-                                                />
-                                            ),
-                                        )}
-                                    </div>
+                                    <MarkPressed selector={columnName === 'Pressed' ? '[data-chip][role]' : ':not(*)'}>
+                                        <div
+                                            className={`flex items-center justify-center ${isInteractiveRow ? 'flex-col gap-6' : 'gap-2'}`}
+                                        >
+                                            {chipsToRender.map((chipVariant, index) =>
+                                                isInteractiveRow ? (
+                                                    <StyledInteractiveChip
+                                                        key={index}
+                                                        dataTest={`chip-table-${rowName}-${columnName}-${index}`}
+                                                        {...rowConfig}
+                                                        {...COLUMN_CHIP_PROPS[columnName]}
+                                                        {...chipVariant}
+                                                    />
+                                                ) : (
+                                                    <StyledChip
+                                                        key={index}
+                                                        dataTest={`chip-table-${rowName}-${columnName}-${index}`}
+                                                        {...rowConfig}
+                                                        {...COLUMN_CHIP_PROPS[columnName]}
+                                                        {...chipVariant}
+                                                    />
+                                                ),
+                                            )}
+                                        </div>
+                                    </MarkPressed>
                                 </td>
                             )
                         })}
@@ -265,6 +284,26 @@ export const Chip = () => {
 
 // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
 Chip.parameters = { a11y: { test: 'todo' } }
+
+/**
+ * ASMA-9001. The delete affordance's first-line alignment is proven on the non-interactive chip,
+ * whose plain root may legally contain a focusable `<button>`; an interactive chip root
+ * (`role="checkbox"`) may not (nested-interactive). A consumer-forced label wrap at desktop width
+ * keeps the delete button on the first line.
+ */
+export const DesktopWrappedLabelWithDelete: StoryObj = {
+    render: () => (
+        <div style={{ width: 200 }}>
+            <StyledChip
+                dataTest='desktop-wrapped-chip-delete'
+                label={LONG_WRAPPING_LABEL}
+                className={DESKTOP_WRAP_CHIP_CLASSES}
+                classes={{ label: DESKTOP_WRAP_LABEL_CLASSES }}
+                onDelete={fn()}
+            />
+        </div>
+    ),
+}
 
 export const FigmaPaddingMedium: StoryObj = {
     // axe: color-contrast (text/background contrast below the 4.5:1 threshold). ASMA-8136 allowlist - see docs/a11y-allowlist.md
@@ -286,3 +325,4 @@ export const FigmaPaddingMedium: StoryObj = {
         await expect(style.height).toBe('32px')
     },
 }
+

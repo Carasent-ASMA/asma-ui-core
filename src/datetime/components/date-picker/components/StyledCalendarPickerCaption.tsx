@@ -1,5 +1,5 @@
 import type { MonthCaptionProps } from 'react-day-picker'
-import { StyledButton } from 'src/datetime/shared-components/button'
+import { StyledButton } from 'src/components/inputs/button/StyledButton'
 import { CloseIcon } from 'src/datetime/shared-components/CloseIcon'
 
 export function CustomCaption(

@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect } from 'storybook/test'
 import { StyledCheckbox } from './StyledCheckbox'
 import { StyledFormControlLabel } from 'src/components/miscellaneous/StyledFormControlLabel'
+import { MarkPressed } from 'src/test-utils/MarkPressed'
 
 const meta = {
     title: 'base-ui/Checkbox',
@@ -58,7 +59,7 @@ export const Interactive: Story = {
     },
 }
 
-/** Figma Checkbox+Label composite with 8px control-to-label gap. */
+/** Figma Checkbox+Label composite: the label follows the 40px target directly. */
 export const CheckboxWithLabel: Story = {
     render: () => (
         <StyledFormControlLabel
@@ -68,7 +69,7 @@ export const CheckboxWithLabel: Story = {
     ),
 }
 
-const COLUMN_NAMES = ['Enabled', 'Hovered', 'Focused', 'Error', 'Disabled', 'Read only']
+const COLUMN_NAMES = ['Enabled', 'Hovered', 'Pressed', 'Focused', 'Error', 'Disabled', 'Read only']
 const ROW_NAMES = ['Green', 'Blue', 'Fretex']
 
 const ROW_THEME_BY_NAME: Record<string, 'greenish' | 'default' | 'fretex'> = {
@@ -84,6 +85,9 @@ type ColumnProps = Partial<React.ComponentProps<typeof StyledCheckbox>> & {
 
 const COLUMN_CHECKBOX_PROPS: Record<string, ColumnProps> = {
     Hovered: { 'data-hovered': '' },
+    // ASMA-9003 (Figma Pressed state 47847:229830): a hovered checkbox whose wrapper carries the `data-pressed`
+    // a real press sets (`MarkPressed` below).
+    Pressed: { 'data-hovered': '' },
     Focused: { 'data-focus-visible': '' },
     Error: { error: true },
     Disabled: { disabled: true },
@@ -128,13 +132,15 @@ const CheckboxStateTable = ({ title, checkboxProps }: CheckboxTableProps) => {
                                     {/* The adjacent "Label" span is a visual sample, not an
                                         associated label, so each matrix cell names its own
                                         checkbox (axe `label`, ASMA-8143). */}
-                                    <StyledCheckbox
-                                        dataTest={`${title}-${rowName}-${columnName}`}
-                                        size='small'
-                                        aria-label={`${title} ${rowName} ${columnName}`}
-                                        {...checkboxProps}
-                                        {...COLUMN_CHECKBOX_PROPS[columnName]}
-                                    />
+                                    <MarkPressed selector={columnName === 'Pressed' ? '[class*="CheckboxWrapper"]' : ':not(*)'}>
+                                        <StyledCheckbox
+                                            dataTest={`${title}-${rowName}-${columnName}`}
+                                            size='small'
+                                            aria-label={`${title} ${rowName} ${columnName}`}
+                                            {...checkboxProps}
+                                            {...COLUMN_CHECKBOX_PROPS[columnName]}
+                                        />
+                                    </MarkPressed>
                                     <span className='text-sm font-normal text-delta-800'>Label</span>
                                 </div>
                             </td>

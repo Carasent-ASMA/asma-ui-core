@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { MarkPressed } from 'src/test-utils/MarkPressed'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { ColumnDef, Table } from '@tanstack/react-table'
 import { expect, userEvent, waitFor } from 'storybook/test'
@@ -153,7 +154,7 @@ export const SizingPersistenceAndControlAlignment: Story = {
 
         const checkboxes = Array.from(canvasElement.querySelectorAll<HTMLElement>('[role="checkbox"]'))
         const checkboxGlyphs = Array.from(
-            canvasElement.querySelectorAll<HTMLElement>('[data-test="cell-select-all"], [data-test="cell-select"]'),
+            canvasElement.querySelectorAll<HTMLElement>('[data-testid="cell-select-all"], [data-testid="cell-select"]'),
         )
 
         // Regression: in the shell every micro-app injects its own purged Tailwind sheet, and a
@@ -174,7 +175,7 @@ export const SizingPersistenceAndControlAlignment: Story = {
             hostileAppSheet.remove()
         }
 
-        const rowCheckboxBox = checkboxes[1]?.querySelector<HTMLElement>('[data-test="cell-select"] > span:last-child')
+        const rowCheckboxBox = checkboxes[1]?.querySelector<HTMLElement>('[data-testid="cell-select"] > span:last-child')
         await expect(rowCheckboxBox).not.toBeNull()
         const initialCheckboxBounds = rowCheckboxBox!.getBoundingClientRect()
 
@@ -196,10 +197,10 @@ export const SizingPersistenceAndControlAlignment: Story = {
             await expect(height, `collapsed row ${index} height`).toBeLessThanOrEqual(49)
         }
         const shortRow = bodyRows[1]!
-        const shortRowArrow = shortRow.querySelector<HTMLElement>('[data-test="expand-text-button"]')
+        const shortRowArrow = shortRow.querySelector<HTMLElement>('[data-testid="expand-text-button"]')
         await expect(shortRowArrow).not.toBeNull()
         const shortRowArrowIcon = shortRowArrow!.querySelector<SVGElement>('svg')!
-        const shortRowCheckbox = shortRow.querySelector<HTMLElement>('[data-test="cell-select"]')!
+        const shortRowCheckbox = shortRow.querySelector<HTMLElement>('[data-testid="cell-select"]')!
         const beforeToggle = {
             rowRect: shortRow.getBoundingClientRect(),
             arrowCenter: (() => {
@@ -228,7 +229,7 @@ export const SizingPersistenceAndControlAlignment: Story = {
 
         await userEvent.click(shortRowArrow!)
 
-        const expandButton = canvasElement.querySelector<HTMLElement>('[data-test="expand-text-button"]')
+        const expandButton = canvasElement.querySelector<HTMLElement>('[data-testid="expand-text-button"]')
         await expect(expandButton).not.toBeNull()
         const initialExpandBounds = expandButton!.getBoundingClientRect()
         const firstRow = expandButton!.closest('tr')!
@@ -237,7 +238,7 @@ export const SizingPersistenceAndControlAlignment: Story = {
             return {
                 rowHeight: firstRow.getBoundingClientRect().height,
                 checkboxCenterY: (() => {
-                    const glyph = firstRow.querySelector<HTMLElement>('[data-test="cell-select"]')!
+                    const glyph = firstRow.querySelector<HTMLElement>('[data-testid="cell-select"]')!
                     const bounds = glyph.getBoundingClientRect()
                     return bounds.top + bounds.height / 2
                 })(),
@@ -268,7 +269,7 @@ export const SizingPersistenceAndControlAlignment: Story = {
 
         await userEvent.click(expandButton!)
 
-        const expandedButton = canvasElement.querySelector<HTMLElement>('[data-test="expand-text-button"]')
+        const expandedButton = canvasElement.querySelector<HTMLElement>('[data-testid="expand-text-button"]')
         await expect(expandedButton).not.toBeNull()
         const expandedBounds = expandedButton!.getBoundingClientRect()
         const expandedIcon = expandedButton!.querySelector<SVGElement>('svg')
@@ -310,7 +311,7 @@ export const SizingPersistenceAndControlAlignment: Story = {
         await expect(expandedBounds.width).toBe(initialExpandBounds.width)
         await expect(expandedBounds.height).toBe(initialExpandBounds.height)
         const expandedCheckboxBox = canvasElement.querySelector<HTMLElement>(
-            '[role="checkbox"] [data-test="cell-select"] > span:last-child',
+            '[role="checkbox"] [data-testid="cell-select"] > span:last-child',
         )
         await expect(expandedCheckboxBox).not.toBeNull()
         const expandedCheckboxBounds = expandedCheckboxBox!.getBoundingClientRect()
@@ -453,7 +454,7 @@ export const FooterRowCountBoundary: Story = {
 
         // Under the threshold: the custom footer renders, pagination controls stay hidden.
         await expect(section('footer-boundary-4').querySelector('[data-test="custom-footer"]')).not.toBeNull()
-        await expect(section('footer-boundary-4').querySelector('[data-test="table-rows-count-button"]')).toBeNull()
+        await expect(section('footer-boundary-4').querySelector('[data-testid="table-rows-count-button"]')).toBeNull()
         for (const row of section('footer-boundary-4').querySelectorAll('tbody tr')) {
             const height = row.getBoundingClientRect().height
             await expect(height).toBeGreaterThanOrEqual(48)
@@ -464,7 +465,7 @@ export const FooterRowCountBoundary: Story = {
         for (const rowCount of [5, 6]) {
             const boundarySection = section(`footer-boundary-${rowCount}`)
             await expect(boundarySection.querySelector('[data-test="custom-footer"]')).not.toBeNull()
-            await expect(boundarySection.querySelector('[data-test="table-rows-count-button"]')).not.toBeNull()
+            await expect(boundarySection.querySelector('[data-testid="table-rows-count-button"]')).not.toBeNull()
         }
 
         // Under the threshold without a custom footer: no footer element renders at all.
@@ -611,7 +612,7 @@ export const LockedRows: Story = {
         const control = (rowId: string) =>
             canvasElement.querySelector<HTMLElement>(`tr[id="${rowId}"] [role="checkbox"]`)!
         const box = (rowId: string) =>
-            control(rowId).querySelector<HTMLElement>('[data-test="cell-select"] > span:last-of-type')!
+            control(rowId).querySelector<HTMLElement>('[data-testid="cell-select"] > span:last-of-type')!
 
         // Ticked + locked: read-only, so the box keeps its white fill rather than the disabled grey.
         await expect(control('attached')).toHaveAttribute('aria-checked', 'true')
@@ -623,9 +624,12 @@ export const LockedRows: Story = {
             getComputedStyle(box('free')).borderColor,
         )
 
-        // Free to pick: untouched by any of this.
+        // Free to pick: untouched by any of this. A control of its row, reached with the arrow keys (ASMA-8875); the
+        // locked ones are not controls at all.
         await expect(control('free')).toHaveAttribute('aria-disabled', 'false')
-        await expect(control('free')).toHaveAttribute('tabindex', '0')
+        await expect(control('free')).toHaveAttribute('tabindex', '-1')
+        await expect(control('free')).toHaveAttribute('data-table-control')
+        await expect(control('attached')).not.toHaveAttribute('data-table-control')
     },
 }
 
@@ -639,10 +643,12 @@ interface RowStateProps {
 
 const CHECKED = { columnVisibility: { select: true }, rowSelection: { '2': true } }
 
-/** The six Figma `_table row DS` states, in the order and with the names of the Figma Tables page. */
+/** The six Figma `_table row DS` states, in the order and with the names of the Figma Tables page, plus the pressed select box. */
 const ROW_STATES: { label: string; key: string; props: RowStateProps }[] = [
     { label: 'Row • Default enabled', key: 'default', props: {} },
     { label: 'Row • Hovered', key: 'hovered', props: {} },
+    // ASMA-9003 (Figma Pressed state 47847:229830): the hovered row's select box pressed — gama-800 edge.
+    { label: 'Row • Checkbox pressed', key: 'pressed', props: {} },
     { label: 'Row • Selected', key: 'selected', props: { activeRowId: '2' } },
     { label: 'Row • Focused', key: 'focused', props: {} },
     { label: 'Row • Checked', key: 'checked', props: { initialState: CHECKED } },
@@ -657,6 +663,7 @@ const ROW_STATES: { label: string; key: string; props: RowStateProps }[] = [
  * | --- | --- | --- |
  * | Row • Default enabled | — | white, 1px `table/border-default` (delta-200) line under the row |
  * | Row • Hovered | pointer over the row | `table/bg-row-hover` (delta-50) |
+ * | Row • Checkbox pressed | pointer pressing the select box (ASMA-9003) | hovered row; box edge (or fill when ticked) gama-800 |
  * | Row • Selected | `activeRowId` — the row opened in a side panel / preview | `table/bg-row-selected` (gama-25) + 2px `border/selected` (gama-400) frame, kept on hover |
  * | Row • Focused | keyboard focus | white + 3px `table/border-focus` (gama-500) frame |
  * | Row • Checked | ticked in the select column | `table/bg-row-selected` (gama-25) |
@@ -671,25 +678,27 @@ export const RowStates: Story = {
         // axe: empty-table-header (table header cell has no text). ASMA-8136 allowlist - see docs/a11y-allowlist.md
         a11y: { test: 'todo' },
         pseudo: {
-            hover: ['[data-test="row-state-hovered"] tbody tr'],
+            hover: ['[data-test="row-state-hovered"] tbody tr', '[data-test="row-state-pressed"] tbody tr'],
             focusVisible: ['[data-test="row-state-focused"] tbody tr', '[data-test="row-state-checked-focused"] tbody tr'],
         },
     },
     render: () => (
-        // Two columns, so all six states fit one 1280x720 VRT frame.
+        // Two columns, so all seven states fit one 1280x720 VRT frame.
         <div className='grid w-[1240px] grid-cols-2 gap-x-8 gap-y-5'>
             {ROW_STATES.map(({ label, key, props }) => (
                 <div key={key} data-test={`row-state-${key}`} className='flex flex-col gap-1'>
                     <span className='text-sm font-semibold text-delta-800'>{label}</span>
-                    <StyledTable
-                        columns={consumerColumns.slice(0, 3)}
-                        data={rowStateData}
-                        enableRowSelection
-                        hideFooter
-                        initialState={{ columnVisibility: { select: true } }}
-                        uniqueKey={`row-state-${key}`}
-                        {...props}
-                    />
+                    <MarkPressed selector={key === 'pressed' ? 'tbody [role="checkbox"]' : ':not(*)'}>
+                        <StyledTable
+                            columns={consumerColumns.slice(0, 3)}
+                            data={rowStateData}
+                            enableRowSelection
+                            hideFooter
+                            initialState={{ columnVisibility: { select: true } }}
+                            uniqueKey={`row-state-${key}`}
+                            {...props}
+                        />
+                    </MarkPressed>
                 </div>
             ))}
         </div>
@@ -990,5 +999,147 @@ export const TriangleFitsSlot: Story = {
             await expect(overlaps(triangle, text)).toBe(false)
             await expect(overlaps(triangle, zone)).toBe(false)
         }
+    },
+}
+
+const tooltipColumns: ColumnDef<TableRow>[] = [
+    { accessorKey: 'name', header: 'Quarterly revenue forecast owner', size: 110 },
+    { accessorKey: 'role', header: 'Role', size: 160 },
+    { accessorKey: 'updatedBy', header: 'Updated by', size: 160 },
+    { id: 'plain', header: 'A label that cannot sort and is cut short', size: 130, enableSorting: false },
+]
+
+/**
+ * ASMA-8597 (Ana Rozimova, Jira comment 95216; the owner, 2026-11-11): a header label cut short by its column is shown in
+ * full in the table's tooltip, on hover and on keyboard focus of a sortable header; a label that fits has none. It is visual
+ * only (the header's accessible name already holds the text, so the sort button gets no `aria-describedby`), Escape closes it
+ * and the pointer can move onto it. The text is `pinnedHeaderText` or a string header, the text the column settings use.
+ * The play function hovers the first header, so the accessibility run and the baseline see the tooltip open; the keyboard
+ * focus look is captured by `visual-tests/interaction-states.ts`.
+ */
+export const TruncatedHeaderTooltip: Story = {
+    loaders: [
+        () => {
+            localStorage.clear()
+            return {}
+        },
+    ],
+    render: () => (
+        <div className='w-[680px] pt-16'>
+            <StyledTable columns={tooltipColumns} data={indicatorRows} hideFooter locale='en' />
+        </div>
+    ),
+    play: async ({ canvasElement }) => {
+        const header = headerOf(canvasElement, 'Quarterly revenue forecast owner')
+        const sortButton = header.querySelector<HTMLElement>('[role="button"]')!
+        const label = header.querySelector<HTMLElement>('[class*="header-content"]')!
+
+        // The first label is cut short by its column; "Role" fits, and the label that cannot sort is cut short too.
+        await waitFor(() => expect(label.scrollWidth).toBeGreaterThan(label.clientWidth))
+        await expect(sortButton).not.toHaveAttribute('aria-describedby')
+        // The table needs a frame to find that out: hover once it has.
+        await new Promise((resolve) => setTimeout(resolve, 250))
+        await userEvent.hover(sortButton)
+        await waitFor(() => expect(canvasElement.ownerDocument.querySelector('[role="tooltip"]')).not.toBeNull(), { timeout: 3000 })
+
+        await expect(canvasElement.ownerDocument.querySelector('[role="tooltip"]')).toHaveTextContent('Quarterly revenue forecast owner')
+        await expect(sortButton).not.toHaveAttribute('aria-describedby')
+    },
+}
+
+const columnSettingsColumns: ColumnDef<TableRow>[] = [
+    { accessorKey: 'name', header: 'Workspace name', size: 200, fixedLeft: true },
+    { accessorKey: 'role', header: 'Role', size: 140 },
+    { accessorKey: 'description', header: 'Description', size: 160, enableHiding: false },
+    { accessorKey: 'updatedBy', header: 'Updated by', size: 140 },
+]
+
+/**
+ * The column settings menu (the pin). Each column is a row, the column's checkbox (`menuitemcheckbox`, ASMA-9003: a press
+ * anywhere on it shows or hides the column), with its drag handle, a button of its own, beside it (ASMA-8875). The handle
+ * reorders by dragging (ASMA-8597) and from the keyboard: Right from a row reaches its handle, Space lifts the column, Up and
+ * Down move it, Space drops it, Escape puts it back. "Workspace name" is fixed (it cannot be reordered) and "Description"
+ * cannot be hidden, so their tooltips and read-only state show too. The play function opens the menu, so the accessibility
+ * run (axe, via addon-a11y) sees it open.
+ */
+export const ColumnSettingsMenu: Story = {
+    loaders: [
+        () => {
+            localStorage.clear()
+            return {}
+        },
+    ],
+    render: () => (
+        <div className='w-[760px] pb-[320px]'>
+            <StyledTable columns={columnSettingsColumns} data={indicatorRows} hideFooter locale='en' />
+        </div>
+    ),
+    play: async ({ canvasElement }) => {
+        const pin = canvasElement.querySelector<HTMLElement>('button[aria-haspopup="true"]')!
+        await userEvent.click(pin)
+        await waitFor(() => expect(pin).toHaveAttribute('aria-expanded', 'true'))
+
+        // The row is the column's checkbox.
+        const checkbox = (column: string): HTMLElement =>
+            canvasElement.ownerDocument.querySelector<HTMLElement>(`[data-testid="${column}-column-visibility-checkbox"]`)!
+        await waitFor(() => expect(checkbox('role')).not.toBeNull())
+        await expect(checkbox('role')).toHaveAttribute('role', 'menuitemcheckbox')
+        await expect(checkbox('role')).toHaveAccessibleName('Role')
+        await expect(checkbox('updatedBy')).toHaveAccessibleName('Updated by')
+        await expect(checkbox('description')).toHaveAttribute('aria-readonly', 'true')
+        await expect(checkbox('role').closest('li')!.querySelector('button')).toHaveAccessibleName('Reorder Role')
+        await expect(canvasElement.ownerDocument.querySelectorAll('[class*="table-action-item"]')).toHaveLength(4)
+    },
+}
+
+const keyboardReorderColumns: ColumnDef<TableRow>[] = [
+    { accessorKey: 'name', header: 'Workspace name', size: 200, fixedLeft: true },
+    { accessorKey: 'role', header: 'Role', size: 140 },
+    { accessorKey: 'description', header: 'Description', size: 160, enableHiding: false },
+    { accessorKey: 'updatedDate', header: 'Updated date', size: 140 },
+    { accessorKey: 'updatedBy', header: 'Updated by', size: 140 },
+    { accessorKey: 'added', header: 'Added', size: 120 },
+    { accessorKey: 'offers', header: 'Offers', size: 120 },
+    { id: 'notes', header: 'Notes', size: 120 },
+    { id: 'owner', header: 'Owner', size: 120 },
+]
+
+/**
+ * ASMA-8875 (UX comment 95823): reordering columns from the keyboard. The play function opens the menu from the keyboard
+ * (Enter on the pin: the first row takes the focus), steps to "Role" with Down, to its handle with Right, lifts it with
+ * Space and moves it down once, and leaves it lifted: the focus bar on its row, the raised row standing where it will land,
+ * and the footer hint with the keys. Space drops it (the focus goes to its row), Escape puts it back. Nine columns,
+ * so the list scrolls and the footer (Reset columns, the hint) stays pinned under it.
+ */
+export const ColumnSettingsKeyboardReorder: Story = {
+    loaders: [
+        () => {
+            localStorage.clear()
+            return {}
+        },
+    ],
+    render: () => (
+        <div className='w-[760px] pb-[420px]'>
+            <StyledTable columns={keyboardReorderColumns} data={indicatorRows} hideFooter locale='en' />
+        </div>
+    ),
+    play: async ({ canvasElement }) => {
+        const pin = canvasElement.querySelector<HTMLElement>('button[aria-haspopup="true"]')!
+        pin.focus()
+        await userEvent.keyboard('{Enter}')
+        await waitFor(() => expect(pin).toHaveAttribute('aria-expanded', 'true'))
+        const row = (column: string): HTMLElement =>
+            canvasElement.ownerDocument.querySelector<HTMLElement>(`[data-testid="${column}-column-visibility-checkbox"]`)!
+        await waitFor(() => expect(canvasElement.ownerDocument.activeElement).toBe(row('name')))
+
+        await userEvent.keyboard('{ArrowDown}{ArrowRight}')
+        await expect(canvasElement.ownerDocument.activeElement).toHaveAccessibleName('Reorder Role')
+        await userEvent.keyboard(' ')
+        await new Promise((resolve) => setTimeout(resolve, 120))
+        await userEvent.keyboard('{ArrowDown}')
+        await waitFor(() => expect(row('role').closest('li')).toHaveAttribute('data-lifted', 'keyboard'))
+        await waitFor(() =>
+            expect(canvasElement.ownerDocument.querySelector('[role="menu"] ~ [role="status"]')).toHaveTextContent('Position 3 of 9.'),
+        )
     },
 }

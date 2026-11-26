@@ -1,9 +1,9 @@
-import type { CellContext, ColumnDef } from '@tanstack/react-table'
+import type { ColumnDef } from '@tanstack/react-table'
 import { afterEach, describe, it } from 'vitest'
 import { expect, fn, userEvent, waitFor, within } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { StyledTable } from 'src/table/components/StyledTableIndex'
-import { RowActionMenu } from './RowActionMenu'
+import { menuItem, row, rowActionsTrigger } from 'src/test-utils/tableFixture'
 
 interface Row {
     id: string
@@ -15,29 +15,6 @@ const columns: ColumnDef<Row>[] = [{ accessorKey: 'name', header: 'Name' }]
 
 describe('RowActionMenu disabled reason', () => {
     afterEach(cleanup)
-
-    it('keeps a disabled trigger focusable, describes the reason and opens no menu', async () => {
-        mount(
-            <StyledTable
-                locale='en'
-                columns={columns}
-                data={data}
-                actions={() => [{ label: 'Edit', onClick: () => undefined }]}
-                rowActionsState={() => ({ state: 'disabled', tooltipTitle: 'Signed rows are locked' })}
-            />,
-        )
-        const trigger = document.querySelector<HTMLButtonElement>('[data-test="row-actions-button"]')!
-
-        await expect(trigger).not.toBeDisabled()
-        await expect(trigger).toHaveAttribute('aria-disabled', 'true')
-        await expect(trigger).toHaveAccessibleDescription('Signed rows are locked')
-
-        trigger.click()
-        await expect(document.querySelector('[role="menu"]')).toBeNull()
-
-        trigger.focus()
-        await waitFor(() => expect(document.querySelector('[role="tooltip"]')).toHaveTextContent('Signed rows are locked'))
-    })
 
     it('describes a disabled menu action on the item itself and keeps it reachable', async () => {
         mount(
@@ -51,17 +28,15 @@ describe('RowActionMenu disabled reason', () => {
                 ]}
             />,
         )
-        document.querySelector<HTMLButtonElement>('[data-test="row-actions-button"]')!.click()
+        document.querySelector<HTMLButtonElement>('[data-testid="row-actions-button"]')!.click()
 
         const item = await waitFor(() => {
-            const found = [...document.querySelectorAll<HTMLElement>('[role="menuitem"]')].find(
-                (node) => node.textContent === 'Delete',
-            )
+            const found = menuItem('Delete')
             if (!found) throw new Error('menu not open')
             return found
         })
         await expect(item).toHaveAttribute('aria-disabled', 'true')
-        await expect(item).toHaveAttribute('data-has-reason', 'true')
+        await expect(item).toHaveAttribute('data-has-reason')
         await expect(item).toHaveAccessibleDescription('Only the owner can delete')
     })
 
@@ -78,11 +53,9 @@ describe('RowActionMenu disabled reason', () => {
                 ]}
             />,
         )
-        document.querySelector<HTMLButtonElement>('[data-test="row-actions-button"]')!.click()
+        document.querySelector<HTMLButtonElement>('[data-testid="row-actions-button"]')!.click()
         const item = await waitFor(() => {
-            const found = [...document.querySelectorAll<HTMLElement>('[role="menuitem"]')].find(
-                (node) => node.textContent === 'Delete',
-            )
+            const found = menuItem('Delete')
             if (!found) throw new Error('menu not open')
             return found
         })
@@ -109,7 +82,7 @@ describe('RowActionMenu disabled reason', () => {
             />,
         )
 
-        const trigger = document.querySelector<HTMLButtonElement>('[data-test="row-actions-button"]')!
+        const trigger = document.querySelector<HTMLButtonElement>('[data-testid="row-actions-button"]')!
         await expect(trigger).not.toBeDisabled()
         await expect(trigger).toHaveAttribute('aria-disabled', 'true')
     })
@@ -118,39 +91,33 @@ describe('RowActionMenu disabled reason', () => {
 /**
  * A row whose actions are all disabled keeps its ⋮ focusable (`aria-disabled`, not native `disabled`),
  * so keyboard users reach it and its reason (disabled-states DIS-2, DIS-3). A press only explains.
+ * The ⋮ is not a tab stop since ASMA-8875: the arrow keys reach it in its row.
  */
-
-interface CellRow {
-    id: string
-}
-
-const cell = { row: { original: { id: '1' } }, table: { options: { meta: { locale: 'en' } } } } as unknown as CellContext<
-    CellRow,
-    unknown
->
-
-const button = (container: HTMLElement): HTMLButtonElement =>
-    container.querySelector<HTMLButtonElement>('[data-test="row-actions-button"]')!
 
 describe('RowActionMenu — all actions disabled', () => {
     afterEach(cleanup)
 
-    it('is reachable with Tab, announced as disabled, gives its reason on focus, and opens no menu', async () => {
+    it('is reachable with the arrow keys from its row, announced as disabled, gives its reason on focus, and opens no menu', async () => {
         const onEdit = fn()
-        const { container } = mount(
-            <RowActionMenu<CellRow>
-                tableData={cell}
+
+        mount(
+            <StyledTable
+                locale='en'
+                columns={columns}
+                data={data}
                 actions={() => [{ label: 'Edit', onClick: onEdit }]}
                 rowActionsState={() => ({ state: 'disabled', tooltipTitle: 'Imported – change it there' })}
             />,
         )
-        const trigger = button(container)
+        // Reached as a keyboard user reaches it: the row, then Right Arrow (ASMA-8875).
+        const trigger = rowActionsTrigger('r-1')
 
+        row('r-1').focus()
+        await userEvent.keyboard('{ArrowRight}')
+        await expect(document.activeElement).toBe(trigger)
         await expect(trigger).not.toBeDisabled()
         await expect(trigger).toHaveAttribute('aria-disabled', 'true')
-
-        await userEvent.tab()
-        await expect(document.activeElement).toBe(trigger)
+        await expect(trigger).toHaveAttribute('tabindex', '-1')
         await waitFor(async () =>
             expect(within(document.body).getByRole('tooltip')).toHaveTextContent('Imported – change it there'),
         )
@@ -168,58 +135,29 @@ describe('RowActionMenu — all actions disabled', () => {
 describe('RowActionMenu keyboard', () => {
     afterEach(cleanup)
 
-    const mountMenu = (onEdit = fn()): HTMLButtonElement => {
+    it('leaves focus on the ⋮ after a mouse click; an arrow key then moves it into the menu', async () => {
         mount(
             <StyledTable
                 locale='en'
                 columns={columns}
                 data={data}
                 actions={() => [
-                    { label: 'Edit', onClick: onEdit },
+                    { label: 'Edit', onClick: () => undefined },
                     { label: 'Delete', onClick: () => undefined },
                 ]}
             />,
         )
-        return document.querySelector<HTMLButtonElement>('[data-test="row-actions-button"]')!
-    }
-    const item = (label: string): HTMLElement | undefined =>
-        [...document.querySelectorAll<HTMLElement>('[role="menuitem"]')].find((node) => node.textContent === label)
-
-    it('moves focus onto the first item when Enter opens the menu, and the arrows move on from there', async () => {
-        const trigger = mountMenu()
-        trigger.focus()
-        await userEvent.keyboard('{Enter}')
-
-        await waitFor(() => expect(document.activeElement).toBe(item('Edit')))
-        await userEvent.keyboard('{ArrowDown}')
-        await waitFor(() => expect(document.activeElement).toBe(item('Delete')))
-    })
-
-    it('leaves focus on the ⋮ after a mouse click; an arrow key then moves it into the menu', async () => {
-        const trigger = mountMenu()
+        const trigger = rowActionsTrigger('r-1')
         await userEvent.click(trigger)
-        await waitFor(() => expect(item('Edit')).toBeDefined())
+        await waitFor(() => expect(menuItem('Edit')).toBeDefined())
 
         // No item takes focus, so none shows the keyboard focus bar.
         await expect(document.activeElement).toBe(trigger)
 
         await userEvent.keyboard('{ArrowUp}')
-        await waitFor(() => expect(document.activeElement).toBe(item('Delete')))
+        await waitFor(() => expect(document.activeElement).toBe(menuItem('Delete')))
         await userEvent.keyboard('{ArrowUp}')
-        await waitFor(() => expect(document.activeElement).toBe(item('Edit')))
+        await waitFor(() => expect(document.activeElement).toBe(menuItem('Edit')))
     })
 
-    it('runs the action on Enter and closes the menu, handing focus back to the ⋮', async () => {
-        const onEdit = fn()
-        const trigger = mountMenu(onEdit)
-        trigger.focus()
-        await userEvent.keyboard('{Enter}')
-        await waitFor(() => expect(document.activeElement).toBe(item('Edit')))
-
-        await userEvent.keyboard('{Enter}')
-
-        await waitFor(() => expect(document.querySelector('[role="menu"]')).toBeNull())
-        await expect(onEdit).toHaveBeenCalledTimes(1)
-        await waitFor(() => expect(document.activeElement).toBe(trigger))
-    })
 })

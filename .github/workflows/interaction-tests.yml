@@ -7,10 +7,22 @@ name: 'Interaction tests'
 # the axe baseline — folding a second suite into it would misattribute a red run and silently change
 # what "test-storybook green" means for everyone who cites it.
 #
-# `pull_request` as well as `push`, so the check reports on the PR itself and can be made a required
-# status check on master (same rationale as visual-regression.yml).
+# `pull_request` so the check reports on the PR itself and can be made a required status check on
+# master (same rationale as visual-regression.yml) — that half is unchanged.
+#
+# `push` is limited to master. Unrestricted it also fired on every branch, so a branch with an open
+# pull request ran this suite twice for the same commit. Measured over the 30 days to 2026-11-13:
+# 541 runs, 218 of them `pull_request` and 323 `push`, of which 241 were on non-master branches —
+# and 218 of 321 distinct commits ran under both events. Two identical results, and this repository
+# is 10% of the organisation's Actions bill.
+#
+# What this gives up: a push to a branch with no pull request open yet no longer runs this suite.
+# That is roughly 23 runs a month, and `lint-and-a11y.yml` still runs on every push, so a bare
+# branch is not left without signal.
 on:
     push:
+        branches:
+            - master
     pull_request:
 
 jobs:

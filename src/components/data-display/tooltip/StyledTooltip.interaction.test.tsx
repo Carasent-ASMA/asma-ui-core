@@ -151,6 +151,49 @@ describe('StyledTooltip keyboard contract', () => {
         await expect(trigger).toHaveAccessibleDescription('Archive this thread')
     })
 
+    it('is visual only with describesTrigger={false}: it shows, and the trigger is not described (4.1.2)', async () => {
+        // A tooltip that repeats what the trigger's accessible name already says (a truncated table header) would be
+        // heard twice if it described the trigger. It still opens on focus and still dismisses on Escape.
+        const { container } = mount(
+            <>
+                <StyledTooltip title='Archive this thread' enterDelay={0} describesTrigger={false}>
+                    <span data-testid='tip-trigger'>
+                        <StyledButton dataTest='tip-target'>Archive this thread</StyledButton>
+                    </span>
+                </StyledTooltip>
+            </>,
+        )
+        const trigger = container.querySelector<HTMLButtonElement>('[data-testid="tip-target"]')!
+        const wrapper = container.querySelector<HTMLElement>('[data-testid="tip-trigger"]')!
+
+        await userEvent.tab()
+        await waitFor(() => expect(tip()).not.toBeNull())
+
+        await expect(tip()).toHaveTextContent('Archive this thread')
+        await expect(tip()).toHaveAttribute('role', 'tooltip')
+        await expect(trigger).not.toHaveAttribute('aria-describedby')
+        await expect(wrapper).not.toHaveAttribute('aria-describedby')
+        await expect(trigger).toHaveAccessibleName('Archive this thread')
+        await expect(trigger).toHaveAccessibleDescription('')
+
+        await userEvent.keyboard('{Escape}')
+        await waitFor(() => expect(tip()).toBeNull())
+    })
+
+    it('does not keep a persistent description when describesTrigger is false (4.1.2)', async () => {
+        const { container } = mount(
+            <StyledTooltip title='Locked after signing' enterDelay={0} persistentDescription describesTrigger={false}>
+                <span data-testid='tip-trigger'>
+                    <StyledButton dataTest='tip-target'>Sign</StyledButton>
+                </span>
+            </StyledTooltip>,
+        )
+        const trigger = container.querySelector<HTMLButtonElement>('[data-testid="tip-target"]')!
+
+        await expect(trigger).not.toHaveAttribute('aria-describedby')
+        await expect(document.body.textContent).not.toContain('Locked after signing')
+    })
+
     it('falls back to the wrapper when the subtree has nothing focusable (4.1.2)', async () => {
         // Decorative/disabled content (e.g. the table's row-selection checkbox) exposes no focusable
         // control. An unassociated description is worse than one on the wrapper, which browse mode

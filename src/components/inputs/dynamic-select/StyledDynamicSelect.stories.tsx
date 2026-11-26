@@ -128,7 +128,7 @@ function SelectFrame(props: {
 
     return (
         <div className='grid min-h-screen gap-6 p-6 lg:grid-cols-[1fr_320px]'>
-            <section className='rounded-2xl border border-delta-200 bg-white p-4 shadow-xs'>
+            <section className='rounded-2xl border border-delta-200 bg-white p-4 shadow-sm'>
                 <div className='mb-4'>
                     <h2 className='text-lg font-semibold text-delta-900'>{title}</h2>
                     <p className='text-sm text-delta-600'>
@@ -185,7 +185,7 @@ function SelectFrame(props: {
                 </div>
             </section>
 
-            <aside className='rounded-2xl border border-delta-200 bg-delta-50 p-4 shadow-xs'>
+            <aside className='rounded-2xl border border-delta-200 bg-delta-50 p-4 shadow-sm'>
                 <StyledFormLabel title='Extras' className='mb-3 flex items-center' />
 
                 <div className='flex flex-col gap-3'>
@@ -260,7 +260,7 @@ function PlaygroundFrame() {
 
     return (
         <div className='grid min-h-screen gap-6 p-6 lg:grid-cols-[1fr_320px]'>
-            <section className='rounded-2xl border border-delta-200 bg-white p-4 shadow-xs'>
+            <section className='rounded-2xl border border-delta-200 bg-white p-4 shadow-sm'>
                 <div className='mb-4 flex items-center justify-between gap-4'>
                     <div>
                         <h2 className='text-lg font-semibold text-delta-900'>Playground</h2>
@@ -330,7 +330,7 @@ function PlaygroundFrame() {
                 </div>
             </section>
 
-            <aside className='rounded-2xl border border-delta-200 bg-delta-50 p-4 shadow-xs'>
+            <aside className='rounded-2xl border border-delta-200 bg-delta-50 p-4 shadow-sm'>
                 <StyledFormLabel title='Controls' className='mb-3 flex items-center' />
 
                 <div className='flex flex-col gap-3'>
@@ -661,6 +661,39 @@ export const MultiplePrimitiveOptions: Story = {
 }
 
 /**
+ * **Read-only multiple select reserves no helper row** (ASMA-8853).
+ *
+ * The chips are the last thing in the block. The helper slot used to render here with nothing in it —
+ * `min-h-[24px]` plus `pt-1`, about 28px of dead space — because `DynamicInteractiveChipGroup` never
+ * passed `readOnly` to `useHelperSlot`, so the hook's own read-only rule could not fire. A panel
+ * stacking several read-only multi-selects (a saved filter, say) accumulated the gap visibly.
+ *
+ * The field is followed by a marker so the VRT baseline shows the gap, not just the chips: anything
+ * that re-reserves the row pushes the marker down and the snapshot moves. No story covered this
+ * combination before, which is why the regression reached an app unseen.
+ */
+export const ReadOnlyMultipleReservesNoHelperRow: Story = {
+    render: () => (
+        <div className='flex w-[420px] flex-col'>
+            <StyledDynamicSelect<Option>
+                dataTest='ro-multi'
+                title='Pathway category'
+                options={MODE_OPTIONS}
+                value={[MODE_OPTIONS[0]!, MODE_OPTIONS[1]!]}
+                onChange={() => undefined}
+                labelKey='name'
+                valueKey='id'
+                multiple
+                readOnly
+            />
+            <div data-testid='next-field' className='bg-delta-100 text-sm/5 text-delta-700'>
+                Next field starts here
+            </div>
+        </div>
+    ),
+}
+
+/**
  * Read-only single select with an autocomplete-sized list (>5 options) must never be openable. Since
  * read-only single selects render as plain text (no input at all), that holds by construction: there is
  * no textbox to click and no listbox to open — just the title and `-` for the empty value. Name kept so
@@ -678,7 +711,7 @@ export const ReadOnlyAutocompleteDoesNotOpen: Story = {
         await expect(inSelect.queryByRole('textbox')).not.toBeInTheDocument()
 
         const value = select.querySelector<HTMLElement>('[data-testid$="-read-only-value"]')!
-        await expect(value).toHaveTextContent('-')
+        await expect(value).toHaveTextContent('—Not provided')
 
         await userEvent.click(value)
         await expect(canvas.queryByRole('listbox')).not.toBeInTheDocument()
@@ -795,8 +828,11 @@ export const FocusDemo: Story = {
     },
     play: async ({ canvas }) => {
         // const canvas = within(canvasElement)
-        await userEvent.click(canvas.getByTestId('focus-select-btn'))
+        const button = canvas.getByTestId('focus-select-btn')
+        await userEvent.click(button)
         await expect(canvas.getByRole('combobox')).toHaveFocus()
+        // Let the button's 150 ms release ease finish, so axe reads its resting colours (ASMA-9003).
+        await Promise.all(button.getAnimations().map((animation) => animation.finished))
     },
 }
 

@@ -343,6 +343,8 @@ export function DynamicToolbar(props: DynamicToolbarProps): ReactElement {
                 ref={containerRef}
                 data-testid={dataTest}
                 data-layout={layout}
+                // ASMA-8600: StyledAccordionDetails `toolbarHeader` needs to know the helper row is there.
+                data-has-helper={helperText ? 'true' : 'false'}
                 data-filter-icon-only={filterIconOnly ? 'true' : 'false'}
                 data-trailing-icon-only={trailingIconOnly ? 'true' : 'false'}
                 className={cn('relative flex w-full flex-col gap-2', className)}

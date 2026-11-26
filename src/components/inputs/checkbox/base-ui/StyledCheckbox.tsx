@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, type ChangeEvent, type SVGProps } from 'react'
 import styles from './StyledCheckbox.module.scss'
 import { cn } from 'src/helpers/cn'
+import { composeHandlers, pressedStateHandlers } from 'src/helpers/pressedState'
 
 /**
  * @figmaNode wXrXt5uKNNzV2DnQCgyYZH#15385-19713
@@ -8,10 +9,16 @@ import { cn } from 'src/helpers/cn'
  * `checked`/`indeterminate`; Figma **State** (Enabled/Hovered/Focused/Disabled/Read-only) ← native
  * hover/focus + `disabled`/`readOnly`/`error`. Checked/indeterminate box = `gama-500` #168181,
  * unchecked border = `delta-500`; Error = box border `error-500` #e10700 (node 41325-207511/207527).
+ * Pressed (47847:229830): circle `gama-200`, box `gama-800`. @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
  */
 type StyledCheckboxProps = {
     /** @figmaProp none — test hook */
     dataTest: string
+    /**
+     * @figmaProp none — legacy test hook on the root (next to `data-testid` from `dataTest`), for apps whose
+     * `testIdAttribute` is `data-test` (editor, qnreditor, storage, crm). New tests should query `data-testid`.
+     */
+    'data-test'?: string
     /** @figmaProp none — kept for API compatibility; Figma has one size, so both render the 16px box in a 40px target */
     size?: 'small' | 'medium'
     /** @figmaProp Type = true→"Checked" | false→"Unchecked" */
@@ -20,6 +27,7 @@ type StyledCheckboxProps = {
     indeterminate?: boolean
     /** @figmaProp State = true→"Error" (box border → error-500) */
     error?: boolean
+    /** No own hover circle or pressed look, for a row or chip that draws its own (the name predates ASMA-9003's ripple removal). */
     disableRipple?: boolean
     hideWrapper?: boolean
     className?: string
@@ -77,8 +85,8 @@ const FigmaCheckGlyph = (): JSX.Element => (
 
 /**
  * Native `<input type="checkbox">` checkbox (replaces `@base-ui/react`). A visually-hidden input
- * carries state + a11y; the visual box, ripple, and indeterminate bar come from the SCSS module
- * (kept: `@keyframes`/pseudo-elements aren't Tailwind-expressible — GUD-003), whose `data-*`
+ * carries state + a11y; the visual box, hover/pressed circle, and indeterminate bar come from the SCSS module
+ * (kept: its pseudo-elements and inherited pressed accent aren't Tailwind-expressible — GUD-003), whose `data-*`
  * selectors are driven from React here. Public props unchanged. TASK-201.
  */
 export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
@@ -97,12 +105,13 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
     onClick,
     onKeyDown,
     decorative,
+    'data-test': legacyDataTest,
     ...props
 }): JSX.Element => {
     const isHideWrapper = !!hideWrapper
-    const isRippleEnabled = !disableRipple && !isHideWrapper && !disabled && !readOnly
+    // The 40px hover/pressed circle; a decorative box is pressed only through its widget.
+    const hasCircle = !disableRipple && !isHideWrapper && !disabled && !readOnly
     const inputRef = useRef<HTMLInputElement>(null)
-    const rippleRef = useRef<HTMLSpanElement>(null)
 
     useEffect(() => {
         if (inputRef.current) inputRef.current.indeterminate = indeterminate
@@ -115,7 +124,9 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
         indeterminate && styles['Indeterminate'],
         readOnly && styles['ReadOnly'],
         error && styles['Error'],
-        isRippleEnabled && styles['CheckboxHover'],
+        hasCircle && styles['CheckboxHover'],
+        hasCircle && !decorative && styles['Pressable'],
+        !decorative && 'asma-touch-ready',
         className,
     )
     const checkboxClasses = cn(
@@ -126,22 +137,8 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
     )
     const CheckboxIcon = indeterminate ? IndeterminateIcon : FigmaCheckGlyph
 
-    const handlePointerDown = React.useCallback(
-        (e: React.PointerEvent) => {
-            e.stopPropagation()
-            if (!isRippleEnabled) return
-            const ripple = document.createElement('span')
-            if (styles['CheckboxRipple']) ripple.className = styles['CheckboxRipple']
-            ripple.addEventListener('animationend', () => ripple.remove(), { once: true })
-            rippleRef.current?.appendChild(ripple)
-        },
-        [isRippleEnabled],
-    )
-
-    useEffect(() => {
-        const rippleNode = rippleRef.current
-        return () => rippleNode?.replaceChildren()
-    }, [])
+    // `data-pressed` while pressed; the press still never reaches a parent's pointerdown.
+    const pressed = pressedStateHandlers({ enabled: !disabled && !readOnly, keyboard: true })
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         if (readOnly) return
@@ -162,6 +159,8 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
         'data-unchecked': !checked && !indeterminate ? '' : undefined,
         'data-indeterminate': indeterminate ? '' : undefined,
         'data-disabled': disabled ? '' : undefined,
+        // Lets StyledFormControlLabel give a checkbox Figma's own left label (14/20), unlike the switch's.
+        'data-control': 'checkbox',
     }
 
     // The visual box/icon (below) is identical in both modes — only the ROOT element and whether a
@@ -172,9 +171,7 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
     // checkbox is a pure state indicator inside a widget that already owns selection itself.
     const visual = (
         <>
-            {!isHideWrapper && isRippleEnabled && (
-                <span ref={rippleRef} className={styles['CheckboxRippleContainer']} />
-            )}
+            {hasCircle && <span className={styles['CheckboxCircle']} />}
             <span className={checkboxClasses}>
                 <span className={styles['Indicator']}>
                     <CheckboxIcon />
@@ -185,7 +182,13 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
 
     if (decorative) {
         return (
-            <span aria-hidden='true' className={wrapperClasses} data-testid={dataTest} {...stateAttrs}>
+            <span
+                aria-hidden='true'
+                className={wrapperClasses}
+                data-testid={dataTest}
+                data-test={legacyDataTest}
+                {...stateAttrs}
+            >
                 {visual}
             </span>
         )
@@ -195,13 +198,15 @@ export const StyledCheckbox: React.FC<StyledCheckboxProps> = ({
         // False positive: this is the native <label>-wraps-<input> pattern. The wrapped real
         // <input type='checkbox'> below is the actual interactive/keyboard-operable element (Tab
         // reaches it, Space toggles it); the browser natively delegates a label click to it. The
-        // onClick/onPointerDown here (ripple effect + optional consumer passthrough) ride on top of
-        // that native delegation and don't need their own keyboard handling.
+        // handlers here (pressed state, pointerdown containment, consumer onClick) ride on top of that
+        // native delegation; Space on the input bubbles to them.
         // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
         <label
             className={wrapperClasses}
             data-testid={dataTest}
-            onPointerDown={handlePointerDown}
+            data-test={legacyDataTest}
+            {...pressed}
+            onPointerDown={composeHandlers(pressed.onPointerDown, (event) => event.stopPropagation())}
             onClick={onClick as React.MouseEventHandler<HTMLLabelElement> | undefined}
             {...stateAttrs}
         >
