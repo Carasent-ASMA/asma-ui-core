@@ -21,16 +21,20 @@ const OPTIONS = ['Alpha', 'Bravo', 'Charlie', 'Delta']
 const AutocompleteFixture = ({
     onChange = () => undefined,
     locale,
+    options = OPTIONS,
+    initialValue = null,
 }: {
     onChange?: (value: unknown) => void
     locale?: 'no' | 'en'
+    options?: string[]
+    initialValue?: string | null
 }): JSX.Element => {
-    const [value, setValue] = useState<string | null>(null)
+    const [value, setValue] = useState<string | null>(initialValue)
     return (
         <StyledSelectAutocomplete<string, false, false, false>
             dataTest='ac'
             locale={locale}
-            options={OPTIONS}
+            options={options}
             value={value}
             onChange={(_event, next) => {
                 setValue(next)
@@ -436,6 +440,49 @@ describe('StyledSelectAutocomplete keyboard contract', () => {
         await userEvent.keyboard('{ArrowDown}')
         await expect(document.querySelector('[data-testid="cursor-Bravo"]')).not.toBeNull()
         await expect(document.querySelector('[data-testid="cursor-Alpha"]')).toBeNull()
+    })
+})
+
+/* Every option is listed, as on phones (long-lists pattern LIST-4). A list cut at 100 rows hid every
+ * option after the hundredth from scrolling and the keyboard, with nothing to say so (ASMA-9087). The
+ * first 100 rows come at once and the rest right after, so typing stays quick in a long list. */
+describe('StyledSelectAutocomplete long lists (LIST-4)', () => {
+    afterEach(cleanup)
+
+    const MANY = Array.from({ length: 150 }, (_, index) => `Option ${String(index + 1).padStart(3, '0')}`)
+
+    it('lists every option, with no row limit', async () => {
+        mount(<AutocompleteFixture options={MANY} />)
+        input().focus()
+
+        await userEvent.keyboard('{ArrowDown}')
+
+        await waitFor(() => expect(listbox()).not.toBeNull())
+        await waitFor(() => expect(optionRows()).toHaveLength(MANY.length))
+    })
+
+    it('opens at the chosen option past the first 100 rows', async () => {
+        mount(<AutocompleteFixture options={MANY} initialValue='Option 140' />)
+        input().focus()
+
+        await userEvent.keyboard('{ArrowDown}')
+
+        await waitFor(() => expect(listbox()).not.toBeNull())
+        await expect(activeOption()).toHaveTextContent('Option 140')
+    })
+
+    it('reaches and chooses the last option with End and Enter', async () => {
+        const onChange = fn()
+        mount(<AutocompleteFixture options={MANY} onChange={onChange} />)
+        input().focus()
+
+        await userEvent.keyboard('{ArrowDown}')
+        await waitFor(() => expect(listbox()).not.toBeNull())
+        await userEvent.keyboard('{End}')
+
+        await expect(activeOption()).toHaveTextContent('Option 150')
+        await userEvent.keyboard('{Enter}')
+        await expect(onChange).toHaveBeenCalledWith('Option 150')
     })
 })
 

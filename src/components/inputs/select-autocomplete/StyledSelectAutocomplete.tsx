@@ -12,6 +12,7 @@ import {
     useRole,
 } from '@floating-ui/react'
 import {
+    startTransition,
     useEffect,
     useMemo,
     useRef,
@@ -22,6 +23,7 @@ import {
     type ReactNode,
     type SyntheticEvent,
 } from 'react'
+import { flushSync } from 'react-dom'
 import { StyledChip } from 'src/components/data-display/chip'
 import { CheckIcon, ChevronDownIcon, CloseIcon, PlusIconCircle } from 'src/components/icons'
 import { StyledCheckbox } from 'src/components/inputs/checkbox/base-ui/StyledCheckbox'
@@ -216,6 +218,15 @@ const isOptionObjectDisabled = <T,>(option: T): boolean =>
     typeof option === 'object' && option !== null && 'disabled' in option && Boolean((option as { disabled?: unknown }).disabled)
 
 /**
+ * Rows the attached list draws with a keystroke. Every option is listed (long-lists pattern LIST-4): the rows
+ * past these follow once the query has stayed still for DRAW_REST_AFTER_MS, in a transition that the next
+ * keystroke interrupts, so typing stays quick in a list of thousands. Until ASMA-9087 the list stopped at
+ * FIRST_ROWS and hid every later option.
+ */
+const FIRST_ROWS = 100
+const DRAW_REST_AFTER_MS = 150
+
+/**
  * single + multiple selection (with tag chips + optional select-all), type-ahead filtering,
  * async `loading`, grouping, and the MUI `renderInput`/`renderOption`/`renderValue` callback
  *
@@ -283,6 +294,8 @@ export function StyledSelectAutocomplete<
 
     const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
     const open = controlledOpen ?? uncontrolledOpen
+    // The query whose rows past FIRST_ROWS are drawn; a new query or a closed list starts from the first rows.
+    const [allRowsQuery, setAllRowsQuery] = useState<string | null>(null)
     const setOpen = (next: boolean): void => {
         // Read-only / disabled fields are display-only: no path (click, keyboard, icon, typing) may
         // open the popup. Closing is always allowed. Gating here is the single root cause — the input's
@@ -295,6 +308,7 @@ export function StyledSelectAutocomplete<
         if (next) onOpen?.()
         else {
             setActiveIndex(null)
+            setAllRowsQuery(null)
             onClose?.()
         }
     }
@@ -340,18 +354,33 @@ export function StyledSelectAutocomplete<
         // getLabel is stable enough for this memo; options/inputValue are the real inputs.
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [options, inputValue, filterOptions, value])
-    const visibleOptions = useMemo(() => filtered.slice(0, 100), [filtered])
-    const enabledOptionIndexes = visibleOptions.flatMap((option, index) =>
-        !isOptionDisabled(option) ? [index] : [],
+    // LIST-4: every option is listed, as in the phone picker. The first FIRST_ROWS rows come with the keystroke
+    // and the rest once the query stays still (ASMA-9087). The cursor and every index below count over all the
+    // options.
+    const allRowsDrawn = filtered.length <= FIRST_ROWS || allRowsQuery === inputValue
+    const visibleOptions = useMemo(
+        () => (allRowsDrawn ? filtered : filtered.slice(0, FIRST_ROWS)),
+        [allRowsDrawn, filtered],
     )
+    useEffect(() => {
+        if (!open || allRowsDrawn) return
+        const timer = setTimeout(() => startTransition(() => setAllRowsQuery(inputValue)), DRAW_REST_AFTER_MS)
+        return () => clearTimeout(timer)
+    }, [allRowsDrawn, inputValue, open])
+    const enabledOptionIndexes = filtered.flatMap((option, index) => (!isOptionDisabled(option) ? [index] : []))
     const enabledActiveIndexes =
         allowSelectAll && isMultiple ? [-1, ...enabledOptionIndexes] : enabledOptionIndexes
     // Arrow keys, Home and End visit disabled options too (WAI-ARIA APG listbox; disabled-states
     // DIS-3), so a keyboard or screen-reader user finds an option that cannot be chosen, and why.
     // Enter and Space still refuse it; opening still lands on the selected or first enabled option.
-    const navigableOptionIndexes = visibleOptions.map((_option, index) => index)
+    const navigableOptionIndexes = filtered.map((_option, index) => index)
     const activeIndexes = allowSelectAll && isMultiple ? [-1, ...navigableOptionIndexes] : navigableOptionIndexes
-    const selectedOptionIndex = visibleOptions.findIndex(isSelected)
+    const selectedOptionIndex = filtered.findIndex(isSelected)
+    // A cursor past the drawn rows draws the rest first, so its row and `aria-activedescendant` exist.
+    const moveCursorTo = (index: number | null): void => {
+        if (index !== null && index >= visibleOptions.length) flushSync(() => setAllRowsQuery(inputValue))
+        setActiveIndex(index)
+    }
 
     useEffect(() => {
         if (!open) return
@@ -359,7 +388,8 @@ export function StyledSelectAutocomplete<
         if (index < 0) return
         const id = requestAnimationFrame(() => listRef.current[index]?.scrollIntoView({ block: 'nearest' }))
         return () => cancelAnimationFrame(id)
-    }, [activeIndex, open, popperMaxHeight, selectedOptionIndex])
+        // The chosen option can sit past the first rows; scroll to it once the rest are drawn.
+    }, [activeIndex, open, popperMaxHeight, selectedOptionIndex, visibleOptions.length])
 
     const { refs, floatingStyles, context } = useFloating({
         open,
@@ -405,7 +435,7 @@ export function StyledSelectAutocomplete<
 
     const moveActiveOption = (direction: -1 | 1): void => {
         if (activeIndexes.length === 0) return
-        setActiveIndex((index) => nextActiveIndex(activeIndexes, index, selectedOptionIndex, direction))
+        moveCursorTo(nextActiveIndex(activeIndexes, activeIndex, selectedOptionIndex, direction))
     }
 
     const emitChange = (event: SyntheticEvent, option: T, close = !isMultiple || !disableCloseOnSelect): void => {
@@ -472,14 +502,14 @@ export function StyledSelectAutocomplete<
         } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
             event.preventDefault()
             if (!open) {
-                setActiveIndex(getInitialActiveIndex(event.key === 'ArrowDown' ? 1 : -1))
+                moveCursorTo(getInitialActiveIndex(event.key === 'ArrowDown' ? 1 : -1))
                 setOpen(true)
                 return
             }
             moveActiveOption(event.key === 'ArrowDown' ? 1 : -1)
         } else if (event.key === 'Home' || event.key === 'End') {
             event.preventDefault()
-            setActiveIndex(activeIndexes[event.key === 'Home' ? 0 : activeIndexes.length - 1] ?? null)
+            moveCursorTo(activeIndexes[event.key === 'Home' ? 0 : activeIndexes.length - 1] ?? null)
         } else if (event.key === ' ' && activeIndex === -1) {
             event.preventDefault()
             toggleSelectAll(event)
