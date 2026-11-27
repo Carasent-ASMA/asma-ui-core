@@ -27,8 +27,9 @@
     padding: 0 0 8px 8px;
 }
 
-// The keys, shown only while the keyboard focus is on a handle (`:focus-visible`, so a mouse user never sees it). It
-// takes the menu's width without widening it (`contain: inline-size`), and wraps.
+// The key that works where the keyboard is (UX comment 95952): on a row, on its handle, or while the column is lifted.
+// Shown only on keyboard focus (`:focus-visible`, so a mouse user never sees it). It takes the menu's width without
+// widening it (`contain: inline-size`), and wraps.
 .reorder-hint {
     display: none;
     align-self: stretch;
@@ -41,8 +42,8 @@
     color: var(--colors-delta-600);
 }
 
-// Not on a fixed column's handle: it lifts nothing (its tooltip says why).
-.column-menu:has([data-column-part='handle']:not([aria-disabled='true']):focus-visible) .reorder-hint {
+// Not on a fixed column's row or handle: it does not move (its handle's tooltip says why), so no key would work.
+.column-menu:has(li:not([data-fixed]) [data-column-part]:focus-visible) .reorder-hint {
     display: block;
 }
 

@@ -915,3 +915,52 @@ describe('StyledDialog initialFocusRef (ASMA-8895)', () => {
         await expect(container.querySelector('dialog')).toHaveFocus()
     })
 })
+
+/** A dialog closed by unmounting it, `open` always set: the crm organization details dialog does this. */
+function UnmountedOnClose(): JSX.Element {
+    const [shown, setShown] = useState(false)
+
+    return (
+        <div>
+            <StyledButton dataTest='opener' onClick={() => setShown(true)}>
+                Open
+            </StyledButton>
+            {shown && (
+                <StyledDialog dataTest='dlg' dialogTitle='Details' open onClose={() => setShown(false)}>
+                    Body
+                </StyledDialog>
+            )}
+        </div>
+    )
+}
+
+describe('StyledDialog returns the focus to its opener when it is unmounted to close (ASMA-8875)', () => {
+    afterEach(cleanup)
+
+    it('Escape: the dialog goes from the tree, and the focus goes back to the opener', async () => {
+        const { container } = mount(<UnmountedOnClose />)
+        const opener = container.querySelector<HTMLButtonElement>('[data-testid="opener"]')!
+        opener.focus()
+
+        await userEvent.keyboard('{Enter}')
+        await waitFor(() => expect(document.querySelector('dialog[open]')).not.toBeNull())
+        await userEvent.keyboard('{Escape}')
+
+        await waitFor(() => expect(document.querySelector('dialog')).toBeNull())
+        await waitFor(() => expect(document.activeElement).toBe(opener))
+    })
+
+    it('the close button: the same', async () => {
+        const { container } = mount(<UnmountedOnClose />)
+        const opener = container.querySelector<HTMLButtonElement>('[data-testid="opener"]')!
+        opener.focus()
+
+        await userEvent.keyboard('{Enter}')
+        await waitFor(() => expect(document.querySelector('dialog[open]')).not.toBeNull())
+        await userEvent.click(document.querySelector<HTMLElement>('dialog [data-testid="dlg-close-button"], dialog button')!)
+
+        await waitFor(() => expect(document.querySelector('dialog')).toBeNull())
+        await waitFor(() => expect(document.activeElement).toBe(opener))
+    })
+})
+

@@ -61,7 +61,8 @@ const SILENT: Announcements = {
  * - A column lifted from the keyboard is raised (shadow); a mouse drag looks as it always did (Figma draws no drag
  *   state). No line marks where it will land: the lifted row itself stands there. The focus bar stays on the row while
  *   the keyboard is on its handle and while it is lifted; the handle adds its own ring.
- * - Each step is announced in a polite live region; the footer shows the keys while the keyboard is on a handle.
+ * - Each step is announced in a polite live region; the footer hint names the key that works where the keyboard is:
+ *   "→ to reorder" on a row, "Space to lift" on its handle, the move keys while it is lifted (not on a fixed column).
  */
 export function ColumnSettingsMenu<TData>({
     table,
@@ -92,6 +93,10 @@ export function ColumnSettingsMenu<TData>({
     }
     const positionOf = (id: string): number => ids.indexOf(id) + 1
     const stop = tabStop && ids.includes(tabStop.id) ? tabStop : ids[0] ? { id: ids[0], part: 'row' as const } : null
+    // The focus moves the roving stop with it, so the stop is where the keyboard is: a row, a handle, or a lifted column.
+    let hintText = t.reorder_hint_row
+    if (move?.byKeyboard) hintText = t.reorder_hint_lifted
+    else if (stop?.part === 'handle') hintText = t.reorder_hint
 
     useEffect(() => {
         if (focusFirstRow) listRef.current?.querySelector<HTMLElement>('[data-column-part][tabindex="0"]')?.focus()
@@ -237,10 +242,11 @@ export function ColumnSettingsMenu<TData>({
                     >
                         {t.reset_columns}
                     </StyledButton>
-                    {/* The keys, for sighted keyboard users: shown only while the keyboard is on a handle. A screen
-                        reader hears the handle's instructions and the live region instead. */}
+                    {/* The key that works where the keyboard is, for sighted keyboard users (UX comment 95952): shown
+                        only while it is on a movable column (CSS). A screen reader hears the handle's instructions and
+                        the live region instead. */}
                     <span aria-hidden='true' className={styles['reorder-hint']}>
-                        {move?.byKeyboard ? t.reorder_hint_lifted : t.reorder_hint}
+                        {hintText}
                     </span>
                 </div>
                 <div role='status' aria-live='polite' aria-atomic='true' className='sr-only'>

@@ -250,6 +250,13 @@ $focus-right: inset -3px 0 0 0 $focus-ring;
                 }
             }
 
+            // The internal columns (select, expand, show-text, drag, actions) hold fixed-size controls and no text to
+            // truncate, so their wrappers do not clip: the show-text chevron, 32px in a 38px cell's 28px content box, lost
+            // its focus ring's sides to them in every collapsed row (ASMA-8875). The cell itself still clips at its edge.
+            &.control-cell:not(.expanded_row) div {
+                overflow: visible;
+            }
+
             // Figma _table row DS spacing for content columns: `table/row-left-right` 8px at the row
             // edges and `table/between-cells` 20px between cells (10px a side). Internal columns
             // (select/expand/drag/actions/show-text) and narrow ones (<= COMPACT_COLUMN_MAX_WIDTH)

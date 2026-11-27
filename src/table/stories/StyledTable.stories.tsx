@@ -260,7 +260,8 @@ export const SizingPersistenceAndControlAlignment: Story = {
         const initialIconBounds = expandIcon!.getBoundingClientRect()
         const initialHeaders = Array.from(canvasElement.querySelectorAll('th')).map((header) => header.textContent)
         const initialScrollPositions = Array.from(canvasElement.querySelectorAll<HTMLElement>('div'))
-            .filter((element) => element.scrollWidth > element.clientWidth)
+            // Real scroll containers only: a cell wrapper that does not clip its control (ASMA-8875) is no scroller.
+            .filter((element) => /auto|scroll/.test(getComputedStyle(element).overflowX) && element.scrollWidth > element.clientWidth)
             .map((element) => element.scrollLeft)
         const expectedHeaders = ['Workspace name', 'Description', 'Role', 'Updated date', 'Updated by', 'Added', 'Offers']
         expectedHeaders.forEach((header) =>
@@ -277,7 +278,8 @@ export const SizingPersistenceAndControlAlignment: Story = {
         const expandedIconBounds = expandedIcon!.getBoundingClientRect()
         const expandedHeaders = Array.from(canvasElement.querySelectorAll('th')).map((header) => header.textContent)
         const expandedScrollPositions = Array.from(canvasElement.querySelectorAll<HTMLElement>('div'))
-            .filter((element) => element.scrollWidth > element.clientWidth)
+            // Real scroll containers only: a cell wrapper that does not clip its control (ASMA-8875) is no scroller.
+            .filter((element) => /auto|scroll/.test(getComputedStyle(element).overflowX) && element.scrollWidth > element.clientWidth)
             .map((element) => element.scrollLeft)
         const expandedSnapshot = measureRowSnapshot()
         await expect(expandedSnapshot.rowHeight, 'wrapped expand grows downward').toBeGreaterThan(
