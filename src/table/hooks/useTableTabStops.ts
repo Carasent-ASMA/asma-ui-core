@@ -44,8 +44,19 @@ const ownTabStops = (table: HTMLTableElement): (() => void) => {
     observer.observe(table, { childList: true, subtree: true, attributes: true, attributeFilter: WATCHED_ATTRIBUTES })
     table.addEventListener('focusin', followFocus)
 
+    // A table first rendered with no box (in a `display: none` or `hidden` panel) has no header controls, so no header stop.
+    // Whatever shows it changes nothing inside the table: sync again when it gets a box.
+    let hasBox = table.getClientRects().length > 0
+    const resizeObserver = new ResizeObserver(() => {
+        const nowHasBox = table.getClientRects().length > 0
+        if (nowHasBox && !hasBox) sync()
+        hasBox = nowHasBox
+    })
+    resizeObserver.observe(table)
+
     return () => {
         observer.disconnect()
+        resizeObserver.disconnect()
         table.removeEventListener('focusin', followFocus)
     }
 }
@@ -54,7 +65,8 @@ const ownTabStops = (table: HTMLTableElement): (() => void) => {
  * Keeps the table at two tab stops (ASMA-8875): the header row and the body's active row. Every other
  * control in the header and in the body rows' cells — built in or a consumer's — is `tabindex="-1"`, marked
  * `data-table-control`, and reached with the arrow keys (`tableKeyboard.ts`). One MutationObserver on the `<table>`
- * catches rows, cells and controls as they render (sorting, paging, column virtualisation, a consumer's own re-render).
+ * catches rows, cells and controls as they render (sorting, paging, column virtualisation, a consumer's own re-render);
+ * a ResizeObserver syncs again when a table rendered with no box (`display: none`) is shown.
  *
  * Only the outermost StyledTable does this. A StyledTable nested in a sub-row (`renderSubRows`) leaves it to the outermost
  * one, whose observer sees the nested table too: its rows join the outermost body's one tab stop, and its header has none.

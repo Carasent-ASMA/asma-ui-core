@@ -29,9 +29,14 @@ export const isMarked = (element: Element): boolean => element.hasAttribute(TABL
 const isTabStop = (element: HTMLElement): boolean =>
     element.tabIndex >= 0 || (element.isContentEditable && !element.hasAttribute('tabindex'))
 
-/** Rendered and visible: `hidden`, `display: none`, `visibility: hidden` or an `inert` ancestor make it unreachable. */
+/**
+ * Rendered and visible: `hidden`, `display: none`, `visibility: hidden` or an `inert` ancestor inside the table make it
+ * unreachable. An `inert` or `hidden` around the whole table does not: it hides the table, not the control, and the tab
+ * stops must already be in place when the table is shown. A collapsed accordion panel is `inert` and opens later, and the
+ * table does not see that happen (`useTableTabStops`).
+ */
 const isShown = (element: HTMLElement): boolean =>
-    !element.closest('[inert], [hidden]') &&
+    !element.closest('[inert], [hidden]')?.closest(STYLED_TABLE) &&
     element.getClientRects().length > 0 &&
     getComputedStyle(element).visibility !== 'hidden'
 
