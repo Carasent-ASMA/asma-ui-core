@@ -297,7 +297,8 @@ native table semantics, there is no `role="grid"`).
   - The select checkboxes (body and header select-all) show the base-ui checkbox's frame around their 16px box: a 3px
     ring, 26px outer, with a 2px white gap (Figma Focused 11460-105640). Base-ui and the table share it
     (`styles/_checkbox-focus.scss`); base-ui's compiled CSS is byte-identical.
-  - The ⋮ keeps its own ring (the `focus-ring('inset')` mixin: its 1px border recoloured, 2px inside).
+  - The ⋮ keeps its own ring (the `focus-ring('inset')` mixin: its 1px border recoloured, 2px inside). It is an icon-only
+    button (`startIcon`), 34px wide in its 40px slot; as a 42px label button its slot clipped the ring's sides to 2px.
   - Forced colours: the row and cell frames become a 3px `CanvasText` outline inside; the checkbox frame takes
     `CanvasText` and `Canvas`, as base-ui does.
 
@@ -362,8 +363,11 @@ table's rule, arrows move inside and Tab enters and leaves:
   raised either: it looks as it always did.
 - **Telling.** A polite `role="status"` region in the menu announces picked up, position n of m, dropped and cancelled, in
   the table's language; dnd-kit's own (assertive, English) region is silenced and its instructions, which describe each
-  movable handle, are translated. The footer, pinned under the list (the list scrolls, capped at seven rows), shows the
-  keys while the keyboard is on a handle: "Space to reorder", then "↑↓ move · Space drop · Esc cancel" (visual only).
+  movable handle ("Reorder <column>", described by "Press Space to pick up, then arrow keys to move. Press Space again
+  to drop, or Escape to cancel."; UX comment 95952), are translated. The footer, pinned under the list (the list
+  scrolls, capped at seven rows), names only the key that works where the keyboard is (UX comment 95952): "→ to
+  reorder" on a row, "Space to lift" on its handle, "↕ move · Space drop · Esc cancel" while lifted; nothing on a fixed
+  column's row or handle, and nothing for a mouse user (visual only).
 
 Known gaps. Keyboard lifting satisfies 2.1.1, not 2.5.7: a pointer user who cannot drag still has no single-pointer way
 to reorder (Move up / Move down, ASMA-8145). Moving a column past a fixed one that is not at an end of the list is not
@@ -373,6 +377,36 @@ Covered by `StyledTable.columnSettingsKeyboard.interaction.test.tsx` (the keys, 
 columns, the indicators, the announcements in both languages, the hint, the pinned footer) and
 `StyledTable.columnSettingsMenu.interaction.test.tsx` (structure, names, targets, the pointer). The Storybook story
 `Data display/StyledTable` → `ColumnSettingsKeyboardReorder` opens the menu from the keyboard and leaves a column lifted.
+
+**Q (ASMA-8875, 2026-11) — WCAG 2.4.3 / 2.4.7, `inputs/button/StyledButton.module.scss`, `feedback/dialog/
+StyledDialog.tsx`, `table/components/columns/action-column/actionColumn.tsx`, `RowActionMenu.tsx`,
+`table/components/TableRow.tsx`, `StyledTable.module.scss`.** Checked live on crm (organizations-new) with this ui-core linked.
+- **An open popup's trigger shows the focus ring.** A `StyledButton` with `aria-expanded="true"` and `aria-haspopup` (the
+  ⋮, a filter button, `PopoverSheet`'s action trigger, a select-like trigger) used the legacy `focused-*` fill tokens:
+  after a mouse click, with no `:focus-visible`, only its background changed, the same gama-50 as a hover. It now takes
+  the Focused look (the Figma focus ring) with its rest fill and text, a hover included, while the popup is open. An
+  expanded disclosure (no `aria-haspopup`, e.g. `StyledEmojiChoice`'s "Hide options") keeps its expanded fill: a lasting
+  ring there would read as focus.
+- **`StyledDialog` returns the focus when it is unmounted to close.** A consumer that closes it by removing it (`open`
+  always set, e.g. crm's organization details) got the open effect's clean-up before React removed the `<dialog>`: still
+  modal, it left the page inert, the opener refused the focus, and it fell to `<body>`. The clean-up closes the native
+  dialog first (a `close` it makes itself is no dismissal: the native-close recovery ignores it).
+- **Closing a dialog an ⋮ action opened returns the focus to the ⋮.** Two causes, both needed: the menu went in the same
+  commit as the dialog came, so the dialog remembered `<body>` as its opener (the click inside the menu now moves the focus
+  to the ⋮ before it closes, as a WAI-ARIA menu button does, custom actions included); and the actions column's `cell` was
+  inline, so an app's inline `actions={() => […]}` remounted the cell on every render and the remembered ⋮ was gone when
+  the dialog closed (the cell is module-level now, as its header already was).
+
+- **A control in a collapsed row keeps its whole ring.** Every `div` in a collapsed row's cell clips (`overflow: hidden`,
+  for the ellipsis), and the show-text chevron (32px) is wider than its 38px cell's 28px content box: its ring lost 2px a
+  side. The internal columns' cells (select, expand, show-text, drag, actions: `control-cell`) hold no text to truncate,
+  so their wrappers no longer clip; the cell still clips at its edge.
+
+Covered by `RowActionMenu.interaction.test.tsx` (the dialog round trip, a plain and a custom action),
+`StyledDialog.interaction.test.tsx` (unmounted to close: Escape and the close button),
+`StyledTable.focusLook.interaction.test.tsx` (the chevron and the ⋮ in a collapsed row: 3px a side, nothing clipped),
+`StyledTable.pressedState.interaction.test.tsx` and the `StyledTable` focus suites; the open-trigger look was checked in
+Storybook (`Utils/StyledFilterMenu`, `Table/Keyboard reach` → `RowMenus`).
 
 H was retired as a false escalation: the popup indicator is intentionally out of the tab order; the focused combobox opens the list with Enter, ArrowDown or ArrowUp.
 

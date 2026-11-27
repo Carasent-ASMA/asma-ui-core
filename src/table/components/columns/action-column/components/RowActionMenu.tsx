@@ -80,6 +80,9 @@ export function RowActionMenu<TData>({
             aria-expanded={open}
             variant='text'
             size='small'
+            // Icon-only (`startIcon`, no children): a 32 x 32px button, as Figma's table row "More" (Table cells, Type=More
+            // menu). As children the icon took the label's padding, 42px, and its 40px slot clipped the focus ring's sides.
+            startIcon={<DotsVerticalIcon className={disabled ? 'text-delta-300' : 'text-delta-700'} width={20} height={20} />}
             // Reached with the arrow keys in its row, not with Tab; the context-menu key opens it (ASMA-8875).
             tabIndex={-1}
             data-table-control=''
@@ -120,9 +123,7 @@ export function RowActionMenu<TData>({
                 e.stopPropagation()
                 e.preventDefault()
             }}
-        >
-            <DotsVerticalIcon className={disabled ? 'text-delta-300' : 'text-delta-700'} width={20} height={20} />
-        </StyledButton>
+        />
     )
 
     return (
@@ -165,7 +166,14 @@ export function RowActionMenu<TData>({
                         open={open}
                         anchorEl={anchorEl}
                         onClose={handleClose}
-                        onClick={handleClose}
+                        onClick={() => {
+                            // An item's click closes the menu; the focus goes back to the ⋮ first (WAI-ARIA menu button),
+                            // in this same event. A dialog the action opens remembers what had the focus as it opens, and
+                            // returns it there on close: without this it opened after the menu had gone, with the focus on
+                            // <body>, so closing it lost the focus. A custom action's click bubbles here too.
+                            anchorEl?.focus({ preventScroll: true })
+                            handleClose()
+                        }}
                         // Same as `StyledMenu`: the arrow keys, not Tab, step from the ⋮ into the menu.
                         tabIntoContent={false}
                         anchorOrigin={{

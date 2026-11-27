@@ -49,13 +49,21 @@ describe('table row-action menu item pressed state (ASMA-9003)', () => {
             />,
         )
         document.querySelector<HTMLButtonElement>('[data-test="row-actions-button"]')!.click()
-        const edit = await waitFor(() => {
-            const found = menuItem('Edit')
-            if (!found) throw new Error('menu not open')
-            return found
+        await waitFor(() => {
+            if (!menuItem('Edit')) throw new Error('menu not open')
         })
         await waitFor(() => expect(document.getAnimations().filter((a) => a.playState === 'running')).toHaveLength(0))
-        return { edit, remove: menuItem('Delete')! }
+        // The open ⋮ no longer eases into a fill (it keeps the focus ring), so no animation outlasts the menu's placement:
+        // wait until the item stands still, and take the items as they are then.
+        let last = ''
+        await waitFor(() => {
+            const { x, y } = menuItem('Edit')!.getBoundingClientRect()
+            const now = `${x},${y}`
+            const settled = now === last
+            last = now
+            if (!settled) throw new Error('menu still moving')
+        })
+        return { edit: menuItem('Edit')!, remove: menuItem('Delete')! }
     }
 
     it('fills a hovered, pressed item gama-200 with a gama-700 label at once, and drops it when dragged off', async () => {

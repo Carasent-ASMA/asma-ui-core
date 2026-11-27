@@ -20,6 +20,36 @@ function ActionsPinHeader<TData>(ctx: HeaderContext<TData, unknown>): JSX.Elemen
     return <HeaderActionMenu headerData={ctx} locale={localeOf(ctx)} />
 }
 
+/** The row actions an actions column renders, kept on its definition for `ActionsCell` (a spread copies a symbol key). */
+const ROW_ACTIONS = Symbol('asma-row-actions')
+
+interface RowActionsOptions<TData> {
+    actions?: (row: Row<TData>) => (IAction<TData> | ICustomAction<TData>)[]
+    customActionsNode?: (row: CellContext<TData, unknown>) => ReactNode
+    rowHeight?: number
+    rowActionsState?: (row: Row<TData>) => RowActionsState | undefined
+}
+
+/**
+ * Module-level for the same reason as `ActionsPinHeader`. An inline `cell` got a new identity whenever the columns were
+ * rebuilt, which an app's inline `actions={() => […]}` does on every render: React remounted the cell, so the ⋮ a dialog
+ * had been opened from was gone when the dialog closed, and the focus had nowhere to return (ASMA-8875). An open menu
+ * closed the same way.
+ */
+function ActionsCell<TData>(cell: CellContext<TData, unknown>): JSX.Element | null {
+    const options = (cell.column.columnDef as unknown as Record<symbol, RowActionsOptions<TData> | undefined>)[ROW_ACTIONS]
+    const { actions, customActionsNode, rowHeight, rowActionsState } = options ?? {}
+
+    if (!actions && !customActionsNode) return null
+
+    return (
+        <div className={'flex items-center justify-end gap-x-1'} style={{ height: rowHeight ?? 'auto' }}>
+            {customActionsNode && <div>{customActionsNode(cell)}</div>}
+            {actions && <RowActionMenu tableData={cell} actions={actions} rowActionsState={rowActionsState} />}
+        </div>
+    )
+}
+
 function ActionsEmptyHeader<TData>(ctx: HeaderContext<TData, unknown>): JSX.Element {
     // Visually blank by design (no pin menu here), but the <th> must still have an
     // accessible name — an empty header cell leaves screen-reader table navigation unable
@@ -38,7 +68,7 @@ export function generateActionsColumn<TData>(options: {
 }): ColumnDef<TData, unknown> {
     const { headerPin, actions, customActionsNode, rowHeight, customActionsColumnProps, rowActionsState } = options
 
-    return {
+    const column: ColumnDef<TData, unknown> = {
         id: ACTIONS_COLUMN_ID,
         enableHiding: false,
         enableSorting: false,
@@ -46,18 +76,12 @@ export function generateActionsColumn<TData>(options: {
             return row
         },
         header: headerPin ? ActionsPinHeader : ActionsEmptyHeader,
-        cell: (cell: CellContext<TData, unknown>) =>
-            actions || customActionsNode ? (
-                <div
-                    className={'flex items-center justify-end gap-x-1'}
-                    style={{ height: rowHeight ?? 'auto' }}
-                >
-                    {customActionsNode && <div>{customActionsNode?.(cell)}</div>}
-                    {actions && <RowActionMenu tableData={cell} actions={actions} rowActionsState={rowActionsState} />}
-                </div>
-            ) : null,
+        cell: ActionsCell,
         minSize: 50,
         size: 50,
         ...customActionsColumnProps,
     }
+    const rowActions: RowActionsOptions<TData> = { actions, customActionsNode, rowHeight, rowActionsState }
+
+    return Object.assign(column, { [ROW_ACTIONS]: rowActions })
 }

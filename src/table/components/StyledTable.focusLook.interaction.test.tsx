@@ -253,3 +253,52 @@ describe('ASMA-8875 AC 11: every focus indicator is 3px, a cell border part of i
         }
     })
 })
+
+/** The sides of an element that an ancestor up to its cell clips (an `overflow` other than visible, too small a box). */
+const clippedSides = (element: Element): Side[] => {
+    const own = element.getBoundingClientRect()
+    const clipped = new Set<Side>()
+
+    for (let ancestor = element.parentElement; ancestor && ancestor.tagName !== 'TR'; ancestor = ancestor.parentElement) {
+        const style = getComputedStyle(ancestor)
+        if (style.overflowX === 'visible' && style.overflowY === 'visible') continue
+        const box = ancestor.getBoundingClientRect()
+        const border = (side: Side): number => Number.parseFloat(style.getPropertyValue(`border-${side}-width`))
+        if (own.left < box.left + border('left') - 0.5) clipped.add('left')
+        if (own.right > box.right - border('right') + 0.5) clipped.add('right')
+        if (own.top < box.top + border('top') - 0.5) clipped.add('top')
+        if (own.bottom > box.bottom - border('bottom') + 0.5) clipped.add('bottom')
+    }
+
+    return SIDES.filter((side) => clipped.has(side))
+}
+
+describe('ASMA-8875: a control in a collapsed row keeps its whole focus ring (the cell wrappers do not clip it)', () => {
+    afterEach(cleanup)
+
+    it('the show-text chevron, 32px in its 38px cell, next to the select checkbox: 3px on every side, nothing clipped', async () => {
+        mountTable({ expandArrow: false, textExpandArrow: true })
+        await enterBody()
+        for (let presses = 0; presses < 4 && !/full text/i.test(document.activeElement?.getAttribute('aria-label') ?? ''); presses += 1)
+            await press('{ArrowRight}')
+        const chevron = document.activeElement!
+
+        await expect(chevron.getAttribute('aria-label')).toBe('Show full text for row 1')
+        await expect(chevron.closest('td')!.className).not.toContain('expanded_row')
+        await expect(focusSides(chevron)).toEqual({ top: 3, right: 3, bottom: 3, left: 3 })
+        await expect(clippedSides(chevron)).toEqual([])
+    })
+
+    it('the ⋮: 3px on every side, nothing clipped', async () => {
+        mountTable()
+        await enterBody()
+        for (let presses = 0; presses < 4 && document.activeElement?.getAttribute('aria-label') !== 'Row actions'; presses += 1)
+            await press('{ArrowRight}')
+        const dots = document.activeElement!
+
+        await expect(dots.getAttribute('aria-label')).toBe('Row actions')
+        await expect(focusSides(dots)).toEqual({ top: 3, right: 3, bottom: 3, left: 3 })
+        await expect(clippedSides(dots)).toEqual([])
+    })
+})
+
