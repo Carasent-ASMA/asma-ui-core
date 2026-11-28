@@ -19,7 +19,7 @@ export const DynamicSelectTitle = ({ title, titleSize = 'base', id }: DynamicSel
         <span
             id={id}
             className={
-                titleSize === 'lg' ? 'text-lg/7 font-semibold text-delta-800' : 'text-base font-semibold text-delta-800'
+                titleSize === 'lg' ? 'text-delta-800 text-lg/7 font-semibold' : 'text-delta-800 text-base font-semibold'
             }
         >
             {title}

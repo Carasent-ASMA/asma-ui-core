@@ -36,13 +36,13 @@ export const StyledMenuItem = ({ children, selected, disabled, className, onClic
             {...pressedStateHandlers({ enabled: !disabled })}
             className={cn(
                 // Figma Menus item, Type=Check mark (16048:31636): 40px row, 8px padding, 4px gap, 20px check.
-                'flex items-center gap-x-1 p-2 text-base text-delta-700 outline-none',
+                'text-delta-700 flex items-center gap-x-1 p-2 text-base outline-hidden',
                 'asma-touch-ready',
                 // Figma Disabled: text-icon/disabled. Pressed state (47847-229830): at once in, 150ms ease-out back only after a
                 // press; hover and selection keep master's timing (none). @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
                 disabled
-                    ? 'cursor-not-allowed aria-disabled:text-delta-300'
-                    : 'group/item cursor-pointer data-[pressed]:text-gama-700 data-[pressed]:[--control-pressed-accent:var(--colors-gama-700)] data-[press-released]:transition-colors data-[press-released]:duration-150 data-[press-released]:ease-[ease-out] hover:bg-delta-50 forced-colors:data-[pressed]:![outline-offset:-2px] forced-colors:data-[pressed]:![outline:2px_solid_Highlight] [&[role][data-pressed]]:bg-gama-200',
+                    ? 'aria-disabled:text-delta-300 cursor-not-allowed'
+                    : 'group/item data-[pressed]:text-gama-700 hover:bg-delta-50 [&[role][data-pressed]]:bg-gama-200 cursor-pointer data-press-released:transition-colors data-press-released:duration-150 data-press-released:ease-[ease-out] data-pressed:[--control-pressed-accent:var(--colors-gama-700)] forced-colors:data-pressed:[outline:2px_solid_Highlight]! forced-colors:data-pressed:-outline-offset-2!',
                 // Figma Selected=on: bg/selected (gama-25), hover bg/hover-selected (gama-50).
                 selected && 'bg-gama-25 hover:bg-gama-50',
                 className,
@@ -58,7 +58,7 @@ export const StyledMenuItem = ({ children, selected, disabled, className, onClic
                     '[transition:color_0.2s_ease]',
                     selected &&
                         !disabled &&
-                        'group-data-[pressed]/item:text-gama-700 group-data-[pressed]/item:transition-none group-data-[press-released]/item:[transition:color_150ms_ease-out]',
+                        'group-data-[pressed]/item:text-gama-700 group-data-press-released/item:[transition:color_150ms_ease-out] group-data-pressed/item:transition-none',
                 )}
             />
             <span className='pr-2'>{children}</span>

@@ -22,7 +22,7 @@ export const StyledWidgetTitle = forwardRef<HTMLHeadingElement, StyledWidgetTitl
                     style['styled-widget-title'],
                     // Narrower than a phone: shrinks with its card (`fit-content` would hold it at the
                     // longest word, past the card edge).
-                    'max-xs:min-w-0 max-xs:hyphens-auto max-xs:![overflow-wrap:anywhere]',
+                    'max-xs:min-w-0 max-xs:hyphens-auto max-xs:[overflow-wrap:anywhere]!',
                     props.className,
                 )}
             >

@@ -261,7 +261,7 @@ function ListboxOption<T>({
             className={cn(
                 'asma-touch-ready',
                 !disabled &&
-                    'data-[pressed]:text-gama-700 data-[pressed]:[--control-pressed-accent:var(--colors-gama-700)] data-[press-released]:transition-colors data-[press-released]:duration-150 data-[press-released]:ease-[ease-out] forced-colors:data-[pressed]:![outline-offset:-2px] forced-colors:data-[pressed]:![outline:2px_solid_Highlight] [&[data-pressed][role][aria-selected]]:bg-gama-200',
+                    'data-[pressed]:text-gama-700 [&[data-pressed][role][aria-selected]]:bg-gama-200 data-press-released:transition-colors data-press-released:duration-150 data-press-released:ease-[ease-out] data-pressed:[--control-pressed-accent:var(--colors-gama-700)] forced-colors:data-pressed:[outline:2px_solid_Highlight]! forced-colors:data-pressed:-outline-offset-2!',
                 className,
             )}
             {...pressedStateHandlers({ enabled: !disabled })}

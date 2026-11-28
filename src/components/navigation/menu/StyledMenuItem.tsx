@@ -145,7 +145,7 @@ export const StyledMenuItem = ({
             {...pressedStateHandlers({ enabled: !disabled && !ariaBusy })}
             className={cn(
                 // Figma Menus item (node 16073-21583): h40, py8, label Body Base 16px.
-                'box-border flex items-center px-4 text-base outline-none focus-visible:shadow-[inset_3px_0_var(--colors-focus-ring)]',
+                'box-border flex items-center px-4 text-base outline-hidden focus-visible:shadow-[inset_3px_0_var(--colors-focus-ring)]',
                 dense ? 'min-h-8 py-1' : 'min-h-10 py-2',
                 // ASMA-8210: rows under the 44px touch height grow on phones (min-height only); flush rows
                 // cannot take an overlaid hit area, which would steal the neighbour's presses.
@@ -157,13 +157,13 @@ export const StyledMenuItem = ({
                 // Figma Menus item: hover bg/hover-default (delta-50); selected bg/selected (gama-25),
                 // hovered bg/hover-selected (gama-50).
                 disabled
-                    ? 'cursor-not-allowed text-delta-300 aria-disabled:text-delta-300'
+                    ? 'text-delta-300 aria-disabled:text-delta-300 cursor-not-allowed'
                     : cn(
-                          'cursor-pointer text-delta-700',
+                          'text-delta-700 cursor-pointer',
                           selected ? 'hover:bg-gama-50' : 'hover:bg-delta-50',
                           // ASMA-9003 pressed look; `[role]` lifts the fill over the hover fills.
                           // @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
-                          'data-[pressed]:text-gama-700 data-[pressed]:[--control-pressed-accent:var(--colors-gama-700)] data-[press-released]:transition-colors data-[press-released]:duration-150 data-[press-released]:ease-[ease-out] forced-colors:data-[pressed]:![outline-offset:-2px] forced-colors:data-[pressed]:![outline:2px_solid_Highlight] [&[data-pressed][role]]:bg-gama-200',
+                          'data-[pressed]:text-gama-700 [&[data-pressed][role]]:bg-gama-200 data-press-released:transition-colors data-press-released:duration-150 data-press-released:ease-[ease-out] data-pressed:[--control-pressed-accent:var(--colors-gama-700)] forced-colors:data-pressed:[outline:2px_solid_Highlight]! forced-colors:data-pressed:-outline-offset-2!',
                       ),
                 selected && cn('bg-gama-25', classes?.selected),
                 classes?.root,

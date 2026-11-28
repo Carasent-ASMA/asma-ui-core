@@ -277,7 +277,7 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                     // pixel, including ReactNode labels whose first line is not 24px. A wrapped
                     // label switches to `items-start`, drops the vertical padding (which only
                     // centered the one-line row) and puts the slots on the first line below.
-                    'box-border inline-flex gap-1 rounded-[25px] border border-solid border-delta-300 bg-white text-base text-delta-700',
+                    'border-delta-300 text-delta-700 box-border inline-flex gap-1 rounded-[25px] border border-solid bg-white text-base',
                     labelWraps ? 'items-start py-0' : 'items-center',
                     !consumerSetsWidth && 'w-fit',
                     !consumerSetsMaxWidth && 'max-w-full',
@@ -294,12 +294,12 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                     disabled && (focusableDisabled ? 'asma-touch-ready cursor-not-allowed' : 'pointer-events-none'),
                     interactive &&
                         cn(
-                            'cursor-pointer outline-none',
+                            'cursor-pointer outline-hidden',
                             // ASMA-8220 touch fixes; no `asma-touch-target`: the h-6/h-8 heights are the Figma chip.
                             'asma-touch-ready',
                             // ASMA-9003 pressed look; the booster beats the hover and selected-radio fills.
                             // @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
-                            'data-[pressed]:text-gama-700 data-[pressed]:[--control-pressed-accent:var(--colors-gama-700)] data-[press-released]:transition-colors data-[press-released]:duration-150 data-[press-released]:ease-[ease-out] forced-colors:data-[pressed]:![outline-offset:-2px] forced-colors:data-[pressed]:![outline:2px_solid_Highlight] [&[data-chip][role][data-pressed]]:bg-gama-200',
+                            'data-[pressed]:text-gama-700 [&[data-chip][role][data-pressed]]:bg-gama-200 data-press-released:transition-colors data-press-released:duration-150 data-press-released:ease-[ease-out] data-pressed:[--control-pressed-accent:var(--colors-gama-700)] forced-colors:data-pressed:[outline:2px_solid_Highlight]! forced-colors:data-pressed:-outline-offset-2!',
                         ),
                     // Figma Hovered (every Type, e.g. 18832-25540): fill bg/hover-default #f0f2f4
                     // (delta-50); the border stays border/outline (delta-300). A deletable chip is
@@ -329,7 +329,7 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                     ref={labelRef}
                     className={cn(
                         'min-w-0 truncate',
-                        'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:![overflow-wrap:anywhere]',
+                        'max-xs:hyphens-auto max-xs:whitespace-normal max-xs:[overflow-wrap:anywhere]!',
                         // Wrapped label: small centres its 24px line with a -1px pair of margins;
                         // medium reserves 3px above and below. A consumer can force a wrap at any
                         // width; a one-line chip keeps the original centered row and padding.
@@ -353,7 +353,7 @@ export const StyledChip = forwardRef<HTMLDivElement, StyledChipProps>(
                         className={cn(
                             // Its focus indication is intentionally painted by the parent (via
                             // `:has(button:focus-visible)`), matching the Figma state without a second button ring.
-                            'flex shrink-0 items-center justify-center rounded-full border border-solid border-delta-100 bg-delta-50 p-0 text-delta-700 [outline:none]',
+                            'border-delta-100 bg-delta-50 text-delta-700 flex shrink-0 items-center justify-center rounded-full border border-solid p-0 [outline:none]',
                             size === 'small' ? 'h-[18px] w-[18px]' : 'h-5 w-5',
                             // Wrapped label: first-line alignment, same rule as the start slot
                             // (18px centre = 1px border + 2px; 20px centre = 1px border + 5px).

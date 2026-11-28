@@ -136,7 +136,7 @@ export function ColumnSettingsItem({
                             className={styles['column-checkbox']}
                         />
                     </span>
-                    <span id={labelId} className='font-roboto text-base text-delta-700'>
+                    <span id={labelId} className='font-roboto text-delta-700 text-base'>
                         {label}
                     </span>
                 </div>

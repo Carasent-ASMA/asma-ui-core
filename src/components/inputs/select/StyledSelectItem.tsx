@@ -46,15 +46,15 @@ export const StyledSelectItem = ({
             // ASMA-8220 (TB-14) touch fixes; also covers CountryCodeOptions, which renders this component.
             'asma-touch-ready',
             // h40 = py8 + Body Base lh24.
-            'relative box-border flex min-h-10 items-center gap-1 py-2 pl-2 pr-4 text-base outline-none [&:not(:last-child)]:shadow-[inset_0_-1px_0_0_var(--colors-delta-200)]',
+            'relative box-border flex min-h-10 items-center gap-1 py-2 pr-4 pl-2 text-base outline-hidden not-last:shadow-[inset_0_-1px_0_0_var(--colors-delta-200)]',
             disabled
-                ? 'cursor-not-allowed text-delta-300'
+                ? 'text-delta-300 cursor-not-allowed'
                 : cn(
                       // Figma Menus item: hover bg/hover-default; selected bg/selected, hovered bg/hover-selected.
-                      'group/option cursor-pointer text-delta-700',
+                      'group/option text-delta-700 cursor-pointer',
                       selected ? 'hover:bg-gama-50' : 'hover:bg-delta-50',
                       // ASMA-9003: the menu item's pressed look. @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
-                      'data-[pressed]:text-gama-700 data-[pressed]:[--control-pressed-accent:var(--colors-gama-700)] data-[press-released]:transition-colors data-[press-released]:duration-150 data-[press-released]:ease-[ease-out] forced-colors:data-[pressed]:![outline-offset:-2px] forced-colors:data-[pressed]:![outline:2px_solid_Highlight] [&[data-pressed][role]]:bg-gama-200',
+                      'data-[pressed]:text-gama-700 [&[data-pressed][role]]:bg-gama-200 data-press-released:transition-colors data-press-released:duration-150 data-press-released:ease-[ease-out] data-pressed:[--control-pressed-accent:var(--colors-gama-700)] forced-colors:data-pressed:[outline:2px_solid_Highlight]! forced-colors:data-pressed:-outline-offset-2!',
                   ),
             selected && 'bg-gama-25',
             className,
@@ -65,7 +65,7 @@ export const StyledSelectItem = ({
             <span
                 aria-hidden='true'
                 data-select-active-indicator
-                className='border-l-solid pointer-events-none absolute inset-y-0 left-0 border-l-[3px] border-focus-ring'
+                className='border-l-solid border-focus-ring pointer-events-none absolute inset-y-0 left-0 border-l-[3px]'
             />
         )}
         <span className='flex w-5 justify-center'>
@@ -73,11 +73,11 @@ export const StyledSelectItem = ({
                 <CheckIcon
                     width={20}
                     height={20}
-                    className='text-gama-500 group-data-[pressed]/option:text-gama-700 group-data-[press-released]/option:transition-colors group-data-[press-released]/option:duration-150 group-data-[press-released]/option:ease-[ease-out]'
+                    className='text-gama-500 group-data-[pressed]/option:text-gama-700 group-data-press-released/option:transition-colors group-data-press-released/option:duration-150 group-data-press-released/option:ease-[ease-out]'
                 />
             )}
         </span>
         {/* Two lines, then ellipsis (ASMA-7847) — see StyledSelectAutocomplete's option label. */}
-        <span className='line-clamp-2 min-w-0 flex-1 break-words'>{children}</span>
+        <span className='line-clamp-2 min-w-0 flex-1 wrap-break-word'>{children}</span>
     </li>
 )

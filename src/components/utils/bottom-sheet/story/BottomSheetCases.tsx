@@ -11,8 +11,8 @@ import { actionList, FilterSheet, SheetDemo, tallContent, UNFILTERED_TOTAL } fro
 
 const Case = ({ label, hint, children }: { label: string; hint: string; children: ReactNode }): JSX.Element => (
     <div className='flex flex-col items-start gap-2'>
-        <p className='m-0 text-base font-semibold leading-6 text-delta-800'>{label}</p>
-        <p className='m-0 text-sm leading-5 text-delta-600'>{hint}</p>
+        <p className='text-delta-800 m-0 text-base/6 font-semibold'>{label}</p>
+        <p className='text-delta-600 m-0 text-sm/5'>{hint}</p>
         <div className='flex items-start pt-1'>{children}</div>
     </div>
 )
@@ -34,7 +34,7 @@ const reset = (
 )
 
 export const BottomSheetCases = (): JSX.Element => (
-    <div className='grid grid-cols-1 gap-x-10 gap-y-10 p-6 md:grid-cols-2 xl:grid-cols-3'>
+    <div className='grid grid-cols-1 gap-10 p-6 md:grid-cols-2 xl:grid-cols-3'>
         <Case label='Filter — live count' hint='Tick a chip: the count follows after ~500ms; the sheet stays open.'>
             <FilterSheet dataTest='case-filter' />
         </Case>

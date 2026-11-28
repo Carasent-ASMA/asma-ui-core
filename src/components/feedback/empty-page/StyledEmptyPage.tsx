@@ -18,13 +18,13 @@ export const StyledEmptyPage: FC<{ emptyText: string; isEmpty?: boolean; classNa
         <div
             data-testid='empty-page-container'
             // text-icon/helper, not text-icon/placeholder (delta-500 is 3.56:1 on white, below 4.5:1); design sign-off ASMA-8963.
-            className={`flex h-full min-h-[106px] w-full animate-opacity-in items-center justify-center gap-2 text-sm text-delta-600 duration-300 ${className}`}
+            className={`animate-opacity-in text-delta-600 flex h-full min-h-[106px] w-full items-center justify-center gap-2 text-sm duration-300 ${className}`}
         >
             <EmptyPageIcon
                 data-testid='empty-page-icon'
                 width={24}
                 height={24}
-                className='cursor-default text-delta-600'
+                className='text-delta-600 cursor-default'
             />
             <span className='font-normal'>{emptyText}</span>
         </div>

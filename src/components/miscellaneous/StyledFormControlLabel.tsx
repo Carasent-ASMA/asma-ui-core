@@ -162,7 +162,7 @@ export const StyledFormControlLabel = ({
             {...pressedStateHandlers({ enabled: !isDisabled && !isReadOnly })}
             className={cn(
                 // Figma Checkbox+Label / Radiobutton / Switch: the label follows the control's target, in text-icon/body.
-                'asma-touch-ready m-0 inline-flex align-middle text-delta-700',
+                'asma-touch-ready text-delta-700 m-0 inline-flex align-middle',
                 // First-line alignment needs the text column to start at the row's top; the label's
                 // own first-line margin (below) centres that line on the control. Vertical
                 // placements keep the old centred cross-axis alignment.
@@ -186,7 +186,7 @@ export const StyledFormControlLabel = ({
                                 styles['Label'],
                                 isHorizontal && styles['FirstLineLabel'],
                                 // Narrower than a phone: a long word breaks instead of pushing past the screen edge.
-                                'max-xs:min-w-0 max-xs:hyphens-auto max-xs:![overflow-wrap:anywhere]',
+                                'max-xs:min-w-0 max-xs:hyphens-auto max-xs:[overflow-wrap:anywhere]!',
                                 isDisabled && 'text-delta-300',
                                 classes?.label,
                             )}
@@ -200,7 +200,7 @@ export const StyledFormControlLabel = ({
                             className={cn(
                                 styles['HelperText'],
                                 isDisabled && styles['HelperTextDisabled'],
-                                'max-xs:hyphens-auto max-xs:![overflow-wrap:anywhere]',
+                                'max-xs:hyphens-auto max-xs:[overflow-wrap:anywhere]!',
                                 classes?.helperText,
                             )}
                         >

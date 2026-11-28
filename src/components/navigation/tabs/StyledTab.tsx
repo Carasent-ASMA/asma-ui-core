@@ -93,7 +93,7 @@ export const StyledTab: FC<StyledTabProps> = ({
             className={cn(
                 // Figma Tab set 15981:32783: Medium h48 (28px line centred: py10) px16 18px, Small h40 py8 px12
                 // 16px, gap 8; the label is SemiBold in every state and size.
-                'inline-flex min-w-[90px] shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-t-lg border-0 bg-transparent tracking-normal outline-none transition-colors',
+                'inline-flex min-w-[90px] shrink-0 items-center justify-center gap-2 rounded-t-lg border-0 bg-transparent tracking-normal whitespace-nowrap outline-hidden transition-colors',
                 ctx?.size === 'small' ? 'min-h-10 px-3 py-2' : 'min-h-12 px-4 py-2.5',
                 !hasTextSize && (ctx?.size === 'small' ? 'text-base' : 'text-lg'),
                 !hasFontWeight && 'font-semibold',
@@ -112,7 +112,7 @@ export const StyledTab: FC<StyledTabProps> = ({
                 // ASMA-9003 Figma Tab State=Pressed: the 1px separator line, not the hover underline, under the fill.
                 // @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
                 !disabled &&
-                    'data-[pressed]:bg-gama-200 data-[pressed]:bg-[linear-gradient(to_top,var(--colors-delta-200)_1px,transparent_1px)] data-[pressed]:text-gama-700 data-[pressed]:transition-none data-[press-released]:duration-150 data-[press-released]:ease-[ease-out] forced-colors:data-[pressed]:![outline-offset:-2px] forced-colors:data-[pressed]:![outline:2px_solid_Highlight]',
+                    'data-[pressed]:bg-gama-200 data-[pressed]:text-gama-700 data-press-released:duration-150 data-press-released:ease-[ease-out] data-pressed:bg-[linear-gradient(to_top,var(--colors-delta-200)_1px,transparent_1px)] data-pressed:transition-none forced-colors:data-pressed:[outline:2px_solid_Highlight]! forced-colors:data-pressed:-outline-offset-2!',
                 className,
             )}
             style={{ fontFamily: 'Roboto, Helvetica, Arial, sans-serif', ...resolveSx(sx) }}

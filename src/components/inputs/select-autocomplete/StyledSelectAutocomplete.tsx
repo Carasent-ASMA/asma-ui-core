@@ -588,7 +588,7 @@ export function StyledSelectAutocomplete<
                     tabIndex={-1}
                     aria-label={locale === 'no' ? (isMultiple ? 'Fjern alle valg' : 'Fjern valget') : 'Clear'}
                     data-testid={`${dataTest}-clear`}
-                    className='invisible flex min-h-6 min-w-6 cursor-pointer items-center justify-center rounded-full border-0 bg-delta-50 group-focus-within:visible'
+                    className='bg-delta-50 invisible flex min-h-6 min-w-6 cursor-pointer items-center justify-center rounded-full border-0 group-focus-within:visible'
                     onMouseDown={(event) => event.preventDefault()}
                     onClick={clearValue}
                 >
@@ -681,18 +681,18 @@ export function StyledSelectAutocomplete<
         // Figma Menus item (Autocomplete section 20474:27966): Body Base 16/lh24 in text-icon/body (delta-700), a 1px
         // border/separator between rows; Check mark rows 8px / gap 4, Checkbox rows a 12px box inset / gap 12.
         // A custom `renderOption` keeps its own spacing.
-        'group/option relative box-border flex cursor-pointer items-center py-2 text-base text-delta-700 [&:not(:last-child)]:shadow-[inset_0_-1px_0_0_var(--colors-delta-200)]',
-        renderOption ? 'gap-x-3 px-3' : isMultiple ? 'gap-x-3 pl-3 pr-4' : 'gap-x-1 pl-2 pr-4',
+        'group/option text-delta-700 relative box-border flex cursor-pointer items-center py-2 text-base not-last:shadow-[inset_0_-1px_0_0_var(--colors-delta-200)]',
+        renderOption ? 'gap-x-3 px-3' : isMultiple ? 'gap-x-3 pr-4 pl-3' : 'gap-x-1 pr-4 pl-2',
         // Row density: 'compact' = 40px (Figma Menus item); 'regular' = roomier 48px. min-height only,
         // so a wrapped 2-line label still grows the row past this.
         rowSize === 'regular' ? 'min-h-12' : 'min-h-10',
         // Figma Menus item: hover bg/hover-default; selected bg/selected, hovered bg/hover-selected.
         'aria-selected:bg-gama-25 hover:bg-delta-50 aria-selected:hover:bg-gama-50',
         // Disabled options never take a highlight (hover, selected or keyboard) and read as muted.
-        'aria-disabled:cursor-default aria-disabled:!bg-transparent aria-disabled:text-delta-300 aria-disabled:hover:!bg-transparent',
+        'aria-disabled:text-delta-300 aria-disabled:cursor-default aria-disabled:bg-transparent! aria-disabled:hover:bg-transparent!',
         // ASMA-9003: the menu item's pressed look; the booster beats `aria-selected:hover:`.
         // @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
-        'data-[pressed]:text-gama-700 data-[pressed]:[--control-pressed-accent:var(--colors-gama-700)] data-[press-released]:transition-colors data-[press-released]:duration-150 data-[press-released]:ease-[ease-out] forced-colors:data-[pressed]:![outline-offset:-2px] forced-colors:data-[pressed]:![outline:2px_solid_Highlight] [&[data-pressed][role][aria-selected]]:bg-gama-200',
+        'data-[pressed]:text-gama-700 [&[data-pressed][role][aria-selected]]:bg-gama-200 data-press-released:transition-colors data-press-released:duration-150 data-press-released:ease-[ease-out] data-pressed:[--control-pressed-accent:var(--colors-gama-700)] forced-colors:data-pressed:[outline:2px_solid_Highlight]! forced-colors:data-pressed:-outline-offset-2!',
     )
 
     const defaultRenderOption = (props: OptionLiProps, option: T, state: AutocompleteRenderOptionState): ReactNode => {
@@ -702,7 +702,7 @@ export function StyledSelectAutocomplete<
                 {props['data-active'] !== undefined && (
                     <span
                         aria-hidden='true'
-                        className='border-l-solid pointer-events-none absolute inset-y-0 left-0 border-l-[3px] border-focus-ring'
+                        className='border-l-solid border-focus-ring pointer-events-none absolute inset-y-0 left-0 border-l-[3px]'
                     />
                 )}
                 {isMultiple ? (
@@ -730,15 +730,15 @@ export function StyledSelectAutocomplete<
                             <CheckIcon
                                 width={20}
                                 height={20}
-                                className='text-gama-500 group-data-[pressed]/option:text-gama-700 group-data-[press-released]/option:transition-colors group-data-[press-released]/option:duration-150 group-data-[press-released]/option:ease-[ease-out]'
+                                className='text-gama-500 group-data-[pressed]/option:text-gama-700 group-data-press-released/option:transition-colors group-data-press-released/option:duration-150 group-data-press-released/option:ease-[ease-out]'
                             />
                         )}
                     </span>
                 )}
                 {/* Long labels wrap to a second line and only then ellipsise (ASMA-7847): one
-                    clipped line hid which organisation a row actually was. `break-words` mirrors
+                    clipped line hid which organisation a row actually was. `wrap-break-word` mirrors
                     Figma's `word-break: break-word`, so an unbroken name still wraps. */}
-                <span className={cn(!state.inPicker && 'line-clamp-2', 'min-w-0 flex-1 break-words')}>{getLabel(option)}</span>
+                <span className={cn(!state.inPicker && 'line-clamp-2', 'min-w-0 flex-1 wrap-break-word')}>{getLabel(option)}</span>
             </li>
         )
     }
@@ -841,7 +841,7 @@ export function StyledSelectAutocomplete<
                             // border/outline delta-300 (#bdc4cf), Menus shadow. Matches StyledSelect/StyledMenu.
                             // Figma Menus (node 34522-151497) pads the list `8px 0` — the rows run
                             // edge to edge horizontally, with 8px of breathing room top and bottom.
-                            'z-[1300] m-0 list-none overflow-auto rounded border border-solid border-delta-300 bg-white px-0 py-2 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
+                            'border-delta-300 z-1300 m-0 list-none overflow-auto rounded-[4px] border border-solid bg-white px-0 py-2 shadow-[0px_2px_4px_0px_rgba(34,33,51,0.15)]',
                             // With a group-select header the Figma popover has no vertical padding:
                             // the grey header bar sits flush against the top edge and the last option
                             // against the bottom, so drop both `py-2` paddings.
@@ -887,12 +887,12 @@ export function StyledSelectAutocomplete<
                                     // select-all, so hover deepens the grey rather than turning the header
                                     // green like a selected option.
                                     // ASMA-9003: pressed like the option rows (optionRowClassName).
-                                    className='asma-touch-ready relative box-border flex h-8 cursor-pointer items-center gap-x-3 bg-[var(--colors-gray-10)] px-3 text-xs font-semibold uppercase tracking-[0.2px] text-delta-600 data-[pressed]:text-gama-700 data-[pressed]:[--control-pressed-accent:var(--colors-gama-700)] data-[press-released]:transition-colors data-[press-released]:duration-150 data-[press-released]:ease-[ease-out] hover:bg-delta-50 forced-colors:data-[pressed]:![outline-offset:-2px] forced-colors:data-[pressed]:![outline:2px_solid_Highlight] [&[data-pressed][role]]:bg-gama-200'
+                                    className='asma-touch-ready text-delta-600 data-[pressed]:text-gama-700 [&[data-pressed][role]]:bg-gama-200 hover:bg-delta-50 relative box-border flex h-8 cursor-pointer items-center gap-x-3 bg-(--colors-gray-10) px-3 text-xs font-semibold tracking-[0.2px] uppercase data-press-released:transition-colors data-press-released:duration-150 data-press-released:ease-[ease-out] data-pressed:[--control-pressed-accent:var(--colors-gama-700)] forced-colors:data-pressed:[outline:2px_solid_Highlight]! forced-colors:data-pressed:-outline-offset-2!'
                                 >
                                     {activeIndex === -1 && (
                                         <span
                                             aria-hidden='true'
-                                            className='border-l-solid pointer-events-none absolute inset-y-0 left-0 border-l-[3px] border-focus-ring'
+                                            className='border-l-solid border-focus-ring pointer-events-none absolute inset-y-0 left-0 border-l-[3px]'
                                         />
                                     )}
                                     <StyledCheckbox
@@ -914,11 +914,11 @@ export function StyledSelectAutocomplete<
                                 // Placeholder text, not a selectable option — `role='presentation'`
                                 // exempts it from `role='listbox'`'s required-children check (axe
                                 // `aria-required-children`), which a bare, roleless <li> doesn't satisfy.
-                                <li role='presentation' className='px-3 py-2 text-sm text-delta-600'>
+                                <li role='presentation' className='text-delta-600 px-3 py-2 text-sm'>
                                     {loadingText}
                                 </li>
                             ) : visibleOptions.length === 0 ? (
-                                <li role='presentation' className='px-3 py-2 text-sm text-delta-600'>
+                                <li role='presentation' className='text-delta-600 px-3 py-2 text-sm'>
                                     {noOptionsText}
                                 </li>
                             ) : (

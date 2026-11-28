@@ -94,7 +94,7 @@ describe('table check menu item pressed state (ASMA-9003)', () => {
  * hover on bg/hover-selected (gama-50) with a gama-500 check.
  */
 // ASMA-9003: in forced colours a pressed row shows an inset Highlight outline. It must beat the row's own
-// `outline-none` (an `!important` utility), which an arbitrary property without `!` does not.
+// `outline-hidden` (an `!important` utility), which an arbitrary property without `!` does not.
 describe('table menu items in forced colours', () => {
     afterEach(async () => {
         await cdp().send('Emulation.setEmulatedMedia', { features: [] })

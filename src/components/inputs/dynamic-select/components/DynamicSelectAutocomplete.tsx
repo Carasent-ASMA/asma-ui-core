@@ -242,17 +242,17 @@ export const DynamicSelectAutocomplete = forwardRef(
                                     className={cn(
                                         // Figma Menus item: Body Base 16/lh24. Row density: 'compact'
                                         // = 40px (default), 'regular' = 48px.
-                                        'asma-touch-ready relative box-border flex cursor-pointer items-center bg-white py-2 text-base text-delta-800 aria-selected:bg-gama-50 hover:bg-delta-50',
+                                        'asma-touch-ready text-delta-800 aria-selected:bg-gama-50 hover:bg-delta-50 relative box-border flex cursor-pointer items-center bg-white py-2 text-base',
                                         // Figma picker row (several choices, ASMA-8468): a 40 px checkbox
                                         // cell from the list's 16 px inset, label at 40 px — the 36 px
                                         // cell here, moved 2 px in. The list sets the right inset.
                                         state.inPicker ? 'gap-x-0.5 pl-0.5' : 'gap-x-1 px-2',
                                         rowSize === 'regular' ? 'min-h-12' : 'min-h-10',
                                         disabled
-                                            ? 'cursor-not-allowed bg-delta-50 aria-selected:!bg-delta-50 hover:!bg-delta-50 [&_*]:cursor-not-allowed'
+                                            ? 'bg-delta-50 aria-selected:!bg-delta-50 hover:!bg-delta-50 cursor-not-allowed **:cursor-not-allowed'
                                             : // ASMA-9003: the menu item's pressed look, as on StyledSelectAutocomplete's rows; the
                                               // accent turns the box gama-700. @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
-                                              'data-[pressed]:text-gama-700 data-[pressed]:[--control-pressed-accent:var(--colors-gama-700)] data-[press-released]:transition-colors data-[press-released]:duration-150 data-[press-released]:ease-[ease-out] forced-colors:data-[pressed]:![outline-offset:-2px] forced-colors:data-[pressed]:![outline:2px_solid_Highlight] [&[data-pressed][role][aria-selected]]:bg-gama-200',
+                                              'data-[pressed]:text-gama-700 [&[data-pressed][role][aria-selected]]:bg-gama-200 data-press-released:transition-colors data-press-released:duration-150 data-press-released:ease-[ease-out] data-pressed:[--control-pressed-accent:var(--colors-gama-700)] forced-colors:data-pressed:[outline:2px_solid_Highlight]! forced-colors:data-pressed:-outline-offset-2!',
                                     )}
                                     aria-disabled={disabled}
                                     aria-describedby={reasonId}
@@ -261,7 +261,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                                     {props['data-active'] !== undefined && (
                                         <span
                                             aria-hidden='true'
-                                            className='border-l-solid pointer-events-none absolute inset-y-0 left-0 border-l-[3px] border-focus-ring'
+                                            className='border-l-solid border-focus-ring pointer-events-none absolute inset-y-0 left-0 border-l-[3px]'
                                         />
                                     )}
                                     <StyledTooltip arrow title={tooltipTitle} open={tooltipOpen}>
@@ -290,7 +290,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                                                 <span
                                                     className={cn(
                                                         !state.inPicker && 'line-clamp-2',
-                                                        'h-fit min-w-0 flex-1 break-words text-base',
+                                                        'h-fit min-w-0 flex-1 text-base wrap-break-word',
                                                     )}
                                                 >
                                                     {getOptionLabel(option)}
@@ -317,13 +317,13 @@ export const DynamicSelectAutocomplete = forwardRef(
                                 className={cn(
                                     // Figma Menus item: Body Base 16/lh24. Row density: 'compact' =
                                     // 40px (default), 'regular' = 48px.
-                                    'asma-touch-ready group/option relative box-border flex cursor-pointer items-center gap-x-1 px-2 py-2 text-base text-delta-800 aria-selected:bg-gama-50 hover:bg-delta-50',
+                                    'asma-touch-ready group/option text-delta-800 aria-selected:bg-gama-50 hover:bg-delta-50 relative box-border flex cursor-pointer items-center gap-x-1 px-2 py-2 text-base',
                                     rowSize === 'regular' ? 'min-h-12' : 'min-h-10',
                                     disabled
-                                        ? 'cursor-not-allowed bg-delta-50 aria-selected:!bg-delta-50 hover:!bg-delta-50 [&_*]:cursor-not-allowed'
+                                        ? 'bg-delta-50 aria-selected:!bg-delta-50 hover:!bg-delta-50 cursor-not-allowed **:cursor-not-allowed'
                                         : // ASMA-9003: the menu item's pressed look, as on StyledSelectAutocomplete's rows.
                                           // @see asma-modules/_docs/ux/patterns/pattern-pressed-state.md
-                                          'data-[pressed]:text-gama-700 data-[press-released]:transition-colors data-[press-released]:duration-150 data-[press-released]:ease-[ease-out] forced-colors:data-[pressed]:![outline-offset:-2px] forced-colors:data-[pressed]:![outline:2px_solid_Highlight] [&[data-pressed][role][aria-selected]]:bg-gama-200',
+                                          'data-[pressed]:text-gama-700 [&[data-pressed][role][aria-selected]]:bg-gama-200 data-press-released:transition-colors data-press-released:duration-150 data-press-released:ease-[ease-out] forced-colors:data-pressed:[outline:2px_solid_Highlight]! forced-colors:data-pressed:-outline-offset-2!',
                                 )}
                                 onClick={!disabled ? props.onClick : undefined}
                                 aria-disabled={disabled}
@@ -333,7 +333,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                                 {props['data-active'] !== undefined && (
                                     <span
                                         aria-hidden='true'
-                                        className='border-l-solid pointer-events-none absolute inset-y-0 left-0 border-l-[3px] border-focus-ring'
+                                        className='border-l-solid border-focus-ring pointer-events-none absolute inset-y-0 left-0 border-l-[3px]'
                                     />
                                 )}
                                 <StyledTooltip arrow title={tooltipTitle} open={tooltipOpen}>
@@ -342,7 +342,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                                         <span className={cn('w-5 min-w-5', state.inPicker && 'flex')}>
                                             {isSelected && (
                                                 <CheckIcon
-                                                    className='size-5 min-h-5 min-w-5 text-gama-500 group-data-[pressed]/option:text-gama-700 group-data-[press-released]/option:transition-colors group-data-[press-released]/option:duration-150 group-data-[press-released]/option:ease-[ease-out]'
+                                                    className='text-gama-500 group-data-[pressed]/option:text-gama-700 size-5 min-h-5 min-w-5 group-data-press-released/option:transition-colors group-data-press-released/option:duration-150 group-data-press-released/option:ease-[ease-out]'
                                                     height={20}
                                                     width={20}
                                                 />
@@ -357,7 +357,7 @@ export const DynamicSelectAutocomplete = forwardRef(
                                             <span
                                                 className={cn(
                                                     !state.inPicker && 'line-clamp-2',
-                                                    'min-w-0 flex-1 break-words text-base',
+                                                    'min-w-0 flex-1 text-base wrap-break-word',
                                                 )}
                                             >
                                                 {getOptionLabel(option)}

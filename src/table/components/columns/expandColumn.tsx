@@ -47,7 +47,7 @@ export function generateExpandColumn<TData>(
                     tabIndex={-1}
                     data-table-control=''
                     className={clsx(
-                        'flex w-full items-center justify-center border-0 bg-transparent p-0 outline-none',
+                        'flex w-full items-center justify-center border-0 bg-transparent p-0 outline-hidden',
                         style['expand-control'],
                     )}
                     onClick={() => cell.row.getToggleExpandedHandler()()}

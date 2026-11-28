@@ -415,9 +415,9 @@ export const StyledBottomSheet = ({
             onCancel={handleCancel}
             className={cn(
                 style['StyledBottomSheet'],
-                'fixed inset-0 m-0 h-full max-h-none w-full max-w-none flex-col items-center justify-end overflow-visible border-0 bg-transparent p-0 outline-none open:flex',
+                'fixed inset-0 m-0 size-full max-h-none max-w-none flex-col items-center justify-end overflow-visible border-0 bg-transparent p-0 outline-hidden open:flex',
                 // Sliding out: taps reach the page underneath. Out of the top layer it needs a z-index to stay on top.
-                !open && 'pointer-events-none z-[9999]',
+                !open && 'pointer-events-none z-9999',
             )}
         >
             <OverlayBackOwnerContext.Provider value={overlayOwnerRef}>
@@ -451,7 +451,7 @@ export const StyledBottomSheet = ({
                 className={cn(
                     // `box-border` is load-bearing: Tailwind runs with preflight off, so widths would fall
                     // back to content-box. The 1px edge is the last child, so it takes no width (Figma).
-                    'relative box-border flex w-full max-w-[640px] flex-col bg-white text-delta-700 outline-none',
+                    'text-delta-700 relative box-border flex w-full max-w-[640px] flex-col bg-white outline-hidden',
                     isShortViewport
                         ? 'h-full max-h-none rounded-none'
                         : cn('rounded-t-[28px]', !isLifting && (expanded ? 'max-h-[90dvh]' : 'max-h-[50dvh]')),
@@ -467,7 +467,7 @@ export const StyledBottomSheet = ({
             >
                 {/* `border-b-solid`, not `border-solid`: with preflight off the other three sides would default
                     to a 3px `medium` width and paint a solid border — a visible line under the corners. */}
-                <div className='border-b-solid shrink-0 border-b border-delta-200 pb-2'>
+                <div className='border-b-solid border-delta-200 shrink-0 border-b pb-2'>
                     {/* The top 48px is the drag zone (Figma "touch target area"). The drag handle comes before
                         the close control in the DOM, so Tab lands on it first (Figma keyboard notes). */}
                     <div {...dragHandleProps} className='relative flex h-12 touch-none items-center gap-2 px-2'>
@@ -494,15 +494,15 @@ export const StyledBottomSheet = ({
                                     if (expanded) collapse()
                                     else setExpanded(true)
                                 }}
-                                className='absolute left-1/2 top-1/2 flex h-6 w-12 -translate-x-1/2 -translate-y-1/2 cursor-grab items-center justify-center rounded border-0 bg-transparent p-0 outline-none focus-visible:[box-shadow:inset_0_0_0_2px_var(--colors-focus-ring)]'
+                                className='absolute top-1/2 left-1/2 flex h-6 w-12 -translate-x-1/2 -translate-y-1/2 cursor-grab items-center justify-center rounded-[4px] border-0 bg-transparent p-0 outline-hidden focus-visible:[box-shadow:inset_0_0_0_2px_var(--colors-focus-ring)]'
                             >
-                                <span aria-hidden='true' className='h-1 w-8 rounded-full bg-delta-700' />
+                                <span aria-hidden='true' className='bg-delta-700 h-1 w-8 rounded-full' />
                             </button>
                         ) : (
                             <span
                                 aria-hidden='true'
                                 data-testid={`${dataTest}-drag-handle`}
-                                className='pointer-events-none absolute left-1/2 top-1/2 h-1 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full bg-delta-700'
+                                className='bg-delta-700 pointer-events-none absolute top-1/2 left-1/2 h-1 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full'
                             />
                         )}
                         <StyledButton
@@ -519,11 +519,11 @@ export const StyledBottomSheet = ({
                     {title && (
                         <div className='flex items-center gap-1 px-4'>
                             {titleIcon && (
-                                <span aria-hidden='true' className='flex size-5 shrink-0 items-center justify-center text-delta-700'>
+                                <span aria-hidden='true' className='text-delta-700 flex size-5 shrink-0 items-center justify-center'>
                                     {titleIcon}
                                 </span>
                             )}
-                            <div id={titleId} className='min-w-0 flex-1 truncate text-lg font-semibold leading-7 text-delta-800'>
+                            <div id={titleId} className='text-delta-800 min-w-0 flex-1 truncate text-lg leading-7 font-semibold'>
                                 {title}
                             </div>
                         </div>
@@ -532,7 +532,7 @@ export const StyledBottomSheet = ({
                 <div
                     ref={setBodyRef}
                     className={cn(
-                        'flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain pl-4 pr-2 pt-2',
+                        'flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain pt-2 pr-2 pl-4',
                         hasFooter || extraActions ? 'pb-2' : 'pb-[max(0.5rem,env(safe-area-inset-bottom))]',
                     )}
                 >
@@ -541,7 +541,7 @@ export const StyledBottomSheet = ({
                 {hasFooter && (
                     <div
                         className={cn(
-                            'border-t-solid flex shrink-0 items-start border-t border-delta-200 bg-white p-1',
+                            'border-t-solid border-delta-200 flex shrink-0 items-start border-t bg-white p-1',
                             viewResults ? 'justify-between' : 'justify-end',
                             // Narrower than a phone: the reset button (second, after view results) wraps
                             // onto its own line, still on the right, instead of being pushed off screen.
@@ -575,7 +575,7 @@ export const StyledBottomSheet = ({
                     <span
                         aria-hidden='true'
                         data-testid={`${dataTest}-skirt`}
-                        className='pointer-events-none absolute inset-x-0 top-full h-[100lvh] bg-white'
+                        className='pointer-events-none absolute inset-x-0 top-full h-lvh bg-white'
                     />
                 )}
                 <span

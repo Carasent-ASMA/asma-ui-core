@@ -69,7 +69,7 @@ function dialogStyle(width: number | undefined, right: number | undefined): Reac
 
 function LongBody({ testId }: { testId: string }) {
     return (
-        <div className='flex flex-grow flex-col gap-y-3 overflow-auto px-4' data-testid={testId}>
+        <div className='flex grow flex-col gap-y-3 overflow-auto px-4' data-testid={testId}>
             <div>
                 Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the
                 industry's standard dummy text ever since the 1500s.

@@ -135,7 +135,7 @@ export const StyledPhoneField = ({
             {readOnly === true ? (
                 // Figma draws the read-only number as a link (gama-500, underlined), which is
                 // also what makes it dialable on a phone — so it is a real anchor, not styled text.
-                <span className='py-2 text-base text-delta-800'>
+                <span className='text-delta-800 py-2 text-base'>
                     {readOnlyHref === undefined ? (
                         <span data-testid={`${dataTest}-readonly`}>{readOnlyText ?? displayValue}</span>
                     ) : (

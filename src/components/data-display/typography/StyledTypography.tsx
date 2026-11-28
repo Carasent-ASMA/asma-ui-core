@@ -139,7 +139,7 @@ export const StyledTypography = (props: TypographyProps): JSX.Element => {
             className: clsx(
                 styles['root'],
                 VARIANT_CLASS[variant],
-                noWrap && 'overflow-hidden text-ellipsis whitespace-nowrap',
+                noWrap && 'truncate',
                 gutterBottom && 'mb-[0.35em]',
                 className,
             ),

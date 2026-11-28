@@ -284,7 +284,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
             openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
             node.showModal()
             // showModal() focuses the first focusable element (the header close button) — move focus
-            // back to the shell, which has tabIndex={-1} + outline-none, so no :focus ring paints.
+            // back to the shell, which has tabIndex={-1} + outline-hidden, so no :focus ring paints.
             // A consumer's `initialFocusRef` takes it instead (the safe button of a confirmation).
             focusDialogStart(node, initialFocusRef)
             // Some engines defer showModal()'s first-focusable step until after this turn; re-assert
@@ -489,7 +489,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
             }}
             className={cn(
                 style['StyledDialog'],
-                'fixed inset-0 m-0 h-full max-h-none w-full max-w-none items-center justify-center overflow-hidden border-0 bg-transparent p-0 outline-none open:flex',
+                'fixed inset-0 m-0 h-full max-h-none w-full max-w-none items-center justify-center overflow-hidden border-0 bg-transparent p-0 outline-hidden open:flex',
                 scroll === 'body' && 'overflow-y-auto',
                 className,
                 classes?.root,
@@ -519,7 +519,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                 className={cn(
                     // Figma dialog: radius 8, Dialogue-popup shadow (#22213366, 0 4 40).
                     // `flex-col` is unconditional: `scroll` decides where overflow lives, not the paper's main axis.
-                    'relative z-[1] flex flex-col overflow-hidden rounded-lg border-0 bg-white p-0 text-delta-800 shadow-[0px_4px_40px_0px_#22213366]',
+                    'text-delta-800 relative z-1 flex flex-col overflow-hidden rounded-lg border-0 bg-white p-0 shadow-[0px_4px_40px_0px_#22213366]',
                     isFullScreen && 'rounded-none',
                     paper.className,
                     classes?.paper,
@@ -550,7 +550,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                 <div
                     ref={bodyRef}
                     data-dialog-body=''
-                    className='flex min-h-0 w-full min-w-0 flex-auto flex-col overflow-y-auto overflow-x-hidden overscroll-contain'
+                    className='flex min-h-0 w-full min-w-0 flex-auto flex-col overflow-x-hidden overflow-y-auto overscroll-contain'
                     style={dialogScrollerStyle(scrollPaddingTop, scrollPaddingBottom)}
                 >
                 {(hasHeaderActions || !!dialogTitle || !!titleChildId) && (
@@ -560,7 +560,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                         data-header-pinned={pinned ? 'true' : 'false'}
                         aria-hidden={headerHidden || undefined}
                         hidden={headerHidden}
-                        className={cn(DIALOG_HEADER_CLASSES, pinned && 'sticky top-0 z-[2]', headerHidden && 'hidden')}
+                        className={cn(DIALOG_HEADER_CLASSES, pinned && 'sticky top-0 z-2', headerHidden && 'hidden')}
                     >
                         {hasHeaderActions && (
                             <div
@@ -588,7 +588,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
                                     <div
                                         className={cn(
                                             DIALOG_HEADER_BUTTONS_CLASSES,
-                                            'min-w-0 max-w-full shrink-0 justify-end max-xs:flex-wrap max-xs:gap-y-2',
+                                            'max-xs:flex-wrap max-xs:gap-y-2 max-w-full min-w-0 shrink-0 justify-end',
                                         )}
                                     >
                                         {dialogHeaderNode}

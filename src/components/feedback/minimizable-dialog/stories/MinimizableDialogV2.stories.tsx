@@ -204,7 +204,7 @@ export const FullscreenToggle: Story = {
     render: (args) => <MinimizableDialogStoryFrame {...args} />,
     play: async ({ canvas }) => {
         const fullscreenButton = canvas.getByTestId('fullscreen-button')
-        const overlaySelector = '[class*="bg-opacity-70"]'
+        const overlaySelector = '[class*="bg-[rgb(98,110,126)]/70"]'
 
         await userEvent.click(fullscreenButton)
         await expect(document.querySelector(overlaySelector)).toBeTruthy()

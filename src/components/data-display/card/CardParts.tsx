@@ -32,7 +32,7 @@ export const CardControl = ({ children, className }: CardControlProps): JSX.Elem
     return (
         <div
             data-card-control=''
-            className={cn('relative z-[1] inline-flex min-h-10 min-w-10 max-w-full select-text items-center self-start', className)}
+            className={cn('relative z-1 inline-flex min-h-10 max-w-full min-w-10 items-center self-start select-text', className)}
         >
             {children}
         </div>
@@ -44,7 +44,7 @@ export const CardControl = ({ children, className }: CardControlProps): JSX.Elem
  * spell it out. Sized in rem with no fixed height, so larger text and spacing never clip it (CARD-10, Q10).
  */
 export const CardTag = ({ children }: { children: string }): JSX.Element => (
-    <span className='inline-flex min-h-4 items-center rounded-[0.1875rem] bg-success-300 px-[0.375rem] text-[0.6875rem] font-semibold uppercase leading-3 tracking-[0.034375rem] text-black'>
+    <span className='bg-success-300 inline-flex min-h-4 items-center rounded-[0.1875rem] px-1.5 text-[0.6875rem] leading-3 font-semibold tracking-[0.034375rem] text-black uppercase'>
         {children}
     </span>
 )
@@ -77,7 +77,7 @@ export const CardCheckboxControl = ({ checkbox, titleText, labels, dataTest }: C
                 onChange={(_event, checked) => checkbox.onChange(checked)}
             />
             {!checkbox.hideLabel && (
-                <label htmlFor={inputId} className='cursor-pointer select-none pr-2 text-base leading-6 text-delta-700'>
+                <label htmlFor={inputId} className='text-delta-700 cursor-pointer pr-2 text-base leading-6 select-none'>
                     {labels.select}
                 </label>
             )}

@@ -6,7 +6,7 @@ export function processInfoSnackbar(message: string): void {
         message,
         severity: 'success',
         alertClassName:
-            'min-w-[350px] bg-theta-700 flex w-full text-center justify-center items-center !text-[color:var(--colors-link-text-standart)]',
+            'min-w-[350px] bg-theta-700 flex w-full text-center justify-center items-center text-(--colors-link-text-standart)!',
         alertVariant: 'filled',
         autoHideDuration: 6000,
         closeButton: true,
