@@ -40,9 +40,24 @@
             }
         }
 
+        // An expanded disclosure (an inline list it shows, no popup) keeps its expanded fill.
         &[aria-expanded='true'] {
             color: var(--colors-button-#{$type}-#{$color}-focused-text-color) #{!important};
             background-color: var(--colors-button-#{$type}-#{$color}-focused-bg-color) #{!important};
+        }
+
+        // A trigger whose popup is open (`aria-haspopup`: a menu, a filter popover, a listbox) keeps the Focused look while
+        // it is open, even after a mouse click, which shows no `:focus-visible`: only the frame changes, to the Figma focus
+        // ring (ASMA-8875). Its fill and text stay at rest, a hover included: the expanded fill above read as a hover.
+        &[aria-expanded='true'][aria-haspopup]:not([aria-haspopup='false'], :disabled, [aria-disabled='true']) {
+            transition: none #{!important};
+            color: var(--colors-button-#{$type}-#{$color}-text-color) #{!important};
+            background-color: var(--colors-button-#{$type}-#{$color}-bg-color) #{!important};
+            @if $type == 'contained' {
+                @include focus.focus-ring('filled');
+            } @else {
+                @include focus.focus-ring('inset');
+            }
         }
 
         // textWhite (dark surfaces) has no pressed look yet.

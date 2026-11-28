@@ -100,6 +100,7 @@ export function ColumnSettingsItem({
             ref={setNodeRef}
             role='none'
             data-column-id={id}
+            data-fixed={dragDisabled || undefined}
             data-lifted={isDragging ? (liftedByKeyboard ? 'keyboard' : 'pointer') : undefined}
             style={{ transform: CSS.Transform.toString(transform), transition }}
             className={styles['drag-item']}

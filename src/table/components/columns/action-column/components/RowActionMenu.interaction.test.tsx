@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import type { ColumnDef } from '@tanstack/react-table'
 import { afterEach, describe, it } from 'vitest'
 import { expect, fn, userEvent, waitFor, within } from 'src/test-utils/interaction-api'
 import { cleanup, mount } from 'src/test-utils/renderInteraction'
 import { StyledTable } from 'src/table/components/StyledTableIndex'
+import { StyledDialog } from 'src/components/feedback/dialog'
 import { menuItem, row, rowActionsTrigger } from 'src/test-utils/tableFixture'
 
 interface Row {
@@ -160,4 +162,85 @@ describe('RowActionMenu keyboard', () => {
         await waitFor(() => expect(document.activeElement).toBe(menuItem('Edit')))
     })
 
+})
+
+const dots = (): HTMLElement => document.querySelector<HTMLElement>('[data-row-actions-trigger]')!
+
+/** A table whose ⋮ action opens a dialog, as "View details" does in the apps. */
+function TableWithDetailsDialog({ custom = false }: { custom?: boolean }): JSX.Element {
+    const [open, setOpen] = useState(false)
+
+    return (
+        <>
+            <StyledTable
+                locale='en'
+                columns={columns}
+                data={data}
+                actions={() =>
+                    custom
+                        ? [
+                              {
+                                  component: (_row, close) => (
+                                      <button
+                                          type='button'
+                                          role='menuitem'
+                                          onClick={() => {
+                                              setOpen(true)
+                                              close()
+                                          }}
+                                      >
+                                          View details
+                                      </button>
+                                  ),
+                              },
+                          ]
+                        : [{ label: 'View details', onClick: () => setOpen(true) }]
+                }
+            />
+            <StyledDialog dataTest='details' dialogTitle='Details' open={open} onClose={() => setOpen(false)}>
+                Row details
+            </StyledDialog>
+        </>
+    )
+}
+
+describe('RowActionMenu returns the focus to the ⋮ after a dialog its action opened', () => {
+    afterEach(cleanup)
+
+    it('keyboard: Enter on the ⋮, Enter on "View details", Escape on the dialog — the focus is back on the ⋮', async () => {
+        mount(<TableWithDetailsDialog />)
+        const trigger = dots()
+        trigger.focus()
+
+        await userEvent.keyboard('{Enter}')
+        await waitFor(() => expect(document.activeElement).toBe(menuItem('View details')))
+        await userEvent.keyboard('{Enter}')
+        await waitFor(() => expect(document.querySelector('dialog[open]')).not.toBeNull())
+
+        await userEvent.keyboard('{Escape}')
+        await waitFor(() => expect(document.querySelector('dialog[open]')).toBeNull())
+        await waitFor(() => expect(document.activeElement).toBe(dots()))
+    })
+
+    it('the same for a custom action that opens the dialog itself', async () => {
+        mount(<TableWithDetailsDialog custom />)
+        const trigger = dots()
+        trigger.focus()
+
+        await userEvent.keyboard('{Enter}')
+        const item = await waitFor(() => {
+            const found = [...document.querySelectorAll<HTMLElement>('[role="menuitem"]')].find((candidate) =>
+                candidate.textContent?.includes('View details'),
+            )
+            if (!found) throw new Error('menu not open')
+            return found
+        })
+        item.focus()
+        await userEvent.keyboard('{Enter}')
+        await waitFor(() => expect(document.querySelector('dialog[open]')).not.toBeNull())
+
+        await userEvent.keyboard('{Escape}')
+        await waitFor(() => expect(document.querySelector('dialog[open]')).toBeNull())
+        await waitFor(() => expect(document.activeElement).toBe(dots()))
+    })
 })

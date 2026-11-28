@@ -296,7 +296,7 @@ describe('Lifting, moving and dropping a column from its handle', () => {
 })
 
 describe('Telling the keyboard user what the keys do', () => {
-    it('the handle is described by the lifting instructions; a fixed column’s handle is not', async () => {
+    it('the handle is named by its column and described by the lifting instructions (UX comment 95952); a fixed column’s handle is not described', async () => {
         await mountTable(RESTRICTED)
         await openMenu()
         const description = (control: Element): string =>
@@ -306,41 +306,56 @@ describe('Telling the keyboard user what the keys do', () => {
                 .join(' ')
                 .trim()
 
+        await expect(handleOf('Role')).toHaveAccessibleName('Reorder Role')
         await expect(description(handleOf('Role'))).toBe(
-            'Press Space or Enter to pick up the column. Move it with the up and down arrow keys, drop it with Space or Enter, or press Escape to cancel.',
+            'Press Space to pick up, then arrow keys to move. Press Space again to drop, or Escape to cancel.',
+        )
+        await expect(handleOf('Role')).toHaveAccessibleDescription(
+            'Press Space to pick up, then arrow keys to move. Press Space again to drop, or Escape to cancel.',
         )
         await expect(handleOf('Name').hasAttribute('aria-describedby')).toBe(false)
     })
 
-    it('the footer hint shows only while the keyboard is on a handle: the key to lift, then the keys to move', async () => {
+    it('the footer hint names only the key that works where the keyboard is: → on a row, Space on its handle, the move keys while lifted (UX comment 95952)', async () => {
         await mountTable()
         await openMenu()
 
         await expect(isHintShown(), 'at rest').toBe(false)
         await arrowTo('Role')
-        await expect(isHintShown(), 'on a row').toBe(false)
+        await expect(isHintShown(), 'on a row').toBe(true)
+        await expect(hintText()).toBe('→ to reorder')
 
         await press('{ArrowRight}')
         await expect(isHintShown(), 'on a handle').toBe(true)
-        await expect(hintText()).toBe('Space to reorder')
+        await expect(hintText()).toBe('Space to lift')
 
         await press(' ')
-        await expect(hintText()).toBe('↑↓ move · Space drop · Esc cancel')
+        await expect(hintText()).toBe('↕ move · Space drop · Esc cancel')
         await press('{Escape}')
-        await expect(hintText()).toBe('Space to reorder')
+        await expect(hintText()).toBe('Space to lift')
+
+        await press('{ArrowLeft}')
+        await expect(hintText(), 'back on the row').toBe('→ to reorder')
+        await press('{ArrowDown}')
+        await expect(hintText(), 'the next row').toBe('→ to reorder')
         // It is visual only: a screen reader has the instructions and the live region.
         await expect(hint().getAttribute('aria-hidden')).toBe('true')
     })
 
-    it('a fixed column’s handle shows no hint: it lifts nothing', async () => {
+    it('a fixed column’s row and handle show no hint: it does not move, so no key would work', async () => {
         await mountTable(RESTRICTED)
         await openMenu()
         await tabTo(rowOf('Name'))
+        await expect(isHintShown(), 'fixed row').toBe(false)
 
         await press('{ArrowRight}')
-
         await expect(document.activeElement).toBe(handleOf('Name'))
-        await expect(isHintShown()).toBe(false)
+        await expect(isHintShown(), 'fixed handle').toBe(false)
+
+        // Age cannot be hidden but can move: its row shows the hint.
+        await press('{ArrowDown}{ArrowDown}')
+        await expect(document.activeElement).toBe(rowOf('Age'))
+        await expect(isHintShown(), 'movable row').toBe(true)
     })
 
     it('a mouse click on a handle shows no hint', async () => {
@@ -359,11 +374,15 @@ describe('Telling the keyboard user what the keys do', () => {
         await arrowTo('Role')
 
         await expect(handleOf('Role')).toHaveAccessibleName('Flytt Role')
+        await expect(handleOf('Role')).toHaveAccessibleDescription(
+            'Trykk mellomrom for å plukke opp, og bruk deretter piltastene for å flytte. Trykk mellomrom igjen for å slippe, eller Escape for å avbryte.',
+        )
+        await expect(hintText()).toBe('→ for å flytte')
         await press('{ArrowRight}')
-        await expect(hintText()).toBe('Mellomrom for å flytte')
+        await expect(hintText()).toBe('Mellomrom for å plukke opp')
         await press(' ')
         await expect(announcement()).toBe('Plukket opp Role. Posisjon 2 av 4.')
-        await expect(hintText()).toBe('↑↓ flytt · Mellomrom slipp · Esc avbryt')
+        await expect(hintText()).toBe('↕ flytt · Mellomrom slipp · Esc avbryt')
         await press('{ArrowDown}')
         await expect(announcement()).toBe('Posisjon 3 av 4.')
         await press(' ')

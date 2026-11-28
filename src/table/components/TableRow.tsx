@@ -239,6 +239,7 @@ export function TableRow<TData extends { id: string | number }, TCustomData = Re
                         style['t-cell'],
                         !INTERNAL_COLUMN_IDS.includes(cell.column.id) && cell.column.getSize() > COMPACT_COLUMN_MAX_WIDTH && style['data-cell'],
                         cell.column.id === SELECT_COLUMN_ID && style['select-cell'],
+                        INTERNAL_COLUMN_IDS.includes(cell.column.id) && style['control-cell'],
                         hasRowClickHandler && 'cursor-pointer',
                         tdClassName,
                         isActionsCell && isActionsColumnSticky && style['action-cell'],

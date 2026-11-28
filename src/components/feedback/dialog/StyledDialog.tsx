@@ -210,6 +210,8 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
         scrollPaddingBottom,
     } = useDialogHeaderPinning(bodyRef)
     const openerRef = useRef<HTMLElement | null>(null)
+    // Set while the open effect's clean-up closes the native dialog itself (see there): that `close` is no dismissal.
+    const closingOnCleanupRef = useRef(false)
     const escapeHandledRef = useRef(false)
     // ASMA-8471: a genuine Escape KEYDOWN just happened, so the keyboard path below (which Floating
     // UI's inner layers can legitimately pre-empt via `stopPropagation` before `window` ever sees it —
@@ -278,6 +280,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
         const node = dialogRef.current
         if (!node || !open) return
         if (!node.open) {
+            closingOnCleanupRef.current = false
             openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
             node.showModal()
             // showModal() focuses the first focusable element (the header close button) — move focus
@@ -295,6 +298,14 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
         const unregister = registerOpenModalDialog(node)
         return () => {
             unregister()
+            // A consumer that closes the dialog by unmounting it (`open` always set) gets this clean-up before React
+            // removes the <dialog>: still modal, it leaves the page behind it inert, so the opener cannot take the
+            // focus and it fell to <body> (ASMA-8875). Close it first. When `open` turns false instead, the node is
+            // already gone by now.
+            if (node.isConnected && node.open) {
+                closingOnCleanupRef.current = true
+                node.close()
+            }
             if (openerRef.current?.isConnected) openerRef.current.focus({ preventScroll: true })
         }
         // `initialFocusRef` is read only when the dialog opens. A new ref object must not re-run this
@@ -404,7 +415,7 @@ export const StyledDialog: React.FC<IStyledDialogProps> = ({
             })
         }
         const handleNativeClose = (): void => {
-            if (attemptPending) return
+            if (attemptPending || closingOnCleanupRef.current) return
             attemptPending = true
             // A close already in flight must not be started again. Either way the native dialog is
             // already shut, so put it back on the next frame while React still has it open. Waiting
